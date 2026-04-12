@@ -46,12 +46,21 @@ echo ""
 
 # Check Codex
 echo "[4/5] Checking Codex CLI..."
-if command -v codex &>/dev/null; then
-    CODEX_VERSION=$(codex --version 2>/dev/null || echo "unknown")
-    echo "✓ Codex CLI installed ($CODEX_VERSION)"
+ENSURE_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ensure_codex_cli.sh"
+if [[ -x "${ENSURE_SCRIPT}" ]]; then
+    CODEX_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
+else
+    CODEX_BIN=""
+fi
+
+if [[ -n "${CODEX_BIN}" && -x "${CODEX_BIN}" ]]; then
+    CODEX_VERSION=$("${CODEX_BIN}" --version 2>/dev/null || echo "unknown")
+    CODEX_PREFIX="$("${ENSURE_SCRIPT}" --no-install --print-prefix 2>/dev/null || echo "unknown")"
+    echo "✓ Codex CLI installed (${CODEX_VERSION})"
+    echo "  → Prefix: ${CODEX_PREFIX}"
 else
     echo "✗ Codex CLI not found"
-    echo "  → Run: npm install -g @openai/codex"
+    echo "  → Run: bash ./scripts/ops/setup_wsl_codex.sh"
     ERRORS=$((ERRORS + 1))
 fi
 echo ""

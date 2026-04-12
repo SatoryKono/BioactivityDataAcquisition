@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.deduplication import iter_deduplicated_records
 from bioetl.infrastructure.adapters.chembl.fetch_multi_filter_mixin import (
     ChemblFetchMultiFilterMixin,
 )
@@ -65,34 +66,6 @@ class ChemblFetchAdapterMixin(
                 if limit and total_fetched >= limit:
                     return
 
-    def _is_duplicate_by_key(
-        self,
-        record: BronzeRecord,
-        entity_type: str,
-        pk_field: str,
-        pk_fields: list[str],
-        seen_keys: set[str],
-    ) -> bool:
-        """Check if record is a duplicate and track its key. Returns True if duplicate."""
-        key = (
-            self._compute_composite_key(record, tuple(pk_fields))
-            if len(pk_fields) > 1
-            else str(record.get(pk_field, ""))
-        )
-
-        if not key:
-            return False
-        if key in seen_keys:
-            self._logger.debug(
-                "skipping_duplicate_record",
-                entity_type=entity_type,
-                key=key,
-            )
-            self._adapter_metrics.record_dropped_duplicates(entity_type)
-            return True
-        seen_keys.add(key)
-        return False
-
     async def _fetch_standard(
         self,
         entity_type: str,
@@ -113,15 +86,22 @@ class ChemblFetchAdapterMixin(
         seen_keys: set[str] = set()
         pk_field = self._get_api_pk_field(entity_type)
         pk_fields = self._get_api_dedup_fields(entity_type)
+        logger = getattr(self, "_logger", None)
+        metrics = getattr(self, "_adapter_metrics", None)
 
         async for records in self._page_iterator(
             entity_type, limit, start_offset=offset
         ):
-            for record in records:
-                if self._is_duplicate_by_key(
-                    record, entity_type, pk_field, pk_fields, seen_keys
-                ):
-                    continue
+            for record in iter_deduplicated_records(
+                records,
+                seen_keys=seen_keys,
+                primary_field=pk_field,
+                composite_fields=pk_fields if len(pk_fields) > 1 else None,
+                composite_key_builder=self._compute_composite_key,
+                entity_type=entity_type,
+                logger=logger,
+                metrics=metrics,
+            ):
                 yield record
                 total_fetched += 1
                 if limit and total_fetched >= limit:

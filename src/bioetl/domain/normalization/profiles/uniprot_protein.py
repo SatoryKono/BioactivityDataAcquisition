@@ -12,7 +12,15 @@ __all__ = [
     "UNIPROT_PROTEIN_SCHEMA_FIELDS",
 ]
 
-UNIPROT_PROTEIN_SCHEMA_FIELDS = tuple(UniprotTargetSchema.to_schema().columns.keys())
+_UNIPROT_PROTEIN_BASE_FIELDS = tuple(UniprotTargetSchema.to_schema().columns.keys())
+_UNIPROT_PROTEIN_COMPAT_FIELDS = tuple(
+    field
+    for field in ("gene_names", "organism_id")
+    if field not in _UNIPROT_PROTEIN_BASE_FIELDS
+)
+UNIPROT_PROTEIN_SCHEMA_FIELDS = (
+    _UNIPROT_PROTEIN_BASE_FIELDS + _UNIPROT_PROTEIN_COMPAT_FIELDS
+)
 
 _META_FIELDS = frozenset(
     {

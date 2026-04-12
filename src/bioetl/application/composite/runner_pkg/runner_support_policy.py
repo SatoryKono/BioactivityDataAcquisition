@@ -11,7 +11,7 @@ from bioetl.application.composite.preflight_validator import (
 from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     CompositeResultBuildRequest,
 )
-from bioetl.application.composite.runner_pkg.runner_models import (
+from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
 )
 from bioetl.application.composite.runner_pkg.runner_support_types import (

@@ -654,10 +654,11 @@ class TestFromDict:
 
     def test_runtime_anchors_are_normalized_during_round_trip(self) -> None:
         """Checkpoint serialization/deserialization canonicalizes runtime anchors."""
+        effective_config_hash = " SHA256:" + ("ABCDEF12" * 8) + " "
         original = CompositeCheckpointState(
             composite_name="c",
             run_id="r",
-            effective_config_hash=" SHA256:ABC ",
+            effective_config_hash=effective_config_hash,
             contract_ref=" ChemBL.Activity ",
             contract_version=" v2 ",
             manifest_id=" manifest-123 ",
@@ -667,12 +668,12 @@ class TestFromDict:
         payload = original.to_dict()
         restored = CompositeCheckpointState.from_dict(payload)
 
-        assert payload["effective_config_hash"] == "sha256:abc"
+        assert payload["effective_config_hash"] == ("abcdef12" * 8)
         assert payload["contract_ref"] == "chembl.activity"
         assert payload["contract_version"] == "2.0.0"
         assert payload["manifest_id"] == "manifest-123"
         assert payload["composite_run_identity"] == "run-42"
-        assert restored.effective_config_hash == "sha256:abc"
+        assert restored.effective_config_hash == ("abcdef12" * 8)
         assert restored.contract_ref == "chembl.activity"
         assert restored.contract_version == "2.0.0"
         assert restored.manifest_id == "manifest-123"

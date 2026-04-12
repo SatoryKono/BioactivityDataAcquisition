@@ -25,7 +25,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.composite.runner_pkg.runner_models import (
+    from bioetl.application.composite.runtime_models import (
         CompositeExecutionContext,
     )
     from bioetl.application.services.run_ledger_service import RunLedgerService

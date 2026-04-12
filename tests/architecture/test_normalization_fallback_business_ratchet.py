@@ -5,7 +5,7 @@ from __future__ import annotations
 from scripts.qa.report_normalization_fallback_inventory import _build_payload
 from scripts.qa.report_normalization_fallback_inventory import _fallback_rows
 
-FALLBACK_BUSINESS_FIELD_BUDGET = 73
+FALLBACK_BUSINESS_FIELD_BUDGET = 0
 
 
 def test_fallback_business_field_count_does_not_exceed_budget() -> None:

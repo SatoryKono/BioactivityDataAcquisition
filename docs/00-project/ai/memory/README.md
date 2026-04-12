@@ -52,6 +52,8 @@ profiles в BioETL.
   `storage_surface` для Bronze/Silver/Gold/composite/control-plane artifact refs,
   `runtime_evidence_surface` для `run_manifest` / `run_ledger` /
   `effective_config_artifact` / `lineage`,
+  `control_plane_artifact_surface` для artifact-level templates вокруг manifest /
+  ledger / effective-config / lineage persistence paths,
   `workflow_surface` / `workflow_job_surface` для `.github/workflows/*.yml`,
   и `DESCRIBES` drift edges из published docs/policies к code/config/workflow
   targets.
@@ -60,6 +62,11 @@ profiles в BioETL.
   Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
   он пересобирает managed relations и удаляет только stale repo-derived nodes
   текущей ingest wave, а не весь graph.
+  Для shard-level selective rebuild используй:
+  `python -m scripts.ops sync-neo4j-memory --export /tmp/storage-memory.json --only-storage-layer`,
+  `python -m scripts.ops sync-neo4j-memory --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,
+  `python -m scripts.ops sync-neo4j-memory --export /tmp/workflow-memory.json --only-workflow-graph`,
+  `python -m scripts.ops sync-neo4j-memory --export /tmp/docs-drift-memory.json --only-docs-drift`.
   Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:
   он пишет JSON-отчет с snapshot stats, live managed/unmanaged summary,
   orphan summary и diff между snapshot и текущим managed graph.
@@ -85,7 +92,8 @@ profiles в BioETL.
   `python -m scripts.ci neo4j-memory`:
   он проверяет ontology invariants без живого Neo4j и падает при drift по
   required labels/relations, protocol-level ports, rich contract metadata,
-  runtime links или orphan nodes в snapshot.
+  runtime links, storage/runtime/workflow coverage, docs-to-code `DESCRIBES`
+  edges или orphan nodes в snapshot.
   Для live gate с применением sync в реальный локальный Neo4j используй
   `python -m scripts.ci neo4j-memory-live`.
   Для operator-facing ownership shortcuts используй
@@ -93,11 +101,23 @@ profiles в BioETL.
   `python -m scripts.ops query-neo4j-memory owner-contract chembl.activity`,
   `python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity`,
   `python -m scripts.ops query-neo4j-memory owner-alert BioETLPipelineRunFailed`,
-  `python -m scripts.ops query-neo4j-memory owner-doc "architecture diagrams hub"`.
+  `python -m scripts.ops query-neo4j-memory owner-doc "architecture diagrams hub"`,
+  `python -m scripts.ops query-neo4j-memory owner-storage silver/chembl/activity`,
+  `python -m scripts.ops query-neo4j-memory owner-runtime-evidence run_manifest`,
+  `python -m scripts.ops query-neo4j-memory owner-workflow tests`,
+  `python -m scripts.ops query-neo4j-memory owner-workflow-job tests::governance-preflight`.
   Для ближайших semantic edges используй `neighbors-*` профили, например:
   `python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity`,
   `python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed`,
-  `python -m scripts.ops query-neo4j-memory neighbors-contract chembl.activity`.
+  `python -m scripts.ops query-neo4j-memory neighbors-contract chembl.activity`,
+  `python -m scripts.ops query-neo4j-memory neighbors-storage silver/chembl/activity`,
+  `python -m scripts.ops query-neo4j-memory neighbors-runtime-evidence run_manifest`,
+  `python -m scripts.ops query-neo4j-memory neighbors-workflow tests`,
+  `python -m scripts.ops query-neo4j-memory neighbors-workflow-job tests::governance-preflight`.
+  Для новых surface-specific shortcuts используй:
+  `python -m scripts.ops query-neo4j-memory docs-drift all`,
+  `python -m scripts.ops query-neo4j-memory workflow-gates tests`,
+  `python -m scripts.ops query-neo4j-memory storage-lineage silver/chembl/activity`.
   Для поиска повторяющейся логики и кандидатов на вынос используй:
   `python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608`,
   `python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer`,
@@ -127,6 +147,11 @@ profiles в BioETL.
   — anchors для `run_manifest`, `run_ledger`, `effective_config_artifact`,
   `lineage` с `BACKED_BY` links к modules, `DESCRIBED_IN` links к docs и
   `WRITES_TO` links к control-plane storage artifacts.
+- **Artifact-level control-plane surfaces**:
+  `control_plane_artifact_surface`
+  — template-level nodes для persisted manifest / ledger / effective-config /
+  lineage artifacts и sidecar indexes, связанные через
+  `runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface -> MATERIALIZED_AS -> storage_surface`.
 - **CI / workflow graph**:
   `workflow_surface`, `workflow_job_surface`
   — GitHub Actions workflows/jobs из `.github/workflows/*.yml`, включая

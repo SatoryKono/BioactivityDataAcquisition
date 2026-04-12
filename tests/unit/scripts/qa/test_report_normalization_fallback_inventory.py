@@ -13,29 +13,10 @@ from scripts.qa.report_normalization_fallback_inventory import (
 )
 
 
-def test_fallback_rows_include_unprofiled_entity_fields() -> None:
+def test_fallback_rows_are_empty_when_all_entity_pipelines_are_profiled() -> None:
     rows = _fallback_rows()
 
-    assert not any(row["pipeline_name"] == "chembl_assay" for row in rows)
-    assert not any(
-        row["pipeline_name"] == "chembl_publication"
-        and row["normalization_source"] == "fallback_business"
-        for row in rows
-    )
-    assert not any(row["pipeline_name"] == "chembl_target" for row in rows)
-    assert not any(row["pipeline_name"] == "uniprot_idmapping" for row in rows)
-    assert any(
-        row["pipeline_name"] == "chembl_assay_parameters"
-        and row["field_name"] == "assay_id"
-        and row["normalization_source"] == "fallback_business"
-        for row in rows
-    )
-    assert any(
-        row["pipeline_name"] == "chembl_assay_parameters"
-        and row["field_name"] == "_run_id"
-        and row["normalization_source"] == "fallback_technical_passthrough"
-        for row in rows
-    )
+    assert rows == []
 
 
 def test_build_payload_summarizes_fallback_rows() -> None:
@@ -172,7 +153,8 @@ def test_main_writes_deterministic_artifacts(tmp_path) -> None:
 
 
 def test_main_returns_non_zero_when_fallback_business_budget_is_exceeded() -> None:
-    assert main(["--max-fallback-business-fields", "0"]) == 1
+    current_budget = int(build_fallback_inventory_payload()["fallback_business_field_count"])
+    assert main(["--max-fallback-business-fields", str(current_budget - 1)]) == 1
 
 
 def test_main_accepts_current_fallback_business_budget() -> None:

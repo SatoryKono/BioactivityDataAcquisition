@@ -17,6 +17,7 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+ENSURE_SCRIPT="${SCRIPT_DIR}/ensure_codex_cli.sh"
 
 # Step 1: Update package manager (with retry logic)
 echo "[1/5] Updating package manager..."
@@ -44,28 +45,18 @@ else
 fi
 echo ""
 
-# Step 3: Install/update Codex CLI globally
+# Step 3: Install/update Codex CLI in a writable local prefix
 echo "[3/5] Installing Codex CLI..."
-if npm list -g @openai/codex >/dev/null 2>&1; then
-    echo "  → Updating Codex CLI..."
-    npm install -g --silent @openai/codex@latest 2>/dev/null || npm install -g @openai/codex
-    echo "✓ Codex CLI updated"
-else
-    echo "  → Installing Codex CLI..."
-    npm install -g --silent @openai/codex 2>/dev/null || npm install -g @openai/codex
-    echo "✓ Codex CLI installed"
-fi
+"${ENSURE_SCRIPT}" --update >/dev/null
+CODEX_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
+echo "✓ Codex CLI installed in ${CODEX_PREFIX}"
 echo ""
 
 # Step 4: Verify Codex installation
 echo "[4/5] Verifying Codex installation..."
-if command -v codex &>/dev/null; then
-    CODEX_VERSION=$(codex --version 2>/dev/null || echo "unknown")
-    echo "✓ Codex CLI verified: $CODEX_VERSION"
-else
-    echo "[ERROR] Codex CLI installation failed or not in PATH"
-    exit 1
-fi
+CODEX_BIN="$("${ENSURE_SCRIPT}" --print-bin)"
+CODEX_VERSION=$("${CODEX_BIN}" --version 2>/dev/null || echo "unknown")
+echo "✓ Codex CLI verified: ${CODEX_VERSION}"
 echo ""
 
 # Step 5: Configure WSL proxy (for API access)

@@ -144,6 +144,27 @@ async def test_retry_with_split_batches(adapter, mock_http_client):
     assert args_list[1][0][1] == ["3", "4"]  # Second half
 
 
+def test_mark_record_as_seen_supports_composite_keys(adapter) -> None:
+    seen_ids: set[str] = set()
+
+    first = adapter._mark_record_as_seen(
+        {"left_id": "A", "right_id": "B"},
+        seen_ids,
+        "left_id",
+        ("left_id", "right_id"),
+    )
+    duplicate = adapter._mark_record_as_seen(
+        {"left_id": "A", "right_id": "B"},
+        seen_ids,
+        "left_id",
+        ("left_id", "right_id"),
+    )
+
+    assert first is True
+    assert duplicate is False
+    assert seen_ids == {"A|B"}
+
+
 @pytest.mark.asyncio
 async def test_is_retry_exhausted_error(adapter):
     """Test error type checking."""

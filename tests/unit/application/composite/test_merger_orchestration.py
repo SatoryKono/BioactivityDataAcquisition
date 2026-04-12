@@ -1,7 +1,8 @@
-"""Unit tests for merger_orchestration — load_merge_inputs and execute_merge_workflow."""
+"""Unit tests for merger_orchestration helpers."""
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import polars as pl
@@ -9,7 +10,11 @@ import pytest
 
 from bioetl.application.composite.merger_input_mixin import _PreparedSeedDataframe
 from bioetl.application.composite.merger_orchestration import (
+    MergeExecutionContext,
     MergeInputContext,
+    build_merge_execution_request,
+    prepare_merge_execution_context,
+    resolve_merge_metadata_timestamp,
     load_merge_inputs,
 )
 from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
@@ -61,6 +66,68 @@ class TestMergeInputContext:
         )
         assert ctx.records_from_seed == 0
         assert ctx.sources_used == ["seed"]
+
+
+@pytest.mark.unit
+class TestMergeExecutionRequestHelpers:
+    """Test canonical request/context helpers for merge execution."""
+
+    def test_build_merge_execution_request_when_called_then_binds_all_fields(self) -> (
+        None
+    ):
+        request = build_merge_execution_request(
+            seed_table="silver/seed",
+            seed_pipeline="seed_pipeline",
+            enrichers=[],
+            enrichment_results={},
+            run_id="run-123",
+            metadata_timestamp=datetime(2026, 4, 10, 0, 0, 0, tzinfo=UTC),
+        )
+
+        assert request.seed_table == "silver/seed"
+        assert request.seed_pipeline == "seed_pipeline"
+        assert request.run_id == "run-123"
+        assert request.metadata_timestamp == datetime(2026, 4, 10, 0, 0, 0, tzinfo=UTC)
+
+    def test_resolve_merge_metadata_timestamp_when_none_then_returns_none(self) -> None:
+        assert resolve_merge_metadata_timestamp(None) is None
+
+    def test_resolve_merge_metadata_timestamp_when_iso_date_then_returns_utc_midnight(self) -> (
+        None
+    ):
+        assert resolve_merge_metadata_timestamp("2026-04-10") == datetime(
+            2026,
+            4,
+            10,
+            0,
+            0,
+            0,
+            tzinfo=UTC,
+        )
+
+    @pytest.mark.asyncio
+    async def test_prepare_merge_execution_context_when_called_then_loads_inputs_once(self) -> (
+        None
+    ):
+        host = _make_host()
+        request = build_merge_execution_request(
+            seed_table="silver/chembl",
+            seed_pipeline="chembl_compound",
+            enrichers=[],
+            enrichment_results={},
+            run_id="run-ctx",
+        )
+
+        execution_context = await prepare_merge_execution_context(host, request)
+
+        assert isinstance(execution_context, MergeExecutionContext)
+        assert execution_context.request is request
+        assert execution_context.loaded_inputs.records_from_seed == 1
+        assert execution_context.started_at.tzinfo == UTC
+        host._prepare_seed_dataframe.assert_awaited_once_with(
+            "silver/chembl",
+            "chembl_compound",
+        )
 
 
 @pytest.mark.unit

@@ -17,7 +17,15 @@ _PUBMED_PUBLICATION_BASE_FIELDS = tuple(
 )
 _PUBMED_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
     field
-    for field in ("publication_doi", "publication_pmid", "publication_pmc_id")
+    for field in (
+        "publication_doi",
+        "publication_pmid",
+        "publication_pmc_id",
+        "_source",
+        "issue",
+        "pub_date",
+        "volume",
+    )
     if field not in _PUBMED_PUBLICATION_BASE_FIELDS
 )
 PUBMED_PUBLICATION_SCHEMA_FIELDS = (
@@ -35,6 +43,7 @@ _META_FIELDS = frozenset(
         "_index",
         "_lookup_method",
         "_original_id",
+        "_source",
         "_dq_error",
         "_dq_warn",
     }

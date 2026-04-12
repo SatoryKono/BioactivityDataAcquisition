@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
+from collections.abc import Awaitable, Callable
+from datetime import datetime
+from typing import Any
 
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
+    build_merge_execution_request,
+    resolve_merge_metadata_timestamp,
 )
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_constants import (
@@ -41,17 +45,6 @@ __all__ = [
 ]
 
 
-def _resolve_merge_metadata_timestamp(
-    host: _CompositeRunnerMergeStageHostProtocol,
-) -> datetime | None:
-    """Return a deterministic metadata timestamp for replay-backed composite runs."""
-    cached_bronze_date = getattr(host._runtime, "cached_bronze_date", None)
-    if cached_bronze_date is None:
-        return None
-    replay_date = date.fromisoformat(str(cached_bronze_date))
-    return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
-
-
 def build_merge_inputs(
     host: _CompositeRunnerMergeStageHostProtocol,
     enrichment_results: dict[str, EnrichmentResult],
@@ -85,13 +78,15 @@ def build_merge_request(
         enrichment_results,
         dependency_results,
     )
-    return MergeExecutionRequest(
+    return build_merge_execution_request(
         seed_table=host._config.seed.silver_table,
         seed_pipeline=host._config.seed.pipeline,
         enrichers=prepared_inputs.enrichers,
         enrichment_results=enrichment_results,
         run_id=host._run_id_str,
-        metadata_timestamp=_resolve_merge_metadata_timestamp(host),
+        metadata_timestamp=resolve_merge_metadata_timestamp(
+            getattr(host._runtime, "cached_bronze_date", None)
+        ),
         dependencies=prepared_inputs.dependencies,
         dependency_results=dependency_results,
     )
@@ -102,7 +97,35 @@ async def run_prepared_merge_request(
     request: MergeExecutionRequest,
 ) -> MergeResult:
     """Run merger through a normalized request context."""
-    return await host._merger.execute_request(request)
+    merger = host._merger
+    execute_request = _get_explicit_merger_method(merger, "execute_request")
+    if execute_request is not None:
+        return await execute_request(request)
+    merge = _get_explicit_merger_method(merger, "merge")
+    if merge is None:
+        raise AttributeError("Merger does not implement execute_request() or merge()")
+    return await merge(
+        request.seed_table,
+        request.enrichers,
+        request.enrichment_results,
+        request.run_id,
+        seed_pipeline=request.seed_pipeline,
+        dependencies=request.dependencies,
+        dependency_results=request.dependency_results,
+    )
+
+
+def _get_explicit_merger_method(
+    merger: Any,
+    method_name: str,
+) -> Callable[..., Awaitable[MergeResult]] | None:
+    """Ignore autovivified mock attrs; accept real or explicitly assigned methods."""
+    instance_attrs = vars(merger)
+    if method_name in instance_attrs:
+        method = instance_attrs[method_name]
+        return method if callable(method) else None
+    method = getattr(type(merger), method_name, None)
+    return method.__get__(merger, type(merger)) if callable(method) else None
 
 
 async def execute_started_merge_phase(

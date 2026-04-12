@@ -2,21 +2,15 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from bioetl.application.composite.column_orderer_group_flow import (
     apply_renames,
     filter_columns_by_explicit,
     filter_columns_by_groups,
     order_by_yaml_groups,
-)
-from bioetl.application.composite.column_orderer_helpers import (
-    collect_explicit_group_columns,
-    collect_pattern_columns,
-    extract_field_from_qualified_name,
-    resolve_publication_field_aliases,
-    sort_columns_by_provider,
 )
 from bioetl.application.composite.column_orderer_semantic import (
     count_groups,
@@ -36,6 +30,102 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 __all__ = ["ColumnOrderer"]
+
+_SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
+
+
+def sort_columns_by_provider(
+    columns: list[str],
+    provider_order: tuple[str, ...],
+) -> list[str]:
+    """Sort columns by provider prefix order."""
+
+    def sort_key(col: str) -> tuple[int, str]:
+        """Return ``(provider_index, name)`` placing seed columns first."""
+        parts = col.split(".")
+        if len(parts) < 3:
+            return (0, col.lower())
+
+        provider = parts[0].lower()
+        try:
+            idx = provider_order.index(provider)
+            return (idx + 1, col.lower())
+        except ValueError:
+            return (len(provider_order) + 1, col.lower())
+
+    return sorted(columns, key=sort_key)
+
+
+def extract_field_from_qualified_name(column: str) -> str:
+    """Extract field name from a qualified column name."""
+    parts = column.split(".", maxsplit=3)
+    if len(parts) == 3:
+        return parts[2]
+    if len(parts) == 2:
+        return parts[1]
+    return column
+
+
+def resolve_publication_field_aliases(
+    field_name: str,
+) -> tuple[set[str], str | None, str | None]:
+    """Return alias set plus optional legacy/canonical mapping for warnings."""
+    return {field_name}, None, None
+
+
+def collect_pattern_columns(
+    available: set[str],
+    used: set[str],
+    group: ColumnGroupConfig,
+    sort_fn: _SortFn,
+    logger: LoggerPort,
+) -> list[str]:
+    """Collect columns matching a group regex pattern."""
+    if not group.pattern:
+        return []
+    try:
+        pattern_re = re.compile(group.pattern, re.IGNORECASE)
+    except re.error as error:
+        logger.warning(
+            "Invalid regex pattern in column group",
+            group=group.name,
+            pattern=group.pattern,
+            error=str(error),
+        )
+        return []
+
+    pattern_matches: list[str] = []
+    for column in available:
+        if column not in used and pattern_re.search(column):
+            pattern_matches.append(column)
+            used.add(column)
+    return sort_fn(pattern_matches, group.provider_order)
+
+
+def collect_explicit_group_columns(
+    available: set[str],
+    group: ColumnGroupConfig,
+    sort_fn: _SortFn,
+    extract_field_fn: Callable[[str], str],
+    resolve_aliases_fn: Callable[[str], set[str]],
+) -> tuple[list[str], set[str]]:
+    """Collect explicit field matches for a YAML group in declared field order."""
+    ordered: list[str] = []
+    used: set[str] = set()
+
+    for field_name in group.fields:
+        field_matches: list[str] = []
+        aliases = resolve_aliases_fn(field_name)
+        for column in available:
+            if column in used:
+                continue
+            extracted = extract_field_fn(column)
+            if extracted in aliases or column in aliases:
+                field_matches.append(column)
+                used.add(column)
+        ordered.extend(sort_fn(field_matches, group.provider_order))
+
+    return ordered, used
 
 
 class ColumnOrderer:

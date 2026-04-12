@@ -15,7 +15,7 @@ from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
 )
-from bioetl.application.composite.runner_pkg.runner_models import (
+from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,
     CompositeRuntimeConfig,
 )

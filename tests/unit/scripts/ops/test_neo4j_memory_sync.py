@@ -174,6 +174,8 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("storage_surface", "silver/chembl/activity") in node_keys
     assert ("storage_surface", "silver/composite/activity") in node_keys
     assert ("storage_surface", "control/run_manifest/{manifest_id}.json") in node_keys
+    assert ("storage_surface", "control/effective_config/{artifact_id}.json") in node_keys
+    assert ("storage_surface", "control/lineage/fragments/{fragment_hash}.json") in node_keys
     assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
     assert ("doc_source_surface", "architecture diagrams hub") in node_keys
     assert ("doc_source_surface", "diagram governance workflow") in node_keys
@@ -204,6 +206,9 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("runtime_evidence_surface", "run_ledger") in node_keys
     assert ("runtime_evidence_surface", "effective_config_artifact") in node_keys
     assert ("runtime_evidence_surface", "lineage") in node_keys
+    assert ("control_plane_artifact_surface", "run_manifest::json") in node_keys
+    assert ("control_plane_artifact_surface", "effective_config_artifact::json") in node_keys
+    assert ("control_plane_artifact_surface", "lineage::fragment") in node_keys
     assert ("workflow_surface", "tests") in node_keys
     assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
@@ -349,6 +354,15 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("project", "BioETL", "HAS_RUNTIME_EVIDENCE", "runtime_evidence_surface", "run_manifest"),
     ("runtime_evidence_surface", "run_manifest", "BACKED_BY", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
     ("runtime_evidence_surface", "run_manifest", "WRITES_TO", "storage_surface", "control/run_manifest/{manifest_id}.json"),
+    ("project", "BioETL", "HAS_CONTROL_PLANE_ARTIFACT", "control_plane_artifact_surface", "run_manifest::json"),
+    ("runtime_evidence_surface", "run_manifest", "EMITS_ARTIFACT", "control_plane_artifact_surface", "run_manifest::json"),
+    ("control_plane_artifact_surface", "run_manifest::json", "MATERIALIZED_AS", "storage_surface", "control/run_manifest/{manifest_id}.json"),
+    ("runtime_evidence_surface", "effective_config_artifact", "WRITES_TO", "storage_surface", "control/effective_config/{artifact_id}.json"),
+    ("runtime_evidence_surface", "effective_config_artifact", "EMITS_ARTIFACT", "control_plane_artifact_surface", "effective_config_artifact::json"),
+    ("control_plane_artifact_surface", "effective_config_artifact::json", "MATERIALIZED_AS", "storage_surface", "control/effective_config/{artifact_id}.json"),
+    ("runtime_evidence_surface", "lineage", "WRITES_TO", "storage_surface", "control/lineage/fragments/{fragment_hash}.json"),
+    ("runtime_evidence_surface", "lineage", "EMITS_ARTIFACT", "control_plane_artifact_surface", "lineage::fragment"),
+    ("control_plane_artifact_surface", "lineage::fragment", "MATERIALIZED_AS", "storage_surface", "control/lineage/fragments/{fragment_hash}.json"),
     ("project", "BioETL", "HAS_WORKFLOW", "workflow_surface", "tests"),
     ("workflow_surface", "tests", "CONTAINS", "workflow_job_surface", "tests::governance-preflight"),
     ("workflow_job_surface", "tests::governance-preflight", "EXECUTES_GATE", "quality_gate", "deterministic neo4j memory ontology invariants"),
@@ -401,9 +415,13 @@ def test_normalization_evidence_statements_cover_registry_and_fallback_metrics()
     assert chembl_params["profile_field_count"] > 0
 
     assay_params = assay_parameters["parameters"]
-    assert assay_params["normalization_profile_registered"] is False
-    assert assay_params["fallback_business_field_count"] > 0
-    assert assay_params["fallback_field_count"] >= assay_params["fallback_business_field_count"]
+    assert assay_params["normalization_profile_registered"] is True
+    assert assay_params["normalization_profile_module_path"] == (
+        "src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py"
+    )
+    assert assay_params["profile_field_count"] > 0
+    assert assay_params["fallback_business_field_count"] == 0
+    assert assay_params["fallback_field_count"] == 0
 
 
 def test_apply_normalization_evidence_only_executes_batched_statements(monkeypatch) -> None:
@@ -484,11 +502,14 @@ def test_snapshot_enriches_current_normalization_topology() -> None:
     assert int(chembl_activity.properties["profile_field_count"]) > 0
 
     assay_parameters = snapshot.nodes[NodeKey("pipeline_surface", "chembl_assay_parameters")]
-    assert assay_parameters.properties["normalization_profile_registered"] is False
-    assert int(assay_parameters.properties["fallback_business_field_count"]) > 0
-    assert int(assay_parameters.properties["fallback_field_count"]) >= int(
-        assay_parameters.properties["fallback_business_field_count"]
+    assert assay_parameters.properties["normalization_profile_registered"] is True
+    assert (
+        assay_parameters.properties["normalization_profile_module_path"]
+        == "src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py"
     )
+    assert int(assay_parameters.properties["profile_field_count"]) > 0
+    assert int(assay_parameters.properties["fallback_business_field_count"]) == 0
+    assert int(assay_parameters.properties["fallback_field_count"]) == 0
 
     relation_keys = _relation_keys(snapshot)
     assert (
@@ -642,6 +663,7 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "test_artifact",
         "storage_surface",
         "runtime_evidence_surface",
+        "control_plane_artifact_surface",
         "workflow_surface",
         "workflow_job_surface",
     }
@@ -704,6 +726,95 @@ def test_storage_surface_helpers_merge_base_and_pipeline_overrides() -> None:
 def test_storage_ref_from_output_path_normalizes_data_output_prefix() -> None:
     assert _storage_ref_from_output_path("data/output/silver/composite/activity") == "silver/composite/activity"
     assert _storage_ref_from_output_path("silver/chembl/activity") == "silver/chembl/activity"
+
+
+def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_links() -> None:
+    _, snapshot = _snapshot()
+
+    filtered = _filtered_snapshot(snapshot, only_storage_layer=True)
+    relation_keys = _relation_keys(filtered)
+
+    assert ("storage_surface", "silver/chembl/activity") in {(key.label, key.name) for key in filtered.nodes}
+    assert ("control_plane_artifact_surface", "run_manifest::json") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
+    assert (
+        "pipeline_surface",
+        "chembl_activity",
+        "WRITES_TO",
+        "storage_surface",
+        "silver/chembl/activity",
+    ) in relation_keys
+    assert (
+        "runtime_evidence_surface",
+        "run_manifest",
+        "EMITS_ARTIFACT",
+        "control_plane_artifact_surface",
+        "run_manifest::json",
+    ) in relation_keys
+
+
+def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_links() -> None:
+    _, snapshot = _snapshot()
+
+    filtered = _filtered_snapshot(snapshot, only_runtime_evidence_layer=True)
+    relation_keys = _relation_keys(filtered)
+
+    assert ("runtime_evidence_surface", "run_manifest") in {(key.label, key.name) for key in filtered.nodes}
+    assert ("module_surface", "src/bioetl/domain/control_plane/run_manifest.py") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
+    assert (
+        "runtime_evidence_surface",
+        "run_manifest",
+        "BACKED_BY",
+        "module_surface",
+        "src/bioetl/domain/control_plane/run_manifest.py",
+    ) in relation_keys
+
+
+def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -> None:
+    _, snapshot = _snapshot()
+
+    filtered = _filtered_snapshot(snapshot, only_workflow_graph=True)
+    relation_keys = _relation_keys(filtered)
+
+    assert ("workflow_surface", "tests") in {(key.label, key.name) for key in filtered.nodes}
+    assert ("workflow_job_surface", "tests::governance-preflight") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
+    assert (
+        "workflow_job_surface",
+        "tests::governance-preflight",
+        "EXECUTES_GATE",
+        "quality_gate",
+        "pytest",
+    ) in relation_keys
+    assert (
+        "workflow_job_surface",
+        "tests::governance-preflight",
+        "RUNS_VIA",
+        "script_surface",
+        "scripts/qa/__main__.py",
+    ) in relation_keys
+
+
+def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
+    _, snapshot = _snapshot()
+
+    filtered = _filtered_snapshot(snapshot, only_docs_drift=True)
+    relation_keys = _relation_keys(filtered)
+
+    assert ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
+    assert (
+        "doc_artifact",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+        "DESCRIBES",
+        "module_surface",
+        "src/bioetl/domain/control_plane/run_manifest.py",
+    ) in relation_keys
 
 
 def test_workflow_quality_gates_detect_repo_gate_signals() -> None:
@@ -1339,3 +1450,71 @@ def test_snapshot_invariants_are_clean() -> None:
     _, snapshot = _snapshot()
 
     assert snapshot_invariant_issues(snapshot) == []
+
+
+def test_snapshot_invariants_require_docs_to_code_drift_edges() -> None:
+    _, snapshot = _snapshot()
+    keys_to_delete = [
+        key
+        for key, relation in snapshot.relations.items()
+        if relation.relation_type == "DESCRIBES"
+        and relation.source.label in {"doc_source_surface", "doc_artifact", "policy_surface"}
+    ]
+    for key in keys_to_delete:
+        snapshot.relations.pop(key)
+
+    issues = snapshot_invariant_issues(snapshot)
+
+    assert "missing docs-to-code drift edges" in issues
+
+
+def test_snapshot_invariants_require_workflow_job_parent_links() -> None:
+    _, snapshot = _snapshot()
+    keys_to_delete = [
+        key
+        for key, relation in snapshot.relations.items()
+        if relation.relation_type == "CONTAINS"
+        and relation.source.label == "workflow_surface"
+        and relation.target.label == "workflow_job_surface"
+    ]
+    for key in keys_to_delete:
+        snapshot.relations.pop(key)
+
+    issues = snapshot_invariant_issues(snapshot)
+
+    assert "missing workflow_surface -> CONTAINS -> workflow_job_surface links" in issues
+    assert any(issue.startswith("workflow jobs without workflow parent links:") for issue in issues)
+
+
+def test_snapshot_invariants_require_runtime_evidence_support_links() -> None:
+    _, snapshot = _snapshot()
+    keys_to_delete = [
+        key
+        for key, relation in snapshot.relations.items()
+        if relation.source.label == "runtime_evidence_surface"
+        and relation.relation_type in {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"}
+    ]
+    for key in keys_to_delete:
+        snapshot.relations.pop(key)
+
+    issues = snapshot_invariant_issues(snapshot)
+
+    assert "missing runtime_evidence_surface -> WRITES_TO -> storage_surface links" in issues
+    assert any(issue.startswith("runtime evidence surfaces without support links:") for issue in issues)
+
+
+def test_snapshot_invariants_require_control_plane_artifact_links() -> None:
+    _, snapshot = _snapshot()
+    keys_to_delete = [
+        key
+        for key, relation in snapshot.relations.items()
+        if relation.source.label == "runtime_evidence_surface"
+        and relation.relation_type == "EMITS_ARTIFACT"
+    ]
+    for key in keys_to_delete:
+        snapshot.relations.pop(key)
+
+    issues = snapshot_invariant_issues(snapshot)
+
+    assert "missing runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface links" in issues
+    assert any(issue.startswith("control-plane artifacts without runtime/storage links:") for issue in issues)

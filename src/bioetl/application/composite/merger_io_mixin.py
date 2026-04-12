@@ -138,7 +138,6 @@ class MergeIOMixin(MergeOutputWriterMixin, _MergeInputLoaderMixin):
             path=self._config.output_gold_path,
             records=len(df),
         )
-        await self._write_merged_gold(df, run_id=run_id, sources_used=sources_used)
         await self._write_merged_gold(
             df,
             completed_at=metadata_timestamp,

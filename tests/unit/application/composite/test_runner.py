@@ -19,9 +19,7 @@ from bioetl.application.composite.runner_pkg import (
     CompositeRunnerDependencies,
     CompositeRuntimeConfig,
 )
-from bioetl.application.composite.runner_pkg.runner_models import (
-    CompositeExecutionContext,
-)
+from bioetl.application.composite.runtime_models import CompositeExecutionContext
 from bioetl.domain.composite.result import (
     DependencyResult,
     DependencyStatus,

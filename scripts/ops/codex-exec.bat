@@ -1,7 +1,7 @@
 @echo off
-setlocal EnableExtensions EnableDelayedExpansion
+setlocal EnableExtensions
 
-REM Launch OpenAI Codex CLI in auto-execution mode
+REM Launch OpenAI Codex CLI in auto-execution mode through the project WSL wrapper.
 REM Usage: codex-exec.bat "prompt"
 
 if "%~1"=="" (
@@ -12,36 +12,24 @@ if "%~1"=="" (
     exit /b 1
 )
 
-set WSL_DISTRO=Ubuntu
-set SCRIPT_DIR=%~dp0
+set "WSL_DISTRO=Ubuntu"
+set "SCRIPT_DIR=%~dp0"
 
-REM Get absolute path
-pushd "%SCRIPT_DIR%..\..\" >nul
-set REPO_WIN=%cd%
+pushd "%SCRIPT_DIR%..\..\" >nul || (
+    echo [codex-launch] ERROR: Unable to resolve repository root
+    exit /b 1
+)
+set "REPO_WIN=%CD%"
 popd >nul
 
-REM Convert to WSL path format
-setlocal EnableDelayedExpansion
-set "TEMP_PATH=!REPO_WIN:\=/!"
-for /f "tokens=1,* delims=:" %%A in ("!TEMP_PATH!") do (
-    set "DRIVE=%%A"
-    set "REST=%%B"
-)
-set REPO_WSL=/mnt/!DRIVE!/!REST!
+for /f "usebackq delims=" %%I in (`wsl -d %WSL_DISTRO% -- wslpath -a "%REPO_WIN%" 2^>nul`) do set "REPO_WSL=%%I"
 
-REM Clear problematic PATH
-set "PATH=C:\Windows\System32;C:\Windows"
-
-REM Verify Codex is installed
-wsl -d %WSL_DISTRO% -- command -v codex >/dev/null 2>&1
-if errorlevel 1 (
-    echo [codex-launch] ERROR: Codex not found
-    echo [codex-launch] Install: npm install -g @openai/codex
+if not defined REPO_WSL (
+    echo [codex-launch] ERROR: Unable to convert repository path for WSL
     exit /b 1
 )
 
-REM Launch in full-auto mode
-echo [codex-launch] Prompt: %~1
-wsl -d %WSL_DISTRO% -- codex exec --full-auto -C "%REPO_WSL%" "%~1"
+echo [codex-launch] Prompt: %*
+wsl -d %WSL_DISTRO% -- bash "%REPO_WSL%/scripts/ops/codex-exec.sh" %*
 
 exit /b %errorlevel%

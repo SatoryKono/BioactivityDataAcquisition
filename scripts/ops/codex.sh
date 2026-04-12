@@ -7,39 +7,31 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-WSL_DISTRO="Ubuntu"  # Use Ubuntu (change to Debian if preferred)
+ENSURE_SCRIPT="${SCRIPT_DIR}/ensure_codex_cli.sh"
 
-# Get absolute path in WSL format
-get_wsl_path() {
-    local path="$1"
-    if [[ "$path" =~ ^/mnt/[a-z]/ ]]; then
-        echo "$path"
-    else
-        echo "$path"
-    fi
-}
+UPDATE_FLAG=""
+if [[ "${1:-}" == "--update" ]]; then
+    UPDATE_FLAG="--update"
+    shift
+fi
 
-REPO_WSL=$(get_wsl_path "$REPO_ROOT")
-
-# Verify Codex is installed
-if ! command -v codex &>/dev/null; then
-    echo "[ERROR] Codex CLI not found in PATH"
-    echo "[INFO] Install: npm install -g @openai/codex"
+if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
+    echo "[ERROR] Codex bootstrap helper not found: ${ENSURE_SCRIPT}"
     exit 1
 fi
 
-# Verify npm/node
-if ! command -v node &>/dev/null; then
-    echo "[ERROR] Node.js not found"
-    echo "[INFO] Install Node.js in WSL: apt-get update && apt-get install -y nodejs npm"
-    exit 1
-fi
+CODEX_BIN="$("${ENSURE_SCRIPT}" ${UPDATE_FLAG:+$UPDATE_FLAG} --print-bin)"
+CODEX_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
+
+export NPM_CONFIG_PREFIX="${CODEX_PREFIX}"
+export npm_config_prefix="${CODEX_PREFIX}"
+export PATH="${CODEX_PREFIX}/bin:${PATH}"
 
 # Launch Codex
 if [[ $# -eq 0 ]]; then
     echo "[codex] Starting interactive mode..."
-    exec codex
+    exec "${CODEX_BIN}" -C "${REPO_ROOT}"
 else
     echo "[codex] Prompt: $*"
-    exec codex "$@"
+    exec "${CODEX_BIN}" -C "${REPO_ROOT}" "$@"
 fi

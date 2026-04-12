@@ -103,6 +103,7 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "test_artifact",
     "storage_surface",
     "runtime_evidence_surface",
+    "control_plane_artifact_surface",
     "workflow_surface",
     "workflow_job_surface",
 )
@@ -748,8 +749,163 @@ def _filtered_snapshot(
     only_analysis_layer: bool = False,
     only_retirement_layer: bool = False,
     only_complexity_layer: bool = False,
+    only_storage_layer: bool = False,
+    only_runtime_evidence_layer: bool = False,
+    only_workflow_graph: bool = False,
+    only_docs_drift: bool = False,
 ) -> GraphSnapshot:
+    shard_label_sets: list[set[str]] = []
+    shard_relation_specs: list[tuple[str, frozenset[str], frozenset[str]]] = []
+    if only_storage_layer:
+        shard_label_sets.append(
+            {
+                "project",
+                "pipeline_surface",
+                "entity_config",
+                "composite_config",
+                "config_artifact",
+                "storage_surface",
+                "runtime_evidence_surface",
+                "control_plane_artifact_surface",
+            }
+        )
+        shard_relation_specs.extend(
+            (
+                ("HAS_STORAGE_SURFACE", frozenset({"project"}), frozenset({"storage_surface"})),
+                ("HAS_RUNTIME_EVIDENCE", frozenset({"project"}), frozenset({"runtime_evidence_surface"})),
+                (
+                    "HAS_CONTROL_PLANE_ARTIFACT",
+                    frozenset({"project"}),
+                    frozenset({"control_plane_artifact_surface"}),
+                ),
+                (
+                    "WRITES_TO",
+                    frozenset({"pipeline_surface", "entity_config", "composite_config", "runtime_evidence_surface"}),
+                    frozenset({"storage_surface"}),
+                ),
+                (
+                    "DEFINED_BY",
+                    frozenset({"pipeline_surface", "entity_config", "composite_config"}),
+                    frozenset({"config_artifact"}),
+                ),
+                ("PROMOTES_TO", frozenset({"storage_surface"}), frozenset({"storage_surface"})),
+                (
+                    "EMITS_ARTIFACT",
+                    frozenset({"runtime_evidence_surface"}),
+                    frozenset({"control_plane_artifact_surface"}),
+                ),
+                (
+                    "MATERIALIZED_AS",
+                    frozenset({"control_plane_artifact_surface"}),
+                    frozenset({"storage_surface"}),
+                ),
+            )
+        )
+    if only_runtime_evidence_layer:
+        shard_label_sets.append(
+            {
+                "project",
+                "runtime_evidence_surface",
+                "control_plane_artifact_surface",
+                "storage_surface",
+                "module_surface",
+                "doc_artifact",
+            }
+        )
+        shard_relation_specs.extend(
+            (
+                ("HAS_RUNTIME_EVIDENCE", frozenset({"project"}), frozenset({"runtime_evidence_surface"})),
+                (
+                    "HAS_CONTROL_PLANE_ARTIFACT",
+                    frozenset({"project"}),
+                    frozenset({"control_plane_artifact_surface"}),
+                ),
+                ("BACKED_BY", frozenset({"runtime_evidence_surface"}), frozenset({"module_surface"})),
+                ("DESCRIBED_IN", frozenset({"runtime_evidence_surface"}), frozenset({"doc_artifact"})),
+                ("WRITES_TO", frozenset({"runtime_evidence_surface"}), frozenset({"storage_surface"})),
+                (
+                    "EMITS_ARTIFACT",
+                    frozenset({"runtime_evidence_surface"}),
+                    frozenset({"control_plane_artifact_surface"}),
+                ),
+                (
+                    "MATERIALIZED_AS",
+                    frozenset({"control_plane_artifact_surface"}),
+                    frozenset({"storage_surface"}),
+                ),
+            )
+        )
+    if only_workflow_graph:
+        shard_label_sets.append(
+            {
+                "project",
+                "workflow_surface",
+                "workflow_job_surface",
+                "script_surface",
+                "file_surface",
+                "directory_surface",
+                "quality_gate",
+            }
+        )
+        shard_relation_specs.extend(
+            (
+                ("HAS_WORKFLOW", frozenset({"project"}), frozenset({"workflow_surface"})),
+                ("CONTAINS", frozenset({"workflow_surface"}), frozenset({"workflow_job_surface"})),
+                (
+                    "RUNS_VIA",
+                    frozenset({"workflow_job_surface"}),
+                    frozenset({"script_surface", "file_surface", "directory_surface"}),
+                ),
+                (
+                    "EXECUTES_GATE",
+                    frozenset({"workflow_job_surface"}),
+                    frozenset({"quality_gate"}),
+                ),
+                (
+                    "DEPENDS_ON",
+                    frozenset({"workflow_job_surface"}),
+                    frozenset({"workflow_job_surface"}),
+                ),
+            )
+        )
+    if only_docs_drift:
+        shard_label_sets.append(
+            {
+                "doc_source_surface",
+                "doc_artifact",
+                "policy_surface",
+                "module_surface",
+                "script_surface",
+                "config_artifact",
+                "workflow_surface",
+                "file_surface",
+                "directory_surface",
+                "execution_path",
+            }
+        )
+        shard_relation_specs.extend(
+            (
+                (
+                    "DESCRIBES",
+                    frozenset({"doc_source_surface", "doc_artifact", "policy_surface"}),
+                    frozenset(
+                        {
+                            "module_surface",
+                            "script_surface",
+                            "config_artifact",
+                            "workflow_surface",
+                            "file_surface",
+                            "directory_surface",
+                            "execution_path",
+                        }
+                    ),
+                ),
+            )
+        )
+
     allowed_labels = set(only_labels)
+    for label_set in shard_label_sets:
+        allowed_labels |= label_set
     if only_analysis_layer:
         allowed_labels |= set(ANALYSIS_NODE_LABELS)
     if only_retirement_layer:
@@ -769,9 +925,22 @@ def _filtered_snapshot(
         allowed_analysis_relation_types |= set(COMPLEXITY_RELATION_TYPES)
     if not allowed_analysis_relation_types:
         allowed_analysis_relation_types = set(ANALYSIS_RELATION_TYPES)
-    for key, node in snapshot.nodes.items():
-        if key.label in allowed_labels:
-            filtered.nodes[key] = node
+    has_shard_filters = bool(shard_relation_specs)
+    if not has_shard_filters:
+        for key, node in snapshot.nodes.items():
+            if key.label in allowed_labels:
+                filtered.nodes[key] = node
+
+    def _matches_shard_relation(relation: GraphRelation) -> bool:
+        for relation_type, source_labels, target_labels in shard_relation_specs:
+            if (
+                relation.relation_type == relation_type
+                and relation.source.label in source_labels
+                and relation.target.label in target_labels
+            ):
+                return True
+        return False
+
     for rel_key, relation in snapshot.relations.items():
         if relation.relation_type in ANALYSIS_RELATION_TYPES:
             if relation.relation_type not in allowed_analysis_relation_types:
@@ -779,7 +948,14 @@ def _filtered_snapshot(
             if only_analysis_layer or relation.source.label in allowed_labels or relation.target.label in allowed_labels:
                 filtered.relations[rel_key] = relation
             continue
-        if relation.source.label in allowed_labels and relation.target.label in allowed_labels:
+        if has_shard_filters and _matches_shard_relation(relation):
+            if relation.source in snapshot.nodes:
+                filtered.nodes.setdefault(relation.source, snapshot.nodes[relation.source])
+            if relation.target in snapshot.nodes:
+                filtered.nodes.setdefault(relation.target, snapshot.nodes[relation.target])
+            filtered.relations[rel_key] = relation
+            continue
+        if not has_shard_filters and relation.source.label in allowed_labels and relation.target.label in allowed_labels:
             filtered.relations[rel_key] = relation
     return filtered
 
@@ -964,6 +1140,38 @@ def _parser() -> argparse.ArgumentParser:
         help=(
             "Limit apply/export/report snapshot operations to the complexity analysis layer "
             "(complexity nodes and complexity relations)."
+        ),
+    )
+    parser.add_argument(
+        "--only-storage-layer",
+        action="store_true",
+        help=(
+            "Limit apply/export/report snapshot operations to storage, control-plane artifact, "
+            "and related lineage materialization surfaces."
+        ),
+    )
+    parser.add_argument(
+        "--only-runtime-evidence-layer",
+        action="store_true",
+        help=(
+            "Limit apply/export/report snapshot operations to runtime evidence, emitted artifacts, "
+            "and directly supporting module/doc/storage links."
+        ),
+    )
+    parser.add_argument(
+        "--only-workflow-graph",
+        action="store_true",
+        help=(
+            "Limit apply/export/report snapshot operations to GitHub workflow/job graph and "
+            "related gate/script/file-structure links."
+        ),
+    )
+    parser.add_argument(
+        "--only-docs-drift",
+        action="store_true",
+        help=(
+            "Limit apply/export/report snapshot operations to docs/policies and their "
+            "DESCRIBES drift edges into code/config/workflow surfaces."
         ),
     )
     return parser
@@ -2743,6 +2951,36 @@ def _add_storage_surface(
     return surface
 
 
+def _add_control_plane_artifact_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    artifact_name: str,
+    *,
+    summary: str,
+    today: str,
+    artifact_family: str,
+    artifact_kind: str,
+    storage_ref: str,
+    artifact_format: str | None = None,
+    key_template: str | None = None,
+) -> NodeKey:
+    artifact = snapshot.add_node(
+        "control_plane_artifact_surface",
+        artifact_name,
+        summary=summary,
+        artifact_family=artifact_family,
+        artifact_kind=artifact_kind,
+        storage_ref=storage_ref,
+        artifact_format=artifact_format,
+        key_template=key_template,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_CONTROL_PLANE_ARTIFACT", artifact, provenance="runtime_evidence")
+    return artifact
+
+
 def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     base_pipeline_path = root / "configs" / "base" / "pipeline.yaml"
     base_payload = _read_yaml(base_pipeline_path) if base_pipeline_path.is_file() else {}
@@ -2903,8 +3141,8 @@ def _add_control_plane_runtime_evidence(
                 "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
             ),
             "storage_refs": (
-                ("control/run_manifest/{manifest_id}.json", "json"),
-                ("control/run_manifest/_by_run_id/{run_id}.txt", "index"),
+                ("control/run_manifest/{manifest_id}.json", "json", "{manifest_id}"),
+                ("control/run_manifest/_by_run_id/{run_id}.txt", "run_index", "{run_id}"),
             ),
         },
         {
@@ -2921,8 +3159,8 @@ def _add_control_plane_runtime_evidence(
                 "src/bioetl/application/services/run_ledger_service.py",
             ),
             "storage_refs": (
-                ("control/run_ledger/{manifest_id}.jsonl", "jsonl"),
-                ("control/run_ledger/_by_run_id/{run_id}.txt", "index"),
+                ("control/run_ledger/{manifest_id}.jsonl", "jsonl", "{manifest_id}"),
+                ("control/run_ledger/_by_run_id/{run_id}.txt", "run_index", "{run_id}"),
             ),
         },
         {
@@ -2938,7 +3176,10 @@ def _add_control_plane_runtime_evidence(
                 "src/bioetl/composition/services/effective_config_serializer.py",
                 "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
             ),
-            "storage_refs": (),
+            "storage_refs": (
+                ("control/effective_config/{artifact_id}.json", "json", "{artifact_id}"),
+                ("control/effective_config/_by_run_id/{run_id}.txt", "run_index", "{run_id}"),
+            ),
         },
         {
             "name": "lineage",
@@ -2951,8 +3192,14 @@ def _add_control_plane_runtime_evidence(
             "modules": (
                 "src/bioetl/application/services/lineage_inspection_service.py",
                 "src/bioetl/composition/bootstrap/cli/lineage.py",
+                "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
             ),
-            "storage_refs": (),
+            "storage_refs": (
+                ("control/lineage/fragments/{fragment_hash}.json", "fragment", "{fragment_id}"),
+                ("control/lineage/_by_run_id/{run_id_hash}.jsonl", "run_index", "{run_id}"),
+                ("control/lineage/_by_manifest_id/{manifest_id_hash}.jsonl", "manifest_index", "{manifest_id}"),
+                ("control/lineage/_by_node_id/{node_id_hash}.jsonl", "node_index", "{node_id}"),
+            ),
         },
     )
 
@@ -2976,7 +3223,7 @@ def _add_control_plane_runtime_evidence(
             module_key = NodeKey("module_surface", str(module_path))
             if module_key in snapshot.nodes:
                 snapshot.add_relation(surface, "BACKED_BY", module_key, provenance="runtime_evidence")
-        for storage_ref, suffix in spec["storage_refs"]:
+        for storage_ref, suffix, key_template in spec["storage_refs"]:
             storage = _add_storage_surface(
                 snapshot,
                 project,
@@ -2987,6 +3234,24 @@ def _add_control_plane_runtime_evidence(
                 storage_kind="control_plane_artifact",
             )
             snapshot.add_relation(surface, "WRITES_TO", storage, provenance="runtime_evidence", suffix=suffix)
+            artifact = _add_control_plane_artifact_surface(
+                snapshot,
+                project,
+                f"{spec['name']}::{suffix}",
+                summary=f"{spec['name']} control-plane artifact `{storage_ref}`.",
+                today=today,
+                artifact_family=str(spec["name"]),
+                artifact_kind=suffix,
+                storage_ref=storage_ref,
+                artifact_format=(
+                    str(snapshot.nodes[storage].properties.get("format"))
+                    if storage in snapshot.nodes and snapshot.nodes[storage].properties.get("format") is not None
+                    else None
+                ),
+                key_template=key_template,
+            )
+            snapshot.add_relation(surface, "EMITS_ARTIFACT", artifact, provenance="runtime_evidence")
+            snapshot.add_relation(artifact, "MATERIALIZED_AS", storage, provenance="runtime_evidence")
 
 
 def _workflow_script_targets(run_text: str) -> set[NodeKey]:
@@ -3053,6 +3318,16 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
         for job_id, job_payload in jobs.items():
             if not isinstance(job_payload, dict):
                 continue
+            steps = job_payload.get("steps")
+            inline_run_step_count = 0
+            uses_step_count = 0
+            if isinstance(steps, list):
+                inline_run_step_count = sum(
+                    1 for step in steps if isinstance(step, dict) and isinstance(step.get("run"), str)
+                )
+                uses_step_count = sum(
+                    1 for step in steps if isinstance(step, dict) and isinstance(step.get("uses"), str)
+                )
             job_name = f"{workflow_name}::{job_id}"
             job = snapshot.add_node(
                 "workflow_job_surface",
@@ -3063,6 +3338,8 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                 workflow=workflow_name,
                 job_id=str(job_id),
                 runs_on=str(job_payload.get("runs-on")) if job_payload.get("runs-on") is not None else None,
+                inline_run_step_count=inline_run_step_count,
+                uses_step_count=uses_step_count,
                 last_verified=today,
                 ingest_wave="repo_sync_v1",
                 confidence="high",
@@ -3070,7 +3347,6 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             job_nodes[(workflow_name, str(job_id))] = job
             snapshot.add_relation(workflow, "CONTAINS", job, provenance="workflow_graph")
 
-            steps = job_payload.get("steps")
             if isinstance(steps, list):
                 for step in steps:
                     if not isinstance(step, dict):
@@ -5421,6 +5697,10 @@ def sync_snapshot(
     only_analysis_layer: bool = False,
     only_retirement_layer: bool = False,
     only_complexity_layer: bool = False,
+    only_storage_layer: bool = False,
+    only_runtime_evidence_layer: bool = False,
+    only_workflow_graph: bool = False,
+    only_docs_drift: bool = False,
 ) -> None:
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
@@ -5431,8 +5711,21 @@ def sync_snapshot(
         only_analysis_layer=only_analysis_layer,
         only_retirement_layer=only_retirement_layer,
         only_complexity_layer=only_complexity_layer,
+        only_storage_layer=only_storage_layer,
+        only_runtime_evidence_layer=only_runtime_evidence_layer,
+        only_workflow_graph=only_workflow_graph,
+        only_docs_drift=only_docs_drift,
     )
-    targeted_mode = only_analysis_layer or only_retirement_layer or only_complexity_layer or bool(only_labels)
+    targeted_mode = (
+        only_analysis_layer
+        or only_retirement_layer
+        or only_complexity_layer
+        or only_storage_layer
+        or only_runtime_evidence_layer
+        or only_workflow_graph
+        or only_docs_drift
+        or bool(only_labels)
+    )
     if targeted_mode:
         mode_description = "targeted sync"
         if only_complexity_layer:
@@ -5441,6 +5734,14 @@ def sync_snapshot(
             mode_description = "retirement-layer targeted sync"
         elif only_analysis_layer:
             mode_description = "analysis-layer targeted sync"
+        elif only_storage_layer:
+            mode_description = "storage-layer targeted sync"
+        elif only_runtime_evidence_layer:
+            mode_description = "runtime-evidence targeted sync"
+        elif only_workflow_graph:
+            mode_description = "workflow-graph targeted sync"
+        elif only_docs_drift:
+            mode_description = "docs-drift targeted sync"
         _ensure_targeted_apply_prerequisites(
             client,
             snapshot,
@@ -5980,6 +6281,11 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "execution_path",
         "quality_gate",
         "dashboard_surface",
+        "storage_surface",
+        "runtime_evidence_surface",
+        "control_plane_artifact_surface",
+        "workflow_surface",
+        "workflow_job_surface",
     )
     required_relation_types = (
         "BACKS",
@@ -5996,6 +6302,15 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "COVERED_BY_TEST",
         "HAS_COMPLEXITY_SIGNAL",
         "CANDIDATE_FOR_SIMPLIFICATION",
+        "DESCRIBES",
+        "WRITES_TO",
+        "PROMOTES_TO",
+        "HAS_RUNTIME_EVIDENCE",
+        "HAS_CONTROL_PLANE_ARTIFACT",
+        "HAS_WORKFLOW",
+        "EXECUTES_GATE",
+        "EMITS_ARTIFACT",
+        "MATERIALIZED_AS",
     )
     for label in required_labels:
         if int(stats["labels"].get(label, 0)) <= 0:
@@ -6170,10 +6485,165 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append("missing alert_surface -> OBSERVED_BY -> dashboard_surface links")
 
     if not any(
+        source_label == "project" and relation_type == "HAS_RUNTIME_EVIDENCE" and target_label == "runtime_evidence_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing project -> HAS_RUNTIME_EVIDENCE -> runtime_evidence_surface links")
+
+    if not any(
+        source_label == "project" and relation_type == "HAS_CONTROL_PLANE_ARTIFACT" and target_label == "control_plane_artifact_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing project -> HAS_CONTROL_PLANE_ARTIFACT -> control_plane_artifact_surface links")
+
+    if not any(
+        source_label == "project" and relation_type == "HAS_WORKFLOW" and target_label == "workflow_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing project -> HAS_WORKFLOW -> workflow_surface links")
+
+    if not any(
+        source_label == "workflow_surface" and relation_type == "CONTAINS" and target_label == "workflow_job_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow_surface -> CONTAINS -> workflow_job_surface links")
+
+    if not any(
+        source_label == "workflow_job_surface" and relation_type == "RUNS_VIA" and target_label in {"script_surface", "file_surface", "directory_surface"}
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow_job_surface -> RUNS_VIA operational target links")
+
+    if not any(
+        source_label == "workflow_job_surface" and relation_type == "EXECUTES_GATE" and target_label == "quality_gate"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing workflow_job_surface -> EXECUTES_GATE -> quality_gate links")
+
+    if not any(
+        source_label == "pipeline_surface" and relation_type == "WRITES_TO" and target_label == "storage_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing pipeline_surface -> WRITES_TO -> storage_surface links")
+
+    if not any(
+        source_label == "storage_surface" and relation_type == "PROMOTES_TO" and target_label == "storage_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing storage_surface promotion links")
+
+    if not any(
+        source_label == "runtime_evidence_surface" and relation_type == "WRITES_TO" and target_label == "storage_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing runtime_evidence_surface -> WRITES_TO -> storage_surface links")
+
+    if not any(
+        source_label == "runtime_evidence_surface" and relation_type == "EMITS_ARTIFACT" and target_label == "control_plane_artifact_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface links")
+
+    if not any(
+        source_label == "control_plane_artifact_surface" and relation_type == "MATERIALIZED_AS" and target_label == "storage_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing control_plane_artifact_surface -> MATERIALIZED_AS -> storage_surface links")
+
+    if not any(
+        source_label in {"doc_source_surface", "doc_artifact", "policy_surface"}
+        and relation_type == "DESCRIBES"
+        and target_label in {
+            "module_surface",
+            "script_surface",
+            "config_artifact",
+            "workflow_surface",
+            "file_surface",
+            "directory_surface",
+            "execution_path",
+        }
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing docs-to-code drift edges")
+
+    if not any(
         source_label == "adapter_surface" and relation_type == "CONTAINS" and target_label == "adapter_impl_surface"
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing adapter_surface -> CONTAINS -> adapter_impl_surface links")
+
+    runtime_evidence_nodes = [
+        node.key for node in snapshot.nodes.values() if node.key.label == "runtime_evidence_surface"
+    ]
+    unsupported_runtime_evidence = [
+        key.name
+        for key in runtime_evidence_nodes
+        if not any(
+            rel.source == key and rel.relation_type in {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"}
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if unsupported_runtime_evidence:
+        issues.append(
+            "runtime evidence surfaces without support links: "
+            + ", ".join(sorted(unsupported_runtime_evidence)[:10])
+        )
+
+    control_plane_artifact_nodes = [
+        node.key for node in snapshot.nodes.values() if node.key.label == "control_plane_artifact_surface"
+    ]
+    orphan_control_plane_artifacts = [
+        key.name
+        for key in control_plane_artifact_nodes
+        if not any(
+            (rel.target == key and rel.relation_type == "EMITS_ARTIFACT" and rel.source.label == "runtime_evidence_surface")
+            or (rel.source == key and rel.relation_type == "MATERIALIZED_AS" and rel.target.label == "storage_surface")
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if orphan_control_plane_artifacts:
+        issues.append(
+            "control-plane artifacts without runtime/storage links: "
+            + ", ".join(sorted(orphan_control_plane_artifacts)[:10])
+        )
+
+    storage_nodes = [node.key for node in snapshot.nodes.values() if node.key.label == "storage_surface"]
+    unowned_storage_nodes = [
+        key.name
+        for key in storage_nodes
+        if not any(
+            (
+                rel.target == key
+                and rel.relation_type in {"WRITES_TO", "DEPENDS_ON", "DEFINED_BY"}
+                and rel.source.label in {"pipeline_surface", "entity_config", "runtime_evidence_surface", "storage_surface"}
+            )
+            or (
+                rel.source == key
+                and rel.relation_type in {"PROMOTES_TO", "DEFINED_BY"}
+            )
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if unowned_storage_nodes:
+        issues.append(
+            "storage surfaces without ownership or lineage links: "
+            + ", ".join(sorted(unowned_storage_nodes)[:10])
+        )
+
+    workflow_job_nodes = [node.key for node in snapshot.nodes.values() if node.key.label == "workflow_job_surface"]
+    workflow_jobs_without_parent = [
+        key.name
+        for key in workflow_job_nodes
+        if not any(
+            rel.target == key and rel.relation_type == "CONTAINS" and rel.source.label == "workflow_surface"
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if workflow_jobs_without_parent:
+        issues.append(
+            "workflow jobs without workflow parent links: "
+            + ", ".join(sorted(workflow_jobs_without_parent)[:10])
+        )
 
     ignored_paths = [
         node.key.name
@@ -6539,6 +7009,10 @@ def main(argv: list[str] | None = None) -> int:
         only_analysis_layer=args.only_analysis_layer,
         only_retirement_layer=args.only_retirement_layer,
         only_complexity_layer=args.only_complexity_layer,
+        only_storage_layer=args.only_storage_layer,
+        only_runtime_evidence_layer=args.only_runtime_evidence_layer,
+        only_workflow_graph=args.only_workflow_graph,
+        only_docs_drift=args.only_docs_drift,
     )
     stats = snapshot.stats()
     print(json.dumps(stats, indent=2))
@@ -6558,11 +7032,19 @@ def main(argv: list[str] | None = None) -> int:
             only_analysis_layer=args.only_analysis_layer,
             only_retirement_layer=args.only_retirement_layer,
             only_complexity_layer=args.only_complexity_layer,
+            only_storage_layer=args.only_storage_layer,
+            only_runtime_evidence_layer=args.only_runtime_evidence_layer,
+            only_workflow_graph=args.only_workflow_graph,
+            only_docs_drift=args.only_docs_drift,
         )
         targeted_mode = (
             args.only_analysis_layer
             or args.only_retirement_layer
             or args.only_complexity_layer
+            or args.only_storage_layer
+            or args.only_runtime_evidence_layer
+            or args.only_workflow_graph
+            or args.only_docs_drift
             or bool(args.only_label)
         )
         if not targeted_mode:

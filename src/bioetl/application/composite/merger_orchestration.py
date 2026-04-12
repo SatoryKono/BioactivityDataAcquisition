@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.merger_post_join import (
@@ -51,6 +51,15 @@ class MergeExecutionRequest:
     seed_pipeline: str | None = None
     dependencies: Sequence[DependencyConfig] | None = None
     dependency_results: dict[str, DependencyResult] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MergeExecutionContext:
+    """Prepared execution state for one canonical merge/join run."""
+
+    request: MergeExecutionRequest
+    started_at: datetime
+    loaded_inputs: MergeInputContext
 
 
 class MergeWorkflowContext(MergePostJoinWorkflowContext, Protocol):
@@ -121,6 +130,60 @@ async def load_merge_inputs(
     )
 
 
+def resolve_merge_metadata_timestamp(
+    cached_bronze_date: object | None,
+) -> datetime | None:
+    """Return deterministic replay timestamp from cached bronze date."""
+    if cached_bronze_date is None:
+        return None
+    replay_date = date.fromisoformat(str(cached_bronze_date))
+    return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
+
+
+def build_merge_execution_request(
+    *,
+    seed_table: str,
+    enrichers: Sequence[EnricherConfig],
+    enrichment_results: dict[str, EnrichmentResult],
+    run_id: str,
+    metadata_timestamp: datetime | None = None,
+    seed_pipeline: str | None = None,
+    dependencies: Sequence[DependencyConfig] | None = None,
+    dependency_results: dict[str, DependencyResult] | None = None,
+) -> MergeExecutionRequest:
+    """Build the canonical request envelope for merge/join execution."""
+    return MergeExecutionRequest(
+        seed_table=seed_table,
+        seed_pipeline=seed_pipeline,
+        enrichers=enrichers,
+        enrichment_results=enrichment_results,
+        run_id=run_id,
+        metadata_timestamp=metadata_timestamp,
+        dependencies=dependencies,
+        dependency_results=dependency_results,
+    )
+
+
+async def prepare_merge_execution_context(
+    host: MergeWorkflowContext,
+    request: MergeExecutionRequest,
+) -> MergeExecutionContext:
+    """Load all merge inputs and bind them to one execution context model."""
+    return MergeExecutionContext(
+        request=request,
+        started_at=datetime.now(tz=UTC),
+        loaded_inputs=await load_merge_inputs(
+            host,
+            seed_table=request.seed_table,
+            seed_pipeline=request.seed_pipeline,
+            enrichers=request.enrichers,
+            enrichment_results=request.enrichment_results,
+            dependencies=request.dependencies,
+            dependency_results=request.dependency_results,
+        ),
+    )
+
+
 async def execute_merge_workflow(
     host: MergeWorkflowContext,
     *,
@@ -133,33 +196,25 @@ async def execute_merge_workflow(
     dependency_results: dict[str, DependencyResult] | None = None,
 ) -> MergeResult:
     """Execute the full composite merge workflow for ``MergeService``."""
-    request = MergeExecutionRequest(
+    request = build_merge_execution_request(
         seed_table=seed_table,
-        seed_pipeline=seed_pipeline,
         enrichers=enrichers,
         enrichment_results=enrichment_results,
         run_id=run_id,
+        seed_pipeline=seed_pipeline,
         dependencies=dependencies,
         dependency_results=dependency_results,
     )
     return await execute_merge_request(host, request)
 
 
-async def execute_merge_request(
+async def execute_merge_execution_core(
     host: MergeWorkflowContext,
-    request: MergeExecutionRequest,
+    execution_context: MergeExecutionContext,
 ) -> MergeResult:
-    """Execute the full composite merge workflow from a canonical request."""
-    started_at = datetime.now(tz=UTC)
-    loaded = await load_merge_inputs(
-        host,
-        seed_table=request.seed_table,
-        seed_pipeline=request.seed_pipeline,
-        enrichers=request.enrichers,
-        enrichment_results=request.enrichment_results,
-        dependencies=request.dependencies,
-        dependency_results=request.dependency_results,
-    )
+    """Execute merge/join sequencing from one prepared execution context."""
+    request = execution_context.request
+    loaded = execution_context.loaded_inputs
 
     merged_df = await host._join_planner.apply_joins(
         seed_df=loaded.seed_df,
@@ -197,5 +252,14 @@ async def execute_merge_request(
         quarantine_payloads=post_join_context.quarantine_payloads,
         metadata_timestamp=request.metadata_timestamp,
         run_id=request.run_id,
-        started_at=started_at,
+        started_at=execution_context.started_at,
     )
+
+
+async def execute_merge_request(
+    host: MergeWorkflowContext,
+    request: MergeExecutionRequest,
+) -> MergeResult:
+    """Execute the full composite merge workflow from a canonical request."""
+    execution_context = await prepare_merge_execution_context(host, request)
+    return await execute_merge_execution_core(host, execution_context)

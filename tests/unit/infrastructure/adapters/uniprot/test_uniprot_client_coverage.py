@@ -7,6 +7,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.domain.types import CircuitBreakerState, HealthStatus
+from bioetl.infrastructure.adapters.common.deduplication import (
+    deduplicate_preserving_order,
+)
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
@@ -140,6 +143,14 @@ async def test_fetch_filtered_non_protein_uses_individual_strategy(adapter):
         records.append(record)
 
     assert [r["feature_id"] for r in records] == ["F1", "F2"]
+
+
+def test_common_deduplicate_preserving_order_supports_uniprot_filter_ids() -> None:
+    assert deduplicate_preserving_order(["P2", "P1", "P2", "P3", "P1"]) == [
+        "P2",
+        "P1",
+        "P3",
+    ]
 
 
 @pytest.mark.asyncio

@@ -85,12 +85,28 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
     ]
     if isinstance(run_manifest, dict):
         manifest = run_manifest.get("manifest", {})
+        diagnostics = run_manifest.get("diagnostics", {})
+        identity_graph = run_manifest.get("identity_graph", {})
+        replay_view = (
+            identity_graph
+            if isinstance(identity_graph, dict) and identity_graph
+            else diagnostics
+        )
         if isinstance(manifest, dict):
             lines.extend(
                 [
                     f"  manifest_id: {manifest.get('manifest_id')}",
                     f"  pipeline_name: {manifest.get('pipeline_name')}",
-                    f"  replay_capability: {manifest.get('replay_capability')}",
+                ]
+            )
+        if isinstance(replay_view, dict):
+            lines.extend(
+                [
+                    f"  replay_capability: {replay_view.get('replay_capability')}",
+                    f"  replay_capability_reason: {replay_view.get('replay_capability_reason')}",
+                    f"  exact_replay_blockers: {replay_view.get('exact_replay_blockers')}",
+                    f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",
+                    f"  input_snapshot_identity_fingerprint: {replay_view.get('input_snapshot_identity_fingerprint')}",
                 ]
             )
     lines.extend(["", "Audit Entries"])

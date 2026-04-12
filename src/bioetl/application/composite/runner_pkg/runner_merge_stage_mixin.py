@@ -36,7 +36,7 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
 )
-from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.composite.result import (
     DependencyResult,

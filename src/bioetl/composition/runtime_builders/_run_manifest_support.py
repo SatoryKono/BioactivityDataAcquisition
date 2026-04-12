@@ -104,9 +104,28 @@ def resolve_provider_entity(
     else:
         fallback_provider = pipeline_name
         fallback_entity = pipeline_name
-    provider = getattr(yaml_config, "provider", fallback_provider) or fallback_provider
-    entity = getattr(yaml_config, "entity_type", fallback_entity) or fallback_entity
-    return str(provider), str(entity)
+    provider = _resolve_name_component(
+        getattr(yaml_config, "provider", None),
+        fallback=fallback_provider,
+    )
+    entity = _resolve_name_component(
+        getattr(yaml_config, "entity_type", None),
+        fallback=fallback_entity,
+    )
+    return provider, entity
+
+
+def _resolve_name_component(value: object, *, fallback: str) -> str:
+    """Return a canonical provider/entity component or fall back safely.
+
+    ``MagicMock`` and other object doubles frequently expose arbitrary attributes
+    in tests; they must not leak into manifest ``contract_ref`` values.
+    """
+    if isinstance(value, str):
+        normalized = value.strip()
+        if normalized:
+            return normalized
+    return fallback
 
 
 def build_run_source_refs(
@@ -141,12 +160,16 @@ def build_run_source_refs(
 
 
 def resolve_replay_capability(
+    *,
     source_refs: tuple[RunSourceRef, ...],
+    resume_requested: bool,
 ) -> ReplayCapability:
-    """Classify whether one manifested run supports exact replay."""
+    """Classify control-plane replay capability for one manifested run."""
     has_input_snapshots = any(ref.input_snapshots for ref in source_refs)
     if has_input_snapshots:
         return ReplayCapability.EXACT_REPLAY_SUPPORTED
+    if resume_requested:
+        return ReplayCapability.RESUME_ONLY
     return ReplayCapability.REBUILD_ONLY
 
 

@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-10T19:09:10.908825+00:00",
+  "generated_at": "2026-04-12T11:54:04.252594+00:00",
   "summary": {
-    "total_scripts": 291,
+    "total_scripts": 292,
     "status_counts": {
-      "active": 238,
+      "active": 239,
       "legacy": 29,
       "orphan": 23,
       "unknown": 1
@@ -14,9 +14,9 @@
       "build": 31,
       "ci": 48,
       "docs": 117,
-      "scripts": 247,
+      "scripts": 248,
       "skills": 9,
-      "tests": 94
+      "tests": 99
     }
   },
   "scripts": [
@@ -179,13 +179,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 85,
+          "line": 92,
           "source_group": "docs",
           "text": "`python -m scripts.ci neo4j-memory`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 90,
+          "line": 98,
           "source_group": "docs",
           "text": "`python -m scripts.ci neo4j-memory-live`."
         },
@@ -3910,7 +3910,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 92,
+      "reference_count": 94,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4565,7 +4565,7 @@
         },
         {
           "path": "scripts/ops/neo4j_memory_sync.py",
-          "line": 497,
+          "line": 498,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
         }
@@ -4698,7 +4698,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 79,
+      "reference_count": 109,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -4708,45 +4708,45 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 60,
+          "line": 62,
           "source_group": "docs",
           "text": "Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 63,
+          "line": 66,
           "source_group": "docs",
-          "text": "Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:"
+          "text": "`python -m scripts.ops sync-neo4j-memory --export /tmp/storage-memory.json --only-storage-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
           "line": 67,
           "source_group": "docs",
+          "text": "`python -m scripts.ops sync-neo4j-memory --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 68,
+          "source_group": "docs",
+          "text": "`python -m scripts.ops sync-neo4j-memory --export /tmp/workflow-memory.json --only-workflow-graph`,"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 69,
+          "source_group": "docs",
+          "text": "`python -m scripts.ops sync-neo4j-memory --export /tmp/docs-drift-memory.json --only-docs-drift`."
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": "Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 74,
+          "source_group": "docs",
           "text": "`python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json`:"
-        },
-        {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 71,
-          "source_group": "docs",
-          "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:"
-        },
-        {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 81,
-          "source_group": "docs",
-          "text": "`python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:"
-        },
-        {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 92,
-          "source_group": "docs",
-          "text": "`python -m scripts.ops query-neo4j-memory <profile> <name>`, например:"
-        },
-        {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 93,
-          "source_group": "docs",
-          "text": "`python -m scripts.ops query-neo4j-memory owner-contract chembl.activity`,"
         }
       ]
     },
@@ -5049,7 +5049,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 27,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -5106,7 +5106,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 37,
       "references": [
         {
           "path": "scripts/ops/00_START_HERE.md",
@@ -5220,7 +5220,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 70,
+      "reference_count": 71,
       "references": [
         {
           "path": "Makefile",
@@ -5277,7 +5277,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 105,
+      "reference_count": 109,
       "references": [
         {
           "path": "scripts/ops/00_START_HERE.md",
@@ -5461,6 +5461,63 @@
       ]
     },
     {
+      "path": "scripts/ops/ensure_codex_cli.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "scripts/ops/codex-exec.sh",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure_codex_cli.sh\""
+        },
+        {
+          "path": "scripts/ops/codex.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure_codex_cli.sh\""
+        },
+        {
+          "path": "scripts/ops/setup_wsl_codex.sh",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure_codex_cli.sh\""
+        },
+        {
+          "path": "scripts/ops/verify_codex_setup.sh",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)/ensure_codex_cli.sh\""
+        },
+        {
+          "path": "tests/architecture/test_codex_launcher_bootstrap.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "assert \"ensure_codex_cli.sh\" in codex_sh"
+        },
+        {
+          "path": "tests/architecture/test_codex_launcher_bootstrap.py",
+          "line": 24,
+          "source_group": "tests",
+          "text": "assert \"ensure_codex_cli.sh\" in codex_exec_sh"
+        },
+        {
+          "path": "tests/architecture/test_codex_launcher_bootstrap.py",
+          "line": 60,
+          "source_group": "tests",
+          "text": "assert \"ensure_codex_cli.sh\" in setup_sh"
+        },
+        {
+          "path": "tests/architecture/test_codex_launcher_bootstrap.py",
+          "line": 64,
+          "source_group": "tests",
+          "text": "assert \"ensure_codex_cli.sh\" in verify_sh"
+        }
+      ]
+    },
+    {
       "path": "scripts/ops/fix_grafana_dashboards.py",
       "type": "py",
       "status": "active",
@@ -5553,13 +5610,13 @@
         },
         {
           "path": "scripts/ops/check_mcp.sh",
-          "line": 7,
+          "line": 18,
           "source_group": "scripts",
           "text": "# shellcheck source=./load_repo_env.sh"
         },
         {
           "path": "scripts/ops/check_mcp.sh",
-          "line": 8,
+          "line": 19,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/load_repo_env.sh\""
         },
@@ -5609,13 +5666,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
           "line": 130,
           "source_group": "scripts",
           "text": "\"brave-search\": _wrapper_server(root, \"mcp_brave_search_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "EXPECTED_BRAVE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -5645,13 +5708,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
           "line": 125,
           "source_group": "scripts",
           "text": "\"context7\": _wrapper_server(root, \"mcp_context7_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_context7_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -5681,13 +5750,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
           "line": 124,
           "source_group": "scripts",
           "text": "\"docker-docs\": _wrapper_server(root, \"mcp_docker_docs_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "EXPECTED_DOCKER_DOCS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_docker_docs_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -5717,13 +5792,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
           "line": 123,
           "source_group": "scripts",
           "text": "\"docker\": _wrapper_server(root, \"mcp_docker_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_docker_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -5753,13 +5834,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
           "line": 127,
           "source_group": "scripts",
           "text": "\"dockerhub\": _wrapper_server(root, \"mcp_dockerhub_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "EXPECTED_DOCKERHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_dockerhub_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -5789,13 +5876,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
           "line": 129,
           "source_group": "scripts",
           "text": "\"grafana\": _wrapper_server(root, \"mcp_grafana_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "EXPECTED_GRAFANA_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_grafana_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -5825,7 +5918,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/NEO4J-MCP-SETUP.md",
@@ -5838,6 +5931,12 @@
           "line": 131,
           "source_group": "scripts",
           "text": "\"neo4j-cypher\": _wrapper_server(root, \"mcp_neo4j_cypher_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "EXPECTED_NEO4J_CYPHER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_neo4j_cypher_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -5867,7 +5966,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 31,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -5939,13 +6038,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
           "line": 126,
           "source_group": "scripts",
           "text": "\"paper-search\": _wrapper_server(root, \"mcp_paper_search_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "EXPECTED_PAPER_SEARCH_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_paper_search_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -5975,13 +6080,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/dev/setup_copilot_codex_mcp.py",
           "line": 128,
           "source_group": "scripts",
           "text": "\"prometheus\": _wrapper_server(root, \"mcp_prometheus_wrapper.sh\"),"
+        },
+        {
+          "path": "scripts/ops/check_mcp.sh",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "EXPECTED_PROMETHEUS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_prometheus_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
@@ -6451,7 +6562,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 44,
       "references": [
         {
           "path": "scripts/ops/00_START_HERE.md",
@@ -6808,7 +6919,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 27,
       "references": [
         {
           "path": "scripts/ops/00_START_HERE.md",

@@ -78,11 +78,21 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert uniprot_protein_name["normalizer"] == "normalize_profile_title"
 
     chembl_assay_parameters_run_id = _row(rows, "chembl_assay_parameters", "_run_id")
-    assert (
-        chembl_assay_parameters_run_id["normalization_source"]
-        == "fallback_technical_passthrough"
+    assert chembl_assay_parameters_run_id["normalization_source"] == "profile"
+    assert chembl_assay_parameters_run_id["normalizer"] == "normalize_profile_json_string"
+    assert chembl_assay_parameters_run_id["include_in_content_hash"] == "false"
+
+    chembl_target_component_id = _row(
+        rows, "chembl_target_component", "protein_classification_id"
     )
-    assert chembl_assay_parameters_run_id["normalizer"] == "passthrough"
+    assert chembl_target_component_id["normalization_source"] == "profile"
+    assert chembl_target_component_id["normalizer"] == "normalize_profile_int"
+
+    chembl_publication_similarity_pmid = _row(
+        rows, "chembl_publication_similarity", "pubmed_id1"
+    )
+    assert chembl_publication_similarity_pmid["normalization_source"] == "profile"
+    assert chembl_publication_similarity_pmid["normalizer"] == "normalize_profile_pmid"
 
 
 def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields() -> None:

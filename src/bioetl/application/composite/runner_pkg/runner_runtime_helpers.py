@@ -15,7 +15,7 @@ from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.application.composite.checkpoint import CompositeCheckpointState
-    from bioetl.application.composite.runner_pkg.runner_models import (
+    from bioetl.application.composite.runtime_models import (
         CompositeRunnerDependencies,
         CompositeRuntimeConfig,
     )

@@ -16,7 +16,7 @@ from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import (
     EnrichmentResult,

@@ -11,14 +11,41 @@ from bioetl.domain.normalization.profiles.chembl_activity import (
 from bioetl.domain.normalization.profiles.chembl_assay import (
     CHEMBL_ASSAY_PROFILE,
 )
+from bioetl.domain.normalization.profiles.chembl_assay_parameters import (
+    CHEMBL_ASSAY_PARAMETERS_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_cell_line import (
+    CHEMBL_CELL_LINE_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_compound_record import (
+    CHEMBL_COMPOUND_RECORD_PROFILE,
+)
 from bioetl.domain.normalization.profiles.chembl_molecule import (
     CHEMBL_MOLECULE_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_protein_class import (
+    CHEMBL_PROTEIN_CLASS_PROFILE,
 )
 from bioetl.domain.normalization.profiles.chembl_publication import (
     CHEMBL_PUBLICATION_PROFILE,
 )
+from bioetl.domain.normalization.profiles.chembl_publication_similarity import (
+    CHEMBL_PUBLICATION_SIMILARITY_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_publication_term import (
+    CHEMBL_PUBLICATION_TERM_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_subcellular_fraction import (
+    CHEMBL_SUBCELLULAR_FRACTION_PROFILE,
+)
 from bioetl.domain.normalization.profiles.chembl_target import (
     CHEMBL_TARGET_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_target_component import (
+    CHEMBL_TARGET_COMPONENT_PROFILE,
+)
+from bioetl.domain.normalization.profiles.chembl_tissue import (
+    CHEMBL_TISSUE_PROFILE,
 )
 from bioetl.domain.normalization.profiles.crossref_publication import (
     CROSSREF_PUBLICATION_PROFILE,
@@ -70,9 +97,18 @@ def build_normalization_profile_registry() -> Mapping[tuple[str, str], Normaliza
     return {
         ("chembl", "activity"): CHEMBL_ACTIVITY_PROFILE,
         ("chembl", "assay"): CHEMBL_ASSAY_PROFILE,
+        ("chembl", "assay_parameters"): CHEMBL_ASSAY_PARAMETERS_PROFILE,
+        ("chembl", "cell_line"): CHEMBL_CELL_LINE_PROFILE,
+        ("chembl", "compound_record"): CHEMBL_COMPOUND_RECORD_PROFILE,
         ("chembl", "molecule"): CHEMBL_MOLECULE_PROFILE,
+        ("chembl", "protein_class"): CHEMBL_PROTEIN_CLASS_PROFILE,
         ("chembl", "publication"): CHEMBL_PUBLICATION_PROFILE,
+        ("chembl", "publication_similarity"): CHEMBL_PUBLICATION_SIMILARITY_PROFILE,
+        ("chembl", "publication_term"): CHEMBL_PUBLICATION_TERM_PROFILE,
+        ("chembl", "subcellular_fraction"): CHEMBL_SUBCELLULAR_FRACTION_PROFILE,
         ("chembl", "target"): CHEMBL_TARGET_PROFILE,
+        ("chembl", "target_component"): CHEMBL_TARGET_COMPONENT_PROFILE,
+        ("chembl", "tissue"): CHEMBL_TISSUE_PROFILE,
         ("crossref", "publication"): CROSSREF_PUBLICATION_PROFILE,
         ("openalex", "publication"): OPENALEX_PUBLICATION_PROFILE,
         ("pubchem", "compound"): PUBCHEM_COMPOUND_PROFILE,
@@ -88,9 +124,39 @@ def build_normalization_profile_module_paths() -> Mapping[tuple[str, str], str]:
     return {
         ("chembl", "activity"): "src/bioetl/domain/normalization/profiles/chembl_activity.py",
         ("chembl", "assay"): "src/bioetl/domain/normalization/profiles/chembl_assay.py",
+        (
+            "chembl",
+            "assay_parameters",
+        ): "src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py",
+        ("chembl", "cell_line"): "src/bioetl/domain/normalization/profiles/chembl_cell_line.py",
+        (
+            "chembl",
+            "compound_record",
+        ): "src/bioetl/domain/normalization/profiles/chembl_compound_record.py",
         ("chembl", "molecule"): "src/bioetl/domain/normalization/profiles/chembl_molecule.py",
+        (
+            "chembl",
+            "protein_class",
+        ): "src/bioetl/domain/normalization/profiles/chembl_protein_class.py",
         ("chembl", "publication"): "src/bioetl/domain/normalization/profiles/chembl_publication.py",
+        (
+            "chembl",
+            "publication_similarity",
+        ): "src/bioetl/domain/normalization/profiles/chembl_publication_similarity.py",
+        (
+            "chembl",
+            "publication_term",
+        ): "src/bioetl/domain/normalization/profiles/chembl_publication_term.py",
+        (
+            "chembl",
+            "subcellular_fraction",
+        ): "src/bioetl/domain/normalization/profiles/chembl_subcellular_fraction.py",
         ("chembl", "target"): "src/bioetl/domain/normalization/profiles/chembl_target.py",
+        (
+            "chembl",
+            "target_component",
+        ): "src/bioetl/domain/normalization/profiles/chembl_target_component.py",
+        ("chembl", "tissue"): "src/bioetl/domain/normalization/profiles/chembl_tissue.py",
         (
             "crossref",
             "publication",

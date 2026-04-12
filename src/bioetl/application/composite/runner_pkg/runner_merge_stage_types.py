@@ -14,7 +14,7 @@ from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
 )
-from bioetl.application.composite.runner_pkg.runner_models import CompositeRuntimeConfig
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import (
     CompositeConfig,
     DependencyConfig,

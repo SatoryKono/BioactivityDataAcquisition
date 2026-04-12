@@ -4,6 +4,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 EXPECTED_MEMORY_PATH="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
+EXPECTED_GITHUB_WRAPPER_PATH="${REPO_ROOT}/.claude/github-mcp-wrapper.sh"
+EXPECTED_DOCKER_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_docker_wrapper.sh"
+EXPECTED_DOCKER_DOCS_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_docker_docs_wrapper.sh"
+EXPECTED_CONTEXT7_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_context7_wrapper.sh"
+EXPECTED_PAPER_SEARCH_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_paper_search_wrapper.sh"
+EXPECTED_DOCKERHUB_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_dockerhub_wrapper.sh"
+EXPECTED_PROMETHEUS_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_prometheus_wrapper.sh"
+EXPECTED_GRAFANA_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_grafana_wrapper.sh"
+EXPECTED_BRAVE_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_brave_search_wrapper.sh"
+EXPECTED_NEO4J_CYPHER_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_neo4j_cypher_wrapper.sh"
+EXPECTED_NEO4J_MEMORY_WRAPPER_PATH="${REPO_ROOT}/scripts/ops/mcp_neo4j_memory_wrapper.sh"
 # shellcheck source=./load_repo_env.sh
 source "${SCRIPT_DIR}/load_repo_env.sh"
 
@@ -31,6 +42,13 @@ require_contains() {
     fail "$message"
     return 1
   fi
+}
+
+require_wrapper_path() {
+  local text="$1"
+  local expected_path="$2"
+  local message="$3"
+  require_contains "$text" "args: ${expected_path}" "$message"
 }
 
 if ! command -v codex >/dev/null 2>&1; then
@@ -81,17 +99,17 @@ require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026
 require_contains "$sequential_out" "@modelcontextprotocol/server-sequential-thinking@2025.12.18" "sequential-thinking is pinned to @2025.12.18" || status=1
 require_contains "$fetch_out" "mcp-server-fetch==2025.4.7" "fetch is pinned to mcp-server-fetch==2025.4.7" || status=1
 require_contains "$pdf_out" "@modelcontextprotocol/server-pdf@1.3.1" "pdf is pinned to @1.3.1" || status=1
-require_contains "$github_out" "github-mcp-wrapper.sh" "github is routed through the project wrapper" || status=1
-require_contains "$docker_out" "mcp_docker_wrapper" "docker is routed through the project wrapper" || status=1
-require_contains "$docker_docs_out" "mcp_docker_docs_wrapper" "docker-docs is routed through the project wrapper" || status=1
-require_contains "$context7_out" "mcp_context7_wrapper" "context7 is routed through the project wrapper" || status=1
-require_contains "$paper_search_out" "mcp_paper_search_wrapper" "paper-search is routed through the project wrapper" || status=1
-require_contains "$dockerhub_out" "mcp_dockerhub_wrapper" "dockerhub is routed through the project wrapper" || status=1
-require_contains "$prometheus_out" "mcp_prometheus_wrapper" "prometheus is routed through the project wrapper" || status=1
-require_contains "$grafana_out" "mcp_grafana_wrapper" "grafana is routed through the project wrapper" || status=1
-require_contains "$brave_out" "mcp_brave_search_wrapper" "brave-search is routed through the project wrapper" || status=1
-require_contains "$neo4j_cypher_out" "mcp_neo4j_cypher_wrapper" "neo4j-cypher is routed through the project wrapper" || status=1
-require_contains "$neo4j_memory_out" "mcp_neo4j_memory_wrapper" "neo4j-memory is routed through the project wrapper" || status=1
+require_wrapper_path "$github_out" "$EXPECTED_GITHUB_WRAPPER_PATH" "github is routed through the project wrapper" || status=1
+require_wrapper_path "$docker_out" "$EXPECTED_DOCKER_WRAPPER_PATH" "docker is routed through the project wrapper" || status=1
+require_wrapper_path "$docker_docs_out" "$EXPECTED_DOCKER_DOCS_WRAPPER_PATH" "docker-docs is routed through the project wrapper" || status=1
+require_wrapper_path "$context7_out" "$EXPECTED_CONTEXT7_WRAPPER_PATH" "context7 is routed through the project wrapper" || status=1
+require_wrapper_path "$paper_search_out" "$EXPECTED_PAPER_SEARCH_WRAPPER_PATH" "paper-search is routed through the project wrapper" || status=1
+require_wrapper_path "$dockerhub_out" "$EXPECTED_DOCKERHUB_WRAPPER_PATH" "dockerhub is routed through the project wrapper" || status=1
+require_wrapper_path "$prometheus_out" "$EXPECTED_PROMETHEUS_WRAPPER_PATH" "prometheus is routed through the project wrapper" || status=1
+require_wrapper_path "$grafana_out" "$EXPECTED_GRAFANA_WRAPPER_PATH" "grafana is routed through the project wrapper" || status=1
+require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search is routed through the project wrapper" || status=1
+require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
+require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
 require_contains "$openai_docs_out" "https://developers.openai.com/mcp" "openaiDeveloperDocs points to official OpenAI MCP endpoint" || status=1
 
 if grep -Fq -- "${REPO_ROOT}" <<<"$filesystem_out"; then

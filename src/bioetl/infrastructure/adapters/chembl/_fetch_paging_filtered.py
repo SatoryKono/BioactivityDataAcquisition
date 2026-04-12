@@ -8,6 +8,7 @@ __all__ = ["_ChemblFetchPagingFilteredMixin"]
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.deduplication import iter_deduplicated_records
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
@@ -15,56 +16,6 @@ if TYPE_CHECKING:
 
 class _ChemblFetchPagingFilteredMixin:
     """Filtered-page continuation and dedup helpers for ChEMBL paging flow."""
-
-    def _is_duplicate_composite(
-        self,
-        record: BronzeRecord,
-        pk_fields: tuple[str, ...],
-        seen_ids: set[str],
-        entity_type: str,
-        filter_field: str,
-    ) -> bool:
-        """Check composite-key duplicate, returning True if record should be skipped."""
-        composite_key = self._compute_composite_key(record, pk_fields)
-        if not composite_key or composite_key == "|".join([""] * len(pk_fields)):
-            return False
-        if composite_key not in seen_ids:
-            seen_ids.add(composite_key)
-            return False
-        self._logger.debug(
-            "skipping_duplicate_record",
-            entity_type=entity_type,
-            pk_fields=pk_fields,
-            composite_key=composite_key,
-            filter_field=filter_field,
-        )
-        self._adapter_metrics.record_dropped_duplicates(entity_type)
-        return True
-
-    def _is_duplicate_simple(
-        self,
-        record: BronzeRecord,
-        pk_field: str,
-        seen_ids: set[str],
-        entity_type: str,
-        filter_field: str,
-    ) -> bool:
-        """Check simple-key duplicate, returning True if record should be skipped."""
-        record_id = str(record.get(pk_field, ""))
-        if not record_id:
-            return False
-        if record_id not in seen_ids:
-            seen_ids.add(record_id)
-            return False
-        self._logger.debug(
-            "skipping_duplicate_record",
-            entity_type=entity_type,
-            pk_field=pk_field,
-            record_id=record_id,
-            filter_field=filter_field,
-        )
-        self._adapter_metrics.record_dropped_duplicates(entity_type)
-        return True
 
     def _yield_deduplicated(
         self,
@@ -77,27 +28,32 @@ class _ChemblFetchPagingFilteredMixin:
     ) -> Iterator[BronzeRecord]:
         """Yield records while tracking seen IDs for deduplication."""
         use_composite = pk_fields is not None and len(pk_fields) > 1
+        logger = getattr(self, "_logger", None)
+        metrics = getattr(self, "_adapter_metrics", None)
+        if use_composite:
+            assert pk_fields is not None
+            yield from iter_deduplicated_records(
+                records,
+                seen_keys=seen_ids,
+                primary_field=pk_fields[0],
+                composite_fields=pk_fields,
+                composite_key_builder=self._compute_composite_key,
+                entity_type=entity_type,
+                logger=logger,
+                metrics=metrics,
+                log_context={"filter_field": filter_field},
+            )
+            return
 
-        for record in records:
-            if use_composite:
-                assert pk_fields is not None
-                if self._is_duplicate_composite(
-                    record,
-                    pk_fields,
-                    seen_ids,
-                    entity_type,
-                    filter_field,
-                ):
-                    continue
-            elif self._is_duplicate_simple(
-                record,
-                pk_field,
-                seen_ids,
-                entity_type,
-                filter_field,
-            ):
-                continue
-            yield record
+        yield from iter_deduplicated_records(
+            records,
+            seen_keys=seen_ids,
+            primary_field=pk_field,
+            entity_type=entity_type,
+            logger=logger,
+            metrics=metrics,
+            log_context={"filter_field": filter_field},
+        )
 
     async def _paginate_filter_results(
         self,

@@ -22,6 +22,7 @@ from bioetl.application.composite.merger_io_mixin import MergeIOMixin
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
+    build_merge_execution_request,
     execute_merge_request,
     execute_merge_workflow,
 )
@@ -148,12 +149,12 @@ class MergeService(
             MergeResult with merged record counts, source provenance, cross-validation
             stats, quarantine payloads, and duration metrics.
         """
-        request = MergeExecutionRequest(
+        request = build_merge_execution_request(
             seed_table=seed_table,
-            seed_pipeline=seed_pipeline,
             enrichers=enrichers,
             enrichment_results=enrichment_results,
             run_id=run_id,
+            seed_pipeline=seed_pipeline,
             dependencies=dependencies,
             dependency_results=dependency_results,
         )

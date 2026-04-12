@@ -115,6 +115,24 @@ def test_create_manifest_persists_and_links_run_id() -> None:
     assert store.get_by_run_id(manifest.run_id) == manifest
 
 
+def test_create_manifest_preserves_resume_only_replay_capability() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-resume-only",
+    )
+
+    manifest = service.create_manifest(
+        replace(
+            _make_request(),
+            replay_capability=ReplayCapability.RESUME_ONLY,
+        )
+    )
+
+    assert manifest.replay_capability == ReplayCapability.RESUME_ONLY
+    assert manifest.to_dict()["replay_capability"] == "resume_only"
+
+
 def test_create_manifest_fails_closed_when_persisted_manifest_is_not_resolvable() -> None:
     store = _MissingLookupRunManifestStore()
     service = RunManifestService(

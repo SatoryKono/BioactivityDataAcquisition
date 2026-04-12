@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -11,7 +12,12 @@ from bioetl.application.services.run_ledger_service import RunLedgerService
 from bioetl.application.services.run_manifest_diagnostics import (
     build_diagnostics_summary,
 )
-from bioetl.domain.control_plane import RunCodeProvenance, RunLedgerEntry, RunManifest
+from bioetl.domain.control_plane import (
+    ReplayCapability,
+    RunCodeProvenance,
+    RunLedgerEntry,
+    RunManifest,
+)
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID, RunType
 
@@ -139,10 +145,39 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "dq_contract_compatibility_hash": "compat-hash-1",
         "effective_config_artifact_id": "eca-123",
         "replay_capability": "rebuild_only",
+        "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
+        "exact_replay_blockers": ["immutable_input_snapshots_missing"],
+        "input_snapshot_ids": [],
+        "input_snapshot_content_hashes": [],
+        "input_snapshot_identity_fingerprint": None,
         "planned_artifacts": [],
         "occurrence_only_diagnostics": [],
     }
+
+
+def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
+    manifest = replace(
+        _make_manifest(),
+        launch_context={"limit": 25, "resume": True, "exact_replay": False},
+        replay_capability=ReplayCapability.RESUME_ONLY,
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["replay_capability"] == "resume_only"
+    assert (
+        summary["replay_capability_reason"]
+        == "resume_requested_without_snapshot_backed_inputs"
+    )
+    assert summary["exact_replay_eligible"] is False
+    assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
+    assert summary["input_snapshot_ids"] == []
+    assert summary["input_snapshot_content_hashes"] == []
+    assert summary["input_snapshot_identity_fingerprint"] is None
+    assert summary["replay_mode"] == "resume"
+    assert summary["input_snapshot_count"] == 0
+    assert summary["input_snapshots"] == []
 
 
 @pytest.mark.parametrize(
@@ -196,7 +231,12 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_capability": "rebuild_only",
+        "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
+        "exact_replay_blockers": ["immutable_input_snapshots_missing"],
+        "input_snapshot_ids": [],
+        "input_snapshot_content_hashes": [],
+        "input_snapshot_identity_fingerprint": None,
         "planned_artifacts": [],
         "published_artifacts": [
             {

@@ -175,6 +175,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     source_refs = payload["source_refs"]
     assert isinstance(source_refs, list)
     assert len(source_refs) == 1
+    assert payload["replay_capability"] == "exact_replay_supported"
     snapshots = source_refs[0]["input_snapshots"]
     assert len(snapshots) == 2
     assert sorted(snapshot["immutable_uri"] for snapshot in snapshots) == [
@@ -545,6 +546,7 @@ def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enable
     launch_context = payload["launch_context"]
     assert isinstance(launch_context, dict)
     assert launch_context["resume"] is True
+    assert payload["replay_capability"] == "resume_only"
     assert launch_context["query"] == "status=active"
     assert launch_context["pipeline_name"] == "chembl_activity"
 

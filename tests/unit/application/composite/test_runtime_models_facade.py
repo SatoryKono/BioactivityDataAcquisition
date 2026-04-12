@@ -1,20 +1,24 @@
-"""Unit tests for the stable composite runtime-model facade."""
+"""Unit tests for the composite runtime compatibility facades."""
 
 from __future__ import annotations
 
 from bioetl.application.composite.runtime_models import (
+    CompositeRunnerDependencies,
     CompositeExecutionContext,
     CompositeRuntimeConfig,
 )
-from bioetl.application.composite.runner_pkg.runner_models import (
-    CompositeExecutionContext as CanonicalCompositeExecutionContext,
-)
-from bioetl.application.composite.runner_pkg.runner_models import (
-    CompositeRuntimeConfig as CanonicalCompositeRuntimeConfig,
+from bioetl.application.composite.runner_pkg import (
+    CompositeRunnerDependencies as RunnerPkgCompositeRunnerDependencies,
+    CompositeRuntimeConfig as RunnerPkgCompositeRuntimeConfig,
 )
 
 
-def test_runtime_models_facade_reexports_canonical_runtime_models() -> None:
-    """Stable runtime facade should re-export canonical runner models unchanged."""
-    assert CompositeRuntimeConfig is CanonicalCompositeRuntimeConfig
-    assert CompositeExecutionContext is CanonicalCompositeExecutionContext
+def test_runner_pkg_facade_reexports_runtime_models() -> None:
+    """Legacy runner_pkg facade should preserve canonical runtime model identity."""
+    assert CompositeRuntimeConfig is RunnerPkgCompositeRuntimeConfig
+    assert CompositeRunnerDependencies is RunnerPkgCompositeRunnerDependencies
+
+
+def test_runtime_models_exports_execution_context_directly() -> None:
+    """Execution context remains available from the stable runtime facade."""
+    assert CompositeExecutionContext.__name__ == "CompositeExecutionContext"

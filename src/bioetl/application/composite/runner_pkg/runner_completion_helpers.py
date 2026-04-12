@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         CompositeCheckpointService,
         CompositeCheckpointState,
     )
-    from bioetl.application.composite.runner_pkg.runner_models import (
+    from bioetl.application.composite.runtime_models import (
         CompositeExecutionContext,
     )
     from bioetl.domain.ports import LoggerPort

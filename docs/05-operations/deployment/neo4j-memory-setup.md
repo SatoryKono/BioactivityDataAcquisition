@@ -69,6 +69,8 @@ Last verified: '2026-04-09'
    `storage_surface` nodes for Bronze/Silver/Gold/composite/control-plane
    artifacts, `runtime_evidence_surface` anchors for
    `run_manifest` / `run_ledger` / `effective_config_artifact` / `lineage`,
+   `control_plane_artifact_surface` nodes for artifact-level manifest / ledger /
+   effective-config / lineage templates and indexes,
    `workflow_surface` / `workflow_job_surface` from `.github/workflows/*.yml`,
    and docs-to-code `DESCRIBES` drift edges from published docs/policies to
    repo code/config/workflow targets.
@@ -80,6 +82,18 @@ Last verified: '2026-04-09'
    ```
    This mode is destructive for stale repo-derived nodes and resets managed
    relations between repo-managed nodes before recreating them.
+
+8a. For selective rebuild/debug of one graph shard without exporting the full
+   repo snapshot, use one of the shard filters:
+   ```bash
+   python -m scripts.ops sync-neo4j-memory --export /tmp/storage-memory.json --only-storage-layer
+   python -m scripts.ops sync-neo4j-memory --export /tmp/runtime-memory.json --only-runtime-evidence-layer
+   python -m scripts.ops sync-neo4j-memory --export /tmp/workflow-memory.json --only-workflow-graph
+   python -m scripts.ops sync-neo4j-memory --export /tmp/docs-drift-memory.json --only-docs-drift
+   ```
+   These filters reuse the normal deterministic builder but keep only the
+   requested shard plus the minimal relation-linked context needed to inspect
+   or sync it safely.
 
 9. When you want an audit snapshot without manual Neo4j inspection, run:
    ```bash
@@ -123,7 +137,8 @@ Last verified: '2026-04-09'
     This checks snapshot invariants for the managed ontology layer and fails on
     missing required labels/relations, missing protocol-level port surfaces,
     missing rich contract metadata, missing pipeline-to-test or alert-to-contract
-    links, leaked ignored paths, or snapshot orphans.
+    links, missing storage/runtime/workflow/drift coverage, leaked ignored
+    paths, or snapshot orphans.
 
 13. To run a full live gate against a real local Neo4j backend, apply the
     deterministic sync, and fail on managed drift, use:
@@ -138,8 +153,19 @@ Last verified: '2026-04-09'
     python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity
     python -m scripts.ops query-neo4j-memory owner-alert BioETLPipelineRunFailed
     python -m scripts.ops query-neo4j-memory owner-doc "architecture diagrams hub"
+    python -m scripts.ops query-neo4j-memory owner-storage silver/chembl/activity
+    python -m scripts.ops query-neo4j-memory owner-runtime-evidence run_manifest
+    python -m scripts.ops query-neo4j-memory owner-workflow tests
+    python -m scripts.ops query-neo4j-memory owner-workflow-job tests::governance-preflight
     python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity
     python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed
+    python -m scripts.ops query-neo4j-memory neighbors-storage silver/chembl/activity
+    python -m scripts.ops query-neo4j-memory neighbors-runtime-evidence run_manifest
+    python -m scripts.ops query-neo4j-memory neighbors-workflow tests
+    python -m scripts.ops query-neo4j-memory neighbors-workflow-job tests::governance-preflight
+    python -m scripts.ops query-neo4j-memory docs-drift all
+    python -m scripts.ops query-neo4j-memory workflow-gates tests
+    python -m scripts.ops query-neo4j-memory storage-lineage silver/chembl/activity
     python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608
     python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer
     python -m scripts.ops query-neo4j-memory promotion-candidates all
@@ -199,6 +225,7 @@ Last verified: '2026-04-09'
     Then inspect the exported audit JSON or Neo4j Browser for:
     - `storage_surface` such as `silver/chembl/activity`
     - `runtime_evidence_surface` such as `run_manifest`
+    - `control_plane_artifact_surface` such as `run_manifest::json`
     - `workflow_surface` / `workflow_job_surface` such as `tests` and `tests::governance-preflight`
     - `DESCRIBES` edges from `docs/04-reference/contracts/run-manifest-ledger.md`
       to `src/bioetl/domain/control_plane/run_manifest.py`

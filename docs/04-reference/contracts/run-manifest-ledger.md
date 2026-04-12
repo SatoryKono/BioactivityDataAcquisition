@@ -172,6 +172,7 @@ provenance.
 | `runtime_config`        | `object`   |      yes | Runtime-only settings snapshot                   |
 | `resolved_config`       | `object`   |      yes | Effective resolved pipeline config               |
 | `code_provenance`       | `object`   |      yes | See the full `RunCodeProvenance` field set below |
+| `replay_capability`     | `str`      |      yes | Replay classification: `exact_replay_supported`, `resume_only`, or `rebuild_only` |
 | `source_refs`           | `array`    |       no | Canonical input/source references                |
 | `planned_artifacts`     | `array`    |       no | Intended output locations by layer               |
 
@@ -321,16 +322,28 @@ The CLI resolves `manifest_id` directly and falls back to `run_id` lookup when
 an identifier parses as UUID-like input. Default output is human-readable
 `text`; use `--format json` or `--format yaml` for machine-readable output.
 
-`show` returns a three-part inspection payload:
+`show` returns a four-part inspection payload:
 
 - `manifest`
 - `ledger_entries`
 - `diagnostics`
+- `identity_graph`
 
 The `diagnostics` block is built from
 `src/bioetl/application/services/run_manifest_diagnostics.py` and is the
 published operator-facing summary for event counts, artifact linkage, DQ
-anchors, correlation-anchor gaps, alert signals, and suggested next steps.
+anchors, correlation-anchor gaps, replay capability, and suggested next steps.
+
+For replay-safe runs the published inspection surface MUST expose compact replay
+anchors derived from manifest source refs:
+
+- `input_snapshot_ids`
+- `input_snapshot_content_hashes`
+- `input_snapshot_identity_fingerprint`
+
+These fields are derived operator-facing summaries used to line up run-manifest
+inspection with checkpoint compatibility diagnostics; they do not expand the
+persisted `RunManifest` storage schema.
 
 ## References
 
