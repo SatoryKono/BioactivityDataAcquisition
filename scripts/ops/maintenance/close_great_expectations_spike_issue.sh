@@ -10,7 +10,7 @@ SPIKE_MEMO_PATH="docs/reports/great-expectations-spike-2026-04-01.md"
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/close_great_expectations_spike_issue.sh [--dry-run]
+  bash scripts/ops/maintenance/close_great_expectations_spike_issue.sh [--dry-run]
 
 Environment:
   GITHUB_PERSONAL_ACCESS_TOKEN   Fine-grained or classic token with issue write access

@@ -156,7 +156,11 @@ class PipelineSettings(BaseSettings):
         checkpoint_compatibility_policy: Literal[
             "observe", "soft_fail", "hard_fail"
         ] = Field(default="soft_fail")
-        """Resume behavior when checkpoint execution identity is incompatible."""
+        """Resume behavior when checkpoint compatibility validation fails.
+
+        `observe` remains a degraded operator mode for non-identity signals, but
+        canonical execution-identity mismatches always block resume.
+        """
 
         @model_validator(mode="after")
         def _validate_ledger_dependency(self) -> PipelineSettings.ControlPlaneSettings:

@@ -9,7 +9,7 @@ DEFAULT_REPO="BioactivityDataAcquisition"
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/post_issue_rescope_comments.sh [--apply] [--owner NAME] [--repo NAME] [--issue NUMBER]...
+  bash scripts/ops/maintenance/post_issue_rescope_comments.sh [--apply] [--owner NAME] [--repo NAME] [--issue NUMBER]...
 
 Options:
   --apply        Send comments to GitHub. Default mode is dry-run.
@@ -26,9 +26,9 @@ Behavior:
   - uses dry-run by default so the payload can be reviewed safely first
 
 Examples:
-  bash scripts/ops/post_issue_rescope_comments.sh
-  bash scripts/ops/post_issue_rescope_comments.sh --issue 2600 --issue 2516
-  GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/ops/post_issue_rescope_comments.sh --apply
+  bash scripts/ops/maintenance/post_issue_rescope_comments.sh
+  bash scripts/ops/maintenance/post_issue_rescope_comments.sh --issue 2600 --issue 2516
+  GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/ops/maintenance/post_issue_rescope_comments.sh --apply
 EOF
 }
 

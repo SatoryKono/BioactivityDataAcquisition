@@ -9,7 +9,7 @@ API="https://api.github.com/repos/${OWNER}/${REPO}"
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/close_pandera_schema_drift_issue.sh [--dry-run]
+  bash scripts/ops/maintenance/close_pandera_schema_drift_issue.sh [--dry-run]
 
 Environment:
   GITHUB_PERSONAL_ACCESS_TOKEN   Fine-grained or classic token with issue write access

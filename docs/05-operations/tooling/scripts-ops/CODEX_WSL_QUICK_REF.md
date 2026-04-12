@@ -74,7 +74,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 - `scripts/ops/codex-exec.sh` - WSL auto-exec launcher
 - `scripts/ops/codex-wsl.bat` - Modern Windows wrapper
 - `scripts/ops/setup_wsl_codex.sh` - Installation script
-- `scripts/ops/CODEX_WSL_SETUP.md` - Full guide (this document)
+- `docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md` - Full guide (this document)
 
 ## Keyboard Shortcuts (Interactive Mode)
 

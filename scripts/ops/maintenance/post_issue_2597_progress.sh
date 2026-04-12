@@ -10,7 +10,7 @@ ISSUE_NUMBER="2597"
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/post_issue_2597_progress.sh [--apply] [--owner NAME] [--repo NAME]
+  bash scripts/ops/maintenance/post_issue_2597_progress.sh [--apply] [--owner NAME] [--repo NAME]
 
 Options:
   --apply        Send the comment to GitHub. Default mode is dry-run.
@@ -22,8 +22,8 @@ Environment:
   GITHUB_PERSONAL_ACCESS_TOKEN   Required only with --apply
 
 Examples:
-  bash scripts/ops/post_issue_2597_progress.sh
-  GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/ops/post_issue_2597_progress.sh --apply
+  bash scripts/ops/maintenance/post_issue_2597_progress.sh
+  GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/ops/maintenance/post_issue_2597_progress.sh --apply
 EOF
 }
 
