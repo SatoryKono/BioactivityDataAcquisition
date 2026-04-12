@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import polars as pl
+from typing import cast
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_helpers import (
@@ -178,7 +179,9 @@ class _CompositeRunnerStageEnrichmentMixin:
         enrichment_results = dict(enrichment_results)
         enrichment_results.update(state.enrichment_results)
 
-        return add_not_run_results(
+        return cast(
+            dict[str, EnrichmentResult],
+            add_not_run_results(
             enrichment_results,
             context.enrichers_to_run,
             self._config.enrichers,
@@ -186,6 +189,7 @@ class _CompositeRunnerStageEnrichmentMixin:
             self._runtime.required_only,
             self._config.name,
             self._logger,
+            ),
         )
 
     def _record_completed_enrichment_results(

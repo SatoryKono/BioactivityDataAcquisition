@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
+from typing import cast
 
 from bioetl.application.composite.lifecycle_observer_service import (
     CompositeLifecycleObserverService,
@@ -123,14 +124,17 @@ class CompositeRunnerSupportMixin:
         artifacts: CompositeExecutionContext,
     ) -> CompositeResultBuildRequest:
         """Build an explicit result-assembly request for completion helpers."""
-        return build_result_build_request(
-            artifacts=artifacts,
-            composite_name=self._config.name,
-            run_id=self._run_id_str,
-            started_at=self._started_at,
-            original_run_id=self._original_run_id,
-            required_enrichers=self._config.required_enrichers,
-            required_dependencies=self._config.required_dependencies,
+        return cast(
+            CompositeResultBuildRequest,
+            build_result_build_request(
+                artifacts=artifacts,
+                composite_name=self._config.name,
+                run_id=self._run_id_str,
+                started_at=self._started_at,
+                original_run_id=self._original_run_id,
+                required_enrichers=self._config.required_enrichers,
+                required_dependencies=self._config.required_dependencies,
+            ),
         )
 
     def _validate_config_consistency(
@@ -150,9 +154,12 @@ class CompositeRunnerSupportMixin:
     ) -> _PreparedPreflightValidationContext | None:
         """Build the canonical preflight validation context when validation can run."""
         field_priorities = getattr(self._config.merge, "field_priorities", ())
-        return build_preflight_validation_context(
-            validator=self._preflight_validator,
-            field_priorities=field_priorities,
+        return cast(
+            _PreparedPreflightValidationContext | None,
+            build_preflight_validation_context(
+                validator=self._preflight_validator,
+                field_priorities=field_priorities,
+            ),
         )
 
     def _get_preflight_skip_reason(
@@ -160,9 +167,12 @@ class CompositeRunnerSupportMixin:
     ) -> str | None:
         """Return skip reason for preflight validation when it should not run."""
         field_priorities = getattr(self._config.merge, "field_priorities", ())
-        return get_preflight_skip_reason(
-            validator=self._preflight_validator,
-            field_priorities=field_priorities,
+        return cast(
+            str | None,
+            get_preflight_skip_reason(
+                validator=self._preflight_validator,
+                field_priorities=field_priorities,
+            ),
         )
 
     async def _save_checkpoint_safe(
@@ -176,7 +186,7 @@ class CompositeRunnerSupportMixin:
             True if the checkpoint was saved successfully, False if a non-fatal error
             occurred (resume capability may be degraded).
         """
-        return await save_checkpoint_safe(self, state, operation)
+        return cast(bool, await save_checkpoint_safe(self, state, operation))
 
     async def _run_seed(self: _CompositeRunnerSupportHostProtocol) -> SeedResult:
         """Run the seed pipeline."""
@@ -192,12 +202,15 @@ class CompositeRunnerSupportMixin:
             List of EnricherConfig entries that have not been completed and match
             the current runtime filters (required_only, enrich_only, force_enricher).
         """
-        return build_enrichers_to_run(
-            self._config.enrichers,
-            completed_enrichers=state.completed_enrichers,
-            required_only=self._runtime.required_only,
-            enrich_only=self._runtime.enrich_only,
-            force_enricher=self._runtime.force_enricher,
+        return cast(
+            list[EnricherConfig],
+            build_enrichers_to_run(
+                self._config.enrichers,
+                completed_enrichers=state.completed_enrichers,
+                required_only=self._runtime.required_only,
+                enrich_only=self._runtime.enrich_only,
+                force_enricher=self._runtime.force_enricher,
+            ),
         )
 
     def _should_run_enricher(
@@ -206,12 +219,15 @@ class CompositeRunnerSupportMixin:
         state: CompositeCheckpointState,
     ) -> bool:
         """Return whether an enricher should execute under current runtime policy."""
-        return can_run_enricher(
-            enricher,
-            completed_enrichers=state.completed_enrichers,
-            required_only=self._runtime.required_only,
-            enrich_only=self._runtime.enrich_only,
-            force_enricher=self._runtime.force_enricher,
+        return cast(
+            bool,
+            can_run_enricher(
+                enricher,
+                completed_enrichers=state.completed_enrichers,
+                required_only=self._runtime.required_only,
+                enrich_only=self._runtime.enrich_only,
+                force_enricher=self._runtime.force_enricher,
+            ),
         )
 
     def _check_required_enrichers(
@@ -228,7 +244,10 @@ class CompositeRunnerSupportMixin:
         enrichment_results: dict[str, EnrichmentResult],
     ) -> str | None:
         """Return failure reason for required enricher validation, if any."""
-        return get_required_enricher_failure(
-            required_enrichers=self._config.required_enrichers,
-            enrichment_results=enrichment_results,
+        return cast(
+            str | None,
+            get_required_enricher_failure(
+                required_enrichers=self._config.required_enrichers,
+                enrichment_results=enrichment_results,
+            ),
         )

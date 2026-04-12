@@ -52,11 +52,17 @@ async def start_composite_phase(
     on_started: Callable[[], None] | None = None,
 ) -> CompositeCheckpointState:
     """Execute the shared start choreography for one composite phase."""
+    next_validate = True
+    extra_transition_kwargs = dict(transition_details or {})
+    validate_value = extra_transition_kwargs.pop("validate", True)
+    if isinstance(validate_value, bool):
+        next_validate = validate_value
     next_state = host._transition_state_with_fsm_log(
         state,
         to_state,
         stage=stage,
-        **dict(transition_details or {}),
+        validate=next_validate,
+        **extra_transition_kwargs,
     )
     await host._call_save_checkpoint_safe(next_state, checkpoint_operation)
     if on_started is not None:

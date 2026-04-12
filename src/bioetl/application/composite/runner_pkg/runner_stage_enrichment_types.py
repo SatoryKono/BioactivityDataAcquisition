@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, cast
 
 import polars as pl
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
@@ -25,6 +28,7 @@ class _CompositeRunnerStageEnrichmentHostProtocol(Protocol):
     _enricher_runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort]
     _fsm: FSMStateHelperService
     _logger: LoggerPort
+    _observer: CompositeLifecycleObserverService
     _runtime: CompositeRuntimeConfig
     _run_id_str: str
 
