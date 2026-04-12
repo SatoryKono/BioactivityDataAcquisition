@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.7.2
+Version: 1.7.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-12'
 
 ______________________________________________________________________
 
@@ -129,6 +129,49 @@ consistency, а этот документ задаёт правила публи
 1. Документы по runtime, который не является стандартным или default-supported, могут быть `published`, `internal-published` или `repo-only` только при явной пометке experimental/disclaimer и без конфликта с ADR-010 Local-Only posture.
 1. `internal-generated` документы не используются как первичный источник архитектурной или операционной политики.
 1. Материалы в `docs/99-archive/` сохраняются для traceability, но не являются нормативными для текущего поведения проекта.
+
+## Repo-Only Reports Boundary
+
+Для report-like материалов MUST применяться следующая развилка:
+
+1. `docs/reports/**`
+
+- curated repo-only surface;
+- допустимы evidence indexes, bounded summaries, synthesis, decisions, risks,
+  curated internal analysis;
+- материал здесь SHOULD already be down-selected and navigable;
+- `docs/reports/**` MUST NOT становиться зеркалом raw run-by-run working output.
+
+2. `reports/**`
+
+- working-output surface;
+- допустимы generated outputs, iteration-heavy audits, temporary analysis
+  snapshots, model-specific run artifacts, reusable machine-readable bundles;
+- содержимое здесь MAY быть сырым, промежуточным, tool-specific, or transient;
+- `reports/**` MUST NOT использоваться как published or operator-default
+  guidance surface.
+
+3. `docs/00-05/**`
+
+- canonical published or internal-published guidance;
+- если материал содержит instructions, operator workflow, contract semantics,
+  or contributor-default guidance, он MUST жить здесь, а не в
+  `docs/reports/**` или `reports/**`.
+
+4. `docs/99-archive/**`
+
+- archive-only lane for historical, superseded, or traceability-preserved
+  materials;
+- если report or note больше не является active curated surface, но его нужно
+  сохранить для истории, он SHOULD переехать сюда, а не зависать между
+  `docs/reports/**` и `reports/**`.
+
+Practical routing rule:
+
+- normative guidance -> `docs/00-05/**`
+- curated repo-only evidence / bounded summary -> `docs/reports/**`
+- generated or working output -> `reports/**`
+- superseded but retained context -> `docs/99-archive/**`
 
 ## Published Control-Plane & Feature-Rollout Pack
 

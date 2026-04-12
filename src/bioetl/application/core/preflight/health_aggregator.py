@@ -8,12 +8,6 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
-from bioetl.application.core.preflight.health_aggregator_reporting import (
-    assert_report_healthy,
-    log_health_report,
-    record_health_metrics,
-    record_probe_mode_fallback,
-)
 from bioetl.application.core.preflight.health_aggregator_runtime import (
     build_component_result,
     build_data_source_exception_result,
@@ -22,6 +16,7 @@ from bioetl.application.core.preflight.health_aggregator_runtime import (
     normalize_data_source_status,
     resolve_probe_fallback_reason,
 )
+from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
 if TYPE_CHECKING:
@@ -39,13 +34,6 @@ _HEALTH_CHECK_ERRORS = OPERATION_ERRORS
 class HealthAggregator:
     """Aggregates health checks for critical infrastructure components."""
 
-    METRIC_HEALTH_STATUS = "bioetl_health_check_status"
-    METRIC_HEALTH_MODE_STATUS = "bioetl_health_check_mode_status"
-    METRIC_HEALTH_DURATION = "bioetl_health_check_duration_seconds"
-    METRIC_HEALTH_LATENCY = "bioetl_health_check_latency_seconds"
-    METRIC_HEALTH_MODE_LATENCY = "bioetl_health_check_mode_latency_seconds"
-    METRIC_PROBE_MODE_FALLBACK_TOTAL = "bioetl_probe_mode_fallback_total"
-
     def __init__(
         self,
         metrics: MetricsPort | None = None,
@@ -59,10 +47,11 @@ class HealthAggregator:
                 "health_check_mode must be 'strict' or 'probe', "
                 f"got {health_check_mode!r}"
             )
-        self._metrics = metrics
-        self._logger = logger
+        # Metrics/logging publication for ordinary runs is observer-owned.
+        # Keep these compatibility params in the constructor so composition and
+        # older tests can instantiate the helper without a broad signature churn.
+        _ = metrics, logger, pipeline_name
         self._health_monitor = health_monitor
-        self._pipeline_name = pipeline_name or "unknown"
         self._health_check_mode = health_check_mode
 
     async def check_all(self, services: PipelineService) -> HealthReport:
@@ -91,7 +80,6 @@ class HealthAggregator:
             results=component_results,
             checked_at=datetime.now(tz=UTC),
         )
-        log_health_report(logger=self._logger, report=report)
         return report
 
     async def _check_storage(self, services: PipelineService) -> ComponentHealthResult:
@@ -114,17 +102,6 @@ class HealthAggregator:
                 duration_seconds=duration,
                 error_message=str(exc),
             )
-
-        record_health_metrics(
-            metrics=self._metrics,
-            component=component,
-            result=result,
-            health_check_mode=self._health_check_mode,
-            metric_health_status=self.METRIC_HEALTH_STATUS,
-            metric_health_mode_status=self.METRIC_HEALTH_MODE_STATUS,
-            metric_health_latency=self.METRIC_HEALTH_LATENCY,
-            metric_health_mode_latency=self.METRIC_HEALTH_MODE_LATENCY,
-        )
         return result
 
     async def _check_data_source(
@@ -163,6 +140,9 @@ class HealthAggregator:
                         status=status,
                         error_message=health_result.last_error,
                     ),
+                    provider=health_result.provider,
+                    latency_ms=health_result.latency_ms,
+                    probe_fallback_reason=fallback_reason,
                 )
             else:
                 status = await services.data_source.health_check()
@@ -183,6 +163,7 @@ class HealthAggregator:
                         status=status,
                         error_message=None,
                     ),
+                    probe_fallback_reason=fallback_reason,
                 )
         except _HEALTH_CHECK_ERRORS as exc:
             duration = time.perf_counter() - start_time
@@ -194,26 +175,6 @@ class HealthAggregator:
             )
             if self._health_check_mode == "probe":
                 fallback_reason = "exception"
-
-        record_health_metrics(
-            metrics=self._metrics,
-            component=component,
-            result=result,
-            health_check_mode=self._health_check_mode,
-            metric_health_status=self.METRIC_HEALTH_STATUS,
-            metric_health_mode_status=self.METRIC_HEALTH_MODE_STATUS,
-            metric_health_latency=self.METRIC_HEALTH_LATENCY,
-            metric_health_mode_latency=self.METRIC_HEALTH_MODE_LATENCY,
-            health_result=health_result,
-        )
-        if fallback_reason is not None:
-            record_probe_mode_fallback(
-                metrics=self._metrics,
-                pipeline_name=self._pipeline_name,
-                component=component,
-                reason=fallback_reason,
-                metric_name=self.METRIC_PROBE_MODE_FALLBACK_TOTAL,
-            )
         return result
 
     def assert_healthy(self, report: HealthReport) -> None:
@@ -225,7 +186,19 @@ class HealthAggregator:
         Raises:
             InfrastructureError: If any component in the report is UNHEALTHY.
         """
-        assert_report_healthy(report)
+        failures = report.get_failures()
+        if not failures:
+            return
+
+        failed_components = [failure.component for failure in failures]
+        error_messages = [
+            f"{failure.component}: {failure.error_message or 'check failed'}"
+            for failure in failures
+        ]
+        raise InfrastructureError(
+            f"Health check failed for: {', '.join(failed_components)}. "
+            f"Details: {'; '.join(error_messages)}"
+        )
 
 
 # Backward-compatible alias kept for transitional imports.

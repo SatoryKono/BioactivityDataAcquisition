@@ -35,7 +35,7 @@ Use the repository docs with the following priority:
 
 - **Canonical active docs**: `docs/00-05`. These pages define current project
   rules, architecture, guides, operations, and reference contracts.
-- **Repo-only / extended working docs**: planning, evidence, AI runtime
+- **Repo-only / extended working docs**: planning, curated evidence, AI runtime
   guidance, and other extended working materials may live outside the published
   MkDocs surface. They remain discoverable through repository-path references,
   but they do not override canonical active docs.
@@ -44,7 +44,7 @@ Use the repository docs with the following priority:
 Useful entry points for non-normative surfaces:
 
 - Repository path `docs/plans/README.md` — indexed retained planning artifacts (repo-only working surface, not published in MkDocs)
-- Repository path `docs/reports/index.md` — curated evidence and internal reports (repo-only working surface, not published in MkDocs)
+- Repository path `docs/reports/index.md` — curated repo-only evidence and bounded internal reports
 - Repository path `reports/README.md` — generated or working analysis outputs before curation
 - Repository path `docs/00-project/ai/README.md` — top-level AI docs map for agents, memory, prompts, and skills
 - Repository path `.codex/agents/ORCHESTRATION.md` — Codex source-of-truth orchestration
