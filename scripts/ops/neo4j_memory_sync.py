@@ -1361,18 +1361,20 @@ def _duplication_analysis_config(memory_mapping: dict[str, object]) -> dict[str,
     families: list[DuplicateFamilyConfig] = []
     if isinstance(raw_families, dict):
         for family_name, family_payload in raw_families.items():
-        if not isinstance(family_payload, dict):
-            continue
-        roots = tuple(_as_string_list(family_payload.get("roots")))
-        package_family = str(family_payload.get("package_family", "")).strip()
-        if not roots or not package_family:
-            continue
-        excluded_paths = tuple(sorted(set(_as_string_list(family_payload.get("excluded_paths")))))
-        promotion_targets: list[NodeKey] = []
-        raw_targets = family_payload.get("promotion_targets", [])
-        if isinstance(raw_targets, list):
-            for raw_target in raw_targets:
-                if not isinstance(raw_target, dict):
+            if not isinstance(family_payload, dict):
+                continue
+            roots = tuple(_as_string_list(family_payload.get("roots")))
+            package_family = str(family_payload.get("package_family", "")).strip()
+            if not roots or not package_family:
+                continue
+            excluded_paths = tuple(
+                sorted(set(_as_string_list(family_payload.get("excluded_paths"))))
+            )
+            promotion_targets: list[NodeKey] = []
+            raw_targets = family_payload.get("promotion_targets", [])
+            if isinstance(raw_targets, list):
+                for raw_target in raw_targets:
+                    if not isinstance(raw_target, dict):
                         continue
                     label = str(raw_target.get("label", "")).strip()
                     name = str(raw_target.get("name", "")).strip()
