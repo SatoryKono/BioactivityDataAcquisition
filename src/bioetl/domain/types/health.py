@@ -42,12 +42,18 @@ class ComponentHealthResult:
         status: Health status of the component.
         duration_seconds: Time taken to perform the health check.
         error_message: Optional error message if check failed.
+        provider: Optional provider identity for enhanced health-check probes.
+        latency_ms: Optional provider probe latency in milliseconds.
+        probe_fallback_reason: Optional deterministic probe-mode fallback reason.
     """
 
     component: str
     status: HealthStatus
     duration_seconds: float
     error_message: str | None = None
+    provider: str | None = None
+    latency_ms: float | None = None
+    probe_fallback_reason: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

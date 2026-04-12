@@ -23,6 +23,18 @@ Canonical sources:
 - `docs/reports/` is intentionally narrower than `reports/`: it should act as a
   curated map, not as a second copy of raw working output families.
 
+## Boundary Contract
+
+Use the following routing rule before adding a new report-like artifact:
+
+- current instructions / operator workflow / contract guidance -> `docs/00-05/`
+- curated repo-only evidence, synthesis, or bounded internal memo -> `docs/reports/`
+- generated, iterative, model-specific, or tool-heavy working output -> `reports/`
+- historical retained context -> `docs/99-archive/`
+
+`docs/reports/` SHOULD contain curated entrypoints and bounded artefacts.
+It SHOULD NOT absorb raw review dumps or act as a second working-output tree.
+
 ## Main Entry Points
 
 - this index page — short orientation note for the repo-only reports surface

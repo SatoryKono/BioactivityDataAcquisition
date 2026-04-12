@@ -11,6 +11,9 @@ def build_component_result(
     status: HealthStatus,
     duration_seconds: float,
     error_message: str | None = None,
+    provider: str | None = None,
+    latency_ms: float | None = None,
+    probe_fallback_reason: str | None = None,
 ) -> ComponentHealthResult:
     """Create a component health result with shared field wiring."""
     return ComponentHealthResult(
@@ -18,6 +21,9 @@ def build_component_result(
         status=status,
         duration_seconds=duration_seconds,
         error_message=error_message,
+        provider=provider,
+        latency_ms=latency_ms,
+        probe_fallback_reason=probe_fallback_reason,
     )
 
 
@@ -83,6 +89,7 @@ def build_data_source_exception_result(
             if probe_mode
             else exception_message
         ),
+        probe_fallback_reason="exception" if probe_mode else None,
     )
 
 

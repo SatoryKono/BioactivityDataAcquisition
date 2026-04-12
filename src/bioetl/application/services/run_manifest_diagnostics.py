@@ -348,7 +348,10 @@ def _build_final_summary(
             "payload": degraded_runtime_anchor_payload,
         },
         "planned_artifacts": planned_artifacts,
-        "published_artifacts": artifact_refs,
+        "published_artifacts": [
+            _build_identity_graph_artifact_ref(artifact_ref)
+            for artifact_ref in artifact_refs
+        ],
         "occurrence_only_diagnostics": sorted(occurrence_only_diagnostic_scopes),
     }
     if "replay_mode" in base_summary:
@@ -402,6 +405,17 @@ def _build_final_summary(
         }
     )
     return summary
+
+
+def _build_identity_graph_artifact_ref(
+    artifact_ref: dict[str, object],
+) -> dict[str, object]:
+    """Return the operator-facing artifact shape used inside identity graph."""
+    return {
+        key: value
+        for key, value in artifact_ref.items()
+        if key != "artifact_id"
+    }
 
 
 def _build_persistence_profile(
