@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from bioetl.application.core.factory_wiring_api import BasePipeline, PipelineRunner
+from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _PipelineFactoryContext,
     build_create_pipeline_with_services_request,

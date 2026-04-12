@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.runtime_wiring_api import (
+from bioetl.application.core.wiring.runtime import (
     BatchExecutionFSM,
     BatchExecutionStateService,
     BatchExecutor,
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
-    from bioetl.application.core.runtime_wiring_api import (
+    from bioetl.application.core.wiring.runtime import (
         BasePipeline,
         BatchCheckpointRecoveryService,
         BatchExecutionRunService,

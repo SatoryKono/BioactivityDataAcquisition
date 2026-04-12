@@ -5,12 +5,12 @@ from typing import Generic, TypeVar
 
 import pyarrow as pa
 
-from bioetl.application.core.factory_wiring_api import (
+from bioetl.application.core.wiring.factory import (
     BasePipeline,
     PipelineRunner,
     PipelineService,
 )
-from bioetl.application.core.transformer_wiring_api import (
+from bioetl.application.core.wiring.transformer import (
     BaseTransformer,
     TransformerDependencyContext,
 )

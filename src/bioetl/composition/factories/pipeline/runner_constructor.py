@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.core.factory_wiring_api import (
+from bioetl.application.core.wiring.factory import (
     BasePipeline,
     BatchExecutor,
     CheckpointManagerService,

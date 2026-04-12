@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.pipeline_registry_wiring_api import (
+from bioetl.application.core.wiring.registry import (
     CrossRefPublicationTransformer,
     IDMappingTransformer,
     OpenAlexPublicationTransformer,

@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
-from bioetl.application.core.runtime_wiring_api import (
+from bioetl.application.core.wiring.runtime import (
     BatchMetricsRecorderService,
     BatchProcessingComponents,
     BatchTransformer,

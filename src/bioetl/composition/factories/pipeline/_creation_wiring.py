@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.application.core.factory_wiring_api import ShutdownSignal
+from bioetl.application.core.wiring.factory import ShutdownSignal
 from bioetl.application.services.metadata_coordinator import MetadataCoordinator
 from bioetl.composition.factories.pipeline.construction_types import (
     _SchemaBuilder,
@@ -25,11 +25,11 @@ from bioetl.infrastructure.config.domain_config_resolver import (
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.application.core.factory_wiring_api import (
+    from bioetl.application.core.wiring.factory import (
         BasePipeline,
         PipelineService,
     )
-    from bioetl.application.core.transformer_wiring_api import BaseTransformer
+    from bioetl.application.core.wiring.transformer import BaseTransformer
     from bioetl.composition.factories.datasource.data_source_factory import (
         DataSourceCreatorProtocol,
     )

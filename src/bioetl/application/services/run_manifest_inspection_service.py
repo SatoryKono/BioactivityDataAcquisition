@@ -110,6 +110,7 @@ class RunManifestInspectionService:
             ledger_entries = tuple(self.ledger_port.list_entries(manifest.manifest_id))
         diagnostics = build_diagnostics_summary(manifest, ledger_entries)
         identity_graph = self._build_identity_graph(manifest, diagnostics)
+        diagnostics["identity_graph"] = identity_graph
         return RunManifestInspectionResult(
             manifest=manifest,
             ledger_entries=ledger_entries,
@@ -180,6 +181,13 @@ class RunManifestInspectionService:
         """Return one operator-facing run identity graph payload."""
         existing = diagnostics.get("identity_graph")
         if isinstance(existing, dict):
+            artifact_refs = diagnostics.get("artifact_refs")
+            if isinstance(artifact_refs, list):
+                existing["published_artifacts"] = [
+                    artifact_ref
+                    for artifact_ref in artifact_refs
+                    if isinstance(artifact_ref, dict)
+                ]
             return existing
 
         code_provenance = manifest.code_provenance

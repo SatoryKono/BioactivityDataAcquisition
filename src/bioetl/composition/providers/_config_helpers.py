@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.filtered_data_source import FilteredDataSource
+from bioetl.application.core.data_sources.filtered import FilteredDataSource
 from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
     RateLimitContext,
