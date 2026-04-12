@@ -1,64 +1,76 @@
-# mypy: disable-error-code=attr-defined
-"""Internal retry-recovery helpers for ChEMBL fetch resilience."""
+"""Shared resilience template for adapter filtered-fetch recovery flows."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.common import run_retry_exhausted_recovery_policy
+from bioetl.infrastructure.adapters.common.retry_reduction_policy import (
+    run_retry_exhausted_recovery_policy,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import LoggerPort
 
-    class _ChemblRecoveryHost:
-        """Type-only host contract required by ChEMBL recovery helpers."""
-
-        _logger: LoggerPort
-        provider_name: str
-
-        def _is_retry_exhausted_error(self, error: Exception) -> bool: ...
-
-        def _fetch_batch_with_reduction(
-            self,
-            entity_type: str,
-            id_batch: list[str],
-            filter_field: str,
-            limit: int | None,
-            seen_ids: set[str],
-            pk_field: str,
-            pk_fields: tuple[str, ...] | None = None,
-        ) -> AsyncIterator[BronzeRecord]: ...
-
-        def _yield_single_id_fallback(
-            self,
-            entity_type: str,
-            id_batch: list[str],
-            filter_field: str,
-            seen_ids: set[str],
-            pk_field: str,
-            error: Exception,
-            pk_fields: tuple[str, ...] | None = None,
-        ) -> AsyncIterator[BronzeRecord]: ...
-
-        def _yield_deduplicated_filtered_records(
-            self,
-            entity_type: str,
-            id_batch: list[str],
-            filter_field: str,
-            limit: int | None,
-            seen_ids: set[str],
-            pk_field: str,
-            pk_fields: tuple[str, ...] | None = None,
-        ) -> AsyncIterator[BronzeRecord]: ...
 else:
-    _ChemblRecoveryHost = object
+    AsyncIterator = object
+    LoggerPort = object
 
 
-def _log_batch_reduction_retry(
+class FilteredBatchRecoveryHost(Protocol):
+    """Host contract for shared filtered batch recovery helpers."""
+
+    _logger: LoggerPort
+    provider_name: str
+
+    def _is_retry_exhausted_error(self, error: Exception) -> bool: ...
+
+    def _fetch_batch_with_reduction(
+        self,
+        entity_type: str,
+        id_batch: list[str],
+        filter_field: str,
+        limit: int | None,
+        seen_ids: set[str],
+        pk_field: str,
+        pk_fields: tuple[str, ...] | None = None,
+    ) -> AsyncIterator[BronzeRecord]: ...
+
+    def _yield_single_id_fallback(
+        self,
+        entity_type: str,
+        id_batch: list[str],
+        filter_field: str,
+        seen_ids: set[str],
+        pk_field: str,
+        error: Exception,
+        pk_fields: tuple[str, ...] | None = None,
+    ) -> AsyncIterator[BronzeRecord]: ...
+
+    def _yield_deduplicated_filtered_records(
+        self,
+        entity_type: str,
+        id_batch: list[str],
+        filter_field: str,
+        limit: int | None,
+        seen_ids: set[str],
+        pk_field: str,
+        pk_fields: tuple[str, ...] | None = None,
+    ) -> AsyncIterator[BronzeRecord]: ...
+
+__all__ = [
+    "FilteredBatchRecoveryHost",
+    "fetch_batch_with_reduction",
+    "log_batch_reduction_retry",
+    "retry_with_split_batches",
+    "yield_retry_exhausted_recovery",
+]
+
+
+def log_batch_reduction_retry(
     logger: LoggerPort,
     provider_name: str,
     *,
@@ -83,7 +95,7 @@ def _log_batch_reduction_retry(
 
 
 async def retry_with_split_batches(
-    host: _ChemblRecoveryHost,
+    host: FilteredBatchRecoveryHost,
     entity_type: str,
     id_batch: list[str],
     filter_field: str,
@@ -125,7 +137,7 @@ async def retry_with_split_batches(
         id_batch=id_batch,
         retry_error=error,
         on_split=lambda first_half, second_half, retry_error: (
-            _log_batch_reduction_retry(
+            log_batch_reduction_retry(
                 host._logger,
                 host.provider_name,
                 entity_type=entity_type,
@@ -143,7 +155,7 @@ async def retry_with_split_batches(
 
 
 async def yield_retry_exhausted_recovery(
-    host: _ChemblRecoveryHost,
+    host: FilteredBatchRecoveryHost,
     entity_type: str,
     id_batch: list[str],
     filter_field: str,
@@ -153,7 +165,7 @@ async def yield_retry_exhausted_recovery(
     error: Exception,
     pk_fields: tuple[str, ...] | None = None,
 ) -> AsyncIterator[BronzeRecord]:
-    """Recover from RetryExhaustedError using shared policy orchestrator."""
+    """Recover from RetryExhaustedError using the shared recovery template."""
     async for record in retry_with_split_batches(
         host,
         entity_type,
@@ -169,7 +181,7 @@ async def yield_retry_exhausted_recovery(
 
 
 async def fetch_batch_with_reduction(
-    host: _ChemblRecoveryHost,
+    host: FilteredBatchRecoveryHost,
     entity_type: str,
     id_batch: list[str],
     filter_field: str,

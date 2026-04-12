@@ -6,6 +6,10 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.common.response_shapes import (
+    extract_response_items,
+    extract_response_text,
+)
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJobError
 
 if TYPE_CHECKING:
@@ -101,7 +105,11 @@ class IDMappingTransportMixin:
             )
 
         result = response.json()
-        job_id = result.get("jobId")
+        if not isinstance(result, dict):
+            raise IDMappingJobError(
+                job_id="unknown", message="No jobId in malformed response"
+            )
+        job_id = extract_response_text(result, "jobId")
         if not job_id:
             raise IDMappingJobError(job_id="unknown", message="No jobId in response")
 
@@ -131,7 +139,9 @@ class IDMappingTransportMixin:
                 break
 
             data = response.json()
-            for mapping in data.get("results", []):
+            if not isinstance(data, dict):
+                break
+            for mapping in extract_response_items(data, "results"):
                 if not isinstance(mapping, dict):
                     continue
                 from_id, entry_data = deps._parse_mapping_entry(mapping)

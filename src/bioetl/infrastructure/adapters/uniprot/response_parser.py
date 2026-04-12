@@ -5,6 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.response_shapes import (
+    extract_response_items,
+    extract_response_text,
+)
 
 if TYPE_CHECKING:
     import httpx
@@ -24,8 +28,13 @@ def parse_uniprot_protein_response(
     if response.status_code != 200:
         return [], None
     data = response.json()
-    results = data.get("results", [])
-    cursor = data.get("nextCursor")
+    if not isinstance(data, dict):
+        return [], None
+    results = [
+        record for record in extract_response_items(data, "results")
+        if isinstance(record, dict)
+    ]
+    cursor = extract_response_text(data, "nextCursor")
     return results, cursor
 
 

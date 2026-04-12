@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 import httpx
 
@@ -27,16 +27,17 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.chembl.entity_mapper import (
         ChemblEntityMapper,
     )
+    from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
+        FilteredBatchRecoveryHost,
+    )
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
-    class _ChemblFallbackHost:
+    class _ChemblFallbackHost(FilteredBatchRecoveryHost, Protocol):
         """Type-only host contract required by ChEMBL fallback helpers."""
 
-        _logger: LoggerPort
-        provider_name: str
         _mapper: ChemblEntityMapper
         _adapter_metrics: AdapterMetricsRecorder
         _http_client: UnifiedHTTPClient
@@ -134,7 +135,7 @@ def mark_record_as_seen(
     pk_fields: tuple[str, ...] | None = None,
 ) -> bool:
     """Return True when record is new and register its dedup key."""
-    return (
+    return bool(
         register_record_dedup_key(
             record=record,
             seen_keys=seen_ids,

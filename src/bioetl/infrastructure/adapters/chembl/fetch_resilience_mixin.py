@@ -21,14 +21,12 @@ from bioetl.infrastructure.adapters.chembl._fetch_resilience_fallback import (
     yield_deduplicated_filtered_records,
     yield_single_id_fallback,
 )
-from bioetl.infrastructure.adapters.chembl._fetch_resilience_recovery import (
-    _ChemblRecoveryHost,
+from bioetl.infrastructure.adapters.common import is_retry_exhausted_error
+from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
+    FilteredBatchRecoveryHost,
     fetch_batch_with_reduction,
     retry_with_split_batches,
     yield_retry_exhausted_recovery,
-)
-from bioetl.infrastructure.adapters.common import (
-    is_retry_exhausted_error,
 )
 
 if TYPE_CHECKING:
@@ -126,7 +124,7 @@ class ChemblFetchResilienceMixin:
     ) -> AsyncIterator[BronzeRecord]:
         """Recover retry-exhausted batch via shared split-or-single policy."""
         async for record in retry_with_split_batches(
-            cast(_ChemblRecoveryHost, self),
+            cast(FilteredBatchRecoveryHost, self),
             entity_type,
             id_batch,
             filter_field,
@@ -215,7 +213,7 @@ class ChemblFetchResilienceMixin:
     ) -> AsyncIterator[BronzeRecord]:
         """Recover from RetryExhaustedError using shared policy orchestrator."""
         async for record in yield_retry_exhausted_recovery(
-            cast(_ChemblRecoveryHost, self),
+            cast(FilteredBatchRecoveryHost, self),
             entity_type,
             id_batch,
             filter_field,
@@ -239,7 +237,7 @@ class ChemblFetchResilienceMixin:
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch filtered batch and recover from retry-exhausted failures."""
         async for record in fetch_batch_with_reduction(
-            cast(_ChemblRecoveryHost, self),
+            cast(FilteredBatchRecoveryHost, self),
             entity_type,
             id_batch,
             filter_field,

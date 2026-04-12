@@ -8,6 +8,9 @@ import time
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.response_shapes import (
+    normalize_response_items,
+)
 from bioetl.infrastructure.adapters.common.doi_helpers import (
     strip_doi_transport_prefix,
 )
@@ -89,8 +92,10 @@ class SemanticScholarBatchRequestMixin:
         with contextlib.suppress(Exception):
             self._request_collector.record_from_response(response, duration_ms)
 
-        result: list[BronzeRecord | None] = response.json()
-        return result
+        return [
+            record if isinstance(record, dict) else None
+            for record in normalize_response_items(response.json())
+        ]
 
     @staticmethod
     def _normalize_doi(doi: str) -> str:

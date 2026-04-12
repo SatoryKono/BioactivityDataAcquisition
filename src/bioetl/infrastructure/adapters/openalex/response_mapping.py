@@ -8,6 +8,11 @@ from dataclasses import dataclass
 from typing import cast
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.response_shapes import (
+    extract_response_items,
+    extract_response_mapping,
+    extract_response_text,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -23,9 +28,7 @@ class OpenAlexResponseMapper:
         Returns:
             List of BronzeRecord dictionaries from the results array, or empty list if absent.
         """
-        raw_results = payload.get("results")
-        if not isinstance(raw_results, list):
-            return []
+        raw_results = extract_response_items(payload, "results")
         return [
             cast("BronzeRecord", item) for item in raw_results if isinstance(item, dict)
         ]
@@ -39,13 +42,10 @@ class OpenAlexResponseMapper:
         Returns:
             Next cursor string if present, None if last page or meta is missing.
         """
-        raw_meta = payload.get("meta")
-        if not isinstance(raw_meta, dict):
+        raw_meta = extract_response_mapping(payload, "meta")
+        if raw_meta is None:
             return None
-        raw_cursor = raw_meta.get("next_cursor")
-        if isinstance(raw_cursor, str):
-            return raw_cursor
-        return None
+        return extract_response_text(raw_meta, "next_cursor")
 
     def mark_lookup(
         self,
