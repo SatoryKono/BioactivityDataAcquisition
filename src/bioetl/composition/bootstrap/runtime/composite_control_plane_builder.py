@@ -33,6 +33,7 @@ from bioetl.composition.runtime_builders._runner_builder_support import (
 )
 from bioetl.composition.services.versioning import compute_config_hash, get_git_commit
 from bioetl.domain.types import RunID, RunType
+from bioetl.domain.control_plane import ReplayCapability
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
 
 if TYPE_CHECKING:
@@ -158,6 +159,7 @@ def _build_composite_manifest_create_request(
         config_hash=config_hash or None,
         contract_ref=contract_ref,
         contract_version=contract_version or None,
+        replay_capability=ReplayCapability.REBUILD_ONLY,
     )
 
 

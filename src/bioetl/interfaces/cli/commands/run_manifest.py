@@ -182,6 +182,10 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                     diagnostics.get("requested_exact_replay"),
                 ),
                 (
+                    "exact_replay_support_boundary",
+                    diagnostics.get("exact_replay_support_boundary"),
+                ),
+                (
                     "replay_capability_reason",
                     diagnostics.get("replay_capability_reason"),
                 ),
@@ -273,6 +277,10 @@ def _render_identity_graph_section(identity_graph: object) -> list[str]:
             ("contract_version", identity_graph.get("contract_version")),
             ("replay_capability", identity_graph.get("replay_capability")),
             ("requested_exact_replay", identity_graph.get("requested_exact_replay")),
+            (
+                "exact_replay_support_boundary",
+                identity_graph.get("exact_replay_support_boundary"),
+            ),
             (
                 "replay_capability_reason",
                 identity_graph.get("replay_capability_reason"),

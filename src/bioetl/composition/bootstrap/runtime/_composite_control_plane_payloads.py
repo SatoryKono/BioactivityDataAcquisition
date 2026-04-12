@@ -39,6 +39,7 @@ def build_composite_launch_context_snapshot(
         "cached_bronze_enrichers": runtime.cached_bronze_enrichers,
         "cached_bronze_dependencies": runtime.cached_bronze_dependencies,
         "execution_context": "composite",
+        "exact_replay_support_boundary": "composite_execution_unsupported",
     }
 
 
