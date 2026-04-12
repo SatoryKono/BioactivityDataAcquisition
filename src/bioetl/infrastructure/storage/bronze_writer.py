@@ -207,7 +207,9 @@ class BronzeWriter(
             span.set_attribute("run_id", str(request.run_id))
 
             labels = {"provider": request.provider, "entity": request.entity}
-            self._metrics.increment_counter("bronze_write_attempts_total", 1, labels)
+            self._metrics.increment_counter(
+                "bioetl_bronze_write_attempts_total", 1, labels
+            )
             start_time = time.perf_counter()
             prepared = self._prepare_bronze_write(request)
             write_artifacts = await self._write_bronze_data_and_sidecar(prepared)
@@ -222,7 +224,7 @@ class BronzeWriter(
             )
             total_duration = time.perf_counter() - start_time
             self._metrics.observe_histogram(
-                "bronze_write_total_duration_seconds",
+                "bioetl_bronze_write_total_duration_seconds",
                 total_duration,
                 labels,
             )

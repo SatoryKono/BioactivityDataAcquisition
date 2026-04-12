@@ -1434,12 +1434,12 @@ class TestBronzeWriterMetrics:
         histogram_calls = [
             call
             for call in mock_metrics.observe_histogram.call_args_list
-            if call[0][0] == "bronze_write_duration_seconds"
+            if call[0][0] == "bioetl_bronze_write_duration_seconds"
         ]
         assert len(histogram_calls) == 1
 
         call_args = histogram_calls[0]
-        assert call_args[0][0] == "bronze_write_duration_seconds"
+        assert call_args[0][0] == "bioetl_bronze_write_duration_seconds"
         assert isinstance(call_args[0][1], float)
         assert call_args[0][1] >= 0  # Duration should be non-negative
         assert call_args[0][2] == {"provider": "chembl", "entity": "activity"}
@@ -1479,12 +1479,12 @@ class TestBronzeWriterMetrics:
         counter_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
-            if call[0][0] == "bronze_records_written_total"
+            if call[0][0] == "bioetl_bronze_records_written_total"
         ]
         assert len(counter_calls) == 1
 
         call_args = counter_calls[0]
-        assert call_args[0][0] == "bronze_records_written_total"
+        assert call_args[0][0] == "bioetl_bronze_records_written_total"
         assert call_args[0][1] == len(sample_records)  # 3 records
         assert call_args[0][2] == {"provider": "pubchem", "entity": "compound"}
 
@@ -1523,12 +1523,12 @@ class TestBronzeWriterMetrics:
         counter_calls = [
             call
             for call in mock_metrics.increment_counter.call_args_list
-            if call[0][0] == "bronze_bytes_written_total"
+            if call[0][0] == "bioetl_bronze_bytes_written_total"
         ]
         assert len(counter_calls) == 1
 
         call_args = counter_calls[0]
-        assert call_args[0][0] == "bronze_bytes_written_total"
+        assert call_args[0][0] == "bioetl_bronze_bytes_written_total"
         assert call_args[0][1] > 0  # Should have written some bytes
         assert call_args[0][2] == {"provider": "uniprot", "entity": "protein"}
 
@@ -1577,11 +1577,11 @@ class TestBronzeWriterMetrics:
             call[0][0] for call in mock_metrics.increment_counter.call_args_list
         ]
 
-        assert "bronze_write_duration_seconds" in histogram_names
-        assert "bronze_write_total_duration_seconds" in histogram_names
-        assert "bronze_write_attempts_total" in counter_names
-        assert "bronze_records_written_total" in counter_names
-        assert "bronze_bytes_written_total" in counter_names
+        assert "bioetl_bronze_write_duration_seconds" in histogram_names
+        assert "bioetl_bronze_write_total_duration_seconds" in histogram_names
+        assert "bioetl_bronze_write_attempts_total" in counter_names
+        assert "bioetl_bronze_records_written_total" in counter_names
+        assert "bioetl_bronze_bytes_written_total" in counter_names
 
     @pytest.mark.asyncio
     async def test_logger_includes_metrics_info(

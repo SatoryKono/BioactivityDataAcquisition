@@ -391,6 +391,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "effective_config_artifact_id": "eca-123",
         "planned_artifacts": [],
         "occurrence_only_diagnostics": [],
+        "identity_graph": result.identity_graph,
         "persistence_profile": {
             "attained_profile": "replay_ready",
             "claims": {
@@ -622,6 +623,7 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     assert result.diagnostics["next_steps"] == [
         "Validate artifact publication metadata and repair dataset/lineage links.",
         "Investigate lineage persistence for published artifacts before restart.",
+        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
 
 
@@ -1042,13 +1044,14 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
-        "replay_ready_gap": False,
-        "forensic_grade_gap": False,
+        "replay_ready_gap": True,
+        "forensic_grade_gap": True,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
     assert result.diagnostics["next_steps"] == [
-        "No alert signals detected; continue routine monitoring."
+        "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
+        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
     assert result.diagnostics["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
@@ -1157,13 +1160,15 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "run_shutdown": False,
         "artifact_linkage_gap": False,
         "lineage_gap": False,
-        "replay_ready_gap": False,
-        "forensic_grade_gap": False,
+        "replay_ready_gap": True,
+        "forensic_grade_gap": True,
         "dq_signal_present": True,
         "cross_validation_signal_present": False,
     }
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
+        "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
+        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
     ]
 

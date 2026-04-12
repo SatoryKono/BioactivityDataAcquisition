@@ -49,17 +49,17 @@ class BronzeWriterMetricsMixin:
         labels = {"provider": provider, "entity": entity}
 
         self._metrics.observe_histogram(
-            "bronze_write_duration_seconds",
+            "bioetl_bronze_write_duration_seconds",
             duration,
             labels,
         )
         self._metrics.increment_counter(
-            "bronze_records_written_total",
+            "bioetl_bronze_records_written_total",
             record_count,
             labels,
         )
         self._metrics.increment_counter(
-            "bronze_bytes_written_total",
+            "bioetl_bronze_bytes_written_total",
             compressed_size,
             labels,
         )

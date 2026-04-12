@@ -40,13 +40,13 @@ class TestBronzeWriterMetricsMixin:
             run_type=RunType.INCREMENTAL,
         )
         host._metrics.observe_histogram.assert_called_once_with(
-            "bronze_write_duration_seconds",
+            "bioetl_bronze_write_duration_seconds",
             1.234,
             {"provider": "chembl", "entity": "activity"},
         )
 
     def test_emit_bronze_write_metrics_increments_records_counter(self) -> None:
-        """Should increment bronze_records_written_total counter."""
+        """Should increment bioetl_bronze_records_written_total counter."""
         host = _Host()
         host._emit_bronze_write_metrics(
             duration=0.5,
@@ -62,13 +62,13 @@ class TestBronzeWriterMetricsMixin:
         )
         calls = host._metrics.increment_counter.call_args_list
         assert calls[0].args == (
-            "bronze_records_written_total",
+            "bioetl_bronze_records_written_total",
             200,
             {"provider": "pubmed", "entity": "publication"},
         )
 
     def test_emit_bronze_write_metrics_increments_bytes_counter(self) -> None:
-        """Should increment bronze_bytes_written_total with compressed size."""
+        """Should increment bioetl_bronze_bytes_written_total with compressed size."""
         host = _Host()
         host._emit_bronze_write_metrics(
             duration=0.5,
@@ -84,7 +84,7 @@ class TestBronzeWriterMetricsMixin:
         )
         calls = host._metrics.increment_counter.call_args_list
         assert calls[1].args == (
-            "bronze_bytes_written_total",
+            "bioetl_bronze_bytes_written_total",
             1500,
             {"provider": "chembl", "entity": "compound"},
         )
