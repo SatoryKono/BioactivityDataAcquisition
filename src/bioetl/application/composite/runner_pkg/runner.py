@@ -49,7 +49,6 @@ from bioetl.application.composite.runner_pkg.runner_support_mixin import (
 )
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.composite.state import CompositePipelineState
-from bioetl.domain.events import PipelineEvent
 from bioetl.domain.exceptions import (
     BioETLError,
 )

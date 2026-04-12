@@ -10,6 +10,9 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointState,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.merger_orchestration import (
     MergeExecutionRequest,
@@ -32,6 +35,7 @@ class _CompositeRunnerMergeStageHostProtocol(Protocol):
     _runtime: CompositeRuntimeConfig
     _fsm: FSMStateHelperService
     _logger: LoggerPort
+    _observer: CompositeLifecycleObserverService
     _config: CompositeConfig
     _run_id_str: str
     _merger: MergeService

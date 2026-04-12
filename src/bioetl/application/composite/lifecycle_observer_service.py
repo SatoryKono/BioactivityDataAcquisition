@@ -79,11 +79,14 @@ class CompositeLifecycleObserverService:
         details: dict[str, object] | None = None,
     ) -> None:
         """Emit one composite phase-start lifecycle event."""
+        log_kwargs: dict[str, object] = {
+            "composite": composite_name,
+            "run_id": run_id,
+        }
+        log_kwargs.update(details or {})
         self.logger.info(
             PipelineEvent.phase_started(phase_name),
-            composite=composite_name,
-            run_id=run_id,
-            **(details or {}),
+            **log_kwargs,
         )
 
     def emit_phase_completed(
@@ -95,11 +98,14 @@ class CompositeLifecycleObserverService:
         details: dict[str, object] | None = None,
     ) -> None:
         """Emit one composite phase-complete lifecycle event."""
+        log_kwargs: dict[str, object] = {
+            "composite": composite_name,
+            "run_id": run_id,
+        }
+        log_kwargs.update(details or {})
         self.logger.info(
             PipelineEvent.phase_completed(phase_name),
-            composite=composite_name,
-            run_id=run_id,
-            **(details or {}),
+            **log_kwargs,
         )
 
     def emit_run_completed(
