@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
+from collections.abc import AsyncIterable, AsyncIterator, Iterable, Iterator
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.types import BronzeRecord
 
 __all__ = [
+    "async_iter_deduplicated_records",
     "build_record_dedup_key",
+    "compute_composite_dedup_key",
     "deduplicate_preserving_order",
+    "is_duplicate_record",
+    "is_new_record",
     "iter_deduplicated_records",
     "register_record_dedup_key",
 ]
@@ -71,6 +75,48 @@ def iter_deduplicated_records(
         yield record
 
 
+async def async_iter_deduplicated_records(
+    records: AsyncIterable[BronzeRecord],
+    *,
+    seen_keys: set[str],
+    primary_field: str,
+    composite_fields: tuple[str, ...] | None = None,
+    composite_key_builder: Callable[[JsonDict, tuple[str, ...]], str] | None = None,
+    entity_type: str | None = None,
+    logger: _DuplicateLoggerPort | None = None,
+    metrics: _DuplicateMetricsPort | None = None,
+    log_context: dict[str, object] | None = None,
+) -> AsyncIterator[BronzeRecord]:
+    """Yield async records while skipping duplicates for the configured key semantics."""
+    async for record in records:
+        status = register_record_dedup_key(
+            record=record,
+            seen_keys=seen_keys,
+            primary_field=primary_field,
+            composite_fields=composite_fields,
+            composite_key_builder=composite_key_builder,
+            entity_type=entity_type,
+            logger=logger,
+            metrics=metrics,
+            log_context=log_context,
+        )
+        if status == "duplicate":
+            continue
+        yield record
+
+
+def compute_composite_dedup_key(
+    record: JsonDict,
+    composite_fields: tuple[str, ...],
+) -> str:
+    """Serialize a composite deduplication key using pipe-joined field values."""
+    parts = []
+    for field in composite_fields:
+        value = record.get(field, "")
+        parts.append(str(value) if value is not None else "")
+    return "|".join(parts)
+
+
 def build_record_dedup_key(
     record: BronzeRecord,
     primary_field: str,
@@ -85,11 +131,7 @@ def build_record_dedup_key(
     """
     if composite_fields is not None and len(composite_fields) > 1:
         if composite_key_builder is None:
-            parts = []
-            for field in composite_fields:
-                value = record.get(field, "")
-                parts.append(str(value) if value is not None else "")
-            composite_key = "|".join(parts)
+            composite_key = compute_composite_dedup_key(record, composite_fields)
         else:
             composite_key = composite_key_builder(record, composite_fields)
         empty_key = "|".join([""] * len(composite_fields))
@@ -141,3 +183,61 @@ def register_record_dedup_key(
     if metrics is not None and entity_type is not None:
         metrics.record_dropped_duplicates(entity_type)
     return "duplicate"
+
+
+def is_duplicate_record(
+    *,
+    record: BronzeRecord,
+    seen_keys: set[str],
+    primary_field: str,
+    composite_fields: tuple[str, ...] | None = None,
+    composite_key_builder: Callable[[JsonDict, tuple[str, ...]], str] | None = None,
+    entity_type: str | None = None,
+    logger: _DuplicateLoggerPort | None = None,
+    metrics: _DuplicateMetricsPort | None = None,
+    log_context: dict[str, object] | None = None,
+) -> bool:
+    """Return ``True`` when the record is a duplicate for the configured key semantics."""
+    return (
+        register_record_dedup_key(
+            record=record,
+            seen_keys=seen_keys,
+            primary_field=primary_field,
+            composite_fields=composite_fields,
+            composite_key_builder=composite_key_builder,
+            entity_type=entity_type,
+            logger=logger,
+            metrics=metrics,
+            log_context=log_context,
+        )
+        == "duplicate"
+    )
+
+
+def is_new_record(
+    *,
+    record: BronzeRecord,
+    seen_keys: set[str],
+    primary_field: str,
+    composite_fields: tuple[str, ...] | None = None,
+    composite_key_builder: Callable[[JsonDict, tuple[str, ...]], str] | None = None,
+    entity_type: str | None = None,
+    logger: _DuplicateLoggerPort | None = None,
+    metrics: _DuplicateMetricsPort | None = None,
+    log_context: dict[str, object] | None = None,
+) -> bool:
+    """Return ``True`` when the record registered as a new dedup key."""
+    return (
+        register_record_dedup_key(
+            record=record,
+            seen_keys=seen_keys,
+            primary_field=primary_field,
+            composite_fields=composite_fields,
+            composite_key_builder=composite_key_builder,
+            entity_type=entity_type,
+            logger=logger,
+            metrics=metrics,
+            log_context=log_context,
+        )
+        == "new"
+    )

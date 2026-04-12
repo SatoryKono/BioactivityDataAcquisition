@@ -104,6 +104,7 @@ DEFAULT_LEGACY_PRUNE_LABELS: tuple[str, ...] = (
     "storage_surface",
     "runtime_evidence_surface",
     "control_plane_artifact_surface",
+    "run_instance_surface",
     "workflow_surface",
     "workflow_job_surface",
 )
@@ -767,6 +768,7 @@ def _filtered_snapshot(
                 "storage_surface",
                 "runtime_evidence_surface",
                 "control_plane_artifact_surface",
+                "run_instance_surface",
             }
         )
         shard_relation_specs.extend(
@@ -778,6 +780,7 @@ def _filtered_snapshot(
                     frozenset({"project"}),
                     frozenset({"control_plane_artifact_surface"}),
                 ),
+                ("HAS_RUN_INSTANCE", frozenset({"project"}), frozenset({"run_instance_surface"})),
                 (
                     "WRITES_TO",
                     frozenset({"pipeline_surface", "entity_config", "composite_config", "runtime_evidence_surface"}),
@@ -799,6 +802,11 @@ def _filtered_snapshot(
                     frozenset({"control_plane_artifact_surface"}),
                     frozenset({"storage_surface"}),
                 ),
+                (
+                    "REFERENCES_ARTIFACT",
+                    frozenset({"run_instance_surface"}),
+                    frozenset({"control_plane_artifact_surface"}),
+                ),
             )
         )
     if only_runtime_evidence_layer:
@@ -807,9 +815,13 @@ def _filtered_snapshot(
                 "project",
                 "runtime_evidence_surface",
                 "control_plane_artifact_surface",
+                "run_instance_surface",
                 "storage_surface",
                 "module_surface",
                 "doc_artifact",
+                "test_artifact",
+                "pipeline_surface",
+                "contract_surface",
             }
         )
         shard_relation_specs.extend(
@@ -820,8 +832,19 @@ def _filtered_snapshot(
                     frozenset({"project"}),
                     frozenset({"control_plane_artifact_surface"}),
                 ),
+                ("HAS_RUN_INSTANCE", frozenset({"project"}), frozenset({"run_instance_surface"})),
                 ("BACKED_BY", frozenset({"runtime_evidence_surface"}), frozenset({"module_surface"})),
                 ("DESCRIBED_IN", frozenset({"runtime_evidence_surface"}), frozenset({"doc_artifact"})),
+                (
+                    "DESCRIBED_IN",
+                    frozenset({"run_instance_surface"}),
+                    frozenset({"doc_artifact", "test_artifact"}),
+                ),
+                (
+                    "DEPENDS_ON",
+                    frozenset({"run_instance_surface"}),
+                    frozenset({"pipeline_surface", "contract_surface"}),
+                ),
                 ("WRITES_TO", frozenset({"runtime_evidence_surface"}), frozenset({"storage_surface"})),
                 (
                     "EMITS_ARTIFACT",
@@ -832,6 +855,11 @@ def _filtered_snapshot(
                     "MATERIALIZED_AS",
                     frozenset({"control_plane_artifact_surface"}),
                     frozenset({"storage_surface"}),
+                ),
+                (
+                    "REFERENCES_ARTIFACT",
+                    frozenset({"run_instance_surface"}),
+                    frozenset({"control_plane_artifact_surface"}),
                 ),
             )
         )
@@ -904,6 +932,17 @@ def _filtered_snapshot(
         )
 
     allowed_labels = set(only_labels)
+    label_scoped_only = bool(only_labels) and not any(
+        (
+            only_analysis_layer,
+            only_retirement_layer,
+            only_complexity_layer,
+            only_storage_layer,
+            only_runtime_evidence_layer,
+            only_workflow_graph,
+            only_docs_drift,
+        )
+    )
     for label_set in shard_label_sets:
         allowed_labels |= label_set
     if only_analysis_layer:
@@ -944,6 +983,10 @@ def _filtered_snapshot(
     for rel_key, relation in snapshot.relations.items():
         if relation.relation_type in ANALYSIS_RELATION_TYPES:
             if relation.relation_type not in allowed_analysis_relation_types:
+                continue
+            if label_scoped_only:
+                if relation.source.label in allowed_labels and relation.target.label in allowed_labels:
+                    filtered.relations[rel_key] = relation
                 continue
             if only_analysis_layer or relation.source.label in allowed_labels or relation.target.label in allowed_labels:
                 filtered.relations[rel_key] = relation
@@ -2915,6 +2958,74 @@ def _storage_ref_from_output_path(raw_path: str) -> str:
     return normalized
 
 
+def _optional_text(value: object) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _normalized_text_list(value: object) -> list[str] | None:
+    if not isinstance(value, list | tuple):
+        return None
+    normalized = [str(item).strip() for item in value if str(item).strip()]
+    return normalized
+
+
+def _storage_ref_identity(ref: str) -> tuple[str | None, str | None, str | None]:
+    parts = [part for part in ref.split("/") if part]
+    if len(parts) < 3:
+        return (parts[0] if parts else None, None, None)
+    return parts[0], parts[1], "/".join(parts[2:])
+
+
+def _infer_storage_format(ref: str) -> str | None:
+    suffix = Path(ref).suffix.casefold()
+    if suffix == ".json":
+        return "json"
+    if suffix == ".jsonl":
+        return "jsonl"
+    if suffix == ".txt":
+        return "txt"
+    return None
+
+
+def _storage_schema_properties(
+    payload: dict[str, object],
+    *,
+    layer_name: str,
+) -> dict[str, JsonValue]:
+    schema_payload = payload.get("schema") if isinstance(payload.get("schema"), dict) else {}
+    layer_schema = schema_payload.get(layer_name) if isinstance(schema_payload.get(layer_name), dict) else {}
+    column_groups = schema_payload.get("column_groups")
+    schema_column_groups = [
+        name
+        for item in column_groups if isinstance(column_groups, list)
+        for name in [item.get("name")] if isinstance(item, dict) and isinstance(item.get("name"), str)
+    ]
+    return {
+        "schema_present": bool(layer_schema),
+        "schema_column_groups": schema_column_groups if schema_column_groups else None,
+        "schema_include_groups": _normalized_text_list(layer_schema.get("include_groups")),
+        "schema_exclude_fields": _normalized_text_list(layer_schema.get("exclude_fields")),
+        "schema_alias_policy": _optional_text(layer_schema.get("alias_policy")),
+    }
+
+
+def _merged_maintenance_config(
+    base_payload: dict[str, object],
+    payload: dict[str, object],
+) -> dict[str, object]:
+    merged: dict[str, object] = {}
+    base_maintenance = base_payload.get("maintenance")
+    if isinstance(base_maintenance, dict):
+        merged.update(base_maintenance)
+    payload_maintenance = payload.get("maintenance")
+    if isinstance(payload_maintenance, dict):
+        merged.update(payload_maintenance)
+    return merged
+
+
 def _add_storage_surface(
     snapshot: GraphSnapshot,
     project: NodeKey,
@@ -2930,22 +3041,56 @@ def _add_storage_surface(
     format_name: str | None = None,
     mode: str | None = None,
     enabled: bool | None = None,
+    **semantic_properties: JsonValue,
 ) -> NodeKey:
+    key = NodeKey("storage_surface", ref)
+    existing = snapshot.nodes.get(key)
+    inferred_layer, inferred_provider, inferred_entity = _storage_ref_identity(ref)
+    format_name = format_name or _infer_storage_format(ref)
+    provider = provider or inferred_provider
+    entity = entity or inferred_entity
+    if inferred_layer is not None and not layer:
+        layer = inferred_layer
+
+    existing_roles_raw = existing.properties.get("storage_roles") if existing is not None else None
+    existing_roles = _normalized_text_list(existing_roles_raw) or []
+    storage_roles = sorted({*existing_roles, storage_kind})
+
+    existing_pipeline_names_raw = (
+        existing.properties.get("pipeline_names") if existing is not None else None
+    )
+    existing_pipeline_names = _normalized_text_list(existing_pipeline_names_raw) or []
+    pipeline_names = sorted(
+        {
+            *existing_pipeline_names,
+            *([pipeline_name] if pipeline_name is not None else []),
+        }
+    )
+
+    primary_storage_kind = (
+        _optional_text(existing.properties.get("storage_kind")) if existing is not None else None
+    ) or storage_kind
+    primary_pipeline_name = (
+        _optional_text(existing.properties.get("pipeline_name")) if existing is not None else None
+    ) or pipeline_name
     surface = snapshot.add_node(
         "storage_surface",
         ref,
         summary=summary,
         layer=layer,
-        storage_kind=storage_kind,
+        storage_kind=primary_storage_kind,
+        storage_roles=storage_roles,
         provider=provider,
         entity=entity,
-        pipeline_name=pipeline_name,
+        pipeline_name=primary_pipeline_name,
+        pipeline_names=pipeline_names if pipeline_names else None,
         format=format_name,
         mode=mode,
         enabled=enabled,
         last_verified=today,
         ingest_wave="repo_sync_v1",
         confidence="high",
+        **semantic_properties,
     )
     snapshot.add_relation(project, "HAS_STORAGE_SURFACE", surface, provenance="storage_surfaces")
     return surface
@@ -2997,6 +3142,11 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
         entity_key = NodeKey("entity_config", pipeline_name)
         config_artifact = NodeKey("config_artifact", _rel_path(root, entity_path))
         pipeline_sink = pipeline_payload.get("sink") if isinstance(pipeline_payload.get("sink"), dict) else {}
+        maintenance_config = _merged_maintenance_config(base_payload, payload)
+        retention_days = maintenance_config.get("vacuum_retention_days")
+        config_version = _optional_text(payload.get("version"))
+        quality_payload = payload.get("quality") if isinstance(payload.get("quality"), dict) else {}
+        quality_version = _optional_text(quality_payload.get("version"))
 
         layer_nodes: dict[str, NodeKey] = {}
         for layer_name in ("bronze", "silver", "gold"):
@@ -3019,6 +3169,34 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
                 format_name=str(layer_config.get("format")) if layer_config.get("format") is not None else None,
                 mode=str(layer_config.get("mode")) if layer_config.get("mode") is not None else None,
                 enabled=enabled,
+                retention_days=int(retention_days) if isinstance(retention_days, int | float) else None,
+                config_version=config_version,
+                quality_version=quality_version,
+                partition_by=_normalized_text_list(layer_config.get("partition_by")),
+                sort_by=_normalized_text_list(layer_config.get("sort_by")),
+                on_schema_mismatch=_optional_text(layer_config.get("on_schema_mismatch")),
+                versioning_mode=_optional_text(layer_config.get("mode")),
+                version_column=(
+                    _optional_text(layer_config.get("scd_config", {}).get("version_col"))
+                    if isinstance(layer_config.get("scd_config"), dict)
+                    else None
+                ),
+                current_flag_column=(
+                    _optional_text(layer_config.get("scd_config", {}).get("current_flag_col"))
+                    if isinstance(layer_config.get("scd_config"), dict)
+                    else None
+                ),
+                valid_from_column=(
+                    _optional_text(layer_config.get("scd_config", {}).get("valid_from_col"))
+                    if isinstance(layer_config.get("scd_config"), dict)
+                    else None
+                ),
+                valid_to_column=(
+                    _optional_text(layer_config.get("scd_config", {}).get("valid_to_col"))
+                    if isinstance(layer_config.get("scd_config"), dict)
+                    else None
+                ),
+                **_storage_schema_properties(payload, layer_name=layer_name),
             )
             layer_nodes[layer_name] = surface
             if pipeline_key in snapshot.nodes:
@@ -3090,6 +3268,7 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
 
         merge_payload = composite_payload.get("merge") if isinstance(composite_payload.get("merge"), dict) else {}
         output_payload = merge_payload.get("output") if isinstance(merge_payload.get("output"), dict) else {}
+        composite_version = _optional_text(composite_payload.get("version"))
         layer_nodes: dict[str, NodeKey] = {}
         for layer_name in ("silver", "gold"):
             output_path = output_payload.get(layer_name)
@@ -3105,6 +3284,13 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
                 today=today,
                 storage_kind="composite_layer_output",
                 pipeline_name=composite_name,
+                config_version=composite_version,
+                merge_strategy=_optional_text(merge_payload.get("strategy")),
+                sort_by=_normalized_text_list(
+                    merge_payload.get("sort_by", {}).get(layer_name)
+                    if isinstance(merge_payload.get("sort_by"), dict)
+                    else None
+                ),
             )
             layer_nodes[layer_name] = surface
             if pipeline_key in snapshot.nodes:
@@ -3252,6 +3438,181 @@ def _add_control_plane_runtime_evidence(
             )
             snapshot.add_relation(surface, "EMITS_ARTIFACT", artifact, provenance="runtime_evidence")
             snapshot.add_relation(artifact, "MATERIALIZED_AS", storage, provenance="runtime_evidence")
+
+    _add_control_plane_run_instance_surfaces(snapshot, root, project, today)
+
+
+def _add_control_plane_run_instance_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+) -> None:
+    run_instance_specs: tuple[dict[str, object], ...] = (
+        {
+            "manifest_id": "manifest-left",
+            "run_id": "00000000-0000-0000-0000-000000000301",
+            "pipeline_name": "chembl_activity",
+            "provider": "chembl",
+            "entity": "activity",
+            "run_type": "incremental",
+            "execution_fingerprint": "fp-stable",
+            "created_at": "2025-01-01T00:00:00+00:00",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.0.0",
+            "effective_config_artifact_id": "eca-123",
+            "config_hash": "deadbeef",
+            "replay_capability": "rebuild_only",
+            "surface_kind": "reproducibility_fixture",
+            "lifecycle_status": "fixture_manifest_only",
+            "source_path": "tests/integration/ci/test_reproducibility_contract_suite.py",
+            "doc_paths": ("docs/04-reference/contracts/run-manifest-ledger.md",),
+            "artifact_refs": ("run_manifest::json", "effective_config_artifact::json"),
+        },
+        {
+            "manifest_id": "manifest-chain-smoke",
+            "run_id": "00000000-0000-0000-0000-000000000103",
+            "pipeline_name": "chembl_activity",
+            "provider": "chembl",
+            "entity": "activity",
+            "run_type": "incremental",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.0.0",
+            "effective_config_artifact_id": "eca-smoke-1",
+            "config_hash": "hash-smoke",
+            "surface_kind": "lifecycle_smoke_fixture",
+            "lifecycle_status": "success",
+            "published_dataset_ref": "silver:chembl.activity@1",
+            "lineage_fragment_id": "silver:fragment-smoke-1",
+            "source_path": "tests/unit/application/services/test_run_manifest_inspection_service.py",
+            "doc_paths": (
+                "docs/04-reference/contracts/run-manifest-ledger.md",
+                "docs/05-operations/runbooks/run-manifest-inspection.md",
+            ),
+            "artifact_refs": (
+                "run_manifest::json",
+                "run_ledger::jsonl",
+                "effective_config_artifact::json",
+                "lineage::run_index",
+            ),
+        },
+        {
+            "manifest_id": "manifest-chain-2",
+            "run_id": "00000000-0000-0000-0000-000000000102",
+            "pipeline_name": "chembl_activity",
+            "provider": "chembl",
+            "entity": "activity",
+            "run_type": "incremental",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.0.0",
+            "effective_config_artifact_id": "eca-chain-2",
+            "surface_kind": "dq_failure_fixture",
+            "lifecycle_status": "failed",
+            "dq_disposition": "fail",
+            "dq_rule_id": "gold.not_null.id",
+            "dq_report_path": "data/output/gold/chembl/activity/_dq.json",
+            "source_path": "tests/unit/application/services/test_run_manifest_inspection_service.py",
+            "doc_paths": (
+                "docs/04-reference/contracts/run-manifest-ledger.md",
+                "docs/05-operations/runbooks/traceability-signal-ownership.md",
+            ),
+            "artifact_refs": (
+                "run_manifest::json",
+                "run_ledger::jsonl",
+                "effective_config_artifact::json",
+            ),
+        },
+        {
+            "manifest_id": "manifest-composite-quarantine",
+            "run_id": "00000000-0000-0000-0000-000000000402",
+            "pipeline_name": "chembl_activity",
+            "provider": "chembl",
+            "entity": "activity",
+            "run_type": "incremental",
+            "execution_fingerprint": "fp-stable",
+            "created_at": "2025-01-01T00:00:00+00:00",
+            "contract_ref": "chembl.activity",
+            "contract_version": "1.0.0",
+            "effective_config_artifact_id": "eca-123",
+            "config_hash": "deadbeef",
+            "surface_kind": "cross_validation_quarantine_fixture",
+            "lifecycle_status": "quarantined",
+            "last_event_at": "2025-02-03T00:00:00+00:00",
+            "replay_contract": "excluded_from_exact_replay",
+            "diagnostic_scope": "composite_cross_validation_quarantine",
+            "source_path": "tests/integration/ci/test_reproducibility_contract_suite.py",
+            "doc_paths": (
+                "docs/04-reference/contracts/run-manifest-ledger.md",
+                "docs/05-operations/runbooks/traceability-signal-ownership.md",
+            ),
+            "artifact_refs": (
+                "run_manifest::json",
+                "run_ledger::jsonl",
+                "effective_config_artifact::json",
+            ),
+        },
+    )
+
+    for spec in run_instance_specs:
+        manifest_id = str(spec["manifest_id"])
+        surface = snapshot.add_node(
+            "run_instance_surface",
+            manifest_id,
+            summary=f"Deterministic control-plane run instance surface for `{manifest_id}`.",
+            manifest_id=manifest_id,
+            run_id=_optional_text(spec.get("run_id")),
+            pipeline_name=_optional_text(spec.get("pipeline_name")),
+            provider=_optional_text(spec.get("provider")),
+            entity=_optional_text(spec.get("entity")),
+            run_type=_optional_text(spec.get("run_type")),
+            execution_fingerprint=_optional_text(spec.get("execution_fingerprint")),
+            created_at=_optional_text(spec.get("created_at")),
+            contract_ref=_optional_text(spec.get("contract_ref")),
+            contract_version=_optional_text(spec.get("contract_version")),
+            effective_config_artifact_id=_optional_text(spec.get("effective_config_artifact_id")),
+            config_hash=_optional_text(spec.get("config_hash")),
+            replay_capability=_optional_text(spec.get("replay_capability")),
+            lifecycle_status=_optional_text(spec.get("lifecycle_status")),
+            dq_disposition=_optional_text(spec.get("dq_disposition")),
+            dq_rule_id=_optional_text(spec.get("dq_rule_id")),
+            dq_report_path=_optional_text(spec.get("dq_report_path")),
+            published_dataset_ref=_optional_text(spec.get("published_dataset_ref")),
+            lineage_fragment_id=_optional_text(spec.get("lineage_fragment_id")),
+            replay_contract=_optional_text(spec.get("replay_contract")),
+            diagnostic_scope=_optional_text(spec.get("diagnostic_scope")),
+            last_event_at=_optional_text(spec.get("last_event_at")),
+            surface_kind=_optional_text(spec.get("surface_kind")),
+            source_path=_optional_text(spec.get("source_path")),
+            source_kind="run_instance_surface",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(project, "HAS_RUN_INSTANCE", surface, provenance="runtime_evidence")
+
+        pipeline_key = NodeKey("pipeline_surface", str(spec["pipeline_name"]))
+        if pipeline_key in snapshot.nodes:
+            snapshot.add_relation(surface, "DEPENDS_ON", pipeline_key, provenance="runtime_evidence")
+
+        contract_ref = _optional_text(spec.get("contract_ref"))
+        if contract_ref is not None:
+            contract_key = NodeKey("contract_surface", contract_ref)
+            if contract_key in snapshot.nodes:
+                snapshot.add_relation(surface, "DEPENDS_ON", contract_key, provenance="runtime_evidence")
+
+        source_path = _optional_text(spec.get("source_path"))
+        if source_path is not None:
+            test_key = NodeKey("test_artifact", source_path)
+            if test_key in snapshot.nodes:
+                snapshot.add_relation(surface, "DESCRIBED_IN", test_key, provenance="runtime_evidence")
+        for doc_path in spec.get("doc_paths", ()):
+            doc_key = NodeKey("doc_artifact", str(doc_path))
+            if doc_key in snapshot.nodes:
+                snapshot.add_relation(surface, "DESCRIBED_IN", doc_key, provenance="runtime_evidence")
+        for artifact_name in spec.get("artifact_refs", ()):
+            artifact_key = NodeKey("control_plane_artifact_surface", str(artifact_name))
+            if artifact_key in snapshot.nodes:
+                snapshot.add_relation(surface, "REFERENCES_ARTIFACT", artifact_key, provenance="runtime_evidence")
 
 
 def _workflow_script_targets(run_text: str) -> set[NodeKey]:
@@ -6284,6 +6645,7 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "storage_surface",
         "runtime_evidence_surface",
         "control_plane_artifact_surface",
+        "run_instance_surface",
         "workflow_surface",
         "workflow_job_surface",
     )
@@ -6307,10 +6669,12 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         "PROMOTES_TO",
         "HAS_RUNTIME_EVIDENCE",
         "HAS_CONTROL_PLANE_ARTIFACT",
+        "HAS_RUN_INSTANCE",
         "HAS_WORKFLOW",
         "EXECUTES_GATE",
         "EMITS_ARTIFACT",
         "MATERIALIZED_AS",
+        "REFERENCES_ARTIFACT",
     )
     for label in required_labels:
         if int(stats["labels"].get(label, 0)) <= 0:
@@ -6497,6 +6861,12 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append("missing project -> HAS_CONTROL_PLANE_ARTIFACT -> control_plane_artifact_surface links")
 
     if not any(
+        source_label == "project" and relation_type == "HAS_RUN_INSTANCE" and target_label == "run_instance_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing project -> HAS_RUN_INSTANCE -> run_instance_surface links")
+
+    if not any(
         source_label == "project" and relation_type == "HAS_WORKFLOW" and target_label == "workflow_surface"
         for source_label, _, relation_type, target_label in relation_keys
     ):
@@ -6549,6 +6919,12 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         for source_label, _, relation_type, target_label in relation_keys
     ):
         issues.append("missing control_plane_artifact_surface -> MATERIALIZED_AS -> storage_surface links")
+
+    if not any(
+        source_label == "run_instance_surface" and relation_type == "REFERENCES_ARTIFACT" and target_label == "control_plane_artifact_surface"
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing run_instance_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links")
 
     if not any(
         source_label in {"doc_source_surface", "doc_artifact", "policy_surface"}
@@ -6605,6 +6981,24 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append(
             "control-plane artifacts without runtime/storage links: "
             + ", ".join(sorted(orphan_control_plane_artifacts)[:10])
+        )
+
+    run_instance_nodes = [
+        node.key for node in snapshot.nodes.values() if node.key.label == "run_instance_surface"
+    ]
+    unsupported_run_instances = [
+        key.name
+        for key in run_instance_nodes
+        if not any(
+            (rel.source == key and rel.relation_type in {"REFERENCES_ARTIFACT", "DESCRIBED_IN", "DEPENDS_ON"})
+            or (rel.target == key and rel.relation_type == "HAS_RUN_INSTANCE" and rel.source.label == "project")
+            for rel in snapshot.relations.values()
+        )
+    ]
+    if unsupported_run_instances:
+        issues.append(
+            "run instance surfaces without support links: "
+            + ", ".join(sorted(unsupported_run_instances)[:10])
         )
 
     storage_nodes = [node.key for node in snapshot.nodes.values() if node.key.label == "storage_surface"]

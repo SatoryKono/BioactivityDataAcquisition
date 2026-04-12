@@ -82,7 +82,9 @@ class TestActivityTransformerTransform:
         assert result["pchembl_value"] == pytest.approx(8.0)
         assert "entity_id" in result
         assert "content_hash" in result
-        assert "_run_id" not in result
+        assert result["_run_id"] == str(mock_context.run_id)
+        assert result["_run_type"] == mock_context.run_type.value
+        assert "_ingestion_ts" in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_activity_id(self, transformer, mock_context):

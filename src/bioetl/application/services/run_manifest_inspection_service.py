@@ -190,6 +190,10 @@ class RunManifestInspectionService:
                 "replay_capability",
                 manifest.replay_capability.value,
             ),
+            "requested_exact_replay": diagnostics.get(
+                "requested_exact_replay",
+                bool(manifest.launch_context.get("exact_replay")),
+            ),
             "replay_capability_reason": diagnostics.get(
                 "replay_capability_reason",
                 None,

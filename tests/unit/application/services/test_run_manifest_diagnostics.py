@@ -15,8 +15,10 @@ from bioetl.application.services.run_manifest_diagnostics import (
 from bioetl.domain.control_plane import (
     ReplayCapability,
     RunCodeProvenance,
+    RunInputSnapshotRef,
     RunLedgerEntry,
     RunManifest,
+    RunSourceRef,
 )
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID, RunType
@@ -145,12 +147,16 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "dq_contract_compatibility_hash": "compat-hash-1",
         "effective_config_artifact_id": "eca-123",
         "replay_capability": "rebuild_only",
+        "requested_exact_replay": False,
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
+        "replay_mode": "live_fetch",
+        "input_snapshot_count": 0,
+        "input_snapshots": [],
         "planned_artifacts": [],
         "occurrence_only_diagnostics": [],
     }
@@ -166,6 +172,7 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
     summary = build_diagnostics_summary(manifest, ())
 
     assert summary["replay_capability"] == "resume_only"
+    assert summary["requested_exact_replay"] is False
     assert (
         summary["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
@@ -178,6 +185,53 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
     assert summary["replay_mode"] == "resume"
     assert summary["input_snapshot_count"] == 0
     assert summary["input_snapshots"] == []
+
+
+def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact_replay() -> None:
+    manifest = replace(
+        _make_manifest(),
+        launch_context={"limit": 25, "resume": False, "exact_replay": False},
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-1",
+                        content_hash="sha256:snapshot-1",
+                        immutable_uri="file:///tmp/bronze/batch_1.jsonl.zst",
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["replay_capability"] == "exact_replay_supported"
+    assert summary["requested_exact_replay"] is False
+    assert summary["exact_replay_eligible"] is True
+    assert summary["replay_mode"] == "snapshot_backed_run"
+    assert summary["exact_replay_blockers"] == []
+    assert summary["input_snapshot_ids"] == ["snapshot-1"]
+
+
+def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alone() -> None:
+    manifest = replace(
+        _make_manifest(),
+        launch_context={"limit": 25, "resume": False, "exact_replay": True},
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+        source_refs=(),
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["requested_exact_replay"] is True
+    assert summary["exact_replay_eligible"] is False
+    assert summary["replay_mode"] == "live_fetch"
+    assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
 
 
 @pytest.mark.parametrize(
@@ -231,12 +285,16 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_capability": "rebuild_only",
+        "requested_exact_replay": False,
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
+        "replay_mode": "live_fetch",
+        "input_snapshot_count": 0,
+        "input_snapshots": [],
         "planned_artifacts": [],
         "published_artifacts": [
             {

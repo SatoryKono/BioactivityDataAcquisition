@@ -209,6 +209,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("control_plane_artifact_surface", "run_manifest::json") in node_keys
     assert ("control_plane_artifact_surface", "effective_config_artifact::json") in node_keys
     assert ("control_plane_artifact_surface", "lineage::fragment") in node_keys
+    assert ("run_instance_surface", "manifest-left") in node_keys
+    assert ("run_instance_surface", "manifest-chain-smoke") in node_keys
+    assert ("run_instance_surface", "manifest-chain-2") in node_keys
+    assert ("run_instance_surface", "manifest-composite-quarantine") in node_keys
     assert ("workflow_surface", "tests") in node_keys
     assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
@@ -244,6 +248,48 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         for node in snapshot.nodes.values()
         if node.key.label in {"module_surface", "class_surface", "function_surface", "method_surface"}
     )
+
+    silver_assay = snapshot.nodes[NodeKey("storage_surface", "silver/chembl/assay")]
+    assert silver_assay.properties["partition_by"] == ["assay_type"]
+    assert silver_assay.properties["schema_present"] is True
+    assert silver_assay.properties["schema_include_groups"] == ["system", "business", "dq"]
+    assert silver_assay.properties["quality_version"] == "1.1.0"
+    assert silver_assay.properties["retention_days"] == 7
+    assert silver_assay.properties["storage_roles"] == ["entity_layer_output"]
+
+    gold_assay = snapshot.nodes[NodeKey("storage_surface", "gold/chembl/assay")]
+    assert gold_assay.properties["versioning_mode"] == "scd2"
+    assert gold_assay.properties["version_column"] == "_version"
+    assert gold_assay.properties["current_flag_column"] == "_is_current"
+    assert gold_assay.properties["valid_from_column"] == "_valid_from"
+    assert gold_assay.properties["valid_to_column"] == "_valid_to"
+
+    shared_activity = snapshot.nodes[NodeKey("storage_surface", "silver/chembl/activity")]
+    assert sorted(shared_activity.properties["storage_roles"]) == [
+        "composite_seed_input",
+        "entity_layer_output",
+    ]
+
+    composite_activity = snapshot.nodes[NodeKey("storage_surface", "silver/composite/activity")]
+    assert composite_activity.properties["config_version"] == "1.0.0"
+    assert composite_activity.properties["merge_strategy"] == "left_outer"
+    assert composite_activity.properties["sort_by"] == ["entity_id", "activity_id"]
+
+    manifest_left = snapshot.nodes[NodeKey("run_instance_surface", "manifest-left")]
+    assert manifest_left.properties["run_id"] == "00000000-0000-0000-0000-000000000301"
+    assert manifest_left.properties["execution_fingerprint"] == "fp-stable"
+    assert manifest_left.properties["contract_version"] == "1.0.0"
+    assert manifest_left.properties["effective_config_artifact_id"] == "eca-123"
+
+    chain_smoke = snapshot.nodes[NodeKey("run_instance_surface", "manifest-chain-smoke")]
+    assert chain_smoke.properties["lifecycle_status"] == "success"
+    assert chain_smoke.properties["lineage_fragment_id"] == "silver:fragment-smoke-1"
+
+    composite_quarantine = snapshot.nodes[
+        NodeKey("run_instance_surface", "manifest-composite-quarantine")
+    ]
+    assert composite_quarantine.properties["lifecycle_status"] == "quarantined"
+    assert composite_quarantine.properties["replay_contract"] == "excluded_from_exact_replay"
 
 
 RelationKey = tuple[str, str, str, str, str]
@@ -363,6 +409,12 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("runtime_evidence_surface", "lineage", "WRITES_TO", "storage_surface", "control/lineage/fragments/{fragment_hash}.json"),
     ("runtime_evidence_surface", "lineage", "EMITS_ARTIFACT", "control_plane_artifact_surface", "lineage::fragment"),
     ("control_plane_artifact_surface", "lineage::fragment", "MATERIALIZED_AS", "storage_surface", "control/lineage/fragments/{fragment_hash}.json"),
+    ("project", "BioETL", "HAS_RUN_INSTANCE", "run_instance_surface", "manifest-left"),
+    ("run_instance_surface", "manifest-left", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "run_manifest::json"),
+    ("run_instance_surface", "manifest-left", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "effective_config_artifact::json"),
+    ("run_instance_surface", "manifest-chain-smoke", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "run_ledger::jsonl"),
+    ("run_instance_surface", "manifest-chain-2", "DESCRIBED_IN", "test_artifact", "tests/unit/application/services/test_run_manifest_inspection_service.py"),
+    ("run_instance_surface", "manifest-composite-quarantine", "DEPENDS_ON", "contract_surface", "chembl.activity"),
     ("project", "BioETL", "HAS_WORKFLOW", "workflow_surface", "tests"),
     ("workflow_surface", "tests", "CONTAINS", "workflow_job_surface", "tests::governance-preflight"),
     ("workflow_job_surface", "tests::governance-preflight", "EXECUTES_GATE", "quality_gate", "deterministic neo4j memory ontology invariants"),
@@ -664,6 +716,7 @@ def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
         "storage_surface",
         "runtime_evidence_surface",
         "control_plane_artifact_surface",
+        "run_instance_surface",
         "workflow_surface",
         "workflow_job_surface",
     }
@@ -738,6 +791,9 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
     assert ("control_plane_artifact_surface", "run_manifest::json") in {
         (key.label, key.name) for key in filtered.nodes
     }
+    assert ("run_instance_surface", "manifest-chain-smoke") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
     assert (
         "pipeline_surface",
         "chembl_activity",
@@ -752,6 +808,13 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
         "control_plane_artifact_surface",
         "run_manifest::json",
     ) in relation_keys
+    assert (
+        "run_instance_surface",
+        "manifest-chain-smoke",
+        "REFERENCES_ARTIFACT",
+        "control_plane_artifact_surface",
+        "run_ledger::jsonl",
+    ) in relation_keys
 
 
 def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_links() -> None:
@@ -761,6 +824,9 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
     relation_keys = _relation_keys(filtered)
 
     assert ("runtime_evidence_surface", "run_manifest") in {(key.label, key.name) for key in filtered.nodes}
+    assert ("run_instance_surface", "manifest-chain-2") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
     assert ("module_surface", "src/bioetl/domain/control_plane/run_manifest.py") in {
         (key.label, key.name) for key in filtered.nodes
     }
@@ -770,6 +836,13 @@ def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_link
         "BACKED_BY",
         "module_surface",
         "src/bioetl/domain/control_plane/run_manifest.py",
+    ) in relation_keys
+    assert (
+        "run_instance_surface",
+        "manifest-chain-2",
+        "DESCRIBED_IN",
+        "test_artifact",
+        "tests/unit/application/services/test_run_manifest_inspection_service.py",
     ) in relation_keys
 
 
@@ -873,6 +946,38 @@ def test_targeted_apply_required_anchor_labels_identifies_missing_base_labels() 
     filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
 
     assert _targeted_apply_required_anchor_labels(filtered) == ("class_surface",)
+
+
+def test_only_label_filter_does_not_pull_external_analysis_anchors() -> None:
+    snapshot = GraphSnapshot()
+    function_surface = snapshot.add_node("function_surface", "pkg.normalize")
+    duplication_cluster = snapshot.add_node(
+        "duplication_cluster",
+        "adapter_layer:function_surface:abc123",
+    )
+    complexity_candidate = snapshot.add_node(
+        "complexity_candidate",
+        "function_surface:pkg.normalize",
+    )
+    snapshot.add_relation(duplication_cluster, "CONTAINS", function_surface)
+    snapshot.add_relation(function_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
+
+    filtered = _filtered_snapshot(
+        snapshot,
+        only_labels=("duplication_cluster", "function_surface"),
+    )
+
+    assert _targeted_apply_required_anchor_labels(filtered) == ()
+    assert _targeted_apply_external_anchor_keys(filtered) == ()
+    assert (
+        NodeKey("duplication_cluster", "adapter_layer:function_surface:abc123"),
+        "CONTAINS",
+        NodeKey("function_surface", "pkg.normalize"),
+    ) in filtered.relations
+    assert all(
+        relation.relation_type != "HAS_COMPLEXITY_SIGNAL"
+        for relation in filtered.relations.values()
+    )
 
 
 def test_targeted_apply_external_anchor_keys_identifies_missing_base_nodes() -> None:
@@ -1518,3 +1623,20 @@ def test_snapshot_invariants_require_control_plane_artifact_links() -> None:
 
     assert "missing runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface links" in issues
     assert any(issue.startswith("control-plane artifacts without runtime/storage links:") for issue in issues)
+
+
+def test_snapshot_invariants_require_run_instance_artifact_links() -> None:
+    _, snapshot = _snapshot()
+    keys_to_delete = [
+        key
+        for key, relation in snapshot.relations.items()
+        if relation.source.label == "run_instance_surface"
+        and relation.relation_type == "REFERENCES_ARTIFACT"
+    ]
+    for key in keys_to_delete:
+        snapshot.relations.pop(key)
+
+    issues = snapshot_invariant_issues(snapshot)
+
+    assert "missing run_instance_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links" in issues
+    assert any(issue.startswith("run instance surfaces without support links:") for issue in issues)

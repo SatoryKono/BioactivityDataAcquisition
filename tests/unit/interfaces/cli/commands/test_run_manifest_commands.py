@@ -79,6 +79,7 @@ class _FakeRunManifestService:
                 "rule_bundle_version": "2026.03",
                 "effective_config_artifact_id": "eca-123",
                 "dq_contract_compatibility_hash": "compat-hash-1",
+                "requested_exact_replay": True,
                 "replay_capability_reason": "immutable_input_snapshots_present",
                 "exact_replay_blockers": [],
                 "input_snapshot_ids": ["snapshot-1"],
@@ -128,6 +129,7 @@ class _FakeRunManifestService:
                     "contract_ref": "chembl_activity",
                     "contract_version": "1.2.0",
                     "replay_capability": "exact_replay_supported",
+                    "requested_exact_replay": True,
                     "replay_capability_reason": "immutable_input_snapshots_present",
                     "exact_replay_eligible": True,
                     "exact_replay_blockers": [],
@@ -209,6 +211,7 @@ class _FakeRunManifestService:
                 "contract_ref": "chembl_activity",
                 "contract_version": "1.2.0",
                 "replay_capability": "exact_replay_supported",
+                "requested_exact_replay": True,
                 "replay_capability_reason": "immutable_input_snapshots_present",
                 "exact_replay_eligible": True,
                 "exact_replay_blockers": [],
@@ -382,6 +385,10 @@ class TestRunManifestCommands:
         assert "latest_status: success" in result.output
         assert "contract_version: 1.2.0" in result.output
         assert "dq_policy_ref: chembl_activity.gold" in result.output
+        assert (
+            "requested_exact_replay: true"
+            in result.output
+        )
         assert (
             "replay_capability_reason: immutable_input_snapshots_present"
             in result.output

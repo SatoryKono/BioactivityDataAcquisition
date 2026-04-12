@@ -334,9 +334,23 @@ The `diagnostics` block is built from
 published operator-facing summary for event counts, artifact linkage, DQ
 anchors, correlation-anchor gaps, replay capability, and suggested next steps.
 
+Replay intent and replay proof are intentionally distinct in this inspection
+surface:
+
+- `requested_exact_replay` reports launch-time operator intent from
+  `launch_context.exact_replay`;
+- `replay_capability` and `exact_replay_eligible` report what the persisted
+  immutable input snapshot set actually proves about the run;
+- `exact_replay_blockers` explains why a run is not exact-replay eligible;
+- `replay_mode=exact_replay` is only emitted when exact replay was requested
+  and the manifest carries immutable input snapshots;
+- snapshot-backed runs that captured immutable inputs without being launched as
+  exact replay are rendered as `replay_mode=snapshot_backed_run`.
+
 For replay-safe runs the published inspection surface MUST expose compact replay
 anchors derived from manifest source refs:
 
+- `requested_exact_replay`
 - `input_snapshot_ids`
 - `input_snapshot_content_hashes`
 - `input_snapshot_identity_fingerprint`
