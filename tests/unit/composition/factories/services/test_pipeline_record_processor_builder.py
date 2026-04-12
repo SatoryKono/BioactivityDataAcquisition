@@ -131,6 +131,7 @@ def test_build_record_processor_config_and_validator_forwards_paths_and_strict()
     assert config.content_hash_exclude_fields == frozenset(
         {"journal", "publisher", "entity_id", "content_hash"}
     )
+    assert config.allow_compatibility_fallback is False
     assert config.content_hash_policy_by_version is not None
     assert config.content_hash_policy_by_version.affects_hash is True
     assert config.content_hash_policy_by_version.versions == ("1.0.0", "2.0.0")

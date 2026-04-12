@@ -1243,7 +1243,7 @@ _NEXT_WAVE_PROFILE_HASH_CASES = (
         {
             "entity_id": "chembl:cell-line-a",
             "content_hash": "stale-a",
-            "cell_chembl_id": "CHEMBL123",
+            "cell_id": "CHEMBL123",
             "cell_name": " <b>Human Fibroblast</b> ",
             "cell_source_tissue": " <b>Cervix</b> ",
             "cell_source_taxonomy_id": "9606",
@@ -1252,7 +1252,7 @@ _NEXT_WAVE_PROFILE_HASH_CASES = (
         {
             "entity_id": "chembl:cell-line-b",
             "content_hash": "stale-b",
-            "cell_chembl_id": "CHEMBL123",
+            "cell_id": "CHEMBL123",
             "cell_name": "Human Fibroblast",
             "cell_source_tissue": "Cervix",
             "cell_source_taxonomy_id": 9606.0,
@@ -1266,7 +1266,7 @@ _NEXT_WAVE_PROFILE_HASH_CASES = (
         {
             "entity_id": "chembl:cell-line-c",
             "content_hash": "stale-c",
-            "cell_chembl_id": "CHEMBL123",
+            "cell_id": "CHEMBL123",
             "cell_name": "Human Fibroblast",
             "cell_source_tissue": "Cervix",
             "cell_source_taxonomy_id": 10090,
