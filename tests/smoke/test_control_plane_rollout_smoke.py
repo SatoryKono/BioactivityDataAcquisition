@@ -39,7 +39,7 @@ def _make_manifest(run_id: RunID) -> RunManifest:
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
-            config_hash="deadbeef",
+            config_hash="d" * 64,
             contract_ref="chembl.activity",
             contract_version="1.2.0",
             dq_policy_ref="chembl_activity.gold",
