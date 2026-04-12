@@ -37,7 +37,7 @@ FACADE_RATCHETS: dict[str, tuple[int, set[str]]] = {
         270,
         {
             "bioetl.infrastructure.adapters.chembl._fetch_resilience_fallback",
-            "bioetl.infrastructure.adapters.chembl._fetch_resilience_recovery",
+            "bioetl.infrastructure.adapters.common.fetch_resilience_template",
         },
     ),
     "src/bioetl/infrastructure/adapters/pubmed/adapter_filter_fetch_mixin.py": (

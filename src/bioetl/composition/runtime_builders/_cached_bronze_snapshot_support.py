@@ -29,14 +29,17 @@ def build_cached_bronze_input_snapshot_refs(
     if not batch_files:
         return ()
 
-    return tuple(
+    snapshot_refs = [
         _build_cached_bronze_snapshot_ref(
             bronze_root=bronze_root,
             batch_file=batch_file,
             pipeline_name=pipeline_name,
         )
         for batch_file in batch_files
-    )
+    ]
+    # Persist manifest snapshots in a stable identity order so replay metadata
+    # does not depend on filesystem enumeration or content-hash/path interplay.
+    return tuple(sorted(snapshot_refs, key=lambda ref: ref.snapshot_id))
 
 
 def _build_cached_bronze_snapshot_ref(

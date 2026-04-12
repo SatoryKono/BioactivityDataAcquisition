@@ -93,6 +93,15 @@ async def test_fetch_batch_raw_suppresses_collector_errors() -> None:
     assert result == [{"paperId": "A"}]
 
 
+@pytest.mark.asyncio
+async def test_fetch_batch_raw_normalizes_malformed_payload_entries() -> None:
+    harness = _SemanticScholarHarness(payload=[{"paperId": "A"}, "bad", None])
+
+    result = await harness._fetch_batch_raw(["DOI:10.1/a"])
+
+    assert result == [{"paperId": "A"}, None, None]
+
+
 def test_normalize_doi_handles_all_supported_prefixes() -> None:
     normalize = _SemanticScholarHarness._normalize_doi
     assert normalize("https://doi.org/10.1000/xyz") == "10.1000/xyz"

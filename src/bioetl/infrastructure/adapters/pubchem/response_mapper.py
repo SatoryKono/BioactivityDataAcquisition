@@ -4,20 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.infrastructure.adapters.common.response_shapes import normalize_response_items
+
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 
 __all__ = ["PubChemResponseMapper", "normalize_pubchem_results"]
 
-
-def normalize_pubchem_results(results: object) -> list[object]:
-    """Normalize pubchempy responses to a concrete list."""
-    if isinstance(results, list):
-        return results
-    if isinstance(results, tuple):
-        return list(results)
-    return []
+normalize_pubchem_results = normalize_response_items
 
 
 class PubChemResponseMapper:
