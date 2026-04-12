@@ -81,6 +81,7 @@ def echo_composite_startup(
     composite: str,
     dry_run: bool,
     resume: bool,
+    cached_bronze_enabled: bool,
     health_server: bool,
     health_port: int,
 ) -> None:
@@ -90,6 +91,8 @@ def echo_composite_startup(
         composite: Composite pipeline name (e.g., 'publication').
         dry_run: When True, displays a dry-run warning in the output.
         resume: When True, displays a resume-mode notice in the output.
+        cached_bronze_enabled: When True, prints a warning that cached Bronze
+            on composite execution is outside the strict exact-replay boundary.
         health_server: Whether the HTTP health server is enabled.
         health_port: Port the health server is listening on.
     """
@@ -98,4 +101,9 @@ def echo_composite_startup(
         echo_warning("Dry-run mode: no data will be written")
     if resume:
         echo_info("Resume mode: continuing from last checkpoint")
+    if cached_bronze_enabled:
+        echo_warning(
+            "Cached Bronze inputs on composite execution are outside the strict "
+            "exact-replay boundary; treat this run as rebuild/resume, not exact replay."
+        )
     echo_health_server_info(health_server, health_port)

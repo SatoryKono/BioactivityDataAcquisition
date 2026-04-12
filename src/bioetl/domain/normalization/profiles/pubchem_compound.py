@@ -5,7 +5,10 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.domain.normalization.profiles.helpers import normalize_profile_smiles
+from bioetl.domain.normalization.profiles.helpers import (
+    normalize_profile_canonical_smiles,
+    normalize_profile_isomeric_smiles,
+)
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
 
 __all__ = [
@@ -54,22 +57,13 @@ _FLOAT_FIELDS = frozenset(
     }
 )
 
-
-def _normalize_canonical_smiles(value: object) -> object:
-    return normalize_profile_smiles(value, is_canonical=True)
-
-
-def _normalize_isomeric_smiles(value: object) -> object:
-    return normalize_profile_smiles(value, is_canonical=False)
-
-
 _SPECIAL_RULES = {
     "canonical_smiles": (
-        _normalize_canonical_smiles,
+        normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
     ),
     "isomeric_smiles": (
-        _normalize_isomeric_smiles,
+        normalize_profile_isomeric_smiles,
         "Normalize isomeric SMILES via the domain SMILES Value Object; invalid values collapse to None.",
     ),
 }

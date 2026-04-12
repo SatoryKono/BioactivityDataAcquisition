@@ -388,6 +388,43 @@ class TestRunCompositeCommand:
         assert "Resume mode: continuing from last checkpoint" in result.output
         assert result.exit_code == ExitCode.OK.value
 
+    def test_cached_bronze_mode_displays_exact_replay_boundary_warning(
+        self, cli_runner: CliRunner
+    ) -> None:
+        """Cached Bronze startup warns that composite execution is not exact replay."""
+        with mock_asyncio_run(return_value=(True, None)):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "run-composite",
+                    "--composite",
+                    "publication",
+                    "--use-cached-bronze",
+                ],
+            )
+
+        assert "outside the strict exact-replay boundary" in result.output
+        assert "rebuild/resume, not exact replay" in result.output
+        assert result.exit_code == ExitCode.OK.value
+
+    def test_cached_bronze_dependencies_displays_exact_replay_boundary_warning(
+        self, cli_runner: CliRunner
+    ) -> None:
+        """Dependency-only cached Bronze still warns that composite execution is not exact replay."""
+        with mock_asyncio_run(return_value=(True, None)):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "run-composite",
+                    "--composite",
+                    "publication",
+                    "--cached-bronze-dependencies",
+                ],
+            )
+
+        assert "outside the strict exact-replay boundary" in result.output
+        assert result.exit_code == ExitCode.OK.value
+
     def test_keyboard_interrupt(self, cli_runner: CliRunner) -> None:
         """Test handling of keyboard interrupt."""
         with mock_asyncio_run(side_effect=KeyboardInterrupt):

@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from bioetl.domain.normalization.profiles.helpers import (
     normalize_profile_abstract,
+    normalize_profile_canonical_smiles,
     normalize_profile_date,
     normalize_profile_doi,
     normalize_profile_float,
     normalize_profile_int,
+    normalize_profile_isomeric_smiles,
     normalize_profile_json_string,
     normalize_profile_pmc_id,
     normalize_profile_pmid,
@@ -55,6 +57,11 @@ def test_normalize_profile_identifier_helpers() -> None:
 def test_normalize_profile_smiles_returns_canonical_text_or_none() -> None:
     assert normalize_profile_smiles(None, is_canonical=True) is None
     assert normalize_profile_smiles("C", is_canonical=True) == "C"
+
+
+def test_normalize_profile_smiles_specializations_delegate_to_shared_seam() -> None:
+    assert normalize_profile_canonical_smiles("C") == "C"
+    assert normalize_profile_isomeric_smiles("C") == "C"
 
 
 def test_normalize_profile_title_and_abstract_use_canonical_text_rules() -> None:

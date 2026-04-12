@@ -123,6 +123,7 @@ class TestEchoCompositeStartup:
                 composite="publication",
                 dry_run=False,
                 resume=False,
+                cached_bronze_enabled=False,
                 health_server=False,
                 health_port=8081,
             )
@@ -141,6 +142,7 @@ class TestEchoCompositeStartup:
                 composite="publication",
                 dry_run=True,
                 resume=False,
+                cached_bronze_enabled=False,
                 health_server=False,
                 health_port=8081,
             )
@@ -157,6 +159,7 @@ class TestEchoCompositeStartup:
                 composite="publication",
                 dry_run=False,
                 resume=False,
+                cached_bronze_enabled=False,
                 health_server=False,
                 health_port=8081,
             )
@@ -173,6 +176,7 @@ class TestEchoCompositeStartup:
                 composite="publication",
                 dry_run=False,
                 resume=True,
+                cached_bronze_enabled=False,
                 health_server=False,
                 health_port=8081,
             )
@@ -189,6 +193,7 @@ class TestEchoCompositeStartup:
                 composite="publication",
                 dry_run=False,
                 resume=False,
+                cached_bronze_enabled=False,
                 health_server=False,
                 health_port=8081,
             )
@@ -205,6 +210,7 @@ class TestEchoCompositeStartup:
                 composite="publication",
                 dry_run=False,
                 resume=False,
+                cached_bronze_enabled=False,
                 health_server=True,
                 health_port=9090,
             )
@@ -222,6 +228,7 @@ class TestEchoCompositeStartup:
                 composite="publication",
                 dry_run=True,
                 resume=True,
+                cached_bronze_enabled=False,
                 health_server=False,
                 health_port=8081,
             )
@@ -229,3 +236,42 @@ class TestEchoCompositeStartup:
         out = capsys.readouterr().out
         assert "Dry-run mode: no data will be written" in out
         assert "Resume mode: continuing from last checkpoint" in out
+
+    def test_cached_bronze_true_echoes_exact_replay_boundary_warning(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """Cached Bronze on composite run prints exact-replay boundary warning."""
+        with patch(
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
+        ):
+            echo_composite_startup(
+                composite="publication",
+                dry_run=False,
+                resume=False,
+                cached_bronze_enabled=True,
+                health_server=False,
+                health_port=8081,
+            )
+
+        out = capsys.readouterr().out
+        assert "outside the strict exact-replay boundary" in out
+        assert "rebuild/resume, not exact replay" in out
+
+    def test_cached_bronze_false_does_not_echo_boundary_warning(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """Boundary warning is omitted when cached Bronze is not enabled."""
+        with patch(
+            "bioetl.interfaces.cli.commands.domains.composite.runtime.echo_health_server_info"
+        ):
+            echo_composite_startup(
+                composite="publication",
+                dry_run=False,
+                resume=False,
+                cached_bronze_enabled=False,
+                health_server=False,
+                health_port=8081,
+            )
+
+        out = capsys.readouterr().out
+        assert "strict exact-replay boundary" not in out
