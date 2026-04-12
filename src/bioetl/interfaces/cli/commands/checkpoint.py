@@ -110,6 +110,7 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
                 [
                     f"  replay_capability: {replay_view.get('replay_capability')}",
                     f"  requested_exact_replay: {replay_view.get('requested_exact_replay')}",
+                    f"  exact_replay_support_boundary: {replay_view.get('exact_replay_support_boundary')}",
                     f"  replay_capability_reason: {replay_view.get('replay_capability_reason')}",
                     f"  exact_replay_blockers: {replay_view.get('exact_replay_blockers')}",
                     f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",

@@ -36,6 +36,7 @@ def _build_base_summary(
         input_snapshots=input_snapshots,
         resume_requested=resume_requested,
     )
+    exact_replay_support_boundary = _resolve_exact_replay_support_boundary(manifest)
     exact_replay_blockers = _resolve_exact_replay_blockers(
         manifest=manifest,
         input_snapshots=input_snapshots,
@@ -60,6 +61,7 @@ def _build_base_summary(
         "effective_config_artifact_id": code_provenance.effective_config_artifact_id,
         "replay_capability": manifest.replay_capability.value,
         "requested_exact_replay": requested_exact_replay,
+        "exact_replay_support_boundary": exact_replay_support_boundary,
         "replay_capability_reason": replay_capability_reason,
         "exact_replay_eligible": (
             manifest.replay_capability.value == "exact_replay_supported"
@@ -117,6 +119,8 @@ def _resolve_replay_capability_reason(
     resume_requested: bool,
 ) -> str:
     """Return one operator-facing explanation for replay capability."""
+    if _is_composite_execution_context(manifest):
+        return "exact_replay_not_supported_for_composite_execution"
     if (
         manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
         and input_snapshots
@@ -136,9 +140,24 @@ def _resolve_exact_replay_blockers(
     if manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
         return []
     blockers: list[str] = []
+    if _is_composite_execution_context(manifest):
+        blockers.append("exact_replay_not_supported_for_composite_execution")
     if not input_snapshots:
         blockers.append("immutable_input_snapshots_missing")
     return blockers
+
+
+def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
+    """Return the supported exact-replay boundary for one manifested run."""
+    if _is_composite_execution_context(manifest):
+        return "composite_execution_unsupported"
+    return "snapshot_backed_source_runs_only"
+
+
+def _is_composite_execution_context(manifest: RunManifest) -> bool:
+    """Return whether the manifest represents composite execution."""
+    execution_context = str(manifest.launch_context.get("execution_context") or "")
+    return execution_context == "composite" or manifest.provider == "composite"
 
 
 def _process_ledger_entries(
@@ -440,11 +459,22 @@ def _build_persistence_profile(
     )
     immutable_input_snapshots_present = bool(base_summary.get("input_snapshot_ids", []))
     exact_replay_supported = bool(base_summary.get("exact_replay_eligible", False))
+    exact_replay_boundary = str(
+        base_summary.get("exact_replay_support_boundary")
+        or "snapshot_backed_source_runs_only"
+    )
+    strict_replay_execution_context_supported = (
+        exact_replay_boundary == "snapshot_backed_source_runs_only"
+    )
     artifact_lineage_links_complete = not artifact_refs or (
         missing_link_count == 0 and bool(lineage_fragment_ids)
     )
 
     replay_ready_missing_requirements: list[str] = []
+    if not strict_replay_execution_context_supported:
+        replay_ready_missing_requirements.append(
+            "strict_replay_execution_context_support"
+        )
     if not exact_replay_supported:
         replay_ready_missing_requirements.append("exact_replay_capability")
     if not immutable_input_snapshots_present:
@@ -474,6 +504,9 @@ def _build_persistence_profile(
         "surfaces": {
             "control_plane_manifest": True,
             "effective_config_artifact": effective_config_artifact_present,
+            "strict_replay_execution_context_support": (
+                strict_replay_execution_context_supported
+            ),
             "immutable_input_snapshots": immutable_input_snapshots_present,
             "exact_replay_capability": exact_replay_supported,
             "run_ledger_history": ledger_entries_present,

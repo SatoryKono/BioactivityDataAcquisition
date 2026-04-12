@@ -251,6 +251,10 @@ class RunManifestInspectionService:
                 "requested_exact_replay",
                 bool(manifest.launch_context.get("exact_replay")),
             ),
+            "exact_replay_support_boundary": diagnostics.get(
+                "exact_replay_support_boundary",
+                "snapshot_backed_source_runs_only",
+            ),
             "replay_capability_reason": diagnostics.get(
                 "replay_capability_reason",
                 None,

@@ -55,6 +55,7 @@ def test_build_composite_launch_context_snapshot_returns_runtime_sensitive_field
 
     assert result["pipeline_name"] == "publications"
     assert result["execution_context"] == "composite"
+    assert result["exact_replay_support_boundary"] == "composite_execution_unsupported"
     assert result["required_only"] is True
     assert result["seed_limit"] == 50
     assert result["enrich_only"] == ["openalex_publications"]
