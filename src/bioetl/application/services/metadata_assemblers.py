@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from bioetl.application.services.metadata_assemblers_helpers import (
     PipelineMetadataProtocol,
     RuntimeMetadataProtocol,
+    _build_dataset_content_hash,
     _build_gold_dq_summary,
     _build_gold_lineage,
     _build_gold_output,
@@ -96,6 +97,10 @@ class SilverMetadataService:
             ),
             record_count=record_count,
             total_bytes=input_data.total_bytes,
+            content_hash=_build_dataset_content_hash(
+                provider=self.run_context.provider,
+                records=input_data.records,
+            ),
             write_started_at=input_data.started_at,
             write_completed_at=input_data.completed_at,
         )

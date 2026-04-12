@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
@@ -25,6 +26,7 @@ from bioetl.domain.services.composite_metadata_helpers import (
     parse_lineage_created_at,
     summarize_composite_cv_dq,
 )
+from bioetl.domain.transformations.hashing import canonical_json_dumps, normalize_for_hash
 from bioetl.domain.value_objects.run_context import RunContext
 
 if TYPE_CHECKING:
@@ -328,6 +330,33 @@ def _build_silver_artifact_id(
     return str(dataset.node_id)
 
 
+def _build_dataset_content_hash(
+    *,
+    provider: str,
+    records: Sequence[Mapping[str, object]] | None,
+) -> str | None:
+    """Build an order-insensitive dataset-level content hash for one sidecar."""
+    if not records:
+        return None
+    normalized_rows = [
+        canonical_json_dumps(
+            normalize_for_hash(
+                {str(key): value for key, value in record.items()},
+                exclude_fields={"content_hash"},
+            )
+        )
+        for record in records
+    ]
+    normalized_rows.sort()
+    canonical_payload = canonical_json_dumps(
+        {
+            "provider": provider,
+            "rows": normalized_rows,
+        }
+    )
+    return hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
+
+
 def _build_gold_lineage(
     *,
     source_tables: dict[str, int],
@@ -399,6 +428,14 @@ def _build_gold_output(
         ),
         record_count=record_count,
         total_bytes=input_data.total_bytes,
+        content_hash=(
+            _build_dataset_content_hash(
+                provider=run_context.provider,
+                records=input_data.records,
+            )
+            if run_context is not None
+            else None
+        ),
         write_started_at=input_data.started_at,
         write_completed_at=input_data.completed_at,
         composite_run_id=composite_run_id,
@@ -408,6 +445,7 @@ def _build_gold_output(
 __all__ = [
     "PipelineMetadataProtocol",
     "RuntimeMetadataProtocol",
+    "_build_dataset_content_hash",
     "_build_gold_dq_summary",
     "_build_gold_lineage",
     "_build_gold_output",

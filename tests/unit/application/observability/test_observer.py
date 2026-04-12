@@ -603,10 +603,15 @@ class TestObserverHealthCheckEvents:
         )
 
         logger_mock.info.assert_called()
-        metrics_mock.set_gauge.assert_called_with(
+        metrics_mock.set_gauge.assert_any_call(
             "bioetl_pipeline_health_check_passed",
             1.0,
             {"pipeline": "test_pipeline", "component": "storage"},
+        )
+        metrics_mock.set_gauge.assert_any_call(
+            "bioetl_health_check_status",
+            2.0,
+            {"component": "storage"},
         )
 
     def test_emit_health_check_result_unhealthy(
@@ -628,10 +633,63 @@ class TestObserverHealthCheckEvents:
         )
 
         logger_mock.warning.assert_called()
-        metrics_mock.set_gauge.assert_called_with(
+        metrics_mock.set_gauge.assert_any_call(
             "bioetl_pipeline_health_check_passed",
             0.0,
             {"pipeline": "test_pipeline", "component": "data_source"},
+        )
+        metrics_mock.set_gauge.assert_any_call(
+            "bioetl_health_check_status",
+            0.0,
+            {"component": "data_source"},
+        )
+
+    def test_emit_health_check_result_records_mode_latency_and_fallback(
+        self, metrics_mock, logger_mock, run_id
+    ):
+        """Enhanced probe metadata must emit observer-owned health metrics."""
+        observer = PipelineObserver(
+            pipeline_name="test_pipeline",
+            run_id=run_id,
+            run_type=RunType.INCREMENTAL,
+            metrics=metrics_mock,
+            logger=logger_mock,
+        )
+
+        observer.emit_health_check_result(
+            component="data_source",
+            healthy=True,
+            duration_ms=20.0,
+            provider="chembl",
+            latency_ms=42.0,
+            health_check_mode="probe",
+            fallback_reason="status_downgrade",
+            health_status="DEGRADED",
+        )
+
+        metrics_mock.set_gauge.assert_any_call(
+            "bioetl_health_check_mode_status",
+            1.0,
+            {"component": "data_source", "mode": "probe"},
+        )
+        metrics_mock.observe_histogram.assert_any_call(
+            "bioetl_health_check_latency_seconds",
+            0.042,
+            {"provider": "chembl"},
+        )
+        metrics_mock.observe_histogram.assert_any_call(
+            "bioetl_health_check_mode_latency_seconds",
+            0.042,
+            {"provider": "chembl", "mode": "probe"},
+        )
+        metrics_mock.increment_counter.assert_any_call(
+            "bioetl_probe_mode_fallback_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "component": "data_source",
+                "reason": "status_downgrade",
+            },
         )
 
 

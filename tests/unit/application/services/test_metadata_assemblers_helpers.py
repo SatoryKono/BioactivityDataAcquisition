@@ -8,6 +8,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.services.metadata_assemblers_helpers import (
+    _build_dataset_content_hash,
     _build_gold_lineage,
     _build_gold_output,
     _build_gold_scd,
@@ -319,6 +320,30 @@ def test_build_runtime_duration_computes_seconds_or_zero() -> None:
 
 
 @pytest.mark.unit
+def test_build_dataset_content_hash_is_order_insensitive_and_excludes_row_hash() -> None:
+    records_a = [
+        {"id": 1, "value": "A", "content_hash": "row-hash-a"},
+        {"id": 2, "value": "B", "content_hash": "row-hash-b"},
+    ]
+    records_b = [
+        {"id": 2, "value": "B", "content_hash": "changed-row-hash-b"},
+        {"id": 1, "value": "A", "content_hash": "changed-row-hash-a"},
+    ]
+
+    hash_a = _build_dataset_content_hash(provider="chembl", records=records_a)
+    hash_b = _build_dataset_content_hash(provider="chembl", records=records_b)
+
+    assert isinstance(hash_a, str)
+    assert hash_a == hash_b
+
+
+@pytest.mark.unit
+def test_build_dataset_content_hash_returns_none_without_records() -> None:
+    assert _build_dataset_content_hash(provider="chembl", records=None) is None
+    assert _build_dataset_content_hash(provider="chembl", records=[]) is None
+
+
+@pytest.mark.unit
 def test_build_lineage_helpers_populate_expected_fields() -> None:
     silver_lineage = _build_silver_lineage(
         source_batch_ids=["batch-1"],
@@ -392,9 +417,30 @@ def test_build_gold_output_uses_composite_run_id_when_present() -> None:
 
     assert output.record_count == 12
     assert output.total_bytes == 999
+    assert output.content_hash is None
     assert output.composite_run_id == "cmp-123"
     assert output.write_started_at == input_data.started_at
     assert output.write_completed_at == input_data.completed_at
+
+
+@pytest.mark.unit
+def test_build_gold_output_sets_dataset_content_hash_with_run_context() -> None:
+    run_context = RunContext(
+        run_id=RunID(uuid4()),
+        run_type=RunType.INCREMENTAL,
+        started_at=datetime(2026, 3, 17, 10, 0, tzinfo=UTC),
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+    )
+    output = _build_gold_output(
+        run_context=run_context,
+        input_data=_make_gold_input(records=[{"id": 1, "value": "A"}]),
+        record_count=1,
+        composite_ext=None,
+    )
+
+    assert isinstance(output.content_hash, str)
 
 
 @pytest.mark.unit

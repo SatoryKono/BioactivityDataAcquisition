@@ -271,6 +271,7 @@ def _record_artifact_publication(
         "metadata_path": metadata_path,
         "record_count": int(metadata.output.record_count),
         "total_bytes": int(metadata.output.total_bytes),
+        "content_hash": metadata.output.content_hash,
         "run_id": str(metadata.runtime.run_id),
         "manifest_id": manifest_id,
         "pipeline_name": metadata.pipeline.name,
