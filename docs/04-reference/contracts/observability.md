@@ -271,6 +271,19 @@ operator-facing команды:
 
 - `bioetl checkpoint audit-run --run-id ... [--limit ...] [--format text|json|yaml]`
 - `bioetl checkpoint inspect --pipeline ... [--run-id ...] [--audit-limit ...] [--format text|json|yaml]`
+
+Selected operator/admin service seams also emit bounded tracing spans through
+`TracingPort` when tracing is enabled:
+
+- `MetricsService.start`, `MetricsService.get_status`, `MetricsService.push_to_gateway`
+- `QuarantineService.inspect`, `QuarantineService.get_stats`, `QuarantineService.replay`,
+  `QuarantineService.mark_as_reprocessed`, `QuarantineService.purge`, `QuarantineService.update_status`
+- `ObservabilityWorkflowService.inspect_audit_run`, `ObservabilityWorkflowService.inspect_checkpoint_workflow`
+
+Intentional non-goals for now:
+
+- per-record quarantine explorer/detail lookup flows are not traced
+- CLI commands themselves do not create spans directly; tracing stays in application services
 ## 5. Provider Rate-Limit Baseline (as configured)
 
 Значения ниже берутся из `configs/providers/*.yaml` и отражают **текущую конфигурацию репозитория**, не внешние SLA провайдеров.

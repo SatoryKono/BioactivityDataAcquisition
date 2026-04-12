@@ -113,8 +113,8 @@ class MetricsService:
     """
 
     logger: LoggerPort
-    tracer: TracingPort | None = None
     _server: MetricsServerPort
+    tracer: TracingPort | None = None
     _publisher: MetricsPublisherPort | None = field(default=None, repr=False)
     _port: int | None = field(default=None, repr=False)
     _started_at: datetime | None = field(default=None, repr=False)

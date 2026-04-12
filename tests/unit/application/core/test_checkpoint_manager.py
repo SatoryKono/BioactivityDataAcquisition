@@ -539,7 +539,7 @@ class TestCheckpointManagerCompatibilityPolicy:
         )
 
     async def test_observe_policy_allows_resume_on_incompatibility(
-        self, mock_checkpoint_port, mock_logger
+        self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
@@ -562,6 +562,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             resume=True,
+            metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
             current_metadata=CheckpointMetadata(
                 records_processed=0,
@@ -578,9 +579,18 @@ class TestCheckpointManagerCompatibilityPolicy:
         assert "resume blocked despite observe policy" in warning_call.args[0]
         assert warning_call.kwargs["resume_rejected"] is True
         assert warning_call.kwargs["execution_identity_compatible"] is False
+        assert (
+            warning_call.kwargs["compatibility_disposition"]
+            == "observe_blocked_identity"
+        )
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "chembl_activity", "status": "observe_blocked_identity"},
+        )
 
     async def test_observe_policy_still_allows_resume_on_non_identity_mismatch(
-        self, mock_checkpoint_port, mock_logger
+        self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
@@ -603,6 +613,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             resume=True,
+            metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
             current_metadata=CheckpointMetadata(
                 records_processed=0,
@@ -618,9 +629,18 @@ class TestCheckpointManagerCompatibilityPolicy:
         warning_call = mock_logger.warning.call_args
         assert "resume continues" in warning_call.args[0]
         assert warning_call.kwargs["resume_rejected"] is False
+        assert (
+            warning_call.kwargs["compatibility_disposition"]
+            == "observe_loaded_degraded"
+        )
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "chembl_activity", "status": "observe_loaded_degraded"},
+        )
 
     async def test_hard_fail_policy_raises_on_incompatibility(
-        self, mock_checkpoint_port, mock_logger
+        self, mock_checkpoint_port, mock_logger, mock_metrics
     ) -> None:
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
@@ -643,6 +663,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             pipeline_name="chembl_activity",
             run_id=uuid4(),
             resume=True,
+            metrics=mock_metrics,
             checkpoint_compatibility_service=compatibility_service,
             current_metadata=CheckpointMetadata(
                 records_processed=0,
@@ -656,6 +677,11 @@ class TestCheckpointManagerCompatibilityPolicy:
             match="hard_fail policy",
         ):
             await manager.load_checkpoint()
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_load_events_total",
+            1,
+            {"pipeline": "chembl_activity", "status": "incompatible_hard_fail"},
+        )
 
     async def test_save_checkpoint_enriches_execution_identity(
         self, mock_checkpoint_port, mock_logger

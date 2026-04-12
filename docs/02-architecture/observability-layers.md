@@ -156,6 +156,32 @@ quarantine actions:
 These metrics are intended for operational diagnosis of inspect/replay/purge and
 related workflows, not for per-record drill-down.
 
+### Operator tracing
+
+Selected operator/admin workflows now participate in tracing through
+`TracingPort` at the application-service layer:
+
+- `MetricsService.start`
+- `MetricsService.get_status`
+- `MetricsService.push_to_gateway`
+- `QuarantineService.inspect`
+- `QuarantineService.get_stats`
+- `QuarantineService.replay`
+- `QuarantineService.mark_as_reprocessed`
+- `QuarantineService.purge`
+- `QuarantineService.update_status`
+- `ObservabilityWorkflowService.inspect_audit_run`
+- `ObservabilityWorkflowService.inspect_checkpoint_workflow`
+
+These spans must remain bounded and summary-oriented. They may include low-cardinality
+attributes such as operation names, pipeline names, boolean filter presence, and
+aggregate counts.
+
+Intentional exclusions:
+
+- record-level quarantine explorer/detail lookups remain metric/log-only for now
+- CLI commands remain thin adapters and must not start infrastructure-specific tracing directly
+
 ### Audit traceability
 
 - `AuditPort` is part of the observability/traceability contract surface

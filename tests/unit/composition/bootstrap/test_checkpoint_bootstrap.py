@@ -23,6 +23,7 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
 from bioetl.composition.bootstrap.cli.checkpoint import (
     bootstrap_checkpoint_manager,
     bootstrap_checkpoint_service,
+    bootstrap_observability_workflow_service,
     bootstrap_quarantine_manager,
     bootstrap_quarantine_service,
 )
@@ -31,6 +32,7 @@ from bioetl.domain.ports import (
     CheckpointPort,
     CompositeCheckpointPort,
     QuarantinePort,
+    TracingPort,
 )
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
@@ -337,3 +339,34 @@ class TestBootstrapQuarantineService:
             result = bootstrap_quarantine_service()
 
         assert isinstance(result.metrics, NoOpMetrics)
+
+    def test_bootstrap_quarantine_service_wires_tracing_port(self):
+        """CLI quarantine service should inject an explicit tracing port."""
+        with patch(
+            "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
+        ) as mock_settings:
+            mock_settings.return_value = MagicMock(
+                quarantine_path=Path("/tmp/quarantine"),
+                observability=MagicMock(tracing_enabled=False),
+            )
+            result = bootstrap_quarantine_service()
+
+        assert isinstance(result.tracer, TracingPort)
+
+
+@pytest.mark.unit
+class TestBootstrapObservabilityWorkflowService:
+    """Tests for bootstrap_observability_workflow_service function."""
+
+    def test_wires_tracing_port(self):
+        """Workflow diagnostics bootstrap should inject an explicit tracing port."""
+        with patch(
+            "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
+        ) as mock_settings:
+            mock_settings.return_value = MagicMock(
+                checkpoint_path=Path("/tmp/checkpoints"),
+                observability=MagicMock(tracing_enabled=False),
+            )
+            result = bootstrap_observability_workflow_service()
+
+        assert isinstance(result.tracer, TracingPort)

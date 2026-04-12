@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.application.services.metrics_service import MetricsService
 from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+from bioetl.domain.ports import TracingPort
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
@@ -57,3 +58,9 @@ class TestBootstrapMetricsService:
         result2 = bootstrap_metrics_service()
 
         assert result1._server is not result2._server
+
+    def test_wires_tracing_port(self) -> None:
+        """bootstrap_metrics_service should wire an explicit tracing port."""
+        result = bootstrap_metrics_service()
+
+        assert isinstance(result.tracer, TracingPort)
