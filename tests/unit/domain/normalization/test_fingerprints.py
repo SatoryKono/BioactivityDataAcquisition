@@ -2,96 +2,58 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization import compute_manifest_execution_fingerprint
+from bioetl.domain.normalization import compute_execution_identity_fingerprint
 from bioetl.domain.normalization import compute_degraded_runtime_anchor_fingerprint
-from bioetl.domain.normalization import normalize_run_manifest_spec
+from bioetl.domain.normalization import build_execution_identity_payload
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
+from bioetl.domain.normalization import normalize_control_plane_sha256
+from bioetl.domain.normalization import normalize_contract_ref
+from bioetl.domain.normalization import normalize_contract_version
 
 
-def test_manifest_execution_fingerprint_is_deterministic_for_equivalent_payloads() -> None:
-    payload = {
-        "schema_version": "1.0",
-        "run_type": "incremental",
-        "pipeline_name": "chembl_activity",
-        "provider": "chembl",
-        "entity": "activity",
-        "launch_context": {"resume": False, "limit": 100},
-        "runtime_config": {"limit": 100, "run_type": "incremental"},
-        "resolved_config": {"entity_type": "activity", "provider": "chembl"},
-        "code_provenance": {
-            "git_commit": "abc1234",
-            "config_hash": "DEADBEEF",
-            "contract_ref": " ChemBL.Activity ",
-            "contract_version": " v2 ",
-        },
-        "source_refs": [
-            {
-                "query": "assay_type=B",
-                "pipeline_name": "chembl_activity",
-                "entity": "activity",
-                "provider": "chembl",
-                "input_snapshots": [
-                    {"snapshot_id": "b-2", "content_hash": "hash-b-2"},
-                    {"snapshot_id": "b-1", "content_hash": "hash-b-1"},
-                ],
-            }
-        ],
-        "planned_artifacts": [
-            {"path": "data/output/gold/chembl/activity", "layer": "gold"},
-            {"layer": "bronze", "path": "data/output/bronze/chembl/activity"},
-        ],
-    }
+def _build_payload() -> dict[str, str | None]:
+    return build_execution_identity_payload(
+        pipeline_name="chembl_activity",
+        run_type="incremental",
+        pipeline_version=None,
+        effective_config_hash=normalize_control_plane_sha256("a" * 64),
+        dq_contract_compatibility_hash=None,
+        contract_ref=normalize_contract_ref(" ChemBL.Activity "),
+        contract_version=normalize_contract_version(" v2 "),
+        effective_config_artifact_id=None,
+        exact_replay=False,
+        input_snapshot_fingerprint=(
+            "b9b909fbc69f111484ed86aa0d8ec6f6390b76739145b2b2d6404fa17f6e05f8"
+        ),
+    )
+
+
+def test_execution_identity_fingerprint_is_deterministic_for_equivalent_payloads() -> None:
+    payload = _build_payload()
     reordered = {
-        **payload,
-        "launch_context": {"limit": 100, "resume": False},
-        "runtime_config": {"run_type": "incremental", "limit": 100},
-        "resolved_config": {"provider": "chembl", "entity_type": "activity"},
-        "source_refs": list(reversed(payload["source_refs"])),
-        "planned_artifacts": list(reversed(payload["planned_artifacts"])),
+        "input_snapshot_fingerprint": payload["input_snapshot_fingerprint"],
+        "exact_replay": payload["exact_replay"],
+        "effective_config_artifact_id": payload["effective_config_artifact_id"],
+        "contract_version": payload["contract_version"],
+        "contract_ref": payload["contract_ref"],
+        "dq_contract_compatibility_hash": payload["dq_contract_compatibility_hash"],
+        "effective_config_hash": payload["effective_config_hash"],
+        "pipeline_version": payload["pipeline_version"],
+        "run_type": payload["run_type"],
+        "pipeline_name": payload["pipeline_name"],
     }
 
-    assert compute_manifest_execution_fingerprint(
-        normalize_run_manifest_spec(payload)
-    ) == compute_manifest_execution_fingerprint(normalize_run_manifest_spec(reordered))
+    assert compute_execution_identity_fingerprint(
+        payload
+    ) == compute_execution_identity_fingerprint(reordered)
 
 
-def test_manifest_execution_fingerprint_matches_golden_value() -> None:
-    payload = {
-        "schema_version": "1.0",
-        "run_type": "incremental",
-        "pipeline_name": "chembl_activity",
-        "provider": "chembl",
-        "entity": "activity",
-        "launch_context": {"resume": False, "limit": 100},
-        "runtime_config": {"limit": 100, "run_type": "incremental"},
-        "resolved_config": {"entity_type": "activity", "provider": "chembl"},
-        "code_provenance": {
-            "git_commit": "abc1234",
-            "config_hash": "DEADBEEF",
-            "contract_ref": " ChemBL.Activity ",
-            "contract_version": " v2 ",
-        },
-        "source_refs": [
-            {
-                "query": "assay_type=B",
-                "pipeline_name": "chembl_activity",
-                "entity": "activity",
-                "provider": "chembl",
-                "input_snapshots": [
-                    {"snapshot_id": "b-2", "content_hash": "hash-b-2"},
-                    {"snapshot_id": "b-1", "content_hash": "hash-b-1"},
-                ],
-            }
-        ],
-        "planned_artifacts": [
-            {"path": "data/output/gold/chembl/activity", "layer": "gold"},
-            {"layer": "bronze", "path": "data/output/bronze/chembl/activity"},
-        ],
-    }
+def test_execution_identity_fingerprint_matches_golden_value() -> None:
+    payload = _build_payload()
 
     assert (
-        compute_manifest_execution_fingerprint(normalize_run_manifest_spec(payload))
-        == "608f808f7b3842c09f42505853ee92ba113ff9ef29851d2a481714247a8ca08d"
+        compute_execution_identity_fingerprint(payload)
+        == "ab7bface86b238e30828761b54e0423d890d7ca1c9c15e630f0ba668bb6d7677"
     )
 
 
