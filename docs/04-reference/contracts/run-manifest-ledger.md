@@ -168,12 +168,17 @@ The current diagnostics surface exposes:
 - `persistence_profile.surfaces`;
 - `persistence_profile.replay_ready_missing_requirements`;
 - `persistence_profile.forensic_grade_missing_requirements`.
+- `alert_signals.immutable_input_snapshot_gap`;
 - `alert_signals.replay_ready_gap`;
 - `alert_signals.forensic_grade_gap`;
 
 When ledger-backed diagnostics are available, these profile gaps are promoted
 into alert-oriented booleans and operator next steps so replay/forensic
 deficiencies are visible as actionable signals rather than passive metadata.
+When immutable input snapshots are the missing replay-ready requirement, the
+diagnostics surface raises `alert_signals.immutable_input_snapshot_gap` and
+points the operator back to cached-Bronze snapshot persistence before exact
+replay can be claimed.
 
 Composite replay is additionally documented as a bounded reconstructability
 surface:

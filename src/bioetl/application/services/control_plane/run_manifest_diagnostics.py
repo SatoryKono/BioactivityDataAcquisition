@@ -730,6 +730,9 @@ def _build_alert_signals(
     latest_status_normalized = (latest_status or "").strip().lower()
     artifact_ref_count = len(artifact_refs)
     has_artifact_refs = artifact_ref_count > 0
+    immutable_input_snapshot_gap = (
+        "immutable_input_snapshots" in replay_ready_missing_requirements
+    )
     strict_replay_boundary_gap = (
         "strict_replay_execution_context_support"
         in replay_ready_missing_requirements
@@ -739,6 +742,7 @@ def _build_alert_signals(
         "run_shutdown": latest_status_normalized == "shutdown",
         "artifact_linkage_gap": missing_link_count > 0,
         "lineage_gap": has_artifact_refs and not lineage_fragment_ids,
+        "immutable_input_snapshot_gap": immutable_input_snapshot_gap,
         "strict_replay_boundary_gap": strict_replay_boundary_gap,
         "replay_ready_gap": bool(replay_ready_missing_requirements),
         "forensic_grade_gap": bool(forensic_grade_missing_requirements),
@@ -761,6 +765,10 @@ def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     if alert_signals.get("lineage_gap", False):
         steps.append(
             "Investigate lineage persistence for published artifacts before restart."
+        )
+    if alert_signals.get("immutable_input_snapshot_gap", False):
+        steps.append(
+            "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable."
         )
     if alert_signals.get("strict_replay_boundary_gap", False):
         steps.append(

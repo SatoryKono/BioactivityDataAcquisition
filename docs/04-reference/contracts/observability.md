@@ -286,6 +286,9 @@ Selected operator/admin service seams also emit bounded tracing spans through
 Intentional non-goals for now:
 
 - per-record quarantine explorer/detail lookup flows are not traced
+- filtered quarantine explorer workflows remain metric/log-only:
+  `list_filtered_records`, `get_filtered_record`, `get_filtered_stats`,
+  `get_filtered_filter_options`
 - CLI commands themselves do not create spans directly; tracing stays in application services
 ## 5. Provider Rate-Limit Baseline (as configured)
 

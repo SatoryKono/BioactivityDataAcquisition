@@ -287,6 +287,9 @@ than silently accepting the bundle as canonical.
 - `exact_replay_support_boundary=composite_execution_unsupported` means the
   current composite execution path must not be interpreted as exact-replayable
   even when cached Bronze inputs are used;
+- `alert_signals.immutable_input_snapshot_gap=true` means the run is still on
+  the ordinary source boundary, but immutable cached-Bronze input snapshots are
+  missing, so strict exact replay cannot be claimed yet;
 - `alert_signals.replay_ready_gap=true` means the run must not be treated as
   exact-replay ready even if manifest inspection itself is available;
 - `alert_signals.forensic_grade_gap=true` means the run must not be treated as
