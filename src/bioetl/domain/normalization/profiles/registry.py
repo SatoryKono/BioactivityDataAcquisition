@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TypeVar
 
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_activity import (
@@ -93,9 +92,7 @@ def normalize_normalization_profile_coordinates(
     return normalized_provider, normalized_entity
 
 
-T = TypeVar("T")
-
-def _resolve_normalization_profile_value(
+def _resolve_normalization_profile_value[T](
     mapping: Mapping[tuple[str, str], T],
     provider: str,
     entity_type: str | None,

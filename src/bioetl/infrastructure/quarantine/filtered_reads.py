@@ -141,24 +141,6 @@ def _resolve_run_manifest_root(base_path: str) -> Path | None:
     return None
 
 
-def _resolve_manifest_id_for_run(run_id: str, run_index_root: Path) -> str | None:
-    """Resolve manifest ID from run index."""
-    run_index_path = run_index_root / f"{run_id}.txt"
-    try:
-        manifest_id = run_index_path.read_text(encoding="utf-8").strip()
-        return manifest_id if manifest_id else None
-    except OSError:
-        return None
-
-def _resolve_run_type_for_manifest(manifest_id: str, manifest_root: Path) -> str | None:
-    """Read manifest payload and extract run type."""
-    manifest_path = manifest_root / f"{manifest_id}.json"
-    try:
-        manifest_payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-        return _parse_run_type_from_manifest_payload(manifest_payload)
-    except (OSError, json.JSONDecodeError):
-        return None
-
 def _build_run_type_lookup(
     table_records: list[JsonDict],
     *,
@@ -181,14 +163,26 @@ def _build_run_type_lookup(
         if not run_id or run_id in run_type_by_run_id:
             continue
 
-        manifest_id = _resolve_manifest_id_for_run(run_id, run_index_root)
+        run_index_path = run_index_root / f"{run_id}.txt"
+        try:
+            manifest_id = run_index_path.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
         if not manifest_id:
             continue
 
         if manifest_id not in manifest_run_type_cache:
-            manifest_run_type_cache[manifest_id] = _resolve_run_type_for_manifest(
-                manifest_id, manifest_root
-            )
+            manifest_path = manifest_root / f"{manifest_id}.json"
+            try:
+                manifest_payload = json.loads(
+                    manifest_path.read_text(encoding="utf-8")
+                )
+            except (OSError, json.JSONDecodeError):
+                manifest_run_type_cache[manifest_id] = None
+            else:
+                manifest_run_type_cache[manifest_id] = (
+                    _parse_run_type_from_manifest_payload(manifest_payload)
+                )
 
         run_type = manifest_run_type_cache.get(manifest_id)
         if run_type:
