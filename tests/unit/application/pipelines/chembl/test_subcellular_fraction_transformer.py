@@ -71,6 +71,8 @@ class TestSubcellularFractionTransformer:
         assert result["entity_id"] == "a1b2c3d4e5f67890"
         assert "content_hash" in result
         assert result["_run_id"] == str(mock_context.run_id)
+        assert result["_run_type"] == mock_context.run_type.value
+        assert "_ingestion_ts" in result
 
     @pytest.mark.asyncio
     async def test_transform_record_without_entity_id(

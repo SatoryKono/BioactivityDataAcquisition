@@ -72,7 +72,7 @@ class TestCellLineTransformer:
         assert result["efo_id"] == "EFO_0001185"
         assert "entity_id" in result
         assert "content_hash" in result
-        assert "_run_id" not in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_cell_id(self, transformer, mock_context):
@@ -264,10 +264,10 @@ class TestCellLineTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert "_run_id" not in result
-        assert "_run_type" not in result
+        assert "_run_id" in result
+        assert "_run_type" in result
         assert "_source_batch_id" not in result
-        assert "_ingestion_ts" not in result
+        assert "_ingestion_ts" in result
         assert "_index" in result
         assert result["_index"] == 0
 

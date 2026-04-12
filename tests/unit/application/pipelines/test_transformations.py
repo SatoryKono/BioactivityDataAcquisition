@@ -88,7 +88,7 @@ class TestPubChemCompoundPipeline:
         assert "content_hash" in result
         assert result["entity_id"] is not None
         assert result["content_hash"] is not None
-        assert "_run_id" not in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_no_molecule_id(
@@ -159,7 +159,7 @@ class TestUniProtProteinPipeline:
         assert "content_hash" in result
         assert result["entity_id"] is not None
         assert result["content_hash"] is not None
-        assert "_run_id" not in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_no_accession(

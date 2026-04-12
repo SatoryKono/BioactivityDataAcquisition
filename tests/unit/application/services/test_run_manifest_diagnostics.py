@@ -200,6 +200,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "effective_config_artifact_id": "eca-123",
         "replay_capability": "rebuild_only",
         "requested_exact_replay": False,
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
@@ -221,6 +222,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "surfaces": {
                 "control_plane_manifest": True,
                 "effective_config_artifact": True,
+                "strict_replay_execution_context_support": True,
                 "immutable_input_snapshots": False,
                 "exact_replay_capability": False,
                 "run_ledger_history": False,
@@ -264,6 +266,7 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
 
     assert summary["replay_capability"] == "resume_only"
     assert summary["requested_exact_replay"] is False
+    assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
     assert (
         summary["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
@@ -303,6 +306,7 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
 
     assert summary["replay_capability"] == "exact_replay_supported"
     assert summary["requested_exact_replay"] is False
+    assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
     assert summary["exact_replay_eligible"] is True
     assert summary["replay_mode"] == "snapshot_backed_run"
     assert summary["exact_replay_blockers"] == []
@@ -320,6 +324,7 @@ def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alon
     summary = build_diagnostics_summary(manifest, ())
 
     assert summary["requested_exact_replay"] is True
+    assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
     assert summary["exact_replay_eligible"] is False
     assert summary["replay_mode"] == "live_fetch"
     assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
@@ -382,6 +387,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "degraded_runtime_anchor": _expected_degraded_runtime_anchor(manifest),
         "replay_capability": "rebuild_only",
         "requested_exact_replay": False,
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
@@ -410,12 +416,13 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
             "replay_ready": False,
             "forensic_grade": False,
         },
-        "surfaces": {
-            "control_plane_manifest": True,
-            "effective_config_artifact": True,
-            "immutable_input_snapshots": False,
-            "exact_replay_capability": False,
-            "run_ledger_history": True,
+            "surfaces": {
+                "control_plane_manifest": True,
+                "effective_config_artifact": True,
+                "strict_replay_execution_context_support": True,
+                "immutable_input_snapshots": False,
+                "exact_replay_capability": False,
+                "run_ledger_history": True,
             "artifact_lineage_links": True,
         },
         "replay_ready_missing_requirements": [
@@ -492,3 +499,46 @@ def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() 
     summary = build_diagnostics_summary(manifest, (entry,))
 
     assert summary["correlation_anchor_gaps"]["contract_version"] == 0
+
+
+def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() -> None:
+    manifest = replace(
+        _make_manifest(),
+        provider="composite",
+        entity="publications",
+        pipeline_name="publications",
+        launch_context={
+            "resume": False,
+            "exact_replay": False,
+            "execution_context": "composite",
+            "exact_replay_support_boundary": "composite_execution_unsupported",
+        },
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+        source_refs=(),
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+
+    assert summary["exact_replay_support_boundary"] == "composite_execution_unsupported"
+    assert (
+        summary["replay_capability_reason"]
+        == "exact_replay_not_supported_for_composite_execution"
+    )
+    assert summary["exact_replay_blockers"] == [
+        "exact_replay_not_supported_for_composite_execution",
+        "immutable_input_snapshots_missing",
+    ]
+    assert summary["persistence_profile"]["surfaces"] == {
+        "control_plane_manifest": True,
+        "effective_config_artifact": True,
+        "strict_replay_execution_context_support": False,
+        "immutable_input_snapshots": False,
+        "exact_replay_capability": False,
+        "run_ledger_history": False,
+        "artifact_lineage_links": True,
+    }
+    assert summary["persistence_profile"]["replay_ready_missing_requirements"] == [
+        "strict_replay_execution_context_support",
+        "exact_replay_capability",
+        "immutable_input_snapshots",
+    ]

@@ -18,7 +18,7 @@ from bioetl.composition.bootstrap.runtime.composite_control_plane_builder import
     build_composite_control_plane_bundle,
     resolve_composite_control_plane_flags,
 )
-from bioetl.domain.control_plane import RunArtifactRef, RunSourceRef
+from bioetl.domain.control_plane import ReplayCapability, RunArtifactRef, RunSourceRef
 
 _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 
@@ -132,6 +132,7 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
     assert request.config_hash == "hash-123"
     assert request.contract_ref == "composite_publication"
     assert request.contract_version == "1.0.0"
+    assert request.replay_capability == ReplayCapability.REBUILD_ONLY
 
 
 def test_normalize_object_delegates_to_shared_manifest_support() -> None:

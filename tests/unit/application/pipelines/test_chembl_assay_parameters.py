@@ -254,7 +254,7 @@ class TestAssayParametersTransformer:
         assert result["standard_value"] == 10000.0
         assert "entity_id" in result
         assert "content_hash" in result
-        assert "_run_id" not in result
+        assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_missing_assay_param_id(
