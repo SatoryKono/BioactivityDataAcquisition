@@ -146,6 +146,12 @@ REQUIRED_CONTROL_PLANE_CONTRACT_SECTIONS = (
     "Invariants",
     "Inspection surface",
 )
+CONTROL_PLANE_COMPATIBILITY_FACADE_PATHS = (
+    "src/bioetl/application/services/run_manifest_service.py",
+    "src/bioetl/application/services/run_ledger_service.py",
+    "src/bioetl/application/services/run_manifest_diagnostics.py",
+    "src/bioetl/application/services/run_manifest_inspection_service.py",
+)
 
 
 class DriftRule:
@@ -205,6 +211,10 @@ DRIFT_RULES = (
     DriftRule(
         name="invalid_env_style",
         pattern=re.compile(r"\bBIOETL-[A-Z][A-Z0-9-]*\b"),
+    ),
+    DriftRule(
+        name="legacy_quarantine_mark_as_reprocessed_token",
+        pattern=re.compile(r"\bQuarantineService\.mark_as_reprocessed\b"),
     ),
 )
 
@@ -549,6 +559,27 @@ def check_control_plane_contract_governance() -> list[tuple[Path, str]]:
                     md_file,
                     "control-plane contract-spec: invalid Version SemVer: "
                     f"{version_str!r}",
+                )
+            )
+
+        try:
+            text = md_file.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+
+        for legacy_path in CONTROL_PLANE_COMPATIBILITY_FACADE_PATHS:
+            if legacy_path not in text:
+                continue
+            canonical_path = legacy_path.replace(
+                "src/bioetl/application/services/",
+                "src/bioetl/application/services/control_plane/",
+                1,
+            )
+            violations.append(
+                (
+                    md_file,
+                    "control-plane contract-spec: compatibility facade path "
+                    f"{legacy_path!r} is not sanctioned; use {canonical_path!r}",
                 )
             )
 

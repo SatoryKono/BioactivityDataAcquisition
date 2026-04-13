@@ -35,8 +35,8 @@ def test_collect_metric_inventory_classifies_registry_runtime_and_docs(
         encoding="utf-8",
     )
 
-    docs_dir = tmp_path / "docs"
-    docs_dir.mkdir()
+    docs_dir = tmp_path / "docs" / "03-guides"
+    docs_dir.mkdir(parents=True)
     (docs_dir / "guide.md").write_text(
         "bioetl_live_counter_total\nbioetl_doc_only_total\nbioetl_unknown_total\n",
         encoding="utf-8",
@@ -45,19 +45,35 @@ def test_collect_metric_inventory_classifies_registry_runtime_and_docs(
     rules_dir = tmp_path / "grafana" / "prometheus-rules"
     rules_dir.mkdir(parents=True)
     (rules_dir / "rules.yml").write_text(
-        "expr: increase(bioetl_live_counter_total[5m]) or increase(bioetl_rule_only_total[5m])\n",
+        "\n".join(
+            [
+                "groups:",
+                "  - name: test",
+                "    rules:",
+                "      - record: test_rule",
+                "        expr: increase(bioetl_live_counter_total[5m]) or increase(bioetl_rule_only_total[5m])",
+            ]
+        ),
         encoding="utf-8",
     )
 
     report = inventory.collect_metric_inventory(tmp_path)
 
     assert report["live_metrics"] == ["bioetl_live_counter_total"]
+    assert report["direct_live_metrics"] == ["bioetl_live_counter_total"]
+    assert report["helper_backed_live_metrics"] == []
     assert report["registered_without_runtime"] == [
         "bioetl_doc_only_total",
         "bioetl_rule_only_total",
     ]
+    assert report["registry_only_metrics"] == [
+        "bioetl_doc_only_total",
+        "bioetl_rule_only_total",
+    ]
+    assert report["dead_metrics"] == []
     assert report["documented_without_registry"] == ["bioetl_unknown_total"]
     assert report["documented_without_runtime"] == ["bioetl_doc_only_total"]
+    assert report["documented_only_metrics"] == ["bioetl_doc_only_total"]
     assert report["ruled_without_runtime"] == ["bioetl_rule_only_total"]
     assert report["compatibility_alias_candidates"] == ["legacy_alias_total"]
     runtime_emitters = report["runtime_emitters"]
@@ -66,3 +82,114 @@ def test_collect_metric_inventory_classifies_registry_runtime_and_docs(
         "src/bioetl/application/emitters.py"
     ]
 
+
+def test_filter_documented_metric_mentions_ignores_generated_series_and_group_names() -> None:
+    filtered = inventory._filter_documented_metric_mentions(
+        {
+            "bioetl_dq_check_duration_ms_bucket": ["grafana/prometheus-rules/rules.yml"],
+            "bioetl_dq_check_duration_ms": ["docs/03-guides/metrics-monitoring.md"],
+            "bioetl_dq_observability": ["grafana/prometheus-rules/rules.yml"],
+            "bioetl_runtime_alert_condition_dq_soft_threshold_15m": [
+                "grafana/prometheus-rules/rules.yml"
+            ],
+        },
+        registered_metrics=frozenset({"bioetl_dq_check_duration_ms"}),
+    )
+
+    assert filtered == {
+        "bioetl_dq_check_duration_ms": ["docs/03-guides/metrics-monitoring.md"]
+    }
+
+
+def test_collect_metric_inventory_detects_keyword_metric_name_emitters(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_circuit_breaker_trips_total"}),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "infrastructure" / "adapters"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "breaker.py").write_text(
+        "\n".join(
+            [
+                'METRIC_CIRCUIT_BREAKER_TRIPS = "bioetl_circuit_breaker_trips_total"',
+                "emit_counter_metric(metrics, metric_name=METRIC_CIRCUIT_BREAKER_TRIPS)",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["live_metrics"] == ["bioetl_circuit_breaker_trips_total"]
+    assert report["direct_live_metrics"] == []
+    assert report["helper_backed_live_metrics"] == [
+        "bioetl_circuit_breaker_trips_total"
+    ]
+    assert report["registered_without_runtime"] == []
+    runtime_emitters = report["runtime_emitters"]
+    assert isinstance(runtime_emitters, dict)
+    assert runtime_emitters == {}
+    helper_emitters = report["helper_backed_emitters"]
+    assert isinstance(helper_emitters, dict)
+    assert helper_emitters["bioetl_circuit_breaker_trips_total"] == [
+        "src/bioetl/infrastructure/adapters/breaker.py"
+    ]
+
+
+def test_collect_metric_inventory_tracks_helper_backed_emitters(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset(
+            {
+                "bioetl_direct_live_total",
+                "bioetl_helper_live_total",
+                "bioetl_dead_metric_total",
+            }
+        ),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "emitters.py").write_text(
+        "\n".join(
+            [
+                'DIRECT_METRIC = "bioetl_direct_live_total"',
+                'HELPER_METRIC = "bioetl_helper_live_total"',
+                'metrics.increment_counter(DIRECT_METRIC, labels={})',
+                "emit_metric(metrics, HELPER_METRIC)",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    docs_dir = tmp_path / "docs" / "03-guides"
+    docs_dir.mkdir(parents=True)
+    (docs_dir / "guide.md").write_text(
+        "bioetl_dead_metric_total\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["live_metrics"] == [
+        "bioetl_direct_live_total",
+        "bioetl_helper_live_total",
+    ]
+    assert report["direct_live_metrics"] == ["bioetl_direct_live_total"]
+    assert report["helper_backed_live_metrics"] == ["bioetl_helper_live_total"]
+    assert report["registered_without_runtime"] == ["bioetl_dead_metric_total"]
+    assert report["dead_metrics"] == []
+    helper_emitters = report["helper_backed_emitters"]
+    assert isinstance(helper_emitters, dict)
+    assert helper_emitters["bioetl_helper_live_total"] == [
+        "src/bioetl/application/emitters.py"
+    ]

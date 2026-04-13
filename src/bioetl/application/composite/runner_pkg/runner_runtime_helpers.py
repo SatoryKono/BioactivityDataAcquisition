@@ -74,6 +74,7 @@ class _CompositeRunnerHostProtocol(Protocol):
     _preflight_validator: object
     _quarantine_port: object
     _metrics: object
+    _tracing: object
     _observer: object
     _fsm: object
     _manifest_id: str | None
@@ -120,6 +121,7 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
     runner_host._preflight_validator = deps.preflight_validator
     runner_host._quarantine_port = deps.quarantine_port
     runner_host._metrics = deps.metrics
+    runner_host._tracing = deps.tracer
     runner_host._observer = deps.observer or CompositeLifecycleObserverService(
         logger=deps.logger,
         metrics=deps.metrics,

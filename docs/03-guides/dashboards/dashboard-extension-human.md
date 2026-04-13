@@ -5,12 +5,12 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-13'
 ---
 
 # Dashboard Extension Guide (Human)
 
-Дата сверки: **2026-03-29**
+Дата сверки: **2026-04-13**
 Источник истины: `grafana/dashboards/*.json`
 
 Короткий guide для инженера, который вручную расширяет shipped Grafana dashboards
@@ -18,10 +18,11 @@ Last verified: '2026-03-29'
 
 ## 1. Текущая карта дашбордов
 
-- `1. Overview` (`bioetl-overview-v2`) — главный hub. Держит ссылки на `2. Runtime`, `3. Provider Health`, `4. Data Quality`, а также `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
-- `2. Runtime` (`bioetl-runtime`) — runtime triage surface. Держит `Back to Overview` и Explore links.
-- `3. Provider Health` (`bioetl-provider-health-v2`) — health-check surface по провайдерам. Держит `Back to Overview` и Explore links.
-- `4. Data Quality` (`bioetl-dq-v2`) — DQ surface. Держит `Back to Overview` и Explore links.
+- `1. Overview` (`bioetl-overview-v2`) — главный hub. Держит ссылки на `2. Runtime`, `Control Plane v1`, `3. Provider Health`, `4. Data Quality`, а также `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)`.
+- `2. Runtime` (`bioetl-runtime`) — runtime triage surface. Держит `Back to Overview`, `Control Plane v1`, `4. Data Quality` и Explore links.
+- `BioETL Control Plane v1` (`bioetl-control-plane-v1`) — deep-dive по reproducibility/control-plane paths. Держит `Back to Overview`, `2. Runtime`, `4. Data Quality` и Explore links.
+- `3. Provider Health` (`bioetl-provider-health-v2`) — provider incident surface по health checks/retries. Держит `Back to Overview`, `2. Runtime` и Explore links.
+- `4. Data Quality` (`bioetl-dq-v2`) — DQ surface. Держит `Back to Overview`, `5. Silver Reject Explorer` и Explore links.
 
 ## 2. Когда расширять существующий дашборд, а когда создавать новый
 
@@ -41,8 +42,11 @@ Last verified: '2026-03-29'
 
 ### Навигация
 
-- `1. Overview`: `2. Runtime` → `3. Provider Health` → `4. Data Quality`
-- Остальные shipped dashboards: `Back to Overview`
+- `1. Overview`: `2. Runtime` / `Control Plane v1` / `3. Provider Health` / `4. Data Quality`
+- `2. Runtime`: `Back to Overview` + `Control Plane v1` + `4. Data Quality`
+- `BioETL Control Plane v1`: `Back to Overview` + `2. Runtime` + `4. Data Quality`
+- `3. Provider Health`: `Back to Overview` + `2. Runtime`
+- `4. Data Quality`: `Back to Overview` + `5. Silver Reject Explorer`
 - Explore links не заменяют dashboard links, а дополняют их
 
 ### Prometheus

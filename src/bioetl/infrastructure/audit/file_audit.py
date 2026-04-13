@@ -168,7 +168,7 @@ class FileAuditAdapter:
             span.set_attribute("bioetl.audit.records_count", entry.records_count)
             try:
                 await asyncio.to_thread(self._write_entry_sync, entry)
-            except Exception as exc:
+            except OSError as exc:
                 duration_seconds = time.perf_counter() - started
                 self._emit_write_metrics(
                     layer=entry.layer,
@@ -293,7 +293,7 @@ class FileAuditAdapter:
                     end_time,
                     limit,
                 )
-            except Exception as exc:
+            except OSError as exc:
                 duration_seconds = time.perf_counter() - started
                 self._emit_query_metrics(
                     layer_filter=layer_filter,

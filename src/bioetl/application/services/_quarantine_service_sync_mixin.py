@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from time import perf_counter
+from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.observability.span_helpers import traced_operation
+from bioetl.application.runtime_timestamps import (
+    capture_runtime_timing_anchor,
+    derive_completion_timestamp,
+)
 from bioetl.application.services._quarantine_service_support import (
     _QUARANTINE_OPERATOR_ERRORS,
 )
@@ -54,6 +57,23 @@ class _QuarantineSyncHost(Protocol):
 class QuarantineServiceSyncMixin:
     """Sync admin operations for QuarantineService."""
 
+    @staticmethod
+    def _capture_operator_timing_anchor() -> tuple[datetime, float]:
+        """Capture the canonical operator timing anchor for one sync admin flow."""
+        return capture_runtime_timing_anchor()
+
+    @staticmethod
+    def _derive_operator_completion(
+        *,
+        started_at: datetime,
+        started_monotonic: float,
+    ) -> tuple[datetime, float]:
+        """Derive completion timestamp/duration from the captured operator anchor."""
+        return derive_completion_timestamp(
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+        )
+
     def replay(
         self: _QuarantineSyncHost,
         pipeline: str,
@@ -61,15 +81,15 @@ class QuarantineServiceSyncMixin:
         max_age_days: int = 7,
     ) -> list[JsonDict]:
         """Replay quarantine records for reprocessing."""
-        now = datetime.now(tz=UTC)
-        start_time = perf_counter()
+        started_at, started_monotonic = self._capture_operator_timing_anchor()
         if self.tracer is None:
             return self._replay_impl(
                 pipeline=pipeline,
                 error_code=error_code,
                 max_age_days=max_age_days,
-                now=now,
-                start_time=start_time,
+                now=started_at,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
             )
         with traced_operation(
             self.tracer,
@@ -88,8 +108,9 @@ class QuarantineServiceSyncMixin:
                 pipeline=pipeline,
                 error_code=error_code,
                 max_age_days=max_age_days,
-                now=now,
-                start_time=start_time,
+                now=started_at,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
             )
             self._set_trace_result(
                 span,
@@ -105,7 +126,8 @@ class QuarantineServiceSyncMixin:
         error_code: str | None,
         max_age_days: int,
         now: datetime,
-        start_time: float,
+        started_at: datetime,
+        started_monotonic: float,
     ) -> list[JsonDict]:
         """Implement quarantine replay lookup without tracing concerns."""
         self.logger.info(
@@ -125,22 +147,32 @@ class QuarantineServiceSyncMixin:
                 )
             )
         except _QUARANTINE_OPERATOR_ERRORS:
+            _, duration_seconds = self._derive_operator_completion(
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+            )
             self._record_operator_metrics(
                 operation="replay",
                 status="failed",
-                duration_seconds=perf_counter() - start_time,
+                duration_seconds=duration_seconds,
             )
             raise
 
+        completed_at, duration_seconds = self._derive_operator_completion(
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+        )
         self.logger.info(
             "Replay records retrieved",
             pipeline=pipeline,
             record_count=len(records),
+            completed_at=completed_at.isoformat(),
+            duration_seconds=duration_seconds,
         )
         self._record_operator_metrics(
             operation="replay",
             status="success",
-            duration_seconds=perf_counter() - start_time,
+            duration_seconds=duration_seconds,
         )
         return records
 
@@ -149,9 +181,13 @@ class QuarantineServiceSyncMixin:
         records: list[JsonDict],
     ) -> int:
         """Mark replay records as reprocessed."""
-        start_time = perf_counter()
+        started_at, started_monotonic = self._capture_operator_timing_anchor()
         if self.tracer is None:
-            return self._mark_as_reprocessed_impl(records=records, start_time=start_time)
+            return self._mark_as_reprocessed_impl(
+                records=records,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+            )
         with traced_operation(
             self.tracer,
             "quarantine.mark_reprocessed",
@@ -162,7 +198,11 @@ class QuarantineServiceSyncMixin:
             ),
             tracer_name=self.TRACER_NAME,
         ) as span:
-            count = self._mark_as_reprocessed_impl(records=records, start_time=start_time)
+            count = self._mark_as_reprocessed_impl(
+                records=records,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+            )
             self._set_trace_result(
                 span,
                 success=count == len(records),
@@ -174,7 +214,8 @@ class QuarantineServiceSyncMixin:
         self: _QuarantineSyncHost,
         *,
         records: list[JsonDict],
-        start_time: float,
+        started_at: datetime,
+        started_monotonic: float,
     ) -> int:
         """Implement reprocessed status updates without tracing concerns."""
         count = 0
@@ -186,15 +227,21 @@ class QuarantineServiceSyncMixin:
             ):
                 count += 1
 
+        completed_at, duration_seconds = self._derive_operator_completion(
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+        )
         self.logger.info(
             "Marked records as reprocessed",
             record_count=count,
+            completed_at=completed_at.isoformat(),
+            duration_seconds=duration_seconds,
         )
         status = "success" if count == len(records) else "partial"
         self._record_operator_metrics(
             operation="mark_reprocessed",
             status=status,
-            duration_seconds=perf_counter() - start_time,
+            duration_seconds=duration_seconds,
         )
         return count
 
@@ -204,14 +251,14 @@ class QuarantineServiceSyncMixin:
         older_than_days: int = 30,
     ) -> int:
         """Purge old quarantine records."""
-        now = datetime.now(tz=UTC)
-        start_time = perf_counter()
+        started_at, started_monotonic = self._capture_operator_timing_anchor()
         if self.tracer is None:
             return self._purge_impl(
                 pipeline=pipeline,
                 older_than_days=older_than_days,
-                now=now,
-                start_time=start_time,
+                now=started_at,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
             )
         with traced_operation(
             self.tracer,
@@ -226,8 +273,9 @@ class QuarantineServiceSyncMixin:
             count = self._purge_impl(
                 pipeline=pipeline,
                 older_than_days=older_than_days,
-                now=now,
-                start_time=start_time,
+                now=started_at,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
             )
             self._set_trace_result(
                 span,
@@ -242,7 +290,8 @@ class QuarantineServiceSyncMixin:
         pipeline: str,
         older_than_days: int,
         now: datetime,
-        start_time: float,
+        started_at: datetime,
+        started_monotonic: float,
     ) -> int:
         """Implement purge flow without tracing concerns."""
         self.logger.info(
@@ -258,22 +307,32 @@ class QuarantineServiceSyncMixin:
                 now=now,
             )
         except _QUARANTINE_OPERATOR_ERRORS:
+            _, duration_seconds = self._derive_operator_completion(
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+            )
             self._record_operator_metrics(
                 operation="purge",
                 status="failed",
-                duration_seconds=perf_counter() - start_time,
+                duration_seconds=duration_seconds,
             )
             raise
 
+        completed_at, duration_seconds = self._derive_operator_completion(
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+        )
         self.logger.info(
             "Purged quarantine records",
             pipeline=pipeline,
             records_purged=count,
+            completed_at=completed_at.isoformat(),
+            duration_seconds=duration_seconds,
         )
         self._record_operator_metrics(
             operation="purge",
             status="success",
-            duration_seconds=perf_counter() - start_time,
+            duration_seconds=duration_seconds,
         )
         return int(count)
 
@@ -283,12 +342,13 @@ class QuarantineServiceSyncMixin:
         new_status: QuarantineRecordStatus,
     ) -> bool:
         """Update DQ status for a quarantined record."""
-        start_time = perf_counter()
+        started_at, started_monotonic = self._capture_operator_timing_anchor()
         if self.tracer is None:
             return self._update_status_impl(
                 payload_hash=payload_hash,
                 new_status=new_status,
-                start_time=start_time,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
             )
         with traced_operation(
             self.tracer,
@@ -302,7 +362,8 @@ class QuarantineServiceSyncMixin:
             success = self._update_status_impl(
                 payload_hash=payload_hash,
                 new_status=new_status,
-                start_time=start_time,
+                started_at=started_at,
+                started_monotonic=started_monotonic,
             )
             self._set_trace_result(
                 span,
@@ -316,7 +377,8 @@ class QuarantineServiceSyncMixin:
         *,
         payload_hash: str,
         new_status: QuarantineRecordStatus,
-        start_time: float,
+        started_at: datetime,
+        started_monotonic: float,
     ) -> bool:
         """Implement status update flow without tracing concerns."""
         self.logger.debug(
@@ -328,28 +390,40 @@ class QuarantineServiceSyncMixin:
         try:
             success = self.quarantine_port.update_status(payload_hash, new_status)
         except _QUARANTINE_OPERATOR_ERRORS:
+            _, duration_seconds = self._derive_operator_completion(
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+            )
             self._record_operator_metrics(
                 operation="update_status",
                 status="failed",
-                duration_seconds=perf_counter() - start_time,
+                duration_seconds=duration_seconds,
             )
             raise
 
+        completed_at, duration_seconds = self._derive_operator_completion(
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+        )
         if success:
             self.logger.info(
                 "Updated quarantine status",
                 payload_hash=payload_hash,
                 new_status=new_status.value,
+                completed_at=completed_at.isoformat(),
+                duration_seconds=duration_seconds,
             )
         else:
             self.logger.warning(
                 "Failed to update quarantine status - record not found",
                 payload_hash=payload_hash,
+                completed_at=completed_at.isoformat(),
+                duration_seconds=duration_seconds,
             )
 
         self._record_operator_metrics(
             operation="update_status",
             status="success" if success else "not_found",
-            duration_seconds=perf_counter() - start_time,
+            duration_seconds=duration_seconds,
         )
         return bool(success)

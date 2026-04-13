@@ -9,7 +9,7 @@ import click
 from bioetl.interfaces.cli.commands._inspection_output import (
     emit_inspection_payload,
 )
-from bioetl.interfaces.cli.commands._run_manifest_output import (
+from bioetl.interfaces.cli.commands.run_manifest_output import (
     render_text_payload,
 )
 from bioetl.interfaces.cli.formatters import echo_error

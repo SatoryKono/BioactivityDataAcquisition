@@ -31,6 +31,8 @@ if TYPE_CHECKING:
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.composition.health_api import HealthServerDependencies
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.config import Settings
 
 
 def get_health_service() -> HealthService:
@@ -54,6 +56,39 @@ def get_quarantine_service() -> QuarantineService:
     from bioetl.composition.health_api import get_quarantine_service as _impl
 
     return _impl()
+
+
+def get_settings() -> Settings:
+    """Load runtime settings on demand."""
+    from bioetl.infrastructure.config import get_settings as _impl
+
+    return _impl()
+
+
+def _start_metrics_server_via_interface(
+    *,
+    port: int,
+    addr: str,
+    fail_fast: bool,
+    retry_count: int,
+    retry_delay: float,
+    logger: LoggerPort,
+) -> bool:
+    """Start the metrics server through the canonical observability facade."""
+    from bioetl.interfaces.observability import start_metrics_server as _impl
+
+    return _impl(
+        port=port,
+        addr=addr,
+        fail_fast=fail_fast,
+        retry_count=retry_count,
+        retry_delay=retry_delay,
+        logger=logger,
+    )
+
+
+# Backward-compatible patch point for existing tests and callers.
+start_metrics_server = _start_metrics_server_via_interface
 
 
 def _handle_health_failure(
@@ -110,6 +145,39 @@ def _echo_health_server_info(host: str, port: int) -> None:
         click.echo(line)
 
 
+def _start_health_observability(logger: LoggerPort | None = None) -> None:
+    """Start the Prometheus metrics server for long-lived health mode."""
+    settings = get_settings()
+    if not (
+        settings.observability.metrics_enabled
+        and settings.observability.metrics_server_enabled
+    ):
+        if logger is not None:
+            logger.info(
+                "health_server_metrics_disabled",
+                metrics_enabled=settings.observability.metrics_enabled,
+                metrics_server_enabled=settings.observability.metrics_server_enabled,
+            )
+        return
+
+    start_metrics = start_metrics_server
+    started = start_metrics(
+        port=settings.metrics_port,
+        addr=settings.metrics_addr,
+        fail_fast=settings.observability.metrics_fail_fast,
+        retry_count=settings.observability.metrics_retry_count,
+        retry_delay=settings.observability.metrics_retry_delay,
+        logger=logger,
+    )
+    if logger is not None:
+        logger.info(
+            "health_server_metrics_ready",
+            metrics_started=started,
+            metrics_port=settings.metrics_port,
+            metrics_addr=settings.metrics_addr,
+        )
+
+
 async def _run_health_server(host: str, port: int) -> None:
     """Start and keep the health server alive until interrupted.
 
@@ -120,6 +188,7 @@ async def _run_health_server(host: str, port: int) -> None:
     from bioetl.interfaces.http.health_server import HealthServer
 
     deps = get_health_server_dependencies()
+    _start_health_observability()
     quarantine_service: QuarantineService | None = None
     try:
         quarantine_service = get_quarantine_service()

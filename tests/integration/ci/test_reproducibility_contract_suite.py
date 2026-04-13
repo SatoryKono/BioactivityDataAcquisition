@@ -31,6 +31,9 @@ from bioetl.domain.control_plane import (
     RunInputSnapshotRef,
     RunSourceRef,
 )
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    published_supported_reproducibility_families,
+)
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
@@ -58,6 +61,7 @@ from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageSt
 pytestmark = pytest.mark.integration
 
 _VALID_CONFIG_HASH = "a" * 64
+_PUBLISHED_SUPPORTED_FAMILIES = tuple(published_supported_reproducibility_families())
 
 
 class _InMemoryRunManifestStore(RunManifestPort):
@@ -190,6 +194,11 @@ def _make_manifest(
         ),
         planned_artifacts=(RunArtifactRef(layer="silver", path="/tmp/output"),),
     )
+
+
+def _family_context(family: str) -> tuple[str, str, str]:
+    provider, entity = family.split(".", maxsplit=1)
+    return provider, entity, f"{provider}_{entity}"
 
 
 def test_reproducibility_contract_manifest_diff_classifies_occurrence_only() -> None:
@@ -564,10 +573,14 @@ def test_reproducibility_contract_supported_gold_trace_path_resolves_run_context
     assert result.manifest.manifest_id == "manifest-gold-trace-1"
 
 
-def test_reproducibility_contract_forensic_grade_profile_is_attained() -> None:
+@pytest.mark.parametrize("family", _PUBLISHED_SUPPORTED_FAMILIES)
+def test_reproducibility_contract_forensic_grade_profile_is_attained(
+    family: str,
+) -> None:
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
     run_id = RunID(UUID("00000000-0000-0000-0000-000000000412"))
+    provider, entity, pipeline_name = _family_context(family)
     manifest = _make_manifest(
         manifest_id="manifest-forensic-grade-1",
         run_id=run_id,
@@ -582,6 +595,10 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained() -> None:
                 captured_at=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             ),
         ),
+        pipeline_name=pipeline_name,
+        provider=provider,
+        entity=entity,
+        contract_ref=family,
     )
     manifest_store.save(manifest)
     ledger_store.append(
@@ -594,15 +611,15 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained() -> None:
             event_family="artifact",
             status="success",
             stage="silver",
-            dataset_ref="silver:chembl.activity@7",
-            lineage_fragment_id="silver:chembl.activity@7#lineage",
+            dataset_ref=f"silver:{family}@7",
+            lineage_fragment_id=f"silver:{family}@7#lineage",
             details={
-                "artifact_path": "silver/chembl/activity",
-                "metadata_path": "silver/chembl/activity/activity_metadata.yaml",
+                "artifact_path": f"silver/{provider}/{entity}",
+                "metadata_path": f"silver/{provider}/{entity}/{entity}_metadata.yaml",
                 "artifact_kind": "metadata_sidecar",
-                "pipeline_name": "chembl_activity",
-                "provider": "chembl",
-                "entity": "activity",
+                "pipeline_name": pipeline_name,
+                "provider": provider,
+                "entity": entity,
                 "run_id": str(run_id),
                 "manifest_id": manifest.manifest_id,
             },
@@ -616,12 +633,16 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained() -> None:
 
     assert result.diagnostics["required_persistence_profile"] == "forensic_grade"
     assert result.diagnostics["lineage_closure_boundary"] == {
-        "family": "chembl.activity",
+        "family": family,
         "support_scope": "operator_grade_trace_debug",
         "supported": True,
         "reason": "family_within_supported_boundary",
-        "supported_families": ["chembl.activity"],
+        "supported_families": list(_PUBLISHED_SUPPORTED_FAMILIES),
     }
+    assert result.diagnostics["replay_family_contract"]["family"] == family
+    assert result.diagnostics["replay_family_contract"][
+        "strict_exact_replay_supported"
+    ] is True
     assert result.diagnostics["persistence_profile"]["attained_profile"] == (
         "forensic_grade"
     )
@@ -724,10 +745,10 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
                 captured_at=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             ),
         ),
-        pipeline_name="pubmed_publication",
-        provider="pubmed",
-        entity="publication",
-        contract_ref="pubmed.publication",
+        pipeline_name="openalex_works",
+        provider="openalex",
+        entity="works",
+        contract_ref="openalex.works",
     )
     manifest_store.save(manifest)
     ledger_store.append(
@@ -740,15 +761,15 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
             event_family="artifact",
             status="success",
             stage="silver",
-            dataset_ref="silver:pubmed.publication@1",
-            lineage_fragment_id="silver:pubmed.publication@1#lineage",
+            dataset_ref="silver:openalex.works@1",
+            lineage_fragment_id="silver:openalex.works@1#lineage",
             details={
-                "artifact_path": "silver/pubmed/publication",
-                "metadata_path": "silver/pubmed/publication/publication_metadata.yaml",
+                "artifact_path": "silver/openalex/works",
+                "metadata_path": "silver/openalex/works/works_metadata.yaml",
                 "artifact_kind": "metadata_sidecar",
-                "pipeline_name": "pubmed_publication",
-                "provider": "pubmed",
-                "entity": "publication",
+                "pipeline_name": "openalex_works",
+                "provider": "openalex",
+                "entity": "works",
                 "run_id": str(run_id),
                 "manifest_id": manifest.manifest_id,
             },
@@ -761,23 +782,40 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
     ).show(manifest.manifest_id)
 
     assert result.diagnostics["lineage_closure_boundary"] == {
-        "family": "pubmed.publication",
+        "family": "openalex.works",
         "support_scope": "operator_grade_trace_debug",
         "supported": False,
         "reason": "family_outside_supported_boundary",
-        "supported_families": ["chembl.activity"],
+        "supported_families": list(_PUBLISHED_SUPPORTED_FAMILIES),
     }
-    assert result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
+    assert result.diagnostics["replay_family_contract"]["family"] == "openalex.works"
+    assert result.diagnostics["replay_family_contract"][
+        "strict_exact_replay_supported"
+    ] is False
+    assert (
+        result.diagnostics["persistence_profile"]["attained_profile"]
+        == "degraded_observable"
+    )
     assert result.diagnostics["persistence_profile"]["required_profile"] == (
         "forensic_grade"
     )
     assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
     assert result.diagnostics["persistence_profile"][
         "required_profile_missing_requirements"
-    ] == ["lineage_closure_boundary_support"]
+    ] == [
+        "strict_replay_execution_context_support",
+        "lineage_closure_boundary_support",
+    ]
+    assert result.diagnostics["persistence_profile"][
+        "replay_ready_missing_requirements"
+    ] == ["strict_replay_execution_context_support"]
     assert result.diagnostics["persistence_profile"][
         "forensic_grade_missing_requirements"
-    ] == ["lineage_closure_boundary_support"]
+    ] == [
+        "strict_replay_execution_context_support",
+        "lineage_closure_boundary_support",
+    ]
+    assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is True
     assert result.diagnostics["alert_signals"]["lineage_closure_boundary_gap"] is True
     assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
 

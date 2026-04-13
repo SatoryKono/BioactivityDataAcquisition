@@ -6,21 +6,24 @@ __all__ = ["BatchCheckpointRecoveryService"]
 
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_runtime_failure_policy import OPERATION_ERRORS
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import Span
+
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointManagerService,
     )
-    from bioetl.domain.ports import LoggerPort, MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 
 class BatchCheckpointRecoveryService:
     """Owns checkpoint save semantics for runtime, shutdown, and recovery."""
 
     _CHECKPOINT_SAVE_ERRORS = OPERATION_ERRORS
+    _CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
 
     def __init__(
         self,
@@ -28,11 +31,13 @@ class BatchCheckpointRecoveryService:
         checkpoint_manager: CheckpointManagerService,
         logger: LoggerPort,
         metrics: MetricsPort | None = None,
+        tracer: TracingPort | None = None,
         pipeline_name: str,
     ) -> None:
         self._checkpoint_manager = checkpoint_manager
         self._logger = logger
         self._metrics = metrics
+        self._tracer = tracer
         self._pipeline_name = pipeline_name
 
     async def save_periodic_checkpoint(
@@ -166,11 +171,57 @@ class BatchCheckpointRecoveryService:
             },
         )
 
+    def _start_checkpoint_save_span(
+        self,
+        *,
+        operation: str,
+        records_processed: int,
+    ) -> Span | None:
+        if self._tracer is None:
+            return None
+        span = cast(
+            "Span",
+            self._tracer.get_tracer(self._CHECKPOINT_TRACER_NAME).start_as_current_span(
+                "checkpoint_save",
+                attributes={
+                    "bioetl.pipeline": self._pipeline_name,
+                    "bioetl.checkpoint.operation": operation,
+                    "bioetl.checkpoint.scope": "ordinary",
+                    "bioetl.checkpoint.records_processed": records_processed,
+                },
+            ),
+        )
+        span.__enter__()
+        return span
+
+    def _close_checkpoint_save_span(
+        self,
+        span: Span | None,
+        *,
+        status: str,
+        error: BaseException | None = None,
+    ) -> None:
+        if span is None:
+            return
+        span.set_attribute("bioetl.checkpoint.status", status)
+        if error is not None:
+            span.set_attribute("error", True)
+            span.set_attribute("error.type", type(error).__name__)
+            if isinstance(error, Exception):
+                span.record_exception(error)
+        span.__exit__(None, None, None)
+        if self._tracer is not None:
+            self._tracer.flush()
+
     async def _save_checkpoint(self, total: int, *, operation: str) -> None:
         started_at = time.monotonic()
+        span = self._start_checkpoint_save_span(
+            operation=operation,
+            records_processed=total,
+        )
         try:
             await self._checkpoint_manager.save_checkpoint(total)
-        except self._CHECKPOINT_SAVE_ERRORS:
+        except self._CHECKPOINT_SAVE_ERRORS as error:
             duration_seconds = time.monotonic() - started_at
             self._emit_checkpoint_save_event(
                 operation=operation,
@@ -180,6 +231,11 @@ class BatchCheckpointRecoveryService:
                 operation=operation,
                 status="failed",
                 duration_seconds=duration_seconds,
+            )
+            self._close_checkpoint_save_span(
+                span,
+                status="failed",
+                error=error,
             )
             raise
         duration_seconds = time.monotonic() - started_at
@@ -191,4 +247,8 @@ class BatchCheckpointRecoveryService:
             operation=operation,
             status="succeeded",
             duration_seconds=duration_seconds,
+        )
+        self._close_checkpoint_save_span(
+            span,
+            status="succeeded",
         )

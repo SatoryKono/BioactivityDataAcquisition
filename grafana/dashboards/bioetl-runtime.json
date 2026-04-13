@@ -25,7 +25,17 @@
       "targetBlank": false,
       "title": "Back to Overview",
       "type": "link",
-      "url": "/d/bioetl-overview-v2"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "title": "Control Plane v1",
+      "type": "link",
+      "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1"
     },
     {
       "asDropdown": false,
@@ -45,7 +55,7 @@
       "targetBlank": false,
       "title": "Explore Logs (Loki, tracing profile)",
       "type": "link",
-      "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
     },
     {
       "asDropdown": false,
@@ -55,7 +65,7 @@
       "targetBlank": false,
       "title": "Explore Traces (Tempo, tracing profile)",
       "type": "link",
-      "url": "/explore?left=%7B%22datasource%22%3A%22tempo%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22queryType%22%3A%22traceqlSearch%22%2C%22query%22%3A%22%7B%20span.%5C%22bioetl.pipeline%5C%22%20%3D~%20%5C%22%24%7Bpipeline%3Aregex%7D%5C%22%20%26%26%20span.%5C%22bioetl.run_type%5C%22%20%3D~%20%5C%22%24%7Brun_type%3Aregex%7D%5C%22%20%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
     }
   ],
   "panels": [
@@ -247,7 +257,7 @@
       },
       "targets": [
         {
-          "expr": "((sum((max by (pipeline) (max_over_time(bioetl_pipeline_health_check_passed{pipeline=~\"$pipeline\",component=\"data_source\"}[15m])) == bool 0)) or vector(0))) + ((sum((max by (pipeline) (max_over_time(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}[15m])) < bool 1)) or vector(0))) + ((sum((sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) > bool 0)) or vector(0)))",
+          "expr": "(sum(bioetl_runtime_alert_condition_pipeline_preflight_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_pipeline_runs_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0))",
           "refId": "A"
         }
       ],
@@ -306,7 +316,7 @@
       },
       "targets": [
         {
-          "expr": "((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[15m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\",severity=\"hard_fail\"}[15m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\",severity=\"critical\"}[30m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[30m])) > bool 0) or vector(0))",
+          "expr": "(sum(bioetl_runtime_alert_condition_dq_soft_threshold_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_hard_fail_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_dq_critical_anomaly_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_silver_validation_failures_30m{pipeline=~\"$pipeline\"}) or vector(0))",
           "refId": "A"
         }
       ],
@@ -365,7 +375,7 @@
       },
       "targets": [
         {
-          "expr": "((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~\"$pipeline\",status=\"failed\"}[15m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~\"$pipeline\",disposition=~\".*_incompatible\"}[30m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_lineage_refs_missing_total{pipeline=~\"$pipeline\"}[15m])) > bool 0) or vector(0))",
+          "expr": "(sum(bioetl_runtime_alert_condition_manifest_write_failed_15m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_ledger_append_failed_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_checkpoint_incompatible_30m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_lineage_refs_missing_15m{pipeline=~\"$pipeline\"}) or vector(0))",
           "refId": "A"
         }
       ],
@@ -424,7 +434,7 @@
       },
       "targets": [
         {
-          "expr": "(sum((sum by (provider) (increase(bioetl_health_check_failures_total[15m])) / clamp_min(sum by (provider) (increase(bioetl_health_check_success_total[15m]) + increase(bioetl_health_check_degraded_total[15m]) + increase(bioetl_health_check_failures_total[15m])), 1)) > bool 0.2) or vector(0)) + (sum((sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[1h])) > bool 0)) or vector(0))",
+          "expr": "(sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h) or vector(0))",
           "refId": "A"
         }
       ],
@@ -995,11 +1005,11 @@
         "dataLinks": [
           {
             "title": "Open Logs in Loki Explore (tracing profile)",
-            "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
           },
           {
             "title": "Open Traces in Tempo Explore (tracing profile)",
-            "url": "/explore?left=%7B%22datasource%22%3A%22tempo%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22queryType%22%3A%22traceqlSearch%22%2C%22query%22%3A%22%7B%20span.%5C%22bioetl.pipeline%5C%22%20%3D~%20%5C%22%24%7Bpipeline%3Aregex%7D%5C%22%20%26%26%20span.%5C%22bioetl.run_type%5C%22%20%3D~%20%5C%22%24%7Brun_type%3Aregex%7D%5C%22%20%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+            "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
           }
         ],
         "legend": {

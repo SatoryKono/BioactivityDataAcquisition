@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-13T12:42:57.459584+00:00",
+  "generated_at": "2026-04-13T18:36:12.566457+00:00",
   "summary": {
     "total_scripts": 295,
     "status_counts": {
@@ -4376,7 +4376,7 @@
         },
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
-          "line": 531,
+          "line": 535,
           "source_group": "docs",
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },
@@ -7424,7 +7424,7 @@
       "agent_usage": [
         "py-architecture-debt-bot"
       ],
-      "reference_count": 88,
+      "reference_count": 92,
       "references": [
         {
           "path": ".codex/agents/py-architecture-debt-bot.md",

@@ -82,6 +82,12 @@ class _SupportMixinHarness(CompositeRunnerSupportMixin):
         self._metrics = MagicMock()
         self._metrics.increment_counter = MagicMock()
         self._metrics.observe_histogram = MagicMock()
+        self._tracing = MagicMock()
+        self._tracing.flush = MagicMock()
+        self._otel_tracer = MagicMock()
+        self._checkpoint_span = MagicMock()
+        self._otel_tracer.start_as_current_span.return_value = self._checkpoint_span
+        self._tracing.get_tracer.return_value = self._otel_tracer
         self._observer_logger = MagicMock()
         self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-test-1"
@@ -361,6 +367,12 @@ async def test_save_checkpoint_safe_when_success_then_returns_true() -> None:
         },
     )
     harness._metrics.observe_histogram.assert_called_once()
+    harness._tracing.get_tracer.assert_called_once_with("bioetl.checkpoint")
+    harness._checkpoint_span.set_attribute.assert_called_with(
+        "bioetl.checkpoint.status",
+        "succeeded",
+    )
+    harness._tracing.flush.assert_called_once()
 
 
 @pytest.mark.unit
@@ -396,6 +408,17 @@ async def test_save_checkpoint_safe_when_non_fatal_error_then_returns_false(
         },
     )
     harness._metrics.observe_histogram.assert_called_once()
+    harness._checkpoint_span.set_attribute.assert_any_call(
+        "bioetl.checkpoint.status",
+        "failed",
+    )
+    harness._checkpoint_span.set_attribute.assert_any_call("error", True)
+    harness._checkpoint_span.set_attribute.assert_any_call(
+        "error.type",
+        type(exc).__name__,
+    )
+    harness._checkpoint_span.record_exception.assert_called_once_with(exc)
+    harness._tracing.flush.assert_called_once()
 
 
 @pytest.mark.unit
@@ -423,6 +446,17 @@ async def test_save_checkpoint_safe_when_bioetl_error_then_returns_false() -> No
         },
     )
     harness._metrics.observe_histogram.assert_called_once()
+    harness._checkpoint_span.set_attribute.assert_any_call(
+        "bioetl.checkpoint.status",
+        "failed",
+    )
+    harness._checkpoint_span.set_attribute.assert_any_call("error", True)
+    harness._checkpoint_span.set_attribute.assert_any_call(
+        "error.type",
+        "BioETLError",
+    )
+    harness._checkpoint_span.record_exception.assert_called_once()
+    harness._tracing.flush.assert_called_once()
 
 
 @pytest.mark.unit

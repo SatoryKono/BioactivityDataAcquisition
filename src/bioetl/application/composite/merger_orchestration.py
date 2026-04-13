@@ -11,6 +11,7 @@ from bioetl.application.composite.merger_post_join import (
     finalize_post_join_context,
     persist_and_build_result,
 )
+from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -59,6 +60,7 @@ class MergeExecutionContext:
 
     request: MergeExecutionRequestSpec
     started_at: datetime
+    started_monotonic: float
     loaded_inputs: MergeInputContext
 
 
@@ -169,9 +171,11 @@ async def prepare_merge_execution_context(
     request: MergeExecutionRequestSpec,
 ) -> MergeExecutionContext:
     """Load all merge inputs and bind them to one execution context model."""
+    started_at, started_monotonic = capture_runtime_timing_anchor()
     return MergeExecutionContext(
         request=request,
-        started_at=datetime.now(tz=UTC),
+        started_at=started_at,
+        started_monotonic=started_monotonic,
         loaded_inputs=await load_merge_inputs(
             host,
             seed_table=request.seed_table,
@@ -253,6 +257,7 @@ async def execute_merge_execution_core(
         metadata_timestamp=request.metadata_timestamp,
         run_id=request.run_id,
         started_at=execution_context.started_at,
+        started_monotonic=execution_context.started_monotonic,
     )
 
 

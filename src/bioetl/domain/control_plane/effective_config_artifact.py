@@ -24,16 +24,18 @@ def _compute_dq_compatibility_hash(policy_refs: list[DQPolicyRef]) -> str:
     return ":".join(policy_hashes)
 
 
-def _now_utc() -> datetime:
-    """Return the current UTC timestamp."""
-    return datetime.now(UTC)
-
-
 def _normalize_utc(value: datetime) -> datetime:
     """Normalize an explicit timestamp to timezone-aware UTC."""
     if value.tzinfo is None:
         return value.replace(tzinfo=UTC)
     return value.astimezone(UTC)
+
+
+def _current_utc_time() -> datetime:
+    """Resolve the sanctioned domain time source lazily to avoid import cycles."""
+    from bioetl.domain.context import current_utc_time
+
+    return current_utc_time()
 
 
 @dataclass(frozen=True)
@@ -44,6 +46,17 @@ class ConfigSourceRef:
     source_path: str
     source_hash: str | None = None
     priority: int = 0
+
+
+@dataclass(frozen=True)
+class SourceClassProvenance:
+    """Published provenance contract for one supported config/input source class."""
+
+    source_class: str
+    provenance_status: Literal["identity_anchored", "external_anchor", "unsupported"]
+    artifact_surface: str
+    anchor_field: str | None = None
+    notes: str | None = None
 
 
 @dataclass(frozen=True)
@@ -63,7 +76,7 @@ class ResolvedConfigSnapshot:
     config_type: str  # "standard" | "composite"
     config_data: JsonDict
     config_hash: str
-    timestamp: datetime = field(default_factory=_now_utc)
+    timestamp: datetime = field(default_factory=_current_utc_time)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "timestamp", _normalize_utc(self.timestamp))
@@ -85,7 +98,7 @@ class EffectiveExecutionConfig:
 
     config_data: JsonDict
     effective_hash: str
-    timestamp: datetime = field(default_factory=_now_utc)
+    timestamp: datetime = field(default_factory=_current_utc_time)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "timestamp", _normalize_utc(self.timestamp))
@@ -119,8 +132,9 @@ class EffectiveConfigArtifact:
     resolved_config_hash: str
     effective_config_hash: str
     source_fingerprint: str
+    source_class_provenance: tuple[SourceClassProvenance, ...] = ()
     schema_version: str = "1.0"
-    created_at: datetime = field(default_factory=_now_utc)
+    created_at: datetime = field(default_factory=_current_utc_time)
     contract_refs: list[str] = field(default_factory=list)
     dq_policy_refs: list[DQPolicyRef] = field(default_factory=list)
     dq_rule_bundle_versions: dict[str, str] = field(default_factory=dict)

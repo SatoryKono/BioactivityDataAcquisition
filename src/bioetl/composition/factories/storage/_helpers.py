@@ -145,7 +145,7 @@ def create_storage_adapter(
     config: PipelineYamlConfig,
     logger: LoggerPort,
     metrics: MetricsPort,
-    tracing: TracingPort | None,
+    tracing: TracingPort,
     metadata_coordinator: MetadataCoordinator | None,
     silver_validator: SilverValidatorPort | None,
 ) -> StorageAdapter:
@@ -206,7 +206,7 @@ def _create_silver_layer_writer(
     config: PipelineYamlConfig,
     logger: LoggerPort,
     metrics: MetricsPort,
-    tracing: TracingPort | None,
+    tracing: TracingPort,
     metadata_coordinator: MetadataCoordinator | None,
     silver_validator: SilverValidatorPort | None,
     audit: AuditPort,
@@ -252,7 +252,7 @@ def _create_gold_layer_writer(
     config: PipelineYamlConfig,
     logger: LoggerPort,
     metrics: MetricsPort,
-    tracing: TracingPort | None,
+    tracing: TracingPort,
     metadata_coordinator: MetadataCoordinator | None,
     audit: AuditPort,
 ) -> GoldWriter:

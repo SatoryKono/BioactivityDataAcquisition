@@ -147,6 +147,7 @@ def test_drift_rules_include_legacy_run_flag_and_path_tokens(
     assert "legacy_system_meta_field_token" in rule_names
     assert "legacy_lineage_log_token" in rule_names
     assert "legacy_docs_pipelines_path" in rule_names
+    assert "legacy_quarantine_mark_as_reprocessed_token" in rule_names
 
 
 def test_legacy_system_meta_field_rule_ignores_cli_double_dash_flags(
@@ -246,6 +247,45 @@ def test_not_in_nav_growth_excludes_reports_prefixes(
     assert baseline_count == 1
     assert added == []
     assert removed == []
+
+
+def test_control_plane_contract_governance_detects_compatibility_facade_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
+    contract_doc = tmp_path / "run-manifest-ledger.md"
+    contract_doc.write_text(
+        """---
+Version: 1.1.0
+Class: published
+Last verified: "2026-04-13"
+---
+
+# Run Manifest and Run Ledger Contract
+## Purpose
+## Storage layout
+## Rollout flags
+## Invariants
+## Inspection surface
+
+- `src/bioetl/application/services/run_manifest_service.py`
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        module,
+        "_control_plane_contract_spec_files",
+        lambda: [contract_doc],
+    )
+
+    violations = module.check_control_plane_contract_governance()
+
+    assert any(
+        "compatibility facade path" in message and "run_manifest_service.py" in message
+        for _path, message in violations
+    )
 
 
 def test_collect_link_scan_files_keeps_nav_docs_without_prechecking_existence(

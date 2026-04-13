@@ -6,6 +6,10 @@ import hashlib
 from collections.abc import Mapping
 
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    build_replay_family_contract,
+    resolve_reproducibility_family_profile,
+)
 from bioetl.domain.normalization import serialize_json_canonical
 
 
@@ -16,16 +20,18 @@ def _resolve_replay_mode(
     resume_requested: bool,
 ) -> str:
     """Resolve operator-facing replay mode from manifest intent and capability."""
+    profile = _resolve_reproducibility_profile(manifest)
     if (
         requested_exact_replay
         and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+        and profile.strict_exact_replay_supported
     ):
         return "exact_replay"
     if manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
-        return "snapshot_backed_run"
+        return "same_data_state_recovery"
     if resume_requested or manifest.replay_capability == ReplayCapability.RESUME_ONLY:
         return "resume"
-    return "live_fetch"
+    return "rebuild"
 
 
 def _resolve_replay_capability_reason(
@@ -35,8 +41,11 @@ def _resolve_replay_capability_reason(
     resume_requested: bool,
 ) -> str:
     """Return one operator-facing explanation for replay capability."""
+    profile = _resolve_reproducibility_profile(manifest)
     if _is_composite_execution_context(manifest):
         return "exact_replay_not_supported_for_composite_execution"
+    if not profile.strict_exact_replay_supported:
+        return "family_outside_supported_exact_replay_boundary"
     if (
         manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
         and input_snapshots
@@ -53,27 +62,59 @@ def _resolve_exact_replay_blockers(
     input_snapshots: list[dict[str, object]],
 ) -> list[str]:
     """Return explicit blockers preventing exact replay eligibility."""
-    if manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED:
+    profile = _resolve_reproducibility_profile(manifest)
+    if (
+        profile.strict_exact_replay_supported
+        and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
+    ):
         return []
     blockers: list[str] = []
     if _is_composite_execution_context(manifest):
         blockers.append("exact_replay_not_supported_for_composite_execution")
+    elif not profile.strict_exact_replay_supported:
+        blockers.append("family_outside_supported_exact_replay_boundary")
     if not input_snapshots:
         blockers.append("immutable_input_snapshots_missing")
+    elif manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        blockers.append("exact_replay_capability_unavailable")
     return blockers
 
 
 def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
     """Return the supported exact-replay boundary for one manifested run."""
-    if _is_composite_execution_context(manifest):
-        return "composite_execution_unsupported"
-    return "snapshot_backed_source_runs_only"
+    return _resolve_reproducibility_profile(manifest).exact_replay_support_boundary
+
+
+def _resolve_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
+    """Return the canonical per-family replay contract for one manifested run."""
+    execution_context = (
+        "composite" if _is_composite_execution_context(manifest) else "source"
+    )
+    return build_replay_family_contract(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
 
 
 def _is_composite_execution_context(manifest: RunManifest) -> bool:
     """Return whether the manifest represents composite execution."""
     execution_context = str(manifest.launch_context.get("execution_context") or "")
     return execution_context == "composite" or manifest.provider == "composite"
+
+
+def _resolve_reproducibility_profile(manifest: RunManifest):
+    """Resolve the canonical reproducibility profile for one manifested run."""
+    execution_context = (
+        "composite" if _is_composite_execution_context(manifest) else "source"
+    )
+    return resolve_reproducibility_family_profile(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
 
 
 def _build_replay_parentage(manifest: RunManifest) -> dict[str, object]:

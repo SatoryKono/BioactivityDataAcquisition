@@ -21,7 +21,7 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
 from bioetl.interfaces.cli.commands.inspection_output import (
     emit_inspection_payload,
 )
-from bioetl.interfaces.cli.commands._run_manifest_output import (
+from bioetl.interfaces.cli.commands.run_manifest_output import (
     render_text_payload,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
@@ -31,8 +31,10 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.run_manifest_inspection_service import (
         RunManifestInspectionService,
     )
-    from bioetl.composition.observability_api import ObservabilityDiagnosticsBundle
-    from bioetl.composition.observability_api import MetricsOperatorProfile
+    from bioetl.composition.observability_api import (
+        MetricsOperatorProfile,
+        ObservabilityDiagnosticsBundle,
+    )
     from bioetl.domain.types import JsonDict
 
 __all__ = [
@@ -41,12 +43,12 @@ __all__ = [
     "diagnostics_checkpoint",
     "diagnostics_guide",
     "diagnostics_health",
-    "diagnostics_metrics",
     "diagnostics_manifest",
+    "diagnostics_metrics",
     "diagnostics_quarantine",
     "diagnostics_run",
-    "get_observability_diagnostics_bundle",
     "get_metrics_operator_profile",
+    "get_observability_diagnostics_bundle",
     "get_quarantine_manager",
 ]
 
@@ -102,6 +104,15 @@ def _build_diagnostics_guide_lines() -> list[str]:
         (
             "  quarantine: bioetl diagnostics quarantine --pipeline <pipeline> "
             "[--run-id <run-id>] [--group-by reason-signature] [--json]"
+        ),
+        "",
+        "Observability verification workflow:",
+        "  1. bioetl diagnostics metrics [--json]",
+        "  2. bioetl diagnostics health [--json]",
+        "  3. python -m scripts.qa report-observability-metric-inventory --json",
+        (
+            "  4. compare inventory output with "
+            "grafana/prometheus-rules/bioetl_observability.yml and shipped dashboards"
         ),
         "",
         "Metrics server startup is auto-managed during pipeline runs when metrics are enabled.",
@@ -165,6 +176,14 @@ def _build_metrics_profile_lines(profile: MetricsOperatorProfile) -> list[str]:
         "Operator workflow:",
         "  inspect metrics/admin state: bioetl diagnostics metrics [--json]",
         "  inspect provider health: bioetl diagnostics health [--json]",
+        (
+            "  reconcile metric inventory: "
+            "python -m scripts.qa report-observability-metric-inventory --json"
+        ),
+        (
+            "  compare rules/dashboards: "
+            "grafana/prometheus-rules/bioetl_observability.yml + shipped dashboard JSON"
+        ),
         "  inspect one run: bioetl diagnostics run --run-id <run-id>",
         "  inspect checkpoint state: bioetl diagnostics checkpoint --pipeline <pipeline>",
     ]

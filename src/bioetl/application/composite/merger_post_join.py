@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Protocol
 
 import polars as pl
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
+from bioetl.application.runtime_timestamps import derive_completion_timestamp
 from bioetl.domain.composite.config import EnricherConfig
 from bioetl.domain.composite.cross_validation import CrossValidationStats
 from bioetl.domain.composite.result import (
@@ -186,6 +187,7 @@ async def persist_and_build_result(
     metadata_timestamp: datetime | None,
     run_id: str,
     started_at: datetime,
+    started_monotonic: float,
 ) -> MergeResult:
     """Persist merge outputs and build the domain ``MergeResult``."""
     await host._write_outputs(
@@ -194,8 +196,10 @@ async def persist_and_build_result(
         run_id=run_id,
         sources_used=sources_used,
     )
-    completed_at = datetime.now(tz=UTC)
-    duration = (completed_at - started_at).total_seconds()
+    _, duration = derive_completion_timestamp(
+        started_at=started_at,
+        started_monotonic=started_monotonic,
+    )
 
     host._logger.info(
         "Merge completed",

@@ -6,6 +6,7 @@ Tests health check and health server CLI commands.
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -146,6 +147,74 @@ class TestHealthServerCommand:
 
         assert "Starting health server on http://localhost:8888" in result.output
         assert result.exit_code == ExitCode.OK.value
+
+    @patch("bioetl.interfaces.cli.commands.health.start_metrics_server")
+    @patch("bioetl.interfaces.cli.commands.health.get_settings")
+    def test_start_health_observability_starts_metrics_server_when_enabled(
+        self,
+        mock_get_settings: MagicMock,
+        mock_start_metrics_server: MagicMock,
+    ) -> None:
+        """Health server mode should start metrics when observability enables it."""
+        import bioetl.interfaces.cli.commands.health as health_module
+
+        mock_get_settings.return_value = SimpleNamespace(
+            metrics_port=8000,
+            metrics_addr="0.0.0.0",
+            observability=SimpleNamespace(
+                metrics_enabled=True,
+                metrics_server_enabled=True,
+                metrics_fail_fast=False,
+                metrics_retry_count=3,
+                metrics_retry_delay=1.0,
+            ),
+        )
+        mock_logger = MagicMock()
+        mock_start_metrics_server.return_value = True
+
+        health_module._start_health_observability(mock_logger)
+
+        mock_start_metrics_server.assert_called_once_with(
+            port=8000,
+            addr="0.0.0.0",
+            fail_fast=False,
+            retry_count=3,
+            retry_delay=1.0,
+            logger=mock_logger,
+        )
+        mock_logger.info.assert_called_with(
+            "health_server_metrics_ready",
+            metrics_started=True,
+            metrics_port=8000,
+            metrics_addr="0.0.0.0",
+        )
+
+    @patch("bioetl.interfaces.cli.commands.health.start_metrics_server")
+    @patch("bioetl.interfaces.cli.commands.health.get_settings")
+    def test_start_health_observability_skips_when_disabled(
+        self,
+        mock_get_settings: MagicMock,
+        mock_start_metrics_server: MagicMock,
+    ) -> None:
+        """Health server mode should not start metrics when disabled in settings."""
+        import bioetl.interfaces.cli.commands.health as health_module
+
+        mock_get_settings.return_value = SimpleNamespace(
+            observability=SimpleNamespace(
+                metrics_enabled=False,
+                metrics_server_enabled=True,
+            ),
+        )
+        mock_logger = MagicMock()
+
+        health_module._start_health_observability(mock_logger)
+
+        mock_start_metrics_server.assert_not_called()
+        mock_logger.info.assert_called_with(
+            "health_server_metrics_disabled",
+            metrics_enabled=False,
+            metrics_server_enabled=True,
+        )
 
 
 class TestHealthCheckCommand:

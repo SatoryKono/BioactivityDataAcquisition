@@ -28,7 +28,7 @@
       "title": "Back to Overview",
       "tooltip": "",
       "type": "link",
-      "url": "/d/bioetl-overview-v2"
+      "url": "/d/bioetl-overview-v2/bioetl-overview-v2"
     },
     {
       "asDropdown": false,
@@ -40,7 +40,7 @@
       "title": "Back to Data Quality",
       "tooltip": "",
       "type": "link",
-      "url": "/d/bioetl-dq-v2"
+      "url": "/d/bioetl-dq-v2/bioetl-dq-v2"
     },
     {
       "asDropdown": false,
@@ -52,7 +52,7 @@
       "title": "Open Logs (Loki, tracing profile)",
       "tooltip": "",
       "type": "link",
-      "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+      "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
     },
     {
       "asDropdown": false,
@@ -64,7 +64,7 @@
       "title": "Open Traces (Tempo, tracing profile)",
       "tooltip": "",
       "type": "link",
-      "url": "/explore?left=%7B%22datasource%22%3A%22tempo%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22queryType%22%3A%22traceqlSearch%22%2C%22query%22%3A%22%7B%20span.%5C%22bioetl.pipeline%5C%22%20%3D~%20%5C%22%24%7Bpipeline%3Aregex%7D%5C%22%20%26%26%20span.%5C%22bioetl.run_type%5C%22%20%3D~%20%5C%22%24%7Brun_type%3Aregex%7D%5C%22%20%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+      "url": "/a/grafana-exploretraces-app/?from=${__from}&to=${__to}"
     }
   ],
   "panels": [
@@ -103,6 +103,26 @@
       "options": {
         "showHeader": true
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "bronze_records": true,
+              "by_field": true,
+              "by_reason_code": true,
+              "by_reason_signature": true,
+              "reject_ratio": true
+            },
+            "indexByName": {
+              "total": 0
+            },
+            "renameByName": {
+              "total": "filtered_records_total"
+            }
+          }
+        }
+      ],
       "targets": [
         {
           "format": "table",
@@ -132,7 +152,24 @@
             "mode": "palette-classic"
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reject_ratio"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
@@ -144,6 +181,26 @@
       "options": {
         "showHeader": true
       },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "by_field": true,
+              "by_reason_code": true,
+              "by_reason_signature": true
+            },
+            "indexByName": {
+              "reject_ratio": 0,
+              "bronze_records": 1,
+              "total": 2
+            },
+            "renameByName": {
+              "reject_ratio": "reject_rate_vs_bronze"
+            }
+          }
+        }
+      ],
       "targets": [
         {
           "format": "table",
@@ -330,7 +387,7 @@
           "links": [
             {
               "title": "Open same dashboard with this payload_hash",
-              "url": "/d/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}"
+              "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-reason_code=${__data.fields.reason_code}&var-field=${__data.fields.field}&var-run_id=${__data.fields.run_id}&var-payload_hash=${__data.fields.payload_hash}"
             },
             {
               "title": "Open quarantine CLI command",
@@ -338,7 +395,7 @@
             },
             {
               "title": "Open Logs",
-              "url": "/explore?left=%7B%22datasource%22%3A%22loki%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22%7Bjob%3D%5C%22bioetl%5C%22%2Cpipeline%3D%5C%22${__data.fields.pipeline}%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22%24%7B__from%7D%22%2C%22to%22%3A%22%24%7B__to%7D%22%7D%7D"
+              "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}"
             }
           ]
         },
@@ -401,15 +458,12 @@
       "targets": [
         {
           "format": "table",
-          "json_options": {
-            "root_is_not_array": true
-          },
           "parser": "backend",
           "refId": "A",
-          "root_selector": "$",
+          "root_selector": "items",
           "source": "url",
           "type": "json",
-          "url": "/ops/quarantine/filtered-record/${payload_hash}?pipeline=${pipeline:csv}",
+          "url": "/ops/quarantine/filtered-records?pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}&run_id=${run_id}&payload_hash=${payload_hash}&from=${__from:date:iso}&to=${__to:date:iso}&limit=1&offset=0&sort=ingestion_ts_desc",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -433,35 +487,22 @@
   "templating": {
     "list": [
       {
-        "allValue": "*",
+        "allValue": null,
         "current": {
           "selected": true,
-          "text": "All",
-          "value": "*"
+          "text": "chembl_activity",
+          "value": "chembl_activity"
         },
-        "datasource": "Quarantine Explorer",
+        "datasource": "Prometheus",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "label": "Pipeline",
-        "multi": true,
+        "multi": false,
         "name": "pipeline",
         "options": [],
         "query": {
-          "queryType": "infinity",
-          "refId": "StandardVariableQuery",
-          "infinityQuery": {
-            "format": "table",
-            "parser": "backend",
-            "refId": "StandardVariableQuery",
-            "root_selector": "pipelines",
-            "source": "url",
-            "type": "json",
-            "url": "/ops/quarantine/filter-options?from=${__from:date:iso}&to=${__to:date:iso}",
-            "url_options": {
-              "data": "",
-              "method": "GET"
-            }
-          }
+          "query": "label_values(bioetl_records_processed_total, pipeline)",
+          "refId": "StandardVariableQuery"
         },
         "refresh": 1,
         "regex": "",

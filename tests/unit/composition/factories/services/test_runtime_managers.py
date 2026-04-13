@@ -113,6 +113,7 @@ class TestBuildRuntimeManagers:
             checkpoint_manager=checkpoint_manager,
             logger=pipeline.services.logger,
             metrics=pipeline.services.metrics,
+            tracer=resolved_tracer,
             pipeline_name="test_pipeline",
         )
         mock_resolve_tracer.assert_called_once_with(tracer)
@@ -201,6 +202,7 @@ class TestBuildRuntimeManagers:
             checkpoint_manager=checkpoint_manager,
             logger=pipeline.services.logger,
             metrics=pipeline.services.metrics,
+            tracer=resolved_tracer,
             pipeline_name="test_pipeline",
         )
         mock_uuid_batch_id_generator.assert_called_once_with()

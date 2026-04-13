@@ -420,6 +420,31 @@ class TestQuarantineServiceReplay:
         assert result[0]["payload_hash"] == "hash1"
         mock_quarantine_port.replay.assert_called_once()
 
+    def test_replay_uses_sanctioned_timing_anchor(
+        self, quarantine_service, mock_quarantine_port
+    ) -> None:
+        """Replay passes the captured timing anchor into the quarantine port."""
+        started_at = datetime(2026, 4, 13, 9, 0, tzinfo=UTC)
+        completed_at = datetime(2026, 4, 13, 9, 0, 2, tzinfo=UTC)
+        quarantine_service._capture_operator_timing_anchor = MagicMock(
+            return_value=(started_at, 10.0)
+        )
+        quarantine_service._derive_operator_completion = MagicMock(
+            return_value=(completed_at, 2.0)
+        )
+        mock_quarantine_port.replay.return_value = iter([])
+
+        quarantine_service.replay("pipeline1", max_age_days=7)
+
+        assert mock_quarantine_port.replay.call_args.kwargs["now"] == started_at
+        quarantine_service.logger.info.assert_any_call(
+            "Replay records retrieved",
+            pipeline="pipeline1",
+            record_count=0,
+            completed_at=completed_at.isoformat(),
+            duration_seconds=2.0,
+        )
+
     def test_replay_with_error_code_filter(
         self, quarantine_service, mock_quarantine_port
     ):
@@ -490,6 +515,31 @@ class TestQuarantineServicePurge:
         call_kwargs = mock_quarantine_port.purge.call_args[1]
         assert call_kwargs["older_than_days"] == 60
 
+    def test_purge_uses_sanctioned_timing_anchor(
+        self, quarantine_service, mock_quarantine_port
+    ) -> None:
+        """Purge passes the captured timing anchor into the quarantine port."""
+        started_at = datetime(2026, 4, 13, 10, 0, tzinfo=UTC)
+        completed_at = datetime(2026, 4, 13, 10, 0, 5, tzinfo=UTC)
+        quarantine_service._capture_operator_timing_anchor = MagicMock(
+            return_value=(started_at, 20.0)
+        )
+        quarantine_service._derive_operator_completion = MagicMock(
+            return_value=(completed_at, 5.0)
+        )
+        mock_quarantine_port.purge.return_value = 0
+
+        quarantine_service.purge("pipeline1", older_than_days=30)
+
+        assert mock_quarantine_port.purge.call_args.kwargs["now"] == started_at
+        quarantine_service.logger.info.assert_any_call(
+            "Purged quarantine records",
+            pipeline="pipeline1",
+            records_purged=0,
+            completed_at=completed_at.isoformat(),
+            duration_seconds=5.0,
+        )
+
 
 @pytest.mark.unit
 class TestQuarantineServiceUpdateStatus:
@@ -521,6 +571,30 @@ class TestQuarantineServiceUpdateStatus:
             "bioetl_quarantine_operator_operations_total",
             1,
             labels={"operation": "update_status", "status": "not_found"},
+        )
+
+    def test_update_status_logs_derived_completion_timestamp(
+        self, quarantine_service, mock_quarantine_port
+    ) -> None:
+        """Status updates should log completion via the sanctioned timing anchor."""
+        started_at = datetime(2026, 4, 13, 11, 0, tzinfo=UTC)
+        completed_at = datetime(2026, 4, 13, 11, 0, 1, tzinfo=UTC)
+        quarantine_service._capture_operator_timing_anchor = MagicMock(
+            return_value=(started_at, 30.0)
+        )
+        quarantine_service._derive_operator_completion = MagicMock(
+            return_value=(completed_at, 1.0)
+        )
+        mock_quarantine_port.update_status.return_value = True
+
+        quarantine_service.update_status("hash123", QuarantineRecordStatus.IGNORED)
+
+        quarantine_service.logger.info.assert_any_call(
+            "Updated quarantine status",
+            payload_hash="hash123",
+            new_status=QuarantineRecordStatus.IGNORED.value,
+            completed_at=completed_at.isoformat(),
+            duration_seconds=1.0,
         )
 
 

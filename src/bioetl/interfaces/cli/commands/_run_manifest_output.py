@@ -154,6 +154,7 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                     "exact_replay_support_boundary",
                     diagnostics.get("exact_replay_support_boundary"),
                 ),
+                ("replay_family_contract", diagnostics.get("replay_family_contract")),
                 (
                     "replay_capability_reason",
                     diagnostics.get("replay_capability_reason"),
@@ -244,6 +245,7 @@ def _render_identity_graph_section(identity_graph: object) -> list[str]:
                 "exact_replay_support_boundary",
                 identity_graph.get("exact_replay_support_boundary"),
             ),
+            ("replay_family_contract", identity_graph.get("replay_family_contract")),
             (
                 "replay_capability_reason",
                 identity_graph.get("replay_capability_reason"),

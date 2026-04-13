@@ -46,6 +46,11 @@ BioETL предоставляет комплексную систему observab
 4. `bioetl diagnostics run --run-id <run-id>` или
    `bioetl diagnostics checkpoint --pipeline <pipeline>` — углубиться в
    run/checkpoint diagnostics.
+5. `python -m scripts.qa report-observability-metric-inventory --json` —
+   сверить canonical metric vocabulary между runtime emitters, docs и rules.
+6. Сравнить inventory output с
+   `grafana/prometheus-rules/bioetl_observability.yml` и shipped Grafana
+   dashboard JSON до того, как трактовать missing panel data как runtime outage.
 
 Важно:
 
@@ -55,6 +60,23 @@ BioETL предоставляет комплексную систему observab
 - Pushgateway publication остаётся best-effort on run completion;
 - `bioetl diagnostics metrics` — canonical operator summary для этих
   auto-managed behaviors.
+
+#### Observability verification QA
+
+Используйте `report-observability-metric-inventory` как canonical QA surface
+для metric drift:
+
+- `direct_live_metrics`: metric families, которые runtime вызывает напрямую
+  через canonical metrics API.
+- `helper_backed_live_metrics`: metric families, которые проходят через helper
+  или wrapper path, но всё ещё реально live.
+- `registry_only_metrics`: зарегистрированные metric families без обнаруженного
+  runtime emission path.
+- `dead_metrics`: строгий поднабор `registry_only_metrics`, для которого в repo
+  не осталось ни runtime, ни docs, ни rules evidence.
+- `documented_without_runtime` / `ruled_without_runtime`: published operator
+  surfaces, которые всё ещё ссылаются на registered family без live runtime
+  emission path.
 
 ### Архитектура Observability
 
@@ -606,6 +628,24 @@ Use this counter together with `2. Runtime` and Tempo:
 
 - `Trace-enabled Runs (24h) = 0` means empty Tempo is expected for the selected pipeline/run_type window.
 - `Trace-enabled Runs (24h) > 0` plus empty Tempo usually means a broken tracing/export path rather than an intentionally untraced run.
+
+### Checkpoint recovery tracing
+
+- `checkpoint_save` spans are emitted by both ordinary and composite checkpoint
+  save paths when tracing is enabled.
+- Bounded checkpoint tracing attributes are intentionally shared across these
+  paths:
+  - `bioetl.pipeline`
+  - `bioetl.checkpoint.operation`
+  - `bioetl.checkpoint.scope`
+  - `bioetl.checkpoint.status`
+- `bioetl.checkpoint.operation` remains bounded to the published save families
+  such as `periodic`, `exception`, `shutdown`, `manual`, and composite stage
+  transitions that persist composite checkpoint state.
+- Use `checkpoint_save` spans together with
+  `bioetl_checkpoint_save_events_total` and
+  `bioetl_checkpoint_save_duration_seconds` when debugging resume and graceful
+  shutdown behavior.
 
 ### Control-plane read metrics
 

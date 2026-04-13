@@ -1,11 +1,4 @@
-"""FSM (Finite State Machine) helpers for Composite Pipeline.
-
-Extracts FSM-related logic from CompositePipelineRunner to reduce
-file size and improve testability.
-
-Implements state transition validation and logging for composite pipeline
-execution states (ADR-026).
-"""
+"""FSM helpers for composite pipeline state transitions and resume flow."""
 
 from __future__ import annotations
 
@@ -25,6 +18,8 @@ class ResumePhaseInfo:
 
     phase: CompositePipelineState
     description: str
+
+ResumePhasePlan = ResumePhaseInfo
 
 
 def _resolve_resume_phase(
@@ -205,8 +200,7 @@ class FSMStateHelperService:
             total_enrichers=total_enrichers,
         )
 
-        # Validate and log FSM transition from FAILED to resume phase
-        # allow_resume=True permits transitions from terminal FAILED state
+        # allow_resume=True permits transitions from terminal FAILED state.
         self.validate_fsm_transition(state.state, resume_phase, allow_resume=True)
         self.log_fsm_transition(
             from_state=state.state,
@@ -248,4 +242,4 @@ class FSMStateHelperService:
 # Backward-compatible alias for iterative NAME-001 migration.
 FSMStateHelper = FSMStateHelperService
 
-__all__ = ["FSMStateHelper", "FSMStateHelperService"]
+__all__ = ["FSMStateHelper", "FSMStateHelperService", "ResumePhaseInfo", "ResumePhasePlan"]

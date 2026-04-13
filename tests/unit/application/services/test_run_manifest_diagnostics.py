@@ -20,6 +20,10 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    build_lineage_closure_boundary,
+    build_replay_family_contract,
+)
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
     compute_execution_identity_fingerprint,
@@ -175,19 +179,37 @@ def _expected_replay_parentage(manifest: RunManifest) -> dict[str, object]:
 
 
 def _expected_lineage_closure_boundary(manifest: RunManifest) -> dict[str, object]:
-    family = manifest.code_provenance.contract_ref
-    supported = family == "chembl.activity"
-    return {
-        "family": family,
-        "support_scope": "operator_grade_trace_debug",
-        "supported": supported,
-        "reason": (
-            "family_within_supported_boundary"
-            if supported
-            else "family_outside_supported_boundary"
-        ),
-        "supported_families": ["chembl.activity"],
-    }
+    execution_context = (
+        "composite"
+        if (
+            str(manifest.launch_context.get("execution_context") or "") == "composite"
+            or manifest.provider == "composite"
+        )
+        else "source"
+    )
+    return build_lineage_closure_boundary(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
+
+
+def _expected_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
+    execution_context = (
+        "composite"
+        if (
+            str(manifest.launch_context.get("execution_context") or "") == "composite"
+            or manifest.provider == "composite"
+        )
+        else "source"
+    )
+    return build_replay_family_contract(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
 
 
 def _build_ledger_entries(
@@ -264,13 +286,14 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "required_persistence_profile": "degraded_observable",
         "requested_exact_replay": False,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "replay_family_contract": _expected_replay_family_contract(manifest),
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
-        "replay_mode": "live_fetch",
+        "replay_mode": "rebuild",
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
@@ -361,6 +384,9 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
     assert summary["replay_capability"] == "resume_only"
     assert summary["requested_exact_replay"] is False
     assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    assert summary["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
     assert (
         summary["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
@@ -428,8 +454,11 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
     assert summary["replay_capability"] == "exact_replay_supported"
     assert summary["requested_exact_replay"] is False
     assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    assert summary["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
     assert summary["exact_replay_eligible"] is True
-    assert summary["replay_mode"] == "snapshot_backed_run"
+    assert summary["replay_mode"] == "same_data_state_recovery"
     assert summary["exact_replay_blockers"] == []
     assert summary["input_snapshot_ids"] == ["snapshot-1"]
 
@@ -446,8 +475,11 @@ def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alon
 
     assert summary["requested_exact_replay"] is True
     assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    assert summary["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
     assert summary["exact_replay_eligible"] is False
-    assert summary["replay_mode"] == "live_fetch"
+    assert summary["replay_mode"] == "rebuild"
     assert summary["exact_replay_blockers"] == ["immutable_input_snapshots_missing"]
 
 
@@ -512,13 +544,14 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "replay_capability": "rebuild_only",
         "requested_exact_replay": False,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "replay_family_contract": _expected_replay_family_contract(manifest),
         "replay_capability_reason": "immutable_input_snapshots_missing",
         "exact_replay_eligible": False,
         "exact_replay_blockers": ["immutable_input_snapshots_missing"],
         "input_snapshot_ids": [],
         "input_snapshot_content_hashes": [],
         "input_snapshot_identity_fingerprint": None,
-        "replay_mode": "live_fetch",
+        "replay_mode": "rebuild",
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
         "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
@@ -776,6 +809,9 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
     summary = build_diagnostics_summary(manifest, ())
 
     assert summary["exact_replay_support_boundary"] == "composite_execution_unsupported"
+    assert summary["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
     assert (
         summary["replay_capability_reason"]
         == "exact_replay_not_supported_for_composite_execution"

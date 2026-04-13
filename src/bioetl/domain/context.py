@@ -32,11 +32,12 @@ __all__ = [
     "PipelineContext",
     "PipelineRunContext",
     "VacuumSettings",
+    "current_utc_time",
 ]
 
 
-def _now_utc() -> datetime:
-    """Factory function for default started_at timestamp."""
+def current_utc_time() -> datetime:
+    """Return the sanctioned domain UTC timestamp source."""
     return datetime.now(UTC)
 
 
@@ -94,7 +95,7 @@ class PipelineContext:
     run_id: RunID
     run_type: RunType
     logger: LoggerPort
-    started_at: datetime = field(default_factory=_now_utc)
+    started_at: datetime = field(default_factory=current_utc_time)
     source_batch_id: BatchID | None = None
     replay_timestamp_anchor: datetime | None = None
 
@@ -125,7 +126,7 @@ class PipelineContext:
             run_id=run_id,
             run_type=run_type,
             logger=logger,
-            started_at=started_at or datetime.now(UTC),
+            started_at=started_at or current_utc_time(),
             source_batch_id=source_batch_id,
             replay_timestamp_anchor=replay_timestamp_anchor,
         )

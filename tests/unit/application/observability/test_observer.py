@@ -334,6 +334,34 @@ def test_pipeline_result_timestamp_requires_wall_start_time() -> None:
         PipelineObserver._build_pipeline_result_timestamp(None, 1.0)
 
 
+@patch("bioetl.application.observability.observer_context_mixin.capture_runtime_timing_anchor")
+def test_observer_captures_startup_timing_anchor(
+    capture_anchor_mock: MagicMock,
+    metrics_mock: MagicMock,
+    logger_mock: MagicMock,
+    run_id,
+) -> None:
+    """Observer startup must use the shared runtime timing seam."""
+    started_at = datetime(2026, 4, 13, 8, 0, 0, tzinfo=UTC)
+    started_monotonic = 1234.5
+    capture_anchor_mock.return_value = (started_at, started_monotonic)
+
+    observer = PipelineObserver(
+        pipeline_name="test_pipeline",
+        run_id=run_id,
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics_mock,
+        logger=logger_mock,
+    )
+
+    with observer:
+        pass
+
+    capture_anchor_mock.assert_called_once_with()
+    assert observer.wall_start_time == started_at
+    assert observer.start_time == started_monotonic
+
+
 # ==================== Unified Observability: Lifecycle Event Tests ====================
 
 

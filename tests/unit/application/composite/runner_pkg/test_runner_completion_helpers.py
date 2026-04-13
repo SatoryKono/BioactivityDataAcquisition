@@ -91,8 +91,8 @@ def test_build_composite_result_marks_optional_failures_as_warnings() -> None:
     )
 
     with patch(
-        "bioetl.application.composite.runner_pkg.runner_completion_helpers.time.monotonic",
-        return_value=112.5,
+        "bioetl.application.composite.runner_pkg.runner_completion_helpers.derive_completion_timestamp",
+        return_value=(request.started_at + timedelta(seconds=12.5), 12.5),
     ):
         result = build_composite_result(
             request=request,

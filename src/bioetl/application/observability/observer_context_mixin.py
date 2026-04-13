@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Self
 
 from bioetl.application.observability.observer_event_mixin import _ObserverEventMixin
+from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.domain.aggregates.events import (
     PipelineCompleted,
     PipelineFailed,
@@ -44,8 +45,9 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
 
     def __enter__(self) -> Self:
         """Start observation (Span + Log + Metric)."""
-        self.start_time = time.monotonic()
-        self.wall_start_time = datetime.now(tz=UTC)
+        wall_start_time, started_monotonic = capture_runtime_timing_anchor()
+        self.wall_start_time = wall_start_time
+        self.start_time = started_monotonic
         self._start_trace_span()
         self._emit_contract_event(
             PipelineEvent.START,

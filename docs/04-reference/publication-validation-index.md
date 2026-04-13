@@ -211,8 +211,8 @@ cat logs/bioetl.log | \
 ### DevOps / Support (Эксплуатация)
 
 1. **Настроить мониторинг:**
-   - Prometheus metrics: `bioetl_validation_passed_total`, `bioetl_validation_warned_total`, `bioetl_validation_failed_total`
-   - Grafana dashboard: DQ Pass Rate, Top Failing Rules, Validation Latency
+   - Prometheus metrics: `bioetl_dq_validation_score`, `bioetl_dq_records_quarantined_total`, `bioetl_dq_validation_failures_total`, `bioetl_dq_check_duration_ms`
+   - Grafana dashboard: DQ Score, Quarantine Rate, Hard-Fail Events, Validation Latency
 
 2. **При алерте:**
    - Открыть [Operational Runbook](../05-operations/runbooks/publication-validation-runbook.md)

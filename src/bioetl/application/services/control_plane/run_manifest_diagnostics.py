@@ -7,6 +7,12 @@ from typing import cast
 from bioetl.application.services.control_plane._run_manifest_diagnostics_ledger import (
     _process_ledger_entries,
 )
+from bioetl.application.services.control_plane._run_manifest_diagnostics_persistence import (
+    build_alert_signals,
+    build_lineage_closure_boundary,
+    build_next_steps,
+    build_persistence_profile,
+)
 from bioetl.application.services.control_plane._run_manifest_diagnostics_replay import (
     _build_replay_parentage,
     _build_resume_contract,
@@ -18,14 +24,11 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_exact_replay_blockers,
     _resolve_exact_replay_support_boundary,
     _resolve_replay_capability_reason,
+    _resolve_replay_family_contract,
     _resolve_replay_mode,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
-    _build_alert_signals,
     _build_final_summary,
-    _build_next_steps,
-    _build_persistence_profile,
-    build_lineage_closure_boundary,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
@@ -58,6 +61,7 @@ def _build_base_summary(
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
     )
+    replay_family_contract = _resolve_replay_family_contract(manifest)
     summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
         "run_id": str(manifest.run_id),
@@ -99,6 +103,7 @@ def _build_base_summary(
             _compute_input_snapshot_identity_fingerprint(input_snapshots)
         ),
         "replay_mode": replay_mode,
+        "replay_family_contract": replay_family_contract,
         "resume_contract": resume_contract,
         "resume_diagnostics": None,
         "lineage_closure_boundary": build_lineage_closure_boundary(
@@ -114,7 +119,7 @@ def _build_base_summary(
         ],
         "occurrence_only_diagnostics": [],
     }
-    persistence_profile = _build_persistence_profile(
+    persistence_profile = build_persistence_profile(
         base_summary=summary,
         ledger_entries_present=False,
         artifact_refs=[],
@@ -122,7 +127,7 @@ def _build_base_summary(
         missing_link_count=0,
     )
     summary["persistence_profile"] = persistence_profile
-    summary["alert_signals"] = _build_alert_signals(
+    summary["alert_signals"] = build_alert_signals(
         latest_status=None,
         artifact_refs=[],
         lineage_fragment_ids=set(),
@@ -145,7 +150,7 @@ def _build_base_summary(
             persistence_profile.get("forensic_grade_missing_requirements", []),
         ),
     )
-    summary["next_steps"] = _build_next_steps(
+    summary["next_steps"] = build_next_steps(
         cast("dict[str, bool]", summary["alert_signals"])
     )
     return summary

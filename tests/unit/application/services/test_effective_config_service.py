@@ -59,6 +59,15 @@ class TestEffectiveConfigService:
         assert artifact.pipeline_name == "test_pipeline"
         assert artifact.pipeline_kind == "standard"
         assert len(artifact.source_refs) == 1
+        assert {item.source_class for item in artifact.source_class_provenance} == {
+            "config_file",
+            "cli_override",
+            "env_override",
+            "runtime_adjustment",
+            "dq_policy_contract",
+            "immutable_input_snapshot",
+            "implicit_process_environment",
+        }
         assert artifact.dq_policy_refs == []  # No DQ config provided
 
     def test_create_artifact_with_dq_config(self) -> None:
@@ -215,7 +224,47 @@ class TestEffectiveConfigService:
         parsed = json.loads(json_str)
         assert parsed["artifact_id"] == artifact.artifact_id
         assert parsed["semantic_artifact"]["pipeline_name"] == "test_pipeline"
+        assert parsed["semantic_artifact"]["source_class_provenance"]
+        assert {
+            item["source_class"]
+            for item in parsed["semantic_artifact"]["source_class_provenance"]
+        } == {
+            "config_file",
+            "cli_override",
+            "env_override",
+            "runtime_adjustment",
+            "dq_policy_contract",
+            "immutable_input_snapshot",
+            "implicit_process_environment",
+        }
         assert "occurrence_envelope" in parsed
+
+    def test_source_class_provenance_marks_external_and_unsupported_classes(self) -> None:
+        """Source-class provenance should distinguish anchored, external, and unsupported inputs."""
+        artifact = self.service.create_effective_config_artifact(
+            pipeline_name="test_pipeline",
+            pipeline_kind="standard",
+            resolved_config={"pipeline": {"name": "test_pipeline"}},
+            runtime_overrides={},
+            source_refs=[],
+        )
+
+        provenance_by_class = {
+            item.source_class: item for item in artifact.source_class_provenance
+        }
+
+        immutable_snapshot = provenance_by_class["immutable_input_snapshot"]
+        assert immutable_snapshot.provenance_status == "external_anchor"
+        assert immutable_snapshot.anchor_field == "content_hash"
+        assert (
+            immutable_snapshot.artifact_surface
+            == "run_manifest.source_refs[*].input_snapshots[*]"
+        )
+
+        ambient_environment = provenance_by_class["implicit_process_environment"]
+        assert ambient_environment.provenance_status == "unsupported"
+        assert ambient_environment.artifact_surface == "not_persisted"
+        assert ambient_environment.anchor_field is None
 
     def test_semantic_serialization_is_stable_across_occurrence_timestamps(self) -> None:
         """Semantic serialization should ignore occurrence envelope timestamps."""

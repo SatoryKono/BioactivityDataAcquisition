@@ -56,10 +56,10 @@ ______________________________________________________________________
 1. Semantic Validation
 
 - **Key Metrics:**
-- **DQ Pass Rate** — процент записей без ошибок/предупреждений
-- **WARN Rate** — процент записей с `-dq-warn=True`
-- **FAIL Rate** — процент отклонённых записей
-- **Validation Latency** — время выполнения валидации (per level)
+- **DQ Score** — `bioetl_dq_validation_score` для entity-level качества данных
+- **WARN Rate / Quarantine Rate** — доля записей из `bioetl_dq_records_quarantined_total`
+- **Hard-Fail Events** — `bioetl_dq_validation_failures_total{severity="hard_fail"}`
+- **Validation Latency** — `bioetl_dq_check_duration_ms`
 
 ______________________________________________________________________
 
@@ -67,18 +67,17 @@ ______________________________________________________________________
 
 ### Критичные алерты (P1 — немедленная реакция)
 
-#### Alert: HighFailRate
+#### Alert: DQValidationFailuresCritical
 
 - **Триггер:**
 
 ```promql
-(
-  bioetl_validation_failed_total /
-  (bioetl_validation_passed_total + bioetl_validation_warned_total + bioetl_validation_failed_total)
-) > 0.10
+sum by (pipeline, stage) (
+  increase(bioetl_dq_validation_failures_total{severity="hard_fail"}[15m])
+) > 0
 ```
 
-- **Описание:** Более 10% записей отклонены валидацией
+- **Описание:** За последние 15 минут появились hard-fail DQ validation failures
 
 - **Действия:**
 
@@ -93,12 +92,12 @@ ______________________________________________________________________
      jq 'select(.event == "validation-failed") | select(.timestamp > now - 3600)'
    ```
 
-1. Определить провайдера и уровень с наибольшим fail rate:
+1. Определить pipeline/stage с hard-fail событиями:
 
    ```bash
-   # Топ провайдеров по fail rate
+   # Топ pipeline/stage по validation-failed
    cat logs/bioetl.log | \
-     jq -r 'select(.event == "validation-failed") | "\(.provider) \(.validation-level)"' | \
+     jq -r 'select(.event == "validation-failed") | "\(.pipeline) \(.stage // .validation-level // "unknown")"' | \
      sort | uniq -c | sort -rn | head -10
    ```
 
@@ -108,15 +107,20 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-#### Alert: ValidationLatencyHigh
+#### Alert: DQValidationLatencyHigh
 
 - **Триггер:**
 
 ```promql
-histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
+histogram_quantile(
+  0.95,
+  sum by (le, pipeline) (
+    increase(bioetl_dq_check_duration_ms_bucket[15m])
+  )
+) > 300000
 ```
 
-- **Описание:** P95 validation latency > 5 минут
+- **Описание:** P95 DQ check latency > 5 минут
 
 - **Действия:**
 
@@ -153,14 +157,21 @@ ______________________________________________________________________
 
 ### Предупреждающие алерты (P2 — реакция в течение 4 часов)
 
-#### Alert: HighWarnRate
+#### Alert: DQQuarantineRateCritical
 
 - **Триггер:**
 
 ```promql
 (
-  bioetl_validation_warned_total /
-  (bioetl_validation_passed_total + bioetl_validation_warned_total + bioetl_validation_failed_total)
+  sum by (pipeline, run_type) (
+    increase(bioetl_dq_records_quarantined_total[15m])
+  ) /
+  clamp_min(
+    sum by (pipeline, run_type) (
+      increase(bioetl_records_processed_total{stage="bronze"}[15m])
+    ),
+    1
+  )
 ) > 0.20
 ```
 
@@ -808,7 +819,7 @@ ______________________________________________________________________
 
 - Grafana dashboard пустой
 
-- Prometheus `/metrics` endpoint не показывает `bioetl_validation_*` метрики
+- Prometheus `/metrics` endpoint не показывает `bioetl_dq_*` метрики
 
 - **Диагностика:**
 
@@ -817,7 +828,7 @@ ______________________________________________________________________
 curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job == "bioetl")'
 
 # Проверить метрики напрямую
-curl http://localhost:8000/metrics | grep bioetl_validation
+curl http://localhost:8000/metrics | grep bioetl_dq
 ```
 
 - **Решение:**

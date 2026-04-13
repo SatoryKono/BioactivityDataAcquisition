@@ -11,6 +11,15 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     EffectiveExecutionConfig,
     ResolvedConfigSnapshot,
     RuntimeOverrideSnapshot,
+    SourceClassProvenance,
+)
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    ReproducibilityFamilyProfile,
+    build_lineage_closure_boundary,
+    build_replay_family_contract,
+    published_supported_reproducibility_families,
+    resolve_reproducibility_family,
+    resolve_reproducibility_family_profile,
 )
 from bioetl.domain.control_plane.run_ledger import RunLedgerEntry
 from bioetl.domain.control_plane.run_manifest import (
@@ -30,6 +39,7 @@ __all__ = [
     "EffectiveConfigHashes",
     "EffectiveExecutionConfig",
     "ReplayCapability",
+    "ReproducibilityFamilyProfile",
     "ResolvedConfigSnapshot",
     "RunArtifactRef",
     "RunCodeProvenance",
@@ -38,4 +48,10 @@ __all__ = [
     "RunManifest",
     "RunSourceRef",
     "RuntimeOverrideSnapshot",
+    "SourceClassProvenance",
+    "build_lineage_closure_boundary",
+    "build_replay_family_contract",
+    "published_supported_reproducibility_families",
+    "resolve_reproducibility_family",
+    "resolve_reproducibility_family_profile",
 ]

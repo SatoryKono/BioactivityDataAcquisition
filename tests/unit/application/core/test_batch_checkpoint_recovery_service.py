@@ -45,11 +45,23 @@ def mock_metrics():
 
 
 @pytest.fixture
-def service(mock_checkpoint_manager, mock_logger, mock_metrics):
+def mock_tracer():
+    tracer = MagicMock()
+    otel_tracer = MagicMock()
+    span = MagicMock()
+    otel_tracer.start_as_current_span.return_value = span
+    tracer.get_tracer.return_value = otel_tracer
+    tracer.flush = MagicMock()
+    return tracer
+
+
+@pytest.fixture
+def service(mock_checkpoint_manager, mock_logger, mock_metrics, mock_tracer):
     return BatchCheckpointRecoveryService(
         checkpoint_manager=mock_checkpoint_manager,
         logger=mock_logger,
         metrics=mock_metrics,
+        tracer=mock_tracer,
         pipeline_name="test_pipeline",
     )
 
@@ -115,7 +127,7 @@ class TestSavePeriodicCheckpoint:
         assert mock_checkpoint_manager.save_checkpoint.await_count == 5
 
     async def test_emits_metrics_when_periodic_save_succeeds(
-        self, service, mock_metrics
+        self, service, mock_metrics, mock_tracer
     ):
         """Periodic checkpoint saves emit success event and duration metrics."""
         await service.save_periodic_checkpoint(
@@ -134,6 +146,13 @@ class TestSavePeriodicCheckpoint:
             },
         )
         mock_metrics.observe_histogram.assert_called_once()
+        mock_tracer.get_tracer.assert_called_once_with("bioetl.checkpoint")
+        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span.set_attribute.assert_called_with(
+            "bioetl.checkpoint.status",
+            "succeeded",
+        )
+        mock_tracer.flush.assert_called_once()
 
     async def test_no_save_at_zero_records(self, service, mock_checkpoint_manager):
         """records_fetched=0 triggers save only if 0 % interval == 0 (edge)."""
@@ -359,7 +378,7 @@ class TestSaveCheckpointOnShutdown:
         mock_checkpoint_manager.save_checkpoint.assert_awaited_once_with(0)
 
     async def test_emits_failed_metrics_when_shutdown_save_fails(
-        self, mock_checkpoint_manager, mock_logger, mock_metrics
+        self, mock_checkpoint_manager, mock_logger, mock_metrics, mock_tracer
     ):
         """Shutdown save failures emit failed checkpoint save metrics."""
         mock_checkpoint_manager.save_checkpoint = AsyncMock(
@@ -369,6 +388,7 @@ class TestSaveCheckpointOnShutdown:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             metrics=mock_metrics,
+            tracer=mock_tracer,
             pipeline_name="test_pipeline",
         )
 
@@ -387,6 +407,12 @@ class TestSaveCheckpointOnShutdown:
             },
         )
         mock_metrics.observe_histogram.assert_called_once()
+        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span.set_attribute.assert_any_call("bioetl.checkpoint.status", "failed")
+        mock_span.set_attribute.assert_any_call("error", True)
+        mock_span.set_attribute.assert_any_call("error.type", "RuntimeError")
+        mock_span.record_exception.assert_called_once()
+        mock_tracer.flush.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TRIAGE_PATH = PROJECT_ROOT / "configs/quality/retirement_candidate_triage.yaml"
+SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
 SRC_ROOT = PROJECT_ROOT / "src" / "bioetl"
 
 
@@ -16,6 +17,22 @@ def _load_triage() -> dict[str, object]:
     payload = yaml.safe_load(TRIAGE_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _load_scorecard() -> dict[str, object]:
+    payload = yaml.safe_load(SCORECARD_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _iter_triage_entries(triage: dict[str, object]) -> list[dict[str, object]]:
+    return [
+        entry
+        for family in triage.get("families", [])
+        if isinstance(family, dict)
+        for entry in family.get("entries", [])
+        if isinstance(entry, dict)
+    ]
 
 
 def _iter_src_python_files() -> list[Path]:
@@ -57,11 +74,7 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
     families = triage.get("families", [])
     assert isinstance(families, list) and families
     entries = [
-        entry
-        for family in families
-        if isinstance(family, dict)
-        for entry in family.get("entries", [])
-        if isinstance(entry, dict)
+        entry for entry in _iter_triage_entries(triage)
     ]
     assert entries, "Expected at least one retirement-triage entry"
 
@@ -90,10 +103,8 @@ def test_removed_retirement_tranches_stay_absent() -> None:
     triage = _load_triage()
     entries = [
         entry
-        for family in triage.get("families", [])
-        if isinstance(family, dict)
-        for entry in family.get("entries", [])
-        if isinstance(entry, dict) and entry.get("disposition") == "removed"
+        for entry in _iter_triage_entries(triage)
+        if entry.get("disposition") == "removed"
     ]
     assert entries, "Expected at least one removed retirement tranche"
 
@@ -112,10 +123,8 @@ def test_retained_zero_anchor_tranches_have_live_src_importers() -> None:
     triage = _load_triage()
     retained = [
         entry
-        for family in triage.get("families", [])
-        if isinstance(family, dict)
-        for entry in family.get("entries", [])
-        if isinstance(entry, dict) and entry.get("disposition") == "retain_active"
+        for entry in _iter_triage_entries(triage)
+        if entry.get("disposition") == "retain_active"
     ]
     assert retained, "Expected at least one retained retirement tranche"
 
@@ -139,3 +148,44 @@ def test_retained_zero_anchor_tranches_have_live_src_importers() -> None:
             f"{module_name} only has {actual_importers} src importers, below the "
             f"triaged minimum {min_src_importers}. Remove it or refresh the triage ledger intentionally."
         )
+
+
+def test_neo4j_memory_calibration_candidates_match_triage_decisions() -> None:
+    """Calibration candidates from the memory refresh must map to explicit triage decisions."""
+    triage = _load_triage()
+    triage_entries = {
+        str(target["module_path"]): entry
+        for entry in _iter_triage_entries(triage)
+        if isinstance((target := entry.get("target", {})), dict)
+        and isinstance(target.get("module_path"), str)
+    }
+
+    scorecard = _load_scorecard()
+    calibration = scorecard.get("neo4j_memory_calibration", {})
+    assert isinstance(calibration, dict)
+    assert calibration.get("snapshot_date") == "2026-04-13"
+    assert isinstance(calibration.get("update_policy"), str) and calibration["update_policy"]
+
+    families = calibration.get("families", [])
+    assert isinstance(families, list) and families
+
+    for family in families:
+        assert isinstance(family, dict)
+        assert isinstance(family.get("linked_issue"), str) and family["linked_issue"]
+        candidates = family.get("candidates", [])
+        assert isinstance(candidates, list) and candidates
+        for candidate in candidates:
+            assert isinstance(candidate, dict)
+            module_path = candidate.get("module_path")
+            expected_disposition = candidate.get("expected_disposition")
+            assert isinstance(module_path, str) and module_path
+            assert expected_disposition in {"removed", "retain_active"}
+            triage_entry = triage_entries.get(module_path)
+            assert triage_entry is not None, (
+                f"{module_path} is tracked in neo4j_memory_calibration but missing from "
+                "retirement_candidate_triage.yaml."
+            )
+            assert triage_entry.get("disposition") == expected_disposition, (
+                f"{module_path} is calibrated as {expected_disposition} but triage marks it "
+                f"as {triage_entry.get('disposition')}."
+            )

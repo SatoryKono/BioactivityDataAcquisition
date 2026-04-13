@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-04'
+  Last verified: '2026-04-13'
 
 ______________________________________________________________________
 
@@ -52,6 +52,10 @@ writes, ledger appends, checkpoint compatibility и read failures. Это dashbo
 warnings, unstructured logs и Prometheus-backed alert conditions. Он не
 заменяет `overview`/`dq`/`provider-health`, а собирает log+alert surface в одном
 месте для быстрого расследования.
+
+Runtime alert-condition summary панели используют recording-rule series
+`bioetl_runtime_alert_condition_*`, чтобы поддерживать согласованность с alert
+логикой и уменьшать сложность dashboard JSON.
 
 Для incident drilldown канонический handoff теперь идёт через shipped Explore
 links в `bioetl-overview-v2`, `bioetl-dq-v2`, `bioetl-runtime` и

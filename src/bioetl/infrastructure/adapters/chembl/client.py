@@ -85,19 +85,7 @@ class ChemblAdapter(
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
-        # Dataclass-generated __init__ bypasses BaseHttpAdapter.__init__.
-        # Delegate shared runtime setup to the base class to keep adapter
-        # construction consistent with other HTTP adapters.
-        BaseHttpAdapter.__init__(
-            self,
-            http_client=self.http_client,
-            logger=self.logger,
-            metrics=self.metrics,
-            dependency_context=self.dependency_context,
-            error_handler=self.error_handler,
-            adapter_metrics=self.adapter_metrics,
-            request_collector=self.request_collector,
-        )
+        self._bootstrap_dataclass_http_adapter()
         # Resolve configuration: use provided config or domain defaults
         config = (
             self.adapter_config if self.adapter_config is not None else AdapterConfig()

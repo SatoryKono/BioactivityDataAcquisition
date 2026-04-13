@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.composite.lifecycle_observer_service import (
@@ -19,6 +19,7 @@ from bioetl.application.composite.runner_pkg.runner_helpers import (
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _PreparedCompositeResultContext,
 )
+from bioetl.application.runtime_timestamps import derive_completion_timestamp
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.exceptions import BioETLError
 
@@ -134,8 +135,12 @@ def _resolve_completed_at(request: CompositeResultBuildContext) -> datetime:
             "Composite result timestamp requires captured start context. "
             "CompositePipelineRunner must set wall and monotonic start times before completion."
         )
-    duration_seconds = time.monotonic() - request.start_time
-    return request.started_at + timedelta(seconds=duration_seconds)
+    completed_at, _ = derive_completion_timestamp(
+        started_at=request.started_at,
+        started_monotonic=request.start_time,
+        completed_monotonic=time.monotonic(),
+    )
+    return completed_at
 
 
 def finalize_composite_result(

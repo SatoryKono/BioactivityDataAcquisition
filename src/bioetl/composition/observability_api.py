@@ -6,8 +6,8 @@ helpers that need composition-owned dependency assembly.
 
 from __future__ import annotations
 
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -39,8 +39,8 @@ __all__ = [
     "get_checkpoint_service",
     "get_health_service",
     "get_lineage_service",
-    "get_metrics_service",
     "get_metrics_operator_profile",
+    "get_metrics_service",
     "get_observability_diagnostics_bundle",
     "get_observability_workflow_service",
     "get_quarantine_service",

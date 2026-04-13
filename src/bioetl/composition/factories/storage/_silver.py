@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports.noop import NoOpMetadataWriter, NoOpTracing
+from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
@@ -39,7 +39,7 @@ def create_silver_writer(
     base_path: Path,
     config: SinkLayerConfig | None,
     logger: LoggerPort,
-    tracing: TracingPort | None,
+    tracing: TracingPort,
     csv_exporter: CsvExporter | None,
     metadata_coordinator: MetadataCoordinator | None,
     audit: AuditPort,
@@ -59,7 +59,7 @@ def create_silver_writer(
         base_path: Root directory for Silver layer storage.
         config: Optional sink layer config providing save_metadata flag.
         logger: LoggerPort for structured logging.
-        tracing: TracingPort resolved by composition bootstrap.
+        tracing: Explicit TracingPort resolved by composition bootstrap.
         csv_exporter: Optional CSV exporter for parallel Silver CSV output.
         metadata_coordinator: Optional coordinator for metadata side-effects.
         transform_version: Transform version tag written to Silver metadata.
@@ -91,7 +91,10 @@ def create_silver_writer(
         else NoOpMetadataWriter()
     )
     if tracing is None:
-        tracing = NoOpTracing()
+        raise TypeError(
+            "SilverWriter requires explicit tracing injection. "
+            "Build NoOpTracing in composition when tracing is disabled."
+        )
     runtime_services = build_silver_writer_runtime_services(
         csv_exporter=csv_exporter,
         tracing=tracing,

@@ -1,4 +1,9 @@
-"""Stable public anchor-context helpers for composite checkpoint consumers."""
+"""Compatibility shim for legacy composite checkpoint anchor-context imports.
+
+New first-party governance consumers must import these helpers from the package
+root facade ``bioetl.application.composite.checkpoint``. This module remains
+only as a compatibility surface for older imports.
+"""
 
 from __future__ import annotations
 

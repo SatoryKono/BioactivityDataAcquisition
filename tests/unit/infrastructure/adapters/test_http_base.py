@@ -6,6 +6,7 @@ observability across BaseHttpAdapter and BaseSyncAdapter.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -61,6 +62,35 @@ class StubHttpAdapter(BaseHttpAdapter):
         **kwargs: Any,
     ) -> Any:
         """Not used in these tests."""
+        yield {}  # pragma: no cover
+
+
+@dataclass
+class DataclassBootstrapStub(BaseHttpAdapter):
+    """Dataclass-style adapter using shared BaseHttpAdapter helpers."""
+
+    http_client: Any
+    logger: Any
+    metrics: Any = None
+    dependency_context: HttpAdapterDependencyContext | None = None
+    provider_name: str = "dataclass_stub"
+
+    def __post_init__(self) -> None:
+        self._bootstrap_dataclass_http_adapter()
+
+    async def _probe_health(self) -> HealthStatus:
+        return HealthStatus.HEALTHY
+
+    def _get_health_endpoint(self) -> str:
+        return "/health"
+
+    async def fetch(
+        self,
+        entity: str,
+        query: str | None = None,
+        limit: int | None = None,
+        **kwargs: Any,
+    ) -> Any:
         yield {}  # pragma: no cover
 
 
@@ -190,6 +220,41 @@ class TestHealthCheckLogging:
         error_factory.assert_not_called()
         metrics_factory.assert_not_called()
         collector_factory.assert_not_called()
+
+    def test_dataclass_bootstrap_helper_initializes_base_runtime(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+        mock_metrics: MagicMock,
+    ) -> None:
+        """Dataclass-style adapters can reuse centralized BaseHttpAdapter bootstrap."""
+        adapter = DataclassBootstrapStub(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            metrics=mock_metrics,
+        )
+
+        assert adapter._http_client is mock_http_client
+        assert adapter._logger is mock_logger
+        assert adapter.metrics is mock_metrics
+        assert adapter._adapter_metrics is not None
+        assert adapter._request_collector is not None
+
+    def test_bind_fallback_fetch_service_helper_sets_canonical_attribute(
+        self,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Fallback-aware adapters can bind the shared orchestrator via base helper."""
+        adapter = DataclassBootstrapStub(
+            http_client=mock_http_client,
+            logger=mock_logger,
+        )
+        fallback_service = MagicMock(name="fallback_fetch_service")
+
+        adapter._bind_fallback_fetch_service(fallback_service)
+
+        assert adapter._fallback_fetch_service is fallback_service
 
     async def test_health_check_logs_warning_on_exception(
         self,
