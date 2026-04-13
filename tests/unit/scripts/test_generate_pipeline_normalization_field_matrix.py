@@ -90,8 +90,14 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
 
     chembl_assay_parameters_run_id = _row(rows, "chembl_assay_parameters", "_run_id")
     assert chembl_assay_parameters_run_id["normalization_source"] == "profile"
-    assert chembl_assay_parameters_run_id["normalizer"] == "normalize_profile_json_string"
+    assert chembl_assay_parameters_run_id["normalizer"] == "normalize_profile_passthrough"
     assert chembl_assay_parameters_run_id["include_in_content_hash"] == "false"
+
+    chembl_assay_parameters_json = _row(rows, "chembl_assay", "assay_parameters")
+    assert chembl_assay_parameters_json["normalizer"] == "normalize_profile_json_string"
+
+    chembl_assay_description = _row(rows, "chembl_assay", "description")
+    assert chembl_assay_description["normalizer"] == "normalize_profile_text"
 
     chembl_target_component_id = _row(
         rows, "chembl_target_component", "protein_classification_id"
@@ -112,6 +118,12 @@ def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields(
     molecule_id = _row(rows, "composite_activity", "molecule_id")
     assert molecule_id["normalization_source"] == "composite_join_key_policy"
     assert molecule_id["normalizer"] == "join_key_policy"
+
+    composite_pmid = _row(rows, "composite_publication", "pmid")
+    assert (
+        composite_pmid["normalization_summary"]
+        == "Validate PMID through the canonical domain identifier contract, then emit digits-only join-canonical text."
+    )
 
     standard_type = _row(rows, "composite_activity", "standard_type")
     assert standard_type["normalization_source"] == "upstream_inherited"

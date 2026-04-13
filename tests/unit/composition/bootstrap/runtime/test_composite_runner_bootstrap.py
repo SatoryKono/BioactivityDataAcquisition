@@ -72,6 +72,7 @@ def test_bootstrap_composite_runner_orchestrates_builders() -> None:
     plan = SimpleNamespace(
         run_id="00000000-0000-0000-0000-000000000001",
         logger=MagicMock(),
+        metrics=MagicMock(),
         lock=MagicMock(),
         seed_runner_factory=MagicMock(name="seed_runner_factory"),
         dependencies_runner_factory=MagicMock(name="dependency_runner_factory"),
@@ -212,6 +213,7 @@ def test_bootstrap_composite_runner_delegates_final_assembly_to_plan_helper() ->
     plan = SimpleNamespace(
         run_id="00000000-0000-0000-0000-000000000004",
         logger=MagicMock(),
+        metrics=MagicMock(),
         lock=MagicMock(),
         seed_runner_factory=MagicMock(),
         dependencies_runner_factory=MagicMock(),
@@ -294,6 +296,7 @@ def test_build_composite_bootstrap_plan_uses_named_runtime_basics_context() -> N
 
     assert plan.run_id == infra_context.run_id
     assert plan.logger is infra_context.logger
+    assert plan.metrics is infra_context.metrics
     assert plan.lock is infra_context.lock
     assert plan.seed_runner_factory is seed_runner_factory
     assert plan.dependencies_runner_factory is dependencies_runner_factory

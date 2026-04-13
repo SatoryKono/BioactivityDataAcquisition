@@ -62,7 +62,7 @@ def test_normalize_join_key_dataframe_columns_covers_supported_mutating_families
 
     assert result.to_dict(as_series=False) == {
         "doi": ["10.1000/abc"],
-        "pmid": ["pmid:12345"],
+        "pmid": ["12345"],
         "pmc_id": ["pmc123"],
         "uniprot_accession": ["p12345"],
         "title": ["Mixed Case Title"],

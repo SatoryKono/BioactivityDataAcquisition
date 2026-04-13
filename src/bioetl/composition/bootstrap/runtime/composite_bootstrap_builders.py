@@ -91,7 +91,7 @@ if TYPE_CHECKING:
         CompositeSupportServices,
     )
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LockPort, LoggerPort
+    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort
     from bioetl.infrastructure.config import Settings
 
 

@@ -118,6 +118,7 @@ class TestCreateCompositeRunner:
             runtime=MagicMock(),
             run_id=_VALID_RUN_ID,
             logger=MagicMock(),
+            metrics=MagicMock(),
             lock=MagicMock(),
             seed_runner_factory=MagicMock(),
             dependencies_runner_factory=MagicMock(),
@@ -158,6 +159,7 @@ class TestCreateCompositeRunner:
             runtime=MagicMock(),
             run_id=_VALID_RUN_ID,
             logger=MagicMock(),
+            metrics=MagicMock(),
             lock=MagicMock(),
             seed_runner_factory=MagicMock(),
             dependencies_runner_factory=MagicMock(),
@@ -184,11 +186,12 @@ class TestBootstrapCompositeRunner:
         """bootstrap_composite_runner chains basics -> factories -> services -> runner."""
         settings = SimpleNamespace()
         logger = MagicMock()
+        metrics = MagicMock()
         storage = MagicMock()
         lock = MagicMock()
 
         bootstrap_basics = MagicMock(
-            return_value=("rid", settings, logger, storage, lock)
+            return_value=("rid", settings, logger, metrics, storage, lock)
         )
         seed_f = MagicMock()
         dep_f = MagicMock()
@@ -224,6 +227,7 @@ class TestBootstrapCompositeRunner:
                 MagicMock(),
                 MagicMock(),
                 MagicMock(),
+                MagicMock(),
             )
         )
         create_runner = MagicMock(return_value=MagicMock())
@@ -247,10 +251,11 @@ class TestBootstrapCompositeRunner:
         """bootstrap_composite_runner should forward basics to support builder."""
         settings = SimpleNamespace(name="settings")
         logger = MagicMock()
+        metrics = MagicMock()
         storage = MagicMock()
         lock = MagicMock()
         bootstrap_basics = MagicMock(
-            return_value=("effective-rid", settings, logger, storage, lock)
+            return_value=("effective-rid", settings, logger, metrics, storage, lock)
         )
         build_support = MagicMock(return_value=SimpleNamespace())
 

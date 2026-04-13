@@ -14,7 +14,7 @@ from bioetl.domain.normalization.join_keys import (
 
 
 def test_normalize_join_key_text_applies_trim_and_lowercase_for_doi() -> None:
-    assert normalize_join_key_text(" 10.1000/ABC ", key="doi") == "10.1000/abc"
+    assert normalize_join_key_text(" https://doi.org/10.1000/ABC ", key="doi") == "10.1000/abc"
 
 
 def test_normalize_join_key_scalar_preserves_non_string_values() -> None:
@@ -25,7 +25,7 @@ def test_normalize_join_key_scalar_preserves_non_string_values() -> None:
     ("key", "raw_value", "expected"),
     (
         ("doi", " 10.1000/ABC ", "10.1000/abc"),
-        ("pmid", " PMID:12345 ", "pmid:12345"),
+        ("pmid", " PMID:12345 ", "12345"),
         ("pmc_id", " PMC123 ", "pmc123"),
         ("uniprot_accession", " P12345 ", "p12345"),
         ("title", "  Mixed Case Title  ", "Mixed Case Title"),
@@ -43,6 +43,11 @@ def test_normalize_join_key_text_covers_supported_mutating_families(
 def test_stringify_join_key_value_normalizes_float_ints_and_strings() -> None:
     assert stringify_join_key_value(42.0, key="pmid") == "42"
     assert stringify_join_key_value(" PMC123 ", key="pmc_id") == "pmc123"
+
+
+def test_invalid_identifier_family_collapses_to_empty_join_key() -> None:
+    assert normalize_join_key_text("PMC1234567", key="pmid") is None
+    assert stringify_join_key_value("PMC1234567", key="pmid") == ""
 
 
 def test_stringify_join_key_value_handles_none_empty_and_real_float_stably() -> None:

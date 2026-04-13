@@ -298,7 +298,7 @@ def bootstrap_composite_runner(
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
     bootstrap_runtime_basics_fn: Callable[
-        ..., tuple[str, Settings, LoggerPort, object, LockPort]
+        ..., tuple[str, Settings, LoggerPort, MetricsPort, object, LockPort]
     ],
     build_runner_factories_fn: Callable[
         ...,
@@ -318,7 +318,7 @@ def bootstrap_composite_runner(
         runtime: Runtime options (resume, dry_run, cached bronze, etc.).
         run_id: Optional UUID string for this run; generated when None.
         bootstrap_runtime_basics_fn: Callable that provisions base dependencies
-            (run_id, settings, logger, storage, lock).
+            (run_id, settings, logger, metrics, storage, lock).
         build_runner_factories_fn: Callable that returns (seed_factory,
             dependency_factory, enricher_factory) tuples.
         build_support_services_fn: Callable that returns CompositeSupportServices.

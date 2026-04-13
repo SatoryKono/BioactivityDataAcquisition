@@ -8,7 +8,11 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
+    bind_runner_dependencies,
     prepare_run_state,
     resolve_original_run_id,
     run_with_managed_lock,
@@ -16,6 +20,39 @@ from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import LockAcquisitionError, RunnerAlreadyExecutedError
+
+
+@pytest.mark.unit
+def test_bind_runner_dependencies_builds_metrics_aware_observer_fallback() -> None:
+    host = SimpleNamespace()
+    logger = MagicMock()
+    metrics = MagicMock()
+    deps = SimpleNamespace(
+        seed_runner_factory=MagicMock(),
+        enricher_runner_factory=MagicMock(),
+        dependencies_runner_factory=MagicMock(),
+        key_extractor=MagicMock(),
+        dependency_coordinator=MagicMock(),
+        coordinator=MagicMock(),
+        merger=MagicMock(),
+        checkpoint_manager=MagicMock(),
+        logger=logger,
+        lock=MagicMock(),
+        dq_report_service=MagicMock(),
+        preflight_validator=MagicMock(),
+        quarantine_port=MagicMock(),
+        metrics=metrics,
+        observer=None,
+        fsm_state_helper=MagicMock(),
+        manifest_id="manifest-123",
+        run_ledger_service=MagicMock(),
+    )
+
+    bind_runner_dependencies(host, deps)
+
+    assert isinstance(host._observer, CompositeLifecycleObserverService)
+    assert host._observer.logger is logger
+    assert host._observer.metrics is metrics
 
 
 @pytest.mark.unit

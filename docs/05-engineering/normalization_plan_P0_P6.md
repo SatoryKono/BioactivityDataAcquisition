@@ -388,6 +388,10 @@ Replace heuristic drift with explicit field contracts.
 - every schema field is covered explicitly
 - normalization function is declared field by field
 - hash participation is explicit per field
+- standard profile families must distinguish:
+  - pure textual normalization
+  - explicitly declared JSON-bearing string normalization
+  - meta-field passthrough outside `content_hash`
 
 ### Acceptance
 
@@ -401,7 +405,7 @@ Use explicit profiles as canonical contracts for covered pipeline schemas.
 
 ### Current state on `main`
 
-- [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) already ships a canonical registry
+- [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) already ships a canonical registry derived from one declarative shipped-profile table
 - shipped profiles currently include:
   - `chembl.activity`
   - `chembl.assay`
@@ -430,10 +434,12 @@ Use explicit profiles as canonical contracts for covered pipeline schemas.
 - each covered schema field is described explicitly
 - each profile field declares normalization behavior and hash participation
 - profile lookup coordinates are canonicalized by provider/entity pair
+- registry/module-path views must be derived from one canonical declaration rather than duplicated maps
 
 ### Acceptance
 
 - shipped profiles resolve only through the canonical registry
+- runtime registry and module-path registry cannot drift independently
 - each shipped profile covers its target schema exactly
 - covered fields do not depend on undocumented fallback heuristics
 
@@ -479,12 +485,19 @@ purity or import boundaries.
 - pure scalar join-key policies stay in the domain layer
 - DataFrame/runtime/config traversal stays in application/composite
 - canonical trim/casing semantics for join-key text remain shared across composite runtime paths
+- publication join-key identifiers must distinguish row-level canonical form from join-level canonical form:
+  - row-level `pmid` stays digits-only
+  - row-level `pmc_id` stays uppercase `PMC...`
+  - join-level `pmid` must validate against the PMID contract before comparison
+  - join-level `pmc_id` must validate against the PMC contract before lowercase comparison
+  - wrong-family values must collapse before they participate in composite joins
 
 ### Acceptance
 
 - domain join-key helpers remain dependency-free
 - application adapters reuse the canonical domain policies rather than redefining them locally
 - join-key behavior is documented as part of the normalization architecture
+- composite publication joins cannot silently accept `pmc_id` payloads in `pmid` keys
 
 ## P4 - Stabilize Set-Like Lists
 

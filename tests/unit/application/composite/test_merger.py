@@ -297,8 +297,8 @@ class TestMergeServiceJoinKeyNormalization:
         # Non-normalized columns should be unchanged
         assert result["title"].to_list() == ["Title 1", "Title 2"]
 
-    def test_normalize_pmid_to_lowercase(self, merge_service):
-        """Test PMID column is normalized to lowercase."""
+    def test_normalize_pmid_validates_family_before_join_canonicalization(self, merge_service):
+        """Test PMID column keeps digits-only IDs and nulls wrong-family identifiers."""
         import polars as pl
 
         df = pl.DataFrame(
@@ -312,7 +312,7 @@ class TestMergeServiceJoinKeyNormalization:
             df, ["pmid"], None
         )
 
-        assert result["pmid"].to_list() == ["12345678", "pmc1234567"]
+        assert result["pmid"].to_list() == ["12345678", None]
 
     def test_normalize_pmc_id_to_lowercase(self, merge_service):
         """Test PMC_ID column is normalized to lowercase."""

@@ -47,6 +47,7 @@ _PMID_FIELDS = frozenset({"pmid", "publication_pmid"})
 _PMC_ID_FIELDS = frozenset({"pmc_id", "publication_pmc_id"})
 _DATE_FIELDS = frozenset({"publication_date", "creation_date"})
 _INT_FIELDS = frozenset({"publication_year", "src_id", "citations_received", "citations_made"})
+_JSON_STRING_FIELDS = frozenset({"authors", "affiliation_list", "author_orcids"})
 
 CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="chembl.publication",
@@ -60,6 +61,7 @@ CHEMBL_PUBLICATION_PROFILE = build_standard_profile(
     pmc_id_fields=_PMC_ID_FIELDS,
     date_fields=_DATE_FIELDS,
     int_fields=_INT_FIELDS,
+    json_string_fields=_JSON_STRING_FIELDS,
 )
 
 CHEMBL_PUBLICATION_PROFILE.assert_covers_schema(CHEMBL_PUBLICATION_SCHEMA_FIELDS)

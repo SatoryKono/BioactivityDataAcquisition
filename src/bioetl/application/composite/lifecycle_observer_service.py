@@ -47,6 +47,16 @@ class CompositeLifecycleObserverService:
         """Return the canonical composite pipeline name for observability."""
         return f"composite:{composite_name}"
 
+    @staticmethod
+    def _filter_reserved_context(
+        context: dict[str, object],
+        *,
+        reserved_keys: set[str] | None = None,
+    ) -> dict[str, object]:
+        """Drop reserved contract keys from caller-provided event context."""
+        reserved = reserved_keys or {"composite", "run_id"}
+        return {key: value for key, value in context.items() if key not in reserved}
+
     def _emit_contract_event(
         self,
         event_name: str,
@@ -250,7 +260,9 @@ class CompositeLifecycleObserverService:
             "phase": phase_name,
             "composite": composite_name,
         }
-        log_kwargs.update(details or {})
+        log_kwargs.update(
+            self._filter_reserved_context(details or {}),
+        )
         self._emit_contract_event(
             PipelineEvent.phase_started(phase_name),
             composite_name=composite_name,
@@ -280,7 +292,9 @@ class CompositeLifecycleObserverService:
         }
         if duration_seconds is not None:
             log_kwargs["duration_seconds"] = round(duration_seconds, 4)
-        log_kwargs.update(details or {})
+        log_kwargs.update(
+            self._filter_reserved_context(details or {}),
+        )
         self._emit_contract_event(
             PipelineEvent.phase_completed(phase_name),
             composite_name=composite_name,
