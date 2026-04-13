@@ -110,6 +110,7 @@ def _serialized_state(
     state: CompositePipelineState = CompositePipelineState.SEED_COMPLETED,
     seed_completed: bool = True,
     with_seed_result: bool = True,
+    composite_run_identity: str | None = None,
     last_event_id: str | None = None,
     last_event_occurred_at: str | None = None,
 ) -> str:
@@ -134,6 +135,7 @@ def _serialized_state(
         "dependency_results": {},
         "completed_enrichers": [],
         "enrichment_results": {},
+        "composite_run_identity": composite_run_identity or run_id,
         "last_event_id": last_event_id,
         "last_event_occurred_at": last_event_occurred_at,
         "created_at": "2024-06-01T08:00:00+00:00",
@@ -164,6 +166,7 @@ def _make_run_ledger_entry(
 def _enriched_serialized_state(
     composite_name: str = "my_composite",
     run_id: str = "run-001",
+    composite_run_identity: str | None = None,
 ) -> str:
     """Return JSON with enricher progress (is_resumable=True)."""
     data = {
@@ -195,6 +198,7 @@ def _enriched_serialized_state(
                 "error_message": None,
             }
         },
+        "composite_run_identity": composite_run_identity or run_id,
         "created_at": "2024-06-01T08:00:00+00:00",
         "updated_at": "2024-06-01T09:00:00+00:00",
     }
@@ -673,6 +677,56 @@ class TestLoadResume:
 
         with pytest.raises(CheckpointConflictError):
             await svc.load()
+
+    @pytest.mark.asyncio
+    async def test_resume_blocks_on_composite_run_identity_mismatch(self) -> None:
+        """Resume is blocked when checkpoint composite_run_identity mismatches."""
+        svc, storage, logger = _make_service(
+            resume=True,
+            run_id="run-current",
+            expected_manifest_id="manifest-current",
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            manifest_id="manifest-current",
+            composite_run_identity="run-old",
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        with pytest.raises(CheckpointConflictError):
+            await svc.load()
+
+        error_calls = [str(c) for c in logger.error.call_args_list]
+        assert any("composite_run_identity" in c for c in error_calls)
+
+    @pytest.mark.asyncio
+    async def test_resume_blocks_when_composite_run_identity_missing(self) -> None:
+        """Resume is blocked when checkpoint misses composite_run_identity anchor."""
+        svc, storage, logger = _make_service(
+            resume=True,
+            run_id="run-current",
+            expected_manifest_id="manifest-current",
+        )
+        state_data = CompositeCheckpointState(
+            composite_name="my_composite",
+            run_id="run-old",
+            state=CompositePipelineState.ENRICHING,
+            seed_completed=True,
+            manifest_id="manifest-current",
+            composite_run_identity="",
+        )
+        storage.exists.return_value = True
+        storage.read.return_value = json.dumps(state_data.to_dict())
+
+        with pytest.raises(CheckpointConflictError):
+            await svc.load()
+
+        error_calls = [str(c) for c in logger.error.call_args_list]
+        assert any("missing composite_run_identity" in c for c in error_calls)
 
 
 # ---------------------------------------------------------------------------

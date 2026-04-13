@@ -901,7 +901,7 @@ def _claim_trace_statement() -> str:
         "  WHEN target.name IS NULL THEN NULL "
         "  ELSE {name: target.name, labels: labels(target)} "
         "END) AS targets "
-        "ORDER BY doc.name ASC, claim.line_number ASC"
+        "ORDER BY doc_name ASC, line_number ASC"
     )
 
 

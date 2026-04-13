@@ -41,7 +41,14 @@ from bioetl.domain.normalization import (
     normalize_run_manifest_spec,
     normalize_runtime_anchor_payload,
 )
-from bioetl.domain.normalization.profiles import resolve_normalization_profile
+from bioetl.domain.normalization.profiles import (
+    NORMALIZATION_PROFILE_REGISTRY,
+    resolve_normalization_profile,
+)
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_json_string,
+    normalize_profile_passthrough,
+)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
     CHEMBL_ASSAY_PARAMETERS_SCHEMA,
@@ -94,6 +101,10 @@ CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI = "control_plane_normalization_coverage
 ENTITY_RECORD_SURFACE = "entity_record"
 COMPOSITE_JOIN_KEY_SURFACE = "composite_join_key"
 CONTROL_PLANE_REPRODUCIBILITY_SURFACE = "control_plane_reproducibility"
+PROFILE_SEMANTICS_SURFACE = "profile_semantics"
+PROFILE_META_PASSTHROUGH_KPI = "shipped_profile_meta_passthrough_pct"
+PROFILE_SET_LIKE_JSON_STRING_KPI = "shipped_profile_set_like_json_string_pct"
+PROFILE_NON_META_PASSTHROUGH_FREE_KPI = "shipped_profile_non_meta_passthrough_free_pct"
 
 ENTITY_SILVER_SCHEMA_REGISTRY: dict[str, Any] = {
     "chembl_activity": CHEMBL_ACTIVITY_SCHEMA,
@@ -679,6 +690,100 @@ def build_surface_coverage_kpis(
     ]
 
 
+def _build_profile_semantic_kpi(
+    *,
+    name: str,
+    numerator: int,
+    denominator: int,
+    description: str,
+    regressions: list[str],
+) -> dict[str, object]:
+    value_pct = 100.0 if denominator == 0 else round((numerator * 100 / denominator), 2)
+    return {
+        "surface": PROFILE_SEMANTICS_SURFACE,
+        "name": name,
+        "description": description,
+        "numerator": numerator,
+        "denominator": denominator,
+        "value_pct": value_pct,
+        "regressions": regressions,
+    }
+
+
+def build_profile_semantic_invariants() -> list[dict[str, object]]:
+    """Return shipped-profile semantic invariants derived from active profile contracts."""
+    meta_total = 0
+    meta_ok = 0
+    set_like_total = 0
+    set_like_ok = 0
+    non_meta_total = 0
+    non_meta_ok = 0
+    meta_regressions: list[str] = []
+    set_like_regressions: list[str] = []
+    non_meta_passthrough_regressions: list[str] = []
+
+    for (provider, entity), profile in sorted(NORMALIZATION_PROFILE_REGISTRY.items()):
+        for field_name, rule in sorted(profile.field_rules.items()):
+            location = f"{provider}.{entity}.{field_name}"
+            if field_name in profile.meta_fields:
+                meta_total += 1
+                if (
+                    rule.normalizer is normalize_profile_passthrough
+                    and not rule.include_in_hash
+                ):
+                    meta_ok += 1
+                else:
+                    meta_regressions.append(
+                        f"{location} -> {getattr(rule.normalizer, '__name__', type(rule.normalizer).__name__)}"
+                    )
+                continue
+
+            non_meta_total += 1
+            if rule.normalizer is normalize_profile_passthrough:
+                non_meta_passthrough_regressions.append(location)
+            else:
+                non_meta_ok += 1
+
+            if rule.set_like:
+                set_like_total += 1
+                if rule.normalizer is normalize_profile_json_string:
+                    set_like_ok += 1
+                else:
+                    set_like_regressions.append(
+                        f"{location} -> {getattr(rule.normalizer, '__name__', type(rule.normalizer).__name__)}"
+                    )
+
+    return [
+        _build_profile_semantic_kpi(
+            name=PROFILE_META_PASSTHROUGH_KPI,
+            numerator=meta_ok,
+            denominator=meta_total,
+            description=(
+                "Shipped profile meta fields must use passthrough semantics and stay excluded from content_hash."
+            ),
+            regressions=meta_regressions,
+        ),
+        _build_profile_semantic_kpi(
+            name=PROFILE_SET_LIKE_JSON_STRING_KPI,
+            numerator=set_like_ok,
+            denominator=set_like_total,
+            description=(
+                "Shipped profile set-like fields must canonicalize through the JSON-string normalizer family."
+            ),
+            regressions=set_like_regressions,
+        ),
+        _build_profile_semantic_kpi(
+            name=PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
+            numerator=non_meta_ok,
+            denominator=non_meta_total,
+            description=(
+                "Non-meta shipped profile fields must not silently fall through the passthrough seam."
+            ),
+            regressions=non_meta_passthrough_regressions,
+        ),
+    ]
+
+
 def render_csv(rows: list[dict[str, str]]) -> str:
     output = io.StringIO()
     writer = csv.DictWriter(
@@ -694,6 +799,7 @@ def render_csv(rows: list[dict[str, str]]) -> str:
 def render_markdown(rows: list[dict[str, str]]) -> str:
     headers = list(CSV_COLUMNS)
     surface_kpis = build_surface_coverage_kpis(rows)
+    semantic_kpis = build_profile_semantic_invariants()
     lines = [
         "# Pipeline Normalization Field Matrix",
         "",
@@ -712,6 +818,19 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         lines.append(
             f"- {kpi['surface']} / {kpi['name']}: `{kpi['value_pct']:.2f}%` "
             f"(`{kpi['numerator']}` / `{kpi['denominator']}`) {kpi['description']}"
+        )
+    lines.extend(["", "## Semantic Invariant Summary", ""])
+    for kpi in semantic_kpis:
+        regressions = list(kpi.get("regressions", []))
+        regression_note = (
+            f" Regressions: {', '.join(regressions)}."
+            if regressions
+            else ""
+        )
+        lines.append(
+            f"- {kpi['surface']} / {kpi['name']}: `{kpi['value_pct']:.2f}%` "
+            f"(`{kpi['numerator']}` / `{kpi['denominator']}`) {kpi['description']}"
+            f"{regression_note}"
         )
     lines.extend(
         [

@@ -68,10 +68,22 @@ def test_build_payload_summarizes_fallback_rows() -> None:
                 "description": "Composite coverage.",
             },
         ],
+        semantic_invariants=[
+            {
+                "surface": "profile_semantics",
+                "name": "shipped_profile_meta_passthrough_pct",
+                "numerator": 10,
+                "denominator": 10,
+                "value_pct": 100.0,
+                "description": "Meta passthrough contract.",
+                "regressions": [],
+            }
+        ],
     )
 
     coverage_kpi = cast(dict[str, object], payload["coverage_kpi"])
     surface_kpis = cast(list[dict[str, object]], payload["surface_kpis"])
+    semantic_invariants = cast(list[dict[str, object]], payload["semantic_invariants"])
     pipelines = cast(list[dict[str, object]], payload["pipelines"])
     normalizers = cast(list[dict[str, object]], payload["normalizers"])
     sources = cast(list[dict[str, object]], payload["sources"])
@@ -79,6 +91,7 @@ def test_build_payload_summarizes_fallback_rows() -> None:
     assert payload["scope"] == "entity_record_fallback_only"
     assert coverage_kpi["name"] == "explicit_profile_coverage_pct"
     assert len(surface_kpis) == 2
+    assert len(semantic_invariants) == 1
     assert payload["fallback_field_count"] == 3
     assert payload["fallback_business_field_count"] == 2
     assert payload["fallback_technical_passthrough_field_count"] == 1
@@ -135,6 +148,17 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
                     "description": "Control-plane coverage.",
                 },
             ],
+            "semantic_invariants": [
+                {
+                    "surface": "profile_semantics",
+                    "name": "shipped_profile_meta_passthrough_pct",
+                    "numerator": 21,
+                    "denominator": 21,
+                    "value_pct": 100.0,
+                    "description": "Meta passthrough contract.",
+                    "regressions": [],
+                }
+            ],
             "fallback_field_count": 2,
             "fallback_business_field_count": 1,
             "fallback_technical_passthrough_field_count": 1,
@@ -177,7 +201,12 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
     assert "- scope: `entity_record_fallback_only`" in markdown
     assert "Fallback inventory tracks only entity-record fallback normalization debt." in markdown
     assert "## Surface Coverage Context" in markdown
+    assert "## Semantic Invariant Context" in markdown
     assert "- entity_record / explicit_profile_coverage_pct: `70.00%` (`7` / `10`)" in markdown
+    assert (
+        "- profile_semantics / shipped_profile_meta_passthrough_pct: `100.00%` "
+        "(`21` / `21`) Meta passthrough contract."
+    ) in markdown
     assert (
         "- composite_join_key / composite_join_key_policy_coverage_pct: `100.00%` "
         "(`4` / `4`) Composite coverage."
@@ -226,6 +255,7 @@ def test_main_writes_deterministic_artifacts(tmp_path: Path) -> None:
     assert markdown_out.read_text(encoding="utf-8") == first_md
     assert json.loads(first_json)["mode"] == "report-only"
     assert json.loads(first_json)["scope"] == "entity_record_fallback_only"
+    assert "semantic_invariants" in json.loads(first_json)
 
 
 def test_main_returns_non_zero_when_fallback_business_budget_is_exceeded() -> None:

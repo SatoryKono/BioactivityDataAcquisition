@@ -12,11 +12,15 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     DEFAULT_OUT_DIR,
     ENTITY_RECORD_SURFACE,
     MD_NAME,
+    PROFILE_META_PASSTHROUGH_KPI,
+    PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
+    PROFILE_SET_LIKE_JSON_STRING_KPI,
     build_artifacts,
     build_composite_join_key_policy_coverage_kpi,
     build_control_plane_normalization_coverage_kpi,
     build_entity_profile_coverage_kpi,
     build_field_matrix_rows,
+    build_profile_semantic_invariants,
     build_surface_coverage_kpis,
     check_artifacts,
     render_markdown,
@@ -92,6 +96,16 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert chembl_assay_parameters_run_id["normalization_source"] == "profile"
     assert chembl_assay_parameters_run_id["normalizer"] == "normalize_profile_passthrough"
     assert chembl_assay_parameters_run_id["include_in_content_hash"] == "false"
+
+    chembl_activity_run_id = _row(rows, "chembl_activity", "_run_id")
+    assert chembl_activity_run_id["normalization_source"] == "profile"
+    assert chembl_activity_run_id["normalizer"] == "normalize_profile_passthrough"
+    assert chembl_activity_run_id["include_in_content_hash"] == "false"
+
+    chembl_activity_index = _row(rows, "chembl_activity", "_index")
+    assert chembl_activity_index["normalization_source"] == "profile"
+    assert chembl_activity_index["normalizer"] == "normalize_profile_passthrough"
+    assert chembl_activity_index["include_in_content_hash"] == "false"
 
     chembl_assay_parameters_json = _row(rows, "chembl_assay", "assay_parameters")
     assert chembl_assay_parameters_json["normalizer"] == "normalize_profile_json_string"
@@ -180,6 +194,19 @@ def test_build_surface_coverage_kpis_lists_entity_composite_and_control_plane() 
     ]
 
 
+def test_build_profile_semantic_invariants_report_reviewed_semantics() -> None:
+    kpis = build_profile_semantic_invariants()
+
+    assert [kpi["name"] for kpi in kpis] == [
+        PROFILE_META_PASSTHROUGH_KPI,
+        PROFILE_SET_LIKE_JSON_STRING_KPI,
+        PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
+    ]
+    assert all(float(cast(float, kpi["value_pct"])) == 100.0 for kpi in kpis)
+    assert all(kpi["surface"] == "profile_semantics" for kpi in kpis)
+    assert all(list(kpi["regressions"]) == [] for kpi in kpis)
+
+
 def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
     markdown = render_markdown(
         [
@@ -211,6 +238,7 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
     )
 
     assert "## Surface Coverage Summary" in markdown
+    assert "## Semantic Invariant Summary" in markdown
     assert "Entity coverage is entity-scoped only" in markdown
     assert (
         "- entity_record / explicit_profile_coverage_pct: `50.00%` (`1` / `2`)"
@@ -221,6 +249,7 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
         "control_plane_reproducibility / control_plane_normalization_coverage_pct"
         in markdown
     )
+    assert "profile_semantics / shipped_profile_meta_passthrough_pct" in markdown
 
 
 def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:

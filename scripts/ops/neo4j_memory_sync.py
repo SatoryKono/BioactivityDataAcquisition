@@ -6965,8 +6965,22 @@ def _sync_run_id() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def _neo4j_property_value(value: JsonValue) -> JsonScalar | list[JsonScalar]:
+    if isinstance(value, dict):
+        return json.dumps(value, sort_keys=True)
+    if isinstance(value, list):
+        normalized_items: list[JsonScalar] = []
+        for item in value:
+            if isinstance(item, dict | list):
+                normalized_items.append(json.dumps(item, sort_keys=True))
+            else:
+                normalized_items.append(item)
+        return normalized_items
+    return value
+
+
 def _managed_properties(properties: dict[str, JsonValue], sync_run: str) -> dict[str, JsonValue]:
-    managed = dict(properties)
+    managed = {key: _neo4j_property_value(value) for key, value in properties.items()}
     managed["managed_by"] = DEFAULT_MANAGED_BY
     managed["sync_run"] = sync_run
     managed.setdefault("ingest_wave", DEFAULT_INGEST_WAVE)

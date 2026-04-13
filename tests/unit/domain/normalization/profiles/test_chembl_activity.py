@@ -6,6 +6,10 @@ from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_passthrough,
+    normalize_profile_text,
+)
 
 
 def test_chembl_activity_profile_covers_schema_exactly() -> None:
@@ -46,3 +50,22 @@ def test_chembl_activity_profile_snapshot_contains_expected_fields_and_semantics
     )
     assert CHEMBL_ACTIVITY_PROFILE.rule_for("activity_properties") is not None
     assert CHEMBL_ACTIVITY_PROFILE.rule_for("activity_properties").set_like is True
+
+
+def test_chembl_activity_meta_fields_use_passthrough_normalizer() -> None:
+    assert (
+        CHEMBL_ACTIVITY_PROFILE.rule_for("entity_id").normalizer
+        is normalize_profile_passthrough
+    )
+    assert (
+        CHEMBL_ACTIVITY_PROFILE.rule_for("_run_id").normalizer
+        is normalize_profile_passthrough
+    )
+    assert (
+        CHEMBL_ACTIVITY_PROFILE.rule_for("_index").normalizer
+        is normalize_profile_passthrough
+    )
+    assert (
+        CHEMBL_ACTIVITY_PROFILE.rule_for("activity_id").normalizer
+        is normalize_profile_text
+    )

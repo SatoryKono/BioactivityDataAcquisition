@@ -190,6 +190,7 @@ def test_claim_trace_statement_collects_claims_and_targets() -> None:
     assert "MATCH (doc)-[:ASSERTS]->(claim:doc_claim_surface)" in statement
     assert "(claim)-[:ASSERTS_ABOUT]->(target)" in statement
     assert "coalesce(claim.claim_text, '') AS claim_text" in statement
+    assert "ORDER BY doc_name ASC, line_number ASC" in statement
 
 
 def test_cli_semantics_statement_collects_options_and_side_effects() -> None:

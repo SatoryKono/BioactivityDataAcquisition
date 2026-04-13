@@ -6,6 +6,7 @@ import pandas as pd
 import pandera as pa
 import pytest
 
+from scripts.docs.generate_pipeline_normalization_field_matrix import build_field_matrix_rows
 from bioetl.application.core.field_specs import normalize_pmid as normalize_pmid_field_spec
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -26,10 +27,14 @@ from bioetl.domain.normalization import (
     normalize_runtime_anchor_payload,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.profiles import CHEMBL_ACTIVITY_PROFILE
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_doi,
+    normalize_profile_json_string,
+    normalize_profile_passthrough,
     normalize_profile_pmc_id,
     normalize_profile_pmid,
+    normalize_profile_text,
 )
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
@@ -40,6 +45,14 @@ from bioetl.domain.value_objects.publications import PubMedId
 pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 
 _HASH_A = "a" * 64
+
+
+def _matrix_row(pipeline_name: str, field_name: str) -> dict[str, str]:
+    return next(
+        row
+        for row in build_field_matrix_rows()
+        if row["pipeline_name"] == pipeline_name and row["field_name"] == field_name
+    )
 
 
 def test_pmid_contract_agrees_across_active_layers(
@@ -232,4 +245,55 @@ def test_record_normalization_processor_keeps_equivalent_payloads_hash_stable() 
     assert normalized_dirty["publication_date"] == "2024-03-31"
     assert processor.compute_content_hash(normalized_dirty) == processor.compute_content_hash(
         normalized_clean
+    )
+
+
+def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> None:
+    """chembl_activity meta fields must stay passthrough across all active seams."""
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
+    raw_run_id = "  run-001  "
+    raw_entity_id = " entity-42 "
+
+    assert CHEMBL_ACTIVITY_PROFILE.rule_for("_run_id").normalizer is normalize_profile_passthrough
+    assert CHEMBL_ACTIVITY_PROFILE.rule_for("entity_id").normalizer is normalize_profile_passthrough
+
+    run_id_row = _matrix_row("chembl_activity", "_run_id")
+    entity_id_row = _matrix_row("chembl_activity", "entity_id")
+    assert run_id_row["normalizer"] == "normalize_profile_passthrough"
+    assert entity_id_row["normalizer"] == "normalize_profile_passthrough"
+    assert run_id_row["include_in_content_hash"] == "false"
+    assert entity_id_row["include_in_content_hash"] == "false"
+
+    normalized = processor.normalize_business_data(
+        {"_run_id": raw_run_id, "entity_id": raw_entity_id}
+    )
+    assert normalized["_run_id"] == raw_run_id
+    assert normalized["entity_id"] == raw_entity_id
+
+
+def test_chembl_activity_business_and_set_like_fields_follow_profile_family_contracts() -> None:
+    """chembl_activity business text and set-like fields must align across profile/matrix/runtime."""
+    processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
+
+    assert CHEMBL_ACTIVITY_PROFILE.rule_for("activity_id").normalizer is normalize_profile_text
+    assert (
+        CHEMBL_ACTIVITY_PROFILE.rule_for("activity_properties").normalizer
+        is normalize_profile_json_string
+    )
+
+    activity_id_row = _matrix_row("chembl_activity", "activity_id")
+    activity_properties_row = _matrix_row("chembl_activity", "activity_properties")
+    assert activity_id_row["normalizer"] == "normalize_profile_text"
+    assert activity_properties_row["normalizer"] == "normalize_profile_json_string"
+    assert activity_properties_row["set_like"] == "true"
+
+    normalized = processor.normalize_business_data(
+        {
+            "activity_id": "  ACT-001  ",
+            "activity_properties": ' [ "beta" , "alpha" ] ',
+        }
+    )
+    assert normalized["activity_id"] == "ACT-001"
+    assert normalized["activity_properties"] == canonicalize_json_string(
+        ' [ "beta" , "alpha" ] '
     )

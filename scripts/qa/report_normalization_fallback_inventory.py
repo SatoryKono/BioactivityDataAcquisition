@@ -16,6 +16,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root / "src"))
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
+    build_profile_semantic_invariants,
     build_entity_profile_coverage_kpi,
     build_surface_coverage_kpis,
     FALLBACK_BUSINESS,
@@ -47,6 +48,7 @@ def _build_payload(
     *,
     coverage_kpi: dict[str, object] | None = None,
     surface_kpis: list[dict[str, object]] | None = None,
+    semantic_invariants: list[dict[str, object]] | None = None,
 ) -> dict[str, object]:
     per_pipeline = Counter(row["pipeline_name"] for row in rows)
     per_pipeline_source = Counter(
@@ -59,6 +61,7 @@ def _build_payload(
         "scope": "entity_record_fallback_only",
         "coverage_kpi": coverage_kpi or {},
         "surface_kpis": surface_kpis or [],
+        "semantic_invariants": semantic_invariants or [],
         "fallback_field_count": len(rows),
         "fallback_business_field_count": per_source[FALLBACK_BUSINESS],
         "fallback_technical_passthrough_field_count": per_source[
@@ -109,6 +112,7 @@ def build_fallback_inventory_payload() -> dict[str, object]:
         fallback_rows,
         coverage_kpi=build_entity_profile_coverage_kpi(all_rows),
         surface_kpis=build_surface_coverage_kpis(all_rows),
+        semantic_invariants=build_profile_semantic_invariants(),
     )
 
 
@@ -142,6 +146,23 @@ def _render_markdown(payload: dict[str, object], *, limit: int) -> str:
             f"(`{kpi.get('numerator', 0)}` / `{kpi.get('denominator', 0)}`) "
             f"{kpi.get('description', '')}".rstrip()
         )
+    semantic_invariants = cast(list[dict[str, Any]], payload.get("semantic_invariants", []))
+    if semantic_invariants:
+        lines.extend(["", "## Semantic Invariant Context", ""])
+        for kpi in semantic_invariants:
+            regressions = cast(list[str], kpi.get("regressions", []))
+            regression_note = (
+                f" Regressions: {', '.join(regressions)}."
+                if regressions
+                else ""
+            )
+            lines.append(
+                f"- {kpi.get('surface', 'profile_semantics')} / {kpi.get('name', 'semantic_kpi')}: "
+                f"`{float(kpi.get('value_pct', 0.0)):.2f}%` "
+                f"(`{kpi.get('numerator', 0)}` / `{kpi.get('denominator', 0)}`) "
+                f"{kpi.get('description', '')}".rstrip()
+                + regression_note
+            )
     lines.extend(
         [
             "",
