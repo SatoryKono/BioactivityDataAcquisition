@@ -17,6 +17,9 @@ import time
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.observability.observer import LifecyclePhase
+from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
+)
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 from bioetl.domain.types import HealthStatus
 
@@ -41,6 +44,7 @@ _PREPARE_MEDALLION_LAYERS_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[1]
 _EXECUTE_PIPELINE_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[2]
 _POSTRUN_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[3]
 _CHECKPOINT_FINALIZE_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[4]
+_OPERATION_ERRORS = _RF005_OPERATION_ERRORS
 _PHASE_BY_STAGE_NAME = {
     _PREFLIGHT_STAGE_NAME: LifecyclePhase.PREFLIGHT,
     _PREPARE_MEDALLION_LAYERS_STAGE_NAME: LifecyclePhase.LIFECYCLE_CLEAR,
@@ -161,7 +165,7 @@ async def _run_tracked_stage(
     )
     try:
         await operation()
-    except Exception as exc:
+    except _OPERATION_ERRORS as exc:
         host._observer.emit_phase_completed(
             phase,
             start_time,

@@ -8,6 +8,9 @@ from dataclasses import dataclass
 import time
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
+)
 from bioetl.application.core.postrun._service_collaborators import (
     resolve_postrun_collaborators,
 )
@@ -75,6 +78,7 @@ class PostrunService:
     TRACER_NAME = "bioetl.postrun"
     METRIC_POSTRUN_PHASE_EVENTS_TOTAL = "bioetl_postrun_phase_events_total"
     METRIC_POSTRUN_PHASE_DURATION_SECONDS = "bioetl_postrun_phase_duration_seconds"
+    OPERATION_ERRORS = _RF005_OPERATION_ERRORS
 
     def __init__(
         self,
@@ -259,7 +263,7 @@ class PostrunService:
         with self._postrun_span("postrun.dq_evaluation") as span:
             try:
                 result = self.run_dq_checks(executor)
-            except Exception as exc:
+            except self.OPERATION_ERRORS as exc:
                 self._emit_postrun_phase_observability(
                     phase="dq_evaluation",
                     status="failed",
@@ -291,7 +295,7 @@ class PostrunService:
         with self._postrun_span("postrun.compaction") as span:
             try:
                 result = await self.run_silver_compact_if_needed()
-            except Exception as exc:
+            except self.OPERATION_ERRORS as exc:
                 self._emit_postrun_phase_observability(
                     phase="compaction",
                     status="failed",
@@ -326,7 +330,7 @@ class PostrunService:
         with self._postrun_span("postrun.dq_reports") as span:
             try:
                 result = await self._generate_dq_reports(dq_context)
-            except Exception as exc:
+            except self.OPERATION_ERRORS as exc:
                 self._emit_postrun_phase_observability(
                     phase="dq_reports",
                     status="failed",
@@ -358,7 +362,7 @@ class PostrunService:
         with self._postrun_span("postrun.vacuum") as span:
             try:
                 result = await self.run_vacuum_if_enabled()
-            except Exception as exc:
+            except self.OPERATION_ERRORS as exc:
                 self._emit_postrun_phase_observability(
                     phase="vacuum",
                     status="failed",
@@ -399,7 +403,7 @@ class PostrunService:
                     executor,
                     dq_reports,
                 )
-            except Exception as exc:
+            except self.OPERATION_ERRORS as exc:
                 self._emit_postrun_phase_observability(
                     phase="final_metadata",
                     status="failed",

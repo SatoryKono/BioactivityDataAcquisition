@@ -35,6 +35,7 @@ _QUARANTINE_OPERATOR_DURATION_METRIC = "bioetl_quarantine_operator_duration_seco
 _QUARANTINE_OPERATOR_OPERATIONS_METRIC = (
     "bioetl_quarantine_operator_operations_total"
 )
+_QUARANTINE_OPERATOR_ERRORS = (OSError, RuntimeError, TypeError, ValueError)
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,7 +207,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
                 limit=limit,
                 error_code=error_code,
             )
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="inspect",
                 status="failed",
@@ -290,7 +291,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
 
         try:
             stats = await self.quarantine_port.get_stats(pipeline, error_code)
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="stats",
                 status="failed",
@@ -393,7 +394,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
                     now=now,
                 )
             )
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="replay",
                 status="failed",
@@ -548,7 +549,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
                 older_than_days=older_than_days,
                 now=now,
             )
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="purge",
                 status="failed",
@@ -630,7 +631,7 @@ class QuarantineService(QuarantineServiceFilteredMixin):
 
         try:
             success = self.quarantine_port.update_status(payload_hash, new_status)
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="update_status",
                 status="failed",

@@ -194,10 +194,6 @@ class TestSilverWriterSchemaDrift:
             [
                 pa.field("entity_id", pa.string()),
                 pa.field("value", pa.float64()),
-                pa.field("_run_id", pa.string()),
-                pa.field("_run_type", pa.string()),
-                pa.field("_source_batch_id", pa.string()),
-                pa.field("_ingestion_ts", pa.string()),
             ]
         )
         mock_delta_schema = MagicMock()

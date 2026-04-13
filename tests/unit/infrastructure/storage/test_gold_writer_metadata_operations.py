@@ -336,7 +336,7 @@ class TestPersistGoldMetadataWrite:
         host._metrics.increment_counter.assert_has_calls(
             [
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     1,
                     {
                         "pipeline": "composite_publication",
@@ -345,7 +345,7 @@ class TestPersistGoldMetadataWrite:
                     },
                 ),
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     1,
                     {
                         "pipeline": "composite_publication",
@@ -354,7 +354,7 @@ class TestPersistGoldMetadataWrite:
                     },
                 ),
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     2,
                     {
                         "pipeline": "composite_publication",
@@ -363,7 +363,7 @@ class TestPersistGoldMetadataWrite:
                     },
                 ),
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     1,
                     {
                         "pipeline": "composite_publication",

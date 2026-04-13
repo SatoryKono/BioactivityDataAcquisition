@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
+)
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     CheckpointCompatibilityPolicy,
     enrich_metadata_with_execution_identity,
@@ -16,6 +19,8 @@ from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort
 from bioetl.domain.types import RunID
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+
+_OPERATION_ERRORS = _RF005_OPERATION_ERRORS
 
 
 class CheckpointManagerService:
@@ -123,7 +128,7 @@ class CheckpointManagerService:
         if self._resume:
             try:
                 checkpoint_data = await self._checkpoint.load(self._pipeline_name)
-            except Exception:
+            except _OPERATION_ERRORS:
                 self._emit_checkpoint_load_status("failed")
                 raise
             if checkpoint_data:
@@ -165,7 +170,7 @@ class CheckpointManagerService:
                                 ),
                                 messages=compatibility_result.messages,
                             )
-                        except Exception:
+                        except _OPERATION_ERRORS:
                             self._emit_checkpoint_load_status(
                                 "incompatible_hard_fail"
                                 if disposition == "hard_fail_raised"
