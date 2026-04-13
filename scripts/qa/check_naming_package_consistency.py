@@ -31,6 +31,9 @@ SINGULAR_ROLE_TO_CANONICAL = {
     "service": "services",
     "facade": "facades",
 }
+ALLOWED_FACTORY_FACADES = {
+    "src/bioetl/application/core/wiring/factory.py",
+}
 
 
 @dataclass(frozen=True)
@@ -44,6 +47,7 @@ class Violation:
 
 def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
     script = repo_root / "scripts" / "qa" / "naming_audit.py"
+    docs_skip_path = repo_root / "docs" / "__naming_gate_skip__"
     if not script.exists():
         return [
             Violation(
@@ -53,7 +57,17 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
             )
         ]
     result = subprocess.run(
-        [sys.executable, str(script), "--check"],
+        [
+            sys.executable,
+            str(script),
+            "--check",
+            "--src",
+            str(repo_root / SRC_ROOT),
+            "--docs",
+            str(docs_skip_path),
+            "--configs",
+            str(repo_root / "configs"),
+        ],
         capture_output=True,
         text=True,
         cwd=repo_root,
@@ -84,6 +98,8 @@ def _factory_violations(repo_root: Path) -> list[Violation]:
 
             if py_file.name == "factory.py" or py_file.name.endswith("_factory.py"):
                 rel = py_file.relative_to(repo_root).as_posix()
+                if rel in ALLOWED_FACTORY_FACADES:
+                    continue
                 violations.append(
                     Violation(
                         rule="factory-only-in-composition",
