@@ -234,6 +234,39 @@ class TestQuarantineManagerBulkWrites:
         assert any(isinstance(event, RecordQuarantined) for event in emitted_events)
 
     @pytest.mark.asyncio
+    async def test_quarantine_record_prefers_activity_id_over_shared_record_id(
+        self,
+        quarantine_port: MagicMock,
+        metrics: MagicMock,
+    ) -> None:
+        """Activity quarantine events should expose the entity PK, not shared source ids."""
+        event_emitter = MagicMock()
+        manager = QuarantineManagerService(
+            quarantine_port=quarantine_port,
+            pipeline_name="chembl_activity",
+            metrics=metrics,
+            domain_event_emitter=event_emitter,
+        )
+        batch_id = BatchID(uuid4())
+        run_id = RunID(uuid4())
+        ingestion_ts = datetime(2026, 3, 10, 12, 0, 0, tzinfo=UTC)
+
+        await manager.quarantine_filtered_record(
+            record={"activity_id": "CHEMBL-ACT-1", "record_id": "250193"},
+            batch_id=batch_id,
+            error_details="filtered",
+            run_id=run_id,
+            ingestion_ts=ingestion_ts,
+        )
+
+        record_event = next(
+            call.args[0]
+            for call in event_emitter.emit_domain_event.call_args_list
+            if isinstance(call.args[0], RecordQuarantined)
+        )
+        assert record_event.record_id == "CHEMBL-ACT-1"
+
+    @pytest.mark.asyncio
     async def test_quarantine_records_empty_list_is_noop(
         self,
         quarantine_port: MagicMock,

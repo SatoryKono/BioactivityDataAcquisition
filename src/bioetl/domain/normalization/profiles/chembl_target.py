@@ -29,6 +29,7 @@ _META_FIELDS = frozenset(
 )
 _TITLE_FIELDS = frozenset({"pref_name"})
 _FLOAT_FIELDS = frozenset({"primary_component_id", "taxonomy_id"})
+_JSON_STRING_FIELDS = frozenset({"cross_references"})
 
 CHEMBL_TARGET_PROFILE = build_standard_profile(
     profile_name="chembl.target",
@@ -37,6 +38,7 @@ CHEMBL_TARGET_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     float_fields=_FLOAT_FIELDS,
+    json_string_fields=_JSON_STRING_FIELDS,
 )
 
 CHEMBL_TARGET_PROFILE.assert_covers_schema(CHEMBL_TARGET_SCHEMA_FIELDS)

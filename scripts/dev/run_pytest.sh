@@ -312,6 +312,34 @@ determine_preflight_scope() {
     printf '%s\n' "full"
 }
 
+_selected_is_compatibility_inventory_guard() {
+    _has_selected_test_paths || return 1
+    _selected_has_exact_test_root && return 1
+
+    local matched=0
+    local target
+    for target in "${_SELECTED_TEST_PATHS[@]}"; do
+        case "$target" in
+            tests/architecture/test_compatibility_facade_inventory.py|tests/architecture/test_compatibility_telemetry_reporting.py)
+                matched=1
+                ;;
+            *)
+                return 1
+                ;;
+        esac
+    done
+
+    [[ "$matched" == "1" ]]
+}
+
+determine_preflight_mode() {
+    if _selected_is_compatibility_inventory_guard; then
+        printf '%s\n' "check"
+        return 0
+    fi
+    printf '%s\n' "auto"
+}
+
 if _needs_cov_plugin "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}" && [[ -z "${COVERAGE_FILE:-}" ]]; then
     mkdir -p /tmp/bioetl-coverage
     coverage_file="$(mktemp /tmp/bioetl-coverage/.coverage.XXXXXX.sqlite)"
@@ -323,7 +351,8 @@ _collect_selected_test_paths "${PYTEST_ARGS[@]}"
 
 if should_run_preflight && [[ -f "scripts/dev/pretest_guardrails.sh" ]]; then
     preflight_scope="$(determine_preflight_scope)"
-    preflight_cmd=(bash scripts/dev/pretest_guardrails.sh --mode auto --scope "$preflight_scope")
+    preflight_mode="$(determine_preflight_mode)"
+    preflight_cmd=(bash scripts/dev/pretest_guardrails.sh --mode "$preflight_mode" --scope "$preflight_scope")
     if [[ "${BIOETL_PREFLIGHT_STRICT_DOCS:-0}" == "1" ]]; then
         preflight_cmd+=(--strict-docs)
     fi

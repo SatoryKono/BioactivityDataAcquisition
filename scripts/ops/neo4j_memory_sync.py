@@ -7837,6 +7837,14 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         issues.append("missing duplication_cluster promotion targets")
 
     if not any(
+        source_label == "duplication_cluster"
+        and relation_type == "CONTAINS"
+        and target_label in {"method_surface", "function_surface"}
+        for source_label, _, relation_type, target_label in relation_keys
+    ):
+        issues.append("missing duplication_cluster -> CONTAINS -> callable surface links")
+
+    if not any(
         source_label in {"method_surface", "function_surface"} and relation_type == "SAME_SHAPE_AS"
         for source_label, _, relation_type, _ in relation_keys
     ):

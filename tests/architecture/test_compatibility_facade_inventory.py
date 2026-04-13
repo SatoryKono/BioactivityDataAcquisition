@@ -105,6 +105,17 @@ def test_registry_yaml_has_expected_shape() -> None:
         assert row.new_code_policy in mod.ALLOWED_MEASURED_ONLY_NEW_CODE_POLICIES
         assert row.promotion_trigger in mod.ALLOWED_MEASURED_ONLY_PROMOTION_TRIGGERS
 
+    assert registry.measured_only_ratchet.max_total_modules >= len(
+        registry.measured_only_modules
+    )
+    assert registry.measured_only_ratchet.scoped_limits
+    assert registry.measured_only_review_workflow.required_checks
+    assert registry.measured_only_review_workflow.allowed_outcomes
+    assert (
+        registry.measured_only_review_workflow.review_cadence
+        in mod.ALLOWED_MEASURED_ONLY_REVIEW_CADENCES
+    )
+
 
 @pytest.mark.architecture
 def test_inventory_doc_exists_with_required_sections() -> None:
@@ -125,6 +136,8 @@ def test_inventory_doc_exists_with_required_sections() -> None:
         "### Retained Public Entrypoints",
         "## Generated Snapshot",
         "## Usage Notes",
+        "## Measured-Only Lifecycle Review",
+        "## Measured-Only Ratchet",
         "## Historical Review Log",
     ):
         assert heading in text, f"Missing heading in inventory doc: {heading}"
@@ -136,6 +149,10 @@ def test_inventory_doc_exists_with_required_sections() -> None:
     assert "## Measured-Only Policy" in text, (
         "Operational compatibility doc must state the measured-only policy "
         "separately from the generated snapshot."
+    )
+    assert "not sanctioned public import targets" in text, (
+        "Operational compatibility doc must explicitly state that measured-only "
+        "modules are not sanctioned public import targets."
     )
 
 
@@ -245,6 +262,59 @@ def test_measured_only_allowlist_matches_docstring_scan() -> None:
         "Allowlisted measured-only modules no longer expose tracked "
         "compatibility docstrings:\n" + "\n".join(sorted(missing))
     )
+
+
+@pytest.mark.architecture
+def test_first_party_src_does_not_import_measured_only_modules() -> None:
+    """Measured-only compatibility modules must stay out of first-party src imports."""
+    mod = _load_registry_module()
+    registry = mod.load_compatibility_registry(REGISTRY_YAML)
+    violations = mod.find_first_party_imports_of_measured_only_modules(registry)
+
+    assert not violations, (
+        "First-party src must not import measured-only compatibility modules.\n"
+        + "\n".join(
+            f"{module} <- {', '.join(importers)}"
+            for module, importers in sorted(violations.items())
+        )
+    )
+
+
+@pytest.mark.architecture
+def test_measured_only_ratchet_budget_is_not_exceeded() -> None:
+    """Measured-only compatibility surface must stay within the reviewed ratchet."""
+    mod = _load_registry_module()
+    registry = mod.load_compatibility_registry(REGISTRY_YAML)
+    violations, scoped_counts = mod.validate_measured_only_ratchet(registry)
+
+    assert not violations, (
+        "Measured-only compatibility surface exceeded its ratchet budget.\n"
+        + "\n".join(violations)
+        + "\nCurrent scoped counts:\n"
+        + "\n".join(
+            f"{path_prefix}={count}"
+            for path_prefix, count in sorted(scoped_counts.items())
+        )
+    )
+
+
+@pytest.mark.architecture
+def test_inventory_doc_declares_measured_only_lifecycle_workflow() -> None:
+    """Operational doc must explain lifecycle review outcomes for measured-only seams."""
+    text = INVENTORY_DOC.read_text(encoding="utf-8")
+
+    for snippet in (
+        "review cadence is quarterly",
+        "retain",
+        "promote",
+        "remove",
+        "Promotions into the curated ledger are required",
+        "Ratchet budgets are enforced",
+    ):
+        assert snippet in text, (
+            "Compatibility facade inventory doc must keep measured-only lifecycle "
+            f"workflow guidance for {snippet!r}"
+        )
 
 
 @pytest.mark.architecture

@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.metadata_assemblers_helpers import (
+from bioetl.application.services.lineage.metadata_assemblers_helpers import (
     _build_dataset_content_hash,
     _build_gold_lineage,
     _build_gold_output,

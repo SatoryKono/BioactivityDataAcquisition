@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from bioetl.application.services.metadata_lineage_node_builders import (
+from bioetl.application.services.lineage.metadata_lineage_node_builders import (
     source_request_node,
     source_system_node,
 )

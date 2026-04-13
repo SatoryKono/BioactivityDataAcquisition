@@ -407,7 +407,16 @@ class QuarantineManagerService:
     @staticmethod
     def _extract_record_id(payload: BronzeRecord) -> str | None:
         """Best-effort extraction of a stable record identifier from raw payloads."""
-        for key in ("record_id", "entity_id", "id", "activity_id", "compound_id"):
+        for key in (
+            "entity_id",
+            "activity_id",
+            "assay_id",
+            "molecule_id",
+            "target_id",
+            "record_id",
+            "compound_id",
+            "id",
+        ):
             value = payload.get(key)
             if value is None:
                 continue

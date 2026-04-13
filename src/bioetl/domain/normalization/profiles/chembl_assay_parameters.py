@@ -31,6 +31,7 @@ _META_FIELDS = frozenset(
 )
 _INT_FIELDS = frozenset({"assay_param_id"})
 _FLOAT_FIELDS = frozenset({"standard_value", "value"})
+_JSON_STRING_FIELDS = frozenset({"comments"})
 
 CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     profile_name="chembl.assay_parameters",
@@ -39,6 +40,7 @@ CHEMBL_ASSAY_PARAMETERS_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
+    json_string_fields=_JSON_STRING_FIELDS,
 )
 
 CHEMBL_ASSAY_PARAMETERS_PROFILE.assert_covers_schema(

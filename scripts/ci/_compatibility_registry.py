@@ -28,6 +28,18 @@ ALLOWED_MEASURED_ONLY_PROMOTION_TRIGGERS = frozenset(
         "sanctioned-public-seam",
     }
 )
+ALLOWED_MEASURED_ONLY_REVIEW_CADENCES = frozenset(
+    {
+        "quarterly",
+    }
+)
+ALLOWED_MEASURED_ONLY_REVIEW_OUTCOMES = frozenset(
+    {
+        "retain",
+        "promote",
+        "remove",
+    }
+)
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY_PATH = (
@@ -65,6 +77,32 @@ class MeasuredOnlyModule:
 
 
 @dataclass(frozen=True)
+class MeasuredOnlyRatchetScope:
+    """One scoped ratchet budget for measured-only compatibility modules."""
+
+    path_prefix: str
+    max_modules: int
+
+
+@dataclass(frozen=True)
+class MeasuredOnlyRatchet:
+    """Repo-level ratchet limits for measured-only compatibility surface growth."""
+
+    max_total_modules: int
+    scoped_limits: tuple[MeasuredOnlyRatchetScope, ...]
+
+
+@dataclass(frozen=True)
+class MeasuredOnlyReviewWorkflow:
+    """Lifecycle review workflow for measured-only compatibility modules."""
+
+    review_cadence: str
+    required_checks: tuple[str, ...]
+    allowed_outcomes: tuple[str, ...]
+    promotion_requires_curated_row: bool
+
+
+@dataclass(frozen=True)
 class CompatibilityRegistry:
     """Machine-readable compatibility registry contract."""
 
@@ -74,6 +112,8 @@ class CompatibilityRegistry:
     transition_debt: tuple[CompatibilityInventoryRow, ...]
     retained_entrypoints: tuple[CompatibilityInventoryRow, ...]
     measured_only_modules: tuple[MeasuredOnlyModule, ...]
+    measured_only_ratchet: MeasuredOnlyRatchet
+    measured_only_review_workflow: MeasuredOnlyReviewWorkflow
 
     @property
     def curated_rows(self) -> tuple[CompatibilityInventoryRow, ...]:
@@ -165,6 +205,82 @@ def _parse_measured_only_rows(payload: object) -> tuple[MeasuredOnlyModule, ...]
     return tuple(rows)
 
 
+def _parse_measured_only_ratchet(payload: object) -> MeasuredOnlyRatchet:
+    if not isinstance(payload, dict):
+        raise ValueError("measured_only_ratchet must be a mapping")
+
+    scoped_limits_payload = payload.get("scoped_limits")
+    if not isinstance(scoped_limits_payload, list) or not scoped_limits_payload:
+        raise ValueError("measured_only_ratchet.scoped_limits must be a non-empty list")
+
+    scoped_limits: list[MeasuredOnlyRatchetScope] = []
+    for item in scoped_limits_payload:
+        if not isinstance(item, dict):
+            raise ValueError("measured_only_ratchet.scoped_limits rows must be mappings")
+        scope = MeasuredOnlyRatchetScope(
+            path_prefix=str(item["path_prefix"]),
+            max_modules=int(item["max_modules"]),
+        )
+        if scope.max_modules < 0:
+            raise ValueError(
+                "measured_only_ratchet scoped max_modules must be non-negative "
+                f"for {scope.path_prefix}"
+            )
+        scoped_limits.append(scope)
+
+    max_total_modules = int(payload["max_total_modules"])
+    if max_total_modules < 0:
+        raise ValueError("measured_only_ratchet.max_total_modules must be non-negative")
+
+    return MeasuredOnlyRatchet(
+        max_total_modules=max_total_modules,
+        scoped_limits=tuple(scoped_limits),
+    )
+
+
+def _parse_measured_only_review_workflow(payload: object) -> MeasuredOnlyReviewWorkflow:
+    if not isinstance(payload, dict):
+        raise ValueError("measured_only_review_workflow must be a mapping")
+
+    review_cadence = str(payload["review_cadence"])
+    if review_cadence not in ALLOWED_MEASURED_ONLY_REVIEW_CADENCES:
+        raise ValueError(
+            "Unsupported measured_only_review_workflow.review_cadence "
+            f"{review_cadence!r}"
+        )
+
+    required_checks_payload = payload.get("required_checks")
+    if not isinstance(required_checks_payload, list) or not required_checks_payload:
+        raise ValueError(
+            "measured_only_review_workflow.required_checks must be a non-empty list"
+        )
+    required_checks = tuple(str(item) for item in required_checks_payload)
+
+    allowed_outcomes_payload = payload.get("allowed_outcomes")
+    if not isinstance(allowed_outcomes_payload, list) or not allowed_outcomes_payload:
+        raise ValueError(
+            "measured_only_review_workflow.allowed_outcomes must be a non-empty list"
+        )
+    allowed_outcomes = tuple(str(item) for item in allowed_outcomes_payload)
+    invalid_outcomes = sorted(
+        outcome
+        for outcome in allowed_outcomes
+        if outcome not in ALLOWED_MEASURED_ONLY_REVIEW_OUTCOMES
+    )
+    if invalid_outcomes:
+        raise ValueError(
+            "Unsupported measured_only_review_workflow.allowed_outcomes values: "
+            + ", ".join(invalid_outcomes)
+        )
+
+    return MeasuredOnlyReviewWorkflow(
+        review_cadence=review_cadence,
+        required_checks=required_checks,
+        allowed_outcomes=allowed_outcomes,
+        promotion_requires_curated_row=bool(payload["promotion_requires_curated_row"]),
+    )
+
+
 def load_compatibility_registry(
     registry_path: Path = DEFAULT_REGISTRY_PATH,
 ) -> CompatibilityRegistry:
@@ -188,6 +304,12 @@ def load_compatibility_registry(
         ),
         measured_only_modules=_parse_measured_only_rows(
             payload.get("measured_only_modules")
+        ),
+        measured_only_ratchet=_parse_measured_only_ratchet(
+            payload.get("measured_only_ratchet")
+        ),
+        measured_only_review_workflow=_parse_measured_only_review_workflow(
+            payload.get("measured_only_review_workflow")
         ),
     )
     if registry.policy_scope != "compatibility_facades":
@@ -216,6 +338,79 @@ def scan_docstring_tracked_modules(
             tracked_paths.add(path.resolve().relative_to(repo_root).as_posix())
 
     return tracked_paths
+
+
+def _iter_imported_modules(path: Path) -> tuple[str, ...]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    imported_modules: set[str] = set()
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported_modules.update(alias.name for alias in node.names if alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imported_modules.add(node.module)
+
+    return tuple(sorted(imported_modules))
+
+
+def find_first_party_imports_of_measured_only_modules(
+    registry: CompatibilityRegistry,
+    *,
+    src_root: Path = DEFAULT_SRC_ROOT,
+) -> dict[str, tuple[str, ...]]:
+    """Return first-party src imports that still target measured-only modules."""
+    repo_root = src_root.resolve().parents[1]
+    measured_module_names = {
+        path.removeprefix("src/").removesuffix(".py").replace("/", ".")
+        for path in registry.measured_only_paths
+    }
+    violations: dict[str, set[str]] = {}
+
+    for path in src_root.rglob("*.py"):
+        relative_path = path.resolve().relative_to(repo_root).as_posix()
+        current_module = relative_path.removeprefix("src/").removesuffix(".py").replace(
+            "/", "."
+        )
+        for imported_module in _iter_imported_modules(path):
+            if imported_module == current_module:
+                continue
+            if imported_module in measured_module_names:
+                violations.setdefault(imported_module, set()).add(relative_path)
+
+    return {
+        module_name: tuple(sorted(importers))
+        for module_name, importers in sorted(violations.items())
+    }
+
+
+def validate_measured_only_ratchet(
+    registry: CompatibilityRegistry,
+) -> tuple[tuple[str, ...], dict[str, int]]:
+    """Return ratchet violations and current scoped counts."""
+    violations: list[str] = []
+    scoped_counts: dict[str, int] = {}
+
+    total_modules = len(registry.measured_only_modules)
+    if total_modules > registry.measured_only_ratchet.max_total_modules:
+        violations.append(
+            "measured-only total exceeds ratchet budget: "
+            f"{total_modules} > {registry.measured_only_ratchet.max_total_modules}"
+        )
+
+    for scope in registry.measured_only_ratchet.scoped_limits:
+        current_count = sum(
+            1
+            for row in registry.measured_only_modules
+            if row.path.startswith(scope.path_prefix)
+        )
+        scoped_counts[scope.path_prefix] = current_count
+        if current_count > scope.max_modules:
+            violations.append(
+                "measured-only scoped budget exceeded for "
+                f"{scope.path_prefix}: {current_count} > {scope.max_modules}"
+            )
+
+    return tuple(violations), scoped_counts
 
 
 def validate_measured_docstring_surface(
