@@ -112,19 +112,25 @@ class TestNoOpMetrics:
         metrics = NoOpMetrics()
         metrics.set_gauge("memory_usage", 75.5, {"unit": "percent"})
 
-    def test_metrics_accept_legacy__labels_alias(self) -> None:
-        """Legacy _labels keyword should remain accepted."""
+    def test_metrics_reject_legacy__labels_alias(self) -> None:
+        """Legacy _labels keyword should remain rejected."""
         metrics = NoOpMetrics()
-        metrics.observe_histogram("duration", 1.5, _labels={"entity": "activity"})
-        metrics.increment_counter("errors", 1, _labels={"type": "validation"})
-        metrics.set_gauge("memory_usage", 75.5, _labels={"unit": "percent"})
+        with pytest.raises(TypeError):
+            metrics.observe_histogram("duration", 1.5, _labels={"entity": "activity"})
+        with pytest.raises(TypeError):
+            metrics.increment_counter("errors", 1, _labels={"type": "validation"})
+        with pytest.raises(TypeError):
+            metrics.set_gauge("memory_usage", 75.5, _labels={"unit": "percent"})
 
-    def test_metrics_accept_legacy_tags_alias(self) -> None:
-        """Legacy tags keyword should remain accepted."""
+    def test_metrics_reject_legacy_tags_alias(self) -> None:
+        """Legacy tags keyword should remain rejected."""
         metrics = NoOpMetrics()
-        metrics.observe_histogram("duration", 1.5, tags={"entity": "activity"})
-        metrics.increment_counter("errors", 1, tags={"type": "validation"})
-        metrics.set_gauge("memory_usage", 75.5, tags={"unit": "percent"})
+        with pytest.raises(TypeError):
+            metrics.observe_histogram("duration", 1.5, tags={"entity": "activity"})
+        with pytest.raises(TypeError):
+            metrics.increment_counter("errors", 1, tags={"type": "validation"})
+        with pytest.raises(TypeError):
+            metrics.set_gauge("memory_usage", 75.5, tags={"unit": "percent"})
 
     def test_close_no_error(self) -> None:
         """Test close is a no-op."""

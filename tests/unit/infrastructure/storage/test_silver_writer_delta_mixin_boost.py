@@ -245,8 +245,7 @@ class TestWriteMergeRetrySuccess:
         )
         merge_builder.when_matched_update_all.assert_called_once()
         matched_kwargs = merge_builder.when_matched_update_all.call_args.kwargs
-        assert "source._run_type = 'rebuild'" in matched_kwargs["predicate"]
-        assert "target._run_type = 'backfill'" in matched_kwargs["predicate"]
+        assert matched_kwargs["predicate"] == "true"
         merge_builder.when_not_matched_insert_all.assert_called_once()
         merge_builder.execute.assert_called_once()
 

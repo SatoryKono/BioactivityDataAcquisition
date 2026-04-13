@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Collection, Mapping
 
 from bioetl.domain.normalization.profiles.base import FieldRule, NormalizationProfile
-from bioetl.domain.normalization.profiles.helpers import (
+from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_abstract,
     normalize_profile_date,
     normalize_profile_doi,

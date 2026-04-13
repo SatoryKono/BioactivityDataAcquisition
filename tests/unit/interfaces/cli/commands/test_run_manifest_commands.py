@@ -209,6 +209,7 @@ class _FakeRunManifestService:
                     "replay_ready_missing_requirements": [],
                     "forensic_grade_missing_requirements": [],
                     "composite_resume_reconstructability": {
+                        "scope": "coarse_grained_composite_resume",
                         "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
                         "reconstructs": [
                             "state",
@@ -230,6 +231,7 @@ class _FakeRunManifestService:
                     "lineage_gap": False,
                     "immutable_input_snapshot_gap": False,
                     "strict_replay_boundary_gap": False,
+                    "composite_resume_reconstructability_gap": False,
                     "dq_signal_present": True,
                     "cross_validation_signal_present": True,
                 },

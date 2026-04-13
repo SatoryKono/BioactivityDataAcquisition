@@ -238,6 +238,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
                 "run_ledger_history",
             ],
             "composite_resume_reconstructability": {
+                "scope": "coarse_grained_composite_resume",
                 "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
                 "reconstructs": [
                     "state",
@@ -259,6 +260,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "lineage_gap": False,
             "immutable_input_snapshot_gap": True,
             "strict_replay_boundary_gap": False,
+            "composite_resume_reconstructability_gap": False,
             "replay_ready_gap": True,
             "forensic_grade_gap": True,
             "dq_signal_present": False,
@@ -451,6 +453,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
             "immutable_input_snapshots",
         ],
         "composite_resume_reconstructability": {
+            "scope": "coarse_grained_composite_resume",
             "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
             "reconstructs": [
                 "state",
@@ -479,6 +482,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     assert alert_signals["lineage_gap"] is False
     assert alert_signals["immutable_input_snapshot_gap"] is True
     assert alert_signals["strict_replay_boundary_gap"] is False
+    assert alert_signals["composite_resume_reconstructability_gap"] is False
     assert alert_signals["replay_ready_gap"] is True
     assert alert_signals["forensic_grade_gap"] is True
     assert alert_signals["dq_signal_present"] is False
@@ -563,9 +567,11 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "immutable_input_snapshots",
     ]
     assert summary["alert_signals"]["strict_replay_boundary_gap"] is True
+    assert summary["alert_signals"]["composite_resume_reconstructability_gap"] is True
     assert summary["next_steps"] == [
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
         "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay.",
+        "Treat composite resume as checkpoint snapshot plus ledger suffix replay only; do not expect per-provider result maps or other rich checkpoint payloads to be reconstructed.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]

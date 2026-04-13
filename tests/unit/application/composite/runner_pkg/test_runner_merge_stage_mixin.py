@@ -9,6 +9,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
 )
@@ -71,6 +74,8 @@ class _MergeHarness(CompositeRunnerMergeStageMixin):
         )
         self._runtime = SimpleNamespace(dry_run=False)
         self._logger = MagicMock()
+        self._observer_logger = MagicMock()
+        self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-merge-test"
         self._fsm = MagicMock()
         self._merger = MagicMock()

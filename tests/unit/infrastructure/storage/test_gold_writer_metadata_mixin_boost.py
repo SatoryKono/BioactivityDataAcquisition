@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
@@ -42,6 +43,14 @@ def _make_record(
     if extra:
         record.update(extra)
     return record
+
+
+def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
+    """Create metadata mocks compatible with MetadataLineageBundle identity checks."""
+    metadata = MagicMock()
+    metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
+    metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    return metadata
 
 
 class _ConcreteGoldMixin(GoldWriterMetadataMixin):
@@ -269,7 +278,7 @@ class TestWriteGoldMetadata:
             MetadataLineageBundle,
         )
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         class _Coordinator:
             def create_gold_metadata_bundle(
@@ -308,7 +317,7 @@ class TestWriteGoldMetadata:
             MetadataLineageBundle,
         )
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         class _Coordinator:
             def create_gold_metadata_bundle(
@@ -386,7 +395,7 @@ class TestWriteGoldMergedMetadata:
             MetadataLineageBundle,
         )
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         class _Coordinator:
             def create_gold_metadata_bundle(
@@ -421,7 +430,7 @@ class TestWriteGoldMergedMetadata:
             MetadataLineageBundle,
         )
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         class _Coordinator:
             def create_gold_metadata_bundle(

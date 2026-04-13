@@ -8,6 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_support_mixin import (
     _CompositeRunnerStageSupportMixin,
 )
@@ -68,6 +71,8 @@ class _StageSupportHarness(_CompositeRunnerStageSupportMixin):
             force_enricher=None,
         )
         self._logger = MagicMock()
+        self._observer_logger = MagicMock()
+        self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-stage-support-test"
         self._fsm = MagicMock()
         self._checkpoint_manager = AsyncMock()

@@ -593,6 +593,16 @@ ______________________________________________________________________
 
 ### `checkpoint` — Управление checkpoint
 
+Checkpoint inspection surfaces also expose correlated run-manifest diagnostics.
+For `bioetl checkpoint audit-run --run-id <UUID>`, the text renderer now
+includes:
+
+- `persistence_profile`;
+- `composite_resume_reconstructability` for the bounded composite replay
+  contract;
+- `alert_signals`;
+- `next_steps`.
+
 #### `checkpoint list` — Список checkpoint
 
 ```bash

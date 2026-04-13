@@ -114,7 +114,6 @@ def test_observability_runtime_public_exports_stable() -> None:
         "bootstrap_observability_bundle",
         "bootstrap_tracer_port",
         "maybe_start_metrics_server",
-        "start_metrics_server",
         "validate_observability_preflight",
     ]
     assert (

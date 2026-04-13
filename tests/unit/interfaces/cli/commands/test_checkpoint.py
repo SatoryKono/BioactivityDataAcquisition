@@ -70,7 +70,28 @@ class _FakeWorkflowService:
                             "attained_profile": "forensic_grade",
                             "replay_ready_missing_requirements": [],
                             "forensic_grade_missing_requirements": [],
+                            "composite_resume_reconstructability": {
+                                "scope": "coarse_grained_composite_resume",
+                                "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+                                "reconstructs": [
+                                    "state",
+                                    "seed_completed",
+                                    "merge_completed",
+                                    "last_event_id",
+                                    "last_event_occurred_at",
+                                ],
+                                "does_not_reconstruct": [
+                                    "per_provider_result_maps",
+                                    "rich_checkpoint_payloads",
+                                ],
+                            },
                         },
+                        "alert_signals": {
+                            "composite_resume_reconstructability_gap": False,
+                        },
+                        "next_steps": [
+                            "No alert signals detected; continue routine monitoring."
+                        ],
                     },
                 },
             }
@@ -241,6 +262,10 @@ class TestCheckpointCommands:
         assert "persistence_profile: forensic_grade" in result.output
         assert "replay_ready_missing_requirements: []" in result.output
         assert "forensic_grade_missing_requirements: []" in result.output
+        assert "composite_resume_reconstructability:" in result.output
+        assert "checkpoint_snapshot_plus_ledger_suffix" in result.output
+        assert "alert_signals:" in result.output
+        assert "next_steps:" in result.output
         assert "silver/chembl.activity merge" in result.output
         assert service.audit_run_calls == [
             ("00000000-0000-0000-0000-000000000001", 100)

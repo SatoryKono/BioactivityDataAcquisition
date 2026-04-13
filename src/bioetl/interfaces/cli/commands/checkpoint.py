@@ -106,6 +106,11 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
                 if isinstance(persistence_profile, dict)
                 else None
             )
+            composite_resume_reconstructability = (
+                persistence_profile.get("composite_resume_reconstructability")
+                if isinstance(persistence_profile, dict)
+                else None
+            )
             lines.extend(
                 [
                     f"  replay_capability: {replay_view.get('replay_capability')}",
@@ -120,6 +125,9 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
                     f"{persistence_profile.get('replay_ready_missing_requirements') if isinstance(persistence_profile, dict) else None}",
                     f"  forensic_grade_missing_requirements: "
                     f"{persistence_profile.get('forensic_grade_missing_requirements') if isinstance(persistence_profile, dict) else None}",
+                    f"  composite_resume_reconstructability: {composite_resume_reconstructability}",
+                    f"  alert_signals: {replay_view.get('alert_signals')}",
+                    f"  next_steps: {replay_view.get('next_steps')}",
                 ]
             )
     lines.extend(["", "Audit Entries"])

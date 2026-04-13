@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib import import_module
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -20,8 +21,6 @@ from bioetl.infrastructure.observability import (
 )
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitorService
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.observability.server import start_metrics_server
-
 from .dq_bootstrap import bootstrap_dq_monitor_port as _bootstrap_dq_monitor_port_impl
 from .metrics_bootstrap import bootstrap_metrics_port as _bootstrap_metrics_port_impl
 from .logger_bootstrap import bootstrap_logger_port as _bootstrap_logger_port_impl
@@ -47,7 +46,6 @@ __all__ = [
     "bootstrap_observability_bundle",
     "bootstrap_tracer_port",
     "maybe_start_metrics_server",
-    "start_metrics_server",
     "validate_observability_preflight",
 ]
 
@@ -161,6 +159,29 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
     """
     return _maybe_start_metrics_server_impl(
         settings=settings,
+    )
+
+
+def start_metrics_server(
+    port: int = 8000,
+    addr: str = "0.0.0.0",
+    *,
+    fail_fast: bool = False,
+    retry_count: int = 3,
+    retry_delay: float = 1.0,
+    logger: LoggerPort | None = None,
+) -> bool:
+    """Compatibility patch-point delegating to the composition observability seam."""
+    observability_api = import_module(
+        "bioetl.composition.observability_api"
+    )
+    return observability_api.start_metrics_server(
+        port=port,
+        addr=addr,
+        fail_fast=fail_fast,
+        retry_count=retry_count,
+        retry_delay=retry_delay,
+        logger=logger,
     )
 
 

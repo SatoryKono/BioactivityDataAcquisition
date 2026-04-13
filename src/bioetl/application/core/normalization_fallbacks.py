@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.application.core.normalization_rules import NormalizationRulesPolicy
 from bioetl.domain.normalization.dates import normalize_partial_date
-from bioetl.domain.normalization.profiles.helpers import (
+from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_doi,
     normalize_profile_json_string,
     normalize_profile_pmid,
