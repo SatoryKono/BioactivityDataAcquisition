@@ -220,7 +220,7 @@ class TestChainedKeyResolver:
         assert result.to_dict(as_series=False) == {
             "doi": ["10.1/abc"],
             "title": ["Mixed Case Title"],
-            "pmid": ["pmid:12345"],
+            "pmid": ["12345"],
             "uniprot_accession": ["p12345"],
         }
 

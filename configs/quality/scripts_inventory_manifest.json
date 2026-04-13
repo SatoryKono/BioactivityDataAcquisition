@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-13T06:23:31.213113+00:00",
+  "generated_at": "2026-04-13T07:04:00.324252+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -1420,15 +1420,15 @@
         },
         {
           "path": "scripts/dev/run_pytest.sh",
-          "line": 324,
+          "line": 352,
           "source_group": "scripts",
           "text": "if should_run_preflight && [[ -f \"scripts/dev/pretest_guardrails.sh\" ]]; then"
         },
         {
           "path": "scripts/dev/run_pytest.sh",
-          "line": 326,
+          "line": 355,
           "source_group": "scripts",
-          "text": "preflight_cmd=(bash scripts/dev/pretest_guardrails.sh --mode auto --scope \"$preflight_scope\")"
+          "text": "preflight_cmd=(bash scripts/dev/pretest_guardrails.sh --mode \"$preflight_mode\" --scope \"$preflight_scope\")"
         }
       ]
     },
@@ -6426,19 +6426,19 @@
         },
         {
           "path": "scripts/dev/run_pytest.sh",
-          "line": 383,
+          "line": 412,
           "source_group": "scripts",
           "text": "if [[ -f \"scripts/ops/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/dev/run_pytest.sh",
-          "line": 384,
+          "line": 413,
           "source_group": "scripts",
           "text": "bash scripts/ops/setup_plugins.sh --pytest-only"
         },
         {
           "path": "scripts/dev/run_pytest.sh",
-          "line": 388,
+          "line": 417,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
         }
@@ -8853,7 +8853,7 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 84,
+          "line": 74,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },

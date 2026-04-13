@@ -1,4 +1,4 @@
-"""Backward-compatible anomaly type aliases for infrastructure detection code."""
+"""Anomaly type aliases for infrastructure detection code."""
 
 from __future__ import annotations
 

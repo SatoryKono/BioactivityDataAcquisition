@@ -154,6 +154,9 @@ operational; do not copy generated snapshot counters back into it by hand.
   transition-only again.
 - For provider adapters, first-party code should prefer provider package roots when those roots are
   the documented canonical path; retained `client.py` modules remain stable compatibility seams.
+- `retained-entrypoint` rows are sanctioned public seams. Measured-only modules are not sanctioned
+  public import targets for first-party `src/`; they remain tracked only to prevent silent
+  compatibility-surface drift while owners decide whether to retain, promote, or remove them.
 
 ## Measured-Only Policy
 
@@ -167,9 +170,36 @@ are not curated ledger rows by default.
 - A measured-only module must be promoted into the curated ledger before or when it becomes a
   sanctioned public seam that needs explicit canonical-target, call-site, or exit-criteria
   governance.
+- Measured-only modules are not sanctioned public import targets. New first-party `src/` imports
+  must point at the canonical package/module seam instead of the measured-only wrapper.
 - The machine-readable policy for measured-only rows lives in
   `configs/quality/compatibility_facade_inventory.yaml` via `new_code_policy` and
   `promotion_trigger`; keep that contract aligned with tests and snapshot generation.
+
+## Measured-Only Lifecycle Review
+
+Measured-only review cadence is quarterly.
+
+- Every quarterly review must re-run the measured-only import scan, docstring-tracking validation,
+  owner tests, and compatibility snapshot generation before making a lifecycle decision.
+- Allowed review outcomes are `retain`, `promote`, and `remove`.
+- `retain` means the wrapper remains unsanctioned and measured-only for one more review cycle.
+- `promote` means the wrapper becomes a sanctioned public seam with a curated ledger row and full
+  governance fields.
+- `remove` means the wrapper has no remaining justified compatibility role and can be deleted once
+  targeted verification is green.
+- Promotions into the curated ledger are required before a measured-only seam can be treated as a
+  sanctioned public import path.
+
+## Measured-Only Ratchet
+
+Ratchet budgets are enforced through the YAML SSOT and architecture tests.
+
+- The repo-level measured-only cap prevents silent growth of compatibility residue.
+- Scoped caps keep `application/services` compatibility wrappers from regrowing after the lineage
+  retirement wave.
+- Raising a ratchet budget requires an explicit policy review, registry update, snapshot refresh,
+  and issue-level justification.
 
 ## Historical Review Log
 

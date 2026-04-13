@@ -1,4 +1,4 @@
-"""Compatibility wrapper for canonical runtime observability assembly."""
+"""Runtime observability bundle assembly helpers."""
 
 from __future__ import annotations
 

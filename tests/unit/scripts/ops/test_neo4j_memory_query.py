@@ -205,8 +205,11 @@ def test_duplication_cluster_statement_uses_cluster_targets_members_and_tests() 
 
     assert "MATCH (cluster:duplication_cluster {name: $name})" in statement
     assert "(cluster)-[:CAN_PROMOTE_TO]->(target)" in statement
-    assert "(cluster)-[:CONTAINS]->(member)" in statement
-    assert "(cluster)-[:COVERED_BY_TEST]->(test)" in statement
+    assert "(cluster)-[:CONTAINS]->(direct_member)" in statement
+    assert "cluster.surface_kind IN labels(fallback)" in statement
+    assert "coalesce(fallback.ast_shape_hash, '') = coalesce(cluster.ast_shape_hash, '')" in statement
+    assert "(cluster)-[:COVERED_BY_TEST]->(direct_test)" in statement
+    assert "[:TESTS_PACKAGE_FAMILY]->(family:package_family" in statement
     assert "collect(DISTINCT" in statement
 
 
@@ -232,8 +235,9 @@ def test_promotion_candidates_statement_filters_by_family_and_orders_by_score() 
 
     assert "MATCH (cluster:duplication_cluster)" in statement
     assert "$name = 'all' OR cluster.family_name = $name" in statement
-    assert "count(DISTINCT member) AS member_count" in statement
-    assert "count(DISTINCT test) AS test_count" in statement
+    assert "(cluster)-[:CONTAINS]->(direct_member)" in statement
+    assert "size(members) AS member_count" in statement
+    assert "size(tests) AS test_count" in statement
     assert "ORDER BY cluster.promotion_score DESC, cluster.duplicate_count DESC" in statement
 
 
