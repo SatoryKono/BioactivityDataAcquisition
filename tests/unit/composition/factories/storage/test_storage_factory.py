@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -402,3 +402,71 @@ def test_create_uses_file_audit_adapter_when_enabled(tmp_path: Path) -> None:
     assert bronze_audit is silver_audit
     assert bronze_audit is gold_audit
     assert bronze_audit.base_path == audit_path
+
+
+@pytest.mark.unit
+def test_create_resolves_tracing_once_at_storage_factory_boundary(
+    tmp_path: Path,
+) -> None:
+    """StorageFactory owns disabled tracing fallback instead of layer sub-factories."""
+    settings = _make_settings(
+        test_mode=False,
+        bronze_path=tmp_path / "default" / "bronze",
+        silver_path=tmp_path / "default" / "silver",
+        gold_path=tmp_path / "default" / "gold",
+        checkpoint_path=tmp_path / "checkpoints",
+    )
+    config = _make_config(
+        bronze_layer=_make_sink_layer(tmp_path / "yaml" / "bronze"),
+        silver_layer=_make_sink_layer(tmp_path / "yaml" / "silver"),
+        gold_layer=_make_sink_layer(tmp_path / "yaml" / "gold"),
+    )
+    logger = MagicMock()
+    metrics = MagicMock()
+    resolved_tracing = MagicMock()
+    ctx = SimpleNamespace(
+        bronze_path=tmp_path / "bronze",
+        silver_path=tmp_path / "silver",
+        gold_path=tmp_path / "gold",
+        bronze_config=config.sink["bronze"],
+        silver_config=config.sink["silver"],
+        gold_config=config.sink["gold"],
+        bronze_flat=False,
+        silver_flat=False,
+        gold_flat=False,
+        bronze_csv_exporter=None,
+        silver_csv_exporter=None,
+        gold_csv_exporter=None,
+    )
+    adapter = MagicMock()
+
+    with (
+        patch(
+            "bioetl.composition.factories.storage.factory.build_storage_creation_context",
+            return_value=ctx,
+        ) as mock_build_ctx,
+        patch(
+            "bioetl.composition.factories.storage.factory.resolve_tracing_port",
+            return_value=resolved_tracing,
+        ) as mock_resolve_tracing,
+        patch(
+            "bioetl.composition.factories.storage.factory.create_storage_adapter",
+            return_value=adapter,
+        ) as mock_create_adapter,
+    ):
+        result = StorageFactory.create(
+            settings=settings,
+            config=config,
+            logger=logger,
+            metrics=metrics,
+            tracing=None,
+        )
+
+    mock_build_ctx.assert_called_once_with(
+        settings=settings,
+        config=config,
+        logger=logger,
+    )
+    mock_resolve_tracing.assert_called_once_with(tracer=None, settings=settings)
+    assert mock_create_adapter.call_args.kwargs["tracing"] is resolved_tracing
+    assert result.adapter is adapter

@@ -44,7 +44,6 @@ criteria:
     description: Checkpoint remains snapshot-only and does not embed event history.
     source_paths:
       - src/bioetl/application/composite/checkpoint/state.py
-      - src/bioetl/application/composite/checkpoint/_state_codec.py
       - src/bioetl/application/composite/checkpoint/load_service.py
     verification_tests:
       - tests/unit/application/composite/checkpoint/test_checkpoint_state.py

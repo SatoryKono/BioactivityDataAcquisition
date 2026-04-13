@@ -182,6 +182,8 @@ def test_diagnostics_guide_displays_canonical_routes(cli_runner: CliRunner) -> N
     assert "bioetl diagnostics manifest" in result.output
     assert "bioetl diagnostics quarantine" in result.output
     assert "auto-managed during pipeline runs" in result.output
+    assert "report-observability-metric-inventory" in result.output
+    assert "grafana/prometheus-rules/bioetl_observability.yml" in result.output
 
 
 @pytest.mark.unit
@@ -257,6 +259,7 @@ def test_diagnostics_metrics_text_displays_operator_workflow(
     assert "metrics_server_mode: auto_managed_during_pipeline_runs" in result.output
     assert "pushgateway_mode: best_effort_on_run_completion" in result.output
     assert "inspect metrics/admin state: bioetl diagnostics metrics [--json]" in result.output
+    assert "report-observability-metric-inventory" in result.output
 
 
 @pytest.mark.unit

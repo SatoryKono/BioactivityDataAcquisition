@@ -12,7 +12,6 @@ from bioetl.composition.factories.storage._silver import create_silver_writer
 from bioetl.domain.ports.noop import (
     NoOpAudit,
     NoOpMetadataWriter,
-    NoOpTracing,
 )
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 
@@ -21,33 +20,27 @@ from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 class TestCreateSilverWriter:
     """Tests for create_silver_writer factory function."""
 
-    def test_creates_writer_with_defaults(self) -> None:
-        """Creates SilverWriter with NoOp defaults when config is None."""
+    def test_requires_explicit_tracing(self) -> None:
+        """Silver writer factory requires composition-owned tracing resolution."""
         writer_cls = MagicMock()
-        expected = MagicMock()
-        writer_cls.return_value = expected
 
-        result = create_silver_writer(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=None,
-            logger=MagicMock(),
-            tracing=None,
-            csv_exporter=None,
-            metadata_coordinator=None,
-            audit=NoOpAudit(),
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=None,
-        )
+        with pytest.raises(TypeError):
+            create_silver_writer(
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=None,
+                logger=MagicMock(),
+                tracing=None,
+                csv_exporter=None,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=None,
+            )
 
-        assert result is expected
-        call_kwargs = writer_cls.call_args[1]
-        runtime_services = call_kwargs["runtime_services"]
-        assert isinstance(runtime_services.audit, NoOpAudit)
-        assert isinstance(runtime_services.tracing, NoOpTracing)
-        assert isinstance(runtime_services.metadata_writer, NoOpMetadataWriter)
+        writer_cls.assert_not_called()
 
     def test_creates_metadata_writer_when_save_metadata(self) -> None:
         """Creates real MetadataWriter when config.save_metadata is True."""
@@ -59,7 +52,7 @@ class TestCreateSilverWriter:
             base_path=Path("/data/silver"),
             config=config,
             logger=MagicMock(),
-            tracing=None,
+            tracing=MagicMock(),
             csv_exporter=None,
             metadata_coordinator=None,
             audit=NoOpAudit(),
@@ -108,7 +101,7 @@ class TestCreateSilverWriter:
             base_path=Path("/data/silver"),
             config=None,
             logger=MagicMock(),
-            tracing=None,
+            tracing=MagicMock(),
             csv_exporter=None,
             metadata_coordinator=None,
             audit=NoOpAudit(),
@@ -132,7 +125,7 @@ class TestCreateSilverWriter:
             base_path=Path("/data/silver"),
             config=None,
             logger=MagicMock(),
-            tracing=None,
+            tracing=MagicMock(),
             csv_exporter=None,
             metadata_coordinator=None,
             audit=NoOpAudit(),
@@ -158,7 +151,7 @@ class TestCreateSilverWriter:
             base_path=Path("/data/silver"),
             config=config,
             logger=MagicMock(),
-            tracing=None,
+            tracing=MagicMock(),
             csv_exporter=None,
             metadata_coordinator=None,
             audit=NoOpAudit(),
@@ -182,7 +175,7 @@ class TestCreateSilverWriter:
             base_path=Path("/data/silver"),
             config=None,
             logger=MagicMock(),
-            tracing=None,
+            tracing=MagicMock(),
             csv_exporter=csv,
             metadata_coordinator=None,
             audit=NoOpAudit(),
@@ -212,7 +205,7 @@ class TestCreateSilverWriter:
             base_path=Path("/data/silver"),
             config=None,
             logger=MagicMock(),
-            tracing=None,
+            tracing=MagicMock(),
             csv_exporter=None,
             metadata_coordinator=None,
             audit=NoOpAudit(),
@@ -236,7 +229,7 @@ class TestCreateSilverWriter:
             base_path=Path("/data/silver"),
             config=None,
             logger=MagicMock(),
-            tracing=None,
+            tracing=MagicMock(),
             csv_exporter=None,
             metadata_coordinator=None,
             audit=audit,

@@ -27,6 +27,16 @@ def _build_rule_map(payload: dict) -> dict[str, dict]:
     return rule_map
 
 
+def _build_record_map(payload: dict) -> dict[str, dict]:
+    record_map: dict[str, dict] = {}
+    for group in payload.get("groups", []):
+        for rule in group.get("rules", []):
+            record_name = rule.get("record")
+            if isinstance(record_name, str):
+                record_map[record_name] = rule
+    return record_map
+
+
 def _classify_quarantine_rate(
     *, bronze_records: int, quarantine_rate: float
 ) -> str | None:
@@ -59,11 +69,42 @@ def _classify_retry_exhaustions(exhaustions_per_hour: int) -> str | None:
 def test_rules_file_contains_control_plane_traceability_group() -> None:
     payload = _load_rules()
     group_names = [group.get("name") for group in payload.get("groups", [])]
+    assert "bioetl_runtime_dashboard_recording" in group_names
     assert "bioetl_pipeline_runtime_observability" in group_names
     assert "bioetl_control_plane_traceability_observability" in group_names
     assert "bioetl_dq_observability" in group_names
     assert "bioetl_provider_health_observability" in group_names
     assert "bioetl_chembl_assay_observability" not in group_names
+
+
+def test_runtime_dashboard_recording_rules_exist_and_reference_source_metrics() -> None:
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+
+    expected = {
+        "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m": "bioetl_pipeline_health_check_passed",
+        "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m": "bioetl_infrastructure_validated",
+        "bioetl_runtime_alert_condition_pipeline_runs_failed_15m": "bioetl_pipeline_runs_total",
+        "bioetl_runtime_alert_condition_dq_soft_threshold_15m": "bioetl_dq_soft_threshold_exceeded",
+        "bioetl_runtime_alert_condition_dq_hard_fail_15m": "bioetl_dq_validation_failures_total",
+        "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": "bioetl_dq_anomaly_detected",
+        "bioetl_runtime_alert_condition_silver_validation_failures_30m": "bioetl_silver_validation_failures_total",
+        "bioetl_runtime_alert_condition_manifest_write_failed_15m": "bioetl_control_plane_manifest_writes_total",
+        "bioetl_runtime_alert_condition_ledger_append_failed_15m": "bioetl_control_plane_ledger_appends_total",
+        "bioetl_runtime_alert_condition_checkpoint_incompatible_30m": "bioetl_checkpoint_compatibility_events_total",
+        "bioetl_runtime_alert_condition_lineage_refs_missing_15m": "bioetl_lineage_refs_missing_total",
+        "bioetl_runtime_alert_condition_provider_failure_rate_high_15m": "bioetl_health_check_failures_total",
+        "bioetl_runtime_alert_condition_provider_retries_exhausted_1h": "bioetl_data_source_retry_exhausted_total",
+    }
+
+    missing = [name for name in expected if name not in record_map]
+    assert not missing, f"Missing expected recording rules: {missing}"
+
+    for record_name, source_metric in expected.items():
+        expr = record_map[record_name].get("expr", "")
+        assert source_metric in expr, (
+            f"{record_name} must reference {source_metric} to avoid semantic drift"
+        )
 
 
 def test_runtime_and_provider_rules_are_fleet_wide_not_chembl_specific() -> None:

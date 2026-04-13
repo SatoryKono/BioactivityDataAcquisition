@@ -224,18 +224,18 @@ For interrupted or failing runs, inspect for:
 The `diagnostics` block from `bioetl run-manifest show --format json` is the
 fastest triage surface.
 
-The current supported Bronze -> Silver -> Gold lineage MVP surface is bounded
-to the representative `chembl.activity` family used by the reproducibility
-contract suite:
+The current published Bronze -> Silver -> Gold lineage closure boundary for
+operator-grade trace/debug claims covers these source families:
 
-- Bronze batch outputs emitted for the `chembl.activity` source path;
-- Silver dataset outputs with canonical artifact ids such as
-  `silver:chembl.activity@<version>`;
-- Gold dataset outputs with canonical artifact ids such as
-  `gold:chembl.activity`.
+- `chembl.activity`
+- `chembl.molecule`
+- `crossref.works`
+- `pubchem.compound`
+- `pubmed.publication`
 
-Outside that documented MVP surface, lineage signals may still exist but are
-not yet the supported closure boundary for operator-grade trace/debug claims.
+Outside that documented family set, lineage signals may still exist but they
+remain outside the supported closure boundary for operator-grade trace/debug
+claims.
 Inspection now exposes that boundary explicitly through
 `diagnostics.lineage_closure_boundary`; operators MUST treat
 `lineage_closure_boundary.supported=false` as a fail-closed block on
@@ -250,6 +250,10 @@ Focus on:
 - `lineage_closure_boundary.family`,
   `lineage_closure_boundary.supported`,
   `lineage_closure_boundary.reason`;
+- `replay_family_contract.family`,
+  `replay_family_contract.contract`,
+  `replay_family_contract.strict_exact_replay_supported`,
+  `replay_family_contract.reason`;
 - `persistence_profile.attained_profile`, `persistence_profile.required_profile`,
   `persistence_profile.required_profile_satisfied`,
   `persistence_profile.surfaces`,
@@ -279,7 +283,7 @@ Interpretation examples:
 
 ### 7a. Supported trace/debug path from output artifact to run context
 
-For the supported lineage MVP surface, the canonical operator path is:
+For the published supported lineage closure surface, the canonical operator path is:
 
 1. Start from the output sidecar (`*_metadata.yaml`) and read:
    - `runtime.run_id`
@@ -330,6 +334,9 @@ than silently accepting the bundle as canonical.
 - `exact_replay_support_boundary=snapshot_backed_source_runs_only` means only
   snapshot-backed source runs can become strict-replayable in the current
   model;
+- `replay_family_contract.strict_exact_replay_supported=true` means the current
+  family is inside the published strict exact-replay contract; `false` is a
+  fail-closed signal even if immutable input snapshots exist;
 - `exact_replay_support_boundary=composite_execution_unsupported` means the
   current composite execution path must not be interpreted as exact-replayable
   even when cached Bronze inputs are used;
@@ -341,6 +348,12 @@ than silently accepting the bundle as canonical.
   an ordinary rerun/rebuild path, treat that as control-plane drift;
 - `run-manifest diff` exposes that ancestry through `replay_relationship`
   without collapsing it into occurrence-only drift;
+- `replay_mode=same_data_state_recovery` means the run captured immutable
+  snapshots and can recreate the same data state, but it was not launched as an
+  explicit exact replay of a prior run;
+- `replay_mode=rebuild` means the run is on the ordinary rebuild/rerun path and
+  operators must not read it as strict exact replay or snapshot-backed same-data-state
+  recovery;
 - `alert_signals.immutable_input_snapshot_gap=true` means the run is still on
   the ordinary source boundary, but immutable cached-Bronze input snapshots are
   missing, so strict exact replay cannot be claimed yet;

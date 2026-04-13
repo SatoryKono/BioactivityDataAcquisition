@@ -143,17 +143,8 @@ class OpenAlexAdapter(
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and decomposed OpenAlex components."""
-        BaseHttpAdapter.__init__(
-            self,
-            http_client=self.http_client,
-            logger=self.logger,
-            metrics=self.metrics,
-            dependency_context=self.dependency_context,
-            error_handler=self.error_handler,
-            adapter_metrics=self.adapter_metrics,
-            request_collector=self.request_collector,
-        )
-        self._fallback_fetch_service = self.fallback_fetch_service
+        self._bootstrap_dataclass_http_adapter()
+        self._bind_fallback_fetch_service(self.fallback_fetch_service)
         runtime_services = build_openalex_runtime_services(
             fallback_fetch_service=self._fallback_fetch_service,
             openalex_query_executor=self.openalex_query_executor,

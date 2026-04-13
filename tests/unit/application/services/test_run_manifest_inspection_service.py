@@ -31,6 +31,10 @@ from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
+from bioetl.domain.control_plane.reproducibility_profiles import (
+    build_lineage_closure_boundary,
+    build_replay_family_contract,
+)
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
     compute_execution_identity_fingerprint,
@@ -136,19 +140,37 @@ def _expected_replay_parentage(manifest: RunManifest) -> dict[str, object]:
 
 
 def _expected_lineage_closure_boundary(manifest: RunManifest) -> dict[str, object]:
-    family = manifest.code_provenance.contract_ref
-    supported = family == "chembl.activity"
-    return {
-        "family": family,
-        "support_scope": "operator_grade_trace_debug",
-        "supported": supported,
-        "reason": (
-            "family_within_supported_boundary"
-            if supported
-            else "family_outside_supported_boundary"
-        ),
-        "supported_families": ["chembl.activity"],
-    }
+    execution_context = (
+        "composite"
+        if (
+            str(manifest.launch_context.get("execution_context") or "") == "composite"
+            or manifest.provider == "composite"
+        )
+        else "source"
+    )
+    return build_lineage_closure_boundary(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
+
+
+def _expected_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
+    execution_context = (
+        "composite"
+        if (
+            str(manifest.launch_context.get("execution_context") or "") == "composite"
+            or manifest.provider == "composite"
+        )
+        else "source"
+    )
+    return build_replay_family_contract(
+        provider=manifest.provider,
+        entity=manifest.entity,
+        contract_ref=manifest.code_provenance.contract_ref,
+        execution_context=execution_context,
+    )
 
 
 class _InMemoryRunManifestStore(RunManifestPort):
@@ -227,7 +249,7 @@ def _make_manifest(
             pipeline_version="1.0.0",
             git_commit="abc1234",
             config_hash=config_hash,
-            contract_ref="chembl_activity",
+            contract_ref="chembl.activity",
             contract_version="1.2.0",
             dq_policy_ref="chembl_activity.gold",
             rule_bundle_version="2026.03",
@@ -284,14 +306,14 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
     assert result.diagnostics["manifest_id"] == "manifest-1"
     assert result.diagnostics["run_id"] == str(run_id)
     assert result.diagnostics["config_hash"] == _VALID_CONFIG_HASH
-    assert result.diagnostics["contract_ref"] == "chembl_activity"
+    assert result.diagnostics["contract_ref"] == "chembl.activity"
     assert result.diagnostics["contract_version"] == "1.2.0"
     assert result.identity_graph == {
         "run_id": str(run_id),
         "manifest_id": "manifest-1",
         "execution_fingerprint": "fingerprint-manifest-1",
         "effective_config_hash": _VALID_CONFIG_HASH,
-        "contract_ref": "chembl_activity",
+        "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_of_run_id": None,
         "replay_of_manifest_id": None,
@@ -305,6 +327,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "replay_capability": "exact_replay_supported",
         "requested_exact_replay": True,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "replay_family_contract": _expected_replay_family_contract(manifest),
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -345,19 +368,18 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
-        "lineage_closure_boundary_gap": True,
+        "lineage_closure_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": True,
+        "forensic_grade_gap": False,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
-    assert result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
-    assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is False
+    assert result.diagnostics["persistence_profile"]["attained_profile"] == "forensic_grade"
+    assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is True
     assert result.diagnostics["next_steps"] == [
-        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
-        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
+        "No alert signals detected; continue routine monitoring.",
     ]
 
 
@@ -377,7 +399,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "manifest_id": "manifest-no-ledger",
         "execution_fingerprint": manifest.execution_fingerprint,
         "effective_config_hash": _VALID_CONFIG_HASH,
-        "contract_ref": "chembl_activity",
+        "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_of_run_id": None,
         "replay_of_manifest_id": None,
@@ -391,6 +413,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "replay_capability": "exact_replay_supported",
         "requested_exact_replay": True,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "replay_family_contract": _expected_replay_family_contract(manifest),
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -424,7 +447,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is True
     assert (
         result.diagnostics["persistence_profile"]["forensic_grade_missing_requirements"]
-        == ["run_ledger_history", "lineage_closure_boundary_support"]
+        == ["run_ledger_history"]
     )
     assert result.diagnostics == {
         "manifest_id": "manifest-no-ledger",
@@ -436,7 +459,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "config_hash": _VALID_CONFIG_HASH,
         "effective_config_hash": _VALID_CONFIG_HASH,
         "pipeline_version": "1.0.0",
-        "contract_ref": "chembl_activity",
+        "contract_ref": "chembl.activity",
         "contract_version": "1.2.0",
         "replay_of_run_id": None,
         "replay_of_manifest_id": None,
@@ -445,6 +468,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "required_persistence_profile": "degraded_observable",
         "requested_exact_replay": True,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "replay_family_contract": _expected_replay_family_contract(manifest),
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
@@ -495,14 +519,11 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
                 "exact_replay_capability": True,
                 "run_ledger_history": False,
                 "artifact_lineage_links": True,
-                "lineage_closure_boundary_support": False,
+                "lineage_closure_boundary_support": True,
             },
             "required_profile_missing_requirements": [],
             "replay_ready_missing_requirements": [],
-            "forensic_grade_missing_requirements": [
-                "run_ledger_history",
-                "lineage_closure_boundary_support",
-            ],
+            "forensic_grade_missing_requirements": ["run_ledger_history"],
             "composite_resume_reconstructability": {
                 "scope": "coarse_grained_composite_resume",
                 "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
@@ -527,7 +548,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
             "lineage_gap": False,
             "immutable_input_snapshot_gap": False,
             "strict_replay_boundary_gap": False,
-            "lineage_closure_boundary_gap": True,
+            "lineage_closure_boundary_gap": False,
             "composite_resume_reconstructability_gap": False,
             "required_persistence_profile_gap": False,
             "replay_ready_gap": False,
@@ -536,7 +557,6 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
             "cross_validation_signal_present": False,
         },
         "next_steps": [
-            "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
     }
@@ -563,6 +583,9 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
         result.diagnostics["exact_replay_support_boundary"]
         == "snapshot_backed_source_runs_only"
     )
+    assert result.diagnostics["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
     assert (
         result.diagnostics["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
@@ -580,6 +603,9 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     assert (
         result.identity_graph["exact_replay_support_boundary"]
         == "snapshot_backed_source_runs_only"
+    )
+    assert result.identity_graph["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
     )
     assert (
         result.identity_graph["replay_capability_reason"]
@@ -714,6 +740,9 @@ def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() 
     assert result.diagnostics["exact_replay_support_boundary"] == (
         "composite_execution_unsupported"
     )
+    assert result.diagnostics["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
     assert (
         result.diagnostics["alert_signals"]["composite_resume_reconstructability_gap"]
         is True
@@ -767,9 +796,15 @@ def test_show_snapshot_backed_manifest_reports_non_replay_snapshot_mode() -> Non
     assert result.diagnostics["replay_capability"] == "exact_replay_supported"
     assert result.diagnostics["requested_exact_replay"] is False
     assert result.diagnostics["exact_replay_eligible"] is True
-    assert result.diagnostics["replay_mode"] == "snapshot_backed_run"
+    assert result.diagnostics["replay_mode"] == "same_data_state_recovery"
     assert result.identity_graph["requested_exact_replay"] is False
-    assert result.identity_graph["replay_mode"] == "snapshot_backed_run"
+    assert result.identity_graph["replay_mode"] == "same_data_state_recovery"
+    assert result.diagnostics["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
+    assert result.identity_graph["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
 
 
 def test_show_does_not_report_exact_replay_from_intent_alone() -> None:
@@ -788,9 +823,15 @@ def test_show_does_not_report_exact_replay_from_intent_alone() -> None:
 
     assert result.diagnostics["requested_exact_replay"] is True
     assert result.diagnostics["exact_replay_eligible"] is False
-    assert result.diagnostics["replay_mode"] == "live_fetch"
+    assert result.diagnostics["replay_mode"] == "rebuild"
     assert result.identity_graph["requested_exact_replay"] is True
-    assert result.identity_graph["replay_mode"] == "live_fetch"
+    assert result.identity_graph["replay_mode"] == "rebuild"
+    assert result.diagnostics["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
+    assert result.identity_graph["replay_family_contract"] == _expected_replay_family_contract(
+        manifest
+    )
 
 
 def test_show_collects_artifact_diagnostic_links() -> None:
@@ -830,11 +871,11 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
-        "lineage_closure_boundary_gap": True,
+        "lineage_closure_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": True,
+        "forensic_grade_gap": False,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
@@ -893,7 +934,6 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     assert result.diagnostics["next_steps"] == [
         "Validate artifact publication metadata and repair dataset/lineage links.",
         "Investigate lineage persistence for published artifacts before restart.",
-        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
 
@@ -993,18 +1033,16 @@ def test_show_collects_dq_trace_anchors() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
-        "lineage_closure_boundary_gap": True,
+        "lineage_closure_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": True,
+        "forensic_grade_gap": False,
         "dq_signal_present": True,
         "cross_validation_signal_present": False,
     }
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
-        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
-        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
     ]
 
@@ -1526,11 +1564,11 @@ def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
-        "lineage_closure_boundary_gap": True,
+        "lineage_closure_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": True,
+        "forensic_grade_gap": False,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
@@ -1602,18 +1640,16 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
-        "lineage_closure_boundary_gap": True,
+        "lineage_closure_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": True,
+        "forensic_grade_gap": False,
         "dq_signal_present": True,
         "cross_validation_signal_present": True,
     }
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
-        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
-        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
         "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes.",
     ]

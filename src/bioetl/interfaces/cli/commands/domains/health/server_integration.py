@@ -70,7 +70,6 @@ async def health_server_context(
         port=port,
         health_monitor=deps.health_monitor,
         quarantine_service=quarantine_service,
-        logger=deps.logger if hasattr(deps, "logger") else None,
     )
 
     try:

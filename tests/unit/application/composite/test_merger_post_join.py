@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import patch
 
 import polars as pl
 import pytest
@@ -146,6 +147,7 @@ class TestPersistAndBuildResult:
             metadata_timestamp=metadata_timestamp,
             run_id="run-1",
             started_at=datetime.now(tz=UTC),
+            started_monotonic=10.0,
         )
 
         host._write_outputs.assert_awaited_once()
@@ -162,21 +164,25 @@ class TestPersistAndBuildResult:
         df = pl.DataFrame({"doi": ["10.1/a"]})
         started_at = datetime(2020, 1, 1, tzinfo=UTC)
 
-        await persist_and_build_result(
-            host,
-            merged_df=df,
-            enrichers=[],
-            records_merged=0,
-            records_from_seed=0,
-            records_enriched=0,
-            sources_used=[],
-            cv_stats=None,
-            quarantine_payloads=[],
-            metadata_timestamp=None,
-            run_id="run-1",
-            started_at=started_at,
-        )
+        with patch(
+            "bioetl.application.composite.merger_post_join.derive_completion_timestamp",
+            return_value=(started_at, 3.5),
+        ):
+            await persist_and_build_result(
+                host,
+                merged_df=df,
+                enrichers=[],
+                records_merged=0,
+                records_from_seed=0,
+                records_enriched=0,
+                sources_used=[],
+                cv_stats=None,
+                quarantine_payloads=[],
+                metadata_timestamp=None,
+                run_id="run-1",
+                started_at=started_at,
+                started_monotonic=5.0,
+            )
 
-        # duration_seconds arg should be positive since started_at is in the past
         call_kwargs = host._build_merge_result.call_args[1]
-        assert call_kwargs["duration_seconds"] > 0
+        assert call_kwargs["duration_seconds"] == 3.5

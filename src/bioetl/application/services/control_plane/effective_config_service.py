@@ -19,6 +19,7 @@ from bioetl.domain.control_plane.effective_config_artifact import (
     EffectiveExecutionConfig,
     ResolvedConfigSnapshot,
     RuntimeOverrideSnapshot,
+    SourceClassProvenance,
 )
 from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver
 from bioetl.domain.types import JsonDict
@@ -192,6 +193,69 @@ def _build_effective_execution_config(
     )
 
 
+def _build_source_class_provenance() -> tuple[SourceClassProvenance, ...]:
+    """Return the canonical provenance table for supported config/input source classes."""
+    return (
+        SourceClassProvenance(
+            source_class="config_file",
+            provenance_status="identity_anchored",
+            artifact_surface="semantic_artifact.source_refs[*]",
+            anchor_field="source_hash",
+            notes="File-backed config sources are persisted when they participate in materialization.",
+        ),
+        SourceClassProvenance(
+            source_class="cli_override",
+            provenance_status="identity_anchored",
+            artifact_surface="semantic_artifact.runtime_overrides.cli_overrides",
+            anchor_field="override_hash",
+            notes="CLI overrides are collapsed into the runtime override hash.",
+        ),
+        SourceClassProvenance(
+            source_class="env_override",
+            provenance_status="identity_anchored",
+            artifact_surface="semantic_artifact.runtime_overrides.env_overrides",
+            anchor_field="override_hash",
+            notes="Explicit environment overrides are collapsed into the runtime override hash.",
+        ),
+        SourceClassProvenance(
+            source_class="runtime_adjustment",
+            provenance_status="identity_anchored",
+            artifact_surface="semantic_artifact.runtime_overrides.runtime_adjustments",
+            anchor_field="override_hash",
+            notes="Runtime adjustments are collapsed into the runtime override hash.",
+        ),
+        SourceClassProvenance(
+            source_class="dq_policy_contract",
+            provenance_status="identity_anchored",
+            artifact_surface="semantic_artifact.dq_policy_refs[*]",
+            anchor_field="policy_hash",
+            notes=(
+                "DQ policy anchors are persisted when DQ policy config "
+                "participates in materialization."
+            ),
+        ),
+        SourceClassProvenance(
+            source_class="immutable_input_snapshot",
+            provenance_status="external_anchor",
+            artifact_surface="run_manifest.source_refs[*].input_snapshots[*]",
+            anchor_field="content_hash",
+            notes=(
+                "Immutable Bronze input snapshots are anchored in the run "
+                "manifest rather than the effective-config artifact."
+            ),
+        ),
+        SourceClassProvenance(
+            source_class="implicit_process_environment",
+            provenance_status="unsupported",
+            artifact_surface="not_persisted",
+            notes=(
+                "Ambient process environment outside explicit overrides is "
+                "intentionally excluded from semantic identity."
+            ),
+        ),
+    )
+
+
 def _serialize_artifact(artifact: EffectiveConfigArtifact) -> str:
     payload = {
         "artifact_id": artifact.artifact_id,
@@ -209,6 +273,9 @@ def _semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
         "pipeline_name": artifact.pipeline_name,
         "pipeline_kind": artifact.pipeline_kind,
         "source_refs": [_to_jsonable(src) for src in artifact.source_refs],
+        "source_class_provenance": [
+            _to_jsonable(item) for item in artifact.source_class_provenance
+        ],
         "resolution_policy": _to_jsonable(artifact.resolution_policy),
         "resolved_config": {
             "config_type": artifact.resolved_config.config_type,
@@ -297,6 +364,7 @@ class EffectiveConfigService:
             pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
             source_refs=source_refs,
+            source_class_provenance=_build_source_class_provenance(),
             resolution_policy=resolved_policy,
             resolved_config=resolved_snapshot,
             runtime_overrides=overrides_snapshot,

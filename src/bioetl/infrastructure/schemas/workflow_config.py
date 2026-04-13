@@ -58,6 +58,8 @@ class WorkflowRunOptionsSchema(BaseModel):
     use_cached_bronze: bool | None = None
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
     exact_replay: bool | None = None
     enable_tracing: bool | None = None
 
@@ -92,6 +94,8 @@ class WorkflowRunOptionsSchema(BaseModel):
             use_cached_bronze=self.use_cached_bronze,
             cached_bronze_path=self.cached_bronze_path,
             cached_bronze_date=self.cached_bronze_date,
+            replay_of_run_id=self.replay_of_run_id,
+            replay_of_manifest_id=self.replay_of_manifest_id,
             exact_replay=self.exact_replay,
             enable_tracing=self.enable_tracing,
         )

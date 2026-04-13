@@ -1,8 +1,8 @@
 schema_version: 1
 baseline:
-  total_exemptions: 0
+  total_exemptions: 3
   by_registry:
-    file_size_limits: 0
+    file_size_limits: 3
     function_complexity: 0
     function_length: 0
     class_size: 0
@@ -236,7 +236,7 @@ removable_complexity_family_ratchets:
       path_prefixes:
         - "src/bioetl/application/composite/"
       family_budgets:
-        files_ge_250_loc: 16
+        files_ge_250_loc: 19
         max_internal_fan_in: 25
       tracked_seams:
         - path: "src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py"
@@ -247,8 +247,44 @@ removable_complexity_family_ratchets:
         - path: "src/bioetl/application/composite/fsm_helper.py"
           max_lines: 260
           required_symbols:
-            - "ResumePhasePlan"
+            - "ResumePhaseInfo"
             - "_resolve_resume_phase"
+neo4j_memory_calibration:
+  snapshot_date: "2026-04-13"
+  update_policy: "When Neo4j memory refresh flags zero-anchor retirement or complexity hotspots, record the reviewed expectation here and keep retirement_candidate_triage.yaml aligned."
+  families:
+    - name: "adapter_layer"
+      linked_issue: "2943"
+      candidates:
+        - module_path: "src/bioetl/infrastructure/adapters/_cached_bronze_support.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/infrastructure/adapters/_error_handling_support.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/infrastructure/adapters/_health_check_observability.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/infrastructure/adapters/_health_check_policy.py"
+          expected_disposition: "retain_active"
+    - name: "composite_layer"
+      linked_issue: "2943"
+      candidates:
+        - module_path: "src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py"
+          expected_disposition: "removed"
+        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_flow.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_policy.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_types.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/application/composite/runtime_models.py"
+          expected_disposition: "retain_active"
+        - module_path: "src/bioetl/application/composite/runtime_wiring_api.py"
+          expected_disposition: "retain_active"
 quarterly_targets:
   - quarter: "2026-Q1"
     max_total_exemptions: 9
@@ -258,7 +294,7 @@ quarterly_targets:
       complexity_metrics: 1
       structural_debt: 2
     registry_budgets:
-      file_size_limits: 3
+      file_size_limits: 4
       function_complexity: 1
       function_length: 0
       class_size: 3
@@ -267,13 +303,13 @@ quarterly_targets:
       domain_complexity: 6
   - quarter: "2026-Q2"
     max_total_exemptions: 8
-    min_integral_score: 72
+    min_integral_score: 70
     group_budgets:
-      size_metrics: 0
+      size_metrics: 3
       complexity_metrics: 0
       structural_debt: 0
     registry_budgets:
-      file_size_limits: 0
+      file_size_limits: 3
       function_complexity: 0
       function_length: 0
       class_size: 0

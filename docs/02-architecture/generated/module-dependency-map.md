@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `1572`
-- Internal import edges (raw): `5906`
+- Scanned modules: `1574`
+- Internal import edges (raw): `5920`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `285`
+- Cross-layer module-group edges (total): `287`
 - Cross-layer module-group edges (top 60): `60`
 
 ## Layer Dependency Graph
@@ -21,38 +21,38 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|977 OK| application
-    application -->|910 OK| domain
-    composition -->|168 OK| application
+    application -->|982 OK| application
+    application -->|911 OK| domain
+    composition -->|169 OK| application
     composition -->|430 OK| composition
     composition -->|316 OK| domain
-    composition -->|263 OK| infrastructure
-    domain -->|960 OK| domain
-    infrastructure -->|653 OK| domain
+    composition -->|264 OK| infrastructure
+    domain -->|961 OK| domain
+    infrastructure -->|654 OK| domain
     infrastructure -->|821 OK| infrastructure
     interfaces -->|63 OK| application
-    interfaces -->|58 OK| composition
+    interfaces -->|60 OK| composition
     interfaces -->|39 OK| domain
-    interfaces -->|248 OK| interfaces
+    interfaces -->|250 OK| interfaces
 ```
 
 ## Layer Edge Table
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |     977 | allowed |
-| `application`    | `domain`         |     910 | allowed |
-| `composition`    | `application`    |     168 | allowed |
+| `application`    | `application`    |     982 | allowed |
+| `application`    | `domain`         |     911 | allowed |
+| `composition`    | `application`    |     169 | allowed |
 | `composition`    | `composition`    |     430 | allowed |
 | `composition`    | `domain`         |     316 | allowed |
-| `composition`    | `infrastructure` |     263 | allowed |
-| `domain`         | `domain`         |     960 | allowed |
-| `infrastructure` | `domain`         |     653 | allowed |
+| `composition`    | `infrastructure` |     264 | allowed |
+| `domain`         | `domain`         |     961 | allowed |
+| `infrastructure` | `domain`         |     654 | allowed |
 | `infrastructure` | `infrastructure` |     821 | allowed |
 | `interfaces`     | `application`    |      63 | allowed |
-| `interfaces`     | `composition`    |      58 | allowed |
+| `interfaces`     | `composition`    |      60 | allowed |
 | `interfaces`     | `domain`         |      39 | allowed |
-| `interfaces`     | `interfaces`     |     248 | allowed |
+| `interfaces`     | `interfaces`     |     250 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
@@ -60,8 +60,8 @@ flowchart LR
 | -------------------------- | ------------------------------- | ------: |
 | `application.composite`    | `domain.composite`              |     113 |
 | `infrastructure.adapters`  | `domain.types`                  |     109 |
+| `application.core`         | `domain.types`                  |      86 |
 | `infrastructure.adapters`  | `domain.ports`                  |      86 |
-| `application.core`         | `domain.types`                  |      85 |
 | `application.pipelines`    | `domain.types`                  |      78 |
 | `application.composite`    | `domain.ports`                  |      61 |
 | `application.core`         | `domain.ports`                  |      60 |
@@ -101,13 +101,13 @@ flowchart LR
 | `application.pipelines`    | `domain.value_objects`          |      14 |
 | `application.services`     | `domain.control_plane`          |      14 |
 | `infrastructure.schemas`   | `domain.config`                 |      14 |
+| `interfaces.observability` | `composition.observability_api` |      14 |
 | `application.pipelines`    | `domain.context`                |      13 |
 | `composition.bootstrap`    | `infrastructure.observability`  |      13 |
 | `interfaces.cli`           | `domain.exceptions`             |      13 |
 | `application.services`     | `domain.lineage`                |      12 |
 | `composition.factories`    | `domain.services`               |      12 |
 | `infrastructure.adapters`  | `domain.models`                 |      12 |
-| `interfaces.observability` | `composition.observability_api` |      12 |
 | `application.core`         | `domain.value_objects`          |      11 |
 | `application.pipelines`    | `domain.services`               |      11 |
 | `application.services`     | `domain.exceptions`             |      11 |

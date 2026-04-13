@@ -261,6 +261,7 @@ class RunManifestInspectionService:
                 "exact_replay_support_boundary",
                 "snapshot_backed_source_runs_only",
             ),
+            "replay_family_contract": diagnostics.get("replay_family_contract"),
             "replay_capability_reason": diagnostics.get("replay_capability_reason"),
             "exact_replay_eligible": diagnostics.get(
                 "exact_replay_eligible",
@@ -275,7 +276,7 @@ class RunManifestInspectionService:
                 [],
             ),
             "input_snapshot_identity_fingerprint": diagnostics.get("input_snapshot_identity_fingerprint"),
-            "replay_mode": diagnostics.get("replay_mode", "live_fetch"),
+            "replay_mode": diagnostics.get("replay_mode", "rebuild"),
             "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
             "input_snapshots": diagnostics.get("input_snapshots", []),
             "planned_artifacts": [

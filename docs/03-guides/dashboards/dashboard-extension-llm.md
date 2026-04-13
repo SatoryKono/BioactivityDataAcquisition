@@ -5,12 +5,12 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-13'
 ---
 
 # Dashboard Extension Guide (LLM)
 
-Дата сверки: **2026-03-29**
+Дата сверки: **2026-04-13**
 Источник истины: `grafana/dashboards/*.json`
 
 Короткий playbook для LLM/AI-агента, который меняет или расширяет shipped
@@ -26,10 +26,11 @@ Grafana dashboards в BioETL.
 
 ## 2. Текущая модель shipped dashboards
 
-- `1. Overview` — hub: `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`
-- `2. Runtime` — `Back to Overview` + Explore links
-- `3. Provider Health` — `Back to Overview` + Explore links
-- `4. Data Quality` — `Back to Overview` + Explore links
+- `1. Overview` — hub: `2. Runtime`, `Control Plane v1`, `3. Provider Health`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`
+- `2. Runtime` — `Back to Overview`, `Control Plane v1`, `4. Data Quality` + Explore links
+- `BioETL Control Plane v1` — `Back to Overview`, `2. Runtime`, `4. Data Quality` + Explore links
+- `3. Provider Health` — `Back to Overview`, `2. Runtime` + Explore links
+- `4. Data Quality` — `Back to Overview`, `5. Silver Reject Explorer` + Explore links
 
 Если правка меняет эту модель, синхронизируй docs в том же change set.
 

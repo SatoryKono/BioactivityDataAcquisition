@@ -127,6 +127,16 @@ bioetl run --pipeline chembl_activity \
     --replay-of-manifest-id manifest-parent-001
 ```
 
+**Operator distinction:**
+
+| Surface | What operators should read it as | What operators must not read it as |
+| ------- | -------------------------------- | ---------------------------------- |
+| `--resume` | Checkpoint continuation of the current pipeline execution | Strict exact replay of a prior run |
+| `--run-type rebuild` | Fresh recomputation of downstream data from available sources/Bronze | Checkpoint continuation or replay proof |
+| `--exact-replay` | Fail-closed request for strict exact replay on snapshot-backed inputs | Ordinary rerun, rebuild, or degraded resume |
+| `replay_mode=same_data_state_recovery` in inspection | A manifested run that can recover the same data state from immutable inputs | A separate CLI mode |
+| `replay_mode=rebuild` in inspection | Ordinary rebuild/rerun path outside strict exact replay | Snapshot-backed same-data-state recovery |
+
 **Checkpoint resume policy (runtime setting):**
 
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=observe`

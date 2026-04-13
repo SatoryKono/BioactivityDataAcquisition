@@ -62,7 +62,42 @@ safe_file_size_bytes() {
 }
 
 FIND_ROOTS=(.)
-EXCLUDE_DIRS=(.git .venv .mypy_cache .pytest_cache .ruff_cache data .idea .vscode)
+EXCLUDE_DIRS=(
+  .benchmarks
+  .cache
+  .claude
+  .codex
+  .codex_tmp
+  .coverage-sharded
+  .cursor
+  .gemini
+  .git
+  .hypothesis
+  .venv
+  .venv-docs
+  .venv-win
+  .venv-win-corrupt
+  .mypy_cache
+  .python-user
+  .pytest_cache
+  .ruff_cache
+  .vibe
+  .idea
+  .vscode
+  .worktrees
+  .mkdocs-site-check
+  .mkdocs-site-check-2
+  .mkdocs-site-verify
+  .mkdocs-site-verify-3
+  assets
+  data
+  logs
+  node_modules
+  output
+  reports
+  site
+  tmp
+)
 
 build_find_prune() {
   local expr=()

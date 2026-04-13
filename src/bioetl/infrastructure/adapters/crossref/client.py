@@ -120,17 +120,8 @@ class CrossRefAdapter(
 
     def __post_init__(self) -> None:
         """Initialize helper services and decomposed CrossRef flow components."""
-        BaseHttpAdapter.__init__(
-            self,
-            http_client=self.http_client,
-            logger=self.logger,
-            metrics=self.metrics,
-            dependency_context=self.dependency_context,
-            error_handler=self.error_handler,
-            adapter_metrics=self.adapter_metrics,
-            request_collector=self.request_collector,
-        )
-        self._fallback_fetch_service = self.fallback_fetch_service
+        self._bootstrap_dataclass_http_adapter()
+        self._bind_fallback_fetch_service(self.fallback_fetch_service)
 
         runtime_services = build_crossref_runtime_services(
             query_builder=self.query_builder,

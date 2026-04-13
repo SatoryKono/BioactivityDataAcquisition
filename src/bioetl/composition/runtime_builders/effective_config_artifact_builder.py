@@ -145,6 +145,11 @@ def _build_effective_config_source_refs(
             priority=2,
             repo_root=resolved_repo_root,
         ),
+        _build_config_source_ref(
+            relative_path="configs/base/contract_registry.yaml",
+            priority=3,
+            repo_root=resolved_repo_root,
+        ),
     ]
 
 

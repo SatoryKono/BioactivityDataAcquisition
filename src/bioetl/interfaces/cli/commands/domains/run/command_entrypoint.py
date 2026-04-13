@@ -34,7 +34,9 @@ def _add_core_options(
         )(cmd)
         cmd = with_run_type_option("Type of run")(cmd)
         cmd = click.option(  # type: ignore[untyped-decorator]
-            "--resume", is_flag=True, help="Resume from last checkpoint"
+            "--resume",
+            is_flag=True,
+            help="Resume from last checkpoint state; not a strict exact replay",
         )(cmd)
         cmd = click.option(  # type: ignore[untyped-decorator]
             "--start-offset",
@@ -160,7 +162,7 @@ def _add_cache_options() -> Callable:
             "--exact-replay/--no-exact-replay",
             "exact_replay",
             default=False,
-            help="Require snapshot-backed inputs and fail closed instead of live refetch",
+            help="Request strict exact replay with snapshot-backed inputs; not the same as --resume or rebuild",
             show_default=True,
         )(cmd)
         return cmd

@@ -12,9 +12,9 @@ from functools import cache
 from pathlib import Path
 import re
 from typing import Any
-from urllib.parse import unquote
 
 import pytest
+import yaml
 
 
 pytestmark = pytest.mark.integration
@@ -56,6 +56,15 @@ def get_all_valid_metric_names() -> set[str]:
 
             # All metric types can have a _created suffix (OpenMetrics)
             all_valid_names.add(f"{base_name}_created")
+
+    # Runtime dashboard also relies on Prometheus recording rules.
+    rules_path = Path("grafana/prometheus-rules/bioetl_observability.yml")
+    rules_payload = yaml.safe_load(rules_path.read_text(encoding="utf-8"))
+    for group in rules_payload.get("groups", []):
+        for rule in group.get("rules", []):
+            record_name = rule.get("record")
+            if isinstance(record_name, str):
+                all_valid_names.add(record_name)
 
     return all_valid_names
 
@@ -251,13 +260,25 @@ def test_variable_query_sources(dashboard_path):
             legacy_url = query.get("query", "")
             return legacy_url if isinstance(legacy_url, str) else ""
 
-        for variable_name in (
-            "pipeline",
-            "run_type",
-            "reason_code",
-            "field",
-            "run_id",
-        ):
+        pipeline_var = variable_map.get("pipeline")
+        assert pipeline_var is not None, (
+            f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
+        )
+        assert pipeline_var.get("datasource") == "Prometheus", (
+            f"Dashboard {dashboard_path.name} 'pipeline' must use Prometheus datasource"
+        )
+        pipeline_query = pipeline_var.get("query", {})
+        pipeline_query_text = (
+            pipeline_query.get("query", "")
+            if isinstance(pipeline_query, dict)
+            else ""
+        )
+        assert "bioetl_records_processed_total" in pipeline_query_text, (
+            f"Dashboard {dashboard_path.name} 'pipeline' query must use "
+            "bioetl_records_processed_total"
+        )
+
+        for variable_name in ("run_type", "reason_code", "field", "run_id"):
             variable = variable_map.get(variable_name)
             assert variable is not None, (
                 f"Dashboard {dashboard_path.name} must define '{variable_name}' variable"
@@ -426,9 +447,10 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Lineage Refs Missing": "round(",
         },
         "bioetl-runtime.json": {
-            "Pipeline Alert Conditions": "> bool 0",
-            "DQ Alert Conditions": "> bool 0",
-            "Control-plane Alert Conditions": "> bool 0",
+            "Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+            "DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+            "Control-plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+            "Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
             "Trace-enabled Runs": "round(",
             "Silver Filter Rejects": "round(",
         },
@@ -672,25 +694,23 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
 
     required_metrics = [
         "bioetl_records_processed_total",
-        "bioetl_dq_soft_threshold_exceeded",
-        "bioetl_dq_validation_failures_total",
-        "bioetl_dq_anomaly_detected",
-        "bioetl_silver_validation_failures_total",
+        "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+        "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
+        "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+        "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+        "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+        "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
+        "bioetl_runtime_alert_condition_silver_validation_failures_30m",
+        "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+        "bioetl_runtime_alert_condition_ledger_append_failed_15m",
+        "bioetl_runtime_alert_condition_checkpoint_incompatible_30m",
+        "bioetl_runtime_alert_condition_lineage_refs_missing_15m",
+        "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+        "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
         "bioetl_data_freshness_seconds",
-        "bioetl_pipeline_health_check_passed",
-        "bioetl_infrastructure_validated",
-        "bioetl_pipeline_runs_total",
-        "bioetl_control_plane_manifest_writes_total",
-        "bioetl_control_plane_ledger_appends_total",
         "bioetl_control_plane_reads_total",
         "bioetl_control_plane_read_duration_seconds",
         "bioetl_traced_runs_total",
-        "bioetl_checkpoint_compatibility_events_total",
-        "bioetl_lineage_refs_missing_total",
-        "bioetl_health_check_failures_total",
-        "bioetl_health_check_degraded_total",
-        "bioetl_health_check_success_total",
-        "bioetl_data_source_retry_exhausted_total",
     ]
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Runtime dashboard missing metrics: {missing}"
@@ -906,35 +926,47 @@ def test_range_aware_summary_panels_use_selected_time_range(
 
 
 @pytest.mark.parametrize(
-    ("panel_title", "expected_snippets"),
+    ("panel_title", "expected_recording_metrics"),
     [
         (
             "Pipeline Alert Conditions",
-            ["[15m]", 'component="data_source"', 'status="failed"'],
+            [
+                "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+                "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
+                "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+            ],
         ),
         (
             "DQ Alert Conditions",
             [
-                "[15m]",
-                "[30m]",
-                'bioetl_dq_validation_failures_total{pipeline=~"$pipeline",severity="hard_fail"}',
-                'bioetl_dq_anomaly_detected{pipeline=~"$pipeline",severity="critical"}',
+                "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+                "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+                "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
+                "bioetl_runtime_alert_condition_silver_validation_failures_30m",
             ],
         ),
         (
             "Control-plane Alert Conditions",
-            ["[15m]", "[30m]", 'status="failed"'],
+            [
+                "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+                "bioetl_runtime_alert_condition_ledger_append_failed_15m",
+                "bioetl_runtime_alert_condition_checkpoint_incompatible_30m",
+                "bioetl_runtime_alert_condition_lineage_refs_missing_15m",
+            ],
         ),
         (
             "Provider Alert Conditions",
-            ["[15m]", "[1h]", "0.2"],
+            [
+                "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+                "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
+            ],
         ),
     ],
 )
-def test_runtime_alert_condition_panels_use_rule_windows(
-    panel_title: str, expected_snippets: list[str]
+def test_runtime_alert_condition_panels_use_recording_rules(
+    panel_title: str, expected_recording_metrics: list[str]
 ) -> None:
-    """Runtime rule-summary panels should mirror shipped alert windows."""
+    """Runtime alert-summary panels should consume shipped recording rules."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel = next(
         (
@@ -952,10 +984,9 @@ def test_runtime_alert_condition_panels_use_rule_windows(
         if isinstance(target.get("expr"), str)
     ]
     assert expressions, f"Panel '{panel_title}' must define an expression"
-    for expected_snippet in expected_snippets:
-        assert any(expected_snippet in expr for expr in expressions), (
-            f"Panel '{panel_title}' must include {expected_snippet!r} to stay aligned "
-            "with shipped alert-rule windows"
+    for metric_name in expected_recording_metrics:
+        assert any(metric_name in expr for expr in expressions), (
+            f"Panel '{panel_title}' must include recording rule metric {metric_name!r}"
         )
 
 
@@ -1148,14 +1179,151 @@ def test_overview_and_provider_dashboards_expose_explore_drilldown_links() -> No
         assert any("Traces" in title for title in titles), (
             f"{dashboard_name} must expose a traces drilldown link"
         )
-        assert any("/explore" in url and "loki" in url for url in urls), (
-            f"{dashboard_name} must point logs drilldown to Loki Explore"
+        assert any("/a/grafana-lokiexplore-app/" in url for url in urls), (
+            f"{dashboard_name} must point logs drilldown to Logs Drilldown app"
         )
-        assert any("/explore" in url and "tempo" in url for url in urls), (
-            f"{dashboard_name} must point traces drilldown to Tempo Explore"
+        assert any("/a/grafana-exploretraces-app/" in url for url in urls), (
+            f"{dashboard_name} must point traces drilldown to Traces Drilldown app"
         )
-        assert any("/explore?left=" in url and "loki" in url for url in urls), (
-            f"{dashboard_name} Loki drilldown must use a Loki Explore payload"
+        drilldown_urls = [
+            url
+            for url in urls
+            if "/a/grafana-lokiexplore-app/" in url
+            or "/a/grafana-exploretraces-app/" in url
+        ]
+        assert drilldown_urls, (
+            f"{dashboard_name} must expose Grafana Drilldown app URLs"
+        )
+        for url in drilldown_urls:
+            assert "from=${__from}" in url and "to=${__to}" in url, (
+                f"{dashboard_name} drilldown URL must preserve dashboard time range"
+            )
+            assert "/explore?left=" not in url, (
+                f"{dashboard_name} drilldown URL must not use legacy /explore payload links"
+            )
+
+
+def _is_logs_drilldown_url(url: str) -> bool:
+    return "/a/grafana-lokiexplore-app/" in url
+
+
+def _is_traces_drilldown_url(url: str) -> bool:
+    return "/a/grafana-exploretraces-app/" in url
+
+
+def test_explore_links_use_drilldown_routes_and_time_range() -> None:
+    """Explore links should target Drilldown apps and preserve current time range."""
+    expectations = (
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-control-plane-v1.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-silver-reject-explorer.json",
+    )
+
+    for dashboard_name in expectations:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        drilldown_links = [
+            link
+            for link in _collect_dashboard_links(dashboard)
+            if _is_logs_drilldown_url(link.get("url", ""))
+            or _is_traces_drilldown_url(link.get("url", ""))
+        ]
+        assert drilldown_links, (
+            f"{dashboard_name} must expose at least one Drilldown app link"
+        )
+
+        for link in drilldown_links:
+            url = link.get("url", "")
+            assert "from=${__from}" in url and "to=${__to}" in url, (
+                f"{dashboard_name} drilldown link must preserve current time range"
+            )
+            assert "/explore?left=" not in url, (
+                f"{dashboard_name} drilldown link must not use legacy Explore payload URL"
+            )
+
+
+def test_tempo_drilldown_routes_to_traces_drilldown_app() -> None:
+    """Tempo drilldown links should route to Grafana Traces Drilldown app."""
+    expectations = (
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-control-plane-v1.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-silver-reject-explorer.json",
+    )
+
+    for dashboard_name in expectations:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        tempo_links = [
+            link
+            for link in _collect_dashboard_links(dashboard)
+            if _is_traces_drilldown_url(link.get("url", ""))
+        ]
+        assert tempo_links, (
+            f"{dashboard_name} must expose at least one Traces Drilldown link"
+        )
+        for link in tempo_links:
+            url = link.get("url", "")
+            assert "from=${__from}" in url and "to=${__to}" in url
+
+
+def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:
+    """Loki/Tempo drilldown titles should warn that tracing profile is required."""
+    expectations = (
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-control-plane-v1.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-silver-reject-explorer.json",
+    )
+
+    for dashboard_name in expectations:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        for link in _collect_dashboard_links(dashboard):
+            url = link.get("url", "")
+            title = link.get("title", "")
+            if not (_is_logs_drilldown_url(url) or _is_traces_drilldown_url(url)):
+                continue
+            assert "tracing" in title.lower(), (
+                f"{dashboard_name} Drilldown title must disclose tracing profile dependency"
+            )
+
+
+def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
+    """Loki drilldown should route to Grafana Logs Drilldown app entrypoint."""
+    sample_line = _emit_sample_structured_log(
+        pipeline="chembl_activity",
+        provider="chembl",
+    )
+    assert re.search(r'"pipeline"\s*:\s*"chembl_activity"', sample_line)
+    assert re.search(r'"provider"\s*:\s*"chembl"', sample_line)
+    assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
+
+    expectations = (
+        "bioetl-overview-v2.json",
+        "bioetl-dq-v2.json",
+        "bioetl-runtime.json",
+        "bioetl-control-plane-v1.json",
+        "bioetl-provider-health-v2.json",
+        "bioetl-silver-reject-explorer.json",
+    )
+
+    for dashboard_name in expectations:
+        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+        loki_links = [
+            link
+            for link in _collect_dashboard_links(dashboard)
+            if _is_logs_drilldown_url(link.get("url", ""))
+        ]
+        assert loki_links, (
+            f"{dashboard_name} must expose at least one Logs Drilldown link"
+        )
+        assert all("/explore?left=" not in link.get("url", "") for link in loki_links), (
+            f"{dashboard_name} must not keep legacy Loki Explore payload links"
         )
 
 
@@ -1228,139 +1396,115 @@ def test_silver_reject_explorer_record_level_panels_do_not_use_prometheus() -> N
         )
 
 
-def test_explore_links_decode_to_valid_queries() -> None:
-    """Explore links should decode to valid Loki/Tempo query payloads."""
-    expectations = {
-        "bioetl-overview-v2.json": {
-            "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
-        },
-        "bioetl-dq-v2.json": {
-            "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
-        },
-        "bioetl-runtime.json": {
-            "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
-        },
-        "bioetl-control-plane-v1.json": {
-            "tempo_terms": ('span."bioetl.pipeline"', 'span."bioetl.run_type"'),
-        },
-        "bioetl-provider-health-v2.json": {
-            "tempo_terms": ('span."bioetl.provider"',),
-        },
+def test_silver_reject_explorer_summary_panels_use_distinct_projections() -> None:
+    """Summary trio should expose total, reject-rate view, and full scope summary separately."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
+    )
+    panel_map = {
+        panel.get("title"): panel
+        for panel in get_dashboard_panels(dashboard)
+        if panel.get("title")
+        in {
+            "Filtered Records Total",
+            "Reject Rate vs Bronze",
+            "Run Scope Summary",
+        }
     }
+    assert panel_map.keys() == {
+        "Filtered Records Total",
+        "Reject Rate vs Bronze",
+        "Run Scope Summary",
+    }, "Silver Reject Explorer must define all three scoped summary panels"
 
-    for dashboard_name, config in expectations.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for link in _collect_dashboard_links(dashboard):
-            url = link.get("url", "")
-            if "/explore?left=" not in url:
-                continue
-            encoded = url.split("left=", 1)[1]
-            payload = json.loads(unquote(encoded))
-            assert payload["datasource"] in {"loki", "tempo"}
-            assert payload["range"]["from"] == "${__from}"
-            assert payload["range"]["to"] == "${__to}"
-            if payload["datasource"] == "loki":
-                expr = payload["queries"][0]["expr"]
-                assert expr == '{job="bioetl"}'
-                continue
+    total_panel = panel_map["Filtered Records Total"]
+    total_transformations = total_panel.get("transformations", [])
+    assert total_transformations, (
+        "Filtered Records Total must project only total field, not full raw payload"
+    )
+    total_organize = next(
+        (
+            transformation
+            for transformation in total_transformations
+            if transformation.get("id") == "organize"
+        ),
+        None,
+    )
+    assert total_organize is not None, (
+        "Filtered Records Total must use organize transform to isolate total"
+    )
+    total_options = total_organize.get("options", {})
+    assert total_options.get("renameByName", {}).get("total") == "filtered_records_total"
+    assert total_options.get("excludeByName", {}).get("reject_ratio") is True
 
-            assert payload["queries"][0]["queryType"] == "traceqlSearch"
-            query = payload["queries"][0]["query"]
-            assert query != "{}", (
-                f"{dashboard_name} Tempo drilldown must be scoped to the current dashboard selection"
-            )
-            for term in config["tempo_terms"]:
-                assert term in query, (
-                    f"{dashboard_name} Tempo drilldown must include {term!r}"
-                )
+    ratio_panel = panel_map["Reject Rate vs Bronze"]
+    ratio_transformations = ratio_panel.get("transformations", [])
+    ratio_organize = next(
+        (
+            transformation
+            for transformation in ratio_transformations
+            if transformation.get("id") == "organize"
+        ),
+        None,
+    )
+    assert ratio_organize is not None, (
+        "Reject Rate vs Bronze must use organize transform for ratio/bronze/total view"
+    )
+    ratio_options = ratio_organize.get("options", {})
+    assert ratio_options.get("renameByName", {}).get("reject_ratio") == (
+        "reject_rate_vs_bronze"
+    )
+    assert ratio_options.get("excludeByName", {}).get("by_reason_code") is True
 
+    ratio_overrides = ratio_panel.get("fieldConfig", {}).get("overrides", [])
+    assert any(
+        override.get("matcher", {}).get("options") == "reject_ratio"
+        and any(prop.get("id") == "unit" for prop in override.get("properties", []))
+        for override in ratio_overrides
+        if isinstance(override, dict)
+    ), "Reject Rate vs Bronze must format reject_ratio as percentage"
 
-def test_tempo_drilldown_uses_contextual_traceql_filters() -> None:
-    """Tempo drilldown should preserve current dashboard scope via TraceQL."""
-    expectations = {
-        "bioetl-overview-v2.json": ("${pipeline:regex}", "${run_type:regex}"),
-        "bioetl-dq-v2.json": ("${pipeline:regex}", "${run_type:regex}"),
-        "bioetl-runtime.json": ("${pipeline:regex}", "${run_type:regex}"),
-        "bioetl-control-plane-v1.json": ("${pipeline:regex}", "${run_type:regex}"),
-        "bioetl-provider-health-v2.json": ("${provider:regex}",),
-    }
-
-    for dashboard_name, fragments in expectations.items():
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        tempo_links = [
-            link
-            for link in _collect_dashboard_links(dashboard)
-            if "/explore?left=" in link.get("url", "")
-            and "tempo" in link.get("url", "")
-        ]
-        assert tempo_links, (
-            f"{dashboard_name} must expose at least one Tempo drilldown link"
-        )
-
-        for link in tempo_links:
-            payload = json.loads(unquote(link["url"].split("left=", 1)[1]))
-            query = payload["queries"][0]["query"]
-            for fragment in fragments:
-                assert fragment in query, (
-                    f"{dashboard_name} Tempo drilldown must preserve {fragment} in TraceQL"
-                )
-
-
-def test_explore_drilldown_titles_disclose_tracing_profile_dependency() -> None:
-    """Loki/Tempo drilldown titles should warn that tracing profile is required."""
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
+    summary_panel = panel_map["Run Scope Summary"]
+    assert not summary_panel.get("transformations"), (
+        "Run Scope Summary must remain full payload panel for forensic context"
     )
 
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        for link in _collect_dashboard_links(dashboard):
-            url = link.get("url", "")
-            title = link.get("title", "")
-            if "/explore" not in url or ("loki" not in url and "tempo" not in url):
-                continue
-            assert "tracing" in title.lower(), (
-                f"{dashboard_name} Explore drilldown title must disclose tracing profile dependency"
-            )
 
-
-def test_loki_drilldown_uses_safe_generic_entrypoint() -> None:
-    """Loki drilldown should avoid broken variable interpolation inside Explore."""
-    sample_line = _emit_sample_structured_log(
-        pipeline="chembl_activity",
-        provider="chembl",
+def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter() -> None:
+    """Selected Record Details should not depend on path-bound payload hash."""
+    dashboard = load_dashboard(
+        Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
-    assert re.search(r'"pipeline"\s*:\s*"chembl_activity"', sample_line)
-    assert re.search(r'"provider"\s*:\s*"chembl"', sample_line)
-    assert re.search(r'"stage"\s*:\s*"extract"', sample_line)
+    panel = next(
+        (
+            candidate
+            for candidate in get_dashboard_panels(dashboard)
+            if candidate.get("title") == "Selected Record Details"
+        ),
+        None,
+    )
+    assert panel is not None, "Silver Reject Explorer must include Selected Record Details"
 
-    expectations = (
-        "bioetl-overview-v2.json",
-        "bioetl-dq-v2.json",
-        "bioetl-runtime.json",
-        "bioetl-control-plane-v1.json",
-        "bioetl-provider-health-v2.json",
+    targets = panel.get("targets", [])
+    assert targets, "Selected Record Details must define at least one query target"
+    target = targets[0]
+    url = target.get("url", "")
+    assert isinstance(url, str), "Selected Record Details query URL must be a string"
+    assert "/ops/quarantine/filtered-records" in url, (
+        "Selected Record Details must query list endpoint to avoid hard failure "
+        "when payload_hash is blank"
+    )
+    assert "/ops/quarantine/filtered-record/${payload_hash}" not in url, (
+        "Selected Record Details must not use strict path payload hash endpoint"
+    )
+    assert "payload_hash=${payload_hash}" in url, (
+        "Selected Record Details must filter by payload_hash via query parameter"
+    )
+    assert target.get("root_selector") == "items", (
+        "Selected Record Details must parse list payload via items root selector"
     )
 
-    for dashboard_name in expectations:
-        dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        loki_links = [
-            link
-            for link in _collect_dashboard_links(dashboard)
-            if "/explore?left=" in link.get("url", "") and "loki" in link.get("url", "")
-        ]
-        assert loki_links, (
-            f"{dashboard_name} must expose at least one Loki drilldown link"
-        )
 
-        for link in loki_links:
-            payload = json.loads(unquote(link["url"].split("left=", 1)[1]))
-            expr = payload["queries"][0]["expr"]
-            assert expr == '{job="bioetl"}'
 
 
 def test_control_plane_dashboard_exposes_working_runbook_link() -> None:

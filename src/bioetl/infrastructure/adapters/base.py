@@ -206,6 +206,28 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         )
         self._request_collector = create_default_request_collector()
 
+    def _bootstrap_dataclass_http_adapter(self) -> None:
+        """Initialize base runtime for dataclass-style HTTP adapters.
+
+        Dataclass adapters expose the standard public constructor fields but do
+        not automatically execute ``BaseHttpAdapter.__init__``. Centralizing the
+        bootstrap here removes repeated argument plumbing from provider clients.
+        """
+        BaseHttpAdapter.__init__(
+            self,
+            http_client=self.http_client,
+            logger=self.logger,
+            metrics=getattr(self, "metrics", None),
+            dependency_context=getattr(self, "dependency_context", None),
+            error_handler=getattr(self, "error_handler", None),
+            adapter_metrics=getattr(self, "adapter_metrics", None),
+            request_collector=getattr(self, "request_collector", None),
+        )
+
+    def _bind_fallback_fetch_service(self, fallback_fetch_service: object) -> None:
+        """Bind the canonical fallback orchestrator on adapters that use one."""
+        self._fallback_fetch_service = fallback_fetch_service
+
     @property
     def _circuit_breaker(self) -> CircuitBreakerPort:
         """Return circuit breaker from HTTP client.

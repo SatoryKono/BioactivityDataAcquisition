@@ -39,6 +39,11 @@ target windows, and alert-to-SLI mapping.
 4. `bioetl diagnostics run --run-id <run-id>` или
    `bioetl diagnostics checkpoint --pipeline <pipeline>` — workflow-level
    расследование run/checkpoint state.
+5. `python -m scripts.qa report-observability-metric-inventory --json` —
+   reconciliation surface между runtime emitters, docs и Prometheus rules.
+6. Сравните inventory output с
+   `grafana/prometheus-rules/bioetl_observability.yml` и shipped dashboard JSON
+   до того, как трактовать missing panels как runtime outage.
 
 Важно:
 
@@ -77,7 +82,9 @@ Pushgateway publication на завершении run. Это позволяет
 - **3. Provider Health**: `$provider`
 - **5. Silver Reject Explorer**: `$pipeline`, `$run_type`, `$reason_code`, `$field`, `$run_id`, `$payload_hash`
 
-> **Важно**: Если вы не видите данных, убедитесь, что в фильтре выбран правильный пайплайн или стоит значение `All`.
+> **Важно**: для `1-4` dashboard допустим общий scope (`All`), но
+> `5. Silver Reject Explorer` требует **scoped pipeline** (single-select, без
+> `All`), иначе backend quarantine API возвращает fail-closed ошибку.
 
 ### Основные Дашборды
 
@@ -138,6 +145,9 @@ Pushgateway publication на завершении run. Это позволяет
   рискам: preflight `data_source`, `infrastructure_validated` и
   `pipeline_runs_total{status="failed"}`. Если панель активна, расследование
   стоит начинать с `pipeline-failure-critical.md`, а не только с provider/DQ path.
+  Начиная с текущего baseline dashboard читает recording-rule series
+  `bioetl_runtime_alert_condition_*`, чтобы не дублировать тяжёлую alert
+  PromQL-логику прямо в JSON-панелях.
 
 - **Global Control-plane Lookup Outcomes (1h) / Global Control-plane Lookup p95 (1h)**:
   runtime-срез по success/miss/failed для manifest, ledger и lineage lookup
@@ -158,9 +168,13 @@ Pushgateway publication на завершении run. Это позволяет
 
 - **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
 - **Healthy Checks / Degraded Checks / Health Checks Total**: разделяют completed probes по outcome и не маскируют `DEGRADED` как success.
+- **Failure & Degraded Trend by Provider**: показывает устойчивость деградации по каждому provider в выбранном time range.
+- **Provider Failure Share (Selected Range)**: ранжирует providers по доле failed probes внутри активного scope.
+- **Retries Exhausted by Provider / Operation** и **Retries Exhausted Trend by Provider / Operation**:
+  показывают, где и насколько часто исчерпываются retries (`bioetl_data_source_retry_exhausted_total`).
 - **Per-provider gauge (102)**: повторяемая p95-панель по `$provider`.
-- **Drilldown**: dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` / `Explore Traces (Tempo, tracing profile)`
-  и data links у latency-панели открывают correlation path. Для Loki shipped
+- **Drilldown**: dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` /
+  `Explore Traces (Tempo, tracing profile)` и data links у latency-панели открывают correlation path. Для Loki shipped
   baseline стартует с общего `{job="bioetl"}` stream, а дополнительное
   сужение по `provider` оператор делает уже в Explore. Tempo handoff здесь сразу
   использует `span."bioetl.provider"` для текущего `$provider`.
@@ -289,7 +303,10 @@ uv run python -m pytest -q tests/integration/test_prometheus_rules_config.py
   1. Перейдите в `5. Silver Reject Explorer` для списка записей и detail по `payload_hash`.
   1. Если нужны action-операции, используйте quarantine CLI (`inspect/resolve/replay`).
 - **`5. Silver Reject Explorer` показывает `No data` во всех панелях**:
-  1. Проверьте, что backend доступен: `curl http://127.0.0.1:8081/ops/quarantine/filter-options`.
+  1. Проверьте, что backend доступен и `pipeline` явно задан:
+     `curl "http://127.0.0.1:8081/ops/quarantine/filter-options?pipeline=<pipeline_name>"`.
+  1. Убедитесь, что в dashboard выбран конкретный `$pipeline` (single-select),
+     а не общий scope.
   1. Проверьте, что сервер поднят с внешним bind для Grafana container:
      `bioetl health server --host 0.0.0.0 --port 8081`.
   1. Проверьте наличие Infinity plugin и datasource:

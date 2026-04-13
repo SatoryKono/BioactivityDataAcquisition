@@ -5,12 +5,12 @@ Class: published
 Owner: BioETL Team
 Reviewers:
 - BioETL Team
-Last verified: '2026-03-29'
+Last verified: '2026-04-13'
 ---
 
 # Dashboards Docs Index
 
-Дата сверки: **2026-03-29**
+Дата сверки: **2026-04-13**
 Источник истины: `grafana/dashboards/*.json`
 
 ## Актуальные документы
@@ -25,6 +25,12 @@ Last verified: '2026-03-29'
 Текущий shipped Explore handoff:
 - Loki использует безопасный baseline `{job="bioetl"}`.
 - Tempo использует contextual TraceQL filters по текущему dashboard scope (`pipeline/run_type` или `provider`).
+
+Текущая навигационная модель:
+- `1. Overview` -> `2. Runtime` / `Control Plane v1` / `3. Provider Health` / `4. Data Quality`
+- `2. Runtime` -> `Back to Overview` / `Control Plane v1` / `4. Data Quality`
+- `3. Provider Health` -> `Back to Overview` / `2. Runtime`
+- `4. Data Quality` -> `Back to Overview` / `5. Silver Reject Explorer`
 
 ## Legacy-документы
 

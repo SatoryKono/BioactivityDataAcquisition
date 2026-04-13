@@ -114,11 +114,7 @@ def test_acceptance_baseline_code_anchors_match_current_runtime_contract() -> No
         assert anchor in ledger_source
 
     for anchor in criteria["checkpoint_snapshot_only_contract"]["code_anchors"]:
-        assert anchor in _read(
-            "src/bioetl/application/composite/checkpoint/state.py"
-        ) or anchor in _read(
-            "src/bioetl/application/composite/checkpoint/_state_codec.py"
-        )
+        assert anchor in _read("src/bioetl/application/composite/checkpoint/state.py")
 
     for anchor in criteria["resume_checkpoint_plus_replay"]["code_anchors"]:
         assert anchor in load_service_source or anchor in ledger_source

@@ -51,6 +51,8 @@ class WorkflowRunOptionsConfig:
     use_cached_bronze: bool | None = None
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
     exact_replay: bool | None = None
     enable_tracing: bool | None = None
 

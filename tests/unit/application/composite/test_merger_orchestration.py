@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import patch
 
 import polars as pl
 import pytest
@@ -118,12 +119,18 @@ class TestMergeExecutionRequestHelpers:
             run_id="run-ctx",
         )
 
-        execution_context = await prepare_merge_execution_context(host, request)
+        started_at = datetime(2026, 4, 12, 12, 0, tzinfo=UTC)
+        with patch(
+            "bioetl.application.composite.merger_orchestration.capture_runtime_timing_anchor",
+            return_value=(started_at, 10.0),
+        ):
+            execution_context = await prepare_merge_execution_context(host, request)
 
         assert isinstance(execution_context, MergeExecutionContext)
         assert execution_context.request is request
         assert execution_context.loaded_inputs.records_from_seed == 1
-        assert execution_context.started_at.tzinfo == UTC
+        assert execution_context.started_at == started_at
+        assert execution_context.started_monotonic == 10.0
         host._prepare_seed_dataframe.assert_awaited_once_with(
             "silver/chembl",
             "chembl_compound",

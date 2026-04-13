@@ -29,8 +29,8 @@ if TYPE_CHECKING:
     from bioetl.application.services.observability_workflow_service import (
         ObservabilityWorkflowService,
     )
-    from bioetl.composition.observability_api import MetricsOperatorProfile
     from bioetl.application.services.quarantine_service import QuarantineService
+    from bioetl.composition.observability_api import MetricsOperatorProfile
 
 __all__ = [
     "MetricsServerError",
@@ -38,8 +38,8 @@ __all__ = [
     "get_checkpoint_service",
     "get_health_service",
     "get_lineage_service",
-    "get_metrics_service",
     "get_metrics_operator_profile",
+    "get_metrics_service",
     "get_observability_diagnostics_bundle",
     "get_observability_workflow_service",
     "get_quarantine_service",

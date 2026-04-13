@@ -48,6 +48,22 @@ def test_generator_uses_checkpoint_package_facade() -> None:
     assert "checkpoint.anchor_context" not in source
 
 
+def test_checkpoint_governance_import_contract_is_documented() -> None:
+    facade_source = Path(
+        "src/bioetl/application/composite/checkpoint/__init__.py"
+    ).read_text(encoding="utf-8")
+    shim_source = Path(
+        "src/bioetl/application/composite/checkpoint/anchor_context.py"
+    ).read_text(encoding="utf-8")
+    plan_source = Path(
+        "docs/05-engineering/normalization_plan_P0_P6.md"
+    ).read_text(encoding="utf-8")
+
+    assert "sanctioned public import surface" in facade_source
+    assert "compatibility-only shim" in shim_source
+    assert "bioetl.application.composite.checkpoint.anchor_context" in plan_source
+
+
 def test_entity_schema_registry_matches_entity_config_inventory() -> None:
     expected_pipeline_names = set()
     for path in _entity_config_paths():

@@ -140,7 +140,7 @@ class UniProtAdapter(
             "feature": self._fetch_features,
             "sequence": self._fetch_sequences,
         }
-        self._fallback_fetch_service = fallback_fetch_service
+        self._bind_fallback_fetch_service(fallback_fetch_service)
         self.configure_fallback_policy(None)
 
     def _get_default_fallback_config(self) -> FallbackDecoratorConfig:

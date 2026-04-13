@@ -186,7 +186,7 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
 @click.option(  # type: ignore[untyped-decorator]
     "--resume",
     is_flag=True,
-    help="Resume from last checkpoint",
+    help="Resume from last checkpoint state; not a strict exact replay",
 )
 @click.option(  # type: ignore[untyped-decorator]
     "--dry-run",

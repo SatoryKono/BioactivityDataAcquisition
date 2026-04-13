@@ -132,9 +132,7 @@ class CompositeRunnerControlPlaneMixin:
 
     def _record_run_started(self: _CompositeRunnerControlPlaneHostProtocol) -> None:
         """Append ``run_started`` when control-plane ledger is attached."""
-        self._record_with_ledger_service(
-            lambda ledger_service: ledger_service.record_run_started()
-        )
+        self._record_with_ledger_service(lambda ledger_service: ledger_service.record_run_started())
 
     def _record_run_failed(
         self: _CompositeRunnerControlPlaneHostProtocol,
@@ -143,11 +141,9 @@ class CompositeRunnerControlPlaneMixin:
         """Append ``run_failed`` when control-plane ledger is attached."""
         self._record_run_metrics_event(
             metrics_snapshot={},
-            recorder=lambda ledger_service, metrics_snapshot: (
-                ledger_service.record_run_exception(
-                    error=error,
-                    metrics_snapshot=metrics_snapshot,
-                )
+            recorder=lambda ledger_service, metrics_snapshot: ledger_service.record_run_exception(
+                error=error,
+                metrics_snapshot=metrics_snapshot,
             ),
         )
 
@@ -157,10 +153,8 @@ class CompositeRunnerControlPlaneMixin:
         """Append ``run_shutdown`` when control-plane ledger is attached."""
         self._record_run_metrics_event(
             metrics_snapshot={},
-            recorder=lambda ledger_service, metrics_snapshot: (
-                ledger_service.record_run_shutdown(
-                    metrics_snapshot=metrics_snapshot,
-                )
+            recorder=lambda ledger_service, metrics_snapshot: ledger_service.record_run_shutdown(
+                metrics_snapshot=metrics_snapshot,
             ),
         )
 

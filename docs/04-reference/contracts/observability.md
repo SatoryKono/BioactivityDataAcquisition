@@ -318,8 +318,12 @@ Selected operator/admin service seams also emit bounded tracing spans through
 `TracingPort` when tracing is enabled:
 
 - `MetricsService.start`, `MetricsService.get_status`, `MetricsService.push_to_gateway`
-- `QuarantineService.inspect`, `QuarantineService.get_stats`, `QuarantineService.replay`,
-  `QuarantineService.mark_as_reprocessed`, `QuarantineService.purge`, `QuarantineService.update_status`
+- `quarantine.inspect` (`QuarantineService.inspect`),
+  `quarantine.get_stats` (`QuarantineService.get_stats`),
+  `quarantine.replay` (`QuarantineService.replay`),
+  `quarantine.mark_reprocessed`,
+  `quarantine.purge` (`QuarantineService.purge`),
+  `quarantine.update_status` (`QuarantineService.update_status`)
 - `ObservabilityWorkflowService.inspect_audit_run`, `ObservabilityWorkflowService.inspect_checkpoint_workflow`
 - `FileAuditAdapter.log_write`, `FileAuditAdapter.get_entries`, `FileAuditAdapter.aclose`
 

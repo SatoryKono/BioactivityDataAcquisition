@@ -762,38 +762,39 @@ ______________________________________________________________________
 
 ```python
 # Экспортировать метрики в Prometheus
-from prometheus-client import Counter, Histogram
+from prometheus-client import Counter, Gauge, Histogram
 
-validation-passed = Counter(
-    "bioetl_validation_passed_total",
-    "Records passed validation",
-    ["provider", "level"]
+dq_validation_failures = Counter(
+    "bioetl_dq_validation_failures_total",
+    "DQ validation failures by stage and severity",
+    ["pipeline", "stage", "severity"]
 )
 
-validation-warned = Counter(
-    "bioetl_validation_warned_total",
-    "Records with warnings",
-    ["provider", "level", "rule"]
+dq_records_quarantined = Counter(
+    "bioetl_dq_records_quarantined_total",
+    "Records quarantined by DQ checks",
+    ["pipeline", "error_type", "run_type"]
 )
 
-validation-failed = Counter(
-    "bioetl_validation_failed_total",
-    "Records failed validation",
-    ["provider", "level", "rule"]
+dq_validation_score = Gauge(
+    "bioetl_dq_validation_score",
+    "Entity-level DQ score between 0.0 and 1.0",
+    ["pipeline", "entity"]
 )
 
-validation-duration = Histogram(
-    "bioetl_validation_duration_seconds",
-    "Validation duration",
-    ["provider", "level"]
+dq_check_duration = Histogram(
+    "bioetl_dq_check_duration_ms",
+    "DQ check duration in milliseconds",
+    ["pipeline"]
 )
 ```
 
 **Dashboard (Grafana):**
 
-- DQ Pass Rate: `validation-passed / (validation-passed + validation-warned + validation-failed)`
-- Top Failing Rules: `topk(10, validation-failed)`
-- Validation Latency: `validation-duration{quantile="0.95"}`
+- DQ Score: `bioetl_dq_validation_score`
+- Top Hard-Fail Events: `topk(10, increase(bioetl_dq_validation_failures_total{severity="hard_fail"}[15m]))`
+- Quarantine Rate: `sum(rate(bioetl_dq_records_quarantined_total[5m])) / clamp_min(sum(rate(bioetl_records_processed_total{stage="bronze"}[5m])), 1)`
+- Validation Latency: `histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket[5m])))`
 
 ______________________________________________________________________
 

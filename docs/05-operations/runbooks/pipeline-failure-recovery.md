@@ -87,6 +87,10 @@ Use resume only when:
 - checkpoint belongs to the expected pipeline/run family
 - storage layout is still intact
 - there is no evidence of schema or write-side corruption
+- operators only need checkpoint continuation rather than strict exact replay
+
+Do not interpret `--resume` as exact replay proof. It is a recovery path for the
+current execution family and relies on checkpoint compatibility policy.
 
 ### 5. Rebuild when state is not trustworthy
 
@@ -102,6 +106,9 @@ Use rebuild when:
 - checkpoint compatibility blocks resume
 - critical schema/write invariants were violated
 - output needs to be recomputed from source of truth
+
+Do not interpret `--run-type rebuild` as replay evidence. Rebuild is a fresh
+recomputation path, not checkpoint continuation and not strict exact replay.
 
 ### 6. Backup and rebuild affected Delta outputs when needed
 

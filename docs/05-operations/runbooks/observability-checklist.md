@@ -71,6 +71,7 @@ specific operator-facing subcommand:
 - `bioetl diagnostics checkpoint --pipeline <pipeline>`
 - `bioetl diagnostics manifest <run-id|manifest-id>`
 - `bioetl diagnostics quarantine --pipeline <pipeline>`
+- `python -m scripts.qa report-observability-metric-inventory --json`
 
 ### 1. Metrics Endpoint / Scrape Surface
 
@@ -79,6 +80,9 @@ specific operator-facing subcommand:
 - For postrun incidents, confirm the scrape surface includes:
   - `bioetl_postrun_phase_events_total`
   - `bioetl_postrun_phase_duration_seconds`
+- For checkpoint/resume incidents, confirm the scrape surface includes:
+  - `bioetl_checkpoint_save_events_total`
+  - `bioetl_checkpoint_save_duration_seconds`
 
 ```bash
 curl http://localhost:8000/metrics | grep bioetl_
@@ -102,8 +106,25 @@ cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
 
 - Check that the shipped Grafana dashboards load and that the expected filters are
   available for the active pipeline or provider.
+- Run the canonical inventory helper before escalating a missing dashboard panel
+  as a runtime outage:
+
+```bash
+python -m scripts.qa report-observability-metric-inventory --json
+```
+
+- Confirm the inventory output still classifies expected families as
+  `direct_live_metrics` or `helper_backed_live_metrics`, not
+  `registry_only_metrics` / `dead_metrics`.
+- Compare the inventory output with
+  `grafana/prometheus-rules/bioetl_observability.yml` and the shipped dashboard
+  JSON to verify that dashboard vocabulary still matches runtime and rule
+  vocabulary.
 - Confirm the alert-condition panels in `2. Runtime` reflect the same symptom
   family the operator is investigating.
+- For checkpoint or graceful-shutdown symptoms, confirm the checkpoint save
+  counter/histogram series reflect the investigated operation and status before
+  moving to trace-level debugging.
 - Spotlight the new `bioetl-control-plane-v1` aggregated view and confirm
   `BioETLControlPlaneReadFailureRate` is either firing or cleared, depending on
   whether control-plane reads have exceeded the 5% failure ratio limit in the
@@ -113,6 +134,8 @@ cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
   before switching to trace-first debugging.
 - If dashboard data is missing, stop and verify metrics publication before
   troubleshooting alerts.
+- If tracing is enabled and checkpoint incidents are under investigation, verify
+  Tempo contains `checkpoint_save` spans for the same pipeline and time window.
 
 ### 4. Alert-to-Diagnostics Route
 

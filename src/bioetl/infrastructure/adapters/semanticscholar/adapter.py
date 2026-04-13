@@ -136,17 +136,8 @@ class SemanticScholarAdapter(
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and fallback helper components."""
-        BaseHttpAdapter.__init__(
-            self,
-            http_client=self.http_client,
-            logger=self.logger,
-            metrics=self.metrics,
-            dependency_context=self.dependency_context,
-            error_handler=self.error_handler,
-            adapter_metrics=self.adapter_metrics,
-            request_collector=self.request_collector,
-        )
-        self._fallback_fetch_service = self.fallback_fetch_service
+        self._bootstrap_dataclass_http_adapter()
+        self._bind_fallback_fetch_service(self.fallback_fetch_service)
         self._fallback_handler = (
             self.title_fallback_handler
             if self.title_fallback_handler is not None

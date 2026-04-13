@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import patch
 from uuid import UUID, uuid4
 
 import pytest
@@ -260,6 +261,25 @@ def _composite_execution_context() -> CompositeExecutionContext:
 
 class TestFSMSeedStateTransitions:
     """Tests for FSM state transitions during seed execution."""
+
+    @pytest.mark.unit
+    def test_start_run_lifecycle_uses_captured_runtime_timing_anchor(self) -> None:
+        runner = create_runner()
+        started_at = datetime(2026, 4, 13, 10, 0, tzinfo=UTC)
+        runner._observer.emit_run_started = MagicMock()
+
+        with patch(
+            "bioetl.application.composite.runner_pkg.runner.capture_runtime_timing_anchor",
+            return_value=(started_at, 42.0),
+        ):
+            runner._start_run_lifecycle()
+
+        assert runner._started_at == started_at
+        assert runner._start_time == 42.0
+        runner._observer.emit_run_started.assert_called_once_with(
+            composite_name="test_composite",
+            run_id=runner.run_id,
+        )
 
     @pytest.mark.asyncio
     async def test_seed_running_state_set_before_seed_execution(self):

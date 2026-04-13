@@ -24,10 +24,10 @@ The current code owners / source-of-truth seams are:
 - `src/bioetl/domain/control_plane/run_manifest.py`
 - `src/bioetl/domain/control_plane/run_ledger.py`
 - `src/bioetl/domain/ports/control_plane/`
-- `src/bioetl/application/services/run_manifest_service.py`
-- `src/bioetl/application/services/run_ledger_service.py`
-- `src/bioetl/application/services/run_manifest_diagnostics.py`
-- `src/bioetl/application/services/run_manifest_inspection_service.py`
+- `src/bioetl/application/services/control_plane/run_manifest_service.py`
+- `src/bioetl/application/services/control_plane/run_ledger_service.py`
+- `src/bioetl/application/services/control_plane/run_manifest_diagnostics.py`
+- `src/bioetl/application/services/control_plane/run_manifest_inspection_service.py`
 - `src/bioetl/application/core/lifecycle/checkpoint_runtime.py`
 - `src/bioetl/application/composite/checkpoint/load_service.py`
 - `src/bioetl/interfaces/cli/commands/run_manifest.py`
@@ -455,20 +455,29 @@ an identifier parses as UUID-like input. Default output is human-readable
 - `identity_graph`
 
 The `diagnostics` block is built from
-`src/bioetl/application/services/run_manifest_diagnostics.py` and is the
+`src/bioetl/application/services/control_plane/run_manifest_diagnostics.py` and is the
 published operator-facing summary for event counts, artifact linkage, DQ
 anchors, correlation-anchor gaps, replay capability, and suggested next steps.
 
-Current supported lineage MVP boundary for Bronze -> Silver -> Gold closure:
+Current published lineage closure boundary for Bronze -> Silver -> Gold
+operator-grade trace/debug support covers these source families:
 
-- Bronze batch outputs for the representative `chembl.activity` family;
+- `chembl.activity`
+- `chembl.molecule`
+- `crossref.works`
+- `pubchem.compound`
+- `pubmed.publication`
+
+For each supported family the canonical semantic artifact anchors remain:
+
+- Bronze batch outputs emitted for the family source path;
 - Silver dataset outputs with canonical artifact ids of the form
-  `silver:chembl.activity@<version>`;
+  `silver:{family}@<version>`;
 - Gold dataset outputs with canonical artifact ids of the form
-  `gold:chembl.activity`.
+  `gold:{family}`.
 
-This boundary is intentionally narrow. Other families may emit lineage signals,
-but they are not yet the explicitly supported end-to-end closure surface for
+Families outside that published list may still emit lineage signals, but they
+are fail-closed outside the supported end-to-end closure surface for
 operator-grade trace/debug guarantees.
 The diagnostics payload therefore publishes an explicit
 `lineage_closure_boundary` contract for every manifested run. When
@@ -513,13 +522,17 @@ surface:
 - `exact_replay_support_boundary` reports whether the manifested execution
   context can ever be strict-replayable. Current published values are
   `snapshot_backed_source_runs_only` and `composite_execution_unsupported`;
+- `replay_family_contract` publishes the per-family replay contract that
+  decides whether strict exact replay is supported for this manifested family;
 - `replay_capability` and `exact_replay_eligible` report what the persisted
   immutable input snapshot set actually proves about the run;
 - `exact_replay_blockers` explains why a run is not exact-replay eligible;
 - `replay_mode=exact_replay` is only emitted when exact replay was requested
   and the manifest carries immutable input snapshots;
 - snapshot-backed runs that captured immutable inputs without being launched as
-  exact replay are rendered as `replay_mode=snapshot_backed_run`.
+  exact replay are rendered as `replay_mode=same_data_state_recovery`;
+- non-snapshot source runs that stay outside strict exact replay are rendered
+  as `replay_mode=rebuild`.
 - `replay_of_run_id` and `replay_of_manifest_id` record replay ancestry when a
   run is an explicit exact replay of a previous execution rather than merely a
   semantically equivalent new run;
@@ -546,6 +559,18 @@ anchors derived from manifest source refs:
 These fields are derived operator-facing summaries used to line up run-manifest
 inspection with checkpoint compatibility diagnostics; they do not expand the
 persisted `RunManifest` storage schema.
+
+The paired effective-config artifact publishes a separate semantic provenance
+table through `semantic_artifact.source_class_provenance`. That table makes the
+supported source classes explicit:
+
+- `config_file`
+- `cli_override`
+- `env_override`
+- `runtime_adjustment`
+- `dq_policy_contract`
+- `immutable_input_snapshot` as an external anchor on the run manifest
+- `implicit_process_environment` as intentionally unsupported ambient state
 
 `execution_fingerprint` in this contract now means the canonical
 execution-identity fingerprint shared across manifest persistence, checkpoint

@@ -7,15 +7,14 @@ Split from entrypoints.py per audit-package-structure-2026-02-07.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
-from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
     derive_completion_timestamp,
 )
+from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition import PipelineRegistry
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner,

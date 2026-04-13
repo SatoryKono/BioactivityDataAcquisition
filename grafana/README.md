@@ -698,8 +698,8 @@ shipped pack.
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
-**Drilldown:** dashboard links `2. Runtime`, `3. Provider Health`,
-`4. Data Quality`, `5. Silver Reject Explorer`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
+**Drilldown:** dashboard links `2. Runtime`, `Control Plane v1`, `3. Provider Health`,
+`4. Data Quality`, `Explore Logs (Loki, tracing profile)` и `Explore Traces (Tempo, tracing profile)` используют
 текущее временное окно. Panel `Processing Volume by Stage` дублирует Explore handoff
 через data links для быстрого перехода в Grafana Explore. Tempo handoff для
 pipeline dashboards использует TraceQL filter по `span."bioetl.pipeline"` и
@@ -797,24 +797,28 @@ table row links дают self-drilldown по `payload_hash` и CLI handoff.
 **UID:** `bioetl-provider-health-v2`
 **Refresh:** 30 секунд
 **Time range:** Последние 12 часов
-**Назначение:** Операционный мониторинг health-check сигналов по внешним провайдерам: p95 латентность, failure-rate и текущий объём проверок.
+**Назначение:** Операционный incident dashboard по внешним провайдерам: p95 latency, failure/degraded trends, failure share и retry exhaustion.
 
 ### Панели
 
 | ID | Название | Тип | PromQL | Описание |
 |---|---|---|---|---|
-| 1 | Health Check Latency by Provider (p95) | Timeseries | `histogram_quantile(0.95, sum by (le, provider) (bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}))` | Сравнение p95 latency по всем выбранным провайдерам на cumulative histogram buckets; avoids `NaN` on sparse provider probes. |
-| 2 | Healthy Checks | Stat | `sum(last_over_time(bioetl_health_check_success_total{provider=~"$provider"}[$__range]))` | Latest observed объём health probes со статусом `HEALTHY` внутри выбранного временного окна Grafana. |
-| 105 | Degraded Checks | Stat | `sum(last_over_time(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range]))` | Latest observed объём health probes со статусом `DEGRADED` внутри выбранного временного окна. |
-| 104 | Provider Failure Rate | Gauge | `failures_last[$__range] / clamp_min(healthy_last[$__range] + degraded_last[$__range] + failures_last[$__range], 1)` | Failure-rate по latest observed provider counters внутри текущего временного окна; подходит для sparse batch probes. |
-| 7 | Health Checks Total | Stat | `sum(last_over_time(success[$__range])) + sum(last_over_time(degraded[$__range])) + sum(last_over_time(failures[$__range]))` | Общий объём completed health probes по latest observed counters внутри выбранного временного окна. |
-| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (bioetl_health_check_latency_seconds_bucket{provider=~"$provider"}))` | Повторяемые p95 gauges по выбранным провайдерам без `rate(...)`-induced `NaN` на редких health checks. |
+| 1 | Health Check Latency by Provider (p95) | Timeseries | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))` | p95 latency trend по выбранным providers. |
+| 2 | Healthy Checks | Stat | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))` | Completed probes со статусом `HEALTHY` в выбранном окне. |
+| 105 | Degraded Checks | Stat | `round(sum(increase(bioetl_health_check_degraded_total{provider=~"$provider"}[$__range])) or vector(0))` | Completed probes со статусом `DEGRADED` в выбранном окне. |
+| 104 | Provider Failure Rate | Gauge | `failures_increase / clamp_min(total_increase, 1)` | Failure-rate за выбранный range. |
+| 7 | Health Checks Total | Stat | `round(sum(increase(success+degraded+failures[$__range])) or vector(0))` | Общий completed health-check volume в выбранном окне. |
+| 106 | Failure & Degraded Trend by Provider | Timeseries | `round(sum by (provider) (increase(failures|degraded[$__interval])) or vector(0))` | Устойчивость деградации/ошибок по provider. |
+| 107 | Provider Failure Share (Selected Range) | Bar gauge | `100 * failures_by_provider / clamp_min(total_failures, 1)` | Ранжирование providers по доле failed probes. |
+| 108 | Retries Exhausted by Provider / Operation | Table | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))` | Где retries чаще всего исчерпываются. |
+| 109 | Retries Exhausted Trend by Provider / Operation | Timeseries | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__interval])) or vector(0))` | Тренд retry exhaustion incidents во времени. |
+| 102 | Provider Health Check Latency (p95) - $provider | Repeated Gauge | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))` | Current p95 by provider для выбранного range. |
 
 **Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
 
 **Фильтрация:** только `$provider`. Health-check counters и histograms в текущем инструментировании являются provider-labeled, поэтому pipeline filter здесь намеренно не используется.
 
-**Drilldown:** dashboard link `Back to Overview` плюс `Explore Logs (Loki, tracing profile)` и
+**Drilldown:** dashboard links `Back to Overview`, `2. Runtime`, `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` плюс data links у latency-панели открывают Grafana
 Explore в том же time range.
 Loki drilldown стартует с безопасного `{job="bioetl"}` entrypoint без encoded
@@ -849,11 +853,15 @@ dashboard-variable interpolation. Дополнительное сужение п
 
 **Фильтрация:** `$pipeline`, `$run_type`.
 
-**Drilldown:** dashboard links `Back to Overview`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)` и
+**Drilldown:** dashboard links `Back to Overview`, `Control Plane v1`, `4. Data Quality`, `Explore Logs (Loki, tracing profile)` и
 `Explore Traces (Tempo, tracing profile)` плюс data links у `Log Hygiene Trend` ведут в
 Explore с тем же time range. Как и в остальных shipped dashboards, Loki handoff
 стартует с безопасного `{job="bioetl"}` entrypoint. Tempo handoff использует
 тот же dashboard scope через `span."bioetl.pipeline"` и `span."bioetl.run_type"`.
+
+Панели `Pipeline/DQ/Control-plane/Provider Alert Conditions` читают recording-rule
+серии `bioetl_runtime_alert_condition_*`, чтобы dashboard JSON не дублировал
+тяжёлые alert-condition выражения целиком.
 
 **Silver Rejects triage sequence:**
 1. Используйте panel `Silver Filter Rejects` как быстрый runtime signal, чтобы

@@ -10,25 +10,33 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY pyproject.toml uv.lock ./
-COPY src ./src
-COPY requirements.txt ./
+# Copy dependency files only (layer caching optimization)
+COPY pyproject.toml uv.lock requirements.txt ./
 
-# Install dependencies
-RUN pip install --upgrade pip setuptools && \
+# Install dependencies with pip cache disabled
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip setuptools && \
     pip install -e .[tracing] && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install -r requirements.txt
+
+# Copy application code
+COPY src ./src
 
 # Stage 2: Runtime
 FROM python:3.11-slim
 
+# Set environment variables for production
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
 WORKDIR /app
 
-# Install runtime dependencies only
+# Install runtime dependencies and ca-certificates for HTTPS
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy installed packages from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
@@ -37,12 +45,13 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy application code
 COPY --from=builder /app/src ./src
 
-# Create non-root user
-RUN useradd -m -u 1000 bioetl && chown -R bioetl:bioetl /app
+# Create non-root user with no shell access
+RUN useradd -m -u 1000 -s /sbin/nologin bioetl && \
+    chown -R bioetl:bioetl /app
 USER bioetl
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+# Health check (adjust port/path if needed)
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=5s \
     CMD curl -f http://localhost:8000/health || exit 1
 
 ENTRYPOINT ["bioetl"]
