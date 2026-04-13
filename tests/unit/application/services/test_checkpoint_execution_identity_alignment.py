@@ -27,6 +27,7 @@ def _v2_service() -> CheckpointCompatibilityServiceV2:
 def _metadata(
     *,
     effective_config_hash: str = "a" * 64,
+    composite_run_identity: str | None = None,
     execution_fingerprint: str | None = None,
     dq_contract_compatibility_hash: str | None = None,
     pipeline_version: str | None = None,
@@ -40,6 +41,7 @@ def _metadata(
         dq_contract_compatibility_hash=dq_contract_compatibility_hash,
         pipeline_version=pipeline_version,
         effective_config_hash=effective_config_hash,
+        composite_run_identity=composite_run_identity,
         execution_fingerprint=execution_fingerprint,
         manifest_id=manifest_id,
         contract_ref=contract_ref,
@@ -51,6 +53,7 @@ def _metadata(
 def _identity(
     *,
     effective_config_hash: str = "a" * 64,
+    composite_run_identity: str | None = None,
     execution_fingerprint: str | None = None,
     manifest_id: str | None = None,
     contract_ref: str | None = None,
@@ -61,6 +64,7 @@ def _identity(
         effective_config_hash=effective_config_hash,
         execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
         checkpoint_schema_version="1.0.0",
+        composite_run_identity=composite_run_identity,
         execution_fingerprint=execution_fingerprint,
         manifest_id=manifest_id,
         contract_ref=contract_ref,
@@ -162,4 +166,31 @@ def test_legacy_and_v2_align_when_runtime_anchor_fingerprint_mismatches() -> Non
     assert (
         v2_result.details["execution_identity_compatibility"]["reason"]
         == "degraded_runtime_anchor_fingerprint_mismatch"
+    )
+
+
+def test_legacy_and_v2_align_when_composite_run_identity_mismatches() -> None:
+    legacy = _legacy_service()
+    v2 = _v2_service()
+
+    current_metadata = _metadata(composite_run_identity="run-a")
+    checkpoint_metadata = _metadata(composite_run_identity="run-b")
+    current_identity = _identity(composite_run_identity="run-a")
+    checkpoint_identity = _identity(composite_run_identity="run-b")
+
+    legacy_result = legacy.validate_checkpoint_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+    v2_result = v2.check_compatibility(current_identity, checkpoint_identity)
+
+    assert legacy_result.compatible is False
+    assert legacy_result.execution_identity_compatible is False
+    assert any(
+        "Composite run identity mismatch" in msg for msg in legacy_result.messages
+    )
+    assert v2_result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert (
+        v2_result.details["execution_identity_compatibility"]["reason"]
+        == "composite_run_identity_mismatch"
     )
