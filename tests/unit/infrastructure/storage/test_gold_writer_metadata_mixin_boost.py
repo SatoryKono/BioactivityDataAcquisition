@@ -274,7 +274,7 @@ class TestWriteGoldMetadata:
     @pytest.mark.asyncio
     async def test_writes_metadata_for_non_empty_records(self) -> None:
         """Lines 318-336: writes metadata when records present."""
-        from bioetl.application.services.metadata_lineage_bundle import (
+        from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
 
@@ -313,7 +313,7 @@ class TestWriteGoldMetadata:
     @pytest.mark.asyncio
     async def test_prepares_resolved_metadata_context_before_write(self) -> None:
         """Standard Gold metadata path should resolve provider/entity before persist."""
-        from bioetl.application.services.metadata_lineage_bundle import (
+        from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
 
@@ -391,7 +391,7 @@ class TestWriteGoldMergedMetadata:
     @pytest.mark.asyncio
     async def test_with_coordinator_writes_metadata(self) -> None:
         """Lines 380-395: coordinator present writes metadata."""
-        from bioetl.application.services.metadata_lineage_bundle import (
+        from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
 
@@ -426,7 +426,7 @@ class TestWriteGoldMergedMetadata:
     @pytest.mark.asyncio
     async def test_prepares_merged_metadata_context_before_write(self) -> None:
         """Merged Gold metadata path should resolve provider/entity before persist."""
-        from bioetl.application.services.metadata_lineage_bundle import (
+        from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
 

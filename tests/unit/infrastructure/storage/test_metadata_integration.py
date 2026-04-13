@@ -15,7 +15,7 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
-from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundle
 from bioetl.domain.models.metadata import (
     DeltaMetrics,
     EnvironmentMetadata,

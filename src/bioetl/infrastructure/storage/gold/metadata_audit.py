@@ -9,7 +9,7 @@ from typing import Protocol
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditEntry, AuditLayer, AuditOperation, LoggerPort
 from bioetl.domain.types import GoldRecord, RunID
-from bioetl.infrastructure.storage._audit_normalization import (
+from bioetl.infrastructure.storage.audit_normalization import (
     require_audit_run_id,
     require_audit_timestamp,
 )

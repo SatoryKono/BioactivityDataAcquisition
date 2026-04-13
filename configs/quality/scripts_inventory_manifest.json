@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-13T05:41:42.819960+00:00",
+  "generated_at": "2026-04-13T05:53:57.471123+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -8841,7 +8841,7 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 55,
+          "line": 84,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },

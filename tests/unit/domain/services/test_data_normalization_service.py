@@ -71,12 +71,15 @@ class TestNormalizePmid:
             ("12345678", "12345678"),
             ("  12345678  ", "12345678"),
             ("012345678", "12345678"),  # Leading zeros removed
+            ("9999999999", "9999999999"),
             (None, None),
             ("", None),
             ("abc", None),
             ("12.34", None),
             (0, None),
             (-1, None),
+            (10_000_000_000, None),
+            ("10000000000", None),
             (True, None),  # Booleans rejected
             (False, None),
         ],

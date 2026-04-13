@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundle
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.infrastructure.storage.lineage_persistence import (
     emit_composite_source_selection_metrics,

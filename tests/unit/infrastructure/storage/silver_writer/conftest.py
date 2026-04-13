@@ -46,7 +46,7 @@ def mock_metadata_coordinator():
     """Create a mock MetadataCoordinator that returns proper SilverMetadata."""
     from datetime import UTC, datetime
 
-    from bioetl.application.services.metadata_lineage_bundle import (
+    from bioetl.application.services.lineage import (
         MetadataLineageBundle,
     )
     from bioetl.domain.models.metadata import (

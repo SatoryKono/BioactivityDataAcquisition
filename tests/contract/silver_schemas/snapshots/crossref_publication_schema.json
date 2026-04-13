@@ -383,11 +383,11 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^[1-9]\\d*$"
+        "regex": "^[1-9]\\d{0,9}$"
       }
     ],
     "coerce": false,
-    "description": "PubMed ID (positive numeric string)",
+    "description": "PubMed ID (positive numeric string < 10^10)",
     "dtype": "str",
     "nullable": true,
     "required": true,

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import re
 
+from bioetl.domain.normalization.identifiers import PMID_MAX_EXCLUSIVE
 from bioetl.domain.value_objects.base import ValueObject
 
 __all__ = [
@@ -142,7 +143,7 @@ class PubMedId(ValueObject[str]):
     __slots__ = ()
     _value: str
     _PATTERN = re.compile(r"^\d+$")
-    _MAX_PMID = 10_000_000_000  # Reasonable upper bound
+    _MAX_PMID = PMID_MAX_EXCLUSIVE  # Keep ValueObject bound aligned with helper seam
 
     def _coerce_to_str(self, value: str | int) -> str:
         """Coerce value to string, raising ValueError on failure."""

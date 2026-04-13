@@ -15,7 +15,7 @@ from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
     CompositeRunnerObservabilityMixin,
 )
 from bioetl.application.services.effective_config_service import EffectiveConfigService
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
+from bioetl.application.services.lineage import MetadataCoordinator
 from bioetl.application.services.run_manifest_inspection_service import (
     RunManifestInspectionService,
 )

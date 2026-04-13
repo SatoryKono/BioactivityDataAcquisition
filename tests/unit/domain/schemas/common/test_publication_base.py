@@ -143,7 +143,7 @@ class TestPublicationBaseSchemaFieldValidation:
 
     def test_valid_pmid_formats(self, valid_base_record: dict) -> None:
         """PMID must be numeric string."""
-        valid_pmids = ["1", "12345678", "99999999999"]
+        valid_pmids = ["1", "12345678", "9999999999"]
 
         for pmid in valid_pmids:
             record = valid_base_record.copy()
@@ -154,7 +154,7 @@ class TestPublicationBaseSchemaFieldValidation:
 
     def test_invalid_pmid_format_fails(self, valid_base_record: dict) -> None:
         """PMID must be numeric string - non-numeric should fail."""
-        invalid_pmids = ["PMID12345", "abc", "12345.67", "12345abc"]
+        invalid_pmids = ["PMID12345", "abc", "12345.67", "12345abc", "10000000000"]
 
         for pmid in invalid_pmids:
             record = valid_base_record.copy()

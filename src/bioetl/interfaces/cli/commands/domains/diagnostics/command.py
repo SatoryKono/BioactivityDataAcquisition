@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.interfaces.cli.commands._inspection_output import (
+from bioetl.interfaces.cli.commands.inspection_output import (
     emit_inspection_payload,
 )
 from bioetl.interfaces.cli.commands.checkpoint import _render_checkpoint_payload

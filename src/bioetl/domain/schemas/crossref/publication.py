@@ -42,8 +42,8 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     # Note: Fields are already nullable in base schema, just re-declaring here for clarity
     pmid: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^[1-9]\d*$",
-        description="PubMed ID (positive numeric string)",
+        str_matches=r"^[1-9]\d{0,9}$",
+        description="PubMed ID (positive numeric string < 10^10)",
     )
     pmc_id: Series[str] = pa.Field(
         nullable=True,

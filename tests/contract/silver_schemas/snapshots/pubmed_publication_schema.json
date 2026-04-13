@@ -526,11 +526,11 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^[1-9]\\d*$"
+        "regex": "^[1-9]\\d{0,9}$"
       }
     ],
     "coerce": false,
-    "description": "PubMed ID (PK, numeric string)",
+    "description": "PubMed ID (PK, numeric string < 10^10)",
     "dtype": "str",
     "nullable": false,
     "required": true,

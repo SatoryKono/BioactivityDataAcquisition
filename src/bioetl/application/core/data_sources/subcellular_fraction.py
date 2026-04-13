@@ -8,12 +8,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core import _subcellular_fraction_support as support
-from bioetl.application.core._data_source_mixins import (
+from bioetl.application.core import subcellular_fraction_support as support
+from bioetl.application.core.data_source_mixins import (
     _SourceMetadataDelegationMixin,
     _WrappedDataSourceDelegationMixin,
 )
-from bioetl.application.core._target_data_source_mixins import (
+from bioetl.application.core.target_data_source_mixins import (
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
     _TargetEntityFetchDelegationMixin,

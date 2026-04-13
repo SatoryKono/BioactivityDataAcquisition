@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TypeVar
 
-from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundle
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
