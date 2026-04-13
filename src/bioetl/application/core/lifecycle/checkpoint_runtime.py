@@ -128,6 +128,7 @@ def handle_incompatible_checkpoint(
     logger: LoggerPort,
     pipeline_name: str,
     compatibility_policy: CheckpointCompatibilityPolicy,
+    current_metadata: CheckpointMetadata | None,
     checkpoint_metadata: CheckpointMetadata,
     execution_identity_compatible: bool,
     messages: list[str],
@@ -148,13 +149,8 @@ def handle_incompatible_checkpoint(
         "identity_mismatch_forces_rejection": forced_resume_rejection,
         "messages": messages,
         "checkpoint_metadata": checkpoint_metadata.to_dict(),
-        "checkpoint_identity": {
-            "manifest_id": checkpoint_metadata.manifest_id,
-            "contract_ref": checkpoint_metadata.contract_ref,
-            "contract_version": checkpoint_metadata.contract_version,
-            "exact_replay": checkpoint_metadata.exact_replay,
-            "input_snapshot_ids": list(checkpoint_metadata.input_snapshot_ids),
-        },
+        "current_identity": _checkpoint_identity_payload(current_metadata),
+        "checkpoint_identity": _checkpoint_identity_payload(checkpoint_metadata),
     }
     if disposition == "observe_blocked_identity":
         logger.warning(
@@ -181,6 +177,33 @@ def handle_incompatible_checkpoint(
     )
 
 
+def _checkpoint_identity_payload(
+    metadata: CheckpointMetadata | None,
+) -> dict[str, object | None]:
+    """Return the compact identity anchors most useful for resume forensics."""
+    if metadata is None:
+        return {
+            "composite_run_identity": None,
+            "execution_fingerprint": None,
+            "manifest_id": None,
+            "effective_config_hash": None,
+            "contract_ref": None,
+            "contract_version": None,
+            "exact_replay": None,
+            "input_snapshot_ids": [],
+        }
+    return {
+        "composite_run_identity": metadata.composite_run_identity,
+        "execution_fingerprint": metadata.execution_fingerprint,
+        "manifest_id": metadata.manifest_id,
+        "effective_config_hash": metadata.effective_config_hash,
+        "contract_ref": metadata.contract_ref,
+        "contract_version": metadata.contract_version,
+        "exact_replay": metadata.exact_replay,
+        "input_snapshot_ids": list(metadata.input_snapshot_ids),
+    }
+
+
 def resolve_incompatible_checkpoint_disposition(
     *,
     compatibility_policy: CheckpointCompatibilityPolicy,
@@ -197,8 +220,8 @@ def resolve_incompatible_checkpoint_disposition(
 
 
 __all__ = [
-    "CheckpointCompatibilityPolicy",
     "CheckpointCompatibilityDisposition",
+    "CheckpointCompatibilityPolicy",
     "enrich_metadata_with_execution_identity",
     "handle_incompatible_checkpoint",
     "resolve_current_metadata",

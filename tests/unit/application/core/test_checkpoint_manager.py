@@ -699,6 +699,7 @@ class TestCheckpointManagerCompatibilityPolicy:
                 effective_config_hash="cfg-hash",
                 effective_config_artifact_id="artifact-1",
                 execution_fingerprint="exec-fp",
+                composite_run_identity="run-1",
                 manifest_id="manifest-1",
                 contract_ref="chembl.activity",
                 contract_version="1.0.0",
@@ -716,6 +717,7 @@ class TestCheckpointManagerCompatibilityPolicy:
         assert call_kwargs["metadata"]["effective_config_hash"] == "cfg-hash"
         assert call_kwargs["metadata"]["effective_config_artifact_id"] == "artifact-1"
         assert call_kwargs["metadata"]["execution_fingerprint"] == "exec-fp"
+        assert call_kwargs["metadata"]["composite_run_identity"] == "run-1"
         assert call_kwargs["metadata"]["manifest_id"] == "manifest-1"
         assert call_kwargs["metadata"]["contract_ref"] == "chembl.activity"
         assert call_kwargs["metadata"]["contract_version"] == "1.0.0"
@@ -730,6 +732,7 @@ class TestCheckpointManagerCompatibilityPolicy:
             saved_run_id,
             {
                 "records_processed": 42,
+                "composite_run_identity": "run-old",
                 "manifest_id": "manifest-old",
                 "contract_ref": "chembl.activity",
                 "contract_version": "1.0.0",
@@ -756,7 +759,10 @@ class TestCheckpointManagerCompatibilityPolicy:
             checkpoint_compatibility_service=compatibility_service,
             current_metadata=CheckpointMetadata(
                 records_processed=0,
+                composite_run_identity="run-new",
                 manifest_id="manifest-new",
+                effective_config_hash="cfg-new",
+                execution_fingerprint="fp-new",
             ),
             compatibility_policy="soft_fail",
         )
@@ -766,5 +772,12 @@ class TestCheckpointManagerCompatibilityPolicy:
         assert result is None
         warning_extra = mock_logger.warning.call_args.kwargs
         assert warning_extra["resume_rejected"] is True
+        assert warning_extra["current_identity"]["composite_run_identity"] == "run-new"
+        assert warning_extra["current_identity"]["manifest_id"] == "manifest-new"
+        assert warning_extra["current_identity"]["effective_config_hash"] == "cfg-new"
+        assert warning_extra["current_identity"]["execution_fingerprint"] == "fp-new"
+        assert (
+            warning_extra["checkpoint_identity"]["composite_run_identity"] == "run-old"
+        )
         assert warning_extra["checkpoint_identity"]["manifest_id"] == "manifest-old"
         assert warning_extra["checkpoint_identity"]["exact_replay"] is True

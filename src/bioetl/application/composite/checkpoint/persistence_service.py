@@ -5,7 +5,9 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.checkpoint import _service_support as support
+from bioetl.application.composite.checkpoint._checkpoint_runtime import (
+    CHECKPOINT_WRITE_ERRORS,
+)
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.exceptions import BioETLError, CheckpointConflictError
 
@@ -45,7 +47,7 @@ class CompositeCheckpointPersistenceService:
                 state=state.state.value,
                 completed_enrichers=len(state.completed_enrichers),
             )
-        except support.CHECKPOINT_WRITE_ERRORS as error:
+        except CHECKPOINT_WRITE_ERRORS as error:
             self._logger.error(
                 "Failed to save checkpoint",
                 composite=self._composite_name,

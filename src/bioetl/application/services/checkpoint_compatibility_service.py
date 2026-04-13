@@ -166,11 +166,30 @@ def _validate_execution_identity_compatibility(
     ):
         if not bool(execution_identity_result["compatible"]):
             execution_identity_compatible = False
-            messages.append(
-                "Execution fingerprint mismatch: "
-                f"current={current_metadata.execution_fingerprint}, "
-                f"checkpoint={checkpoint_metadata.execution_fingerprint}"
-            )
+            if (
+                execution_identity_result["reason"]
+                == "composite_run_identity_missing"
+            ):
+                messages.append(
+                    "Composite run identity missing: "
+                    f"current={current_metadata.composite_run_identity}, "
+                    f"checkpoint={checkpoint_metadata.composite_run_identity}"
+                )
+            elif (
+                execution_identity_result["reason"]
+                == "composite_run_identity_mismatch"
+            ):
+                messages.append(
+                    "Composite run identity mismatch: "
+                    f"current={current_metadata.composite_run_identity}, "
+                    f"checkpoint={checkpoint_metadata.composite_run_identity}"
+                )
+            else:
+                messages.append(
+                    "Execution fingerprint mismatch: "
+                    f"current={current_metadata.execution_fingerprint}, "
+                    f"checkpoint={checkpoint_metadata.execution_fingerprint}"
+                )
         return execution_identity_compatible, messages
     if (
         execution_identity_result["reason"] == "composite_run_identity_missing"

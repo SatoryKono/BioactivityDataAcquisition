@@ -164,6 +164,7 @@ class CheckpointManagerService:
                                 logger=self._logger,
                                 pipeline_name=self._pipeline_name,
                                 compatibility_policy=self._compatibility_policy,
+                                current_metadata=effective_current_metadata,
                                 checkpoint_metadata=checkpoint_metadata,
                                 execution_identity_compatible=(
                                     compatibility_result.execution_identity_compatible

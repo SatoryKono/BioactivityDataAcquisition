@@ -1,0 +1,99 @@
+schema_version: 1
+snapshot_date: "2026-04-13"
+source:
+  query: "python -m scripts.ops query-neo4j-memory dead-code-candidates all --json"
+  focus: "zero-anchor retirement tranche after the 2026-04-13 cleanup wave"
+  owner: "@bioetl-architecture"
+policy:
+  dispositions:
+    - "removed"
+    - "retain_active"
+  review_cycle_days: 90
+families:
+  - name: "composite_layer"
+    owner: "@bioetl-architecture"
+    linked_issue: "2909"
+    entries:
+      - id: "preflight_rules_removed"
+        disposition: "removed"
+        rationale: "Legacy compat mixin was folded into CompositePreflightValidationService."
+        reviewed_on: "2026-04-13"
+        linked_issue: "2903"
+        target:
+          label: "module_surface"
+          name: "src/bioetl/application/composite/_preflight_rules.py"
+          module_path: "src/bioetl/application/composite/_preflight_rules.py"
+      - id: "checkpoint_service_support_removed"
+        disposition: "removed"
+        rationale: "Checkpoint support facade was replaced by direct imports from extracted canonical helper modules."
+        reviewed_on: "2026-04-13"
+        linked_issue: "2907"
+        target:
+          label: "module_surface"
+          name: "src/bioetl/application/composite/checkpoint/_service_support.py"
+          module_path: "src/bioetl/application/composite/checkpoint/_service_support.py"
+      - id: "checkpoint_state_codec_active"
+        disposition: "retain_active"
+        rationale: "State codec remains the canonical checkpoint serialization seam used by runtime state orchestration."
+        reviewed_on: "2026-04-13"
+        review_by: "2026-07-12"
+        linked_issue: "2909"
+        target:
+          label: "module_surface"
+          name: "src/bioetl/application/composite/checkpoint/_state_codec.py"
+          module_path: "src/bioetl/application/composite/checkpoint/_state_codec.py"
+          module_name: "bioetl.application.composite.checkpoint._state_codec"
+        verification:
+          min_src_importers: 1
+      - id: "fsm_helper_active"
+        disposition: "retain_active"
+        rationale: "FSM helper is still part of runtime wiring and resume handling; missing memory anchors reflect stale analysis rather than dead code."
+        reviewed_on: "2026-04-13"
+        review_by: "2026-07-12"
+        linked_issue: "2908"
+        target:
+          label: "module_surface"
+          name: "src/bioetl/application/composite/fsm_helper.py"
+          module_path: "src/bioetl/application/composite/fsm_helper.py"
+          module_name: "bioetl.application.composite.fsm_helper"
+        verification:
+          min_src_importers: 5
+      - id: "runner_merge_stage_flow_active"
+        disposition: "retain_active"
+        rationale: "Merge-stage flow helpers remain the canonical implementation behind runner mixins."
+        reviewed_on: "2026-04-13"
+        review_by: "2026-07-12"
+        linked_issue: "2909"
+        target:
+          label: "module_surface"
+          name: "src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py"
+          module_path: "src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py"
+          module_name: "bioetl.application.composite.runner_pkg.runner_merge_stage_flow"
+        verification:
+          min_src_importers: 1
+      - id: "column_priority_orderer_active"
+        disposition: "retain_active"
+        rationale: "Column priority ordering is used by runtime wiring, coalesce policy, and merge support. The zero-anchor signal is a memory false positive."
+        reviewed_on: "2026-04-13"
+        review_by: "2026-07-12"
+        linked_issue: "2909"
+        target:
+          label: "module_surface"
+          name: "src/bioetl/application/composite/column_priority_orderer.py"
+          module_path: "src/bioetl/application/composite/column_priority_orderer.py"
+          module_name: "bioetl.application.composite.column_priority_orderer"
+        verification:
+          min_src_importers: 3
+      - id: "merger_input_mixin_active"
+        disposition: "retain_active"
+        rationale: "Merge input loading still powers merger IO/orchestration paths and has active first-party imports."
+        reviewed_on: "2026-04-13"
+        review_by: "2026-07-12"
+        linked_issue: "2909"
+        target:
+          label: "module_surface"
+          name: "src/bioetl/application/composite/merger_input_mixin.py"
+          module_path: "src/bioetl/application/composite/merger_input_mixin.py"
+          module_name: "bioetl.application.composite.merger_input_mixin"
+        verification:
+          min_src_importers: 2
