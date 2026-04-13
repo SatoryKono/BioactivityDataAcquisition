@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+
+from bioetl.domain.normalization.identifiers import (
+    normalize_doi,
+    normalize_pmc_id,
+    normalize_pmid,
+)
 
 __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
@@ -21,11 +27,30 @@ class JoinKeyNormalizationPolicy:
 
     trim: bool = False
     lowercase: bool = False
+    domain_canonicalizer: Callable[[str], str | None] | None = None
 
     @property
     def requires_string_normalization(self) -> bool:
         """Return True when the policy mutates string values."""
-        return self.trim or self.lowercase
+        return self.trim or self.lowercase or self.domain_canonicalizer is not None
+
+
+def _normalize_join_key_doi(value: str) -> str | None:
+    """Normalize DOI text through the domain identifier seam."""
+    return normalize_doi(value)
+
+
+def _normalize_join_key_pmid(value: str) -> str | None:
+    """Normalize PMID join text while tolerating an explicit PMID prefix."""
+    normalized = value.strip()
+    if normalized.lower().startswith("pmid:"):
+        normalized = normalized[5:]
+    return normalize_pmid(normalized)
+
+
+def _normalize_join_key_pmc_id(value: str) -> str | None:
+    """Normalize PMC join text through the domain identifier seam."""
+    return normalize_pmc_id(value)
 
 
 _NOOP_POLICY = JoinKeyNormalizationPolicy()  # EXC-002: immutable module constant
@@ -33,11 +58,23 @@ _NOOP_POLICY = JoinKeyNormalizationPolicy()  # EXC-002: immutable module constan
 JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
     "canonical_smiles": JoinKeyNormalizationPolicy(trim=True),
     "cell_id": _NOOP_POLICY,
-    "doi": JoinKeyNormalizationPolicy(trim=True, lowercase=True),
+    "doi": JoinKeyNormalizationPolicy(
+        trim=True,
+        lowercase=True,
+        domain_canonicalizer=_normalize_join_key_doi,
+    ),
     "inchi_key": JoinKeyNormalizationPolicy(trim=True),
     "molecule_id": _NOOP_POLICY,
-    "pmc_id": JoinKeyNormalizationPolicy(trim=True, lowercase=True),
-    "pmid": JoinKeyNormalizationPolicy(trim=True, lowercase=True),
+    "pmc_id": JoinKeyNormalizationPolicy(
+        trim=True,
+        lowercase=True,
+        domain_canonicalizer=_normalize_join_key_pmc_id,
+    ),
+    "pmid": JoinKeyNormalizationPolicy(
+        trim=True,
+        lowercase=True,
+        domain_canonicalizer=_normalize_join_key_pmid,
+    ),
     "primary_component_id": _NOOP_POLICY,
     "protein_classification_id": _NOOP_POLICY,
     "publication_id": _NOOP_POLICY,
@@ -65,7 +102,7 @@ def normalize_join_key_text(
     normalization_policies: Mapping[
         str, JoinKeyNormalizationPolicy
     ] = JOIN_KEY_NORMALIZATION_POLICIES,
-) -> str:
+) -> str | None:
     """Apply canonical trim/casing transforms to one string join key value."""
     policy = get_join_key_normalization_policy(
         key,
@@ -74,7 +111,13 @@ def normalize_join_key_text(
     if policy is None:
         return value
 
-    normalized = value.strip() if policy.trim else value
+    normalized = value
+    if policy.domain_canonicalizer is not None:
+        normalized = policy.domain_canonicalizer(value)
+        if normalized is None:
+            return None
+    elif policy.trim:
+        normalized = value.strip()
     return normalized.lower() if policy.lowercase else normalized
 
 
@@ -114,4 +157,6 @@ def stringify_join_key_value(
         key=key,
         normalization_policies=normalization_policies,
     )
+    if normalized is None:
+        return ""
     return str(normalized)

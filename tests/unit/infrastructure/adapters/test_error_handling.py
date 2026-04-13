@@ -224,7 +224,7 @@ class TestErrorService:
         )
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "adapter_error_taxonomy_total",
+            "bioetl_adapter_error_taxonomy_total",
             1,
             {
                 "provider": "crossref",

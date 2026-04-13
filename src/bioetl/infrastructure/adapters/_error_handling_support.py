@@ -95,7 +95,7 @@ def emit_error_telemetry(
     )
     if metrics is not None:
         metrics.increment_counter(
-            "adapter_error_taxonomy_total",
+            "bioetl_adapter_error_taxonomy_total",
             1,
             {
                 "provider": provider,

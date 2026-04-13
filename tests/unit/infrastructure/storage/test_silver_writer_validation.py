@@ -231,7 +231,7 @@ class TestSilverWriterValidateSilverPandera:
             writer._validate_silver_pandera(records, "test.table")
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "silver_validation_failures_total",
+            "bioetl_silver_validation_failures_total",
             1,
             {"table": "test.table", "pipeline": "test_table"},
         )
@@ -266,7 +266,7 @@ class TestSilverWriterValidateSilverPandera:
             writer._validate_silver_pandera(records, "chembl.activity__v1_0_0")
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "silver_validation_failures_total",
+            "bioetl_silver_validation_failures_total",
             1,
             {
                 "table": "chembl.activity__v1_0_0",

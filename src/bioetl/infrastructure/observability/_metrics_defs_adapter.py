@@ -18,6 +18,7 @@ __all__ = [
     "DATA_SOURCE_RETRY_EXHAUSTED_TOTAL",
     "HTTP_REQUEST_DURATION_SECONDS",
     "HTTP_REQUEST_ERRORS_TOTAL",
+    "HTTP_RETRY_BUDGET_EXHAUSTED_TOTAL",
     "HTTP_RETRIES_TOTAL",
     "PROVIDER_HEALTH_STATUS",
     "RATE_LIMITER_TOKENS_AVAILABLE",
@@ -102,6 +103,12 @@ HTTP_REQUEST_DURATION_SECONDS = Histogram(
 HTTP_RETRIES_TOTAL = Counter(
     "bioetl_http_retries_total",
     "Total HTTP request retries",
+    ["provider", "method"],
+)
+
+HTTP_RETRY_BUDGET_EXHAUSTED_TOTAL = Counter(
+    "bioetl_http_retry_budget_exhausted_total",
+    "Total HTTP requests that exhausted their retry budget",
     ["provider", "method"],
 )
 

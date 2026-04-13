@@ -267,12 +267,12 @@ class BronzeWriterIOMixin:
         if not dry_run and files > 0:
             cleanup_labels = {"operation": "cleanup"}
             self._metrics.increment_counter(
-                "bronze_files_removed_total",
+                "bioetl_bronze_files_removed_total",
                 files,
                 cleanup_labels,
             )
             self._metrics.increment_counter(
-                "bronze_bytes_freed_total",
+                "bioetl_bronze_bytes_freed_total",
                 bytes_total,
                 cleanup_labels,
             )

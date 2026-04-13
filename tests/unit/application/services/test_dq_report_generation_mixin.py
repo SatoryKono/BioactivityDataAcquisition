@@ -129,7 +129,7 @@ async def test_generate_bronze_report_skips_when_analyzer_or_writer_missing(
         run_id=context.run_id,
     )
     service._metrics.increment_counter.assert_called_once_with(
-        "dq_report_skipped_total",
+        "bioetl_dq_report_skipped_total",
         1,
         {
             "pipeline": context.pipeline_name,
@@ -158,7 +158,7 @@ async def test_generate_bronze_report_skips_when_data_missing(
         run_id=context.run_id,
     )
     service._metrics.increment_counter.assert_called_once_with(
-        "dq_report_skipped_total",
+        "bioetl_dq_report_skipped_total",
         1,
         {
             "pipeline": context.pipeline_name,
@@ -186,7 +186,7 @@ async def test_generate_silver_report_emits_generated_metric(
 
     assert result == expected_path
     service._metrics.increment_counter.assert_called_once_with(
-        "dq_report_generated_total",
+        "bioetl_dq_report_generated_total",
         1,
         {
             "pipeline": context.pipeline_name,

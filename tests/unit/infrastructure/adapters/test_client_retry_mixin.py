@@ -253,7 +253,7 @@ def test_record_retry_budget_exhausted_increments_counter(
     client._record_retry_budget_exhausted(method="GET", url="https://api.example.com")
 
     client._metrics.increment_counter.assert_called_once_with(
-        "http_retry_budget_exhausted_total",
+        "bioetl_http_retry_budget_exhausted_total",
         1,
         {"provider": "chembl", "method": "GET"},
     )
@@ -594,7 +594,7 @@ async def test_request_with_retry_records_retry_budget_exhaustion_end_to_end(
 
     assert exc_info.value.attempts == 2
     client._metrics.increment_counter.assert_any_call(
-        "http_retry_budget_exhausted_total",
+        "bioetl_http_retry_budget_exhausted_total",
         1,
         {"provider": "chembl", "method": "GET"},
     )

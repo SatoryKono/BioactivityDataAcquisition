@@ -297,7 +297,7 @@ class _BaseTransformerExecutionMixin:
         owner = cast("_TransformerExecutionOwner", self)
         duration = time.perf_counter() - start_time
         owner._metrics.observe_histogram(
-            "transform_duration_seconds",
+            "bioetl_transform_duration_seconds",
             duration,
             labels={
                 "provider": owner.provider,
@@ -306,7 +306,7 @@ class _BaseTransformerExecutionMixin:
         )
         if error_type:
             owner._metrics.increment_counter(
-                "transform_errors_total",
+                "bioetl_transform_errors_total",
                 1,
                 labels={
                     "provider": owner.provider,

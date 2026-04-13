@@ -65,6 +65,21 @@ def build_join_key_normalization_expr(
         return None
 
     expr = pl.col(column).cast(pl.String)
+    if policy.domain_canonicalizer is not None:
+        return (
+            expr.map_elements(
+                lambda value: None
+                if value is None
+                else normalize_join_key_text(
+                    value,
+                    key=key,
+                    normalization_policies=normalization_policies,
+                ),
+                return_dtype=pl.String,
+                skip_nulls=False,
+            )
+            .alias(column)
+        )
     if policy.trim:
         expr = expr.str.strip_chars()
     if policy.lowercase:

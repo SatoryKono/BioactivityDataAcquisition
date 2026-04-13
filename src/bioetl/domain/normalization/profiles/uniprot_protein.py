@@ -38,6 +38,14 @@ _META_FIELDS = frozenset(
 _TITLE_FIELDS = frozenset({"protein_name"})
 _INT_FIELDS = frozenset({"annotation_score", "organism_id", "sequence_length"})
 _SET_LIKE_FIELDS = frozenset({"gene_names"})
+_JSON_STRING_FIELDS = frozenset(
+    {
+        "alternative_products",
+        "biophysicochemical_properties",
+        "cofactors",
+        "features_json",
+    }
+)
 
 UNIPROT_PROTEIN_PROFILE = build_standard_profile(
     profile_name="uniprot.protein",
@@ -47,6 +55,7 @@ UNIPROT_PROTEIN_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
+    json_string_fields=_JSON_STRING_FIELDS,
 )
 
 UNIPROT_PROTEIN_PROFILE.assert_covers_schema(UNIPROT_PROTEIN_SCHEMA_FIELDS)

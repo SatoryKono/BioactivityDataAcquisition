@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-13T05:53:57.471123+00:00",
+  "generated_at": "2026-04-13T06:13:49.298021+00:00",
   "summary": {
     "total_scripts": 292,
     "status_counts": {
@@ -13,7 +13,7 @@
       "agents": 10,
       "build": 31,
       "ci": 48,
-      "docs": 134,
+      "docs": 136,
       "scripts": 243,
       "skills": 9,
       "tests": 99
@@ -6155,8 +6155,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
+          "line": 205,
+          "source_group": "docs",
+          "text": "- `scripts/ops/neo4j_memory_query.py`"
+        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 40,
@@ -6170,8 +6176,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
+          "line": 206,
+          "source_group": "docs",
+          "text": "- `scripts/ops/neo4j_memory_sync.py`"
+        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 39,
