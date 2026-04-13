@@ -7,7 +7,7 @@ load_repo_env_if_present() {
 
   local script_dir repo_root env_file env_local_file load_env_local
   script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-  repo_root="$(cd -- "${script_dir}/../.." && pwd)"
+  repo_root="$(cd -- "${script_dir}/../../.." && pwd)"
   env_file="${BIOETL_ENV_FILE:-${repo_root}/.env}"
   env_local_file="${repo_root}/.env.local"
   load_env_local="${BIOETL_SKIP_ENV_LOCAL:-0}"
