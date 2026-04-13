@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, QuarantinePort
 
 
+_QUARANTINE_OPERATOR_ERRORS = (OSError, RuntimeError, TypeError, ValueError)
+
+
 class _FilteredQuarantineHost(Protocol):
     """Structural contract required by filtered quarantine explorer helpers."""
 
@@ -74,7 +77,7 @@ class QuarantineServiceFilteredMixin:
                 offset=offset,
                 sort=sort,
             )
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="filtered_list",
                 status="failed",
@@ -114,7 +117,7 @@ class QuarantineServiceFilteredMixin:
                 payload_hash=payload_hash,
                 pipeline=pipeline,
             )
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="filtered_get",
                 status="failed",
@@ -181,7 +184,7 @@ class QuarantineServiceFilteredMixin:
                 from_ts=from_ts,
                 to_ts=to_ts,
             )
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="filtered_stats",
                 status="failed",
@@ -233,7 +236,7 @@ class QuarantineServiceFilteredMixin:
                 from_ts=from_ts,
                 to_ts=to_ts,
             )
-        except Exception:
+        except _QUARANTINE_OPERATOR_ERRORS:
             self._record_operator_metrics(
                 operation="filtered_filter_options",
                 status="failed",

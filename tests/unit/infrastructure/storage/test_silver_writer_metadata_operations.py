@@ -44,7 +44,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
 
         host._write_silver_metadata_file.assert_awaited_once()
         host._metrics.increment_counter.assert_called_once_with(
-            "lineage_refs_missing_total",
+            "bioetl_lineage_refs_missing_total",
             1,
             {
                 "pipeline": "chembl_activity",
@@ -93,7 +93,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
         host._metrics.increment_counter.assert_has_calls(
             [
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     1,
                     {
                         "pipeline": "composite_publication",
@@ -102,7 +102,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
                     },
                 ),
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     1,
                     {
                         "pipeline": "composite_publication",
@@ -111,7 +111,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
                     },
                 ),
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     1,
                     {
                         "pipeline": "composite_publication",
@@ -120,7 +120,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
                     },
                 ),
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     2,
                     {
                         "pipeline": "composite_publication",
@@ -129,7 +129,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
                     },
                 ),
                 call(
-                    "composite_source_selection_total",
+                    "bioetl_composite_source_selection_total",
                     1,
                     {
                         "pipeline": "composite_publication",

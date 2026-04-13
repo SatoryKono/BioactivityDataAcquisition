@@ -17,6 +17,7 @@ from bioetl.application.core.batch_processing_runtime import (
     get_source_metadata,
 )
 from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
     PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.batch_transformer import TransformResult
@@ -43,6 +44,7 @@ if TYPE_CHECKING:
 
 _ResultT = TypeVar("_ResultT")
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
+_OPERATION_ERRORS = _RF005_OPERATION_ERRORS
 
 
 class BatchProcessingSupportService:
@@ -247,7 +249,7 @@ class BatchProcessingSupportService:
             await self._quarantine_manager.quarantine_records(
                 entries, batch_id, ingestion_ts=ingestion_ts
             )
-        except Exception as error:
+        except _OPERATION_ERRORS as error:
             self._emit_batch_failed(
                 batch_id=batch_id,
                 layer=layer,

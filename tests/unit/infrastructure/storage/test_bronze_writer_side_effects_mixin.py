@@ -144,6 +144,7 @@ class TestBronzeWriterSideEffectsMixin:
         host = _Host(tmp_path)
         metadata = MagicMock()
         metadata.runtime.run_id = "run-1"
+        metadata.output.lineage_fragment_id = None
         metadata.output.artifact_id = "bronze_batch:batch-1"
         produced_node = LineageNodeRef(
             node_type=LineageNodeType.BRONZE_BATCH,
@@ -191,6 +192,7 @@ class TestBronzeWriterSideEffectsMixin:
 
         host._metadata_writer.write_bronze_metadata.assert_awaited_once()
         host._lineage_store.save.assert_called_once_with(fragment)
+        assert metadata.output.lineage_fragment_id == "bronze:fragment-1"
         assert coordinator.last_input is not None
         assert len(coordinator.last_input.input_snapshots) == 1
         assert coordinator.last_input.input_snapshots[0].immutable_uri == str(batch_path)
