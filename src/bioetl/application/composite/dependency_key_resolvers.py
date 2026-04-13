@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import TypeVar
 
 import polars as pl
 
@@ -31,6 +32,8 @@ _DEPENDENCY_KEY_READ_ERRORS = (
     RuntimeError,
     TypeError,
 )
+
+TResolver = TypeVar("TResolver", "SeedKeyResolver", "ChainedKeyResolver")
 
 
 class SeedKeyResolver:
@@ -305,7 +308,7 @@ def create_chained_key_resolver(
     )
 
 
-def _create_key_resolver[TResolver: SeedKeyResolver | ChainedKeyResolver](
+def _create_key_resolver(
     resolver_type: type[TResolver],
     logger: LoggerPort,
     *,

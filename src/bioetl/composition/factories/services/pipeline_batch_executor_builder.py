@@ -31,7 +31,6 @@ from bioetl.infrastructure.validation import PanderaGoldValidator
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.application.core.wiring.runtime import (
         BasePipeline,
         BatchCheckpointRecoveryService,
@@ -41,6 +40,7 @@ if TYPE_CHECKING:
         BatchProgressService,
         ShutdownSignal,
     )
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import (
         BatchIdGeneratorPort,

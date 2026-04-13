@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.column_orderer_group_flow import (
     apply_renames,

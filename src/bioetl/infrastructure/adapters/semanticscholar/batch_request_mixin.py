@@ -8,11 +8,11 @@ import time
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.common.response_shapes import (
-    normalize_response_items,
-)
 from bioetl.infrastructure.adapters.common.doi_helpers import (
     strip_doi_transport_prefix,
+)
+from bioetl.infrastructure.adapters.common.response_shapes import (
+    normalize_response_items,
 )
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,

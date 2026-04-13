@@ -7,14 +7,14 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.composite.lifecycle_observer_service import (
-    CompositeLifecycleObserverService,
-)
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
     CompositeCheckpointState,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
 )

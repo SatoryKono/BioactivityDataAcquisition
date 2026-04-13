@@ -147,13 +147,13 @@ groups:
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDQValidationFailuresCritical
-        expr: sum by (pipeline, stage) (increase(bioetl_dq_validation_failures_total{severity="critical"}[15m])) > 0
+        expr: sum by (pipeline, stage) (increase(bioetl_dq_validation_failures_total{severity="hard_fail"}[15m])) > 0
         for: 2m
         labels:
           severity: critical
         annotations:
           summary: "Critical DQ validation failures detected"
-          description: "bioetl_dq_validation_failures_total increased with severity=critical for pipeline={{ $labels.pipeline }} stage={{ $labels.stage }} in the last 15m."
+          description: "bioetl_dq_validation_failures_total increased with severity=hard_fail for pipeline={{ $labels.pipeline }} stage={{ $labels.stage }} in the last 15m."
           runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"
 
       - alert: BioETLDQCriticalAnomaliesDetected

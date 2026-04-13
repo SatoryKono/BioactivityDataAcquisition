@@ -8,9 +8,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.wiring.runtime import PipelineService
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
-from bioetl.composition.observability_resolution import (
-    resolve_tracing_port as _resolve_tracing_port,
-)
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
     create_lock,
@@ -18,6 +15,9 @@ from bioetl.composition.factories.services.port_factories import (
     create_quarantine,
 )
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
+from bioetl.composition.observability_resolution import (
+    resolve_tracing_port as _resolve_tracing_port,
+)
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:

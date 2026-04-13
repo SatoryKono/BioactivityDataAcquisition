@@ -4,14 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
-from bioetl.application.composite.lifecycle_observer_service import (
-    CompositeLifecycleObserverService,
-)
+
 from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
     CompositeCheckpointState,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.preflight_validator import (
     CompositePreflightValidationService,
 )
@@ -21,10 +22,6 @@ from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     finalize_composite_result,
     log_composite_completion,
     prepare_composite_result_context,
-)
-from bioetl.application.composite.runtime_models import (
-    CompositeExecutionContext,
-    CompositeRuntimeConfig,
 )
 from bioetl.application.composite.runner_pkg.runner_support_flow import (
     build_correlation_log_context,
@@ -47,6 +44,10 @@ from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
     _PreparedCompositeResultContext,
     _PreparedPreflightValidationContext,
+)
+from bioetl.application.composite.runtime_models import (
+    CompositeExecutionContext,
+    CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult, SeedResult

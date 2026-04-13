@@ -13,14 +13,14 @@ from bioetl.application.core.data_source_mixins import (
     _SourceMetadataDelegationMixin,
     _WrappedDataSourceDelegationMixin,
 )
-from bioetl.application.core.target_data_source_mixins import (
-    _TargetEntityFetchDelegationMixin,
-)
 from bioetl.application.core.publication_term_extraction_mixin import (
     PublicationTermExtractionMixin,
 )
 from bioetl.application.core.publication_term_filtering_mixin import (
     PublicationTermFilteringMixin,
+)
+from bioetl.application.core.target_data_source_mixins import (
+    _TargetEntityFetchDelegationMixin,
 )
 from bioetl.domain.types import BronzeRecord
 

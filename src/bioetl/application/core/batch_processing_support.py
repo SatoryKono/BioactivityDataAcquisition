@@ -18,6 +18,8 @@ from bioetl.application.core.batch_processing_runtime import (
 )
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
+)
+from bioetl.application.core.batch_runtime_failure_policy import (
     PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.batch_transformer import TransformResult
@@ -33,12 +35,12 @@ from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, RunID
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
 
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.batch_tracing import BatchTracingManagerService
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 

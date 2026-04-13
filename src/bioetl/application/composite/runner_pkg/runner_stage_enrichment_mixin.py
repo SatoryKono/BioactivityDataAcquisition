@@ -2,23 +2,24 @@
 
 from __future__ import annotations
 
-import polars as pl
 from typing import cast
+
+import polars as pl
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_helpers import (
     add_not_run_results,
     log_enrichment_summary,
 )
+from bioetl.application.composite.runner_pkg.runner_stage_enrichment_types import (
+    _CompositeRunnerStageEnrichmentHostProtocol,
+    _PreparedEnrichmentRunContext,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
     build_enrichment_stage_details,
 )
 from bioetl.application.composite.runner_pkg.runner_stage_start_flow import (
     start_composite_phase,
-)
-from bioetl.application.composite.runner_pkg.runner_stage_enrichment_types import (
-    _CompositeRunnerStageEnrichmentHostProtocol,
-    _PreparedEnrichmentRunContext,
 )
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.composite.state import CompositePipelineState

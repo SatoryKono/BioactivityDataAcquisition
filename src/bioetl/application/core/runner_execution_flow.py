@@ -11,15 +11,15 @@ __all__ = [
     "validate_infrastructure",
 ]
 
+import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-import time
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.observability.observer import LifecyclePhase
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
+from bioetl.application.observability.observer import LifecyclePhase
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 from bioetl.domain.types import HealthStatus
 

@@ -157,11 +157,6 @@ class _ObserverContextManagerMixin(_ObserverEventMixin):
         """Emit final pipeline lifecycle event."""
         from bioetl.application.observability.observer import LifecyclePhase
 
-        log_ctx = {
-            "duration_seconds": duration,
-            "status": status,
-            "phase": "cleanup",
-        }
         if status == "failed":
             self.emit_domain_event(
                 PipelineFailed(

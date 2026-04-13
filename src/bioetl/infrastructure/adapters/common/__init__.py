@@ -29,17 +29,17 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
 from bioetl.infrastructure.adapters.common.fallback_policy_mixin import (
     FallbackPolicyMixin,
 )
-from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
-    is_retry_exhausted_error,
-    run_fetch_with_fallback_policy,
-    split_filter_ids_for_fallback,
-)
 from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
     FilteredBatchRecoveryHost,
     fetch_batch_with_reduction,
     log_batch_reduction_retry,
     retry_with_split_batches,
     yield_retry_exhausted_recovery,
+)
+from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
+    is_retry_exhausted_error,
+    run_fetch_with_fallback_policy,
+    split_filter_ids_for_fallback,
 )
 from bioetl.infrastructure.adapters.common.retry_reduction_policy import (
     run_retry_exhausted_recovery_policy,
@@ -77,9 +77,9 @@ __all__ = [
     "log_batch_reduction_retry",
     "normalize_title",
     "resolve_fallback_policy",
+    "retry_with_split_batches",
     "run_fetch_with_fallback_policy",
     "run_retry_exhausted_recovery_policy",
-    "retry_with_split_batches",
     "split_filter_ids_for_fallback",
     "titles_match",
     "yield_retry_exhausted_recovery",

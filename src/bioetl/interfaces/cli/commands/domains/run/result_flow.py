@@ -15,7 +15,9 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.application.services.execution.pipeline_runner_models import PipelineRunResult
+    from bioetl.application.services.execution.pipeline_runner_models import (
+        PipelineRunResult,
+    )
     from bioetl.interfaces.cli.exit_codes import ExitCode
 
 

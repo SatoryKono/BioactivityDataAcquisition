@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-import time
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.batch_runtime_failure_policy import (

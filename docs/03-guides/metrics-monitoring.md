@@ -140,7 +140,7 @@ curl http://localhost:8000/metrics | grep bioetl_
 | ------------------------------------- | --------- | ---------------------------------------- | ------------------------------------------------------------------------------------- |
 | `bioetl_dq_records_quarantined_total` | Counter   | pipeline, error_type, run_type           | Карантинные записи                                                                    |
 | `bioetl_dq_check_duration_ms`         | Histogram | pipeline                                 | Длительность DQ проверок                                                              |
-| `bioetl_dq_validation_failures_total` | Counter   | pipeline, stage, severity                | Превышения DQ порогов                                                                 |
+| `bioetl_dq_validation_failures_total` | Counter   | pipeline, stage, severity                | Превышения DQ порогов; `severity` использует bounded vocabulary `soft_fail` / `hard_fail` |
 | `bioetl_dq_validation_score`          | Gauge     | pipeline, entity                         | Оценка валидности (0.0-1.0)                                                           |
 | `bioetl_dq_anomaly_detected`          | Counter   | pipeline, metric, severity, anomaly_type | Обнаруженные аномалии                                                                 |
 | `bioetl_data_freshness_seconds`       | Gauge     | pipeline, entity                         | Unix timestamp последнего successful ingestion; lag вычисляется как `time() - metric` |

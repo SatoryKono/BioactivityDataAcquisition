@@ -66,6 +66,39 @@ def test_published_control_plane_docs_describe_dual_mode_resume_contract() -> No
         )
 
 
+def test_published_control_plane_docs_describe_resume_identity_anchors() -> None:
+    """Published docs must describe semantic vs occurrence-scoped resume identity."""
+    expected_fragments = (
+        "execution_fingerprint",
+        "composite_run_identity",
+        "occurrence-scoped",
+        "current_identity",
+        "checkpoint_identity",
+    )
+    for path in PUBLISHED_CONTROL_PLANE_DOCS:
+        text = path.read_text(encoding="utf-8").lower()
+        missing = [fragment for fragment in expected_fragments if fragment not in text]
+        assert not missing, (
+            f"{path.relative_to(PROJECT_ROOT)} is missing resume identity "
+            f"fragments: {missing}"
+        )
+
+
+def test_published_control_plane_docs_describe_exact_replay_hard_fail_policy() -> None:
+    """Published docs must freeze exact replay coercion to hard_fail."""
+    expected_fragments = (
+        "exact replay",
+        "hard_fail",
+    )
+    for path in PUBLISHED_CONTROL_PLANE_DOCS:
+        text = path.read_text(encoding="utf-8").lower()
+        missing = [fragment for fragment in expected_fragments if fragment not in text]
+        assert not missing, (
+            f"{path.relative_to(PROJECT_ROOT)} is missing exact replay policy "
+            f"fragments: {missing}"
+        )
+
+
 def test_contract_doc_enumerates_supported_execution_paths() -> None:
     """The published contract doc should freeze the supported execution matrix."""
     text = CONTRACT_DOC.read_text(encoding="utf-8").lower()

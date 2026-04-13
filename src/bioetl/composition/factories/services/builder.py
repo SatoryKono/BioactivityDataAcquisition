@@ -38,8 +38,8 @@ if TYPE_CHECKING:
     import pandera as pdr
     import pyarrow as pa
 
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.application.core.wiring.runtime import BasePipeline
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.domain.config import DQConfig, MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (

@@ -28,11 +28,11 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.chembl.entity_mapper import (
         ChemblEntityMapper,
     )
-    from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
-        FilteredBatchRecoveryHost,
-    )
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
+        FilteredBatchRecoveryHost,
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 

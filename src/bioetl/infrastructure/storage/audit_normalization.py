@@ -7,7 +7,7 @@ from datetime import datetime
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import RunID
 
-__all__ = ["require_audit_timestamp", "require_audit_run_id"]
+__all__ = ["require_audit_run_id", "require_audit_timestamp"]
 
 
 def require_audit_timestamp(

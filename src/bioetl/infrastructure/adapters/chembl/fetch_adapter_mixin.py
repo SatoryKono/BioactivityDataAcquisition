@@ -6,7 +6,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.common.deduplication import iter_deduplicated_records
 from bioetl.infrastructure.adapters.chembl.fetch_multi_filter_mixin import (
     ChemblFetchMultiFilterMixin,
 )
@@ -15,6 +14,9 @@ from bioetl.infrastructure.adapters.chembl.fetch_paging_mixin import (
 )
 from bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin import (
     ChemblFetchResilienceMixin,
+)
+from bioetl.infrastructure.adapters.common.deduplication import (
+    iter_deduplicated_records,
 )
 
 if TYPE_CHECKING:

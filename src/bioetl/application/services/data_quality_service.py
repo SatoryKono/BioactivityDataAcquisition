@@ -16,8 +16,8 @@ Does NOT handle:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 import time
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder

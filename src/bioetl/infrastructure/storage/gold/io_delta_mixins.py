@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 import pyarrow as pa
 
+from bioetl.infrastructure.storage.delta.schema_ops import (
+    drop_nondeterministic_persisted_fields,
+)
 from bioetl.infrastructure.storage.gold.io_delta_runtime import (
     _build_simple_gold_write,
     _execute_prepared_scd2_gold_write,
@@ -20,9 +23,6 @@ from bioetl.infrastructure.storage.gold.io_delta_runtime import (
 )
 from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
-)
-from bioetl.infrastructure.storage.delta.schema_ops import (
-    drop_nondeterministic_persisted_fields,
 )
 
 T = TypeVar("T")

@@ -63,7 +63,7 @@ def _diff_schema_fields(
 
     incoming_fields = {
         field_name
-        for field_name in records[0].keys()
+        for field_name in records[0]
         if field_name not in NONDETERMINISTIC_PERSISTED_FIELDS
     }
     existing_fields = set(existing_schema.names)

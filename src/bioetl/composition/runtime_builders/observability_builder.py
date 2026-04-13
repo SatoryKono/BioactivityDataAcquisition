@@ -12,8 +12,6 @@ from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
 )
 from bioetl.composition.bootstrap.runtime.observability_bundle import (
     bootstrap_observability_bundle_impl,
-)
-from bioetl.composition.bootstrap.runtime.observability_bundle import (
     validate_observability_preflight_impl,
 )
 from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (

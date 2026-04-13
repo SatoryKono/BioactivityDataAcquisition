@@ -5,16 +5,24 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.application.core.wiring.runtime import BatchProcessingComponents, CheckpointManagerService
+from bioetl.application.core.wiring.runtime import (
+    BatchProcessingComponents,
+    CheckpointManagerService,
+)
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
-from bioetl.composition.factories.services.pipeline_batch_executor_builder import create_batch_executor_from_pipeline as build_batch_executor_from_pipeline
-from bioetl.composition.factories.services.pipeline_processing_components_builder import create_batch_processing_components as build_batch_processing_components
-from bioetl.composition.factories.services.pipeline_record_processor_builder import create_record_processor_from_pipeline as build_record_processor_from_pipeline
+from bioetl.composition.factories.services.pipeline_batch_executor_builder import (
+    create_batch_executor_from_pipeline as build_batch_executor_from_pipeline,
+)
+from bioetl.composition.factories.services.pipeline_processing_components_builder import (
+    create_batch_processing_components as build_batch_processing_components,
+)
+from bioetl.composition.factories.services.pipeline_record_processor_builder import (
+    create_record_processor_from_pipeline as build_record_processor_from_pipeline,
+)
 
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.application.core.wiring.runtime import (
         BasePipeline,
         BatchExecutor,
@@ -26,6 +34,7 @@ if TYPE_CHECKING:
         ShutdownSignal,
         TransformCallback,
     )
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -159,4 +168,10 @@ def create_batch_executor_from_pipeline(
         batch_id_factory=batch_id_factory,
         domain_event_emitter=domain_event_emitter,
     )
-__all__ = ["BatchProcessingComponents", "create_batch_executor_from_pipeline", "create_batch_processing_components", "create_checkpoint_manager", "create_record_processor_from_pipeline"]
+__all__ = [
+    "BatchProcessingComponents",
+    "create_batch_executor_from_pipeline",
+    "create_batch_processing_components",
+    "create_checkpoint_manager",
+    "create_record_processor_from_pipeline",
+]

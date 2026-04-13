@@ -5,15 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.domain.composite.result import (
-    DependencyResult,
-    EnrichmentResult,
-    MergeResult,
-    SeedResult,
-)
-from bioetl.domain.control_plane.run_ledger import (
-    COMPOSITE_RUN_LEDGER_STAGE_NAMES,
-)
 from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
     build_composite_run_completion_metrics,
     build_dependency_stage_details,
@@ -22,6 +13,15 @@ from bioetl.application.composite.runner_pkg.runner_stage_payloads import (
     build_enrichment_stage_metrics,
     build_merge_stage_metrics,
     build_seed_stage_metrics,
+)
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    EnrichmentResult,
+    MergeResult,
+    SeedResult,
+)
+from bioetl.domain.control_plane.run_ledger import (
+    COMPOSITE_RUN_LEDGER_STAGE_NAMES,
 )
 
 if TYPE_CHECKING:

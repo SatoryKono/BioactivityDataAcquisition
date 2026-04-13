@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from typing import TypeVar
 
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_activity import (
@@ -80,6 +81,8 @@ __all__ = [
     "resolve_normalization_profile_module_path",
 ]
 
+TValue = TypeVar("TValue")
+
 
 @dataclass(frozen=True, slots=True)
 class _NormalizationProfileDeclaration:
@@ -103,11 +106,11 @@ def normalize_normalization_profile_coordinates(
     return normalized_provider, normalized_entity
 
 
-def _resolve_normalization_profile_value[T](
-    mapping: Mapping[tuple[str, str], T],
+def _resolve_normalization_profile_value(
+    mapping: Mapping[tuple[str, str], TValue],
     provider: str,
     entity_type: str | None,
-) -> T | None:
+) -> TValue | None:
     """Resolve one canonical registry value by provider/entity coordinates."""
     coordinates = normalize_normalization_profile_coordinates(provider, entity_type)
     if coordinates is None:

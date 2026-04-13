@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Mapping
 from collections import Counter
 from typing import cast
 
@@ -41,6 +42,11 @@ def _build_base_summary(
         manifest=manifest,
         input_snapshots=input_snapshots,
     )
+    resume_contract = _build_resume_contract(
+        manifest=manifest,
+        requested_exact_replay=requested_exact_replay,
+        resume_requested=resume_requested,
+    )
     summary: dict[str, object] = {
         "manifest_id": manifest.manifest_id,
         "run_id": str(manifest.run_id),
@@ -75,6 +81,8 @@ def _build_base_summary(
             _compute_input_snapshot_identity_fingerprint(input_snapshots)
         ),
         "replay_mode": replay_mode,
+        "resume_contract": resume_contract,
+        "resume_diagnostics": None,
         "input_snapshot_count": len(input_snapshots),
         "input_snapshots": input_snapshots,
         "planned_artifacts": [
@@ -183,6 +191,129 @@ def _is_composite_execution_context(manifest: RunManifest) -> bool:
     return execution_context == "composite" or manifest.provider == "composite"
 
 
+def _build_resume_contract(
+    *,
+    manifest: RunManifest,
+    requested_exact_replay: bool,
+    resume_requested: bool,
+) -> dict[str, object]:
+    """Return the published checkpoint/resume contract for one manifested run."""
+    requested_policy = _resolve_requested_checkpoint_compatibility_policy(manifest)
+    applied_policy = (
+        "hard_fail" if requested_exact_replay else requested_policy or "observe"
+    )
+    is_composite = _is_composite_execution_context(manifest)
+    execution_context = "composite" if is_composite else "ordinary"
+    return {
+        "resume_requested": resume_requested,
+        "requested_exact_replay": requested_exact_replay,
+        "requested_checkpoint_compatibility_policy": requested_policy,
+        "applied_checkpoint_compatibility_policy": applied_policy,
+        "strict_replay_safe": applied_policy == "hard_fail",
+        "execution_context": execution_context,
+        "resume_mode": (
+            "checkpoint_snapshot_plus_ledger_suffix"
+            if is_composite
+            else "checkpoint_snapshot_only"
+        ),
+        "semantic_identity_anchor": "execution_fingerprint",
+        "occurrence_identity_anchor": (
+            "composite_run_identity" if is_composite else None
+        ),
+    }
+
+
+def _resolve_requested_checkpoint_compatibility_policy(
+    manifest: RunManifest,
+) -> str | None:
+    """Resolve requested checkpoint compatibility policy from manifest context."""
+    candidates = (
+        manifest.launch_context.get("checkpoint_compatibility_policy"),
+        _lookup_mapping_path(
+            manifest.runtime_config,
+            "pipeline",
+            "control_plane",
+            "checkpoint_compatibility_policy",
+        ),
+        _lookup_mapping_path(
+            manifest.runtime_config,
+            "control_plane",
+            "checkpoint_compatibility_policy",
+        ),
+        _lookup_mapping_path(
+            manifest.runtime_config,
+            "checkpoint_compatibility_policy",
+        ),
+    )
+    for candidate in candidates:
+        if isinstance(candidate, str):
+            normalized = candidate.strip().lower()
+            if normalized in {"observe", "soft_fail", "hard_fail"}:
+                return normalized
+    return None
+
+
+def _lookup_mapping_path(
+    mapping: Mapping[str, object],
+    *path: str,
+) -> object | None:
+    """Read one nested mapping path using only mapping-shaped objects."""
+    current: object = mapping
+    for component in path:
+        if not isinstance(current, Mapping):
+            return None
+        current = current.get(component)
+    return current
+
+
+def _extract_resume_diagnostics(
+    ledger_entries: tuple[RunLedgerEntry, ...],
+) -> dict[str, object] | None:
+    """Return the latest persisted resume diagnostics, if any."""
+    for entry in reversed(ledger_entries):
+        details = entry.details
+        if not isinstance(details, Mapping):
+            continue
+        compatibility_disposition = details.get("compatibility_disposition")
+        resume_rejected = details.get("resume_rejected")
+        execution_identity_compatible = details.get("execution_identity_compatible")
+        messages = details.get("messages")
+        current_identity = details.get("current_identity")
+        checkpoint_identity = details.get("checkpoint_identity")
+        if not any(
+            value is not None
+            for value in (
+                compatibility_disposition,
+                resume_rejected,
+                execution_identity_compatible,
+                messages,
+                current_identity,
+                checkpoint_identity,
+            )
+        ):
+            continue
+        diagnostics: dict[str, object] = {
+            "source_event_type": entry.event_type,
+            "source_status": entry.status,
+        }
+        if compatibility_disposition is not None:
+            diagnostics["compatibility_disposition"] = compatibility_disposition
+        if resume_rejected is not None:
+            diagnostics["resume_rejected"] = resume_rejected
+        if execution_identity_compatible is not None:
+            diagnostics["execution_identity_compatible"] = (
+                execution_identity_compatible
+            )
+        if isinstance(messages, list):
+            diagnostics["messages"] = [message for message in messages]
+        if isinstance(current_identity, Mapping):
+            diagnostics["current_identity"] = dict(current_identity)
+        if isinstance(checkpoint_identity, Mapping):
+            diagnostics["checkpoint_identity"] = dict(checkpoint_identity)
+        return diagnostics
+    return None
+
+
 def _process_ledger_entries(
     ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> tuple[
@@ -200,6 +331,7 @@ def _process_ledger_entries(
     bool,
     int,
     dict[str, int],
+    dict[str, object] | None,
 ]:
     """Process ledger entries and extract statistics."""
     family_counter: Counter[str] = Counter()
@@ -224,6 +356,7 @@ def _process_ledger_entries(
         "contract_version": 0,
         "composite_run_id": 0,
     }
+    resume_diagnostics = _extract_resume_diagnostics(ledger_entries)
 
     for entry in ledger_entries:
         family_counter.update([entry.event_family or "diagnostic"])
@@ -283,6 +416,7 @@ def _process_ledger_entries(
         cross_validation_signal_present,
         missing_link_count,
         correlation_anchor_gaps,
+        resume_diagnostics,
     )
 
 
@@ -307,6 +441,7 @@ def _build_final_summary(
     cross_validation_signal_present: bool,
     missing_link_count: int,
     correlation_anchor_gaps: dict[str, int],
+    resume_diagnostics: dict[str, object] | None,
 ) -> dict[str, object]:
     """Build final summary with all processed data."""
     latest_entry = ledger_entries[-1]
@@ -362,6 +497,8 @@ def _build_final_summary(
         "replay_capability_reason": base_summary.get("replay_capability_reason"),
         "exact_replay_eligible": base_summary.get("exact_replay_eligible"),
         "exact_replay_blockers": base_summary.get("exact_replay_blockers", []),
+        "resume_contract": base_summary.get("resume_contract"),
+        "resume_diagnostics": resume_diagnostics,
         "input_snapshot_ids": base_summary.get("input_snapshot_ids", []),
         "input_snapshot_content_hashes": base_summary.get(
             "input_snapshot_content_hashes",
@@ -448,6 +585,7 @@ def _build_final_summary(
                 cross_validation_replay_contracts
             ),
             "occurrence_only_diagnostics": sorted(occurrence_only_diagnostic_scopes),
+            "resume_diagnostics": resume_diagnostics,
             "cross_validation_signal_present": cross_validation_signal_present,
             "correlation_anchor_gaps": correlation_anchor_gaps,
             "identity_graph_complete": (
@@ -657,6 +795,7 @@ def build_diagnostics_summary(
         cross_validation_signal_present,
         missing_link_count,
         correlation_anchor_gaps,
+        resume_diagnostics,
     ) = _process_ledger_entries(ledger_entries)
 
     return _build_final_summary(
@@ -680,6 +819,7 @@ def build_diagnostics_summary(
         cross_validation_signal_present,
         missing_link_count,
         correlation_anchor_gaps,
+        resume_diagnostics,
     )
 
 
@@ -783,11 +923,14 @@ def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
         )
     if alert_signals.get("strict_replay_boundary_gap", False):
         steps.append(
-            "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay."
+            "Treat this execution context as outside the strict exact-replay "
+            "support boundary; use rebuild/resume semantics instead of exact replay."
         )
     if alert_signals.get("composite_resume_reconstructability_gap", False):
         steps.append(
-            "Treat composite resume as checkpoint snapshot plus ledger suffix replay only; do not expect per-provider result maps or other rich checkpoint payloads to be reconstructed."
+            "Treat composite resume as checkpoint snapshot plus ledger suffix "
+            "replay only; do not expect per-provider result maps or other rich "
+            "checkpoint payloads to be reconstructed."
         )
     if alert_signals.get("replay_ready_gap", False):
         steps.append(

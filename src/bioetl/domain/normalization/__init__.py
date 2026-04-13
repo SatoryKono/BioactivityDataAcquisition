@@ -9,7 +9,6 @@ from bioetl.domain.normalization.authors import (
 )
 from bioetl.domain.normalization.control_plane import (
     build_execution_identity_payload,
-    normalize_execution_identity_payload,
     normalize_contract_ref,
     normalize_contract_version,
     normalize_control_plane_datetime,
@@ -17,6 +16,7 @@ from bioetl.domain.normalization.control_plane import (
     normalize_control_plane_sha256,
     normalize_control_plane_strict_sha256,
     normalize_control_plane_uuid,
+    normalize_execution_identity_payload,
     normalize_run_ledger_payload,
     normalize_run_manifest_spec,
     normalize_runtime_anchor_effective_config_hash,
@@ -29,8 +29,8 @@ from bioetl.domain.normalization.dates import (
     validate_publication_year,
 )
 from bioetl.domain.normalization.fingerprints import (
-    compute_execution_identity_fingerprint,
     compute_degraded_runtime_anchor_fingerprint,
+    compute_execution_identity_fingerprint,
     compute_input_snapshot_identity_fingerprint,
     compute_manifest_execution_fingerprint,
 )
@@ -102,8 +102,8 @@ __all__ = [
     "parse_authors_to_list",
     "parse_date_field",
     "parse_page_range",
-    "serialize_json_canonical",
     "serialize_hash_identity_canonical_json",
+    "serialize_json_canonical",
     "stringify_join_key_value",
     "strip_doi_prefix",
     "strip_html_tags",

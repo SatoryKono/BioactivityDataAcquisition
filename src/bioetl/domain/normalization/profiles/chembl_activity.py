@@ -10,7 +10,7 @@ from ._chembl_activity_fields import (
     SET_LIKE_FIELDS,
 )
 from ._standard_profile_builder import build_standard_profile
-from .profile_normalizers import normalize_profile_smiles
+from .profile_normalizers import normalize_profile_canonical_smiles
 
 __all__ = [
     "CHEMBL_ACTIVITY_PROFILE",
@@ -19,7 +19,7 @@ __all__ = [
 
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
-        lambda value: normalize_profile_smiles(value, is_canonical=True),
+        normalize_profile_canonical_smiles,
         "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
     ),
 }

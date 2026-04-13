@@ -66,6 +66,9 @@ Interpretation:
 - if resume is enabled, `checkpoint_compatibility_policy` controls checkpoint mismatch handling:
   `observe` may continue only for degraded non-identity signals, while canonical
   execution-identity mismatches still block resume.
+- if the current run is `exact_replay=true`, runtime coerces checkpoint
+  compatibility handling to `hard_fail`; exact replay is not allowed to
+  continue after any compatibility mismatch.
 
 ### 2. Resolve one run
 
@@ -105,6 +108,9 @@ Interpretation:
   across manifest, checkpoint, and runtime compatibility surfaces.
 - this fingerprint intentionally excludes occurrence-only anchors such as
   `manifest_id`, ledger history, and operator-facing diagnostics.
+- `composite_run_identity` is a separate occurrence-scoped resume anchor used
+  only to prevent composite checkpoint drift; it must not be interpreted as a
+  replacement for the semantic `execution_fingerprint`.
 - checkpoint compatibility may also use a narrower runtime-anchor contract when a persisted manifest fingerprint is unavailable, but that contract is intentionally smaller and must not be read as a substitute for full manifest identity.
 
 ### 4. Inspect storage layout directly when needed
@@ -183,6 +189,9 @@ Interpretation:
 - replay consumes only ledger entries strictly after `last_event_id`;
 - replay is intentionally coarse-grained: it restores lifecycle milestones and
   watermark metadata, not rich checkpoint payloads;
+- composite resume additionally enforces `composite_run_identity`; a missing or
+  mismatched occurrence anchor is a resume blocker even when other semantic
+  anchors match;
 - a missing watermark entry for the current manifest indicates checkpoint
   incompatibility and should be treated as a resume blocker on the fail-closed
   path.
@@ -235,6 +244,11 @@ Focus on:
 - `execution_fingerprint` as the canonical execution-identity fingerprint shared
   across manifest, checkpoint, and runtime compatibility surfaces;
 - `effective_config_hash`, `contract_ref`, `contract_version`, and `effective_config_artifact_id` as runtime-anchor compatibility fields;
+- `current_identity` and `checkpoint_identity` when resume compatibility was
+  rejected or degraded; these compact payloads surface
+  `composite_run_identity`, `execution_fingerprint`, `manifest_id`,
+  `effective_config_hash`, `contract_ref`, `contract_version`, `exact_replay`,
+  and `input_snapshot_ids`;
 - `dq_policy_ref`, `rule_bundle_version`, and `dq_contract_compatibility_hash` as adjacent DQ/control-plane anchors that are related but not interchangeable with manifest identity;
 - `correlation_anchor_gaps`, `alert_signals`, `next_steps`.
 

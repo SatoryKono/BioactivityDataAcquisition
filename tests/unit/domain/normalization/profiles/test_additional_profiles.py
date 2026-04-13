@@ -10,6 +10,12 @@ from bioetl.domain.normalization.profiles import (
     PUBMED_PUBLICATION_PROFILE,
     PUBMED_PUBLICATION_SCHEMA_FIELDS,
 )
+from bioetl.domain.normalization.profiles._standard_profile_builder import (
+    build_standard_profile,
+)
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_canonical_smiles,
+)
 
 
 def test_crossref_publication_profile_covers_schema_exactly() -> None:
@@ -38,3 +44,23 @@ def test_pubchem_smiles_rules_use_domain_smiles_normalization() -> None:
     assert canonical_rule.apply(" C ") == "C"
     assert isomeric_rule is not None
     assert isomeric_rule.apply(" C ") == "C"
+
+
+def test_standard_profile_builder_accepts_legacy_single_item_special_rules() -> None:
+    profile = build_standard_profile(
+        profile_name="test.legacy_special_rule",
+        description="Regression profile for single-item custom rule components.",
+        schema_fields=("canonical_smiles",),
+        meta_fields=(),
+        special_rules={
+            "canonical_smiles": (normalize_profile_canonical_smiles,),
+        },
+    )
+
+    canonical_rule = profile.rule_for("canonical_smiles")
+
+    assert canonical_rule is not None
+    assert canonical_rule.apply(" C ") == "C"
+    assert canonical_rule.notes == (
+        "Apply custom normalization rule for field 'canonical_smiles'."
+    )

@@ -255,10 +255,7 @@ class RunManifestInspectionService:
                 "exact_replay_support_boundary",
                 "snapshot_backed_source_runs_only",
             ),
-            "replay_capability_reason": diagnostics.get(
-                "replay_capability_reason",
-                None,
-            ),
+            "replay_capability_reason": diagnostics.get("replay_capability_reason"),
             "exact_replay_eligible": diagnostics.get(
                 "exact_replay_eligible",
                 manifest.replay_capability.value == "exact_replay_supported",
@@ -269,10 +266,7 @@ class RunManifestInspectionService:
                 "input_snapshot_content_hashes",
                 [],
             ),
-            "input_snapshot_identity_fingerprint": diagnostics.get(
-                "input_snapshot_identity_fingerprint",
-                None,
-            ),
+            "input_snapshot_identity_fingerprint": diagnostics.get("input_snapshot_identity_fingerprint"),
             "replay_mode": diagnostics.get("replay_mode", "live_fetch"),
             "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
             "input_snapshots": diagnostics.get("input_snapshots", []),

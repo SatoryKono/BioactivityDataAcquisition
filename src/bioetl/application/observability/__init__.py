@@ -26,8 +26,8 @@ from bioetl.application.observability.span_helpers import (
 
 __all__ = [
     "LifecyclePhase",
-    "PipelineObserver",
     "PipelineMetricsRecorder",
+    "PipelineObserver",
     "traced_async_operation",
     "traced_operation",
 ]

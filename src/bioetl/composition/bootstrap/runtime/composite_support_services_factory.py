@@ -38,8 +38,10 @@ from bioetl.infrastructure.storage.delta_reader import DeltaReader
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from bioetl.application.services.control_plane.run_ledger_service import (
+        RunLedgerService,
+    )
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.application.services.control_plane.run_ledger_service import RunLedgerService
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import LoggerPort, MetricsPort, QuarantinePort

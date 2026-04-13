@@ -8,9 +8,6 @@ from typing import TYPE_CHECKING
 
 import click
 
-from bioetl.interfaces.cli.commands.inspection_output import (
-    emit_inspection_payload,
-)
 from bioetl.interfaces.cli.commands.checkpoint import _render_checkpoint_payload
 from bioetl.interfaces.cli.commands.domains.health.rendering import (
     all_health_results_healthy,
@@ -19,6 +16,9 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
 )
 from bioetl.interfaces.cli.commands.domains.quarantine.support import (
     _show_quarantine_stats,
+)
+from bioetl.interfaces.cli.commands.inspection_output import (
+    emit_inspection_payload,
 )
 from bioetl.interfaces.cli.commands.run_manifest import _render_text_payload
 from bioetl.interfaces.cli.exit_codes import ExitCode

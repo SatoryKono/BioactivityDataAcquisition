@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import UUID
 
 from bioetl.domain.control_plane._run_manifest_serialization import (
@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 
-class ReplayCapability(str, Enum):
+class ReplayCapability(StrEnum):
     """Exact-replay capability classification for one manifested run."""
 
     EXACT_REPLAY_SUPPORTED = "exact_replay_supported"

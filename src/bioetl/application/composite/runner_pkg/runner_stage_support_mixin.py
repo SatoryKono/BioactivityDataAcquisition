@@ -15,7 +15,6 @@ from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
-from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.application.composite.runner_pkg.runner_stage_state_flow import (
     complete_seed_phase,
     fail_required_dependencies,
@@ -29,6 +28,7 @@ from bioetl.application.composite.runner_pkg.runner_stage_state_flow import (
 from bioetl.application.composite.runner_pkg.runner_stage_support_types import (
     _CompositeRunnerStageSupportHostProtocol,
 )
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import (
     DependencyResult,

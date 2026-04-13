@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from bioetl.domain.models.metadata import BronzeMetadata, GoldMetadata, SilverMetadata
 from bioetl.domain.lineage import LineageEdgeType, LineageNodeType
+from bioetl.domain.models.metadata import BronzeMetadata, GoldMetadata, SilverMetadata
 
 if TYPE_CHECKING:
     from bioetl.domain.lineage import LineageGraphFragment
