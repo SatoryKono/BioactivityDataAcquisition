@@ -65,8 +65,8 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     # === Primary Key (str for cross-provider consistency) ===
     pmid: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^[1-9]\d*$",
-        description="PubMed ID (PK, numeric string)",
+        str_matches=r"^[1-9]\d{0,9}$",
+        description="PubMed ID (PK, numeric string < 10^10)",
     )
 
     # === External Identifiers (override doi for check method) ===

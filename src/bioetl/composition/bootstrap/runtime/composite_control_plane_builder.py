@@ -24,11 +24,11 @@ from bioetl.composition.bootstrap.runtime._composite_control_plane_payloads impo
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     CompositeControlPlaneBundle,
 )
-from bioetl.composition.runtime_builders._run_manifest_support import (
+from bioetl.composition.runtime_builders.run_manifest_support import (
     control_plane_root as _shared_control_plane_root,
     to_serializable_mapping as _shared_to_serializable_mapping,
 )
-from bioetl.composition.runtime_builders._runner_builder_support import (
+from bioetl.composition.runtime_builders.runner_builder_support import (
     validate_required_persistence_profile,
 )
 from bioetl.composition.services.versioning import compute_config_hash, get_git_commit

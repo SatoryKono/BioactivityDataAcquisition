@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 __all__ = [
+    "PMID_MAX_EXCLUSIVE",
     "normalize_doi",
     "normalize_pmc_id",
     "normalize_pmid",
@@ -14,6 +15,7 @@ _DOI_URL_PREFIXES = (
     "http://doi.org/",
     "doi:",
 )
+PMID_MAX_EXCLUSIVE = 10_000_000_000
 
 
 def strip_doi_prefix(doi: str) -> str:
@@ -36,7 +38,7 @@ def normalize_doi(doi: str | None) -> str | None:
 
 def _normalize_pmid_from_int(pmid: int) -> str | None:
     """Normalize integer PMID input."""
-    return str(pmid) if pmid > 0 else None
+    return str(pmid) if 0 < pmid < PMID_MAX_EXCLUSIVE else None
 
 
 def _normalize_pmid_from_str(pmid: str) -> str | None:
@@ -45,7 +47,11 @@ def _normalize_pmid_from_str(pmid: str) -> str | None:
     if not value or not value.isdigit():
         return None
 
-    normalized = str(int(value))
+    normalized_int = int(value)
+    if normalized_int <= 0 or normalized_int >= PMID_MAX_EXCLUSIVE:
+        return None
+
+    normalized = str(normalized_int)
     return normalized if normalized != "0" else None
 
 

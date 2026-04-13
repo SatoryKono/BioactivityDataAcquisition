@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
-from bioetl.application.core._filtered_data_source_mixins import (
+from bioetl.application.core.data_source_mixins import _SourceMetadataDelegationMixin
+from bioetl.application.core.filtered_data_source_mixins import (
     _FilteredDataSourceFetchMixin,
     _FilteredDataSourceLifecycleMixin,
 )

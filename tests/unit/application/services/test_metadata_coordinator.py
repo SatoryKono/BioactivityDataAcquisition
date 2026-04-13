@@ -10,8 +10,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.metadata_coordinator import MetadataCoordinator
-from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataCoordinator, MetadataLineageBundle
 from bioetl.domain.lineage import LineageEdgeType, LineageNodeType
 from bioetl.domain.medallion import GoldWriteMode, Layer, SilverWriteMode
 from bioetl.domain.models.metadata import (

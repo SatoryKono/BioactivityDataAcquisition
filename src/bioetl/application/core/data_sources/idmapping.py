@@ -10,8 +10,8 @@ __all__ = ["IDMappingDataSource"]
 
 from typing import TYPE_CHECKING, Self
 
-from bioetl.application.core import _idmapping_fetch_support as fetch_support
-from bioetl.application.core import _idmapping_lifecycle_support as lifecycle_support
+from bioetl.application.core import idmapping_fetch_support as fetch_support
+from bioetl.application.core import idmapping_lifecycle_support as lifecycle_support
 from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:

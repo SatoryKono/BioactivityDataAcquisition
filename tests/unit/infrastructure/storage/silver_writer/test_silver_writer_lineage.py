@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundle
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.medallion import SilverWriteMode
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
@@ -677,7 +677,7 @@ class TestSilverWriterLineage:
         self, noop_logger, valid_records
     ):
         """Merged Silver metadata path should reuse resolved provider/entity."""
-        from bioetl.application.services.metadata_lineage_bundle import (
+        from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -737,7 +737,7 @@ class TestSilverWriterLineage:
         self, noop_logger, valid_records
     ):
         """Merged metadata flow should converge on the same canonical file handoff."""
-        from bioetl.application.services.metadata_lineage_bundle import (
+        from bioetl.application.services.lineage import (
             MetadataLineageBundle,
         )
         from bioetl.infrastructure.storage.silver_writer import SilverWriter

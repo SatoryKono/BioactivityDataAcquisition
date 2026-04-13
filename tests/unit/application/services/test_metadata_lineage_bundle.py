@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services.metadata_lineage_bundle import MetadataLineageBundle
+from bioetl.application.services.lineage import MetadataLineageBundle
 from bioetl.domain.lineage import (
     LineageEdge,
     LineageEdgeType,
