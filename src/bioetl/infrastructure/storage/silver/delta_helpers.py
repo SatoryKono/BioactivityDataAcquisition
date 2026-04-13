@@ -55,23 +55,7 @@ class _DeltaWriteDispatchPolicy:
     write_merge: _DeltaWriteHandler
 
 
-_RUN_TYPE_PRECEDENCE_EXPR = (
-    "CASE "
-    "WHEN {alias}._run_type = 'rebuild' THEN 3 "
-    "WHEN {alias}._run_type = 'backfill' THEN 2 "
-    "ELSE 1 END"
-)
-
-_RUN_TYPE_PRECEDENCE_PREDICATE = (
-    "CASE "
-    "WHEN source._run_type = 'rebuild' THEN 3 "
-    "WHEN source._run_type = 'backfill' THEN 2 "
-    "ELSE 1 END >= "
-    "CASE "
-    "WHEN target._run_type = 'rebuild' THEN 3 "
-    "WHEN target._run_type = 'backfill' THEN 2 "
-    "ELSE 1 END"
-)
+_MERGE_UPDATE_POLICY = "content_hash_only"
 
 
 def _build_content_changed_predicate(
@@ -87,7 +71,14 @@ def _build_content_changed_predicate(
 
 
 def _build_merge_update_predicate(records: pa.Table | pa.RecordBatchReader) -> str:
-    """Build the Silver merge update predicate for rerun-safe writes."""
+    """Build the Silver merge update predicate for rerun-safe writes.
+
+    Silver/Gold physical Delta rows intentionally exclude occurrence-scoped runtime
+    anchors such as ``_run_type`` via ``drop_nondeterministic_persisted_fields``.
+    Row-level update decisions therefore remain content-hash based; rebuild/backfill
+    semantics are enforced by lifecycle cleanup and exclusive locks, not by a
+    run-type precedence predicate inside the persisted Delta merge.
+    """
     schema = records.schema
     if "content_hash" not in schema.names:
         return "true"

@@ -14,6 +14,7 @@ def test_composite_infrastructure_context_exposes_bootstrap_primitives() -> None
     settings = SimpleNamespace(data_dir="data")
     logger = MagicMock()
     metrics = MagicMock()
+    tracer = MagicMock()
     storage = MagicMock()
     lock = MagicMock()
 
@@ -22,6 +23,7 @@ def test_composite_infrastructure_context_exposes_bootstrap_primitives() -> None
         settings=settings,
         logger=logger,
         metrics=metrics,
+        tracer=tracer,
         storage=storage,
         lock=lock,
     )
@@ -30,5 +32,6 @@ def test_composite_infrastructure_context_exposes_bootstrap_primitives() -> None
     assert context.settings is settings
     assert context.logger is logger
     assert context.metrics is metrics
+    assert context.tracer is tracer
     assert context.storage is storage
     assert context.lock is lock

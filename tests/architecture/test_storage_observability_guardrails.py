@@ -34,6 +34,13 @@ FORBIDDEN_COMPOSITION_NOOP_METRICS_PATHS = (
     Path("src/bioetl/composition/factories/_observability_wiring.py"),
     Path("src/bioetl/composition/factories/services/port_factories.py"),
 )
+FORBIDDEN_UNIFIED_EVENT_COUNTER_DIRECT_PATHS = (
+    Path("src/bioetl/infrastructure/storage/silver/merge_resilience_helpers.py"),
+    Path("src/bioetl/infrastructure/storage/metadata/writer_operations.py"),
+)
+PARALLEL_PUBLICATION_HELPER_PATH = Path(
+    "src/bioetl/application/observability/domain_event_publication.py"
+)
 FORBIDDEN_ENDPOINT_IDENTIFIERS = {
     "record_id",
     "run_id",
@@ -56,6 +63,26 @@ def _iter_called_names(tree: ast.AST) -> set[str]:
         elif isinstance(func, ast.Attribute):
             calls.add(func.attr)
     return calls
+
+
+def _iter_increment_counter_metric_names(tree: ast.AST) -> set[str]:
+    metric_names: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not (
+            isinstance(func, ast.Attribute) and func.attr == "increment_counter"
+        ):
+            continue
+        if not node.args:
+            continue
+        metric_name_arg = node.args[0]
+        if isinstance(metric_name_arg, ast.Constant) and isinstance(
+            metric_name_arg.value, str
+        ):
+            metric_names.add(metric_name_arg.value)
+    return metric_names
 
 
 def test_storage_layers_do_not_construct_noop_tracing_defaults() -> None:
@@ -116,3 +143,24 @@ def test_adapter_measure_request_labels_do_not_embed_record_identity() -> None:
                 f"{path} uses forbidden dynamic identifiers in measure_request "
                 f"endpoint labels: {', '.join(forbidden)}"
             )
+
+
+def test_storage_helpers_do_not_increment_unified_observability_event_counter() -> None:
+    """Storage-local retry/final telemetry must use dedicated counters only."""
+    for path in FORBIDDEN_UNIFIED_EVENT_COUNTER_DIRECT_PATHS:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        metric_names = _iter_increment_counter_metric_names(tree)
+        assert "bioetl_observability_events_total" not in metric_names, (
+            f"{path} must not increment bioetl_observability_events_total directly. "
+            "Unified runtime event publication belongs to canonical "
+            "PipelineObserver paths only."
+        )
+
+
+def test_parallel_domain_event_publication_helper_is_removed() -> None:
+    """Application must not keep a ports-only domain-event publication backdoor."""
+    assert not PARALLEL_PUBLICATION_HELPER_PATH.exists(), (
+        "src/bioetl/application/observability/domain_event_publication.py must "
+        "remain absent so canonical observer emitters stay the only runtime "
+        "event publication seam."
+    )

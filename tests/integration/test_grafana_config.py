@@ -914,7 +914,12 @@ def test_range_aware_summary_panels_use_selected_time_range(
         ),
         (
             "DQ Alert Conditions",
-            ["[15m]", "[30m]", 'severity="critical"'],
+            [
+                "[15m]",
+                "[30m]",
+                'bioetl_dq_validation_failures_total{pipeline=~"$pipeline",severity="hard_fail"}',
+                'bioetl_dq_anomaly_detected{pipeline=~"$pipeline",severity="critical"}',
+            ],
         ),
         (
             "Control-plane Alert Conditions",

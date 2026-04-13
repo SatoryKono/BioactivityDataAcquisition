@@ -74,6 +74,7 @@ def resolve_composite_control_plane_flags(settings: object) -> tuple[bool, bool]
         ledger_enabled=ledger_enabled,
         required_profile=required_profile,
         execution_label="Composite execution",
+        exact_replay_execution_context_supported=False,
     )
     return True, ledger_enabled
 
@@ -99,6 +100,12 @@ def build_composite_control_plane_bundle(
     _manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
         infra_context.settings
     )
+    control_plane = getattr(getattr(infra_context.settings, "pipeline", None), "control_plane", None)
+    required_profile = getattr(
+        control_plane,
+        "required_persistence_profile",
+        "degraded_observable",
+    )
 
     config_hash = _resolve_effective_config_hash(config)
     contract_ref = config.name
@@ -115,6 +122,7 @@ def build_composite_control_plane_bundle(
             config_hash=config_hash,
             contract_ref=contract_ref,
             contract_version=contract_version,
+            required_persistence_profile=str(required_profile),
         )
     )
     run_ledger_service = _build_run_ledger_service(
@@ -145,6 +153,7 @@ def _build_composite_manifest_create_request(
     config_hash: str,
     contract_ref: str,
     contract_version: str,
+    required_persistence_profile: str,
 ) -> RunManifestCreateRequest:
     """Build the manifest creation payload for one composite execution."""
     return RunManifestCreateRequest(
@@ -153,7 +162,11 @@ def _build_composite_manifest_create_request(
         pipeline_name=config.name,
         provider="composite",
         entity=config.name,
-        launch_context=build_composite_launch_context_snapshot(config, runtime),
+        launch_context=build_composite_launch_context_snapshot(
+            config,
+            runtime,
+            required_persistence_profile=required_persistence_profile,
+        ),
         runtime_config=build_composite_runtime_config_snapshot(runtime),
         resolved_config=build_composite_resolved_config_snapshot(config),
         source_refs=build_composite_source_refs(config),

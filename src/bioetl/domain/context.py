@@ -171,6 +171,8 @@ class PipelineRunContext:
     pipeline_name: str
     run_id: RunID
     run_type: RunType
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
     manifest_id: str | None = None
     config_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None

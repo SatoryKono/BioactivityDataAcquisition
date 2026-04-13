@@ -37,6 +37,7 @@ class _FakeLineageService:
         )
         self._fragment = LineageGraphFragment(
             fragment_id="silver:fragment-1",
+            stored_fragment_id="silver:fragment-1:occurrence:abc123",
             nodes=(self._dataset_node, self._upstream_node),
             created_at=datetime.now(UTC),
         )
@@ -52,9 +53,11 @@ class _FakeLineageService:
         return LineageTraceResult(
             dataset_ref=dataset_ref,
             fragment_ids=("silver:fragment-1",),
+            stored_fragment_ids=("silver:fragment-1:occurrence:abc123",),
             upstream=(
                 LineageNodeRelation(
                     fragment_id="silver:fragment-1",
+                    stored_fragment_id="silver:fragment-1:occurrence:abc123",
                     edge_type="derived_from",
                     node=self._upstream_node,
                 ),
@@ -69,6 +72,7 @@ class _FakeLineageService:
             run_id="00000000-0000-0000-0000-000000000001",
             manifest_id="manifest-1",
             fragment_ids=("silver:fragment-1",),
+            stored_fragment_ids=("silver:fragment-1:occurrence:abc123",),
             produced_datasets=(self._dataset_node,),
             source_systems=(
                 LineageNodeRef(
@@ -128,7 +132,13 @@ class TestLineageCommands:
         assert result.exit_code == 0
         payload = json.loads(result.output)
         assert payload["dataset_ref"] == "silver:chembl.activity@12"
+        assert payload["stored_fragment_ids"] == [
+            "silver:fragment-1:occurrence:abc123"
+        ]
         assert payload["upstream"][0]["node"]["node_id"] == "bronze_batch:batch-1"
+        assert payload["upstream"][0]["stored_fragment_id"] == (
+            "silver:fragment-1:occurrence:abc123"
+        )
 
     def test_explain_defaults_to_text_output(
         self,
@@ -145,6 +155,7 @@ class TestLineageCommands:
         assert result.exit_code == 0
         assert "Lineage Run" in result.output
         assert "manifest_id: manifest-1" in result.output
+        assert "stored_fragments: 1" in result.output
         assert "Produced Datasets" in result.output
 
     def test_show_fragment_json_outputs_fragment(
@@ -162,6 +173,9 @@ class TestLineageCommands:
         assert result.exit_code == 0
         payload = json.loads(result.output)
         assert payload["fragment"]["fragment_id"] == "silver:fragment-1"
+        assert payload["fragment"]["stored_fragment_id"] == (
+            "silver:fragment-1:occurrence:abc123"
+        )
 
     def test_explain_requires_exactly_one_identifier(
         self,

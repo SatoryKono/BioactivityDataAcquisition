@@ -24,7 +24,7 @@ from bioetl.application.composite.runtime_models import (
 )
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult
-from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort, MetricsPort
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
@@ -38,6 +38,7 @@ class _CompositeRunnerSupportHostProtocol(Protocol):
     _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
     _checkpoint_manager: CompositeCheckpointService
     _logger: LoggerPort
+    _metrics: MetricsPort | None
     _observer: CompositeLifecycleObserverService
     _run_id_str: str
     _start_time: float | None

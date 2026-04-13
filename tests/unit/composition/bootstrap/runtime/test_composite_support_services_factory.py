@@ -52,6 +52,7 @@ def _make_factory(
         settings=settings,
         logger=logger,
         metrics=metrics,
+        tracer=MagicMock(),
         storage=storage,
         lock=MagicMock(),
     )

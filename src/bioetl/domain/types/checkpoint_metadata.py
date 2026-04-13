@@ -1,8 +1,4 @@
-"""Domain types for checkpoint metadata with DQ contract compatibility.
-
-Extends checkpoint metadata to include Data Quality contract information
-for resume compatibility validation.
-"""
+"""Domain types for checkpoint metadata with DQ contract compatibility."""
 
 from __future__ import annotations
 
@@ -15,6 +11,14 @@ from bioetl.domain.normalization import (
     normalize_execution_identity_payload,
 )
 from bioetl.domain.types import JsonDict
+from bioetl.domain.types._checkpoint_metadata_support import (
+    coerce_snapshot_ids,
+    extract_run_context_anchor,
+    is_empty_checkpoint_metadata_value,
+)
+from bioetl.domain.types.checkpoint_compatibility_result import (
+    CheckpointCompatibilityResult,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,7 +94,7 @@ class CheckpointMetadata:
             composite_run_identity=cast(
                 "str | None",
                 legacy_metadata.get("composite_run_identity")
-                or _extract_run_context_anchor(
+                or extract_run_context_anchor(
                     legacy_metadata,
                     "composite_run_identity",
                 ),
@@ -98,7 +102,7 @@ class CheckpointMetadata:
             manifest_id=cast(
                 "str | None",
                 legacy_metadata.get("manifest_id")
-                or _extract_run_context_anchor(legacy_metadata, "manifest_id"),
+                or extract_run_context_anchor(legacy_metadata, "manifest_id"),
             ),
             contract_ref=cast("str | None", legacy_metadata.get("contract_ref")),
             contract_version=cast(
@@ -106,7 +110,7 @@ class CheckpointMetadata:
                 legacy_metadata.get("contract_version"),
             ),
             exact_replay=cast("bool | None", legacy_metadata.get("exact_replay")),
-            input_snapshot_ids=_coerce_snapshot_ids(
+            input_snapshot_ids=coerce_snapshot_ids(
                 legacy_metadata.get("input_snapshot_ids")
             ),
             input_snapshot_fingerprint=cast(
@@ -142,7 +146,7 @@ class CheckpointMetadata:
             ("run_context", self.run_context),
         )
         for key, value in optional_values:
-            if _is_empty_checkpoint_metadata_value(value):
+            if is_empty_checkpoint_metadata_value(value):
                 continue
             result[key] = value
         return result
@@ -171,17 +175,16 @@ class CheckpointMetadata:
             composite_run_identity=cast(
                 "str | None",
                 data.get("composite_run_identity")
-                or _extract_run_context_anchor(data, "composite_run_identity"),
+                or extract_run_context_anchor(data, "composite_run_identity"),
             ),
             manifest_id=cast(
                 "str | None",
-                data.get("manifest_id")
-                or _extract_run_context_anchor(data, "manifest_id"),
+                data.get("manifest_id") or extract_run_context_anchor(data, "manifest_id"),
             ),
             contract_ref=cast("str | None", data.get("contract_ref")),
             contract_version=cast("str | None", data.get("contract_version")),
             exact_replay=cast("bool | None", data.get("exact_replay")),
-            input_snapshot_ids=_coerce_snapshot_ids(data.get("input_snapshot_ids")),
+            input_snapshot_ids=coerce_snapshot_ids(data.get("input_snapshot_ids")),
             input_snapshot_fingerprint=cast(
                 "str | None", data.get("input_snapshot_fingerprint")
             ),
@@ -228,103 +231,6 @@ class CheckpointMetadata:
         if not payload:
             return None
         return compute_execution_identity_fingerprint(payload)
-
-
-def _extract_run_context_anchor(data: JsonDict, key: str) -> str | None:
-    """Backfill an optional checkpoint anchor from legacy run_context payloads."""
-    run_context = data.get("run_context")
-    if not isinstance(run_context, dict):
-        return None
-    value = run_context.get(key)
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
-
-
-def _coerce_snapshot_ids(value: object | None) -> tuple[str, ...]:
-    """Normalize persisted snapshot identifiers into a stable tuple."""
-    if not isinstance(value, (list, tuple)):
-        return ()
-    normalized: list[str] = []
-    seen: set[str] = set()
-    for item in value:
-        text = str(item).strip()
-        if not text or text in seen:
-            continue
-        seen.add(text)
-        normalized.append(text)
-    return tuple(normalized)
-
-
-def _is_empty_checkpoint_metadata_value(value: object | None) -> bool:
-    """Return whether optional checkpoint metadata should be omitted from serialization."""
-    if value is None or value == "":
-        return True
-    if isinstance(value, (tuple, list, dict)):
-        return len(value) == 0
-    return False
-
-
-@dataclass(frozen=True, slots=True)
-class CheckpointCompatibilityResult:
-    """Result of checkpoint compatibility validation.
-
-    Attributes:
-        compatible: Whether checkpoint is compatible for resume.
-        dq_compatible: Whether DQ contracts are compatible.
-        pipeline_compatible: Whether pipeline versions are compatible.
-        execution_identity_compatible: Whether execution identity is compatible.
-        messages: List of compatibility messages.
-    """
-
-    compatible: bool
-    dq_compatible: bool
-    pipeline_compatible: bool
-    messages: list[str]
-    execution_identity_compatible: bool = True
-
-    @staticmethod
-    def compatible_result() -> CheckpointCompatibilityResult:
-        """Create a compatible result.
-
-        Returns:
-            CheckpointCompatibilityResult indicating full compatibility.
-        """
-        return CheckpointCompatibilityResult(
-            compatible=True,
-            dq_compatible=True,
-            pipeline_compatible=True,
-            execution_identity_compatible=True,
-            messages=["Checkpoint is compatible for resume"],
-        )
-
-    @staticmethod
-    def incompatible_result(
-        dq_compatible: bool = False,
-        pipeline_compatible: bool = False,
-        execution_identity_compatible: bool = False,
-        messages: list[str] | None = None,
-    ) -> CheckpointCompatibilityResult:
-        """Create an incompatible result.
-
-        Args:
-            dq_compatible: Whether DQ contracts are compatible.
-            pipeline_compatible: Whether pipeline versions are compatible.
-            messages: List of incompatibility messages.
-
-        Returns:
-            CheckpointCompatibilityResult indicating incompatibility.
-        """
-        return CheckpointCompatibilityResult(
-            compatible=False,
-            dq_compatible=dq_compatible,
-            pipeline_compatible=pipeline_compatible,
-            execution_identity_compatible=execution_identity_compatible,
-            messages=messages or [],
-        )
-
-
 __all__ = [
     "CheckpointCompatibilityResult",
     "CheckpointMetadata",

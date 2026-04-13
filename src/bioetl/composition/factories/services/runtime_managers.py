@@ -66,7 +66,10 @@ def build_runtime_managers(
         logger=pipeline.services.logger, data_source=pipeline.services.data_source
     )
     checkpoint_recovery_service = BatchCheckpointRecoveryService(
-        checkpoint_manager=checkpoint_manager, logger=pipeline.services.logger
+        checkpoint_manager=checkpoint_manager,
+        logger=pipeline.services.logger,
+        metrics=pipeline.services.metrics,
+        pipeline_name=pipeline.pipeline_name,
     )
     execution_lifecycle_service = BatchExecutionLifecycleService(
         progress_service=progress_service,

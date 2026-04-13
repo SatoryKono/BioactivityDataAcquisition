@@ -114,6 +114,10 @@ Cross-links for canonical observability governance:
 - direct logger-only publication не считается canonical path для lifecycle /
   typed domain events; structured logs/metrics/spans являются side effects
   canonical observer emission
+- `bioetl_observability_events_total` является observer-owned metric family и
+  не должен использоваться infrastructure-local retry/final telemetry helpers;
+  storage/control-plane operational telemetry обязана публиковаться через
+  dedicated bounded metric families, а не через unified runtime event counter
 - helper-local preflight reporting modules are not a sanctioned runtime
   publication path for ordinary pipeline runs
 - Lifecycle phase emissions используют low-cardinality `phase` labels и не
@@ -141,7 +145,7 @@ Cross-links for canonical observability governance:
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
 и собирается через `prometheus_metric_registries.py`.
 
-Текущий размер каталога: **93** метрики
+Текущий размер каталога: **102** метрики
 (`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
@@ -155,6 +159,8 @@ Cross-links for canonical observability governance:
 | `bioetl_control_plane_ledger_appends_total`    | Counter   | `pipeline,event_type,status`             | Попытки append в run ledger                                                        |
 | `bioetl_checkpoint_compatibility_events_total` | Counter   | `pipeline,disposition`                   | Итоги resume/checkpoint compatibility policy                                       |
 | `bioetl_checkpoint_load_events_total`          | Counter   | `pipeline,status`                        | Bounded checkpoint load decisions (`loaded`, `missing`, `blocked`, `incompatible`, `observe_blocked_identity`, `observe_loaded_degraded`, `incompatible_hard_fail`, `failed`) |
+| `bioetl_checkpoint_save_events_total`          | Counter   | `pipeline,operation,status`              | Bounded checkpoint save outcomes across ordinary and composite persistence paths    |
+| `bioetl_checkpoint_save_duration_seconds`      | Histogram | `pipeline,operation,status`              | Latency of checkpoint save attempts and failures                                   |
 | `bioetl_lineage_fragments_emitted_total`       | Counter   | `pipeline,layer,status`                  | Попытки публикации lineage fragments                                               |
 | `bioetl_lineage_refs_missing_total`            | Counter   | `pipeline,layer,ref_type`                | Missing upstream lineage references detected during persistence                    |
 | `bioetl_composite_source_selection_total`      | Counter   | `pipeline,decision_type,selected_source` | Low-cardinality composite source-selection decisions recorded during persistence   |
@@ -227,10 +233,17 @@ alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/ob
 
 Текущее состояние:
 
-- Спаны создаются на pipeline и HTTP-операциях
+- Спаны создаются на pipeline, composite lifecycle и HTTP-операциях
+- `CompositeLifecycleObserverService` использует sanctioned `TracingPort` seam
+  для composite runtime lifecycle и создаёт bounded spans:
+  - `pipeline.composite:<pipeline>`
+  - `pipeline.composite:<pipeline>.<phase>`
 - `postrun.run` дополнительно декомпозирован на nested spans:
   `postrun.compaction`, `postrun.dq_evaluation`, `postrun.dq_reports`,
   `postrun.vacuum`, `postrun.final_metadata`
+- При включённом tracing composite lifecycle также инкрементит
+  `bioetl_traced_runs_total` через injected `MetricsPort`; logger-only
+  composite tracing path не считается canonical
 - `logging_config.py` автоматически добавляет `trace_id` и `span_id` в structlog-записи,
   если в текущем контексте есть активный OTel span
 - При отключённом tracing или отсутствии активного span лог-схема деградирует

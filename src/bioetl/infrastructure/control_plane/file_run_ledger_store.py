@@ -29,6 +29,10 @@ if TYPE_CHECKING:
 _LEDGER_APPEND_OPEN_FLAGS = os.O_APPEND | os.O_CREAT | os.O_WRONLY
 
 
+class _RunLedgerCorruptionError(ValueError):
+    """Raised when persisted JSONL ledger contents are structurally corrupted."""
+
+
 def _resolve_ledger_pipeline(entry: RunLedgerEntry) -> str:
     """Resolve the canonical pipeline label from diagnostic entry details."""
     if entry.details is None:
@@ -103,21 +107,35 @@ def _append_jsonl_payload(path: Path, payload: bytes) -> int:
         os.close(file_descriptor)
 
 
-def _iter_complete_jsonl_payloads(raw_text: str) -> list[dict[str, object]]:
-    """Parse complete JSONL objects while tolerating one truncated tail line."""
-    stripped_lines = [line for line in raw_text.splitlines() if line.strip()]
-    if not stripped_lines:
+def _iter_jsonl_payloads_strict(
+    *,
+    ledger_path: Path,
+    raw_text: str,
+) -> list[dict[str, object]]:
+    """Parse JSONL objects and fail closed on truncated or invalid content."""
+    if not raw_text.strip():
         return []
-
-    complete_lines = stripped_lines
-    if raw_text and not raw_text.endswith(("\n", "\r")):
-        complete_lines = stripped_lines[:-1]
+    if not raw_text.endswith(("\n", "\r")):
+        raise _RunLedgerCorruptionError(
+            f"Run ledger file '{ledger_path}' is corrupted: truncated tail line"
+        )
 
     payloads: list[dict[str, object]] = []
-    for line in complete_lines:
-        payload = json.loads(line)
+    for line_number, line in enumerate(raw_text.splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise _RunLedgerCorruptionError(
+                f"Run ledger file '{ledger_path}' is corrupted at line "
+                f"{line_number}: {error.msg}"
+            ) from error
         if not isinstance(payload, dict):
-            raise ValueError("Ledger payload must be a JSON object")
+            raise _RunLedgerCorruptionError(
+                f"Run ledger file '{ledger_path}' is corrupted at line "
+                f"{line_number}: payload must be a JSON object"
+            )
         payloads.append({str(key): value for key, value in payload.items()})
     return payloads
 
@@ -247,6 +265,16 @@ class FileRunLedgerStore(RunLedgerPort):
                 status = "miss"
                 return []
             return list(slice_ledger_entries_after(entries, after_entry_id))
+        except _RunLedgerCorruptionError as error:
+            status = "failed"
+            raise build_storage_error(
+                message_prefix="Run ledger",
+                operation="list_entries_after",
+                path=self.base_path / f"{manifest_id}.jsonl",
+                error=error,
+                manifest_id=manifest_id,
+                after_entry_id=after_entry_id,
+            ) from error
         except ValueError:
             status = "failed"
             raise
@@ -277,5 +305,8 @@ class FileRunLedgerStore(RunLedgerPort):
         raw_text = ledger_path.read_text(encoding="utf-8")
         return [
             RunLedgerEntry.from_dict(payload)
-            for payload in _iter_complete_jsonl_payloads(raw_text)
+            for payload in _iter_jsonl_payloads_strict(
+                ledger_path=ledger_path,
+                raw_text=raw_text,
+            )
         ]

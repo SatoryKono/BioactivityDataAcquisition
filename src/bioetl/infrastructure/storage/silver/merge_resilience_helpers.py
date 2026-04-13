@@ -252,14 +252,11 @@ def _emit_merge_retry_event(
     )
     if metrics is not None:
         metrics.increment_counter(
-            "bioetl_observability_events_total",
+            "bioetl_silver_merge_retries_total",
             1,
             {
-                "event": "silver_merge_retry",
-                "provider": "storage",
                 "pipeline": pipeline_label,
-                "severity": "warning",
-                "error_type": retry_type,
+                "retry_type": retry_type,
             },
         )
 
@@ -280,13 +277,10 @@ def _emit_merge_final_event(
     )
     if metrics is not None:
         metrics.increment_counter(
-            "bioetl_observability_events_total",
+            "bioetl_silver_merge_failures_total",
             1,
             {
-                "event": "silver_merge_final",
-                "provider": "storage",
                 "pipeline": pipeline_label,
-                "severity": "error",
-                "error_type": final_reason,
+                "final_reason": final_reason,
             },
         )

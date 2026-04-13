@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Literal, Protocol, cast
 
 from bioetl.application.services.control_plane.effective_config_service import (
@@ -93,6 +95,29 @@ def _dq_config_to_dict(dq_config: DQConfig) -> JsonDict:
         ),
         "strictness_mode": dq_config.strictness_mode,
     }
+
+
+def _compute_file_hash(path: Path) -> str | None:
+    """Return a stable SHA-256 hash for one config source file when available."""
+    if not path.exists() or not path.is_file():
+        return None
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _build_config_source_ref(
+    *,
+    relative_path: str,
+    priority: int,
+    repo_root: Path,
+) -> ConfigSourceRef:
+    """Build one file-backed source ref for admin effective-config tooling."""
+    source_path = repo_root / relative_path
+    return ConfigSourceRef(
+        source_type="file",
+        source_path=relative_path,
+        source_hash=_compute_file_hash(source_path),
+        priority=priority,
+    )
 
 
 def _build_source_refs(artifact_dict: JsonDict) -> list[ConfigSourceRef]:
@@ -223,6 +248,7 @@ class ConfigDQService:
     _pipeline_yaml_getter: PipelineYamlConfigGetterPort
     _dq_config_loader: DQConfigLoaderPort
     _effective_config_service: EffectiveConfigService
+    _repo_root: Path | None = None
 
     def get_dq_config(self, pipeline_name: str) -> JsonDict:
         """Load and normalize the pipeline-level DQ configuration."""
@@ -270,18 +296,17 @@ class ConfigDQService:
         self.logger.debug("Getting effective config artifact", pipeline=pipeline_name)
         pipeline_config = self._pipeline_yaml_getter(pipeline_name)
         provider = str(pipeline_config.get("provider", "unknown"))
+        repo_root = self._repo_root or Path(__file__).resolve().parents[4]
         source_refs = [
-            ConfigSourceRef(
-                source_type="file",
-                source_path="configs/base/pipeline.yaml",
-                source_hash="auto",
+            _build_config_source_ref(
+                relative_path="configs/base/pipeline.yaml",
                 priority=1,
+                repo_root=repo_root,
             ),
-            ConfigSourceRef(
-                source_type="file",
-                source_path=f"configs/providers/{provider}.yaml",
-                source_hash="auto",
+            _build_config_source_ref(
+                relative_path=f"configs/providers/{provider}.yaml",
                 priority=2,
+                repo_root=repo_root,
             ),
         ]
         dq_config: DQConfig | None = None

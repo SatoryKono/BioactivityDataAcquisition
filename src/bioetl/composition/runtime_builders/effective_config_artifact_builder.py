@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict, is_dataclass
 from enum import Enum
@@ -102,24 +103,47 @@ def _build_runtime_overrides_snapshot(ctx: PipelineRunContext) -> dict[str, obje
     }
 
 
+def _compute_file_hash(path: Path) -> str | None:
+    """Return a stable SHA-256 hash for one config source file when available."""
+    if not path.exists() or not path.is_file():
+        return None
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _build_config_source_ref(
+    *,
+    relative_path: str,
+    priority: int,
+    repo_root: Path,
+) -> ConfigSourceRef:
+    """Build one canonical file-backed source ref with provenance hash."""
+    source_path = repo_root / relative_path
+    return ConfigSourceRef(
+        source_type="file",
+        source_path=relative_path,
+        source_hash=_compute_file_hash(source_path),
+        priority=priority,
+    )
+
+
 def _build_effective_config_source_refs(
     *,
     provider: str,
     entity: str,
+    repo_root: Path | None = None,
 ) -> list[ConfigSourceRef]:
     """Build source references used to materialize effective config artifacts."""
+    resolved_repo_root = repo_root or Path(__file__).resolve().parents[4]
     return [
-        ConfigSourceRef(
-            source_type="file",
-            source_path="configs/base/pipeline.yaml",
-            source_hash=None,
+        _build_config_source_ref(
+            relative_path="configs/base/pipeline.yaml",
             priority=1,
+            repo_root=resolved_repo_root,
         ),
-        ConfigSourceRef(
-            source_type="file",
-            source_path=f"configs/entities/{provider}/{entity}.yaml",
-            source_hash=None,
+        _build_config_source_ref(
+            relative_path=f"configs/entities/{provider}/{entity}.yaml",
             priority=2,
+            repo_root=resolved_repo_root,
         ),
     ]
 

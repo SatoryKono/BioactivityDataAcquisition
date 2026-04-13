@@ -53,6 +53,8 @@ class RunManifestCreateSpec:
     launch_context: dict[str, object]
     runtime_config: dict[str, object]
     resolved_config: dict[str, object]
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
     source_refs: tuple[RunSourceRef, ...] = ()
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
     pipeline_version: str | None = None
@@ -232,6 +234,14 @@ class RunManifestService:
                 normalized_payload["resolved_config"],
             ),
             code_provenance=self._hydrate_code_provenance(code_provenance_payload),
+            replay_of_run_id=_optional_payload_string(
+                normalized_payload,
+                "replay_of_run_id",
+            ),
+            replay_of_manifest_id=_optional_payload_string(
+                normalized_payload,
+                "replay_of_manifest_id",
+            ),
             replay_capability=request.replay_capability,
             source_refs=self._hydrate_source_refs(
                 cast(list[object], normalized_payload.get("source_refs", []))
@@ -338,6 +348,8 @@ class RunManifestService:
             "launch_context": request.launch_context,
             "runtime_config": request.runtime_config,
             "resolved_config": request.resolved_config,
+            "replay_of_run_id": request.replay_of_run_id,
+            "replay_of_manifest_id": request.replay_of_manifest_id,
             "replay_capability": request.replay_capability.value,
             "code_provenance": {
                 "pipeline_version": code_provenance.pipeline_version,

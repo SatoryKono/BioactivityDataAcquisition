@@ -91,6 +91,7 @@ def test_show_fragment_returns_stored_fragment() -> None:
     store = _InMemoryLineageStore()
     fragment = LineageGraphFragment(
         fragment_id="silver:fragment-1",
+        stored_fragment_id="silver:fragment-1:occurrence:abc123",
         created_at=datetime.now(UTC),
     )
     store.save(fragment)
@@ -99,6 +100,9 @@ def test_show_fragment_returns_stored_fragment() -> None:
     result = service.show_fragment("silver:fragment-1")
 
     assert result.fragment == fragment
+    assert result.to_dict()["fragment"]["stored_fragment_id"] == (
+        "silver:fragment-1:occurrence:abc123"
+    )
 
 
 def test_trace_returns_upstream_and_downstream_relations() -> None:
@@ -120,6 +124,7 @@ def test_trace_returns_upstream_and_downstream_relations() -> None:
     ).to_node_ref()
     silver_fragment = LineageGraphFragment(
         fragment_id="silver:fragment-1",
+        stored_fragment_id="silver:fragment-1:occurrence:silver",
         nodes=(silver_node, bronze_node),
         edges=(
             LineageEdge(
@@ -133,6 +138,7 @@ def test_trace_returns_upstream_and_downstream_relations() -> None:
     )
     gold_fragment = LineageGraphFragment(
         fragment_id="gold:fragment-1",
+        stored_fragment_id="gold:fragment-1:occurrence:gold",
         nodes=(gold_node, silver_node),
         edges=(
             LineageEdge(
@@ -152,8 +158,18 @@ def test_trace_returns_upstream_and_downstream_relations() -> None:
 
     assert result.dataset_ref == silver_node.node_id
     assert result.fragment_ids == ("silver:fragment-1", "gold:fragment-1")
+    assert result.stored_fragment_ids == (
+        "silver:fragment-1:occurrence:silver",
+        "gold:fragment-1:occurrence:gold",
+    )
     assert result.upstream[0].node.node_id == bronze_node.node_id
+    assert result.upstream[0].stored_fragment_id == (
+        "silver:fragment-1:occurrence:silver"
+    )
     assert result.downstream[0].node.node_id == gold_node.node_id
+    assert result.downstream[0].stored_fragment_id == (
+        "gold:fragment-1:occurrence:gold"
+    )
 
 
 def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
@@ -180,6 +196,7 @@ def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
     )
     fragment = LineageGraphFragment(
         fragment_id="silver:fragment-1",
+        stored_fragment_id="silver:fragment-1:occurrence:manifest-1",
         nodes=(silver_node, transform_node, source_node),
         edges=(
             LineageEdge(
@@ -204,6 +221,9 @@ def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
     assert result.manifest_id == "manifest-1"
     assert result.run_id == str(run_id)
     assert result.fragment_ids == ("silver:fragment-1",)
+    assert result.stored_fragment_ids == (
+        "silver:fragment-1:occurrence:manifest-1",
+    )
     assert result.produced_datasets[0].node_id == silver_node.node_id
     assert result.transforms[0].node_id == transform_node.node_id
     assert result.source_systems[0].node_id == source_node.node_id

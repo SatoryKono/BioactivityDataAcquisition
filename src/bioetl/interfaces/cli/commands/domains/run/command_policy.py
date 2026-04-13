@@ -101,6 +101,8 @@ class RunCommandInput:
     use_cached_bronze: bool
     cached_bronze_date: str | None
     cached_bronze_path: str | None
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
     exact_replay: bool = False
 
 
@@ -125,6 +127,8 @@ def prepare_run_request(
     use_cached_bronze: bool,
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
+    replay_of_run_id: str | None,
+    replay_of_manifest_id: str | None,
     exact_replay: bool,
     exit_func: ExitCallable,
 ) -> RunExecutionRequest:
@@ -148,6 +152,8 @@ def prepare_run_request(
         use_cached_bronze=use_cached_bronze,
         cached_bronze_date=cached_bronze_date,
         cached_bronze_path=cached_bronze_path,
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
         exact_replay=exact_replay,
     )
     if preparation.request is not None:
@@ -292,6 +298,8 @@ def run_command_flow(
         use_cached_bronze=cli_input.use_cached_bronze,
         cached_bronze_date=cli_input.cached_bronze_date,
         cached_bronze_path=cli_input.cached_bronze_path,
+        replay_of_run_id=cli_input.replay_of_run_id,
+        replay_of_manifest_id=cli_input.replay_of_manifest_id,
         exact_replay=cli_input.exact_replay,
         exit_func=exit_func,
     )

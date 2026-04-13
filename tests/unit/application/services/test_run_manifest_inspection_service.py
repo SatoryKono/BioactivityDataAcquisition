@@ -92,6 +92,49 @@ def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object
     }
 
 
+def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
+    requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
+    is_composite = (
+        str(manifest.launch_context.get("execution_context") or "") == "composite"
+        or manifest.provider == "composite"
+    )
+    requested_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
+    if not isinstance(requested_policy, str):
+        requested_policy = None
+    return {
+        "resume_requested": bool(manifest.launch_context.get("resume")),
+        "requested_exact_replay": requested_exact_replay,
+        "requested_checkpoint_compatibility_policy": requested_policy,
+        "applied_checkpoint_compatibility_policy": (
+            "hard_fail"
+            if requested_exact_replay
+            else requested_policy or "observe"
+        ),
+        "strict_replay_safe": requested_exact_replay,
+        "execution_context": "composite" if is_composite else "ordinary",
+        "resume_mode": (
+            "checkpoint_snapshot_plus_ledger_suffix"
+            if is_composite
+            else "checkpoint_snapshot_only"
+        ),
+        "semantic_identity_anchor": "execution_fingerprint",
+        "occurrence_identity_anchor": (
+            "composite_run_identity" if is_composite else None
+        ),
+    }
+
+
+def _expected_replay_parentage(manifest: RunManifest) -> dict[str, object]:
+    return {
+        "is_exact_replay": (
+            manifest.replay_of_run_id is not None
+            or manifest.replay_of_manifest_id is not None
+        ),
+        "replay_of_run_id": manifest.replay_of_run_id,
+        "replay_of_manifest_id": manifest.replay_of_manifest_id,
+    }
+
+
 class _InMemoryRunManifestStore(RunManifestPort):
     def __init__(self) -> None:
         self._items: dict[str, RunManifest] = {}
@@ -234,6 +277,9 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "effective_config_hash": _VALID_CONFIG_HASH,
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_of_run_id": None,
+        "replay_of_manifest_id": None,
+        "replay_parentage": _expected_replay_parentage(manifest),
         "canonical_execution_identity": _expected_canonical_execution_identity(
             manifest,
             requested_exact_replay=True,
@@ -246,6 +292,8 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "resume_contract": _expected_resume_contract(manifest),
+        "resume_diagnostics": None,
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
@@ -281,6 +329,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
+        "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": False,
@@ -311,6 +360,9 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "effective_config_hash": _VALID_CONFIG_HASH,
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_of_run_id": None,
+        "replay_of_manifest_id": None,
+        "replay_parentage": _expected_replay_parentage(manifest),
         "canonical_execution_identity": _expected_canonical_execution_identity(
             manifest,
             requested_exact_replay=True,
@@ -323,6 +375,8 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "resume_contract": _expected_resume_contract(manifest),
+        "resume_diagnostics": None,
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
@@ -365,12 +419,18 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "pipeline_version": "1.0.0",
         "contract_ref": "chembl_activity",
         "contract_version": "1.2.0",
+        "replay_of_run_id": None,
+        "replay_of_manifest_id": None,
+        "replay_parentage": _expected_replay_parentage(manifest),
         "replay_capability": "exact_replay_supported",
+        "required_persistence_profile": "degraded_observable",
         "requested_exact_replay": True,
         "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
         "replay_capability_reason": "immutable_input_snapshots_present",
         "exact_replay_eligible": True,
         "exact_replay_blockers": [],
+        "resume_contract": _expected_resume_contract(manifest),
+        "resume_diagnostics": None,
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
@@ -400,6 +460,8 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "identity_graph": result.identity_graph,
         "persistence_profile": {
             "attained_profile": "replay_ready",
+            "required_profile": "degraded_observable",
+            "required_profile_satisfied": True,
             "claims": {
                 "degraded_observable": True,
                 "replay_ready": True,
@@ -414,6 +476,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
                 "run_ledger_history": False,
                 "artifact_lineage_links": True,
             },
+            "required_profile_missing_requirements": [],
             "replay_ready_missing_requirements": [],
             "forensic_grade_missing_requirements": ["run_ledger_history"],
             "composite_resume_reconstructability": {
@@ -440,6 +503,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
+        "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": True,
         "dq_signal_present": False,
@@ -495,8 +559,104 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
         == "resume_requested_without_snapshot_backed_inputs"
     )
     assert result.identity_graph["replay_mode"] == "resume"
+    assert result.identity_graph["resume_contract"] == _expected_resume_contract(
+        manifest
+    )
+    assert result.identity_graph["resume_diagnostics"] is None
     assert result.identity_graph["exact_replay_blockers"] == [
         "immutable_input_snapshots_missing"
+    ]
+
+
+def test_diff_distinguishes_exact_replay_ancestry_from_semantic_equality() -> None:
+    store = _InMemoryRunManifestStore()
+    parent_run_id = RunID(uuid4())
+    child_run_id = RunID(uuid4())
+    parent = _make_manifest(
+        manifest_id="manifest-parent",
+        run_id=parent_run_id,
+        execution_fingerprint="fp-stable",
+    )
+    child = replace(
+        _make_manifest(
+            manifest_id="manifest-child",
+            run_id=child_run_id,
+            execution_fingerprint="fp-stable",
+        ),
+        replay_of_run_id=str(parent_run_id),
+        replay_of_manifest_id="manifest-parent",
+    )
+    store.save(parent)
+    store.save(child)
+    service = RunManifestInspectionService(manifest_port=store)
+
+    result = service.diff("manifest-parent", "manifest-child")
+
+    assert result.classification == "semantic_equivalent_with_noncanonical_differences"
+    assert result.semantic_equivalent is True
+    assert result.replay_relationship == "right_is_exact_replay_of_left"
+
+
+def test_show_surfaces_persisted_resume_diagnostics() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(uuid4())
+    manifest = _make_manifest(manifest_id="manifest-resume-diagnostics", run_id=run_id)
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-resume-rejected",
+            manifest_id=manifest.manifest_id,
+            run_id=run_id,
+            event_type="checkpoint_resume_rejected",
+            event_family="pipeline.lifecycle",
+            occurred_at=datetime.now(UTC),
+            status="rejected",
+            details={
+                "compatibility_disposition": "hard_fail",
+                "resume_rejected": True,
+                "execution_identity_compatible": False,
+                "messages": ["execution identity mismatch"],
+                "current_identity": {
+                    "execution_fingerprint": manifest.execution_fingerprint,
+                    "composite_run_identity": "current-identity",
+                },
+                "checkpoint_identity": {
+                    "execution_fingerprint": manifest.execution_fingerprint,
+                    "composite_run_identity": "checkpoint-identity",
+                },
+            },
+        )
+    )
+    service = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    )
+
+    result = service.show("manifest-resume-diagnostics")
+
+    assert result.diagnostics["resume_contract"] == _expected_resume_contract(manifest)
+    assert result.diagnostics["resume_diagnostics"] == {
+        "source_event_type": "checkpoint_resume_rejected",
+        "source_status": "rejected",
+        "compatibility_disposition": "hard_fail",
+        "resume_rejected": True,
+        "execution_identity_compatible": False,
+        "messages": ["execution identity mismatch"],
+        "current_identity": {
+            "execution_fingerprint": manifest.execution_fingerprint,
+            "composite_run_identity": "current-identity",
+        },
+        "checkpoint_identity": {
+            "execution_fingerprint": manifest.execution_fingerprint,
+            "composite_run_identity": "checkpoint-identity",
+        },
+    }
+    assert result.identity_graph["resume_contract"] == _expected_resume_contract(
+        manifest
+    )
+    assert result.identity_graph["resume_diagnostics"] == result.diagnostics[
+        "resume_diagnostics"
     ]
 
 
@@ -644,6 +804,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
+        "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": False,
@@ -804,6 +965,7 @@ def test_show_collects_dq_trace_anchors() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
+        "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": True,
@@ -1131,6 +1293,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         "immutable_input_snapshot_gap": True,
         "strict_replay_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
+        "required_persistence_profile_gap": False,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": False,
@@ -1251,6 +1414,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "immutable_input_snapshot_gap": True,
         "strict_replay_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
+        "required_persistence_profile_gap": False,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": True,
@@ -1329,6 +1493,7 @@ def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
+        "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": False,
@@ -1403,6 +1568,7 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
+        "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": True,

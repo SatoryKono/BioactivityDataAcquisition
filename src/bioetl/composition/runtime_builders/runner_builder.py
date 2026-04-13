@@ -196,7 +196,11 @@ def _handle_control_plane_setup(
     inputs: _RunnerInputs,
 ) -> tuple[PipelineRunContext, _RunnerInputs, RunLedgerService | None]:
     """Handle control plane setup including manifest and ledger services."""
-    manifest_enabled, ledger_enabled = _resolve_control_plane_flags(inputs.settings)
+    manifest_enabled, ledger_enabled = _resolve_control_plane_flags(
+        inputs.settings,
+        yaml_config=inputs.yaml_config,
+        skip_gold=bool(getattr(ctx, "skip_gold", False)),
+    )
     run_ledger_service: RunLedgerService | None = None
 
     if manifest_enabled:

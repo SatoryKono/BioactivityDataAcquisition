@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, is_dataclass
+from collections.abc import Mapping
+from dataclasses import asdict, is_dataclass
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -13,9 +14,15 @@ import yaml
 from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    ManifestControlPlaneRefs,
+    build_planned_artifacts,
+    control_plane_root,
+    create_control_plane_refs,
+    resolve_run_context_values,
+)
 from bioetl.domain.control_plane import (
     ReplayCapability,
-    RunArtifactRef,
     RunInputSnapshotRef,
     RunSourceRef,
 )
@@ -71,6 +78,7 @@ def build_launch_context_snapshot(
     *,
     run_type_value: str,
     execution_context_value: str,
+    required_persistence_profile: str,
 ) -> dict[str, object]:
     """Capture launch-time options that materially affect execution semantics."""
     return {
@@ -86,6 +94,7 @@ def build_launch_context_snapshot(
         "skip_gold": getattr(ctx, "skip_gold", False),
         "exact_replay": getattr(ctx, "exact_replay", False),
         "execution_context": execution_context_value,
+        "required_persistence_profile": required_persistence_profile,
         "exact_replay_support_boundary": (
             "snapshot_backed_source_runs_only"
             if execution_context_value != "composite"
@@ -95,6 +104,66 @@ def build_launch_context_snapshot(
         "input_filter": to_serializable_mapping(getattr(ctx, "input_filter", None)),
         "cached_bronze": to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
     }
+
+
+def resolve_replay_parentage(
+    *,
+    ctx: PipelineRunContext,
+    runtime_config: object,
+) -> tuple[str | None, str | None]:
+    """Resolve explicit replay ancestry from context or runtime configuration."""
+    runtime_config_mapping = _as_runtime_config_mapping(runtime_config)
+    replay_of_run_id = _coerce_optional_text(getattr(ctx, "replay_of_run_id", None))
+    replay_of_manifest_id = _coerce_optional_text(
+        getattr(ctx, "replay_of_manifest_id", None)
+    )
+    if replay_of_run_id is None:
+        replay_of_run_id = _resolve_replay_parentage_mapping_value(
+            runtime_config_mapping,
+            "replay_of_run_id",
+            "exact_replay_parent_run_id",
+        )
+    if replay_of_manifest_id is None:
+        replay_of_manifest_id = _resolve_replay_parentage_mapping_value(
+            runtime_config_mapping,
+            "replay_of_manifest_id",
+            "exact_replay_parent_manifest_id",
+        )
+    return replay_of_run_id, replay_of_manifest_id
+
+
+def _as_runtime_config_mapping(runtime_config: object) -> Mapping[str, object]:
+    """Return a mapping view for runtime-config lookups or an empty mapping."""
+    if isinstance(runtime_config, Mapping):
+        return runtime_config
+    return {}
+
+
+def _resolve_replay_parentage_mapping_value(
+    runtime_config: Mapping[str, object],
+    *keys: str,
+) -> str | None:
+    """Resolve one replay parentage field from known runtime-config locations."""
+    for key in keys:
+        direct_value = _coerce_optional_text(runtime_config.get(key))
+        if direct_value is not None:
+            return direct_value
+        control_plane = runtime_config.get("control_plane")
+        if isinstance(control_plane, Mapping):
+            nested_value = _coerce_optional_text(control_plane.get(key))
+            if nested_value is not None:
+                return nested_value
+        pipeline = runtime_config.get("pipeline")
+        if isinstance(pipeline, Mapping):
+            nested_direct = _coerce_optional_text(pipeline.get(key))
+            if nested_direct is not None:
+                return nested_direct
+            nested_control_plane = pipeline.get("control_plane")
+            if isinstance(nested_control_plane, Mapping):
+                nested_value = _coerce_optional_text(nested_control_plane.get(key))
+                if nested_value is not None:
+                    return nested_value
+    return None
 
 
 def resolve_provider_entity(
@@ -253,83 +322,4 @@ def resolve_contract_identity(
         contract_schema_hash,
         dq_policy_ref,
         rule_bundle_version,
-    )
-
-
-def build_planned_artifacts(
-    *,
-    settings: Settings,
-    provider: str,
-    entity: str,
-) -> tuple[RunArtifactRef, ...]:
-    """Capture planned layer roots for the manifest control-plane snapshot."""
-    output_root = Path(getattr(settings, "data_dir", "data")) / "output"
-    return (
-        RunArtifactRef(
-            layer="bronze", path=str(output_root / "bronze" / provider / entity)
-        ),
-        RunArtifactRef(
-            layer="silver", path=str(output_root / "silver" / provider / entity)
-        ),
-        RunArtifactRef(
-            layer="gold", path=str(output_root / "gold" / provider / entity)
-        ),
-    )
-
-
-def control_plane_root(settings: Settings, leaf: str) -> Path:
-    """Return the canonical control-plane output root for one leaf namespace."""
-    return Path(getattr(settings, "data_dir", "data")) / "output" / "control" / leaf
-
-
-@dataclass(frozen=True, slots=True)
-class ManifestControlPlaneRefs:
-    """Resolved control-plane references produced before factory runner wiring."""
-
-    manifest_id: str
-    config_hash: str | None
-    dq_contract_compatibility_hash: str | None
-    effective_config_artifact_id: str | None
-    contract_ref: str | None
-    contract_version: str | None
-    contract_schema_hash: str | None
-    dq_policy_ref: str | None
-    rule_bundle_version: str | None
-
-
-def resolve_run_context_values(
-    ctx: PipelineRunContext,
-) -> tuple[str, str]:
-    """Resolve run type and execution context values from context."""
-    raw_run_type = getattr(ctx, "run_type", "incremental")
-    run_type_value = str(getattr(raw_run_type, "value", raw_run_type))
-    raw_execution_context = getattr(ctx, "execution_context", "isolated")
-    execution_context_value = str(
-        getattr(raw_execution_context, "value", raw_execution_context)
-    )
-    return run_type_value, execution_context_value
-
-
-def create_control_plane_refs(
-    manifest_id: str,
-    effective_config_hash: str,
-    dq_contract_compatibility_hash: str,
-    effective_config_artifact_id: str,
-    contract_ref: str,
-    contract_version: str | None,
-    contract_schema_hash: str | None,
-    dq_policy_ref: str | None,
-    rule_bundle_version: str | None,
-) -> ManifestControlPlaneRefs:
-    """Build the compact control-plane refs bundle returned to callers."""
-    return ManifestControlPlaneRefs(
-        manifest_id=manifest_id,
-        config_hash=effective_config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        contract_schema_hash=contract_schema_hash,
-        dq_policy_ref=dq_policy_ref,
-        rule_bundle_version=rule_bundle_version,
     )

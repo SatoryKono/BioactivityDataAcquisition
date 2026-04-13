@@ -88,6 +88,7 @@ class TestBuildSimpleGoldWrite:
                     "id": 1,
                     "name": "a",
                     "_run_id": "run-1",
+                    "_run_type": "rebuild",
                     "_ingestion_ts": "2024-01-01T00:00:00Z",
                     "_lineage_created_at": "2024-01-01T00:00:00Z",
                 }

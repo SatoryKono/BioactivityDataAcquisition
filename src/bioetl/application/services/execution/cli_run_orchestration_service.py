@@ -93,6 +93,8 @@ class CliRunOrchestrationService:
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
+        replay_of_run_id: str | None = None,
+        replay_of_manifest_id: str | None = None,
         exact_replay: bool = False,
         enable_tracing: bool | None = None,
     ) -> RunOptions:
@@ -113,6 +115,8 @@ class CliRunOrchestrationService:
             use_cached_bronze: If True, use a previously cached Bronze extract.
             cached_bronze_date: Date string for the cached Bronze snapshot.
             cached_bronze_path: File system path to the cached Bronze snapshot.
+            replay_of_run_id: Optional parent run identifier when this run is an exact replay.
+            replay_of_manifest_id: Optional parent manifest identifier when this run is an exact replay.
             exact_replay: If True, require replay-safe snapshot-backed inputs.
 
         Returns:
@@ -133,6 +137,8 @@ class CliRunOrchestrationService:
             use_cached_bronze=use_cached_bronze,
             cached_bronze_path=cached_bronze_path,
             cached_bronze_date=cached_bronze_date,
+            replay_of_run_id=replay_of_run_id,
+            replay_of_manifest_id=replay_of_manifest_id,
             exact_replay=exact_replay,
             enable_tracing=enable_tracing,
         )
@@ -157,6 +163,8 @@ class CliRunOrchestrationService:
         use_cached_bronze: bool,
         cached_bronze_date: str | None,
         cached_bronze_path: str | None,
+        replay_of_run_id: str | None = None,
+        replay_of_manifest_id: str | None = None,
         exact_replay: bool = False,
         enable_tracing: bool | None = None,
     ) -> RunPreparationResult:
@@ -168,6 +176,14 @@ class CliRunOrchestrationService:
         )
         if not validation.is_valid:
             return RunPreparationResult(error_message=validation.error_message)
+        if (
+            replay_of_run_id is not None or replay_of_manifest_id is not None
+        ) and not exact_replay:
+            return RunPreparationResult(
+                error_message=(
+                    "--replay-of-run-id/--replay-of-manifest-id require --exact-replay"
+                )
+            )
         if exact_replay and not use_cached_bronze:
             return RunPreparationResult(
                 error_message=(
@@ -194,6 +210,8 @@ class CliRunOrchestrationService:
                     use_cached_bronze=use_cached_bronze,
                     cached_bronze_date=cached_bronze_date,
                     cached_bronze_path=cached_bronze_path,
+                    replay_of_run_id=replay_of_run_id,
+                    replay_of_manifest_id=replay_of_manifest_id,
                     exact_replay=exact_replay,
                 ),
                 health_server=health_server,

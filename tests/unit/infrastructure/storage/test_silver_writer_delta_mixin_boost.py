@@ -21,6 +21,7 @@ from bioetl.infrastructure.storage.silver.delta_mixin import (
 )
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _build_dispatch_policy,
+    _build_merge_update_predicate,
     _DeltaWriteRequest,
     _MergeExecutionTimeoutError,
     _dispatch_request_by_mode,
@@ -119,6 +120,23 @@ class TestWriteDeleteLines:
         assert len(write_calls) == 1
         assert write_calls[0]["mode"] == "overwrite"
         assert write_calls[0]["schema_mode"] == "overwrite"
+
+
+@pytest.mark.unit
+def test_build_merge_update_predicate_ignores_run_type_precedence() -> None:
+    """Silver merge predicate must stay content-hash based even if _run_type exists."""
+    records = pa.table(
+        {
+            "id": [1],
+            "content_hash": ["hash-1"],
+            "_run_type": ["rebuild"],
+        }
+    )
+
+    predicate = _build_merge_update_predicate(records)
+
+    assert "source.content_hash <> target.content_hash" in predicate
+    assert "_run_type" not in predicate
 
     @pytest.mark.asyncio
     async def test_write_delete_with_partition_cols(self) -> None:
@@ -574,11 +592,10 @@ class TestEmitMergeRetryTelemetry:
 
         metrics.increment_counter.assert_called_once()
         call_args = metrics.increment_counter.call_args
-        assert call_args[0][0] == "bioetl_observability_events_total"
+        assert call_args[0][0] == "bioetl_silver_merge_retries_total"
         labels = call_args[0][2]
-        assert labels["event"] == "silver_merge_retry"
         assert labels["pipeline"] == "table"
-        assert labels["error_type"] == "commit_conflict"
+        assert labels["retry_type"] == "commit_conflict"
 
     def test_emit_retry_telemetry_without_metrics(self) -> None:
         """Line 274: metrics is None, no counter increment."""
@@ -612,10 +629,13 @@ class TestEmitMergeFinalTelemetry:
         )
 
         metrics.increment_counter.assert_called_once()
+        assert (
+            metrics.increment_counter.call_args[0][0]
+            == "bioetl_silver_merge_failures_total"
+        )
         labels = metrics.increment_counter.call_args[0][2]
-        assert labels["event"] == "silver_merge_final"
         assert labels["pipeline"] == "table"
-        assert labels["error_type"] == "commit_conflict_retries_exhausted"
+        assert labels["final_reason"] == "commit_conflict_retries_exhausted"
 
     def test_emit_final_telemetry_without_metrics(self) -> None:
         """Line 296: metrics is None, no counter called."""

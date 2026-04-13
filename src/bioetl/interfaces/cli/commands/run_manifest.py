@@ -96,6 +96,8 @@ def _render_manifest_section(manifest: dict[str, object]) -> list[str]:
             ("created_at", manifest.get("created_at")),
             ("execution_fingerprint", manifest.get("execution_fingerprint")),
             ("schema_version", manifest.get("schema_version")),
+            ("replay_of_run_id", manifest.get("replay_of_run_id")),
+            ("replay_of_manifest_id", manifest.get("replay_of_manifest_id")),
         ),
     )
 
@@ -202,6 +204,9 @@ def _render_diagnostics_section(diagnostics: dict[str, object]) -> list[str]:
                     diagnostics.get("input_snapshot_identity_fingerprint"),
                 ),
                 ("replay_mode", diagnostics.get("replay_mode")),
+                ("replay_of_run_id", diagnostics.get("replay_of_run_id")),
+                ("replay_of_manifest_id", diagnostics.get("replay_of_manifest_id")),
+                ("replay_parentage", diagnostics.get("replay_parentage")),
                 ("input_snapshot_count", diagnostics.get("input_snapshot_count")),
                 ("input_snapshots", diagnostics.get("input_snapshots")),
                 ("event_family_counts", diagnostics.get("event_family_counts")),
@@ -296,6 +301,9 @@ def _render_identity_graph_section(identity_graph: object) -> list[str]:
                 identity_graph.get("input_snapshot_identity_fingerprint"),
             ),
             ("replay_mode", identity_graph.get("replay_mode")),
+            ("replay_of_run_id", identity_graph.get("replay_of_run_id")),
+            ("replay_of_manifest_id", identity_graph.get("replay_of_manifest_id")),
+            ("replay_parentage", identity_graph.get("replay_parentage")),
             ("input_snapshot_count", identity_graph.get("input_snapshot_count")),
             ("input_snapshots", identity_graph.get("input_snapshots")),
             ("planned_artifacts", identity_graph.get("planned_artifacts")),
@@ -358,6 +366,7 @@ def _render_diff_payload(payload: dict[str, object]) -> str:
         f"  classification: {_format_scalar(payload.get('classification'))}",
         f"  semantic_equivalent: {_format_scalar(payload.get('semantic_equivalent'))}",
         f"  occurrence_only: {_format_scalar(payload.get('occurrence_only'))}",
+        f"  replay_relationship: {_format_scalar(payload.get('replay_relationship'))}",
     ]
     for label in (
         "occurrence_difference_fields",

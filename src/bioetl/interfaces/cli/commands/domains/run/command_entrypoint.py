@@ -168,6 +168,27 @@ def _add_cache_options() -> Callable:
     return decorator
 
 
+def _add_replay_parentage_options() -> Callable:
+    """Add explicit replay ancestry options."""
+
+    def decorator(cmd: CommandCallback) -> CommandCallback:
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--replay-of-run-id",
+            type=str,
+            default=None,
+            help="Explicit parent run_id when this execution is an exact replay",
+        )(cmd)
+        cmd = click.option(  # type: ignore[untyped-decorator]
+            "--replay-of-manifest-id",
+            type=str,
+            default=None,
+            help="Explicit parent manifest_id when this execution is an exact replay",
+        )(cmd)
+        return cmd
+
+    return decorator
+
+
 def build_run_click_command(
     *,
     validate_pipeline_name: Callable[..., object],
@@ -190,6 +211,7 @@ def build_run_click_command(
     run_command = _add_debug_options(default_health_server_port)(run_command)
     run_command = _add_tracing_options()(run_command)
     run_command = _add_cache_options()(run_command)
+    run_command = _add_replay_parentage_options()(run_command)
 
     return run_command
 

@@ -41,6 +41,7 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
         QuarantinePort,
+        TracingPort,
     )
 
 __all__ = [
@@ -96,6 +97,7 @@ class CompositeRunnerDependencyGroup:
     dependency_coordinator: DependencyCoordinatorService | None = None
     quarantine_port: QuarantinePort | None = None
     metrics: MetricsPort | None = None
+    tracer: TracingPort | None = None
     observer: CompositeLifecycleObserverService | None = None
     manifest_id: str | None = None
     run_ledger_service: RunLedgerService | None = None

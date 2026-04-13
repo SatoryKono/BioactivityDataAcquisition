@@ -1,0 +1,48 @@
+"""Private helpers for checkpoint metadata serialization and backfill."""
+
+from __future__ import annotations
+
+from bioetl.domain.types import JsonDict
+
+
+def extract_run_context_anchor(data: JsonDict, key: str) -> str | None:
+    """Backfill an optional checkpoint anchor from legacy run_context payloads."""
+    run_context = data.get("run_context")
+    if not isinstance(run_context, dict):
+        return None
+    value = run_context.get(key)
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def coerce_snapshot_ids(value: object | None) -> tuple[str, ...]:
+    """Normalize persisted snapshot identifiers into a stable tuple."""
+    if not isinstance(value, (list, tuple)):
+        return ()
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        text = str(item).strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        normalized.append(text)
+    return tuple(normalized)
+
+
+def is_empty_checkpoint_metadata_value(value: object | None) -> bool:
+    """Return whether optional checkpoint metadata should be omitted from serialization."""
+    if value is None or value == "":
+        return True
+    if isinstance(value, (tuple, list, dict)):
+        return len(value) == 0
+    return False
+
+
+__all__ = [
+    "coerce_snapshot_ids",
+    "extract_run_context_anchor",
+    "is_empty_checkpoint_metadata_value",
+]

@@ -149,6 +149,25 @@ class TestBuildContext:
         assert context.exact_replay is True
         assert context.has_cached_bronze is True
 
+    def test_build_context_propagates_replay_parentage(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="chembl_activity",
+            run_id=RunID(uuid4()),
+            options=RunOptions(
+                use_cached_bronze=True,
+                cached_bronze_path="bronze/cache",
+                cached_bronze_date="2026-03-18",
+                replay_of_run_id="run-parent",
+                replay_of_manifest_id="manifest-parent",
+                exact_replay=True,
+            ),
+        )
+
+        assert context.replay_of_run_id == "run-parent"
+        assert context.replay_of_manifest_id == "manifest-parent"
+
     def test_build_context_rejects_exact_replay_without_cached_bronze(self) -> None:
         service = PipelineRunContextService()
 

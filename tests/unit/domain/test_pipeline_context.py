@@ -387,3 +387,15 @@ class TestRunContextValidationAndProperties:
         assert ctx.has_input_filter is True
         assert ctx.has_cached_bronze is True
         assert ctx.vacuum_enabled_override is True
+
+    def test_pipeline_run_context_replay_parentage_fields(self) -> None:
+        ctx = PipelineRunContext(
+            pipeline_name="chembl_activity",
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            replay_of_run_id="run-parent",
+            replay_of_manifest_id="manifest-parent",
+        )
+
+        assert ctx.replay_of_run_id == "run-parent"
+        assert ctx.replay_of_manifest_id == "manifest-parent"

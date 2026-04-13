@@ -186,6 +186,39 @@ class TestPrepareExecutionRequest:
             == "--exact-replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
         )
 
+    def test_replay_parentage_requires_exact_replay(self) -> None:
+        service = CliRunOrchestrationService()
+
+        result = service.prepare_execution_request(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=None,
+            input_csv=None,
+            filter_column=None,
+            filter_field=None,
+            dry_run=False,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            health_server=True,
+            health_port=8080,
+            use_cached_bronze=True,
+            cached_bronze_date="2026-03-12",
+            cached_bronze_path="/tmp/bronze",
+            replay_of_run_id="run-parent",
+            replay_of_manifest_id="manifest-parent",
+            exact_replay=False,
+        )
+
+        assert result.is_valid is False
+        assert result.request is None
+        assert (
+            result.error_message
+            == "--replay-of-run-id/--replay-of-manifest-id require --exact-replay"
+        )
+
     def test_validate_start_offset_rejects_negative_offset(self) -> None:
         service = CliRunOrchestrationService()
 
@@ -258,6 +291,63 @@ class TestPrepareExecutionRequest:
 
         assert options.use_cached_bronze is True
         assert options.exact_replay is True
+
+    def test_build_options_propagates_replay_parentage(self) -> None:
+        service = CliRunOrchestrationService()
+
+        options = service.build_options(
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=10,
+            input_csv=None,
+            filter_column=None,
+            filter_field=None,
+            dry_run=False,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            use_cached_bronze=True,
+            cached_bronze_date="2026-03-12",
+            cached_bronze_path="/tmp/bronze",
+            replay_of_run_id="run-parent",
+            replay_of_manifest_id="manifest-parent",
+            exact_replay=True,
+        )
+
+        assert options.replay_of_run_id == "run-parent"
+        assert options.replay_of_manifest_id == "manifest-parent"
+
+    def test_prepare_execution_request_propagates_replay_parentage(self) -> None:
+        service = CliRunOrchestrationService()
+
+        result = service.prepare_execution_request(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=25,
+            input_csv=None,
+            filter_column=None,
+            filter_field=None,
+            dry_run=False,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            health_server=False,
+            health_port=8081,
+            use_cached_bronze=True,
+            cached_bronze_date="2026-03-12",
+            cached_bronze_path="/tmp/bronze",
+            replay_of_run_id="run-parent",
+            replay_of_manifest_id="manifest-parent",
+            exact_replay=True,
+        )
+
+        assert result.is_valid is True
+        assert result.request is not None
+        assert result.request.options.replay_of_run_id == "run-parent"
+        assert result.request.options.replay_of_manifest_id == "manifest-parent"
 
 
 class TestExecutePipeline:

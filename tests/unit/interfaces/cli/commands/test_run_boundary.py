@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from click.testing import CliRunner
 
 
 @pytest.mark.unit
@@ -84,3 +85,16 @@ def test_cli_main_imports_run_via_public_command_seam() -> None:
     run_spec = lazy_mapping["run"]
     assert run_spec[0] == "bioetl.interfaces.cli.commands.run"
     assert "bioetl.interfaces.cli.commands.domains.run.command" not in str(run_spec)
+
+
+@pytest.mark.unit
+def test_run_help_exposes_replay_parentage_flags() -> None:
+    """Published run CLI must expose explicit replay ancestry flags."""
+    from bioetl.interfaces.cli.commands.run import run
+
+    runner = CliRunner()
+    result = runner.invoke(run, ["--help"])
+
+    assert result.exit_code == 0
+    assert "--replay-of-run-id" in result.output
+    assert "--replay-of-manifest-id" in result.output

@@ -7,6 +7,8 @@ from prometheus_client import Counter, Histogram
 __all__ = [
     "CHECKPOINT_COMPATIBILITY_EVENTS_TOTAL",
     "CHECKPOINT_LOAD_EVENTS_TOTAL",
+    "CHECKPOINT_SAVE_DURATION_SECONDS",
+    "CHECKPOINT_SAVE_EVENTS_TOTAL",
     "COMPOSITE_SOURCE_SELECTION_TOTAL",
     "CONTROL_PLANE_LEDGER_APPENDS_TOTAL",
     "CONTROL_PLANE_MANIFEST_WRITES_TOTAL",
@@ -180,6 +182,19 @@ CHECKPOINT_LOAD_EVENTS_TOTAL = Counter(
     "bioetl_checkpoint_load_events_total",
     "Total checkpoint load decisions observed during runtime and composite resume paths",
     ["pipeline", "status"],
+)
+
+CHECKPOINT_SAVE_EVENTS_TOTAL = Counter(
+    "bioetl_checkpoint_save_events_total",
+    "Total checkpoint save outcomes observed during runtime and composite persistence paths",
+    ["pipeline", "operation", "status"],
+)
+
+CHECKPOINT_SAVE_DURATION_SECONDS = Histogram(
+    "bioetl_checkpoint_save_duration_seconds",
+    "Duration of checkpoint save operations in seconds",
+    ["pipeline", "operation", "status"],
+    buckets=[0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
 )
 
 LINEAGE_FRAGMENTS_EMITTED_TOTAL = Counter(

@@ -24,11 +24,12 @@ _FIXED_UUID = UUID("12345678-1234-5678-1234-567812345678")
 class TestBootstrapRuntimeBasics:
     """Tests for bootstrap_runtime_basics."""
 
-    def test_returns_six_element_tuple(self) -> None:
-        """bootstrap_runtime_basics returns (run_id, settings, logger, metrics, storage, lock)."""
+    def test_returns_seven_element_tuple(self) -> None:
+        """bootstrap_runtime_basics returns run_id/settings/logger/metrics/tracer/storage/lock."""
         config = SimpleNamespace(name="test_pipeline")
         settings = SimpleNamespace(metrics_enabled=False)
         logger = MagicMock()
+        tracer = MagicMock()
         storage = MagicMock()
         lock = MagicMock()
 
@@ -37,17 +38,19 @@ class TestBootstrapRuntimeBasics:
             run_id=None,
             settings_provider=lambda: settings,
             logger_bootstrapper=lambda _n, _u, _l: logger,
+            tracer_bootstrapper=lambda _settings: tracer,
             storage_bootstrapper=lambda **kw: storage,
             lock_factory=lambda: lock,
             uuid_factory=lambda: _FIXED_UUID,
         )
 
-        assert len(result) == 6
-        run_id, s, lg, mt, st, lk = result
+        assert len(result) == 7
+        run_id, s, lg, mt, tr, st, lk = result
         assert run_id == str(_FIXED_UUID)
         assert s is settings
         assert lg is logger
         assert mt is not None
+        assert tr is tracer
         assert st is storage
         assert lk is lock
 
@@ -63,6 +66,7 @@ class TestBootstrapRuntimeBasics:
                 return_value=SimpleNamespace(metrics_enabled=False)
             ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
+            tracer_bootstrapper=lambda _settings: MagicMock(),
             storage_bootstrapper=lambda **kw: MagicMock(),
             lock_factory=MagicMock(return_value=MagicMock()),
             uuid_factory=MagicMock(),
@@ -81,6 +85,7 @@ class TestBootstrapRuntimeBasics:
                 return_value=SimpleNamespace(metrics_enabled=False)
             ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
+            tracer_bootstrapper=lambda _settings: MagicMock(),
             storage_bootstrapper=lambda **kw: MagicMock(),
             lock_factory=MagicMock(return_value=MagicMock()),
             uuid_factory=uuid_factory,
@@ -100,6 +105,7 @@ class TestBootstrapRuntimeBasics:
                 return_value=SimpleNamespace(metrics_enabled=False)
             ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
+            tracer_bootstrapper=lambda _settings: MagicMock(),
             storage_bootstrapper=storage_bootstrapper,
             lock_factory=MagicMock(return_value=MagicMock()),
             uuid_factory=MagicMock(),
@@ -122,6 +128,7 @@ class TestBootstrapRuntimeBasics:
                 return_value=SimpleNamespace(metrics_enabled=False)
             ),
             logger_bootstrapper=_logger_bootstrapper,
+            tracer_bootstrapper=lambda _settings: MagicMock(),
             storage_bootstrapper=lambda **kw: MagicMock(),
             lock_factory=MagicMock(return_value=MagicMock()),
             uuid_factory=MagicMock(),
@@ -145,6 +152,7 @@ class TestBuildSupportServices:
             settings=SimpleNamespace(metrics_enabled=False),
             logger=MagicMock(),
             metrics=MagicMock(),
+            tracer=MagicMock(),
             storage=MagicMock(),
             lock=MagicMock(),
         )
@@ -173,6 +181,7 @@ class TestBuildSupportServices:
             settings=SimpleNamespace(metrics_enabled=False),
             logger=MagicMock(),
             metrics=MagicMock(),
+            tracer=MagicMock(),
             storage=MagicMock(),
             lock=MagicMock(),
         )

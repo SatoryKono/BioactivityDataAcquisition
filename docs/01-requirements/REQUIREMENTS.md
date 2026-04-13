@@ -219,8 +219,8 @@ ______________________________________________________________________
 #### REQ-BACKFILL-002
 
 - **Уровень**: MUST
-- **Описание**: Приоритет merge: `rebuild` > `backfill` > `incremental`
-- **Проверка**: Unit-тест конфликта версий — rebuild побеждает
+- **Описание**: Семантика `backfill` / `rebuild` должна обеспечиваться на execution-level через exclusive lock и cleanup-before-run. Persisted Silver/Gold row updates MUST оставаться детерминированными и content-hash-based, без зависимости от `_run_type` в физических Delta rows.
+- **Проверка**: Unit-тесты подтверждают, что `_run_type` не участвует в physical Delta merge predicate, а governance/lock tests подтверждают exclusive execution для `backfill`/`rebuild`
 
 #### REQ-BACKFILL-003
 

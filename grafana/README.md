@@ -1262,7 +1262,7 @@ BioETL использует трёхуровневую Medallion Architecture д
 │  Метрики:                                                           │
 │  - records_processed_total{stage="silver"} — валидные записи        │
 │  - dq_validation_score — оценка качества (0.0 — 1.0)               │
-│  - silver_validation_failures_total — ошибки валидации схемы         │
+│  - bioetl_silver_validation_failures_total — ошибки валидации схемы  │
 │                                                                     │
 │  Пример: 15,380 записей прошли валидацию (40 отсеяно)               │
 └──────────────────────────────┬──────────────────────────────────────┘
@@ -1677,7 +1677,7 @@ groups:
 - reusable DQ/freshness сигналы:
   `dq_soft_threshold_exceeded`, quarantine-rate, critical
   `dq_validation_failures_total`, `dq_anomaly_detected`,
-  `silver_validation_failures_total`, `data_freshness_seconds`;
+  `bioetl_silver_validation_failures_total`, `data_freshness_seconds`;
 - reusable provider сигналы:
   `health_check_*` failure ratio и `data_source_retry_exhausted_total`.
 

@@ -39,6 +39,9 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_replay_capability as _resolve_replay_capability,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
+    resolve_replay_parentage as _resolve_replay_parentage,
+)
+from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_run_context_values as _resolve_run_context_values,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
@@ -48,6 +51,7 @@ from bioetl.composition.services.versioning import (
     get_git_commit,
     get_pipeline_version,
 )
+from bioetl.domain.control_plane import ReplayCapability
 from bioetl.infrastructure.control_plane import FileRunManifestStore
 
 if TYPE_CHECKING:
@@ -101,7 +105,19 @@ def _build_manifest_create_request(
         provider=provider,
         entity=entity,
     )
-    return RunManifestCreateRequest(
+    replay_of_run_id, replay_of_manifest_id = _resolve_replay_parentage(
+        ctx=ctx,
+        runtime_config=inputs.runtime_config,
+    )
+    control_plane = getattr(getattr(inputs.settings, "pipeline", None), "control_plane", None)
+    required_persistence_profile = str(
+        getattr(
+            control_plane,
+            "required_persistence_profile",
+            "degraded_observable",
+        )
+    )
+    request = RunManifestCreateRequest(
         run_id=ctx.run_id,
         run_type=getattr(ctx, "run_type", "incremental"),
         pipeline_name=ctx.pipeline_name,
@@ -111,9 +127,12 @@ def _build_manifest_create_request(
             ctx,
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
+            required_persistence_profile=required_persistence_profile,
         ),
         runtime_config=_to_serializable_mapping(inputs.runtime_config),
         resolved_config=_to_serializable_mapping(yaml_config),
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
         source_refs=source_refs,
         planned_artifacts=_build_planned_artifacts(
             settings=inputs.settings,
@@ -135,6 +154,27 @@ def _build_manifest_create_request(
             resume_requested=bool(getattr(ctx, "resume", False)),
         ),
     )
+    _validate_required_runtime_persistence_profile(
+        request=request,
+        required_persistence_profile=required_persistence_profile,
+    )
+    return request
+
+
+def _validate_required_runtime_persistence_profile(
+    *,
+    request: RunManifestCreateRequest,
+    required_persistence_profile: str,
+) -> None:
+    """Fail closed when the built manifest request cannot satisfy its profile."""
+    if required_persistence_profile not in {"replay_ready", "forensic_grade"}:
+        return
+    if request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
+        raise RuntimeError(
+            "Pipeline execution cannot satisfy required persistence profile "
+            f"'{required_persistence_profile}' because immutable input snapshots "
+            "and exact replay capability are not available for this run"
+        )
 
 def create_run_manifest(
     *,

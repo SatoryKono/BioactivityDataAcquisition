@@ -306,7 +306,7 @@
       },
       "targets": [
         {
-          "expr": "((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[15m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\",severity=\"critical\"}[15m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\",severity=\"critical\"}[30m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[30m])) > bool 0) or vector(0))",
+          "expr": "((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[15m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\",severity=\"hard_fail\"}[15m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\",severity=\"critical\"}[30m])) > bool 0) or vector(0)) + ((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[30m])) > bool 0) or vector(0))",
           "refId": "A"
         }
       ],

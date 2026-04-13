@@ -22,6 +22,8 @@ __all__ = [
 def build_composite_launch_context_snapshot(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
+    *,
+    required_persistence_profile: str,
 ) -> dict[str, object]:
     """Capture launch-time options that materially affect composite execution."""
     return {
@@ -40,6 +42,7 @@ def build_composite_launch_context_snapshot(
         "cached_bronze_dependencies": runtime.cached_bronze_dependencies,
         "execution_context": "composite",
         "exact_replay_support_boundary": "composite_execution_unsupported",
+        "required_persistence_profile": required_persistence_profile,
     }
 
 

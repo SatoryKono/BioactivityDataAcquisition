@@ -389,6 +389,17 @@ class DataQualityService:
                 1,
                 {"pipeline": self._pipeline_name, "metric": metric_name},
             )
+            if self._dq_monitor is None:
+                continue
+            baseline_stats = self._dq_monitor.get_baseline_stats(metric_name)
+            if baseline_stats is None:
+                continue
+            _baseline_mean, _baseline_stddev, sample_count = baseline_stats
+            self._metrics.set_gauge(
+                "bioetl_dq_baseline_samples",
+                float(sample_count),
+                {"pipeline": self._pipeline_name, "metric": metric_name},
+            )
 
     def _emit_dq_monitor_disabled_signal(self) -> None:
         """Emit an explicit signal when anomaly detection is unavailable."""

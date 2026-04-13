@@ -217,6 +217,9 @@ surface clearly through record-level reject exploration.
   - `BioETLDQValidationFailuresCritical` -> `dq-failure-investigation.md`
   - `BioETLDQCriticalAnomaliesDetected` -> `dq-failure-investigation.md`
   - `BioETLSilverValidationFailuresDetected` -> `dq-failure-investigation.md`
+    (driven by `bioetl_silver_validation_failures_total`, which increments on
+    canonical failed Silver Pandera validation outcomes with bounded
+    `table/pipeline` labels)
   - `BioETLDataFreshnessLagHigh` / `BioETLDataFreshnessLagCritical` -> `dq-failure-investigation.md`
     (`24-72h` warning / `>72h` critical; lag считается как `time() - bioetl_data_freshness_seconds`)
 - **Provider health**

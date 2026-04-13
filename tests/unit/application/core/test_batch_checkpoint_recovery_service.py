@@ -37,10 +37,20 @@ def mock_logger():
 
 
 @pytest.fixture
-def service(mock_checkpoint_manager, mock_logger):
+def mock_metrics():
+    metrics = MagicMock()
+    metrics.increment_counter = MagicMock()
+    metrics.observe_histogram = MagicMock()
+    return metrics
+
+
+@pytest.fixture
+def service(mock_checkpoint_manager, mock_logger, mock_metrics):
     return BatchCheckpointRecoveryService(
         checkpoint_manager=mock_checkpoint_manager,
         logger=mock_logger,
+        metrics=mock_metrics,
+        pipeline_name="test_pipeline",
     )
 
 
@@ -103,6 +113,27 @@ class TestSavePeriodicCheckpoint:
             )
 
         assert mock_checkpoint_manager.save_checkpoint.await_count == 5
+
+    async def test_emits_metrics_when_periodic_save_succeeds(
+        self, service, mock_metrics
+    ):
+        """Periodic checkpoint saves emit success event and duration metrics."""
+        await service.save_periodic_checkpoint(
+            records_fetched=100,
+            resume_offset=0,
+            checkpoint_interval=100,
+        )
+
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_save_events_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "operation": "periodic",
+                "status": "succeeded",
+            },
+        )
+        mock_metrics.observe_histogram.assert_called_once()
 
     async def test_no_save_at_zero_records(self, service, mock_checkpoint_manager):
         """records_fetched=0 triggers save only if 0 % interval == 0 (edge)."""
@@ -168,6 +199,28 @@ class TestSaveCheckpointOnException:
 
         mock_checkpoint_manager.save_checkpoint.assert_not_awaited()
 
+    async def test_emits_skipped_metric_when_exception_save_has_no_progress(
+        self, service, mock_checkpoint_manager, mock_metrics
+    ):
+        """Exception checkpoint skips emit a bounded skipped outcome."""
+        await service.save_checkpoint_on_exception(
+            records_fetched=0,
+            resume_offset=0,
+            error=ValueError("zero records"),
+        )
+
+        mock_checkpoint_manager.save_checkpoint.assert_not_awaited()
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_save_events_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "operation": "exception",
+                "status": "skipped",
+            },
+        )
+        mock_metrics.observe_histogram.assert_not_called()
+
     async def test_logs_warning_on_checkpoint_save_failure(
         self, mock_checkpoint_manager, mock_logger
     ):
@@ -178,6 +231,8 @@ class TestSaveCheckpointOnException:
         service = BatchCheckpointRecoveryService(
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
+            metrics=None,
+            pipeline_name="test_pipeline",
         )
 
         # Must not raise — failure is swallowed and logged
@@ -202,6 +257,8 @@ class TestSaveCheckpointOnException:
         service = BatchCheckpointRecoveryService(
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
+            metrics=None,
+            pipeline_name="test_pipeline",
         )
 
         await service.save_checkpoint_on_exception(
@@ -257,6 +314,8 @@ class TestSaveCheckpointOnShutdown:
         service = BatchCheckpointRecoveryService(
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
+            metrics=None,
+            pipeline_name="test_pipeline",
         )
 
         # Must not raise
@@ -279,6 +338,8 @@ class TestSaveCheckpointOnShutdown:
         service = BatchCheckpointRecoveryService(
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
+            metrics=None,
+            pipeline_name="test_pipeline",
         )
 
         await service.save_checkpoint_on_shutdown(records_fetched=20, resume_offset=5)
@@ -296,6 +357,36 @@ class TestSaveCheckpointOnShutdown:
         )
 
         mock_checkpoint_manager.save_checkpoint.assert_awaited_once_with(0)
+
+    async def test_emits_failed_metrics_when_shutdown_save_fails(
+        self, mock_checkpoint_manager, mock_logger, mock_metrics
+    ):
+        """Shutdown save failures emit failed checkpoint save metrics."""
+        mock_checkpoint_manager.save_checkpoint = AsyncMock(
+            side_effect=RuntimeError("shutdown storage error")
+        )
+        service = BatchCheckpointRecoveryService(
+            checkpoint_manager=mock_checkpoint_manager,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+        )
+
+        await service.save_checkpoint_on_shutdown(
+            records_fetched=50,
+            resume_offset=10,
+        )
+
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_save_events_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "operation": "shutdown",
+                "status": "failed",
+            },
+        )
+        mock_metrics.observe_histogram.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
@@ -326,6 +417,8 @@ class TestSaveCheckpointNow:
         service = BatchCheckpointRecoveryService(
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
+            metrics=None,
+            pipeline_name="test_pipeline",
         )
 
         with pytest.raises(BioETLError):
@@ -336,6 +429,23 @@ class TestSaveCheckpointNow:
         await service.save_checkpoint_now(records_fetched=0, resume_offset=0)
 
         mock_checkpoint_manager.save_checkpoint.assert_awaited_once_with(0)
+
+    async def test_emits_metrics_for_manual_checkpoint_save(
+        self, service, mock_metrics
+    ):
+        """Immediate/manual checkpoint saves emit success metrics."""
+        await service.save_checkpoint_now(records_fetched=10, resume_offset=5)
+
+        mock_metrics.increment_counter.assert_called_once_with(
+            "bioetl_checkpoint_save_events_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "operation": "manual",
+                "status": "succeeded",
+            },
+        )
+        mock_metrics.observe_histogram.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

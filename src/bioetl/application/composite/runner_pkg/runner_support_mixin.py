@@ -52,7 +52,7 @@ from bioetl.application.composite.runtime_models import (
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
 from bioetl.domain.composite.result import CompositeResult, EnrichmentResult, SeedResult
 from bioetl.domain.exceptions import InvalidStateError
-from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort
+from bioetl.domain.ports import ExecutionMetricsRunnerPort, LoggerPort, MetricsPort
 
 __all__ = ["CompositeRunnerSupportMixin"]
 
@@ -65,6 +65,7 @@ class CompositeRunnerSupportMixin:
     _seed_runner_factory: Callable[[], ExecutionMetricsRunnerPort]
     _checkpoint_manager: CompositeCheckpointService
     _logger: LoggerPort
+    _metrics: MetricsPort | None
     _observer: CompositeLifecycleObserverService
     _run_id_str: str
     _start_time: float | None

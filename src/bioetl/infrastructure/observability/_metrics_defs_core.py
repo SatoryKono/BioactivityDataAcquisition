@@ -9,8 +9,6 @@ from bioetl.infrastructure.observability.circuit_breaker_mapping import (
 )
 
 __all__ = [
-    "ARCHIVE_DURATION_SECONDS",
-    "ARCHIVE_FILES_TOTAL",
     "BATCH_SIZE_RECORDS",
     "CIRCUIT_BREAKER_FAILURE_TOTAL",
     "CIRCUIT_BREAKER_STATE",
@@ -35,7 +33,6 @@ __all__ = [
     "QUARANTINE_RECORDS_TOTAL",
     "RECORDS_PROCESSED_TOTAL",
     "SILVER_FILTER_REJECTIONS_TOTAL",
-    "VACUUM_DURATION_SECONDS",
     "VACUUM_FILES_REMOVED_TOTAL",
 ]
 
@@ -140,24 +137,6 @@ VACUUM_FILES_REMOVED_TOTAL = Counter(
     "bioetl_vacuum_files_removed_total",
     "Total files removed by vacuum operations",
     ["table", "layer"],
-)
-
-VACUUM_DURATION_SECONDS = Histogram(
-    "bioetl_vacuum_duration_seconds",
-    "Duration of vacuum operations",
-    ["table"],
-)
-
-ARCHIVE_FILES_TOTAL = Counter(
-    "bioetl_archive_files_total",
-    "Total files archived",
-    ["table", "target"],
-)
-
-ARCHIVE_DURATION_SECONDS = Histogram(
-    "bioetl_archive_duration_seconds",
-    "Duration of archive operations",
-    ["table"],
 )
 
 DQ_VALIDATION_SCORE = Gauge(

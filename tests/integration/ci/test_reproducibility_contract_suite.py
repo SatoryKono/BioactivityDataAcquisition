@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
@@ -25,11 +27,17 @@ from bioetl.domain.control_plane import (
     RunArtifactRef,
     RunCodeProvenance,
     RunManifest,
+    RunInputSnapshotRef,
     RunSourceRef,
 )
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.domain.composite.result import MergeResult
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
+from bioetl.domain.lineage import (
+    LineageGraphFragment,
+    LineageNodeRef,
+    LineageNodeType,
+)
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.ports.metadata.coordinator import (
     BronzeMetadataInput,
@@ -43,6 +51,7 @@ from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _deduplicate_by_primary_keys_impl,
 )
+from bioetl.infrastructure.control_plane.file_lineage_store import FileLineageStore
 
 
 pytestmark = pytest.mark.integration
@@ -114,6 +123,10 @@ def _make_manifest(
     run_id: RunID,
     execution_fingerprint: str,
     config_hash: str = _VALID_CONFIG_HASH,
+    replay_of_run_id: str | None = None,
+    replay_of_manifest_id: str | None = None,
+    required_persistence_profile: str = "degraded_observable",
+    input_snapshots: tuple[RunInputSnapshotRef, ...] = (),
 ) -> RunManifest:
     return RunManifest(
         manifest_id=manifest_id,
@@ -125,13 +138,20 @@ def _make_manifest(
         pipeline_name="chembl_activity",
         provider="chembl",
         entity="activity",
-        launch_context={"limit": 25, "exact_replay": True},
+        launch_context={
+            "limit": 25,
+            "exact_replay": True,
+            "required_persistence_profile": required_persistence_profile,
+        },
         runtime_config={
             "run_type": "incremental",
             "limit": 25,
             "exact_replay": True,
+            "required_persistence_profile": required_persistence_profile,
         },
         resolved_config={"provider": "chembl", "entity_type": "activity"},
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
@@ -149,6 +169,7 @@ def _make_manifest(
                 entity="activity",
                 pipeline_name="chembl_activity",
                 query="fixture://sample",
+                input_snapshots=input_snapshots,
             ),
         ),
         planned_artifacts=(RunArtifactRef(layer="silver", path="/tmp/output"),),
@@ -206,6 +227,77 @@ def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> N
     assert result.classification == "semantic_drift"
     assert result.semantic_equivalent is False
     assert "code_provenance" in result.semantic_difference_fields
+
+
+def test_reproducibility_contract_manifest_diff_exposes_exact_replay_parentage() -> None:
+    store = _InMemoryRunManifestStore()
+    parent_run_id = RunID(UUID("00000000-0000-0000-0000-000000000305"))
+    child_run_id = RunID(UUID("00000000-0000-0000-0000-000000000306"))
+    parent = _make_manifest(
+        manifest_id="manifest-parent",
+        run_id=parent_run_id,
+        execution_fingerprint="fp-stable",
+    )
+    child = _make_manifest(
+        manifest_id="manifest-child",
+        run_id=child_run_id,
+        execution_fingerprint="fp-stable",
+        replay_of_run_id=str(parent_run_id),
+        replay_of_manifest_id="manifest-parent",
+    )
+    store.save(parent)
+    store.save(child)
+
+    result = RunManifestInspectionService(manifest_port=store).diff(
+        "manifest-parent",
+        "manifest-child",
+    )
+
+    assert result.classification == "semantic_equivalent_with_noncanonical_differences"
+    assert result.semantic_equivalent is True
+    assert result.occurrence_only is False
+    assert result.replay_relationship == "right_is_exact_replay_of_left"
+    assert "replay_of_manifest_id" in result.noncanonical_difference_fields
+
+
+def test_reproducibility_contract_lineage_store_preserves_occurrence_history(
+    tmp_path: Path,
+) -> None:
+    store = FileLineageStore(base_path=tmp_path / "control" / "lineage")
+    semantic_fragment_id = "silver:chembl.activity@4"
+    node = LineageNodeRef(
+        node_type=LineageNodeType.DATASET,
+        node_id=semantic_fragment_id,
+    )
+    first = LineageGraphFragment(
+        fragment_id=semantic_fragment_id,
+        nodes=(node,),
+        run_id="00000000-0000-0000-0000-000000000901",
+        manifest_id="manifest-first",
+        created_at=datetime(2025, 1, 1, tzinfo=UTC),
+    )
+    second = replace(
+        first,
+        run_id="00000000-0000-0000-0000-000000000902",
+        manifest_id="manifest-second",
+    )
+
+    store.save(first)
+    store.save(second)
+
+    first_loaded = store.list_by_run_id(RunID(UUID(first.run_id or "")))
+    second_loaded = store.list_by_run_id(RunID(UUID(second.run_id or "")))
+
+    assert first_loaded[0].fragment_id == semantic_fragment_id
+    assert second_loaded[0].fragment_id == semantic_fragment_id
+    assert first_loaded[0].stored_fragment_id is not None
+    assert second_loaded[0].stored_fragment_id is not None
+    assert first_loaded[0].stored_fragment_id != second_loaded[0].stored_fragment_id
+    with pytest.raises(
+        ValueError,
+        match="Semantic lineage fragment id resolves to multiple stored occurrence records",
+    ):
+        store.get(semantic_fragment_id)
 
 
 def test_reproducibility_contract_effective_config_semantic_payload_is_stable() -> None:
@@ -426,6 +518,71 @@ def test_reproducibility_contract_supported_gold_trace_path_resolves_run_context
     ]
     assert result.manifest.run_id == run_id
     assert result.manifest.manifest_id == "manifest-gold-trace-1"
+
+
+def test_reproducibility_contract_forensic_grade_profile_is_attained() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000412"))
+    manifest = _make_manifest(
+        manifest_id="manifest-forensic-grade-1",
+        run_id=run_id,
+        execution_fingerprint="fp-forensic-grade-1",
+        required_persistence_profile="forensic_grade",
+        input_snapshots=(
+            RunInputSnapshotRef(
+                snapshot_id="snapshot-1",
+                content_hash="content-hash-1",
+                immutable_uri="file:///snapshots/bronze-1.jsonl.zst",
+                query_fingerprint="query-hash-1",
+                captured_at=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
+            ),
+        ),
+    )
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-forensic-grade-1",
+            manifest_id=manifest.manifest_id,
+            run_id=run_id,
+            event_type="artifact_published",
+            occurred_at=datetime(2025, 1, 1, 0, 1, tzinfo=UTC),
+            event_family="artifact",
+            status="success",
+            stage="silver",
+            dataset_ref="silver:chembl.activity@7",
+            lineage_fragment_id="silver:chembl.activity@7#lineage",
+            details={
+                "artifact_path": "silver/chembl/activity",
+                "metadata_path": "silver/chembl/activity/activity_metadata.yaml",
+                "artifact_kind": "metadata_sidecar",
+                "pipeline_name": "chembl_activity",
+                "provider": "chembl",
+                "entity": "activity",
+                "run_id": str(run_id),
+                "manifest_id": manifest.manifest_id,
+            },
+        )
+    )
+
+    result = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    ).show(manifest.manifest_id)
+
+    assert result.diagnostics["required_persistence_profile"] == "forensic_grade"
+    assert result.diagnostics["persistence_profile"]["attained_profile"] == (
+        "forensic_grade"
+    )
+    assert result.diagnostics["persistence_profile"]["required_profile"] == (
+        "forensic_grade"
+    )
+    assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is True
+    assert (
+        result.diagnostics["persistence_profile"]["required_profile_missing_requirements"]
+        == []
+    )
+    assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is False
 
 
 def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> None:

@@ -157,9 +157,11 @@ def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
         ctx,
         run_type_value="incremental",
         execution_context_value="pipeline",
+        required_persistence_profile="replay_ready",
     )
 
     assert launch_context["execution_context"] == "pipeline"
+    assert launch_context["required_persistence_profile"] == "replay_ready"
     assert (
         launch_context["exact_replay_support_boundary"]
         == "snapshot_backed_source_runs_only"
@@ -188,9 +190,13 @@ def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported()
         ctx,
         run_type_value="incremental",
         execution_context_value="composite",
+        required_persistence_profile="degraded_observable",
     )
 
     assert launch_context["execution_context"] == "composite"
+    assert (
+        launch_context["required_persistence_profile"] == "degraded_observable"
+    )
     assert (
         launch_context["exact_replay_support_boundary"]
         == "composite_execution_unsupported"

@@ -46,6 +46,8 @@ class _FakeRunManifestService:
             launch_context={"limit": 100},
             runtime_config={"run_type": "incremental", "limit": 100},
             resolved_config={"provider": "chembl", "entity_type": "activity"},
+            replay_of_run_id="00000000-0000-0000-0000-000000000099",
+            replay_of_manifest_id="manifest-parent",
             code_provenance=RunCodeProvenance(
                 pipeline_version="1.0.0",
                 git_commit="abc1234",
@@ -87,6 +89,13 @@ class _FakeRunManifestService:
                 "input_snapshot_content_hashes": ["sha256:snapshot-1"],
                 "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
                 "replay_mode": "exact_replay",
+                "replay_of_run_id": "00000000-0000-0000-0000-000000000099",
+                "replay_of_manifest_id": "manifest-parent",
+                "replay_parentage": {
+                    "is_exact_replay": True,
+                    "replay_of_run_id": "00000000-0000-0000-0000-000000000099",
+                    "replay_of_manifest_id": "manifest-parent",
+                },
                 "input_snapshot_count": 1,
                 "input_snapshots": [
                     {
@@ -142,6 +151,13 @@ class _FakeRunManifestService:
                         _SNAPSHOT_IDENTITY_FINGERPRINT
                     ),
                     "replay_mode": "exact_replay",
+                    "replay_of_run_id": "00000000-0000-0000-0000-000000000099",
+                    "replay_of_manifest_id": "manifest-parent",
+                    "replay_parentage": {
+                        "is_exact_replay": True,
+                        "replay_of_run_id": "00000000-0000-0000-0000-000000000099",
+                        "replay_of_manifest_id": "manifest-parent",
+                    },
                     "input_snapshot_count": 1,
                     "input_snapshots": [
                         {
@@ -304,6 +320,9 @@ class _FakeRunManifestService:
         return RunManifestDiffResult(
             left_manifest_id="manifest-1",
             right_manifest_id="manifest-2",
+            replay_relationship="right_is_exact_replay_of_left",
+            classification="semantic_equivalent_with_noncanonical_differences",
+            semantic_equivalent=True,
             differences=(
                 RunManifestDiffEntry(
                     field="runtime_config",
@@ -378,9 +397,12 @@ class TestRunManifestCommands:
         assert result.exit_code == 0
         payload = json.loads(result.output)
         assert payload["manifest"]["manifest_id"] == "manifest-1"
+        assert payload["manifest"]["replay_of_manifest_id"] == "manifest-parent"
         assert payload["ledger_entries"][0]["event_type"] == "run_finished"
         assert payload["diagnostics"]["latest_status"] == "success"
+        assert payload["diagnostics"]["replay_parentage"]["is_exact_replay"] is True
         assert payload["identity_graph"]["manifest_id"] == "manifest-1"
+        assert payload["identity_graph"]["replay_mode"] == "exact_replay"
         assert payload["diagnostics"]["contract_version"] == "1.2.0"
         assert payload["diagnostics"]["dq_rule_ids"] == ["gold.not_null.id"]
         assert payload["diagnostics"]["cross_validation_rule_ids"] == [
@@ -419,6 +441,7 @@ class TestRunManifestCommands:
         assert result.exit_code == 0
         assert "Manifest" in result.output
         assert "manifest_id: manifest-1" in result.output
+        assert "replay_of_manifest_id: manifest-parent" in result.output
         assert "Code Provenance" in result.output
         assert "Ledger" in result.output
         assert "Diagnostics" in result.output
@@ -437,6 +460,7 @@ class TestRunManifestCommands:
             "replay_capability_reason: immutable_input_snapshots_present"
             in result.output
         )
+        assert "replay_parentage" in result.output
         assert "input_snapshot_ids" in result.output
         assert "input_snapshot_identity_fingerprint" in result.output
         assert "event_family_counts" in result.output
@@ -505,6 +529,7 @@ class TestRunManifestCommands:
         payload = json.loads(result.output)
         assert payload["left_manifest_id"] == "manifest-1"
         assert payload["right_manifest_id"] == "manifest-2"
+        assert payload["replay_relationship"] == "right_is_exact_replay_of_left"
         assert payload["differences"][0]["field"] == "runtime_config"
 
     def test_diff_defaults_to_human_readable_text(
@@ -523,6 +548,7 @@ class TestRunManifestCommands:
         assert "Manifest Diff" in result.output
         assert "left_manifest_id: manifest-1" in result.output
         assert "right_manifest_id: manifest-2" in result.output
+        assert "replay_relationship: right_is_exact_replay_of_left" in result.output
         assert "field: runtime_config" in result.output
 
     def test_diff_yaml_outputs_changed_fields(
@@ -547,5 +573,6 @@ class TestRunManifestCommands:
         assert result.exit_code == 0
         assert "left_manifest_id: manifest-1" in result.output
         assert "right_manifest_id: manifest-2" in result.output
+        assert "replay_relationship: right_is_exact_replay_of_left" in result.output
         assert "differences:" in result.output
         assert "field: runtime_config" in result.output

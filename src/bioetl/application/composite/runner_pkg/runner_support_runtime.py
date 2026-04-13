@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = ["run_seed", "save_checkpoint_safe"]
 
+import time
 from datetime import UTC, datetime
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
@@ -17,16 +18,82 @@ from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.exceptions import BioETLError
 
 
+def _emit_checkpoint_save_event(
+    host: _CompositeRunnerSupportHostProtocol,
+    *,
+    operation: str,
+    status: str,
+) -> None:
+    metrics = getattr(host, "_metrics", None)
+    if metrics is None:
+        return
+    metrics.increment_counter(
+        "bioetl_checkpoint_save_events_total",
+        1,
+        {
+            "pipeline": host._config.name,
+            "operation": operation,
+            "status": status,
+        },
+    )
+
+
+def _observe_checkpoint_save_duration(
+    host: _CompositeRunnerSupportHostProtocol,
+    *,
+    operation: str,
+    status: str,
+    duration_seconds: float,
+) -> None:
+    metrics = getattr(host, "_metrics", None)
+    if metrics is None:
+        return
+    metrics.observe_histogram(
+        "bioetl_checkpoint_save_duration_seconds",
+        duration_seconds,
+        {
+            "pipeline": host._config.name,
+            "operation": operation,
+            "status": status,
+        },
+    )
+
+
 async def save_checkpoint_safe(
     host: _CompositeRunnerSupportHostProtocol,
     state: CompositeCheckpointState,
     operation: str,
 ) -> bool:
     """Save checkpoint with graceful error handling."""
+    started_at = time.monotonic()
     try:
         await host._checkpoint_manager.save(state)
+        duration_seconds = time.monotonic() - started_at
+        _emit_checkpoint_save_event(
+            host,
+            operation=operation,
+            status="succeeded",
+        )
+        _observe_checkpoint_save_duration(
+            host,
+            operation=operation,
+            status="succeeded",
+            duration_seconds=duration_seconds,
+        )
         return True
     except CHECKPOINT_NON_FATAL_ERRORS as error:
+        duration_seconds = time.monotonic() - started_at
+        _emit_checkpoint_save_event(
+            host,
+            operation=operation,
+            status="failed",
+        )
+        _observe_checkpoint_save_duration(
+            host,
+            operation=operation,
+            status="failed",
+            duration_seconds=duration_seconds,
+        )
         host._logger.warning(
             "checkpoint_save_failed",
             **host._build_correlation_log_context(
@@ -38,6 +105,18 @@ async def save_checkpoint_safe(
         )
         return False
     except BioETLError as error:
+        duration_seconds = time.monotonic() - started_at
+        _emit_checkpoint_save_event(
+            host,
+            operation=operation,
+            status="failed",
+        )
+        _observe_checkpoint_save_duration(
+            host,
+            operation=operation,
+            status="failed",
+            duration_seconds=duration_seconds,
+        )
         host._logger.warning(
             "checkpoint_save_failed",
             **host._build_correlation_log_context(
