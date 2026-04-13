@@ -379,8 +379,10 @@ class TestLoadResume:
         )
 
     @pytest.mark.asyncio
-    async def test_resume_fallback_to_glob_when_exact_file_missing(self) -> None:
-        """If exact filename missing, resume uses glob to find latest checkpoint."""
+    async def test_resume_blocks_glob_fallback_from_different_run_identity(
+        self,
+    ) -> None:
+        """If exact filename missing, resume rejects a checkpoint from another run."""
         svc, storage, _ = _make_service(
             composite_name="my_composite",
             run_id="run-new",
@@ -401,10 +403,8 @@ class TestLoadResume:
         storage.list_glob.return_value = [latest_filename]
         storage.read.return_value = content
 
-        state = await svc.load()
-
-        # Should have loaded the older checkpoint via glob fallback
-        assert state.state == CompositePipelineState.ENRICHING
+        with pytest.raises(CheckpointConflictError):
+            await svc.load()
 
     @pytest.mark.asyncio
     async def test_resume_handles_corrupted_json_gracefully(self) -> None:
