@@ -254,6 +254,10 @@ def validate_resume_compatibility(
                 logger=logger,
                 composite_name=composite_name,
             ),
+            _composite_run_identity_mismatch(
+                state=state,
+                expected_composite_run_identity=anchors.composite_run_identity,
+            ),
         )
         if mismatch is not None
     ]
@@ -268,9 +272,11 @@ def validate_resume_compatibility(
         expected_contract_ref=anchors.contract_ref,
         expected_contract_version=anchors.contract_version,
         expected_effective_config_hash=anchors.effective_config_hash,
+        expected_composite_run_identity=anchors.composite_run_identity,
         checkpoint_contract_ref=state.contract_ref,
         checkpoint_contract_version=state.contract_version,
         checkpoint_effective_config_hash=state.effective_config_hash,
+        checkpoint_composite_run_identity=state.composite_run_identity,
         reason_code="checkpoint_resume_incompatible",
         incompatibility=detail,
     )
@@ -476,4 +482,21 @@ def _manifest_id_mismatch(
         composite=composite_name,
         reason_code="checkpoint_anchor_missing_manifest_id",
     )
+    return None
+
+
+def _composite_run_identity_mismatch(
+    *,
+    state: CompositeCheckpointState,
+    expected_composite_run_identity: str,
+) -> str | None:
+    if not expected_composite_run_identity:
+        return None
+    if not state.composite_run_identity:
+        return "checkpoint missing composite_run_identity anchor"
+    if state.composite_run_identity != expected_composite_run_identity:
+        return (
+            "composite_run_identity "
+            f"{state.composite_run_identity!r} != {expected_composite_run_identity!r}"
+        )
     return None

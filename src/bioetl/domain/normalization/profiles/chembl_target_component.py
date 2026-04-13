@@ -32,7 +32,9 @@ _META_FIELDS = frozenset(
 _INT_FIELDS = frozenset(
     {"component_id", "taxonomy_id", "protein_classification_id"}
 )
-_JSON_STRING_FIELDS = frozenset({"protein_classification_ids"})
+_JSON_STRING_FIELDS = frozenset(
+    {"protein_classification_ids", "target_component_xrefs"}
+)
 
 CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(
     profile_name="chembl.target_component",
