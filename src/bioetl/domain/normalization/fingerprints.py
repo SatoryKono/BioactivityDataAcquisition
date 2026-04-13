@@ -8,8 +8,8 @@ from collections.abc import Mapping
 from bioetl.domain.normalization.json import serialize_json_canonical
 
 __all__ = [
-    "compute_execution_identity_fingerprint",
     "compute_degraded_runtime_anchor_fingerprint",
+    "compute_execution_identity_fingerprint",
     "compute_input_snapshot_identity_fingerprint",
     "compute_manifest_execution_fingerprint",
 ]

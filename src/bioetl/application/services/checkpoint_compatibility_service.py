@@ -193,68 +193,39 @@ def _validate_execution_identity_compatibility(
     if (
         execution_identity_result["reason"]
         == "checkpoint_execution_identity_fallback_mismatch"
-    ):
-        execution_identity_compatible = False
-        messages.append(
-            "Canonical checkpoint execution identity mismatch: "
-            f"current={current_metadata.checkpoint_execution_identity_fingerprint()}, "
-            f"checkpoint={checkpoint_metadata.checkpoint_execution_identity_fingerprint()}"
-        )
-    elif (
+    ) or (
         execution_identity_result["reason"]
         == "degraded_runtime_anchor_fingerprint_mismatch"
     ):
         execution_identity_compatible = False
-        messages.append(
-            "Degraded runtime-anchor fingerprint mismatch: "
-            f"current_manifest={current_metadata.manifest_id}, "
-            f"checkpoint_manifest={checkpoint_metadata.manifest_id}"
-        )
+
     if (
         current_metadata.effective_config_hash
         and checkpoint_metadata.effective_config_hash
         and current_metadata.effective_config_hash
         != checkpoint_metadata.effective_config_hash
-    ):
-        execution_identity_compatible = False
-        messages.append(
-            "Effective config hash mismatch: "
-            f"current={current_metadata.effective_config_hash}, "
-            f"checkpoint={checkpoint_metadata.effective_config_hash}"
-        )
-    if (
+    ) or (
         current_metadata.manifest_id
         and checkpoint_metadata.manifest_id
         and current_metadata.manifest_id != checkpoint_metadata.manifest_id
-    ):
-        execution_identity_compatible = False
-        messages.append(
-            "Manifest identity mismatch: "
-            f"current={current_metadata.manifest_id}, "
-            f"checkpoint={checkpoint_metadata.manifest_id}"
-        )
-    if (
+    ) or (
         current_metadata.contract_ref
         and checkpoint_metadata.contract_ref
         and current_metadata.contract_ref != checkpoint_metadata.contract_ref
-    ):
-        execution_identity_compatible = False
-        messages.append(
-            "Contract reference mismatch: "
-            f"current={current_metadata.contract_ref}, "
-            f"checkpoint={checkpoint_metadata.contract_ref}"
-        )
-    if (
+    ) or (
         current_metadata.contract_version
         and checkpoint_metadata.contract_version
         and current_metadata.contract_version != checkpoint_metadata.contract_version
     ):
         execution_identity_compatible = False
-        messages.append(
-            "Contract version mismatch: "
-            f"current={current_metadata.contract_version}, "
-            f"checkpoint={checkpoint_metadata.contract_version}"
-        )
+
+    _validate_mismatch_reasons(current_metadata, checkpoint_metadata, execution_identity_result, messages)
+
+    _validate_metadata_fields(current_metadata, checkpoint_metadata, messages)
+    execution_identity_compatible = _validate_exact_replay_and_snapshots(current_metadata, checkpoint_metadata, messages, execution_identity_compatible)
+    return execution_identity_compatible, messages
+
+def _validate_exact_replay_and_snapshots(current_metadata: CheckpointMetadata, checkpoint_metadata: CheckpointMetadata, messages: list[str], execution_identity_compatible: bool) -> bool:
     if current_metadata.exact_replay:
         if checkpoint_metadata.exact_replay is not True:
             execution_identity_compatible = False
@@ -278,8 +249,71 @@ def _validate_execution_identity_compatibility(
             f"current={list(current_metadata.input_snapshot_ids)}, "
             f"checkpoint={list(checkpoint_metadata.input_snapshot_ids)}"
         )
-    return execution_identity_compatible, messages
+    return execution_identity_compatible
 
+
+def _validate_mismatch_reasons(current_metadata: CheckpointMetadata, checkpoint_metadata: CheckpointMetadata, execution_identity_result: Mapping[str, Any], messages: list[str]) -> None:
+    if (
+        execution_identity_result["reason"]
+        == "checkpoint_execution_identity_fallback_mismatch"
+    ):
+        messages.append(
+            "Canonical checkpoint execution identity mismatch: "
+            f"current={current_metadata.checkpoint_execution_identity_fingerprint()}, "
+            f"checkpoint={checkpoint_metadata.checkpoint_execution_identity_fingerprint()}"
+        )
+    elif (
+        execution_identity_result["reason"]
+        == "degraded_runtime_anchor_fingerprint_mismatch"
+    ):
+        messages.append(
+            "Degraded runtime-anchor fingerprint mismatch: "
+            f"current_manifest={current_metadata.manifest_id}, "
+            f"checkpoint_manifest={checkpoint_metadata.manifest_id}"
+        )
+
+def _validate_metadata_fields(current_metadata: CheckpointMetadata, checkpoint_metadata: CheckpointMetadata, messages: list[str]) -> None:
+    if (
+        current_metadata.effective_config_hash
+        and checkpoint_metadata.effective_config_hash
+        and current_metadata.effective_config_hash
+        != checkpoint_metadata.effective_config_hash
+    ):
+        messages.append(
+            "Effective config hash mismatch: "
+            f"current={current_metadata.effective_config_hash}, "
+            f"checkpoint={checkpoint_metadata.effective_config_hash}"
+        )
+    if (
+        current_metadata.manifest_id
+        and checkpoint_metadata.manifest_id
+        and current_metadata.manifest_id != checkpoint_metadata.manifest_id
+    ):
+        messages.append(
+            "Manifest identity mismatch: "
+            f"current={current_metadata.manifest_id}, "
+            f"checkpoint={checkpoint_metadata.manifest_id}"
+        )
+    if (
+        current_metadata.contract_ref
+        and checkpoint_metadata.contract_ref
+        and current_metadata.contract_ref != checkpoint_metadata.contract_ref
+    ):
+        messages.append(
+            "Contract reference mismatch: "
+            f"current={current_metadata.contract_ref}, "
+            f"checkpoint={checkpoint_metadata.contract_ref}"
+        )
+    if (
+        current_metadata.contract_version
+        and checkpoint_metadata.contract_version
+        and current_metadata.contract_version != checkpoint_metadata.contract_version
+    ):
+        messages.append(
+            "Contract version mismatch: "
+            f"current={current_metadata.contract_version}, "
+            f"checkpoint={checkpoint_metadata.contract_version}"
+        )
 
 def _validate_lenient_dq_compatibility(
     current_metadata: CheckpointMetadata,

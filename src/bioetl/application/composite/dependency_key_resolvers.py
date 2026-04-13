@@ -305,7 +305,11 @@ def create_chained_key_resolver(
     )
 
 
-def _create_key_resolver[TResolver: SeedKeyResolver | ChainedKeyResolver](
+from typing import TypeVar
+
+TResolver = TypeVar("TResolver", bound="SeedKeyResolver | ChainedKeyResolver")
+
+def _create_key_resolver(
     resolver_type: type[TResolver],
     logger: LoggerPort,
     *,

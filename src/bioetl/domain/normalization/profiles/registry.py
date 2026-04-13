@@ -103,7 +103,11 @@ def normalize_normalization_profile_coordinates(
     return normalized_provider, normalized_entity
 
 
-def _resolve_normalization_profile_value[T](
+from typing import TypeVar
+
+T = TypeVar("T")
+
+def _resolve_normalization_profile_value(
     mapping: Mapping[tuple[str, str], T],
     provider: str,
     entity_type: str | None,

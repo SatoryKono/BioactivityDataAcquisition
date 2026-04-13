@@ -6,9 +6,9 @@ Legacy alias keys are no longer migrated after grace-period completion.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
-import re
 
 from bioetl.domain._observability_contract_primitives import (
     REQUIRED_OBSERVABILITY_FIELDS,
