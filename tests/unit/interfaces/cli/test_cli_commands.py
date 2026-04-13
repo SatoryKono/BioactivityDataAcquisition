@@ -1609,6 +1609,9 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
             use_cached_bronze=False,
             cached_bronze_date=None,
             cached_bronze_path=None,
+            replay_of_run_id=None,
+            replay_of_manifest_id=None,
+            exact_replay=False,
         )
 
     mock_build_input.assert_called_once_with(
@@ -1631,6 +1634,8 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
         use_cached_bronze=False,
         cached_bronze_date=None,
         cached_bronze_path=None,
+        replay_of_run_id=None,
+        replay_of_manifest_id=None,
     )
     mock_run_with_policy.assert_called_once_with(ctx, cli_input)
 

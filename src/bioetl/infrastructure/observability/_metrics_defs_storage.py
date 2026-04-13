@@ -12,7 +12,11 @@ __all__ = [
     "BRONZE_WRITE_ATTEMPTS_TOTAL",
     "BRONZE_WRITE_DURATION_SECONDS",
     "BRONZE_WRITE_TOTAL_DURATION_SECONDS",
+    "METADATA_WRITE_OUTCOMES_TOTAL",
+    "METADATA_WRITE_RETRIES_TOTAL",
     "POLICY_VIOLATIONS_TOTAL",
+    "SILVER_MERGE_FAILURES_TOTAL",
+    "SILVER_MERGE_RETRIES_TOTAL",
     "SILVER_VALIDATION_FAILURES_TOTAL",
 ]
 
@@ -66,8 +70,32 @@ POLICY_VIOLATIONS_TOTAL = Counter(
     ["layer", "mode"],
 )
 
+SILVER_MERGE_RETRIES_TOTAL = Counter(
+    "bioetl_silver_merge_retries_total",
+    "Total Silver merge retry attempts emitted by storage resilience helpers",
+    ["pipeline", "retry_type"],
+)
+
+SILVER_MERGE_FAILURES_TOTAL = Counter(
+    "bioetl_silver_merge_failures_total",
+    "Total exhausted Silver merge failures emitted by storage resilience helpers",
+    ["pipeline", "final_reason"],
+)
+
 SILVER_VALIDATION_FAILURES_TOTAL = Counter(
     "bioetl_silver_validation_failures_total",
     "Total silver schema validation failures",
     ["table", "pipeline"],
+)
+
+METADATA_WRITE_RETRIES_TOTAL = Counter(
+    "bioetl_metadata_write_retries_total",
+    "Total metadata sidecar atomic-write retry attempts",
+    ["layer", "provider", "pipeline", "reason"],
+)
+
+METADATA_WRITE_OUTCOMES_TOTAL = Counter(
+    "bioetl_metadata_write_outcomes_total",
+    "Total metadata sidecar write outcomes",
+    ["layer", "provider", "pipeline", "status", "final_reason"],
 )

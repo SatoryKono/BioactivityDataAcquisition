@@ -136,6 +136,29 @@ def test_create_manifest_preserves_resume_only_replay_capability() -> None:
     assert manifest.to_dict()["replay_capability"] == "resume_only"
 
 
+def test_create_manifest_persists_explicit_replay_parentage() -> None:
+    store = _InMemoryRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-replay-child",
+    )
+
+    manifest = service.create_manifest(
+        replace(
+            _make_request(),
+            replay_of_run_id="00000000-0000-0000-0000-000000000999",
+            replay_of_manifest_id="manifest-parent",
+        )
+    )
+
+    assert manifest.replay_of_run_id == "00000000-0000-0000-0000-000000000999"
+    assert manifest.replay_of_manifest_id == "manifest-parent"
+    assert manifest.to_dict()["replay_of_run_id"] == (
+        "00000000-0000-0000-0000-000000000999"
+    )
+    assert manifest.to_dict()["replay_of_manifest_id"] == "manifest-parent"
+
+
 def test_create_manifest_fails_closed_when_persisted_manifest_is_not_resolvable() -> None:
     store = _MissingLookupRunManifestStore()
     service = RunManifestService(

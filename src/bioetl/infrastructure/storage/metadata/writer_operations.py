@@ -210,14 +210,13 @@ def _emit_retry_telemetry(
     )
     if metrics is not None:
         metrics.increment_counter(
-            "bioetl_observability_events_total",
+            "bioetl_metadata_write_retries_total",
             1,
             {
-                "event": "metadata_atomic_replace_retry",
+                "layer": context.layer,
                 "provider": context.provider or "storage",
                 "pipeline": context.pipeline,
-                "severity": "warning",
-                "error_type": reason,
+                "reason": reason,
             },
         )
 
@@ -251,14 +250,14 @@ def _emit_final_telemetry(
         )
     if metrics is not None:
         metrics.increment_counter(
-            "bioetl_observability_events_total",
+            "bioetl_metadata_write_outcomes_total",
             1,
             {
-                "event": "metadata_write_final",
+                "layer": context.layer,
                 "provider": context.provider or "storage",
                 "pipeline": context.pipeline,
-                "severity": outcome.severity,
-                "error_type": outcome.final_reason,
+                "status": "failed" if outcome.severity == "error" else "succeeded",
+                "final_reason": outcome.final_reason,
             },
         )
 

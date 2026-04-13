@@ -244,7 +244,7 @@ def test_file_store_rolls_back_ledger_append_when_run_index_write_fails(
     assert store.list_entries_by_run_id(run_id) == []
 
 
-def test_file_store_ignores_truncated_tail_line_during_reads(tmp_path) -> None:
+def test_file_store_fails_closed_on_truncated_tail_line_during_reads(tmp_path) -> None:
     run_id = RunID(uuid4())
     store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
     entry = RunLedgerEntry(
@@ -261,8 +261,41 @@ def test_file_store_ignores_truncated_tail_line_during_reads(tmp_path) -> None:
     with ledger_path.open("a", encoding="utf-8") as handle:
         handle.write('{"entry_id":"broken-tail"')
 
-    assert store.list_entries("manifest-1") == [entry]
-    assert store.list_entries_by_run_id(run_id) == [entry]
+    with pytest.raises(StorageError, match="corrupted: truncated tail line") as exc_info:
+        store.list_entries("manifest-1")
+    assert exc_info.value.operation == "list_entries"
+    assert exc_info.value.manifest_id == "manifest-1"
+
+    with pytest.raises(StorageError, match="corrupted: truncated tail line") as run_id_exc:
+        store.list_entries_by_run_id(run_id)
+    assert run_id_exc.value.operation == "list_entries_by_run_id"
+    assert run_id_exc.value.run_id == str(run_id)
+
+    with pytest.raises(StorageError, match="corrupted: truncated tail line") as after_exc:
+        store.list_entries_after("manifest-1", None)
+    assert after_exc.value.operation == "list_entries_after"
+    assert after_exc.value.manifest_id == "manifest-1"
+
+
+def test_file_store_fails_closed_on_invalid_json_line_during_reads(tmp_path) -> None:
+    run_id = RunID(uuid4())
+    store = FileRunLedgerStore(base_path=tmp_path / "run_ledger")
+    entry = RunLedgerEntry(
+        entry_id="entry-1",
+        manifest_id="manifest-1",
+        run_id=run_id,
+        event_type="manifest_created",
+        occurred_at=datetime.now(UTC),
+        status="created",
+    )
+
+    store.append(entry)
+    ledger_path = tmp_path / "run_ledger" / "manifest-1.jsonl"
+    with ledger_path.open("a", encoding="utf-8") as handle:
+        handle.write("not-json\n")
+
+    with pytest.raises(StorageError, match="corrupted at line 2"):
+        store.list_entries("manifest-1")
 
 
 def test_file_store_lists_entries_after_watermark(tmp_path) -> None:

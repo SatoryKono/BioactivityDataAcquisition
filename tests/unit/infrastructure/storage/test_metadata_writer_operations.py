@@ -14,6 +14,7 @@ from bioetl.infrastructure.storage.metadata.writer_operations import (
     _MetadataWriteTelemetryContext,
     _build_metadata_write_final_telemetry,
     _build_retry_callback,
+    _emit_final_telemetry,
     _emit_retry_telemetry,
     _get_metadata_filename,
     _resolve_metadata_target,
@@ -127,6 +128,16 @@ class TestEmitRetryTelemetry:
         )
         logger.warning.assert_called_once()
         metrics.increment_counter.assert_called_once()
+        assert (
+            metrics.increment_counter.call_args[0][0]
+            == "bioetl_metadata_write_retries_total"
+        )
+        assert metrics.increment_counter.call_args[0][2] == {
+            "layer": "bronze",
+            "provider": "chembl",
+            "pipeline": "chembl.compound",
+            "reason": "EACCES",
+        }
 
     def test_skips_metrics_when_none(self) -> None:
         """Should still log warning but skip metrics when metrics is None."""
@@ -143,6 +154,44 @@ class TestEmitRetryTelemetry:
             reason="ENOENT",
         )
         logger.warning.assert_called_once()
+
+
+@pytest.mark.unit
+class TestEmitFinalTelemetry:
+    """Tests for final metadata telemetry emission."""
+
+    def test_emits_metadata_write_outcome_counter(self) -> None:
+        """Final metadata outcomes must use the dedicated storage counter."""
+        logger = MagicMock()
+        metrics = MagicMock()
+        context = _MetadataWriteTelemetryContext(
+            layer="silver", provider=None, pipeline="silver_metadata"
+        )
+        outcome = _build_metadata_write_final_telemetry(
+            status="failed",
+            retry_count=2,
+            final_reason="atomic_write_error",
+        )
+
+        _emit_final_telemetry(
+            logger=logger,
+            metrics=metrics,
+            context=context,
+            outcome=outcome,
+        )
+
+        logger.error.assert_called_once()
+        metrics.increment_counter.assert_called_once_with(
+            "bioetl_metadata_write_outcomes_total",
+            1,
+            {
+                "layer": "silver",
+                "provider": "storage",
+                "pipeline": "silver_metadata",
+                "status": "failed",
+                "final_reason": "atomic_write_error",
+            },
+        )
 
 
 @pytest.mark.unit

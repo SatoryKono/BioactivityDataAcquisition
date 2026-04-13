@@ -63,6 +63,10 @@ def _namespace_observability(logger: object | None = None) -> SimpleNamespace:
     return SimpleNamespace(logger=effective_logger, metrics=MagicMock())
 
 
+def _runtime_config_stub() -> dict[str, object]:
+    return {"runtime_profile": "stub"}
+
+
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:
     """Default provider bootstrap should come from the named loader helper."""
     default_fn = runner_builder.build_pipeline_runner.__kwdefaults__[
@@ -112,8 +116,8 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     def assemble_vacuum_settings_fn(**_: object) -> str:
         return "vacuum"
 
-    def assemble_runtime_config_fn(**_: object) -> str:
-        return "runtime"
+    def assemble_runtime_config_fn(**_: object) -> dict[str, object]:
+        return _runtime_config_stub()
 
     def assemble_filter_config_fn(**_: object) -> SimpleNamespace:
         return SimpleNamespace(
@@ -164,7 +168,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     assert calls["providers"] is True
     assert calls["pipelines_registry"] is fake_registry
     assert fake_factory.kwargs is not None
-    assert fake_factory.kwargs["runtime"] == "runtime"
+    assert fake_factory.kwargs["runtime"] == _runtime_config_stub()
     assert fake_factory.kwargs["cached_bronze"].enabled is True
     manifest_id = fake_factory.kwargs["manifest_id"]
     assert isinstance(manifest_id, str)
@@ -240,14 +244,14 @@ def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
         load_pipeline_config_fn=load_pipeline_config_fn,
         build_observability_bundle_fn=build_observability_bundle_fn,
         assemble_vacuum_settings_fn=lambda **_: None,
-        assemble_runtime_config_fn=lambda **_: "runtime",
+        assemble_runtime_config_fn=lambda **_: _runtime_config_stub(),
         assemble_filter_config_fn=lambda **_: None,
         assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
     )
 
     assert result == "runner-instance"
     assert fake_factory.kwargs is not None
-    assert fake_factory.kwargs["runtime"] == "runtime"
+    assert fake_factory.kwargs["runtime"] == _runtime_config_stub()
 
 
 def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> None:
@@ -292,7 +296,7 @@ def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> No
             SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: None,
-        assemble_runtime_config_fn=lambda **_: "runtime",
+        assemble_runtime_config_fn=lambda **_: _runtime_config_stub(),
         assemble_filter_config_fn=lambda **_: None,
         assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
     )
@@ -1099,9 +1103,235 @@ def test_build_pipeline_runner_requires_ledger_for_forensic_grade_profile(
             assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
         )
 
+
+def test_build_pipeline_runner_requires_lineage_sidecars_for_forensic_grade_profile(
+    tmp_path: Path,
+) -> None:
+    """Forensic-grade profile must fail when active sink layers skip metadata."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="metadata sidecars / lineage persistence for active layers",
+    ):
+        runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    heartbeat_interval=30,
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=True,
+                        required_persistence_profile="forensic_grade",
+                    ),
+                ),
+                test_mode=False,
+            ),
+            load_pipeline_config_fn=lambda _: SimpleNamespace(
+                provider="chembl",
+                entity_type="activity",
+                version="2.0.0",
+                maintenance=None,
+                input_filter=SimpleNamespace(),
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=False),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=False),
+                },
+                business_primary_keys=["activity_id"],
+                technical_primary_key="entity_id",
+            ),
+            build_observability_bundle_fn=lambda **_: _namespace_observability(
+                SimpleNamespace(info=lambda *_, **__: None),
+            ),
+            assemble_vacuum_settings_fn=lambda **_: None,
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+            assemble_filter_config_fn=lambda **_: None,
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+        )
+
+
+def test_build_pipeline_runner_requires_exact_replay_capability_for_replay_ready_profile(
+    tmp_path: Path,
+) -> None:
+    """Replay-ready profile must fail when the run has no immutable snapshots."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        input_filter=SimpleNamespace(enabled=False),
+        exact_replay=False,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="immutable input snapshots and exact replay capability are not available",
+    ):
+        runner_builder.build_pipeline_runner(
+            context,
+            registry=fake_registry,
+            ensure_providers_loaded_fn=lambda: None,
+            register_all_pipelines_fn=lambda registry=None: None,
+            get_settings_fn=lambda: SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    heartbeat_interval=30,
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=True,
+                        required_persistence_profile="replay_ready",
+                    ),
+                ),
+                test_mode=False,
+            ),
+            load_pipeline_config_fn=lambda _: SimpleNamespace(
+                provider="chembl",
+                entity_type="activity",
+                version="2.0.0",
+                maintenance=None,
+                input_filter=SimpleNamespace(),
+                sink={
+                    "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                    "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                    "gold": SimpleNamespace(enabled=True, save_metadata=True),
+                },
+                business_primary_keys=["activity_id"],
+                technical_primary_key="entity_id",
+            ),
+            build_observability_bundle_fn=lambda **_: _namespace_observability(
+                SimpleNamespace(info=lambda *_, **__: None),
+            ),
+            assemble_vacuum_settings_fn=lambda **_: None,
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
+            assemble_filter_config_fn=lambda **_: None,
+            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+        )
+
     assert fake_factory.kwargs is None
     assert not (tmp_path / "output" / "control" / "run_manifest").exists()
     assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+
+
+def test_build_pipeline_runner_allows_forensic_grade_with_exact_replay_and_sidecars(
+    tmp_path: Path,
+) -> None:
+    """Forensic-grade profile should succeed when replay and sidecar surfaces exist."""
+    fake_factory = _FakeFactory()
+    fake_registry = _FakeRegistry(factory=fake_factory)
+    bronze_root = tmp_path / "bronze-cache"
+    bronze_day = bronze_root / "2026-01-01"
+    bronze_day.mkdir(parents=True)
+    (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
+
+    context = SimpleNamespace(
+        pipeline_name="chembl_activity",
+        run_id=uuid4(),
+        log_level="INFO",
+        vacuum=None,
+        run_type="incremental",
+        resume=False,
+        limit=25,
+        query=None,
+        dry_run=False,
+        skip_gold=False,
+        start_offset=None,
+        exact_replay=True,
+        input_filter=SimpleNamespace(enabled=False),
+    )
+
+    result = runner_builder.build_pipeline_runner(
+        context,
+        registry=fake_registry,
+        ensure_providers_loaded_fn=lambda: None,
+        register_all_pipelines_fn=lambda registry=None: None,
+        get_settings_fn=lambda: SimpleNamespace(
+            data_dir=str(tmp_path),
+            pipeline=SimpleNamespace(
+                heartbeat_interval=30,
+                control_plane=SimpleNamespace(
+                    run_manifest_enabled=True,
+                    run_ledger_enabled=True,
+                    required_persistence_profile="forensic_grade",
+                ),
+            ),
+            test_mode=False,
+        ),
+        load_pipeline_config_fn=lambda _: SimpleNamespace(
+            provider="chembl",
+            entity_type="activity",
+            version="2.0.0",
+            maintenance=None,
+            input_filter=SimpleNamespace(),
+            sink={
+                "bronze": SimpleNamespace(enabled=True, save_metadata=True),
+                "silver": SimpleNamespace(enabled=True, save_metadata=True),
+                "gold": SimpleNamespace(enabled=True, save_metadata=True),
+            },
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        ),
+        build_observability_bundle_fn=lambda **_: _namespace_observability(
+            SimpleNamespace(info=lambda *_, **__: None),
+        ),
+        assemble_vacuum_settings_fn=lambda **_: None,
+        assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+        assemble_filter_config_fn=lambda **_: None,
+        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(
+            enabled=True,
+            bronze_path=str(bronze_root),
+            bronze_date="2026-01-01",
+        ),
+    )
+
+    assert result == "runner-instance"
+    assert isinstance(fake_factory.kwargs, dict)
+    manifest_id = fake_factory.kwargs["manifest_id"]
+    assert isinstance(manifest_id, str)
+    assert fake_factory.runner.attached_run_ledger_service is not None
+
+    manifest_path = (
+        tmp_path / "output" / "control" / "run_manifest" / f"{manifest_id}.json"
+    )
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert payload["launch_context"]["required_persistence_profile"] == (
+        "forensic_grade"
+    )
+    assert payload["replay_capability"] == "exact_replay_supported"
 
 
 def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
@@ -1258,9 +1488,9 @@ def test_build_pipeline_runner_forces_probe_mode_in_test_mode() -> None:
             provider="chembl",
         )
 
-    def assemble_runtime_config_fn(**kwargs: object) -> str:
+    def assemble_runtime_config_fn(**kwargs: object) -> dict[str, object]:
         captured.update(kwargs)
-        return "runtime"
+        return _runtime_config_stub()
 
     context = SimpleNamespace(
         pipeline_name="chembl_activity",
@@ -1321,9 +1551,9 @@ def test_build_pipeline_runner_uses_configured_mode_outside_test_mode() -> None:
             provider="chembl",
         )
 
-    def assemble_runtime_config_fn(**kwargs: object) -> str:
+    def assemble_runtime_config_fn(**kwargs: object) -> dict[str, object]:
         captured.update(kwargs)
-        return "runtime"
+        return _runtime_config_stub()
 
     context = SimpleNamespace(
         pipeline_name="chembl_activity",

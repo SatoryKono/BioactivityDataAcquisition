@@ -1,4 +1,4 @@
-"""Compatibility facade for provider health-monitor helper modules."""
+"""Helper exports for provider health-monitor modules."""
 
 from __future__ import annotations
 

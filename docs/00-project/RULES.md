@@ -271,7 +271,7 @@ sink:
 ### 2.4. Политика Backfill / Replay
 
 - **Metadata / Control Plane**: Обязательные runtime anchors `_run_id` (UUID), `_run_type` (`incremental` | `backfill` | `rebuild`) публикуются через manifest / ledger / sidecar / audit artifacts, а не через persisted Silver/Gold rows.
-- **Merge Priority**: `rebuild` > `backfill` > `incremental`. При конфликте версий побеждает более "полный" тип запуска.
+- **Merge Semantics**: Persisted Silver/Gold row updates остаются `content_hash`-based и не используют `_run_type` в physical Delta merge predicate. Семантика `backfill` / `rebuild` обеспечивается execution-level cleanup и exclusive locks, а не row-level precedence в persisted rows.
 - **Concurrency Constraint**: В один момент времени для одной сущности допустим только один процесс записи типа `rebuild` или `backfill`. Параллельный запуск запрещен (Lock должен это гарантировать).
 
 #### 2.4.1. Backfill Lock Enforcement

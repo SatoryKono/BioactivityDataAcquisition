@@ -7,18 +7,14 @@ on:
   pull_request:
     paths-ignore:
       - 'docs/**'
-      - '*.md'
       - '.ai/**'
       - '.claude/**'
-      - '.github/workflows/**'
       - 'LICENSE'
   push:
     paths-ignore:
       - 'docs/**'
-      - '*.md'
       - '.ai/**'
       - '.claude/**'
-      - '.github/workflows/**'
       - 'LICENSE'
 
 jobs:

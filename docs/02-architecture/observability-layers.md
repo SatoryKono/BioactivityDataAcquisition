@@ -62,6 +62,13 @@ runs. The runner orchestration uses it to emit:
 - DQ anomaly signals
 - vacuum results
 
+Composite runtime uses `CompositeLifecycleObserverService` as the sanctioned
+counterpart for composite lifecycle publication. Composition injects
+`LoggerPort`, `MetricsPort`, and `TracingPort` into that service so composite
+runs do not fall back to logger-only lifecycle publication. When tracing is
+enabled it creates one bounded run span and one bounded phase span per active
+composite phase while keeping metric labels low-cardinality.
+
 `PreflightService` and `HealthAggregator` may still compute typed preflight
 reports/results, but they are not a parallel runtime publication path. For
 ordinary pipeline runs, `runner_execution_flow` owns the handoff from those
@@ -133,7 +140,7 @@ The infrastructure layer provides concrete adapters for the domain ports.
 - `PrometheusMetrics` implements `MetricsPort`
 - metric export names are defined centrally in
   `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`
-- the current exported catalog size is **93 metrics**
+- the current exported catalog size is **102 metrics**
 - provider health-check latency is standardized on seconds-based metric families
   (`bioetl_health_check_latency_seconds`,
   `bioetl_health_check_mode_latency_seconds`)

@@ -43,18 +43,14 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
-    from bioetl.domain.ports import LockPort, MetricsPort, QuarantinePort
+    from bioetl.domain.ports import LockPort, MetricsPort, QuarantinePort, TracingPort
     from bioetl.infrastructure.config import Settings
 
 
 CompositeRunnerFactory = Callable[..., CompositePipelineRunnerService]
 
 
-__all__ = [
-    "bootstrap_composite_runner",
-    "create_composite_runner",
-    "create_composite_runner_service",
-]
+__all__ = ["bootstrap_composite_runner", "create_composite_runner", "create_composite_runner_service"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,6 +75,7 @@ class _CompositeRunnerServiceInputs:
     dependency_coordinator: DependencyCoordinatorService | None
     quarantine_port: QuarantinePort | None
     metrics: MetricsPort | None
+    tracer: TracingPort | None
     observer: CompositeLifecycleObserverService
     manifest_id: str | None
     run_ledger_service: RunLedgerService | None
@@ -109,6 +106,7 @@ def _build_composite_runner_dependencies(
         dependency_coordinator=inputs.dependency_coordinator,
         quarantine_port=inputs.quarantine_port,
         metrics=inputs.metrics,
+        tracer=inputs.tracer,
         observer=inputs.observer,
         manifest_id=inputs.manifest_id,
         run_ledger_service=inputs.run_ledger_service,
@@ -122,6 +120,7 @@ def _build_composite_runner_service_inputs(
     run_id: str,
     logger: LoggerPort,
     metrics: MetricsPort | None,
+    tracer: TracingPort | None,
     lock: LockPort,
     seed_runner_factory: Callable[[], PipelineRunner],
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
@@ -148,7 +147,12 @@ def _build_composite_runner_service_inputs(
         dependency_coordinator=support_services.dependency_coordinator,
         quarantine_port=support_services.quarantine_port,
         metrics=metrics,
-        observer=CompositeLifecycleObserverService(logger=logger, metrics=metrics),
+        tracer=tracer,
+        observer=CompositeLifecycleObserverService(
+            logger=logger,
+            metrics=metrics,
+            tracer=tracer,
+        ),
         manifest_id=getattr(support_services, "manifest_id", None),
         run_ledger_service=getattr(support_services, "run_ledger_service", None),
     )
@@ -179,6 +183,7 @@ def _invoke_composite_runner_factory(
         dependency_coordinator=inputs.dependency_coordinator,
         quarantine_port=inputs.quarantine_port,
         metrics=inputs.metrics,
+        tracer=inputs.tracer,
         observer=inputs.observer,
         manifest_id=inputs.manifest_id,
         run_ledger_service=inputs.run_ledger_service,
@@ -219,15 +224,12 @@ def create_composite_runner_service(
     dependency_coordinator: DependencyCoordinatorService | None = None,
     quarantine_port: QuarantinePort | None = None,
     metrics: MetricsPort | None = None,
+    tracer: TracingPort | None = None,
     observer: CompositeLifecycleObserverService | None = None,
     manifest_id: str | None = None,
     run_ledger_service: RunLedgerService | None = None,
 ) -> CompositePipelineRunnerService:
-    """Create composite runner service from fully resolved composition dependencies.
-
-    Returns:
-        CompositePipelineRunnerService wired with the provided dependencies.
-    """
+    """Create a composite runner service from fully resolved dependencies."""
     if fsm_state_helper is None:
         raise AssertionError("Composite runner requires fsm_state_helper")
     inputs = _CompositeRunnerServiceInputs(
@@ -249,8 +251,13 @@ def create_composite_runner_service(
         dependency_coordinator=dependency_coordinator,
         quarantine_port=quarantine_port,
         metrics=metrics,
+        tracer=tracer,
         observer=observer
-        or CompositeLifecycleObserverService(logger=logger, metrics=metrics),
+        or CompositeLifecycleObserverService(
+            logger=logger,
+            metrics=metrics,
+            tracer=tracer,
+        ),
         manifest_id=manifest_id,
         run_ledger_service=run_ledger_service,
     )
@@ -264,6 +271,7 @@ def create_composite_runner(
     run_id: str,
     logger: LoggerPort,
     metrics: MetricsPort | None,
+    tracer: TracingPort | None,
     lock: LockPort,
     seed_runner_factory: Callable[[], PipelineRunner],
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
@@ -271,17 +279,14 @@ def create_composite_runner(
     support_services: CompositeSupportServices,
     runner_factory: CompositeRunnerFactory = create_composite_runner_service,
 ) -> CompositePipelineRunnerService:
-    """Create fully wired CompositePipelineRunner service.
-
-    Returns:
-        Fully wired CompositePipelineRunnerService ready for execution.
-    """
+    """Create a fully wired ``CompositePipelineRunnerService``."""
     service_inputs = _build_composite_runner_service_inputs(
         config=config,
         runtime=runtime,
         run_id=run_id,
         logger=logger,
         metrics=metrics,
+        tracer=tracer,
         lock=lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
@@ -300,7 +305,7 @@ def bootstrap_composite_runner(
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
     bootstrap_runtime_basics_fn: Callable[
-        ..., tuple[str, Settings, LoggerPort, MetricsPort, object, LockPort]
+        ..., tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
     ],
     build_runner_factories_fn: Callable[
         ...,
@@ -313,23 +318,7 @@ def bootstrap_composite_runner(
     build_support_services_fn: Callable[..., CompositeSupportServices],
     create_composite_runner_fn: Callable[..., CompositePipelineRunnerService],
 ) -> CompositePipelineRunnerService:
-    """Assemble and create composite runner with injected dependency builders.
-
-    Args:
-        config: Validated CompositeConfig for this composite run.
-        runtime: Runtime options (resume, dry_run, cached bronze, etc.).
-        run_id: Optional UUID string for this run; generated when None.
-        bootstrap_runtime_basics_fn: Callable that provisions base dependencies
-            (run_id, settings, logger, metrics, storage, lock).
-        build_runner_factories_fn: Callable that returns (seed_factory,
-            dependency_factory, enricher_factory) tuples.
-        build_support_services_fn: Callable that returns CompositeSupportServices.
-        create_composite_runner_fn: Callable that assembles the final
-            CompositePipelineRunnerService from all dependencies.
-
-    Returns:
-        Fully wired CompositePipelineRunnerService ready for execution.
-    """
+    """Assemble and create a composite runner via injected dependency builders."""
     return bootstrap_composite_runner_via_wiring(
         config=config,
         runtime=runtime,

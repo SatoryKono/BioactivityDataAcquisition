@@ -82,6 +82,9 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                    |
 | `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`     |
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                |
+| `--exact-replay/--no-exact-replay`       | flag   | False         | Включить strict exact replay с fail-closed policy |
+| `--replay-of-run-id`                     | str    | None          | Явный parent `run_id` для exact replay            |
+| `--replay-of-manifest-id`                | str    | None          | Явный parent `manifest_id` для exact replay       |
 
 **Примеры:**
 
@@ -115,6 +118,13 @@ bioetl run --pipeline chembl_activity --debug
 
 # Запуск из локального Bronze cache
 bioetl run --pipeline chembl_activity --use-cached-bronze
+
+# Strict exact replay с явным ancestry
+bioetl run --pipeline chembl_activity \
+    --use-cached-bronze \
+    --exact-replay \
+    --replay-of-run-id 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87 \
+    --replay-of-manifest-id manifest-parent-001
 ```
 
 **Checkpoint resume policy (runtime setting):**
@@ -129,6 +139,9 @@ bioetl run --pipeline chembl_activity --use-cached-bronze
 - если текущий запуск выполняется как `exact_replay`, runtime принудительно
   применяет `hard_fail`, даже если в settings запрошен более мягкий policy;
   для published contract это режим strict `exact replay`, а не degraded resume.
+- `--replay-of-run-id` и `--replay-of-manifest-id` допустимы только вместе с
+  `--exact-replay`; они публикуют explicit replay ancestry в manifest/inspection
+  surface и не должны использоваться для обычного rerun/rebuild.
 
 Supported resume modes:
 
@@ -346,6 +359,12 @@ bioetl run-manifest show <run-id|manifest-id> [--format text|json|yaml]
 - затем при UUID-like identifier выполняет `run_id -> manifest_id` lookup;
 - выводит `manifest`, `ledger_entries`, `diagnostics`;
 - добавляет ledger history для этого же manifest, если ledger включён.
+- в inspection payload сохраняет replay ancestry через
+  `replay_of_run_id`, `replay_of_manifest_id`, `replay_parentage`;
+- публикует semantic lineage anchors как `lineage_fragment_id`, а
+  occurrence-scoped persisted lineage records как `stored_fragment_id`, когда
+  historical fragment lookup должен различать несколько occurrence одного
+  semantic fragment.
 
 Когда `diagnostics` отражает rejected/degraded resume path, inspection payload
 дополнительно показывает компактные forensic blocks:
@@ -356,6 +375,10 @@ bioetl run-manifest show <run-id|manifest-id> [--format text|json|yaml]
 Они содержат resume-critical anchors: `composite_run_identity`,
 `execution_fingerprint`, `manifest_id`, `effective_config_hash`,
 `contract_ref`, `contract_version`, `exact_replay`, `input_snapshot_ids`.
+
+В `text`/`json`/`yaml` diff output отдельное поле `replay_relationship`
+показывает, является ли один manifest exact replay другого, вместо того чтобы
+смешивать replay ancestry с `occurrence_only` или `semantic_drift`.
 
 По умолчанию команда использует человекочитаемый `text`-формат. Для
 machine-readable вывода укажи `--format json` или `--format yaml`.

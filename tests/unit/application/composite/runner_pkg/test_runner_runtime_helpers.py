@@ -27,6 +27,7 @@ def test_bind_runner_dependencies_builds_metrics_aware_observer_fallback() -> No
     host = SimpleNamespace()
     logger = MagicMock()
     metrics = MagicMock()
+    tracer = MagicMock()
     deps = SimpleNamespace(
         seed_runner_factory=MagicMock(),
         enricher_runner_factory=MagicMock(),
@@ -42,6 +43,7 @@ def test_bind_runner_dependencies_builds_metrics_aware_observer_fallback() -> No
         preflight_validator=MagicMock(),
         quarantine_port=MagicMock(),
         metrics=metrics,
+        tracer=tracer,
         observer=None,
         fsm_state_helper=MagicMock(),
         manifest_id="manifest-123",
@@ -53,6 +55,7 @@ def test_bind_runner_dependencies_builds_metrics_aware_observer_fallback() -> No
     assert isinstance(host._observer, CompositeLifecycleObserverService)
     assert host._observer.logger is logger
     assert host._observer.metrics is metrics
+    assert host._observer.tracer is tracer
 
 
 @pytest.mark.unit

@@ -19,9 +19,11 @@ def _make_pipeline(*, batch_size: int | None = 50) -> SimpleNamespace:
         config=SimpleNamespace(batch_size=batch_size),
         services=SimpleNamespace(
             logger=MagicMock(name="logger"),
+            metrics=MagicMock(name="metrics"),
             data_source=MagicMock(name="data_source"),
         ),
         context=MagicMock(name="context"),
+        pipeline_name="test_pipeline",
     )
 
 
@@ -107,6 +109,12 @@ class TestBuildRuntimeManagers:
             memory_config=memory_config,
             logger=pipeline.services.logger,
         )
+        mock_checkpoint_recovery_cls.assert_called_once_with(
+            checkpoint_manager=checkpoint_manager,
+            logger=pipeline.services.logger,
+            metrics=pipeline.services.metrics,
+            pipeline_name="test_pipeline",
+        )
         mock_resolve_tracer.assert_called_once_with(tracer)
         mock_tracing_manager_cls.assert_called_once_with(
             tracer=resolved_tracer,
@@ -188,5 +196,11 @@ class TestBuildRuntimeManagers:
             memory_monitor=None,
             memory_config=None,
             logger=pipeline.services.logger,
+        )
+        mock_checkpoint_recovery_cls.assert_called_once_with(
+            checkpoint_manager=checkpoint_manager,
+            logger=pipeline.services.logger,
+            metrics=pipeline.services.metrics,
+            pipeline_name="test_pipeline",
         )
         mock_uuid_batch_id_generator.assert_called_once_with()

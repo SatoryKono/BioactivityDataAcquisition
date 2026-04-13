@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import ast
+import re
+import shutil
+import subprocess
+import tokenize
 from dataclasses import dataclass
+from functools import cache
 from pathlib import Path
 
 import yaml
@@ -325,34 +330,51 @@ def scan_docstring_tracked_modules(
     prefixes: tuple[str, ...],
 ) -> set[str]:
     """Return first-party modules whose first docstring line matches tracking prefixes."""
-    repo_root = src_root.resolve().parents[1]
-    tracked_paths: set[str] = set()
+    return set(
+        _scan_docstring_tracked_modules_cached(
+            src_root=str(src_root.resolve()),
+            prefixes=prefixes,
+        )
+    )
 
-    for path in src_root.rglob("*.py"):
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        module_docstring = ast.get_docstring(tree)
-        if module_docstring is None:
+
+@cache
+def _scan_docstring_tracked_modules_cached(
+    *,
+    src_root: str,
+    prefixes: tuple[str, ...],
+) -> tuple[str, ...]:
+    repo_root = Path(src_root).resolve().parents[1]
+    tracked_paths: list[str] = []
+
+    for path in Path(src_root).rglob("*.py"):
+        first_line = _module_docstring_first_line(path)
+        if first_line is None:
             continue
-        first_line = module_docstring.splitlines()[0].strip()
         if first_line.startswith(prefixes):
-            tracked_paths.add(path.resolve().relative_to(repo_root).as_posix())
+            tracked_paths.append(path.resolve().relative_to(repo_root).as_posix())
 
-    return tracked_paths
-
-
-def _iter_imported_modules(path: Path) -> tuple[str, ...]:
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    imported_modules: set[str] = set()
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            imported_modules.update(alias.name for alias in node.names if alias.name)
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            imported_modules.add(node.module)
-
-    return tuple(sorted(imported_modules))
+    return tuple(sorted(tracked_paths))
 
 
+def _module_docstring_first_line(path: Path) -> str | None:
+    """Return the first module-docstring line without parsing the full file AST."""
+    with tokenize.open(path) as handle:
+        for token in tokenize.generate_tokens(handle.readline):
+            if token.type in {
+                tokenize.COMMENT,
+                tokenize.ENCODING,
+                tokenize.NL,
+                tokenize.NEWLINE,
+            }:
+                continue
+            if token.type != tokenize.STRING:
+                return None
+            value = ast.literal_eval(token.string)
+            if not isinstance(value, str):
+                return None
+            return value.splitlines()[0].strip()
+    return None
 def find_first_party_imports_of_measured_only_modules(
     registry: CompatibilityRegistry,
     *,
@@ -366,7 +388,10 @@ def find_first_party_imports_of_measured_only_modules(
     }
     violations: dict[str, set[str]] = {}
 
-    for path in src_root.rglob("*.py"):
+    for path in _candidate_import_paths(
+        src_root=src_root,
+        measured_module_names=measured_module_names,
+    ):
         relative_path = path.resolve().relative_to(repo_root).as_posix()
         current_module = relative_path.removeprefix("src/").removesuffix(".py").replace(
             "/", "."
@@ -381,6 +406,80 @@ def find_first_party_imports_of_measured_only_modules(
         module_name: tuple(sorted(importers))
         for module_name, importers in sorted(violations.items())
     }
+
+
+def _candidate_import_paths(
+    *,
+    src_root: Path,
+    measured_module_names: set[str],
+) -> tuple[Path, ...]:
+    """Return candidate files that textually reference any measured module."""
+    rg_paths = _candidate_import_paths_via_rg(
+        src_root=src_root,
+        measured_module_names=measured_module_names,
+    )
+    if rg_paths is not None:
+        return rg_paths
+    return _candidate_import_paths_via_python(
+        src_root=src_root,
+        measured_module_names=measured_module_names,
+    )
+
+
+def _candidate_import_paths_via_rg(
+    *,
+    src_root: Path,
+    measured_module_names: set[str],
+) -> tuple[Path, ...] | None:
+    """Use ripgrep when available to avoid opening every source file in Python."""
+    if shutil.which("rg") is None or not measured_module_names:
+        return None
+    pattern = "|".join(re.escape(name) for name in sorted(measured_module_names))
+    result = subprocess.run(
+        ["rg", "-l", "-g", "*.py", "-e", pattern, str(src_root)],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode not in {0, 1}:
+        return None
+    return tuple(
+        sorted(
+            Path(line.strip())
+            for line in result.stdout.splitlines()
+            if line.strip()
+        )
+    )
+
+
+def _candidate_import_paths_via_python(
+    *,
+    src_root: Path,
+    measured_module_names: set[str],
+    ) -> tuple[Path, ...]:
+    """Fallback candidate scan when ripgrep is unavailable."""
+    candidates: list[Path] = []
+    for path in src_root.rglob("*.py"):
+        source_text = path.read_text(encoding="utf-8")
+        if any(module_name in source_text for module_name in measured_module_names):
+            candidates.append(path)
+    return tuple(candidates)
+
+
+@cache
+def _iter_imported_modules(path: Path) -> tuple[str, ...]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    imported_modules: set[str] = set()
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported_modules.update(alias.name for alias in node.names if alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            imported_modules.add(node.module)
+
+    return tuple(sorted(imported_modules))
 
 
 def validate_measured_only_ratchet(

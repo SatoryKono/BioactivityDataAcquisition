@@ -105,6 +105,7 @@ class LineageGraphFragment:
     run_id: str | None = None
     manifest_id: str | None = None
     created_at: datetime | None = None
+    stored_fragment_id: str | None = None
 
     def __post_init__(self) -> None:
         """Normalize list inputs to tuples for immutability."""
@@ -122,6 +123,7 @@ class LineageGraphFragment:
             "created_at": (
                 self.created_at.isoformat() if self.created_at is not None else None
             ),
+            "stored_fragment_id": self.stored_fragment_id,
         }
 
     @classmethod
@@ -134,4 +136,5 @@ class LineageGraphFragment:
             run_id=load_optional_str(payload, "run_id"),
             manifest_id=load_optional_str(payload, "manifest_id"),
             created_at=load_optional_datetime(payload, "created_at"),
+            stored_fragment_id=load_optional_str(payload, "stored_fragment_id"),
         )

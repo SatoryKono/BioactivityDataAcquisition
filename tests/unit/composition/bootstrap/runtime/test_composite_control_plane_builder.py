@@ -121,6 +121,7 @@ def test_build_composite_manifest_create_request_wires_control_plane_payloads() 
             config_hash="hash-123",
             contract_ref="composite_publication",
             contract_version="1.0.0",
+            required_persistence_profile="replay_ready",
         )
 
     assert str(request.run_id) == _VALID_RUN_ID
@@ -290,6 +291,46 @@ def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade
     with pytest.raises(
         RuntimeError,
         match="required persistence profile 'forensic_grade'",
+    ):
+        build_composite_control_plane_bundle(
+            config=config,
+            runtime=runtime,
+            infra_context=infra_context,
+        )
+
+    assert not (tmp_path / "output" / "control" / "run_manifest").exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
+
+
+def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
+    tmp_path: Path,
+) -> None:
+    config = cast(Any, _RichMockCompositeConfig())
+    runtime = CompositeRuntimeConfig(resume=True)
+    infra_context = cast(
+        Any,
+        SimpleNamespace(
+            run_id=_VALID_RUN_ID,
+            settings=SimpleNamespace(
+                data_dir=str(tmp_path),
+                pipeline=SimpleNamespace(
+                    control_plane=SimpleNamespace(
+                        run_manifest_enabled=True,
+                        run_ledger_enabled=True,
+                        required_persistence_profile="replay_ready",
+                    )
+                ),
+            ),
+            logger=MagicMock(),
+            metrics=MagicMock(),
+            storage=MagicMock(),
+            lock=MagicMock(),
+        ),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="outside the strict exact-replay support boundary",
     ):
         build_composite_control_plane_bundle(
             config=config,

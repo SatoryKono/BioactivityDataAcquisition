@@ -12,6 +12,67 @@ from bioetl.application.composite.lifecycle_observer_service import (
 from bioetl.domain.events import PipelineEvent
 
 
+class _FakeSpanHandle:
+    def __init__(self, name: str, attributes: dict[str, object]) -> None:
+        self.name = name
+        self.entered = 0
+        self.exited = 0
+        self.attributes = dict(attributes)
+        self.recorded_exceptions: list[Exception] = []
+
+    def __enter__(self) -> object:
+        self.entered += 1
+        return object()
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object | None,
+    ) -> None:
+        self.exited += 1
+        return None
+
+    def set_attribute(self, key: str, value: object) -> None:
+        self.attributes[key] = value
+
+    def record_exception(self, exception: Exception) -> None:
+        self.recorded_exceptions.append(exception)
+
+
+class _FakeOtelTracer:
+    def __init__(self) -> None:
+        self.started_spans: list[_FakeSpanHandle] = []
+
+    def start_as_current_span(
+        self,
+        name: str,
+        *,
+        attributes: dict[str, object] | None = None,
+    ) -> _FakeSpanHandle:
+        span = _FakeSpanHandle(name, attributes or {})
+        self.started_spans.append(span)
+        return span
+
+
+class _FakeTracingPort:
+    is_noop = False
+
+    def __init__(self) -> None:
+        self.tracer = _FakeOtelTracer()
+        self.flush_calls = 0
+
+    def get_tracer(self, name: str) -> _FakeOtelTracer:
+        assert name == "bioetl.pipeline"
+        return self.tracer
+
+    def close(self) -> None:
+        return None
+
+    def flush(self) -> None:
+        self.flush_calls += 1
+
+
 @pytest.mark.unit
 def test_emit_phase_started_preserves_correlation_details() -> None:
     logger = MagicMock()
@@ -70,3 +131,94 @@ def test_emit_run_completed_marks_warning_status_when_present() -> None:
     assert log_kwargs["pipeline"] == "composite:test_composite"
     assert log_kwargs["provider"] == "composite"
     assert log_kwargs["run_type"] == "composite"
+
+
+@pytest.mark.unit
+def test_composite_lifecycle_tracing_records_run_and_phase_spans() -> None:
+    logger = MagicMock()
+    metrics = MagicMock()
+    tracer = _FakeTracingPort()
+    observer = CompositeLifecycleObserverService(
+        logger=logger,
+        metrics=metrics,
+        tracer=tracer,
+    )
+
+    observer.emit_run_started(
+        composite_name="test_composite",
+        run_id="run-123",
+    )
+    observer.emit_phase_started(
+        composite_name="test_composite",
+        run_id="run-123",
+        phase_name="merge",
+    )
+    observer.emit_phase_completed(
+        composite_name="test_composite",
+        run_id="run-123",
+        phase_name="merge",
+    )
+    observer.emit_run_completed(
+        composite_name="test_composite",
+        run_id="run-123",
+        duration_seconds=12.5,
+        had_warnings=False,
+    )
+
+    traced_calls = [
+        call
+        for call in metrics.increment_counter.call_args_list
+        if call.args and call.args[0] == "bioetl_traced_runs_total"
+    ]
+    assert len(traced_calls) == 1
+    assert traced_calls[0].kwargs["labels"] == {
+        "pipeline": "composite:test_composite",
+        "run_type": "composite",
+    }
+    assert [span.name for span in tracer.tracer.started_spans] == [
+        "pipeline.composite:test_composite",
+        "pipeline.composite:test_composite.merge",
+    ]
+    run_span, phase_span = tracer.tracer.started_spans
+    assert run_span.exited == 1
+    assert phase_span.exited == 1
+    assert run_span.attributes["bioetl.status"] == "success"
+    assert phase_span.attributes["bioetl.status"] == "success"
+    assert tracer.flush_calls == 1
+
+
+@pytest.mark.unit
+def test_composite_lifecycle_tracing_records_exceptions_on_failed_run() -> None:
+    logger = MagicMock()
+    tracer = _FakeTracingPort()
+    observer = CompositeLifecycleObserverService(
+        logger=logger,
+        tracer=tracer,
+    )
+
+    observer.emit_run_started(
+        composite_name="test_composite",
+        run_id="run-123",
+    )
+    observer.emit_phase_started(
+        composite_name="test_composite",
+        run_id="run-123",
+        phase_name="merge",
+    )
+    error = RuntimeError("boom")
+    observer.emit_run_failed(
+        composite_name="test_composite",
+        run_id="run-123",
+        error=error,
+        reason_code="composite_failed",
+        stage="merge",
+    )
+
+    run_span, phase_span = tracer.tracer.started_spans
+    assert run_span.exited == 1
+    assert phase_span.exited == 1
+    assert run_span.recorded_exceptions == [error]
+    assert phase_span.recorded_exceptions == [error]
+    assert run_span.attributes["bioetl.status"] == "failed"
+    assert phase_span.attributes["bioetl.status"] == "failed"
+    assert tracer.flush_calls == 1

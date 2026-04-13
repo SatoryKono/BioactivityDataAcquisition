@@ -249,6 +249,8 @@ def _create_batch_executor(
     checkpoint_recovery_service = BatchCheckpointRecoveryService(
         checkpoint_manager=checkpoint_manager,
         logger=services.logger,
+        metrics=services.metrics,
+        pipeline_name=config.pipeline_name,
     )
     effective_batch_id_factory = batch_id_factory or BatchExecutorUuidFactoryAdapter()
     batch_processing_service = BatchProcessingService(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import sys
 from datetime import datetime
@@ -348,6 +349,38 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
     missing_service.get_effective_config_artifact("crossref_publication")
     second_call = effective_service.create_calls[1]
     assert second_call["dq_config"] is None
+
+
+def test_get_effective_config_artifact_persists_real_source_hashes(
+    tmp_path: Path,
+) -> None:
+    logger = MagicMock()
+    base_config = tmp_path / "configs" / "base" / "pipeline.yaml"
+    provider_config = tmp_path / "configs" / "providers" / "crossref.yaml"
+    base_config.parent.mkdir(parents=True, exist_ok=True)
+    provider_config.parent.mkdir(parents=True, exist_ok=True)
+    base_config.write_text("pipeline:\n  version: 1\n", encoding="utf-8")
+    provider_config.write_text("provider:\n  name: crossref\n", encoding="utf-8")
+
+    effective_service = _StubEffectiveConfigService(_sample_artifact_dict())
+    service = ConfigDQService(
+        logger=logger,
+        _pipeline_yaml_getter=lambda pipeline_name: {
+            "provider": "crossref",
+            "entity": "publication",
+        },
+        _dq_config_loader=lambda pipeline_name: DQConfig(contract_ref="dq.crossref"),
+        _effective_config_service=effective_service,
+        _repo_root=tmp_path,
+    )
+
+    service.get_effective_config_artifact("crossref_publication")
+
+    source_refs = effective_service.create_calls[0]["source_refs"]
+    assert [src.source_hash for src in source_refs] == [
+        hashlib.sha256(base_config.read_bytes()).hexdigest(),
+        hashlib.sha256(provider_config.read_bytes()).hexdigest(),
+    ]
 
 
 def test_get_effective_config_artifact_rejects_non_mapping_payload() -> None:

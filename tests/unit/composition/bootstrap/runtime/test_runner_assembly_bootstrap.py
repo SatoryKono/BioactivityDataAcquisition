@@ -119,6 +119,7 @@ class TestCreateCompositeRunner:
             run_id=_VALID_RUN_ID,
             logger=MagicMock(),
             metrics=MagicMock(),
+            tracer=MagicMock(),
             lock=MagicMock(),
             seed_runner_factory=MagicMock(),
             dependencies_runner_factory=MagicMock(),
@@ -160,6 +161,7 @@ class TestCreateCompositeRunner:
             run_id=_VALID_RUN_ID,
             logger=MagicMock(),
             metrics=MagicMock(),
+            tracer=MagicMock(name="tracer"),
             lock=MagicMock(),
             seed_runner_factory=MagicMock(),
             dependencies_runner_factory=MagicMock(),
@@ -174,6 +176,7 @@ class TestCreateCompositeRunner:
         assert call_kwargs["fsm_state_helper"] is fsm_state_helper
         assert call_kwargs["dq_report_service"] is dq_report_service
         assert call_kwargs["quarantine_port"] is quarantine_port
+        assert call_kwargs["tracer"] is not None
         assert call_kwargs["manifest_id"] == "manifest-123"
         assert call_kwargs["run_ledger_service"] is support_services.run_ledger_service
 
@@ -191,7 +194,7 @@ class TestBootstrapCompositeRunner:
         lock = MagicMock()
 
         bootstrap_basics = MagicMock(
-            return_value=("rid", settings, logger, metrics, storage, lock)
+            return_value=("rid", settings, logger, metrics, MagicMock(), storage, lock)
         )
         seed_f = MagicMock()
         dep_f = MagicMock()
@@ -228,6 +231,7 @@ class TestBootstrapCompositeRunner:
                 MagicMock(),
                 MagicMock(),
                 MagicMock(),
+                MagicMock(),
             )
         )
         create_runner = MagicMock(return_value=MagicMock())
@@ -255,7 +259,15 @@ class TestBootstrapCompositeRunner:
         storage = MagicMock()
         lock = MagicMock()
         bootstrap_basics = MagicMock(
-            return_value=("effective-rid", settings, logger, metrics, storage, lock)
+            return_value=(
+                "effective-rid",
+                settings,
+                logger,
+                metrics,
+                MagicMock(),
+                storage,
+                lock,
+            )
         )
         build_support = MagicMock(return_value=SimpleNamespace())
 

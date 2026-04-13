@@ -60,9 +60,11 @@ Interpretation:
 - if `run_manifest_enabled=true` and `run_ledger_enabled=false`, manifest inspection still works but ledger history is intentionally absent;
 - if `run_manifest_enabled=false`, runtime assembly also coerces ledger attachment off for new runs;
 - if `required_persistence_profile=replay_ready`, runtime bootstrap requires
-  `run_manifest_enabled=true`;
+  `run_manifest_enabled=true` and an execution context inside the strict
+  exact-replay support boundary;
 - if `required_persistence_profile=forensic_grade`, runtime bootstrap requires
-  both `run_manifest_enabled=true` and `run_ledger_enabled=true`;
+  both `run_manifest_enabled=true` and `run_ledger_enabled=true`, plus
+  metadata-sidecar / lineage persistence on every active published sink layer;
 - if resume is enabled, `checkpoint_compatibility_policy` controls checkpoint mismatch handling:
   `observe` may continue only for degraded non-identity signals, while canonical
   execution-identity mismatches still block resume.
@@ -104,6 +106,10 @@ Interpretation:
 
 - differences are computed over top-level manifest fields using canonical JSON comparison;
 - differences in `resolved_config`, `runtime_config`, `code_provenance`, `source_refs`, or `planned_artifacts` mean the runs are not reproducibly identical.
+- for effective-config provenance, treat `source_refs[*].source_hash` as the
+  canonical source-file anchor when present; occurrence timestamps inside the
+  effective-config artifact are UTC-normalized and should not by themselves be
+  interpreted as semantic drift.
 - `execution_fingerprint` is the canonical execution-identity fingerprint shared
   across manifest, checkpoint, and runtime compatibility surfaces.
 - this fingerprint intentionally excludes occurrence-only anchors such as
@@ -236,7 +242,11 @@ Focus on:
 - `latest_status`, `latest_event_type`, `total_events`;
 - `event_family_counts`, `event_type_counts`;
 - `artifact_refs`, `lineage_fragment_ids`, `missing_artifact_links`;
-- `persistence_profile.attained_profile`, `persistence_profile.surfaces`,
+- `required_persistence_profile`;
+- `persistence_profile.attained_profile`, `persistence_profile.required_profile`,
+  `persistence_profile.required_profile_satisfied`,
+  `persistence_profile.surfaces`,
+  `persistence_profile.required_profile_missing_requirements`,
   `persistence_profile.replay_ready_missing_requirements`,
   `persistence_profile.forensic_grade_missing_requirements`;
 - `dq_rule_ids`, `dq_dispositions`, `dq_report_paths`, `dq_violation_kinds`;
@@ -244,6 +254,8 @@ Focus on:
 - `execution_fingerprint` as the canonical execution-identity fingerprint shared
   across manifest, checkpoint, and runtime compatibility surfaces;
 - `effective_config_hash`, `contract_ref`, `contract_version`, and `effective_config_artifact_id` as runtime-anchor compatibility fields;
+- stable `source_refs[*].source_hash` values in the effective-config artifact
+  when canonical config files are available;
 - `current_identity` and `checkpoint_identity` when resume compatibility was
   rejected or degraded; these compact payloads surface
   `composite_run_identity`, `execution_fingerprint`, `manifest_id`,
@@ -285,6 +297,18 @@ For the supported lineage MVP surface, the canonical operator path is:
      anchors for the run;
    - `run_id` and `manifest_id` line up across sidecar, manifest, and ledger.
 
+For historical lineage reconstruction, distinguish two fragment identities:
+
+- `lineage_fragment_id` is the semantic fragment anchor shared by sidecars,
+  ledger diagnostics, and manifest inspection;
+- `stored_fragment_id` is the occurrence-scoped persisted lineage record id
+  exposed by lineage inspection when more than one historical fragment payload
+  shares the same semantic `lineage_fragment_id`.
+
+If one semantic fragment id resolves to multiple stored occurrences, treat
+direct lookup by semantic `lineage_fragment_id` as ambiguous and pivot through
+`run_id` / `manifest_id` instead of accepting the first matching fragment.
+
 If any of those anchors disagree, treat it as lineage integrity drift rather
 than silently accepting the bundle as canonical.
 - `persistence_profile.attained_profile=forensic_grade` means the run is both
@@ -301,12 +325,23 @@ than silently accepting the bundle as canonical.
 - `exact_replay_support_boundary=composite_execution_unsupported` means the
   current composite execution path must not be interpreted as exact-replayable
   even when cached Bronze inputs are used;
+- `replay_of_run_id`, `replay_of_manifest_id`, and `replay_parentage` identify
+  explicit exact-replay ancestry and distinguish it from a merely semantically
+  equivalent fresh run;
+- on the published `bioetl run` surface these ancestry anchors are only valid
+  when the run was launched with `--exact-replay`; if the operator sees them on
+  an ordinary rerun/rebuild path, treat that as control-plane drift;
+- `run-manifest diff` exposes that ancestry through `replay_relationship`
+  without collapsing it into occurrence-only drift;
 - `alert_signals.immutable_input_snapshot_gap=true` means the run is still on
   the ordinary source boundary, but immutable cached-Bronze input snapshots are
   missing, so strict exact replay cannot be claimed yet;
 - `alert_signals.composite_resume_reconstructability_gap=true` means the run is
   on the bounded composite resume path: expect checkpoint snapshot +
   ledger-suffix reconstruction only, not full rich checkpoint-state recovery;
+- `alert_signals.required_persistence_profile_gap=true` means the run did not
+  meet the minimum persistence profile declared at launch time and must not be
+  treated as satisfying that operator contract;
 - `alert_signals.replay_ready_gap=true` means the run must not be treated as
   exact-replay ready even if manifest inspection itself is available;
 - `alert_signals.forensic_grade_gap=true` means the run must not be treated as

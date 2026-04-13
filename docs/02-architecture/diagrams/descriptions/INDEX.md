@@ -1,6 +1,6 @@
 # Diagram Descriptions Index
 
-_Автогенерация: 2026-04-13T10:53:29+03:00_
+_Автогенерация: 2026-04-13T12:35:20+03:00_
 
 - Карточек описаний: **292**
 - Формат публикации: family-oriented index для derived description cards.

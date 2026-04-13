@@ -170,15 +170,33 @@ persistence-profile taxonomy:
 - `degraded_observable`: the run remains inspectable through the persisted
   manifest, but one or more mandatory replay-ready requirements are missing.
 
+`required_persistence_profile` is the declared minimum profile requested by the
+runtime/deployment for that run. The current published contract is:
+
+- `degraded_observable` is always the floor and may still be inspected even
+  when richer replay/forensic surfaces are absent;
+- `replay_ready` is only valid inside the strict exact-replay support boundary;
+  execution contexts outside that boundary must fail closed during bootstrap
+  instead of running and merely reporting a degraded profile later. For
+  ordinary source runs this also requires immutable input snapshots and
+  `exact_replay_capability` on the built manifest request for the current run;
+- `forensic_grade` requires `replay_ready` surfaces plus append-only ledger
+  history and metadata-sidecar / lineage persistence for every active published
+  layer in the configured sink surface.
+
 The current diagnostics surface exposes:
 
 - `persistence_profile.attained_profile`;
+- `persistence_profile.required_profile`;
+- `persistence_profile.required_profile_satisfied`;
+- `persistence_profile.required_profile_missing_requirements`;
 - `persistence_profile.claims`;
 - `persistence_profile.surfaces`;
 - `persistence_profile.replay_ready_missing_requirements`;
 - `persistence_profile.forensic_grade_missing_requirements`.
 - `alert_signals.immutable_input_snapshot_gap`;
 - `alert_signals.composite_resume_reconstructability_gap`;
+- `alert_signals.required_persistence_profile_gap`;
 - `alert_signals.replay_ready_gap`;
 - `alert_signals.forensic_grade_gap`;
 
@@ -247,6 +265,8 @@ provenance.
 | `resolved_config`       | `object`   |      yes | Effective resolved pipeline config               |
 | `code_provenance`       | `object`   |      yes | See the full `RunCodeProvenance` field set below |
 | `replay_capability`     | `str`      |      yes | Replay classification: `exact_replay_supported`, `resume_only`, or `rebuild_only` |
+| `replay_of_run_id`      | `str`      |       no | Parent run anchor when this manifest is an exact replay of a prior run |
+| `replay_of_manifest_id` | `str`      |       no | Parent manifest anchor when this manifest is an exact replay of a prior manifest |
 | `source_refs`           | `array`    |       no | Canonical input/source references                |
 | `planned_artifacts`     | `array`    |       no | Intended output locations by layer               |
 
@@ -256,6 +276,20 @@ provenance.
 - `exact_replay_support_boundary` publishes the strict replay boundary for that execution context:
   - `snapshot_backed_source_runs_only` for ordinary source execution;
   - `composite_execution_unsupported` for composite execution.
+
+### Effective-config provenance baseline
+
+When `code_provenance.effective_config_artifact_id` is present, the current
+published effective-config baseline is:
+
+- canonical YAML-backed `source_refs` persist stable `source_hash` values when
+  the referenced config files exist;
+- occurrence-only timestamps inside the effective-config artifact are
+  UTC-normalized before persistence and are not part of the semantic
+  effective-config identity;
+- file-backed effective-config persistence is crash-safe at the payload/index
+  pair boundary: runtime must not leave a committed artifact payload behind when
+  the corresponding `run_id -> artifact_id` index write fails in-process.
 
 ### `RunCodeProvenance` field set
 
@@ -336,6 +370,9 @@ Event taxonomy behavior:
 - Prefix-based families are supported (`dq_*`, `lineage_*`, `checkpoint_*`,
   `composite_*`, `artifact_*`), and suffix-based phase events
   (`*_started`, `*_completed`) map to `pipeline.phase`.
+- file-backed ledger reads are corruption-visible and fail closed: a truncated
+  tail line or malformed JSONL entry is treated as ledger corruption rather
+  than silently ignored during inspection or resume-time replay.
 
 ## Manifest Diff Classification
 
@@ -359,6 +396,7 @@ The diff payload should therefore expose:
 - `occurrence_difference_fields`
 - `semantic_difference_fields`
 - `noncanonical_difference_fields`
+- `replay_relationship`
 
 ## Canonical Stage Sets
 
@@ -442,6 +480,19 @@ minimal identity contract:
   operator-facing alias of the published `dataset_ref` so sidecar, ledger, and
   inspection surfaces can be correlated without translation.
 
+The lineage fragment anchor itself is intentionally split:
+
+- `output.lineage_fragment_id` and ledger `lineage_fragment_id` remain the
+  semantic fragment identity used by sidecars, manifests, and artifact-linkage
+  diagnostics;
+- persisted lineage storage may additionally expose an occurrence-scoped
+  `stored_fragment_id` to distinguish multiple historical fragment payloads
+  that share one semantic `fragment_id`;
+- when more than one stored occurrence exists for the same semantic fragment,
+  operator tooling must treat direct lookup by semantic `fragment_id` as
+  ambiguous and resolve history through `run_id` or `manifest_id` instead of
+  silently returning an arbitrary occurrence record.
+
 Bundle assembly MUST fail closed on mismatched preexisting sidecar anchors
 instead of silently overwriting them with lineage-derived values.
 
@@ -460,6 +511,15 @@ surface:
   and the manifest carries immutable input snapshots;
 - snapshot-backed runs that captured immutable inputs without being launched as
   exact replay are rendered as `replay_mode=snapshot_backed_run`.
+- `replay_of_run_id` and `replay_of_manifest_id` record replay ancestry when a
+  run is an explicit exact replay of a previous execution rather than merely a
+  semantically equivalent new run;
+- for the published `bioetl run` surface, these ancestry anchors are only
+  accepted together with `--exact-replay`; ordinary rerun/rebuild execution
+  must not publish replay parentage;
+- `run-manifest diff` reports this ancestry separately through
+  `replay_relationship` so replay parentage is visible without collapsing it
+  into occurrence-only or semantic drift classifications.
 
 Composite execution is currently outside the strict exact-replay support
 boundary. Composite manifests therefore publish

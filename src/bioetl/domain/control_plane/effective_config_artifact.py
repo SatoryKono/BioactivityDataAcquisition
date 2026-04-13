@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal
 
 from bioetl.domain.types import JsonDict
@@ -22,6 +22,18 @@ def _compute_dq_compatibility_hash(policy_refs: list[DQPolicyRef]) -> str:
     if not policy_hashes:
         return "no_dq_policy_hashes"
     return ":".join(policy_hashes)
+
+
+def _now_utc() -> datetime:
+    """Return the current UTC timestamp."""
+    return datetime.now(UTC)
+
+
+def _normalize_utc(value: datetime) -> datetime:
+    """Normalize an explicit timestamp to timezone-aware UTC."""
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
 
 
 @dataclass(frozen=True)
@@ -51,7 +63,10 @@ class ResolvedConfigSnapshot:
     config_type: str  # "standard" | "composite"
     config_data: JsonDict
     config_hash: str
-    timestamp: datetime = field(default_factory=datetime.now)
+    timestamp: datetime = field(default_factory=_now_utc)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "timestamp", _normalize_utc(self.timestamp))
 
 
 @dataclass(frozen=True)
@@ -70,7 +85,10 @@ class EffectiveExecutionConfig:
 
     config_data: JsonDict
     effective_hash: str
-    timestamp: datetime = field(default_factory=datetime.now)
+    timestamp: datetime = field(default_factory=_now_utc)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "timestamp", _normalize_utc(self.timestamp))
 
 
 @dataclass(frozen=True)
@@ -102,7 +120,7 @@ class EffectiveConfigArtifact:
     effective_config_hash: str
     source_fingerprint: str
     schema_version: str = "1.0"
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=_now_utc)
     contract_refs: list[str] = field(default_factory=list)
     dq_policy_refs: list[DQPolicyRef] = field(default_factory=list)
     dq_rule_bundle_versions: dict[str, str] = field(default_factory=dict)
@@ -114,6 +132,7 @@ class EffectiveConfigArtifact:
         _require_non_empty(self.artifact_id, "artifact_id")
         _require_non_empty(self.pipeline_name, "pipeline_name")
         _require_non_empty(self.pipeline_kind, "pipeline_kind")
+        object.__setattr__(self, "created_at", _normalize_utc(self.created_at))
         compatibility_hash = (
             self.dq_contract_compatibility_hash
             or _compute_dq_compatibility_hash(self.dq_policy_refs)

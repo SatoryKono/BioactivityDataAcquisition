@@ -79,6 +79,9 @@ class _SupportMixinHarness(CompositeRunnerSupportMixin):
             force_enricher=None,
         )
         self._logger = MagicMock()
+        self._metrics = MagicMock()
+        self._metrics.increment_counter = MagicMock()
+        self._metrics.observe_histogram = MagicMock()
         self._observer_logger = MagicMock()
         self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-test-1"
@@ -348,6 +351,16 @@ async def test_save_checkpoint_safe_when_success_then_returns_true() -> None:
 
     assert result is True
     harness._checkpoint_manager.save.assert_awaited_once_with(state)
+    harness._metrics.increment_counter.assert_called_once_with(
+        "bioetl_checkpoint_save_events_total",
+        1,
+        {
+            "pipeline": "test_composite",
+            "operation": "test_op",
+            "status": "succeeded",
+        },
+    )
+    harness._metrics.observe_histogram.assert_called_once()
 
 
 @pytest.mark.unit
@@ -373,6 +386,16 @@ async def test_save_checkpoint_safe_when_non_fatal_error_then_returns_false(
 
     assert result is False
     harness._logger.warning.assert_called_once()
+    harness._metrics.increment_counter.assert_called_once_with(
+        "bioetl_checkpoint_save_events_total",
+        1,
+        {
+            "pipeline": "test_composite",
+            "operation": "test_op",
+            "status": "failed",
+        },
+    )
+    harness._metrics.observe_histogram.assert_called_once()
 
 
 @pytest.mark.unit
@@ -390,6 +413,16 @@ async def test_save_checkpoint_safe_when_bioetl_error_then_returns_false() -> No
     harness._logger.warning.assert_called_once()
     warning_kwargs = harness._logger.warning.call_args.kwargs
     assert warning_kwargs.get("reason_code") == "unexpected_bioetl_error"
+    harness._metrics.increment_counter.assert_called_once_with(
+        "bioetl_checkpoint_save_events_total",
+        1,
+        {
+            "pipeline": "test_composite",
+            "operation": "test_op",
+            "status": "failed",
+        },
+    )
+    harness._metrics.observe_histogram.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

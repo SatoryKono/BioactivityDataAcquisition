@@ -123,6 +123,7 @@ def bind_runner_dependencies(host: object, deps: CompositeRunnerDependencies) ->
     runner_host._observer = deps.observer or CompositeLifecycleObserverService(
         logger=deps.logger,
         metrics=deps.metrics,
+        tracer=deps.tracer,
     )
     runner_host._fsm = deps.fsm_state_helper
     runner_host._manifest_id = deps.manifest_id

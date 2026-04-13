@@ -142,22 +142,46 @@ def _coerce_rule_component(
 ) -> RuleComponent:
     """Normalize legacy custom-rule shapes to the canonical (normalizer, notes) form."""
     if callable(component):
-        return (
-            component,
-            f"Apply custom normalization rule for field '{field_name}'.",
+        return _default_custom_rule_component(field_name=field_name, normalizer=component)
+    if _is_explicit_rule_component(component):
+        return component
+    if _is_single_normalizer_rule_component(component):
+        return _default_custom_rule_component(
+            field_name=field_name,
+            normalizer=component[0],
         )
-    if isinstance(component, tuple):
-        if len(component) == 2 and callable(component[0]) and isinstance(component[1], str):
-            return component
-        if len(component) == 1 and callable(component[0]):
-            return (
-                component[0],
-                f"Apply custom normalization rule for field '{field_name}'.",
-            )
     raise ValueError(
         "special_rules entries must be a callable or a "
         "(normalizer, notes) tuple; got invalid component "
         f"for field '{field_name}': {component!r}"
+    )
+
+
+def _default_custom_rule_component(
+    *,
+    field_name: str,
+    normalizer: FieldNormalizer,
+) -> RuleComponent:
+    return (
+        normalizer,
+        f"Apply custom normalization rule for field '{field_name}'.",
+    )
+
+
+def _is_explicit_rule_component(component: RuleComponentSpec) -> bool:
+    return (
+        isinstance(component, tuple)
+        and len(component) == 2
+        and callable(component[0])
+        and isinstance(component[1], str)
+    )
+
+
+def _is_single_normalizer_rule_component(component: RuleComponentSpec) -> bool:
+    return (
+        isinstance(component, tuple)
+        and len(component) == 1
+        and callable(component[0])
     )
 
 

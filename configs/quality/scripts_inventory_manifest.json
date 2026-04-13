@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-13T08:36:40.365448+00:00",
+  "generated_at": "2026-04-13T11:20:05.699151+00:00",
   "summary": {
     "total_scripts": 294,
     "status_counts": {
@@ -8413,7 +8413,7 @@
         },
         {
           "path": ".github/workflows/root-hygiene.yml",
-          "line": 38,
+          "line": 34,
           "source_group": "ci",
           "text": "run: python scripts/repo/audit_root_cleanliness.py"
         },
@@ -8915,7 +8915,7 @@
           "path": "docs/02-architecture/diagrams/foundation/svg/33-cli-run-interaction.svg",
           "line": 1,
           "source_group": "docs",
-          "text": "<svg xmlns=\"http://www.w3.org/2000/svg\" id=\"my-svg\" width=\"100%\" aria-roledescription=\"sequence\" style=\"max-width:2956.5px;background-color:white\" viewBox=\"-50 -16 2956.5 1222\"><path id=\"actor9\" strok"
+          "text": "<svg id=\"my-svg\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" style=\"max-width: 2961.5px; background-color: white;\" viewBox=\"-50 -16 2961.5 1196\" role=\"gr"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/PROMPT-diagram-expansion.md",

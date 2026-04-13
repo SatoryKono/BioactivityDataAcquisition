@@ -159,7 +159,9 @@ def build_run_options(
     use_cached_bronze: bool,
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
-    exact_replay: bool,
+    replay_of_run_id: str | None = None,
+    replay_of_manifest_id: str | None = None,
+    exact_replay: bool = False,
 ) -> RunOptions:
     """Build RunOptions from CLI parameters."""
     return get_cli_run_orchestration_service().build_options(
@@ -178,6 +180,8 @@ def build_run_options(
         use_cached_bronze=use_cached_bronze,
         cached_bronze_date=cached_bronze_date,
         cached_bronze_path=cached_bronze_path,
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
         exact_replay=exact_replay,
     )
 
@@ -295,6 +299,8 @@ def _run_callback(
     use_cached_bronze: bool,
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
+    replay_of_run_id: str | None,
+    replay_of_manifest_id: str | None,
     exact_replay: bool = False,
 ) -> None:
     """Canonical callback implementation for the run Click command."""
@@ -323,6 +329,8 @@ def _run_callback(
         "use_cached_bronze": use_cached_bronze,
         "cached_bronze_date": cached_bronze_date,
         "cached_bronze_path": cached_bronze_path,
+        "replay_of_run_id": replay_of_run_id,
+        "replay_of_manifest_id": replay_of_manifest_id,
     }
     if exact_replay:
         cli_input_kwargs["exact_replay"] = True

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
@@ -100,6 +100,17 @@ class TestResolvedConfigSnapshot:
         assert snapshot.config_data == config_data
         assert snapshot.config_hash == "config_hash_123"
         assert isinstance(snapshot.timestamp, datetime)
+        assert snapshot.timestamp.tzinfo == UTC
+
+    def test_resolved_config_snapshot_normalizes_naive_timestamp_to_utc(self) -> None:
+        snapshot = ResolvedConfigSnapshot(
+            config_type="standard",
+            config_data={},
+            config_hash="config_hash_123",
+            timestamp=datetime(2026, 4, 13, 12, 0, 0),
+        )
+
+        assert snapshot.timestamp.tzinfo == UTC
 
 
 class TestRuntimeOverrideSnapshot:
@@ -147,6 +158,7 @@ class TestEffectiveExecutionConfig:
         assert config.config_data == config_data
         assert config.effective_hash == "effective_hash_789"
         assert isinstance(config.timestamp, datetime)
+        assert config.timestamp.tzinfo == UTC
 
 
 class TestDQPolicySnapshot:
@@ -284,6 +296,7 @@ class TestEffectiveConfigArtifact:
         assert len(artifact.dq_policy_refs) == 1
         assert len(artifact.dq_policy_snapshots) == 1
         assert artifact.dq_contract_compatibility_hash == "dq_hash_abc"  # Auto-computed
+        assert artifact.created_at.tzinfo == UTC
 
     def test_effective_config_artifact_minimal(self) -> None:
         """Test EffectiveConfigArtifact with minimal required fields."""
@@ -331,6 +344,28 @@ class TestEffectiveConfigArtifact:
                 effective_config_hash="hash",
                 source_fingerprint="fingerprint",
             )
+
+    def test_effective_config_artifact_normalizes_naive_created_at_to_utc(self) -> None:
+        artifact = EffectiveConfigArtifact(
+            artifact_id="test",
+            pipeline_name="test",
+            pipeline_kind="standard",
+            source_refs=[],
+            resolution_policy=ConfigResolutionPolicy(),
+            resolved_config=ResolvedConfigSnapshot(
+                config_type="standard", config_data={}, config_hash="hash"
+            ),
+            runtime_overrides=RuntimeOverrideSnapshot(),
+            effective_execution_config=EffectiveExecutionConfig(
+                config_data={}, effective_hash="hash"
+            ),
+            resolved_config_hash="hash",
+            effective_config_hash="hash",
+            source_fingerprint="fingerprint",
+            created_at=datetime(2026, 4, 13, 12, 0, 0),
+        )
+
+        assert artifact.created_at.tzinfo == UTC
 
         with pytest.raises(ValueError, match="pipeline_name cannot be empty"):
             EffectiveConfigArtifact(

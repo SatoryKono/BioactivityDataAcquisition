@@ -1,6 +1,6 @@
 # BioETL Class Diagrams Bundle
 
-- Generated: 2026-04-13T10:53:29
+- Generated: 2026-04-13T12:35:19
 - Diagram count: 94
 
 ## Table of Contents
@@ -488,7 +488,7 @@
 ![90-pkg-application-composite-checkpoint](../class-diagrams/svg/90-pkg-application-composite-checkpoint.svg)
 
 ### Описание
-Диаграмма «Package Family: application/composite/checkpoint» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/composite/checkpoint; modules: _service_support, load_service, persistence_service, service, state.. Схема имеет плотность порядка 5 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: service support, load service, persistence service, service, state. Показательные узлы для быстрого чтения: ExpectedCheckpointContext, CompositeCheckpointLoadService, CompositeCheckpointPersistenceService, CompositeCheckpointService, CompositeCheckpointState. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
+Диаграмма «Package Family: application/composite/checkpoint» показывает архитектурную модель модуля и фиксирует контракты, роли и отношения между сущностями слоя. Она представлена в формате диаграмма классов (class diagram) и служит ориентиром на уровне детализации «Package Family / Inventory Slice». В комментариях исходника зафиксирован фокус диаграммы: AST-derived supplemental package-family inventory for src/bioetl/application/composite/checkpoint; modules: anchor_context, _anchor_context, load_service, persistence_service, service, state.. Схема имеет плотность порядка 5 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы:  anchor context, load service, persistence service, service, state. Показательные узлы для быстрого чтения: ExpectedCheckpointContext, CompositeCheckpointLoadService, CompositeCheckpointPersistenceService, CompositeCheckpointService, CompositeCheckpointState. Примечание: Generated supplemental package-family diagram. Curated class-summary remains narrative-only..
 
 ### Метаданные
 - Тип: `classDiagram`

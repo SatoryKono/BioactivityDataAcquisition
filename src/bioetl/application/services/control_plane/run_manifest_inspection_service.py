@@ -77,6 +77,7 @@ class RunManifestDiffResult:
     occurrence_difference_fields: tuple[str, ...] = ()
     semantic_difference_fields: tuple[str, ...] = ()
     noncanonical_difference_fields: tuple[str, ...] = ()
+    replay_relationship: str = "none"
 
     def to_dict(self) -> dict[str, object]:
         """Return JSON/YAML-safe payload for CLI presentation."""
@@ -91,6 +92,7 @@ class RunManifestDiffResult:
             "noncanonical_difference_fields": list(
                 self.noncanonical_difference_fields
             ),
+            "replay_relationship": self.replay_relationship,
             "differences": [entry.to_dict() for entry in self.differences],
         }
 
@@ -159,6 +161,7 @@ class RunManifestInspectionService:
                 tuple[str, ...],
                 classification["noncanonical_difference_fields"],
             ),
+            replay_relationship=str(classification["replay_relationship"]),
         )
 
     def _resolve_manifest(self, identifier: str) -> RunManifest:
@@ -228,6 +231,9 @@ class RunManifestInspectionService:
             "effective_config_hash": code_provenance.config_hash,
             "contract_ref": code_provenance.contract_ref,
             "contract_version": code_provenance.contract_version,
+            "replay_of_run_id": diagnostics.get("replay_of_run_id"),
+            "replay_of_manifest_id": diagnostics.get("replay_of_manifest_id"),
+            "replay_parentage": diagnostics.get("replay_parentage"),
             "canonical_execution_identity": {
                 "execution_fingerprint": manifest.execution_fingerprint,
                 "payload": canonical_execution_identity,
@@ -261,6 +267,8 @@ class RunManifestInspectionService:
                 manifest.replay_capability.value == "exact_replay_supported",
             ),
             "exact_replay_blockers": diagnostics.get("exact_replay_blockers", []),
+            "resume_contract": diagnostics.get("resume_contract"),
+            "resume_diagnostics": diagnostics.get("resume_diagnostics"),
             "input_snapshot_ids": diagnostics.get("input_snapshot_ids", []),
             "input_snapshot_content_hashes": diagnostics.get(
                 "input_snapshot_content_hashes",
@@ -314,6 +322,7 @@ class RunManifestInspectionService:
                 "occurrence_difference_fields": (),
                 "semantic_difference_fields": (),
                 "noncanonical_difference_fields": (),
+                "replay_relationship": "none",
             }
 
         occurrence_difference_fields = tuple(
@@ -325,6 +334,10 @@ class RunManifestInspectionService:
         semantic_equivalent = (
             left_manifest.execution_fingerprint == right_manifest.execution_fingerprint
         )
+        replay_relationship = RunManifestInspectionService._resolve_replay_relationship(
+            left_manifest=left_manifest,
+            right_manifest=right_manifest,
+        )
         if semantic_equivalent and not non_occurrence_fields:
             return {
                 "classification": "occurrence_only",
@@ -333,6 +346,7 @@ class RunManifestInspectionService:
                 "occurrence_difference_fields": occurrence_difference_fields,
                 "semantic_difference_fields": (),
                 "noncanonical_difference_fields": (),
+                "replay_relationship": replay_relationship,
             }
         if semantic_equivalent:
             return {
@@ -342,6 +356,7 @@ class RunManifestInspectionService:
                 "occurrence_difference_fields": occurrence_difference_fields,
                 "semantic_difference_fields": (),
                 "noncanonical_difference_fields": non_occurrence_fields,
+                "replay_relationship": replay_relationship,
             }
         return {
             "classification": "semantic_drift",
@@ -350,4 +365,35 @@ class RunManifestInspectionService:
             "occurrence_difference_fields": occurrence_difference_fields,
             "semantic_difference_fields": non_occurrence_fields or diff_fields,
             "noncanonical_difference_fields": (),
+            "replay_relationship": replay_relationship,
         }
+
+    @staticmethod
+    def _resolve_replay_relationship(
+        *,
+        left_manifest: RunManifest,
+        right_manifest: RunManifest,
+    ) -> str:
+        """Classify explicit replay ancestry separately from semantic equality."""
+        left_replays_right = (
+            left_manifest.replay_of_manifest_id == right_manifest.manifest_id
+            or left_manifest.replay_of_run_id == str(right_manifest.run_id)
+        )
+        right_replays_left = (
+            right_manifest.replay_of_manifest_id == left_manifest.manifest_id
+            or right_manifest.replay_of_run_id == str(left_manifest.run_id)
+        )
+        if left_replays_right and right_replays_left:
+            return "mutual_replay_cycle"
+        if left_replays_right:
+            return "left_is_exact_replay_of_right"
+        if right_replays_left:
+            return "right_is_exact_replay_of_left"
+        if (
+            left_manifest.replay_of_manifest_id is not None
+            or left_manifest.replay_of_run_id is not None
+            or right_manifest.replay_of_manifest_id is not None
+            or right_manifest.replay_of_run_id is not None
+        ):
+            return "external_replay_parentage_present"
+        return "none"

@@ -36,6 +36,7 @@ def bootstrap_runtime_basics(
     run_id: str | None,
     settings_provider: Callable[[], Settings],
     logger_bootstrapper: Callable[[str, UUID, str], LoggerPort],
+    tracer_bootstrapper: Callable[[Settings], TracingPort],
     storage_bootstrapper: Callable[..., object],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
@@ -55,12 +56,13 @@ def bootstrap_runtime_basics(
     Returns:
         Infrastructure context handoff for the composite run.
     """
-    run_id_value, settings, logger, metrics, storage, lock = (
+    run_id_value, settings, logger, metrics, tracer, storage, lock = (
         _bootstrap_runtime_basics_impl(
             config=config,
             run_id=run_id,
             settings_provider=settings_provider,
             logger_bootstrapper=logger_bootstrapper,
+            tracer_bootstrapper=tracer_bootstrapper,
             storage_bootstrapper=storage_bootstrapper,
             lock_factory=lock_factory,
             uuid_factory=uuid_factory,
@@ -71,6 +73,7 @@ def bootstrap_runtime_basics(
         settings=settings,
         logger=logger,
         metrics=metrics,
+        tracer=tracer,
         storage=storage,
         lock=lock,
     )
@@ -91,7 +94,7 @@ if TYPE_CHECKING:
         CompositeSupportServices,
     )
     from bioetl.domain.composite.config import CompositeConfig
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.config import Settings
 
 
@@ -102,6 +105,7 @@ def create_composite_runner(
     run_id: str,
     logger: LoggerPort,
     metrics: MetricsPort | None,
+    tracer: TracingPort | None,
     lock: LockPort,
     seed_runner_factory: Callable[[], PipelineRunner],
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
@@ -135,6 +139,7 @@ def create_composite_runner(
         run_id=run_id,
         logger=logger,
         metrics=metrics,
+        tracer=tracer,
         lock=lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,

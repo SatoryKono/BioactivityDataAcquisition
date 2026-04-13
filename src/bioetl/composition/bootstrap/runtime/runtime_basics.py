@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -53,10 +53,11 @@ def bootstrap_runtime_basics(
     run_id: str | None,
     settings_provider: Callable[[], Settings],
     logger_bootstrapper: Callable[[str, UUID, str], LoggerPort],
+    tracer_bootstrapper: Callable[[Settings], TracingPort],
     storage_bootstrapper: Callable[..., object],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
-) -> tuple[str, Settings, LoggerPort, MetricsPort, object, LockPort]:
+) -> tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]:
     """Build base runtime dependencies shared across composite bootstrap.
 
     Args:
@@ -73,15 +74,16 @@ def bootstrap_runtime_basics(
             for deterministic testing.
 
     Returns:
-        Tuple of (run_id, settings, logger, metrics, storage, lock) for the composite run.
+        Tuple of (run_id, settings, logger, metrics, tracer, storage, lock) for the composite run.
     """
     effective_run_id = run_id or str(uuid_factory())
     settings = settings_provider()
     logger = logger_bootstrapper(config.name, UUID(effective_run_id), "INFO")
     metrics = create_metrics(settings)
+    tracer = tracer_bootstrapper(settings)
     storage = storage_bootstrapper(enable_csv_export=True)
     lock = lock_factory()
-    return effective_run_id, settings, logger, metrics, storage, lock
+    return effective_run_id, settings, logger, metrics, tracer, storage, lock
 
 
 def build_runner_factories(

@@ -57,14 +57,20 @@ def _render_relation_lines(relations: list[object]) -> list[str]:
             continue
         node = item.get("node", {})
         fragment_id = item.get("fragment_id", "?")
+        stored_fragment_id = item.get("stored_fragment_id")
         edge_type = item.get("edge_type", "?")
+        fragment_suffix = ""
+        if stored_fragment_id not in (None, "", fragment_id):
+            fragment_suffix = f" occurrence={stored_fragment_id}"
         if isinstance(node, dict):
             node_id = node.get("node_id", "?")
             label = node.get("label")
             suffix = f" label={label}" if label not in (None, "") else ""
-            lines.append(f"  - {edge_type} via {fragment_id}: {node_id}{suffix}")
+            lines.append(
+                f"  - {edge_type} via {fragment_id}{fragment_suffix}: {node_id}{suffix}"
+            )
             continue
-        lines.append(f"  - {edge_type} via {fragment_id}: {node}")
+        lines.append(f"  - {edge_type} via {fragment_id}{fragment_suffix}: {node}")
     return lines or ["  - none"]
 
 
@@ -76,6 +82,7 @@ def _render_fragment_payload(payload: dict[str, object]) -> str:
     lines = [
         "Lineage Fragment",
         f"  fragment_id: {fragment.get('fragment_id')}",
+        f"  stored_fragment_id: {fragment.get('stored_fragment_id')}",
         f"  run_id: {fragment.get('run_id')}",
         f"  manifest_id: {fragment.get('manifest_id')}",
         f"  created_at: {fragment.get('created_at')}",
@@ -96,10 +103,15 @@ def _render_trace_payload(payload: dict[str, object]) -> str:
     """Render one trace payload in human-readable form."""
     fragment_ids = payload.get("fragment_ids")
     fragment_count = len(fragment_ids) if isinstance(fragment_ids, list) else 0
+    stored_fragment_ids = payload.get("stored_fragment_ids")
+    stored_fragment_count = (
+        len(stored_fragment_ids) if isinstance(stored_fragment_ids, list) else 0
+    )
     lines = [
         "Lineage Trace",
         f"  dataset_ref: {payload.get('dataset_ref')}",
         f"  fragments: {fragment_count}",
+        f"  stored_fragments: {stored_fragment_count}",
         "",
         "Upstream",
     ]
@@ -121,12 +133,17 @@ def _render_explain_payload(payload: dict[str, object]) -> str:
     """Render one run explanation payload in human-readable form."""
     fragment_ids = payload.get("fragment_ids")
     fragment_count = len(fragment_ids) if isinstance(fragment_ids, list) else 0
+    stored_fragment_ids = payload.get("stored_fragment_ids")
+    stored_fragment_count = (
+        len(stored_fragment_ids) if isinstance(stored_fragment_ids, list) else 0
+    )
     lines = [
         "Lineage Run",
         f"  identifier: {payload.get('identifier')}",
         f"  run_id: {payload.get('run_id')}",
         f"  manifest_id: {payload.get('manifest_id')}",
         f"  fragments: {fragment_count}",
+        f"  stored_fragments: {stored_fragment_count}",
         "",
         "Produced Datasets",
     ]

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING
@@ -25,6 +25,19 @@ if TYPE_CHECKING:
 def _stable_key_filename(key: str) -> str:
     """Return a filesystem-safe filename stem for one semantic key."""
     return hashlib.sha256(key.encode("utf-8")).hexdigest()
+
+
+def _build_stored_fragment_id(fragment: LineageGraphFragment) -> str:
+    """Return one occurrence-scoped stored fragment identity."""
+    anchors = [fragment.fragment_id]
+    if fragment.run_id is not None:
+        anchors.append(fragment.run_id)
+    if fragment.manifest_id is not None:
+        anchors.append(fragment.manifest_id)
+    if len(anchors) == 1:
+        return fragment.fragment_id
+    digest = hashlib.sha256("|".join(anchors).encode("utf-8")).hexdigest()[:12]
+    return f"{fragment.fragment_id}:occurrence:{digest}"
 
 
 def _load_fragment_ids(index_path: Path, *, key: str) -> list[str]:
@@ -58,29 +71,41 @@ class FileLineageStore(LineageStorePort):
         """Persist one fragment JSON and maintain lightweight lookup indexes."""
         fragments_dir = self.base_path / "fragments"
         fragments_dir.mkdir(parents=True, exist_ok=True)
-        fragment_path = self._fragment_path(fragment.fragment_id)
+        stored_fragment_id = fragment.stored_fragment_id or _build_stored_fragment_id(
+            fragment
+        )
+        persisted_fragment = replace(
+            fragment,
+            stored_fragment_id=stored_fragment_id,
+        )
+        fragment_path = self._fragment_path(stored_fragment_id)
         fragment_path.write_text(
-            json.dumps(fragment.to_dict(), indent=2, sort_keys=True),
+            json.dumps(persisted_fragment.to_dict(), indent=2, sort_keys=True),
             encoding="utf-8",
+        )
+        self._append_index(
+            self._semantic_fragment_index_path(fragment.fragment_id),
+            key=fragment.fragment_id,
+            fragment_id=stored_fragment_id,
         )
 
         if fragment.run_id is not None:
             self._append_index(
                 self._run_index_path(fragment.run_id),
                 key=fragment.run_id,
-                fragment_id=fragment.fragment_id,
+                fragment_id=stored_fragment_id,
             )
         if fragment.manifest_id is not None:
             self._append_index(
                 self._manifest_index_path(fragment.manifest_id),
                 key=fragment.manifest_id,
-                fragment_id=fragment.fragment_id,
+                fragment_id=stored_fragment_id,
             )
         for node in fragment.nodes:
             self._append_index(
                 self._node_index_path(node.node_id),
                 key=node.node_id,
-                fragment_id=fragment.fragment_id,
+                fragment_id=stored_fragment_id,
             )
 
     def get(self, fragment_id: str) -> LineageGraphFragment | None:
@@ -90,8 +115,24 @@ class FileLineageStore(LineageStorePort):
         try:
             fragment = self._load_fragment(fragment_id)
             if fragment is None:
-                status = "miss"
-                return None
+                stored_fragment_ids = _load_fragment_ids(
+                    self._semantic_fragment_index_path(fragment_id),
+                    key=fragment_id,
+                )
+                if not stored_fragment_ids:
+                    status = "miss"
+                    return None
+                if len(stored_fragment_ids) > 1:
+                    status = "failed"
+                    raise ValueError(
+                        "Semantic lineage fragment id resolves to multiple stored "
+                        "occurrence records; use run_id or manifest_id lookup for "
+                        "historical reconstruction"
+                    )
+                fragment = self._load_fragment(stored_fragment_ids[0])
+                if fragment is None:
+                    status = "miss"
+                    return None
             return fragment
         except (OSError, TypeError, ValueError):
             status = "failed"
@@ -187,6 +228,14 @@ class FileLineageStore(LineageStorePort):
         """Resolve the run-id index path."""
         return self.base_path / "_by_run_id" / f"{_stable_key_filename(run_id)}.jsonl"
 
+    def _semantic_fragment_index_path(self, fragment_id: str) -> Path:
+        """Resolve the semantic-fragment index path."""
+        return (
+            self.base_path
+            / "_by_fragment_id"
+            / f"{_stable_key_filename(fragment_id)}.jsonl"
+        )
+
     def _manifest_index_path(self, manifest_id: str) -> Path:
         """Resolve the manifest-id index path."""
         return (
@@ -234,4 +283,7 @@ class FileLineageStore(LineageStorePort):
         if not isinstance(payload, dict):
             raise ValueError("Lineage fragment payload must be a JSON object")
         fragment = LineageGraphFragment.from_dict(payload)
+        stored_fragment_id = fragment.stored_fragment_id
+        if stored_fragment_id is not None:
+            return fragment if stored_fragment_id == fragment_id else None
         return fragment if fragment.fragment_id == fragment_id else None

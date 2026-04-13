@@ -240,3 +240,44 @@ class TestValidateSilverPandera:
             _validate_silver_pandera(host, records, "test_table")
         host.logger.error.assert_called_once()
         host._metrics.increment_counter.assert_called_once()
+
+    def test_invalid_records_emit_canonical_silver_validation_metric(self) -> None:
+        """Validation failures should increment the shipped Silver alert metric."""
+        host = MagicMock()
+        host._silver_validator.validate.return_value = MagicMock(
+            valid=False, errors=["col 'x' is null"]
+        )
+        host._metrics = MagicMock()
+        records = [{"id": 1}]
+
+        with pytest.raises(SchemaViolationError):
+            _validate_silver_pandera(host, records, "test_table")
+
+        host._metrics.increment_counter.assert_called_once_with(
+            "bioetl_silver_validation_failures_total",
+            1,
+            {"table": "test_table", "pipeline": "test_table"},
+        )
+
+    def test_invalid_records_for_versioned_tables_emit_normalized_pipeline_label(
+        self,
+    ) -> None:
+        """Versioned table names should still expose stable pipeline labels."""
+        host = MagicMock()
+        host._silver_validator.validate.return_value = MagicMock(
+            valid=False, errors=["col 'x' is null"]
+        )
+        host._metrics = MagicMock()
+        records = [{"id": 1}]
+
+        with pytest.raises(SchemaViolationError):
+            _validate_silver_pandera(host, records, "chembl.activity__v1_0_0")
+
+        host._metrics.increment_counter.assert_called_once_with(
+            "bioetl_silver_validation_failures_total",
+            1,
+            {
+                "table": "chembl.activity__v1_0_0",
+                "pipeline": "chembl_activity",
+            },
+        )

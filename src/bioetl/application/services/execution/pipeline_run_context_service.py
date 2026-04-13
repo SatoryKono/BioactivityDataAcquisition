@@ -79,6 +79,8 @@ class PipelineRunContextService:
             pipeline_name=pipeline_name,
             run_id=run_id,
             run_type=RunType(options.run_type),
+            replay_of_run_id=options.replay_of_run_id,
+            replay_of_manifest_id=options.replay_of_manifest_id,
             resume=options.resume,
             start_offset=options.start_offset,
             limit=options.limit,

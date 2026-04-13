@@ -40,6 +40,7 @@ class LineageNodeRelationResult:
     """One upstream/downstream relation around a traced lineage node."""
 
     fragment_id: str
+    stored_fragment_id: str | None
     edge_type: str
     node: LineageNodeRef
 
@@ -47,6 +48,7 @@ class LineageNodeRelationResult:
         """Return a JSON/YAML-safe CLI payload."""
         return {
             "fragment_id": self.fragment_id,
+            "stored_fragment_id": self.stored_fragment_id,
             "edge_type": self.edge_type,
             "node": self.node.to_dict(),
         }
@@ -61,6 +63,7 @@ class LineageTraceResult:
 
     dataset_ref: str
     fragment_ids: tuple[str, ...]
+    stored_fragment_ids: tuple[str, ...] = ()
     upstream: tuple[LineageNodeRelationResult, ...] = ()
     downstream: tuple[LineageNodeRelationResult, ...] = ()
 
@@ -69,6 +72,7 @@ class LineageTraceResult:
         return {
             "dataset_ref": self.dataset_ref,
             "fragment_ids": list(self.fragment_ids),
+            "stored_fragment_ids": list(self.stored_fragment_ids),
             "upstream": [relation.to_dict() for relation in self.upstream],
             "downstream": [relation.to_dict() for relation in self.downstream],
         }
@@ -82,6 +86,7 @@ class LineageRunExplanationResult:
     run_id: str | None
     manifest_id: str | None
     fragment_ids: tuple[str, ...]
+    stored_fragment_ids: tuple[str, ...] = ()
     produced_datasets: tuple[LineageNodeRef, ...] = ()
     produced_bronze_batches: tuple[LineageNodeRef, ...] = ()
     transforms: tuple[LineageNodeRef, ...] = ()
@@ -96,6 +101,7 @@ class LineageRunExplanationResult:
             "run_id": self.run_id,
             "manifest_id": self.manifest_id,
             "fragment_ids": list(self.fragment_ids),
+            "stored_fragment_ids": list(self.stored_fragment_ids),
             "produced_datasets": [node.to_dict() for node in self.produced_datasets],
             "produced_bronze_batches": [
                 node.to_dict() for node in self.produced_bronze_batches
@@ -119,9 +125,14 @@ def _dedupe_relations(
     relations: list[LineageNodeRelationResult],
 ) -> tuple[LineageNodeRelationResult, ...]:
     """Deduplicate relations by fragment, edge semantics, and related node id."""
-    unique: dict[tuple[str, str, str], LineageNodeRelationResult] = {}
+    unique: dict[tuple[str, str, str, str | None], LineageNodeRelationResult] = {}
     for relation in relations:
-        key = (relation.fragment_id, relation.edge_type, relation.node.node_id)
+        key = (
+            relation.fragment_id,
+            relation.edge_type,
+            relation.node.node_id,
+            relation.stored_fragment_id,
+        )
         unique.setdefault(key, relation)
     return tuple(unique.values())
 
@@ -135,6 +146,7 @@ def _relation_for_edge(
     """Build one canonical relation payload for trace results."""
     return LineageNodeRelationResult(
         fragment_id=fragment.fragment_id,
+        stored_fragment_id=fragment.stored_fragment_id,
         edge_type=edge_type,
         node=node,
     )
@@ -221,6 +233,10 @@ class LineageInspectionService:
         return LineageTraceResult(
             dataset_ref=dataset_ref,
             fragment_ids=tuple(fragment.fragment_id for fragment in fragments),
+            stored_fragment_ids=tuple(
+                fragment.stored_fragment_id or fragment.fragment_id
+                for fragment in fragments
+            ),
             upstream=_dedupe_relations(upstream_relations),
             downstream=_dedupe_relations(downstream_relations),
         )
@@ -233,6 +249,10 @@ class LineageInspectionService:
             run_id=run_id,
             manifest_id=manifest_id,
             fragment_ids=tuple(fragment.fragment_id for fragment in fragments),
+            stored_fragment_ids=tuple(
+                fragment.stored_fragment_id or fragment.fragment_id
+                for fragment in fragments
+            ),
             produced_datasets=_resolve_produced_nodes(
                 fragments=fragments,
                 node_type=LineageNodeType.DATASET,

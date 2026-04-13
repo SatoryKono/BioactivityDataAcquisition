@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 
 from bioetl.domain.types import RunID
+from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["FileEffectiveConfigArtifactStore"]
 
@@ -24,14 +26,21 @@ class FileEffectiveConfigArtifactStore:
         artifact_path = self.base_path / f"{artifact_id}.json"
         run_index_dir = self.base_path / "_by_run_id"
         run_index_path = run_index_dir / f"{run_id}.txt"
+        failed_path = artifact_path
 
         self.base_path.mkdir(parents=True, exist_ok=True)
         run_index_dir.mkdir(parents=True, exist_ok=True)
-        artifact_path.write_text(
-            json.dumps(payload, indent=2, sort_keys=True),
-            encoding="utf-8",
-        )
-        run_index_path.write_text(artifact_id, encoding="utf-8")
+        try:
+            atomic_write_text(
+                artifact_path,
+                json.dumps(payload, indent=2, sort_keys=True),
+            )
+            failed_path = run_index_path
+            atomic_write_text(run_index_path, artifact_id)
+        except (OSError, TypeError, ValueError):
+            if failed_path == run_index_path:
+                self._rollback_artifact_file(artifact_path)
+            raise
 
     def get(self, artifact_id: str) -> dict[str, object] | None:
         """Load one artifact payload by identifier."""
@@ -52,3 +61,10 @@ class FileEffectiveConfigArtifactStore:
         if not artifact_id:
             return None
         return self.get(artifact_id)
+
+    @staticmethod
+    def _rollback_artifact_file(artifact_path: Path) -> None:
+        """Remove a persisted artifact file when a later consistency step fails."""
+        with suppress(OSError):
+            if artifact_path.exists():
+                artifact_path.unlink()

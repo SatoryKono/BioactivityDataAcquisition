@@ -123,7 +123,7 @@ class ShutdownService:
 
         if self.metrics is not None:
             self.metrics.increment_counter(
-                "shutdown_initiated",
+                "bioetl_shutdown_initiated",
                 value=1,
                 labels={"reason": self._reason.value},
             )
@@ -184,7 +184,7 @@ class ShutdownService:
 
         if self.metrics is not None:
             self.metrics.increment_counter(
-                "shutdown_completed",
+                "bioetl_shutdown_completed",
                 value=1,
                 labels={"reason": self._reason.value},
             )

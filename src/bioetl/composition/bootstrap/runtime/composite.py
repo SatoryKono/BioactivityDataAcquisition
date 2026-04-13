@@ -64,7 +64,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
 
 __all__ = [
     "CompositeRuntimeConfig",
@@ -80,6 +80,7 @@ class _CompositeBootstrapPlan:
     run_id: str
     logger: LoggerPort
     metrics: MetricsPort
+    tracer: TracingPort
     lock: LockPort
     seed_runner_factory: Callable[[], PipelineRunner]
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
@@ -143,6 +144,9 @@ def _bootstrap_runtime_basics(
     from bioetl.composition.bootstrap.runtime.observability import (
         bootstrap_logger_port,
     )
+    from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
+        bootstrap_tracer_port,
+    )
     from bioetl.infrastructure.config import get_settings
     from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
@@ -157,6 +161,7 @@ def _bootstrap_runtime_basics(
                 log_level=level,
             )
         ),
+        tracer_bootstrapper=bootstrap_tracer_port,
         storage_bootstrapper=bootstrap_storage_adapter,
         lock_factory=MemoryLock,
         uuid_factory=uuid4,
@@ -242,6 +247,7 @@ def _build_composite_bootstrap_plan(
         run_id=infra_context.run_id,
         logger=infra_context.logger,
         metrics=infra_context.metrics,
+        tracer=infra_context.tracer,
         lock=infra_context.lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
@@ -263,6 +269,7 @@ def _create_composite_runner_from_plan(
         run_id=plan.run_id,
         logger=plan.logger,
         metrics=plan.metrics,
+        tracer=plan.tracer,
         lock=plan.lock,
         seed_runner_factory=plan.seed_runner_factory,
         dependencies_runner_factory=plan.dependencies_runner_factory,

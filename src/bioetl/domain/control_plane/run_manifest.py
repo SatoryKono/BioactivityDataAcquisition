@@ -107,6 +107,8 @@ class RunManifest:
     runtime_config: dict[str, object]
     resolved_config: dict[str, object]
     code_provenance: RunCodeProvenance
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
     replay_capability: ReplayCapability = ReplayCapability.REBUILD_ONLY
     source_refs: tuple[RunSourceRef, ...] = ()
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
@@ -143,6 +145,10 @@ class RunManifest:
             runtime_config=_load_object_mapping(payload.get("runtime_config")),
             resolved_config=_load_object_mapping(payload.get("resolved_config")),
             code_provenance=_load_code_provenance(payload.get("code_provenance")),
+            replay_of_run_id=_load_optional_str(payload, "replay_of_run_id"),
+            replay_of_manifest_id=_load_optional_str(
+                payload, "replay_of_manifest_id"
+            ),
             replay_capability=_load_replay_capability(payload.get("replay_capability")),
             source_refs=_load_source_refs(payload.get("source_refs")),
             planned_artifacts=_load_artifacts(payload.get("planned_artifacts")),

@@ -189,6 +189,8 @@ curl http://localhost:8000/metrics | grep bioetl_
 | `bioetl_control_plane_manifest_writes_total`   | Counter | pipeline, run_type, status               | Попытки записи immutable run manifest                                             |
 | `bioetl_control_plane_ledger_appends_total`    | Counter | pipeline, event_type, status             | Попытки append в run ledger                                                       |
 | `bioetl_checkpoint_compatibility_events_total` | Counter | pipeline, disposition                    | Исходы compatibility policy при resume                                            |
+| `bioetl_checkpoint_save_events_total`          | Counter | pipeline, operation, status              | Исходы checkpoint save paths (`periodic`, `exception`, `shutdown`, `manual`, composite stage transitions) |
+| `bioetl_checkpoint_save_duration_seconds`      | Histogram | pipeline, operation, status            | Длительность checkpoint save operations                                           |
 | `bioetl_lineage_fragments_emitted_total`       | Counter | pipeline, layer, status                  | Попытки публикации lineage fragments                                              |
 | `bioetl_lineage_refs_missing_total`            | Counter | pipeline, layer, ref_type                | Missing upstream lineage references during persistence                            |
 | `bioetl_composite_source_selection_total`      | Counter | pipeline, decision_type, selected_source | Low-cardinality composite source-selection decisions during composite persistence |
@@ -227,7 +229,7 @@ checkpoint compatibility и read failures. Основной операторск
 | `bioetl_bronze_records_written_total`     | Counter   | provider, entity | Записи в Bronze            |
 | `bioetl_bronze_bytes_written_total`       | Counter   | provider, entity | Байты в Bronze             |
 | `bioetl_policy_violations_total`          | Counter   | layer, mode      | Нарушения политик          |
-| `bioetl_silver_validation_failures_total` | Counter   | table, pipeline  | Ошибки валидации Silver    |
+| `bioetl_silver_validation_failures_total` | Counter   | table, pipeline  | Canonical Silver Pandera validation failures; increments on failed Silver schema validation outcome before `SchemaViolationError` |
 
 #### Input Filter Metrics
 

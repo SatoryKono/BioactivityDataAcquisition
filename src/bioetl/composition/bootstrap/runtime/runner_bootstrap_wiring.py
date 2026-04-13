@@ -11,7 +11,7 @@ from bioetl.application.composite.runtime_wiring_api import (
     CompositePipelineRunnerService,
 )
 from bioetl.domain.composite.config import CompositeConfig
-from bioetl.domain.ports import LoggerPort, MetricsPort
+from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
     import polars as pl
@@ -32,6 +32,7 @@ class _BootstrapRuntimeBasics:
     settings: Settings
     logger: LoggerPort
     metrics: MetricsPort
+    tracer: TracingPort
     storage: object
     lock: LockPort
 
@@ -69,13 +70,13 @@ def _build_bootstrap_support_services(
 def _resolve_bootstrap_runtime_basics(
     *,
     bootstrap_runtime_basics_fn: Callable[
-        ..., tuple[str, Settings, LoggerPort, MetricsPort, object, LockPort]
+        ..., tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
     ],
     config: CompositeConfig,
     run_id: str | None,
 ) -> _BootstrapRuntimeBasics:
     """Resolve the named runtime-basics bundle for bootstrap assembly."""
-    effective_run_id, settings, logger, metrics, storage, lock = (
+    effective_run_id, settings, logger, metrics, tracer, storage, lock = (
         bootstrap_runtime_basics_fn(
             config=config,
             run_id=run_id,
@@ -86,6 +87,7 @@ def _resolve_bootstrap_runtime_basics(
         settings=settings,
         logger=logger,
         metrics=metrics,
+        tracer=tracer,
         storage=storage,
         lock=lock,
     )
@@ -126,6 +128,7 @@ def _create_bootstrapped_composite_runner(
     run_id: str,
     logger: LoggerPort,
     metrics: MetricsPort,
+    tracer: TracingPort,
     lock: LockPort,
     seed_runner_factory: Callable[[], PipelineRunner],
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
@@ -139,6 +142,7 @@ def _create_bootstrapped_composite_runner(
         run_id=run_id,
         logger=logger,
         metrics=metrics,
+        tracer=tracer,
         lock=lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
@@ -153,7 +157,7 @@ def bootstrap_composite_runner_via_wiring(
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
     bootstrap_runtime_basics_fn: Callable[
-        ..., tuple[str, Settings, LoggerPort, MetricsPort, object, LockPort]
+        ..., tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
     ],
     build_runner_factories_fn: Callable[
         ...,
@@ -194,6 +198,7 @@ def bootstrap_composite_runner_via_wiring(
         run_id=runtime_basics.run_id,
         logger=runtime_basics.logger,
         metrics=runtime_basics.metrics,
+        tracer=runtime_basics.tracer,
         lock=runtime_basics.lock,
         seed_runner_factory=runner_factories.seed_factory,
         dependencies_runner_factory=runner_factories.dependency_factory,

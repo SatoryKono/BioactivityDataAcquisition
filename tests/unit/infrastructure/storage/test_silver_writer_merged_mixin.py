@@ -36,7 +36,14 @@ class TestSilverWriterMergedMixin:
     ) -> None:
         """Merged write prep should use canonical order unless preservation is requested."""
         host = _MergedHost()
-        records = [{"name": "Alice", "_run_id": "run-1", "id": 1}]
+        records = [
+            {
+                "name": "Alice",
+                "_run_id": "run-1",
+                "_run_type": "backfill",
+                "id": 1,
+            }
+        ]
 
         prepared = host._prepare_merged_silver_write(
             request=_MergedSilverWriteRequest(
@@ -51,6 +58,7 @@ class TestSilverWriterMergedMixin:
             ["name", "id"]
         )
         assert "_run_id" not in prepared.arrow_table.column_names
+        assert "_run_type" not in prepared.arrow_table.column_names
 
     def test_prepare_merged_silver_write_preserves_input_order_when_requested(
         self,

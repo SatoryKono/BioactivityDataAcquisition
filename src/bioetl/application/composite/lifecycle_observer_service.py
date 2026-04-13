@@ -8,21 +8,23 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any
 
+from bioetl.application.composite._lifecycle_observer_tracing_mixin import (
+    CompositeLifecycleTracingMixin,
+    _CompositeSpanHandleProtocol,
+)
 from bioetl.domain.events import PipelineEvent
-from bioetl.domain.observability_contract import build_observability_contract_payload
-from bioetl.domain.ports import LoggerPort, MetricsPort
+from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 __all__ = ["CompositeLifecycleObserverService"]
 
-
 @dataclass(slots=True)
-class CompositeLifecycleObserverService:
+class CompositeLifecycleObserverService(CompositeLifecycleTracingMixin):
     """Emit canonical composite lifecycle events through contract-aware seams."""
 
     logger: LoggerPort
     metrics: MetricsPort | None = None
+    tracer: TracingPort | None = None
     _run_start_times: dict[str, float] = field(
         init=False,
         default_factory=dict,
@@ -33,138 +35,21 @@ class CompositeLifecycleObserverService:
         default_factory=dict,
         repr=False,
     )
-
-    @staticmethod
-    def _normalize_severity(level: str) -> str:
-        """Normalize severity to the bounded contract vocabulary."""
-        normalized = level.strip().lower()
-        if normalized in {"debug", "info", "warning", "error"}:
-            return normalized
-        return "info"
-
-    @staticmethod
-    def _pipeline_name(composite_name: str) -> str:
-        """Return the canonical composite pipeline name for observability."""
-        return f"composite:{composite_name}"
-
-    @staticmethod
-    def _filter_reserved_context(
-        context: dict[str, object],
-        *,
-        reserved_keys: set[str] | None = None,
-    ) -> dict[str, object]:
-        """Drop reserved contract keys from caller-provided event context."""
-        reserved = reserved_keys or {"composite", "run_id"}
-        return {key: value for key, value in context.items() if key not in reserved}
-
-    def _emit_contract_event(
-        self,
-        event_name: str,
-        *,
-        composite_name: str,
-        run_id: str,
-        severity: str,
-        **context: Any,
-    ) -> None:
-        """Emit one lifecycle event through the canonical observability contract."""
-        normalized_severity = self._normalize_severity(severity)
-        payload = build_observability_contract_payload(
-            event_name=event_name,
-            context=context,
-            default_provider="composite",
-            default_pipeline=self._pipeline_name(composite_name),
-            default_run_id=run_id,
-            default_severity=normalized_severity,
-            correlation_defaults={
-                "entity": composite_name,
-                "run_type": "composite",
-                "composite_run_id": run_id,
-            },
-        )
-        log_context = dict(payload.context)
-        log_context.pop("event", None)
-        log_method = getattr(self.logger, normalized_severity, self.logger.info)
-        log_method(event_name, **log_context)
-        if self.metrics is None:
-            return
-        self.metrics.increment_counter(
-            "bioetl_observability_events_total",
-            1,
-            labels=payload.metric_labels,
-        )
-
-    def _record_pipeline_terminal_metrics(
-        self,
-        *,
-        composite_name: str,
-        duration_seconds: float | None,
-        status: str,
-    ) -> None:
-        """Emit composite run duration and terminal counter metrics."""
-        if self.metrics is None:
-            return
-        pipeline_name = self._pipeline_name(composite_name)
-        if duration_seconds is not None:
-            self.metrics.observe_histogram(
-                "bioetl_pipeline_duration_seconds",
-                duration_seconds,
-                labels={
-                    "pipeline": pipeline_name,
-                    "stage": "pipeline",
-                    "run_type": "composite",
-                    "status": status,
-                },
-            )
-        self.metrics.increment_counter(
-            "bioetl_pipeline_runs_total",
-            1,
-            labels={
-                "pipeline": pipeline_name,
-                "run_type": "composite",
-                "status": status,
-            },
-        )
-
-    def _record_phase_duration(
-        self,
-        *,
-        composite_name: str,
-        phase_name: str,
-        duration_seconds: float,
-        status: str,
-    ) -> None:
-        """Emit composite phase duration metric."""
-        if self.metrics is None:
-            return
-        self.metrics.observe_histogram(
-            "bioetl_phase_duration_seconds",
-            duration_seconds,
-            labels={
-                "pipeline": self._pipeline_name(composite_name),
-                "phase": phase_name,
-                "status": status,
-            },
-        )
-
-    def _clear_run_state(self, run_id: str) -> None:
-        """Drop cached monotonic timing state for one composite run."""
-        self._run_start_times.pop(run_id, None)
-        stale_phase_keys = [
-            phase_key for phase_key in self._phase_start_times if phase_key[0] == run_id
-        ]
-        for phase_key in stale_phase_keys:
-            self._phase_start_times.pop(phase_key, None)
-
-    def _resolve_run_duration(self, run_id: str) -> float | None:
-        """Return elapsed monotonic runtime if the run start was observed."""
-        start_time = self._run_start_times.get(run_id)
-        if start_time is None:
-            return None
-        return time.monotonic() - start_time
+    _run_spans: dict[str, _CompositeSpanHandleProtocol] = field(
+        init=False,
+        default_factory=dict,
+        repr=False,
+    )
+    _phase_spans: dict[tuple[str, str], _CompositeSpanHandleProtocol] = field(
+        init=False,
+        default_factory=dict,
+        repr=False,
+    )
 
     def emit_run_started(self, *, composite_name: str, run_id: str) -> None:
         """Emit the canonical composite run start event."""
         self._run_start_times[run_id] = time.monotonic()
+        self._start_run_span(composite_name=composite_name, run_id=run_id)
         self._emit_contract_event(
             PipelineEvent.START,
             composite_name=composite_name,
@@ -209,6 +94,17 @@ class CompositeLifecycleObserverService:
             duration_seconds=duration_seconds,
             status="failed",
         )
+        self._close_active_phase_spans_for_run(
+            run_id=run_id,
+            status="failed",
+            error=error,
+        )
+        self._close_run_span(
+            run_id=run_id,
+            status="failed",
+            duration_seconds=duration_seconds,
+            error=error,
+        )
         self._clear_run_state(run_id)
 
     def emit_run_shutdown(
@@ -244,6 +140,17 @@ class CompositeLifecycleObserverService:
             duration_seconds=duration_seconds,
             status="shutdown",
         )
+        self._close_active_phase_spans_for_run(
+            run_id=run_id,
+            status="shutdown",
+            error=error,
+        )
+        self._close_run_span(
+            run_id=run_id,
+            status="shutdown",
+            duration_seconds=duration_seconds,
+            error=error,
+        )
         self._clear_run_state(run_id)
 
     def emit_phase_started(
@@ -256,6 +163,11 @@ class CompositeLifecycleObserverService:
     ) -> None:
         """Emit one composite phase-start lifecycle event."""
         self._phase_start_times[(run_id, phase_name)] = time.monotonic()
+        self._start_phase_span(
+            composite_name=composite_name,
+            run_id=run_id,
+            phase_name=phase_name,
+        )
         log_kwargs: dict[str, object] = {
             "phase": phase_name,
             "composite": composite_name,
@@ -309,6 +221,12 @@ class CompositeLifecycleObserverService:
                 duration_seconds=duration_seconds,
                 status="success",
             )
+        self._close_phase_span(
+            run_id=run_id,
+            phase_name=phase_name,
+            status="success",
+            duration_seconds=duration_seconds,
+        )
 
     def emit_run_completed(
         self,
@@ -339,5 +257,14 @@ class CompositeLifecycleObserverService:
             composite_name=composite_name,
             duration_seconds=duration_seconds,
             status="success",
+        )
+        self._close_active_phase_spans_for_run(
+            run_id=run_id,
+            status=status,
+        )
+        self._close_run_span(
+            run_id=run_id,
+            status=status,
+            duration_seconds=duration_seconds,
         )
         self._clear_run_state(run_id)
