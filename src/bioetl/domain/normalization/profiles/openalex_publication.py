@@ -56,6 +56,18 @@ _SET_LIKE_FIELDS = frozenset(
         "subject_mesh",
     }
 )
+_JSON_STRING_FIELDS = frozenset(
+    {
+        "affiliation_list",
+        "author_openalex_ids",
+        "author_orcids",
+        "authors",
+        "grants",
+        "primary_topic",
+        "ror_ids",
+        "subject_topics",
+    }
+)
 
 OPENALEX_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="openalex.publication",
@@ -71,6 +83,7 @@ OPENALEX_PUBLICATION_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
+    json_string_fields=_JSON_STRING_FIELDS,
 )
 
 OPENALEX_PUBLICATION_PROFILE.assert_covers_schema(OPENALEX_PUBLICATION_SCHEMA_FIELDS)

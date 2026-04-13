@@ -11,6 +11,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_int,
     normalize_profile_isomeric_smiles,
     normalize_profile_json_string,
+    normalize_profile_passthrough,
     normalize_profile_pmc_id,
     normalize_profile_pmid,
     normalize_profile_smiles,
@@ -26,6 +27,12 @@ def test_normalize_profile_text_trims_blank_to_none() -> None:
 
 def test_normalize_profile_json_string_canonicalizes_order() -> None:
     assert normalize_profile_json_string(' { "b": 2, "a": 1 } ') == '{"a":1,"b":2}'
+
+
+def test_normalize_profile_passthrough_preserves_value() -> None:
+    marker = object()
+    assert normalize_profile_passthrough(marker) is marker
+    assert normalize_profile_passthrough("  x  ") == "  x  "
 
 
 def test_normalize_profile_title_and_abstract_clean_html_and_whitespace() -> None:

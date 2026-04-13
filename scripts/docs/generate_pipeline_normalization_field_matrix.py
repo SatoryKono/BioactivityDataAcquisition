@@ -170,7 +170,22 @@ def _looks_like_string_type(type_name: str) -> bool:
     return "string" in lowered or "large_string" in lowered
 
 
-def _normalize_summary_from_policy(*, trim: bool, lowercase: bool) -> str:
+def _normalize_summary_from_policy(*, key: str, trim: bool, lowercase: bool) -> str:
+    if key == "doi":
+        return (
+            "Validate DOI through the canonical domain identifier contract, then "
+            "emit lowercase join-canonical text."
+        )
+    if key == "pmid":
+        return (
+            "Validate PMID through the canonical domain identifier contract, then "
+            "emit digits-only join-canonical text."
+        )
+    if key == "pmc_id":
+        return (
+            "Validate PMC identifier through the canonical domain identifier "
+            "contract, then emit lowercase join-canonical text."
+        )
     if trim and lowercase:
         return "Trim surrounding whitespace and lowercase join-key text."
     if trim:
@@ -382,6 +397,7 @@ def _build_composite_rows_for_pipeline(
             source = "composite_join_key_policy"
             normalizer = "join_key_policy"
             summary = _normalize_summary_from_policy(
+                key=field_name,
                 trim=policy.trim,
                 lowercase=policy.lowercase,
             )

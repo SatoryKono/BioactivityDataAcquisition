@@ -68,6 +68,18 @@ _INT_FIELDS = frozenset(
     }
 )
 _SET_LIKE_FIELDS = frozenset({"subject_keywords"})
+_JSON_STRING_FIELDS = frozenset(
+    {
+        "affiliation_list",
+        "alternative_id",
+        "author_details",
+        "author_orcids",
+        "authors",
+        "content_domain_domains",
+        "issn_list",
+        "references",
+    }
+)
 
 CROSSREF_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="crossref.publication",
@@ -82,6 +94,7 @@ CROSSREF_PUBLICATION_PROFILE = build_standard_profile(
     date_fields=_DATE_FIELDS,
     int_fields=_INT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
+    json_string_fields=_JSON_STRING_FIELDS,
 )
 
 CROSSREF_PUBLICATION_PROFILE.assert_covers_schema(CROSSREF_PUBLICATION_SCHEMA_FIELDS)

@@ -75,6 +75,19 @@ _INT_FIELDS = frozenset(
     }
 )
 _SET_LIKE_FIELDS = frozenset({"publication_types", "subject_keywords", "subject_mesh"})
+_JSON_STRING_FIELDS = frozenset(
+    {
+        "affiliation_list",
+        "affiliation_structured",
+        "author_orcids",
+        "authors",
+        "authors_with_affiliations",
+        "chemicals",
+        "databanks",
+        "gene_symbols",
+        "publication_type_list",
+    }
+)
 
 PUBMED_PUBLICATION_PROFILE = build_standard_profile(
     profile_name="pubmed.publication",
@@ -89,6 +102,7 @@ PUBMED_PUBLICATION_PROFILE = build_standard_profile(
     date_fields=_DATE_FIELDS,
     int_fields=_INT_FIELDS,
     set_like_fields=_SET_LIKE_FIELDS,
+    json_string_fields=_JSON_STRING_FIELDS,
 )
 
 PUBMED_PUBLICATION_PROFILE.assert_covers_schema(PUBMED_PUBLICATION_SCHEMA_FIELDS)

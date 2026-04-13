@@ -95,6 +95,22 @@ def get_join_key_normalization_policy(
     return normalization_policies.get(key)
 
 
+def _apply_join_key_policy(
+    value: str,
+    policy: JoinKeyNormalizationPolicy,
+) -> str | None:
+    """Normalize one string value according to a resolved join-key policy."""
+    if policy.domain_canonicalizer is not None:
+        normalized = policy.domain_canonicalizer(value)
+        if normalized is None:
+            return None
+    elif policy.trim:
+        normalized = value.strip()
+    else:
+        normalized = value
+    return normalized.lower() if policy.lowercase else normalized
+
+
 def normalize_join_key_text(
     value: str,
     *,
@@ -111,14 +127,7 @@ def normalize_join_key_text(
     if policy is None:
         return value
 
-    normalized = value
-    if policy.domain_canonicalizer is not None:
-        normalized = policy.domain_canonicalizer(value)
-        if normalized is None:
-            return None
-    elif policy.trim:
-        normalized = value.strip()
-    return normalized.lower() if policy.lowercase else normalized
+    return _apply_join_key_policy(value, policy)
 
 
 def normalize_join_key_scalar(

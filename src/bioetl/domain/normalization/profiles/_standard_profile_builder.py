@@ -185,7 +185,6 @@ def _rule_family_specs(
     json_string_fields: frozenset[str],
 ) -> tuple[RuleFamilySpec, ...]:
     """Return ordered field-family rules used by the standard profile builder."""
-    effective_json_string_fields = frozenset(json_string_fields | set_like_fields)
     return (
         (
             title_fields,
@@ -228,7 +227,12 @@ def _rule_family_specs(
             "Coerce stable float semantics and remove NaN/Inf noise.",
         ),
         (
-            effective_json_string_fields,
+            set_like_fields,
+            normalize_profile_json_string,
+            "Canonicalize JSON; when represented as an array, treat item order as set-like for content_hash.",
+        ),
+        (
+            json_string_fields,
             normalize_profile_json_string,
             "Canonicalize JSON-bearing string payloads after textual cleanup.",
         ),
