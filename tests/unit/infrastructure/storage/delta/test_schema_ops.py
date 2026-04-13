@@ -7,7 +7,7 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
 )
 
 
-def test_drop_nondeterministic_persisted_fields_keeps_runtime_provenance() -> None:
+def test_drop_nondeterministic_persisted_fields_removes_runtime_provenance() -> None:
     table = pa.table(
         {
             "entity_id": ["chembl:1"],
@@ -22,10 +22,4 @@ def test_drop_nondeterministic_persisted_fields_keeps_runtime_provenance() -> No
 
     result = drop_nondeterministic_persisted_fields(table)
 
-    assert result.column_names == [
-        "entity_id",
-        "_run_id",
-        "_run_type",
-        "_source_batch_id",
-        "_ingestion_ts",
-    ]
+    assert result.column_names == ["entity_id"]
