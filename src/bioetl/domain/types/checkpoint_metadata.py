@@ -181,7 +181,9 @@ class CheckpointMetadata:
         snapshot_fingerprint = (
             self.input_snapshot_fingerprint
             if self.input_snapshot_fingerprint is not None
-            else compute_input_snapshot_identity_fingerprint(list(self.input_snapshot_ids))
+            else compute_input_snapshot_identity_fingerprint(
+                list(self.input_snapshot_ids)
+            )
         )
         normalized_payload = normalize_execution_identity_payload(
             {
@@ -198,9 +200,7 @@ class CheckpointMetadata:
             }
         )
         return {
-            key: value
-            for key, value in normalized_payload.items()
-            if value is not None
+            key: value for key, value in normalized_payload.items() if value is not None
         }
 
     def checkpoint_execution_identity_fingerprint(self) -> str | None:

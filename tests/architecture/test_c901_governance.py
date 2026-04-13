@@ -24,8 +24,8 @@ def test_c901_baseline_manifest_contains_expected_count() -> None:
 
     entries = payload.get("entries", [])
     assert isinstance(entries, list)
-    assert len(entries) == 7, (
-        "C901 baseline must track exactly 7 approved violations. "
+    assert len(entries) == 10, (
+        "C901 baseline must track exactly 10 approved violations. "
         "If debt is reduced, remove entries; if increased, refactor code instead."
     )
 

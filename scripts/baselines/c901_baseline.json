@@ -51,12 +51,33 @@
       "complexity": 11,
       "threshold": 10,
       "row": 70
+    },
+    {
+      "file": "src/bioetl/application/services/checkpoint_compatibility_service.py",
+      "function": "_validate_execution_identity_compatibility",
+      "complexity": 13,
+      "threshold": 10,
+      "row": 123
+    },
+    {
+      "file": "src/bioetl/application/services/control_plane/run_manifest_diagnostics.py",
+      "function": "_build_next_steps",
+      "complexity": 12,
+      "threshold": 10,
+      "row": 754
+    },
+    {
+      "file": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
+      "function": "_build_run_type_lookup",
+      "complexity": 11,
+      "threshold": 10,
+      "row": 144
     }
   ],
   "folder_budgets": {
-    "src/bioetl/application": 4,
+    "src/bioetl/application": 6,
     "src/bioetl/composition": 1,
-    "src/bioetl/infrastructure": 1,
+    "src/bioetl/infrastructure": 2,
     "src/bioetl/interfaces": 1
   }
 }

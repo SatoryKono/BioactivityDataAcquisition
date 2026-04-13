@@ -29,9 +29,7 @@ _META_FIELDS = frozenset(
         "_dq_warn",
     }
 )
-_INT_FIELDS = frozenset(
-    {"component_id", "taxonomy_id", "protein_classification_id"}
-)
+_INT_FIELDS = frozenset({"component_id", "taxonomy_id", "protein_classification_id"})
 
 CHEMBL_TARGET_COMPONENT_PROFILE = build_standard_profile(
     profile_name="chembl.target_component",

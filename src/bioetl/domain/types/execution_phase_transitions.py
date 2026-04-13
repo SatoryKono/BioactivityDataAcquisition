@@ -27,7 +27,9 @@ def build_transition_table(
     execution_phase: _ExecutionPhaseNamespace[PhaseT],
     phase_transition: _PhaseTransitionNamespace[TransitionT],
     transition_policy: _TransitionPolicyNamespace[PolicyT],
-    phase_transition_rule: _PhaseTransitionRuleBuilder[PhaseT, TransitionT, PolicyT, RuleT],
+    phase_transition_rule: _PhaseTransitionRuleBuilder[
+        PhaseT, TransitionT, PolicyT, RuleT
+    ],
 ) -> dict[PhaseT, list[RuleT]]:
     """Build transition table for ``CompositeFSM`` without coupling to class names."""
     return {

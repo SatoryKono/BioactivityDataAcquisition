@@ -16,9 +16,7 @@ __all__ = [
     "PUBCHEM_COMPOUND_SCHEMA_FIELDS",
 ]
 
-PUBCHEM_COMPOUND_SCHEMA_FIELDS = tuple(
-    PubchemMoleculeSchema.to_schema().columns.keys()
-)
+PUBCHEM_COMPOUND_SCHEMA_FIELDS = tuple(PubchemMoleculeSchema.to_schema().columns.keys())
 
 _META_FIELDS = frozenset(
     {

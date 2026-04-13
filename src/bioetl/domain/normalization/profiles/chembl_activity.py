@@ -105,7 +105,10 @@ CHEMBL_ACTIVITY_PROFILE = NormalizationProfile(
         "Canonical field-level normalization policy for the ChEMBL Activity Silver schema."
     ),
     meta_fields=META_FIELDS,
-    field_rules={field_name: _rule_for_field(field_name) for field_name in CHEMBL_ACTIVITY_SCHEMA_FIELDS},
+    field_rules={
+        field_name: _rule_for_field(field_name)
+        for field_name in CHEMBL_ACTIVITY_SCHEMA_FIELDS
+    },
 )
 
 CHEMBL_ACTIVITY_PROFILE.assert_covers_schema(CHEMBL_ACTIVITY_SCHEMA_FIELDS)
