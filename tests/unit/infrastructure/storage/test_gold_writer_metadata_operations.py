@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
@@ -22,6 +23,14 @@ from bioetl.infrastructure.storage.gold.metadata_operations import (
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
+
+
+def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
+    """Create metadata mocks compatible with MetadataLineageBundle identity checks."""
+    metadata = MagicMock()
+    metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
+    metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    return metadata
 
 
 @pytest.mark.unit
@@ -78,7 +87,7 @@ class TestPrepareGoldMetadataWrite:
 
     def test_resolves_provider_entity_and_builds_metadata(self) -> None:
         """Should call host methods to resolve provider/entity and build metadata."""
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         class _Coordinator:
             def create_gold_metadata_bundle(
@@ -160,7 +169,7 @@ class TestPrepareGoldMetadataWrite:
                 _ = input_data
                 return metadata
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
         fragment = make_produced_artifact_fragment(
             fragment_id="gold:fragment-1",
             layer="gold",
@@ -197,7 +206,7 @@ class TestPersistGoldMetadataWrite:
     async def test_calls_write_gold_metadata_file(self) -> None:
         """Should delegate to host._write_gold_metadata_file."""
         host = AsyncMock()
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         from bioetl.domain.medallion import GoldWriteMode
 
@@ -224,7 +233,7 @@ class TestPersistGoldMetadataWrite:
         """Prepared lineage fragments should be written after metadata handoff."""
         host = AsyncMock()
         host._lineage_store = MagicMock()
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
         fragment = LineageGraphFragment(
             fragment_id="gold:fragment-2",
             created_at=datetime.now(UTC),
@@ -258,7 +267,7 @@ class TestPersistGoldMetadataWrite:
         host = AsyncMock()
         host._lineage_store = None
         host._metrics = MagicMock()
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         from bioetl.domain.medallion import GoldWriteMode
 
@@ -282,7 +291,7 @@ class TestPersistGoldMetadataWrite:
         await _persist_gold_metadata_write(host, prepared)
 
         host._metrics.increment_counter.assert_called_once_with(
-            "lineage_refs_missing_total",
+            "bioetl_lineage_refs_missing_total",
             1,
             {
                 "pipeline": "chembl_compound",
@@ -298,7 +307,7 @@ class TestPersistGoldMetadataWrite:
         host = AsyncMock()
         host._lineage_store = None
         host._metrics = MagicMock()
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
         request = _GoldMergedMetadataWriteRequest(
             table_path="/tmp/gold/composite/publication",
             table_name="composite.publication",
@@ -400,7 +409,7 @@ class TestMaybePrepareGoldMergedMetadataWrite:
             _maybe_prepare_gold_merged_metadata_write(host, request)
 
     def test_prepares_merged_metadata_via_module_helper(self) -> None:
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         class _Coordinator:
             def create_gold_metadata_bundle(

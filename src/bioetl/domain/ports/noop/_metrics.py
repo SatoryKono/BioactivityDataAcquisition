@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.ports.observability.metrics import (
-    MetricLabels,
-    resolve_metric_labels,
-)
+from bioetl.domain.ports.observability.metrics import MetricLabels
 
 
 class NoOpMetrics:
@@ -42,9 +39,6 @@ class NoOpMetrics:
         name: str,
         value: float,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """No-op implementation — discards the histogram observation.
 
@@ -52,11 +46,8 @@ class NoOpMetrics:
             name: Metric name (ignored).
             value: Observed value (ignored).
             labels: Canonical metric labels (ignored).
-            _labels: Legacy alias for ``labels`` retained for compatibility.
-            tags: Legacy alias for ``labels`` retained for compatibility.
         """
-        resolved_labels = resolve_metric_labels(labels or _labels or tags)
-        del name, value, resolved_labels
+        del name, value, labels
         return None
 
     def increment_counter(
@@ -64,9 +55,6 @@ class NoOpMetrics:
         name: str,
         value: int,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """No-op implementation — discards the counter increment.
 
@@ -74,11 +62,8 @@ class NoOpMetrics:
             name: Counter metric name (ignored).
             value: Increment value (ignored).
             labels: Canonical metric labels (ignored).
-            _labels: Legacy alias for ``labels`` retained for compatibility.
-            tags: Legacy alias for ``labels`` retained for compatibility.
         """
-        resolved_labels = resolve_metric_labels(labels or _labels or tags)
-        del name, value, resolved_labels
+        del name, value, labels
         return None
 
     def set_gauge(
@@ -86,9 +71,6 @@ class NoOpMetrics:
         name: str,
         value: float,
         labels: MetricLabels | None = None,
-        *,
-        _labels: MetricLabels | None = None,
-        tags: MetricLabels | None = None,
     ) -> None:
         """No-op implementation — discards the gauge value.
 
@@ -96,11 +78,8 @@ class NoOpMetrics:
             name: Gauge metric name (ignored).
             value: Gauge value to set (ignored).
             labels: Canonical metric labels (ignored).
-            _labels: Legacy alias for ``labels`` retained for compatibility.
-            tags: Legacy alias for ``labels`` retained for compatibility.
         """
-        resolved_labels = resolve_metric_labels(labels or _labels or tags)
-        del name, value, resolved_labels
+        del name, value, labels
         return None
 
     def close(self) -> None:

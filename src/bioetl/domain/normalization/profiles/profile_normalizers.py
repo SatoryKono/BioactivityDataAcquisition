@@ -1,4 +1,4 @@
-"""Shared pure helpers for normalization profiles."""
+"""Shared pure normalizers for normalization profiles."""
 
 from __future__ import annotations
 

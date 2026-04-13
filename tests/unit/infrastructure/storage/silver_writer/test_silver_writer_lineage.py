@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -14,6 +15,14 @@ from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
+    """Create metadata mocks compatible with MetadataLineageBundle identity checks."""
+    metadata = MagicMock()
+    metadata.runtime = SimpleNamespace(run_id=run_id, manifest_id=None)
+    metadata.output = SimpleNamespace(lineage_fragment_id=None, artifact_id=None)
+    return metadata
 
 
 class TestSilverWriterAudit:
@@ -513,7 +522,7 @@ class TestSilverWriterLineage:
         """Standard Silver metadata path should preserve version and resolved target."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
         captured_input = None
 
         def create_silver_metadata_bundle(input_data: object) -> MetadataLineageBundle:
@@ -569,7 +578,7 @@ class TestSilverWriterLineage:
         """Standard and merged metadata flows should converge on one file handoff."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
 
         def create_silver_metadata_bundle(input_data: object) -> MetadataLineageBundle:
             _ = input_data
@@ -620,7 +629,7 @@ class TestSilverWriterLineage:
             SilverWriter,
         )
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
         fragment = make_produced_artifact_fragment(
             fragment_id="silver:fragment-1",
             layer="silver",
@@ -673,7 +682,7 @@ class TestSilverWriterLineage:
         )
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata()
         mock_metadata_writer = MagicMock()
         mock_metadata_writer.write_silver_metadata = AsyncMock()
 
@@ -733,7 +742,7 @@ class TestSilverWriterLineage:
         )
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata(run_id="run-1")
 
         class _Coordinator:
             def create_silver_metadata_bundle(
@@ -785,7 +794,7 @@ class TestSilverWriterLineage:
         from bioetl.domain.ports import SilverMetadataInput
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        metadata = MagicMock()
+        metadata = _make_bundle_safe_metadata(run_id="run-1")
         fragment = make_produced_artifact_fragment(
             fragment_id="silver:merged-fragment-1",
             layer="silver",

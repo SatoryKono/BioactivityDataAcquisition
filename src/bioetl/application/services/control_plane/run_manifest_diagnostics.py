@@ -96,6 +96,9 @@ def _build_base_summary(
         artifact_refs=[],
         lineage_fragment_ids=set(),
         missing_link_count=0,
+        composite_resume_reconstructability_gap=_is_composite_execution_context(
+            manifest
+        ),
         dq_signal_present=False,
         cross_validation_signal_present=False,
         replay_ready_missing_requirements=cast(
@@ -404,6 +407,9 @@ def _build_final_summary(
         artifact_refs=artifact_refs,
         lineage_fragment_ids=lineage_fragment_ids,
         missing_link_count=missing_link_count,
+        composite_resume_reconstructability_gap=_is_composite_execution_context(
+            manifest
+        ),
         dq_signal_present=dq_signal_present,
         cross_validation_signal_present=cross_validation_signal_present,
         replay_ready_missing_requirements=cast(
@@ -538,6 +544,7 @@ def _build_persistence_profile(
         "replay_ready_missing_requirements": replay_ready_missing_requirements,
         "forensic_grade_missing_requirements": forensic_grade_missing_requirements,
         "composite_resume_reconstructability": {
+            "scope": "coarse_grained_composite_resume",
             "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
             "reconstructs": [
                 "state",
@@ -721,6 +728,7 @@ def _build_alert_signals(
     artifact_refs: list[dict[str, object]],
     lineage_fragment_ids: set[str],
     missing_link_count: int,
+    composite_resume_reconstructability_gap: bool,
     dq_signal_present: bool,
     cross_validation_signal_present: bool,
     replay_ready_missing_requirements: list[str],
@@ -744,6 +752,9 @@ def _build_alert_signals(
         "lineage_gap": has_artifact_refs and not lineage_fragment_ids,
         "immutable_input_snapshot_gap": immutable_input_snapshot_gap,
         "strict_replay_boundary_gap": strict_replay_boundary_gap,
+        "composite_resume_reconstructability_gap": (
+            composite_resume_reconstructability_gap
+        ),
         "replay_ready_gap": bool(replay_ready_missing_requirements),
         "forensic_grade_gap": bool(forensic_grade_missing_requirements),
         "dq_signal_present": dq_signal_present,
@@ -773,6 +784,10 @@ def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     if alert_signals.get("strict_replay_boundary_gap", False):
         steps.append(
             "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay."
+        )
+    if alert_signals.get("composite_resume_reconstructability_gap", False):
+        steps.append(
+            "Treat composite resume as checkpoint snapshot plus ledger suffix replay only; do not expect per-provider result maps or other rich checkpoint payloads to be reconstructed."
         )
     if alert_signals.get("replay_ready_gap", False):
         steps.append(

@@ -13,7 +13,7 @@ from ._chembl_activity_fields import (
     TEXT_FIELDS,
 )
 from .base import FieldRule, NormalizationProfile
-from .helpers import (
+from .profile_normalizers import (
     normalize_profile_doi,
     normalize_profile_float,
     normalize_profile_int,

@@ -8,6 +8,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_enrichment_mixin import (
     _CompositeRunnerStageEnrichmentMixin,
 )
@@ -74,6 +77,8 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
         )
         self._runtime = SimpleNamespace(required_only=False)
         self._logger = MagicMock()
+        self._observer_logger = MagicMock()
+        self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-enrich-test"
         self._coordinator = MagicMock()
         self._coordinator.run_enrichers = AsyncMock(return_value=enricher_results or {})
@@ -283,8 +288,7 @@ async def test_transition_to_enrichment_completed_when_enriching_then_calls_comp
 
     await harness._transition_to_enrichment_completed(state)
 
-    # _complete_enrichment_stage logs and saves checkpoint
-    harness._logger.info.assert_called()
+    harness._observer_logger.info.assert_called_once()
 
 
 @pytest.mark.unit

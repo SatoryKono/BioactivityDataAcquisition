@@ -290,6 +290,9 @@ than silently accepting the bundle as canonical.
 - `alert_signals.immutable_input_snapshot_gap=true` means the run is still on
   the ordinary source boundary, but immutable cached-Bronze input snapshots are
   missing, so strict exact replay cannot be claimed yet;
+- `alert_signals.composite_resume_reconstructability_gap=true` means the run is
+  on the bounded composite resume path: expect checkpoint snapshot +
+  ledger-suffix reconstruction only, not full rich checkpoint-state recovery;
 - `alert_signals.replay_ready_gap=true` means the run must not be treated as
   exact-replay ready even if manifest inspection itself is available;
 - `alert_signals.forensic_grade_gap=true` means the run must not be treated as
@@ -298,8 +301,9 @@ than silently accepting the bundle as canonical.
 - `correlation_anchor_gaps.effective_config_hash > 0` means execution-critical ledger events lost effective config linkage;
 - `correlation_anchor_gaps.contract_version > 0` on failure-critical runs means contract traceability is incomplete.
 - `persistence_profile.composite_resume_reconstructability` states the current
-  composite replay boundary explicitly: lifecycle milestones and watermarks are
-  reconstructed from persisted state, but rich checkpoint payloads are not.
+  composite replay boundary explicitly with
+  `scope=coarse_grained_composite_resume`: lifecycle milestones and watermarks
+  are reconstructed from persisted state, but rich checkpoint payloads are not.
 
 ## Compliance
 

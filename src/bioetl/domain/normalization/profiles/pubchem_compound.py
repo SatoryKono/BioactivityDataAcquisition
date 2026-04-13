@@ -5,7 +5,7 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.domain.normalization.profiles.helpers import (
+from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
     normalize_profile_isomeric_smiles,
 )

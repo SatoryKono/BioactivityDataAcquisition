@@ -7,6 +7,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.application.composite.lifecycle_observer_service import (
+    CompositeLifecycleObserverService,
+)
 from bioetl.application.composite.runner_pkg.runner_stage_start_flow import (
     start_composite_phase,
 )
@@ -17,6 +20,8 @@ class _PhaseStartHarness:
     def __init__(self) -> None:
         self._config = SimpleNamespace(name="composite_demo")
         self._logger = MagicMock()
+        self._observer_logger = MagicMock()
+        self._observer = CompositeLifecycleObserverService(logger=self._observer_logger)
         self._run_id_str = "run-123"
         self._transition_state_with_fsm_log = MagicMock(
             return_value=SimpleNamespace(state=CompositePipelineState.ENRICHING)
@@ -48,6 +53,7 @@ async def test_start_composite_phase_transitions_saves_and_logs() -> None:
         state,
         CompositePipelineState.ENRICHING,
         stage="enrichment_start",
+        validate=True,
         enrichers=["a", "b"],
         count=2,
     )
@@ -56,8 +62,8 @@ async def test_start_composite_phase_transitions_saves_and_logs() -> None:
         "enrichment_running",
     )
     assert harness.started == ["called"]
-    harness._logger.info.assert_called_once()
-    log_kwargs = harness._logger.info.call_args.kwargs
+    harness._observer_logger.info.assert_called_once()
+    log_kwargs = harness._observer_logger.info.call_args.kwargs
     assert log_kwargs["composite"] == "composite_demo"
     assert log_kwargs["run_id"] == "run-123"
     assert log_kwargs["enrichers"] == ["a", "b"]

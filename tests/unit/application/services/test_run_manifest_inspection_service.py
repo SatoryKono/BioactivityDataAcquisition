@@ -280,6 +280,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "composite_resume_reconstructability_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": False,
@@ -416,6 +417,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
             "replay_ready_missing_requirements": [],
             "forensic_grade_missing_requirements": ["run_ledger_history"],
             "composite_resume_reconstructability": {
+                "scope": "coarse_grained_composite_resume",
                 "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
                 "reconstructs": [
                     "state",
@@ -431,16 +433,17 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
             },
         },
         "alert_signals": {
-            "run_failed": False,
-            "run_shutdown": False,
-            "artifact_linkage_gap": False,
-            "lineage_gap": False,
-            "immutable_input_snapshot_gap": False,
-            "strict_replay_boundary_gap": False,
-            "replay_ready_gap": False,
-            "forensic_grade_gap": True,
-            "dq_signal_present": False,
-            "cross_validation_signal_present": False,
+        "run_failed": False,
+        "run_shutdown": False,
+        "artifact_linkage_gap": False,
+        "lineage_gap": False,
+        "immutable_input_snapshot_gap": False,
+        "strict_replay_boundary_gap": False,
+        "composite_resume_reconstructability_gap": False,
+        "replay_ready_gap": False,
+        "forensic_grade_gap": True,
+        "dq_signal_present": False,
+        "cross_validation_signal_present": False,
         },
         "next_steps": [
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
@@ -495,6 +498,52 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
     assert result.identity_graph["exact_replay_blockers"] == [
         "immutable_input_snapshots_missing"
     ]
+
+
+def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    run_id = RunID(uuid4())
+    manifest = replace(
+        _make_manifest(manifest_id="manifest-composite", run_id=run_id),
+        provider="composite",
+        entity="publications",
+        pipeline_name="publications",
+        launch_context={
+            "resume": False,
+            "exact_replay": False,
+            "execution_context": "composite",
+            "exact_replay_support_boundary": "composite_execution_unsupported",
+        },
+        runtime_config={"run_type": "incremental"},
+        resolved_config={"composite": "publications"},
+        replay_capability=ReplayCapability.REBUILD_ONLY,
+        source_refs=(),
+    )
+    manifest_store.save(manifest)
+    service = RunManifestInspectionService(manifest_port=manifest_store)
+
+    result = service.show("manifest-composite")
+
+    assert result.diagnostics["exact_replay_support_boundary"] == (
+        "composite_execution_unsupported"
+    )
+    assert (
+        result.diagnostics["alert_signals"]["composite_resume_reconstructability_gap"]
+        is True
+    )
+    assert (
+        result.diagnostics["persistence_profile"]["composite_resume_reconstructability"][
+            "scope"
+        ]
+        == "coarse_grained_composite_resume"
+    )
+    assert (
+        any(
+            "Treat composite resume as checkpoint snapshot plus ledger suffix replay only;"
+            in step
+            for step in result.diagnostics["next_steps"]
+        )
+    )
     assert result.identity_graph["input_snapshot_ids"] == []
     assert result.identity_graph["input_snapshot_content_hashes"] == []
     assert result.identity_graph["input_snapshot_identity_fingerprint"] is None
@@ -594,6 +643,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "composite_resume_reconstructability_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": False,
@@ -753,6 +803,7 @@ def test_show_collects_dq_trace_anchors() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "composite_resume_reconstructability_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": True,
@@ -1079,6 +1130,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": True,
         "strict_replay_boundary_gap": False,
+        "composite_resume_reconstructability_gap": False,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": False,
@@ -1198,6 +1250,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": True,
         "strict_replay_boundary_gap": False,
+        "composite_resume_reconstructability_gap": False,
         "replay_ready_gap": True,
         "forensic_grade_gap": True,
         "dq_signal_present": True,
@@ -1275,6 +1328,7 @@ def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "composite_resume_reconstructability_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": False,
@@ -1348,6 +1402,7 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "composite_resume_reconstructability_gap": False,
         "replay_ready_gap": False,
         "forensic_grade_gap": False,
         "dq_signal_present": True,

@@ -169,6 +169,7 @@ The current diagnostics surface exposes:
 - `persistence_profile.replay_ready_missing_requirements`;
 - `persistence_profile.forensic_grade_missing_requirements`.
 - `alert_signals.immutable_input_snapshot_gap`;
+- `alert_signals.composite_resume_reconstructability_gap`;
 - `alert_signals.replay_ready_gap`;
 - `alert_signals.forensic_grade_gap`;
 
@@ -183,11 +184,17 @@ replay can be claimed.
 Composite replay is additionally documented as a bounded reconstructability
 surface:
 
+- scope: `coarse_grained_composite_resume`;
 - resume model: `checkpoint_snapshot_plus_ledger_suffix`;
 - reconstructed from persisted state: `state`, `seed_completed`,
   `merge_completed`, `last_event_id`, `last_event_occurred_at`;
 - not reconstructed: per-provider result maps and other rich checkpoint
   payloads.
+
+When the inspected execution context is composite, diagnostics also raise
+`alert_signals.composite_resume_reconstructability_gap` and point operators to
+the bounded replay contract instead of implying richer checkpoint-state
+reconstruction.
 
 ## Observability & Metrics
 

@@ -23,7 +23,7 @@ from bioetl.domain.normalization.profiles import (
     NormalizationProfile,
     resolve_normalization_profile,
 )
-from bioetl.domain.normalization.profiles.helpers import (
+from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_smiles,
 )
 from bioetl.domain.normalization.text import (

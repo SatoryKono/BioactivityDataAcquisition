@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.profiles.helpers import (
+from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_abstract,
     normalize_profile_canonical_smiles,
     normalize_profile_date,

@@ -409,8 +409,9 @@ class TestCliCommands:
     def test_run_exact_replay_without_cached_bronze_warns_boundary(
         self, mock_asyncio_run, mock_register, cli_runner, mock_registry
     ):
-        """Exact replay without cached Bronze warns that the run is outside the boundary."""
+        """Exact replay without cached Bronze warns and exits with config error."""
         from bioetl.application.services import PipelineRunResult, RunResult
+        from bioetl.interfaces.cli.exit_codes import ExitCode
 
         mock_asyncio_run.return_value = RunResult(
             status=PipelineRunResult.SUCCESS,
@@ -423,9 +424,15 @@ class TestCliCommands:
             cli, ["run", "--pipeline", "chembl_activity", "--exact-replay"]
         )
 
-        assert result.exit_code == 0, f"Command failed: {result.output}"
+        assert result.exit_code == ExitCode.CONFIG_ERROR, (
+            f"Command failed: {result.output}"
+        )
         assert "outside the strict exact-replay boundary" in result.output
         assert "without --use-cached-bronze" in result.output
+        assert (
+            "--exact-replay currently requires --use-cached-bronze "
+            "with snapshot-backed Bronze inputs" in result.output
+        )
 
     @patch("bioetl.interfaces.cli.main.register_all_pipelines")
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")

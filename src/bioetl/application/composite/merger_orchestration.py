@@ -40,7 +40,7 @@ class MergeInputContext:
 
 
 @dataclass(frozen=True, slots=True)
-class MergeExecutionRequest:
+class MergeExecutionRequestSpec:
     """Canonical request envelope for one composite merge execution."""
 
     seed_table: str
@@ -57,7 +57,7 @@ class MergeExecutionRequest:
 class MergeExecutionContext:
     """Prepared execution state for one canonical merge/join run."""
 
-    request: MergeExecutionRequest
+    request: MergeExecutionRequestSpec
     started_at: datetime
     loaded_inputs: MergeInputContext
 
@@ -152,7 +152,7 @@ def build_merge_execution_request(
     dependency_results: dict[str, DependencyResult] | None = None,
 ) -> MergeExecutionRequest:
     """Build the canonical request envelope for merge/join execution."""
-    return MergeExecutionRequest(
+    return MergeExecutionRequestSpec(
         seed_table=seed_table,
         seed_pipeline=seed_pipeline,
         enrichers=enrichers,
@@ -166,7 +166,7 @@ def build_merge_execution_request(
 
 async def prepare_merge_execution_context(
     host: MergeWorkflowContext,
-    request: MergeExecutionRequest,
+    request: MergeExecutionRequestSpec,
 ) -> MergeExecutionContext:
     """Load all merge inputs and bind them to one execution context model."""
     return MergeExecutionContext(
@@ -258,8 +258,11 @@ async def execute_merge_execution_core(
 
 async def execute_merge_request(
     host: MergeWorkflowContext,
-    request: MergeExecutionRequest,
+    request: MergeExecutionRequestSpec,
 ) -> MergeResult:
     """Execute the full composite merge workflow from a canonical request."""
     execution_context = await prepare_merge_execution_context(host, request)
     return await execute_merge_execution_core(host, execution_context)
+
+
+MergeExecutionRequest = MergeExecutionRequestSpec
