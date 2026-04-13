@@ -163,6 +163,7 @@ def test_diagnostics_help_displays_subcommands(cli_runner: CliRunner) -> None:
     assert result.exit_code == 0
     assert "guide" in result.output
     assert "health" in result.output
+    assert "metrics" in result.output
     assert "run" in result.output
     assert "checkpoint" in result.output
     assert "manifest" in result.output
@@ -175,10 +176,87 @@ def test_diagnostics_guide_displays_canonical_routes(cli_runner: CliRunner) -> N
 
     assert result.exit_code == 0
     assert "BioETL Diagnostics Guide" in result.output
+    assert "bioetl diagnostics metrics" in result.output
     assert "bioetl diagnostics health" in result.output
     assert "bioetl diagnostics checkpoint" in result.output
     assert "bioetl diagnostics manifest" in result.output
     assert "bioetl diagnostics quarantine" in result.output
+    assert "auto-managed during pipeline runs" in result.output
+
+
+@pytest.mark.unit
+def test_diagnostics_metrics_json_uses_operator_profile(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    profile = SimpleNamespace(
+        to_dict=lambda: {
+            "metrics_enabled": True,
+            "metrics_server_enabled": True,
+            "metrics_server_running": False,
+            "metrics_port": 8000,
+            "metrics_addr": "0.0.0.0",
+            "metrics_started_at": None,
+            "metrics_endpoint": "http://0.0.0.0:8000/metrics",
+            "metrics_server_mode": "auto_managed_during_pipeline_runs",
+            "pushgateway_mode": "best_effort_on_run_completion",
+            "pushgateway_gateway": "localhost:9091",
+            "tracing_enabled": False,
+            "audit_enabled": False,
+        }
+    )
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_metrics_operator_profile",
+        lambda: profile,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(cli, ["diagnostics", "metrics", "--json"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["metrics_server_mode"] == "auto_managed_during_pipeline_runs"
+    assert payload["pushgateway_mode"] == "best_effort_on_run_completion"
+
+
+@pytest.mark.unit
+def test_diagnostics_metrics_text_displays_operator_workflow(
+    cli_runner: CliRunner,
+    monkeypatch: Any,
+) -> None:
+    profile = SimpleNamespace(
+        metrics_enabled=True,
+        metrics_server_enabled=True,
+        metrics_server_running=False,
+        metrics_port=8000,
+        metrics_addr="0.0.0.0",
+        metrics_started_at=None,
+        metrics_endpoint="http://0.0.0.0:8000/metrics",
+        metrics_server_mode="auto_managed_during_pipeline_runs",
+        pushgateway_mode="best_effort_on_run_completion",
+        pushgateway_gateway="localhost:9091",
+        tracing_enabled=False,
+        audit_enabled=False,
+    )
+    import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
+
+    monkeypatch.setattr(
+        diagnostics_module,
+        "get_metrics_operator_profile",
+        lambda: profile,
+        raising=True,
+    )
+
+    result = cli_runner.invoke(cli, ["diagnostics", "metrics"])
+
+    assert result.exit_code == 0
+    assert "BioETL Metrics Diagnostics" in result.output
+    assert "metrics_server_mode: auto_managed_during_pipeline_runs" in result.output
+    assert "pushgateway_mode: best_effort_on_run_completion" in result.output
+    assert "inspect metrics/admin state: bioetl diagnostics metrics [--json]" in result.output
 
 
 @pytest.mark.unit

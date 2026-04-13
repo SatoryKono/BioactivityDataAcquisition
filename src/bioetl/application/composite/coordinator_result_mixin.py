@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 
 from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
@@ -108,8 +108,9 @@ class EnrichmentCoordinatorResultMixin:
         enricher: EnricherConfig,
         records_input: int,
         started_at: datetime,
+        completed_at: datetime,
+        duration: float,
     ) -> EnrichmentResult:
-        duration = (datetime.now(tz=UTC) - started_at).total_seconds()
         self._logger.warning(
             "Enricher timed out",
             enricher=enricher.pipeline,
@@ -120,6 +121,9 @@ class EnrichmentCoordinatorResultMixin:
             enricher_name=enricher.pipeline,
             timeout_seconds=enricher.timeout_seconds,
             records_input=records_input,
+            duration_seconds=duration,
+            started_at=started_at,
+            completed_at=completed_at,
         )
 
     @staticmethod
@@ -140,16 +144,18 @@ class EnrichmentCoordinatorResultMixin:
         enricher: EnricherConfig,
         records_input: int,
         started_at: datetime,
+        completed_at: datetime,
+        duration: float,
         *,
         reason_code: str | None = None,
     ) -> EnrichmentResult:
         """Handle enricher execution error."""
-        duration = (datetime.now(tz=UTC) - started_at).total_seconds()
         log_kwargs: JsonDict = {
             "enricher": enricher.pipeline,
             "error": str(error),
             "error_type": type(error).__name__,
             "required": enricher.required,
+            "duration_seconds": duration,
         }
         if reason_code:
             log_kwargs["reason_code"] = reason_code
@@ -164,6 +170,8 @@ class EnrichmentCoordinatorResultMixin:
             error_message=str(error),
             records_input=records_input,
             duration_seconds=duration,
+            started_at=started_at,
+            completed_at=completed_at,
         )
 
     def _process_results(

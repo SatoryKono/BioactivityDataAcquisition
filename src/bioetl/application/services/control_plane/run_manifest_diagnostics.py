@@ -25,6 +25,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_summary
     _build_final_summary,
     _build_next_steps,
     _build_persistence_profile,
+    build_lineage_closure_boundary,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 
@@ -100,6 +101,11 @@ def _build_base_summary(
         "replay_mode": replay_mode,
         "resume_contract": resume_contract,
         "resume_diagnostics": None,
+        "lineage_closure_boundary": build_lineage_closure_boundary(
+            provider=manifest.provider,
+            entity=manifest.entity,
+            contract_ref=code_provenance.contract_ref,
+        ),
         "input_snapshot_count": len(input_snapshots),
         "input_snapshots": input_snapshots,
         "planned_artifacts": [

@@ -130,7 +130,16 @@ def bootstrap_audit_inspection_service() -> AuditInspectionService:
     """Bootstrap AuditInspectionService for operator diagnostics workflows."""
     settings = get_settings()
     noop_logger = create_noop_logger()
-    audit_port = create_audit_port(settings=settings, logger=noop_logger)
+    audit_port = create_audit_port(
+        settings=settings,
+        logger=noop_logger,
+        metrics=resolve_metrics_port(metrics=None, settings=settings),
+        tracing=resolve_tracing_port(
+            tracer=None,
+            settings=settings,
+            service_name="bioetl.audit_admin",
+        ),
+    )
     return AuditInspectionService(audit_port=audit_port)
 
 

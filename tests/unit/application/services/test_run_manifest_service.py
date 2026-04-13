@@ -221,6 +221,24 @@ def test_execution_fingerprint_is_stable_for_equivalent_requests() -> None:
     assert manifest_a.execution_fingerprint == manifest_b.execution_fingerprint
 
 
+def test_execution_fingerprint_ignores_run_occurrence_drift() -> None:
+    request = _make_request()
+    drifted_request = replace(
+        request,
+        run_id=RunID(UUID("22222222-2222-2222-2222-222222222222")),
+    )
+    service = RunManifestService(
+        manifest_port=_InMemoryRunManifestStore(),
+        _manifest_id_factory=lambda: "manifest-a",
+    )
+
+    manifest = service.create_manifest(request)
+    manifest_drifted = service.create_manifest(drifted_request)
+
+    assert manifest.run_id != manifest_drifted.run_id
+    assert manifest.execution_fingerprint == manifest_drifted.execution_fingerprint
+
+
 def test_execution_fingerprint_ignores_source_ref_and_artifact_order() -> None:
     request = _make_request()
     request_reordered = replace(

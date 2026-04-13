@@ -163,7 +163,7 @@ persistence-profile taxonomy:
 
 - `forensic_grade`: the run is replay-ready and also retains ledger-backed
   control-plane history plus complete artifact/lineage anchors for published
-  outputs;
+  outputs within the currently supported lineage-closure boundary;
 - `replay_ready`: immutable input snapshots, exact-replay capability, and the
   effective-config artifact anchor are present, but richer forensic surfaces may
   still be absent;
@@ -189,6 +189,9 @@ The current diagnostics surface exposes:
 - `persistence_profile.attained_profile`;
 - `persistence_profile.required_profile`;
 - `persistence_profile.required_profile_satisfied`;
+- `lineage_closure_boundary.family`;
+- `lineage_closure_boundary.supported`;
+- `lineage_closure_boundary.reason`;
 - `persistence_profile.required_profile_missing_requirements`;
 - `persistence_profile.claims`;
 - `persistence_profile.surfaces`;
@@ -199,6 +202,7 @@ The current diagnostics surface exposes:
 - `alert_signals.required_persistence_profile_gap`;
 - `alert_signals.replay_ready_gap`;
 - `alert_signals.forensic_grade_gap`;
+- `alert_signals.lineage_closure_boundary_gap`;
 
 When ledger-backed diagnostics are available, these profile gaps are promoted
 into alert-oriented booleans and operator next steps so replay/forensic
@@ -466,6 +470,11 @@ Current supported lineage MVP boundary for Bronze -> Silver -> Gold closure:
 This boundary is intentionally narrow. Other families may emit lineage signals,
 but they are not yet the explicitly supported end-to-end closure surface for
 operator-grade trace/debug guarantees.
+The diagnostics payload therefore publishes an explicit
+`lineage_closure_boundary` contract for every manifested run. When
+`lineage_closure_boundary.supported=false`, the run must not be treated as
+forensic-grade even if replay-ready and ledger/linkage anchors are otherwise
+present.
 
 For the supported MVP surface, sidecar/lineage bundles MUST satisfy this
 minimal identity contract:
@@ -543,6 +552,14 @@ execution-identity fingerprint shared across manifest persistence, checkpoint
 metadata, and runtime compatibility checks. It is derived from normalized
 semantic execution anchors and intentionally excludes occurrence-only values
 such as `manifest_id`, ledger entry order, and diagnostic summaries.
+
+Dataset-level metadata-sidecar identity is also semantic-only:
+
+- sidecar `output.content_hash` must exclude occurrence-scoped runtime anchors
+  such as `run_id`, `manifest_id`, `composite_run_id`, and write/lineage
+  timestamps even if they appear in one intermediate row payload;
+- changing occurrence-only runtime drift must not change replay eligibility,
+  replay mode, or manifest diff classification.
 
 ## References
 

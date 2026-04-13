@@ -19,6 +19,7 @@ __all__ = ["FileAuditAdapter"]
 
 
 import asyncio
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -29,8 +30,10 @@ from bioetl.domain.serialization import serialize_to_json
 from ._file_audit_readers import process_audit_file
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
+
+from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 
 
 class FileAuditAdapter:
@@ -49,10 +52,18 @@ class FileAuditAdapter:
         AuditPort: Domain port for audit logging.
     """
 
+    TRACER_NAME = "bioetl.audit"
+    AUDIT_WRITE_EVENTS_TOTAL = "bioetl_audit_write_events_total"
+    AUDIT_WRITE_DURATION_SECONDS = "bioetl_audit_write_duration_seconds"
+    AUDIT_QUERY_EVENTS_TOTAL = "bioetl_audit_query_events_total"
+    AUDIT_QUERY_DURATION_SECONDS = "bioetl_audit_query_duration_seconds"
+
     def __init__(
         self,
         base_path: str | Path,
         logger: LoggerPort,
+        metrics: MetricsPort | None = None,
+        tracing: TracingPort | None = None,
     ) -> None:
         """Initialize file audit adapter.
 
@@ -62,7 +73,48 @@ class FileAuditAdapter:
         """
         self.base_path = Path(base_path)
         self.logger = logger
+        self.metrics = metrics if metrics is not None else NoOpMetrics()
+        self.tracing = tracing if tracing is not None else NoOpTracing()
+        self._tracer = self.tracing.get_tracer(self.TRACER_NAME)
         self._closed = False
+
+    def _emit_write_metrics(
+        self,
+        *,
+        layer: AuditLayer,
+        operation: str,
+        status: str,
+        duration_seconds: float,
+    ) -> None:
+        labels = {
+            "layer": layer.value,
+            "operation": operation,
+            "status": status,
+        }
+        self.metrics.increment_counter(self.AUDIT_WRITE_EVENTS_TOTAL, 1, labels=labels)
+        self.metrics.observe_histogram(
+            self.AUDIT_WRITE_DURATION_SECONDS,
+            duration_seconds,
+            labels=labels,
+        )
+
+    def _emit_query_metrics(
+        self,
+        *,
+        layer_filter: str,
+        status: str,
+        duration_seconds: float,
+    ) -> None:
+        labels = {
+            "layer_filter": layer_filter,
+            "status": status,
+        }
+        self.metrics.increment_counter(self.AUDIT_QUERY_EVENTS_TOTAL, 1, labels=labels)
+        self.metrics.observe_histogram(
+            self.AUDIT_QUERY_DURATION_SECONDS,
+            duration_seconds,
+            labels=labels,
+        )
 
     def _get_audit_file_path(self, date: datetime) -> Path:
         """Get the audit file path for a specific date.
@@ -109,8 +161,33 @@ class FileAuditAdapter:
         """
         if self._closed:
             raise RuntimeError("FileAuditAdapter has been closed")
+        started = time.perf_counter()
+        with self._tracer.start_as_current_span("audit.log_write") as span:
+            span.set_attribute("bioetl.audit.layer", entry.layer.value)
+            span.set_attribute("bioetl.audit.operation", entry.operation.value)
+            span.set_attribute("bioetl.audit.records_count", entry.records_count)
+            try:
+                await asyncio.to_thread(self._write_entry_sync, entry)
+            except Exception as exc:
+                duration_seconds = time.perf_counter() - started
+                self._emit_write_metrics(
+                    layer=entry.layer,
+                    operation=entry.operation.value,
+                    status="error",
+                    duration_seconds=duration_seconds,
+                )
+                span.set_attribute("bioetl.audit.status", "error")
+                span.record_exception(exc)
+                raise
 
-        await asyncio.to_thread(self._write_entry_sync, entry)
+            duration_seconds = time.perf_counter() - started
+            self._emit_write_metrics(
+                layer=entry.layer,
+                operation=entry.operation.value,
+                status="success",
+                duration_seconds=duration_seconds,
+            )
+            span.set_attribute("bioetl.audit.status", "success")
 
         self.logger.debug(
             "audit_entry_logged",
@@ -195,24 +272,58 @@ class FileAuditAdapter:
         """
         if self._closed:
             raise RuntimeError("FileAuditAdapter has been closed")
+        started = time.perf_counter()
+        layer_filter = layer.value if layer is not None else "all"
+        with self._tracer.start_as_current_span("audit.get_entries") as span:
+            span.set_attribute("bioetl.audit.layer_filter", layer_filter)
+            span.set_attribute("bioetl.audit.has_run_filter", run_id is not None)
+            span.set_attribute("bioetl.audit.has_table_filter", table_name is not None)
+            span.set_attribute(
+                "bioetl.audit.has_time_range",
+                start_time is not None or end_time is not None,
+            )
+            span.set_attribute("bioetl.audit.limit", limit)
+            try:
+                entries = await asyncio.to_thread(
+                    self._read_entries_sync,
+                    run_id,
+                    layer,
+                    table_name,
+                    start_time,
+                    end_time,
+                    limit,
+                )
+            except Exception as exc:
+                duration_seconds = time.perf_counter() - started
+                self._emit_query_metrics(
+                    layer_filter=layer_filter,
+                    status="error",
+                    duration_seconds=duration_seconds,
+                )
+                span.set_attribute("bioetl.audit.status", "error")
+                span.record_exception(exc)
+                raise
 
-        return await asyncio.to_thread(
-            self._read_entries_sync,
-            run_id,
-            layer,
-            table_name,
-            start_time,
-            end_time,
-            limit,
-        )
+            duration_seconds = time.perf_counter() - started
+            self._emit_query_metrics(
+                layer_filter=layer_filter,
+                status="success",
+                duration_seconds=duration_seconds,
+            )
+            span.set_attribute("bioetl.audit.entries_count", len(entries))
+            span.set_attribute("bioetl.audit.status", "success")
+            return entries
 
     async def aclose(self) -> None:
         """Gracefully close the audit adapter.
 
         This method is idempotent (safe to call multiple times).
         """
-        if self._closed:
-            return
+        with self._tracer.start_as_current_span("audit.close") as span:
+            span.set_attribute("bioetl.audit.already_closed", self._closed)
+            if self._closed:
+                return
 
-        self._closed = True
-        self.logger.debug("audit_adapter_closed")
+            self._closed = True
+            span.set_attribute("bioetl.audit.status", "success")
+            self.logger.debug("audit_adapter_closed")

@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.observability_workflow_service import (
         ObservabilityWorkflowService,
     )
+    from bioetl.composition.observability_api import MetricsOperatorProfile
     from bioetl.application.services.quarantine_service import QuarantineService
 
 __all__ = [
@@ -38,6 +39,7 @@ __all__ = [
     "get_health_service",
     "get_lineage_service",
     "get_metrics_service",
+    "get_metrics_operator_profile",
     "get_observability_diagnostics_bundle",
     "get_observability_workflow_service",
     "get_quarantine_service",
@@ -104,6 +106,15 @@ def get_audit_service() -> AuditInspectionService:
 def get_metrics_service() -> MetricsService:
     """Load the metrics diagnostics service through the canonical composition API."""
     from bioetl.composition.observability_api import get_metrics_service as _impl
+
+    return _impl()
+
+
+def get_metrics_operator_profile() -> MetricsOperatorProfile:
+    """Load the operator-facing metrics/admin diagnostics profile."""
+    from bioetl.composition.observability_api import (
+        get_metrics_operator_profile as _impl,
+    )
 
     return _impl()
 

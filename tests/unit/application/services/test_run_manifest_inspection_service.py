@@ -135,6 +135,22 @@ def _expected_replay_parentage(manifest: RunManifest) -> dict[str, object]:
     }
 
 
+def _expected_lineage_closure_boundary(manifest: RunManifest) -> dict[str, object]:
+    family = manifest.code_provenance.contract_ref
+    supported = family == "chembl.activity"
+    return {
+        "family": family,
+        "support_scope": "operator_grade_trace_debug",
+        "supported": supported,
+        "reason": (
+            "family_within_supported_boundary"
+            if supported
+            else "family_outside_supported_boundary"
+        ),
+        "supported_families": ["chembl.activity"],
+    }
+
+
 class _InMemoryRunManifestStore(RunManifestPort):
     def __init__(self) -> None:
         self._items: dict[str, RunManifest] = {}
@@ -294,6 +310,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "exact_replay_blockers": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
+        "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
@@ -328,17 +345,19 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "lineage_closure_boundary_gap": True,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": False,
+        "forensic_grade_gap": True,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
-    assert result.diagnostics["persistence_profile"]["attained_profile"] == "forensic_grade"
-    assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is True
+    assert result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
+    assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is False
     assert result.diagnostics["next_steps"] == [
-        "No alert signals detected; continue routine monitoring."
+        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
+        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
 
 
@@ -405,7 +424,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
     assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is True
     assert (
         result.diagnostics["persistence_profile"]["forensic_grade_missing_requirements"]
-        == ["run_ledger_history"]
+        == ["run_ledger_history", "lineage_closure_boundary_support"]
     )
     assert result.diagnostics == {
         "manifest_id": "manifest-no-ledger",
@@ -431,6 +450,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "exact_replay_blockers": [],
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
+        "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         "input_snapshot_ids": ["snapshot-1"],
         "input_snapshot_content_hashes": ["sha256:snapshot-1"],
         "input_snapshot_identity_fingerprint": _SNAPSHOT_IDENTITY_FINGERPRINT,
@@ -475,10 +495,14 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
                 "exact_replay_capability": True,
                 "run_ledger_history": False,
                 "artifact_lineage_links": True,
+                "lineage_closure_boundary_support": False,
             },
             "required_profile_missing_requirements": [],
             "replay_ready_missing_requirements": [],
-            "forensic_grade_missing_requirements": ["run_ledger_history"],
+            "forensic_grade_missing_requirements": [
+                "run_ledger_history",
+                "lineage_closure_boundary_support",
+            ],
             "composite_resume_reconstructability": {
                 "scope": "coarse_grained_composite_resume",
                 "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
@@ -494,22 +518,25 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
                     "rich_checkpoint_payloads",
                 ],
             },
+            "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         },
         "alert_signals": {
-        "run_failed": False,
-        "run_shutdown": False,
-        "artifact_linkage_gap": False,
-        "lineage_gap": False,
-        "immutable_input_snapshot_gap": False,
-        "strict_replay_boundary_gap": False,
-        "composite_resume_reconstructability_gap": False,
-        "required_persistence_profile_gap": False,
-        "replay_ready_gap": False,
-        "forensic_grade_gap": True,
-        "dq_signal_present": False,
-        "cross_validation_signal_present": False,
+            "run_failed": False,
+            "run_shutdown": False,
+            "artifact_linkage_gap": False,
+            "lineage_gap": False,
+            "immutable_input_snapshot_gap": False,
+            "strict_replay_boundary_gap": False,
+            "lineage_closure_boundary_gap": True,
+            "composite_resume_reconstructability_gap": False,
+            "required_persistence_profile_gap": False,
+            "replay_ready_gap": False,
+            "forensic_grade_gap": True,
+            "dq_signal_present": False,
+            "cross_validation_signal_present": False,
         },
         "next_steps": [
+            "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
             "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         ],
     }
@@ -803,10 +830,11 @@ def test_show_collects_artifact_diagnostic_links() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "lineage_closure_boundary_gap": True,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": False,
+        "forensic_grade_gap": True,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
@@ -865,6 +893,7 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     assert result.diagnostics["next_steps"] == [
         "Validate artifact publication metadata and repair dataset/lineage links.",
         "Investigate lineage persistence for published artifacts before restart.",
+        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
     ]
 
@@ -964,15 +993,18 @@ def test_show_collects_dq_trace_anchors() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "lineage_closure_boundary_gap": True,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": False,
+        "forensic_grade_gap": True,
         "dq_signal_present": True,
         "cross_validation_signal_present": False,
     }
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
+        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
+        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
     ]
 
@@ -1292,6 +1324,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": True,
         "strict_replay_boundary_gap": False,
+        "lineage_closure_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": True,
@@ -1413,6 +1446,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": True,
         "strict_replay_boundary_gap": False,
+        "lineage_closure_boundary_gap": False,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": True,
@@ -1492,10 +1526,11 @@ def test_show_surfaces_supported_gold_trace_path_in_diagnostics() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "lineage_closure_boundary_gap": True,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": False,
+        "forensic_grade_gap": True,
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
@@ -1567,15 +1602,18 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
         "lineage_gap": False,
         "immutable_input_snapshot_gap": False,
         "strict_replay_boundary_gap": False,
+        "lineage_closure_boundary_gap": True,
         "composite_resume_reconstructability_gap": False,
         "required_persistence_profile_gap": False,
         "replay_ready_gap": False,
-        "forensic_grade_gap": False,
+        "forensic_grade_gap": True,
         "dq_signal_present": True,
         "cross_validation_signal_present": True,
     }
     assert result.diagnostics["next_steps"] == [
         "Inspect failure classification and decide retry/quarantine/escalation.",
+        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
+        "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
         "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
         "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes.",
     ]

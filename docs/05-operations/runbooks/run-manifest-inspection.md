@@ -236,6 +236,10 @@ contract suite:
 
 Outside that documented MVP surface, lineage signals may still exist but are
 not yet the supported closure boundary for operator-grade trace/debug claims.
+Inspection now exposes that boundary explicitly through
+`diagnostics.lineage_closure_boundary`; operators MUST treat
+`lineage_closure_boundary.supported=false` as a fail-closed block on
+forensic-grade trace/debug claims for that family.
 
 Focus on:
 
@@ -243,6 +247,9 @@ Focus on:
 - `event_family_counts`, `event_type_counts`;
 - `artifact_refs`, `lineage_fragment_ids`, `missing_artifact_links`;
 - `required_persistence_profile`;
+- `lineage_closure_boundary.family`,
+  `lineage_closure_boundary.supported`,
+  `lineage_closure_boundary.reason`;
 - `persistence_profile.attained_profile`, `persistence_profile.required_profile`,
   `persistence_profile.required_profile_satisfied`,
   `persistence_profile.surfaces`,
@@ -313,7 +320,8 @@ If any of those anchors disagree, treat it as lineage integrity drift rather
 than silently accepting the bundle as canonical.
 - `persistence_profile.attained_profile=forensic_grade` means the run is both
   replay-ready and backed by ledger/artifact-lineage evidence suitable for
-  stronger postmortem reconstruction;
+  stronger postmortem reconstruction within the current supported lineage
+  closure boundary;
 - `persistence_profile.attained_profile=replay_ready` means exact replay anchors
   are present but richer forensic surfaces are still incomplete;
 - `persistence_profile.attained_profile=degraded_observable` means manifest
@@ -347,6 +355,10 @@ than silently accepting the bundle as canonical.
 - `alert_signals.forensic_grade_gap=true` means the run must not be treated as
   full postmortem/trace reconstruction evidence without checking the listed
   missing requirements;
+- `alert_signals.lineage_closure_boundary_gap=true` means the current pipeline
+  family is outside the published operator-grade lineage closure boundary and
+  must not be presented as forensic-grade even if other replay/ledger anchors
+  are present;
 - `correlation_anchor_gaps.effective_config_hash > 0` means execution-critical ledger events lost effective config linkage;
 - `correlation_anchor_gaps.contract_version > 0` on failure-critical runs means contract traceability is incomplete.
 - `persistence_profile.composite_resume_reconstructability` states the current

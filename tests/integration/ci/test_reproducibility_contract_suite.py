@@ -23,6 +23,7 @@ from bioetl.application.services.run_manifest_inspection_service import (
 )
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane import (
+    ReplayCapability,
     RunLedgerEntry,
     RunArtifactRef,
     RunCodeProvenance,
@@ -127,7 +128,19 @@ def _make_manifest(
     replay_of_manifest_id: str | None = None,
     required_persistence_profile: str = "degraded_observable",
     input_snapshots: tuple[RunInputSnapshotRef, ...] = (),
+    pipeline_name: str = "chembl_activity",
+    provider: str = "chembl",
+    entity: str = "activity",
+    contract_ref: str = "chembl.activity",
+    exact_replay: bool = True,
+    execution_context: str = "ordinary",
 ) -> RunManifest:
+    is_composite = execution_context == "composite" or provider == "composite"
+    replay_capability = (
+        ReplayCapability.REBUILD_ONLY
+        if is_composite or not input_snapshots
+        else ReplayCapability.EXACT_REPLAY_SUPPORTED
+    )
     return RunManifest(
         manifest_id=manifest_id,
         execution_fingerprint=execution_fingerprint,
@@ -135,39 +148,42 @@ def _make_manifest(
         created_at=datetime(2025, 1, 1, tzinfo=UTC),
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
-        pipeline_name="chembl_activity",
-        provider="chembl",
-        entity="activity",
+        pipeline_name=pipeline_name,
+        provider=provider,
+        entity=entity,
         launch_context={
             "limit": 25,
-            "exact_replay": True,
+            "exact_replay": exact_replay,
+            "execution_context": execution_context,
             "required_persistence_profile": required_persistence_profile,
         },
         runtime_config={
             "run_type": "incremental",
             "limit": 25,
-            "exact_replay": True,
+            "exact_replay": exact_replay,
+            "execution_context": execution_context,
             "required_persistence_profile": required_persistence_profile,
         },
-        resolved_config={"provider": "chembl", "entity_type": "activity"},
+        resolved_config={"provider": provider, "entity_type": entity},
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
+        replay_capability=replay_capability,
         code_provenance=RunCodeProvenance(
             pipeline_version="1.0.0",
             git_commit="abc1234",
             config_hash=config_hash,
-            contract_ref="chembl.activity",
+            contract_ref=contract_ref,
             contract_version="1.0.0",
-            dq_policy_ref="chembl.activity.dq",
+            dq_policy_ref=f"{contract_ref}.dq",
             rule_bundle_version="dq-rules.v1",
             dq_contract_compatibility_hash="compat-hash-1",
             effective_config_artifact_id="eca-123",
         ),
         source_refs=(
             RunSourceRef(
-                provider="chembl",
-                entity="activity",
-                pipeline_name="chembl_activity",
+                provider=provider,
+                entity=entity,
+                pipeline_name=pipeline_name,
                 query="fixture://sample",
                 input_snapshots=input_snapshots,
             ),
@@ -200,6 +216,34 @@ def test_reproducibility_contract_manifest_diff_classifies_occurrence_only() -> 
     assert result.semantic_equivalent is True
     assert result.occurrence_only is True
     assert result.occurrence_difference_fields == ("manifest_id", "run_id")
+
+
+def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_only(
+) -> None:
+    store = _InMemoryRunManifestStore()
+    left = _make_manifest(
+        manifest_id="manifest-left-created-at",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000316")),
+        execution_fingerprint="fp-created-at-stable",
+    )
+    right = replace(
+        left,
+        manifest_id="manifest-right-created-at",
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000317")),
+        created_at=datetime(2025, 1, 2, tzinfo=UTC),
+    )
+    store.save(left)
+    store.save(right)
+
+    result = RunManifestInspectionService(manifest_port=store).diff(
+        "manifest-left-created-at",
+        "manifest-right-created-at",
+    )
+
+    assert result.classification == "occurrence_only"
+    assert result.semantic_equivalent is True
+    assert result.occurrence_only is True
+    assert result.occurrence_difference_fields == ("created_at", "manifest_id", "run_id")
 
 
 def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> None:
@@ -571,6 +615,13 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained() -> None:
     ).show(manifest.manifest_id)
 
     assert result.diagnostics["required_persistence_profile"] == "forensic_grade"
+    assert result.diagnostics["lineage_closure_boundary"] == {
+        "family": "chembl.activity",
+        "support_scope": "operator_grade_trace_debug",
+        "supported": True,
+        "reason": "family_within_supported_boundary",
+        "supported_families": ["chembl.activity"],
+    }
     assert result.diagnostics["persistence_profile"]["attained_profile"] == (
         "forensic_grade"
     )
@@ -583,6 +634,152 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained() -> None:
         == []
     )
     assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is False
+
+
+def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_inputs() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000413"))
+    manifest = _make_manifest(
+        manifest_id="manifest-replay-ready-missing-snapshots",
+        run_id=run_id,
+        execution_fingerprint="fp-replay-ready-missing-snapshots",
+        required_persistence_profile="replay_ready",
+        input_snapshots=(),
+        exact_replay=False,
+    )
+    manifest_store.save(manifest)
+
+    result = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    ).show(manifest.manifest_id)
+
+    assert result.diagnostics["required_persistence_profile"] == "replay_ready"
+    assert result.diagnostics["persistence_profile"]["attained_profile"] == (
+        "degraded_observable"
+    )
+    assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    assert result.diagnostics["persistence_profile"][
+        "required_profile_missing_requirements"
+    ] == ["exact_replay_capability", "immutable_input_snapshots"]
+    assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+    assert result.diagnostics["alert_signals"]["immutable_input_snapshot_gap"] is True
+
+
+def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000414"))
+    manifest = _make_manifest(
+        manifest_id="manifest-composite-replay-ready",
+        run_id=run_id,
+        execution_fingerprint="fp-composite-replay-ready",
+        required_persistence_profile="replay_ready",
+        input_snapshots=(),
+        exact_replay=False,
+        pipeline_name="publications",
+        provider="composite",
+        entity="publications",
+        contract_ref="composite.publications",
+        execution_context="composite",
+    )
+    manifest_store.save(manifest)
+
+    result = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    ).show(manifest.manifest_id)
+
+    assert result.diagnostics["exact_replay_support_boundary"] == (
+        "composite_execution_unsupported"
+    )
+    assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    assert result.diagnostics["persistence_profile"][
+        "required_profile_missing_requirements"
+    ] == [
+        "strict_replay_execution_context_support",
+        "exact_replay_capability",
+        "immutable_input_snapshots",
+    ]
+    assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is True
+    assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+
+
+def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_lineage_family() -> None:
+    manifest_store = _InMemoryRunManifestStore()
+    ledger_store = _InMemoryRunLedgerStore()
+    run_id = RunID(UUID("00000000-0000-0000-0000-000000000415"))
+    manifest = _make_manifest(
+        manifest_id="manifest-forensic-unsupported-family",
+        run_id=run_id,
+        execution_fingerprint="fp-forensic-unsupported-family",
+        required_persistence_profile="forensic_grade",
+        input_snapshots=(
+            RunInputSnapshotRef(
+                snapshot_id="snapshot-pubmed-1",
+                content_hash="content-hash-pubmed-1",
+                immutable_uri="file:///snapshots/pubmed/publication-1.jsonl.zst",
+                query_fingerprint="query-hash-pubmed-1",
+                captured_at=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
+            ),
+        ),
+        pipeline_name="pubmed_publication",
+        provider="pubmed",
+        entity="publication",
+        contract_ref="pubmed.publication",
+    )
+    manifest_store.save(manifest)
+    ledger_store.append(
+        RunLedgerEntry(
+            entry_id="entry-forensic-unsupported-family-1",
+            manifest_id=manifest.manifest_id,
+            run_id=run_id,
+            event_type="artifact_published",
+            occurred_at=datetime(2025, 1, 1, 0, 1, tzinfo=UTC),
+            event_family="artifact",
+            status="success",
+            stage="silver",
+            dataset_ref="silver:pubmed.publication@1",
+            lineage_fragment_id="silver:pubmed.publication@1#lineage",
+            details={
+                "artifact_path": "silver/pubmed/publication",
+                "metadata_path": "silver/pubmed/publication/publication_metadata.yaml",
+                "artifact_kind": "metadata_sidecar",
+                "pipeline_name": "pubmed_publication",
+                "provider": "pubmed",
+                "entity": "publication",
+                "run_id": str(run_id),
+                "manifest_id": manifest.manifest_id,
+            },
+        )
+    )
+
+    result = RunManifestInspectionService(
+        manifest_port=manifest_store,
+        ledger_port=ledger_store,
+    ).show(manifest.manifest_id)
+
+    assert result.diagnostics["lineage_closure_boundary"] == {
+        "family": "pubmed.publication",
+        "support_scope": "operator_grade_trace_debug",
+        "supported": False,
+        "reason": "family_outside_supported_boundary",
+        "supported_families": ["chembl.activity"],
+    }
+    assert result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
+    assert result.diagnostics["persistence_profile"]["required_profile"] == (
+        "forensic_grade"
+    )
+    assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    assert result.diagnostics["persistence_profile"][
+        "required_profile_missing_requirements"
+    ] == ["lineage_closure_boundary_support"]
+    assert result.diagnostics["persistence_profile"][
+        "forensic_grade_missing_requirements"
+    ] == ["lineage_closure_boundary_support"]
+    assert result.diagnostics["alert_signals"]["lineage_closure_boundary_gap"] is True
+    assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
 
 
 def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> None:

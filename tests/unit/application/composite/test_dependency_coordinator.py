@@ -477,6 +477,12 @@ class TestDependencyExecution:
         assert result.records_extracted == 7
         assert result.records_silver == 5
         assert result.duration_seconds >= 0.0
+        assert result.started_at is not None
+        assert result.completed_at is not None
+        assert result.duration_seconds == pytest.approx(
+            (result.completed_at - result.started_at).total_seconds(),
+            abs=1e-6,
+        )
 
     @pytest.mark.asyncio
     async def test_run_single_dependency_timeout_returns_timeout_result(
@@ -512,6 +518,12 @@ class TestDependencyExecution:
         )
 
         assert result.status == DependencyStatus.TIMEOUT
+        assert result.started_at is not None
+        assert result.completed_at is not None
+        assert result.duration_seconds == pytest.approx(
+            (result.completed_at - result.started_at).total_seconds(),
+            abs=1e-6,
+        )
         mock_logger.warning.assert_called()
 
     @pytest.mark.asyncio
@@ -538,6 +550,12 @@ class TestDependencyExecution:
 
         assert result.status == DependencyStatus.FAILED
         assert "boom" in (result.error_message or "")
+        assert result.started_at is not None
+        assert result.completed_at is not None
+        assert result.duration_seconds == pytest.approx(
+            (result.completed_at - result.started_at).total_seconds(),
+            abs=1e-6,
+        )
         mock_logger.warning.assert_called()
 
     @pytest.mark.asyncio
@@ -564,4 +582,10 @@ class TestDependencyExecution:
 
         assert result.status == DependencyStatus.FAILED
         assert "required boom" in (result.error_message or "")
+        assert result.started_at is not None
+        assert result.completed_at is not None
+        assert result.duration_seconds == pytest.approx(
+            (result.completed_at - result.started_at).total_seconds(),
+            abs=1e-6,
+        )
         mock_logger.error.assert_called()

@@ -18,8 +18,10 @@ from bioetl.infrastructure.observability.metrics import (
     ADAPTER_REQUEST_DURATION_SECONDS,
     ADAPTER_REQUEST_P95_SECONDS,
     ADAPTER_REQUESTS_TOTAL,
-    ARCHIVE_DURATION_SECONDS,
-    ARCHIVE_FILES_TOTAL,
+    AUDIT_QUERY_DURATION_SECONDS,
+    AUDIT_QUERY_EVENTS_TOTAL,
+    AUDIT_WRITE_DURATION_SECONDS,
+    AUDIT_WRITE_EVENTS_TOTAL,
     BATCH_SIZE_RECORDS,
     BRONZE_BYTES_FREED_TOTAL,
     BRONZE_BYTES_WRITTEN_TOTAL,
@@ -87,8 +89,6 @@ from bioetl.infrastructure.observability.metrics import (
     POLICY_VIOLATIONS_TOTAL,
     POSTRUN_PHASE_DURATION_SECONDS,
     POSTRUN_PHASE_EVENTS_TOTAL,
-    PREFLIGHT_CONFIG_ERRORS_TOTAL,
-    PREFLIGHT_MEDALLION_POLICY_VALID,
     PROBE_MODE_FALLBACK_TOTAL,
     PROVIDER_HEALTH_STATUS,
     QUARANTINE_OPERATOR_DURATION_SECONDS,
@@ -109,7 +109,6 @@ from bioetl.infrastructure.observability.metrics import (
     TRACED_RUNS_TOTAL,
     TRANSFORM_DURATION_SECONDS,
     TRANSFORM_ERRORS_TOTAL,
-    VACUUM_DURATION_SECONDS,
     VACUUM_FILES_REMOVED_TOTAL,
 )
 
@@ -168,8 +167,9 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
 STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
     family="storage_medallion",
     counters={
+        "bioetl_audit_write_events_total": AUDIT_WRITE_EVENTS_TOTAL,
+        "bioetl_audit_query_events_total": AUDIT_QUERY_EVENTS_TOTAL,
         "bioetl_vacuum_files_removed_total": VACUUM_FILES_REMOVED_TOTAL,
-        "bioetl_archive_files_total": ARCHIVE_FILES_TOTAL,
         "bioetl_storage_optimization_total": STORAGE_OPTIMIZATION_TOTAL,
         "bioetl_bronze_write_attempts_total": BRONZE_WRITE_ATTEMPTS_TOTAL,
         "bioetl_bronze_records_written_total": BRONZE_RECORDS_WRITTEN_TOTAL,
@@ -191,8 +191,8 @@ STORAGE_MEDALLION_REGISTRY = MetricRegistryFamily(
     },
     gauges={},
     histograms={
-        "bioetl_vacuum_duration_seconds": VACUUM_DURATION_SECONDS,
-        "bioetl_archive_duration_seconds": ARCHIVE_DURATION_SECONDS,
+        "bioetl_audit_write_duration_seconds": AUDIT_WRITE_DURATION_SECONDS,
+        "bioetl_audit_query_duration_seconds": AUDIT_QUERY_DURATION_SECONDS,
         "bioetl_bronze_write_duration_seconds": BRONZE_WRITE_DURATION_SECONDS,
         "bioetl_bronze_write_total_duration_seconds": BRONZE_WRITE_TOTAL_DURATION_SECONDS,
         "bioetl_quarantine_operator_duration_seconds": QUARANTINE_OPERATOR_DURATION_SECONDS,
@@ -270,8 +270,6 @@ SYSTEM_PROCESS_REGISTRY = MetricRegistryFamily(
         "bioetl_infrastructure_validated": INFRASTRUCTURE_VALIDATED,
         "bioetl_health_check_status": HEALTH_CHECK_STATUS,
         "bioetl_health_check_mode_status": HEALTH_CHECK_MODE_STATUS,
-        "bioetl_preflight_medallion_policy_valid": PREFLIGHT_MEDALLION_POLICY_VALID,
-        "bioetl_preflight_config_errors_total": PREFLIGHT_CONFIG_ERRORS_TOTAL,
     },
     histograms={
         "bioetl_health_check_duration_seconds": HEALTH_CHECK_DURATION_SECONDS,

@@ -344,9 +344,12 @@ run_auto_fix() {
         "$PYTHON_BIN" -m scripts.qa sync-integration-vcr-policy --write
     run_step repo-identity-sync \
         "$PYTHON_BIN" -m scripts.docs sync-repo-identity --write
-    # Keep inventory refresh last because sync-repo-identity may rewrite script files.
+    # Keep inventory refresh last because upstream auto-fix steps may rewrite
+    # tracked files that contribute script references.
     run_step inventory-sync \
         "$PYTHON_BIN" -m scripts.repo sync-inventory --write
+    # Refresh the hotspot-family baseline after inventory sync because the
+    # baseline report consumes inventory-derived metadata.
     run_step hotspot-family-baseline-sync \
         "$PYTHON_BIN" -m scripts.qa report-family-baseline \
         --active-only \
@@ -373,6 +376,13 @@ run_repo_checks() {
     run_step catalog-check \
         "$PYTHON_BIN" -m scripts.repo check-catalog \
         --catalog scripts/catalog.yaml
+
+    if [[ "$MODE" == "auto" ]]; then
+        run_step hotspot-family-baseline-resync \
+            "$PYTHON_BIN" -m scripts.qa report-family-baseline \
+            --active-only \
+            --update
+    fi
 
     run_step hotspot-family-baseline-check \
         "$PYTHON_BIN" -m scripts.qa report-family-baseline \

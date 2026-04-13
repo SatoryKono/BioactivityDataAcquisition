@@ -34,6 +34,28 @@ BioETL предоставляет комплексную систему observab
 - **OpenTelemetry Tracing:** Распределённая трассировка (опционально)
 - **Health Checks:** HTTP endpoints для мониторинга состояния
 
+### Canonical operator workflow
+
+Для operator-facing observability discovery используйте один маршрут:
+
+1. `bioetl diagnostics guide` — показать canonical routing по diagnostics surface.
+2. `bioetl diagnostics metrics [--json]` — проверить metrics/admin profile:
+   текущий metrics endpoint, running/stopped status, tracing/audit flags и
+   Pushgateway publication mode.
+3. `bioetl diagnostics health [--json]` — проверить provider health.
+4. `bioetl diagnostics run --run-id <run-id>` или
+   `bioetl diagnostics checkpoint --pipeline <pipeline>` — углубиться в
+   run/checkpoint diagnostics.
+
+Важно:
+
+- metrics HTTP server startup остаётся auto-managed during normal
+  `bioetl run`, `bioetl run-all` и `bioetl run-composite` execution when
+  metrics are enabled;
+- Pushgateway publication остаётся best-effort on run completion;
+- `bioetl diagnostics metrics` — canonical operator summary для этих
+  auto-managed behaviors.
+
 ### Архитектура Observability
 
 ```
@@ -223,13 +245,29 @@ checkpoint compatibility и read failures. Основной операторск
 
 | Метрика                                   | Тип       | Labels           | Описание                   |
 | ----------------------------------------- | --------- | ---------------- | -------------------------- |
-| `bioetl_vacuum_duration_seconds`          | Histogram | table            | Длительность VACUUM        |
 | `bioetl_vacuum_files_removed_total`       | Counter   | table, layer     | Удалённые файлы            |
 | `bioetl_bronze_write_duration_seconds`    | Histogram | provider, entity | Длительность записи Bronze |
 | `bioetl_bronze_records_written_total`     | Counter   | provider, entity | Записи в Bronze            |
 | `bioetl_bronze_bytes_written_total`       | Counter   | provider, entity | Байты в Bronze             |
 | `bioetl_policy_violations_total`          | Counter   | layer, mode      | Нарушения политик          |
 | `bioetl_silver_validation_failures_total` | Counter   | table, pipeline  | Canonical Silver Pandera validation failures; increments on failed Silver schema validation outcome before `SchemaViolationError` |
+
+#### Audit Traceability Metrics
+
+| Метрика                               | Тип       | Labels                    | Описание                                      |
+| ------------------------------------- | --------- | ------------------------- | --------------------------------------------- |
+| `bioetl_audit_write_events_total`     | Counter   | layer, operation, status  | Outcomes file-backed audit write operations   |
+| `bioetl_audit_write_duration_seconds` | Histogram | layer, operation, status  | Latency of audit write operations             |
+| `bioetl_audit_query_events_total`     | Counter   | layer_filter, status      | Outcomes audit inspection/query workflows     |
+| `bioetl_audit_query_duration_seconds` | Histogram | layer_filter, status      | Latency of audit inspection/query workflows   |
+
+Guardrail:
+
+- audit metrics remain low-cardinality;
+- `run_id`, `table_name`, filesystem paths, and record identifiers must not be
+  exposed as Prometheus labels for audit families;
+- record-level drilldown stays in audit files and CLI inspection paths rather
+  than metric labels.
 
 #### Input Filter Metrics
 
@@ -256,8 +294,6 @@ checkpoint compatibility и read failures. Основной операторск
 
 | Метрика                                   | Тип   | Labels   | Описание                        |
 | ----------------------------------------- | ----- | -------- | ------------------------------- |
-| `bioetl_preflight_medallion_policy_valid` | Gauge | pipeline | Валидность medallion policy     |
-| `bioetl_preflight_config_errors_total`    | Gauge | pipeline | Ошибки конфигурации             |
 | `bioetl_infrastructure_validated`         | Gauge | pipeline | Статус валидации инфраструктуры |
 
 #### Adapter / HTTP Metrics

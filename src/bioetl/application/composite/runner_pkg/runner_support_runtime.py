@@ -5,7 +5,6 @@ from __future__ import annotations
 __all__ = ["run_seed", "save_checkpoint_safe"]
 
 import time
-from datetime import UTC, datetime
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_pkg.runner_constants import (
@@ -13,6 +12,10 @@ from bioetl.application.composite.runner_pkg.runner_constants import (
 )
 from bioetl.application.composite.runner_pkg.runner_support_types import (
     _CompositeRunnerSupportHostProtocol,
+)
+from bioetl.application.runtime_timestamps import (
+    capture_runtime_timing_anchor,
+    derive_completion_timestamp,
 )
 from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.exceptions import BioETLError
@@ -140,10 +143,13 @@ async def run_seed(host: _CompositeRunnerSupportHostProtocol) -> SeedResult:
         ),
     )
 
-    started_at = datetime.now(tz=UTC)
+    started_at, started_monotonic = capture_runtime_timing_anchor()
     runner = host._seed_runner_factory()
     await runner.run()
-    completed_at = datetime.now(tz=UTC)
+    completed_at, duration_seconds = derive_completion_timestamp(
+        started_at=started_at,
+        started_monotonic=started_monotonic,
+    )
 
     metrics = runner.execution_metrics
     records_extracted = int(metrics["records_fetched"])
@@ -154,7 +160,7 @@ async def run_seed(host: _CompositeRunnerSupportHostProtocol) -> SeedResult:
         records_extracted=records_extracted,
         records_silver=records_silver,
         keys_generated=records_silver,
-        duration_seconds=(completed_at - started_at).total_seconds(),
+        duration_seconds=duration_seconds,
         started_at=started_at,
         completed_at=completed_at,
     )

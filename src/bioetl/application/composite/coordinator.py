@@ -17,7 +17,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 
 import polars as pl
 
@@ -28,6 +28,10 @@ from bioetl.application.composite.coordinator_planning import (
 )
 from bioetl.application.composite.coordinator_result_mixin import (
     EnrichmentCoordinatorResultMixin,
+)
+from bioetl.application.runtime_timestamps import (
+    capture_runtime_timing_anchor,
+    derive_completion_timestamp,
 )
 from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
 from bioetl.domain.composite.result import EnrichmentResult
@@ -66,6 +70,7 @@ class _EnricherExecutionContext:
     enricher: EnricherConfig
     records_input: int
     started_at: datetime
+    started_monotonic_at: float
 
 
 class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
@@ -180,6 +185,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
                     keys=keys,
                     runner_factory=runner_factory,
                     started_at=execution_context.started_at,
+                    started_monotonic_at=execution_context.started_monotonic_at,
                 )
                 return self._complete_enricher_execution(
                     execution_context=execution_context,
@@ -207,10 +213,12 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         keys: pl.DataFrame,
     ) -> _EnricherExecutionContext:
         """Create the canonical execution context and start log for one enricher."""
+        started_at, started_monotonic_at = capture_runtime_timing_anchor()
         execution_context = _EnricherExecutionContext(
             enricher=enricher,
             records_input=len(keys),
-            started_at=datetime.now(tz=UTC),
+            started_at=started_at,
+            started_monotonic_at=started_monotonic_at,
         )
         self._log_enricher_start(enricher, execution_context.records_input)
         return execution_context
@@ -239,17 +247,24 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
     ) -> EnrichmentResult:
         """Apply timeout policy, re-raising for required enrichers only."""
         enricher = execution_context.enricher
+        completed_at, duration = derive_completion_timestamp(
+            started_at=execution_context.started_at,
+            started_monotonic=execution_context.started_monotonic_at,
+        )
         if enricher.required:
             self._logger.error(
                 "Required enricher timed out",
                 enricher=enricher.pipeline,
                 timeout_seconds=enricher.timeout_seconds,
+                duration_seconds=duration,
             )
             raise
         return self._build_timeout_result(
             enricher,
             execution_context.records_input,
             execution_context.started_at,
+            completed_at,
+            duration,
         )
 
     def _handle_enricher_execution_error(
@@ -265,6 +280,10 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
             execution_context.enricher,
             execution_context.records_input,
             execution_context.started_at,
+            *derive_completion_timestamp(
+                started_at=execution_context.started_at,
+                started_monotonic=execution_context.started_monotonic_at,
+            ),
             reason_code=reason_code,
         )
 
@@ -283,10 +302,13 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
         keys: pl.DataFrame,
         runner_factory: Callable[[str, pl.DataFrame], ExecutionMetricsRunnerPort],
         started_at: datetime,
+        started_monotonic_at: float,
     ) -> tuple[ExecutionMetricsRunnerPort, datetime, float]:
         async with asyncio.timeout(enricher.timeout_seconds):
             runner = runner_factory(enricher.pipeline, keys)
             await runner.run()
-        completed_at = datetime.now(tz=UTC)
-        duration = (completed_at - started_at).total_seconds()
+        completed_at, duration = derive_completion_timestamp(
+            started_at=started_at,
+            started_monotonic=started_monotonic_at,
+        )
         return runner, completed_at, duration

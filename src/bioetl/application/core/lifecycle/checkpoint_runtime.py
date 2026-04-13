@@ -42,6 +42,30 @@ def resolve_current_metadata(
     return current_metadata if current_metadata is not None else default_metadata
 
 
+def _prefer_identity_value(
+    current_value: str | None,
+    identity_value: str | None,
+) -> str | None:
+    """Prefer persisted execution identity, then fall back to current identity."""
+    return current_value if current_value is not None else identity_value
+
+
+def _prefer_identity_flag(
+    current_value: bool | None,
+    identity_value: bool | None,
+) -> bool | None:
+    """Prefer persisted boolean identity flag, then fall back to current identity."""
+    return current_value if current_value is not None else identity_value
+
+
+def _prefer_identity_sequence(
+    current_value: tuple[str, ...],
+    identity_value: tuple[str, ...],
+) -> tuple[str, ...]:
+    """Prefer persisted non-empty tuple values, otherwise use identity fallback."""
+    return current_value if current_value else identity_value
+
+
 def enrich_metadata_with_execution_identity(
     metadata: CheckpointMetadata,
     *,
@@ -52,74 +76,59 @@ def enrich_metadata_with_execution_identity(
         return metadata
     return CheckpointMetadata(
         records_processed=metadata.records_processed,
-        dq_contract_compatibility_hash=(
-            metadata.dq_contract_compatibility_hash
-            if metadata.dq_contract_compatibility_hash is not None
-            else identity.dq_contract_compatibility_hash
+        dq_contract_compatibility_hash=_prefer_identity_value(
+            metadata.dq_contract_compatibility_hash,
+            identity.dq_contract_compatibility_hash,
         ),
-        dq_policy_hash=(
-            metadata.dq_policy_hash
-            if metadata.dq_policy_hash is not None
-            else identity.dq_policy_hash
+        dq_policy_hash=_prefer_identity_value(
+            metadata.dq_policy_hash,
+            identity.dq_policy_hash,
         ),
-        dq_rule_bundle_version=(
-            metadata.dq_rule_bundle_version
-            if metadata.dq_rule_bundle_version is not None
-            else identity.dq_rule_bundle_version
+        dq_rule_bundle_version=_prefer_identity_value(
+            metadata.dq_rule_bundle_version,
+            identity.dq_rule_bundle_version,
         ),
-        pipeline_version=(
-            metadata.pipeline_version
-            if metadata.pipeline_version is not None
-            else identity.pipeline_version
+        pipeline_version=_prefer_identity_value(
+            metadata.pipeline_version,
+            identity.pipeline_version,
         ),
-        effective_config_hash=(
-            metadata.effective_config_hash
-            if metadata.effective_config_hash is not None
-            else identity.effective_config_hash
+        effective_config_hash=_prefer_identity_value(
+            metadata.effective_config_hash,
+            identity.effective_config_hash,
         ),
-        effective_config_artifact_id=(
-            metadata.effective_config_artifact_id
-            if metadata.effective_config_artifact_id is not None
-            else identity.effective_config_artifact_id
+        effective_config_artifact_id=_prefer_identity_value(
+            metadata.effective_config_artifact_id,
+            identity.effective_config_artifact_id,
         ),
-        execution_fingerprint=(
-            metadata.execution_fingerprint
-            if metadata.execution_fingerprint is not None
-            else identity.execution_fingerprint
+        execution_fingerprint=_prefer_identity_value(
+            metadata.execution_fingerprint,
+            identity.execution_fingerprint,
         ),
-        composite_run_identity=(
-            metadata.composite_run_identity
-            if metadata.composite_run_identity is not None
-            else identity.composite_run_identity
+        composite_run_identity=_prefer_identity_value(
+            metadata.composite_run_identity,
+            identity.composite_run_identity,
         ),
-        manifest_id=(
-            metadata.manifest_id
-            if metadata.manifest_id is not None
-            else identity.manifest_id
+        manifest_id=_prefer_identity_value(
+            metadata.manifest_id,
+            identity.manifest_id,
         ),
-        contract_ref=(
-            metadata.contract_ref
-            if metadata.contract_ref is not None
-            else identity.contract_ref
+        contract_ref=_prefer_identity_value(
+            metadata.contract_ref,
+            identity.contract_ref,
         ),
-        contract_version=(
-            metadata.contract_version
-            if metadata.contract_version is not None
-            else identity.contract_version
+        contract_version=_prefer_identity_value(
+            metadata.contract_version,
+            identity.contract_version,
         ),
-        exact_replay=(
-            metadata.exact_replay
-            if metadata.exact_replay is not None
-            else identity.exact_replay
+        exact_replay=_prefer_identity_flag(
+            metadata.exact_replay,
+            identity.exact_replay,
         ),
-        input_snapshot_ids=(
-            metadata.input_snapshot_ids
-            if metadata.input_snapshot_ids
-            else identity.input_snapshot_ids
+        input_snapshot_ids=_prefer_identity_sequence(
+            metadata.input_snapshot_ids,
+            identity.input_snapshot_ids,
         ),
-        run_context=metadata.run_context
-        if metadata.run_context is not None
-        else identity.run_context,
+        run_context=metadata.run_context or identity.run_context,
     )
 
 

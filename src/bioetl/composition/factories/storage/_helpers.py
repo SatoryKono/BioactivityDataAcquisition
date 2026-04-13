@@ -150,7 +150,12 @@ def create_storage_adapter(
     silver_validator: SilverValidatorPort | None,
 ) -> StorageAdapter:
     """Create StorageAdapter with Bronze/Silver/Gold writers."""
-    audit = create_audit_port(settings=settings, logger=logger)
+    audit = create_audit_port(
+        settings=settings,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+    )
     metadata_atomic_retry_policy = create_silver_atomic_retry_policy(settings)
     merge_resilience_policy = create_silver_merge_resilience_policy(settings)
     silver_writer = _create_silver_layer_writer(

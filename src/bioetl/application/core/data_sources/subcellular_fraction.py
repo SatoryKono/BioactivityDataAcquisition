@@ -138,8 +138,8 @@ class SubcellularFractionDataSource(
     def _yield_target_records_from_fallback_source_records(
         self,
         source_records: AsyncIterator[
-            Any
-        ],  # Any: fallback source stream forwards raw upstream records before normalization.
+            object
+        ],  # object: fallback source stream forwards raw upstream records before normalization.
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
         return self._fetch_filtered_fractions(source_records, limit)

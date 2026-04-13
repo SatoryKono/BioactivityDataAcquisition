@@ -139,13 +139,17 @@ Cross-links for canonical observability governance:
 - terminal Domain Event timestamps MUST be derived from the observer's captured
   `wall_start_time` plus monotonic duration; missing `wall_start_time` is an
   explicit observer invariant violation, not a trigger for `datetime.now()`
+- replay-facing composite/admin/public execution results MUST derive
+  `completed_at` from the captured `started_at` anchor plus monotonic duration
+  as well; terminal result assembly must not invent a separate wall-clock
+  completion timestamp after the run has already finished
 
 ## 3. Runtime Metrics Contract
 
 Полный каталог метрик задаётся в `src/bioetl/infrastructure/observability/_metrics_defs_*.py`
 и собирается через `prometheus_metric_registries.py`.
 
-Текущий размер каталога: **102** метрики
+Текущий размер каталога: **101** метрики
 (`src/bioetl/infrastructure/observability/prometheus_metric_registries.py`).
 
 Ниже обязательное ядро (MUST для мониторинга запусков):
@@ -179,6 +183,10 @@ Cross-links for canonical observability governance:
 | `bioetl_quarantine_operator_duration_seconds`  | Histogram | `operation,status`                       | latency of quarantine operator workflows                                           |
 | `bioetl_postrun_phase_events_total`            | Counter   | `pipeline,phase,status`                  | bounded postrun subphase outcomes for `dq_evaluation`, `dq_reports`, `compaction`, `vacuum`, `final_metadata` |
 | `bioetl_postrun_phase_duration_seconds`        | Histogram | `pipeline,phase,status`                  | bounded durations for the same postrun subphases                                   |
+| `bioetl_audit_write_events_total`              | Counter   | `layer,operation,status`                 | bounded outcomes for file-backed audit persistence                                 |
+| `bioetl_audit_write_duration_seconds`          | Histogram | `layer,operation,status`                 | latency of file-backed audit persistence                                           |
+| `bioetl_audit_query_events_total`              | Counter   | `layer_filter,status`                    | bounded outcomes for audit inspection/query workflows                              |
+| `bioetl_audit_query_duration_seconds`          | Histogram | `layer_filter,status`                    | latency of audit inspection/query workflows                                        |
 
 DQ anomaly timing semantics:
 
@@ -200,6 +208,9 @@ Guardrail для новых метрик control-plane/traceability:
 - provider health-check latency MUST use `_seconds` families only; `_ms`
   latency families для provider health-check path считаются legacy и не должны
   добавляться в новые dashboards, alerts или runtime emission paths
+- audit traceability metric families MUST stay bounded as well; `run_id`,
+  `table_name`, filesystem paths, and record identifiers belong in audit files,
+  logs, or trace attributes, not in Prometheus labels
 
 Новый `bioetl-control-plane-v1` dashboard собирает агрегаты manifest write
 failures, ledger append failures, checkpoint compatibility и read failures, а
@@ -264,6 +275,7 @@ service getters:
 - `get_health_service()`
 - `get_checkpoint_service()`
 - `get_metrics_service()`
+- `get_metrics_operator_profile()`
 - `get_observability_workflow_service()`
 - `get_quarantine_service()`
 - `get_run_manifest_service()`
@@ -285,8 +297,22 @@ run-manifest context, не перенося orchestration в CLI или interfac
 CLI surface должен оставаться thin adapter над этим seam. Канонические
 operator-facing команды:
 
+- `bioetl diagnostics guide`
+- `bioetl diagnostics metrics [--json]`
+- `bioetl diagnostics health [--json]`
 - `bioetl checkpoint audit-run --run-id ... [--limit ...] [--format text|json|yaml]`
 - `bioetl checkpoint inspect --pipeline ... [--run-id ...] [--audit-limit ...] [--format text|json|yaml]`
+
+`bioetl diagnostics metrics` является canonical operator summary для
+metrics/admin behavior:
+
+- metrics HTTP server startup остаётся auto-managed during pipeline runs when
+  metrics are enabled;
+- current metrics server status/config and Pushgateway publication mode should
+  be discovered through `get_metrics_operator_profile()` /
+  `bioetl diagnostics metrics`, not by reading composition helpers directly;
+- Pushgateway publication остаётся best-effort on run completion and не
+  требует отдельного operator command for normal execution.
 
 Selected operator/admin service seams also emit bounded tracing spans through
 `TracingPort` when tracing is enabled:
@@ -295,6 +321,7 @@ Selected operator/admin service seams also emit bounded tracing spans through
 - `QuarantineService.inspect`, `QuarantineService.get_stats`, `QuarantineService.replay`,
   `QuarantineService.mark_as_reprocessed`, `QuarantineService.purge`, `QuarantineService.update_status`
 - `ObservabilityWorkflowService.inspect_audit_run`, `ObservabilityWorkflowService.inspect_checkpoint_workflow`
+- `FileAuditAdapter.log_write`, `FileAuditAdapter.get_entries`, `FileAuditAdapter.aclose`
 
 Intentional non-goals for now:
 

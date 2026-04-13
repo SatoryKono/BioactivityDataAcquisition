@@ -140,7 +140,7 @@ The infrastructure layer provides concrete adapters for the domain ports.
 - `PrometheusMetrics` implements `MetricsPort`
 - metric export names are defined centrally in
   `src/bioetl/infrastructure/observability/prometheus_metric_registries.py`
-- the current exported catalog size is **102 metrics**
+- the current exported catalog size is **101 metrics**
 - provider health-check latency is standardized on seconds-based metric families
   (`bioetl_health_check_latency_seconds`,
   `bioetl_health_check_mode_latency_seconds`)
@@ -198,6 +198,14 @@ Intentional exclusions:
 - Bronze/Silver/Gold runtime wiring injects audit adapters from composition
 - file-backed audit persistence is an infrastructure concern hidden behind the
   port boundary
+- `FileAuditAdapter` publishes bounded audit metrics for write/query workflows:
+  - `bioetl_audit_write_events_total`
+  - `bioetl_audit_write_duration_seconds`
+  - `bioetl_audit_query_events_total`
+  - `bioetl_audit_query_duration_seconds`
+- audit inspection and persistence also participate in tracing through
+  `TracingPort`; spans stay summary-oriented and avoid high-cardinality
+  identifiers such as `run_id`, table names, and filesystem paths
 
 ## Composition Layer
 
@@ -254,6 +262,10 @@ Terminal event timestamps are derived deterministically from
 `wall_start_time + monotonic_duration`. Missing `wall_start_time` is treated as
 an observer invariant violation rather than a reason to fall back to a fresh
 wall-clock timestamp.
+
+The same rule applies to replay-facing composite/admin/public execution
+results: `completed_at` must be derived from the captured `started_at` anchor
+plus monotonic duration, rather than sampled again from a later wall clock.
 
 ## Interaction Diagram
 

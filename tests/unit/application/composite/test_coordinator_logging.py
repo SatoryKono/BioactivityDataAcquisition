@@ -207,7 +207,7 @@ class TestCoordinatorSuccessLogging:
             }
             return runner
 
-        await coordinator.run_enrichers(
+        result = await coordinator.run_enrichers(
             keys=sample_keys,
             enrichers=[enricher_config],
             completed=frozenset(),
@@ -221,6 +221,13 @@ class TestCoordinatorSuccessLogging:
             if c.args and "Enricher completed" in str(c.args[0])
         ]
         assert len(info_calls) >= 1, "Should log info for enricher completion"
+        pipeline_result = result[enricher_config.pipeline]
+        assert pipeline_result.started_at is not None
+        assert pipeline_result.completed_at is not None
+        assert pipeline_result.duration_seconds == pytest.approx(
+            (pipeline_result.completed_at - pipeline_result.started_at).total_seconds(),
+            abs=1e-6,
+        )
 
 
 @pytest.mark.unit
@@ -248,7 +255,7 @@ class TestCoordinatorTimeoutLogging:
             runner.run = slow_run
             return runner
 
-        await coordinator.run_enrichers(
+        result = await coordinator.run_enrichers(
             keys=sample_keys,
             enrichers=[enricher_config],
             completed=frozenset(),
@@ -262,3 +269,10 @@ class TestCoordinatorTimeoutLogging:
             if c.args and "timed out" in str(c.args[0]).lower()
         ]
         assert len(warning_calls) >= 1, "Should log warning for enricher timeout"
+        pipeline_result = result[enricher_config.pipeline]
+        assert pipeline_result.started_at is not None
+        assert pipeline_result.completed_at is not None
+        assert pipeline_result.duration_seconds == pytest.approx(
+            (pipeline_result.completed_at - pipeline_result.started_at).total_seconds(),
+            abs=1e-6,
+        )

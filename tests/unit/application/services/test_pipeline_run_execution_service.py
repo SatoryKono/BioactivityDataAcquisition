@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -56,11 +57,19 @@ class TestPipelineRunExecutionService:
         runner: MagicMock,
         run_logger: MagicMock,
         metrics_extractor: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
+        started_at = datetime(2026, 4, 13, 12, 0, tzinfo=UTC)
+        monkeypatch.setattr(
+            "bioetl.application.services.execution.pipeline_run_execution_service.derive_completion_timestamp",
+            MagicMock(return_value=(started_at + timedelta(seconds=5), 5.0)),
+        )
         result = await service.execute(
             runner=runner,
             run_logger=run_logger,
             metrics_extractor=metrics_extractor,
+            started_at=started_at,
+            started_monotonic=100.0,
         )
 
         assert isinstance(result, PipelineExecutionResult)
@@ -69,6 +78,7 @@ class TestPipelineRunExecutionService:
         assert result.error_type is None
         assert result.metrics == {"records_silver": 7}
         assert result.completed_at.tzinfo is not None
+        assert result.completed_at == started_at + timedelta(seconds=5)
         runner.run.assert_awaited_once()
         metrics_extractor.extract_metrics.assert_called_once_with(runner)
         run_logger.info.assert_called_once_with("Pipeline completed successfully")

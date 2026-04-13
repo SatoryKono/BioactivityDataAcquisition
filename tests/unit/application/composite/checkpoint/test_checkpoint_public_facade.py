@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
-from bioetl.application.composite.checkpoint.anchor_context import (
+from bioetl.application.composite.checkpoint import (
+    CompositeCheckpointState,
     ExpectedCheckpointContext,
     create_expected_checkpoint_context,
     fresh_checkpoint_state,

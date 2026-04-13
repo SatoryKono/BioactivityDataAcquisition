@@ -107,6 +107,8 @@ class EnrichmentResult:
         error_message: str,
         records_input: int = 0,
         duration_seconds: float = 0.0,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> EnrichmentResult:
         """Factory for failed enrichment result.
 
@@ -115,6 +117,8 @@ class EnrichmentResult:
             error_message: Error message.
             records_input: Records input.
             duration_seconds: Duration seconds.
+            started_at: Started at.
+            completed_at: Completed at.
 
         Returns:
             The EnrichmentResult result.
@@ -125,6 +129,8 @@ class EnrichmentResult:
             records_input=records_input,
             error_message=error_message,
             duration_seconds=duration_seconds,
+            started_at=started_at,
+            completed_at=completed_at,
         )
 
     @classmethod
@@ -154,6 +160,9 @@ class EnrichmentResult:
         enricher_name: str,
         timeout_seconds: float,
         records_input: int = 0,
+        duration_seconds: float | None = None,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> EnrichmentResult:
         """Factory for timeout enrichment result.
 
@@ -161,6 +170,9 @@ class EnrichmentResult:
             enricher_name: Enricher pipeline name.
             timeout_seconds: Timeout seconds.
             records_input: Records input.
+            duration_seconds: Observed duration before timeout. Defaults to timeout_seconds.
+            started_at: Started at.
+            completed_at: Completed at.
 
         Returns:
             The EnrichmentResult result.
@@ -170,7 +182,11 @@ class EnrichmentResult:
             status=EnrichmentStatus.TIMEOUT,
             records_input=records_input,
             error_message=f"Timeout after {timeout_seconds}s",
-            duration_seconds=timeout_seconds,
+            duration_seconds=timeout_seconds
+            if duration_seconds is None
+            else duration_seconds,
+            started_at=started_at,
+            completed_at=completed_at,
         )
 
     @classmethod

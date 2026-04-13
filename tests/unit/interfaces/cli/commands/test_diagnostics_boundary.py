@@ -22,6 +22,10 @@ def test_diagnostics_module_reexports_canonical_command_symbols() -> None:
         is canonical_command.get_observability_diagnostics_bundle
     )
     assert (
+        diagnostics_module.get_metrics_operator_profile
+        is canonical_command.get_metrics_operator_profile
+    )
+    assert (
         diagnostics_module.get_quarantine_manager
         is canonical_command.get_quarantine_manager
     )

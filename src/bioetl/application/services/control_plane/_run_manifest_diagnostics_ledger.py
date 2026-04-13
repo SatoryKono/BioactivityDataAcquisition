@@ -12,6 +12,32 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_helpers
 from bioetl.domain.control_plane import RunLedgerEntry
 
 
+def _resume_diagnostics_present(details: Mapping[str, object]) -> bool:
+    """Return whether one ledger detail payload carries resume diagnostics."""
+    return any(
+        details.get(field) is not None
+        for field in (
+            "compatibility_disposition",
+            "resume_rejected",
+            "execution_identity_compatible",
+            "messages",
+            "current_identity",
+            "checkpoint_identity",
+        )
+    )
+
+
+def _copy_resume_mapping(
+    diagnostics: dict[str, object],
+    details: Mapping[str, object],
+    field: str,
+) -> None:
+    """Copy one mapping field into resume diagnostics when present."""
+    value = details.get(field)
+    if isinstance(value, Mapping):
+        diagnostics[field] = dict(value)
+
+
 def _extract_resume_diagnostics(
     ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> dict[str, object] | None:
@@ -20,42 +46,25 @@ def _extract_resume_diagnostics(
         details = entry.details
         if not isinstance(details, Mapping):
             continue
-        compatibility_disposition = details.get("compatibility_disposition")
-        resume_rejected = details.get("resume_rejected")
-        execution_identity_compatible = details.get("execution_identity_compatible")
-        messages = details.get("messages")
-        current_identity = details.get("current_identity")
-        checkpoint_identity = details.get("checkpoint_identity")
-        if not any(
-            value is not None
-            for value in (
-                compatibility_disposition,
-                resume_rejected,
-                execution_identity_compatible,
-                messages,
-                current_identity,
-                checkpoint_identity,
-            )
-        ):
+        if not _resume_diagnostics_present(details):
             continue
         diagnostics: dict[str, object] = {
             "source_event_type": entry.event_type,
             "source_status": entry.status,
         }
-        if compatibility_disposition is not None:
-            diagnostics["compatibility_disposition"] = compatibility_disposition
-        if resume_rejected is not None:
-            diagnostics["resume_rejected"] = resume_rejected
-        if execution_identity_compatible is not None:
-            diagnostics["execution_identity_compatible"] = (
-                execution_identity_compatible
-            )
+        for field in (
+            "compatibility_disposition",
+            "resume_rejected",
+            "execution_identity_compatible",
+        ):
+            value = details.get(field)
+            if value is not None:
+                diagnostics[field] = value
+        messages = details.get("messages")
         if isinstance(messages, list):
             diagnostics["messages"] = list(messages)
-        if isinstance(current_identity, Mapping):
-            diagnostics["current_identity"] = dict(current_identity)
-        if isinstance(checkpoint_identity, Mapping):
-            diagnostics["checkpoint_identity"] = dict(checkpoint_identity)
+        _copy_resume_mapping(diagnostics, details, "current_identity")
+        _copy_resume_mapping(diagnostics, details, "checkpoint_identity")
         return diagnostics
     return None
 

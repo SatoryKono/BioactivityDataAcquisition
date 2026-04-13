@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
@@ -20,7 +21,9 @@ from bioetl.interfaces.cli.commands.domains.quarantine.support import (
 from bioetl.interfaces.cli.commands.inspection_output import (
     emit_inspection_payload,
 )
-from bioetl.interfaces.cli.commands.run_manifest import _render_text_payload
+from bioetl.interfaces.cli.commands._run_manifest_output import (
+    render_text_payload,
+)
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
@@ -29,6 +32,7 @@ if TYPE_CHECKING:
         RunManifestInspectionService,
     )
     from bioetl.composition.observability_api import ObservabilityDiagnosticsBundle
+    from bioetl.composition.observability_api import MetricsOperatorProfile
     from bioetl.domain.types import JsonDict
 
 __all__ = [
@@ -37,10 +41,12 @@ __all__ = [
     "diagnostics_checkpoint",
     "diagnostics_guide",
     "diagnostics_health",
+    "diagnostics_metrics",
     "diagnostics_manifest",
     "diagnostics_quarantine",
     "diagnostics_run",
     "get_observability_diagnostics_bundle",
+    "get_metrics_operator_profile",
     "get_quarantine_manager",
 ]
 
@@ -50,6 +56,13 @@ def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
     from bioetl.interfaces.observability import (
         get_observability_diagnostics_bundle as _impl,
     )
+
+    return _impl()
+
+
+def get_metrics_operator_profile() -> MetricsOperatorProfile:
+    """Load the canonical operator-facing metrics diagnostics profile."""
+    from bioetl.interfaces.observability import get_metrics_operator_profile as _impl
 
     return _impl()
 
@@ -66,6 +79,10 @@ def _build_diagnostics_guide_lines() -> list[str]:
     return [
         "BioETL Diagnostics Guide",
         "  start_here: bioetl diagnostics guide",
+        (
+            "  metrics/admin: bioetl diagnostics metrics "
+            "[--json]",
+        ),
         (
             "  health: bioetl diagnostics health "
             "[--provider <provider>] [--json]"
@@ -86,6 +103,9 @@ def _build_diagnostics_guide_lines() -> list[str]:
             "  quarantine: bioetl diagnostics quarantine --pipeline <pipeline> "
             "[--run-id <run-id>] [--group-by reason-signature] [--json]"
         ),
+        "",
+        "Metrics server startup is auto-managed during pipeline runs when metrics are enabled.",
+        "Pushgateway publication is best-effort on run completion; inspect current config with diagnostics metrics.",
         "",
         "Legacy command groups remain supported:",
         "  health check",
@@ -118,6 +138,36 @@ def _render_guide_lines(lines: Iterable[str]) -> None:
     """Emit guide text lines in stable order."""
     for line in lines:
         click.echo(line)
+
+
+def _build_metrics_profile_lines(profile: MetricsOperatorProfile) -> list[str]:
+    """Render the canonical operator-facing metrics/admin workflow summary."""
+    started_at = (
+        profile.metrics_started_at.isoformat()
+        if profile.metrics_started_at is not None
+        else "not_running"
+    )
+    endpoint = profile.metrics_endpoint or "disabled"
+    running = "running" if profile.metrics_server_running else "stopped"
+    return [
+        "BioETL Metrics Diagnostics",
+        f"  metrics_enabled: {str(profile.metrics_enabled).lower()}",
+        f"  metrics_server_enabled: {str(profile.metrics_server_enabled).lower()}",
+        f"  metrics_server_status: {running}",
+        f"  metrics_endpoint: {endpoint}",
+        f"  metrics_started_at: {started_at}",
+        f"  metrics_server_mode: {profile.metrics_server_mode}",
+        f"  pushgateway_mode: {profile.pushgateway_mode}",
+        f"  pushgateway_gateway: {profile.pushgateway_gateway}",
+        f"  tracing_enabled: {str(profile.tracing_enabled).lower()}",
+        f"  audit_enabled: {str(profile.audit_enabled).lower()}",
+        "",
+        "Operator workflow:",
+        "  inspect metrics/admin state: bioetl diagnostics metrics [--json]",
+        "  inspect provider health: bioetl diagnostics health [--json]",
+        "  inspect one run: bioetl diagnostics run --run-id <run-id>",
+        "  inspect checkpoint state: bioetl diagnostics checkpoint --pipeline <pipeline>",
+    ]
 
 
 @click.group()  # type: ignore[untyped-decorator]
@@ -159,6 +209,22 @@ def diagnostics_health(provider: tuple[str, ...], output_json: bool) -> None:
         return
     if not all_health_results_healthy(results):
         raise SystemExit(ExitCode.FAIL)
+
+
+@diagnostics.command("metrics")  # type: ignore[untyped-decorator]
+@click.option(  # type: ignore[untyped-decorator]
+    "--json",
+    "output_json",
+    is_flag=True,
+    help="Output as JSON",
+)
+def diagnostics_metrics(output_json: bool) -> None:
+    """Show the canonical metrics/admin observability workflow summary."""
+    profile = get_metrics_operator_profile()
+    if output_json:
+        click.echo(json.dumps(profile.to_dict(), indent=2, default=str))
+        return
+    _render_guide_lines(_build_metrics_profile_lines(profile))
 
 
 @diagnostics.command("run")  # type: ignore[untyped-decorator]
@@ -268,7 +334,7 @@ def _emit_manifest_payload(
     emit_inspection_payload(
         result.to_dict(),
         output_format,
-        text_renderer=_render_text_payload,
+        text_renderer=render_text_payload,
     )
 
 
@@ -333,6 +399,7 @@ def diagnostics_quarantine(
 COMMANDS = (
     diagnostics_guide,
     diagnostics_health,
+    diagnostics_metrics,
     diagnostics_run,
     diagnostics_checkpoint,
     diagnostics_manifest,

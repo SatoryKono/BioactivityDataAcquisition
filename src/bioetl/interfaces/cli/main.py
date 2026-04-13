@@ -42,7 +42,7 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
     "diagnostics": (
         "bioetl.interfaces.cli.commands.diagnostics",
         "diagnostics",
-        "Unified operator diagnostics across health, checkpoints, manifests, and quarantine",
+        "Unified operator diagnostics across metrics, health, checkpoints, manifests, and quarantine",
     ),
     "debug": (
         "bioetl.interfaces.cli.commands.debug",

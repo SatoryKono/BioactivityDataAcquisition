@@ -22,6 +22,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
+from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution._pipeline_runner_support import (
     build_dry_run_result,
     build_pipeline_run_result,
@@ -120,7 +121,9 @@ class PipelineRunnerService:
         Raises:
             PipelineNotFoundError: If pipeline_name is not registered in the factory.
         """
-        started_at = self.clock.now()
+        started_at, started_monotonic = capture_runtime_timing_anchor(
+            started_at=self.clock.now()
+        )
         effective_options = self._merge_options(options, dry_run)
         self._ensure_pipeline_exists(pipeline_name)
         effective_run_id: RunID = cast(RunID, run_id or uuid4())
@@ -149,6 +152,7 @@ class PipelineRunnerService:
             run_id=effective_run_id,
             run_type=effective_options.run_type,
             started_at=started_at,
+            started_monotonic=started_monotonic,
         )
 
     def _ensure_pipeline_exists(self, pipeline_name: str) -> None:
@@ -244,12 +248,15 @@ class PipelineRunnerService:
         run_id: RunID,
         run_type: str,
         started_at: datetime,
+        started_monotonic: float,
     ) -> RunResult:
         """Execute pipeline and build normalized RunResult."""
         outcome = await self._execution_service.execute(
             runner=runner,
             run_logger=run_logger,
             metrics_extractor=self.metrics_extractor,
+            started_at=started_at,
+            started_monotonic=started_monotonic,
         )
         return self._build_run_result(
             outcome=outcome,

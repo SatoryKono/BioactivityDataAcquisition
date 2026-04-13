@@ -47,6 +47,7 @@ def test_build_success_result_uses_runner_execution_metrics(
         runner=runner,
         started_at=started_at,
         completed_at=completed_at,
+        duration_seconds=3.0,
     )
 
     assert result.status == DependencyStatus.SUCCESS
@@ -74,6 +75,7 @@ def test_build_success_result_requires_canonical_metric_keys(
             runner=runner,
             started_at=datetime(2026, 3, 11, 10, 0, tzinfo=UTC),
             completed_at=datetime(2026, 3, 11, 10, 0, 3, tzinfo=UTC),
+            duration_seconds=3.0,
         )
 
 
@@ -88,11 +90,14 @@ def test_build_failed_result_uses_error_log_for_required_dependency(
         required=True,
     )
     started_at = datetime.now(tz=UTC)
+    completed_at = started_at
 
     result = mapper.build_failed_result(
         dependency=dependency,
         error=RuntimeError("boom"),
         started_at=started_at,
+        completed_at=completed_at,
+        duration_seconds=0.0,
     )
 
     assert result.status == DependencyStatus.FAILED
@@ -111,9 +116,14 @@ def test_build_timeout_result_returns_timeout_status(
         timeout_seconds=12,
     )
 
+    started_at = datetime.now(tz=UTC)
+    completed_at = started_at
+
     result = mapper.build_timeout_result(
         dependency=dependency,
-        started_at=datetime.now(tz=UTC),
+        started_at=started_at,
+        completed_at=completed_at,
+        duration_seconds=12.0,
     )
 
     assert result.status == DependencyStatus.TIMEOUT

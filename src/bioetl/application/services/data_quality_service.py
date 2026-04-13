@@ -392,7 +392,11 @@ class DataQualityService:
             if self._dq_monitor is None:
                 continue
             baseline_stats = self._dq_monitor.get_baseline_stats(metric_name)
-            if baseline_stats is None:
+            if (
+                baseline_stats is None
+                or not isinstance(baseline_stats, tuple)
+                or len(baseline_stats) != 3
+            ):
                 continue
             _baseline_mean, _baseline_stddev, sample_count = baseline_stats
             self._metrics.set_gauge(
