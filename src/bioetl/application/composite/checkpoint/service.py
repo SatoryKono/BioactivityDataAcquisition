@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.checkpoint import _service_support as support
+from bioetl.application.composite.checkpoint._anchor_context import (
+    ExpectedCheckpointContext,
+    create_expected_checkpoint_context,
+)
 from bioetl.application.composite.checkpoint.load_service import (
     CompositeCheckpointLoadService,
 )
@@ -28,6 +31,7 @@ class CompositeCheckpointService:
     """Thin facade for composite checkpoint persistence workflows."""
 
     _DEFAULT_STALE_THRESHOLD_HOURS: float = 24.0
+    _expected_checkpoint_context: ExpectedCheckpointContext
 
     def __init__(
         self,
@@ -60,7 +64,7 @@ class CompositeCheckpointService:
             if stale_checkpoint_threshold_hours is not None
             else self._DEFAULT_STALE_THRESHOLD_HOURS
         )
-        self._expected_checkpoint_context = support.create_expected_checkpoint_context(
+        self._expected_checkpoint_context = create_expected_checkpoint_context(
             effective_config_hash=expected_effective_config_hash,
             contract_ref=expected_contract_ref,
             contract_version=expected_contract_version,

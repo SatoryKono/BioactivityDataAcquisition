@@ -15,7 +15,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.composite.checkpoint import (
-    _service_support as checkpoint_support,
+    _checkpoint_runtime as checkpoint_runtime,
 )
 from bioetl.application.composite.checkpoint.service import CompositeCheckpointService
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
@@ -47,7 +47,7 @@ def _freeze_checkpoint_support_now(
                 return current_time
             return current_time.astimezone(tz)
 
-    monkeypatch.setattr(checkpoint_support, "datetime", _FrozenDateTime)
+    monkeypatch.setattr(checkpoint_runtime, "datetime", _FrozenDateTime)
 
 
 def _make_logger() -> MagicMock:

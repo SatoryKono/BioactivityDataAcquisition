@@ -212,6 +212,43 @@ report_only_hotspot_families:
       trend:
         status: "down_vs_2026-03-23"
         next_action: "2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in caps at the current reviewed baseline for composition/factories/pipeline."
+removable_complexity_family_ratchets:
+  snapshot_date: "2026-04-13"
+  update_policy: "Only raise budgets after an intentional reviewed baseline refresh tied to a closed cleanup issue."
+  families:
+    - name: "adapter_layer"
+      owner: "@bioetl-platform"
+      linked_issue: "2910"
+      path_prefixes:
+        - "src/bioetl/infrastructure/adapters/"
+      family_budgets:
+        files_ge_250_loc: 19
+        max_internal_fan_in: 31
+      tracked_seams:
+        - path: "src/bioetl/infrastructure/adapters/http/_health_monitor_support.py"
+          max_lines: 40
+          required_modules:
+            - "bioetl.infrastructure.adapters.http._health_monitor_observability"
+            - "bioetl.infrastructure.adapters.http._health_monitor_transitions"
+    - name: "composite_layer"
+      owner: "@bioetl-architecture"
+      linked_issue: "2910"
+      path_prefixes:
+        - "src/bioetl/application/composite/"
+      family_budgets:
+        files_ge_250_loc: 16
+        max_internal_fan_in: 25
+      tracked_seams:
+        - path: "src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py"
+          max_lines: 130
+          required_symbols:
+            - "EnrichmentSummary"
+            - "_summarize_enrichment_results"
+        - path: "src/bioetl/application/composite/fsm_helper.py"
+          max_lines: 260
+          required_symbols:
+            - "ResumePhasePlan"
+            - "_resolve_resume_phase"
 quarterly_targets:
   - quarter: "2026-Q1"
     max_total_exemptions: 9

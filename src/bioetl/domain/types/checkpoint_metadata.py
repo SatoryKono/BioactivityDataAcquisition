@@ -175,7 +175,8 @@ class CheckpointMetadata:
             ),
             manifest_id=cast(
                 "str | None",
-                data.get("manifest_id") or _extract_run_context_anchor(data, "manifest_id"),
+                data.get("manifest_id")
+                or _extract_run_context_anchor(data, "manifest_id"),
             ),
             contract_ref=cast("str | None", data.get("contract_ref")),
             contract_version=cast("str | None", data.get("contract_version")),

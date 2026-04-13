@@ -144,6 +144,8 @@ class FSMStateHelperService:
             When allow_resume=True, transitions from FAILED to any resumable state
             are permitted. This is needed for resume-from-failed functionality.
         """
+        from bioetl.domain.composite.state import CompositePipelineState
+
         if allow_resume and from_state == CompositePipelineState.FAILED:
             self._logger.debug(
                 "FSM resume transition from FAILED",

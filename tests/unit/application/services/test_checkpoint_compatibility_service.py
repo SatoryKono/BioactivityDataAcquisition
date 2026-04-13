@@ -290,6 +290,36 @@ class TestCheckpointCompatibilityService:
             "Composite run identity missing" in msg for msg in result.messages
         )
 
+    def test_validate_composite_run_identity_mismatch_overrides_matching_fingerprint(
+        self,
+    ) -> None:
+        """Composite drift should not be misreported as a fingerprint mismatch."""
+        current = CheckpointMetadata(
+            records_processed=1000,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            execution_fingerprint="fp-same",
+            composite_run_identity="run-current",
+        )
+        checkpoint = CheckpointMetadata(
+            records_processed=500,
+            dq_contract_compatibility_hash="same_hash",
+            pipeline_version="1.0.0",
+            execution_fingerprint="fp-same",
+            composite_run_identity="run-checkpoint",
+        )
+
+        result = self.service.validate_checkpoint_compatibility(current, checkpoint)
+
+        assert result.compatible is False
+        assert result.execution_identity_compatible is False
+        assert any(
+            "Composite run identity mismatch" in msg for msg in result.messages
+        )
+        assert not any(
+            "Execution fingerprint mismatch" in msg for msg in result.messages
+        )
+
     def test_validate_contract_version_mismatch(self) -> None:
         """Contract version mismatch should block resume."""
         current = CheckpointMetadata(
