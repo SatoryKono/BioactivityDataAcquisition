@@ -87,6 +87,11 @@ def enrich_metadata_with_execution_identity(
             if metadata.execution_fingerprint is not None
             else identity.execution_fingerprint
         ),
+        composite_run_identity=(
+            metadata.composite_run_identity
+            if metadata.composite_run_identity is not None
+            else identity.composite_run_identity
+        ),
         manifest_id=(
             metadata.manifest_id
             if metadata.manifest_id is not None

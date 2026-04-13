@@ -102,6 +102,10 @@ class CheckpointCompatibilityV2Service:
             checkpoint_hash=checkpoint_identity.effective_config_hash,
         )
         execution_identity_compatibility = check_execution_identity_compatibility(
+            current_composite_run_identity=current_identity.composite_run_identity,
+            checkpoint_composite_run_identity=(
+                checkpoint_identity.composite_run_identity
+            ),
             current_execution_fingerprint=current_identity.execution_fingerprint,
             checkpoint_execution_fingerprint=checkpoint_identity.execution_fingerprint,
             current_pipeline_name=current_identity.pipeline_name,

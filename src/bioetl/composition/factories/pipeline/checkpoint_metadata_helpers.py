@@ -133,6 +133,11 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         if run_context is not None
         else None
     )
+    composite_run_identity = (
+        _coerce_optional_str(getattr(run_context, "composite_run_identity", None))
+        if run_context is not None
+        else None
+    )
     exact_replay = bool(getattr(pipeline.runtime, "exact_replay", False))
     input_snapshot_ids = _resolve_input_snapshot_ids(pipeline)
     input_snapshot_fingerprint = compute_input_snapshot_identity_fingerprint(
@@ -165,6 +170,7 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         effective_config_hash=identity_payload["effective_config_hash"],
         effective_config_artifact_id=effective_config_artifact_id,
         execution_fingerprint=execution_fingerprint,
+        composite_run_identity=composite_run_identity,
         manifest_id=manifest_id,
         contract_ref=identity_payload["contract_ref"],
         contract_version=identity_payload["contract_version"],

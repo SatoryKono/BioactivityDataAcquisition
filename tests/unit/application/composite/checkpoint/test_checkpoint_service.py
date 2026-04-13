@@ -440,6 +440,7 @@ class TestLoadResume:
         """Resume is blocked when checkpoint contract_ref mismatches expected anchor."""
         svc, storage, logger = _make_service(
             resume=True,
+            run_id="run-old",
             expected_contract_ref="composite_publication",
         )
         state_data = CompositeCheckpointState(
@@ -449,6 +450,7 @@ class TestLoadResume:
             seed_completed=True,
             contract_ref="composite_activity",
             contract_version="1.0.0",
+            composite_run_identity="run-old",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
@@ -464,6 +466,7 @@ class TestLoadResume:
         """Resume is blocked when checkpoint contract_version mismatches expected anchor."""
         svc, storage, _ = _make_service(
             resume=True,
+            run_id="run-old",
             expected_contract_ref="composite_publication",
             expected_contract_version="2.0.0",
         )
@@ -474,6 +477,7 @@ class TestLoadResume:
             seed_completed=True,
             contract_ref="composite_publication",
             contract_version="1.0.0",
+            composite_run_identity="run-old",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
@@ -486,6 +490,7 @@ class TestLoadResume:
         """Missing effective_config_hash anchor logs warning and allows resume."""
         svc, storage, logger = _make_service(
             resume=True,
+            run_id="run-old",
             expected_contract_ref="composite_publication",
             expected_effective_config_hash=VALID_EFFECTIVE_HASH,
         )
@@ -497,6 +502,7 @@ class TestLoadResume:
             contract_ref="composite_publication",
             contract_version="1.0.0",
             effective_config_hash="",
+            composite_run_identity="run-old",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
@@ -515,6 +521,7 @@ class TestLoadResume:
         """Resume is blocked when checkpoint effective_config_hash mismatches expected."""
         svc, storage, _ = _make_service(
             resume=True,
+            run_id="run-old",
             expected_contract_ref="composite_publication",
             expected_effective_config_hash=VALID_EFFECTIVE_HASH,
         )
@@ -526,6 +533,7 @@ class TestLoadResume:
             contract_ref="composite_publication",
             contract_version="1.0.0",
             effective_config_hash=ALTERNATE_EFFECTIVE_HASH,
+            composite_run_identity="run-old",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
@@ -552,6 +560,7 @@ class TestLoadResume:
         ledger_port.list_entries_after.return_value = [first_replayed, second_replayed]
         svc, storage, _ = _make_service(
             resume=True,
+            run_id="run-old",
             expected_manifest_id="manifest-123",
             run_ledger_port=ledger_port,
         )
@@ -561,6 +570,7 @@ class TestLoadResume:
             state=CompositePipelineState.ENRICHING,
             seed_completed=True,
             manifest_id="manifest-123",
+            composite_run_identity="run-old",
             last_event_id="entry-1",
             last_event_occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
         )
@@ -598,6 +608,7 @@ class TestLoadResume:
         ]
         svc, storage, _ = _make_service(
             resume=True,
+            run_id="run-old",
             expected_manifest_id="manifest-123",
             run_ledger_port=ledger_port,
         )
@@ -616,6 +627,7 @@ class TestLoadResume:
             completed_enrichers=frozenset({"crossref"}),
             enrichment_results={},
             manifest_id="manifest-123",
+            composite_run_identity="run-old",
             last_event_id="entry-1",
             last_event_occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
             merge_completed=False,
@@ -641,6 +653,7 @@ class TestLoadResume:
         ledger_port.list_entries_after.side_effect = ValueError("missing watermark")
         svc, storage, _ = _make_service(
             resume=True,
+            run_id="run-old",
             expected_manifest_id="manifest-123",
             run_ledger_port=ledger_port,
         )
@@ -650,6 +663,7 @@ class TestLoadResume:
             state=CompositePipelineState.ENRICHING,
             seed_completed=True,
             manifest_id="manifest-123",
+            composite_run_identity="run-old",
             last_event_id="entry-missing",
         )
         storage.exists.return_value = True
@@ -663,6 +677,7 @@ class TestLoadResume:
         """Resume is blocked when checkpoint manifest_id mismatches expected anchor."""
         svc, storage, _ = _make_service(
             resume=True,
+            run_id="run-old",
             expected_manifest_id="manifest-current",
         )
         state_data = CompositeCheckpointState(
@@ -671,6 +686,7 @@ class TestLoadResume:
             state=CompositePipelineState.ENRICHING,
             seed_completed=True,
             manifest_id="manifest-old",
+            composite_run_identity="run-old",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
@@ -1054,6 +1070,7 @@ class TestListAll:
             created_at=old_time,
             updated_at=old_time,
             seed_completed=True,
+            composite_run_identity="run-001",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
@@ -1088,6 +1105,7 @@ class TestListAll:
             created_at=recent_time,
             updated_at=recent_time,
             seed_completed=True,
+            composite_run_identity="run-001",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())
@@ -1122,6 +1140,7 @@ class TestListAll:
             created_at=old_time,
             updated_at=old_time,
             seed_completed=True,
+            composite_run_identity="run-001",
         )
         storage.exists.return_value = True
         storage.read.return_value = json.dumps(state_data.to_dict())

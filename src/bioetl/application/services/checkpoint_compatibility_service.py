@@ -127,6 +127,8 @@ def _validate_execution_identity_compatibility(
     messages: list[str] = []
     execution_identity_compatible = True
     execution_identity_result = check_execution_identity_compatibility(
+        current_composite_run_identity=current_metadata.composite_run_identity,
+        checkpoint_composite_run_identity=checkpoint_metadata.composite_run_identity,
         current_execution_fingerprint=current_metadata.execution_fingerprint,
         checkpoint_execution_fingerprint=checkpoint_metadata.execution_fingerprint,
         current_pipeline_name=current_metadata.pipeline_name,
@@ -170,6 +172,24 @@ def _validate_execution_identity_compatibility(
                 f"checkpoint={checkpoint_metadata.execution_fingerprint}"
             )
         return execution_identity_compatible, messages
+    if (
+        execution_identity_result["reason"] == "composite_run_identity_missing"
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Composite run identity missing: "
+            f"current={current_metadata.composite_run_identity}, "
+            f"checkpoint={checkpoint_metadata.composite_run_identity}"
+        )
+    elif (
+        execution_identity_result["reason"] == "composite_run_identity_mismatch"
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Composite run identity mismatch: "
+            f"current={current_metadata.composite_run_identity}, "
+            f"checkpoint={checkpoint_metadata.composite_run_identity}"
+        )
     if (
         execution_identity_result["reason"]
         == "checkpoint_execution_identity_fallback_mismatch"

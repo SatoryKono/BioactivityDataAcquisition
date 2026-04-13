@@ -1,16 +1,6 @@
----
-Version: 1.0.0
-Status: active
-Class: published
-Owner: BioETL Team
-Reviewers:
-- BioETL Team
-Last verified: '2026-03-29'
----
-
 # Diagram Descriptions Index
 
-_Автогенерация: 2026-03-29T14:07:02+03:00_
+_Автогенерация: 2026-04-13T10:53:29+03:00_
 
 - Карточек описаний: **292**
 - Формат публикации: family-oriented index для derived description cards.

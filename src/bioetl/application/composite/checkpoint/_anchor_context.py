@@ -1,0 +1,121 @@
+"""Anchor-context helpers for composite checkpoint orchestration."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime
+
+from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.domain.normalization import normalize_runtime_anchor_payload
+
+
+@dataclass(frozen=True, slots=True)
+class ExpectedCheckpointContext:
+    """Expected runtime anchors used to validate checkpoint resume safety."""
+
+    effective_config_hash: str = ""
+    contract_ref: str = ""
+    contract_version: str = ""
+    manifest_id: str = ""
+    composite_run_identity: str = ""
+
+
+def create_expected_checkpoint_context(
+    *,
+    effective_config_hash: str | None,
+    contract_ref: str | None,
+    contract_version: str | None,
+    manifest_id: str | None,
+    composite_run_identity: str,
+) -> ExpectedCheckpointContext:
+    """Normalize nullable runtime anchors into a comparable checkpoint context."""
+    normalized = normalize_runtime_anchor_payload(
+        {
+            "effective_config_hash": effective_config_hash,
+            "contract_ref": contract_ref,
+            "contract_version": contract_version,
+            "manifest_id": manifest_id,
+            "composite_run_identity": composite_run_identity,
+        }
+    )
+    return ExpectedCheckpointContext(
+        effective_config_hash=normalized["effective_config_hash"] or "",
+        contract_ref=normalized["contract_ref"] or "",
+        contract_version=normalized["contract_version"] or "",
+        manifest_id=normalized["manifest_id"] or "",
+        composite_run_identity=normalized["composite_run_identity"] or "",
+    )
+
+
+def _coalesce_expected_anchor(current: str, expected: str) -> str:
+    """Prefer the persisted checkpoint anchor and fall back to the runtime one."""
+    return current or expected
+
+
+def _build_merged_anchor_payload(
+    *,
+    state: CompositeCheckpointState,
+    anchors: ExpectedCheckpointContext,
+) -> dict[str, str]:
+    """Return the raw anchor payload before normalization."""
+    return {
+        "effective_config_hash": _coalesce_expected_anchor(
+            state.effective_config_hash,
+            anchors.effective_config_hash,
+        ),
+        "contract_ref": _coalesce_expected_anchor(
+            state.contract_ref,
+            anchors.contract_ref,
+        ),
+        "contract_version": _coalesce_expected_anchor(
+            state.contract_version,
+            anchors.contract_version,
+        ),
+        "manifest_id": _coalesce_expected_anchor(
+            state.manifest_id,
+            anchors.manifest_id,
+        ),
+        "composite_run_identity": _coalesce_expected_anchor(
+            state.composite_run_identity,
+            anchors.composite_run_identity,
+        ),
+    }
+
+
+def merge_expected_anchors(
+    state: CompositeCheckpointState,
+    anchors: ExpectedCheckpointContext,
+) -> CompositeCheckpointState:
+    """Fill empty checkpoint anchors with the expected runtime anchor values."""
+    merged = normalize_runtime_anchor_payload(
+        _build_merged_anchor_payload(state=state, anchors=anchors)
+    )
+    return replace(
+        state,
+        effective_config_hash=merged["effective_config_hash"] or "",
+        contract_ref=merged["contract_ref"] or "",
+        contract_version=merged["contract_version"] or "",
+        manifest_id=merged["manifest_id"] or "",
+        composite_run_identity=merged["composite_run_identity"] or "",
+    )
+
+
+def fresh_checkpoint_state(
+    *,
+    composite_name: str,
+    run_id: str,
+    anchors: ExpectedCheckpointContext,
+) -> CompositeCheckpointState:
+    """Create a fresh checkpoint state for a new composite execution."""
+    return CompositeCheckpointState(
+        composite_name=composite_name,
+        run_id=run_id,
+        effective_config_hash=anchors.effective_config_hash,
+        contract_ref=anchors.contract_ref,
+        contract_version=anchors.contract_version,
+        manifest_id=anchors.manifest_id,
+        composite_run_identity=anchors.composite_run_identity,
+        last_event_id=None,
+        last_event_occurred_at=None,
+        created_at=datetime.now(tz=UTC),
+    )

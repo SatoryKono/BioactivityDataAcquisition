@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord, HealthStatus
+from bioetl.infrastructure.adapters.base import build_mailto_user_agent_headers
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -36,10 +37,7 @@ class OpenAlexAdapterHelpersMixin:
         Returns:
             Dictionary of HTTP headers with User-Agent and Accept fields.
         """
-        return {
-            "User-Agent": f"BioETL/1.0 (mailto:{self.mailto})",
-            "Accept": "application/json",
-        }
+        return build_mailto_user_agent_headers(self.mailto)
 
     def _build_base_params(self) -> dict[str, str]:
         """Build base query parameters with mailto for polite pool.

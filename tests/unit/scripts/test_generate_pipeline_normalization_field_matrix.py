@@ -256,8 +256,8 @@ def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
     first = tmp_path / "first"
     second = tmp_path / "second"
 
-    write_artifacts(first)
-    write_artifacts(second)
+    first_payload = write_artifacts(first)
+    second_payload = write_artifacts(second)
 
     assert (first / CSV_NAME).read_text(encoding="utf-8") == (
         second / CSV_NAME
@@ -265,6 +265,12 @@ def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
     assert (first / MD_NAME).read_text(encoding="utf-8") == (
         second / MD_NAME
     ).read_text(encoding="utf-8")
+    assert [kpi["name"] for kpi in first_payload["semantic_kpis"]] == [
+        PROFILE_META_PASSTHROUGH_KPI,
+        PROFILE_SET_LIKE_JSON_STRING_KPI,
+        PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
+    ]
+    assert first_payload["semantic_kpis"] == second_payload["semantic_kpis"]
 
 
 def test_check_artifacts_detects_drift(tmp_path: Path) -> None:

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.infrastructure.adapters.base import build_mailto_user_agent_headers
+
 __all__ = [
     "CROSSREF_SUPPORTED_ENTITY_TYPES",
     "CrossRefQueryBuilder",
@@ -55,10 +57,7 @@ class CrossRefQueryBuilder:
         Returns:
             Dictionary of HTTP headers with User-Agent and Accept fields.
         """
-        return {
-            "User-Agent": f"BioETL/1.0 (mailto:{self.mailto})",
-            "Accept": "application/json",
-        }
+        return build_mailto_user_agent_headers(self.mailto)
 
     def build_health_probe_url(self) -> str:
         """Build health probe URL.
