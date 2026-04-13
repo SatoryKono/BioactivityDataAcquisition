@@ -345,6 +345,60 @@ def test_compatibility_details():
     assert details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"]
 
 
+def test_composite_run_identity_mismatch_is_enforced():
+    """Composite run identity drift must fail execution identity compatibility."""
+    service = CheckpointCompatibilityServiceV2()
+
+    current_identity = CheckpointIdentity(
+        effective_config_hash=HASH_A,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        composite_run_identity="run-001",
+    )
+
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash=HASH_A,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        composite_run_identity="run-002",
+    )
+
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert (
+        result.details["execution_identity_compatibility"]["reason"]
+        == "composite_run_identity_mismatch"
+    )
+
+
+def test_composite_run_identity_missing_is_enforced():
+    """Missing composite identity on one side must fail strict compatibility."""
+    service = CheckpointCompatibilityServiceV2()
+
+    current_identity = CheckpointIdentity(
+        effective_config_hash=HASH_A,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        composite_run_identity="run-001",
+    )
+
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash=HASH_A,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        composite_run_identity=None,
+    )
+
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert (
+        result.details["execution_identity_compatibility"]["reason"]
+        == "composite_run_identity_missing"
+    )
+
+
 def test_execution_fingerprint_takes_precedence_over_runtime_anchors():
     """Explicit execution fingerprints should drive identity compatibility first."""
     service = CheckpointCompatibilityServiceV2()

@@ -9,6 +9,7 @@ execution states (ADR-026).
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -16,6 +17,47 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.composite.state import CompositePipelineState
     from bioetl.domain.ports import LoggerPort
+
+
+@dataclass(frozen=True, slots=True)
+class ResumePhasePlan:
+    """Resolved resume target for a failed composite checkpoint."""
+
+    phase: CompositePipelineState
+    description: str
+
+
+def _resolve_resume_phase(
+    *,
+    seed_completed: bool,
+    completed_count: int,
+    total_enrichers: int,
+    merge_completed: bool,
+) -> ResumePhasePlan:
+    """Resolve the FSM phase that should handle resume-from-failed."""
+    from bioetl.domain.composite.state import CompositePipelineState
+
+    if not seed_completed:
+        return ResumePhasePlan(
+            phase=CompositePipelineState.NOT_STARTED,
+            description="seed (seed not completed)",
+        )
+    if completed_count < total_enrichers:
+        return ResumePhasePlan(
+            phase=CompositePipelineState.ENRICHING,
+            description=(
+                f"enrichment ({completed_count}/{total_enrichers} enrichers completed)"
+            ),
+        )
+    if merge_completed:
+        return ResumePhasePlan(
+            phase=CompositePipelineState.MERGING,
+            description="cross_validation (merge completed)",
+        )
+    return ResumePhasePlan(
+        phase=CompositePipelineState.ENRICHMENT_COMPLETED,
+        description="merge (all enrichers completed)",
+    )
 
 
 class FSMStateHelperService:
@@ -102,9 +144,6 @@ class FSMStateHelperService:
             When allow_resume=True, transitions from FAILED to any resumable state
             are permitted. This is needed for resume-from-failed functionality.
         """
-        from bioetl.domain.composite.state import CompositePipelineState
-
-        # Special case: allow resume from FAILED state
         if allow_resume and from_state == CompositePipelineState.FAILED:
             self._logger.debug(
                 "FSM resume transition from FAILED",
@@ -141,29 +180,16 @@ class FSMStateHelperService:
             Updated CompositeCheckpointState with the appropriate resume FSM phase
             (NOT_STARTED, ENRICHING, or ENRICHMENT_COMPLETED) based on prior progress.
         """
-        from bioetl.domain.composite.state import CompositePipelineState
-
         total_enrichers = len(self._config.enrichers)
         completed_count = len(state.completed_enrichers)
-
-        if not state.seed_completed:
-            # Seed failed - resume from NOT_STARTED (will re-run seed)
-            resume_phase = CompositePipelineState.NOT_STARTED
-            phase_description = "seed (seed not completed)"
-        elif completed_count < total_enrichers:
-            # Enrichment failed - resume from ENRICHING (will run remaining enrichers)
-            resume_phase = CompositePipelineState.ENRICHING
-            phase_description = (
-                f"enrichment ({completed_count}/{total_enrichers} enrichers completed)"
-            )
-        elif state.merge_completed:
-            # Cross-validation failed - resume from MERGING (will re-run cross-validation)
-            resume_phase = CompositePipelineState.MERGING
-            phase_description = "cross_validation (merge completed)"
-        else:
-            # Merge failed - resume from ENRICHMENT_COMPLETED (will re-run merge)
-            resume_phase = CompositePipelineState.ENRICHMENT_COMPLETED
-            phase_description = "merge (all enrichers completed)"
+        resume_plan = _resolve_resume_phase(
+            seed_completed=state.seed_completed,
+            completed_count=completed_count,
+            total_enrichers=total_enrichers,
+            merge_completed=state.merge_completed,
+        )
+        resume_phase = resume_plan.phase
+        phase_description = resume_plan.description
 
         self._logger.info(
             "Checkpoint indicates previous failure, resuming from phase",

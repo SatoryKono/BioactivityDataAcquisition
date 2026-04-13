@@ -5,7 +5,20 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.checkpoint import _service_support as support
+from bioetl.application.composite.checkpoint._anchor_context import (
+    ExpectedCheckpointContext,
+    fresh_checkpoint_state,
+    merge_expected_anchors,
+)
+from bioetl.application.composite.checkpoint._checkpoint_runtime import (
+    load_checkpoint_state,
+    resolve_resume_checkpoint_filename,
+    warn_if_checkpoint_exists_with_progress,
+    warn_if_checkpoint_stale,
+)
+from bioetl.application.composite.checkpoint._resume_compatibility import (
+    validate_resume_compatibility,
+)
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.control_plane.run_ledger import project_run_ledger_replay
 from bioetl.domain.exceptions import CheckpointConflictError
@@ -31,7 +44,7 @@ class CompositeCheckpointLoadService:
         logger: LoggerPort,
         resume: bool,
         stale_threshold_hours: float,
-        expected_context: support.ExpectedCheckpointContext,
+        expected_context: ExpectedCheckpointContext,
         checkpoint_filename: str,
         glob_pattern: str,
         run_ledger_port: RunLedgerPort | None = None,
@@ -71,14 +84,14 @@ class CompositeCheckpointLoadService:
         else:
             self._warn_if_overwrite_would_drop_progress()
 
-        return support.fresh_checkpoint_state(
+        return fresh_checkpoint_state(
             composite_name=self._composite_name,
             run_id=self._run_id,
             anchors=self._expected_context,
         )
 
     def _load_resume_state(self) -> CompositeCheckpointState | None:
-        filename = support.resolve_resume_checkpoint_filename(
+        filename = resolve_resume_checkpoint_filename(
             storage=self._storage,
             checkpoint_filename=self._checkpoint_filename,
             glob_pattern=self._glob_pattern,
@@ -87,7 +100,7 @@ class CompositeCheckpointLoadService:
             self._emit_checkpoint_load_status("missing")
             return None
 
-        state = support.load_checkpoint_state(
+        state = load_checkpoint_state(
             storage=self._storage,
             logger=self._logger,
             composite_name=self._composite_name,
@@ -98,7 +111,7 @@ class CompositeCheckpointLoadService:
             return None
 
         try:
-            support.validate_resume_compatibility(
+            validate_resume_compatibility(
                 state=state,
                 anchors=self._expected_context,
                 logger=self._logger,
@@ -107,9 +120,9 @@ class CompositeCheckpointLoadService:
         except CheckpointConflictError:
             self._emit_checkpoint_load_status("incompatible")
             raise
-        merged_state = support.merge_expected_anchors(state, self._expected_context)
+        merged_state = merge_expected_anchors(state, self._expected_context)
         replayed_state = self._replay_checkpoint_suffix(merged_state)
-        support.warn_if_checkpoint_stale(
+        warn_if_checkpoint_stale(
             logger=self._logger,
             composite_name=self._composite_name,
             stale_threshold_hours=self._stale_threshold_hours,
@@ -118,7 +131,7 @@ class CompositeCheckpointLoadService:
         return replayed_state
 
     def _warn_if_overwrite_would_drop_progress(self) -> None:
-        support.warn_if_checkpoint_exists_with_progress(
+        warn_if_checkpoint_exists_with_progress(
             storage=self._storage,
             logger=self._logger,
             composite_name=self._composite_name,

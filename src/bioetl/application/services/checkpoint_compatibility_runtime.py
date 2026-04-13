@@ -340,6 +340,8 @@ def generate_message(
 
 def check_execution_identity_compatibility(
     *,
+    current_composite_run_identity: str | None,
+    checkpoint_composite_run_identity: str | None,
     current_execution_fingerprint: str | None,
     checkpoint_execution_fingerprint: str | None,
     current_pipeline_name: str | None,
@@ -366,6 +368,13 @@ def check_execution_identity_compatibility(
     checkpoint_input_snapshot_fingerprint: str | None,
 ) -> JsonDict:
     """Check execution identity using canonical manifest and fallback anchors."""
+    composite_identity_result = _check_composite_run_identity_compatibility(
+        current_composite_run_identity=current_composite_run_identity,
+        checkpoint_composite_run_identity=checkpoint_composite_run_identity,
+    )
+    if composite_identity_result is not None:
+        return composite_identity_result
+
     if current_execution_fingerprint and checkpoint_execution_fingerprint:
         if current_execution_fingerprint == checkpoint_execution_fingerprint:
             return {
@@ -465,6 +474,41 @@ def check_execution_identity_compatibility(
     return {
         "compatible": True,
         "reason": "execution_identity_not_enforced",
+        "severity": _SEVERITY_NONE,
+    }
+
+
+def _check_composite_run_identity_compatibility(
+    *,
+    current_composite_run_identity: str | None,
+    checkpoint_composite_run_identity: str | None,
+) -> JsonDict | None:
+    """Return an enforced compatibility verdict for composite run identity."""
+    normalized = normalize_runtime_anchor_payload(
+        {
+            "current": current_composite_run_identity,
+            "checkpoint": checkpoint_composite_run_identity,
+        }
+    )
+    current_identity = normalized["current"] or ""
+    checkpoint_identity = normalized["checkpoint"] or ""
+    if not current_identity and not checkpoint_identity:
+        return None
+    if not current_identity or not checkpoint_identity:
+        return {
+            "compatible": False,
+            "reason": "composite_run_identity_missing",
+            "severity": _SEVERITY_MAJOR,
+        }
+    if current_identity != checkpoint_identity:
+        return {
+            "compatible": False,
+            "reason": "composite_run_identity_mismatch",
+            "severity": _SEVERITY_MAJOR,
+        }
+    return {
+        "compatible": True,
+        "reason": "identical_composite_run_identity",
         "severity": _SEVERITY_NONE,
     }
 

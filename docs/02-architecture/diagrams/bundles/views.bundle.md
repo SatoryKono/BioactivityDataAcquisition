@@ -1,16 +1,6 @@
----
-Version: 1.0.0
-Status: active
-Class: published
-Owner: BioETL Team
-Reviewers:
-- BioETL Team
-Last verified: '2026-03-29'
----
-
 # BioETL Views Diagrams Bundle
 
-- Generated: 2026-03-28T19:29:23
+- Generated: 2026-04-13T10:53:28
 - Diagram count: 165
 
 ## Table of Contents
@@ -1732,7 +1722,7 @@ Last verified: '2026-03-29'
 ![29-composite-pipeline-workflow-domain](../views/svg/29-composite-pipeline-workflow-domain.svg)
 
 ### Описание
-Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. Схема имеет плотность порядка 1 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: bootstrap + legacy FSM adapter.
+Диаграмма «29 Composite Pipeline Workflow» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart). Тип представления: Domain-Focus. Родительская диаграмма: `29-composite-pipeline-workflow-full.mermaid`. Схема имеет плотность порядка 1 узлов и 8 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: runtime bootstrap + control-plane deps.
 
 ### Метаданные
 - Тип: `flowchart`
@@ -1749,12 +1739,12 @@ Last verified: '2026-03-29'
 ![29-composite-pipeline-workflow-full](../views/svg/29-composite-pipeline-workflow-full.svg)
 
 ### Описание
-Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: application/composite runner, checkpoint service, runtime bootstrap. Схема имеет плотность порядка 4 узлов и 23 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Load CompositeConfig, CompositeCheckpointService, Direct LockPort acquire / release fixed TTL, Legacy FSM adapter.
+Диаграмма «Composite Pipeline Full Workflow — Seed to Gold (ADR-026)» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: application/composite runner, checkpoint snapshot + ledger replay, runtime bootstrap. Схема имеет плотность порядка 4 узлов и 23 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Load CompositeConfig, Checkpoint snapshot + ledger suffix replay gate, LockPort + runtime basics, Manifest + run-ledger services.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `Mixed (System / Component / Class)`
-- Дата: `2026-03-16`
+- Дата: `2026-04-02`
 - Представление: `Full`
 
 \newpage
@@ -2880,7 +2870,7 @@ Last verified: '2026-03-29'
 ![50-exception-hierarchy-full](../views/svg/50-exception-hierarchy-full.svg)
 
 ### Описание
-Диаграмма «Exception Hierarchy — Full Tree» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: domain/exceptions/ (base, network, validation, internal, infrastructure, data_quality). Схема имеет плотность порядка 6 узлов и 50 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Exception (Python built-in), BioETLError domain/exceptions/base.py error_type: ErrorType context: dict, ErrorClassifier domain/error_classifier.py .classify(error) → ErrorType, Action: ABORT Pipeline stops immediately PipelineRunState → FAILED, Action: RETRY Exponential backoff Max retries from AdapterConfig, Action: QUARANTINE Record → QuarantineEntry Pipeline continues.
+Диаграмма «Exception Hierarchy — Full Tree» из views-набора представляет фокусированный срез родительской диаграммы для точечного анализа. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». Тип представления: Full. Родительская диаграмма: `(root)`. В комментариях исходника зафиксирован фокус диаграммы: domain/exceptions/ (base, network, validation, internal, infrastructure, data_quality). Схема имеет плотность порядка 6 узлов и 48 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Exception (Python built-in), BioETLError domain/exceptions/base.py error_type: ErrorType context: dict, ErrorClassifier domain/error_classifier.py .classify(error) → ErrorType, Action: ABORT Pipeline stops immediately PipelineRunState → FAILED, Action: RETRY Exponential backoff Max retries from AdapterConfig, Action: QUARANTINE Record → QuarantineEntry Pipeline continues.
 
 ### Метаданные
 - Тип: `flowchart`

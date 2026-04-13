@@ -43,5 +43,13 @@ export NEO4J_PASSWORD
 export NEO4J_DATABASE
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/tmp/npm-cache}"
 
-# Run the Neo4j Memory MCP server
-exec npx -y @knowall-ai/mcp-neo4j-agent-memory@0.2.5 "$@"
+PYTHON_BIN="${PYTHON_BIN:-$(command -v python3 || command -v python || true)}"
+if [[ -z "${PYTHON_BIN}" ]]; then
+    printf '%s\n' "Python interpreter not found for neo4j-memory MCP adapter" >&2
+    exit 1
+fi
+
+# The upstream server still speaks line-delimited JSON over stdio. Bridge it to the
+# framed MCP transport expected by Codex and other repo tooling.
+exec "${PYTHON_BIN}" "${SCRIPT_DIR}/neo4j_memory_mcp_adapter.py" -- \
+    npx -y @knowall-ai/mcp-neo4j-agent-memory@0.2.5 "$@"

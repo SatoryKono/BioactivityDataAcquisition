@@ -858,6 +858,7 @@ def write_artifacts(out_dir: Path) -> dict[str, object]:
     artifacts = build_artifacts()
     rows = build_field_matrix_rows()
     surface_kpis = build_surface_coverage_kpis(rows)
+    semantic_kpis = build_profile_semantic_invariants()
     for name, payload in artifacts.items():
         (out_dir / name).write_text(payload, encoding="utf-8")
     return {
@@ -865,6 +866,7 @@ def write_artifacts(out_dir: Path) -> dict[str, object]:
         "rows": len(rows),
         "coverage_kpi": surface_kpis[0],
         "surface_kpis": surface_kpis,
+        "semantic_kpis": semantic_kpis,
     }
 
 

@@ -8,6 +8,8 @@ from typing import Self
 
 import httpx
 
+from bioetl.infrastructure.adapters.base import build_json_accept_headers
+
 
 class HTTPClientContextMixin:
     """Async context lifecycle and client-access helpers."""
@@ -29,12 +31,10 @@ class HTTPClientContextMixin:
         user_agent = self.user_agent
         if self.contact_email:
             user_agent = f"{user_agent} ({self.contact_email})"
-        headers: dict[str, str] = {
-            "User-Agent": user_agent,
-            "Accept": "application/json",
-        }
-        if self.run_id:
-            headers["X-Correlation-ID"] = str(self.run_id)
+        headers = build_json_accept_headers(
+            user_agent,
+            correlation_id=self.run_id,
+        )
 
         self._client = httpx.AsyncClient(
             timeout=httpx.Timeout(

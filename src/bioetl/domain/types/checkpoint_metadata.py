@@ -33,6 +33,8 @@ class CheckpointMetadata:
         effective_config_artifact_id: Effective-config artifact reference for provenance.
         execution_fingerprint: Canonical execution-identity fingerprint shared
             across manifest, checkpoint, and runtime compatibility surfaces.
+        composite_run_identity: Occurrence-scoped composite resume anchor used
+            to prevent resume across different composite executions.
         manifest_id: Persisted run-manifest identifier for resume identity checks.
         contract_ref: Canonical contract reference for checkpoint compatibility.
         contract_version: Canonical contract version for checkpoint compatibility.
@@ -51,6 +53,7 @@ class CheckpointMetadata:
     effective_config_hash: str | None = None
     effective_config_artifact_id: str | None = None
     execution_fingerprint: str | None = None
+    composite_run_identity: str | None = None
     manifest_id: str | None = None
     contract_ref: str | None = None
     contract_version: str | None = None
@@ -84,10 +87,18 @@ class CheckpointMetadata:
                 "effective_config_artifact_id"
             ),
             execution_fingerprint=legacy_metadata.get("execution_fingerprint"),
+            composite_run_identity=cast(
+                "str | None",
+                legacy_metadata.get("composite_run_identity")
+                or _extract_run_context_anchor(
+                    legacy_metadata,
+                    "composite_run_identity",
+                ),
+            ),
             manifest_id=cast(
                 "str | None",
                 legacy_metadata.get("manifest_id")
-                or _extract_manifest_id_from_run_context(legacy_metadata),
+                or _extract_run_context_anchor(legacy_metadata, "manifest_id"),
             ),
             contract_ref=cast("str | None", legacy_metadata.get("contract_ref")),
             contract_version=cast(
@@ -121,6 +132,7 @@ class CheckpointMetadata:
             ("effective_config_hash", self.effective_config_hash),
             ("effective_config_artifact_id", self.effective_config_artifact_id),
             ("execution_fingerprint", self.execution_fingerprint),
+            ("composite_run_identity", self.composite_run_identity),
             ("manifest_id", self.manifest_id),
             ("contract_ref", self.contract_ref),
             ("contract_version", self.contract_version),
@@ -156,9 +168,14 @@ class CheckpointMetadata:
             effective_config_hash=data.get("effective_config_hash"),
             effective_config_artifact_id=data.get("effective_config_artifact_id"),
             execution_fingerprint=data.get("execution_fingerprint"),
+            composite_run_identity=cast(
+                "str | None",
+                data.get("composite_run_identity")
+                or _extract_run_context_anchor(data, "composite_run_identity"),
+            ),
             manifest_id=cast(
                 "str | None",
-                data.get("manifest_id") or _extract_manifest_id_from_run_context(data),
+                data.get("manifest_id") or _extract_run_context_anchor(data, "manifest_id"),
             ),
             contract_ref=cast("str | None", data.get("contract_ref")),
             contract_version=cast("str | None", data.get("contract_version")),
@@ -212,15 +229,15 @@ class CheckpointMetadata:
         return compute_execution_identity_fingerprint(payload)
 
 
-def _extract_manifest_id_from_run_context(data: JsonDict) -> str | None:
-    """Backfill manifest_id from legacy run_context payloads when present."""
+def _extract_run_context_anchor(data: JsonDict, key: str) -> str | None:
+    """Backfill an optional checkpoint anchor from legacy run_context payloads."""
     run_context = data.get("run_context")
     if not isinstance(run_context, dict):
         return None
-    manifest_id = run_context.get("manifest_id")
-    if manifest_id is None:
+    value = run_context.get(key)
+    if value is None:
         return None
-    text = str(manifest_id).strip()
+    text = str(value).strip()
     return text or None
 
 

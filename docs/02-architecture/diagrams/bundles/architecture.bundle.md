@@ -1,16 +1,6 @@
----
-Version: 1.0.0
-Status: active
-Class: published
-Owner: BioETL Team
-Reviewers:
-- BioETL Team
-Last verified: '2026-03-29'
----
-
 # BioETL Architecture Diagrams Bundle
 
-- Generated: 2026-03-28T19:29:23
+- Generated: 2026-04-13T10:53:28
 - Diagram count: 57
 
 ## Table of Contents
@@ -484,12 +474,12 @@ Last verified: '2026-03-29'
 ![09-observability-stack](../architecture/svg/09-observability-stack.svg)
 
 ### Описание
-Диаграмма «Observability Stack» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Logging, Metrics, Tracing architecture.. Схема имеет плотность порядка 24 узлов и 14 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Ports, Application Observability, Infrastructure: Logging, Infrastructure: Metrics, Infrastructure: Tracing, Infrastructure: Anomaly Detection. Показательные узлы для быстрого чтения: LoggerPort (Protocol) bind + info/warn/error/debug/exception, MetricsPort (Protocol) observe_histogram + increment_counter set_gauge + close, TracingPort (Protocol) get_tracer + close, DQMonitorPort (Protocol) add_metric + check_quality update_baseline, PipelineObserver logger + metrics + tracing hooks, BatchMetricsRecorderService track size/processed/error/quarantine. Примечание: Decomposed into 09a-observability-app, 09b-observability-infra.
+Диаграмма «Observability Stack» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Logging, Metrics, Tracing architecture.. Схема имеет плотность порядка 24 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Ports, Application Emission, Composition-Owned Seams, Infrastructure: Logging, Infrastructure: Metrics, Infrastructure: Tracing. Показательные узлы для быстрого чтения: LoggerPort (Protocol) bind + info/warn/error/debug/exception, MetricsPort (Protocol) observe_histogram + increment_counter set_gauge + close, TracingPort (Protocol) get_tracer + close, DQMonitorPort (Protocol) add_metric + check_quality update_baseline, PipelineObserver canonical lifecycle emitter ordinary runs, PipelineMetricsRecorder pipeline-scoped metric vocabulary. Примечание: Decomposed into 09a-observability-app, 09b-observability-infra.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-24`
+- Дата: `2026-04-12`
 - Узлы (metadata): `24`
 
 \newpage
@@ -503,13 +493,13 @@ Last verified: '2026-03-29'
 ![09a-observability-app](../architecture/svg/09a-observability-app.svg)
 
 ### Описание
-Диаграмма «Observability: Application Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Application-level observability: ports, pipeline observer, batch metrics, adapter metrics.. Схема имеет плотность порядка 8 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Ports, Application Observability, Adapter-Level Metrics. Показательные узлы для быстрого чтения: LoggerPort (Protocol), MetricsPort (Protocol), TracingPort (Protocol), DQMonitorPort (Protocol), PipelineObserver, BatchMetricsRecorderService.
+Диаграмма «Observability: Application Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Application-level observability: ports, pipeline observer, batch metrics, adapter metrics.. Схема имеет плотность порядка 10 узлов и 6 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Ports, Application Observability. Показательные узлы для быстрого чтения: LoggerPort (Protocol), MetricsPort (Protocol), TracingPort (Protocol), DQMonitorPort (Protocol), PipelineObserver canonical lifecycle emitter, PipelineMetricsRecorder.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-27`
-- Узлы (metadata): `8`
+- Дата: `2026-04-12`
+- Узлы (metadata): `10`
 
 \newpage
 
@@ -522,13 +512,13 @@ Last verified: '2026-03-29'
 ![09b-observability-infra](../architecture/svg/09b-observability-infra.svg)
 
 ### Описание
-Диаграмма «Observability: Infrastructure Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Infrastructure implementations: logging, metrics, tracing, anomaly detection, external systems.. Схема имеет плотность порядка 13 узлов и 7 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Infrastructure: Logging, Infrastructure: Metrics, Infrastructure: Tracing, Infrastructure: Anomaly Detection, External Systems. Показательные узлы для быстрого чтения: UnifiedLogger (impl LoggerPort), MetricsCollector (impl MetricsPort), PrometheusMetrics (impl MetricsPort), MetricsServerAdapter, NoOpMetrics, OpenTelemetryTracer (impl TracingPort).
+Диаграмма «Observability: Infrastructure Layer» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Infrastructure implementations: logging, metrics, tracing, anomaly detection, external systems.. Схема имеет плотность порядка 12 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Infrastructure: Logging, Infrastructure: Metrics, Infrastructure: Tracing, Infrastructure: Anomaly Detection, External Systems. Показательные узлы для быстрого чтения: UnifiedLogger (impl LoggerPort), NoOpLogger (compat fallback), PrometheusMetrics (impl MetricsPort), MetricsServerAdapter (MetricsServerPort seam), MetricsPublisherAdapter (MetricsPublisherPort seam), MetricsCollector (compat convenience wrapper).
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-27`
-- Узлы (metadata): `13`
+- Дата: `2026-04-12`
+- Узлы (metadata): `12`
 
 \newpage
 
@@ -769,13 +759,13 @@ Last verified: '2026-03-29'
 ![13c-port-contracts-observability](../architecture/svg/13c-port-contracts-observability.svg)
 
 ### Описание
-Диаграмма «Port Contracts: Observability and Resilience» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers Logger/Metrics/Tracing ports plus resilience control ports.. Схема имеет плотность порядка 15 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: LoggerPort, MetricsPort, TracingPort, CircuitBreakerPort, RateLimiterPort, UnifiedLogger.
+Диаграмма «Port Contracts: Observability and Resilience» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers Logger/Metrics/Tracing ports plus resilience control ports.. Схема имеет плотность порядка 18 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Domain NoOp Compatibility, Infrastructure Layer. Показательные узлы для быстрого чтения: LoggerPort, MetricsPort, TracingPort, DQMonitorPort, AuditPort, CircuitBreakerPort.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-02-25`
-- Узлы (metadata): `15`
+- Дата: `2026-04-12`
+- Узлы (metadata): `18`
 
 \newpage
 
@@ -1073,13 +1063,13 @@ Last verified: '2026-03-29'
 ![19-control-plane-artifacts](../architecture/svg/19-control-plane-artifacts.svg)
 
 ### Описание
-Диаграмма «Control-Plane Artifacts and Traceability» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how runtime assembly publishes immutable run metadata, ledger events, and lineage fragments.. Схема имеет плотность порядка 19 узлов и 21 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Composition runtime builders, Application services, Domain ports, Infrastructure stores, Published artifacts, Runtime publishers. Показательные узлы для быстрого чтения: build_pipeline_runner / pipeline start, run-manifest / lineage CLI, create_run_manifest_with_effective_config control-plane orchestration, attach_control_plane_collaborators ledger event hook-up, EffectiveConfigService, RunManifestService. Примечание: Complements 12-bootstrap-di-container, 13-port-protocol-contracts, and 18-lock-checkpoint-shutdown.
+Диаграмма «Control-Plane Artifacts and Traceability» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: how runtime assembly publishes immutable provenance artifacts and resumes composite runs from checkpoint snapshot + ledger suffix replay.. Схема имеет плотность порядка 24 узлов и 34 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Runtime descriptors, Composition runtime builders, Application services, Domain ports + replay model, Infrastructure stores, Published artifacts. Показательные узлы для быстрого чтения: build_pipeline_runner / CLI run, run-manifest / lineage / inspection CLI, PipelineRunContext launch descriptor, PipelineContext in-run processing context, create_run_manifest_with_effective_config publish manifest + effective config, attach_control_plane_collaborators bind manifest / ledger / lineage. Примечание: Complements 12-bootstrap-di-container, 18-lock-checkpoint-shutdown, 23-reproducible-run-contract, and ADR-044.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Component`
-- Дата: `2026-03-28`
-- Узлы (metadata): `19`
+- Дата: `2026-04-02`
+- Узлы (metadata): `24`
 
 \newpage
 
@@ -1150,10 +1140,10 @@ Last verified: '2026-03-29'
 ![23-reproducible-run-contract](../architecture/svg/23-reproducible-run-contract.svg)
 
 ### Описание
-Диаграмма «Reproducible Run Contract» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Control Plane». В комментариях исходника зафиксирован фокус диаграммы: how source refs, resolved config, runtime overrides, and provenance collapse into a replay/comparison identity.. Схема имеет плотность порядка 19 узлов и 28 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Configuration inputs, Resolution services, Published reproducibility artifacts, Identity anchors, Replay / comparison consumers. Показательные узлы для быстрого чтения: Provider / entity / composite YAML, ConfigSourceRef[], Runtime overrides CLI + env + runtime, DQ contract refs + bundle versions, Config loaders + resolution policy, EffectiveConfigService. Примечание: Complements 11-configuration-system, 20-data-traceability-runtime, and config-runtime-artifacts.md.
+Диаграмма «Reproducible Run Contract» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Control Plane». В комментариях исходника зафиксирован фокус диаграммы: how config resolution, runtime descriptors, and control-plane provenance define one replay/comparison identity.. Схема имеет плотность порядка 23 узлов и 35 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Configuration inputs, Resolution services, Runtime descriptors, Published reproducibility artifacts, Identity anchors, Replay / comparison consumers. Показательные узлы для быстрого чтения: Provider / entity / composite YAML, ConfigSourceRef[], Runtime overrides CLI + env + runtime, DQ contract refs + bundle versions, Config loaders + resolution policy, EffectiveConfigService. Примечание: Complements 11-configuration-system, 19-control-plane-artifacts, and config-runtime-artifacts.md.
 
 ### Метаданные
 - Тип: `flowchart`
 - Уровень: `System / Control Plane`
-- Дата: `2026-03-28`
-- Узлы (metadata): `19`
+- Дата: `2026-04-02`
+- Узлы (metadata): `23`

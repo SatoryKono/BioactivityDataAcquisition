@@ -21,7 +21,11 @@ Health Check Observability (RULES.md §4.8):
 
 from __future__ import annotations
 
-__all__ = ["BaseHttpAdapter"]
+__all__ = [
+    "BaseHttpAdapter",
+    "build_json_accept_headers",
+    "build_mailto_user_agent_headers",
+]
 
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
@@ -44,9 +48,34 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from bioetl.domain.ports import CircuitBreakerPort
     from bioetl.infrastructure.adapters.common import HttpAdapterDependencyContext
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+
+def build_json_accept_headers(
+    user_agent: str,
+    *,
+    correlation_id: object | None = None,
+    extra_headers: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """Build the canonical JSON request-header set for BioETL adapters."""
+    headers: dict[str, str] = {
+        "User-Agent": user_agent,
+        "Accept": "application/json",
+    }
+    if correlation_id is not None:
+        headers["X-Correlation-ID"] = str(correlation_id)
+    if extra_headers is not None:
+        headers.update(extra_headers)
+    return headers
+
+
+def build_mailto_user_agent_headers(mailto: str) -> dict[str, str]:
+    """Build the canonical polite-pool header set for mailto-aware providers."""
+    return build_json_accept_headers(f"BioETL/1.0 (mailto:{mailto})")
 
 
 class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
@@ -215,3 +244,7 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         Base implementation is a no-op as HTTP client is managed by context.
         Subclasses can override if they manage additional resources.
         """
+
+    async def _close_http_client_context(self) -> None:
+        """Close the wrapped HTTP client context when the adapter owns one."""
+        await self._http_client.__aexit__(None, None, None)

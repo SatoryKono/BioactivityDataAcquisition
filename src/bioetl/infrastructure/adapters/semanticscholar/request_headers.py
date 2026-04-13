@@ -4,6 +4,8 @@ from __future__ import annotations
 
 __all__ = ["build_semanticscholar_headers"]
 
+from bioetl.infrastructure.adapters.base import build_json_accept_headers
+
 
 def build_semanticscholar_headers(
     api_key: str,
@@ -22,10 +24,7 @@ def build_semanticscholar_headers(
     Returns:
         Dictionary of HTTP headers for Semantic Scholar requests.
     """
-    headers = {
-        "User-Agent": "BioETL/1.0",
-        "Accept": "application/json",
-    }
+    headers = build_json_accept_headers("BioETL/1.0")
     if include_content_type:
         headers["Content-Type"] = "application/json"
     if api_key and (not skip_placeholder_api_key or not api_key.startswith("your_")):

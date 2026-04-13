@@ -12,9 +12,7 @@ from bioetl.application.composite._preflight_orchestration import (
 from bioetl.application.composite._preflight_reporting import (
     PreflightValidationReportingMixin,
 )
-from bioetl.application.composite._preflight_rules import (
-    PreflightValidationRulesMixin,
-)
+from bioetl.application.composite.preflight_validator import CompositePreflightValidator
 from bioetl.application.composite._preflight_types import (
     FieldInfo,
     PreflightValidationError,
@@ -91,36 +89,35 @@ class TestPreflightTypes:
 
 
 # ---------------------------------------------------------------------------
-# _preflight_rules
+# preflight_validator rule helpers
 # ---------------------------------------------------------------------------
 
 
-def _make_rules_mixin() -> PreflightValidationRulesMixin:
-    mixin = PreflightValidationRulesMixin.__new__(PreflightValidationRulesMixin)
-    return mixin
+def _make_validator() -> CompositePreflightValidator:
+    return CompositePreflightValidator(MagicMock())
 
 
 @pytest.mark.unit
 class TestPreflightRules:
-    """Test PreflightValidationRulesMixin rule checks."""
+    """Test canonical validator rule checks."""
 
     def test_get_valid_sources_from_config(self) -> None:
-        mixin = _make_rules_mixin()
+        validator = _make_validator()
         config = MagicMock()
         config.seed.pipeline = "chembl_compound"
         enricher = MagicMock()
         enricher.pipeline = "crossref_publication"
         config.enrichers = [enricher]
 
-        sources = mixin._get_valid_sources(config)
+        sources = validator._get_valid_sources(config)
 
         assert "seed" in sources
         assert "chembl" in sources
         assert "crossref" in sources
 
     def test_validate_field_priority_unknown_source(self) -> None:
-        mixin = _make_rules_mixin()
-        issues, resolved = mixin._validate_field_priority(
+        validator = _make_validator()
+        issues, resolved = validator._validate_field_priority(
             "doi",
             ("unknown_provider",),
             frozenset({"seed", "chembl"}),
@@ -130,9 +127,9 @@ class TestPreflightRules:
         assert resolved is None
 
     def test_validate_field_priority_missing_field(self) -> None:
-        mixin = _make_rules_mixin()
+        validator = _make_validator()
         source_fields: dict[str, SchemaFields] = {"chembl": {}}
-        issues, resolved = mixin._validate_field_priority(
+        issues, resolved = validator._validate_field_priority(
             "nonexistent",
             ("chembl",),
             frozenset({"seed", "chembl"}),
@@ -141,7 +138,7 @@ class TestPreflightRules:
         assert any(i.issue_type == "missing_field" for i in issues)
 
     def test_validate_field_priority_resolves_first_available(self) -> None:
-        mixin = _make_rules_mixin()
+        validator = _make_validator()
         source_fields: dict[str, SchemaFields] = {
             "chembl": {
                 "doi": FieldInfo(
@@ -149,7 +146,7 @@ class TestPreflightRules:
                 )
             },
         }
-        issues, resolved = mixin._validate_field_priority(
+        issues, resolved = validator._validate_field_priority(
             "doi",
             ("chembl",),
             frozenset({"seed", "chembl"}),
@@ -158,26 +155,26 @@ class TestPreflightRules:
         assert resolved == "chembl"
 
     def test_check_type_compatibility_compatible(self) -> None:
-        mixin = _make_rules_mixin()
-        result = mixin._check_type_compatibility(
+        validator = _make_validator()
+        result = validator._check_type_compatibility(
             "field", {"chembl": "str", "crossref": "String"}
         )
         assert result is None
 
     def test_check_type_compatibility_incompatible(self) -> None:
-        mixin = _make_rules_mixin()
-        result = mixin._check_type_compatibility(
+        validator = _make_validator()
+        result = validator._check_type_compatibility(
             "field", {"chembl": "str", "crossref": "int"}
         )
         assert result is not None
         assert result.issue_type == "type_mismatch"
 
     def test_dtype_in_group(self) -> None:
-        mixin = _make_rules_mixin()
+        validator = _make_validator()
         group = frozenset({"str", "object", "String"})
-        assert mixin._dtype_in_group("str", group) is True
-        assert mixin._dtype_in_group("String", group) is True
-        assert mixin._dtype_in_group("int", group) is False
+        assert validator._dtype_in_group("str", group) is True
+        assert validator._dtype_in_group("String", group) is True
+        assert validator._dtype_in_group("int", group) is False
 
 
 # ---------------------------------------------------------------------------

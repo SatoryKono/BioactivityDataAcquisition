@@ -29,6 +29,7 @@ class TestCheckpointMetadata:
             effective_config_hash="cfg_hash",
             effective_config_artifact_id="artifact-42",
             execution_fingerprint="fingerprint-1",
+            composite_run_identity="run-1",
             manifest_id="manifest-1",
             contract_ref="chembl.activity",
             contract_version="1.2.3",
@@ -48,6 +49,7 @@ class TestCheckpointMetadata:
         assert metadata.effective_config_hash == "cfg_hash"
         assert metadata.effective_config_artifact_id == "artifact-42"
         assert metadata.execution_fingerprint == "fingerprint-1"
+        assert metadata.composite_run_identity == "run-1"
         assert metadata.manifest_id == "manifest-1"
         assert metadata.contract_ref == "chembl.activity"
         assert metadata.contract_version == "1.2.3"
@@ -70,6 +72,7 @@ class TestCheckpointMetadata:
         assert metadata.effective_config_hash is None
         assert metadata.effective_config_artifact_id is None
         assert metadata.execution_fingerprint is None
+        assert metadata.composite_run_identity is None
         assert metadata.manifest_id is None
         assert metadata.contract_ref is None
         assert metadata.contract_version is None
@@ -84,7 +87,10 @@ class TestCheckpointMetadata:
             "dq_contract_compatibility_hash": "legacy_hash",
             "dq_policy_hash": "legacy_policy",
             "pipeline_version": "0.9.0",
-            "run_context": {"manifest_id": "manifest-legacy"},
+            "run_context": {
+                "manifest_id": "manifest-legacy",
+                "composite_run_identity": "run-legacy",
+            },
         }
 
         metadata = CheckpointMetadata.from_legacy_metadata(legacy_metadata)
@@ -97,8 +103,12 @@ class TestCheckpointMetadata:
         assert metadata.effective_config_hash is None
         assert metadata.effective_config_artifact_id is None
         assert metadata.execution_fingerprint is None
+        assert metadata.composite_run_identity == "run-legacy"
         assert metadata.manifest_id == "manifest-legacy"
-        assert metadata.run_context == {"manifest_id": "manifest-legacy"}
+        assert metadata.run_context == {
+            "manifest_id": "manifest-legacy",
+            "composite_run_identity": "run-legacy",
+        }
 
     def test_checkpoint_metadata_to_dict(self) -> None:
         """Test converting CheckpointMetadata to dictionary."""
@@ -108,6 +118,7 @@ class TestCheckpointMetadata:
             pipeline_name="chembl_activity",
             run_type="incremental",
             pipeline_version="1.1.0",
+            composite_run_identity="run-2",
             exact_replay=False,
         )
 
@@ -118,6 +129,7 @@ class TestCheckpointMetadata:
         assert metadata_dict["pipeline_name"] == "chembl_activity"
         assert metadata_dict["run_type"] == "incremental"
         assert metadata_dict["pipeline_version"] == "1.1.0"
+        assert metadata_dict["composite_run_identity"] == "run-2"
         assert metadata_dict["exact_replay"] is False
         assert "dq_policy_hash" not in metadata_dict
         assert "dq_rule_bundle_version" not in metadata_dict
@@ -137,6 +149,7 @@ class TestCheckpointMetadata:
             "effective_config_hash": "cfg_hash_2",
             "effective_config_artifact_id": "artifact-2",
             "execution_fingerprint": "fingerprint-2",
+            "composite_run_identity": "run-2",
             "manifest_id": "manifest-2",
             "contract_ref": "chembl.activity",
             "contract_version": "2.0.0",
@@ -155,6 +168,7 @@ class TestCheckpointMetadata:
         assert metadata.effective_config_hash == "cfg_hash_2"
         assert metadata.effective_config_artifact_id == "artifact-2"
         assert metadata.execution_fingerprint == "fingerprint-2"
+        assert metadata.composite_run_identity == "run-2"
         assert metadata.manifest_id == "manifest-2"
         assert metadata.contract_ref == "chembl.activity"
         assert metadata.contract_version == "2.0.0"
@@ -296,6 +310,7 @@ class TestCheckpointMetadataSerialization:
             effective_config_hash="cfg_roundtrip",
             effective_config_artifact_id="artifact-roundtrip",
             execution_fingerprint="fingerprint-roundtrip",
+            composite_run_identity="run-roundtrip",
             manifest_id="manifest-roundtrip",
             contract_ref="chembl.activity",
             contract_version="1.0.0",
@@ -326,6 +341,7 @@ class TestCheckpointMetadataSerialization:
             == deserialized.effective_config_artifact_id
         )
         assert original.execution_fingerprint == deserialized.execution_fingerprint
+        assert original.composite_run_identity == deserialized.composite_run_identity
         assert original.manifest_id == deserialized.manifest_id
         assert original.contract_ref == deserialized.contract_ref
         assert original.contract_version == deserialized.contract_version
