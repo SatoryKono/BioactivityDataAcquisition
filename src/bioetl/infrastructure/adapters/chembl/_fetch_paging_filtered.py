@@ -8,7 +8,9 @@ __all__ = ["_ChemblFetchPagingFilteredMixin"]
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.common.deduplication import iter_deduplicated_records
+from bioetl.infrastructure.adapters.common.deduplication import (
+    iter_deduplicated_records,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator

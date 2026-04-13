@@ -11,8 +11,8 @@ import polars as pl
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.join_planner_helpers import (
     count_qualified_columns,
-    infer_silver_table,
     infer_pipeline_from_table,
+    infer_silver_table,
     resolve_field_aliases_from_registry,
     table_path_to_name,
 )

@@ -5,6 +5,8 @@ from __future__ import annotations
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common.deduplication import (
     compute_composite_dedup_key,
+)
+from bioetl.infrastructure.adapters.common.deduplication import (
     is_duplicate_record as is_duplicate_record_shared,
 )
 

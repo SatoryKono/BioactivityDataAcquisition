@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.infrastructure.adapters.common.response_shapes import normalize_response_items
+from bioetl.infrastructure.adapters.common.response_shapes import (
+    normalize_response_items,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord

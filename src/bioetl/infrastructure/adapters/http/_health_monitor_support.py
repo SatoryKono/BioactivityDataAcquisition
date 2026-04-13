@@ -9,6 +9,8 @@ from bioetl.infrastructure.adapters.http._health_monitor_observability import (
 )
 from bioetl.infrastructure.adapters.http._health_monitor_transitions import (
     ProviderHealthStateLike as _ProviderHealthStateLike,
+)
+from bioetl.infrastructure.adapters.http._health_monitor_transitions import (
     check_clear_window,
     get_adaptive_params_for_status,
     record_error_transition,

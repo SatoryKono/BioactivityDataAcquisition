@@ -52,7 +52,7 @@ def _build_cached_bronze_snapshot_ref(
     content_hash = _compute_cached_bronze_batch_content_hash(batch_file)
     relative_path = str(batch_file.relative_to(bronze_root))
     snapshot_id = hashlib.sha256(
-        f"{pipeline_name}:{relative_path}:{content_hash}".encode("utf-8")
+        f"{pipeline_name}:{relative_path}:{content_hash}".encode()
     ).hexdigest()
     captured_at = datetime.fromtimestamp(batch_file.stat().st_mtime, tz=UTC)
     return RunInputSnapshotRef(

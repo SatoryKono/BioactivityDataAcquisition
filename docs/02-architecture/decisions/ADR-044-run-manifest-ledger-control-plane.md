@@ -127,6 +127,10 @@ The supported rollout flags are:
 `run_ledger_enabled` depends on `run_manifest_enabled`, and checkpoint resume
 behavior is constrained to `observe | soft_fail | hard_fail`.
 
+When runtime executes an exact replay, checkpoint compatibility handling is
+intentionally coerced to `hard_fail` so a replay attempt cannot continue after
+any compatibility drift.
+
 ### 7. Governance is fail-closed on the enabled path
 
 The enabled control-plane path follows these invariants:
@@ -191,10 +195,17 @@ The supported resume model is intentionally dual-mode:
   without ledger suffix replay;
 - composite resume uses checkpoint snapshot state as the base and then replays
   ledger entries strictly after `last_event_id`.
+- `execution_fingerprint` remains the canonical semantic execution identity,
+  while `composite_run_identity` is enforced as an occurrence-scoped resume
+  anchor for composite checkpoint safety.
 
 ADR-044 therefore does not require one universal replay algorithm across all
 runner families. The stability requirement is a shared control-plane contract,
 not identical resume internals.
+
+Checkpoint incompatibility diagnostics also expose compact `current_identity`
+and `checkpoint_identity` payloads so operators can explain strict resume
+rejection without rehydrating the full checkpoint object.
 
 ## Compliance
 

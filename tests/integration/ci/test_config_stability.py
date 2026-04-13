@@ -450,6 +450,45 @@ class _InMemoryCheckpointPort:
 class TestCheckpointResumeCompatibilityPolicy:
     """Integration checks for resume behavior under compatibility policies."""
 
+    async def _save_checkpoint_metadata(
+        self,
+        checkpoint_port: _InMemoryCheckpointPort,
+        *,
+        run_id: object,
+        **metadata: object,
+    ) -> None:
+        """Persist one checkpoint payload for manager-level resume checks."""
+        payload: dict[str, object] = {"records_processed": 100}
+        payload.update(metadata)
+        await checkpoint_port.save(
+            pipeline="chembl_activity",
+            run_id=run_id,
+            metadata=payload,
+        )
+
+    def _build_manager(
+        self,
+        *,
+        checkpoint_port: _InMemoryCheckpointPort,
+        logger: MagicMock,
+        run_id: object,
+        current_metadata: CheckpointMetadata,
+        compatibility_policy: str,
+    ) -> CheckpointManagerService:
+        """Create a manager wired like the real resume path."""
+        return CheckpointManagerService(
+            checkpoint_port=checkpoint_port,
+            logger=logger,
+            pipeline_name="chembl_activity",
+            run_id=run_id,
+            resume=True,
+            checkpoint_compatibility_service=CheckpointCompatibilityService(
+                logger=logger
+            ),
+            current_metadata=current_metadata,
+            compatibility_policy=compatibility_policy,
+        )
+
     @pytest.mark.asyncio
     async def test_observe_policy_blocks_resume_on_execution_identity_mismatch(
         self,
@@ -567,4 +606,118 @@ class TestCheckpointResumeCompatibilityPolicy:
         )
 
         with pytest.raises(ValueError, match="hard_fail policy"):
+            await manager.load_checkpoint()
+
+    @pytest.mark.asyncio
+    async def test_hard_fail_policy_raises_on_manifest_identity_mismatch(self) -> None:
+        checkpoint_port = _InMemoryCheckpointPort()
+        logger = MagicMock()
+        run_id = uuid4()
+
+        await self._save_checkpoint_metadata(
+            checkpoint_port,
+            run_id=run_id,
+            manifest_id="manifest-old",
+        )
+
+        manager = self._build_manager(
+            checkpoint_port=checkpoint_port,
+            logger=logger,
+            run_id=run_id,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                manifest_id="manifest-new",
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(ValueError, match="Manifest identity mismatch"):
+            await manager.load_checkpoint()
+
+    @pytest.mark.asyncio
+    async def test_hard_fail_policy_raises_on_contract_reference_mismatch(
+        self,
+    ) -> None:
+        checkpoint_port = _InMemoryCheckpointPort()
+        logger = MagicMock()
+        run_id = uuid4()
+
+        await self._save_checkpoint_metadata(
+            checkpoint_port,
+            run_id=run_id,
+            contract_ref="chembl.activity",
+            contract_version="1.0.0",
+        )
+
+        manager = self._build_manager(
+            checkpoint_port=checkpoint_port,
+            logger=logger,
+            run_id=run_id,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                contract_ref="chembl.assay",
+                contract_version="1.0.0",
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(ValueError, match="Contract reference mismatch"):
+            await manager.load_checkpoint()
+
+    @pytest.mark.asyncio
+    async def test_hard_fail_policy_raises_on_exact_replay_snapshot_mismatch(
+        self,
+    ) -> None:
+        checkpoint_port = _InMemoryCheckpointPort()
+        logger = MagicMock()
+        run_id = uuid4()
+
+        await self._save_checkpoint_metadata(
+            checkpoint_port,
+            run_id=run_id,
+            exact_replay=True,
+            input_snapshot_ids=["bronze:chembl.activity:2025-01-01"],
+        )
+
+        manager = self._build_manager(
+            checkpoint_port=checkpoint_port,
+            logger=logger,
+            run_id=run_id,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                exact_replay=True,
+                input_snapshot_ids=("bronze:chembl.activity:2025-01-02",),
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(ValueError, match="Input snapshot identity mismatch"):
+            await manager.load_checkpoint()
+
+    @pytest.mark.asyncio
+    async def test_hard_fail_policy_raises_on_composite_run_identity_mismatch(
+        self,
+    ) -> None:
+        checkpoint_port = _InMemoryCheckpointPort()
+        logger = MagicMock()
+        run_id = uuid4()
+
+        await self._save_checkpoint_metadata(
+            checkpoint_port,
+            run_id=run_id,
+            composite_run_identity="composite-run-old",
+        )
+
+        manager = self._build_manager(
+            checkpoint_port=checkpoint_port,
+            logger=logger,
+            run_id=run_id,
+            current_metadata=CheckpointMetadata(
+                records_processed=0,
+                composite_run_identity="composite-run-new",
+            ),
+            compatibility_policy="hard_fail",
+        )
+
+        with pytest.raises(ValueError, match="Composite run identity mismatch"):
             await manager.load_checkpoint()

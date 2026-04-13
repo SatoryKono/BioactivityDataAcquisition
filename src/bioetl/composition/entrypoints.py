@@ -12,7 +12,28 @@ from __future__ import annotations
 
 import warnings
 from importlib import import_module
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from bioetl.composition.composite_api import (
+        bootstrap_composite_runner,
+        load_composite_config,
+        load_pipeline_config,
+    )
+    from bioetl.composition.execution_api import (
+        ArchiveOptions,
+        PipelineRunResult,
+        RunOptions,
+        RunResult,
+        VacuumOptions,
+        build_pipeline_context,
+        create_pipeline_runner,
+        ensure_metrics_server_started,
+        maybe_start_metrics_server,
+        push_metrics_to_gateway,
+        run_pipeline,
+    )
+    from bioetl.composition.observability_api import start_metrics_server
 
 __all__ = [
     "ArchiveOptions",
@@ -107,5 +128,8 @@ def __getattr__(name: str) -> Any:  # Any: lazy compatibility exports resolve to
 def __dir__() -> list[str]:
     """Return stable introspection results including legacy compatibility names."""
     return sorted(
-        set(globals()) | set(__all__) | set(_PUBLIC_SYMBOL_TARGETS) | set(_LEGACY_SYMBOL_TARGETS)
+        set(globals())
+        | set(__all__)
+        | set(_PUBLIC_SYMBOL_TARGETS)
+        | set(_LEGACY_SYMBOL_TARGETS)
     )

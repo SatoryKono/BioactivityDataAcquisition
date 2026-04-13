@@ -18,6 +18,9 @@ if TYPE_CHECKING:
         AuditInspectionService,
     )
     from bioetl.application.services.checkpoint_service import CheckpointService
+    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
+        RunManifestInspectionService,
+    )
     from bioetl.application.services.health_service import HealthService
     from bioetl.application.services.lineage.lineage_inspection_service import (
         LineageInspectionService,
@@ -27,9 +30,6 @@ if TYPE_CHECKING:
         ObservabilityWorkflowService,
     )
     from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.application.services.control_plane.run_manifest_inspection_service import (
-        RunManifestInspectionService,
-    )
 
 __all__ = [
     "MetricsServerError",

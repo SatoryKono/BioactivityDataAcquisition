@@ -8,6 +8,9 @@ from bioetl.application.composite.checkpoint import (
 )
 from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.merger import MergeService
+from bioetl.application.composite.merger_orchestration import (
+    MergeExecutionRequest,
+)
 from bioetl.application.composite.runner_pkg.runner_completion_helpers import (
     CompositePipelineFinalizationRequest,
     finalize_pipeline,
@@ -32,9 +35,6 @@ from bioetl.application.composite.runner_pkg.runner_merge_stage_runtime import (
 from bioetl.application.composite.runner_pkg.runner_merge_stage_types import (
     _CompositeRunnerMergeStageHostProtocol,
     _PreparedMergeInputs,
-)
-from bioetl.application.composite.merger_orchestration import (
-    MergeExecutionRequest,
 )
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.domain.composite.config import CompositeConfig

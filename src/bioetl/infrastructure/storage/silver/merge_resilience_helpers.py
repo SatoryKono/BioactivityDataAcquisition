@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Any
 from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
-from bioetl.domain.observability_contract import normalize_observability_pipeline_label
 from bioetl.domain.exceptions import DeltaTransactionError
+from bioetl.domain.observability_contract import normalize_observability_pipeline_label
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _DeltaWriteRequest,

@@ -8,7 +8,10 @@ from typing import TYPE_CHECKING
 from bioetl.application.services.execution.cli_run_orchestration_models import (
     RunExecutionRequest,
 )
-from bioetl.application.services.execution.pipeline_runner_models import RunOptions, RunResult
+from bioetl.application.services.execution.pipeline_runner_models import (
+    RunOptions,
+    RunResult,
+)
 from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration import (
     ensure_metrics_server_started,
 )

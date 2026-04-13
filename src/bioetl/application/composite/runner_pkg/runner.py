@@ -5,8 +5,8 @@ Coordinates high-level execution flow while delegating stage logic to mixins.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 import time
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.lifecycle_observer_service import (
@@ -26,11 +26,6 @@ from bioetl.application.composite.runner_pkg.runner_key_flow import (
 from bioetl.application.composite.runner_pkg.runner_merge_stage_mixin import (
     CompositeRunnerMergeStageMixin,
 )
-from bioetl.application.composite.runtime_models import (
-    CompositeExecutionContext,
-    CompositeRunnerDependencies,
-    CompositeRuntimeConfig,
-)
 from bioetl.application.composite.runner_pkg.runner_observability_mixin import (
     CompositeRunnerObservabilityMixin,
 )
@@ -47,6 +42,11 @@ from bioetl.application.composite.runner_pkg.runner_stage_mixin import (
 )
 from bioetl.application.composite.runner_pkg.runner_support_mixin import (
     CompositeRunnerSupportMixin,
+)
+from bioetl.application.composite.runtime_models import (
+    CompositeExecutionContext,
+    CompositeRunnerDependencies,
+    CompositeRuntimeConfig,
 )
 from bioetl.domain.composite.result import CompositeResult
 from bioetl.domain.composite.state import CompositePipelineState

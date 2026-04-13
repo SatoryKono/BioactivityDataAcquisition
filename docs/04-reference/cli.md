@@ -126,6 +126,9 @@ bioetl run --pipeline chembl_activity --use-cached-bronze
   (по умолчанию) Заблокировать resume при несовместимости.
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=hard_fail`
   Прервать запуск ошибкой при несовместимости.
+- если текущий запуск выполняется как `exact_replay`, runtime принудительно
+  применяет `hard_fail`, даже если в settings запрошен более мягкий policy;
+  для published contract это режим strict `exact replay`, а не degraded resume.
 
 Supported resume modes:
 
@@ -133,6 +136,9 @@ Supported resume modes:
   without ledger suffix replay;
 - composite resume uses checkpoint snapshot state as the base and then replays
   the ledger suffix strictly after `last_event_id`.
+- `execution_fingerprint` остаётся canonical semantic identity, а
+  `composite_run_identity` используется как occurrence-scoped resume anchor для
+  composite path.
 
 Checkpoint load telemetry uses bounded statuses. In particular:
 
@@ -257,6 +263,9 @@ Composite resume semantics:
 
 - composite resume сначала загружает checkpoint snapshot;
 - затем runtime валидирует compatibility anchors;
+- среди них `composite_run_identity`, который отделён от semantic
+  `execution_fingerprint` и блокирует drift между разными occurrence одного и
+  того же semantic запуска;
 - когда ledger attached, composite path воспроизводит suffix событий строго
   после `last_event_id`, чтобы восстановить coarse-grained lifecycle milestones
   без фабрикации rich checkpoint payloads.
@@ -337,6 +346,16 @@ bioetl run-manifest show <run-id|manifest-id> [--format text|json|yaml]
 - затем при UUID-like identifier выполняет `run_id -> manifest_id` lookup;
 - выводит `manifest`, `ledger_entries`, `diagnostics`;
 - добавляет ledger history для этого же manifest, если ledger включён.
+
+Когда `diagnostics` отражает rejected/degraded resume path, inspection payload
+дополнительно показывает компактные forensic blocks:
+
+- `current_identity`
+- `checkpoint_identity`
+
+Они содержат resume-critical anchors: `composite_run_identity`,
+`execution_fingerprint`, `manifest_id`, `effective_config_hash`,
+`contract_ref`, `contract_version`, `exact_replay`, `input_snapshot_ids`.
 
 По умолчанию команда использует человекочитаемый `text`-формат. Для
 machine-readable вывода укажи `--format json` или `--format yaml`.

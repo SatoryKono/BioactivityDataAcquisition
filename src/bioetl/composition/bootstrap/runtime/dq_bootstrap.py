@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class _ConfigurableDQMonitor(DQMonitorPort, Protocol):
     """DQ monitor contract with detector configuration support."""
 
-    detector: "_DQDetectorConfig"
+    detector: _DQDetectorConfig
 
 
 class _DQDetectorConfig(Protocol):

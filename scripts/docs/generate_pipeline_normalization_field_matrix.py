@@ -22,7 +22,7 @@ if __package__ in {None, ""}:
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
 )
-from bioetl.application.composite.checkpoint._service_support import (
+from bioetl.application.composite.checkpoint.anchor_context import (
     create_expected_checkpoint_context,
     merge_expected_anchors,
 )

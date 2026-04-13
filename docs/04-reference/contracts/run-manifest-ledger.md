@@ -94,6 +94,9 @@ Current rollout semantics:
    `observe` remains a degraded operator mode for non-identity signals, but canonical
    execution-identity mismatches still block resume; `soft_fail` blocks resume;
    `hard_fail` raises an error.
+1. `exact_replay=true` is stricter than the requested compatibility policy:
+   runtime coerces checkpoint compatibility handling to `hard_fail` so an
+   exact replay attempt cannot continue after any compatibility mismatch.
 
 ## Supported Resume Modes
 
@@ -104,6 +107,9 @@ modes:
   without ledger suffix replay;
 - composite resume uses checkpoint snapshot state as the base and then replays
   only the ledger suffix strictly after `last_event_id`.
+- `execution_fingerprint` remains the canonical semantic execution identity,
+  while `composite_run_identity` is an occurrence-scoped resume anchor used to
+  block composite checkpoint drift across logically different executions.
 
 This asymmetry is intentional. The current contract finishes the existing
 composite replay model without requiring every runner to implement the same
@@ -136,6 +142,9 @@ The current replay-enabled resume path is implemented for composite checkpoints.
 - checkpoint state remains snapshot-only;
 - the composite checkpoint snapshot carries replay watermark metadata through
   `last_event_id` and `last_event_occurred_at`;
+- composite checkpoint compatibility also enforces
+  `composite_run_identity` as an occurrence-scoped anchor distinct from the
+  semantic `execution_fingerprint`;
 - after the checkpoint snapshot is loaded and compatibility anchors are
   validated, runtime replays only the ledger suffix strictly after
   `last_event_id` via `RunLedgerPort.list_entries_after(manifest_id, last_event_id)`;
@@ -196,6 +205,17 @@ When the inspected execution context is composite, diagnostics also raise
 the bounded replay contract instead of implying richer checkpoint-state
 reconstruction.
 
+Checkpoint incompatibility diagnostics also expose two compact forensic payloads:
+
+- `current_identity`
+- `checkpoint_identity`
+
+These payloads intentionally surface the resume-critical anchors
+(`composite_run_identity`, `execution_fingerprint`, `manifest_id`,
+`effective_config_hash`, `contract_ref`, `contract_version`, `exact_replay`,
+`input_snapshot_ids`) so operators can explain why resume was rejected or
+degraded without inspecting the full checkpoint blob first.
+
 ## Observability & Metrics
 
 - Aggregated control-plane telemetry lives in `grafana/dashboards/bioetl-control-plane-v1.json`.
@@ -254,9 +274,11 @@ provenance.
 
 Checkpoint / resume compatibility may additionally rely on a narrower
 runtime-anchor contract derived from a subset of control-plane fields such as
-`manifest_id`, `effective_config_hash`, `contract_ref`, `contract_version`, and
-`effective_config_artifact_id`. That runtime-anchor contract is intentionally
-not the same thing as the canonical `execution_fingerprint`.
+`manifest_id`, `composite_run_identity`, `effective_config_hash`,
+`contract_ref`, `contract_version`, and `effective_config_artifact_id`. That
+runtime-anchor contract is intentionally not the same thing as the canonical
+`execution_fingerprint`: `composite_run_identity` is occurrence-scoped resume
+identity, not semantic manifest identity.
 
 ## Run Ledger Contract
 

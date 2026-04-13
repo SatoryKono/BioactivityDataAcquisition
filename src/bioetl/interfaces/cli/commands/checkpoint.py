@@ -14,8 +14,7 @@ import click
 from bioetl.interfaces.cli.commands._inspection_output import (
     emit_inspection_payload,
 )
-from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_info
-from bioetl.interfaces.cli.formatters import echo_error
+from bioetl.interfaces.cli.formatters import echo_checkpoint, echo_error, echo_info
 
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
@@ -111,6 +110,16 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
                 if isinstance(persistence_profile, dict)
                 else None
             )
+            replay_ready_missing_requirements = (
+                persistence_profile.get("replay_ready_missing_requirements")
+                if isinstance(persistence_profile, dict)
+                else None
+            )
+            forensic_grade_missing_requirements = (
+                persistence_profile.get("forensic_grade_missing_requirements")
+                if isinstance(persistence_profile, dict)
+                else None
+            )
             lines.extend(
                 [
                     f"  replay_capability: {replay_view.get('replay_capability')}",
@@ -121,10 +130,8 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
                     f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",
                     f"  input_snapshot_identity_fingerprint: {replay_view.get('input_snapshot_identity_fingerprint')}",
                     f"  persistence_profile: {attained_profile}",
-                    f"  replay_ready_missing_requirements: "
-                    f"{persistence_profile.get('replay_ready_missing_requirements') if isinstance(persistence_profile, dict) else None}",
-                    f"  forensic_grade_missing_requirements: "
-                    f"{persistence_profile.get('forensic_grade_missing_requirements') if isinstance(persistence_profile, dict) else None}",
+                    f"  replay_ready_missing_requirements: {replay_ready_missing_requirements}",
+                    f"  forensic_grade_missing_requirements: {forensic_grade_missing_requirements}",
                     f"  composite_resume_reconstructability: {composite_resume_reconstructability}",
                     f"  alert_signals: {replay_view.get('alert_signals')}",
                     f"  next_steps: {replay_view.get('next_steps')}",

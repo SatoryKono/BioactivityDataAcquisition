@@ -21,6 +21,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 FieldNormalizer = Callable[[object], object]
 RuleComponent = tuple[FieldNormalizer, str]
+RuleComponentSpec = RuleComponent | tuple[FieldNormalizer] | FieldNormalizer
 RuleFamilySpec = tuple[frozenset[str], FieldNormalizer, str]
 
 __all__ = ["build_standard_profile"]
@@ -42,7 +43,7 @@ def build_standard_profile(
     float_fields: Collection[str] = (),
     set_like_fields: Collection[str] = (),
     json_string_fields: Collection[str] = (),
-    special_rules: Mapping[str, RuleComponent] | None = None,
+    special_rules: Mapping[str, RuleComponentSpec] | None = None,
 ) -> NormalizationProfile:
     """Build one field-complete normalization profile from common field families."""
     normalized_meta_fields = frozenset(meta_fields)
@@ -56,7 +57,10 @@ def build_standard_profile(
     normalized_float_fields = frozenset(float_fields)
     normalized_set_like_fields = frozenset(set_like_fields)
     normalized_json_string_fields = frozenset(json_string_fields)
-    normalized_special_rules = dict(special_rules or {})
+    normalized_special_rules = {
+        field_name: _coerce_rule_component(field_name=field_name, component=component)
+        for field_name, component in (special_rules or {}).items()
+    }
 
     return NormalizationProfile(
         profile_name=profile_name,
@@ -128,6 +132,32 @@ def _build_field_rule(
         include_in_hash=include_in_hash,
         set_like=field_name in set_like_fields,
         notes=notes,
+    )
+
+
+def _coerce_rule_component(
+    *,
+    field_name: str,
+    component: RuleComponentSpec,
+) -> RuleComponent:
+    """Normalize legacy custom-rule shapes to the canonical (normalizer, notes) form."""
+    if callable(component):
+        return (
+            component,
+            f"Apply custom normalization rule for field '{field_name}'.",
+        )
+    if isinstance(component, tuple):
+        if len(component) == 2 and callable(component[0]) and isinstance(component[1], str):
+            return component
+        if len(component) == 1 and callable(component[0]):
+            return (
+                component[0],
+                f"Apply custom normalization rule for field '{field_name}'.",
+            )
+    raise ValueError(
+        "special_rules entries must be a callable or a "
+        "(normalizer, notes) tuple; got invalid component "
+        f"for field '{field_name}': {component!r}"
     )
 
 

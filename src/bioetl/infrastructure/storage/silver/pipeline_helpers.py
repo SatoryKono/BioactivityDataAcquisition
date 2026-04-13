@@ -22,7 +22,6 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.domain.ports.noop import _NoOpSpan
 
-
 __all__ = [
     "_SilverWriteExecutionContext",
     "_SilverWriteInvocation",

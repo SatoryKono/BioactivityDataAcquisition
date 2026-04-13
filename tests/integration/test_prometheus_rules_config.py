@@ -328,6 +328,19 @@ def test_silver_validation_alert_groups_by_pipeline_and_table() -> None:
     assert "{{ $labels.table }}" in description
 
 
+def test_dq_validation_failure_alert_tracks_hard_fail_runtime_vocabulary() -> None:
+    payload = _load_rules()
+    rule_map = _build_rule_map(payload)
+
+    rule = rule_map["BioETLDQValidationFailuresCritical"]
+    expr = rule.get("expr", "")
+    description = rule.get("annotations", {}).get("description", "")
+
+    assert 'bioetl_dq_validation_failures_total{severity="hard_fail"}' in expr
+    assert "severity=hard_fail" in description
+    assert "severity=critical" not in description
+
+
 def test_threshold_smoke_examples_cover_warning_and_critical_boundaries() -> None:
     """Smoke representative threshold scenarios to guard boundary regressions."""
     quarantine_cases = [

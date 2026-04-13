@@ -78,7 +78,9 @@ class SubcellularFractionDataSource(
             yield record
 
     @staticmethod
-    def _normalize_fraction(raw_fraction: Any) -> str | None:  # Any: upstream assay payload may carry heterogeneous scalar/object values.
+    def _normalize_fraction(
+        raw_fraction: Any,  # Any: upstream assay payload may carry heterogeneous scalar/object values.
+    ) -> str | None:
         return support.normalize_fraction(raw_fraction)
 
     @staticmethod
@@ -135,7 +137,9 @@ class SubcellularFractionDataSource(
 
     def _yield_target_records_from_fallback_source_records(
         self,
-        source_records: AsyncIterator[Any],  # Any: fallback source stream forwards raw upstream records before normalization.
+        source_records: AsyncIterator[
+            Any
+        ],  # Any: fallback source stream forwards raw upstream records before normalization.
         limit: int | None,
     ) -> AsyncIterator[JsonDict]:
         return self._fetch_filtered_fractions(source_records, limit)

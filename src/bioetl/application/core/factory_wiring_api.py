@@ -3,4 +3,3 @@
 from __future__ import annotations
 
 from bioetl.application.core.wiring.factory import *  # noqa: F403
-from bioetl.application.core.wiring.factory import __all__

@@ -19,7 +19,6 @@ from bioetl.domain.normalization._control_plane_primitives import (
 
 __all__ = [
     "build_execution_identity_payload",
-    "normalize_execution_identity_payload",
     "normalize_contract_ref",
     "normalize_contract_version",
     "normalize_control_plane_datetime",
@@ -27,6 +26,7 @@ __all__ = [
     "normalize_control_plane_sha256",
     "normalize_control_plane_strict_sha256",
     "normalize_control_plane_uuid",
+    "normalize_execution_identity_payload",
     "normalize_run_ledger_payload",
     "normalize_run_manifest_spec",
     "normalize_runtime_anchor_effective_config_hash",

@@ -8,8 +8,8 @@ from types import ModuleType
 from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import GoldWriteMode
-from bioetl.domain.types import RunID
 from bioetl.domain.ports.noop import NoOpMetadataWriter
+from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold.metadata_audit import (
     _build_gold_audit_entry,
     _GoldAuditWriteRequest,

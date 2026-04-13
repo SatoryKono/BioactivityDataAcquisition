@@ -26,7 +26,10 @@ from bioetl.domain.services.composite_metadata_helpers import (
     parse_lineage_created_at,
     summarize_composite_cv_dq,
 )
-from bioetl.domain.transformations.hashing import canonical_json_dumps, normalize_for_hash
+from bioetl.domain.transformations.hashing import (
+    canonical_json_dumps,
+    normalize_for_hash,
+)
 from bioetl.domain.value_objects.run_context import RunContext
 
 if TYPE_CHECKING:

@@ -3,7 +3,20 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
+    from bioetl.composition._pipeline_execution import (
+        ArchiveOptions,
+        VacuumOptions,
+        build_pipeline_context,
+        create_pipeline_runner,
+        ensure_metrics_server_started,
+        run_pipeline,
+    )
+    from bioetl.composition._services import get_pipeline_runner_service
+    from bioetl.composition.bootstrap import maybe_start_metrics_server
 
 __all__ = [
     "ArchiveOptions",
