@@ -6,6 +6,7 @@ helpers that need composition-owned dependency assembly.
 
 from __future__ import annotations
 
+from datetime import datetime
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -32,12 +33,14 @@ if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
 
 __all__ = [
+    "MetricsOperatorProfile",
     "ObservabilityDiagnosticsBundle",
     "get_audit_service",
     "get_checkpoint_service",
     "get_health_service",
     "get_lineage_service",
     "get_metrics_service",
+    "get_metrics_operator_profile",
     "get_observability_diagnostics_bundle",
     "get_observability_workflow_service",
     "get_quarantine_service",
@@ -59,6 +62,45 @@ class ObservabilityDiagnosticsBundle:
     run_manifest_service: RunManifestInspectionService
     lineage_service: LineageInspectionService
     workflow_service: ObservabilityWorkflowService
+
+
+@dataclass(frozen=True, slots=True)
+class MetricsOperatorProfile:
+    """Operator-facing summary of metrics/admin observability behavior."""
+
+    metrics_enabled: bool
+    metrics_server_enabled: bool
+    metrics_server_running: bool
+    metrics_port: int
+    metrics_addr: str
+    metrics_started_at: datetime | None
+    metrics_endpoint: str | None
+    metrics_server_mode: str
+    pushgateway_mode: str
+    pushgateway_gateway: str
+    tracing_enabled: bool
+    audit_enabled: bool
+
+    def to_dict(self) -> dict[str, object]:
+        """Return a JSON-safe diagnostics payload."""
+        return {
+            "metrics_enabled": self.metrics_enabled,
+            "metrics_server_enabled": self.metrics_server_enabled,
+            "metrics_server_running": self.metrics_server_running,
+            "metrics_port": self.metrics_port,
+            "metrics_addr": self.metrics_addr,
+            "metrics_started_at": (
+                self.metrics_started_at.isoformat()
+                if self.metrics_started_at is not None
+                else None
+            ),
+            "metrics_endpoint": self.metrics_endpoint,
+            "metrics_server_mode": self.metrics_server_mode,
+            "pushgateway_mode": self.pushgateway_mode,
+            "pushgateway_gateway": self.pushgateway_gateway,
+            "tracing_enabled": self.tracing_enabled,
+            "audit_enabled": self.audit_enabled,
+        }
 
 
 def start_metrics_server(
@@ -137,6 +179,45 @@ def get_metrics_service() -> MetricsService:
     from bioetl.composition.services_api import get_metrics_service as _impl
 
     return _impl()
+
+
+def get_metrics_operator_profile() -> MetricsOperatorProfile:
+    """Return the canonical operator-facing metrics/admin profile."""
+    from bioetl.infrastructure.config import get_settings
+
+    settings = get_settings()
+    metrics_service = get_metrics_service()
+    status = metrics_service.get_status()
+    metrics_enabled = bool(settings.observability.metrics_enabled)
+    metrics_server_enabled = bool(settings.observability.metrics_server_enabled)
+    metrics_endpoint = None
+    if metrics_enabled and metrics_server_enabled:
+        metrics_endpoint = (
+            f"http://{settings.metrics_addr}:{settings.metrics_port}/metrics"
+        )
+    metrics_server_mode = (
+        "auto_managed_during_pipeline_runs"
+        if metrics_enabled and metrics_server_enabled
+        else "disabled"
+    )
+    pushgateway_mode = (
+        "best_effort_on_run_completion" if metrics_enabled else "disabled"
+    )
+    pushgateway_gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
+    return MetricsOperatorProfile(
+        metrics_enabled=metrics_enabled,
+        metrics_server_enabled=metrics_server_enabled,
+        metrics_server_running=status.running,
+        metrics_port=settings.metrics_port,
+        metrics_addr=settings.metrics_addr,
+        metrics_started_at=status.started_at,
+        metrics_endpoint=metrics_endpoint,
+        metrics_server_mode=metrics_server_mode,
+        pushgateway_mode=pushgateway_mode,
+        pushgateway_gateway=pushgateway_gateway,
+        tracing_enabled=bool(settings.observability.tracing_enabled),
+        audit_enabled=bool(settings.observability.audit_enabled),
+    )
 
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:

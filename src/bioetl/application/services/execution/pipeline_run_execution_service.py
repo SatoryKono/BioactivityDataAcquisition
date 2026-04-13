@@ -6,6 +6,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+from bioetl.application.runtime_timestamps import (
+    capture_runtime_timing_anchor,
+    derive_completion_timestamp,
+)
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
 from bioetl.domain.types import JsonDict
@@ -52,6 +56,8 @@ class PipelineRunExecutionService:
         runner: ExecutionMetricsRunnerPort,
         run_logger: LoggerPort,
         metrics_extractor: MetricsExtractorPort,
+        started_at: datetime | None = None,
+        started_monotonic: float | None = None,
     ) -> PipelineExecutionResult:
         """Execute runner and return normalized status/metrics outcome.
 
@@ -67,6 +73,10 @@ class PipelineRunExecutionService:
         status = "success"
         error_message: str | None = None
         error_type: str | None = None
+        if started_at is None:
+            started_at, started_monotonic = capture_runtime_timing_anchor()
+        elif started_monotonic is None:
+            _, started_monotonic = capture_runtime_timing_anchor(started_at=started_at)
 
         try:
             await runner.run()
@@ -84,10 +94,14 @@ class PipelineRunExecutionService:
             )
 
         metrics = metrics_extractor.extract_metrics(runner)
+        completed_at, _ = derive_completion_timestamp(
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+        )
         return PipelineExecutionResult(
             status=status,
             error_message=error_message,
             error_type=error_type,
             metrics=metrics,
-            completed_at=datetime.now(tz=UTC),
+            completed_at=completed_at,
         )

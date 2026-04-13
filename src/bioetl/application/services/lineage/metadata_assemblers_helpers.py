@@ -58,6 +58,21 @@ class PipelineMetadataProtocol(Protocol):
     def __call__(self) -> PipelineMetadata: ...
 
 
+_DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS = frozenset(
+    {
+        "content_hash",
+        "run_id",
+        "manifest_id",
+        "composite_run_id",
+        "lineage_created_at",
+        "write_started_at",
+        "write_completed_at",
+        "created_at",
+        "updated_at",
+    }
+)
+
+
 def _parse_composite_list(value: object) -> list[str]:
     """Parse composite list metadata stored as list or stringified list."""
     return parse_composite_list(value)
@@ -338,14 +353,19 @@ def _build_dataset_content_hash(
     provider: str,
     records: Sequence[Mapping[str, object]] | None,
 ) -> str | None:
-    """Build an order-insensitive dataset-level content hash for one sidecar."""
+    """Build an order-insensitive dataset-level content hash for one sidecar.
+
+    Dataset-level sidecar identity must remain semantic-only. Occurrence-scoped
+    runtime anchors such as run identifiers and write timestamps are excluded
+    even when they appear as non-underscored keys in one record payload.
+    """
     if not records:
         return None
     normalized_rows = [
         canonical_json_dumps(
             normalize_for_hash(
                 {str(key): value for key, value in record.items()},
-                exclude_fields={"content_hash"},
+                exclude_fields=set(_DATASET_CONTENT_HASH_OCCURRENCE_ONLY_FIELDS),
             )
         )
         for record in records

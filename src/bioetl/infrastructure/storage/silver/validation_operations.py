@@ -208,10 +208,8 @@ def _deduplicate_by_primary_keys_impl(
         key=lambda item: (item[0], item[1]),
     )
 
-    seen_exact_keys: set[tuple[tuple[Any, ...], str]] = set()
-    # Any: dedupe keys mirror heterogeneous dataframe primary-key scalars.
-    seen_primary_keys: set[tuple[Any, ...]] = set()
-    # Any: primary-key tuples may contain mixed scalar types across entities.
+    seen_exact_keys: set[tuple[tuple[object, ...], str]] = set()
+    seen_primary_keys: set[tuple[object, ...]] = set()
     deduplicated: list[BronzeRecord] = []
     for primary_key, content_identity, record in ranked_records:
         exact_key = (primary_key, content_identity)

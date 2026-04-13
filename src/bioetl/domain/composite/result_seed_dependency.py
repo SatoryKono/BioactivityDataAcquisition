@@ -99,6 +99,8 @@ class DependencyResult:
         pipeline_name: str,
         error_message: str,
         duration_seconds: float = 0.0,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> DependencyResult:
         """Factory for failed dependency result.
 
@@ -106,6 +108,8 @@ class DependencyResult:
             pipeline_name: Name of the dependency pipeline.
             error_message: Human-readable description of the failure.
             duration_seconds: Execution duration before failure. Defaults to 0.0.
+            started_at: UTC timestamp when execution started. Defaults to None.
+            completed_at: UTC timestamp when execution completed. Defaults to None.
 
         Returns:
             DependencyResult with FAILED status and error_message set.
@@ -115,6 +119,8 @@ class DependencyResult:
             status=DependencyStatus.FAILED,
             error_message=error_message,
             duration_seconds=duration_seconds,
+            started_at=started_at,
+            completed_at=completed_at,
         )
 
     @classmethod
@@ -143,12 +149,18 @@ class DependencyResult:
         cls,
         pipeline_name: str,
         timeout_seconds: float,
+        duration_seconds: float | None = None,
+        started_at: datetime | None = None,
+        completed_at: datetime | None = None,
     ) -> DependencyResult:
         """Factory for timeout dependency result.
 
         Args:
             pipeline_name: Name of the dependency pipeline.
             timeout_seconds: Timeout threshold in seconds that was exceeded.
+            duration_seconds: Observed duration before timeout. Defaults to timeout_seconds.
+            started_at: UTC timestamp when execution started. Defaults to None.
+            completed_at: UTC timestamp when execution completed. Defaults to None.
 
         Returns:
             DependencyResult with TIMEOUT status and duration set to timeout_seconds.
@@ -157,5 +169,9 @@ class DependencyResult:
             pipeline_name=pipeline_name,
             status=DependencyStatus.TIMEOUT,
             error_message=f"Timeout after {timeout_seconds}s",
-            duration_seconds=timeout_seconds,
+            duration_seconds=timeout_seconds
+            if duration_seconds is None
+            else duration_seconds,
+            started_at=started_at,
+            completed_at=completed_at,
         )

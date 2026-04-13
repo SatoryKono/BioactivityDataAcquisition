@@ -12,6 +12,10 @@ from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
 from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
+from bioetl.application.runtime_timestamps import (
+    capture_runtime_timing_anchor,
+    derive_completion_timestamp,
+)
 from bioetl.composition import PipelineRegistry
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline_runner,
@@ -274,7 +278,7 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     settings = get_settings()
     maybe_start_metrics_server(settings)
 
-    started_at = datetime.now(tz=UTC)
+    started_at, started_monotonic = capture_runtime_timing_anchor()
     runner = _require_execution_metrics_runner(create_pipeline_runner(name, options))
 
     # Extract run context for result
@@ -294,7 +298,10 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
         error_message = str(e)
         error_type = type(e).__name__
 
-    completed_at = datetime.now(tz=UTC)
+    completed_at, _ = derive_completion_timestamp(
+        started_at=started_at,
+        started_monotonic=started_monotonic,
+    )
 
     metrics = create_metrics_extractor().extract_metrics(runner)
     result = RunResult(

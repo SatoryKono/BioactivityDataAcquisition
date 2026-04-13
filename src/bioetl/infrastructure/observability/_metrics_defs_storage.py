@@ -5,6 +5,10 @@ from __future__ import annotations
 from prometheus_client import Counter, Histogram
 
 __all__ = [
+    "AUDIT_QUERY_DURATION_SECONDS",
+    "AUDIT_QUERY_EVENTS_TOTAL",
+    "AUDIT_WRITE_DURATION_SECONDS",
+    "AUDIT_WRITE_EVENTS_TOTAL",
     "BRONZE_BYTES_FREED_TOTAL",
     "BRONZE_BYTES_WRITTEN_TOTAL",
     "BRONZE_FILES_REMOVED_TOTAL",
@@ -19,6 +23,32 @@ __all__ = [
     "SILVER_MERGE_RETRIES_TOTAL",
     "SILVER_VALIDATION_FAILURES_TOTAL",
 ]
+
+AUDIT_WRITE_EVENTS_TOTAL = Counter(
+    "bioetl_audit_write_events_total",
+    "Total audit log write outcomes",
+    ["layer", "operation", "status"],
+)
+
+AUDIT_WRITE_DURATION_SECONDS = Histogram(
+    "bioetl_audit_write_duration_seconds",
+    "Duration of audit log write operations in seconds",
+    ["layer", "operation", "status"],
+    buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
+)
+
+AUDIT_QUERY_EVENTS_TOTAL = Counter(
+    "bioetl_audit_query_events_total",
+    "Total audit query outcomes",
+    ["layer_filter", "status"],
+)
+
+AUDIT_QUERY_DURATION_SECONDS = Histogram(
+    "bioetl_audit_query_duration_seconds",
+    "Duration of audit query operations in seconds",
+    ["layer_filter", "status"],
+    buckets=[0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 5.0],
+)
 
 BRONZE_WRITE_DURATION_SECONDS = Histogram(
     "bioetl_bronze_write_duration_seconds",

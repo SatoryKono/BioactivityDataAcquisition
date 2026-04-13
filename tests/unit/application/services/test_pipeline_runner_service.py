@@ -5,7 +5,7 @@ Tests the universal pipeline runner service.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -264,6 +264,30 @@ async def test_service_uses_clock_for_dry_run_timestamps(
     assert result.started_at == started_at
     assert result.completed_at == completed_at
     assert result.status == PipelineRunResult.DRY_RUN
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_service_derives_completion_from_started_anchor(
+    service: PipelineRunnerService,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    started_at = datetime(2026, 4, 13, 9, 0, tzinfo=UTC)
+    service.clock.now.return_value = started_at
+    monkeypatch.setattr(
+        "bioetl.application.services.execution.pipeline_runner_service.capture_runtime_timing_anchor",
+        MagicMock(return_value=(started_at, 10.0)),
+    )
+    monkeypatch.setattr(
+        "bioetl.application.services.execution.pipeline_run_execution_service.derive_completion_timestamp",
+        MagicMock(return_value=(started_at + timedelta(seconds=4.5), 4.5)),
+    )
+
+    result = await service.run("test_pipeline")
+
+    assert result.started_at == started_at
+    assert result.completed_at == started_at + timedelta(seconds=4.5)
+    assert result.duration_seconds == pytest.approx(4.5)
 
 
 # =============================================================================

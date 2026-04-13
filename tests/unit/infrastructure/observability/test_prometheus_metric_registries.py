@@ -72,7 +72,20 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 96
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 101
+
+
+@pytest.mark.unit
+def test_removed_dead_metric_families_are_no_longer_registered() -> None:
+    assert "bioetl_archive_duration_seconds" not in REGISTERED_PROMETHEUS_METRIC_NAMES
+    assert "bioetl_archive_files_total" not in REGISTERED_PROMETHEUS_METRIC_NAMES
+    assert "bioetl_preflight_medallion_policy_valid" not in (
+        REGISTERED_PROMETHEUS_METRIC_NAMES
+    )
+    assert "bioetl_preflight_config_errors_total" not in (
+        REGISTERED_PROMETHEUS_METRIC_NAMES
+    )
+    assert "bioetl_vacuum_duration_seconds" not in REGISTERED_PROMETHEUS_METRIC_NAMES
 
 
 @pytest.mark.unit
@@ -81,6 +94,10 @@ def test_bronze_runtime_write_metrics_are_registered() -> None:
     assert "bioetl_bronze_write_total_duration_seconds" in HISTOGRAMS
     assert "bioetl_bronze_files_removed_total" in COUNTERS
     assert "bioetl_bronze_bytes_freed_total" in COUNTERS
+    assert "bioetl_audit_write_events_total" in COUNTERS
+    assert "bioetl_audit_query_events_total" in COUNTERS
+    assert "bioetl_audit_write_duration_seconds" in HISTOGRAMS
+    assert "bioetl_audit_query_duration_seconds" in HISTOGRAMS
 
 
 @pytest.mark.unit
@@ -136,3 +153,25 @@ def test_control_plane_and_lineage_metrics_avoid_high_cardinality_labels() -> No
             f"{metric_name} must not use forbidden high-cardinality labels: "
             f"{sorted(_FORBIDDEN_LABELS.intersection(actual_labels))}"
         )
+
+
+@pytest.mark.unit
+def test_audit_metrics_use_bounded_labels() -> None:
+    expected_counter_labels = {
+        "bioetl_audit_write_events_total": {"layer", "operation", "status"},
+        "bioetl_audit_query_events_total": {"layer_filter", "status"},
+    }
+    expected_histogram_labels = {
+        "bioetl_audit_write_duration_seconds": {"layer", "operation", "status"},
+        "bioetl_audit_query_duration_seconds": {"layer_filter", "status"},
+    }
+
+    for metric_name, labels in expected_counter_labels.items():
+        actual_labels = set(COUNTERS[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)
+
+    for metric_name, labels in expected_histogram_labels.items():
+        actual_labels = set(HISTOGRAMS[metric_name]._labelnames)
+        assert actual_labels == labels
+        assert _FORBIDDEN_LABELS.isdisjoint(actual_labels)

@@ -568,8 +568,6 @@ Host Machine (Windows/macOS/Linux)
 | `bioetl_health_check_success_total` | Counter | `provider` | Количество health check с результатом `HEALTHY`. |
 | `bioetl_health_check_degraded_total` | Counter | `provider` | Количество health check с результатом `DEGRADED`. |
 | `bioetl_health_check_failures_total` | Counter | `provider` | Количество health check с результатом `UNHEALTHY` или probe-exception. |
-| `bioetl_preflight_medallion_policy_valid` | Gauge | `pipeline`, `run_id` | Валидность medallion policy (1=valid, 0=invalid). |
-| `bioetl_preflight_config_errors_total` | Gauge | `pipeline`, `run_id` | Количество ошибок конфигурации при preflight. |
 
 ### 5.6 Adapter / HTTP Metrics
 
@@ -600,9 +598,6 @@ Host Machine (Windows/macOS/Linux)
 | Метрика | Тип | Labels | Описание |
 |---|---|---|---|
 | `bioetl_vacuum_files_removed_total` | Counter | `table`, `layer` | Количество файлов, удалённых vacuum-операциями. |
-| `bioetl_vacuum_duration_seconds` | Histogram | `table` | Длительность vacuum-операций. |
-| `bioetl_archive_files_total` | Counter | `table`, `target` | Количество заархивированных файлов. |
-| `bioetl_archive_duration_seconds` | Histogram | `table` | Длительность архивации. |
 | `bioetl_storage_optimization_total` | Counter | `pipeline`, `status` | Количество операций оптимизации хранилища. |
 | `bioetl_bronze_write_duration_seconds` | Histogram | `provider`, `entity` | Длительность записи в Bronze-слой. |
 | `bioetl_bronze_records_written_total` | Counter | `provider`, `entity` | Количество записей, записанных в Bronze. |

@@ -113,7 +113,7 @@ class CompositeLifecycleTracingMixin:
         composite_name: str,
         run_id: str,
         severity: str,
-        **context: Any,
+        **context: object,
     ) -> None:
         """Emit one lifecycle event through the canonical observability contract."""
         normalized_severity = self._normalize_severity(severity)

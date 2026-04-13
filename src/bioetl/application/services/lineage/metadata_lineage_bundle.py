@@ -56,26 +56,60 @@ def _attach_fragment_anchor(
             output.artifact_id = artifact_id
 
 
-def _validate_bundle_identity_contract(
+def _validate_runtime_identity_contract(
+    metadata: object,
+    fragment: LineageGraphFragment,
+) -> None:
+    """Validate runtime-side lineage anchors against the fragment identity."""
+    runtime = getattr(metadata, "runtime", None)
+    runtime_run_id = _require_runtime_run_id(runtime)
+    _validate_runtime_run_id_matches_fragment(runtime_run_id, fragment)
+    _validate_runtime_manifest_matches_fragment(runtime, fragment)
+
+
+def _require_runtime_run_id(runtime: object) -> str:
+    """Return the persisted runtime.run_id or raise when it is absent."""
+    runtime_run_id = str(getattr(runtime, "run_id", "") or "").strip()
+    if runtime is None or not runtime_run_id:
+        raise ValueError("Sidecar metadata must include runtime.run_id")
+    return runtime_run_id
+
+
+def _validate_runtime_run_id_matches_fragment(
+    runtime_run_id: str,
+    fragment: LineageGraphFragment,
+) -> None:
+    """Ensure runtime.run_id matches the lineage fragment run identity."""
+    fragment_run_id = str(fragment.run_id or "").strip()
+    if fragment_run_id and runtime_run_id != fragment_run_id:
+        raise ValueError(
+            "Sidecar runtime.run_id does not match lineage fragment run_id"
+        )
+
+
+def _validate_runtime_manifest_matches_fragment(
+    runtime: object,
+    fragment: LineageGraphFragment,
+) -> None:
+    """Ensure runtime.manifest_id matches the lineage fragment manifest identity."""
+    runtime_manifest_id = str(getattr(runtime, "manifest_id", "") or "").strip()
+    fragment_manifest_id = str(fragment.manifest_id or "").strip()
+    if (
+        runtime_manifest_id
+        and fragment_manifest_id
+        and runtime_manifest_id != fragment_manifest_id
+    ):
+        raise ValueError(
+            "Sidecar runtime.manifest_id does not match lineage fragment manifest_id"
+        )
+
+
+def _validate_output_identity_contract(
     metadata: object,
     fragment: LineageGraphFragment,
     artifact_id: str,
 ) -> None:
-    """Validate the minimal cross-layer sidecar identity contract."""
-    runtime = getattr(metadata, "runtime", None)
-    if runtime is None or not str(getattr(runtime, "run_id", "")).strip():
-        raise ValueError("Sidecar metadata must include runtime.run_id")
-    fragment_run_id = str(fragment.run_id or "").strip()
-    if fragment_run_id and str(runtime.run_id) != fragment_run_id:
-        raise ValueError(
-            "Sidecar runtime.run_id does not match lineage fragment run_id"
-        )
-    runtime_manifest_id = str(getattr(runtime, "manifest_id", "") or "").strip()
-    fragment_manifest_id = str(fragment.manifest_id or "").strip()
-    if runtime_manifest_id and fragment_manifest_id and runtime_manifest_id != fragment_manifest_id:
-        raise ValueError(
-            "Sidecar runtime.manifest_id does not match lineage fragment manifest_id"
-        )
+    """Validate output-side lineage anchors against the fragment identity."""
     output = getattr(metadata, "output", None)
     if output is None:
         raise ValueError("Sidecar metadata must include output metadata")
@@ -91,6 +125,16 @@ def _validate_bundle_identity_contract(
         )
     if not str(artifact_id).strip():
         raise ValueError("Sidecar metadata must resolve a canonical artifact_id")
+
+
+def _validate_bundle_identity_contract(
+    metadata: object,
+    fragment: LineageGraphFragment,
+    artifact_id: str,
+) -> None:
+    """Validate the minimal cross-layer sidecar identity contract."""
+    _validate_runtime_identity_contract(metadata, fragment)
+    _validate_output_identity_contract(metadata, fragment, artifact_id)
 
 
 @dataclass(frozen=True, slots=True)

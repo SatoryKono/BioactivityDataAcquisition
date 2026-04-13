@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-13T11:20:05.699151+00:00",
+  "generated_at": "2026-04-13T12:42:57.459584+00:00",
   "summary": {
-    "total_scripts": 294,
+    "total_scripts": 295,
     "status_counts": {
-      "active": 237,
+      "active": 238,
       "legacy": 29,
       "orphan": 15,
       "unknown": 13
@@ -14,9 +14,9 @@
       "build": 31,
       "ci": 48,
       "docs": 136,
-      "scripts": 245,
+      "scripts": 246,
       "skills": 9,
-      "tests": 100
+      "tests": 101
     }
   },
   "scripts": [
@@ -4360,7 +4360,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
@@ -4391,6 +4391,12 @@
           "line": 43,
           "source_group": "scripts",
           "text": "\"generate-pipeline-normalization-matrix\": \"generate_pipeline_normalization_field_matrix.py\","
+        },
+        {
+          "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
+          "line": 44,
+          "source_group": "tests",
+          "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }
       ]
     },
@@ -7418,7 +7424,7 @@
       "agent_usage": [
         "py-architecture-debt-bot"
       ],
-      "reference_count": 87,
+      "reference_count": 88,
       "references": [
         {
           "path": ".codex/agents/py-architecture-debt-bot.md",
@@ -7485,7 +7491,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"analyze_duplicate_functions.py\","
         }
@@ -7506,7 +7512,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 59,
+          "line": 61,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"calibrate_hotspot_budgets.py\","
         }
@@ -7527,7 +7533,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"check_application_deps.py\","
         },
@@ -7554,7 +7560,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"check_architecture.py\","
         },
@@ -7593,7 +7599,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"check-c901\": \"check_c901_baseline.py\","
         },
@@ -7620,7 +7626,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"check_constructor_args.py\","
         },
@@ -7668,7 +7674,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"check_naming_package_consistency.py\","
         },
@@ -7725,7 +7731,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"check_quality_exemptions.py\","
         }
@@ -7752,7 +7758,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
         },
@@ -7911,7 +7917,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 54,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"generate_hotspot_degradation_report.py\","
         }
@@ -7967,7 +7973,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"check-terminology\": \"lint_terminology.py\","
         },
@@ -8018,7 +8024,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"check-naming\": \"naming_audit.py\","
         },
@@ -8071,7 +8077,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
         },
@@ -8128,7 +8134,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"report_duplication_baseline.py\","
         }
@@ -8143,7 +8149,7 @@
       "references": [
         {
           "path": "scripts/qa/__main__.py",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"report-function-length-inventory\": \"report_function_length_inventory.py\","
         }
@@ -8164,7 +8170,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"report_hotspot_family_baseline.py\","
         }
@@ -8191,7 +8197,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"report-normalization-fallback-inventory\": \"report_normalization_fallback_inventory.py\","
         },
@@ -8200,6 +8206,21 @@
           "line": 27,
           "source_group": "tests",
           "text": "assert \"report_normalization_fallback_inventory.py\" in plan_text"
+        }
+      ]
+    },
+    {
+      "path": "scripts/qa/report_observability_metric_inventory.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/qa/__main__.py",
+          "line": 59,
+          "source_group": "scripts",
+          "text": "\"report-observability-metric-inventory\": \"report_observability_metric_inventory.py\","
         }
       ]
     },
@@ -8236,7 +8257,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"report_provider_contract_drift.py\","
         }
@@ -8281,7 +8302,7 @@
         },
         {
           "path": "scripts/qa/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"report_vcr_metadata_catalog.py\","
         },
@@ -8308,7 +8329,7 @@
       "references": [
         {
           "path": "scripts/qa/__main__.py",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"sync_integration_vcr_policy.py\","
         }

@@ -103,7 +103,7 @@ class TestShutdownService:
         await shutdown_service.initiate_shutdown("signal 15 (SIGTERM)")
 
         assert len(metrics.increments) == 1
-        assert metrics.increments[0][0] == "shutdown_initiated"
+        assert metrics.increments[0][0] == "bioetl_shutdown_initiated"
         assert metrics.increments[0][1] == 1  # value
         assert metrics.increments[0][2]["reason"] == "SIGTERM"
 
@@ -153,7 +153,7 @@ class TestShutdownService:
         shutdown_service.mark_completed()
 
         assert len(metrics.increments) == 1
-        assert metrics.increments[0][0] == "shutdown_completed"
+        assert metrics.increments[0][0] == "bioetl_shutdown_completed"
         assert metrics.increments[0][1] == 1  # value
 
     def test_reset_clears_state(self, shutdown_service: ShutdownService):

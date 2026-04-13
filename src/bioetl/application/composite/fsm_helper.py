@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
-class ResumePhasePlan:
+class ResumePhaseInfo:
     """Resolved resume target for a failed composite checkpoint."""
 
     phase: CompositePipelineState
@@ -33,28 +33,28 @@ def _resolve_resume_phase(
     completed_count: int,
     total_enrichers: int,
     merge_completed: bool,
-) -> ResumePhasePlan:
+) -> ResumePhaseInfo:
     """Resolve the FSM phase that should handle resume-from-failed."""
     from bioetl.domain.composite.state import CompositePipelineState
 
     if not seed_completed:
-        return ResumePhasePlan(
+        return ResumePhaseInfo(
             phase=CompositePipelineState.NOT_STARTED,
             description="seed (seed not completed)",
         )
     if completed_count < total_enrichers:
-        return ResumePhasePlan(
+        return ResumePhaseInfo(
             phase=CompositePipelineState.ENRICHING,
             description=(
                 f"enrichment ({completed_count}/{total_enrichers} enrichers completed)"
             ),
         )
     if merge_completed:
-        return ResumePhasePlan(
+        return ResumePhaseInfo(
             phase=CompositePipelineState.MERGING,
             description="cross_validation (merge completed)",
         )
-    return ResumePhasePlan(
+    return ResumePhaseInfo(
         phase=CompositePipelineState.ENRICHMENT_COMPLETED,
         description="merge (all enrichers completed)",
     )

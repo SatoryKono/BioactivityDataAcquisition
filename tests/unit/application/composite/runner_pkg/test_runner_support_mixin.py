@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -423,6 +423,34 @@ async def test_save_checkpoint_safe_when_bioetl_error_then_returns_false() -> No
         },
     )
     harness._metrics.observe_histogram.assert_called_once()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_run_seed_uses_monotonic_derived_completion_timestamp() -> None:
+    harness = _SupportMixinHarness()
+    runner = MagicMock()
+    runner.run = AsyncMock()
+    runner.execution_metrics = {
+        "records_fetched": 12,
+        "records_silver": 9,
+    }
+    harness._seed_runner_factory = MagicMock(return_value=runner)
+    started_at = datetime(2026, 4, 13, 9, 0, tzinfo=UTC)
+    completed_at = started_at + timedelta(seconds=6.5)
+
+    with patch(
+        "bioetl.application.composite.runner_pkg.runner_support_runtime.capture_runtime_timing_anchor",
+        return_value=(started_at, 10.0),
+    ), patch(
+        "bioetl.application.composite.runner_pkg.runner_support_runtime.derive_completion_timestamp",
+        return_value=(completed_at, 6.5),
+    ):
+        result = await harness._run_seed()
+
+    assert result.started_at == started_at
+    assert result.completed_at == completed_at
+    assert result.duration_seconds == 6.5
 
 
 # ---------------------------------------------------------------------------

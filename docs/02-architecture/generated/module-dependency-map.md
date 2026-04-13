@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1570`
-- Internal import edges (raw): `5901`
+- Scanned modules: `1572`
+- Internal import edges (raw): `5906`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `285`
@@ -24,16 +24,16 @@ flowchart LR
     application -->|977 OK| application
     application -->|910 OK| domain
     composition -->|168 OK| application
-    composition -->|429 OK| composition
-    composition -->|314 OK| domain
-    composition -->|262 OK| infrastructure
+    composition -->|430 OK| composition
+    composition -->|316 OK| domain
+    composition -->|263 OK| infrastructure
     domain -->|960 OK| domain
     infrastructure -->|653 OK| domain
     infrastructure -->|821 OK| infrastructure
     interfaces -->|63 OK| application
     interfaces -->|58 OK| composition
     interfaces -->|39 OK| domain
-    interfaces -->|247 OK| interfaces
+    interfaces -->|248 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -43,16 +43,16 @@ flowchart LR
 | `application`    | `application`    |     977 | allowed |
 | `application`    | `domain`         |     910 | allowed |
 | `composition`    | `application`    |     168 | allowed |
-| `composition`    | `composition`    |     429 | allowed |
-| `composition`    | `domain`         |     314 | allowed |
-| `composition`    | `infrastructure` |     262 | allowed |
+| `composition`    | `composition`    |     430 | allowed |
+| `composition`    | `domain`         |     316 | allowed |
+| `composition`    | `infrastructure` |     263 | allowed |
 | `domain`         | `domain`         |     960 | allowed |
 | `infrastructure` | `domain`         |     653 | allowed |
 | `infrastructure` | `infrastructure` |     821 | allowed |
 | `interfaces`     | `application`    |      63 | allowed |
 | `interfaces`     | `composition`    |      58 | allowed |
 | `interfaces`     | `domain`         |      39 | allowed |
-| `interfaces`     | `interfaces`     |     247 | allowed |
+| `interfaces`     | `interfaces`     |     248 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 

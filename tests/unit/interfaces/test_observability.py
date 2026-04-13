@@ -188,6 +188,18 @@ def test_get_metrics_service_delegates_to_composition_services_api() -> None:
     mock_impl.assert_called_once_with()
 
 
+def test_get_metrics_operator_profile_delegates_to_composition_api() -> None:
+    expected = mock.Mock()
+    with mock.patch(
+        "bioetl.composition.observability_api.get_metrics_operator_profile",
+        return_value=expected,
+    ) as mock_impl:
+        result = observability.get_metrics_operator_profile()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()
+
+
 def test_get_health_service_delegates_to_composition_services_api() -> None:
     expected = mock.Mock()
     with mock.patch(

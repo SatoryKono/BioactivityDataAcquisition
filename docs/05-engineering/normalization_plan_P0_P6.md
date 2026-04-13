@@ -110,8 +110,8 @@ UUID-like values normalize through canonical string conversion.
 | --- | --- | --- |
 | Control-plane domain normalization | [control_plane.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/control_plane.py) | Pure helpers for manifest specs, ledger payloads, UUIDs, datetimes, set-like collections, canonical execution identity, and degraded runtime anchors |
 | Hash-identity domain normalization | [hash_identity.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/hash_identity.py) | Pure helpers for `content_hash` and content-aware dedup identity, including the current date-only datetime contract |
-| Manifest fingerprint | [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_manifest_service.py) | Calls `normalize_run_manifest_spec()`, then canonical JSON, then SHA-256 |
-| Ledger persist payload | [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
+| Manifest fingerprint | [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_manifest_service.py) | Calls `normalize_run_manifest_spec()`, then canonical JSON, then SHA-256 |
+| Ledger persist payload | [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_ledger_service.py) | Calls `normalize_run_ledger_payload()` before append |
 | Record-level normalization | [record_normalization_processor.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/core/record_normalization_processor.py) | Uses `NormalizationProfile` when available, otherwise falls back to legacy heuristics |
 | Profile framework | [base.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/base.py) | Defines `FieldRule` and `NormalizationProfile` with `include_in_hash` and `set_like` |
 | Shipped profile registry | [registry.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/profiles/registry.py) | Registers shipped profiles for `chembl.activity`, `chembl.assay`, `chembl.assay_parameters`, `chembl.cell_line`, `chembl.compound_record`, `chembl.molecule`, `chembl.protein_class`, `chembl.publication`, `chembl.publication_similarity`, `chembl.publication_term`, `chembl.subcellular_fraction`, `chembl.target`, `chembl.target_component`, `chembl.tissue`, `crossref.publication`, `openalex.publication`, `pubchem.compound`, `pubmed.publication`, `semanticscholar.publication`, `uniprot.idmapping`, and `uniprot.protein` |
@@ -126,7 +126,7 @@ UUID-like values normalize through canonical string conversion.
 
 Canonical manifest path:
 
-- [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_manifest_service.py)
+- [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_manifest_service.py)
 
 Current algorithm on `main`:
 
@@ -306,7 +306,7 @@ Keep `RunManifest` and `RunLedger` normalization pure and deterministic.
 
 ### Current state on `main`
 
-- [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_manifest_service.py) already normalizes payloads before hashing
+- [run_manifest_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_manifest_service.py) already normalizes payloads before hashing
 
 ### Requirements
 
@@ -327,7 +327,7 @@ Persist a deterministic ledger payload for equivalent lifecycle events.
 
 ### Current state on `main`
 
-- [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/run_ledger_service.py) already calls `normalize_run_ledger_payload()`
+- [run_ledger_service.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/services/control_plane/run_ledger_service.py) already calls `normalize_run_ledger_payload()`
 
 ### Requirements
 

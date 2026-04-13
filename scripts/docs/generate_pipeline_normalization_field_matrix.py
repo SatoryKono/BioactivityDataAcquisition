@@ -22,7 +22,7 @@ if __package__ in {None, ""}:
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
 )
-from bioetl.application.composite.checkpoint.anchor_context import (
+from bioetl.application.composite.checkpoint import (
     create_expected_checkpoint_context,
     merge_expected_anchors,
 )
@@ -106,6 +106,10 @@ PROFILE_META_PASSTHROUGH_KPI = "shipped_profile_meta_passthrough_pct"
 PROFILE_SET_LIKE_JSON_STRING_KPI = "shipped_profile_set_like_json_string_pct"
 PROFILE_NON_META_PASSTHROUGH_FREE_KPI = "shipped_profile_non_meta_passthrough_free_pct"
 
+# Intentionally explicit governance seam:
+# the normalization matrix is config-discovered, but the Silver schema mapping
+# remains a reviewed allow-list so shipped entity pipelines cannot silently gain
+# matrix coverage without an explicit schema registration step.
 ENTITY_SILVER_SCHEMA_REGISTRY: dict[str, Any] = {
     "chembl_activity": CHEMBL_ACTIVITY_SCHEMA,
     "chembl_assay": CHEMBL_ASSAY_SCHEMA,

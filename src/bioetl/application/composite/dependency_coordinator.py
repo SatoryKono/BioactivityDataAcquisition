@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 import polars as pl
@@ -18,6 +17,10 @@ from bioetl.application.composite.dependency_progress_tracker import (
 )
 from bioetl.application.composite.dependency_result_mapper import (
     DependencyResultService,
+)
+from bioetl.application.runtime_timestamps import (
+    capture_runtime_timing_anchor,
+    derive_completion_timestamp,
 )
 from bioetl.domain.composite.result import DependencyResult
 from bioetl.domain.exceptions import (
@@ -258,7 +261,7 @@ class DependencyCoordinatorService:
         Returns:
             DependencyResult with execution outcome.
         """
-        started_at = datetime.now(tz=UTC)
+        started_at, started_monotonic = capture_runtime_timing_anchor()
         _log_dependency_start(logger=self._logger, dependency=dependency, keys=keys)
         try:
             runner = await self._execute_dependency_runner(
@@ -267,23 +270,39 @@ class DependencyCoordinatorService:
                 runner_factory=runner_factory,
             )
         except TimeoutError:
+            completed_at, duration_seconds = derive_completion_timestamp(
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+            )
             return self._result_service.build_timeout_result(
                 dependency=dependency,
                 started_at=started_at,
+                completed_at=completed_at,
+                duration_seconds=duration_seconds,
             )
         except _DEPENDENCY_EXECUTION_ERRORS as e:
+            completed_at, duration_seconds = derive_completion_timestamp(
+                started_at=started_at,
+                started_monotonic=started_monotonic,
+            )
             return self._result_service.build_failed_result(
                 dependency=dependency,
                 error=e,
                 started_at=started_at,
+                completed_at=completed_at,
+                duration_seconds=duration_seconds,
             )
 
-        completed_at = datetime.now(tz=UTC)
+        completed_at, duration = derive_completion_timestamp(
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+        )
         return self._result_service.build_success_result(
             dependency=dependency,
             runner=runner,
             started_at=started_at,
             completed_at=completed_at,
+            duration_seconds=duration,
         )
 
     async def _execute_dependency_runner(

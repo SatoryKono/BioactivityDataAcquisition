@@ -10,11 +10,14 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     COMPOSITE_JOIN_KEY_COVERAGE_KPI,
     CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI,
     DEFAULT_OUT_DIR,
+    ENTITY_SILVER_SCHEMA_REGISTRY,
     ENTITY_RECORD_SURFACE,
     MD_NAME,
     PROFILE_META_PASSTHROUGH_KPI,
     PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
     PROFILE_SET_LIKE_JSON_STRING_KPI,
+    _entity_config_paths,
+    _load_yaml,
     build_artifacts,
     build_composite_join_key_policy_coverage_kpi,
     build_control_plane_normalization_coverage_kpi,
@@ -34,6 +37,28 @@ def _row(rows: list[dict[str, str]], pipeline_name: str, field_name: str) -> dic
         for row in rows
         if row["pipeline_name"] == pipeline_name and row["field_name"] == field_name
     )
+
+
+def test_generator_uses_checkpoint_package_facade() -> None:
+    source = Path(
+        "scripts/docs/generate_pipeline_normalization_field_matrix.py"
+    ).read_text(encoding="utf-8")
+
+    assert "from bioetl.application.composite.checkpoint import (" in source
+    assert "checkpoint.anchor_context" not in source
+
+
+def test_entity_schema_registry_matches_entity_config_inventory() -> None:
+    expected_pipeline_names = set()
+    for path in _entity_config_paths():
+        payload = _load_yaml(path)
+        pipeline = payload.get("pipeline")
+        if not isinstance(pipeline, dict):
+            continue
+        expected_pipeline_names.add(str(pipeline.get("pipeline_name", "")).strip())
+
+    assert "" not in expected_pipeline_names
+    assert set(ENTITY_SILVER_SCHEMA_REGISTRY) == expected_pipeline_names
 
 
 def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> None:

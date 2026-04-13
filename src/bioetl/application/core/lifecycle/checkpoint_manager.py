@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Protocol, cast
 
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
@@ -17,10 +17,23 @@ from bioetl.application.core.lifecycle.checkpoint_runtime import (
 )
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, LoggerPort, MetricsPort
-from bioetl.domain.types import RunID
+from bioetl.domain.types import JsonDict, RunID
+from bioetl.domain.types.checkpoint_compatibility_result import (
+    CheckpointCompatibilityResult,
+)
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 _OPERATION_ERRORS = _RF005_OPERATION_ERRORS
+
+
+class _CheckpointCompatibilityService(Protocol):
+    """Duck-typed contract for checkpoint compatibility validation."""
+
+    def validate_checkpoint_compatibility(
+        self,
+        current_metadata: CheckpointMetadata,
+        checkpoint_metadata: CheckpointMetadata,
+    ) -> CheckpointCompatibilityResult: ...
 
 
 class CheckpointManagerService:
@@ -41,7 +54,7 @@ class CheckpointManagerService:
         *,
         loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
-        checkpoint_compatibility_service: object | None = None,
+        checkpoint_compatibility_service: _CheckpointCompatibilityService | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail",
     ) -> None:
@@ -90,6 +103,113 @@ class CheckpointManagerService:
         """Return current execution identity metadata used for compatibility checks."""
         return self._current_metadata
 
+    def _resume_blocked_by_loading_strategy(self) -> bool:
+        """Return whether the configured strategy forbids checkpoint resume."""
+        return bool(
+            self._resume
+            and self._loading_strategy is not None
+            and not self._loading_strategy.allows_checkpoint_resume
+        )
+
+    async def _load_checkpoint_data(self) -> tuple[RunID, JsonDict] | None:
+        """Load raw checkpoint data and emit failure metrics on transport errors."""
+        try:
+            return await self._checkpoint.load(self._pipeline_name)
+        except _OPERATION_ERRORS:
+            self._emit_checkpoint_load_status("failed")
+            raise
+
+    def _resolve_checkpoint_metadata(
+        self,
+        checkpoint_data: tuple[RunID, JsonDict],
+    ) -> CheckpointMetadata:
+        """Convert persisted legacy checkpoint payload into typed metadata."""
+        _, legacy_metadata = checkpoint_data
+        return CheckpointMetadata.from_legacy_metadata(legacy_metadata)
+
+    def _validate_loaded_checkpoint(
+        self,
+        checkpoint_metadata: CheckpointMetadata,
+        *,
+        current_metadata: CheckpointMetadata | None,
+    ) -> tuple[CheckpointMetadata | None, bool]:
+        """Validate compatibility for a loaded checkpoint when runtime identity exists."""
+        effective_current_metadata = resolve_current_metadata(
+            current_metadata,
+            default_metadata=self._current_metadata,
+        )
+        if effective_current_metadata is None or self._compatibility_service is None:
+            return checkpoint_metadata, False
+        compatibility_result = cast(
+            _CheckpointCompatibilityService,
+            self._compatibility_service,
+        ).validate_checkpoint_compatibility(
+            effective_current_metadata,
+            checkpoint_metadata,
+        )
+        if compatibility_result.compatible:
+            self._logger.info(
+                "Checkpoint compatibility validation passed.",
+                pipeline=self._pipeline_name,
+                messages=compatibility_result.messages,
+            )
+            return checkpoint_metadata, False
+        return (
+            self._handle_incompatible_checkpoint_result(
+                checkpoint_metadata=checkpoint_metadata,
+                current_metadata=effective_current_metadata,
+                compatibility_result=compatibility_result,
+            ),
+            True,
+        )
+
+    def _handle_incompatible_checkpoint_result(
+        self,
+        *,
+        checkpoint_metadata: CheckpointMetadata,
+        current_metadata: CheckpointMetadata,
+        compatibility_result: CheckpointCompatibilityResult,
+    ) -> CheckpointMetadata | None:
+        """Apply the configured disposition for an incompatible checkpoint."""
+        disposition = resolve_incompatible_checkpoint_disposition(
+            compatibility_policy=self._compatibility_policy,
+            execution_identity_compatible=(
+                compatibility_result.execution_identity_compatible
+            ),
+        )
+        try:
+            result = handle_incompatible_checkpoint(
+                logger=self._logger,
+                pipeline_name=self._pipeline_name,
+                compatibility_policy=self._compatibility_policy,
+                current_metadata=current_metadata,
+                checkpoint_metadata=checkpoint_metadata,
+                execution_identity_compatible=(
+                    compatibility_result.execution_identity_compatible
+                ),
+                messages=compatibility_result.messages,
+            )
+        except _OPERATION_ERRORS:
+            self._emit_checkpoint_load_status(
+                "incompatible_hard_fail"
+                if disposition == "hard_fail_raised"
+                else "incompatible"
+            )
+            raise
+        if result is None:
+            self._emit_checkpoint_load_status(
+                "observe_blocked_identity"
+                if disposition == "observe_blocked_identity"
+                else "incompatible"
+            )
+            return None
+        self._emit_checkpoint_load_status(
+            "observe_loaded_degraded"
+            if disposition == "observe_loaded_degraded"
+            else "loaded"
+        )
+        return result
+
     async def load_checkpoint(
         self,
         current_metadata: CheckpointMetadata | None = None,
@@ -109,11 +229,7 @@ class CheckpointManagerService:
 
         """
         # Block resume for FULL_SCAN_ONLY loading strategy (ADR-030, ADR-031)
-        if (
-            self._resume
-            and self._loading_strategy is not None
-            and not self._loading_strategy.allows_checkpoint_resume
-        ):
+        if self._resume_blocked_by_loading_strategy():
             self._emit_checkpoint_load_status("blocked")
             self._logger.warning(
                 "Checkpoint resume blocked for full_scan_only pipeline. "
@@ -125,87 +241,29 @@ class CheckpointManagerService:
             )
             return None
 
-        if self._resume:
-            try:
-                checkpoint_data = await self._checkpoint.load(self._pipeline_name)
-            except _OPERATION_ERRORS:
-                self._emit_checkpoint_load_status("failed")
-                raise
-            if checkpoint_data:
-                _, legacy_metadata = checkpoint_data
+        if not self._resume:
+            return None
 
-                # Convert legacy metadata to new format
-                checkpoint_metadata = CheckpointMetadata.from_legacy_metadata(
-                    legacy_metadata
-                )
-
-                # Validate compatibility if current metadata is provided
-                effective_current_metadata = resolve_current_metadata(
-                    current_metadata,
-                    default_metadata=self._current_metadata,
-                )
-                if effective_current_metadata and self._compatibility_service:
-                    compatibility_result = cast(
-                        "Any",  # Any: optional compatibility service is duck-typed
-                        self._compatibility_service,
-                    ).validate_checkpoint_compatibility(
-                        effective_current_metadata, checkpoint_metadata
-                    )
-
-                    if not compatibility_result.compatible:
-                        disposition = resolve_incompatible_checkpoint_disposition(
-                            compatibility_policy=self._compatibility_policy,
-                            execution_identity_compatible=(
-                                compatibility_result.execution_identity_compatible
-                            ),
-                        )
-                        try:
-                            result = handle_incompatible_checkpoint(
-                                logger=self._logger,
-                                pipeline_name=self._pipeline_name,
-                                compatibility_policy=self._compatibility_policy,
-                                current_metadata=effective_current_metadata,
-                                checkpoint_metadata=checkpoint_metadata,
-                                execution_identity_compatible=(
-                                    compatibility_result.execution_identity_compatible
-                                ),
-                                messages=compatibility_result.messages,
-                            )
-                        except _OPERATION_ERRORS:
-                            self._emit_checkpoint_load_status(
-                                "incompatible_hard_fail"
-                                if disposition == "hard_fail_raised"
-                                else "incompatible"
-                            )
-                            raise
-                        if result is None:
-                            self._emit_checkpoint_load_status(
-                                "observe_blocked_identity"
-                                if disposition == "observe_blocked_identity"
-                                else "incompatible"
-                            )
-                            return None
-                        self._emit_checkpoint_load_status(
-                            "observe_loaded_degraded"
-                            if disposition == "observe_loaded_degraded"
-                            else "loaded"
-                        )
-                        return result
-                    else:
-                        self._logger.info(
-                            "Checkpoint compatibility validation passed.",
-                            pipeline=self._pipeline_name,
-                            messages=compatibility_result.messages,
-                        )
-
-                self._logger.info(
-                    "Found compatible checkpoint",
-                    metadata=checkpoint_metadata.to_dict(),
-                )
-                self._emit_checkpoint_load_status("loaded")
-                return checkpoint_metadata
+        checkpoint_data = await self._load_checkpoint_data()
+        if checkpoint_data is None:
             self._emit_checkpoint_load_status("missing")
-        return None
+            return None
+
+        checkpoint_metadata = self._resolve_checkpoint_metadata(checkpoint_data)
+        compatible_checkpoint, status_already_emitted = self._validate_loaded_checkpoint(
+            checkpoint_metadata,
+            current_metadata=current_metadata,
+        )
+        if compatible_checkpoint is None:
+            return None
+
+        self._logger.info(
+            "Found compatible checkpoint",
+            metadata=compatible_checkpoint.to_dict(),
+        )
+        if not status_already_emitted:
+            self._emit_checkpoint_load_status("loaded")
+        return compatible_checkpoint
 
     async def save_checkpoint(self, metadata: CheckpointMetadata | int) -> None:
         """Save checkpoint with extended metadata.

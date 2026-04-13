@@ -616,6 +616,61 @@ class TestDataQualityServiceBaselineUpdates:
         assert len(baseline_calls) == 3
 
     @pytest.mark.asyncio
+    async def test_baseline_samples_gauge_reflects_monitor_stats(
+        self, mock_logger, mock_metrics, dq_config
+    ) -> None:
+        mock_dq_monitor = MagicMock()
+        mock_dq_monitor.check_quality = MagicMock(return_value=[])
+        mock_dq_monitor.update_baseline_from_metrics = MagicMock()
+        mock_dq_monitor.get_baseline_stats = MagicMock(
+            side_effect=[
+                (100.0, 5.0, 7),
+                (0.03, 0.01, 4),
+                (0.95, 0.02, 3),
+            ]
+        )
+
+        service = DataQualityService(
+            dq_monitor=mock_dq_monitor,
+            config=dq_config,
+            logger=mock_logger,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+            entity_type="test_entity",
+        )
+
+        metrics = {
+            "record_count": 100.0,
+            "error_rate": 0.03,
+            "silver_yield": 0.95,
+        }
+
+        service.evaluate(metrics)
+
+        baseline_sample_calls = [
+            call
+            for call in mock_metrics.set_gauge.call_args_list
+            if call.args and call.args[0] == "bioetl_dq_baseline_samples"
+        ]
+        assert baseline_sample_calls == [
+            call(
+                "bioetl_dq_baseline_samples",
+                7.0,
+                {"pipeline": "test_pipeline", "metric": "record_count"},
+            ),
+            call(
+                "bioetl_dq_baseline_samples",
+                4.0,
+                {"pipeline": "test_pipeline", "metric": "error_rate"},
+            ),
+            call(
+                "bioetl_dq_baseline_samples",
+                3.0,
+                {"pipeline": "test_pipeline", "metric": "silver_yield"},
+            ),
+        ]
+
+    @pytest.mark.asyncio
     async def test_baseline_not_updated_on_critical_anomaly(
         self, mock_logger, mock_metrics, dq_config
     ):

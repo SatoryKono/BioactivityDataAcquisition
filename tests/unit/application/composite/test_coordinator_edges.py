@@ -181,6 +181,12 @@ async def test_run_single_enricher_optional_bioetl_error_returns_failed(
 
     assert result.status == EnrichmentStatus.FAILED
     assert "adapter failed" in (result.error_message or "")
+    assert result.started_at is not None
+    assert result.completed_at is not None
+    assert result.duration_seconds == pytest.approx(
+        (result.completed_at - result.started_at).total_seconds(),
+        abs=1e-6,
+    )
     kwargs = mock_logger.warning.call_args.kwargs
     assert kwargs.get("reason_code") == "unexpected_bioetl_error"
 

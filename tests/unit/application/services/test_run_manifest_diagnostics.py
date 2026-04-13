@@ -174,6 +174,22 @@ def _expected_replay_parentage(manifest: RunManifest) -> dict[str, object]:
     }
 
 
+def _expected_lineage_closure_boundary(manifest: RunManifest) -> dict[str, object]:
+    family = manifest.code_provenance.contract_ref
+    supported = family == "chembl.activity"
+    return {
+        "family": family,
+        "support_scope": "operator_grade_trace_debug",
+        "supported": supported,
+        "reason": (
+            "family_within_supported_boundary"
+            if supported
+            else "family_outside_supported_boundary"
+        ),
+        "supported_families": ["chembl.activity"],
+    }
+
+
 def _build_ledger_entries(
     manifest: RunManifest,
     *,
@@ -257,6 +273,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
         "replay_mode": "live_fetch",
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
+        "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         "input_snapshot_count": 0,
         "input_snapshots": [],
         "planned_artifacts": [],
@@ -278,6 +295,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
                 "exact_replay_capability": False,
                 "run_ledger_history": False,
                 "artifact_lineage_links": True,
+                "lineage_closure_boundary_support": True,
             },
             "required_profile_missing_requirements": [],
             "replay_ready_missing_requirements": [
@@ -304,6 +322,9 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
                     "rich_checkpoint_payloads",
                 ],
             },
+            "lineage_closure_boundary": _expected_lineage_closure_boundary(
+                manifest
+            ),
         },
         "alert_signals": {
             "run_failed": False,
@@ -312,6 +333,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
             "lineage_gap": False,
             "immutable_input_snapshot_gap": True,
             "strict_replay_boundary_gap": False,
+            "lineage_closure_boundary_gap": False,
             "composite_resume_reconstructability_gap": False,
             "required_persistence_profile_gap": False,
             "replay_ready_gap": True,
@@ -499,6 +521,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
         "replay_mode": "live_fetch",
         "resume_contract": _expected_resume_contract(manifest),
         "resume_diagnostics": None,
+        "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         "input_snapshot_count": 0,
         "input_snapshots": [],
         "planned_artifacts": [],
@@ -528,9 +551,10 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
                 "strict_replay_execution_context_support": True,
                 "immutable_input_snapshots": False,
                 "exact_replay_capability": False,
-            "run_ledger_history": True,
-            "artifact_lineage_links": True,
-        },
+                "run_ledger_history": True,
+                "artifact_lineage_links": True,
+                "lineage_closure_boundary_support": True,
+            },
         "required_profile_missing_requirements": [],
         "replay_ready_missing_requirements": [
             "exact_replay_capability",
@@ -555,6 +579,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
                 "rich_checkpoint_payloads",
             ],
         },
+        "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
     }
     assert summary["correlation_anchor_gaps"] == {
         "effective_config_hash": 0,
@@ -570,6 +595,7 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
     assert alert_signals["lineage_gap"] is False
     assert alert_signals["immutable_input_snapshot_gap"] is True
     assert alert_signals["strict_replay_boundary_gap"] is False
+    assert alert_signals["lineage_closure_boundary_gap"] is False
     assert alert_signals["composite_resume_reconstructability_gap"] is False
     assert alert_signals["required_persistence_profile_gap"] is False
     assert alert_signals["replay_ready_gap"] is True
@@ -644,6 +670,62 @@ def test_build_diagnostics_summary_surfaces_persisted_resume_diagnostics() -> No
     ]
 
 
+def test_replay_surfaces_ignore_occurrence_only_manifest_drift() -> None:
+    manifest = replace(
+        _make_manifest(),
+        replay_capability=ReplayCapability.EXACT_REPLAY_SUPPORTED,
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                query="fixture://sample",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="snapshot-1",
+                        content_hash="sha256:snapshot-1",
+                        immutable_uri="file:///snapshots/bronze-1.jsonl.zst",
+                        query_fingerprint="query-hash-1",
+                        captured_at=datetime(2025, 1, 1, tzinfo=UTC),
+                    ),
+                ),
+            ),
+        ),
+        launch_context={
+            **_make_manifest().launch_context,
+            "exact_replay": True,
+            "required_persistence_profile": "replay_ready",
+        },
+        runtime_config={
+            **_make_manifest().runtime_config,
+            "exact_replay": True,
+            "required_persistence_profile": "replay_ready",
+        },
+    )
+    drifted = replace(
+        manifest,
+        manifest_id="manifest-diagnostics-drifted",
+        run_id=RunID(uuid4()),
+        created_at=datetime(2026, 4, 13, 12, 0, tzinfo=UTC),
+    )
+
+    summary = build_diagnostics_summary(manifest, ())
+    summary_drifted = build_diagnostics_summary(drifted, ())
+
+    replay_keys = (
+        "replay_mode",
+        "replay_capability",
+        "replay_capability_reason",
+        "exact_replay_support_boundary",
+        "exact_replay_blockers",
+        "required_persistence_profile",
+        "resume_contract",
+        "persistence_profile",
+    )
+    for key in replay_keys:
+        assert summary[key] == summary_drifted[key]
+
+
 def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() -> None:
     manifest = _make_manifest()
     entry = RunLedgerEntry(
@@ -670,8 +752,9 @@ def test_build_diagnostics_summary_accepts_legacy_data_contract_version_alias() 
 
 
 def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() -> None:
+    base_manifest = _make_manifest()
     manifest = replace(
-        _make_manifest(),
+        base_manifest,
         provider="composite",
         entity="publications",
         pipeline_name="publications",
@@ -683,6 +766,11 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         },
         replay_capability=ReplayCapability.REBUILD_ONLY,
         source_refs=(),
+        code_provenance=replace(
+            base_manifest.code_provenance,
+            contract_ref="composite.publications",
+            dq_policy_ref="composite.publications.dq",
+        ),
     )
 
     summary = build_diagnostics_summary(manifest, ())
@@ -704,6 +792,7 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "exact_replay_capability": False,
         "run_ledger_history": False,
         "artifact_lineage_links": True,
+        "lineage_closure_boundary_support": False,
     }
     assert summary["persistence_profile"]["replay_ready_missing_requirements"] == [
         "strict_replay_execution_context_support",
@@ -711,10 +800,12 @@ def test_build_diagnostics_summary_formalizes_composite_exact_replay_boundary() 
         "immutable_input_snapshots",
     ]
     assert summary["alert_signals"]["strict_replay_boundary_gap"] is True
+    assert summary["alert_signals"]["lineage_closure_boundary_gap"] is True
     assert summary["alert_signals"]["composite_resume_reconstructability_gap"] is True
     assert summary["next_steps"] == [
         "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
         "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay.",
+        "Treat this pipeline family as outside the current operator-grade lineage closure boundary; do not claim forensic-grade trace/debug support for it.",
         "Treat composite resume as checkpoint snapshot plus ledger suffix replay only; do not expect per-provider result maps or other rich checkpoint payloads to be reconstructed.",
         "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
         "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",

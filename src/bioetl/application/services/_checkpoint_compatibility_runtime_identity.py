@@ -65,102 +65,56 @@ def check_execution_identity_compatibility(
     if composite_identity_result is not None:
         return composite_identity_result
 
-    if current_execution_fingerprint and checkpoint_execution_fingerprint:
-        if current_execution_fingerprint == checkpoint_execution_fingerprint:
-            return {
-                "compatible": True,
-                "reason": "identical_execution_fingerprint",
-                "severity": _SEVERITY_NONE,
-            }
-        return {
-            "compatible": False,
-            "reason": "execution_fingerprint_mismatch",
-            "severity": _SEVERITY_MAJOR,
-        }
+    execution_fingerprint_result = _compare_optional_identity_fingerprints(
+        current_execution_fingerprint,
+        checkpoint_execution_fingerprint,
+        match_reason="identical_execution_fingerprint",
+        mismatch_reason="execution_fingerprint_mismatch",
+    )
+    if execution_fingerprint_result is not None:
+        return execution_fingerprint_result
 
-    current_checkpoint_execution_identity_fallback = (
-        _compute_checkpoint_execution_identity_fallback_fingerprint(
-            pipeline_name=current_pipeline_name,
-            run_type=current_run_type,
-            pipeline_version=current_pipeline_version,
-            effective_config_hash=current_effective_config_hash,
-            dq_contract_compatibility_hash=current_dq_contract_compatibility_hash,
-            contract_ref=current_contract_ref,
-            contract_version=current_contract_version,
-            effective_config_artifact_id=current_effective_config_artifact_id,
-            exact_replay=current_exact_replay,
-            input_snapshot_fingerprint=current_input_snapshot_fingerprint,
-        )
+    checkpoint_fallback_result = _check_checkpoint_execution_identity_fallback(
+        current_pipeline_name=current_pipeline_name,
+        checkpoint_pipeline_name=checkpoint_pipeline_name,
+        current_run_type=current_run_type,
+        checkpoint_run_type=checkpoint_run_type,
+        current_pipeline_version=current_pipeline_version,
+        checkpoint_pipeline_version=checkpoint_pipeline_version,
+        current_effective_config_hash=current_effective_config_hash,
+        checkpoint_effective_config_hash=checkpoint_effective_config_hash,
+        current_dq_contract_compatibility_hash=current_dq_contract_compatibility_hash,
+        checkpoint_dq_contract_compatibility_hash=(
+            checkpoint_dq_contract_compatibility_hash
+        ),
+        current_contract_ref=current_contract_ref,
+        checkpoint_contract_ref=checkpoint_contract_ref,
+        current_contract_version=current_contract_version,
+        checkpoint_contract_version=checkpoint_contract_version,
+        current_effective_config_artifact_id=current_effective_config_artifact_id,
+        checkpoint_effective_config_artifact_id=checkpoint_effective_config_artifact_id,
+        current_exact_replay=current_exact_replay,
+        checkpoint_exact_replay=checkpoint_exact_replay,
+        current_input_snapshot_fingerprint=current_input_snapshot_fingerprint,
+        checkpoint_input_snapshot_fingerprint=checkpoint_input_snapshot_fingerprint,
     )
-    checkpoint_checkpoint_execution_identity_fallback = (
-        _compute_checkpoint_execution_identity_fallback_fingerprint(
-            pipeline_name=checkpoint_pipeline_name,
-            run_type=checkpoint_run_type,
-            pipeline_version=checkpoint_pipeline_version,
-            effective_config_hash=checkpoint_effective_config_hash,
-            dq_contract_compatibility_hash=(
-                checkpoint_dq_contract_compatibility_hash
-            ),
-            contract_ref=checkpoint_contract_ref,
-            contract_version=checkpoint_contract_version,
-            effective_config_artifact_id=checkpoint_effective_config_artifact_id,
-            exact_replay=checkpoint_exact_replay,
-            input_snapshot_fingerprint=checkpoint_input_snapshot_fingerprint,
-        )
-    )
-    if (
-        current_checkpoint_execution_identity_fallback
-        and checkpoint_checkpoint_execution_identity_fallback
-        and current_checkpoint_execution_identity_fallback
-        == checkpoint_checkpoint_execution_identity_fallback
-    ):
-        return {
-            "compatible": True,
-            "reason": "identical_checkpoint_execution_identity_fallback",
-            "severity": _SEVERITY_NONE,
-        }
-    if (
-        current_checkpoint_execution_identity_fallback
-        and checkpoint_checkpoint_execution_identity_fallback
-    ):
-        return {
-            "compatible": False,
-            "reason": "checkpoint_execution_identity_fallback_mismatch",
-            "severity": _SEVERITY_MAJOR,
-        }
+    if checkpoint_fallback_result is not None:
+        return checkpoint_fallback_result
 
-    current_runtime_anchor_fingerprint = _compute_degraded_runtime_anchor_fingerprint(
-        manifest_id=current_manifest_id,
-        contract_ref=current_contract_ref,
-        contract_version=current_contract_version,
-        effective_config_hash=current_effective_config_hash,
-        effective_config_artifact_id=current_effective_config_artifact_id,
+    runtime_anchor_result = _check_degraded_runtime_anchor_compatibility(
+        current_manifest_id=current_manifest_id,
+        checkpoint_manifest_id=checkpoint_manifest_id,
+        current_contract_ref=current_contract_ref,
+        checkpoint_contract_ref=checkpoint_contract_ref,
+        current_contract_version=current_contract_version,
+        checkpoint_contract_version=checkpoint_contract_version,
+        current_effective_config_hash=current_effective_config_hash,
+        checkpoint_effective_config_hash=checkpoint_effective_config_hash,
+        current_effective_config_artifact_id=current_effective_config_artifact_id,
+        checkpoint_effective_config_artifact_id=checkpoint_effective_config_artifact_id,
     )
-    checkpoint_runtime_anchor_fingerprint = (
-        _compute_degraded_runtime_anchor_fingerprint(
-            manifest_id=checkpoint_manifest_id,
-            contract_ref=checkpoint_contract_ref,
-            contract_version=checkpoint_contract_version,
-            effective_config_hash=checkpoint_effective_config_hash,
-            effective_config_artifact_id=checkpoint_effective_config_artifact_id,
-        )
-    )
-    if (
-        current_runtime_anchor_fingerprint
-        and checkpoint_runtime_anchor_fingerprint
-        and current_runtime_anchor_fingerprint == checkpoint_runtime_anchor_fingerprint
-    ):
-        return {
-            "compatible": True,
-            "reason": "identical_degraded_runtime_anchor_fingerprint",
-            "severity": _SEVERITY_NONE,
-        }
-    if current_runtime_anchor_fingerprint and checkpoint_runtime_anchor_fingerprint:
-        return {
-            "compatible": False,
-            "reason": "degraded_runtime_anchor_fingerprint_mismatch",
-            "severity": _SEVERITY_MAJOR,
-        }
+    if runtime_anchor_result is not None:
+        return runtime_anchor_result
     return {
         "compatible": True,
         "reason": "execution_identity_not_enforced",
@@ -201,6 +155,31 @@ def _check_composite_run_identity_compatibility(
         "reason": "identical_composite_run_identity",
         "severity": _SEVERITY_NONE,
     }
+
+
+def _compatibility_verdict(*, compatible: bool, reason: str) -> JsonDict:
+    """Build a normalized execution-identity compatibility verdict."""
+    return {
+        "compatible": compatible,
+        "reason": reason,
+        "severity": _SEVERITY_NONE if compatible else _SEVERITY_MAJOR,
+    }
+
+
+def _compare_optional_identity_fingerprints(
+    current_value: str | None,
+    checkpoint_value: str | None,
+    *,
+    match_reason: str,
+    mismatch_reason: str,
+) -> JsonDict | None:
+    """Compare two optional fingerprints only when both are available."""
+    if not current_value or not checkpoint_value:
+        return None
+    return _compatibility_verdict(
+        compatible=current_value == checkpoint_value,
+        reason=match_reason if current_value == checkpoint_value else mismatch_reason,
+    )
 
 
 def _build_checkpoint_execution_identity_payload(
@@ -281,6 +260,62 @@ def _compute_checkpoint_execution_identity_fallback_fingerprint(
     return compute_execution_identity_fingerprint(payload)
 
 
+def _check_checkpoint_execution_identity_fallback(
+    *,
+    current_pipeline_name: str | None,
+    checkpoint_pipeline_name: str | None,
+    current_run_type: str | None,
+    checkpoint_run_type: str | None,
+    current_pipeline_version: str | None,
+    checkpoint_pipeline_version: str | None,
+    current_effective_config_hash: str | None,
+    checkpoint_effective_config_hash: str | None,
+    current_dq_contract_compatibility_hash: str | None,
+    checkpoint_dq_contract_compatibility_hash: str | None,
+    current_contract_ref: str | None,
+    checkpoint_contract_ref: str | None,
+    current_contract_version: str | None,
+    checkpoint_contract_version: str | None,
+    current_effective_config_artifact_id: str | None,
+    checkpoint_effective_config_artifact_id: str | None,
+    current_exact_replay: bool | None,
+    checkpoint_exact_replay: bool | None,
+    current_input_snapshot_fingerprint: str | None,
+    checkpoint_input_snapshot_fingerprint: str | None,
+) -> JsonDict | None:
+    """Compare canonical checkpoint execution-identity fallback fingerprints."""
+    current_fingerprint = _compute_checkpoint_execution_identity_fallback_fingerprint(
+        pipeline_name=current_pipeline_name,
+        run_type=current_run_type,
+        pipeline_version=current_pipeline_version,
+        effective_config_hash=current_effective_config_hash,
+        dq_contract_compatibility_hash=current_dq_contract_compatibility_hash,
+        contract_ref=current_contract_ref,
+        contract_version=current_contract_version,
+        effective_config_artifact_id=current_effective_config_artifact_id,
+        exact_replay=current_exact_replay,
+        input_snapshot_fingerprint=current_input_snapshot_fingerprint,
+    )
+    checkpoint_fingerprint = _compute_checkpoint_execution_identity_fallback_fingerprint(
+        pipeline_name=checkpoint_pipeline_name,
+        run_type=checkpoint_run_type,
+        pipeline_version=checkpoint_pipeline_version,
+        effective_config_hash=checkpoint_effective_config_hash,
+        dq_contract_compatibility_hash=checkpoint_dq_contract_compatibility_hash,
+        contract_ref=checkpoint_contract_ref,
+        contract_version=checkpoint_contract_version,
+        effective_config_artifact_id=checkpoint_effective_config_artifact_id,
+        exact_replay=checkpoint_exact_replay,
+        input_snapshot_fingerprint=checkpoint_input_snapshot_fingerprint,
+    )
+    return _compare_optional_identity_fingerprints(
+        current_fingerprint,
+        checkpoint_fingerprint,
+        match_reason="identical_checkpoint_execution_identity_fallback",
+        mismatch_reason="checkpoint_execution_identity_fallback_mismatch",
+    )
+
+
 def _compute_degraded_runtime_anchor_fingerprint(
     *,
     manifest_id: str | None,
@@ -306,6 +341,80 @@ def _compute_degraded_runtime_anchor_fingerprint(
         raw_payload["manifest_id"] = manifest_id
     normalized_payload = normalize_runtime_anchor_payload(raw_payload)
     return compute_degraded_runtime_anchor_fingerprint(normalized_payload)
+
+
+def _check_degraded_runtime_anchor_compatibility(
+    *,
+    current_manifest_id: str | None,
+    checkpoint_manifest_id: str | None,
+    current_contract_ref: str | None,
+    checkpoint_contract_ref: str | None,
+    current_contract_version: str | None,
+    checkpoint_contract_version: str | None,
+    current_effective_config_hash: str | None,
+    checkpoint_effective_config_hash: str | None,
+    current_effective_config_artifact_id: str | None,
+    checkpoint_effective_config_artifact_id: str | None,
+) -> JsonDict | None:
+    """Compare degraded runtime-anchor fingerprints when both anchors exist."""
+    current_fingerprint = _compute_degraded_runtime_anchor_fingerprint(
+        manifest_id=current_manifest_id,
+        contract_ref=current_contract_ref,
+        contract_version=current_contract_version,
+        effective_config_hash=current_effective_config_hash,
+        effective_config_artifact_id=current_effective_config_artifact_id,
+    )
+    checkpoint_fingerprint = _compute_degraded_runtime_anchor_fingerprint(
+        manifest_id=checkpoint_manifest_id,
+        contract_ref=checkpoint_contract_ref,
+        contract_version=checkpoint_contract_version,
+        effective_config_hash=checkpoint_effective_config_hash,
+        effective_config_artifact_id=checkpoint_effective_config_artifact_id,
+    )
+    return _compare_optional_identity_fingerprints(
+        current_fingerprint,
+        checkpoint_fingerprint,
+        match_reason="identical_degraded_runtime_anchor_fingerprint",
+        mismatch_reason="degraded_runtime_anchor_fingerprint_mismatch",
+    )
+
+
+def _identity_detail_value(value: str | None) -> str:
+    """Normalize optional string identity fields for structured detail payloads."""
+    return value or ""
+
+
+def _identity_detail_bool(value: bool | None) -> str:
+    """Normalize optional boolean identity fields for structured detail payloads."""
+    return "" if value is None else str(value).lower()
+
+
+def _checkpoint_execution_identity_fallback_detail(payload: JsonDict) -> str:
+    """Return the canonical checkpoint fallback fingerprint for diagnostics."""
+    if not payload:
+        return ""
+    return compute_execution_identity_fingerprint(payload)
+
+
+def _degraded_runtime_anchor_detail(
+    *,
+    manifest_id: str | None,
+    contract_ref: str | None,
+    contract_version: str | None,
+    effective_config_hash: str,
+    effective_config_artifact_id: str | None,
+) -> str:
+    """Return the degraded runtime-anchor fingerprint for diagnostics."""
+    return (
+        _compute_degraded_runtime_anchor_fingerprint(
+            manifest_id=manifest_id,
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            effective_config_hash=effective_config_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
+        )
+        or ""
+    )
 
 
 def build_identity_details(
@@ -343,32 +452,35 @@ def build_identity_details(
         "effective_config_hash": effective_config_hash,
         "execution_phase": execution_phase.value,
         "checkpoint_schema_version": checkpoint_schema_version,
-        "composite_run_identity": composite_run_identity or "",
-        "execution_fingerprint": execution_fingerprint or "",
-        "pipeline_name": pipeline_name or "",
-        "run_type": run_type or "",
-        "pipeline_version": pipeline_version or "",
-        "manifest_id": manifest_id or "",
-        "dq_contract_compatibility_hash": dq_contract_compatibility_hash or "",
-        "contract_ref": contract_ref or "",
-        "contract_version": contract_version or "",
-        "effective_config_artifact_id": effective_config_artifact_id or "",
-        "exact_replay": "" if exact_replay is None else str(exact_replay).lower(),
+        "composite_run_identity": _identity_detail_value(composite_run_identity),
+        "execution_fingerprint": _identity_detail_value(execution_fingerprint),
+        "pipeline_name": _identity_detail_value(pipeline_name),
+        "run_type": _identity_detail_value(run_type),
+        "pipeline_version": _identity_detail_value(pipeline_version),
+        "manifest_id": _identity_detail_value(manifest_id),
+        "dq_contract_compatibility_hash": _identity_detail_value(
+            dq_contract_compatibility_hash
+        ),
+        "contract_ref": _identity_detail_value(contract_ref),
+        "contract_version": _identity_detail_value(contract_version),
+        "effective_config_artifact_id": _identity_detail_value(
+            effective_config_artifact_id
+        ),
+        "exact_replay": _identity_detail_bool(exact_replay),
         "input_snapshot_fingerprint": input_snapshot_fingerprint or "",
         "canonical_execution_identity_payload": canonical_fallback_payload,
         "checkpoint_execution_identity_fallback_fingerprint": (
-            compute_execution_identity_fingerprint(canonical_fallback_payload)
-            if canonical_fallback_payload
-            else ""
+            _checkpoint_execution_identity_fallback_detail(
+                canonical_fallback_payload
+            )
         ),
-        "degraded_runtime_anchor_fingerprint": _compute_degraded_runtime_anchor_fingerprint(
+        "degraded_runtime_anchor_fingerprint": _degraded_runtime_anchor_detail(
             manifest_id=manifest_id,
             contract_ref=contract_ref,
             contract_version=contract_version,
             effective_config_hash=effective_config_hash,
             effective_config_artifact_id=effective_config_artifact_id,
         )
-        or "",
     }
 
 

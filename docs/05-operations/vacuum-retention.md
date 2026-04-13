@@ -199,8 +199,11 @@ VACUUM операции логируются с structlog pattern:
 | Метрика | Тип | Описание |
 |---------|-----|----------|
 | `bioetl_vacuum_files_removed_total` | Counter | Количество удалённых файлов |
-| `bioetl_vacuum_duration_seconds` | Histogram | Время выполнения VACUUM |
 | `bioetl_errors_total` (label `error_code`) | Counter | Ошибки выполнения, включая VACUUM |
+
+Длительность VACUUM не публикуется как отдельная public Prometheus family.
+Для operator triage используйте структурированные логи `vacuum_completed` и
+postrun/runtime tracing вместо legacy histogram selector.
 
 ---
 

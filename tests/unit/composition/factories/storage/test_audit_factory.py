@@ -43,12 +43,21 @@ def test_create_audit_port_returns_file_adapter_when_enabled() -> None:
     base_path = Path("/tmp/custom-audit")
     settings = _make_settings(audit_enabled=True, audit_base_path=base_path)
     logger = MagicMock()
+    metrics = MagicMock()
+    tracing = MagicMock()
 
-    result = create_audit_port(settings=settings, logger=logger)
+    result = create_audit_port(
+        settings=settings,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracing,
+    )
 
     assert isinstance(result, FileAuditAdapter)
     assert result.base_path == base_path
     assert result.logger is logger
+    assert result.metrics is metrics
+    assert result.tracing is tracing
 
 
 @pytest.mark.unit
@@ -60,3 +69,15 @@ def test_create_audit_port_uses_default_output_audit_path() -> None:
 
     assert isinstance(result, FileAuditAdapter)
     assert result.base_path == Path("/tmp/bioetl/output/audit")
+
+
+@pytest.mark.unit
+def test_create_audit_port_uses_noop_observability_when_ports_not_passed() -> None:
+    """Audit factory should still construct a valid adapter without explicit ports."""
+    settings = _make_settings(audit_enabled=True, audit_base_path=Path("/tmp/custom-audit"))
+
+    result = create_audit_port(settings=settings, logger=MagicMock())
+
+    assert isinstance(result, FileAuditAdapter)
+    assert result.metrics.__class__.__name__ == "NoOpMetrics"
+    assert result.tracing.__class__.__name__ == "NoOpTracing"

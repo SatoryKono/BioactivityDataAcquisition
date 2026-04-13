@@ -28,6 +28,25 @@ operator validation and incident-readiness checks.
 [sli-slo-baseline.md](sli-slo-baseline.md) for numeric operational objectives,
 target windows, and alert-to-SLI mapping.
 
+## 0. Канонический operator workflow
+
+Используйте observability surface в таком порядке:
+
+1. `bioetl diagnostics guide` — discovery entrypoint для supported commands.
+2. `bioetl diagnostics metrics [--json]` — текущий metrics/admin profile:
+   endpoint, running/stopped status, tracing/audit flags и Pushgateway mode.
+3. `bioetl diagnostics health [--json]` — provider health summary.
+4. `bioetl diagnostics run --run-id <run-id>` или
+   `bioetl diagnostics checkpoint --pipeline <pipeline>` — workflow-level
+   расследование run/checkpoint state.
+
+Важно:
+
+- metrics HTTP server startup остаётся auto-managed during normal pipeline runs;
+- Pushgateway publication остаётся best-effort on run completion;
+- `bioetl diagnostics metrics` — canonical operator summary для этих
+  auto-managed observability behaviors.
+
 ## 1. Архитектура наблюдаемости
 
 Система мониторинга построена на принципе "Pull":

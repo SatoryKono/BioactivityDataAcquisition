@@ -191,20 +191,15 @@ def _determine_strict_verdict(
     schema_result: JsonDict,
     validation_report: CompositeValidationReport | None,
 ) -> str:
-    if (
-        phase_result["severity"] == _SEVERITY_MAJOR
-        or config_result["severity"] == _SEVERITY_MAJOR
-        or execution_identity_result["severity"] == _SEVERITY_MAJOR
-        or schema_result["severity"] == _SEVERITY_MAJOR
-    ):
+    severities = (
+        phase_result["severity"],
+        config_result["severity"],
+        execution_identity_result["severity"],
+        schema_result["severity"],
+    )
+    if _SEVERITY_MAJOR in severities:
         return _VERDICT_MAJOR_INCOMPATIBLE
-
-    if (
-        phase_result["severity"] == _SEVERITY_MINOR
-        or config_result["severity"] == _SEVERITY_MINOR
-        or execution_identity_result["severity"] == _SEVERITY_MINOR
-        or schema_result["severity"] == _SEVERITY_MINOR
-    ):
+    if _SEVERITY_MINOR in severities:
         return _VERDICT_MINOR_INCOMPATIBLE
 
     if validation_report and validation_report.has_any_blockers():

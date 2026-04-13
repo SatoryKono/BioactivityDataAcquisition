@@ -338,7 +338,31 @@ class RunManifestInspectionService:
             left_manifest=left_manifest,
             right_manifest=right_manifest,
         )
-        if semantic_equivalent and not non_occurrence_fields:
+        if semantic_equivalent:
+            return RunManifestInspectionService._semantic_equivalent_diff_payload(
+                occurrence_difference_fields=occurrence_difference_fields,
+                non_occurrence_fields=non_occurrence_fields,
+                replay_relationship=replay_relationship,
+            )
+        return {
+            "classification": "semantic_drift",
+            "semantic_equivalent": False,
+            "occurrence_only": False,
+            "occurrence_difference_fields": occurrence_difference_fields,
+            "semantic_difference_fields": non_occurrence_fields or diff_fields,
+            "noncanonical_difference_fields": (),
+            "replay_relationship": replay_relationship,
+            }
+
+    @staticmethod
+    def _semantic_equivalent_diff_payload(
+        *,
+        occurrence_difference_fields: tuple[str, ...],
+        non_occurrence_fields: tuple[str, ...],
+        replay_relationship: str,
+    ) -> dict[str, object]:
+        """Return the diff payload for semantic-equivalent manifest pairs."""
+        if not non_occurrence_fields:
             return {
                 "classification": "occurrence_only",
                 "semantic_equivalent": True,
@@ -348,25 +372,27 @@ class RunManifestInspectionService:
                 "noncanonical_difference_fields": (),
                 "replay_relationship": replay_relationship,
             }
-        if semantic_equivalent:
-            return {
-                "classification": "semantic_equivalent_with_noncanonical_differences",
-                "semantic_equivalent": True,
-                "occurrence_only": False,
-                "occurrence_difference_fields": occurrence_difference_fields,
-                "semantic_difference_fields": (),
-                "noncanonical_difference_fields": non_occurrence_fields,
-                "replay_relationship": replay_relationship,
-            }
         return {
-            "classification": "semantic_drift",
-            "semantic_equivalent": False,
+            "classification": "semantic_equivalent_with_noncanonical_differences",
+            "semantic_equivalent": True,
             "occurrence_only": False,
             "occurrence_difference_fields": occurrence_difference_fields,
-            "semantic_difference_fields": non_occurrence_fields or diff_fields,
-            "noncanonical_difference_fields": (),
+            "semantic_difference_fields": (),
+            "noncanonical_difference_fields": non_occurrence_fields,
             "replay_relationship": replay_relationship,
         }
+
+    @staticmethod
+    def _manifest_replays_other(
+        *,
+        manifest: RunManifest,
+        other: RunManifest,
+    ) -> bool:
+        """Return whether one manifest explicitly replays the other."""
+        return (
+            manifest.replay_of_manifest_id == other.manifest_id
+            or manifest.replay_of_run_id == str(other.run_id)
+        )
 
     @staticmethod
     def _resolve_replay_relationship(
@@ -375,13 +401,13 @@ class RunManifestInspectionService:
         right_manifest: RunManifest,
     ) -> str:
         """Classify explicit replay ancestry separately from semantic equality."""
-        left_replays_right = (
-            left_manifest.replay_of_manifest_id == right_manifest.manifest_id
-            or left_manifest.replay_of_run_id == str(right_manifest.run_id)
+        left_replays_right = RunManifestInspectionService._manifest_replays_other(
+            manifest=left_manifest,
+            other=right_manifest,
         )
-        right_replays_left = (
-            right_manifest.replay_of_manifest_id == left_manifest.manifest_id
-            or right_manifest.replay_of_run_id == str(left_manifest.run_id)
+        right_replays_left = RunManifestInspectionService._manifest_replays_other(
+            manifest=right_manifest,
+            other=left_manifest,
         )
         if left_replays_right and right_replays_left:
             return "mutual_replay_cycle"

@@ -124,8 +124,6 @@ def _validate_execution_identity_compatibility(
     current_metadata: CheckpointMetadata,
     checkpoint_metadata: CheckpointMetadata,
 ) -> tuple[bool, list[str]]:
-    messages: list[str] = []
-    execution_identity_compatible = True
     execution_identity_result = check_execution_identity_compatibility(
         current_composite_run_identity=current_metadata.composite_run_identity,
         checkpoint_composite_run_identity=checkpoint_metadata.composite_run_identity,
@@ -160,144 +158,197 @@ def _validate_execution_identity_compatibility(
             checkpoint_metadata.input_snapshot_fingerprint
         ),
     )
-    if (
+    reason_messages = _execution_identity_reason_messages(
+        current_metadata,
+        checkpoint_metadata,
+        execution_identity_result,
+    )
+    if _execution_fingerprints_present(current_metadata, checkpoint_metadata):
+        compatible = bool(execution_identity_result["compatible"])
+        return compatible, reason_messages
+    messages = [
+        *reason_messages,
+        *_execution_identity_metadata_mismatch_messages(
+            current_metadata,
+            checkpoint_metadata,
+        ),
+        *_exact_replay_mismatch_messages(current_metadata, checkpoint_metadata),
+        *_input_snapshot_mismatch_messages(current_metadata, checkpoint_metadata),
+    ]
+    return not messages, messages
+
+
+def _execution_fingerprints_present(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> bool:
+    """Return whether execution fingerprint compatibility is strictly enforced."""
+    return bool(
         current_metadata.execution_fingerprint
         and checkpoint_metadata.execution_fingerprint
-    ):
-        if not bool(execution_identity_result["compatible"]):
-            execution_identity_compatible = False
-            if (
-                execution_identity_result["reason"]
-                == "composite_run_identity_missing"
-            ):
-                messages.append(
-                    "Composite run identity missing: "
-                    f"current={current_metadata.composite_run_identity}, "
-                    f"checkpoint={checkpoint_metadata.composite_run_identity}"
-                )
-            elif (
-                execution_identity_result["reason"]
-                == "composite_run_identity_mismatch"
-            ):
-                messages.append(
-                    "Composite run identity mismatch: "
-                    f"current={current_metadata.composite_run_identity}, "
-                    f"checkpoint={checkpoint_metadata.composite_run_identity}"
-                )
-            else:
-                messages.append(
-                    "Execution fingerprint mismatch: "
-                    f"current={current_metadata.execution_fingerprint}, "
-                    f"checkpoint={checkpoint_metadata.execution_fingerprint}"
-                )
-        return execution_identity_compatible, messages
-    if (
-        execution_identity_result["reason"] == "composite_run_identity_missing"
-    ):
-        execution_identity_compatible = False
-        messages.append(
+    )
+
+
+def _execution_identity_reason_messages(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+    execution_identity_result: dict[str, object],
+) -> list[str]:
+    """Map compatibility reason codes to user-facing mismatch messages."""
+    return [
+        *_composite_identity_reason_messages(
+            current_metadata,
+            checkpoint_metadata,
+            execution_identity_result,
+        ),
+        *_runtime_anchor_reason_messages(
+            current_metadata,
+            checkpoint_metadata,
+            execution_identity_result,
+        ),
+        *_execution_fingerprint_reason_messages(
+            current_metadata,
+            checkpoint_metadata,
+            execution_identity_result,
+        ),
+    ]
+
+
+def _composite_identity_reason_messages(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+    execution_identity_result: dict[str, object],
+) -> list[str]:
+    """Return composite-run-identity mismatch messages in stable order."""
+    reason = str(execution_identity_result["reason"])
+    if reason == "composite_run_identity_missing":
+        return [
             "Composite run identity missing: "
             f"current={current_metadata.composite_run_identity}, "
             f"checkpoint={checkpoint_metadata.composite_run_identity}"
-        )
-    elif (
-        execution_identity_result["reason"] == "composite_run_identity_mismatch"
-    ):
-        execution_identity_compatible = False
-        messages.append(
+        ]
+    if reason == "composite_run_identity_mismatch":
+        return [
             "Composite run identity mismatch: "
             f"current={current_metadata.composite_run_identity}, "
             f"checkpoint={checkpoint_metadata.composite_run_identity}"
-        )
-    if (
-        execution_identity_result["reason"]
-        == "checkpoint_execution_identity_fallback_mismatch"
-    ):
-        execution_identity_compatible = False
-        messages.append(
+        ]
+    return []
+
+
+def _runtime_anchor_reason_messages(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+    execution_identity_result: dict[str, object],
+) -> list[str]:
+    """Return canonical fallback or degraded-anchor mismatch messages."""
+    reason = str(execution_identity_result["reason"])
+    if reason == "checkpoint_execution_identity_fallback_mismatch":
+        return [
             "Canonical checkpoint execution identity mismatch: "
             f"current={current_metadata.checkpoint_execution_identity_fingerprint()}, "
             f"checkpoint={checkpoint_metadata.checkpoint_execution_identity_fingerprint()}"
-        )
-    elif (
-        execution_identity_result["reason"]
-        == "degraded_runtime_anchor_fingerprint_mismatch"
-    ):
-        execution_identity_compatible = False
-        messages.append(
+        ]
+    if reason == "degraded_runtime_anchor_fingerprint_mismatch":
+        return [
             "Degraded runtime-anchor fingerprint mismatch: "
             f"current_manifest={current_metadata.manifest_id}, "
             f"checkpoint_manifest={checkpoint_metadata.manifest_id}"
-        )
+        ]
+    return []
+
+
+def _execution_fingerprint_reason_messages(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+    execution_identity_result: dict[str, object],
+) -> list[str]:
+    """Return direct execution-fingerprint mismatch messages when applicable."""
+    if str(execution_identity_result["reason"]) != "execution_fingerprint_mismatch":
+        return []
+    return [
+        "Execution fingerprint mismatch: "
+        f"current={current_metadata.execution_fingerprint}, "
+        f"checkpoint={checkpoint_metadata.execution_fingerprint}"
+    ]
+
+
+def _execution_identity_metadata_mismatch_messages(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> list[str]:
+    """Return mismatch messages for runtime anchors stored directly on metadata."""
+    return [
+        *_optional_mismatch_message(
+            current_metadata.effective_config_hash,
+            checkpoint_metadata.effective_config_hash,
+            label="Effective config hash mismatch",
+        ),
+        *_optional_mismatch_message(
+            current_metadata.manifest_id,
+            checkpoint_metadata.manifest_id,
+            label="Manifest identity mismatch",
+        ),
+        *_optional_mismatch_message(
+            current_metadata.contract_ref,
+            checkpoint_metadata.contract_ref,
+            label="Contract reference mismatch",
+        ),
+        *_optional_mismatch_message(
+            current_metadata.contract_version,
+            checkpoint_metadata.contract_version,
+            label="Contract version mismatch",
+        ),
+    ]
+
+
+def _optional_mismatch_message(
+    current_value: str | None,
+    checkpoint_value: str | None,
+    *,
+    label: str,
+) -> list[str]:
+    """Return one mismatch message only when both values exist and differ."""
+    if not current_value or not checkpoint_value or current_value == checkpoint_value:
+        return []
+    return [f"{label}: current={current_value}, checkpoint={checkpoint_value}"]
+
+
+def _exact_replay_mismatch_messages(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> list[str]:
+    """Return exact-replay contract mismatch messages."""
+    if not current_metadata.exact_replay:
+        return []
+    if checkpoint_metadata.exact_replay is not True:
+        return [
+            "Exact replay mismatch: current run requires exact replay but "
+            "checkpoint was not captured in exact replay mode"
+        ]
+    if checkpoint_metadata.input_snapshot_ids:
+        return []
+    return [
+        "Exact replay requires checkpoint input snapshot anchors, but none were persisted"
+    ]
+
+
+def _input_snapshot_mismatch_messages(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> list[str]:
+    """Return persisted input snapshot mismatch messages."""
     if (
-        current_metadata.effective_config_hash
-        and checkpoint_metadata.effective_config_hash
-        and current_metadata.effective_config_hash
-        != checkpoint_metadata.effective_config_hash
+        not current_metadata.input_snapshot_ids
+        or not checkpoint_metadata.input_snapshot_ids
+        or current_metadata.input_snapshot_ids == checkpoint_metadata.input_snapshot_ids
     ):
-        execution_identity_compatible = False
-        messages.append(
-            "Effective config hash mismatch: "
-            f"current={current_metadata.effective_config_hash}, "
-            f"checkpoint={checkpoint_metadata.effective_config_hash}"
-        )
-    if (
-        current_metadata.manifest_id
-        and checkpoint_metadata.manifest_id
-        and current_metadata.manifest_id != checkpoint_metadata.manifest_id
-    ):
-        execution_identity_compatible = False
-        messages.append(
-            "Manifest identity mismatch: "
-            f"current={current_metadata.manifest_id}, "
-            f"checkpoint={checkpoint_metadata.manifest_id}"
-        )
-    if (
-        current_metadata.contract_ref
-        and checkpoint_metadata.contract_ref
-        and current_metadata.contract_ref != checkpoint_metadata.contract_ref
-    ):
-        execution_identity_compatible = False
-        messages.append(
-            "Contract reference mismatch: "
-            f"current={current_metadata.contract_ref}, "
-            f"checkpoint={checkpoint_metadata.contract_ref}"
-        )
-    if (
-        current_metadata.contract_version
-        and checkpoint_metadata.contract_version
-        and current_metadata.contract_version != checkpoint_metadata.contract_version
-    ):
-        execution_identity_compatible = False
-        messages.append(
-            "Contract version mismatch: "
-            f"current={current_metadata.contract_version}, "
-            f"checkpoint={checkpoint_metadata.contract_version}"
-        )
-    if current_metadata.exact_replay:
-        if checkpoint_metadata.exact_replay is not True:
-            execution_identity_compatible = False
-            messages.append(
-                "Exact replay mismatch: current run requires exact replay but "
-                "checkpoint was not captured in exact replay mode"
-            )
-        elif not checkpoint_metadata.input_snapshot_ids:
-            execution_identity_compatible = False
-            messages.append(
-                "Exact replay requires checkpoint input snapshot anchors, but none were persisted"
-            )
-    if (
-        current_metadata.input_snapshot_ids
-        and checkpoint_metadata.input_snapshot_ids
-        and current_metadata.input_snapshot_ids != checkpoint_metadata.input_snapshot_ids
-    ):
-        execution_identity_compatible = False
-        messages.append(
-            "Input snapshot identity mismatch: "
-            f"current={list(current_metadata.input_snapshot_ids)}, "
-            f"checkpoint={list(checkpoint_metadata.input_snapshot_ids)}"
-        )
-    return execution_identity_compatible, messages
+        return []
+    return [
+        "Input snapshot identity mismatch: "
+        f"current={list(current_metadata.input_snapshot_ids)}, "
+        f"checkpoint={list(checkpoint_metadata.input_snapshot_ids)}"
+    ]
 
 
 def _validate_lenient_dq_compatibility(
