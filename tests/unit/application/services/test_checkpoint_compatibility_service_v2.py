@@ -1,5 +1,7 @@
 """Unit tests for checkpoint compatibility service v2."""
 
+import pytest
+
 from bioetl.application.services.checkpoint_compatibility_service_v2 import (
     CheckpointCompatibilityConfig,
     CheckpointCompatibilityMode,
@@ -406,6 +408,109 @@ def test_runtime_anchor_fingerprint_is_used_when_execution_fingerprint_missing()
     assert (
         result.details["execution_identity_compatibility"]["reason"]
         == "degraded_runtime_anchor_fingerprint_mismatch"
+    )
+
+
+@pytest.mark.parametrize(
+    ("current_identity", "checkpoint_identity"),
+    [
+        (
+            CheckpointIdentity(
+                effective_config_hash=HASH_A,
+                execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+                checkpoint_schema_version="1.0.0",
+                manifest_id=" manifest-a ",
+                contract_ref="chembl.activity",
+                contract_version="1.0.0",
+                effective_config_artifact_id="artifact-001",
+            ),
+            CheckpointIdentity(
+                effective_config_hash=HASH_A,
+                execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+                checkpoint_schema_version="1.0.0",
+                manifest_id="manifest-a",
+                contract_ref="chembl.activity",
+                contract_version="1.0.0",
+                effective_config_artifact_id="artifact-001",
+            ),
+        ),
+        (
+            CheckpointIdentity(
+                effective_config_hash=HASH_A,
+                execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+                checkpoint_schema_version="1.0.0",
+                manifest_id="manifest-a",
+                contract_ref=" ChemBL.Activity ",
+                contract_version=" v1 ",
+                effective_config_artifact_id="artifact-001",
+            ),
+            CheckpointIdentity(
+                effective_config_hash=HASH_A,
+                execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+                checkpoint_schema_version="1.0.0",
+                manifest_id="manifest-a",
+                contract_ref="chembl.activity",
+                contract_version="1.0.0",
+                effective_config_artifact_id="artifact-001",
+            ),
+        ),
+    ],
+)
+def test_runtime_anchor_fingerprint_normalizes_equivalent_dirty_anchors(
+    current_identity: CheckpointIdentity,
+    checkpoint_identity: CheckpointIdentity,
+) -> None:
+    """Whitespace and case drift should not fork degraded runtime-anchor identity."""
+    service = CheckpointCompatibilityServiceV2()
+
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+
+    assert result.verdict == CompatibilityVerdict.COMPATIBLE
+    assert (
+        result.details["execution_identity_compatibility"]["reason"]
+        == "identical_degraded_runtime_anchor_fingerprint"
+    )
+    assert (
+        result.details["current_identity"]["degraded_runtime_anchor_fingerprint"]
+        == result.details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"]
+    )
+
+
+def test_runtime_anchor_fingerprint_normalizes_sha256_prefix_drift_in_service_details():
+    """Degraded runtime-anchor fingerprints should normalize SHA256 prefix drift."""
+    service = CheckpointCompatibilityServiceV2()
+
+    current_identity = CheckpointIdentity(
+        effective_config_hash=f" SHA256:{HASH_A.upper()} ",
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        manifest_id="manifest-a",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        effective_config_artifact_id="artifact-001",
+    )
+
+    checkpoint_identity = CheckpointIdentity(
+        effective_config_hash=HASH_A,
+        execution_phase=ExecutionPhase.DEPENDENCY_EXECUTION,
+        checkpoint_schema_version="1.0.0",
+        manifest_id="manifest-a",
+        contract_ref="chembl.activity",
+        contract_version="1.0.0",
+        effective_config_artifact_id="artifact-001",
+    )
+
+    result = service.check_compatibility(current_identity, checkpoint_identity)
+
+    assert result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
+    assert result.details["config_compatibility"]["reason"] == "different_config_hash"
+    assert (
+        result.details["execution_identity_compatibility"]["reason"]
+        == "identical_degraded_runtime_anchor_fingerprint"
+    )
+    assert (
+        result.details["current_identity"]["degraded_runtime_anchor_fingerprint"]
+        == result.details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"]
     )
 
 

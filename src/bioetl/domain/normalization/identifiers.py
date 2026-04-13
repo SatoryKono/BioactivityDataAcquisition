@@ -44,15 +44,10 @@ def _normalize_pmid_from_int(pmid: int) -> str | None:
 def _normalize_pmid_from_str(pmid: str) -> str | None:
     """Normalize string PMID input."""
     value = pmid.strip()
-    if not value or not value.isdigit():
+    if not value.isdigit():
         return None
 
-    normalized_int = int(value)
-    if normalized_int <= 0 or normalized_int >= PMID_MAX_EXCLUSIVE:
-        return None
-
-    normalized = str(normalized_int)
-    return normalized if normalized != "0" else None
+    return _normalize_pmid_from_int(int(value))
 
 
 def normalize_pmid(pmid: str | int | None) -> str | None:

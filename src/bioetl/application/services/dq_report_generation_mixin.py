@@ -54,7 +54,7 @@ class DQReportGenerationMixin:
         if self._metrics is None:
             return
         self._metrics.increment_counter(
-            "dq_report_skipped_total",
+            "bioetl_dq_report_skipped_total",
             1,
             {
                 "pipeline": pipeline,
@@ -73,7 +73,7 @@ class DQReportGenerationMixin:
         if self._metrics is None:
             return
         self._metrics.increment_counter(
-            "dq_report_generated_total",
+            "bioetl_dq_report_generated_total",
             1,
             {
                 "pipeline": pipeline,

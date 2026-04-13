@@ -59,6 +59,10 @@ def test_build_module_paths_match_exported_mapping() -> None:
     assert build_normalization_profile_module_paths() == NORMALIZATION_PROFILE_MODULE_PATHS
 
 
+def test_profile_registry_and_module_paths_share_same_coordinates() -> None:
+    assert set(NORMALIZATION_PROFILE_REGISTRY) == set(NORMALIZATION_PROFILE_MODULE_PATHS)
+
+
 def test_registry_exports_canonical_profile_module_paths() -> None:
     assert (
         NORMALIZATION_PROFILE_MODULE_PATHS[("chembl", "activity")]

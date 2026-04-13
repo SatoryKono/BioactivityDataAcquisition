@@ -12,8 +12,10 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_float,
     normalize_profile_int,
     normalize_profile_json_string,
+    normalize_profile_passthrough,
     normalize_profile_pmc_id,
     normalize_profile_pmid,
+    normalize_profile_text,
     normalize_profile_title,
 )
 
@@ -39,6 +41,7 @@ def build_standard_profile(
     int_fields: Collection[str] = (),
     float_fields: Collection[str] = (),
     set_like_fields: Collection[str] = (),
+    json_string_fields: Collection[str] = (),
     special_rules: Mapping[str, RuleComponent] | None = None,
 ) -> NormalizationProfile:
     """Build one field-complete normalization profile from common field families."""
@@ -52,6 +55,7 @@ def build_standard_profile(
     normalized_int_fields = frozenset(int_fields)
     normalized_float_fields = frozenset(float_fields)
     normalized_set_like_fields = frozenset(set_like_fields)
+    normalized_json_string_fields = frozenset(json_string_fields)
     normalized_special_rules = dict(special_rules or {})
 
     return NormalizationProfile(
@@ -71,6 +75,7 @@ def build_standard_profile(
                 int_fields=normalized_int_fields,
                 float_fields=normalized_float_fields,
                 set_like_fields=normalized_set_like_fields,
+                json_string_fields=normalized_json_string_fields,
                 special_rules=normalized_special_rules,
             )
             for field_name in schema_fields
@@ -91,26 +96,31 @@ def _build_field_rule(
     int_fields: frozenset[str],
     float_fields: frozenset[str],
     set_like_fields: frozenset[str],
+    json_string_fields: frozenset[str],
     special_rules: Mapping[str, RuleComponent],
 ) -> FieldRule:
     include_in_hash = field_name not in meta_fields
-    normalizer, notes = _rule_components(
-        field_name=field_name,
-        title_fields=title_fields,
-        abstract_fields=abstract_fields,
-        doi_fields=doi_fields,
-        pmid_fields=pmid_fields,
-        pmc_id_fields=pmc_id_fields,
-        date_fields=date_fields,
-        int_fields=int_fields,
-        float_fields=float_fields,
-        special_rules=special_rules,
-    )
     if field_name in meta_fields:
         notes = (
             "System/meta field is tracked by the normalization inventory and "
             "excluded from content_hash; persisted-row publication is defined "
             "separately by the Silver/Gold storage contract."
+        )
+        normalizer = normalize_profile_passthrough
+    else:
+        normalizer, notes = _rule_components(
+            field_name=field_name,
+            title_fields=title_fields,
+            abstract_fields=abstract_fields,
+            doi_fields=doi_fields,
+            pmid_fields=pmid_fields,
+            pmc_id_fields=pmc_id_fields,
+            date_fields=date_fields,
+            int_fields=int_fields,
+            float_fields=float_fields,
+            set_like_fields=set_like_fields,
+            json_string_fields=json_string_fields,
+            special_rules=special_rules,
         )
     return FieldRule(
         field_name=field_name,
@@ -132,6 +142,8 @@ def _rule_components(
     date_fields: frozenset[str],
     int_fields: frozenset[str],
     float_fields: frozenset[str],
+    set_like_fields: frozenset[str],
+    json_string_fields: frozenset[str],
     special_rules: Mapping[str, RuleComponent],
 ) -> RuleComponent:
     if field_name in special_rules:
@@ -145,6 +157,8 @@ def _rule_components(
         date_fields=date_fields,
         int_fields=int_fields,
         float_fields=float_fields,
+        set_like_fields=set_like_fields,
+        json_string_fields=json_string_fields,
     ):
         if field_name in fields:
             return normalizer, notes
@@ -152,8 +166,8 @@ def _rule_components(
 
 
 _DEFAULT_RULE_COMPONENT: RuleComponent = (
-    normalize_profile_json_string,
-    "Trim string values and canonicalize JSON-like string payloads when present.",
+    normalize_profile_text,
+    "Trim and collapse blank textual values to None where applicable.",
 )
 
 
@@ -167,8 +181,11 @@ def _rule_family_specs(
     date_fields: frozenset[str],
     int_fields: frozenset[str],
     float_fields: frozenset[str],
+    set_like_fields: frozenset[str],
+    json_string_fields: frozenset[str],
 ) -> tuple[RuleFamilySpec, ...]:
     """Return ordered field-family rules used by the standard profile builder."""
+    effective_json_string_fields = frozenset(json_string_fields | set_like_fields)
     return (
         (
             title_fields,
@@ -209,5 +226,10 @@ def _rule_family_specs(
             float_fields,
             normalize_profile_float,
             "Coerce stable float semantics and remove NaN/Inf noise.",
+        ),
+        (
+            effective_json_string_fields,
+            normalize_profile_json_string,
+            "Canonicalize JSON-bearing string payloads after textual cleanup.",
         ),
     )

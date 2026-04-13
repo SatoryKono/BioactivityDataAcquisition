@@ -180,7 +180,7 @@ def test_build_dataframe_from_records_emits_metric_on_failure(
     assert harness._logger.warning_calls
     assert harness._services.metrics.increment_calls == [
         (
-            "dq_context_build_failures_total",
+            "bioetl_dq_context_build_failures_total",
             1,
             {
                 "pipeline": "pubmed_publication",

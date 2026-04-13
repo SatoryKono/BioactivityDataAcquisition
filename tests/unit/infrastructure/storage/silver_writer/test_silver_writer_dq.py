@@ -135,7 +135,7 @@ class TestSilverWriterWriteModePolicy:
             writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "policy_violations_total",
+            "bioetl_policy_violations_total",
             1,
             {"layer": "silver", "mode": "overwrite"},
         )
@@ -326,7 +326,7 @@ class TestSilverWriterWriteModePolicy:
             )
 
         mock_metrics.increment_counter.assert_called_once_with(
-            "policy_violations_total",
+            "bioetl_policy_violations_total",
             1,
             {"layer": "silver", "mode": "overwrite"},
         )

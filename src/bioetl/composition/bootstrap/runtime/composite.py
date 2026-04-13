@@ -64,7 +64,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
-    from bioetl.domain.ports import LockPort, LoggerPort
+    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort
 
 __all__ = [
     "CompositeRuntimeConfig",
@@ -79,6 +79,7 @@ class _CompositeBootstrapPlan:
 
     run_id: str
     logger: LoggerPort
+    metrics: MetricsPort
     lock: LockPort
     seed_runner_factory: Callable[[], PipelineRunner]
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
@@ -240,6 +241,7 @@ def _build_composite_bootstrap_plan(
     return _CompositeBootstrapPlan(
         run_id=infra_context.run_id,
         logger=infra_context.logger,
+        metrics=infra_context.metrics,
         lock=infra_context.lock,
         seed_runner_factory=seed_runner_factory,
         dependencies_runner_factory=dependencies_runner_factory,
@@ -260,6 +262,7 @@ def _create_composite_runner_from_plan(
         runtime=runtime,
         run_id=plan.run_id,
         logger=plan.logger,
+        metrics=plan.metrics,
         lock=plan.lock,
         seed_runner_factory=plan.seed_runner_factory,
         dependencies_runner_factory=plan.dependencies_runner_factory,

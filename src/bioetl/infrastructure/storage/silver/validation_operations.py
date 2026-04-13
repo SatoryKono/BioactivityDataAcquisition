@@ -311,7 +311,7 @@ def _enforce_write_policy(
         )
         if host._metrics:
             host._metrics.increment_counter(
-                "policy_violations_total",
+                "bioetl_policy_violations_total",
                 1,
                 {"layer": "silver", "mode": policy_mode.value},
             )
@@ -365,7 +365,7 @@ def _validate_silver_pandera(
         )
         if host._metrics:
             host._metrics.increment_counter(
-                "silver_validation_failures_total",
+                "bioetl_silver_validation_failures_total",
                 1,
                 {
                     "table": table_name,

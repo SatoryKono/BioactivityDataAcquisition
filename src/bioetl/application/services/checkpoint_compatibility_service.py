@@ -26,7 +26,7 @@ def _emit_checkpoint_metric(
     if metrics is None:
         return
     metrics.increment_counter(
-        "checkpoint_compatibility_events_total",
+        "bioetl_checkpoint_compatibility_events_total",
         1,
         {
             "pipeline": pipeline_name or "unknown",

@@ -86,7 +86,7 @@ class HTTPClientRetryMixin:
         """Emit retry-budget exhaustion metrics and warning log."""
         if self._metrics is not None:
             self._metrics.increment_counter(
-                "http_retry_budget_exhausted_total",
+                "bioetl_http_retry_budget_exhausted_total",
                 1,
                 {"provider": self.provider, "method": method.upper()},
             )

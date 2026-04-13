@@ -119,7 +119,7 @@ def build_dataframe_from_records(
         )
         if metrics is not None and pipeline is not None:
             metrics.increment_counter(
-                "dq_context_build_failures_total",
+                "bioetl_dq_context_build_failures_total",
                 1,
                 {
                     "pipeline": pipeline,

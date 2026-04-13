@@ -6,7 +6,9 @@ from typing import Final
 
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
+    compute_degraded_runtime_anchor_fingerprint,
     compute_execution_identity_fingerprint,
+    normalize_runtime_anchor_payload,
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.execution_phase import ExecutionPhase
@@ -555,8 +557,8 @@ def _compute_degraded_runtime_anchor_fingerprint(
     effective_config_hash: str | None,
     effective_config_artifact_id: str | None,
 ) -> str | None:
-    """Build the degraded runtime-anchor fallback fingerprint from legacy anchors."""
-    filtered_payload = {
+    """Build the degraded runtime-anchor fallback fingerprint via domain seam."""
+    raw_payload = {
         key: value
         for key, value in {
             "effective_config_hash": effective_config_hash,
@@ -566,13 +568,12 @@ def _compute_degraded_runtime_anchor_fingerprint(
         }.items()
         if value is not None
     }
-    if not filtered_payload:
+    if not raw_payload:
         return None
     if manifest_id is not None:
-        filtered_payload["manifest_id"] = manifest_id
-    if not filtered_payload:
-        return None
-    return compute_execution_identity_fingerprint(filtered_payload)
+        raw_payload["manifest_id"] = manifest_id
+    normalized_payload = normalize_runtime_anchor_payload(raw_payload)
+    return compute_degraded_runtime_anchor_fingerprint(normalized_payload)
 
 
 def build_identity_details(

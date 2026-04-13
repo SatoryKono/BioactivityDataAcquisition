@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 
 from bioetl.domain.normalization.profiles.base import NormalizationProfile
 from bioetl.domain.normalization.profiles.chembl_activity import (
@@ -80,6 +81,16 @@ __all__ = [
 ]
 
 
+@dataclass(frozen=True, slots=True)
+class _NormalizationProfileDeclaration:
+    """One shipped normalization-profile registry declaration."""
+
+    provider: str
+    entity_type: str
+    profile: NormalizationProfile
+    module_path: str
+
+
 def normalize_normalization_profile_coordinates(
     provider: str,
     entity_type: str | None,
@@ -104,87 +115,149 @@ def _resolve_normalization_profile_value[T](
     return mapping.get(coordinates)
 
 
+_NORMALIZATION_PROFILE_DECLARATIONS: tuple[_NormalizationProfileDeclaration, ...] = (
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="activity",
+        profile=CHEMBL_ACTIVITY_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_activity.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="assay",
+        profile=CHEMBL_ASSAY_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_assay.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="assay_parameters",
+        profile=CHEMBL_ASSAY_PARAMETERS_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="cell_line",
+        profile=CHEMBL_CELL_LINE_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_cell_line.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="compound_record",
+        profile=CHEMBL_COMPOUND_RECORD_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_compound_record.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="molecule",
+        profile=CHEMBL_MOLECULE_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_molecule.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="protein_class",
+        profile=CHEMBL_PROTEIN_CLASS_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_protein_class.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="publication",
+        profile=CHEMBL_PUBLICATION_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_publication.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="publication_similarity",
+        profile=CHEMBL_PUBLICATION_SIMILARITY_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_publication_similarity.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="publication_term",
+        profile=CHEMBL_PUBLICATION_TERM_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_publication_term.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="subcellular_fraction",
+        profile=CHEMBL_SUBCELLULAR_FRACTION_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_subcellular_fraction.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="target",
+        profile=CHEMBL_TARGET_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_target.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="target_component",
+        profile=CHEMBL_TARGET_COMPONENT_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_target_component.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="chembl",
+        entity_type="tissue",
+        profile=CHEMBL_TISSUE_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/chembl_tissue.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="crossref",
+        entity_type="publication",
+        profile=CROSSREF_PUBLICATION_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/crossref_publication.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="openalex",
+        entity_type="publication",
+        profile=OPENALEX_PUBLICATION_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/openalex_publication.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="pubchem",
+        entity_type="compound",
+        profile=PUBCHEM_COMPOUND_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/pubchem_compound.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="pubmed",
+        entity_type="publication",
+        profile=PUBMED_PUBLICATION_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/pubmed_publication.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="semanticscholar",
+        entity_type="publication",
+        profile=SEMANTICSCHOLAR_PUBLICATION_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/semanticscholar_publication.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="uniprot",
+        entity_type="idmapping",
+        profile=UNIPROT_IDMAPPING_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/uniprot_idmapping.py",
+    ),
+    _NormalizationProfileDeclaration(
+        provider="uniprot",
+        entity_type="protein",
+        profile=UNIPROT_PROTEIN_PROFILE,
+        module_path="src/bioetl/domain/normalization/profiles/uniprot_protein.py",
+    ),
+)
+
+
 def build_normalization_profile_registry() -> Mapping[tuple[str, str], NormalizationProfile]:
     """Return the immutable registry of shipped normalization profiles."""
     return {
-        ("chembl", "activity"): CHEMBL_ACTIVITY_PROFILE,
-        ("chembl", "assay"): CHEMBL_ASSAY_PROFILE,
-        ("chembl", "assay_parameters"): CHEMBL_ASSAY_PARAMETERS_PROFILE,
-        ("chembl", "cell_line"): CHEMBL_CELL_LINE_PROFILE,
-        ("chembl", "compound_record"): CHEMBL_COMPOUND_RECORD_PROFILE,
-        ("chembl", "molecule"): CHEMBL_MOLECULE_PROFILE,
-        ("chembl", "protein_class"): CHEMBL_PROTEIN_CLASS_PROFILE,
-        ("chembl", "publication"): CHEMBL_PUBLICATION_PROFILE,
-        ("chembl", "publication_similarity"): CHEMBL_PUBLICATION_SIMILARITY_PROFILE,
-        ("chembl", "publication_term"): CHEMBL_PUBLICATION_TERM_PROFILE,
-        ("chembl", "subcellular_fraction"): CHEMBL_SUBCELLULAR_FRACTION_PROFILE,
-        ("chembl", "target"): CHEMBL_TARGET_PROFILE,
-        ("chembl", "target_component"): CHEMBL_TARGET_COMPONENT_PROFILE,
-        ("chembl", "tissue"): CHEMBL_TISSUE_PROFILE,
-        ("crossref", "publication"): CROSSREF_PUBLICATION_PROFILE,
-        ("openalex", "publication"): OPENALEX_PUBLICATION_PROFILE,
-        ("pubchem", "compound"): PUBCHEM_COMPOUND_PROFILE,
-        ("pubmed", "publication"): PUBMED_PUBLICATION_PROFILE,
-        ("semanticscholar", "publication"): SEMANTICSCHOLAR_PUBLICATION_PROFILE,
-        ("uniprot", "idmapping"): UNIPROT_IDMAPPING_PROFILE,
-        ("uniprot", "protein"): UNIPROT_PROTEIN_PROFILE,
+        (declaration.provider, declaration.entity_type): declaration.profile
+        for declaration in _NORMALIZATION_PROFILE_DECLARATIONS
     }
 
 
 def build_normalization_profile_module_paths() -> Mapping[tuple[str, str], str]:
     """Return canonical source-module paths for shipped normalization profiles."""
     return {
-        ("chembl", "activity"): "src/bioetl/domain/normalization/profiles/chembl_activity.py",
-        ("chembl", "assay"): "src/bioetl/domain/normalization/profiles/chembl_assay.py",
-        (
-            "chembl",
-            "assay_parameters",
-        ): "src/bioetl/domain/normalization/profiles/chembl_assay_parameters.py",
-        ("chembl", "cell_line"): "src/bioetl/domain/normalization/profiles/chembl_cell_line.py",
-        (
-            "chembl",
-            "compound_record",
-        ): "src/bioetl/domain/normalization/profiles/chembl_compound_record.py",
-        ("chembl", "molecule"): "src/bioetl/domain/normalization/profiles/chembl_molecule.py",
-        (
-            "chembl",
-            "protein_class",
-        ): "src/bioetl/domain/normalization/profiles/chembl_protein_class.py",
-        ("chembl", "publication"): "src/bioetl/domain/normalization/profiles/chembl_publication.py",
-        (
-            "chembl",
-            "publication_similarity",
-        ): "src/bioetl/domain/normalization/profiles/chembl_publication_similarity.py",
-        (
-            "chembl",
-            "publication_term",
-        ): "src/bioetl/domain/normalization/profiles/chembl_publication_term.py",
-        (
-            "chembl",
-            "subcellular_fraction",
-        ): "src/bioetl/domain/normalization/profiles/chembl_subcellular_fraction.py",
-        ("chembl", "target"): "src/bioetl/domain/normalization/profiles/chembl_target.py",
-        (
-            "chembl",
-            "target_component",
-        ): "src/bioetl/domain/normalization/profiles/chembl_target_component.py",
-        ("chembl", "tissue"): "src/bioetl/domain/normalization/profiles/chembl_tissue.py",
-        (
-            "crossref",
-            "publication",
-        ): "src/bioetl/domain/normalization/profiles/crossref_publication.py",
-        (
-            "openalex",
-            "publication",
-        ): "src/bioetl/domain/normalization/profiles/openalex_publication.py",
-        ("pubchem", "compound"): "src/bioetl/domain/normalization/profiles/pubchem_compound.py",
-        ("pubmed", "publication"): "src/bioetl/domain/normalization/profiles/pubmed_publication.py",
-        (
-            "semanticscholar",
-            "publication",
-        ): "src/bioetl/domain/normalization/profiles/semanticscholar_publication.py",
-        ("uniprot", "idmapping"): "src/bioetl/domain/normalization/profiles/uniprot_idmapping.py",
-        ("uniprot", "protein"): "src/bioetl/domain/normalization/profiles/uniprot_protein.py",
+        (declaration.provider, declaration.entity_type): declaration.module_path
+        for declaration in _NORMALIZATION_PROFILE_DECLARATIONS
     }
 
 

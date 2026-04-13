@@ -72,13 +72,15 @@ def test_metric_definition_exports_remain_stable() -> None:
 @pytest.mark.unit
 def test_grouped_registry_inventory_preserves_expected_size() -> None:
     # This ratchet intentionally changes only when we add/remove public metrics.
-    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 93
+    assert len(REGISTERED_PROMETHEUS_METRIC_NAMES) == 96
 
 
 @pytest.mark.unit
 def test_bronze_runtime_write_metrics_are_registered() -> None:
     assert "bioetl_bronze_write_attempts_total" in COUNTERS
     assert "bioetl_bronze_write_total_duration_seconds" in HISTOGRAMS
+    assert "bioetl_bronze_files_removed_total" in COUNTERS
+    assert "bioetl_bronze_bytes_freed_total" in COUNTERS
 
 
 @pytest.mark.unit
@@ -96,6 +98,7 @@ def test_control_plane_and_lineage_metrics_are_registered() -> None:
     assert "bioetl_lineage_fragments_emitted_total" in COUNTERS
     assert "bioetl_lineage_refs_missing_total" in COUNTERS
     assert "bioetl_composite_source_selection_total" in COUNTERS
+    assert "bioetl_http_retry_budget_exhausted_total" in COUNTERS
 
 
 @pytest.mark.unit

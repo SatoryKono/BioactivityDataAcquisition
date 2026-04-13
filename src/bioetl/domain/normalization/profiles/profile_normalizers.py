@@ -25,6 +25,7 @@ __all__ = [
     "normalize_profile_int",
     "normalize_profile_isomeric_smiles",
     "normalize_profile_json_string",
+    "normalize_profile_passthrough",
     "normalize_profile_pmc_id",
     "normalize_profile_pmid",
     "normalize_profile_smiles",
@@ -33,6 +34,11 @@ __all__ = [
 ]
 
 _UNHANDLED = object()
+
+
+def normalize_profile_passthrough(value: object) -> object:
+    """Return one profile value unchanged."""
+    return value
 
 
 def normalize_profile_text(value: object) -> object:
