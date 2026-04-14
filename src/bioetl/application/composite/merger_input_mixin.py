@@ -77,7 +77,7 @@ class _MergeInputLoaderMixin:
             effective_seed_pipeline = None
         
         return _PreparedSeedDataframe(
-            df=seed_df,
+            seed_df=seed_df,
             records_from_seed=len(seed_df),
             effective_seed_pipeline=effective_seed_pipeline,
         )
