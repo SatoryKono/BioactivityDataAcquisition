@@ -13,3 +13,5 @@
 /.claude
 /docs/reports/evidence
 /.claude
+/.venv-win-corrupt
+/data/output
