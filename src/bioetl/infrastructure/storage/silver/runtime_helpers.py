@@ -41,6 +41,9 @@ class SilverWriterRuntimeServices:
     dq_calculator: DQMetricsCalculator
     merge_resilience_policy: SilverMergeResiliencePolicy
     contract_rollout_policy: ContractRolloutPolicy | None = None
+    # New operation services for composition
+    maintenance_operations: SilverMaintenanceOperations | None = None
+    metadata_operations: SilverMetadataOperations | None = None
 
 
 def resolve_silver_writer_runtime(
@@ -101,6 +104,29 @@ def build_silver_writer_runtime_services(
         dq_calculator=dq_calculator,
         merge_resilience_policy=merge_resilience_policy,
     )
+    # Create maintenance operations if needed components are available
+    maintenance_ops = None
+    if csv_exporter is not None and resolved_merge_resilience_policy is not None:
+        maintenance_ops = SilverMaintenanceOperations(
+            csv_exporter=csv_exporter,
+            retention_manager=resolved_merge_resilience_policy.retention_manager,
+            metrics=metrics,
+            audit=audit,
+        )
+    
+    # Create metadata operations if needed components are available
+    metadata_ops = None
+    if resolved_metadata_writer is not None and resolved_dq_calculator is not None:
+        metadata_ops = SilverMetadataOperations(
+            logger=logger,
+            metrics=metrics,
+            audit=audit,
+            metadata_writer=resolved_metadata_writer,
+            metadata_coordinator=metadata_coordinator,
+            lineage_store=lineage_store,
+            dq_calculator=resolved_dq_calculator,
+        )
+    
     return SilverWriterRuntimeServices(
         csv_exporter=csv_exporter,
         tracing=resolved_tracing,
@@ -114,4 +140,6 @@ def build_silver_writer_runtime_services(
         dq_calculator=resolved_dq_calculator,
         merge_resilience_policy=resolved_merge_resilience_policy,
         contract_rollout_policy=contract_rollout_policy,
+        maintenance_operations=maintenance_ops,
+        metadata_operations=metadata_ops,
     )

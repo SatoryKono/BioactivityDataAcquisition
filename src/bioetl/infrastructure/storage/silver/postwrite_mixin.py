@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
@@ -106,13 +107,27 @@ class SilverWriterPostwriteMixin:
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
         """Run post-write stages: CSV export, audit, and result finalization."""
-        await self._maybe_export_csv(
-            table_name=ctx.table_name,
-            arrow_data=payload.arrow_data,
-            mode=ctx.mode,
-            validated_mode=payload.validated_mode,
-            primary_keys=ctx.primary_keys,
-        )
+        # Use maintenance operations if available, otherwise fall back to mixin method
+        if hasattr(self, '_maintenance') and self._maintenance is not None:
+            csv_append = ctx.mode != "delete"
+            csv_primary_keys = (
+                ctx.primary_keys if payload.validated_mode == SilverWriteMode.MERGE else None
+            )
+            await self._maintenance.maybe_export_csv(
+                table_name=ctx.table_name,
+                arrow_data=payload.arrow_data,
+                mode=ctx.mode,
+                validated_mode=payload.validated_mode,
+                primary_keys=ctx.primary_keys,
+            )
+        else:
+            await self._maybe_export_csv(
+                table_name=ctx.table_name,
+                arrow_data=payload.arrow_data,
+                mode=ctx.mode,
+                validated_mode=payload.validated_mode,
+                primary_keys=ctx.primary_keys,
+            )
         await self._maybe_log_silver_audit(
             table_name=ctx.table_name,
             records=payload.records,
