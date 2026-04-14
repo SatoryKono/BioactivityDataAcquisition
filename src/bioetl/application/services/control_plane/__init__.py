@@ -25,7 +25,7 @@ from bioetl.application.services.control_plane.run_manifest_service import (
 __all__ = [
     "EffectiveConfigService",
     "RunLedgerService",
-    "RunManifestCreateRequest",
+    "RunManifestCreateSpec",
     "RunManifestCreateSpec",
     "RunManifestDiffEntry",
     "RunManifestDiffResult",

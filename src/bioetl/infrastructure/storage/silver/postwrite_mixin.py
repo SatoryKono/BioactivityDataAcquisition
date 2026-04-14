@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
@@ -13,8 +14,7 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 if TYPE_CHECKING:
     import pyarrow as pa
 
-    from bioetl.domain.medallion import SilverWriteMode
-    from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
+    from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import pyarrow as pa
 
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
@@ -17,7 +18,7 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.ports import TracingPort
-    from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
+    from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.domain.ports.noop import _NoOpSpan

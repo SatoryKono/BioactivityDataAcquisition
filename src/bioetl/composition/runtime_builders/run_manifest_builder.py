@@ -8,7 +8,7 @@ from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
 from bioetl.application.services.control_plane.run_manifest_service import (
-    RunManifestCreateRequest,
+    RunManifestCreateSpec,
     RunManifestService,
 )
 from bioetl.composition.runtime_builders._run_manifest_support import (
@@ -95,7 +95,7 @@ def _build_manifest_create_request(
     rule_bundle_version: str | None,
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
-) -> RunManifestCreateRequest:
+) -> RunManifestCreateSpec:
     """Build the manifest create request."""
     yaml_config = inputs.yaml_config
     source_refs = _build_run_source_refs(
@@ -117,7 +117,7 @@ def _build_manifest_create_request(
             "degraded_observable",
         )
     )
-    request = RunManifestCreateRequest(
+    request = RunManifestCreateSpec(
         run_id=ctx.run_id,
         run_type=getattr(ctx, "run_type", "incremental"),
         pipeline_name=ctx.pipeline_name,
@@ -163,7 +163,7 @@ def _build_manifest_create_request(
 
 def _validate_required_runtime_persistence_profile(
     *,
-    request: RunManifestCreateRequest,
+    request: RunManifestCreateSpec,
     required_persistence_profile: str,
 ) -> None:
     """Fail closed when the built manifest request cannot satisfy its profile."""

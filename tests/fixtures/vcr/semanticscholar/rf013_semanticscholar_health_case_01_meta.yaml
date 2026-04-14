@@ -1,7 +1,3 @@
-schema_version: 1
-provider: semanticscholar
-cassette_rel_path: tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_health_case_01.yaml
-metadata_status: seeded_partial_backfill
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 2fb8ce51239286f58a71f5d797f832c7a5edd4cf8f7ffc933e414f52f722d7ec
-staleness_ready: false
+version https://git-lfs.github.com/spec/v1
+oid sha256:76a09b34d8e5f23f0b4dddbd8e6bc4141c2adf35336febd01038a926264f745c
+size 328

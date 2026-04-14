@@ -13,7 +13,7 @@ from bioetl.domain.exceptions import (
     PolicyViolationError,
     SchemaViolationError,
 )
-from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode
+from bioetl.domain.medallion import Layer, SilverWriteMode, WriteMode, WriteModePolicy
 from bioetl.domain.normalization import (
     normalize_hash_identity_record,
     serialize_hash_identity_canonical_json,
@@ -36,7 +36,6 @@ from bioetl.infrastructure.storage.silver.schema_drift_operations import (
 
 if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
-    from bioetl.domain.medallion import WriteModePolicy
     from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
     from bioetl.domain.types import BronzeRecord
 

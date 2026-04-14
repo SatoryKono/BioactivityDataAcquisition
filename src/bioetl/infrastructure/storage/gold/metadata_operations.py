@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.models.metadata import GoldMetadata
 from bioetl.domain.ports import LineageStorePort
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.storage.gold.metadata_payloads import (
@@ -25,7 +26,6 @@ if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
 
     from bioetl.domain.lineage import LineageGraphFragment
-    from bioetl.domain.models.metadata import GoldMetadata
     from bioetl.domain.ports import LoggerPort, MetadataCoordinatorPort, MetricsPort
     from bioetl.domain.types import GoldRecord, ScdConfig
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
