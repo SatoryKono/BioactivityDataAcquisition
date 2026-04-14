@@ -372,9 +372,9 @@ ______________________________________________________________________
 
 **Ключевые ADR:**
 
-- [ADR-007](../../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) — Circuit Breaker
-- [ADR-008](../../../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful Shutdown
-- [ADR-010](../../../../02-architecture/decisions/ADR-010-local-only-deployment.md) — Local-Only Deployment
+- [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) — Circuit Breaker
+- [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful Shutdown
+- [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md) — Local-Only Deployment
 
 ______________________________________________________________________
 

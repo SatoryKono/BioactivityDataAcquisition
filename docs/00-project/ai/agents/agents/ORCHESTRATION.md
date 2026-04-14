@@ -50,7 +50,7 @@ spawn_agent(
 | orchestrator (direct) | `src/bioetl/`, `tests/` | `configs/`, `docs/` |
 | py-architecture-debt-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
 | py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
-| py-doc-bot | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/` | `configs/`, `tests/` |
+| py-doc-bot | `docs/`, docstrings, `scripts/agents/diagrams/` | `configs/`, `tests/` |
 | py-test-bot | `tests/` | `src/bioetl/`, `configs/` |
 | py-debug-bot | `src/bioetl/`, `tests/` (fixes) | `configs/`, `docs/` |
 | py-audit-bot | — (read-only) | всё |
@@ -377,7 +377,7 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 | `docs/02-architecture/decisions/` | ADR-001..ADR-043 |
 | `docs/00-project/glossary.md` | Терминология |
 | `tests/architecture/` | Автоматические проверки инвариантов |
-| `docs/00-project/ai/agents/scripts/py-config-bot-1.py` | Автоматическая проверка конфигов |
+| `scripts/agents/py-config-bot-1.py` | Автоматическая проверка конфигов |
 
 ---
 

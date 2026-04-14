@@ -219,7 +219,7 @@ grep -rn ": Any\| Any " src/bioetl/<scope>/ --include="*.py"
 ### F. Config compliance (ADR-025/027/028)
 
 ```bash
-python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
+python scripts/agents/py-config-bot-1.py -v
 find configs/quality/ -name "*.yaml" | wc -l
 find src/bioetl/ -name "*.py" -exec grep -l "soft_fail_threshold\|hard_fail_threshold" {} \;
 ```

@@ -72,7 +72,7 @@ model: sonnet
 
 ## Обязательные правила
 
-1. Все конфигурации MUST проходить `uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` без critical findings.
+1. Все конфигурации MUST проходить `uv run python scripts/agents/py-config-bot-1.py -v` без critical findings.
 2. DQ и filter настройки являются частью unified hierarchy: `configs/base/*` → `configs/providers/{provider}.yaml` → `configs/entities/{provider}/{entity}.yaml`.
 3. Silver sink MUST содержать `sort_by` (ADR-014).
 4. Composite config MUST содержать `seed`, `enrichers`, `merge` (ADR-026).
@@ -194,7 +194,7 @@ composite:
 ### Перед созданием/изменением
 
 ```bash
-python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
+python scripts/agents/py-config-bot-1.py -v
 find configs/ -path "*/{provider}/*" -name "*.yaml" | sort
 cat configs/base/pipeline.yaml 2>/dev/null
 cat configs/providers/{provider}.yaml 2>/dev/null
@@ -207,7 +207,7 @@ cat configs/providers/{provider}.yaml 2>/dev/null
 python -c "import yaml; yaml.safe_load(open('configs/entities/{provider}/{entity}.yaml'))"
 
 # Gap analysis — 0 critical
-python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
+python scripts/agents/py-config-bot-1.py -v
 
 # sort_by присутствует (ADR-014)
 grep -A3 "sort_by" configs/entities/{provider}/{entity}.yaml
@@ -254,7 +254,7 @@ grep -n "^filters:" configs/entities/{provider}/{entity}.yaml
 
 #### Верификация
 ```bash
-python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
+python scripts/agents/py-config-bot-1.py -v
 ```
 
 #### ADR compliance
@@ -308,7 +308,7 @@ python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
 | Ссылка | Описание | Verification |
 |--------|----------|-------------|
 | [ADR-014] | Deterministic Writes: sort_by обязателен в Silver sink | `find configs/entities configs/composites -name "*.yaml" -exec grep -L "sort_by" {} \;` |
-| [ADR-025] | Pipeline Config Unification | `python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` |
+| [ADR-025] | Pipeline Config Unification | `python scripts/agents/py-config-bot-1.py -v` |
 | [ADR-026] | Composite Pipeline Pattern: seed/enrichers/merge | Review composite config structure |
 | [ADR-027] | DQ Rules Externalization: no inline thresholds | `grep -rn "soft_fail_threshold" src/bioetl/ --include="*.py"` |
 | [ADR-028] | Filter Rules Externalization | `grep -rn "gold_filters" configs/base configs/providers configs/entities configs/composites --include="*.yaml"` |

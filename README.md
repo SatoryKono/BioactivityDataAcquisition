@@ -263,7 +263,7 @@ uv sync --extra dev --extra tracing
    | `BIOETL_QUARANTINE_RETENTION_DAYS`         | Quarantine record retention (days)                          | `30`              |
    | `BIOETL_QUARANTINE_PAYLOAD_MAX_SIZE`       | Max payload size (bytes)                                    | `65536`           |
 
-   See [`.env.example`](.env.example) for the full list with comments.
+   See [`.env.example`](configs/.env.example) for the full list with comments.
 
 1. **Verify Installation**:
    Run tests to ensure everything works.

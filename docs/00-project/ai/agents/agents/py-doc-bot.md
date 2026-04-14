@@ -156,11 +156,11 @@ docs/
 
 | Действие | Команда |
 |----------|---------|
-| Unified checks | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr` |
+| Unified checks | `bash scripts/agents/diagrams/py-doc-bot-1.sh --profile pr` |
 | Рендер SVG/PNG | `bash docs/02-architecture/diagrams/tooling/render.sh` |
-| PDF bundles | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py` |
-| DOCX bundles | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py` |
-| Full pipeline | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh` |
+| PDF bundles | `python scripts/agents/diagrams/py-doc-bot-3.py` |
+| DOCX bundles | `python scripts/agents/diagrams/py-doc-bot-2.py` |
+| Full pipeline | `bash scripts/agents/diagrams/py-doc-bot-4.sh` |
 
 ### Diagram Modes
 
