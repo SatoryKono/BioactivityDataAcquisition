@@ -16,7 +16,7 @@ __all__ = [
 class EnumLoaderPort(Protocol):
     """Port for loading enum configurations. Implemented by infrastructure layer."""
     
-    def load_chembl_enums(self) -> dict[str, Any]:
+    def load_chembl_enums(self) -> dict[str, object]:  # Any: Enum data structure from YAML
         """Load ChEMBL enum configurations.
         
         Returns:
@@ -25,7 +25,7 @@ class EnumLoaderPort(Protocol):
         ...
 
 
-def load_chembl_enums(enum_loader: EnumLoaderPort | None = None) -> dict[str, Any]:
+def load_chembl_enums(enum_loader: EnumLoaderPort | None = None) -> dict[str, object]:
     """Load ChEMBL enum configurations using injected dependency.
     
     Args:
@@ -44,12 +44,17 @@ def load_chembl_enums(enum_loader: EnumLoaderPort | None = None) -> dict[str, An
     return enum_loader.load_chembl_enums()
 
 
-def get_enum_config(section: str, key: str) -> list[str]:
+def get_enum_config(
+    section: str, 
+    key: str,
+    enum_loader: EnumLoaderPort | None = None
+) -> list[str]:
     """Get a specific enum configuration.
     
     Args:
         section: The section name (e.g., 'activity', 'assay')
         key: The key within the section (e.g., 'standard_types', 'types')
+        enum_loader: Optional enum loader dependency
         
     Returns:
         List of enum values
@@ -57,7 +62,7 @@ def get_enum_config(section: str, key: str) -> list[str]:
     Raises:
         KeyError: If section or key not found in enum configuration
     """
-    enums = load_chembl_enums()
+    enums = load_chembl_enums(enum_loader)
     try:
         return enums[section][key]
     except KeyError as e:

@@ -4,11 +4,19 @@ from __future__ import annotations
 
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.normalization.identifiers import normalize_ontology_id
-from bioetl.domain.config.enum_loader import get_chembl_enum_set
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
 from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.constants import (
+    ASSAY_CATEGORIES,
+    ASSAY_GROUPS,
+    ASSAY_TEST_TYPES,
+    ASSAY_TYPES,
+    CONFIDENCE_DESCRIPTIONS,
+    RELATIONSHIP_TYPES,
+    SUBCELLULAR_FRACTIONS,
+)
 
 __all__ = [
     "ASSAY_TYPES",
@@ -23,14 +31,8 @@ __all__ = [
     "create_case_normalizer",
 ]
 
-# Load enum configurations from external YAML file
-ASSAY_TYPES = get_chembl_enum_set("assay", "types")
-RELATIONSHIP_TYPES = get_chembl_enum_set("assay", "relationship_types")
-ASSAY_CATEGORIES = get_chembl_enum_set("assay", "categories")
-ASSAY_TEST_TYPES = get_chembl_enum_set("assay", "test_types")
-ASSAY_GROUPS = get_chembl_enum_set("assay", "assay_groups")
-SUBCELLULAR_FRACTIONS = get_chembl_enum_set("assay", "subcellular_fractions")
-CONFIDENCE_DESCRIPTIONS = get_chembl_enum_set("assay", "confidence_descriptions")
+# Use enum configurations from centralized constants (loaded from YAML)
+# These are already properly loaded and don't require runtime I/O
 
 CHEMBL_ASSAY_SCHEMA_FIELDS = tuple(AssaySchema.to_schema().columns.keys())
 
@@ -94,6 +96,14 @@ _SPECIAL_RULE_COMPONENTS = {
     ),
 }
 
+# Enum fields for strict validation
+_ENUM_FIELDS = {
+    "assay_type": ASSAY_TYPES,
+    "assay_test_type": ASSAY_TEST_TYPES,
+    "assay_category": ASSAY_CATEGORIES,
+    "relationship_type": RELATIONSHIP_TYPES,
+}
+
 CHEMBL_ASSAY_PROFILE = build_standard_profile(
     profile_name="chembl.assay",
     description="Canonical field-level normalization policy for the ChEMBL Assay Silver schema.",
@@ -103,6 +113,7 @@ CHEMBL_ASSAY_PROFILE = build_standard_profile(
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
     json_string_fields=_JSON_STRING_FIELDS,
+    enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULE_COMPONENTS,
 )
 

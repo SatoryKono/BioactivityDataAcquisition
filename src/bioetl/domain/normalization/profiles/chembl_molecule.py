@@ -9,6 +9,7 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_canonical_smiles,
 )
 from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.constants import STRUCTURE_TYPES
 
 __all__ = [
     "CHEMBL_MOLECULE_PROFILE",
@@ -70,6 +71,11 @@ _SPECIAL_RULES = {
     ),
 }
 
+# Enum fields for strict validation
+_ENUM_FIELDS = {
+    "structure_type": STRUCTURE_TYPES,
+}
+
 CHEMBL_MOLECULE_PROFILE = build_standard_profile(
     profile_name="chembl.molecule",
     description="Canonical field-level normalization policy for the ChEMBL Molecule Silver schema.",
@@ -78,6 +84,7 @@ CHEMBL_MOLECULE_PROFILE = build_standard_profile(
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
     float_fields=_FLOAT_FIELDS,
+    enum_fields=_ENUM_FIELDS,
     special_rules=_SPECIAL_RULES,
 )
 

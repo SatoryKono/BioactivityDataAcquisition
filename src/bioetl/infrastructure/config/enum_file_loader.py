@@ -10,7 +10,7 @@ import yaml
 __all__ = ["load_chembl_enums_from_file"]
 
 
-def load_chembl_enums_from_file(yaml_path: Path | None = None) -> dict[str, Any]:
+def load_chembl_enums_from_file(yaml_path: Path | None = None) -> dict[str, Any]:  # Any: Dynamic YAML content structure
     """Load ChEMBL enum configurations from YAML file.
     
     This is an infrastructure-level function that performs direct file I/O.

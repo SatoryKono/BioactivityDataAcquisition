@@ -2,4 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.lineage.metadata_coordinator import *  # noqa: F403
+from bioetl.application.services.lineage.metadata_coordinator import (
+    MetadataCoordinator,
+)
+
+__all__ = [
+    "MetadataCoordinator",
+]

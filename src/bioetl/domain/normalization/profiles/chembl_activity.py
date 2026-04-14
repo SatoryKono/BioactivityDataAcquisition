@@ -30,6 +30,13 @@ __all__ = [
 # Assay types enum (B, F, A, T, P, U)
 ASSAY_TYPES = frozenset(["B", "F", "A", "T", "P", "U"])
 
+# Enum fields for strict validation
+_ENUM_FIELDS = {
+    "standard_relation": STANDARD_RELATIONS,
+    "standard_type": ACTIVITY_STANDARD_TYPES,
+    "assay_type": ASSAY_TYPES,
+}
+
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
         normalize_profile_canonical_smiles,
@@ -95,13 +102,9 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     },
     special_rules={
         **_SPECIAL_RULE_COMPONENTS,
-        "standard_relation": (
-            create_case_normalizer("uppercase"),
-            "Normalize standard_relation to uppercase for consistency.",
-        ),
-        "standard_type": (
-            create_case_normalizer("uppercase"),
-            "Normalize standard_type to uppercase for consistency.",
+        "canonical_smiles": (
+            normalize_profile_canonical_smiles,
+            "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
         ),
     },
     unit_fields={"standard_units"},
