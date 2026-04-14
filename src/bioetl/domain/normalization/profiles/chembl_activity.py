@@ -14,6 +14,7 @@ from ._chembl_activity_fields import (
 )
 from .profile_normalizers import normalize_profile_case, normalize_profile_unit
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
+from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from ._standard_profile_builder import build_standard_profile
 from .profile_normalizers import normalize_profile_canonical_smiles
 
@@ -30,20 +31,6 @@ __all__ = [
 # Assay types enum (B, F, A, T, P, U)
 ASSAY_TYPES = frozenset(["B", "F", "A", "T", "P", "U"])
 
-# Enum fields for strict validation
-_ENUM_FIELDS = {
-    "standard_relation": STANDARD_RELATIONS,
-    "standard_type": ACTIVITY_STANDARD_TYPES,
-    "assay_type": ASSAY_TYPES,
-}
-
-_SPECIAL_RULE_COMPONENTS = {
-    "canonical_smiles": (
-        normalize_profile_canonical_smiles,
-        "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
-    ),
-}
-
 
 def create_case_normalizer(strategy: str = "uppercase"):
     """Create a case normalizer function for profile use.
@@ -58,6 +45,37 @@ def create_case_normalizer(strategy: str = "uppercase"):
         return normalize_cross_pipeline_case(value, strategy)
     
     return normalizer
+
+
+# Enum fields for strict validation
+_ENUM_FIELDS = {
+    "standard_relation": STANDARD_RELATIONS,
+    "standard_type": ACTIVITY_STANDARD_TYPES,
+    "assay_type": ASSAY_TYPES,
+}
+
+_SPECIAL_RULE_COMPONENTS = {
+    "canonical_smiles": (
+        normalize_profile_canonical_smiles,
+        "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
+    ),
+    "bao_format": (
+        normalize_ontology_id,
+        "Normalize BAO ontology ID to underscore format (e.g., 'BAO:0000190' -> 'BAO_0000190').",
+    ),
+    "assay_type": (
+        create_case_normalizer("uppercase"),
+        "Normalize assay_type to uppercase enum value.",
+    ),
+    "assay_test_type": (
+        create_case_normalizer("preserve"),
+        "Normalize assay_test_type preserving original case (e.g., 'In vivo').",
+    ),
+    "assay_category": (
+        create_case_normalizer("preserve"),
+        "Normalize assay_category preserving original case.",
+    ),
+}
 
 
 # Fields that commonly contain pseudo-null values and should be normalized
@@ -100,13 +118,7 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
         "standard_type": ACTIVITY_STANDARD_TYPES,
         "data_validity_comment": DATA_VALIDITY_COMMENTS,
     },
-    special_rules={
-        **_SPECIAL_RULE_COMPONENTS,
-        "canonical_smiles": (
-            normalize_profile_canonical_smiles,
-            "Normalize canonical SMILES via the domain SMILES Value Object; invalid values collapse to None.",
-        ),
-    },
+    special_rules=_SPECIAL_RULE_COMPONENTS,
     unit_fields={"standard_units"},
     null_fields=NULL_FIELDS,
 )

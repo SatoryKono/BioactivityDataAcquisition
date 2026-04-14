@@ -100,6 +100,57 @@ ONTOLOGY_PREFIXES = {
 }
 
 
+def _normalize_colon_format(value: str) -> str | None:
+    """Handle colon format ontology IDs (CLO:1234 -> CLO_1234)."""
+    if ":" in value:
+        prefix, id_part = value.split(":", 1)
+        prefix = prefix.upper()
+        if prefix in ONTOLOGY_PREFIXES:
+            return f"{ONTOLOGY_PREFIXES[prefix]}{id_part}"
+    return None
+
+def _normalize_underscore_format(value: str) -> str | None:
+    """Handle underscore format ontology IDs (already correct format)."""
+    for prefix in ONTOLOGY_PREFIXES.values():
+        if value.startswith(prefix):
+            return value
+    return None
+
+def _normalize_space_format(value: str) -> str | None:
+    """Handle space format ontology IDs (UBERON 7 -> UBERON_0000007)."""
+    parts = value.split()
+    if len(parts) == 2 and parts[0].upper() in ONTOLOGY_PREFIXES:
+        prefix = ONTOLOGY_PREFIXES[parts[0].upper()]
+        id_part = parts[1].zfill(7)  # Pad to 7 digits
+        return f"{prefix}{id_part}"
+    return None
+
+def _validate_input(value: str) -> str | None:
+    """Validate and preprocess input value."""
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return None
+    from bioetl.domain.normalization.text import normalize_string
+    normalized = normalize_string(value)
+    # Preserve original behavior: return empty string for empty input, None for None
+    return normalized if normalized is not None else "" if value == "" else None
+
+def _apply_normalization_strategies(normalized: str) -> str:
+    """Apply normalization strategies in priority order."""
+    strategies = [
+        _normalize_colon_format,
+        _normalize_underscore_format,
+        _normalize_space_format,
+    ]
+    
+    for strategy in strategies:
+        result = strategy(normalized)
+        if result is not None:
+            return result
+    
+    return normalized  # Return as-is (preserves empty string behavior)
+
 def normalize_ontology_id(value: str) -> str | None:
     """Canonicalize ontology IDs with consistent prefix format.
     
@@ -123,40 +174,11 @@ def normalize_ontology_id(value: str) -> str | None:
         >>> normalize_ontology_id("unknown")
         "unknown"
     """
-    if value is None:
-        return None
-    
-    if not isinstance(value, str):
-        return None
-    
-    # Normalize string first (trim whitespace, etc.)
-    from bioetl.domain.normalization.text import normalize_string
-    normalized = normalize_string(value)
+    normalized = _validate_input(value)
     if normalized is None:
         return None
     
-    # Handle colon format (CLO:1234 -> CLO_1234)
-    if ":" in normalized:
-        prefix, id_part = normalized.split(":", 1)
-        prefix = prefix.upper()
-        if prefix in ONTOLOGY_PREFIXES:
-            return f"{ONTOLOGY_PREFIXES[prefix]}{id_part}"
-        return normalized  # Unknown prefix, return as-is
-    
-    # Handle underscore format (already correct)
-    for prefix in ONTOLOGY_PREFIXES.values():
-        if normalized.startswith(prefix):
-            return normalized
-    
-    # Handle space format (UBERON 7 -> UBERON_0000007)
-    parts = normalized.split()
-    if len(parts) == 2 and parts[0].upper() in ONTOLOGY_PREFIXES:
-        prefix = ONTOLOGY_PREFIXES[parts[0].upper()]
-        id_part = parts[1].zfill(7)  # Pad to 7 digits
-        return f"{prefix}{id_part}"
-    
-    # Unknown format, return as-is
-    return normalized
+    return _apply_normalization_strategies(normalized)
 
 
 def normalize_ontology_id_strict(value: str) -> str | None:
@@ -190,6 +212,21 @@ def normalize_ontology_id_strict(value: str) -> str | None:
     return None
 
 
+def _get_prefix_from_canonical(id_value: str) -> str | None:
+    """Extract prefix from canonical underscore format."""
+    for prefix, canonical in ONTOLOGY_PREFIXES.items():
+        if id_value.startswith(canonical):
+            return prefix
+    return None
+
+def _get_prefix_from_colon(id_value: str) -> str | None:
+    """Extract prefix from colon format."""
+    if ":" in id_value:
+        prefix = id_value.split(":")[0].upper()
+        if prefix in ONTOLOGY_PREFIXES:
+            return prefix
+    return None
+
 def get_ontology_prefix(id_value: str) -> str | None:
     """Extract ontology prefix from an ID string.
     
@@ -208,17 +245,10 @@ def get_ontology_prefix(id_value: str) -> str | None:
     if id_value is None:
         return None
     
-    for prefix, canonical in ONTOLOGY_PREFIXES.items():
-        if id_value.startswith(canonical):
-            return prefix
-    
-    # Check colon format
-    if ":" in id_value:
-        prefix = id_value.split(":")[0].upper()
-        if prefix in ONTOLOGY_PREFIXES:
-            return prefix
-    
-    return None
+    return (
+        _get_prefix_from_canonical(id_value) or
+        _get_prefix_from_colon(id_value)
+    )
 
 
 def is_valid_ontology_id(id_value: str) -> bool:
