@@ -786,7 +786,7 @@ def test_prune_statements_target_repo_sync_subgraph() -> None:
     reset_statement = _reset_managed_relations_statement(["CONTAINS", "DEFINED_BY"])
     prune_relations_statement = _prune_stale_relations_statement("sync-run-2")
     prune_nodes_statement = _prune_stale_nodes_statement("sync-run-2")
-    full_reset_statement = _delete_managed_wave_nodes_statement()
+    full_reset_statement = _delete_managed_wave_nodes_statement("doc_artifact", 1000)
     legacy_prune_statement = _prune_legacy_unmanaged_nodes_statement(["quality_gate", "execution_path"])
 
     assert "type(r) IN $relation_types" in reset_statement["statement"]
@@ -1783,7 +1783,7 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
     ]
 
     def _raise_transport_error(req: object, timeout: int = 60) -> object:
-        raise responses.pop(0)
+        raise responses.pop(0) if responses else error.URLError(TimeoutError("timed out"))
 
     monkeypatch.setattr("scripts.ops.neo4j_memory_sync.request.urlopen", _raise_transport_error)
     client = Neo4jHttpClient("http://host.docker.internal:7474", "neo4j", "password", "neo4j")

@@ -42,7 +42,7 @@ def test_build_field_matrix_rows_covers_schema_and_hash_policy() -> None:
     assert activity_properties["type"] == "string"
     assert (
         activity_properties["current_normalization"]
-        == "normalizer=_normalize_json_string; content_hash=included; hash_order=set_like"
+        == "normalizer=normalize_profile_json_string; content_hash=included; hash_order=set_like"
     )
     assert (
         activity_properties["proposed_normalization"]

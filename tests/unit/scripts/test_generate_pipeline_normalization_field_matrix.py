@@ -60,7 +60,7 @@ def test_checkpoint_governance_import_contract_is_documented() -> None:
     ).read_text(encoding="utf-8")
 
     assert "sanctioned public import surface" in facade_source
-    assert "compatibility-only shim" in shim_source
+    assert "compatibility surface" in shim_source
     assert "bioetl.application.composite.checkpoint.anchor_context" in plan_source
 
 

@@ -48,11 +48,6 @@ def create_bronze_writer(
     """
     save_json = config.save_json if config else False
     save_metadata = config.save_metadata if config else False
-    if save_metadata and metadata_coordinator is None:
-        raise RuntimeError(
-            "Bronze metadata publication requires MetadataCoordinator when "
-            "save_metadata is enabled."
-        )
     lineage_store = (
         FileLineageStore(base_path=base_path.parent / "control" / "lineage")
         if save_metadata

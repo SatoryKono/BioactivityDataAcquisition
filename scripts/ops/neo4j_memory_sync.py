@@ -2329,7 +2329,7 @@ def _add_curated_docs(snapshot: GraphSnapshot, root: Path, project: NodeKey, tod
 
 
 def _add_decisions_and_risks(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
-    package_summary = root / "docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md"
+    package_summary = root / "docs/reports/evidence/project-package-topology/SUMMARY.md"
     governance_summary = root / "docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md"
     package_doc = snapshot.add_node(
         "doc_artifact",

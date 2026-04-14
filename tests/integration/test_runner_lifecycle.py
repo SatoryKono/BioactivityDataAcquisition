@@ -245,7 +245,7 @@ def mock_preflight_service(call_recorder):
     """Create a mock preflight service."""
     service = MagicMock(spec=PreflightService)
 
-    async def validate_infrastructure(services):
+    async def validate_infrastructure(services, **kwargs):
         call_recorder.record("preflight.validate_infrastructure")
 
     service.validate_infrastructure = AsyncMock(side_effect=validate_infrastructure)
