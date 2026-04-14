@@ -42,7 +42,6 @@ async def finalize_batch_transform_result(
     records: list[BronzeRecord],
     flush_filtered_records: callable,
     flush_dq_records: callable,
-    flush_quarantined_records: callable,
 ) -> list[BronzeRecord]:
     """Finalize batch transform result with DQ checks and record filtering.
 
@@ -53,7 +52,7 @@ async def finalize_batch_transform_result(
         state: Current transform state
         records: Input records to finalize
         flush_filtered_records: Callback to flush filtered records
-        flush_quarantined_records: Callback to flush quarantined records
+        flush_dq_records: Callback to flush DQ quarantine records
 
     Returns:
         Finalized records ready for Silver write
@@ -81,7 +80,6 @@ async def finalize_batch_transform_result(
     # Flush any buffered records
     await flush_filtered_records()
     await flush_dq_records()
-    await flush_quarantined_records()
 
     return records
 
@@ -95,7 +93,6 @@ async def finalize_stream_transform_result(
     records: list[BronzeRecord],
     flush_filtered_records: callable,
     flush_dq_records: callable,
-    flush_quarantined_records: callable,
 ) -> list[BronzeRecord]:
     """Finalize stream transform result (alias for batch finalization).
 
@@ -109,7 +106,7 @@ async def finalize_stream_transform_result(
         state=state,
         records=records,
         flush_filtered_records=flush_filtered_records,
-        flush_quarantined_records=flush_quarantined_records,
+        flush_dq_records=flush_dq_records,
     )
 
 
