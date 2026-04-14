@@ -164,6 +164,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\docs\config_comparison_matrix.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\docs\reports\generated\pipeline_normalization_field_matrix\pipeline_normalization_field_matrix.csv">
           <value>
             <Attribute>
