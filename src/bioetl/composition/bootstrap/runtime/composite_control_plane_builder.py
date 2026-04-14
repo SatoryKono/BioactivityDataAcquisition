@@ -10,7 +10,7 @@ from bioetl.application.services.control_plane.run_ledger_service import (
     RunLedgerService,
 )
 from bioetl.application.services.control_plane.run_manifest_service import (
-    RunManifestCreateRequest,
+    RunManifestCreateSpec,
     RunManifestService,
 )
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
@@ -154,9 +154,9 @@ def _build_composite_manifest_create_request(
     contract_ref: str,
     contract_version: str,
     required_persistence_profile: str,
-) -> RunManifestCreateRequest:
+) -> RunManifestCreateSpec:
     """Build the manifest creation payload for one composite execution."""
-    return RunManifestCreateRequest(
+    return RunManifestCreateSpec(
         run_id=_coerce_run_id(infra_context.run_id),
         run_type=RunType.INCREMENTAL,
         pipeline_name=config.name,

@@ -101,6 +101,7 @@ def create_silver_writer(
         write_policy=None,
         metrics=metrics,
         audit=audit,
+        logger=logger,
         silver_validator=silver_validator,
         metadata_writer=metadata_writer,
         metadata_coordinator=metadata_coordinator,
@@ -108,6 +109,7 @@ def create_silver_writer(
         dq_calculator=None,
         merge_resilience_policy=merge_resilience_policy,
         contract_rollout_policy=contract_rollout_policy,
+        base_path=base_path,
     )
     return writer_cls(
         base_path=base_path,

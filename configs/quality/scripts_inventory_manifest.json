@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-14T10:25:27.623272+00:00",
+  "generated_at": "2026-04-14T10:56:08.897425+00:00",
   "summary": {
-    "total_scripts": 303,
+    "total_scripts": 304,
     "status_counts": {
       "active": 238,
       "legacy": 29,
-      "orphan": 23,
+      "orphan": 24,
       "unknown": 13
     },
     "reference_group_coverage": {
@@ -4990,6 +4990,14 @@
           "text": "bash scripts/check_skills_mirror.sh --sync"
         }
       ]
+    },
+    {
+      "path": "scripts/ops/cleanup_repository.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/codex-exec.bat",

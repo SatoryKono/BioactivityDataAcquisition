@@ -37,3 +37,6 @@
 
 # VCR cassettes
 *.json text eol=lf
+
+# Git LFS tracking for large VCR cassettes
+tests/fixtures/vcr/**/*.yaml filter=lfs diff=lfs merge=lfs -text

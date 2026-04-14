@@ -14,7 +14,7 @@ class ValidatedSilverWriteContext:
     """Context containing validated data ready for Silver layer write."""
     
     arrow_table: pa.Table
-    metadata: dict[str, Any]
+    metadata: dict[str, Any]  # Any: Flexible metadata structure from various sources
     validation_timestamp: datetime
     write_mode: str
     table_name: str
@@ -38,4 +38,4 @@ class SilverMaintenanceContext:
     
     table_name: str
     operation_type: str  # 'vacuum', 'optimize', 'export'
-    operation_params: dict[str, Any]
+    operation_params: dict[str, Any]  # Any: Flexible operation parameters for different maintenance tasks

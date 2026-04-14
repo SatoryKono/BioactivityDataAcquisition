@@ -22,6 +22,12 @@ from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
     SilverMergeResiliencePolicy,
 )
+from bioetl.infrastructure.storage.support.retention import RetentionPolicy
+from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (
+    SilverMaintenanceOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.metadata_operations import SilverMetadataOperations
+from bioetl.infrastructure.storage.silver.operations.validation_operations import SilverValidationOperations
 from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 
@@ -80,6 +86,7 @@ def build_silver_writer_runtime_services(
     write_policy: WriteModePolicy | None,
     metrics: MetricsPort | None,
     audit: AuditPort | None,
+    logger: LoggerPort | None,
     silver_validator: SilverValidatorPort | None,
     metadata_writer: MetadataWriterPort | None,
     metadata_coordinator: MetadataCoordinatorPort | None,
@@ -87,6 +94,7 @@ def build_silver_writer_runtime_services(
     dq_calculator: DQMetricsCalculator | None,
     merge_resilience_policy: SilverMergeResiliencePolicy | None,
     contract_rollout_policy: ContractRolloutPolicy | None = None,
+    base_path: str | Path | None = None,
 ) -> SilverWriterRuntimeServices:
     """Build grouped runtime collaborators while preserving default resolution."""
     (
@@ -106,10 +114,11 @@ def build_silver_writer_runtime_services(
     )
     # Create maintenance operations if needed components are available
     maintenance_ops = None
-    if csv_exporter is not None and resolved_merge_resilience_policy is not None:
+    if csv_exporter is not None and base_path is not None:
+        retention_manager = RetentionPolicy(base_path)
         maintenance_ops = SilverMaintenanceOperations(
             csv_exporter=csv_exporter,
-            retention_manager=resolved_merge_resilience_policy.retention_manager,
+            retention_manager=retention_manager,
             metrics=metrics,
             audit=audit,
         )

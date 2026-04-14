@@ -14,6 +14,7 @@ from deltalake import write_deltalake as _write_deltalake
 
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
+from bioetl.domain.config import KeyNullabilityRule
 from bioetl.domain.ports import (
     AuditPort,
     MetadataCoordinatorPort,
@@ -69,7 +70,6 @@ write_deltalake = _write_deltalake
 # in this root module while the implementations live in split validation helpers.
 
 if TYPE_CHECKING:
-    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.ports import LineageStorePort, LoggerPort
     from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
@@ -213,7 +213,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     SilverWriterArrowMixin,
     SilverWriterValidationMixin,
     SilverWriterDeltaMixin,
-    SilverWriterMetadataMixin,
     SilverWriterMergedMixin,
     SilverWriterPostwriteMixin,
     BaseDeltaWriter,
@@ -286,12 +285,14 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             write_policy=write_policy,
             metrics=metrics,
             audit=audit,
+            logger=self._logger,
             silver_validator=silver_validator,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
             lineage_store=lineage_store,
             dq_calculator=dq_calculator,
             merge_resilience_policy=merge_resilience_policy,
+            base_path=base_path,
         )
         self.csv_exporter = services.csv_exporter
         self._metrics = services.metrics

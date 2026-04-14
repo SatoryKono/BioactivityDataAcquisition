@@ -7,7 +7,7 @@ from typing import Any, TYPE_CHECKING
 from bioetl.domain.ports import AuditPort, MetricsPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
-from bioetl.infrastructure.storage.delta.retention import RetentionPolicy
+from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -45,7 +45,7 @@ class SilverMaintenanceOperations:
         table_name: str,
         arrow_data: pa.Table,
         export_path: str,
-        **kwargs: Any,
+        **kwargs: Any,  # Any: Flexible CSV export options
     ) -> None:
         """Export data to CSV if exporter is configured.
         
@@ -119,7 +119,7 @@ class SilverMaintenanceOperations:
         self,
         table_name: str,
         zorder_by: list[str] | None = None,
-        **kwargs: Any,
+        **kwargs: Any,  # Any: Flexible optimize operation options
     ) -> JsonDict:
         """Execute optimize operation on Delta table.
         
