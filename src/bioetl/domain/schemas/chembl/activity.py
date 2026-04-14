@@ -147,10 +147,11 @@ class ActivitySchema(ETLRecordSchema):
     toid: Series[float] | None = pa.Field(
         nullable=True, description="Test Occasion ID (float for nullable int)."
     )
-    manual_curation_flag: Series[float] | None = pa.Field(
+    manual_curation_flag: Series[int] | None = pa.Field(
         nullable=True,
-        isin=[0.0, 1.0],
-        description="Manual curation flag (float for nullable int).",
+        ge=0,
+        le=1,
+        description="Manual curation flag (0=auto, 1=manual).",
     )
     original_activity_id: Series[float] | None = pa.Field(
         nullable=True, description="Original activity ID (float for nullable int)."

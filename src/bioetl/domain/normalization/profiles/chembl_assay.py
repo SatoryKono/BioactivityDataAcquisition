@@ -94,6 +94,10 @@ _SPECIAL_RULE_COMPONENTS = {
         create_case_normalizer("uppercase"),
         "Normalize relationship_type to uppercase enum value.",
     ),
+    "bao_format": (
+        normalize_ontology_id,
+        "Normalize BAO ontology ID to underscore format (e.g., 'BAO:0000190' -> 'BAO_0000190').",
+    ),
 }
 
 # Enum fields for strict validation

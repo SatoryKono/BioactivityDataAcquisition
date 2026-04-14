@@ -120,3 +120,31 @@ class TestEnumValidation:
         
         # Non-string should return None (function only handles strings)
         assert normalize_profile_enum(123, allowed_values=allowed_values) is None
+
+
+class TestAssayOntologyNormalization:
+    """Test ontology ID normalization in assay profile."""
+
+    def test_bao_format_ontology_normalization(self) -> None:
+        """Test BAO format ontology ID normalization."""
+        rule = CHEMBL_ASSAY_PROFILE.field_rules['bao_format']
+        
+        # Test colon format to underscore format conversion
+        assert rule.normalizer('BAO:0000190') == 'BAO_0000190'
+        assert rule.normalizer('bao:0000190') == 'BAO_0000190'
+        
+        # Test underscore format preservation
+        assert rule.normalizer('BAO_0000190') == 'BAO_0000190'
+        
+        # Test case normalization
+        assert rule.normalizer('BAO:0000190') == 'BAO_0000190'
+        assert rule.normalizer('bao:0000190') == 'BAO_0000190'
+        
+        # Test None handling
+        assert rule.normalizer(None) is None
+        
+        # Test empty string handling
+        assert rule.normalizer('') == ''
+        
+        # Test unknown format preservation
+        assert rule.normalizer('unknown_format') == 'unknown_format'
