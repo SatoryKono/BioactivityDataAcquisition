@@ -28,6 +28,12 @@ from bioetl.infrastructure.storage.silver.operations.maintenance_operations impo
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_operations import SilverMetadataOperations
 from bioetl.infrastructure.storage.silver.operations.validation_operations import SilverValidationOperations
+from bioetl.infrastructure.storage.silver.validation_operations import (
+    _deduplicate_by_primary_keys_impl,
+    _to_policy_write_mode_impl,
+    _validate_key_nullability_impl,
+    _validate_write_mode_impl,
+)
 from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 
@@ -50,6 +56,7 @@ class SilverWriterRuntimeServices:
     # New operation services for composition
     maintenance_operations: SilverMaintenanceOperations | None = None
     metadata_operations: SilverMetadataOperations | None = None
+    validation_operations: SilverValidationOperations | None = None
 
 
 def resolve_silver_writer_runtime(
@@ -136,6 +143,32 @@ def build_silver_writer_runtime_services(
             dq_calculator=resolved_dq_calculator,
         )
     
+    # Create validation operations if needed components are available
+    validation_ops = None
+    if resolved_silver_validator is not None and base_path is not None:
+        # Import here to avoid circular imports
+        from bioetl.infrastructure.storage.delta.table_ops import resolve_delta_table_path
+        from bioetl.infrastructure.storage.base_delta_writer import (
+            _get_table_schema,
+        )
+        from bioetl.infrastructure.storage.silver.arrow_mixin import (
+            prepare_arrow_data,
+        )
+        
+        validation_ops = SilverValidationOperations(
+            logger=logger,
+            _write_policy=resolved_write_policy,
+            _metrics=metrics,
+            _silver_validator=resolved_silver_validator,
+            _get_table_schema=lambda table_name: get_table_schema(base_path, table_name),
+            _resolve_table_path=lambda table_name: resolve_table_path(base_path, table_name),
+            _prepare_arrow_data=prepare_arrow_data,
+            _validate_write_mode=_validate_write_mode_impl,
+            _deduplicate_by_primary_keys=_deduplicate_by_primary_keys_impl,
+            _to_policy_write_mode=_to_policy_write_mode_impl,
+            _validate_key_nullability=_validate_key_nullability_impl,
+        )
+    
     return SilverWriterRuntimeServices(
         csv_exporter=csv_exporter,
         tracing=resolved_tracing,
@@ -151,4 +184,5 @@ def build_silver_writer_runtime_services(
         contract_rollout_policy=contract_rollout_policy,
         maintenance_operations=maintenance_ops,
         metadata_operations=metadata_ops,
+        validation_operations=validation_ops,
     )
