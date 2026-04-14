@@ -23,8 +23,11 @@ CHEMBL_ID_PATTERN = r"^CHEMBL\d+$"
 # ChEMBL API returns underscore format (BAO_0000190), not colon format (BAO:0000190)
 BAO_ID_PATTERN = r"^BAO[_:]\d+$"  # BioAssay Ontology (accepts both _ and :)
 UO_ID_PATTERN = r"^UO[_:]\d+$"  # Units Ontology (accepts both _ and :)
-CLO_ID_PATTERN = r"^CLO_\d+$"  # Cell Line Ontology
-EFO_ID_PATTERN = r"^EFO_\d+$"  # Experimental Factor Ontology
+CLO_ID_PATTERN = r"^CLO[_:]\d+$"  # Cell Line Ontology (accepts both _ and :)
+EFO_ID_PATTERN = r"^EFO[_:]\d+$"  # Experimental Factor Ontology (accepts both _ and :)
+BTO_ID_PATTERN = r"^BTO[_:]\d+$"  # BRENDA Tissue Ontology (accepts both _ and :)
+UBERON_ID_PATTERN = r"^UBERON[_:]\d+$"  # Uber Anatomical Ontology (accepts both _ and :)
+CALOHA_ID_PATTERN = r"^TS-\d{4}$"  # CALIPHO tissue ontology identifier
 
 # External database identifiers
 CELLOSAURUS_ID_PATTERN = r"^CVCL_[A-Z0-9]+$"
@@ -269,11 +272,14 @@ __all__ = [
     "CANONICAL_SMILES_MAX_LENGTH",
     "CELLOSAURUS_ID_PATTERN",
     # Regex patterns
+    "BTO_ID_PATTERN",
+    "CALOHA_ID_PATTERN",
     "CHEMBL_ID_PATTERN",
     "CLO_ID_PATTERN",
     "DATA_VALIDITY_COMMENTS",
     "EFO_ID_PATTERN",
     "ISO_DATE_PATTERN",
+    "UBERON_ID_PATTERN",
     "ISSN_PATTERN",
     "MAX_PHASE_VALUES",
     # Molecule enums

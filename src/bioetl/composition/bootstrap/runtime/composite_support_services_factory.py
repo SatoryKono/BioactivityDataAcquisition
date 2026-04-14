@@ -246,6 +246,7 @@ class CompositeSupportServicesFactory:
                 renamer=merge_dependencies.renamer,
                 orderer=merge_dependencies.orderer,
                 priority_orderer=merge_dependencies.priority_orderer,
+                order_service=merge_dependencies.order_service,
                 coalesce_policy=merge_dependencies.coalesce_policy,
                 conflict_resolver=merge_dependencies.conflict_resolver,
                 join_planner=merge_dependencies.join_planner,

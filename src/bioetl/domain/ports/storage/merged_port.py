@@ -47,7 +47,7 @@ class MergedStoragePort(Protocol):
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical_column_order()
                 and preserve the column order from records (e.g. semantic
-                ordering applied by ColumnOrderer in composite pipelines).
+                ordering applied by ColumnOrderService in composite pipelines).
         """
         ...
 
@@ -78,7 +78,7 @@ class MergedStoragePort(Protocol):
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical_column_order()
                 and preserve the column order from records (e.g. semantic
-                ordering applied by ColumnOrderer in composite pipelines).
+                ordering applied by ColumnOrderService in composite pipelines).
             schema: Optional Pandera schema used for strict contract validation.
         """
         ...

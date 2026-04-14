@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-13T18:36:12.566457+00:00",
+  "generated_at": "2026-04-14T06:09:29.672517+00:00",
   "summary": {
-    "total_scripts": 295,
+    "total_scripts": 303,
     "status_counts": {
       "active": 238,
       "legacy": 29,
-      "orphan": 15,
+      "orphan": 23,
       "unknown": 13
     },
     "reference_group_coverage": {
@@ -5609,6 +5609,22 @@
       ]
     },
     {
+      "path": "scripts/ops/mcp_chembl_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/mcp_chembl_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ops/mcp_context7_wrapper.ps1",
       "type": "ps1",
       "status": "active",
@@ -5819,6 +5835,22 @@
       ]
     },
     {
+      "path": "scripts/ops/mcp_mermaid_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/mcp_mermaid_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ops/mcp_neo4j_cypher_wrapper.ps1",
       "type": "ps1",
       "status": "active",
@@ -6021,6 +6053,38 @@
           "text": "\"scripts/ops/mcp_prometheus_wrapper.sh\""
         }
       ]
+    },
+    {
+      "path": "scripts/ops/mcp_pubchem_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/mcp_pubchem_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/mcp_pubmed_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ops/mcp_pubmed_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/mistral-exec.bat",
@@ -6942,7 +7006,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 26,
       "references": [
         {
           "path": "scripts/ops/INDEX.md",
@@ -6969,25 +7033,25 @@
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
         },
         {
-          "path": "scripts/ops/mcp_context7_wrapper.sh",
+          "path": "scripts/ops/mcp_chembl_wrapper.sh",
           "line": 5,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/docker_cli_resolver.sh"
         },
         {
-          "path": "scripts/ops/mcp_context7_wrapper.sh",
+          "path": "scripts/ops/mcp_chembl_wrapper.sh",
           "line": 6,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
         },
         {
-          "path": "scripts/ops/mcp_docker_docs_wrapper.sh",
+          "path": "scripts/ops/mcp_context7_wrapper.sh",
           "line": 5,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/docker_cli_resolver.sh"
         },
         {
-          "path": "scripts/ops/mcp_docker_docs_wrapper.sh",
+          "path": "scripts/ops/mcp_context7_wrapper.sh",
           "line": 6,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""

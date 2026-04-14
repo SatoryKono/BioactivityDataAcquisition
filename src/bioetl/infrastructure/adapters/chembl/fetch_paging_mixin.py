@@ -93,6 +93,26 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
             handle_error = cast("Callable[[Exception], NoReturn]", self._handle_error)
             handle_error(error)
 
+    def _calculate_page_limit(self, params: JsonDict, limit: int | None, records_yielded: int) -> int | None:
+        """Calculate the limit for the current page request.
+
+        Args:
+            params: Current request parameters
+            limit: Overall limit for the iteration
+            records_yielded: Records already yielded
+
+        Returns:
+            Limit for this page request, or None if no more records needed
+        """
+        if limit is None or "limit" not in params:
+            return params.get("limit")
+
+        remaining = limit - records_yielded
+        if remaining <= 0:
+            return None  # Signal to stop iteration
+
+        return min(params["limit"], remaining)
+
     async def _page_iterator(
         self,
         entity_type: str,
@@ -112,22 +132,28 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
         url = self._mapper.get_resource_url(entity_type)
         offset = start_offset
         records_yielded = 0
+
         while True:
             params = self._build_params(offset, entity_type)
-            if limit is not None and "limit" in params:
-                remaining = limit - records_yielded
-                if remaining > 0:
-                    params["limit"] = min(params["limit"], remaining)
-                elif remaining <= 0:
-                    break
+            
+            # Apply limit constraint for this page
+            page_limit = self._calculate_page_limit(params, limit, records_yielded)
+            if page_limit is None:
+                break  # Limit reached
+            if page_limit != params.get("limit"):
+                params["limit"] = page_limit
 
             records, has_next = await self._fetch_page(url, params, entity_type)
             if not records:
                 break
+
             yield records
             records_yielded += len(records)
-            if not has_next:
+            
+            # Check if we should continue to next page
+            if not has_next or (limit is not None and records_yielded >= limit):
                 break
+                
             offset += len(records)
 
 

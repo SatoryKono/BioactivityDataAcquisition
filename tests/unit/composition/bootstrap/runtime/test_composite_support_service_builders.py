@@ -279,6 +279,9 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
     "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.PolarsJoinAdapter"
 )
 @patch(
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ResolverHelper"
+)
+@patch(
     "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.JoinKeyResolverService"
 )
 @patch(
@@ -310,6 +313,7 @@ def test_build_merge_dependencies_wires_join_adapter_and_planner(
     mock_priority_orderer_cls: MagicMock,
     mock_coalesce_policy_cls: MagicMock,
     mock_conflict_resolver_cls: MagicMock,
+    mock_resolver_helper_cls: MagicMock,
     mock_join_key_resolver_cls: MagicMock,
     mock_join_adapter_cls: MagicMock,
     mock_dependency_joiner_cls: MagicMock,
@@ -327,8 +331,10 @@ def test_build_merge_dependencies_wires_join_adapter_and_planner(
     join_executor = MagicMock(name="join_executor")
     dependency_joiner = MagicMock(name="dependency_joiner")
     join_planner = MagicMock(name="join_planner")
+    resolver_helper = MagicMock(name="resolver_helper")
 
     mock_deduplicator_cls.return_value = deduplicator
+    mock_resolver_helper_cls.return_value = resolver_helper
     mock_aggregator_cls.return_value = aggregator
     mock_renamer_cls.return_value = renamer
     mock_orderer_cls.return_value = orderer
@@ -363,9 +369,16 @@ def test_build_merge_dependencies_wires_join_adapter_and_planner(
         column_groups=("priority",),
     )
     mock_coalesce_policy_cls.assert_called_once_with(logger, priority_orderer)
+    # Check that resolver_helper is created with normalization_policies
+    from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
+    resolver_helper_call = mock_resolver_helper_cls.call_args
     assert (
-        mock_join_key_resolver_cls.call_args.kwargs["normalization_policies"]
+        resolver_helper_call.kwargs["normalization_policies"]
         is JOIN_KEY_NORMALIZATION_POLICIES
+    )
+    assert (
+        mock_join_key_resolver_cls.call_args.kwargs["resolver_helper"]
+        is resolver_helper_call.return_value
     )
     join_adapter_kwargs = mock_join_adapter_cls.call_args.kwargs
     assert join_adapter_kwargs["logger"] is logger

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Literal
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.domain.types import GoldRecord
 
 _SCHEMA_EXTRACTION_ERRORS = (

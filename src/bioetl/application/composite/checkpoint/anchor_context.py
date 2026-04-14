@@ -1,4 +1,4 @@
-"""Compatibility shim for legacy composite checkpoint anchor-context imports.
+"""Legacy import shim for composite checkpoint anchor-context imports.
 
 New first-party governance consumers must import these helpers from the package
 root facade ``bioetl.application.composite.checkpoint``. This module remains

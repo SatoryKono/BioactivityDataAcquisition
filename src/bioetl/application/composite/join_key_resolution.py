@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
 from bioetl.application.composite.join_key_normalization import (
     JoinKeyNormalizationPolicy,
 )
@@ -29,10 +30,10 @@ class JoinKeyResolverService:
     def __init__(
         self,
         *,
-        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy],
+        resolver_helper: ResolverHelper,
         parse_pipeline_name: Callable[[str], tuple[str, str]],
     ) -> None:
-        self._normalization_policies = normalization_policies
+        self._resolver_helper = resolver_helper
         self._parse_pipeline_name = parse_pipeline_name
 
     def find_join_key_column(
@@ -76,12 +77,9 @@ class JoinKeyResolverService:
             DataFrame with canonical trim/casing policy applied to supported
             string join keys.
         """
-        return normalize_join_key_columns(
+        return self._resolver_helper.normalize_join_keys(
             df=df,
             join_keys=join_keys,
-            pipeline=pipeline,
-            normalization_policies=self._normalization_policies,
-            parse_pipeline_name=self._parse_pipeline_name,
         )
 
     def resolve_join_key_names(

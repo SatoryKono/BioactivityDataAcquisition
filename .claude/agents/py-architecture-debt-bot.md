@@ -12,7 +12,10 @@ Claude-specific coordination rules:
 
 - use `.claude/agents/ORCHESTRATION.md` for subagent routing
 - keep `configs/` changes delegated to `py-config-bot`
+- `configs/` меняет только `py-config-bot`
 - keep docs/docstrings delegated to `py-doc-bot`
 - use `py-audit-bot` as the final architecture gate
+- generate-debt-tasks
+- reduce-architecture-debt
 
 Follow the canonical `.codex` profile and adapt invocation details to Claude's `Agent(...)` runtime.

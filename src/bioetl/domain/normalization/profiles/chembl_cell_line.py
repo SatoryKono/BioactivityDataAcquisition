@@ -5,6 +5,7 @@ from __future__ import annotations
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.schemas.chembl.cell_line import CellLineSchema
 
 __all__ = [
@@ -30,6 +31,18 @@ _META_FIELDS = frozenset(
 _TITLE_FIELDS = frozenset({"cell_name", "cell_source_tissue"})
 _INT_FIELDS = frozenset({"cell_source_taxonomy_id"})
 
+# Special rules for ontology ID fields
+_SPECIAL_RULE_COMPONENTS = {
+    "clo_id": (
+        normalize_ontology_id,
+        "Normalize CLO ontology ID to canonical underscore format.",
+    ),
+    "efo_id": (
+        normalize_ontology_id,
+        "Normalize EFO ontology ID to canonical underscore format.",
+    ),
+}
+
 CHEMBL_CELL_LINE_PROFILE = build_standard_profile(
     profile_name="chembl.cell_line",
     description="Canonical field-level normalization policy for the ChEMBL Cell Line Silver schema.",
@@ -37,6 +50,7 @@ CHEMBL_CELL_LINE_PROFILE = build_standard_profile(
     meta_fields=_META_FIELDS,
     title_fields=_TITLE_FIELDS,
     int_fields=_INT_FIELDS,
+    special_rules=_SPECIAL_RULE_COMPONENTS,
 )
 
 CHEMBL_CELL_LINE_PROFILE.assert_covers_schema(CHEMBL_CELL_LINE_SCHEMA_FIELDS)

@@ -10,7 +10,7 @@ Run the role-specific workflow as defined in the `py-architecture-debt-bot` prof
 
 ## Source Of Truth
 
-- Primary profile: `../../agents/py-architecture-debt-bot.md`
+- Primary profile: `.claude/agents/py-architecture-debt-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Shared project context: `../../PROJECT_CONTEXT.md`
 - Deterministic helpers:

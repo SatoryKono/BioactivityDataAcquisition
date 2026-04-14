@@ -9,7 +9,7 @@ from typing import Protocol
 
 import polars as pl
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.runtime_timestamps import derive_completion_timestamp
 from bioetl.domain.composite.config import EnricherConfig
@@ -38,7 +38,7 @@ class MergePostJoinWorkflowContext(Protocol):
 
     _logger: LoggerPort
     _conflict_resolver: ConflictResolverService
-    _orderer: ColumnOrderer
+    _orderer: ColumnOrderService | None  # Deprecated: Use order_service instead
 
     def _run_cross_validation(
         self,
