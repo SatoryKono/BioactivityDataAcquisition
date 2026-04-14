@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 class _PreparedSeedDataframe:
     """Seed DataFrame with provenance metadata."""
     
-    df: pl.DataFrame
+    seed_df: pl.DataFrame
     records_from_seed: int
     effective_seed_pipeline: str | None
 
