@@ -286,4 +286,17 @@ class CompositePipelineRunner(
 
 
 # Backward-compatible alias for iterative NAME-001 migration.
-CompositePipelineRunnerService = CompositePipelineRunner
+import warnings
+
+class CompositePipelineRunnerService(CompositePipelineRunner):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "CompositePipelineRunnerService is deprecated and will be removed in v2.0. "
+            "Use CompositePipelineRunner instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        super().__init__(*args, **kwargs)
+
+# Also provide the reverse alias for completeness
+CompositePipelineRunnerService_legacy = CompositePipelineRunnerService

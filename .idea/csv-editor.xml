@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CsvFileAttributes">
+    <option name="attributeMap">
+      <map>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\activity.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\cell.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\compound_record.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\dois.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\protein.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\protein_classification.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\publication.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\pubmed.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\reference\unified_classification.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\target.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\target_component.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\data\input\tissue.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\docs\04-reference\config_comparison_matrix.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\docs\04-reference\pipelines\chembl\cell-line-fields.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\docs\04-reference\pipelines\chembl\protein-class-fields.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\docs\04-reference\schemas\publication_field_order.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\docs\04-reference\schemas\publication_validation_schema_v3.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\fixtures\input\openalex_dois_sample.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\fixtures\input\semanticscholar_dois_sample.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\input\molecule.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\input\publication.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\input\pubmed.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\input\pubmed_publications.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\docs\reports\generated\pipeline_normalization_field_matrix\pipeline_normalization_field_matrix.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\reports\quality\field_level_diagnostics.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\reports\quality\field_transformation_spec.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\reports\quality\unified_schema_map.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

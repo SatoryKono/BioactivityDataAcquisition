@@ -161,7 +161,7 @@ class SilverMetadataOperations:
         result = await self._metadata_writer.write(metadata)
         
         if self._metrics:
-            self._metrics.increment_counter("silver.metadata_write_success")
+            self._metrics.increment_counter("silver.metadata_write_success", 1)
         
         if self._audit:
             self._audit.log_event(

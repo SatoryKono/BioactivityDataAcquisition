@@ -19,6 +19,9 @@ __all__ = [
     "METADATA_WRITE_OUTCOMES_TOTAL",
     "METADATA_WRITE_RETRIES_TOTAL",
     "POLICY_VIOLATIONS_TOTAL",
+    "SILVER_CSV_EXPORT_FAILURES_TOTAL",
+    "SILVER_CSV_EXPORT_START_TOTAL",
+    "SILVER_CSV_EXPORT_SUCCESS_TOTAL",
     "SILVER_MERGE_FAILURES_TOTAL",
     "SILVER_MERGE_RETRIES_TOTAL",
     "SILVER_VALIDATION_FAILURES_TOTAL",
@@ -128,4 +131,22 @@ METADATA_WRITE_OUTCOMES_TOTAL = Counter(
     "bioetl_metadata_write_outcomes_total",
     "Total metadata sidecar write outcomes",
     ["layer", "provider", "pipeline", "status", "final_reason"],
+)
+
+SILVER_CSV_EXPORT_START_TOTAL = Counter(
+    "bioetl_silver_csv_export_start_total",
+    "Total Silver CSV export operations started",
+    ["table", "pipeline"],
+)
+
+SILVER_CSV_EXPORT_SUCCESS_TOTAL = Counter(
+    "bioetl_silver_csv_export_success_total",
+    "Total successful Silver CSV export operations",
+    ["table", "pipeline"],
+)
+
+SILVER_CSV_EXPORT_FAILURES_TOTAL = Counter(
+    "bioetl_silver_csv_export_failures_total",
+    "Total failed Silver CSV export operations",
+    ["table", "pipeline", "error_type"],
 )

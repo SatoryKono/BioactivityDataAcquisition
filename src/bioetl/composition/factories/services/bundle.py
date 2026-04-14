@@ -194,6 +194,7 @@ def build_pipeline_services(
         logger=logger,
         data_source=data_source,
         pipeline_config=pipeline_config,
+        pipeline_name=pipeline_name,
         metrics=shared_metrics,
         tracer=tracer,
         dq_monitor=dq_monitor,

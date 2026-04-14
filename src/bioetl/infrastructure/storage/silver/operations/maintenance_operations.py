@@ -24,6 +24,7 @@ class SilverMaintenanceOperations:
         self,
         csv_exporter: CsvExporter | None,
         retention_manager: RetentionPolicy,
+        pipeline_name: str,
         metrics: MetricsPort | None = None,
         audit: AuditPort | None = None,
     ) -> None:
@@ -32,11 +33,13 @@ class SilverMaintenanceOperations:
         Args:
             csv_exporter: Optional CSV exporter for parallel output
             retention_manager: Retention policy for vacuum operations
+            pipeline_name: Name of the pipeline for metric labeling
             metrics: Optional metrics port for instrumentation
             audit: Optional audit port for logging
         """
         self._csv_exporter = csv_exporter
         self._retention_manager = retention_manager
+        self._pipeline_name = pipeline_name
         self._metrics = metrics
         self._audit = audit
     
@@ -59,12 +62,12 @@ class SilverMaintenanceOperations:
             return
         
         if self._metrics:
-            self._metrics.increment_counter("silver.csv_export_start")
+            self._metrics.increment_counter("bioetl_silver_csv_export_start_total", 1, labels={"table": table_name, "pipeline": self._pipeline_name})
         
         try:
-            await self._csv_exporter.export(table_name, arrow_data, export_path, **kwargs)
+            await self._csv_exporter.export(table_name, arrow_data, **kwargs)
             if self._metrics:
-                self._metrics.increment_counter("silver.csv_export_success")
+                self._metrics.increment_counter("bioetl_silver_csv_export_success_total", 1, labels={"table": table_name, "pipeline": self._pipeline_name})
             if self._audit:
                 self._audit.log_event(
                     "SilverCsvExport",
@@ -72,7 +75,7 @@ class SilverMaintenanceOperations:
                 )
         except Exception as e:
             if self._metrics:
-                self._metrics.increment_counter("silver.csv_export_failure")
+                self._metrics.increment_counter("bioetl_silver_csv_export_failures_total", 1, labels={"table": table_name, "pipeline": self._pipeline_name, "error_type": type(e).__name__})
             if self._audit:
                 self._audit.log_event(
                     "SilverCsvExport",
@@ -97,15 +100,15 @@ class SilverMaintenanceOperations:
             Dictionary with vacuum operation results
         """
         if self._metrics:
-            self._metrics.increment_counter("silver.vacuum_start")
+            self._metrics.increment_counter("bioetl_silver_vacuum_start_total", 1)
         
         result = await self._retention_manager.vacuum(
             table_name, retention_hours, dry_run=dry_run
         )
         
         if self._metrics:
-            self._metrics.increment_counter("silver.vacuum_success")
-            self._metrics.gauge("silver.vacuum_files_removed", result.get("files_removed", 0))
+            self._metrics.increment_counter("bioetl_silver_vacuum_success_total", 1)
+            self._metrics.gauge("bioetl_silver_vacuum_files_removed", result.get("files_removed", 0))
         
         if self._audit:
             self._audit.log_event(
@@ -132,13 +135,13 @@ class SilverMaintenanceOperations:
             Dictionary with optimize operation results
         """
         if self._metrics:
-            self._metrics.increment_counter("silver.optimize_start")
+            self._metrics.increment_counter("bioetl_silver_optimize_start_total", 1)
         
         # Implementation would use DeltaTable.optimize()
         result = {"table": table_name, "status": "success"}
         
         if self._metrics:
-            self._metrics.increment_counter("silver.optimize_success")
+            self._metrics.increment_counter("bioetl_silver_optimize_success_total", 1)
         
         if self._audit:
             self._audit.log_event("SilverOptimize", result)

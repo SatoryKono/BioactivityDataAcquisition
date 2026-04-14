@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from datetime import datetime
+
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
@@ -16,6 +18,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
+from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.delta.resilience import (
@@ -27,6 +30,10 @@ from bioetl.infrastructure.storage.silver.operations.maintenance_operations impo
     SilverMaintenanceOperations,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_operations import SilverMetadataOperations
+from bioetl.infrastructure.storage.silver.operations.arrow_operations import SilverArrowOperations
+from bioetl.infrastructure.storage.silver.operations.delta_operations import SilverDeltaOperations
+from bioetl.infrastructure.storage.silver.operations.merged_operations import SilverMergedOperations
+from bioetl.infrastructure.storage.silver.operations.postwrite_operations import SilverPostwriteOperations
 from bioetl.infrastructure.storage.silver.operations.validation_operations import SilverValidationOperations
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _deduplicate_by_primary_keys_impl,
@@ -57,6 +64,10 @@ class SilverWriterRuntimeServices:
     maintenance_operations: SilverMaintenanceOperations | None = None
     metadata_operations: SilverMetadataOperations | None = None
     validation_operations: SilverValidationOperations | None = None
+    delta_operations: SilverDeltaOperations | None = None
+    arrow_operations: SilverArrowOperations | None = None
+    merged_operations: SilverMergedOperations | None = None
+    postwrite_operations: SilverPostwriteOperations | None = None
 
 
 def resolve_silver_writer_runtime(
@@ -102,6 +113,7 @@ def build_silver_writer_runtime_services(
     merge_resilience_policy: SilverMergeResiliencePolicy | None,
     contract_rollout_policy: ContractRolloutPolicy | None = None,
     base_path: str | Path | None = None,
+    pipeline_name: str | None = None,
 ) -> SilverWriterRuntimeServices:
     """Build grouped runtime collaborators while preserving default resolution."""
     (
@@ -126,6 +138,7 @@ def build_silver_writer_runtime_services(
         maintenance_ops = SilverMaintenanceOperations(
             csv_exporter=csv_exporter,
             retention_manager=retention_manager,
+            pipeline_name=pipeline_name,
             metrics=metrics,
             audit=audit,
         )
@@ -149,10 +162,8 @@ def build_silver_writer_runtime_services(
         # Import here to avoid circular imports
         from bioetl.infrastructure.storage.silver.support import (
             get_table_schema,
-            resolve_table_path,
-        )
-        from bioetl.infrastructure.storage.silver.arrow_mixin import (
             prepare_arrow_data,
+            resolve_table_path,
         )
         
         validation_ops = SilverValidationOperations(
@@ -168,6 +179,38 @@ def build_silver_writer_runtime_services(
             _to_policy_write_mode=_to_policy_write_mode_impl,
             _validate_key_nullability=_validate_key_nullability_impl,
         )
+    
+    # Create delta operations if needed components are available
+    delta_ops = None
+    if resolved_merge_resilience_policy is not None:
+        delta_ops = SilverDeltaOperations(
+            logger=logger,
+            _metrics=metrics,
+            _merge_resilience_policy=resolved_merge_resilience_policy,
+        )
+    
+    # Create arrow operations (always available since it's stateless)
+    arrow_ops = SilverArrowOperations()
+    
+    # Create merged operations if needed components are available
+    merged_ops = None
+    if csv_exporter is not None and base_path is not None:
+        # Import here to avoid circular imports
+        from bioetl.infrastructure.storage.silver.support import resolve_table_path
+        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
+        
+        # For now, we'll create the merged operations with a placeholder metadata writer
+        # The real implementation will be set when SilverWriter is fully initialized
+        merged_ops = SilverMergedOperations(
+            logger=logger,
+            csv_exporter=csv_exporter,
+            _arrow_converter=ArrowDataConverter(),
+            _resolve_table_path=lambda table_name: resolve_table_path(base_path, table_name),
+            _write_silver_merged_metadata=lambda **kwargs: None,  # Placeholder
+        )
+    
+    # Create postwrite operations (will be initialized with host in SilverWriter.__init__)
+    postwrite_ops = None
     
     return SilverWriterRuntimeServices(
         csv_exporter=csv_exporter,
@@ -185,4 +228,8 @@ def build_silver_writer_runtime_services(
         maintenance_operations=maintenance_ops,
         metadata_operations=metadata_ops,
         validation_operations=validation_ops,
+        delta_operations=delta_ops,
+        arrow_operations=arrow_ops,
+        merged_operations=merged_ops,
+        postwrite_operations=postwrite_ops,
     )

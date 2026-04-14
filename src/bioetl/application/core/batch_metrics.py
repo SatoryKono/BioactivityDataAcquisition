@@ -202,6 +202,16 @@ class BatchMetricsRecorderService:
 
 # Compatibility alias retained for legacy imports; new code should use
 # BatchMetricsRecorderService directly.
-BatchMetricsRecorder = BatchMetricsRecorderService
+import warnings
+
+class BatchMetricsRecorder(BatchMetricsRecorderService):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "BatchMetricsRecorder is deprecated and will be removed in v2.0. "
+            "Use BatchMetricsRecorderService instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        super().__init__(*args, **kwargs)
 
 __all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService"]

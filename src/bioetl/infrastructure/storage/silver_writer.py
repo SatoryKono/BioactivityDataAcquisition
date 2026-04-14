@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio as _asyncio
 import time
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
@@ -32,15 +33,12 @@ from bioetl.infrastructure.storage.base_delta_writer import (
 from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
 )
-from bioetl.infrastructure.storage.silver.arrow_mixin import (
-    SilverWriterArrowMixin,
-)
-from bioetl.infrastructure.storage.silver.delta_mixin import (
-    SilverWriterDeltaMixin,
-)
-from bioetl.infrastructure.storage.silver.merged_mixin import (
-    SilverWriterMergedMixin,
-)
+# SilverWriterArrowMixin removed from inheritance (composition pattern)
+# Arrow operations now handled by SilverArrowOperations service
+# SilverWriterDeltaMixin removed from inheritance (composition pattern)
+# Delta operations now handled by SilverDeltaOperations service
+# SilverWriterMergedMixin removed from inheritance (composition pattern)
+# Merged operations now handled by SilverMergedOperations service
 
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
@@ -48,15 +46,20 @@ from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     execute_silver_write_pipeline,
     execute_silver_write_with_tracing,
 )
-from bioetl.infrastructure.storage.silver.postwrite_mixin import (
-    SilverWriterPostwriteMixin,
-)
+from bioetl.infrastructure.storage.silver.operations.postwrite_operations import SilverPostwriteOperations
+
+# SilverWriterPostwriteMixin removed from inheritance (composition pattern)
+# Postwrite operations now handled by SilverPostwriteOperations service
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
     build_silver_writer_runtime_services,
 )
 # SilverWriterValidationMixin removed from inheritance (composition pattern)
 # Validation operations now handled by SilverValidationOperations service
+from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+    _PreparedSilverWritePayload,
+    _SilverWritePreparationRequest,
+)
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_write_targets,
 )
@@ -209,10 +212,6 @@ async def _write_dual_targets(
 
 
 class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
-    SilverWriterArrowMixin,
-    SilverWriterDeltaMixin,
-    SilverWriterMergedMixin,
-    SilverWriterPostwriteMixin,
     BaseDeltaWriter,
 ):
     """Writer for Silver layer (normalized data in Delta Lake)."""
@@ -225,6 +224,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         transform_steps: tuple[str, ...] | None = None,
         runtime_services: SilverWriterRuntimeServices | None = None,
         flat_structure: bool = False,
+        pipeline_name: str | None = None,
         **legacy_kwargs: object,
     ) -> None:
         """Initialize Silver writer.
@@ -237,7 +237,9 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             runtime_services: Optional grouped runtime collaborators for tracing,
                 validation, metadata, DQ, resilience, and optional CSV export.
             flat_structure: When True, omit the table-based subdirectory hierarchy.
+            pipeline_name: Optional pipeline name for metric labeling.
         """
+        self._pipeline_name = pipeline_name
         csv_exporter = cast(
             "CsvExporter | None", legacy_kwargs.pop("csv_exporter", None)
         )
@@ -283,7 +285,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             write_policy=write_policy,
             metrics=metrics,
             audit=audit,
-            logger=self._logger,
+            logger=self.logger,
             silver_validator=silver_validator,
             metadata_writer=metadata_writer,
             metadata_coordinator=metadata_coordinator,
@@ -291,6 +293,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             dq_calculator=dq_calculator,
             merge_resilience_policy=merge_resilience_policy,
             base_path=base_path,
+            pipeline_name=self._pipeline_name if hasattr(self, '_pipeline_name') else None,
         )
         self.csv_exporter = services.csv_exporter
         self._metrics = services.metrics
@@ -307,6 +310,24 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self._maintenance = services.maintenance_operations
         self._metadata = services.metadata_operations
         self._validation = services.validation_operations
+        self._delta = services.delta_operations
+        self._arrow = services.arrow_operations
+        self._merged = services.merged_operations
+        self._postwrite = services.postwrite_operations
+        
+        # Update merged operations with the real metadata writer from this instance
+        if self._merged is not None:
+            # Create a new merged operations instance with the real metadata writer
+            from dataclasses import replace
+            self._merged = replace(
+                self._merged,
+                _write_silver_merged_metadata=self._write_silver_merged_metadata,
+            )
+        
+        # Initialize postwrite operations with this instance as host
+        if self._postwrite is None:
+            self._postwrite = SilverPostwriteOperations(self)
+        
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
 
@@ -323,6 +344,15 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             and len(self._contract_rollout_policy.write_versions) > 1
         )
 
+    def _get_dispatch_write_method(self) -> Callable[..., Any]:
+        """Get the dispatch write method from delta operations service or fallback to mixin."""
+        if self._delta:
+            return self._delta._dispatch_write_with_domain_errors
+        else:
+            # Fallback to mixin for backward compatibility
+            from bioetl.infrastructure.storage.silver.delta_mixin import SilverWriterDeltaMixin
+            return SilverWriterDeltaMixin._dispatch_write_with_domain_errors.__get__(self, SilverWriter)
+
     def _enforce_write_policy(
         self,
         mode: SilverWriteMode,
@@ -335,6 +365,27 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             # Fallback to mixin for backward compatibility
             from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
             SilverWriterValidationMixin._enforce_write_policy(self, mode, table_name)
+
+    def _sync_validate_and_build_arrow(
+        self,
+        request: _SilverWritePreparationRequest,
+    ) -> _PreparedSilverWritePayload:
+        """Delegate arrow validation and building to the validation service."""
+        if self._validation:
+            return self._validation._sync_validate_and_build_arrow(request)
+        else:
+            # Fallback to mixin for backward compatibility
+            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            return SilverWriterValidationMixin._sync_validate_and_build_arrow(self, request)
+
+    def _validate_write_mode(self, mode: str) -> SilverWriteMode:
+        """Delegate write mode validation to the validation service."""
+        if self._validation:
+            return self._validation._validate_write_mode(mode)
+        else:
+            # Fallback to mixin for backward compatibility
+            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            return SilverWriterValidationMixin._validate_write_mode(self, mode)
 
     async def _write_single_target(
         self,
@@ -517,6 +568,36 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             ingestion_ts=ingestion_ts,
         )
 
+    async def _write_silver_merged_metadata(
+        self,
+        *,
+        table_path: str,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        completed_at: str,
+        run_id: str,
+    ) -> None:
+        """Write merged Silver metadata for a completed table write.
+        
+        This method is called by SilverMergedOperations after a successful merge.
+        It delegates to the metadata mixin implementation.
+        """
+        from bioetl.infrastructure.storage.silver.metadata_mixin import (
+            SilverWriterMetadataMixin,
+        )
+        # Create a temporary mixin instance to access the method
+        # This is a workaround since we removed the mixin from inheritance
+        temp_mixin = SilverWriterMetadataMixin()
+        await temp_mixin._write_silver_merged_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            completed_at=completed_at,
+            run_id=run_id,
+        )
+
     async def _execute_silver_write_pipeline(
         self,
         *,
@@ -532,10 +613,18 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         Returns:
             SilverWriteResult with record count and write metadata, or None if no records.
         """
+        # Get the prepare payload method with fallback to mixin for backward compatibility
+        if self._validation:
+            prepare_payload_method = self._validation._prepare_silver_write_payload
+        else:
+            # Fallback to mixin for backward compatibility
+            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            prepare_payload_method = SilverWriterValidationMixin._prepare_silver_write_payload.__get__(self, SilverWriter)
+        
         return await execute_silver_write_pipeline(
             invocation=invocation,
             ctx=ctx,
-            prepare_payload=self._prepare_silver_write_payload,
-            dispatch_write=self._dispatch_write_with_domain_errors,
-            complete_pipeline=self._complete_silver_write_pipeline,
+            prepare_payload=prepare_payload_method,
+            dispatch_write=self._get_dispatch_write_method(),
+            complete_pipeline=self._postwrite._complete_silver_write_pipeline,
         )

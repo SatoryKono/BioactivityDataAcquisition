@@ -14,7 +14,7 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.checkpoint import (
-    CompositeCheckpointManager,
+    CompositeCheckpointService,
     CompositeCheckpointState,
 )
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
@@ -507,7 +507,7 @@ class TestCheckpointExistsWarning:
         run_id = str(uuid4())
 
         # Create a real checkpoint manager and save a state with progress
-        manager = CompositeCheckpointManager(
+        manager = CompositeCheckpointService(
             composite_name="test_composite",
             run_id=run_id,
             storage=FileCompositeCheckpointWriter(tmp_path),
@@ -545,7 +545,7 @@ class TestCheckpointExistsWarning:
         await manager.save(existing_state)
 
         # Create new manager without resume flag (should warn)
-        manager_no_resume = CompositeCheckpointManager(
+        manager_no_resume = CompositeCheckpointService(
             composite_name="test_composite",
             run_id=str(uuid4()),  # New run
             storage=FileCompositeCheckpointWriter(tmp_path),
@@ -569,7 +569,7 @@ class TestCheckpointExistsWarning:
         """Should not warn when no checkpoint exists."""
         logger = create_mock_logger()
 
-        manager = CompositeCheckpointManager(
+        manager = CompositeCheckpointService(
             composite_name="test_composite",
             run_id=str(uuid4()),
             storage=FileCompositeCheckpointWriter(tmp_path),
@@ -593,7 +593,7 @@ class TestCheckpointExistsWarning:
         run_id = str(uuid4())
 
         # Save a fresh checkpoint with no progress
-        manager_setup = CompositeCheckpointManager(
+        manager_setup = CompositeCheckpointService(
             composite_name="test_composite",
             run_id=run_id,
             storage=FileCompositeCheckpointWriter(tmp_path),
@@ -611,7 +611,7 @@ class TestCheckpointExistsWarning:
         await manager_setup.save(fresh_state)
 
         # Create new manager without resume flag
-        manager_no_resume = CompositeCheckpointManager(
+        manager_no_resume = CompositeCheckpointService(
             composite_name="test_composite",
             run_id=str(uuid4()),
             storage=FileCompositeCheckpointWriter(tmp_path),

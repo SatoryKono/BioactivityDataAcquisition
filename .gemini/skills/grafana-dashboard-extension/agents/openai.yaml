@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grafana Dashboard Extension"
+  short_description: "Edit and validate BioETL Grafana dashboards"
+  default_prompt: "Use $grafana-dashboard-extension to extend, debug, or review BioETL Grafana dashboards under grafana/dashboards/ and keep related docs synchronized."

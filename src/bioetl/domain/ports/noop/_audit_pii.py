@@ -49,6 +49,19 @@ class NoOpAudit:
         """No-op implementation of aclose — no resources to release."""
         return None
 
+    async def log_event(
+        self,
+        event_name: str,  # noqa: ARG002
+        event_data: dict | None = None,  # noqa: ARG002
+    ) -> None:
+        """No-op implementation of log_event — discards the event.
+
+        Args:
+            event_name: Name of the event to log (ignored).
+            event_data: Event data dictionary (ignored).
+        """
+        return None
+
 
 class NoOpPiiHasher:
     """No-op implementation of PiiHasherPort."""

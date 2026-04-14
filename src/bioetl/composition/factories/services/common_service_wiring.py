@@ -59,6 +59,7 @@ def build_common_service_ports(
     settings: Settings,
     logger: LoggerPort,
     pipeline_config: PipelineYamlConfig,
+    pipeline_name: str,
     metrics: MetricsPort | None = None,
     tracer: TracingPort | None = None,
     metadata_coordinator: MetadataCoordinator | None = None,
@@ -84,6 +85,7 @@ def build_common_service_ports(
         metrics=metrics_port,
         metadata_coordinator=metadata_coordinator,
         silver_validator=silver_validator,
+        pipeline_name=pipeline_name,
     )
     return CommonServicePorts(
         storage_ctx=storage_ctx,

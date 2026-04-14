@@ -51,6 +51,7 @@ def create_silver_writer(
     metadata_atomic_retry_policy: AdaptiveRetryPolicy | None = None,
     merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
     contract_rollout_policy: ContractRolloutPolicy | None = None,
+    pipeline_name: str | None = None,
 ) -> SilverWriter:
     """Create configured Silver writer.
 
@@ -110,6 +111,7 @@ def create_silver_writer(
         merge_resilience_policy=merge_resilience_policy,
         contract_rollout_policy=contract_rollout_policy,
         base_path=base_path,
+        pipeline_name=pipeline_name,
     )
     return writer_cls(
         base_path=base_path,
@@ -117,6 +119,7 @@ def create_silver_writer(
         transform_version=transform_version,
         transform_steps=transform_steps,
         runtime_services=runtime_services,
+        pipeline_name=pipeline_name,
         # Keep legacy kwarg for constructor-call compatibility in tests and shims.
         csv_exporter=csv_exporter,
         flat_structure=flat_structure,

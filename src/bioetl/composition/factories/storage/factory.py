@@ -60,6 +60,7 @@ class StorageFactory:
         tracing: TracingPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
+        pipeline_name: str | None = None,
     ) -> StorageContext:
         """Create local storage context with configured layer writers.
 
@@ -83,6 +84,7 @@ class StorageFactory:
             settings=settings,
             config=config,
             logger=logger,
+            pipeline_name=pipeline_name or config.pipeline_name,
         )
         logger.info(
             "Using local storage",

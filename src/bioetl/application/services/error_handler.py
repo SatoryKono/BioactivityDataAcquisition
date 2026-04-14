@@ -17,8 +17,7 @@ from bioetl.domain.exceptions.base_exceptions import (
     BioETLDomainError,
     BioETLIntegrationError,
 )
-from bioetl.domain.ports.logger_port import LoggerPort
-from bioetl.domain.ports.metrics_port import MetricsPort
+from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
 class ErrorHandler:

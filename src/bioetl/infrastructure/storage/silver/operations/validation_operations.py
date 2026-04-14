@@ -68,13 +68,7 @@ class SilverValidationOperations:
         None,
     ]
 
-    def __post_init__(self) -> None:
-        """Initialize static methods for validation operations."""
-        # Bind static methods from validation_operations module
-        self._validate_write_mode = staticmethod(_validate_write_mode_impl)
-        self._deduplicate_by_primary_keys = staticmethod(_deduplicate_by_primary_keys_impl)
-        self._to_policy_write_mode = staticmethod(_to_policy_write_mode_impl)
-        self._validate_key_nullability = staticmethod(_validate_key_nullability_impl)
+
 
     def _sync_validate_and_build_arrow(
         self,
@@ -156,7 +150,7 @@ class SilverValidationOperations:
             partition_cols=partition_cols,
             key_nullability_rules=key_nullability_rules,
         )
-        validated = await _sync_validate_and_build_arrow(self, request)
+        validated = _sync_validate_and_build_arrow(self, request)
         schema_request = _SilverSchemaPolicyRequest(
             table_name=table_name,
             records=validated.records,

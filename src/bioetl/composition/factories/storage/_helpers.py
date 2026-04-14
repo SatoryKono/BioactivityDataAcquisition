@@ -242,6 +242,7 @@ def _create_silver_layer_writer(
         metadata_atomic_retry_policy=metadata_atomic_retry_policy,
         merge_resilience_policy=merge_resilience_policy,
         contract_rollout_policy=_load_contract_rollout_policy(config),
+        pipeline_name=ctx.pipeline_name,
     )
 
 
