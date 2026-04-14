@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-14T10:56:08.897425+00:00",
+  "generated_at": "2026-04-14T11:03:21.162416+00:00",
   "summary": {
     "total_scripts": 304,
     "status_counts": {
       "active": 238,
       "legacy": 29,
-      "orphan": 24,
-      "unknown": 13
+      "orphan": 23,
+      "unknown": 14
     },
     "reference_group_coverage": {
       "agents": 10,
       "build": 31,
       "ci": 48,
-      "docs": 136,
+      "docs": 137,
       "scripts": 246,
       "skills": 9,
       "tests": 101
@@ -4994,10 +4994,35 @@
     {
       "path": "scripts/ops/cleanup_repository.py",
       "type": "py",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/03-guides/cleanup.md",
+          "line": 28,
+          "source_group": "docs",
+          "text": "python scripts/ops/cleanup_repository.py --dry-run"
+        },
+        {
+          "path": "docs/03-guides/cleanup.md",
+          "line": 31,
+          "source_group": "docs",
+          "text": "python scripts/ops/cleanup_repository.py"
+        },
+        {
+          "path": "docs/03-guides/cleanup.md",
+          "line": 34,
+          "source_group": "docs",
+          "text": "python scripts/ops/cleanup_repository.py --cache --temp"
+        },
+        {
+          "path": "docs/03-guides/cleanup.md",
+          "line": 130,
+          "source_group": "docs",
+          "text": "1. **Always use dry-run first**: `python scripts/ops/cleanup_repository.py --dry-run`"
+        }
+      ]
     },
     {
       "path": "scripts/ops/codex-exec.bat",

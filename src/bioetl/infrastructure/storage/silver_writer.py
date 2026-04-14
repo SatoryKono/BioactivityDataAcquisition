@@ -55,9 +55,8 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
     build_silver_writer_runtime_services,
 )
-from bioetl.infrastructure.storage.silver.validation_mixin import (
-    SilverWriterValidationMixin,
-)
+# SilverWriterValidationMixin removed from inheritance (composition pattern)
+# Validation operations now handled by SilverValidationOperations service
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_write_targets,
 )
@@ -211,7 +210,6 @@ async def _write_dual_targets(
 
 class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     SilverWriterArrowMixin,
-    SilverWriterValidationMixin,
     SilverWriterDeltaMixin,
     SilverWriterMergedMixin,
     SilverWriterPostwriteMixin,
@@ -308,6 +306,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self._contract_rollout_policy = services.contract_rollout_policy
         self._maintenance = services.maintenance_operations
         self._metadata = services.metadata_operations
+        self._validation = services.validation_operations
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
 
@@ -329,8 +328,13 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         mode: SilverWriteMode,
         table_name: str,
     ) -> None:
-        """Delegate Silver write-mode enforcement to the validation mixin."""
-        SilverWriterValidationMixin._enforce_write_policy(self, mode, table_name)
+        """Delegate Silver write-mode enforcement to the validation service."""
+        if self._validation:
+            self._validation._enforce_write_policy(mode, table_name)
+        else:
+            # Fallback to mixin for backward compatibility
+            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            SilverWriterValidationMixin._enforce_write_policy(self, mode, table_name)
 
     async def _write_single_target(
         self,
@@ -411,12 +415,13 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         records: list[BronzeRecord],
         table_name: str,
     ) -> None:
-        """Delegate Pandera validation to the canonical Silver validation seam."""
-        SilverWriterValidationMixin._validate_silver_pandera(
-            self,
-            records,
-            table_name,
-        )
+        """Delegate Pandera validation to the validation service."""
+        if self._validation:
+            self._validation._validate_silver_pandera(records, table_name)
+        else:
+            # Fallback to mixin for backward compatibility
+            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            SilverWriterValidationMixin._validate_silver_pandera(self, records, table_name)
 
     async def _check_schema_drift(
         self,
@@ -424,13 +429,13 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         records: list[BronzeRecord],
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
     ) -> None:
-        """Delegate schema-drift handling to the canonical Silver validation seam."""
-        await SilverWriterValidationMixin._check_schema_drift(
-            self,
-            table_name,
-            records,
-            on_schema_mismatch,
-        )
+        """Delegate schema-drift handling to the validation service."""
+        if self._validation:
+            await self._validation._check_schema_drift(table_name, records, on_schema_mismatch)
+        else:
+            # Fallback to mixin for backward compatibility
+            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            await SilverWriterValidationMixin._check_schema_drift(self, table_name, records, on_schema_mismatch)
 
     async def write_silver(
         self,
