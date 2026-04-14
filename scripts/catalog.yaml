@@ -12,6 +12,7 @@ canonical_roots:
   - scripts/migrations/active
   - scripts/migrations/oneoff
   - scripts/diagrams
+  - scripts/agents
 
 policies:
   root_allowlist:

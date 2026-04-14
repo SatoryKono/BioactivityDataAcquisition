@@ -8,29 +8,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a thin root-level compatibility wrapper to scripts/dev/python/migrate_deprecated_names.py while historical references converge on the canonical dev path."
     },
-    "scripts/run_pytest.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a thin root-level bridge to scripts/dev/run_pytest.sh until historical references and user habits converge on the canonical dev wrapper."
-    },
-    "scripts/run_pytest.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a thin root-level bridge to scripts/dev/run_pytest.ps1 until historical references and user habits converge on the canonical dev wrapper."
-    },
     "scripts/generate_architecture_dependency_map.py": {
       "owner": "@bioetl-architecture",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as a root-level compatibility wrapper while tests and docs still assert the historical path; prefer scripts.qa.generate_architecture_dependency_map as the canonical implementation."
-    },
-    "scripts/rerender_grafana_screenshots.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a root-level compatibility wrapper to scripts/ops/rerender_grafana_screenshots.py until no historical references remain."
     },
     "scripts/ops/maintenance/close_superseded_prs.sh": {
       "owner": "@bioetl-platform",
@@ -224,50 +206,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway mermaid server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-
     "scripts/ops/smoke_test_neo4j_mcp_knowall.ps1": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a Windows-side smoke helper for the knowall Neo4j MCP path; do not treat it as a reusable automation surface for new operator flows."
     },
-    "scripts/ai/code-reviewer.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain for operator compatibility and possible external shell aliases, but do not treat it as a canonical contributor workflow command without stronger in-repo runtime evidence."
-    },
-    "scripts/ai/data-engineer.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain for operator compatibility and possible external shell aliases, but do not treat it as a canonical contributor workflow command without stronger in-repo runtime evidence."
-    },
-    "scripts/ai/literature-researcher.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain for operator compatibility and possible external shell aliases, but do not treat it as a canonical contributor workflow command without stronger in-repo runtime evidence."
-    },
-    "scripts/archive/migrations/migrate_openalex_citation_count.py": {
-      "owner": "@bioetl-platform",
-      "decision": "historical_reference",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical migration reference; new migration entrypoints must live under scripts/migrations/active or scripts/migrations/oneoff."
-    },
-    "scripts/archive/migrations/migrate_pmid_to_string.py": {
-      "owner": "@bioetl-platform",
-      "decision": "historical_reference",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical migration reference; new migration entrypoints must live under scripts/migrations/active or scripts/migrations/oneoff."
-    },
-    "scripts/archive/migrations/rename_structure_fields.py": {
-      "owner": "@bioetl-platform",
-      "decision": "historical_reference",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical migration reference; new migration entrypoints must live under scripts/migrations/active or scripts/migrations/oneoff."
-    },
-
     "scripts/dev/run_project_python.py": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
@@ -298,12 +242,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL bootstrap troubleshooting wrapper while mounted-checkout environment setup remains fragile; fold its behavior into canonical dev setup or remove it."
     },
-    "scripts/diagnostics/_tmp_inspect_vcr.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded troubleshooting helper; rename or remove it before promoting it as a stable diagnostics command."
-    },
     "scripts/ops/maintenance/create_runmanifest_runledger_issue.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -328,81 +266,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded maintainer helper for the prepared docs issue-finalization batch; do not treat this issue-number-specific path as a reusable automation workflow."
     },
-    "scripts/qa/hotspot_family_metrics.py": {
-      "owner": "platform-architecture",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain while RF-06 hotspot-family governance still relies on this shared metrics helper for architecture ratchet tests and baseline reporting; either promote it into a canonical supported metrics surface or remove it once those consumers converge elsewhere."
-    },
-    "scripts/qa/generate_reports.py": {
-      "owner": "platform-architecture",
-      "decision": "deprecate",
-      "next_step": "Remove the legacy report generator after confirming no external automation still depends on it.",
-      "review_by": "2026-05-31",
-      "replacement": "scripts/repo/check_scripts_inventory.py",
-      "sunset_date": "2026-06-30"
-    },
     "scripts/qa/py_review_orchestrator.py": {
       "owner": "platform-architecture",
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
-    },
-    "src/tools/scripts/generate_contracts.py": {
-      "owner": "platform-architecture",
-      "decision": "deprecate",
-      "next_step": "Remove the orphaned contract generator after confirming no external tooling still shells into the historical src/tools path.",
-      "review_by": "2026-05-31",
-      "replacement": "scripts/schema/generate_contracts.py",
-      "sunset_date": "2026-06-30"
-    },
-    "src/tools/scripts/config_matrix_generator.py": {
-      "owner": "platform-architecture",
-      "decision": "deprecate",
-      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.schema generate-config-matrix.",
-      "review_by": "2026-05-31",
-      "replacement": "scripts/schema/generate_config_matrix.py",
-      "sunset_date": "2026-06-30"
-    },
-    "src/tools/scripts/check_architecture.py": {
-      "owner": "platform-architecture",
-      "decision": "deprecate",
-      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.qa check-architecture.",
-      "review_by": "2026-05-31",
-      "replacement": "scripts/qa/check_architecture.py",
-      "sunset_date": "2026-06-30"
-    },
-    "src/tools/scripts/check_application_deps.py": {
-      "owner": "platform-architecture",
-      "decision": "deprecate",
-      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.qa check-app-deps.",
-      "review_by": "2026-05-31",
-      "replacement": "scripts/qa/check_application_deps.py",
-      "sunset_date": "2026-06-30"
-    },
-    "src/tools/scripts/check_constructor_args.py": {
-      "owner": "platform-architecture",
-      "decision": "deprecate",
-      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.qa check-constructor-args.",
-      "review_by": "2026-05-31",
-      "replacement": "scripts/qa/check_constructor_args.py",
-      "sunset_date": "2026-06-30"
-    },
-    "src/tools/scripts/lint_terminology.py": {
-      "owner": "platform-architecture",
-      "decision": "deprecate",
-      "next_step": "Retain only as a compatibility wrapper while historical direct-path callers converge on scripts/qa/lint_terminology.py and python -m scripts.qa check-terminology.",
-      "review_by": "2026-05-31",
-      "replacement": "scripts/qa/lint_terminology.py",
-      "sunset_date": "2026-06-30"
-    },
-    "src/tools/scripts/validate_unified_configs.py": {
-      "owner": "platform-architecture",
-      "decision": "deprecate",
-      "next_step": "Retain only as a compatibility wrapper while direct-path callers converge on python -m scripts.schema validate-unified-configs.",
-      "review_by": "2026-05-31",
-      "replacement": "scripts/schema/validate_unified_configs.py",
-      "sunset_date": "2026-06-30"
     },
     "scripts/ops/cleanup_repository.py": {
       "owner": "platform-architecture",
@@ -535,6 +403,42 @@
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded assay profile update helper; remove it once assay profile updates are handled by canonical migration utilities."
+    },
+    "scripts/tmp/setup_codex.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_setup",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a temporary Codex setup helper; remove it once Codex setup is handled by canonical environment setup utilities."
+    },
+    "scripts/agents/py-team-orchestration.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "agent_workflow",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as canonical agent workflow script; document in agent workflow guides."
+    },
+    "scripts/ops/mistral-exec.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "agent_execution_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as Mistral agent execution wrapper for Windows compatibility."
+    },
+    "scripts/ops/mistral-exec.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "agent_execution_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as Mistral agent execution wrapper for Unix compatibility."
+    },
+    "scripts/ops/mistral.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "agent_execution_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as Mistral agent execution wrapper for Windows compatibility."
+    },
+    "scripts/ops/setup_mistral_vibe.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "agent_setup",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as Mistral Vibe agent setup script; document in agent setup guides."
     }
   }
 }
