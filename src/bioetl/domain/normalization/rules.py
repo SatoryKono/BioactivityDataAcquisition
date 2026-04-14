@@ -124,7 +124,7 @@ UNIT_MAPPING: dict[str, str] = {
 }
 
 
-def normalize_case(value: Any, allowed_values: frozenset[str] | None = None) -> str | None:
+def normalize_case(value: Any, allowed_values: frozenset[str] | None = None) -> str | None:  # Any: Generic input value from various sources
     """Normalize case for enum-like fields.
     
     Args:
@@ -159,7 +159,7 @@ def normalize_case(value: Any, allowed_values: frozenset[str] | None = None) -> 
     return normalized
 
 
-def normalize_unit(value: Any) -> str | None:
+def normalize_unit(value: Any) -> str | None:  # Any: Generic input value from various sources
     """Canonicalize unit strings to standard format.
     
     Args:
@@ -183,7 +183,7 @@ def normalize_unit(value: Any) -> str | None:
     return UNIT_MAPPING.get(normalized, normalized)
 
 
-def normalize_null(value: Any) -> Any:
+def normalize_null(value: Any) -> Any:  # Any: Generic input value from various sources, Any: Generic return type to preserve original value type
     """Convert pseudo-null values to proper None values.
     
     Args:
@@ -210,7 +210,7 @@ def normalize_null(value: Any) -> Any:
     return value
 
 
-def normalize_enum_case(value: Any, allowed_values: frozenset[str]) -> str | None:
+def normalize_enum_case(value: Any, allowed_values: frozenset[str]) -> str | None:  # Any: Generic input value from various sources
     """Normalize enum value with case normalization and validation.
     
     This is a specialized version for enum fields that combines

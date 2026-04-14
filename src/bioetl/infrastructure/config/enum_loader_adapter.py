@@ -21,7 +21,7 @@ class FileSystemEnumLoader(EnumLoaderPort):
         """
         self.base_path = base_path
     
-    def load_chembl_enums(self) -> dict[str, Any]:
+    def load_chembl_enums(self) -> dict[str, Any]:  # Any: Dynamic YAML content structure
         """Load ChEMBL enum configurations from filesystem."""
         from bioetl.infrastructure.config.enum_file_loader import load_chembl_enums_from_file
         

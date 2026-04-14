@@ -2,4 +2,20 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.lineage.lineage_inspection_service import *  # noqa: F403
+from bioetl.application.services.lineage.lineage_inspection_service import (
+    LineageFragmentInspectionResult,
+    LineageInspectionService,
+    LineageNodeRelation,
+    LineageNodeRelationResult,
+    LineageRunExplanationResult,
+    LineageTraceResult,
+)
+
+__all__ = [
+    "LineageFragmentInspectionResult",
+    "LineageInspectionService",
+    "LineageNodeRelation",
+    "LineageNodeRelationResult",
+    "LineageRunExplanationResult",
+    "LineageTraceResult",
+]

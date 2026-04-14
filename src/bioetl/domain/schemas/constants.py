@@ -144,6 +144,23 @@ ASSAY_CATEGORIES: frozenset[str] = frozenset(
 
 RELATIONSHIP_TYPES: frozenset[str] = frozenset(["D", "H", "M", "N", "S", "U"])
 
+# Additional assay enums
+ASSAY_GROUPS: frozenset[str] = frozenset(["FUNCTIONAL", "BINDING"])
+SUBCELLULAR_FRACTIONS: frozenset[str] = frozenset(
+    ["Membrane", "Nucleus", "Cytoplasm", "Mitochondria", "Endoplasmic reticulum"]
+)
+CONFIDENCE_DESCRIPTIONS: frozenset[str] = frozenset(
+    [
+        "Likely active",
+        "Active",
+        "Inactive",
+        "Potentially active",
+        "Potentially inactive",
+        "Inconclusive",
+        "Not determined",
+    ]
+)
+
 # =============================================================================
 # CHEMBL MOLECULE ENUMS
 # =============================================================================
@@ -259,8 +276,14 @@ __all__ = [
     "ASSAY_PARAMETER_STANDARD_TYPES",
     "ASSAY_TEST_TYPES",
     # Assay enums
+    "ASSAY_CATEGORIES",
+    "ASSAY_GROUPS",
+    "ASSAY_TEST_TYPES",
     "ASSAY_TYPES",
     "BAO_ID_PATTERN",
+    "CONFIDENCE_DESCRIPTIONS",
+    "RELATIONSHIP_TYPES",
+    "SUBCELLULAR_FRACTIONS",
     # Canonical validation bounds (Gold / Composite)
     "CANONICAL_HBA_COUNT_RANGE",
     "CANONICAL_HBD_COUNT_RANGE",

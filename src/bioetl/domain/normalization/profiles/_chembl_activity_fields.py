@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from bioetl.domain.config.enum_loader import get_enum_config
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
+from bioetl.domain.schemas.constants import (
+    ACTIVITY_STANDARD_TYPES,
+    DATA_VALIDITY_COMMENTS,
+    STANDARD_RELATIONS,
+)
 
 CHEMBL_ACTIVITY_SCHEMA_FIELDS = tuple(ActivitySchema.to_schema().columns.keys())
 
-# Load enum configurations from external YAML file
-STANDARD_RELATIONS = frozenset(get_enum_config("activity", "standard_relations"))
-ACTIVITY_STANDARD_TYPES = frozenset(get_enum_config("activity", "standard_types"))
-DATA_VALIDITY_COMMENTS = frozenset(get_enum_config("activity", "data_validity_comments"))
+# Use enum configurations from centralized constants (loaded from YAML)
+# These are already properly loaded and don't require runtime I/O
 
 INT_FIELDS = frozenset(
     {

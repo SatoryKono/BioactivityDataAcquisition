@@ -155,13 +155,37 @@ class HTTPClientRetryMixin:
         await self.rate_limiter.acquire()
         return await self.circuit_breaker.call(client.request, method, url, **kwargs)
 
+    def _should_continue_retry(
+        self,
+        result: _RequestAttemptOutcome,
+        retry_state: _RetryRequestState
+    ) -> bool:
+        """Determine if retry should continue based on attempt outcome.
+
+        Args:
+            result: The outcome of the current attempt
+            retry_state: Current retry state
+
+        Returns:
+            True if retry should continue, False to break retry loop
+        """
+        if isinstance(result, httpx.Response):
+            retry_state.status_code = result.status_code
+            return False  # Success - return the response
+        
+        # Apply retry outcome logic
+        return retry_state.apply_attempt_outcome(result)
+
     async def _request_with_retry(
         self,
         method: str,
         url: str,
         **kwargs: Any,  # Any: forwarding arbitrary request kwargs to underlying HTTP client
     ) -> httpx.Response:
-        """Execute request with retries, backoff, and observability."""
+        """Execute request with retries, backoff, and observability.
+
+        Improved version with better separation of concerns and reduced complexity.
+        """
         client = self._get_client()
         retry_state = _RetryRequestState()
         start_time = time.perf_counter()
@@ -172,17 +196,25 @@ class HTTPClientRetryMixin:
             method=method,
             url=url,
         )
+        
         try:
+            # Main retry loop with clearer structure
             for attempt in range(self.retry_config.max_attempts):
                 retry_state.record_attempt(attempt)
+                
+                # Execute the attempt and get result
                 result = await self._attempt_request(
                     client, method, url, attempt, retry_state.retries, span, kwargs
                 )
-                if isinstance(result, httpx.Response):
-                    retry_state.status_code = result.status_code
-                    return result
-                if not retry_state.apply_attempt_outcome(result):
-                    break
+                
+                # Determine if we should continue or return/break
+                if not self._should_continue_retry(result, retry_state):
+                    if isinstance(result, httpx.Response):
+                        return result
+                    else:
+                        break  # Retry outcome says to stop
+            
+            # Exhausted all attempts
             raise_retry_exhausted(url, retry_state, span)
         finally:
             finalize_request_observability(

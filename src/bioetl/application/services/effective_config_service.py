@@ -2,4 +2,10 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.effective_config_service import *  # noqa: F403
+from bioetl.application.services.control_plane.effective_config_service import (
+    EffectiveConfigService,
+)
+
+__all__ = [
+    "EffectiveConfigService",
+]
