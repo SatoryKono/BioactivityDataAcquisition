@@ -7,6 +7,22 @@ from typing import TypeVar
 
 import polars as pl
 
+from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+    JoinKeyNormalizationPolicy,
+)
+
+
+def create_resolver_helper(
+    logger: LoggerPort,
+    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] | None = None,
+) -> ResolverHelper:
+    """Create a ResolverHelper instance with optional normalization policies."""
+    return ResolverHelper(
+        logger=logger,
+        normalization_policies=normalization_policies or JOIN_KEY_NORMALIZATION_POLICIES,
+    )
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     JoinKeyNormalizationPolicy,
@@ -41,13 +57,9 @@ class SeedKeyResolver:
 
     def __init__(
         self,
-        logger: LoggerPort,
-        normalization_policies: Mapping[
-            str, JoinKeyNormalizationPolicy
-        ] = JOIN_KEY_NORMALIZATION_POLICIES,
+        resolver_helper: ResolverHelper,
     ) -> None:
-        self._logger = logger
-        self._normalization_policies = normalization_policies
+        self._resolver_helper = resolver_helper
 
     async def resolve(
         self,
@@ -86,13 +98,9 @@ class ChainedKeyResolver:
 
     def __init__(
         self,
-        logger: LoggerPort,
-        normalization_policies: Mapping[
-            str, JoinKeyNormalizationPolicy
-        ] = JOIN_KEY_NORMALIZATION_POLICIES,
+        resolver_helper: ResolverHelper,
     ) -> None:
-        self._logger = logger
-        self._normalization_policies = normalization_policies
+        self._resolver_helper = resolver_helper
 
     async def resolve(
         self,
@@ -280,11 +288,8 @@ def create_seed_key_resolver(
     Returns:
         New SeedKeyResolver instance wired with the provided logger.
     """
-    return _create_key_resolver(
-        SeedKeyResolver,
-        logger,
-        normalization_policies=normalization_policies,
-    )
+    resolver_helper = create_resolver_helper(logger, normalization_policies)
+    return SeedKeyResolver(resolver_helper)
 
 
 def create_chained_key_resolver(
@@ -301,11 +306,8 @@ def create_chained_key_resolver(
     Returns:
         New ChainedKeyResolver instance wired with the provided logger.
     """
-    return _create_key_resolver(
-        ChainedKeyResolver,
-        logger,
-        normalization_policies=normalization_policies,
-    )
+    resolver_helper = create_resolver_helper(logger, normalization_policies)
+    return ChainedKeyResolver(resolver_helper)
 
 
 def _create_key_resolver(

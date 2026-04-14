@@ -168,13 +168,7 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
             provider_name=self._provider_name,
         )
 
-    def _parse_valid_molecule_ids(self, molecule_id_list: list[str]) -> list[int]:
-        """Backward-compatible alias for CID parser.
 
-        Deprecation note:
-            Use ``_parse_valid_cids`` for new code. Alias kept for staged rollout.
-        """
-        return self._parse_valid_cids(molecule_id_list)
 
     async def _fetch_cid_batch(self, batch: list[int]) -> list[BronzeRecord]:
         """Fetch a batch of compounds by CID."""
@@ -215,23 +209,7 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
                     error=str(error),
                 )
 
-    async def fetch_by_molecule_ids(
-        self,
-        molecule_id_list: list[str],
-        limit: int | None = None,
-        batch_size: int = 50,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Backward-compatible alias for CID-based fetch.
 
-        Deprecation note:
-            Prefer ``fetch_by_cids`` in new call-sites.
-        """
-        async for record in self.fetch_by_cids(
-            molecule_id_list,
-            limit=limit,
-            batch_size=batch_size,
-        ):
-            yield record
 
     async def _fetch_single_inchikey(self, inchikey: str) -> list[BronzeRecord]:
         """Fetch compounds for a single InChIKey."""

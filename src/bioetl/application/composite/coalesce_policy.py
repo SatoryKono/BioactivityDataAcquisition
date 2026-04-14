@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.column_service import ColumnOrderService
+# ColumnPriorityOrderer imported for backward compatibility during migration
 from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrderer,
 )
@@ -117,10 +119,12 @@ class CoalescePolicyService:
     def __init__(
         self,
         logger: LoggerPort,
-        priority_orderer: ColumnPriorityOrderer,
+        priority_orderer: ColumnPriorityOrderer | None = None,
+        order_service: ColumnOrderService | None = None,
     ) -> None:
         self._logger = logger
         self._priority_orderer = priority_orderer
+        self._order_service = order_service
 
     @staticmethod
     def extract_field_from_qualified(column: str) -> str:
@@ -258,42 +262,82 @@ class CoalescePolicyService:
         result = df
         available_columns = set(df.columns)
 
-        for field, priorities in field_priorities.items():
-            columns = self._priority_orderer.collect_field_columns(
-                field,
-                enrichers,
-                available_columns,
-                seed_pipeline,
-            )
-            if len(columns) <= 1:
-                continue
-
-            ordered_cols = self._priority_orderer.order_columns_by_priority(
-                field,
-                columns,
-                priorities,
-                seed_pipeline,
-            )
-            if not ordered_cols:
-                continue
-
-            compatible_cols, _incompatible_cols = (
-                self._priority_orderer.filter_compatible_columns(
-                    result,
+        # Use unified service if available, otherwise fall back to priority orderer
+        if self._order_service:
+            for field, priorities in field_priorities.items():
+                columns = self._order_service.collect_field_columns(
                     field,
-                    ordered_cols,
-                    self.can_coalesce,
+                    enrichers,
+                    available_columns,
+                    seed_pipeline,
                 )
-            )
-            if len(compatible_cols) > 1:
-                target_col = compatible_cols[0]
-                result = result.with_columns(
-                    pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
-                )
+                if len(columns) <= 1:
+                    continue
 
-            cols_to_drop = [col for col in compatible_cols[1:] if col in result.columns]
-            if cols_to_drop:
-                result = result.drop(cols_to_drop)
+                ordered_cols = self._order_service.order_columns_by_priority(
+                    field,
+                    columns,
+                    priorities,
+                    seed_pipeline,
+                )
+                if not ordered_cols:
+                    continue
+
+                compatible_cols, _incompatible_cols = (
+                    self._order_service.filter_compatible_columns(
+                        result,
+                        field,
+                        ordered_cols,
+                        self.can_coalesce,
+                    )
+                )
+                if len(compatible_cols) > 1:
+                    target_col = compatible_cols[0]
+                    result = result.with_columns(
+                        pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
+                    )
+
+                cols_to_drop = [col for col in compatible_cols[1:] if col in result.columns]
+                if cols_to_drop:
+                    result = result.drop(cols_to_drop)
+        else:
+            # Fallback to old priority orderer for backward compatibility
+            for field, priorities in field_priorities.items():
+                columns = self._priority_orderer.collect_field_columns(
+                    field,
+                    enrichers,
+                    available_columns,
+                    seed_pipeline,
+                )
+                if len(columns) <= 1:
+                    continue
+
+                ordered_cols = self._priority_orderer.order_columns_by_priority(
+                    field,
+                    columns,
+                    priorities,
+                    seed_pipeline,
+                )
+                if not ordered_cols:
+                    continue
+
+                compatible_cols, _incompatible_cols = (
+                    self._priority_orderer.filter_compatible_columns(
+                        result,
+                        field,
+                        ordered_cols,
+                        self.can_coalesce,
+                    )
+                )
+                if len(compatible_cols) > 1:
+                    target_col = compatible_cols[0]
+                    result = result.with_columns(
+                        pl.coalesce(*[pl.col(c) for c in compatible_cols]).alias(target_col)
+                    )
+
+                cols_to_drop = [col for col in compatible_cols[1:] if col in result.columns]
+                if cols_to_drop:
+                    result = result.drop(cols_to_drop)
 
         return result
 

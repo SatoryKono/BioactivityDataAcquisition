@@ -5,9 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
 from bioetl.application.composite.runtime_wiring_api import (
     CoalescePolicyService,
-    ColumnOrderer,
+    ColumnOrderService,
     ColumnPriorityOrderer,
     ColumnRenamer,
     ConflictResolverService,
@@ -48,19 +50,28 @@ def build_merge_dependencies(
     deduplicator = EnricherDeduplicatorService(logger)
     aggregator = EnricherAggregator(logger)
     renamer = ColumnRenamer(logger)
+    priority_orderer = ColumnPriorityOrderer(logger)
     orderer = ColumnOrderer(
         logger,
         column_groups=merge_column_groups if merge_column_groups else None,
     )
-    priority_orderer = ColumnPriorityOrderer(logger)
+    order_service = ColumnOrderService(
+        logger,
+        column_groups=merge_column_groups if merge_column_groups else None,
+        priority_orderer=priority_orderer,
+    )
     coalesce_policy = CoalescePolicyService(logger, priority_orderer)
     conflict_resolver = ConflictResolverService(
         config.merge,
         logger,
         coalesce_policy,
     )
-    join_key_resolver = JoinKeyResolverService(
+    resolver_helper = ResolverHelper(
+        logger=logger,
         normalization_policies=normalization_policies,
+    )
+    join_key_resolver = JoinKeyResolverService(
+        resolver_helper=resolver_helper,
         parse_pipeline_name=parse_pipeline_name,
     )
     join_executor = PolarsJoinAdapter(
@@ -97,6 +108,7 @@ def build_merge_dependencies(
         renamer=renamer,
         orderer=orderer,
         priority_orderer=priority_orderer,
+        order_service=order_service,
         coalesce_policy=coalesce_policy,
         conflict_resolver=conflict_resolver,
         join_planner=join_planner,

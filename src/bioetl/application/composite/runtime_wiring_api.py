@@ -11,10 +11,10 @@ from __future__ import annotations
 from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.checkpoint import CompositeCheckpointService
 from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrderer,
 )
+from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.conflict_resolver import ConflictResolverService
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
@@ -66,7 +66,7 @@ from bioetl.application.core.runner import PipelineRunner
 __all__ = [
     "JOIN_KEY_NORMALIZATION_POLICIES",
     "CoalescePolicyService",
-    "ColumnOrderer",
+    "ColumnOrderService",
     "ColumnPriorityOrderer",
     "ColumnRenamer",
     "CompositeCheckpointService",

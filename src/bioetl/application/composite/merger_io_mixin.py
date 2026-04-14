@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.composite.join_planner import JoinPlannerService
-from bioetl.application.composite.merger_input_mixin import _MergeInputLoaderMixin
 from bioetl.application.composite.merger_output_mixin import MergeOutputWriterMixin
 from bioetl.domain.composite.result import MergeResult
 
@@ -28,7 +27,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class MergeIOMixin(MergeOutputWriterMixin, _MergeInputLoaderMixin):
+class MergeIOMixin(MergeOutputWriterMixin):
     """Mixin for merge cross-validation, output persistence, and result assembly."""
 
     # -- Host-class attributes (set by MergeService.__init__) --

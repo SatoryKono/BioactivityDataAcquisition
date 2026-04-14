@@ -82,6 +82,15 @@ assay:
         - Selectivity assay
         - Thermal shift assay
 
+    confidence_descriptions:
+        - Likely active
+        - Active
+        - Inactive
+        - Potentially active
+        - Potentially inactive
+        - Inconclusive
+        - Not determined
+
     relationship_types:
         - D
         - H
@@ -89,6 +98,17 @@ assay:
         - "N"
         - S
         - U
+
+    assay_groups:
+        - FUNCTIONAL
+        - BINDING
+
+    subcellular_fractions:
+        - Membrane
+        - Nucleus
+        - Cytoplasm
+        - Mitochondria
+        - Endoplasmic reticulum
 
     # Parameter-specific types (merged with activity.standard_types at load time)
     parameter_standard_types:

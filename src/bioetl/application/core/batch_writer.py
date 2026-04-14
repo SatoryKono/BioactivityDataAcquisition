@@ -19,7 +19,7 @@ from bioetl.domain.composite.config import DataSchemaConfig
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from bioetl.application.composite.column_orderer import ColumnOrderer
+    from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.domain.config import KeyNullabilityRule
@@ -99,7 +99,7 @@ class BatchWriterOptions:
     tracer: TracingPort | None = None
     lock_validator: BatchWriterLockValidator | None = None
     data_schema_config: DataSchemaConfig | None = None
-    column_orderer: ColumnOrderer | None = None
+    column_orderer: ColumnOrderService | None = None
 
 
 class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracingMixin):
@@ -144,7 +144,7 @@ class BatchWriter(BatchWriterIOMixin, BatchWriterColumnsMixin, BatchWriterTracin
                 legacy_kwargs.get("data_schema_config"),
             )
             column_orderer = cast(
-                "ColumnOrderer | None",
+                "ColumnOrderService | None",
                 legacy_kwargs.get("column_orderer"),
             )
             opts = BatchWriterOptions(

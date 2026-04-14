@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from bioetl.application.composite.column_priority_orderer import (
         ColumnPriorityOrderer,
     )
+    from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.application.composite.column_renamer import ColumnRenamer
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
@@ -27,8 +28,9 @@ class MergeCollaboratorGroup:
     deduplicator: EnricherDeduplicatorService
     aggregator: EnricherAggregator
     renamer: ColumnRenamer
-    orderer: ColumnOrderer
-    priority_orderer: ColumnPriorityOrderer
+    order_service: ColumnOrderService
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService
+    orderer: ColumnOrderer | None = None  # Deprecated: Use order_service
+    priority_orderer: ColumnPriorityOrderer | None = None  # Deprecated: Use order_service

@@ -11,6 +11,7 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmid,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
+from bioetl.domain.normalization.rules import normalize_case, normalize_null, normalize_unit
 from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_string
 from bioetl.domain.normalization.text import normalize_title as _normalize_title
@@ -19,26 +20,85 @@ from bioetl.domain.value_objects import SMILES
 __all__ = [
     "normalize_profile_abstract",
     "normalize_profile_canonical_smiles",
+    "normalize_profile_case",
     "normalize_profile_date",
     "normalize_profile_doi",
+    "normalize_profile_enum",
     "normalize_profile_float",
     "normalize_profile_int",
     "normalize_profile_isomeric_smiles",
     "normalize_profile_json_string",
+    "normalize_profile_null",
     "normalize_profile_passthrough",
     "normalize_profile_pmc_id",
     "normalize_profile_pmid",
     "normalize_profile_smiles",
     "normalize_profile_text",
     "normalize_profile_title",
+    "normalize_profile_unit",
 ]
 
 _UNHANDLED = object()
 
 
+def normalize_profile_null(value: object) -> object:
+    """Convert pseudo-null values to proper None in profile fields.
+    
+    Args:
+        value: The value to check for null patterns
+        
+    Returns:
+        None if value matches null patterns, original value otherwise
+    """
+    return normalize_null(value)
+
+
 def normalize_profile_passthrough(value: object) -> object:
     """Return one profile value unchanged."""
     return value
+
+
+def normalize_profile_case(value: object, *, allowed_values: frozenset[str] | None = None) -> object:
+    """Normalize case for enum-like profile fields.
+    
+    Args:
+        value: The value to normalize
+        allowed_values: Optional set of allowed values for validation
+        
+    Returns:
+        Normalized uppercase value if valid, None otherwise
+    """
+    return normalize_case(value, allowed_values)
+
+
+def normalize_profile_unit(value: object) -> object:
+    """Canonicalize unit strings in profile fields.
+    
+    Args:
+        value: The unit value to normalize
+        
+    Returns:
+        Canonical unit string or None if invalid
+    """
+    return normalize_unit(value)
+
+
+def normalize_profile_enum(value: object, *, allowed_values: frozenset[str]) -> object:
+    """Normalize one enum-like profile field against allowed values.
+    
+    Args:
+        value: The value to normalize
+        allowed_values: Frozenset of allowed enum values
+        
+    Returns:
+        Normalized value if it's in allowed_values, None otherwise
+    """
+    if value is None:
+        return None
+    if isinstance(value, str):
+        normalized = normalize_string(value)
+        return normalized if normalized in allowed_values else None
+    return value if value in allowed_values else None
 
 
 def normalize_profile_text(value: object) -> object:

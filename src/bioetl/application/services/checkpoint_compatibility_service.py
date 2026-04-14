@@ -165,6 +165,46 @@ def _validate_execution_identity_compatibility(
             checkpoint_metadata.input_snapshot_fingerprint
         ),
     )
+def _validate_execution_identity_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    messages: list[str] = []
+    execution_identity_compatible = True
+    execution_identity_result = check_execution_identity_compatibility(
+        current_composite_run_identity=current_metadata.composite_run_identity,
+        checkpoint_composite_run_identity=checkpoint_metadata.composite_run_identity,
+        current_execution_fingerprint=current_metadata.execution_fingerprint,
+        checkpoint_execution_fingerprint=checkpoint_metadata.execution_fingerprint,
+        current_pipeline_name=current_metadata.pipeline_name,
+        checkpoint_pipeline_name=checkpoint_metadata.pipeline_name,
+        current_run_type=current_metadata.run_type,
+        checkpoint_run_type=checkpoint_metadata.run_type,
+        current_pipeline_version=current_metadata.pipeline_version,
+        checkpoint_pipeline_version=checkpoint_metadata.pipeline_version,
+        current_manifest_id=current_metadata.manifest_id,
+        checkpoint_manifest_id=checkpoint_metadata.manifest_id,
+        current_dq_contract_compatibility_hash=(
+            current_metadata.dq_contract_compatibility_hash
+        ),
+        checkpoint_dq_contract_compatibility_hash=(
+            checkpoint_metadata.dq_contract_compatibility_hash
+        ),
+        current_contract_ref=current_metadata.contract_ref,
+        checkpoint_contract_ref=checkpoint_metadata.contract_ref,
+        current_contract_version=current_metadata.contract_version,
+        checkpoint_contract_version=checkpoint_metadata.contract_version,
+        current_effective_config_hash=current_metadata.effective_config_hash,
+        checkpoint_effective_config_hash=checkpoint_metadata.effective_config_hash,
+        current_effective_config_artifact_id=current_metadata.effective_config_artifact_id,
+        checkpoint_effective_config_artifact_id=checkpoint_metadata.effective_config_artifact_id,
+        current_exact_replay=current_metadata.exact_replay,
+        checkpoint_exact_replay=checkpoint_metadata.exact_replay,
+        current_input_snapshot_fingerprint=current_metadata.input_snapshot_fingerprint,
+        checkpoint_input_snapshot_fingerprint=(
+            checkpoint_metadata.input_snapshot_fingerprint
+        ),
+    )
     reason_messages = _execution_identity_reason_messages(
         current_metadata,
         checkpoint_metadata,
@@ -173,8 +213,52 @@ def _validate_execution_identity_compatibility(
     if execution_fingerprints_present(current_metadata, checkpoint_metadata):
         compatible = bool(execution_identity_result["compatible"])
         return compatible, reason_messages
-    messages = [
+    if (
+        current_metadata.execution_fingerprint
+        and checkpoint_metadata.execution_fingerprint
+    ):
+        if not bool(execution_identity_result["compatible"]):
+            execution_identity_compatible = False
+            messages.append(
+                "Execution fingerprint mismatch: "
+                f"current={current_metadata.execution_fingerprint}, "
+                f"checkpoint={checkpoint_metadata.execution_fingerprint}"
+            )
+        return execution_identity_compatible, messages
+    if (
+        execution_identity_result["reason"] == "composite_run_identity_missing"
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Composite run identity missing: "
+            f"current={current_metadata.composite_run_identity}, "
+            f"checkpoint={checkpoint_metadata.composite_run_identity}"
+        )
+    elif (
+        execution_identity_result["reason"] == "composite_run_identity_mismatch"
+    ):
+        execution_identity_compatible = False
+        messages.append(
+            "Composite run identity mismatch: "
+            f"current={current_metadata.composite_run_identity}, "
+            f"checkpoint={checkpoint_metadata.composite_run_identity}"
+        )
+    if (
+        execution_identity_result["reason"]
+        == "checkpoint_execution_identity_fallback_mismatch"
+    ) or (
+        execution_identity_result["reason"]
+        == "degraded_runtime_anchor_fingerprint_mismatch"
+    ):
+        execution_identity_compatible = False
+
+    _validate_mismatch_reasons(current_metadata, checkpoint_metadata, execution_identity_result, messages)
+    _validate_metadata_fields(current_metadata, checkpoint_metadata, messages)
+    execution_identity_compatible = _validate_exact_replay_and_snapshots(current_metadata, checkpoint_metadata, messages, execution_identity_compatible)
+
+    final_messages = [
         *reason_messages,
+        *messages,
         *execution_identity_metadata_mismatch_messages(
             current_metadata,
             checkpoint_metadata,
@@ -182,7 +266,7 @@ def _validate_execution_identity_compatibility(
         *exact_replay_mismatch_messages(current_metadata, checkpoint_metadata),
         *input_snapshot_mismatch_messages(current_metadata, checkpoint_metadata),
     ]
-    return not messages, messages
+    return execution_identity_compatible and not messages, final_messages
 
 
 def _execution_identity_reason_messages(
@@ -196,7 +280,6 @@ def _execution_identity_reason_messages(
         checkpoint_metadata,
         execution_identity_result,
     )
-
 
 def _validate_lenient_dq_compatibility(
     current_metadata: CheckpointMetadata,

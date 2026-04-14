@@ -231,12 +231,7 @@ def diagnostics_health(provider: tuple[str, ...], output_json: bool) -> None:
 
 
 @diagnostics.command("metrics")  # type: ignore[untyped-decorator]
-@click.option(  # type: ignore[untyped-decorator]
-    "--json",
-    "output_json",
-    is_flag=True,
-    help="Output as JSON",
-)
+@click.option("--json", "output_json", is_flag=True, help="Output as JSON")  # type: ignore[untyped-decorator]
 def diagnostics_metrics(output_json: bool) -> None:
     """Show the canonical metrics/admin observability workflow summary."""
     profile = get_metrics_operator_profile()
@@ -322,11 +317,7 @@ def diagnostics_checkpoint(
 @diagnostics.command("manifest")  # type: ignore[untyped-decorator]
 @click.argument("identifier")  # type: ignore[untyped-decorator]
 @click.option(  # type: ignore[untyped-decorator]
-    "--format",
-    "output_format",
-    type=click.Choice(["text", "json", "yaml"]),
-    default="text",
-    help="Output format",
+    "--format", "output_format", type=click.Choice(["text", "json", "yaml"]), default="text", help="Output format"
 )
 def diagnostics_manifest(identifier: str, output_format: str) -> None:
     """Inspect one run manifest and its ledger diagnostics."""
@@ -400,9 +391,7 @@ def diagnostics_quarantine(
 ) -> None:
     """Inspect quarantine statistics from the unified operator entrypoint."""
     bundle = get_observability_diagnostics_bundle()
-    resolved_error_code = (
-        "FILTERED_OUT_SILVER" if silver_filter_only else error_code
-    )
+    resolved_error_code = "FILTERED_OUT_SILVER" if silver_filter_only else error_code
     _show_quarantine_stats(
         get_quarantine_manager(pipeline),
         pipeline=pipeline,

@@ -114,6 +114,7 @@ tracked_suite_inventory:
     normalization_and_pipeline_support:
     - tests/integration/pipelines/test_crossref_date_normalization.py
     - tests/integration/pipelines/test_pubmed_date_normalization.py
+    - tests/integration/test_cross_pipeline_normalization.py
     - tests/integration/test_cross_provider_doi_normalization.py
     governance_and_runtime_surfaces:
       control_plane:

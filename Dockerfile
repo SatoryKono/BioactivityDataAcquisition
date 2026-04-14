@@ -1,6 +1,6 @@
 # Multi-stage build for BioETL
 # Stage 1: Builder
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
@@ -38,21 +38,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Copy installed packages from builder
+# Copy installed packages and app from builder in single operation
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
-
-# Copy application code
 COPY --from=builder /app/src ./src
 
 # Create non-root user with no shell access
 RUN useradd -m -u 1000 -s /sbin/nologin bioetl && \
     chown -R bioetl:bioetl /app
 USER bioetl
-
-# Health check (adjust port/path if needed)
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=5s \
-    CMD curl -f http://localhost:8000/health || exit 1
 
 ENTRYPOINT ["bioetl"]
 CMD ["--help"]

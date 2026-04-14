@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import (
         CoalescePolicyService,
-        ColumnOrderer,
+        ColumnOrderService,
         ColumnPriorityOrderer,
         ColumnRenamer,
         CompositeCheckpointService,
@@ -65,8 +65,9 @@ class MergeDependenciesBundle:
     deduplicator: EnricherDeduplicatorService
     aggregator: EnricherAggregator
     renamer: ColumnRenamer
-    orderer: ColumnOrderer
+    orderer: ColumnOrderService | None
     priority_orderer: ColumnPriorityOrderer
+    order_service: ColumnOrderService
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService

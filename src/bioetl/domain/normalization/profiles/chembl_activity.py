@@ -3,19 +3,32 @@
 from __future__ import annotations
 
 from ._chembl_activity_fields import (
+    ACTIVITY_STANDARD_TYPES,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
+    DATA_VALIDITY_COMMENTS,
     FLOAT_FIELDS,
     INT_FIELDS,
     META_FIELDS,
     SET_LIKE_FIELDS,
+    STANDARD_RELATIONS,
 )
+from .profile_normalizers import normalize_profile_case, normalize_profile_unit
+from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from ._standard_profile_builder import build_standard_profile
 from .profile_normalizers import normalize_profile_canonical_smiles
 
 __all__ = [
+    "ASSAY_TYPES",
     "CHEMBL_ACTIVITY_PROFILE",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
+    "NULL_FIELDS",
+    "STANDARD_RELATIONS",
+    "ACTIVITY_STANDARD_TYPES",
+    "DATA_VALIDITY_COMMENTS",
 ]
+
+# Assay types enum (B, F, A, T, P, U)
+ASSAY_TYPES = frozenset(["B", "F", "A", "T", "P", "U"])
 
 _SPECIAL_RULE_COMPONENTS = {
     "canonical_smiles": (
@@ -24,6 +37,43 @@ _SPECIAL_RULE_COMPONENTS = {
     ),
 }
 
+
+def create_case_normalizer(strategy: str = "uppercase"):
+    """Create a case normalizer function for profile use.
+    
+    Args:
+        strategy: Case strategy ("uppercase", "lowercase", or "preserve")
+        
+    Returns:
+        Normalizer function suitable for profile special_rules
+    """
+    def normalizer(value):
+        return normalize_cross_pipeline_case(value, strategy)
+    
+    return normalizer
+
+
+# Fields that commonly contain pseudo-null values and should be normalized
+NULL_FIELDS = frozenset([
+    "standard_value",
+    "value",
+    "upper_value",
+    "standard_upper_value",
+    "pchembl_value",
+    "data_validity_comment",
+    "assay_description",
+    "target_relation",
+    "target_organism",
+    "target_taxonomy",
+    "cell_line",
+    "tissue",
+    "assay_type",
+    "assay_test_type",
+    "assay_category",
+    "bao_format",
+    "bao_label",
+    "bao_endpoint",
+])
 
 CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     profile_name="chembl.activity",
@@ -38,7 +88,24 @@ CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     int_fields=INT_FIELDS,
     float_fields=FLOAT_FIELDS,
     set_like_fields=SET_LIKE_FIELDS,
-    special_rules=_SPECIAL_RULE_COMPONENTS,
+    enum_fields={
+        "standard_relation": STANDARD_RELATIONS,
+        "standard_type": ACTIVITY_STANDARD_TYPES,
+        "data_validity_comment": DATA_VALIDITY_COMMENTS,
+    },
+    special_rules={
+        **_SPECIAL_RULE_COMPONENTS,
+        "standard_relation": (
+            create_case_normalizer("uppercase"),
+            "Normalize standard_relation to uppercase for consistency.",
+        ),
+        "standard_type": (
+            create_case_normalizer("uppercase"),
+            "Normalize standard_type to uppercase for consistency.",
+        ),
+    },
+    unit_fields={"standard_units"},
+    null_fields=NULL_FIELDS,
 )
 
 CHEMBL_ACTIVITY_PROFILE.assert_covers_schema(CHEMBL_ACTIVITY_SCHEMA_FIELDS)

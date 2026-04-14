@@ -7,16 +7,20 @@ from collections.abc import Callable, Collection, Mapping
 from bioetl.domain.normalization.profiles.base import FieldRule, NormalizationProfile
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_abstract,
+    normalize_profile_case,
     normalize_profile_date,
     normalize_profile_doi,
+    normalize_profile_enum,
     normalize_profile_float,
     normalize_profile_int,
     normalize_profile_json_string,
+    normalize_profile_null,
     normalize_profile_passthrough,
     normalize_profile_pmc_id,
     normalize_profile_pmid,
     normalize_profile_text,
     normalize_profile_title,
+    normalize_profile_unit,
 )
 
 FieldNormalizer = Callable[[object], object]
@@ -43,6 +47,10 @@ def build_standard_profile(
     float_fields: Collection[str] = (),
     set_like_fields: Collection[str] = (),
     json_string_fields: Collection[str] = (),
+    enum_fields: Mapping[str, frozenset[str]] | None = None,
+    case_fields: Mapping[str, frozenset[str] | None] | None = None,
+    unit_fields: Collection[str] | None = None,
+    null_fields: Collection[str] | None = None,
     special_rules: Mapping[str, RuleComponentSpec] | None = None,
 ) -> NormalizationProfile:
     """Build one field-complete normalization profile from common field families."""
@@ -57,6 +65,10 @@ def build_standard_profile(
     normalized_float_fields = frozenset(float_fields)
     normalized_set_like_fields = frozenset(set_like_fields)
     normalized_json_string_fields = frozenset(json_string_fields)
+    normalized_enum_fields = enum_fields or {}
+    normalized_case_fields = case_fields or {}
+    normalized_unit_fields = frozenset(unit_fields or ())
+    normalized_null_fields = frozenset(null_fields or ())
     normalized_special_rules = {
         field_name: _coerce_rule_component(field_name=field_name, component=component)
         for field_name, component in (special_rules or {}).items()
@@ -80,6 +92,10 @@ def build_standard_profile(
                 float_fields=normalized_float_fields,
                 set_like_fields=normalized_set_like_fields,
                 json_string_fields=normalized_json_string_fields,
+                enum_fields=normalized_enum_fields,
+                case_fields=normalized_case_fields,
+                unit_fields=normalized_unit_fields,
+                null_fields=normalized_null_fields,
                 special_rules=normalized_special_rules,
             )
             for field_name in schema_fields
@@ -101,6 +117,10 @@ def _build_field_rule(
     float_fields: frozenset[str],
     set_like_fields: frozenset[str],
     json_string_fields: frozenset[str],
+    enum_fields: Mapping[str, frozenset[str]],
+    case_fields: Mapping[str, frozenset[str] | None],
+    unit_fields: frozenset[str],
+    null_fields: frozenset[str],
     special_rules: Mapping[str, RuleComponent],
 ) -> FieldRule:
     include_in_hash = field_name not in meta_fields
@@ -124,6 +144,10 @@ def _build_field_rule(
             float_fields=float_fields,
             set_like_fields=set_like_fields,
             json_string_fields=json_string_fields,
+            enum_fields=enum_fields,
+            case_fields=case_fields,
+            unit_fields=unit_fields,
+            null_fields=null_fields,
             special_rules=special_rules,
         )
     return FieldRule(
@@ -198,10 +222,36 @@ def _rule_components(
     float_fields: frozenset[str],
     set_like_fields: frozenset[str],
     json_string_fields: frozenset[str],
+    enum_fields: Mapping[str, frozenset[str]],
+    case_fields: Mapping[str, frozenset[str] | None],
+    unit_fields: frozenset[str],
+    null_fields: frozenset[str],
     special_rules: Mapping[str, RuleComponent],
 ) -> RuleComponent:
     if field_name in special_rules:
         return special_rules[field_name]
+    if field_name in enum_fields:
+        allowed_values = enum_fields[field_name]
+        return (
+            lambda value: normalize_profile_enum(value, allowed_values=allowed_values),
+            f"Normalize enum field '{field_name}' against allowed values.",
+        )
+    if field_name in case_fields:
+        allowed_values = case_fields[field_name]
+        return (
+            lambda value: normalize_profile_case(value, allowed_values=allowed_values),
+            f"Normalize case for field '{field_name}'.",
+        )
+    if field_name in unit_fields:
+        return (
+            normalize_profile_unit,
+            f"Canonicalize units for field '{field_name}'.",
+        )
+    if field_name in null_fields:
+        return (
+            normalize_profile_null,
+            f"Convert pseudo-null values to None for field '{field_name}'.",
+        )
     for fields, normalizer, notes in _rule_family_specs(
         title_fields=title_fields,
         abstract_fields=abstract_fields,

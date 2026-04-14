@@ -100,16 +100,7 @@ def _handle_health_failure(
     unexpected_error_title: str,
     interrupted_message: str,
 ) -> None:
-    """Handle health command failures with shared CLI policy.
-
-    Args:
-        exc: Exception caught at the CLI command boundary.
-        reason_code: Machine-readable code for the failure (e.g., 'CLI_HEALTH_CHECK_DOMAIN_ERROR').
-        target: Target identifier (e.g., provider name or host:port) used in error context.
-        domain_error_title: Human-readable title for BioETLError failures.
-        unexpected_error_title: Human-readable title for unexpected exception failures.
-        interrupted_message: Message displayed when KeyboardInterrupt is caught.
-    """
+    """Handle health command failures with the shared CLI execution policy."""
     handle_cli_execution_failure(
         exc,
         reason_code=reason_code,
@@ -123,24 +114,12 @@ def _handle_health_failure(
 
 
 def _provider_subject(provider: tuple[str, ...]) -> str:
-    """Build stable provider subject label for error handling.
-
-    Args:
-        provider: Tuple of provider names selected via CLI. Empty tuple means all providers.
-
-    Returns:
-        Comma-joined provider names, or 'all' when the tuple is empty.
-    """
+    """Build a stable provider subject label for error handling."""
     return ",".join(provider) if provider else "all"
 
 
 def _echo_health_server_info(host: str, port: int) -> None:
-    """Print startup information for health server command.
-
-    Args:
-        host: IP address the server will bind to.
-        port: TCP port the server will listen on.
-    """
+    """Print startup information for the health server command."""
     for line in build_health_server_info_lines(host, port):
         click.echo(line)
 

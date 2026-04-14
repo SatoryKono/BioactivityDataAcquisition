@@ -79,8 +79,8 @@ class HTTPClientRetryMixin:
         return float(delay)
 
     def _can_retry(self, attempt: int, retries_used: int) -> bool:
-        """Backward-compatible wrapper for retry-budget decision logic."""
-        return bool(_can_retry(self.retry_config, attempt, retries_used))
+        """Check if retry is allowed based on retry budget and attempt count."""
+        return _can_retry(self.retry_config, attempt, retries_used)
 
     def _record_retry_budget_exhausted(self, method: str, url: str) -> None:
         """Emit retry-budget exhaustion metrics and warning log."""
@@ -193,12 +193,9 @@ class HTTPClientRetryMixin:
                 record_metrics=self._record_request_metrics,
             )
 
-    def _is_retryable_error(
-        self,
-        exc: Exception,
-    ) -> bool:
-        """Return True when exception is retryable by policy."""
-        return bool(_is_retryable_error(self.retry_config, exc))
+    def _is_retryable_error(self, exc: Exception) -> bool:
+        """Check if the given exception is retryable according to retry policy."""
+        return _is_retryable_error(self.retry_config, exc)
 
     async def _attempt_request(
         self,
