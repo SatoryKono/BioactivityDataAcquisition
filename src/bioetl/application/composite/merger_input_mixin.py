@@ -139,7 +139,8 @@ class _MergeInputLoaderMixin:
             return pl.from_arrow(arrow_table)
         
         # Check if storage fallback is disabled (for test compatibility)
-        if not hasattr(self, '_storage') or self._storage is None:
+        # If _silver_reader is explicitly set to None, disable storage fallback
+        if hasattr(self, '_silver_reader') and self._silver_reader is None:
             raise RuntimeError(
                 f"Reading Silver table {table} requires delta_reader or silver_reader"
             )
