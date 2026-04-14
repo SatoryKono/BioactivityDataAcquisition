@@ -37,15 +37,10 @@ from bioetl.infrastructure.storage.silver.arrow_mixin import (
 from bioetl.infrastructure.storage.silver.delta_mixin import (
     SilverWriterDeltaMixin,
 )
-from bioetl.infrastructure.storage.silver.maintenance_mixin import (
-    SilverWriterMaintenanceMixin,
-)
 from bioetl.infrastructure.storage.silver.merged_mixin import (
     SilverWriterMergedMixin,
 )
-from bioetl.infrastructure.storage.silver.metadata_mixin import (
-    SilverWriterMetadataMixin,
-)
+
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
@@ -221,7 +216,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     SilverWriterMetadataMixin,
     SilverWriterMergedMixin,
     SilverWriterPostwriteMixin,
-    SilverWriterMaintenanceMixin,
     BaseDeltaWriter,
 ):
     """Writer for Silver layer (normalized data in Delta Lake)."""
@@ -311,6 +305,8 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self._dq_calculator = services.dq_calculator
         self._merge_resilience_policy = services.merge_resilience_policy
         self._contract_rollout_policy = services.contract_rollout_policy
+        self._maintenance = services.maintenance_operations
+        self._metadata = services.metadata_operations
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
 
