@@ -228,3 +228,5 @@ docs/reports/branch-full-diff-matrix-2026-03-01.csv
 /site_strict_check3
 docs/reports/evidence/documentation-internal-surface-governance/02-evidence/internal-surface-governance/EV-documentation-internal-surface-governance-strict-mkdocs-build-remains-green-under-current-boundary.yaml
 /.venv-docs
+, t)PY
+.venv-win-corrupt/Lib/site-packages/setproctitle-1.3.7.dist-info/top_level.txt
