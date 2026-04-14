@@ -7,7 +7,11 @@ from bioetl.application.services.control_plane.run_manifest_service import (
     RunManifestService,
 )
 
+# Compatibility alias for refactored naming
+RunManifestCreateRequest = RunManifestCreateSpec
+
 __all__ = [
     "RunManifestCreateSpec",
     "RunManifestService",
+    "RunManifestCreateRequest",
 ]

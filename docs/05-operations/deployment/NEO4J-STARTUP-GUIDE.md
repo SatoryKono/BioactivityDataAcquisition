@@ -214,5 +214,5 @@ docker inspect bioetl-neo4j
 ## Связанные Документы
 
 - [Neo4j Memory Configuration](./neo4j-memory-setup.md) - Детальная конфигурация памяти
-- [MCP Setup](../../NEO4J-MCP-SETUP.md) - Обзор MCP конфигурации
+- [MCP Configuration](./NEO4J-MCP-INDEX.md) - Обзор MCP конфигурации
 - Neo4j Official: https://neo4j.com/docker/

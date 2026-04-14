@@ -55,8 +55,15 @@ def build_join_planner_service(
     if join_type_resolver is None:
         join_type_resolver = _default_join_type_resolver
 
-    join_key_resolver = JoinKeyResolverService(
+    # Create ResolverHelper with normalization policies (new API)
+    from bioetl.application.composite.join_key_resolution import ResolverHelper
+    resolver_helper = ResolverHelper(
+        logger=logger,
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
+    )
+    
+    join_key_resolver = JoinKeyResolverService(
+        resolver_helper=resolver_helper,
         parse_pipeline_name=JoinPlannerService._parse_pipeline_name,
     )
     join_executor = JoinExecutorService(
@@ -140,10 +147,11 @@ def build_merge_service(
             deduplicator=deduplicator,
             aggregator=aggregator,
             renamer=renamer,
-            orderer=orderer,
-            priority_orderer=priority_orderer,
+            order_service=orderer,  # New API: order_service is now required
             coalesce_policy=coalesce_policy,
             conflict_resolver=conflict_resolver,
             join_planner=join_planner,
+            orderer=None,  # Old orderer parameter is now optional
+            priority_orderer=None,  # Old priority_orderer parameter is now optional
         ),
     )

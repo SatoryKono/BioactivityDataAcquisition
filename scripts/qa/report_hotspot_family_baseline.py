@@ -16,12 +16,25 @@ try:
         load_scorecard,
     )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
-    from hotspot_family_metrics import (  # type: ignore[no-redef]
-        PROJECT_ROOT,
-        SCORECARD_PATH,
-        collect_hotspot_family_metrics,
-        load_scorecard,
-    )
+    try:
+        # Try relative import for direct script execution
+        from hotspot_family_metrics import (  # type: ignore[no-redef]
+            PROJECT_ROOT,
+            SCORECARD_PATH,
+            collect_hotspot_family_metrics,
+            load_scorecard,
+        )
+    except ModuleNotFoundError:
+        # Try absolute import with path adjustment
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent))
+        from hotspot_family_metrics import (  # type: ignore[no-redef]
+            PROJECT_ROOT,
+            SCORECARD_PATH,
+            collect_hotspot_family_metrics,
+            load_scorecard,
+        )
 
 DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.json"
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.md"
