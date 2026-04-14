@@ -32,6 +32,7 @@ class StorageCreationContext:
     gold_flat: bool
     silver_csv_exporter: CsvExporter | None
     gold_csv_exporter: CsvExporter | None
+    pipeline_name: str
 
 
 def create_csv_exporter_from_config(
@@ -199,6 +200,7 @@ def build_storage_creation_context(
     settings: Settings,
     config: PipelineYamlConfig,
     logger: LoggerPort,
+    pipeline_name: str,
 ) -> StorageCreationContext:
     """Run the full layer-resolution pipeline and return a bundled context."""
     bronze_config, silver_config, gold_config = get_layer_configs(config)
@@ -242,4 +244,5 @@ def build_storage_creation_context(
         gold_flat=gold_flat,
         silver_csv_exporter=silver_csv_exporter,
         gold_csv_exporter=gold_csv_exporter,
+        pipeline_name=pipeline_name,
     )

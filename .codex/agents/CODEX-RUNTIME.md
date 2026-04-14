@@ -1,0 +1,69 @@
+# CODEX-RUNTIME.md — Runtime Map For BioETL Agents
+
+## Purpose
+
+This file adapts BioETL's logical `py-*` agent profiles to the actual Codex runtime
+available in this repository.
+
+## Key Rule
+
+`py-*` names in `.codex/agents/` are **logical project profiles**, not native
+`spawn_agent()` enum values.
+
+In this Codex environment, use:
+- `default` for orchestration, audit, planning, review, and documentation analysis
+- `explorer` for narrow read-only codebase questions
+- `worker` for isolated implementation work with an explicit write scope
+
+## Invocation Pattern
+
+Use the native agent type plus a prompt that points to the BioETL profile file.
+
+Example:
+
+```text
+spawn_agent(
+  agent_type="default",
+  message="Follow .codex/agents/py-audit-bot.md for task_id=AUD-001, phase=baseline, scope=src/bioetl/application/."
+)
+```
+
+## Recommended Mapping
+
+| Logical profile | Preferred Codex agent type | Notes |
+|-----------------|----------------------------|-------|
+| `py-audit-bot` | `default` | Read-only audit/review work |
+| `py-architecture-debt-bot` | `default` | Debt-reduction orchestration surface; may own `src/`/`tests/` implementation while delegating configs/docs |
+| `py-plan-bot` | `default` | Planning and decomposition |
+| `py-test-bot` | `default` or `worker` | `worker` only when editing tests |
+| `py-config-bot` | `worker` | Owns `configs/` write scope |
+| `py-debug-bot` | `worker` | Owns isolated fix scope in `src/` or `tests/` |
+| `py-doc-bot` | `worker` | Owns `docs/` / docstring edits |
+| `py-test-swarm` | `default` | L1 orchestration, delegates further |
+| `py-review-orchestrator` | `default` | L1 review orchestration |
+
+Repo-wide documentation audits should use the `documentation-audit` /
+`documentation-cascade-audit` skill surfaces instead of the retired
+documentation-only logical profile.
+
+## Ownership Rules
+
+- Main orchestrator keeps ownership of `src/bioetl/` unless there is a clear,
+  non-overlapping parallelization opportunity.
+- `configs/` changes should be delegated only to the logical `py-config-bot`
+  profile.
+- When using `worker`, always state the owned files or directories explicitly.
+- Do not ask child agents to revert unrelated user changes.
+
+## Output Convention
+
+When invoking a logical BioETL profile through a native Codex agent:
+- mention the profile file path explicitly
+- pass `task_id`, `phase` / `mode`, and `scope`
+- require the expected artifact path when the profile defines one
+
+## Related Files
+
+- `.codex/agents/ORCHESTRATION.md`
+- `.codex/skills/agent-orchestration/SKILL.md`
+- `AGENTS.md`

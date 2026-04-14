@@ -304,7 +304,7 @@ class TestDIConstructors:
         # Filter out known exceptions (data containers, not services)
         exceptions = {
             # These are data containers, not services
-            "CheckpointManager",  # This is a wrapper, may be instantiated
+            "CheckpointManager",  # Deprecated wrapper for CheckpointManagerService, may be instantiated
         }
         relevant_services = found_services - exceptions
 

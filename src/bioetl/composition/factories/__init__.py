@@ -65,7 +65,17 @@ _PIPELINE_FACTORY_EXPORTS = frozenset(
 )
 # Compatibility alias retained for legacy imports; new code should use
 # DataSourceCreatorProtocol directly.
-DataSourceCreatorPort = DataSourceCreatorProtocol
+import warnings
+
+class DataSourceCreatorPort(DataSourceCreatorProtocol):
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "DataSourceCreatorPort is deprecated and will be removed in v2.0. "
+            "Use DataSourceCreatorProtocol instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        super().__init__(*args, **kwargs)
 
 _PIPELINE_EXPORTS = frozenset(
     {
