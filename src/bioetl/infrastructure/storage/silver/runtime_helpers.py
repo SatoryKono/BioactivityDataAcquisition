@@ -147,9 +147,9 @@ def build_silver_writer_runtime_services(
     validation_ops = None
     if resolved_silver_validator is not None and base_path is not None:
         # Import here to avoid circular imports
-        from bioetl.infrastructure.storage.delta.table_ops import resolve_delta_table_path
-        from bioetl.infrastructure.storage.base_delta_writer import (
-            _get_table_schema,
+        from bioetl.infrastructure.storage.silver.support import (
+            get_table_schema,
+            resolve_table_path,
         )
         from bioetl.infrastructure.storage.silver.arrow_mixin import (
             prepare_arrow_data,
