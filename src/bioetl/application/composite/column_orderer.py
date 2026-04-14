@@ -39,19 +39,18 @@ def sort_columns_by_provider(
     provider_order: tuple[str, ...],
 ) -> list[str]:
     """Sort columns by provider prefix order."""
+    provider_indices = {p: i for i, p in enumerate(provider_order)}
+    default_idx = len(provider_order) + 1
 
     def sort_key(col: str) -> tuple[int, str]:
         """Return ``(provider_index, name)`` placing seed columns first."""
-        parts = col.split(".")
+        parts = col.split(".", maxsplit=2)
         if len(parts) < 3:
             return (0, col.lower())
 
         provider = parts[0].lower()
-        try:
-            idx = provider_order.index(provider)
-            return (idx + 1, col.lower())
-        except ValueError:
-            return (len(provider_order) + 1, col.lower())
+        idx = provider_indices.get(provider, default_idx)
+        return (idx + 1 if idx != default_idx else default_idx, col.lower())
 
     return sorted(columns, key=sort_key)
 
@@ -113,13 +112,15 @@ def collect_explicit_group_columns(
     ordered: list[str] = []
     used: set[str] = set()
 
+    extracted_fields = {col: extract_field_fn(col) for col in available}
+
     for field_name in group.fields:
         field_matches: list[str] = []
         aliases = resolve_aliases_fn(field_name)
         for column in available:
             if column in used:
                 continue
-            extracted = extract_field_fn(column)
+            extracted = extracted_fields[column]
             if extracted in aliases or column in aliases:
                 field_matches.append(column)
                 used.add(column)
@@ -130,7 +131,7 @@ def collect_explicit_group_columns(
 
 class ColumnOrderer:
     """Service for ordering columns by semantic groups.
-    
+
     .. deprecated:: 2024.2
         Use :class:`ColumnOrderService` instead for unified column ordering functionality.
     """
@@ -143,11 +144,12 @@ class ColumnOrderer:
     ) -> None:
         """Initialize orderer."""
         import warnings
+
         warnings.warn(
             "ColumnOrderer is deprecated and will be removed in a future version. "
             "Use ColumnOrderService instead for unified column ordering functionality.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER
