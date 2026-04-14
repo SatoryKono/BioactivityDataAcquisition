@@ -34,7 +34,7 @@ if TYPE_CHECKING:
         ShutdownSignal,
         TransformCallback,
     )
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
+    from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier

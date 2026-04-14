@@ -74,10 +74,13 @@ def build_merge_dependencies(
         resolver_helper=resolver_helper,
         parse_pipeline_name=parse_pipeline_name,
     )
-    join_executor = PolarsJoinAdapter(
+    # Create the actual JoinExecutorService first
+    join_service = JoinExecutorService(
         logger=logger,
         join_type_resolver=lambda: resolve_join_how(config.merge.strategy),
     )
+    # Wrap it with the real adapter
+    join_executor = PolarsJoinAdapter(join_service)
     dependency_joiner = DependencyJoinerService(
         logger=logger,
         deduplicator=deduplicator,

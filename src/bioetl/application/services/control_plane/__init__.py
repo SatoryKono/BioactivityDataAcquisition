@@ -18,7 +18,6 @@ from bioetl.application.services.control_plane.run_manifest_inspection_service i
     RunManifestInspectionService,
 )
 from bioetl.application.services.control_plane.run_manifest_service import (
-    RunManifestCreateRequest,
     RunManifestCreateSpec,
     RunManifestService,
 )

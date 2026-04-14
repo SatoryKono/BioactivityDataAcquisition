@@ -213,18 +213,9 @@ class GoldMetadataService:
         )
 
 
-SilverMetadataAssembler = SilverMetadataService
-GoldMetadataAssembler = GoldMetadataService
-RuntimeMetadataFactory = RuntimeMetadataProtocol
-PipelineMetadataFactory = PipelineMetadataProtocol
-
 __all__ = [
-    "GoldMetadataAssembler",
     "GoldMetadataService",
-    "PipelineMetadataFactory",
     "PipelineMetadataProtocol",
-    "RuntimeMetadataFactory",
     "RuntimeMetadataProtocol",
-    "SilverMetadataAssembler",
     "SilverMetadataService",
 ]

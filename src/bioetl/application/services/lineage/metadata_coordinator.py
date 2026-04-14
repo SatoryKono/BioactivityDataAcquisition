@@ -32,8 +32,8 @@ from bioetl.application.services.lineage._metadata_coordinator_helpers import (
     validate_records_present,
 )
 from bioetl.application.services.lineage.metadata_assemblers import (
-    GoldMetadataAssembler,
-    SilverMetadataAssembler,
+    GoldMetadataService,
+    SilverMetadataService,
 )
 from bioetl.application.services.lineage.metadata_lineage_bundle import (
     MetadataLineageBundle,
@@ -174,9 +174,9 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         )
 
     @cached_property
-    def _silver_assembler(self) -> SilverMetadataAssembler:
-        """Build Silver metadata assembler once per coordinator instance."""
-        return SilverMetadataAssembler(
+    def _silver_metadata_service(self) -> SilverMetadataService:
+        """Build Silver metadata service once per coordinator instance."""
+        return SilverMetadataService(
             run_context=self._context,
             runtime_metadata_factory=self._build_runtime_metadata,
             pipeline_metadata_factory=self._build_pipeline_metadata,
@@ -184,9 +184,9 @@ class MetadataCoordinator(MetadataCoordinatorPort):
         )
 
     @cached_property
-    def _gold_assembler(self) -> GoldMetadataAssembler:
-        """Build Gold metadata assembler once per coordinator instance."""
-        return GoldMetadataAssembler(
+    def _gold_metadata_service(self) -> GoldMetadataService:
+        """Build Gold metadata service once per coordinator instance."""
+        return GoldMetadataService(
             run_context=self._context,
             runtime_metadata_factory=self._build_runtime_metadata,
             pipeline_metadata_factory=self._build_pipeline_metadata,
@@ -262,7 +262,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             total_records=input_data.total_records,
             layer_name="Silver",
         )
-        return self._silver_assembler.assemble(input_data)
+        return self._silver_metadata_service.assemble(input_data)
 
     def build_silver_lineage_fragment(
         self,
@@ -303,7 +303,7 @@ class MetadataCoordinator(MetadataCoordinatorPort):
             total_records=input_data.total_records,
             layer_name="Gold",
         )
-        return self._gold_assembler.assemble(input_data)
+        return self._gold_metadata_service.assemble(input_data)
 
     def build_gold_lineage_fragment(
         self,

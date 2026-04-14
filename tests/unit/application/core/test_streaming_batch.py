@@ -21,7 +21,7 @@ from bioetl.application.core.transformer_runtime import (
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.domain.config import MemoryConfig
 from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
-from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError
