@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
 __all__ = [
-    "RunExecutionContext",
     "RunExecutionRequest",
     "RunPreparationResult",
     "StartOffsetValidationResult",
@@ -23,16 +22,13 @@ class StartOffsetValidationResult:
 
 
 @dataclass(frozen=True, slots=True)
-class RunExecutionContext:
-    """Prepared run context passed across CLI orchestration boundaries."""
+class RunExecutionRequest:
+    """Prepared run request passed across CLI orchestration boundaries."""
 
     pipeline: str
     options: RunOptions
     health_server: bool
     health_port: int
-
-
-RunExecutionRequest = RunExecutionContext
 
 
 @dataclass(frozen=True, slots=True)

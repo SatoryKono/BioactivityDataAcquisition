@@ -26,7 +26,6 @@ from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID, RunType
 
 __all__ = [
-    "RunManifestCreateRequest",
     "RunManifestCreateSpec",
     "RunManifestService",
 ]
@@ -395,4 +394,4 @@ class RunManifestService:
         return cast(str, compute_execution_identity_fingerprint(payload))
 
 
-RunManifestCreateRequest = RunManifestCreateSpec
+

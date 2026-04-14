@@ -126,6 +126,7 @@ ROLE_SUFFIXES = {
     "Aggregator": ["Aggregator"],
     "Orchestrator": ["Orchestrator"],
     "Collector": ["Collector"],
+    "Assembler": ["Assembler"],
 }
 
 # Directories excluded from doc naming audit (archives, plans, AI content)

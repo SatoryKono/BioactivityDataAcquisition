@@ -99,7 +99,7 @@ class TestDQSoftThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManager
+        from bioetl.application.core.quarantine_manager import QuarantineManagerService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -180,7 +180,7 @@ class TestDQSoftThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManager
+        from bioetl.application.core.quarantine_manager import QuarantineManagerService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -262,7 +262,7 @@ class TestDQHardThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManager
+        from bioetl.application.core.quarantine_manager import QuarantineManagerService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -327,7 +327,7 @@ class TestDQHardThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManager
+        from bioetl.application.core.quarantine_manager import QuarantineManagerService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -389,7 +389,7 @@ class TestDQHardThreshold:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManager
+        from bioetl.application.core.quarantine_manager import QuarantineManagerService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 
@@ -459,7 +459,7 @@ class TestDQQuarantineBehavior:
         from bioetl.application.core.batch_metrics import BatchMetricsRecorder
         from bioetl.application.core.batch_transformer import BatchTransformer
         from bioetl.application.core.config import RecordProcessorConfig
-        from bioetl.application.core.quarantine_manager import QuarantineManager
+        from bioetl.application.core.quarantine_manager import QuarantineManagerService
         from bioetl.domain.error_classifier import ErrorClassifier
         from bioetl.domain.types import BatchID
 

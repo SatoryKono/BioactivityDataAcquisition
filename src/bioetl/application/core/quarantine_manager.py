@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import NamedTuple
 
-from bioetl.application.observability.domain_event_emitter import DomainEventEmitter
+from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
 from bioetl.application.observability.pipeline_metrics import PipelineMetricsRecorder
 from bioetl.domain.aggregates.events import RecordQuarantined
 from bioetl.domain.aggregates.quarantine_entry import QuarantineEntry
@@ -71,7 +71,7 @@ class QuarantineManagerService:
         pipeline_metrics: PipelineMetricsRecorder | None = None,
         domain_event_emitter: DomainEventEmitter | None = None,
     ) -> None:
-        """Initialize QuarantineManager with explicit dependencies.
+        """Initialize QuarantineManagerService with explicit dependencies.
 
         Args:
             quarantine_port: Port for writing to quarantine storage.
@@ -424,11 +424,8 @@ class QuarantineManagerService:
         return None
 
 
-QuarantineManager = QuarantineManagerService
-
 __all__ = [
     "DQQuarantineEntry",
     "FilteredQuarantineEntry",
-    "QuarantineManager",
     "QuarantineManagerService",
 ]

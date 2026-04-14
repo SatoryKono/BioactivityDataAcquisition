@@ -124,6 +124,14 @@ UNIT_MAPPING: dict[str, str] = {
 }
 
 
+def _find_case_match(normalized: str, allowed_values: frozenset[str]) -> str | None:
+    """Find case-insensitive match in allowed values."""
+    for allowed_value in allowed_values:
+        if normalized.upper() == allowed_value.upper():
+            # Return the allowed value's original case to preserve enum casing
+            return allowed_value
+    return None
+
 def normalize_case(value: Any, allowed_values: frozenset[str] | None = None) -> str | None:  # Any: Generic input value from various sources
     """Normalize case for enum-like fields.
     
@@ -134,10 +142,7 @@ def normalize_case(value: Any, allowed_values: frozenset[str] | None = None) -> 
     Returns:
         Normalized value (case-preserved from allowed_values) if valid, None otherwise
     """
-    if value is None:
-        return None
-    
-    if not isinstance(value, str):
+    if value is None or not isinstance(value, str):
         return None
     
     # Normalize string first (trim whitespace, etc.)
@@ -145,15 +150,9 @@ def normalize_case(value: Any, allowed_values: frozenset[str] | None = None) -> 
     if normalized is None:
         return None
     
-    # For case-insensitive matching against allowed values
+    # Handle validation against allowed values
     if allowed_values is not None:
-        # Try case-insensitive matching against each allowed value
-        for allowed_value in allowed_values:
-            if normalized.upper() == allowed_value.upper():
-                # Return the allowed value's original case to preserve enum casing
-                return allowed_value
-        # No match found
-        return None
+        return _find_case_match(normalized, allowed_values)
     
     # No allowed_values provided, just normalize string
     return normalized
@@ -226,6 +225,15 @@ def normalize_enum_case(value: Any, allowed_values: frozenset[str]) -> str | Non
     return normalize_case(value, allowed_values)
 
 
+def _apply_case_strategy(normalized: str, strategy: str) -> str:
+    """Apply the specified case strategy to normalized string."""
+    strategy_map = {
+        "uppercase": normalized.upper(),
+        "lowercase": normalized.lower(),
+        "preserve": normalized,
+    }
+    return strategy_map.get(strategy, normalized)
+
 def normalize_cross_pipeline_case(value: str, strategy: str = "uppercase") -> str | None:
     """Normalize case using consistent strategy across all pipelines.
     
@@ -249,10 +257,7 @@ def normalize_cross_pipeline_case(value: str, strategy: str = "uppercase") -> st
         >>> normalize_cross_pipeline_case("Cell Culture", "preserve")
         "Cell Culture"
     """
-    if value is None:
-        return None
-    
-    if not isinstance(value, str):
+    if value is None or not isinstance(value, str):
         return None
     
     # Normalize string first (trim whitespace, etc.)
@@ -260,10 +265,4 @@ def normalize_cross_pipeline_case(value: str, strategy: str = "uppercase") -> st
     if normalized is None:
         return None
     
-    # Apply case strategy
-    if strategy == "uppercase":
-        return normalized.upper()
-    elif strategy == "lowercase":
-        return normalized.lower()
-    else:  # preserve
-        return normalized
+    return _apply_case_strategy(normalized, strategy)

@@ -109,7 +109,7 @@ def get_quarantine_manager(pipeline: str) -> QuarantineManagerProtocol:
         pipeline: Pipeline name (e.g., 'chembl_activity').
 
     Returns:
-        QuarantineManager instance for the pipeline.
+        QuarantineManagerService instance for the pipeline.
 
     Example:
         >>> manager = get_quarantine_manager("chembl_activity")

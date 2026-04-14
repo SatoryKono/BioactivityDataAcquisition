@@ -106,6 +106,15 @@ policy-backed external IDs, хотя domain использует `PubchemMolecul
 **Формат:** `CHEMBL-{CANONICAL-TERM}-SCHEMA` (UPPER-SNAKE-CASE)
 **Место:** `src/bioetl/infrastructure/schemas/silver.py`
 
+#### 2.4.3. Assembler Services
+
+**Формат:** `{Entity}Assembler` (PascalCase)
+**Место:** `src/bioetl/application/services/`
+
+- **MAY**: Использовать суффикс `Assembler` для сервисов, которые собирают или агрегируют данные из нескольких источников.
+- **SHOULD**: Предпочитать `*Service` для стандартных сервисов.
+- **MUST**: Быть зафиксированным в `configs/naming_exceptions.yaml`, если используется вместо `*Service`.
+
 ______________________________________________________________________
 
 ## 3. Таблицы и Файлы

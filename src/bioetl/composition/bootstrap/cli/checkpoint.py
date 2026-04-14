@@ -56,16 +56,16 @@ __all__ = [
 
 
 def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManagerService:
-    """Bootstrap QuarantineManager for CLI inspection operations.
+    """Bootstrap QuarantineManagerService for CLI inspection operations.
 
-    Creates a QuarantineManager for quarantine inspection and reporting.
+    Creates a QuarantineManagerService for quarantine inspection and reporting.
     Used by CLI for `quarantine inspect` and similar commands.
 
     Args:
         pipeline_name: Name of the pipeline to inspect.
 
     Returns:
-        QuarantineManager configured for the specified pipeline.
+        QuarantineManagerService configured for the specified pipeline.
     """
     quarantine_port = bootstrap_quarantine_port()
     return QuarantineManagerService(
