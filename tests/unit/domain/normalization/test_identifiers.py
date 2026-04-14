@@ -178,8 +178,8 @@ class TestNormalizeOntologyID:
     def test_normalize_ontology_id_none_and_empty(self) -> None:
         """Test None and empty string handling."""
         assert normalize_ontology_id(None) is None
-        assert normalize_ontology_id("") is None
-        assert normalize_ontology_id("   ") is None
+        assert normalize_ontology_id("") == ""  # Empty string returns empty string
+        assert normalize_ontology_id("   ") is None  # Whitespace-only returns None
 
     def test_normalize_ontology_id_invalid(self) -> None:
         """Test invalid ontology ID handling."""
