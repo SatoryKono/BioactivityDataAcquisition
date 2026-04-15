@@ -1,24 +1,24 @@
 # BioETL — Full Project Review Report
 
-**Date**: 2026-04-06
-**RULES.md Version**: 5.22
+**Date**: 2026-04-15
+**RULES.md Version**: 6.1.0
 **Project Version**: 1.0.0
-**Total files reviewed**: 4967
-**Total LOC reviewed**: 853932
+**Total files reviewed**: 5477
+**Total LOC reviewed**: 949813
 
 ---
 
 ## Executive Summary
 **Overall Status**: PASS
-**Overall Score**: 9.2/10.0
+**Overall Score**: 9.4/10.0
 
 ### Key Metrics
 | Metric | Value |
 |--------|-------|
-| Total issues found | 4528 |
-| Critical issues | 151 |
-| High issues | 4064 |
-| Medium issues | 313 |
+| Total issues found | 4499 |
+| Critical issues | 26 |
+| High issues | 4146 |
+| Medium issues | 327 |
 | Low issues | 0 |
 | Sectors reviewed | 8 |
 
@@ -27,65 +27,41 @@
 ## Sector Scores
 | Sector | Scope | Files | LOC | Score | Status |
 |--------|-------|-------|-----|-------|--------|
-| S1 Domain | src/bioetl/domain | 412 | 51702 | 9.5 | PASS |
-| S2 Application | src/bioetl/application | 372 | 59224 | 10.0 | PASS |
-| S3 Infrastructure | src/bioetl/infrastructure | 395 | 59785 | 9.3 | PASS |
-| S4 Composition + Interfaces | src/bioetl/composition, src/bioetl/interfaces | 252 | 31785 | 8.9 | PASS |
-| S6 Tests | tests | 1278 | 333453 | 6.4 | WARN |
-| S7 Configs | configs | 67 | 10487 | 10.0 | PASS |
-| S8 Documentation | docs | 758 | 104850 | 10.0 | PASS |
-| S5 Cross-cutting | src/bioetl | 1433 | 202646 | 8.1 | PASS |
+| S1 Domain | src/bioetl/domain | 465 | 58221 | 9.6 | PASS |
+| S2 Application | src/bioetl/application | 436 | 68659 | 10.0 | PASS |
+| S3 Infrastructure | src/bioetl/infrastructure | 413 | 62377 | 9.9 | PASS |
+| S4 Composition + Interfaces | src/bioetl/composition, src/bioetl/interfaces | 277 | 35470 | 9.2 | PASS |
+| S6 Tests | tests | 1365 | 361504 | 6.4 | WARN |
+| S7 Configs | configs | 71 | 11379 | 10.0 | PASS |
+| S8 Documentation | docs | 857 | 127430 | 10.0 | PASS |
+| S5 Cross-cutting | src/bioetl | 1593 | 224773 | 8.4 | PASS |
 
 ---
 
 ## Critical Issues (блокируют merge/release)
-- **AP-001**: src/bioetl/infrastructure/storage/delta_reader.py:50 - Hard-coded dependency instantiation: Path()
-- **AP-001**: src/bioetl/infrastructure/storage/base_delta_writer.py:191 - Hard-coded dependency instantiation: ArrowDataConverter()
-- **AP-001**: src/bioetl/infrastructure/storage/base_delta_writer.py:192 - Hard-coded dependency instantiation: RetentionPolicy()
-- **AP-001**: src/bioetl/infrastructure/storage/bronze_writer.py:156 - Hard-coded dependency instantiation: Path()
-- **AP-001**: src/bioetl/infrastructure/observability/tracing.py:257 - Hard-coded dependency instantiation: TracerProvider()
-- **AP-001**: src/bioetl/infrastructure/observability/anomaly/monitor.py:67 - Hard-coded dependency instantiation: AnomalyDetector()
+- **AP-001**: src/bioetl/infrastructure/observability/tracing.py:258 - Hard-coded dependency instantiation: TracerProvider()
+- **AP-001**: src/bioetl/infrastructure/observability/anomaly/monitor.py:61 - Hard-coded dependency instantiation: AnomalyDetector()
 - **AP-001**: tests/unit/application/composite/test_runner_fsm.py:63 - Hard-coded dependency instantiation: CompositeCheckpointState()
-- **AP-001**: tests/unit/application/composite/test_runner_checkpoint_resume.py:107 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/test_runner_required_flag.py:114 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/test_runner.py:99 - Hard-coded dependency instantiation: MagicMock()
 - **AP-001**: tests/unit/application/composite/test_runner_robustness.py:63 - Hard-coded dependency instantiation: CompositeCheckpointState()
-- **AP-001**: tests/unit/application/composite/test_runner_observability_mixin.py:22 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/test_runner_observability_mixin.py:33 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:72 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:77 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:80 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:82 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:85 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:58 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:71 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:72 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:74 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:75 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:82 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:83 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:89 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:91 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:92 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:107 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:109 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:75 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:76 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:78 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:80 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:81 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:82 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:65 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:70 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:72 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:73 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:76 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:77 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:80 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:62 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:63 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:66 - Hard-coded dependency instantiation: MagicMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:69 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_completion_helpers.py:70 - Hard-coded dependency instantiation: AsyncMock()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py:33 - Hard-coded dependency instantiation: SimpleNamespace()
-- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_observability_mixin.py:44 - Hard-coded dependency instantiation: MagicMock()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_support_mixin.py:92 - Hard-coded dependency instantiation: CompositeLifecycleObserverService()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_merge_stage_mixin.py:78 - Hard-coded dependency instantiation: CompositeLifecycleObserverService()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_start_flow.py:24 - Hard-coded dependency instantiation: CompositeLifecycleObserverService()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_mixin.py:94 - Hard-coded dependency instantiation: CompositeLifecycleObserverService()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_enrichment_mixin.py:81 - Hard-coded dependency instantiation: CompositeLifecycleObserverService()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_stage_support_mixin.py:75 - Hard-coded dependency instantiation: CompositeLifecycleObserverService()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_execution_orchestrator.py:33 - Hard-coded dependency instantiation: SeedResult()
+- **AP-001**: tests/unit/application/composite/runner_pkg/test_runner_execution_orchestrator.py:50 - Hard-coded dependency instantiation: MergeResult()
+- **AP-001**: tests/unit/infrastructure/adapters/openalex/test_client_helpers_adapter_mixin.py:21 - Hard-coded dependency instantiation: APIRequestCollector()
+- **AP-001**: tests/unit/infrastructure/adapters/openalex/test_request_metadata.py:20 - Hard-coded dependency instantiation: APIRequestCollector()
+- **AP-001**: tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py:21 - Hard-coded dependency instantiation: ArrowDataConverter()
+- **AP-001**: tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:36 - Hard-coded dependency instantiation: RunManifest()
+- **AP-001**: tests/unit/interfaces/cli/commands/test_run_manifest_commands.py:57 - Hard-coded dependency instantiation: RunLedgerEntry()
+- **AP-001**: tests/unit/interfaces/cli/commands/test_lineage_commands.py:34 - Hard-coded dependency instantiation: LineageNodeRef()
+- **AP-001**: tests/unit/interfaces/cli/commands/test_lineage_commands.py:38 - Hard-coded dependency instantiation: LineageGraphFragment()
+- **AP-001**: tests/integration/interfaces/test_cli_run_manifest.py:28 - Hard-coded dependency instantiation: RunID()
+- **AP-001**: tests/integration/interfaces/test_cli_run_manifest.py:29 - Hard-coded dependency instantiation: RunManifest()
+- **AP-001**: tests/integration/ci/test_reproducibility_contract_suite.py:116 - Hard-coded dependency instantiation: RunID()
+- **AP-001**: src/bioetl/infrastructure/export/dq_report_writer.py:59 - Hard-coded dependency instantiation: DQReportSerializer()
+- **AP-001**: src/bioetl/infrastructure/observability/tracing.py:258 - Hard-coded dependency instantiation: TracerProvider()
+- **AP-001**: src/bioetl/infrastructure/observability/anomaly/monitor.py:61 - Hard-coded dependency instantiation: AnomalyDetector()
+- **AP-001**: src/bioetl/infrastructure/validation/contract_validator.py:312 - Hard-coded dependency instantiation: PanderaSilverValidator()
