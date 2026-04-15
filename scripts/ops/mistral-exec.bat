@@ -1,4 +1,4 @@
-@echo off
+.\@echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
 REM Launch Mistral Vibe in prompt mode through WSL

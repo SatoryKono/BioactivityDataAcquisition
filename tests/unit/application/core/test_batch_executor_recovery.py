@@ -99,7 +99,10 @@ class TestBatchExecutorRecoveryInvariants:
                 pipeline_name="test_pipeline",
                 provider="test",
                 entity_type="ent",
-                dq_config=None,
+                dq_config=MagicMock(
+                    soft_fail_threshold=0.1,
+                    hard_fail_threshold=0.3,
+                ),
             ),
             callbacks={
                 "transform": lambda ctx, rec, idx: {"entity_id": str(rec["id"])},
@@ -136,7 +139,10 @@ class TestBatchExecutorRecoveryInvariants:
                 pipeline_name="test_pipeline",
                 provider="test",
                 entity_type="ent",
-                dq_config=None,
+                dq_config=MagicMock(
+                    soft_fail_threshold=0.1,
+                    hard_fail_threshold=0.3,
+                ),
             ),
             callbacks={
                 "transform": lambda ctx, rec, idx: {"entity_id": str(rec["id"])},

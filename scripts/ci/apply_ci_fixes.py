@@ -26,7 +26,6 @@ import base64
 import re as _re
 import sys
 import time
-from typing import Optional
 
 import requests
 

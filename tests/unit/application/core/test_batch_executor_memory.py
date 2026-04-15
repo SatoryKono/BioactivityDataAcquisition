@@ -423,7 +423,7 @@ class TestBatchExecutorMemory:
         )
 
         async def mock_fetch(**kwargs):
-            yield {"id": 1, "value": "test"}
+            yield {"id": 1, "value": 10}
 
         mock_services.data_source.fetch = mock_fetch
 

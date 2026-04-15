@@ -86,7 +86,6 @@ def _err(message: str) -> None:
 def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> list[Path]:
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
-
     paths: list[Path] = []
     for raw in manifest_path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
@@ -99,7 +98,6 @@ def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> lis
                 f"Unsupported suffix in manifest ({allowed} expected): {line}"
             )
         paths.append(path)
-
     if not paths:
         raise ValueError(f"Manifest is empty: {manifest_path}")
     return paths
