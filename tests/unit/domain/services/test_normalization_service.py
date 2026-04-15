@@ -204,6 +204,50 @@ class TestNormalizationServiceNormalizeConcentrations:
         assert result.is_valid is False
         assert "No concentrations" in result.validation_message
 
+    def test_normalize_concentrations_value_error_zero(
+        self, service: NormalizationService
+    ) -> None:
+        """Test normalize_concentrations with zero concentration (ValueError in pChEMBL)."""
+        concs = [Concentration(0.0, ConcentrationUnit.NANOMOLAR)]
+        # This should trigger ValueError in to_pchembl and catch it
+        result = service.normalize_concentrations(concs)
+
+        assert result.value == 0.0
+        assert result.unit == "nM"
+        assert result.pchembl is None
+        assert result.is_potent is False
+        assert result.is_valid is True
+
+    def test_normalize_concentrations_value_error_too_high(
+        self, service: NormalizationService
+    ) -> None:
+        """Test normalize_concentrations with too high concentration (ValueError in pChEMBL)."""
+        # 2M is > 1M, so pChEMBL < 0, which triggers ValueError in PChemblValue.__post_init__
+        concs = [Concentration(2.0, ConcentrationUnit.MOLAR)]
+        result = service.normalize_concentrations(concs)
+
+        # Result unit is nM by default from aggregator
+        assert result.value == pytest.approx(2e9)
+        assert result.unit == "nM"
+        assert result.pchembl is None
+        assert result.is_potent is False
+        assert result.is_valid is True
+
+    def test_normalize_concentrations_value_error_too_low(
+        self, service: NormalizationService
+    ) -> None:
+        """Test normalize_concentrations with too low concentration (ValueError in pChEMBL)."""
+        # 1e-15 M is < 1e-14 M, so pChEMBL > 14, which triggers ValueError in PChemblValue.__post_init__
+        concs = [Concentration(1e-15, ConcentrationUnit.MOLAR)]
+        result = service.normalize_concentrations(concs)
+
+        # 1e-15 M = 1e-6 nM
+        assert result.value == pytest.approx(1e-6)
+        assert result.unit == "nM"
+        assert result.pchembl is None
+        assert result.is_potent is False
+        assert result.is_valid is True
+
 
 class TestNormalizationServicePotencyMethods:
     """Tests for potency classification methods."""
