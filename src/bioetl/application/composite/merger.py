@@ -18,6 +18,9 @@ from bioetl.application.composite.join_planner_helpers import (
 from bioetl.application.composite.merger_collaborators import (
     MergeCollaboratorGroup,
 )
+from bioetl.application.composite.merger_input_mixin import (
+    _MergeInputLoaderMixin,
+)
 from bioetl.application.composite.merger_io_mixin import MergeIOMixin
 from bioetl.application.composite.merger_metrics_mixin import MergeMetricsRecorderMixin
 from bioetl.application.composite.merger_orchestration import (
