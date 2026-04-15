@@ -245,16 +245,9 @@
       <excludeFolder url="file://$MODULE_DIR$/.venv-win-corrupt" />
       <excludeFolder url="file://$MODULE_DIR$/MagicMock" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/.gemini" />
+      <excludeFolder url="file://$MODULE_DIR$/scripts/gemini" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-  </component>
-  <component name="PyDocumentationSettings">
-    <option name="format" value="GOOGLE" />
-    <option name="myDocStringFormat" value="Google" />
-    <option name="renderExternalDocumentation" value="true" />
-  </component>
-  <component name="TestRunnerService">
-    <option name="PROJECT_TEST_RUNNER" value="py.test" />
   </component>
 </module>
