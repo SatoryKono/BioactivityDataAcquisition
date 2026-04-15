@@ -39,7 +39,7 @@ class TestSeedKeyResolver:
     @pytest.mark.asyncio
     async def test_returns_seed_keys_with_canonical_normalization(self) -> None:
         logger = MagicMock()
-        resolver = SeedKeyResolver(logger)
+        resolver = create_seed_key_resolver(logger)
         seed_keys = pl.DataFrame({"doi": [" 10.1/A ", "10.1/b"]})
         dep = _dep_config()
 
@@ -55,7 +55,7 @@ class TestSeedKeyResolver:
     @pytest.mark.asyncio
     async def test_logs_debug_message(self) -> None:
         logger = MagicMock()
-        resolver = SeedKeyResolver(logger)
+        resolver = create_seed_key_resolver(logger)
 
         await resolver.resolve(
             dependency=_dep_config(),
@@ -74,7 +74,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_raises_without_delta_reader(self) -> None:
         logger = MagicMock()
-        resolver = ChainedKeyResolver(logger)
+        resolver = create_chained_key_resolver(logger)
         dep = _dep_config(key_source="source_dep")
 
         with pytest.raises(ValueError, match="requires delta_reader"):
@@ -88,7 +88,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_raises_for_unknown_key_source(self) -> None:
         logger = MagicMock()
-        resolver = ChainedKeyResolver(logger)
+        resolver = create_chained_key_resolver(logger)
         dep = _dep_config(key_source="nonexistent")
         delta_reader = AsyncMock()
 
@@ -103,7 +103,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_raises_when_source_has_no_silver_table(self) -> None:
         logger = MagicMock()
-        resolver = ChainedKeyResolver(logger)
+        resolver = create_chained_key_resolver(logger)
         dep = _dep_config(key_source="source_dep")
         source_dep = _dep_config(pipeline="source_dep", silver_table=None)
         delta_reader = AsyncMock()
@@ -119,7 +119,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_falls_back_to_seed_on_file_not_found(self) -> None:
         logger = MagicMock()
-        resolver = ChainedKeyResolver(logger)
+        resolver = create_chained_key_resolver(logger)
         dep = _dep_config(key_source="source_dep")
         source_dep = _dep_config(pipeline="source_dep", silver_table="silver/src")
         delta_reader = AsyncMock()
@@ -139,7 +139,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_falls_back_to_seed_on_empty_table(self) -> None:
         logger = MagicMock()
-        resolver = ChainedKeyResolver(logger)
+        resolver = create_chained_key_resolver(logger)
         dep = _dep_config(key_source="source_dep")
         source_dep = _dep_config(pipeline="source_dep", silver_table="silver/src")
         delta_reader = AsyncMock()
@@ -160,7 +160,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_resolves_keys_from_source_table(self) -> None:
         logger = MagicMock()
-        resolver = ChainedKeyResolver(logger)
+        resolver = create_chained_key_resolver(logger)
         dep = _dep_config(key_source="source_dep")
         source_dep = _dep_config(pipeline="source_dep", silver_table="silver/src")
         delta_reader = AsyncMock()
@@ -180,7 +180,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_normalizes_chained_source_keys_before_returning(self) -> None:
         logger = MagicMock()
-        resolver = ChainedKeyResolver(logger)
+        resolver = create_chained_key_resolver(logger)
         dep = _dep_config(key_source="source_dep")
         source_dep = _dep_config(pipeline="source_dep", silver_table="silver/src")
         delta_reader = AsyncMock()
@@ -199,7 +199,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_seed_resolver_normalizes_compound_join_key_families(self) -> None:
         logger = MagicMock()
-        resolver = SeedKeyResolver(logger)
+        resolver = create_seed_key_resolver(logger)
         dep = _dep_config(join_keys=("doi", "title", "pmid", "uniprot_accession"))
         seed_keys = pl.DataFrame(
             {
@@ -227,7 +227,7 @@ class TestChainedKeyResolver:
     @pytest.mark.asyncio
     async def test_validates_join_key_exists(self) -> None:
         logger = MagicMock()
-        resolver = ChainedKeyResolver(logger)
+        resolver = create_chained_key_resolver(logger)
         dep = _dep_config(key_source="source_dep", join_keys=("missing_col",))
         source_dep = _dep_config(pipeline="source_dep", silver_table="silver/src")
         delta_reader = AsyncMock()

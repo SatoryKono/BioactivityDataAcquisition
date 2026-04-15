@@ -57,6 +57,7 @@ def _path_to_table_name(path: str) -> str:
 class MergeService(
     MergeIOMixin,
     MergeMetricsRecorderMixin,
+    _MergeInputLoaderMixin,
 ):
     """Facade/orchestrator for seed+dependency+enricher merge workflow."""
 

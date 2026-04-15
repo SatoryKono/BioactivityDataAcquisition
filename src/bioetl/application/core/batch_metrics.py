@@ -59,6 +59,12 @@ class BatchMetricsRecorderService:
                 pipeline_label,
             )
         self._pipeline_metrics = resolved_pipeline_metrics
+        self._error_count = 0
+
+    @property
+    def error_count(self) -> int:
+        """Get the current error count."""
+        return self._error_count
 
     def track_batch_size(self, stage: str, size: int) -> None:
         """Record the size of a batch at a specific stage.
@@ -110,6 +116,7 @@ class BatchMetricsRecorderService:
             error_type: Classification of the error.
 
         """
+        self._error_count += 1
         if self._metrics:
             self._metrics.increment_counter(
                 "bioetl_errors_total",

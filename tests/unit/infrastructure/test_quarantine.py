@@ -46,6 +46,7 @@ class TestUnifiedQuarantine:
         quarantine = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
         assert quarantine.base_path == "/tmp/quarantine"
 
+    @pytest.mark.asyncio
     async def test_write_calls_write_deltalake(self, mock_deltalake):
         """Test that write calls write_deltalake with correct data."""
         quarantine = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")

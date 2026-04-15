@@ -134,11 +134,12 @@ def test_merge_service_accepts_injected_internal_components(
             deduplicator=deduplicator,
             aggregator=aggregator,
             renamer=renamer,
-            orderer=orderer,
-            priority_orderer=priority_orderer,
+            order_service=orderer,  # New API: order_service is now required
             coalesce_policy=coalesce_policy,
             conflict_resolver=conflict_resolver,
             join_planner=join_planner,
+            orderer=None,  # Old orderer parameter is now optional
+            priority_orderer=None,  # Old priority_orderer parameter is now optional
         ),
     )
 

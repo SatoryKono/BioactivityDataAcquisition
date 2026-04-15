@@ -5,7 +5,7 @@ from __future__ import annotations
 import io
 import json
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
 import pytest
@@ -51,6 +51,7 @@ class TestBronzeWriter:
         )
         assert writer.base_path == tmp_path
 
+    @pytest.mark.asyncio
     async def test_write_bronze_creates_file(self, tmp_path, noop_logger):
         """Test write_bronze creates file in local storage."""
         writer = BronzeWriter(
@@ -77,6 +78,7 @@ class TestBronzeWriter:
         expected_file = tmp_path / result.relative_path
         assert expected_file.exists()
 
+    @pytest.mark.asyncio
     async def test_write_bronze_generates_correct_key(self, tmp_path, noop_logger):
         """Test that write_bronze generates the correct path."""
         writer = BronzeWriter(
@@ -115,6 +117,7 @@ class TestBronzeWriter:
         )
         assert result.relative_path.replace("\\", "/") == expected_path
 
+    @pytest.mark.asyncio
     async def test_write_bronze_compresses_with_zstd(self, tmp_path, noop_logger):
         """REQ-DATA-001: Test that data is compressed with zstandard."""
         writer = BronzeWriter(
@@ -152,6 +155,7 @@ class TestBronzeWriter:
 
         assert decompressed_data == b'{"id": 1, "data": "test"}\n'
 
+    @pytest.mark.asyncio
     async def test_write_bronze_with_no_records(self, tmp_path, noop_logger):
         """Test that write_bronze raises error if there are no records."""
         writer = BronzeWriter(
@@ -178,6 +182,7 @@ class TestBronzeWriter:
                 ingestion_ts=TEST_INGESTION_TS,
             )
 
+    @pytest.mark.asyncio
     async def test_write_bronze_save_json_copy(self, tmp_path, noop_logger):
         """Test that write_bronze saves JSON copy if save_json is True."""
         writer = BronzeWriter(
@@ -213,6 +218,7 @@ class TestBronzeWriter:
         assert json_path.exists()
         assert json_path.read_bytes() == b'{"id": 1}\n'
 
+    @pytest.mark.asyncio
     async def test_read_bronze(self, tmp_path, noop_logger):
         """Test read_bronze reads file."""
         # Create a compressed file manually for deterministic testing
@@ -245,6 +251,7 @@ class TestBronzeWriter:
         assert len(read_records) == 2
         assert read_records[0]["id"] == 1
 
+    @pytest.mark.asyncio
     async def test_list_batches(self, tmp_path, noop_logger):
         """Test list_batches."""
         writer = BronzeWriter(
@@ -273,6 +280,7 @@ class TestBronzeWriter:
         assert len(batches) == 2
         assert all(b.endswith(".jsonl.zst") for b in batches)
 
+    @pytest.mark.asyncio
     async def test_list_batches_nonexistent(self, tmp_path, noop_logger):
         """Test list_batches returns empty for nonexistent path."""
         writer = BronzeWriter(
@@ -285,6 +293,7 @@ class TestBronzeWriter:
 
         assert batches == []
 
+    @pytest.mark.asyncio
     async def test_writes_metadata_file(self, tmp_path, noop_logger):
         """Test that write_bronze creates metadata file."""
         writer = BronzeWriter(
@@ -329,6 +338,7 @@ class TestSilverWriter:
         writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
         assert writer.base_path == "/tmp/delta"
 
+    @pytest.mark.asyncio
     async def test_write_silver_creates_new_table(
         self, mock_silver_writer, noop_logger
     ):
@@ -339,6 +349,9 @@ class TestSilverWriter:
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
         writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
+        
+        # Mock the _get_table_schema method to return None (no existing table)
+        writer._get_table_schema = AsyncMock(return_value=None)
 
         records = [
             {
@@ -369,6 +382,7 @@ class TestSilverWriter:
 
         mock_write_deltalake.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_write_silver_merge_existing_table(
         self, mock_silver_writer, noop_logger
     ):
@@ -427,6 +441,7 @@ class TestSilverWriter:
         mock_table_instance.merge.assert_called_once()
 
     @pytest.mark.usefixtures("mock_silver_writer")
+    @pytest.mark.asyncio
     async def test_write_silver_empty_records_raises_error(self, noop_logger):
         writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
 
@@ -456,6 +471,7 @@ class TestGoldWriter:
         ):
             yield mock_delta_table, mock_write_deltalake
 
+    @pytest.mark.asyncio
     async def test_gold_writer_sorts_columns(self, mock_gold_writer_deps, noop_logger):
         """Test that GoldWriter sorts columns alphabetically in _to_arrow_table."""
         from pandera.pandas import Column, DataFrameSchema

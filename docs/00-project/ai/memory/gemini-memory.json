@@ -1,0 +1,10 @@
+{
+  "memories": {
+    "project_context": {
+      "name": "BioETL",
+      "architecture": "hexagonal",
+      "data_pattern": "medallion",
+      "created": "2026-04-14"
+    }
+  }
+}

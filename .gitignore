@@ -240,3 +240,9 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 /.venv-docs
 , t)PY
 .venv-win-corrupt/Lib/site-packages/setproctitle-1.3.7.dist-info/top_level.txt
+/.gemini
+/.gemini
+/.gemini
+.gemini/agents/py-audit-bot.md
+.gemini/agents/py-config-bot.md
+.gemini/agents/GEMINI-RUNTIME.md

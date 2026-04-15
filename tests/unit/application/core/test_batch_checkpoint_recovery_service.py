@@ -72,6 +72,7 @@ def service(mock_checkpoint_manager, mock_logger, mock_metrics, mock_tracer):
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestSavePeriodicCheckpoint:
     """Tests for BatchCheckpointRecoveryService.save_periodic_checkpoint."""
 
@@ -172,6 +173,7 @@ class TestSavePeriodicCheckpoint:
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestSaveCheckpointOnException:
     """Tests for BatchCheckpointRecoveryService.save_checkpoint_on_exception."""
 
@@ -309,6 +311,7 @@ class TestSaveCheckpointOnException:
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestSaveCheckpointOnShutdown:
     """Tests for BatchCheckpointRecoveryService.save_checkpoint_on_shutdown."""
 
@@ -421,6 +424,7 @@ class TestSaveCheckpointOnShutdown:
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestSaveCheckpointNow:
     """Tests for BatchCheckpointRecoveryService.save_checkpoint_now."""
 
@@ -480,6 +484,7 @@ class TestSaveCheckpointNow:
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestTotalProcessed:
     """Tests for BatchCheckpointRecoveryService._total_processed static method."""
 

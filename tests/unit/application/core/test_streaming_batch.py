@@ -49,7 +49,7 @@ def mock_error_classifier():
 @pytest.fixture
 def mock_quarantine_manager():
     """Create mock quarantine manager."""
-    manager = MagicMock(spec=QuarantineManager)
+    manager = MagicMock(spec=QuarantineManagerService)
     manager.quarantine_record = AsyncMock()
     manager.quarantine_records = AsyncMock()
     manager.quarantine_filtered_record = AsyncMock()
