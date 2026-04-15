@@ -2947,11 +2947,12 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
             zone_root = root / relative_root
             if not zone_root.is_dir():
                 continue
-            for current_dir, dirnames, _ in os.walk(zone_root):
+            for current_dir, dirnames, filenames in os.walk(zone_root):
                 current_path = Path(current_dir)
                 relative_dir = _rel_path(root, current_path)
                 if _is_excluded_file_structure_path(relative_dir, config):
                     dirnames[:] = []
+                    filenames[:] = []
                     continue
 
                 dirnames[:] = sorted(
@@ -2977,6 +2978,27 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
                 else:
                     parent_key = NodeKey("directory_surface", _rel_path(root, current_path.parent))
                     snapshot.add_relation(parent_key, "CONTAINS", directory, provenance="file_structure")
+
+                # Create file surfaces for all files in this directory
+                for filename in sorted(filenames):
+                    file_path = current_path / filename
+                    relative_file = _rel_path(root, file_path)
+                    if _is_excluded_file_structure_path(relative_file, config):
+                        continue
+                    
+                    file_surface = snapshot.add_node(
+                        "file_surface",
+                        relative_file,
+                        summary=f"Repository file `{relative_file}`.",
+                        source_path=relative_file,
+                        source_kind="file_structure_file",
+                        repo_zone=zone_name,
+                        file_extension=Path(filename).suffix[1:] if Path(filename).suffix else None,
+                        last_verified=today,
+                        ingest_wave="repo_sync_v1",
+                        confidence="high",
+                    )
+                    snapshot.add_relation(directory, "CONTAINS", file_surface, provenance="file_structure")
 
     source_backed_labels = {
         "layer_family",
@@ -4393,6 +4415,17 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
         )
         workflow_nodes[workflow_name] = workflow
         snapshot.add_relation(project, "HAS_WORKFLOW", workflow, provenance="workflow_graph")
+
+        # Create HOUSES relationship with parent directory
+        parent_dir_relative = str(Path(relative_path).parent)
+        parent_dir_key = NodeKey("directory_surface", parent_dir_relative)
+        if parent_dir_key in snapshot.nodes:
+            snapshot.add_relation(parent_dir_key, "HOUSES", workflow, provenance="file_structure")
+
+        # Create BACKS relationship with file surface
+        file_surface_key = NodeKey("file_surface", relative_path)
+        if file_surface_key in snapshot.nodes:
+            snapshot.add_relation(file_surface_key, "BACKS", workflow, provenance="workflow_graph")
 
         workflow_call_payload = _workflow_on_payload(payload)
         if isinstance(workflow_call_payload, dict):

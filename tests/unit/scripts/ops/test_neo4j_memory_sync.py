@@ -163,7 +163,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     ) in node_keys
     assert (
         "function_surface",
-        "src.bioetl.domain.normalization.profiles.chembl_activity._normalize_text",
+        "src.bioetl.domain.normalization.profiles.chembl_activity.create_case_normalizer",
     ) in node_keys
     assert (
         "method_surface",
@@ -416,7 +416,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("directory_surface", "configs/contracts/chembl", "HOUSES", "contract_surface", "chembl.activity"),
     ("directory_surface", "configs/quality", "HOUSES", "policy_surface", "integration and VCR execution policy"),
     ("module_surface", "src/bioetl/infrastructure/adapters/base.py", "DECLARES", "class_surface", "src.bioetl.infrastructure.adapters.base.BaseHttpAdapter"),
-    ("module_surface", "src/bioetl/domain/normalization/profiles/chembl_activity.py", "DECLARES", "function_surface", "src.bioetl.domain.normalization.profiles.chembl_activity._normalize_text"),
+    ("module_surface", "src/bioetl/domain/normalization/profiles/chembl_activity.py", "DECLARES", "function_surface", "src.bioetl.domain.normalization.profiles.chembl_activity.create_case_normalizer"),
     ("class_surface", "src.bioetl.application.composite.merger.MergeService", "DECLARES", "method_surface", "src.bioetl.application.composite.merger.MergeService.merge"),
     ("project", "BioETL", "HAS_PORT", "port_surface", "bioetl.domain.ports"),
     ("project", "BioETL", "HAS_ADAPTER", "adapter_surface", "bioetl.infrastructure.adapters.chembl"),
@@ -786,7 +786,7 @@ def test_prune_statements_target_repo_sync_subgraph() -> None:
     reset_statement = _reset_managed_relations_statement(["CONTAINS", "DEFINED_BY"])
     prune_relations_statement = _prune_stale_relations_statement("sync-run-2")
     prune_nodes_statement = _prune_stale_nodes_statement("sync-run-2")
-    full_reset_statement = _delete_managed_wave_nodes_statement()
+    full_reset_statement = _delete_managed_wave_nodes_statement("module_surface", 10)
     legacy_prune_statement = _prune_legacy_unmanaged_nodes_statement(["quality_gate", "execution_path"])
 
     assert "type(r) IN $relation_types" in reset_statement["statement"]

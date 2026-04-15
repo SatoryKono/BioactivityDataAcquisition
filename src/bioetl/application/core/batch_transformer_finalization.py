@@ -116,7 +116,7 @@ async def finalize_batch_transform_result(
     
     return TransformResult(
         silver_records=records,
-        gold_records=[],  # Gold records would be created by gold transform
+        gold_records=gold_records,  # Return filtered gold records
         quarantined_count=0,  # Would be tracked by quarantine manager
         filtered_out_count=0,  # Would be tracked by quarantine manager
         records_quarantine_failed=0,  # Would be tracked by quarantine manager
@@ -192,7 +192,7 @@ def check_dq_thresholds(
 
     error_rate = error_count / record_count
 
-    if hard_threshold is not None and error_rate >= hard_threshold:
+    if hard_threshold is not None and error_rate >= float(hard_threshold):
         return DQThresholdCheckResult(
             breach=ThresholdBreach.HARD,
             error_rate=error_rate,
@@ -200,7 +200,7 @@ def check_dq_thresholds(
             hard_threshold=hard_threshold,
         )
 
-    if soft_threshold is not None and error_rate >= soft_threshold:
+    if soft_threshold is not None and error_rate >= float(soft_threshold):
         return DQThresholdCheckResult(
             breach=ThresholdBreach.SOFT,
             error_rate=error_rate,

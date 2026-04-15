@@ -14,6 +14,8 @@ file_structure:
       - "scripts"
     grafana:
       - "grafana"
+    ".github":
+      - ".github"
   excluded_dir_names:
     - "__pycache__"
   excluded_prefixes:

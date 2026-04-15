@@ -53,15 +53,20 @@ def run_git_command(args: list[str]) -> subprocess.CompletedProcess[str]:
     last_completed: subprocess.CompletedProcess[str] | None = None
 
     for git_executable in iter_git_candidates():
-        completed = subprocess.run(
-            [git_executable, *args],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+        try:
+            completed = subprocess.run(
+                [git_executable, *args],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError:
+            continue
+
         if completed.returncode == 0:
             return completed
         last_completed = completed
+        break
 
     err = (
         last_completed.stderr.strip()

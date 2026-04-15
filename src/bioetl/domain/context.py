@@ -98,6 +98,7 @@ class PipelineContext:
     started_at: datetime = field(default_factory=current_utc_time)
     source_batch_id: BatchID | None = None
     replay_timestamp_anchor: datetime | None = None
+    pipeline_name: str | None = None
 
     @classmethod
     def create(
@@ -108,6 +109,7 @@ class PipelineContext:
         started_at: datetime | None = None,
         source_batch_id: BatchID | None = None,
         replay_timestamp_anchor: datetime | None = None,
+        pipeline_name: str | None = None,
     ) -> PipelineContext:
         """Create a new PipelineContext with optional automatic timestamp.
 
@@ -118,6 +120,7 @@ class PipelineContext:
             started_at: Optional UTC start timestamp. Defaults to the current UTC time.
             replay_timestamp_anchor: Optional deterministic timestamp used for
                 replay-facing artifacts that must not drift between exact replays.
+            pipeline_name: Optional pipeline name for context identification.
 
         Returns:
             New PipelineContext instance with all fields set.
@@ -129,6 +132,7 @@ class PipelineContext:
             started_at=started_at or current_utc_time(),
             source_batch_id=source_batch_id,
             replay_timestamp_anchor=replay_timestamp_anchor,
+            pipeline_name=pipeline_name,
         )
 
     def bind_logger(
