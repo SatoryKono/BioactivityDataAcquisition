@@ -139,7 +139,7 @@ def test_merge_service_accepts_injected_internal_components(
             conflict_resolver=conflict_resolver,
             join_planner=join_planner,
             orderer=None,  # Old orderer parameter is now optional
-            priority_orderer=None,  # Old priority_orderer parameter is now optional
+            priority_orderer=priority_orderer,  # Old priority_orderer parameter is now optional
         ),
     )
 

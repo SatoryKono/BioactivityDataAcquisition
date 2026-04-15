@@ -71,7 +71,7 @@ class _MergeInputLoaderMixin:
         # Apply column renaming if seed_pipeline is provided
         effective_seed_pipeline = seed_pipeline
         if seed_pipeline and hasattr(self._renamer, 'rename_dataframe'):
-            seed_df = self._renamer.rename_dataframe(seed_df)
+            seed_df = self._renamer.rename_dataframe(seed_df, pipeline=seed_pipeline)
         else:
             # Try to infer pipeline from table name if not provided
             effective_seed_pipeline = None
@@ -145,8 +145,9 @@ class _MergeInputLoaderMixin:
                 f"Reading Silver table {table} requires delta_reader or silver_reader"
             )
         
-        # Fall back to storage adapter
-        records = await self._storage.read_silver(table)
+        # Fall back to storage adapter - strip "silver/" prefix for storage port
+        storage_table = table.removeprefix("silver/") if table.startswith("silver/") else table
+        records = await self._storage.read_silver(storage_table)
         if not records:
             return pl.DataFrame()
         return pl.from_dicts(records)

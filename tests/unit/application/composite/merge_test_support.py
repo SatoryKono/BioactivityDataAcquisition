@@ -6,9 +6,12 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
+from bioetl.application.composite.column_service import ColumnOrderService
+
 if TYPE_CHECKING:
     from bioetl.application.composite.aggregator import EnricherAggregator
     from bioetl.application.composite.column_renamer import ColumnRenamer
+    from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
     from bioetl.application.composite.join_execution import JoinHow
@@ -120,8 +123,8 @@ def build_merge_service(
     deduplicator = EnricherDeduplicatorService(logger)
     aggregator = EnricherAggregator(logger)
     renamer = ColumnRenamer(logger)
-    orderer = ColumnOrderer(logger)
     priority_orderer = ColumnPriorityOrderer(logger)
+    orderer = ColumnOrderService(logger, priority_orderer=priority_orderer)
     coalesce_policy = CoalescePolicyService(logger, priority_orderer)
     conflict_resolver = ConflictResolverService(
         merge_config=merge_config,

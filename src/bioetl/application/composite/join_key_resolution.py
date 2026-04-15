@@ -80,6 +80,8 @@ class JoinKeyResolverService:
         return self._resolver_helper.normalize_join_keys(
             df=df,
             join_keys=join_keys,
+            pipeline=pipeline,
+            parse_pipeline_name=self._parse_pipeline_name,
         )
 
     def resolve_join_key_names(

@@ -341,6 +341,12 @@ def test_format_rows_renders_docs_drift_summary() -> None:
                 "target_name": "src/bioetl/domain/control_plane/run_manifest.py",
                 "target_labels": ["module_surface"],
                 "target_source_path": "src/bioetl/domain/control_plane/run_manifest.py",
+                "doc_reference": "src/bioetl/domain/control_plane/run_manifest.py",
+                "evidence_kind": "direct_path",
+                "confidence": "high",
+                "section_title": "Purpose",
+                "section_anchor": "purpose",
+                "line_number": 24,
             }
         ],
     )

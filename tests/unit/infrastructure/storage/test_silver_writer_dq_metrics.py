@@ -23,6 +23,8 @@ class TestSilverWriterDQMetrics:
         """Test _compute_dq_metrics returns BatchDQMetrics."""
         from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
+        from bioetl.domain.medallion import SilverWriteMode
+        from bioetl.domain.medallion import SilverWriteMode
         from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
@@ -483,6 +485,7 @@ class TestSilverWriterDQMetrics:
     ):
         """Finalization helper should resolve DQ/version/timing as one context."""
         from datetime import UTC, datetime, timedelta
+        from bioetl.domain.medallion import SilverWriteMode
 
         from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -506,6 +509,11 @@ class TestSilverWriterDQMetrics:
                 table_name="test.table",
                 records=valid_records,
                 table_path="/tmp/silver/test/table",
+                primary_keys=["entity_id"],
+                validated_mode=SilverWriteMode.MERGE,
+                bronze_refs=None,
+                partition_cols=None,
+                source_batch_id="batch-456",
                 started_at=started_at,
                 start_perf=4.0,
             )
