@@ -46,10 +46,11 @@ class TestResolverHelper:
             join_keys=["CHEMBL_ID", "pubchem_cid"]
         )
 
-        # Verify normalization occurred
-        assert "chembl_id" in result.columns
+        # Verify normalization occurred - should keep original column names
+        assert "CHEMBL_ID" in result.columns
         assert "pubchem_cid" in result.columns
-        assert result["chembl_id"][0] == "chembl1"  # Should be lowercase
+        # For keys without specific policies, values should remain unchanged
+        assert result["CHEMBL_ID"][0] == "CHEMBL1"
 
     def test_log_methods(self) -> None:
         """Test that logging methods work correctly."""

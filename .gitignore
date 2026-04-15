@@ -247,3 +247,7 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 .gemini/agents/py-config-bot.md
 .gemini/agents/GEMINI-RUNTIME.md
 /.gemini
+/.gemini
+/scripts/gemini
+/.gemini
+.gemini/agents/GEMINI-RUNTIME.md

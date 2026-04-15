@@ -716,7 +716,7 @@ class TestSilverWriterLineage:
             records=valid_records,
             primary_keys=["entity_id"],
             run_id="run-1",
-            sources_used=["chembl"],
+            completed_at="2025-01-15T12:00:00Z",
         )
 
         input_arg = writer._metadata_coordinator.last_input
@@ -774,7 +774,7 @@ class TestSilverWriterLineage:
             records=valid_records,
             primary_keys=["entity_id"],
             run_id="run-1",
-            sources_used=["chembl"],
+            completed_at="2025-01-15T12:00:00Z",
         )
 
         writer._write_silver_metadata_file.assert_awaited_once_with(
@@ -835,7 +835,7 @@ class TestSilverWriterLineage:
             records=valid_records,
             primary_keys=["entity_id"],
             run_id="run-1",
-            sources_used=["chembl"],
+            completed_at="2025-01-15T12:00:00Z",
         )
 
         assert captured_input is not None

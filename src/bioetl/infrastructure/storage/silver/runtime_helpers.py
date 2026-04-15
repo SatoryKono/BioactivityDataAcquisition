@@ -147,13 +147,14 @@ def build_silver_writer_runtime_services(
     metadata_ops = None
     if resolved_metadata_writer is not None and resolved_dq_calculator is not None:
         metadata_ops = SilverMetadataOperations(
-            logger=logger,
-            metrics=metrics,
-            audit=audit,
-            metadata_writer=resolved_metadata_writer,
-            metadata_coordinator=metadata_coordinator,
-            lineage_store=lineage_store,
-            dq_calculator=resolved_dq_calculator,
+            _logger=logger,
+            _metrics=metrics,
+            _audit=audit,
+            _metadata_writer=resolved_metadata_writer,
+            _metadata_coordinator=metadata_coordinator,
+            _lineage_store=lineage_store,
+            _dq_calculator=resolved_dq_calculator,
+            _host=None,  # Will be set later in SilverWriter.__init__
         )
     
     # Create validation operations if needed components are available
@@ -166,12 +167,19 @@ def build_silver_writer_runtime_services(
             resolve_table_path,
         )
         
+        # Create a wrapper for get_table_schema that can be overridden in tests
+        # This wrapper will be replaced by the writer's _get_table_schema method
+        # when the writer is initialized
+        def _get_table_schema_wrapper(table_name: str) -> Awaitable[pa.Schema | None]:
+            """Wrapper for get_table_schema that can be patched in tests."""
+            return get_table_schema(base_path, table_name)
+        
         validation_ops = SilverValidationOperations(
             logger=logger,
             _write_policy=resolved_write_policy,
             _metrics=metrics,
             _silver_validator=resolved_silver_validator,
-            _get_table_schema=lambda table_name: get_table_schema(base_path, table_name),
+            _get_table_schema=_get_table_schema_wrapper,
             _resolve_table_path=lambda table_name: resolve_table_path(base_path, table_name),
             _prepare_arrow_data=prepare_arrow_data,
             _validate_write_mode=_validate_write_mode_impl,

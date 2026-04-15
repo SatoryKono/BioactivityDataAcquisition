@@ -325,23 +325,23 @@ class TestFetchBySmiles:
 
 @pytest.mark.unit
 class TestParseValidCids:
-    """Tests for _parse_valid_molecule_ids method."""
+    """Tests for _parse_valid_cids method."""
 
     def test_parse_valid_molecule_ids_converts_strings_to_ints(self, fetch_strategies):
-        """Test that _parse_valid_molecule_ids converts string CIDs to integers."""
+        """Test that _parse_valid_cids converts string CIDs to integers."""
         molecule_id_list = ["2244", "3672", "5988"]
 
-        result = fetch_strategies._parse_valid_molecule_ids(molecule_id_list)
+        result = fetch_strategies._parse_valid_cids(molecule_id_list)
 
         assert result == [2244, 3672, 5988]
 
     def test_parse_valid_molecule_ids_skips_invalid_molecule_ids(
         self, fetch_strategies, mock_logger
     ):
-        """Test that _parse_valid_molecule_ids skips invalid CIDs and logs warning."""
+        """Test that _parse_valid_cids skips invalid CIDs and logs warning."""
         molecule_id_list = ["2244", "invalid", "3672", ""]
 
-        result = fetch_strategies._parse_valid_molecule_ids(molecule_id_list)
+        result = fetch_strategies._parse_valid_cids(molecule_id_list)
 
         assert result == [2244, 3672]
         # Should log warnings for invalid CIDs
@@ -350,35 +350,35 @@ class TestParseValidCids:
 
 @pytest.mark.unit
 class TestFetchByCids:
-    """Tests for fetch_by_molecule_ids method."""
+    """Tests for fetch_by_cids method."""
 
     @pytest.mark.asyncio
-    async def test_fetch_by_molecule_ids_yields_compounds(
+    async def test_fetch_by_cids_yields_compounds(
         self, fetch_strategies, mock_circuit_breaker
     ):
-        """Test that fetch_by_molecule_ids yields compound dictionaries."""
+        """Test that fetch_by_cids yields compound dictionaries."""
         mock_compound = MagicMock(molecule_id=2244)
         mock_circuit_breaker.call.return_value = [mock_compound]
 
         molecule_id_list = ["2244"]
         results = await collect_async_iterator(
-            fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=None)
+            fetch_strategies.fetch_by_cids(molecule_id_list, limit=None)
         )
 
         assert len(results) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_by_molecule_ids_batches_requests(
+    async def test_fetch_by_cids_batches_requests(
         self, fetch_strategies, mock_circuit_breaker
     ):
-        """Test that fetch_by_molecule_ids batches requests."""
+        """Test that fetch_by_cids batches requests."""
         mock_compound = MagicMock(molecule_id=1)
         mock_circuit_breaker.call.return_value = [mock_compound]
 
         # Create list with more CIDs than batch size
         molecule_id_list = [str(i) for i in range(120)]
         await collect_async_iterator(
-            fetch_strategies.fetch_by_molecule_ids(
+            fetch_strategies.fetch_by_cids(
                 molecule_id_list, limit=None, batch_size=50
             )
         )
@@ -387,16 +387,16 @@ class TestFetchByCids:
         assert mock_circuit_breaker.call.call_count == 3
 
     @pytest.mark.asyncio
-    async def test_fetch_by_molecule_ids_respects_limit(
+    async def test_fetch_by_cids_respects_limit(
         self, fetch_strategies, mock_circuit_breaker
     ):
-        """Test that fetch_by_molecule_ids respects limit parameter."""
+        """Test that fetch_by_cids respects limit parameter."""
         mock_compounds = [MagicMock(molecule_id=i) for i in range(10)]
         mock_circuit_breaker.call.return_value = mock_compounds
 
         molecule_id_list = [str(i) for i in range(100)]
         results = await collect_async_iterator(
-            fetch_strategies.fetch_by_molecule_ids(
+            fetch_strategies.fetch_by_cids(
                 molecule_id_list, limit=5, batch_size=50
             )
         )
@@ -404,15 +404,15 @@ class TestFetchByCids:
         assert len(results) == 5
 
     @pytest.mark.asyncio
-    async def test_fetch_by_molecule_ids_logs_warning_on_batch_error(
+    async def test_fetch_by_cids_logs_warning_on_batch_error(
         self, fetch_strategies, mock_circuit_breaker, mock_logger
     ):
-        """Test that fetch_by_molecule_ids logs warning when batch fetch fails."""
+        """Test that fetch_by_cids logs warning when batch fetch fails."""
         mock_circuit_breaker.call.side_effect = RuntimeError("API error")
 
         molecule_id_list = ["2244", "3672"]
         results = await collect_async_iterator(
-            fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=None)
+            fetch_strategies.fetch_by_cids(molecule_id_list, limit=None)
         )
 
         assert len(results) == 0

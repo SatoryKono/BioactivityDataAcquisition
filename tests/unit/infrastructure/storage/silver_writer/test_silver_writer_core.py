@@ -419,11 +419,19 @@ class TestSilverWriterValidation:
                 "_ingestion_ts": "2025-01-15T12:00:00Z",
             }
         ]
+        # Create proper Arrow table with explicit schema to avoid Delta Lake errors
+        schema = pa.schema([
+            pa.field("entity_id", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
+            pa.field("_ingestion_ts", pa.string()),
+        ])
         payload = _PreparedSilverWritePayload(
             records=payload_records,
             validated_mode=SilverWriteMode.MERGE,
             table_path="/tmp/silver/test/table",
-            arrow_data=pa.Table.from_pylist(payload_records),
+            arrow_data=pa.Table.from_pylist(payload_records, schema=schema),
             schema_mode=None,
             merge_schema=False,
         )

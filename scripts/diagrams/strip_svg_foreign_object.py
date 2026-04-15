@@ -10,7 +10,9 @@ Use-case:
 from __future__ import annotations
 
 import argparse
+import io
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -33,7 +35,27 @@ def _local_name(tag: str) -> str:
     return tag.split("}", 1)[1] if "}" in tag else tag
 
 
-def strip_foreign_objects(path: Path) -> int:
+def _serialize_svg(tree: ET.ElementTree[ET.Element[str]]) -> str:
+    buffer = io.BytesIO()
+    tree.write(buffer, encoding="utf-8", xml_declaration=False)
+    return buffer.getvalue().decode("utf-8")
+
+
+def _write_text_atomic(path: Path, payload: str) -> None:
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f"{path.name}.",
+        suffix=".tmp",
+        delete=False,
+    ) as temp_file:
+        temp_file.write(payload)
+        temp_path = Path(temp_file.name)
+    temp_path.replace(path)
+
+
+def _strip_foreign_objects_tree(path: Path) -> tuple[ET.ElementTree[ET.Element[str]], int]:
     tree = ET.parse(path)
     root = tree.getroot()
     removed = 0
@@ -45,8 +67,13 @@ def strip_foreign_objects(path: Path) -> int:
             parent.remove(child)
             removed += 1
 
+    return tree, removed
+
+
+def strip_foreign_objects(path: Path) -> int:
+    tree, removed = _strip_foreign_objects_tree(path)
     if removed > 0:
-        tree.write(path, encoding="utf-8", xml_declaration=False)
+        _write_text_atomic(path, _serialize_svg(tree))
     return removed
 
 
@@ -92,18 +119,16 @@ def main() -> int:
 
     changed = 0
     for path in files:
-        original = path.read_text(encoding="utf-8")
-        removed = strip_foreign_objects(path)
+        tree, removed = _strip_foreign_objects_tree(path)
         if removed == 0:
             continue
         changed += 1
         if mode == "check":
             print(f"! {path} (needs foreignObject strip, -{removed})")
-            path.write_text(original, encoding="utf-8")
         elif mode == "dry-run":
             print(f"~ {path} (would remove foreignObject -{removed})")
-            path.write_text(original, encoding="utf-8")
         else:
+            _write_text_atomic(path, _serialize_svg(tree))
             print(f"+ {path} (removed foreignObject -{removed})")
 
     if mode == "check" and changed > 0:

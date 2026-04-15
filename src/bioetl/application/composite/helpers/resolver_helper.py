@@ -33,24 +33,30 @@ class ResolverHelper:
         self,
         df: pl.DataFrame,
         join_keys: list[str],
+        pipeline: str | None = None,
+        parse_pipeline_name: Callable[[str], tuple[str, str]] | None = None,
     ) -> pl.DataFrame:
         """Apply canonical join key normalization to DataFrame columns.
 
         Args:
             df: DataFrame containing columns to normalize.
             join_keys: List of join key names to normalize.
+            pipeline: Optional pipeline name used to locate qualified column variants.
+            parse_pipeline_name: Optional function to parse pipeline names.
 
         Returns:
             DataFrame with normalized join key columns.
         """
-        from bioetl.application.composite.join_key_normalization import (
-            normalize_join_key_dataframe_columns,
+        from bioetl.application.composite.join_key_resolution_helpers import (
+            normalize_join_key_columns,
         )
 
-        return normalize_join_key_dataframe_columns(
+        return normalize_join_key_columns(
             df=df,
             join_keys=join_keys,
+            pipeline=pipeline,
             normalization_policies=self._normalization_policies,
+            parse_pipeline_name=parse_pipeline_name or (lambda x: ("", "")),  # type: ignore
         )
 
     def log_info(

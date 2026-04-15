@@ -452,6 +452,11 @@ class TestSilverWriterPreparePayloadExecutor:
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
+        from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+            _PreparedSilverWritePayload,
+            SilverValidationOperations,
+        )
+        from bioetl.domain.medallion import WriteModePolicy
 
         writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
         records = [
@@ -473,11 +478,32 @@ class TestSilverWriterPreparePayloadExecutor:
             ]
         )
         expected_table = pa.Table.from_pylist(records, schema=schema)
-        writer._check_schema_drift = AsyncMock(return_value=None)  # type: ignore[method-assign]
+        
+        # Create validation operations service with proper mocking
+        from bioetl.infrastructure.storage.silver.operations.validation_operations import SilverValidationOperations
+        from bioetl.infrastructure.storage.silver.pipeline_helpers import execute_silver_write_pipeline
+        
+        # Create a minimal validation operations instance
+        validation_ops = SilverValidationOperations(
+            logger=noop_logger,
+            _write_policy=WriteModePolicy(),
+            _metrics=None,
+            _silver_validator=None,  # type: ignore
+            _get_table_schema=AsyncMock(return_value=None),  # type: ignore
+            _resolve_table_path=lambda x: f"/tmp/silver/{x.replace('.', '/')}",
+            _prepare_arrow_data=lambda *args, **kwargs: expected_table,
+            _validate_write_mode=lambda x: SilverWriteMode.APPEND,
+            _deduplicate_by_primary_keys=lambda records, keys: records,
+            _to_policy_write_mode=lambda x: WriteMode.APPEND,
+            _validate_key_nullability=lambda *args, **kwargs: None,
+        )
+        
+        # Set up the writer with validation operations
+        writer._validation = validation_ops
 
         with (
             patch.object(
-                writer,
+                validation_ops,
                 "_sync_validate_and_build_arrow",
                 return_value=_ValidatedSilverWriteContext(
                     records=records,
@@ -490,7 +516,7 @@ class TestSilverWriterPreparePayloadExecutor:
                 wraps=asyncio.to_thread,
             ) as mock_to_thread,
         ):
-            payload = await writer._prepare_silver_write_payload(
+            payload = await validation_ops._prepare_silver_write_payload(
                 table_name="test.table",
                 records=records,
                 primary_keys=["entity_id"],

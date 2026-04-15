@@ -89,6 +89,7 @@ def test_create_common_services_requires_silver_validator_in_prod() -> None:
             logger=MagicMock(),
             data_source=MagicMock(),
             pipeline_config=pipeline_config,
+            pipeline_name="test_pipeline",
             silver_validator=None,
         )
 
@@ -125,6 +126,7 @@ def test_create_common_services_uses_noop_tracing_when_not_provided(
         logger=logger,
         data_source=data_source,
         pipeline_config=pipeline_config,
+        pipeline_name="test_pipeline",
         metrics=MagicMock(),
         tracer=None,
     )

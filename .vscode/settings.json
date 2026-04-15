@@ -44,5 +44,9 @@
     "**/.ruff_cache": true,
     "**/.mypy_cache": true,
     "**/__pycache__": true
+  },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "satorykono",
+    "projectKey": "SatoryKono_BioactivityDataAcquisition"
   }
 }

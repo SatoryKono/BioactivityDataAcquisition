@@ -121,8 +121,17 @@ class MergeService(
         self._deduplicator = collaborators.deduplicator
         self._aggregator = collaborators.aggregator
         self._renamer = collaborators.renamer
-        self._orderer = collaborators.orderer
-        self._priority_orderer = collaborators.priority_orderer
+        # Use order_service if available, fall back to deprecated orderer
+        self._orderer = collaborators.order_service or collaborators.orderer
+        # Priority orderer logic: use explicit priority_orderer if provided,
+        # otherwise try to get from order_service if it's a ColumnOrderService,
+        # otherwise fall back to None
+        if collaborators.priority_orderer is not None:
+            self._priority_orderer = collaborators.priority_orderer
+        elif collaborators.order_service and hasattr(collaborators.order_service, '_priority_orderer'):
+            self._priority_orderer = collaborators.order_service._priority_orderer
+        else:
+            self._priority_orderer = None
         self._coalesce_policy = collaborators.coalesce_policy
         self._conflict_resolver = collaborators.conflict_resolver
         self._join_planner = collaborators.join_planner
