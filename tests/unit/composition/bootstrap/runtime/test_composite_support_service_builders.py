@@ -279,7 +279,10 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
     "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.PolarsJoinAdapter"
 )
 @patch(
-    "bioetl.application.composite.runtime_wiring_api.ResolverHelper"
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ResolverHelper"
+)
+@patch(
+    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ColumnOrderer"
 )
 @patch(
     "bioetl.application.composite.runtime_wiring_api.JoinKeyResolverService"
@@ -292,9 +295,6 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
 )
 @patch(
     "bioetl.application.composite.runtime_wiring_api.ColumnPriorityOrderer"
-)
-@patch(
-    "bioetl.application.composite.runtime_wiring_api.ColumnOrderer"
 )
 @patch(
     "bioetl.application.composite.runtime_wiring_api.ColumnRenamer"
