@@ -606,7 +606,7 @@ class TestMergeServiceOptionalReadPolicy:
         mock_logger.warning.assert_called_once()
         warning_kwargs = mock_logger.warning.call_args.kwargs
         assert warning_kwargs["dependency"] == "chembl_target_component"
-        assert warning_kwargs["reason_code"] == "unexpected_bioetl_error"
+        assert warning_kwargs.get("reason_code") == "unexpected_bioetl_error"
 
 
 @pytest.mark.unit

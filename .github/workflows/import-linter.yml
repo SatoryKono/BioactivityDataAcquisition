@@ -61,16 +61,21 @@ jobs:
             -   name: Detect changed Python files
                 id: changed-python
                 shell: bash
+                env:
+                    EVENT_NAME: ${{ github.event_name }}
+                    BASE_REF: ${{ github.base_ref }}
+                    EVENT_BEFORE: ${{ github.event.before }}
+                    GITHUB_SHA: ${{ github.sha }}
                 run: |
                     set -euo pipefail
 
-                    if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                      git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-                      diff_range="origin/${{ github.base_ref }}...HEAD"
+                    if [[ "$EVENT_NAME" == "pull_request" ]]; then
+                      git fetch --no-tags --depth=1 origin "$BASE_REF"
+                      diff_range="origin/$BASE_REF...HEAD"
                     else
-                      before="${{ github.event.before }}"
+                      before="$EVENT_BEFORE"
                       if [[ -n "$before" && "$before" != "0000000000000000000000000000000000000000" ]]; then
-                        diff_range="${before}...${{ github.sha }}"
+                        diff_range="${before}...$GITHUB_SHA"
                       else
                         diff_range="HEAD^...HEAD"
                       fi
@@ -93,13 +98,15 @@ jobs:
             -   name: Ruff (autoformat changed Python files)
                 if: steps.changed-python.outputs.has_changes == 'true'
                 shell: bash
+                env:
+                    CHANGED_FILES: ${{ steps.changed-python.outputs.files }}
                 run: |
                     set -euo pipefail
 
                     changed_py=()
                     while IFS= read -r file; do
                       [[ -n "$file" ]] && changed_py+=("$file")
-                    done <<< "${{ steps.changed-python.outputs.files }}"
+                    done <<< "$CHANGED_FILES"
 
                     uv run ruff format "${changed_py[@]}"
 
@@ -156,8 +163,12 @@ jobs:
         if: ${{ always() }}
         steps:
             -   name: Final status
+                env:
+                    LINT_RESULT: ${{ needs.lint.result }}
+                    C901_RESULT: ${{ needs['c901-governance'].result }}
+                    ARCH_RESULT: ${{ needs['arch-tests'].result }}
                 run: |
-                    if [[ "${{ needs.lint.result }}" != "success" || "${{ needs['c901-governance'].result }}" != "success" || "${{ needs['arch-tests'].result }}" != "success" ]]; then
+                    if [[ "$LINT_RESULT" != "success" || "$C901_RESULT" != "success" || "$ARCH_RESULT" != "success" ]]; then
                       echo "One or more checks failed"
                       exit 1
                     fi

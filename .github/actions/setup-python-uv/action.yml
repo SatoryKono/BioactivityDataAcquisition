@@ -52,9 +52,10 @@ runs:
 
     - name: Install dependencies
       shell: bash
+      env:
+        EXTRAS: ${{ inputs.uv-extras }}
+        SYNC_ARGS: ${{ inputs.uv-sync-args }}
       run: |
-        EXTRAS="${{ inputs.uv-extras }}"
-        SYNC_ARGS="${{ inputs.uv-sync-args }}"
         CMD="uv sync ${SYNC_ARGS}"
         for extra in $EXTRAS; do
           CMD="${CMD} --extra ${extra}"

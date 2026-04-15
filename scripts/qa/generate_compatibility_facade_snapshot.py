@@ -242,11 +242,11 @@ def main() -> int:
     output_path = Path(args.output)
     current = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
     frontmatter, current_body = _split_frontmatter(current)
-
     if args.check:
+        is_error = False
         if current_body != rendered:
             print(f"[drift] mismatch: {output_path.as_posix()}")
-            return 1
+            is_error = True
         if unexpected or missing or measured_only_import_violations or ratchet_violations:
             if unexpected:
                 print("[drift] unexpected docstring-tracked modules:")
@@ -265,10 +265,11 @@ def main() -> int:
                 print("[drift] measured-only ratchet violations:")
                 for violation in ratchet_violations:
                     print(f"  - {violation}")
+            is_error = True
+        if is_error:
             return 1
         print("[ok] compatibility facade snapshot is up to date")
         return 0
-
     output_path.parent.mkdir(parents=True, exist_ok=True)
     rendered_with_frontmatter = f"{frontmatter}{rendered}" if frontmatter else rendered
     output_path.write_text(rendered_with_frontmatter, encoding="utf-8")

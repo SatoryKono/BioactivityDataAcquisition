@@ -76,10 +76,12 @@ def _make_config(
     bronze_layer: SimpleNamespace,
     silver_layer: SimpleNamespace,
     gold_layer: SimpleNamespace,
+    pipeline_name: str = "chembl_activity",
 ) -> SimpleNamespace:
     return SimpleNamespace(
         provider="chembl",
         entity_type="activity",
+        pipeline_name=pipeline_name,
         sink={
             "bronze": bronze_layer,
             "silver": silver_layer,
@@ -322,6 +324,7 @@ def test_create_forwards_optional_runtime_collaborators_to_adapter_builder(
         settings=settings,
         config=config,
         logger=logger,
+        pipeline_name=config.pipeline_name,
     )
     mock_create_adapter.assert_called_once_with(
         ctx=ctx,
@@ -466,6 +469,7 @@ def test_create_resolves_tracing_once_at_storage_factory_boundary(
         settings=settings,
         config=config,
         logger=logger,
+        pipeline_name=config.pipeline_name,
     )
     mock_resolve_tracing.assert_called_once_with(tracer=None, settings=settings)
     assert mock_create_adapter.call_args.kwargs["tracing"] is resolved_tracing

@@ -30,6 +30,12 @@ def mock_metrics():
 
 
 @pytest.fixture
+def mock_metadata_coordinator():
+    """Create a mock metadata coordinator."""
+    return MagicMock()
+
+
+@pytest.fixture
 def mock_settings(tmp_path):
     """Settings for local run."""
     settings = MagicMock()
@@ -81,10 +87,13 @@ def mock_config_minimal():
     config = MagicMock()
     config.provider = "chembl"
     config.entity_type = "activity"
+    bronze_config = MagicMock(save_json=False, save_metadata=False, path=None)
+    silver_config = MagicMock(csv_export=MagicMock(enabled=False), save_metadata=False, path=None)
+    gold_config = MagicMock(csv_export=MagicMock(enabled=False), save_metadata=False, path=None)
     config.sink = {
-        "bronze": MagicMock(save_json=False, path=None),
-        "silver": MagicMock(csv_export=MagicMock(enabled=False), path=None),
-        "gold": MagicMock(csv_export=MagicMock(enabled=False), path=None),
+        "bronze": bronze_config,
+        "silver": silver_config,
+        "gold": gold_config,
     }
     return config
 
@@ -98,6 +107,7 @@ def mock_config_with_exports():
 
     bronze_config = MagicMock()
     bronze_config.save_json = True
+    bronze_config.save_metadata = False  # Disable metadata to avoid requiring MetadataCoordinator
     bronze_config.path = None  # Use settings fallback
 
     silver_csv = MagicMock()
@@ -217,11 +227,11 @@ class TestStorageFactoryLocal:
         config.provider = "chembl"
         config.entity_type = "activity"
         config.sink = {
-            "bronze": MagicMock(save_json=False, path="custom/bronze"),
+            "bronze": MagicMock(save_json=False, save_metadata=False, path="custom/bronze"),
             "silver": MagicMock(
-                csv_export=MagicMock(enabled=False), path="custom/silver"
+                csv_export=MagicMock(enabled=False), save_metadata=False, path="custom/silver"
             ),
-            "gold": MagicMock(csv_export=MagicMock(enabled=False), path="custom/gold"),
+            "gold": MagicMock(csv_export=MagicMock(enabled=False), save_metadata=False, path="custom/gold"),
         }
         mock_settings.test_mode = False
 

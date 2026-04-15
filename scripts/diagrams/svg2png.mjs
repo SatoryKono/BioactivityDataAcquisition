@@ -12,8 +12,8 @@
  *   node scripts/diagrams/svg2png.mjs --scale 3 docs/02-architecture/diagrams/architecture/svg/01-high-level-hexagonal.svg
  */
 
-import { createRequire } from "module";
-import { promises as fs } from "fs";
+import {createRequire} from "module";
+import {promises as fs} from "fs";
 import path from "path";
 
 // Resolve puppeteer from mmdc's node_modules
@@ -90,7 +90,7 @@ let svgFiles = [];
 for (const t of targets) {
   svgFiles.push(...(await collectSvgFiles(t)));
 }
-svgFiles.sort();
+svgFiles.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
 if (svgFiles.length === 0) {
   console.error("No SVG files found in specified targets");
