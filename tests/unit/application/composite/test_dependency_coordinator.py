@@ -19,6 +19,8 @@ from bioetl.application.composite.dependency_coordinator import (
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
+    create_chained_key_resolver,
+    create_seed_key_resolver,
 )
 from bioetl.application.composite.dependency_progress_tracker import (
     DependencyProgressService,
@@ -40,8 +42,8 @@ def _make_coordinator(
     """Build coordinator with explicit resolver injection for tests."""
     return DependencyCoordinatorService(
         logger=logger,
-        seed_key_resolver=SeedKeyResolver(logger),
-        chained_key_resolver=ChainedKeyResolver(logger),
+        seed_key_resolver=create_seed_key_resolver(logger),
+        chained_key_resolver=create_chained_key_resolver(logger),
         progress_service=DependencyProgressService(logger),
         result_service=DependencyResultService(logger),
         delta_reader=delta_reader,

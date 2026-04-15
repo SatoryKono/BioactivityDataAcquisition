@@ -748,7 +748,8 @@ class TestBatchTransformerAggregationHelpers:
         assert result.quarantined_count == 1
         assert result.records_quarantine_failed == 1
 
-    def test_finalize_stream_transform_result_builds_result(self, mock_context) -> None:
+    @pytest.mark.asyncio
+    async def test_finalize_stream_transform_result_builds_result(self, mock_context) -> None:
         """Stream finalizer should validate thresholds and build result."""
         state = create_transform_aggregation_state()
         apply_stream_transform_result_to_state(
@@ -760,7 +761,7 @@ class TestBatchTransformerAggregationHelpers:
             ),
         )
 
-        result = finalize_stream_transform_result(
+        result = await finalize_stream_transform_result(
             context=mock_context,
             config=RecordProcessorConfig(
                 pipeline_name="test_provider_test_entity",
@@ -772,6 +773,8 @@ class TestBatchTransformerAggregationHelpers:
             batch_metrics=MagicMock(spec=BatchMetricsRecorder),
             state=state,
             records=[{"id": "1"}],
+            flush_filtered_records=lambda: asyncio.sleep(0),  # No-op async function
+            flush_dq_records=lambda: asyncio.sleep(0),  # No-op async function
         )
 
         assert len(result.silver_records) == 1

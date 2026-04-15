@@ -21,6 +21,8 @@ from bioetl.application.composite.dependency_coordinator import (
 from bioetl.application.composite.dependency_key_resolvers import (
     ChainedKeyResolver,
     SeedKeyResolver,
+    create_chained_key_resolver,
+    create_seed_key_resolver,
 )
 from bioetl.application.composite.dependency_progress_tracker import (
     DependencyProgressService,
@@ -240,8 +242,8 @@ class TestDependencyWithMoleculeFilter:
         """Dependency should receive unique molecule IDs as filter."""
         coordinator = DependencyCoordinatorService(
             logger=mock_logger,
-            seed_key_resolver=SeedKeyResolver(mock_logger),
-            chained_key_resolver=ChainedKeyResolver(mock_logger),
+            seed_key_resolver=create_seed_key_resolver(mock_logger),
+            chained_key_resolver=create_chained_key_resolver(mock_logger),
             progress_service=DependencyProgressService(mock_logger),
             result_service=DependencyResultService(mock_logger),
             delta_reader=mock_delta_reader,

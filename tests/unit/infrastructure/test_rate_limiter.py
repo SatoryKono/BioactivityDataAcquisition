@@ -42,6 +42,7 @@ class TestTokenBucket:
         assert bucket.available_tokens() == 5  # Unchanged
 
     @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_acquire_immediate(self) -> None:
         """acquire should return immediately when tokens available."""
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
@@ -54,6 +55,7 @@ class TestTokenBucket:
         assert bucket.available_tokens() == 5
 
     @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_acquire_waits_for_tokens(self) -> None:
         """acquire should wait when insufficient tokens."""
         bucket = TokenBucketRateLimiter(rate=10.0, capacity=1)  # 10 tokens/sec
@@ -71,6 +73,7 @@ class TestTokenBucket:
         assert elapsed < 3.0  # But not excessively long
 
     @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_acquire_exceeds_capacity_raises(self) -> None:
         """acquire should raise if tokens > capacity."""
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=5)
@@ -115,6 +118,7 @@ class TestTokenBucketMetrics:
     """Tests for TokenBucketRateLimiter metrics integration."""
 
     @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_acquire_records_metrics(self) -> None:
         """acquire should record metrics when MetricsPort is provided."""
         mock_metrics = create_mock_metrics()
@@ -139,6 +143,7 @@ class TestTokenBucketMetrics:
         )
 
     @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_acquire_no_metrics_when_none(self) -> None:
         """acquire should not fail when metrics is None."""
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=10, provider="test")
@@ -149,6 +154,7 @@ class TestTokenBucketMetrics:
         assert bucket.available_tokens() == 9
 
     @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_acquire_records_wait_time(self) -> None:
         """acquire should record non-zero wait time when waiting for tokens."""
         mock_metrics = create_mock_metrics()
@@ -180,6 +186,7 @@ class TestTokenBucketMetrics:
         assert wait_time < 1.0  # But not too long
 
     @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_metrics_called_with_correct_provider(self) -> None:
         """Metrics should use the correct provider label."""
         mock_metrics = create_mock_metrics()

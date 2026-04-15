@@ -279,31 +279,31 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
     "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.PolarsJoinAdapter"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ResolverHelper"
+    "bioetl.application.composite.runtime_wiring_api.ResolverHelper"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.JoinKeyResolverService"
+    "bioetl.application.composite.runtime_wiring_api.JoinKeyResolverService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ConflictResolverService"
+    "bioetl.application.composite.runtime_wiring_api.ConflictResolverService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.CoalescePolicyService"
+    "bioetl.application.composite.runtime_wiring_api.CoalescePolicyService"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ColumnPriorityOrderer"
+    "bioetl.application.composite.runtime_wiring_api.ColumnPriorityOrderer"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ColumnOrderer"
+    "bioetl.application.composite.runtime_wiring_api.ColumnOrderer"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.ColumnRenamer"
+    "bioetl.application.composite.runtime_wiring_api.ColumnRenamer"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.EnricherAggregator"
+    "bioetl.application.composite.runtime_wiring_api.EnricherAggregator"
 )
 @patch(
-    "bioetl.composition.bootstrap.runtime.composite_merge_dependency_builder.EnricherDeduplicatorService"
+    "bioetl.application.composite.runtime_wiring_api.EnricherDeduplicatorService"
 )
 def test_build_merge_dependencies_wires_join_adapter_and_planner(
     mock_deduplicator_cls: MagicMock,
@@ -320,21 +320,38 @@ def test_build_merge_dependencies_wires_join_adapter_and_planner(
     mock_join_planner_cls: MagicMock,
 ) -> None:
     logger = MagicMock()
-    deduplicator = MagicMock(name="deduplicator")
-    aggregator = MagicMock(name="aggregator")
-    renamer = MagicMock(name="renamer")
-    orderer = MagicMock(name="orderer")
-    priority_orderer = MagicMock(name="priority_orderer")
-    coalesce_policy = MagicMock(name="coalesce_policy")
-    conflict_resolver = MagicMock(name="conflict_resolver")
-    join_key_resolver = MagicMock(name="join_key_resolver")
+    # Create mocks with proper spec to handle constructor calls
+    from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
+    from bioetl.application.composite.join_key_resolution import JoinKeyResolverService
+    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
+    from bioetl.application.composite.aggregator import EnricherAggregator
+    from bioetl.application.composite.column_renamer import ColumnRenamer
+    from bioetl.application.composite.column_orderer import ColumnOrderer
+    from bioetl.application.composite.column_priority_orderer import ColumnPriorityOrderer
+    from bioetl.application.composite.coalesce_policy import CoalescePolicyService
+    from bioetl.application.composite.conflict_resolver import ConflictResolverService
+    
+    deduplicator = MagicMock(spec=EnricherDeduplicatorService, name="deduplicator")
+    aggregator = MagicMock(spec=EnricherAggregator, name="aggregator")
+    renamer = MagicMock(spec=ColumnRenamer, name="renamer")
+    orderer = MagicMock(spec=ColumnOrderer, name="orderer")
+    priority_orderer = MagicMock(spec=ColumnPriorityOrderer, name="priority_orderer")
+    coalesce_policy = MagicMock(spec=CoalescePolicyService, name="coalesce_policy")
+    conflict_resolver = MagicMock(spec=ConflictResolverService, name="conflict_resolver")
+    join_key_resolver = MagicMock(spec=JoinKeyResolverService, name="join_key_resolver")
     join_executor = MagicMock(name="join_executor")
     dependency_joiner = MagicMock(name="dependency_joiner")
     join_planner = MagicMock(name="join_planner")
-    resolver_helper = MagicMock(name="resolver_helper")
+    resolver_helper = MagicMock(spec=ResolverHelper, name="resolver_helper")
 
     mock_deduplicator_cls.return_value = deduplicator
-    mock_resolver_helper_cls.return_value = resolver_helper
+    mock_aggregator_cls.return_value = aggregator
+    mock_renamer_cls.return_value = renamer
+    mock_orderer_cls.return_value = orderer
+    mock_priority_orderer_cls.return_value = priority_orderer
+    mock_coalesce_policy_cls.return_value = coalesce_policy
+    mock_conflict_resolver_cls.return_value = conflict_resolver
+    mock_join_key_resolver_cls.return_value = join_key_resolver
     mock_aggregator_cls.return_value = aggregator
     mock_renamer_cls.return_value = renamer
     mock_orderer_cls.return_value = orderer

@@ -83,9 +83,9 @@ class SeedKeyResolver:
         normalized_keys = normalize_join_key_dataframe_columns(
             df=seed_keys,
             join_keys=dependency.join_keys,
-            normalization_policies=self._normalization_policies,
+            normalization_policies=self._resolver_helper._normalization_policies,
         )
-        self._logger.debug(
+        self._resolver_helper.log_debug(
             "Using seed keys for dependency",
             dependency=dependency.pipeline,
             key_count=len(normalized_keys),
@@ -139,7 +139,7 @@ class ChainedKeyResolver:
         try:
             pa_table = await reader.read_table(source_table)
         except FileNotFoundError:
-            self._logger.warning(
+            self._resolver_helper.log_warning(
                 "Source Silver table not found (first run?), falling back to seed keys",
                 dependency=dependency.pipeline,
                 key_source=dependency.key_source,
@@ -149,7 +149,7 @@ class ChainedKeyResolver:
         except ValueError:
             raise
         except (*_DEPENDENCY_KEY_READ_ERRORS, BioETLError) as exc:
-            self._logger.error(
+            self._resolver_helper.log_error(
                 "Failed to read chained dependency keys",
                 dependency=dependency.pipeline,
                 key_source=dependency.key_source,
@@ -164,7 +164,7 @@ class ChainedKeyResolver:
             ) from exc
 
         if pa_table is None or pa_table.num_rows == 0:
-            self._logger.warning(
+            self._resolver_helper.log_warning(
                 "Source Silver table is empty, falling back to seed keys",
                 dependency=dependency.pipeline,
                 key_source=dependency.key_source,
@@ -178,10 +178,10 @@ class ChainedKeyResolver:
         source_keys = normalize_join_key_dataframe_columns(
             df=source_keys,
             join_keys=dependency.join_keys,
-            normalization_policies=self._normalization_policies,
+            normalization_policies=self._resolver_helper._normalization_policies,
         )
 
-        self._logger.info(
+        self._resolver_helper.log_info(
             "Using chained dependency keys",
             dependency=dependency.pipeline,
             key_source=dependency.key_source,
@@ -254,7 +254,7 @@ class ChainedKeyResolver:
         try:
             original_count = len(source_keys)
             filtered = source_keys.filter(pl.sql_expr(dependency.key_filter))
-            self._logger.info(
+            self._resolver_helper.log_info(
                 "Applied key_filter to chained dependency",
                 dependency=dependency.pipeline,
                 key_filter=dependency.key_filter,
@@ -263,7 +263,7 @@ class ChainedKeyResolver:
             )
             return filtered
         except (*_KEY_FILTER_ERRORS, BioETLError) as exc:
-            self._logger.warning(
+            self._resolver_helper.log_warning(
                 "Failed to apply key_filter, using all keys",
                 dependency=dependency.pipeline,
                 key_filter=dependency.key_filter,

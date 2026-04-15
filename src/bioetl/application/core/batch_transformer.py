@@ -238,10 +238,12 @@ class BatchTransformer:
             yield_control=yield_control_if_needed,
         )
 
-        return finalize_stream_transform_result(
+        return await finalize_stream_transform_result(
             context=self._context,
             config=self._config,
             batch_metrics=self._batch_metrics,
             state=state,
             records=records,
+            flush_filtered_records=self._quarantine_manager.quarantine_filtered_records,
+            flush_dq_records=self._quarantine_manager.quarantine_records,
         )
