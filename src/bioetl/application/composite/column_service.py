@@ -47,18 +47,21 @@ def sort_columns_by_provider(
     provider_order: tuple[str, ...],
 ) -> list[str]:
     """Sort columns by provider prefix order."""
-    provider_indices = {p: i for i, p in enumerate(provider_order)}
-    default_idx = len(provider_order) + 1
+
+    # ⚡ Bolt: Replace O(N) list index lookup with O(1) dict lookup
+    provider_idx_map = {provider: idx for idx, provider in enumerate(provider_order)}
 
     def sort_key(col: str) -> tuple[int, str]:
         """Return ``(provider_index, name)`` placing seed columns first."""
-        parts = col.split(".", maxsplit=2)
+        parts = col.split(".")
         if len(parts) < 3:
             return (0, col.lower())
 
         provider = parts[0].lower()
-        idx = provider_indices.get(provider, default_idx)
-        return (idx + 1 if idx != default_idx else default_idx, col.lower())
+        idx = provider_idx_map.get(provider)
+        if idx is not None:
+            return (idx + 1, col.lower())
+        return (len(provider_order) + 1, col.lower())
 
     return sorted(columns, key=sort_key)
 
@@ -120,6 +123,7 @@ def collect_explicit_group_columns(
     ordered: list[str] = []
     used: set[str] = set()
 
+    # ⚡ Bolt: Pre-compute extracted field names to hoist out of inner loop
     extracted_fields = {col: extract_field_fn(col) for col in available}
 
     for field_name in group.fields:
