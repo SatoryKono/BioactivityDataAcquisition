@@ -417,7 +417,7 @@ def collect_svg_files(files: list[Path] | None, dirs: list[Path] | None) -> list
     return result
 
 
-def main() -> int:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Add fallback SVG text for Mermaid foreignObject labels.",
     )
@@ -433,14 +433,10 @@ def main() -> int:
     parser.add_argument(
         "--dir", type=Path, action="append", help="Specific directory(ies)"
     )
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    mode = "check" if args.check else ("dry-run" if args.dry_run else "fix")
-    files = collect_svg_files(args.file, args.dir)
-    if not files:
-        print("No SVG files found.")
-        return 0
 
+def process_files(files: list[Path], mode: str) -> int:
     changed = 0
     for path in files:
         original = path.read_text(encoding="utf-8")
@@ -448,14 +444,30 @@ def main() -> int:
         if inserted == 0:
             continue
         changed += 1
+
         if mode == "check":
             print(f"! {path} (needs fallback text, +{inserted})")
-            path.write_text(original, encoding="utf-8")
         elif mode == "dry-run":
             print(f"~ {path} (would add fallback text +{inserted})")
-            path.write_text(original, encoding="utf-8")
         else:
             print(f"+ {path} (added fallback text +{inserted})")
+
+        if mode in ("check", "dry-run"):
+            path.write_text(original, encoding="utf-8")
+
+    return changed
+
+
+def main() -> int:
+    args = parse_args()
+    mode = "check" if args.check else ("dry-run" if args.dry_run else "fix")
+    files = collect_svg_files(args.file, args.dir)
+
+    if not files:
+        print("No SVG files found.")
+        return 0
+
+    changed = process_files(files, mode)
 
     if mode == "check" and changed > 0:
         return 1

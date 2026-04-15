@@ -51,11 +51,14 @@ jobs:
 
       - name: Run Contract Tests
         id: contract_tests
+        env:
+          PROVIDERS: ${{ github.event.inputs.providers || 'all' }}
+          SKIP_SLOW: ${{ github.event.inputs.skip_slow || 'false' }}
+          # API keys from secrets (optional - tests should work without them but with rate limits)
+          BIOETL_CHEMBL_API_KEY: ${{ secrets.CHEMBL_API_KEY }}
+          BIOETL_PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
+          BIOETL_UNIPROT_API_KEY: ${{ secrets.UNIPROT_API_KEY }}
         run: |
-          # Determine which providers to test
-          PROVIDERS="${{ github.event.inputs.providers || 'all' }}"
-          SKIP_SLOW="${{ github.event.inputs.skip_slow || 'false' }}"
-
           # Build pytest arguments
           PYTEST_ARGS="tests/contract/ -v --tb=short --network"
 
@@ -70,11 +73,6 @@ jobs:
 
           # Run tests and capture exit code
           uv run pytest $PYTEST_ARGS --junit-xml=contract-results.xml || echo "TESTS_FAILED=true" >> $GITHUB_OUTPUT
-        env:
-          # API keys from secrets (optional - tests should work without them but with rate limits)
-          BIOETL_CHEMBL_API_KEY: ${{ secrets.CHEMBL_API_KEY }}
-          BIOETL_PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
-          BIOETL_UNIPROT_API_KEY: ${{ secrets.UNIPROT_API_KEY }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4

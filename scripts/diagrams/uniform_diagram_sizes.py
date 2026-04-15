@@ -44,7 +44,7 @@ import argparse
 import difflib
 import re
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -800,12 +800,10 @@ def _update_uniform_tag(
 
 def normalize_file(path: Path) -> tuple[str, str, bool]:
     """Normalize a single diagram file.
-
     Returns (original_content, normalized_content, changed).
     """
     content = path.read_text(encoding="utf-8")
     lines = content.splitlines()
-
     dtype = _detect_diagram_type(lines)
     if dtype == "class":
         normalized = _normalize_class_diagram(lines)
@@ -813,12 +811,10 @@ def normalize_file(path: Path) -> tuple[str, str, bool]:
         normalized = _normalize_flowchart(lines)
     else:
         return content, content, False
-
     new_content = "\n".join(normalized)
     # Preserve trailing newline
     if content.endswith("\n"):
         new_content += "\n"
-
     return content, new_content, content != new_content
 
 

@@ -78,7 +78,6 @@ def _err(message: str) -> None:
 def load_manifest(manifest_path: Path) -> list[Path]:
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
-
     files: list[Path] = []
     for raw in manifest_path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
@@ -89,7 +88,6 @@ def load_manifest(manifest_path: Path) -> list[Path]:
         if path.suffix not in SUPPORTED_SUFFIXES:
             raise ValueError(f"Manifest entry must be .mmd/.mermaid: {line}")
         files.append(path)
-
     if not files:
         raise ValueError(f"Manifest has no diagram entries: {manifest_path}")
     return files

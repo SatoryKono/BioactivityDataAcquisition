@@ -48,17 +48,19 @@ jobs:
           uv-sync-args: "--frozen"
 
       - name: Run VACUUM on all Delta tables
+        env:
+          RETENTION_DAYS: ${{ github.event.inputs.retention_days || '7' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          LAYER: ${{ github.event.inputs.layer || 'all' }}
         run: |
-          RETENTION_DAYS="${{ github.event.inputs.retention_days || '7' }}"
           DRY_RUN_FLAG=""
-          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+          if [[ "$DRY_RUN" == "true" ]]; then
             DRY_RUN_FLAG="--dry-run"
           fi
-          LAYER="${{ github.event.inputs.layer || 'all' }}"
 
           echo "Running VACUUM with:"
           echo "  Retention: ${RETENTION_DAYS} days"
-          echo "  Dry run: ${{ github.event.inputs.dry_run || 'false' }}"
+          echo "  Dry run: ${DRY_RUN}"
           echo "  Layer: ${LAYER}"
           echo ""
 
@@ -69,11 +71,15 @@ jobs:
 
       - name: Summary
         if: always()
+        env:
+          RETENTION_DAYS: ${{ github.event.inputs.retention_days || '7' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          LAYER: ${{ github.event.inputs.layer || 'all' }}
         run: |
           echo "## VACUUM Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Retention period**: ${{ github.event.inputs.retention_days || '7' }} days (168 hours)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Dry run**: ${{ github.event.inputs.dry_run || 'false' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Layer**: ${{ github.event.inputs.layer || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Retention period**: ${RETENTION_DAYS} days (168 hours)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry run**: ${DRY_RUN}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Layer**: ${LAYER}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "VACUUM removes files older than the retention period that are no longer referenced by the Delta log." >> $GITHUB_STEP_SUMMARY

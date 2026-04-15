@@ -154,12 +154,10 @@ def apply_elk(
     """Process one file. Returns (modified, reason)."""
     content = fpath.read_text(encoding="utf-8")
     lines = content.splitlines()
-
     if not is_flowchart(lines):
         return False, "not a flowchart/graph diagram"
-
     changes: list[str] = []
-
+    nodes = parse_nodes(lines)
     if has_elk_init(lines):
         if edge_routing is not None:
             lines, changed, found = enforce_edge_routing(
@@ -169,48 +167,43 @@ def apply_elk(
                 changes.append(f"edgeRouting->{edge_routing}")
             elif not found:
                 return False, "ELK init present but edgeRouting field not found"
-        if not changes:
-            return False, "ELK init already present"
-        new_content = "\n".join(lines).rstrip("\n") + "\n"
-        if not dry_run:
-            fpath.write_text(new_content, encoding="utf-8")
-        return True, f"changes=[{', '.join(changes)}]"
-
-    nodes = parse_nodes(lines)
-    if nodes is None:
-        return False, "no @nodes metadata"
-
-    if nodes <= threshold:
-        return False, f"@nodes={nodes} <= threshold {threshold}"
-
-    graph_idx = find_graph_line_index(lines)
-    if graph_idx is None:
-        return False, "graph declaration not found"
-
-    # ── Insert ELK init directive before graph declaration ────────────────────
-    selected_routing = edge_routing or DEFAULT_EDGE_ROUTING
-    new_lines = (
-        lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
-    )
-    changes.append("elk_init")
-
+    else:
+        if nodes is None:
+            return False, "no @nodes metadata"
+        if nodes <= threshold:
+            return False, f"@nodes={nodes} <= threshold {threshold}"
+        graph_idx = find_graph_line_index(lines)
+        if graph_idx is None:
+            return False, "graph declaration not found"
+        # ── Insert ELK init directive before graph declaration ────────────────────
+        selected_routing = edge_routing or DEFAULT_EDGE_ROUTING
+        lines = (
+            lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
+        )
+        changes.append("elk_init")
     # ── Optionally override direction ─────────────────────────────────────────
     if auto_direction and should_use_lr(fpath.stem):
-        current_decl = new_lines[graph_idx + 1]  # shifted by +1 after insert
-        updated_decl = _GRAPH_LINE_RE.sub(
-            lambda m: f"{m.group(1)} LR",
-            current_decl,
-        )
-        if updated_decl != current_decl:
-            new_lines[graph_idx + 1] = updated_decl
-            changes.append("direction->LR")
-
-    new_content = "\n".join(new_lines).rstrip("\n") + "\n"
-
+        graph_idx = find_graph_line_index(lines)
+        if graph_idx is not None:
+            current_decl = lines[graph_idx]
+            stripped_decl = current_decl.lstrip()
+            indent = current_decl[: len(current_decl) - len(stripped_decl)]
+            updated_decl = _GRAPH_LINE_RE.sub(
+                lambda m: f"{m.group(1)} LR",
+                stripped_decl,
+            )
+            updated_decl = indent + updated_decl
+            if updated_decl != current_decl:
+                lines[graph_idx] = updated_decl
+                changes.append("direction->LR")
+    if not changes:
+        return False, "ELK init already present"
+    new_content = "\n".join(lines).rstrip("\n") + "\n"
     if not dry_run:
         fpath.write_text(new_content, encoding="utf-8")
-
-    return True, f"@nodes={nodes}, changes=[{', '.join(changes)}]"
+    if "elk_init" in changes:
+        return True, f"@nodes={nodes}, changes=[{', '.join(changes)}]"
+    return True, f"changes=[{', '.join(changes)}]"
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────

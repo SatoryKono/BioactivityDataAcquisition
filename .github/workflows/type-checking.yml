@@ -38,13 +38,15 @@ jobs:
         uses: ./.github/actions/setup-python-uv
 
       - name: Run mypy (strict mode, full gate)
+        env:
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -o pipefail
           mkdir -p reports
           rm -rf .mypy_cache
 
           echo "Running full mypy strict gate on src/bioetl..."
-          echo "Event: ${{ github.event_name }}" | tee reports/mypy_strict.log
+          echo "Event: $EVENT_NAME" | tee reports/mypy_strict.log
 
           set +e
           timeout --signal=TERM --kill-after=30s 30m \

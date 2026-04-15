@@ -15,7 +15,7 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     EnrichmentStatus,
 )
-from bioetl.domain.exceptions import StorageError
+from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MergedStoragePort
@@ -50,12 +50,16 @@ class _MergeInputLoaderMixin:
         """Read optional input table, returning None on error."""
         try:
             return await self._read_silver_table(table)
-        except (StorageError, ValueError) as exc:
+        except (StorageError, ValueError, OSError, BioETLError) as exc:
+            reason_code = "unexpected_bioetl_error" if isinstance(exc, BioETLError) else "unexpected_error"
             self._logger.warning(
                 f"Skipping {role} input due to read error",
                 pipeline=pipeline,
                 table=table,
                 role=role,
+                enricher=pipeline,
+                dependency=pipeline,
+                reason_code=reason_code,
                 error=str(exc),
             )
             return None
