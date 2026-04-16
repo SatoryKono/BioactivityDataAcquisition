@@ -27,6 +27,8 @@ import yaml
 
 JsonScalar: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
+RelationSpec: TypeAlias = tuple[str, frozenset[str], frozenset[str]]
+ShardFilterSpec: TypeAlias = tuple[frozenset[str], tuple[RelationSpec, ...]]
 T = TypeVar("T")
 BIOETL_METRIC_PATTERN = re.compile(r"\bbioetl_[a-zA-Z0-9_:]+")
 
@@ -37,6 +39,34 @@ DEFAULT_BATCH_SIZE = 20
 DEFAULT_INGEST_WAVE = "repo_sync_v1"
 DEFAULT_MANAGED_BY = "neo4j_memory_sync"
 DEFAULT_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
+INIT_PY = "__init__.py"
+MAIN_PY = "__main__.py"
+GITHUB_DIR = ".github"
+GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
+PORTS_MODULE_PREFIX = "bioetl.domain.ports"
+RULES_DOC_PATH = "docs/00-project/RULES.md"
+TESTING_GUIDE_PATH = "docs/03-guides/testing.md"
+DOCS_VERIFICATION_GUIDE_PATH = "docs/03-guides/docs-verification.md"
+INTEGRATION_VCR_POLICY_PATH = "configs/quality/integration_vcr_policy.yaml"
+TEST_MATRIX_CONFIG_PATH = "configs/quality/test_matrix.yaml"
+RUN_MANIFEST_LEDGER_DOC_PATH = "docs/04-reference/contracts/run-manifest-ledger.md"
+RUN_MANIFEST_INSPECTION_DOC_PATH = "docs/05-operations/runbooks/run-manifest-inspection.md"
+TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH = "docs/05-operations/runbooks/traceability-signal-ownership.md"
+CHEMBL_ACTIVITY_CONTRACT_REF = "chembl.activity"
+RUN_MANIFEST_ARTIFACT_REF = "run_manifest::json"
+EFFECTIVE_CONFIG_ARTIFACT_REF = "effective_config_artifact::json"
+RUN_LEDGER_ARTIFACT_REF = "run_ledger::jsonl"
+DOC_GRAFANA_DASHBOARDS_JSON = "grafana dashboards json"
+DOC_ARCHITECTURE_DIAGRAMS_HUB = "architecture diagrams hub"
+DOC_DIAGRAM_TOOLING_README = "diagram tooling readme"
+TEST_SURFACE_INTEGRATION = "integration tests"
+TEST_SURFACE_E2E = "e2e tests"
+TEST_SURFACE_ARCHITECTURE = "architecture tests"
+GATE_MYPY_STRICT = "mypy --strict"
+GATE_DOCS_VERIFICATION = "docs verification"
+GATE_CONFIG_VALIDATION = "config validation"
+GATE_PRETEST_GUARDRAILS = "pretest guardrails"
+GATE_DIAGRAM_QUALITY = "diagram quality gates"
 CRITICAL_ANALYSIS_NODE_LABELS: tuple[str, ...] = (
     "retirement_candidate",
     "complexity_candidate",
@@ -128,7 +158,7 @@ DEFAULT_FILE_STRUCTURE_REPO_ZONES: dict[str, tuple[str, ...]] = {
     "docs": ("docs",),
     "scripts": ("scripts",),
     "grafana": ("grafana",),
-    ".github": (".github",),
+    GITHUB_DIR: (GITHUB_DIR,),
 }
 DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "docs/99-archive",
@@ -154,12 +184,160 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
 KNOWN_LAYERS = ("domain", "application", "infrastructure", "composition", "interfaces")
 TEST_SURFACES: dict[str, str] = {
     "unit": "unit tests",
-    "integration": "integration tests",
-    "e2e": "e2e tests",
-    "architecture": "architecture tests",
+    "integration": TEST_SURFACE_INTEGRATION,
+    "e2e": TEST_SURFACE_E2E,
+    "architecture": TEST_SURFACE_ARCHITECTURE,
     "contract": "contract tests",
     "benchmarks": "benchmarks",
 }
+STORAGE_LAYER_FILTER: ShardFilterSpec = (
+    frozenset(
+        {
+            "project",
+            "pipeline_surface",
+            "entity_config",
+            "composite_config",
+            "config_artifact",
+            "storage_surface",
+            "runtime_evidence_surface",
+            "control_plane_artifact_surface",
+            "run_instance_surface",
+            "runtime_state_surface",
+            "schema_field_surface",
+        }
+    ),
+    (
+        ("HAS_STORAGE_SURFACE", frozenset({"project"}), frozenset({"storage_surface"})),
+        ("HAS_RUNTIME_EVIDENCE", frozenset({"project"}), frozenset({"runtime_evidence_surface"})),
+        ("HAS_CONTROL_PLANE_ARTIFACT", frozenset({"project"}), frozenset({"control_plane_artifact_surface"})),
+        ("HAS_RUN_INSTANCE", frozenset({"project"}), frozenset({"run_instance_surface"})),
+        (
+            "WRITES_TO",
+            frozenset({"pipeline_surface", "entity_config", "composite_config", "runtime_evidence_surface"}),
+            frozenset({"storage_surface"}),
+        ),
+        (
+            "DEFINED_BY",
+            frozenset({"pipeline_surface", "entity_config", "composite_config"}),
+            frozenset({"config_artifact"}),
+        ),
+        ("PROMOTES_TO", frozenset({"storage_surface"}), frozenset({"storage_surface"})),
+        ("EMITS_ARTIFACT", frozenset({"runtime_evidence_surface"}), frozenset({"control_plane_artifact_surface"})),
+        ("MATERIALIZED_AS", frozenset({"control_plane_artifact_surface"}), frozenset({"storage_surface"})),
+        ("REFERENCES_ARTIFACT", frozenset({"run_instance_surface"}), frozenset({"control_plane_artifact_surface"})),
+        ("HAS_SCHEMA_FIELD", frozenset({"project", "storage_surface", "contract_surface"}), frozenset({"schema_field_surface"})),
+        ("PROMOTES_FIELD_TO", frozenset({"schema_field_surface"}), frozenset({"schema_field_surface"})),
+        ("DERIVES_FIELD_FROM", frozenset({"schema_field_surface"}), frozenset({"schema_field_surface"})),
+        ("HAS_RUNTIME_STATE", frozenset({"project", "run_instance_surface"}), frozenset({"runtime_state_surface"})),
+        ("REFERENCES_ARTIFACT", frozenset({"runtime_state_surface"}), frozenset({"control_plane_artifact_surface"})),
+    ),
+)
+RUNTIME_EVIDENCE_LAYER_FILTER: ShardFilterSpec = (
+    frozenset(
+        {
+            "project",
+            "runtime_evidence_surface",
+            "control_plane_artifact_surface",
+            "run_instance_surface",
+            "runtime_state_surface",
+            "storage_surface",
+            "module_surface",
+            "doc_artifact",
+            "test_artifact",
+            "pipeline_surface",
+            "contract_surface",
+            "workflow_surface",
+        }
+    ),
+    (
+        ("HAS_RUNTIME_EVIDENCE", frozenset({"project"}), frozenset({"runtime_evidence_surface"})),
+        ("HAS_CONTROL_PLANE_ARTIFACT", frozenset({"project"}), frozenset({"control_plane_artifact_surface"})),
+        ("HAS_RUN_INSTANCE", frozenset({"project"}), frozenset({"run_instance_surface"})),
+        ("BACKED_BY", frozenset({"runtime_evidence_surface"}), frozenset({"module_surface"})),
+        ("DESCRIBED_IN", frozenset({"runtime_evidence_surface"}), frozenset({"doc_artifact"})),
+        ("DESCRIBED_IN", frozenset({"run_instance_surface"}), frozenset({"doc_artifact", "test_artifact"})),
+        ("DEPENDS_ON", frozenset({"run_instance_surface"}), frozenset({"pipeline_surface", "contract_surface"})),
+        ("WRITES_TO", frozenset({"runtime_evidence_surface"}), frozenset({"storage_surface"})),
+        ("EMITS_ARTIFACT", frozenset({"runtime_evidence_surface"}), frozenset({"control_plane_artifact_surface"})),
+        ("MATERIALIZED_AS", frozenset({"control_plane_artifact_surface"}), frozenset({"storage_surface"})),
+        ("REFERENCES_ARTIFACT", frozenset({"run_instance_surface"}), frozenset({"control_plane_artifact_surface"})),
+        ("HAS_RUNTIME_STATE", frozenset({"project", "run_instance_surface"}), frozenset({"runtime_state_surface"})),
+        (
+            "DEPENDS_ON",
+            frozenset({"runtime_state_surface"}),
+            frozenset({"pipeline_surface", "workflow_surface", "runtime_evidence_surface", "contract_surface"}),
+        ),
+        ("REFERENCES_ARTIFACT", frozenset({"runtime_state_surface"}), frozenset({"control_plane_artifact_surface"})),
+        ("DESCRIBED_IN", frozenset({"runtime_state_surface"}), frozenset({"doc_artifact"})),
+    ),
+)
+WORKFLOW_GRAPH_FILTER: ShardFilterSpec = (
+    frozenset(
+        {
+            "project",
+            "workflow_surface",
+            "workflow_job_surface",
+            "workflow_call_surface",
+            "workflow_matrix_variant_surface",
+            "workflow_output_surface",
+            "workflow_action_surface",
+            "workflow_artifact_surface",
+            "workflow_secret_surface",
+            "script_surface",
+            "file_surface",
+            "directory_surface",
+            "quality_gate",
+        }
+    ),
+    (
+        ("HAS_WORKFLOW", frozenset({"project"}), frozenset({"workflow_surface"})),
+        ("CONTAINS", frozenset({"workflow_surface"}), frozenset({"workflow_job_surface"})),
+        ("CALLS_WORKFLOW", frozenset({"workflow_surface", "workflow_job_surface"}), frozenset({"workflow_call_surface"})),
+        ("HAS_MATRIX_VARIANT", frozenset({"workflow_job_surface"}), frozenset({"workflow_matrix_variant_surface"})),
+        ("EMITS_OUTPUT", frozenset({"workflow_surface", "workflow_job_surface"}), frozenset({"workflow_output_surface"})),
+        ("RUNS_VIA", frozenset({"workflow_job_surface"}), frozenset({"script_surface", "file_surface", "directory_surface"})),
+        ("EXECUTES_GATE", frozenset({"workflow_job_surface"}), frozenset({"quality_gate"})),
+        (
+            "DEPENDS_ON",
+            frozenset({"workflow_job_surface", "workflow_call_surface"}),
+            frozenset({"workflow_job_surface", "workflow_artifact_surface", "workflow_surface"}),
+        ),
+        ("USES_ACTION", frozenset({"workflow_job_surface"}), frozenset({"workflow_action_surface"})),
+        ("PUBLISHES_ARTIFACT", frozenset({"workflow_job_surface"}), frozenset({"workflow_artifact_surface"})),
+        ("REQUIRES_SECRET", frozenset({"workflow_job_surface"}), frozenset({"workflow_secret_surface"})),
+    ),
+)
+DOCS_DRIFT_FILTER: ShardFilterSpec = (
+    frozenset(
+        {
+            "doc_source_surface",
+            "doc_artifact",
+            "policy_surface",
+            "doc_claim_surface",
+            "module_surface",
+            "script_surface",
+            "config_artifact",
+            "workflow_surface",
+            "cli_command_surface",
+            "file_surface",
+            "directory_surface",
+            "execution_path",
+        }
+    ),
+    (
+        (
+            "DESCRIBES",
+            frozenset({"doc_source_surface", "doc_artifact", "policy_surface"}),
+            frozenset({"module_surface", "script_surface", "config_artifact", "workflow_surface", "cli_command_surface", "file_surface", "directory_surface", "execution_path"}),
+        ),
+        ("ASSERTS", frozenset({"doc_source_surface", "doc_artifact", "policy_surface"}), frozenset({"doc_claim_surface"})),
+        (
+            "ASSERTS_ABOUT",
+            frozenset({"doc_claim_surface"}),
+            frozenset({"module_surface", "script_surface", "config_artifact", "workflow_surface", "cli_command_surface", "file_surface", "directory_surface", "execution_path"}),
+        ),
+    ),
+)
 CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
     {
         "name": "Project Navigator",
