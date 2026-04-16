@@ -1,0 +1,39 @@
+---
+Version: 1.0.0
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
+- BioETL Team
+Last verified: '2026-04-16'
+---
+
+# Archive Index
+
+This repository path exists as the stable archive entrypoint referenced by
+current documentation.
+
+## Purpose
+
+- Preserve a canonical repository-path target for historical and superseded
+  materials.
+- Keep archive references resolvable even though archive content is excluded
+  from the published MkDocs navigation by default.
+
+## Current Archive Entry Points
+
+- [Operations Archive Index](../05-operations/archive-index.md) — published
+  archive lane for historical operational and deployment material.
+- [Plans Index](../plans/README.md) — retained planning artifacts that may still
+  provide useful historical context.
+- [Reports Index](../reports/index.md) — curated repo-only evidence and bounded
+  internal reports.
+
+## Usage Rules
+
+- Treat archive material as historical context, not as current normative
+  guidance.
+- Prefer active documentation under `docs/00-05` for current workflows,
+  contracts, and architecture statements.
+- When an archive page is still linked from an active document, the link should
+  explain why that historical context remains relevant.

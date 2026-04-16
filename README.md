@@ -567,7 +567,7 @@ Access the docs at `http://localhost:8000`.
 │   ├── 02-architecture/      # Layer docs, diagrams, ADRs (45 decisions)
 │   ├── 00-project/
 │   │   ├── glossary.md       # Ubiquitous Language glossary
-│   │   └── RULES.md          # Project governance (v6.1.0)
+│   │   └── RULES.md          # Project governance (v6.1.2)
 │   └── ...
 ├── src/
 │   └── bioetl/
