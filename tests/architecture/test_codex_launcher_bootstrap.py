@@ -17,12 +17,12 @@ def test_wsl_launchers_use_local_bootstrap_helper() -> None:
         encoding="utf-8"
     )
 
-    assert "ensure_codex_cli.sh" in codex_sh
+    assert "ensure-codex-cli.sh" in codex_sh
     assert 'exec "${CODEX_BIN}" -C "${REPO_ROOT}"' in codex_sh
     assert "npm install -g @openai/codex" not in codex_sh
 
-    assert "ensure_codex_cli.sh" in codex_exec_sh
-    assert 'exec "${CODEX_BIN}" exec --full-auto -C "$REPO_ROOT" "$@"' in (
+    assert "ensure-codex-cli.sh" in codex_exec_sh
+    assert 'exec "${CODEX_BIN}" exec --full-auto -C "${REPO_ROOT}" "$@"' in (
         codex_exec_sh
     )
     assert "npm install -g @openai/codex" not in codex_exec_sh
@@ -50,16 +50,16 @@ def test_windows_launchers_delegate_to_wsl_scripts_without_posix_redirects() -> 
 def test_wsl_setup_uses_local_update_path() -> None:
     """Setup and verification scripts should rely on the repo-local installer."""
     root = _project_root()
-    setup_sh = (root / "scripts" / "ops" / "setup_wsl_codex.sh").read_text(
+    setup_sh = (root / "script-codex" / "helper" / "setup-wsl.sh").read_text(
         encoding="utf-8"
     )
-    verify_sh = (root / "scripts" / "ops" / "verify_codex_setup.sh").read_text(
+    verify_sh = (root / "script-codex" / "helper" / "verify-setup.sh").read_text(
         encoding="utf-8"
     )
 
-    assert "ensure_codex_cli.sh" in setup_sh
+    assert "ensure-codex-cli.sh" in setup_sh
     assert "--update" in setup_sh
     assert "npm install -g @openai/codex" not in setup_sh
 
-    assert "ensure_codex_cli.sh" in verify_sh
+    assert "ensure-codex-cli.sh" in verify_sh
     assert "--no-install --print-bin" in verify_sh

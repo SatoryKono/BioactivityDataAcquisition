@@ -7,7 +7,7 @@
         "@modelcontextprotocol/server-memory@2026.1.26"
       ],
       "env": {
-        "MEMORY_FILE_PATH": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\docs\\00-project\\ai\\memory\\mcp-memory.json",
+        "MEMORY_FILE_PATH": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/00-project/ai/memory/mcp-memory.json",
         "NPM_CONFIG_CACHE": "/tmp/npm-cache"
       }
     },
@@ -16,7 +16,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem@2026.1.14",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2"
       ],
       "env": {
         "NPM_CONFIG_CACHE": "/tmp/npm-cache"
@@ -52,116 +52,78 @@
       }
     },
     "github": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\.claude\\github-mcp-wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.claude/github-mcp-wrapper.sh"
       ],
       "env": {
         "NPM_CONFIG_CACHE": "/tmp/npm-cache"
       }
     },
     "docker": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_docker_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_docker_wrapper.sh"
       ]
     },
     "docker-docs": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_docker_docs_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_docker_docs_wrapper.sh"
       ]
     },
     "context7": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_context7_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_context7_wrapper.sh"
       ]
     },
     "paper-search": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_paper_search_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_paper_search_wrapper.sh"
       ]
     },
     "dockerhub": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_dockerhub_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_dockerhub_wrapper.sh"
       ]
     },
     "prometheus": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_prometheus_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_prometheus_wrapper.sh"
       ]
     },
     "grafana": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_grafana_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_grafana_wrapper.sh"
       ]
     },
     "brave-search": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_brave_search_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_brave_search_wrapper.sh"
+      ]
+    },
+    "sonarqube": {
+      "command": "bash",
+      "args": [
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_sonarqube_wrapper.sh"
       ]
     },
     "neo4j-cypher": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_neo4j_cypher_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_neo4j_cypher_wrapper.sh"
       ]
     },
     "neo4j-memory": {
-      "command": "powershell",
+      "command": "bash",
       "args": [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\scripts\\ops\\mcp_neo4j_memory_wrapper.ps1"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_neo4j_memory_wrapper.sh"
       ]
     },
     "openaiDeveloperDocs": {

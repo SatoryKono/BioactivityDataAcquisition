@@ -64,7 +64,7 @@ def resolve_logical_type(physical_type: str) -> LogicalType:
         return "integer"
     if normalized.startswith("float"):
         return "float"
-    if normalized == "bool":
+    if normalized == "bool" or "boolean" in normalized or normalized.startswith("bool"):
         return "boolean"
     return "unknown"
 

@@ -8,7 +8,7 @@
 
 ## Support helpers
 
-- `support/ensure_codex_cli.sh`
+- `script-codex/helper/ensure-codex-cli.sh`
 - `support/docker_cli_resolver.sh`
 - `support/load_repo_env.sh`
 - `support/load_repo_env.ps1`

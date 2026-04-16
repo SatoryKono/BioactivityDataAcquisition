@@ -14,18 +14,16 @@ ______________________________________________________________________
 # Mistral Vibe: Setup and Usage via WSL2
 
 Guide for running Mistral Vibe in this repository from WSL2 or from
-Windows through the WSL wrappers in `scripts/ops/`.
+Windows through the canonical wrappers in `script-mistrallvibe/`.
 
 ______________________________________________________________________
 
 ## What Is Configured
 
 - Project-local Vibe config: `.vibe/config.toml`
-- WSL interactive launcher: `scripts/ops/mistral.sh`
-- WSL prompt-mode launcher: `scripts/ops/mistral-exec.sh`
-- Windows interactive launcher: `scripts/ops/mistral.bat`
-- Windows prompt-mode launcher: `scripts/ops/mistral-exec.bat`
-- WSL installer helper: `scripts/ops/setup_mistral_vibe.sh`
+- Canonical WSL launcher: `script-mistrallvibe/run-vibe.sh`
+- Canonical Windows PowerShell launcher: `script-mistrallvibe/run-vibe.ps1`
+- Canonical setup helper: `script-mistrallvibe/helper/setup-env.sh`
 
 The project-local config is discovered automatically by Vibe before
 `~/.vibe/config.toml`, which keeps repository-specific defaults local to
@@ -51,7 +49,7 @@ python3 -m pip install --user mistral-vibe
 Repository helper:
 
 ```bash
-bash scripts/ops/setup_mistral_vibe.sh
+bash script-mistrallvibe/helper/setup-env.sh
 ```
 
 Official references:
@@ -80,24 +78,27 @@ ______________________________________________________________________
 From WSL/Linux:
 
 ```bash
-bash scripts/ops/mistral.sh
-bash scripts/ops/mistral.sh "inspect the failing architecture tests"
-bash scripts/ops/mistral-exec.sh "fix the failing architecture test" --max-turns 5
+bash script-mistrallvibe/run-vibe.sh
+bash script-mistrallvibe/run-vibe.sh "inspect the failing architecture tests"
+bash script-mistrallvibe/run-vibe.sh --prompt "fix the failing architecture test" --max-turns 5
 ```
 
-From Windows PowerShell / CMD:
+From Windows PowerShell:
+
+```powershell
+.\script-mistrallvibe\run-vibe.ps1
+.\script-mistrallvibe\run-vibe.ps1 "inspect the failing architecture tests"
+```
+
+From Windows CMD:
 
 ```cmd
-scripts\ops\mistral.bat
-scripts\ops\mistral.bat "inspect the failing architecture tests"
-scripts\ops\mistral-exec.bat "fix the failing architecture test" --max-turns 5
+powershell -NoProfile -ExecutionPolicy Bypass -File .\script-mistrallvibe\run-vibe.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\script-mistrallvibe\run-vibe.ps1 "inspect the failing architecture tests"
 ```
 
 The wrappers pass `--workdir` with the repository root so Vibe starts in
 the correct project context regardless of the current shell directory.
-On Windows they probe `Ubuntu` first, then `Debian`, by attempting to start
-the distro directly. Set `BIOETL_WSL_DISTRO` explicitly if you use a different
-name.
 
 If `vibe` is not found in a fresh shell after installation, source the uv
 user-tool environment once:

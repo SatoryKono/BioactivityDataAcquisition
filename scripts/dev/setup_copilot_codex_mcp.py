@@ -128,6 +128,7 @@ def _core_servers(root: Path) -> dict[str, dict[str, object]]:
         "prometheus": _wrapper_server(root, "mcp_prometheus_wrapper.sh"),
         "grafana": _wrapper_server(root, "mcp_grafana_wrapper.sh"),
         "brave-search": _wrapper_server(root, "mcp_brave_search_wrapper.sh"),
+        "sonarqube": _wrapper_server(root, "mcp_sonarqube_wrapper.sh"),
         "neo4j-cypher": _wrapper_server(root, "mcp_neo4j_cypher_wrapper.sh"),
         "neo4j-memory": _wrapper_server(root, "mcp_neo4j_memory_wrapper.sh"),
         "openaiDeveloperDocs": {

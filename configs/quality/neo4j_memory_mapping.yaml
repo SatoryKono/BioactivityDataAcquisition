@@ -24,6 +24,8 @@ file_structure:
     - "docs/reports/generated"
     - "docs/02-architecture/generated"
     - "docs/02-architecture/diagrams/bundles"
+    - "docs/02-architecture/diagrams/manifests"
+    - "docs/02-architecture/diagrams/tooling"
     - "docs/02-architecture/diagrams/architecture/png"
     - "docs/02-architecture/diagrams/architecture/svg"
     - "docs/02-architecture/diagrams/class-diagrams/png"
@@ -33,6 +35,7 @@ file_structure:
     - "docs/02-architecture/diagrams/views/png"
     - "docs/02-architecture/diagrams/views/svg"
     - "docs/02-architecture/diagrams/descriptions/legacy"
+    - "scripts/diagrams/svg2png.mjs"
     - "scripts/archive"
   promoted_hubs:
     - "docs/03-guides"

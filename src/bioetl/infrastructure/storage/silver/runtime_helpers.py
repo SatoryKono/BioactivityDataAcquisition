@@ -186,6 +186,7 @@ def build_silver_writer_runtime_services(
             _deduplicate_by_primary_keys=_deduplicate_by_primary_keys_impl,
             _to_policy_write_mode=_to_policy_write_mode_impl,
             _validate_key_nullability=_validate_key_nullability_impl,
+            _host=None,
         )
     
     # Create delta operations if needed components are available

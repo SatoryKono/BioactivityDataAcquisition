@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # WSL Codex setup — install dependencies and configure environment
-# Run from WSL: bash ./scripts/ops/setup_wsl_codex.sh
+# Run from WSL: bash ./script-codex/helper/setup-wsl.sh
 
 set -euo pipefail
 
@@ -12,12 +12,12 @@ echo ""
 # Check if running in WSL
 if ! grep -qi microsoft /proc/version 2>/dev/null; then
     echo "[WARNING] Not running in WSL. This script is designed for WSL2."
-    echo "[INFO] Run from WSL Ubuntu distro: wsl -- bash ./scripts/ops/setup_wsl_codex.sh"
+    echo "[INFO] Run from WSL Ubuntu distro: wsl -- bash ./script-codex/helper/setup-wsl.sh"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-ENSURE_SCRIPT="${SCRIPT_DIR}/support/ensure_codex_cli.sh"
+ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 
 # Step 1: Update package manager (with retry logic)
 echo "[1/5] Updating package manager..."

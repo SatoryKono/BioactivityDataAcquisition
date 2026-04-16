@@ -1,0 +1,382 @@
+#!/usr/bin/env bash
+# Print this index with: cat ./scripts/ops/CODEX_INDEX.txt
+
+cat <<'EOF'
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║               Codex CLI for WSL — Complete Index                          ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+START HERE:
+  📄 CODEX_QUICK_REF.txt         Quick reference card (all commands at a glance)
+  📄 WSL_SETUP_SUMMARY.md        Summary of what was created and how to use it
+  
+COMPREHENSIVE GUIDES:
+  📖 CODEX_WSL_SETUP.md          Complete setup guide with troubleshooting
+                                 (10,400+ words, covers everything)
+  
+THIS FILE:
+  📄 CODEX_INDEX.txt             You are here
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 QUICK START
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FROM WINDOWS (PowerShell):
+
+  1. Setup (one time):
+     .\scripts\ops\setup-codex-wsl.bat
+
+  2. Use it:
+     .\scripts\ops\codex.bat                         # Interactive
+     .\scripts\ops\codex.bat "your prompt"           # With prompt
+     .\scripts\ops\codex-exec.bat "your prompt"      # Auto-exec
+
+FROM WSL (Ubuntu):
+
+  1. Setup (one time):
+     bash ./scripts/ops/setup-wsl-codex-complete.sh
+
+  2. Use it:
+     ./scripts/ops/codex.sh                          # Interactive
+     ./scripts/ops/codex.sh "your prompt"            # With prompt
+     ./scripts/ops/codex-exec.sh "your prompt"       # Auto-exec
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📂 LAUNCH SCRIPTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INTERACTIVE MODE (with confirmations):
+  
+  codex.bat ........................ Windows launcher (interactive)
+  codex.sh ......................... WSL launcher (interactive)
+  
+  Usage:
+    codex.bat [options] [prompt]
+    codex.sh [options] [prompt]
+    
+  Options:
+    --update              Update to latest Codex version
+    --verbose, -v         Show detailed output
+    --help, -h            Show help message
+    
+  Examples:
+    codex.bat "analyze the pipeline"
+    codex.sh --update "refactor the parser"
+    ./codex.sh --verbose "your prompt"
+
+AUTO-EXECUTION MODE (no confirmations):
+  
+  codex-exec.bat .................. Windows launcher (auto-exec)
+  codex-exec.sh ................... WSL launcher (auto-exec)
+  
+  Usage:
+    codex-exec.bat "prompt"
+    codex-exec.sh "prompt"
+    
+  Options:
+    --update              Update to latest Codex version
+    --help, -h            Show help message
+    
+  Examples:
+    codex-exec.bat "refactor ChemBL parser"
+    codex-exec.sh --update "optimize Neo4j queries"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ SETUP SCRIPTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+COMPLETE SETUP (from Windows):
+  
+  setup-codex-wsl.bat ............. Runs complete setup in WSL from Windows
+  
+  Usage:
+    .\scripts\ops\setup-codex-wsl.bat
+    
+  What it does:
+    • Converts Windows paths to WSL paths
+    • Validates WSL distro accessibility
+    • Runs setup-wsl-codex-complete.sh in WSL
+    • Displays progress and results
+
+COMPLETE SETUP (from WSL):
+  
+  setup-wsl-codex-complete.sh ..... Main setup script (run from WSL)
+  
+  Usage:
+    bash ./scripts/ops/setup-wsl-codex-complete.sh
+    
+  What it does:
+    • Step 0: Verifies WSL environment
+    • Step 1: Updates package manager (with retries)
+    • Step 2: Installs Node.js & npm (if needed)
+    • Step 3: Installs Codex CLI
+    • Step 4: Verifies installation
+    • Step 5: Configures WSL proxy
+    • Step 6: Sets up proxy auto-load
+    • Step 7: Checks Docker connectivity
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 DIAGNOSTIC & SUPPORT SCRIPTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HEALTH CHECK (from WSL):
+  
+  diagnose-codex-wsl.sh ........... Automated system diagnostic tool
+  
+  Usage:
+    bash ./scripts/ops/diagnose-codex-wsl.sh
+    
+  Checks:
+    ✓ Environment (WSL detection)
+    ✓ Node.js & npm versions and location
+    ✓ Codex installation status and version
+    ✓ Paths and file permissions
+    ✓ Launch scripts availability
+    ✓ Docker Desktop connectivity
+    ✓ Network and proxy configuration
+    ✓ External connectivity (npm, internet)
+    
+  Output:
+    • Color-coded results (green=pass, yellow=warn, red=fail)
+    • Summary with counts
+    • Actionable recommendations
+
+SUPPORTING SCRIPTS:
+  
+  support/ensure_codex_cli.sh .... Bootstrap helper (installs/verifies Codex)
+  wsl_proxy.py ..................... Python proxy server for WSL networking
+  start-wsl-proxy.bat .............. Batch launcher for proxy
+  .wsl_proxy_env.sh ................ Proxy environment config (auto-sourced)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 DOCUMENTATION FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CODEX_QUICK_REF.txt
+  • One-page cheat sheet
+  • All commands at a glance
+  • Common prompts and use cases
+  • Quick troubleshooting links
+  • Keyboard-friendly (monospace)
+  • Print-friendly format
+
+CODEX_WSL_SETUP.md
+  • 10,400+ word comprehensive guide
+  • Architecture diagrams
+  • Prerequisites and installation
+  • Step-by-step setup instructions
+  • Usage examples (interactive, command, auto-exec)
+  • WSL proxy configuration (automatic and manual)
+  • Troubleshooting section (10+ issues covered)
+  • Advanced usage tips
+  • CI/CD integration examples
+  • File structure and environment variables
+  • References and support
+
+WSL_SETUP_SUMMARY.md
+  • Overview of all changes
+  • Files created/improved
+  • Key improvements summary
+  • Usage quick-start
+  • File structure
+  • Testing instructions
+  • Architecture diagram
+  • Feature checklist
+  • Compatibility information
+
+CODEX_INDEX.txt (this file)
+  • Complete file and command reference
+  • Quick navigation
+  • All options and examples
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 COMMON TASKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Setup for the first time:
+  FROM WINDOWS:
+    .\scripts\ops\setup-codex-wsl.bat
+  FROM WSL:
+    bash ./scripts/ops/setup-wsl-codex-complete.sh
+
+Check system health:
+  bash ./scripts/ops/diagnose-codex-wsl.sh
+
+View all commands:
+  .\scripts\ops\codex.bat --help
+  ./scripts/ops/codex.sh --help
+  .\scripts\ops\codex-exec.bat --help
+  ./scripts/ops/codex-exec.sh --help
+
+Analyze a codebase:
+  .\scripts\ops\codex.bat "analyze the pipeline structure"
+  ./scripts/ops/codex.sh "analyze the pipeline structure"
+
+Refactor code:
+  .\scripts\ops\codex-exec.bat "refactor the ChemBL parser"
+  ./scripts/ops/codex-exec.sh "refactor the ChemBL parser"
+
+Update Codex:
+  .\scripts\ops\codex.bat --update "latest version"
+  ./scripts/ops/codex.sh --update "latest version"
+
+Enable permanent proxy (WSL):
+  echo 'source /path/to/repo/.wsl_proxy_env.sh' >> ~/.bashrc
+  source ~/.bashrc
+
+Debug issues:
+  bash ./scripts/ops/diagnose-codex-wsl.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 INSTALLATION LOCATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Codex CLI binary:
+  .cache/tools/codex-cli/npm-global/bin/codex
+
+npm cache:
+  .cache/tools/codex-cli/npm-cache/
+
+Node.js (WSL):
+  /usr/bin/node (or wherever it was installed)
+
+npm (WSL):
+  /usr/bin/npm (or wherever it was installed)
+
+Repository root:
+  Automatically detected from script location
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 RELATED SCRIPTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mistral CLI:
+  script-mistrallvibe/run-vibe.ps1, script-mistrallvibe/run-vibe.sh
+  script-mistrallvibe/run-vibe.ps1 --prompt ..., script-mistrallvibe/run-vibe.sh --prompt ...
+
+Neo4j Tools:
+  setup-neo4j-wsl.sh
+  wsl_neo4j_startup.sh
+  setup-neo4j-wsl.sh
+
+MCP Wrappers:
+  mcp_*_wrapper.sh and .ps1 files
+
+Other Utilities:
+  setup_agents.sh
+  setup_plugins.sh
+  setup_skills.sh
+  check_mcp.sh
+  check_neo4j_mcp.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ QUICK REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Platform           Interactive            Auto-Execution
+─────────────────────────────────────────────────────────
+Windows            codex.bat              codex-exec.bat
+WSL/Linux          codex.sh               codex-exec.sh
+
+Command Structure:
+  launcher.bat [--update] [--verbose] [prompt]
+  launcher.sh [--update] [--verbose] [--help] [prompt]
+
+Setup:
+  Windows: .\scripts\ops\setup-codex-wsl.bat
+  WSL:     bash ./scripts/ops/setup-wsl-codex-complete.sh
+
+Diagnostics:
+  bash ./scripts/ops/diagnose-codex-wsl.sh
+
+Help:
+  launcher.bat --help
+  launcher.sh --help
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❓ TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For detailed troubleshooting, see:
+  → CODEX_WSL_SETUP.md (Troubleshooting section)
+
+Quick fixes:
+
+  Node.js not found:
+    sudo apt-get install -y nodejs npm
+
+  Codex binary not found:
+    bash ./scripts/ops/support/ensure_codex_cli.sh --update
+
+  WSL Distro not found:
+    wsl --list --verbose
+    (edit setup-codex-wsl.bat to use correct distro name)
+
+  Network errors:
+    source ./.wsl_proxy_env.sh
+
+  Docker not responding:
+    Ensure Docker Desktop is running on Windows
+
+  Permission denied:
+    chmod +x ./scripts/ops/codex*.sh
+    chmod +x ./scripts/ops/diagnose*.sh
+    chmod +x ./scripts/ops/setup*.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📞 SUPPORT & REFERENCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Documentation:
+  📖 CODEX_WSL_SETUP.md ........... Complete setup guide
+  📄 CODEX_QUICK_REF.txt ......... Quick reference card
+  📄 WSL_SETUP_SUMMARY.md ....... What was created
+  📄 CODEX_INDEX.txt ............ This file
+
+Tools:
+  🔧 diagnose-codex-wsl.sh ....... Health check tool
+  ⚙️ setup-wsl-codex-complete.sh . Full setup script
+  🚀 support/ensure_codex_cli.sh . Bootstrap helper
+
+External References:
+  🌐 Codex Docs: https://platform.openai.com/docs/guides/codex
+  🌐 WSL Docs: https://learn.microsoft.com/windows/wsl/
+  🌐 npm Docs: https://docs.npmjs.com/
+  🌐 Node.js: https://nodejs.org/docs/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Works from Windows (PowerShell) and WSL
+✅ Auto-installs Codex on first use
+✅ Retry logic for network operations
+✅ Auto-detects and configures proxy
+✅ Checks Docker Desktop connectivity
+✅ Color-coded output for easy reading
+✅ Help system on all scripts
+✅ Auto-execution mode (no confirmations)
+✅ Diagnostic tool for troubleshooting
+✅ Comprehensive documentation
+✅ Quick reference card
+✅ CI/CD integration examples
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                     Ready to use! Start with:                             ║
+║                                                                            ║
+║                 Windows: .\scripts\ops\setup-codex-wsl.bat               ║
+║                 WSL:     bash ./scripts/ops/setup-wsl-codex-complete.sh   ║
+║                                                                            ║
+║              See CODEX_QUICK_REF.txt for all commands                    ║
+║              See CODEX_WSL_SETUP.md for detailed guide                   ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+EOF

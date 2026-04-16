@@ -20,6 +20,8 @@ ENV/
 # AI agent temporary files
 .codex_tmp/
 .codex_tmp_issue_*.md
+.env.codex
+.env.gemini
 
 # Prevent root-level test scripts
 /test_*.js
@@ -96,6 +98,8 @@ log_test.txt
 *.swp
 *~
 ~$*
+script-codex/.env.codex
+script-gemini/.env.gemini
 
 # AI assistant configs (vendor-specific, not project code)
 .ai/

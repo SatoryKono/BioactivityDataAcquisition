@@ -335,6 +335,26 @@ def _handle_null_fields(field_name: str, null_fields: frozenset[str]) -> RuleCom
         )
     return None
 
+
+def _compose_null_aware_rule(
+    *,
+    base_rule: RuleComponent,
+    field_name: str,
+) -> RuleComponent:
+    """Apply pseudo-null normalization before a field-specific normalizer."""
+    base_normalizer, base_notes = base_rule
+
+    def _normalize(value: object) -> object:
+        null_normalized = normalize_profile_null(value)
+        if null_normalized is None:
+            return None
+        return base_normalizer(null_normalized)
+
+    return (
+        _normalize,
+        f"{base_notes} Pseudo-null values also collapse to None for field '{field_name}'.",
+    )
+
 def _handle_field_families(
     field_name: str,
     title_fields: frozenset[str],
@@ -385,13 +405,13 @@ def _rule_components(
     special_rules: Mapping[str, RuleComponent],
 ) -> RuleComponent:
     """Determine the appropriate rule component for a field."""
-    # Try each rule handler in priority order
+    base_rule: RuleComponent | None = None
+
     handlers = [
         lambda: _handle_special_rules(field_name, special_rules),
         lambda: _handle_enum_fields(field_name, enum_fields),
         lambda: _handle_case_fields(field_name, case_fields),
         lambda: _handle_unit_fields(field_name, unit_fields),
-        lambda: _handle_null_fields(field_name, null_fields),
         lambda: _handle_field_families(
             field_name=field_name,
             title_fields=title_fields,
@@ -406,13 +426,24 @@ def _rule_components(
             json_string_fields=json_string_fields,
         ),
     ]
-    
+
     for handler in handlers:
         result = handler()
         if result is not None:
-            return result
-    
-    return _DEFAULT_RULE_COMPONENT
+            base_rule = result
+            break
+
+    if field_name in null_fields:
+        if base_rule is None:
+            null_rule = _handle_null_fields(field_name, null_fields)
+            assert null_rule is not None
+            return null_rule
+        return _compose_null_aware_rule(
+            base_rule=base_rule,
+            field_name=field_name,
+        )
+
+    return base_rule or _DEFAULT_RULE_COMPONENT
 
 
 _DEFAULT_RULE_COMPONENT: RuleComponent = (

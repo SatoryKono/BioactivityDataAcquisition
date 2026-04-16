@@ -136,6 +136,8 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "docs/reports/generated",
     "docs/02-architecture/generated",
     "docs/02-architecture/diagrams/bundles",
+    "docs/02-architecture/diagrams/manifests",
+    "docs/02-architecture/diagrams/tooling",
     "docs/02-architecture/diagrams/architecture/png",
     "docs/02-architecture/diagrams/architecture/svg",
     "docs/02-architecture/diagrams/class-diagrams/png",
@@ -145,6 +147,7 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "docs/02-architecture/diagrams/views/png",
     "docs/02-architecture/diagrams/views/svg",
     "docs/02-architecture/diagrams/descriptions/legacy",
+    "scripts/diagrams/svg2png.mjs",
     "scripts/archive",
 )
 DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
@@ -264,6 +267,10 @@ CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
     {
         "name": "pretest guardrails",
         "summary": "Broad preflight for cleanup, docs, inventory, and architecture drift.",
+    },
+    {
+        "name": "deterministic neo4j memory ontology invariants",
+        "summary": "Repo-backed ontology validation for deterministic Neo4j memory graph structure and invariants.",
     },
     {
         "name": "diagram quality gates",
@@ -2985,7 +2992,7 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
                     relative_file = _rel_path(root, file_path)
                     if _is_excluded_file_structure_path(relative_file, config):
                         continue
-                    
+
                     file_surface = snapshot.add_node(
                         "file_surface",
                         relative_file,
@@ -2999,6 +3006,26 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
                         confidence="high",
                     )
                     snapshot.add_relation(directory, "CONTAINS", file_surface, provenance="file_structure")
+                    file_extension = Path(filename).suffix.lower()
+                    is_doc_artifact = file_extension in {".md", ".yml", ".yaml"} and (
+                        relative_file in {"README.md", "mkdocs.yml"}
+                        or relative_file.startswith("docs/")
+                        or relative_file.startswith(".github/")
+                    )
+                    if is_doc_artifact:
+                        doc_artifact = snapshot.add_node(
+                            "doc_artifact",
+                            relative_file,
+                            summary=f"Documentation artifact `{relative_file}`.",
+                            source_path=relative_file,
+                            source_kind="doc_artifact",
+                            repo_zone=zone_name,
+                            last_verified=today,
+                            ingest_wave="repo_sync_v1",
+                            confidence="medium",
+                        )
+                        snapshot.add_relation(project, "HAS_DOC_ARTIFACT", doc_artifact, provenance="file_structure")
+                        snapshot.add_relation(doc_artifact, "BACKED_BY", file_surface, provenance="file_structure")
 
     source_backed_labels = {
         "layer_family",
@@ -3300,6 +3327,8 @@ def _add_schema_field_surface(
         ingest_wave="repo_sync_v1",
         confidence="high",
     )
+    if drift_classification is None:
+        snapshot.nodes[key].properties.setdefault("drift_classification", None)
     snapshot.add_relation(project, "HAS_SCHEMA_FIELD", surface, provenance="schema_fields")
     snapshot.add_relation(storage_key, "HAS_SCHEMA_FIELD", surface, provenance="schema_fields")
     if contract_ref is not None:
@@ -3533,6 +3562,31 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
                 layer_field_nodes[field_name] = field_node
                 if config_artifact in snapshot.nodes:
                     snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
+            scd_config = layer_config.get("scd_config") if isinstance(layer_config.get("scd_config"), dict) else {}
+            for metadata_field in (
+                _optional_text(scd_config.get("version_col")),
+                _optional_text(scd_config.get("current_flag_col")),
+                _optional_text(scd_config.get("valid_from_col")),
+                _optional_text(scd_config.get("valid_to_col")),
+            ):
+                if metadata_field is None or metadata_field in layer_field_nodes:
+                    continue
+                field_node = _add_schema_field_surface(
+                    snapshot,
+                    project,
+                    surface,
+                    field_name=metadata_field,
+                    field_group="system",
+                    today=today,
+                    contract_ref=contract_ref,
+                    provider=provider_name,
+                    entity=entity_name,
+                    pipeline_name=pipeline_name,
+                    drift_classification="runtime_metadata",
+                )
+                layer_field_nodes[metadata_field] = field_node
+                if config_artifact in snapshot.nodes:
+                    snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
             field_nodes_by_layer[layer_name] = layer_field_nodes
             schema_fields_by_storage[surface.name] = layer_field_nodes
 
@@ -3574,27 +3628,33 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
         config_artifact = NodeKey("config_artifact", _rel_path(root, composite_path))
         field_nodes_by_layer: dict[str, dict[str, NodeKey]] = {}
         source_storage_refs: list[str] = []
+        dependencies = composite_payload.get("dependencies")
+        has_dependency_pipelines = isinstance(dependencies, list) and any(
+            isinstance(item, dict) for item in dependencies
+        )
 
         seed_payload = composite_payload.get("seed") if isinstance(composite_payload.get("seed"), dict) else {}
         seed_table = seed_payload.get("silver_table")
         if isinstance(seed_table, str) and seed_table.strip():
-            source_storage_refs.append(seed_table.strip())
-            seed_surface = _add_storage_surface(
-                snapshot,
-                project,
-                seed_table.strip(),
-                summary=f"Seed storage surface for composite pipeline `{composite_name}`.",
-                layer="silver",
-                today=today,
-                storage_kind="composite_seed_input",
-                pipeline_name=composite_name,
-            )
+            seed_storage_ref = seed_table.strip()
+            source_storage_refs.append(seed_storage_ref)
+            seed_surface = NodeKey("storage_surface", seed_storage_ref)
+            if has_dependency_pipelines or seed_surface not in snapshot.nodes:
+                seed_surface = _add_storage_surface(
+                    snapshot,
+                    project,
+                    seed_storage_ref,
+                    summary=f"Seed storage surface for composite pipeline `{composite_name}`.",
+                    layer="silver",
+                    today=today,
+                    storage_kind="composite_seed_input",
+                    pipeline_name=composite_name,
+                )
             if pipeline_key in snapshot.nodes:
                 snapshot.add_relation(pipeline_key, "DEPENDS_ON", seed_surface, provenance="storage_surfaces")
             if config_artifact in snapshot.nodes:
                 snapshot.add_relation(seed_surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
 
-        dependencies = composite_payload.get("dependencies")
         if isinstance(dependencies, list):
             for dependency in dependencies:
                 if not isinstance(dependency, dict):
@@ -4188,7 +4248,20 @@ def _workflow_matrix_axes(job_payload: dict[str, object]) -> tuple[str, ...]:
     matrix_payload = strategy_payload.get("matrix")
     if not isinstance(matrix_payload, dict):
         return ()
-    return tuple(sorted(str(key) for key in matrix_payload))
+    return tuple(
+        sorted(
+            _normalize_workflow_matrix_axis_name(str(key))
+            for key in matrix_payload
+            if key not in {"include", "exclude"}
+        )
+    )
+
+
+def _normalize_workflow_matrix_axis_name(axis_name: str) -> str:
+    """Stabilize workflow matrix axis names across workflow refactors."""
+    if axis_name == "test-group":
+        return "suite"
+    return axis_name
 
 
 def _workflow_matrix_variants(job_payload: dict[str, object]) -> tuple[dict[str, str], ...]:
@@ -4203,13 +4276,17 @@ def _workflow_matrix_variants(job_payload: dict[str, object]) -> tuple[dict[str,
     for axis_name, axis_values in matrix_payload.items():
         if axis_name in {"include", "exclude"}:
             continue
+        normalized_axis_name = _normalize_workflow_matrix_axis_name(str(axis_name))
         if isinstance(axis_values, list):
-            normalized = [str(item) for item in axis_values]
+            normalized = [
+                str(item.get("name")) if isinstance(item, dict) and item.get("name") is not None else str(item)
+                for item in axis_values
+            ]
         else:
             normalized = [str(axis_values)]
         if not normalized:
             return ()
-        base_axes.append((str(axis_name), normalized))
+        base_axes.append((normalized_axis_name, normalized))
     if not base_axes:
         return ()
 
@@ -4428,10 +4505,11 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             snapshot.add_relation(file_surface_key, "BACKS", workflow, provenance="workflow_graph")
 
         workflow_call_payload = _workflow_on_payload(payload)
+        workflow_call_entrypoint: NodeKey | None = None
         if isinstance(workflow_call_payload, dict):
             reusable_workflow_payload = workflow_call_payload.get("workflow_call")
             if isinstance(reusable_workflow_payload, dict):
-                workflow_call = snapshot.add_node(
+                workflow_call_entrypoint = snapshot.add_node(
                     "workflow_call_surface",
                     f"{workflow_name}::workflow_call",
                     summary=f"Reusable workflow entrypoint for `{workflow_name}`.",
@@ -4443,8 +4521,8 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                     ingest_wave="repo_sync_v1",
                     confidence="high",
                 )
-                snapshot.add_relation(workflow, "CALLS_WORKFLOW", workflow_call, provenance="workflow_graph")
-                snapshot.add_relation(workflow_call, "DEPENDS_ON", workflow, provenance="workflow_graph")
+                snapshot.add_relation(workflow, "CALLS_WORKFLOW", workflow_call_entrypoint, provenance="workflow_graph")
+                snapshot.add_relation(workflow_call_entrypoint, "DEPENDS_ON", workflow, provenance="workflow_graph")
                 for output_name, expression in _workflow_output_specs(
                     workflow_name,
                     workflow_name,
@@ -4510,6 +4588,8 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             )
             job_nodes[(workflow_name, str(job_id))] = job
             snapshot.add_relation(workflow, "CONTAINS", job, provenance="workflow_graph")
+            if workflow_call_entrypoint is not None:
+                snapshot.add_relation(job, "CALLS_WORKFLOW", workflow_call_entrypoint, provenance="workflow_graph")
 
             reusable_workflow_ref = job_payload.get("uses")
             if isinstance(reusable_workflow_ref, str):
@@ -4783,6 +4863,12 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         r"(?:src|configs|scripts|tests|docs|grafana)/[A-Za-z0-9_./*-]+"
         r")"
     )
+    command_pattern = re.compile(
+        r"(?:python3?\s+-m\s+(?:bioetl|scripts\.[A-Za-z0-9_]+)(?:\s+[A-Za-z0-9_.-]+)?(?:\s+--?[A-Za-z0-9][A-Za-z0-9-]*(?:[ =][^\s`]+)?)*|"
+        r"uv\s+run\s+python3?\s+-m\s+(?:bioetl|scripts\.[A-Za-z0-9_]+)(?:\s+[A-Za-z0-9_.-]+)?(?:\s+--?[A-Za-z0-9][A-Za-z0-9-]*(?:[ =][^\s`]+)?)*|"
+        r"uv\s+run\s+python\s+-m\s+(?:bioetl|scripts\.[A-Za-z0-9_]+)(?:\s+[A-Za-z0-9_.-]+)?(?:\s+--?[A-Za-z0-9][A-Za-z0-9-]*(?:[ =][^\s`]+)?)*"
+        r")"
+    )
     doc_like_labels = {"doc_source_surface", "doc_artifact", "policy_surface"}
     for node in list(snapshot.nodes.values()):
         if node.key.label not in doc_like_labels:
@@ -4821,6 +4907,30 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
                 section_anchor=section_anchor,
                 line_number=line_number,
             )
+        seen_commands: set[str] = set()
+        for command_match in command_pattern.finditer(text):
+            raw_command = command_match.group(0).strip()
+            command_name = _normalize_cli_command_name(raw_command)
+            if command_name is None or command_name in seen_commands:
+                continue
+            command_key = NodeKey("cli_command_surface", command_name)
+            if command_key not in snapshot.nodes:
+                continue
+            seen_commands.add(command_name)
+            section_title, section_anchor = _markdown_heading_context(text, command_match.start())
+            line_number = text.count("\n", 0, command_match.start()) + 1
+            snapshot.add_relation(
+                node.key,
+                "DESCRIBES",
+                command_key,
+                provenance="docs_code_drift",
+                doc_reference=raw_command,
+                evidence_kind="command_reference",
+                confidence="medium",
+                section_title=section_title,
+                section_anchor=section_anchor,
+                line_number=line_number,
+            )
         for line_number, raw_line in enumerate(text.splitlines(), start=1):
             stripped = raw_line.strip()
             if not stripped:
@@ -4848,6 +4958,7 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
                 confidence="medium",
             )
             snapshot.add_relation(node.key, "ASSERTS", claim, provenance="docs_claims")
+            claim_has_target = False
             for claim_match in path_pattern.finditer(stripped):
                 normalized = _normalize_docs_repo_reference(claim_match.group(1))
                 if normalized is None:
@@ -4867,6 +4978,7 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
                     section_anchor=section_anchor,
                     line_number=line_number,
                 )
+                claim_has_target = True
             for target, evidence_kind, confidence in _resolve_claim_targets(snapshot, clean_text):
                 snapshot.add_relation(
                     claim,
@@ -4879,6 +4991,21 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
                     section_anchor=section_anchor,
                     line_number=line_number,
                 )
+                claim_has_target = True
+            if not claim_has_target:
+                file_surface_key = NodeKey("file_surface", source_path)
+                if file_surface_key in snapshot.nodes:
+                    snapshot.add_relation(
+                        claim,
+                        "ASSERTS_ABOUT",
+                        file_surface_key,
+                        provenance="docs_claims_fallback",
+                        evidence_kind="source_document",
+                        confidence="low",
+                        section_title=section_title,
+                        section_anchor=section_anchor,
+                        line_number=line_number,
+                    )
 
 
 def _add_port_surfaces(
@@ -5233,7 +5360,7 @@ def _add_contract_surfaces(
 
         for module_path in control_plane_modules:
             resolved_module = root / module_path
-            if not resolved_module.is_file() or not _path_contains_any_token(resolved_module, control_plane_anchor_fields):
+            if not resolved_module.is_file():
                 continue
             module_key = NodeKey("module_surface", _rel_path(root, resolved_module))
             if module_key in snapshot.nodes:
@@ -5249,7 +5376,7 @@ def _add_contract_surfaces(
 
         for module_path in lineage_modules:
             resolved_module = root / module_path
-            if not resolved_module.is_file() or not _path_contains_any_token(resolved_module, lineage_anchor_fields):
+            if not resolved_module.is_file():
                 continue
             module_key = NodeKey("module_surface", _rel_path(root, resolved_module))
             if module_key in snapshot.nodes:
@@ -6815,6 +6942,7 @@ def _add_pipeline_operational_edges(
 class Neo4jHttpClient:
     def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
         self._endpoint = f"{base_uri}/db/{database}/tx/commit"
+        self._primary_endpoint = self._endpoint
         parsed = parse.urlparse(base_uri)
         self._fallback_endpoint: str | None = None
         if parsed.hostname == "host.docker.internal":
@@ -6865,6 +6993,8 @@ class Neo4jHttpClient:
                         self._endpoint = self._fallback_endpoint
                         self._fallback_endpoint = None
                         continue
+                    if endpoint != self._primary_endpoint:
+                        raise last_exc from exc
                     if attempt == 11:
                         raise last_exc from exc
                     time.sleep(min(3.0, 0.5 * (attempt + 1)))
@@ -6887,6 +7017,14 @@ class Neo4jHttpClient:
                     self._endpoint = self._fallback_endpoint
                     self._fallback_endpoint = None
                     continue
+                if endpoint != self._primary_endpoint:
+                    raise RuntimeError(
+                        self._format_transport_error(
+                            exc,
+                            context=context,
+                            attempt_errors=attempt_errors,
+                        )
+                    ) from exc
                 if attempt == 11:
                     raise RuntimeError(
                         self._format_transport_error(
@@ -8226,10 +8364,19 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     orphan_control_plane_artifacts = [
         key.name
         for key in control_plane_artifact_nodes
-        if not any(
-            (rel.target == key and rel.relation_type == "EMITS_ARTIFACT" and rel.source.label == "runtime_evidence_surface")
-            or (rel.source == key and rel.relation_type == "MATERIALIZED_AS" and rel.target.label == "storage_surface")
-            for rel in snapshot.relations.values()
+        if not (
+            any(
+                rel.target == key
+                and rel.relation_type == "EMITS_ARTIFACT"
+                and rel.source.label == "runtime_evidence_surface"
+                for rel in snapshot.relations.values()
+            )
+            and any(
+                rel.source == key
+                and rel.relation_type == "MATERIALIZED_AS"
+                and rel.target.label == "storage_surface"
+                for rel in snapshot.relations.values()
+            )
         )
     ]
     if orphan_control_plane_artifacts:
@@ -8244,10 +8391,19 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     unsupported_run_instances = [
         key.name
         for key in run_instance_nodes
-        if not any(
-            (rel.source == key and rel.relation_type in {"REFERENCES_ARTIFACT", "DESCRIBED_IN", "DEPENDS_ON"})
-            or (rel.target == key and rel.relation_type == "HAS_RUN_INSTANCE" and rel.source.label == "project")
-            for rel in snapshot.relations.values()
+        if not (
+            any(
+                rel.target == key
+                and rel.relation_type == "HAS_RUN_INSTANCE"
+                and rel.source.label == "project"
+                for rel in snapshot.relations.values()
+            )
+            and any(
+                rel.source == key
+                and rel.relation_type == "REFERENCES_ARTIFACT"
+                and rel.target.label == "control_plane_artifact_surface"
+                for rel in snapshot.relations.values()
+            )
         )
     ]
     if unsupported_run_instances:
@@ -8262,10 +8418,23 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     unsupported_runtime_states = [
         key.name
         for key in runtime_state_nodes
-        if not any(
-            (rel.target == key and rel.relation_type in {"HAS_RUNTIME_STATE"} and rel.source.label in {"project", "run_instance_surface"})
-            or (rel.source == key and rel.relation_type in {"DEPENDS_ON", "REFERENCES_ARTIFACT", "DESCRIBED_IN"})
-            for rel in snapshot.relations.values()
+        if not (
+            any(
+                rel.target == key
+                and rel.relation_type == "HAS_RUNTIME_STATE"
+                and rel.source.label in {"project", "run_instance_surface"}
+                for rel in snapshot.relations.values()
+            )
+            and any(
+                rel.source == key and rel.relation_type == "DEPENDS_ON"
+                for rel in snapshot.relations.values()
+            )
+            and any(
+                rel.source == key
+                and rel.relation_type == "REFERENCES_ARTIFACT"
+                and rel.target.label == "control_plane_artifact_surface"
+                for rel in snapshot.relations.values()
+            )
         )
     ]
     if unsupported_runtime_states:
@@ -8301,10 +8470,18 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     orphan_schema_fields = [
         key.name
         for key in schema_field_nodes
-        if not any(
-            (rel.target == key and rel.relation_type == "HAS_SCHEMA_FIELD" and rel.source.label in {"project", "storage_surface", "contract_surface"})
-            or (rel.source == key and rel.relation_type in {"DEFINED_BY", "PROMOTES_FIELD_TO", "DERIVES_FIELD_FROM"})
-            for rel in snapshot.relations.values()
+        if not (
+            any(
+                rel.target == key
+                and rel.relation_type == "HAS_SCHEMA_FIELD"
+                and rel.source.label in {"storage_surface", "contract_surface"}
+                for rel in snapshot.relations.values()
+            )
+            and any(
+                rel.source == key
+                and rel.relation_type in {"DEFINED_BY", "PROMOTES_FIELD_TO", "DERIVES_FIELD_FROM"}
+                for rel in snapshot.relations.values()
+            )
         )
     ]
     if orphan_schema_fields:

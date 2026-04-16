@@ -12,8 +12,8 @@
 ### ✅ Script Creation Phase
 - [x] Created `codex.sh` - WSL bash launcher
 - [x] Created `codex-exec.sh` - WSL auto-exec launcher
-- [x] Created `setup_wsl_codex.sh` - Installation script
-- [x] Created `verify_codex_setup.sh` - Verification script
+- [x] Created `script-codex/helper/setup-wsl.sh` - Installation script
+- [x] Created `script-codex/helper/verify-setup.sh` - Verification script
 - [x] Created `codex-wsl.bat` - Modern Windows wrapper
 
 ### ✅ Documentation Phase
@@ -30,8 +30,8 @@ scripts/ops/
 ├── 📜 Executable Scripts (5)
 │   ├── codex.sh                    Interactive & prompt launcher
 │   ├── codex-exec.sh               Auto-execution launcher
-│   ├── setup_wsl_codex.sh          Installation & setup
-│   ├── verify_codex_setup.sh       Verification & diagnostics
+│   ├── ../script-codex/helper/setup-wsl.sh          Installation & setup
+│   ├── ../script-codex/helper/verify-setup.sh       Verification & diagnostics
 │   └── codex-wsl.bat               Windows wrapper
 │
 └── 📚 Documentation (5)
@@ -69,10 +69,10 @@ Run these in order:
 ### Step 1: Run Setup Script
 ```bash
 # From WSL:
-bash ./scripts/ops/setup_wsl_codex.sh
+bash ./script-codex/helper/setup-wsl.sh
 
 # From PowerShell:
-wsl -d Debian -- bash ./scripts/ops/setup_wsl_codex.sh
+wsl -d Debian -- bash ./script-codex/helper/setup-wsl.sh
 ```
 
 Progress checklist:
@@ -85,7 +85,7 @@ Progress checklist:
 
 ### Step 2: Verify Installation
 ```bash
-bash ./scripts/ops/verify_codex_setup.sh
+bash ./script-codex/helper/verify-setup.sh
 ```
 
 Verification checklist:
@@ -172,8 +172,8 @@ Test these commands to familiarize yourself:
 If something doesn't work:
 
 ### "Codex not found"
-- [ ] Run: `bash ./scripts/ops/setup_wsl_codex.sh`
-- [ ] Run: `bash ./scripts/ops/verify_codex_setup.sh`
+- [ ] Run: `bash ./script-codex/helper/setup-wsl.sh`
+- [ ] Run: `bash ./script-codex/helper/verify-setup.sh`
 - [ ] Check: `which codex`
 - [ ] Check: `npm list -g @openai/codex`
 
@@ -208,11 +208,11 @@ Final verification that everything works:
 
 ```bash
 # 1. ✓ Setup completed
-bash ./scripts/ops/setup_wsl_codex.sh
+bash ./script-codex/helper/setup-wsl.sh
 # Should end with: ✓ Setup Complete!
 
 # 2. ✓ Verification passed
-bash ./scripts/ops/verify_codex_setup.sh
+bash ./script-codex/helper/verify-setup.sh
 # Should show all green ✓ marks
 
 # 3. ✓ Interactive works
@@ -258,12 +258,12 @@ Read documentation in this order:
 
 1. **Start setup immediately**
    ```bash
-   bash ./scripts/ops/setup_wsl_codex.sh
+   bash ./script-codex/helper/setup-wsl.sh
    ```
 
 2. **Verify after setup**
    ```bash
-   bash ./scripts/ops/verify_codex_setup.sh
+   bash ./script-codex/helper/verify-setup.sh
    ```
 
 3. **Try first command**
@@ -285,8 +285,8 @@ Read documentation in this order:
 
 You'll know it's working when:
 
-- ✓ `bash ./scripts/ops/setup_wsl_codex.sh` completes without errors
-- ✓ `bash ./scripts/ops/verify_codex_setup.sh` shows all green checkmarks
+- ✓ `bash ./script-codex/helper/setup-wsl.sh` completes without errors
+- ✓ `bash ./script-codex/helper/verify-setup.sh` shows all green checkmarks
 - ✓ `./scripts/ops/codex.sh --version` shows Codex version
 - ✓ `curl -I https://api.openai.com` returns HTTP 200
 - ✓ `./scripts/ops/codex.sh "hello"` generates a response from OpenAI
@@ -301,12 +301,12 @@ If you get stuck:
 2. **Detailed help**: See `CODEX_WSL_SETUP.md` § Troubleshooting
 3. **File overview**: See `INDEX.md` for file purposes
 4. **Getting started**: See `00_START_HERE.md` for visual guide
-5. **Run diagnostics**: `bash ./scripts/ops/verify_codex_setup.sh`
+5. **Run diagnostics**: `bash ./script-codex/helper/verify-setup.sh`
 
 ---
 
 **Status**: ✅ All files created and ready to use
 
-**Next Action**: `bash ./scripts/ops/setup_wsl_codex.sh`
+**Next Action**: `bash ./script-codex/helper/setup-wsl.sh`
 
 **Estimated Time to Working Setup**: 5-10 minutes

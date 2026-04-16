@@ -60,7 +60,7 @@ wsl
 cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 
 # Run the setup script
-bash ./scripts/ops/setup_wsl_codex.sh
+bash ./script-codex/helper/setup-wsl.sh
 ```
 
 This script will:
@@ -202,7 +202,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 | `codex-exec.sh` | Auto-execution launcher | WSL2 (bash) |
 | `codex-exec.bat` | Original auto-exec launcher | Windows PowerShell |
 | `codex-wsl.bat` | Modern WSL wrapper | Windows PowerShell |
-| `setup_wsl_codex.sh` | Installation script | WSL2 (bash) |
+| `script-codex/helper/setup-wsl.sh` | Installation script | WSL2 (bash) |
 | `wsl_proxy.py` | HTTP proxy bridge | Windows (Python) |
 | `start-wsl-proxy.bat` | Proxy launcher | Windows PowerShell |
 | `.wsl_proxy_env.sh` | Proxy environment setup | WSL2 (bash) |
@@ -279,7 +279,7 @@ Make scripts executable:
 ```bash
 chmod +x ./scripts/ops/codex.sh
 chmod +x ./scripts/ops/codex-exec.sh
-chmod +x ./scripts/ops/setup_wsl_codex.sh
+chmod +x ./script-codex/helper/setup-wsl.sh
 ```
 
 ### WSL distro not found
@@ -375,7 +375,7 @@ no_alternate_screen = true
 
 ## Next Steps
 
-1. Run setup: `bash ./scripts/ops/setup_wsl_codex.sh`
+1. Run setup: `bash ./script-codex/helper/setup-wsl.sh`
 2. Test: `./scripts/ops/codex.sh "explain this pipeline"`
 3. Explore: Try the examples in Common Usage Examples section
 4. Integrate: Add Codex to your workflow for code reviews, refactoring, etc.
@@ -385,7 +385,7 @@ no_alternate_screen = true
 - `scripts/ops/codex.sh` (new) - WSL bash launcher
 - `scripts/ops/codex-exec.sh` (new) - WSL auto-exec launcher
 - `scripts/ops/codex-wsl.bat` (new) - Modern Windows wrapper
-- `scripts/ops/setup_wsl_codex.sh` (new) - Installation script
+- `script-codex/helper/setup-wsl.sh` (new) - Installation script
 
 Original files remain unchanged:
 - `scripts/ops/codex.bat` - Original Windows launcher
