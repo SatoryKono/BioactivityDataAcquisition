@@ -86,6 +86,8 @@ if TYPE_CHECKING:
 
 __all__ = ["SilverWriteMode", "SilverWriter"]
 
+_UTC_OFFSET_SUFFIX = "+00:00"
+
 
 class _AwaitTrackingAsyncCallable:
     """Tiny await-tracking proxy for compatibility seams used in tests."""
@@ -134,6 +136,13 @@ def _project_records_for_contract_version(
         projected.pop("_content_hashes_by_version", None)
         projected_records.append(projected)
     return projected_records
+
+
+def _normalize_iso_datetime(value: datetime | str) -> datetime:
+    """Normalize ISO string timestamps into aware datetimes."""
+    if isinstance(value, str):
+        return datetime.fromisoformat(value.replace("Z", _UTC_OFFSET_SUFFIX))
+    return value
 
 
 async def _write_single_target(
@@ -688,48 +697,20 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         It's called by postwrite operations and delegates to the metadata mixin
         for backward compatibility with tests that don't provide full runtime_services.
         """
-        # Check if this is a legacy test with mocked _get_delta_version
-        # If _get_delta_version is mocked, use the fallback path for backward compatibility
-        import inspect
-        is_mocked = hasattr(self, '_get_delta_version') and (
-            hasattr(self._get_delta_version, '__name__') and 
-            self._get_delta_version.__name__ == 'AsyncMock'
-        )
-        
-        # Debug: Check what services are available
-        has_metadata = hasattr(self, '_metadata') and self._metadata is not None
-        has_metadata_writer = hasattr(self, '_metadata_writer') and self._metadata_writer is not None
-        
-        # If _get_delta_version is mocked, use fallback path for legacy tests
-        if is_mocked:
-            # Fallback path for legacy tests with mocked _get_delta_version
-            delta_version = await self._get_delta_version(table_path)
-
-            dq_metrics = await self._compute_dq_metrics(table_name, records)
-            await self._write_silver_metadata(
-                table_path=table_path,
+        if self._uses_legacy_mocked_delta_version():
+            return await self._finalize_legacy_mocked_silver_write_result(
                 table_name=table_name,
                 records=records,
-                primary_keys=primary_keys,
-                mode=validated_mode,
-                bronze_refs=bronze_refs,
-                dq_metrics=dq_metrics,
-                partition_by=partition_cols,
-                source_batch_ids=(
-                    [str(source_batch_id)] if source_batch_id is not None else None
-                ),
-                started_at=started_at,
-                completed_at=datetime.now(UTC),
-                version_after=delta_version,
-            )
-            
-            return SilverWriteResult(
-                table_name=table_name,
                 table_path=table_path,
-                delta_version=delta_version,
-                record_count=len(records),
+                primary_keys=primary_keys,
+                validated_mode=validated_mode,
+                bronze_refs=bronze_refs,
+                partition_cols=partition_cols,
+                source_batch_id=source_batch_id,
+                started_at=started_at,
             )
-        elif self._metadata:
+
+        if self._metadata:
             return await self._metadata._finalize_silver_write_result(
                 table_name=table_name,
                 records=records,
@@ -742,67 +723,127 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 started_at=started_at,
                 start_perf=start_perf,
             )
-        elif self._metadata_writer:
-            # Fallback for legacy tests that provide metadata_writer directly
-            # Create minimal metadata and call the writer
-            from bioetl.domain.models.metadata import SilverMetadata
-            from bioetl.domain.value_objects.metadata import (
-                BaseOutputMetadata, DeltaMetrics, EnvironmentMetadata,
-                LineageMetadata, PipelineMetadata, RuntimeMetadata,
-                SilverOutputExt
-            )
-            
-            # Create minimal metadata with required fields
-            metadata = SilverMetadata(
-                table_name=table_name,
-                runtime=RuntimeMetadata(
-                    started_at=started_at,
-                    completed_at=datetime.now(UTC),
-                    duration_seconds=int((datetime.now(UTC) - started_at).total_seconds()),
-                ),
-                pipeline=PipelineMetadata(
-                    name="test",
-                    version="1.0",
-                ),
-                delta=DeltaMetrics(
-                    rows_inserted=len(records),
-                    rows_updated=0,
-                    rows_deleted=0,
-                    files_added=1,
-                ),
-                environment=EnvironmentMetadata(
-                    bioetl_version="test",
-                    python_version="test",
-                ),
-            )
-            
-            # Call the metadata writer
-            await self._metadata_writer.write(metadata)
-            
-            # Return basic result with delta version from fallback method
-            delta_version = await self._get_delta_version(table_path)
-            return SilverWriteResult(
-                table_name=table_name,
-                table_path=table_path,
-                delta_version=delta_version,
-                record_count=len(records),
-            )
-        else:
-            # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.metadata_mixin import SilverWriterMetadataMixin
-            return await SilverWriterMetadataMixin._finalize_silver_write_result(
-                self,
+
+        if self._metadata_writer:
+            return await self._finalize_with_direct_metadata_writer(
                 table_name=table_name,
                 records=records,
                 table_path=table_path,
-                primary_keys=primary_keys,
-                validated_mode=validated_mode,
-                bronze_refs=bronze_refs,
-                partition_cols=partition_cols,
-                source_batch_id=source_batch_id,
                 started_at=started_at,
-                start_perf=start_perf,
             )
+
+        from bioetl.infrastructure.storage.silver.metadata_mixin import SilverWriterMetadataMixin
+
+        return await SilverWriterMetadataMixin._finalize_silver_write_result(
+            self,
+            table_name=table_name,
+            records=records,
+            table_path=table_path,
+            primary_keys=primary_keys,
+            validated_mode=validated_mode,
+            bronze_refs=bronze_refs,
+            partition_cols=partition_cols,
+            source_batch_id=source_batch_id,
+            started_at=started_at,
+            start_perf=start_perf,
+        )
+
+    def _uses_legacy_mocked_delta_version(self) -> bool:
+        """Detect legacy tests that patch `_get_delta_version` with AsyncMock."""
+        return bool(
+            hasattr(self, "_get_delta_version")
+            and hasattr(self._get_delta_version, "__name__")
+            and self._get_delta_version.__name__ == "AsyncMock"
+        )
+
+    async def _finalize_legacy_mocked_silver_write_result(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        table_path: str,
+        primary_keys: list[str],
+        validated_mode: SilverWriteMode,
+        bronze_refs: list[BronzeWriteResult] | None,
+        partition_cols: list[str] | None,
+        source_batch_id: BatchID | None,
+        started_at: datetime,
+    ) -> SilverWriteResult:
+        """Preserve legacy mocked behavior expected by older unit tests."""
+        delta_version = await self._get_delta_version(table_path)
+        dq_metrics = await self._compute_dq_metrics(table_name, records)
+        await self._write_silver_metadata(
+            table_path=table_path,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            mode=validated_mode,
+            bronze_refs=bronze_refs,
+            dq_metrics=dq_metrics,
+            partition_by=partition_cols,
+            source_batch_ids=(
+                [str(source_batch_id)] if source_batch_id is not None else None
+            ),
+            started_at=started_at,
+            completed_at=datetime.now(UTC),
+            version_after=delta_version,
+        )
+        return SilverWriteResult(
+            table_name=table_name,
+            table_path=table_path,
+            delta_version=delta_version,
+            record_count=len(records),
+        )
+
+    async def _finalize_with_direct_metadata_writer(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        table_path: str,
+        started_at: datetime,
+    ) -> SilverWriteResult:
+        """Fallback for legacy tests that inject a metadata writer directly."""
+        from bioetl.domain.models.metadata import SilverMetadata
+        from bioetl.domain.value_objects.metadata import (
+            DeltaMetrics,
+            EnvironmentMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+        )
+        from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+        completed_at = datetime.now(UTC)
+        metadata = SilverMetadata(
+            table_name=table_name,
+            runtime=RuntimeMetadata(
+                started_at=started_at,
+                completed_at=completed_at,
+                duration_seconds=int((completed_at - started_at).total_seconds()),
+            ),
+            pipeline=PipelineMetadata(
+                name="test",
+                version="1.0",
+            ),
+            delta=DeltaMetrics(
+                rows_inserted=len(records),
+                rows_updated=0,
+                rows_deleted=0,
+                files_added=1,
+            ),
+            environment=EnvironmentMetadata(
+                bioetl_version="test",
+                python_version="test",
+            ),
+        )
+        await self._metadata_writer.write(metadata)
+        delta_version = await self._get_delta_version(table_path)
+        return SilverWriteResult(
+            table_name=table_name,
+            table_path=table_path,
+            delta_version=delta_version,
+            record_count=len(records),
+        )
 
     async def _write_silver_metadata(
         self,
@@ -1080,10 +1121,8 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         )
 
         normalized_completed_at = completed_at
-        if isinstance(completed_at, str):
-            normalized_completed_at = datetime.fromisoformat(
-                completed_at.replace("Z", "+00:00")
-            )
+        if completed_at is not None:
+            normalized_completed_at = _normalize_iso_datetime(completed_at)
 
         await SilverWriterMetadataMixin._write_silver_merged_metadata(
             self,

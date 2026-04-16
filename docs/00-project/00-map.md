@@ -538,8 +538,8 @@ ______________________________________________________________________
 
 | Document                  | Last Updated | Status                         |
 | ------------------------- | ------------ | ------------------------------ |
-| RULES.md                  | 2026-03-13   | v6.1 (Latest)                  |
-| REQUIREMENTS.md           | 2026-03-13   | v1.8 (docs governance sync)    |
+| RULES.md                  | 2026-04-09   | v6.1.2 (Latest)                |
+| REQUIREMENTS.md           | 2026-04-16   | v1.8.1 (rules sync refreshed)  |
 | glossary.md               | 2026-03-08   | v2.7 (Ubiquitous Language)     |
 | 00-map.md                 | 2026-03-24   | v8.3 Active navigator synced   |
 | rules-summary.md          | 2026-03-13   | v6.1 Synced                    |
