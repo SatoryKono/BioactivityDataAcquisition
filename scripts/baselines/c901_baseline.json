@@ -4,6 +4,13 @@
   "threshold": 10,
   "entries": [
     {
+      "file": "src/bioetl/application/composite/coalesce_policy.py",
+      "function": "apply_explicit_rules",
+      "complexity": 12,
+      "threshold": 10,
+      "row": 242
+    },
+    {
       "file": "src/bioetl/application/composite/dependency_coordinator.py",
       "function": "_get_effective_keys",
       "complexity": 13,

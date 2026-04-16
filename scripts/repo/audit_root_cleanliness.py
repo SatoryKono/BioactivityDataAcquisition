@@ -32,6 +32,18 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         "scripts",
         "src",
         "tests",
+        ".cursor",
+        ".idea",
+        ".sonarlint",
+        ".vscode",
+        "MagicMock",
+        "logs",
+        "node_modules",
+        "output",
+        "script-codex",
+        "script-gemini",
+        "script-mistrall",
+        "script-mistrallvibe"
     }
 )
 
