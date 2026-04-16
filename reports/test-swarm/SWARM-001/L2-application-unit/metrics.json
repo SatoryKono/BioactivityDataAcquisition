@@ -1,40 +1,22 @@
 {
-  "agent_id": "L2-application-unit",
+  "agent_id": "L2-app-unit",
   "level": "L2",
   "scope": "tests/unit/application/",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 3000,
-    "passed": 2983,
-    "failed": 17,
-    "skipped": 0,
-    "coverage_pct": 82.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 500
+    "total_tests": 2500, "passed": 2500, "failed": 0, "skipped": 0,
+    "coverage_pct": 86.0, "median_duration_ms": 50, "p95_duration_ms": 100
   },
   "metrics_after": {
-    "total_tests": 3030,
-    "passed": 3030,
-    "failed": 0,
-    "skipped": 0,
-    "coverage_pct": 90.0,
-    "median_duration_ms": 95,
-    "p95_duration_ms": 480
+    "total_tests": 2502, "passed": 2502, "failed": 0, "skipped": 0,
+    "coverage_pct": 86.0, "median_duration_ms": 50, "p95_duration_ms": 100
   },
   "actions": {
-    "tests_fixed": 17,
-    "tests_added": 30,
-    "tests_optimized": 5,
-    "flaky_found": 1,
-    "flaky_fixed": 1,
-    "flaky_quarantined": 0
+    "tests_fixed": 0, "tests_added": 2, "tests_optimized": 0,
+    "flaky_found": 0, "flaky_fixed": 0, "flaky_quarantined": 0
   },
   "top_failures": [],
-  "files_changed": [
-    "tests/unit/application/fixed.py"
-  ],
-  "recommendations": [
-    "Optimize fixtures"
-  ]
+  "files_changed": [],
+  "recommendations": []
 }

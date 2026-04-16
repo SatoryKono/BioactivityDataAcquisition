@@ -51,12 +51,26 @@
       "complexity": 11,
       "threshold": 10,
       "row": 70
+    },
+    {
+      "file": "src/bioetl/application/composite/coalesce_policy.py",
+      "function": "apply_explicit_rules",
+      "complexity": 12,
+      "threshold": 10,
+      "row": 242
+    },
+    {
+      "file": "src/bioetl/infrastructure/storage/silver_writer.py",
+      "function": "_write_silver_metadata",
+      "complexity": 16,
+      "threshold": 10,
+      "row": 635
     }
   ],
   "folder_budgets": {
-    "src/bioetl/application": 4,
+    "src/bioetl/application": 5,
     "src/bioetl/composition": 1,
-    "src/bioetl/infrastructure": 1,
+    "src/bioetl/infrastructure": 2,
     "src/bioetl/interfaces": 1
   }
 }

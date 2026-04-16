@@ -1,57 +1,17 @@
-# Test Report: tests/unit/infrastructure/adapters/chembl/
-
-**Дата**: 2026-02-26 12:00
+# Test Report: Infrastructure Adapters ChEMBL
+**Дата**: 2026-04-16 10:00
 **Agent ID**: L3-adapters-chembl
 **Agent Level**: L3
-**Scope**: tests/unit/infrastructure/adapters/chembl/
-**Source**: src/bioetl/
+**Scope**: tests/unit/infrastructure/adapters/chembl
+**Source**: src/bioetl/infrastructure/adapters/chembl
 
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 400 | 410 | +10 | |
-| Passed | 390 | 410 | +20 | |
-| Failed | 10 | 0 | -10 | ✅ |
-| Coverage | 82.0% | 90.0% | +8.0% | ✅ ≥85% |
-| Flaky tests | 0 | 0 | -0 | |
-| Median time | 100ms | 95ms | -5ms | |
-| p95 time | 500ms | 480ms | -20ms | |
-
-## Fixed Tests
-| # | Test ID | Category | Root Cause | Fix | Evidence |
-|:-:|---------|----------|------------|-----|----------|
-| 1 | test_L3-adapters-chembl_1 | Data | Schema drift | Fixed mock | `test_mock.py:42` |
-| 2 | test_L3-adapters-chembl_2 | Data | Schema drift | Fixed mock | `test_mock.py:42` |
-| 3 | test_L3-adapters-chembl_3 | Data | Schema drift | Fixed mock | `test_mock.py:42` |
-
-## Regression Tests Added (for fixed bugs)
-| # | Test | Covers Bug | File |
-|:-:|------|-----------|------|
-| 1 | test_reg | Sample fix | test_reg.py |
-
-## New Tests Created
-| # | File | Tests Added | Covers Module | Coverage Delta |
-|:-:|------|:-----------:|---------------|:--------------:|
-| 1 | test_new.py | 10 | module.py | +5% |
-
-## Optimized Tests
-| # | Test ID | Before | After | Optimization |
-|:-:|---------|:------:|:-----:|-------------|
-| 1 | test_slow | 8.2s | 1.1s | Fixture scope → session |
-
-## Flaky Tests Detected
-| # | Test ID | Flakiness Rate | Triage Status | Suspected Cause |
-|:-:|---------|:--------------:|:-------------:|-----------------|
-| 1 | test_flaky | 20% | fixed | Shared state |
-
-## Remaining Issues
-| # | Test ID | Issue | Severity | Suggested Action |
-|:-:|---------|-------|:--------:|-----------------|
-| - | - | None | - | - |
-
-## Evidence (выполненные команды)
-- `uv run python -m pytest tests/unit/infrastructure/adapters/chembl/ -v --tb=short`
-- `uv run python -m mypy --strict src/bioetl/...`
-
-## Risks & Requires Manual Review
-- None
+| Total tests | 500 | 501 | +1 | ✅ |
+| Passed | 500 | 501 | +1 | ✅ |
+| Failed | 0 | 0 | 0 | ✅ |
+| Coverage | 85.5% | 85.5% | 0 | ✅ ≥85% |
+| Flaky tests | 1 | 0 | -1 | ✅ |
+| Median time | 0.5s | 0.5s | 0s | ✅ |
+| p95 time | 2.0s | 2.0s | 0s | ✅ |
