@@ -96,7 +96,7 @@ class AssaySchema(ETLRecordSchema):
     relationship_description: Series[str] | None = pa.Field(
         nullable=True, description="Relationship description."
     )
-    confidence_score: Series[int] = pa.Field(
+    confidence_score: Series[float] = pa.Field(
         nullable=False,
         ge=0,
         le=9,
@@ -218,3 +218,8 @@ class AssaySchema(ETLRecordSchema):
         strict = True
         ordered = False
         coerce = True
+
+    @pa.check("confidence_score", name="confidence_score_integer")
+    def confidence_score_integer(cls, series: Series[float]) -> Series[bool]:
+        """Require confidence scores to remain integer-valued after coercion."""
+        return series.mod(1).eq(0)

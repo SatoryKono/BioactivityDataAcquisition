@@ -4,7 +4,7 @@
 
 ```bash
 # From WSL in project root
-bash ./scripts/ops/setup_wsl_codex.sh
+bash ./script-codex/helper/setup-wsl.sh
 
 # If issues, configure proxy manually:
 source .wsl_proxy_env.sh
@@ -61,7 +61,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 
 | Problem | Solution |
 |---------|----------|
-| `Codex not found` | Run: `bash ./scripts/ops/setup_wsl_codex.sh` |
+| `Codex not found` | Run: `bash ./script-codex/helper/setup-wsl.sh` |
 | `OpenAI timeout` | Source proxy: `source .wsl_proxy_env.sh` then `curl -I https://api.openai.com` |
 | `WSL not found` | From PowerShell: `wsl -l -v` then `wsl --install -d Ubuntu` |
 | `Permission denied` | `chmod +x ./scripts/ops/codex.sh` |
@@ -73,7 +73,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 - `scripts/ops/codex.sh` - WSL bash launcher
 - `scripts/ops/codex-exec.sh` - WSL auto-exec launcher
 - `scripts/ops/codex-wsl.bat` - Modern Windows wrapper
-- `scripts/ops/setup_wsl_codex.sh` - Installation script
+- `script-codex/helper/setup-wsl.sh` - Installation script
 - `docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md` - Full guide (this document)
 
 ## Keyboard Shortcuts (Interactive Mode)

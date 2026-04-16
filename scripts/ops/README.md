@@ -14,7 +14,8 @@ assets and bounded maintenance scripts.
 
 ## Stable entrypoints
 
-- launchers such as `codex.sh`, `codex.bat`, `mistral.sh`
+- launchers such as `codex.sh`, `codex.bat`
+- canonical Mistral Vibe wrappers live under `script-mistrallvibe/`
 - checks and wrappers such as `check_mcp.sh`, `check_neo4j_mcp.sh`,
   `mcp_*_wrapper.{sh,ps1}`
 - setup/bootstrap commands such as `setup_agents.sh`, `setup_plugins.sh`,
@@ -25,7 +26,7 @@ assets and bounded maintenance scripts.
 
 - `support/load_repo_env.{sh,ps1}`
 - `support/docker_cli_resolver.sh`
-- `support/ensure_codex_cli.sh`
+- `script-codex/helper/ensure-codex-cli.sh`
 
 ## Legacy maintenance zone
 

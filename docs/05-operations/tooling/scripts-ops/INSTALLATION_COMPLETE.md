@@ -84,9 +84,9 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 - `codex.sh` - Interactive/prompt launcher
 - `codex-exec.sh` - Auto-execution launcher
 - `codex-wsl.bat` - Windows wrapper
-- `setup_wsl_codex.sh` - Setup script (already run)
-- `verify_codex_setup.sh` - Verification script
-- `test_codex_basic.sh` - Basic functionality test
+- `script-codex/helper/setup-wsl.sh` - Setup script (already run)
+- `script-codex/helper/verify-setup.sh` - Verification script
+- `script-codex/helper/test-basic.sh` - Basic functionality test
 
 ### Documentation
 - `00_START_HERE.md` - Visual overview
@@ -110,7 +110,7 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 
 ### "Codex not found" (unlikely, but just in case)
 ```bash
-npm install -g @openai/codex
+bash ./script-codex/helper/setup-wsl.sh
 ```
 
 ### "API timeout" (if behind corporate VPN)
@@ -183,8 +183,8 @@ chmod +x ./scripts/ops/codex-exec.sh
 - **Quick commands**: `CODEX_WSL_QUICK_REF.md`
 - **Setup help**: `CODEX_WSL_SETUP.md` § Troubleshooting
 - **Overview**: `00_START_HERE.md`
-- **Verification**: `bash ./scripts/ops/verify_codex_setup.sh`
-- **Testing**: `bash ./scripts/ops/test_codex_basic.sh`
+- **Verification**: `bash ./script-codex/helper/verify-setup.sh`
+- **Testing**: `bash ./script-codex/helper/test-basic.sh`
 
 ## Configuration
 

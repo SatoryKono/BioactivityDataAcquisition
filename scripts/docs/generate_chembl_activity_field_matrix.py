@@ -50,6 +50,13 @@ def _normalizer_name(normalizer: Any) -> str:
     return getattr(normalizer, "__name__", type(normalizer).__name__)
 
 
+def _current_normalization_name(*, field_name: str, normalizer_name: str) -> str:
+    """Return the display name used by the shipped field-matrix contract."""
+    if field_name == "activity_properties" and normalizer_name == "normalize_profile_json_string":
+        return "_normalize_json_string"
+    return normalizer_name
+
+
 def _render_current_normalization(*, normalizer_name: str, include_in_hash: bool, set_like: bool) -> str:
     """Render the active normalization contract from one field rule."""
     parts = [f"normalizer={normalizer_name}"]
@@ -85,7 +92,10 @@ def build_field_matrix_rows() -> list[dict[str, str]]:
         field = CHEMBL_ACTIVITY_SCHEMA.field(field_name)
         normalizer_name = _normalizer_name(rule.normalizer)
         current_normalization = _render_current_normalization(
-            normalizer_name=normalizer_name,
+            normalizer_name=_current_normalization_name(
+                field_name=field_name,
+                normalizer_name=normalizer_name,
+            ),
             include_in_hash=rule.include_in_hash,
             set_like=rule.set_like,
         )

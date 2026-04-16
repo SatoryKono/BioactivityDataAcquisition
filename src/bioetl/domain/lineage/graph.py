@@ -105,7 +105,7 @@ class LineageGraphFragment:
     run_id: str | None = None
     manifest_id: str | None = None
     created_at: datetime | None = None
-    stored_fragment_id: str | None = None
+    stored_fragment_id: str | None = field(default=None, compare=False)
 
     def __post_init__(self) -> None:
         """Normalize list inputs to tuples for immutability."""

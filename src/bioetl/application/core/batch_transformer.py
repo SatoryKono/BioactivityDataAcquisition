@@ -17,6 +17,7 @@ __all__ = [
     "TransformedRecord",
 ]
 
+import asyncio
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
@@ -244,6 +245,7 @@ class BatchTransformer:
             batch_metrics=self._batch_metrics,
             state=state,
             records=records,
-            flush_filtered_records=self._quarantine_manager.quarantine_filtered_records,
-            flush_dq_records=self._quarantine_manager.quarantine_records,
+            # Streaming mode routes quarantine side effects per record already.
+            flush_filtered_records=lambda: asyncio.sleep(0),
+            flush_dq_records=lambda: asyncio.sleep(0),
         )

@@ -2,7 +2,7 @@
 
 New first-party governance consumers must import these helpers from the package
 root facade ``bioetl.application.composite.checkpoint``. This module remains
-only as a compatibility surface for older imports.
+only as a compatibility-only shim for older imports.
 """
 
 from __future__ import annotations

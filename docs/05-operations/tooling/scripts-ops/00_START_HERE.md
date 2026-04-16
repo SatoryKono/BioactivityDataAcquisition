@@ -21,11 +21,11 @@ Your project has existing Windows-based Codex scripts:
 ### 4 New Executable Scripts
 
 ```
-./scripts/ops/
+./scripts/ops/ + ./script-codex/
 ├── codex.sh                    ⭐ NEW - WSL bash launcher
 ├── codex-exec.sh              ⭐ NEW - WSL auto-exec launcher
-├── setup_wsl_codex.sh         ⭐ NEW - Installation & setup
-├── verify_codex_setup.sh      ⭐ NEW - Verification script
+├── ../script-codex/helper/setup-wsl.sh          ⭐ NEW - Installation & setup
+├── ../script-codex/helper/verify-setup.sh       ⭐ NEW - Verification script
 └── codex-wsl.bat              ⭐ NEW - Modern Windows wrapper
 ```
 
@@ -45,10 +45,10 @@ Your project has existing Windows-based Codex scripts:
 
 ```powershell
 # Step 1: Setup (one-time)
-wsl -- bash ./scripts/ops/setup_wsl_codex.sh
+wsl -- bash ./script-codex/helper/setup-wsl.sh
 
 # Step 2: Verify
-wsl -- bash ./scripts/ops/verify_codex_setup.sh
+wsl -- bash ./script-codex/helper/verify-setup.sh
 
 # Step 3: Use it
 .\scripts\ops\codex-wsl.bat "analyze the pipeline"
@@ -58,10 +58,10 @@ wsl -- bash ./scripts/ops/verify_codex_setup.sh
 
 ```bash
 # Step 1: Setup (one-time)
-bash ./scripts/ops/setup_wsl_codex.sh
+bash ./script-codex/helper/setup-wsl.sh
 
 # Step 2: Verify
-bash ./scripts/ops/verify_codex_setup.sh
+bash ./script-codex/helper/verify-setup.sh
 
 # Step 3: Use it
 ./scripts/ops/codex.sh "analyze the pipeline"
@@ -98,7 +98,7 @@ Where to find what:
    → Read: CODEX_WSL_QUICK_REF.md (one-page reference)
 
 🔵 Verify Installation?
-   → Run: verify_codex_setup.sh (automated checker)
+   → Run: script-codex/helper/verify-setup.sh (automated checker)
 
 🟣 Understand What's New?
    → Read: INDEX.md (file overview)
@@ -120,8 +120,8 @@ Where to find what:
 |--------|---------|-----------|
 | `codex.sh` | Launch Codex interactively or with prompt | Simple |
 | `codex-exec.sh` | Auto-execute changes (full-auto mode) | Simple |
-| `setup_wsl_codex.sh` | Install all dependencies & configure | Medium |
-| `verify_codex_setup.sh` | Check installation & connectivity | Medium |
+| `script-codex/helper/setup-wsl.sh` | Install all dependencies & configure | Medium |
+| `script-codex/helper/verify-setup.sh` | Check installation & connectivity | Medium |
 
 ### Batch Scripts (Run from PowerShell)
 
@@ -144,12 +144,12 @@ Where to find what:
 
 ✅ **One-Command Setup**
 ```bash
-bash ./scripts/ops/setup_wsl_codex.sh
+bash ./script-codex/helper/setup-wsl.sh
 ```
 
 ✅ **Automatic Verification**
 ```bash
-bash ./scripts/ops/verify_codex_setup.sh
+bash ./script-codex/helper/verify-setup.sh
 ```
 
 ✅ **Multiple Execution Modes**
@@ -183,7 +183,7 @@ The setup script installs:
 After setup, you should see:
 
 ```bash
-$ bash ./scripts/ops/verify_codex_setup.sh
+$ bash ./script-codex/helper/verify-setup.sh
 
 [1/5] Checking WSL environment...
 ✓ Running in WSL
@@ -248,7 +248,7 @@ $ bash ./scripts/ops/verify_codex_setup.sh
    │
    ├─ codex.sh ───────────┐
    ├─ codex-exec.sh ──────├─ npm/Node.js
-   └─ setup_wsl_codex.sh ─│
+   └─ script-codex/helper/setup-wsl.sh ─│
                           └─ Codex CLI → OpenAI API
 ```
 
@@ -274,7 +274,7 @@ policy = "read-only"  # or "workspace-write"
 
 1. **Run the verifier first**
    ```bash
-   bash ./scripts/ops/verify_codex_setup.sh
+   bash ./script-codex/helper/verify-setup.sh
    ```
 
 2. **Check the quick troubleshooting**
@@ -302,12 +302,12 @@ policy = "read-only"  # or "workspace-write"
 
 2. **Run setup** (2 minutes)
    ```bash
-   bash ./scripts/ops/setup_wsl_codex.sh
+   bash ./script-codex/helper/setup-wsl.sh
    ```
 
 3. **Verify installation** (1 minute)
    ```bash
-   bash ./scripts/ops/verify_codex_setup.sh
+   bash ./script-codex/helper/verify-setup.sh
    ```
 
 4. **Try it out** (1 minute)
@@ -328,18 +328,18 @@ policy = "read-only"  # or "workspace-write"
 | **Scripts Created** | ✅ 5 new scripts |
 | **Documentation Written** | ✅ 4 detailed guides |
 | **Ready to Use** | ✅ Yes |
-| **Installation Required** | ✅ Yes (setup_wsl_codex.sh) |
+| **Installation Required** | ✅ Yes (`script-codex/helper/setup-wsl.sh`) |
 
 ---
 
 **Everything is ready. Start with:**
 ```bash
-bash ./scripts/ops/setup_wsl_codex.sh
+bash ./script-codex/helper/setup-wsl.sh
 ```
 
 **Then verify with:**
 ```bash
-bash ./scripts/ops/verify_codex_setup.sh
+bash ./script-codex/helper/verify-setup.sh
 ```
 
 **Then use it:**

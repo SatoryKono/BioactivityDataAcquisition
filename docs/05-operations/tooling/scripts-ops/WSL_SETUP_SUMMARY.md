@@ -27,7 +27,7 @@ Your project has existing Codex scripts for Windows:
    - Requires a prompt argument
    - Direct WSL context for performance
 
-3. **`scripts/ops/setup_wsl_codex.sh`**
+3. **`script-codex/helper/setup-wsl.sh`**
    - Comprehensive WSL setup script
    - Installs Node.js, npm, and Codex CLI
    - Configures WSL proxy for VPN access
@@ -66,12 +66,12 @@ Your project has existing Codex scripts for Windows:
 
 From PowerShell in project root:
 ```powershell
-wsl -d Debian -- bash ./scripts/ops/setup_wsl_codex.sh
+wsl -d Debian -- bash ./script-codex/helper/setup-wsl.sh
 ```
 
 Or from WSL directly:
 ```bash
-bash ./scripts/ops/setup_wsl_codex.sh
+bash ./script-codex/helper/setup-wsl.sh
 ```
 
 ### Step 2: Verify Installation
@@ -146,7 +146,7 @@ OpenAI API (via proxy if behind VPN)
 - Multiple model support (GPT-4, o3, etc.)
 
 ✅ **Comprehensive Setup**
-- Single command setup: `setup_wsl_codex.sh`
+- Single command setup: `script-codex/helper/setup-wsl.sh`
 - Dependency verification
 - Connectivity testing
 - Clear diagnostic output
@@ -163,7 +163,7 @@ OpenAI API (via proxy if behind VPN)
 |------|---------|----------|
 | `codex.sh` | **NEW** WSL launcher (interactive) | WSL bash |
 | `codex-exec.sh` | **NEW** WSL auto-exec launcher | WSL bash |
-| `setup_wsl_codex.sh` | **NEW** Installation & setup | WSL bash |
+| `script-codex/helper/setup-wsl.sh` | **NEW** Installation & setup | WSL bash |
 | `codex-wsl.bat` | **NEW** Windows wrapper for WSL | PowerShell |
 | `codex.bat` | Original Windows launcher | PowerShell |
 | `codex-exec.bat` | Original Windows auto-exec | PowerShell |
@@ -206,7 +206,7 @@ OpenAI API (via proxy if behind VPN)
 
 ## Troubleshooting Quick Links
 
-- **Codex not found**: Run `setup_wsl_codex.sh`
+- **Codex not found**: Run `script-codex/helper/setup-wsl.sh`
 - **API unreachable**: Run `wsl -d Debian -- source .wsl_proxy_env.sh`
 - **WSL not installed**: `wsl --install -d Debian` (requires Windows Admin)
 - **Permission issues**: Add `-d Debian --` after `wsl` in batch files
@@ -216,7 +216,7 @@ See `CODEX_WSL_SETUP.md` for comprehensive troubleshooting.
 
 ## Next Steps
 
-1. ✅ Run setup: `bash ./scripts/ops/setup_wsl_codex.sh`
+1. ✅ Run setup: `bash ./script-codex/helper/setup-wsl.sh`
 2. ✅ Test: `./scripts/ops/codex.sh --version`
 3. ✅ Try: `./scripts/ops/codex.sh "explain the pipeline"`
 4. ✅ Explore: Review `CODEX_WSL_QUICK_REF.md` for examples

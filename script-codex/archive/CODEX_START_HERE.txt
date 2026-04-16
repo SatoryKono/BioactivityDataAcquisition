@@ -1,0 +1,234 @@
+#!/bin/bash
+# Print this with: cat ./scripts/ops/CODEX_START_HERE.txt
+
+cat <<'EOF'
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                    🚀 CODEX CLI FOR WSL — START HERE 🚀                   ║
+║                                                                            ║
+║                                                                            ║
+║                     YOU HAVE A COMPLETE SETUP READY!                      ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 QUICK START (3 STEPS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Windows Users (PowerShell):
+
+  Step 1: Verify
+    .\scripts\ops\verify-setup.bat
+
+  Step 2: Setup (if needed)
+    .\scripts\ops\setup-codex-wsl.bat
+
+  Step 3: Use It
+    .\scripts\ops\codex.bat "analyze the pipeline"
+
+
+WSL Users (Bash):
+
+  Step 1: Verify
+    bash ./scripts/ops/diagnose-codex-wsl.sh
+
+  Step 2: Setup (if needed)
+    bash ./scripts/ops/setup-wsl-codex-complete.sh
+
+  Step 3: Use It
+    ./scripts/ops/codex.sh "analyze the pipeline"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 DOCUMENTATION (CHOOSE YOUR PATH)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ARE YOU A...
+
+┌──────────────────────────────────────────────────────────────┐
+│ Windows PowerShell User?                                     │
+│                                                              │
+│ → Read: CODEX_WINDOWS_QUICK_START.txt                       │
+│ → This has examples for running from PowerShell             │
+│ → Troubleshooting for Windows-specific issues               │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│ WSL / Linux Terminal User?                                   │
+│                                                              │
+│ → Read: CODEX_QUICK_REF.txt                                 │
+│ → One page with all commands                                │
+│ → Then: CODEX_WSL_SETUP.md for details                      │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│ Want to Understand Everything?                              │
+│                                                              │
+│ → Read: CODEX_WSL_SETUP.md                                  │
+│ → Complete 10,000+ word guide                               │
+│ → Architecture, setup, usage, troubleshooting               │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│ Need Quick Reference?                                        │
+│                                                              │
+│ → Read: CODEX_QUICK_REF.txt                                 │
+│ → All commands on one page                                  │
+│ → Keyboard-friendly format                                  │
+└──────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎓 WHAT YOU CAN DO WITH CODEX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ANALYZE CODE:
+  .\scripts\ops\codex.bat "analyze the ChemBL parser"
+  .\scripts\ops\codex.bat "review the Neo4j adapter"
+  .\scripts\ops\codex.bat "identify performance bottlenecks"
+
+REFACTOR CODE:
+  .\scripts\ops\codex-exec.bat "optimize the parser"
+  .\scripts\ops\codex-exec.bat "improve error handling"
+  .\scripts\ops\codex-exec.bat "refactor for readability"
+
+ADD FEATURES:
+  .\scripts\ops\codex.bat "add unit tests for the parser"
+  .\scripts\ops\codex.bat "implement logging"
+  .\scripts\ops\codex.bat "add a health check endpoint"
+
+WRITE DOCS:
+  .\scripts\ops\codex.bat "generate docstrings"
+  .\scripts\ops\codex.bat "write README for Neo4j integration"
+  .\scripts\ops\codex.bat "document the API"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ WHAT'S INCLUDED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LAUNCH SCRIPTS:
+  ✅ codex.bat / codex.sh ............... Interactive mode
+  ✅ codex-exec.bat / codex-exec.sh .... Auto-execution mode
+
+SETUP SCRIPTS:
+  ✅ setup-codex-wsl.bat ............... Windows setup launcher
+  ✅ setup-wsl-codex-complete.sh ....... Main setup (7 steps)
+
+UTILITIES:
+  ✅ verify-setup.bat ................. Quick health check
+  ✅ diagnose-codex-wsl.* ............. Detailed diagnostics
+
+DOCUMENTATION:
+  ✅ CODEX_WINDOWS_QUICK_START.txt .... Windows user guide
+  ✅ CODEX_QUICK_REF.txt .............. Quick reference card
+  ✅ CODEX_WSL_SETUP.md ............... Complete guide (10k+)
+  ✅ CODEX_INDEX.txt .................. Full command reference
+  ✅ WSL_SETUP_SUMMARY.md ............. What was created
+  ✅ CODEX_SETUP_COMPLETE.md .......... This overview
+
+Auto-installs:
+  ✅ Node.js & npm (if needed)
+  ✅ Codex CLI
+  ✅ WSL proxy configuration
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 IF SOMETHING DOESN'T WORK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Step 1: Run diagnostics
+
+  Windows:  .\scripts\ops\diagnose-codex-wsl.bat
+  WSL:      bash ./scripts/ops/diagnose-codex-wsl.sh
+
+Step 2: Read troubleshooting
+
+  Windows users: CODEX_WINDOWS_QUICK_START.txt (troubleshooting section)
+  Everyone:      CODEX_WSL_SETUP.md (troubleshooting section)
+
+Step 3: Check common issues
+
+  Node.js not found?
+    .\scripts\ops\setup-codex-wsl.bat
+
+  Docker Desktop not running?
+    Open Docker Desktop app
+
+  Network errors?
+    .\scripts\ops\start-wsl-proxy.bat
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📂 FILE LOCATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All scripts and docs are in:
+  scripts/ops/
+
+Launch scripts:
+  scripts/ops/codex.bat                    (Windows, interactive)
+  scripts/ops/codex.sh                     (WSL, interactive)
+  scripts/ops/codex-exec.bat               (Windows, auto-exec)
+  scripts/ops/codex-exec.sh                (WSL, auto-exec)
+
+Setup scripts:
+  scripts/ops/setup-codex-wsl.bat          (Windows launcher)
+  scripts/ops/setup-wsl-codex-complete.sh  (Main setup)
+  scripts/ops/verify-setup.bat             (Quick check)
+
+Diagnostics:
+  scripts/ops/diagnose-codex-wsl.bat
+  scripts/ops/diagnose-codex-wsl.ps1
+  scripts/ops/diagnose-codex-wsl.sh
+
+Documentation:
+  scripts/ops/CODEX_WINDOWS_QUICK_START.txt
+  scripts/ops/CODEX_QUICK_REF.txt
+  scripts/ops/CODEX_WSL_SETUP.md
+  scripts/ops/CODEX_INDEX.txt
+  scripts/ops/WSL_SETUP_SUMMARY.md
+  scripts/ops/CODEX_SETUP_COMPLETE.md
+  scripts/ops/CODEX_START_HERE.txt (this file)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 READY TO GO?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Windows Users:
+
+  1. Open PowerShell
+  2. cd to your repo
+  3. .\scripts\ops\verify-setup.bat
+  4. .\scripts\ops\codex.bat "hello"
+
+WSL Users:
+
+  1. Open WSL terminal
+  2. cd to your repo
+  3. bash ./scripts/ops/diagnose-codex-wsl.sh
+  4. ./scripts/ops/codex.sh "hello"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 TIPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• Use interactive mode (codex.bat) when you want to review changes
+• Use auto-exec mode (codex-exec.bat) when you trust Codex to make changes
+• Include context in your prompts: "in the src/bioetl/ module, ..."
+• Use --update flag to get the latest Codex version
+• Bookmark CODEX_QUICK_REF.txt for fast reference
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                    Everything is ready. You're all set! 🎉                ║
+║                                                                            ║
+║              Pick a documentation guide above and get started             ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+EOF

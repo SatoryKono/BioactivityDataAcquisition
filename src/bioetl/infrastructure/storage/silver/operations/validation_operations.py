@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import AuditPort, LineageStorePort, MetadataCoordinatorPort, MetadataWriterPort
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass
 class SilverValidationOperations:
     """Validation operations service for Silver layer writes.
     
@@ -67,6 +67,7 @@ class SilverValidationOperations:
         ],
         None,
     ]
+    _host: object | None = None
 
 
 
@@ -150,7 +151,13 @@ class SilverValidationOperations:
             partition_cols=partition_cols,
             key_nullability_rules=key_nullability_rules,
         )
-        validated = _sync_validate_and_build_arrow(self, request)
+        from bioetl.infrastructure.storage.silver import validation_mixin
+
+        validated = await validation_mixin.asyncio.to_thread(
+            self._sync_validate_and_build_arrow,
+            request,
+        )
+        host = self._host if self._host is not None else self
         schema_request = _SilverSchemaPolicyRequest(
             table_name=table_name,
             records=validated.records,
@@ -158,4 +165,12 @@ class SilverValidationOperations:
             validated_mode=validated.validated_mode,
             arrow_data=validated.arrow_data,
         )
-        return await self._finalize_silver_write_payload(schema_request)
+        await host._check_schema_drift(  # type: ignore[attr-defined]
+            schema_request.table_name,
+            schema_request.records,
+            schema_request.on_schema_mismatch,
+        )
+        return _build_prepared_silver_write_payload(
+            table_path=host._resolve_table_path(schema_request.table_name),  # type: ignore[attr-defined]
+            schema_request=schema_request,
+        )

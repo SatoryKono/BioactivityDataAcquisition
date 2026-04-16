@@ -134,11 +134,17 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded end-to-end local Neo4j MCP smoke helper while the graph-memory setup remains an operator troubleshooting workflow; either fold it into a canonical verification command or remove it once the setup path is stabilized."
     },
-    "scripts/ops/test_codex_basic.sh": {
+    "script-codex/helper/test-basic.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded local Codex environment smoke helper while the mixed Windows-WSL Codex setup remains operator-maintained; either promote it into a documented verification command or remove it once the bootstrap path is stable."
+    },
+    "scripts/archive/ops/run-codex": {
+      "owner": "@bioetl-platform",
+      "decision": "archived_duplicate",
+      "review_by": "2026-07-15",
+      "next_step": "Archived after consolidation; use script-codex/run-codex.sh as the canonical Unix entrypoint instead of the legacy hardcoded-key launcher."
     },
     "scripts/ops/test_env_loading.sh": {
       "owner": "@bioetl-platform",
@@ -404,11 +410,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded assay profile update helper; remove it once assay profile updates are handled by canonical migration utilities."
     },
-    "scripts/tmp/setup_codex.sh": {
+    "script-codex/archive/setup_codex.sh": {
       "owner": "@bioetl-platform",
-      "decision": "temporary_setup",
+      "decision": "archived_legacy_setup",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a temporary Codex setup helper; remove it once Codex setup is handled by canonical environment setup utilities."
+      "next_step": "Archived after Codex setup consolidation; use script-codex/run-codex.{ps1,sh} or the active scripts/ops bootstrap entrypoints instead."
     },
     "scripts/agents/py-team-orchestration.py": {
       "owner": "@bioetl-architecture",
@@ -416,29 +422,53 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as canonical agent workflow script; document in agent workflow guides."
     },
-    "scripts/ops/mistral-exec.bat": {
+    "scripts/archive/ops/mistral-exec.bat": {
       "owner": "@bioetl-platform",
-      "decision": "agent_execution_wrapper",
+      "decision": "archived_duplicate",
       "review_by": "2026-07-15",
-      "next_step": "Retain as Mistral agent execution wrapper for Windows compatibility."
+      "next_step": "Archived after consolidation; use script-mistrallvibe/run-vibe.ps1 --prompt ... as the supported Windows entrypoint."
     },
-    "scripts/ops/mistral-exec.sh": {
+    "scripts/archive/ops/mistral-exec.sh": {
       "owner": "@bioetl-platform",
-      "decision": "agent_execution_wrapper",
+      "decision": "archived_duplicate",
       "review_by": "2026-07-15",
-      "next_step": "Retain as Mistral agent execution wrapper for Unix compatibility."
+      "next_step": "Archived after consolidation; use script-mistrallvibe/run-vibe.sh for Unix prompt and interactive execution."
     },
-    "scripts/ops/mistral.bat": {
+    "scripts/archive/ops/mistral.bat": {
       "owner": "@bioetl-platform",
-      "decision": "agent_execution_wrapper",
+      "decision": "archived_duplicate",
       "review_by": "2026-07-15",
-      "next_step": "Retain as Mistral agent execution wrapper for Windows compatibility."
+      "next_step": "Archived after consolidation; use script-mistrallvibe/run-vibe.ps1 as the supported Windows entrypoint."
     },
-    "scripts/ops/setup_mistral_vibe.sh": {
+    "scripts/archive/ops/codex-login.sh": {
       "owner": "@bioetl-platform",
-      "decision": "agent_setup",
+      "decision": "archived_duplicate",
       "review_by": "2026-07-15",
-      "next_step": "Retain as Mistral Vibe agent setup script; document in agent setup guides."
+      "next_step": "Archived after consolidation; use script-codex/run-codex.sh login for Unix API-key login."
+    },
+    "scripts/archive/ops/codex-login.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "archived_duplicate",
+      "review_by": "2026-07-15",
+      "next_step": "Archived after consolidation; use script-codex/run-codex.ps1 login for Windows API-key login."
+    },
+    "scripts/archive/ops/codex-device-login.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "archived_duplicate",
+      "review_by": "2026-07-15",
+      "next_step": "Archived after consolidation; use script-codex/run-codex.sh device-login for Unix device-auth login."
+    },
+    "scripts/archive/ops/codex-device-login.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "archived_duplicate",
+      "review_by": "2026-07-15",
+      "next_step": "Archived after consolidation; use script-codex/run-codex.ps1 device-login for Windows device-auth login."
+    },
+    "scripts/archive/ops/setup_mistral_vibe.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "archived_duplicate",
+      "review_by": "2026-07-15",
+      "next_step": "Archived after consolidation; use script-mistrallvibe/helper/setup-env.sh for setup."
     }
   }
 }
