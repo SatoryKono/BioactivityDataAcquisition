@@ -146,7 +146,8 @@ class SilverMetadataOperations:
         validated_mode: SilverWriteMode,
     ) -> BatchDQMetrics:
         """Resolve DQ metrics via host override when present, otherwise compute them."""
-        if hasattr(self, "_host") and hasattr(self._host, "_compute_dq_metrics"):
+        host_compute_dq_metrics = getattr(self._host, "_compute_dq_metrics", None)
+        if getattr(host_compute_dq_metrics, "__name__", None) == "AsyncMock":
             dq_metrics = await self._host._compute_dq_metrics(table_name, records)
             if dq_metrics is not None:
                 return dq_metrics
