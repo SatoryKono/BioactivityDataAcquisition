@@ -50,6 +50,238 @@ class SilverMetadataOperations:
     _lineage_store: LineageStorePort | None = None
     _dq_calculator: DQMetricsCalculator | None = None
     _host: object | None = None
+
+    @staticmethod
+    def _split_table_name(table_name: str) -> tuple[str, str]:
+        """Split a table name into provider/entity parts with safe fallbacks."""
+        if "." in table_name:
+            provider_name, entity_name = table_name.split(".", 1)
+            return provider_name, entity_name
+        return table_name, "unknown"
+
+    @staticmethod
+    def _placeholder_table_path(table_name: str) -> str:
+        """Build a stable placeholder path when the real table path is unavailable."""
+        return f"/tmp/silver/{table_name.replace('.', '/')}"
+
+    @staticmethod
+    def _build_column_metrics_dict(
+        dq_metrics: BatchDQMetrics | None,
+    ) -> dict[str, object]:
+        """Convert DQ column stats into metadata-ready column metrics."""
+        if not dq_metrics or not dq_metrics.column_stats:
+            return {}
+        return {
+            col_name: col_stat.to_column_metrics()
+            for col_name, col_stat in dq_metrics.column_stats.items()
+        }
+
+    @staticmethod
+    def _build_schema_drift_object(dq_metrics: BatchDQMetrics | None) -> object | None:
+        """Convert DQ schema drift info into metadata-ready representation."""
+        if not dq_metrics or not dq_metrics.schema_drift:
+            return None
+        return dq_metrics.schema_drift.to_schema_drift()
+
+    @staticmethod
+    def _resolve_dq_summary_values(
+        dq_metrics: BatchDQMetrics | None,
+        *,
+        records_count: int,
+    ) -> tuple[int, int, int, int, float, bool]:
+        """Resolve DQ summary primitives with safe fallbacks for missing metrics."""
+        if dq_metrics:
+            total_records = dq_metrics.total_records
+            valid_records = dq_metrics.valid_records
+            error_records = dq_metrics.error_records
+            warning_records = dq_metrics.warning_records or 0
+            error_rate = (
+                dq_metrics.error_records / dq_metrics.total_records
+                if dq_metrics.total_records > 0
+                else 0.0
+            )
+            validation_passed = dq_metrics.error_records == 0
+            return (
+                total_records,
+                valid_records,
+                error_records,
+                warning_records,
+                error_rate,
+                validation_passed,
+            )
+
+        return (records_count, records_count, 0, 0, 0.0, True)
+
+    async def _persist_silver_metadata(
+        self,
+        *,
+        metadata: SilverMetadata,
+        table_name: str,
+        table_path: str,
+    ) -> SilverWriteResult | None:
+        """Persist metadata using whichever writer signature is available."""
+        if self._metadata_writer is None:
+            return None
+        if hasattr(self._metadata_writer, "write_silver_metadata"):
+            try:
+                return await self._metadata_writer.write_silver_metadata(
+                    table_path=table_path,
+                    metadata=metadata,
+                    table_name=table_name,
+                )
+            except TypeError:
+                return await self._metadata_writer.write_silver_metadata(
+                    base_path=table_path,
+                    metadata=metadata,
+                    table_name=table_name,
+                )
+        return await self._metadata_writer.write(metadata)
+
+    async def _resolve_finalization_dq_metrics(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str],
+        validated_mode: SilverWriteMode,
+    ) -> BatchDQMetrics:
+        """Resolve DQ metrics via host override when present, otherwise compute them."""
+        if hasattr(self, "_host") and hasattr(self._host, "_compute_dq_metrics"):
+            dq_metrics = await self._host._compute_dq_metrics(table_name, records)
+            if dq_metrics is not None:
+                return dq_metrics
+
+        import polars as pl
+
+        arrow_data = pl.DataFrame(records).to_arrow()
+        return await self.compute_dq_metrics(
+            table_name=table_name,
+            arrow_data=arrow_data,
+            primary_keys=primary_keys,
+            mode="merge",
+            validated_mode=validated_mode,
+        )
+
+    async def _resolve_version_after(self, table_path: str) -> int | None:
+        """Read Delta version via host helper when available."""
+        if self._host is not None and hasattr(self._host, "_get_delta_version"):
+            return await self._host._get_delta_version(table_path)
+        return 0
+
+    def _build_silver_metadata(
+        self,
+        *,
+        table_name: str,
+        table_path: str,
+        records: list[BronzeRecord],
+        dq_metrics: BatchDQMetrics | None,
+        mode: str,
+        runtime_started_at: datetime,
+        runtime_completed_at: datetime,
+        run_id: RunID | str | None,
+        run_type: RunType | object | None,
+        source_batch_id: BatchID | None,
+        transform_version: str | None,
+        transform_steps: tuple[str, ...] | None,
+        bronze_refs: list[BronzeWriteResult] | None,
+        primary_keys: list[str] | None = None,
+        version_after: int | None = None,
+        hostname: str = "localhost",
+        bioetl_version: str = "test",
+        python_version: str = "test",
+    ) -> SilverMetadata:
+        """Build a complete SilverMetadata payload from write/finalization inputs."""
+        from bioetl.domain.models._metadata_common import (
+            BaseOutputMetadata,
+            EnvironmentMetadata,
+            PipelineMetadata,
+            RuntimeMetadata,
+        )
+        from bioetl.domain.models._metadata_silver import (
+            DeltaMetrics,
+            DQSummary,
+            LineageMetadata,
+            SilverOutputExt,
+        )
+
+        provider_name, entity_name = self._split_table_name(table_name)
+        (
+            total_records,
+            valid_records,
+            error_records,
+            warning_records,
+            error_rate,
+            validation_passed,
+        ) = self._resolve_dq_summary_values(dq_metrics, records_count=len(records))
+
+        runtime_metadata = RuntimeMetadata(
+            run_id=str(run_id or "unknown"),
+            run_type=run_type or "incremental",
+            started_at_utc=runtime_started_at,
+            completed_at_utc=runtime_completed_at,
+            duration_seconds=max(
+                0,
+                int((runtime_completed_at - runtime_started_at).total_seconds()),
+            ),
+        )
+        pipeline_metadata = PipelineMetadata(
+            name=provider_name,
+            provider=provider_name,
+            entity=entity_name,
+            version="1.0",
+        )
+        lineage_metadata = LineageMetadata(
+            source_batch_ids=[source_batch_id] if source_batch_id else [],
+            bronze_paths=[ref.relative_path for ref in bronze_refs] if bronze_refs else [],
+            transform_version=transform_version,
+            transform_steps=list(transform_steps) if transform_steps else [],
+        )
+        delta_metadata = DeltaMetrics(
+            table_path=table_path,
+            operation=str(mode),
+            primary_key=primary_keys or [],
+            partition_by=[],
+            version_before=None,
+            version_after=version_after,
+            files_added=1,
+            files_removed=0,
+            rows_inserted=len(records),
+            rows_updated=0,
+            rows_deleted=0,
+        )
+        dq_summary = DQSummary(
+            total_records=total_records,
+            valid_records=valid_records,
+            error_records=error_records,
+            warning_records=warning_records,
+            error_rate=error_rate,
+            column_metrics=self._build_column_metrics_dict(dq_metrics),
+            schema_drift=self._build_schema_drift_object(dq_metrics),
+            validation_passed=validation_passed,
+        )
+        return SilverMetadata(
+            table_name=table_name,
+            runtime=runtime_metadata,
+            pipeline=pipeline_metadata,
+            lineage=lineage_metadata,
+            delta=delta_metadata,
+            dq_summary=dq_summary,
+            output=BaseOutputMetadata(
+                artifact_id=f"{table_name}-{run_id or 'unknown'}",
+                record_count=len(records),
+                total_bytes=0,
+                content_hash="placeholder-hash",
+            ),
+            output_ext=SilverOutputExt(
+                delta_version_before=None,
+                delta_version_after=version_after,
+            ),
+            environment=EnvironmentMetadata(
+                hostname=hostname,
+                bioetl_version=bioetl_version,
+                python_version=python_version,
+            ),
+        )
     
     async def compute_dq_metrics(
         self,
@@ -134,140 +366,29 @@ class SilverMetadataOperations:
         """
         if self._metadata_writer is None:
             return None
-        
-        # Build metadata with required fields
-        from bioetl.domain.models._metadata_common import (
-            BaseOutputMetadata,
-            EnvironmentMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-        )
-        from bioetl.domain.models._metadata_silver import (
-            DeltaMetrics,
-            DQSummary,
-            LineageMetadata,
-            SilverOutputExt,
-        )
-        
-        # Create required metadata objects
-        runtime_metadata = RuntimeMetadata(
-            run_id=run_id or "unknown",
-            run_type=run_type or "incremental",
-            started_at_utc=ingestion_ts or datetime.now(UTC),
-            completed_at_utc=datetime.now(UTC),
-            duration_seconds=0,
-        )
-        
-        pipeline_metadata = PipelineMetadata(
-            name=table_name.split(".")[0] if "." in table_name else table_name,
-            provider=table_name.split(".")[0] if "." in table_name else table_name,
-            entity=table_name.split(".")[1] if "." in table_name else "unknown",
-            version="1.0",
-        )
-        
-        lineage_metadata = LineageMetadata(
-            source_batch_ids=[source_batch_id] if source_batch_id else [],
-            bronze_paths=[ref.relative_path for ref in bronze_refs] if bronze_refs else [],
-            transform_version=transform_version,
-            transform_steps=list(transform_steps) if transform_steps else [],
-        )
-        
-        # Note: table_path is not available in this method signature
-        # We'll use a placeholder path for now
-        table_path_placeholder = f"/tmp/silver/{table_name.replace('.', '/')}"
-        
-        delta_metadata = DeltaMetrics(
-            table_path=table_path_placeholder,
-            operation=str(mode),
-            primary_key=[],  # Will be set by actual write operation
-            partition_by=[],
-            version_before=None,
-            version_after=None,
-            files_added=1,
-            files_removed=0,
-            rows_inserted=len(records),
-            rows_updated=0,
-            rows_deleted=0,
-        )
-        
-        # Convert column stats to column metrics using built-in method
-        column_metrics_dict = {}
-        if dq_metrics and dq_metrics.column_stats:
-            for col_name, col_stat in dq_metrics.column_stats.items():
-                column_metrics_dict[col_name] = col_stat.to_column_metrics()
-        
-        # Convert schema drift info to schema drift using built-in method
-        schema_drift_obj = None
-        if dq_metrics and dq_metrics.schema_drift:
-            schema_drift_obj = dq_metrics.schema_drift.to_schema_drift()
-        
-        # Create DQ summary with fallback values when dq_metrics is None
-        if dq_metrics:
-            total_records = dq_metrics.total_records
-            valid_records = dq_metrics.valid_records
-            error_records = dq_metrics.error_records
-            warning_records = dq_metrics.warning_records or 0
-            error_rate = dq_metrics.error_records / dq_metrics.total_records if dq_metrics.total_records > 0 else 0.0
-            validation_passed = dq_metrics.error_records == 0
-        else:
-            total_records = len(records)
-            valid_records = len(records)
-            error_records = 0
-            warning_records = 0
-            error_rate = 0.0
-            validation_passed = True
-        
-        dq_summary = DQSummary(
-            total_records=total_records,
-            valid_records=valid_records,
-            error_records=error_records,
-            warning_records=warning_records,
-            error_rate=error_rate,
-            column_metrics=column_metrics_dict,
-            schema_drift=schema_drift_obj,
-            validation_passed=validation_passed,
-        )
-        
-        output_metadata = BaseOutputMetadata(
-            artifact_id=f"{table_name}-{run_id or 'unknown'}",
-            record_count=len(records),
-            total_bytes=0,
-            content_hash="placeholder-hash",
-        )
-        
-        output_ext = SilverOutputExt(
-            delta_version_before=None,
-            delta_version_after=None,
-        )
-        
-        environment_metadata = EnvironmentMetadata(
-            hostname="localhost",
-            bioetl_version="test",
-            python_version="test",
-        )
-        
-        # Build complete metadata
-        metadata = SilverMetadata(
+        runtime_started_at = ingestion_ts or datetime.now(UTC)
+        runtime_completed_at = datetime.now(UTC)
+        table_path_placeholder = self._placeholder_table_path(table_name)
+        metadata = self._build_silver_metadata(
             table_name=table_name,
-            runtime=runtime_metadata,
-            pipeline=pipeline_metadata,
-            lineage=lineage_metadata,
-            delta=delta_metadata,
-            dq_summary=dq_summary,
-            output=output_metadata,
-            output_ext=output_ext,
-            environment=environment_metadata,
+            table_path=table_path_placeholder,
+            records=records,
+            dq_metrics=dq_metrics,
+            mode=mode,
+            runtime_started_at=runtime_started_at,
+            runtime_completed_at=runtime_completed_at,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            transform_version=transform_version,
+            transform_steps=transform_steps,
+            bronze_refs=bronze_refs,
         )
-        
-        # Write metadata - use write_silver_metadata if available, otherwise write
-        if hasattr(self._metadata_writer, 'write_silver_metadata'):
-            result = await self._metadata_writer.write_silver_metadata(
-                table_path=table_path_placeholder,
-                metadata=metadata,
-                table_name=table_name,
-            )
-        else:
-            result = await self._metadata_writer.write(metadata)
+        result = await self._persist_silver_metadata(
+            metadata=metadata,
+            table_name=table_name,
+            table_path=table_path_placeholder,
+        )
         
         if self._metrics:
             self._metrics.increment_counter("silver.metadata_write_success", 1)
@@ -400,39 +521,18 @@ class SilverMetadataOperations:
         This method computes DQ metrics, gets the Delta version, and calculates
         timing information to prepare the finalization context.
         """
-        # Compute DQ metrics
-        import polars as pl
-        arrow_data = pl.DataFrame(records).to_arrow()
-        
-        # Check if we're in a test context with mocked _compute_dq_metrics
-        # The mock is set on the writer instance, not on the metadata operations
-        # So we need to access it through the host if available
-        dq_metrics = None
-        if hasattr(self, '_host') and hasattr(self._host, '_compute_dq_metrics'):
-            # Use the host's mock method if available (for tests)
-            dq_metrics = await self._host._compute_dq_metrics(table_name, records)
-        
-        if dq_metrics is None:
-            # Compute DQ metrics normally
-            dq_metrics = await self.compute_dq_metrics(
-                table_name=table_name,
-                arrow_data=arrow_data,
-                primary_keys=primary_keys,
-                mode="merge",
-                validated_mode=validated_mode,
-            )
-        
-        # Get Delta version - use the host's method if available
-        if self._host is not None and hasattr(self._host, '_get_delta_version'):
-            version_after = await self._host._get_delta_version(table_path)
-        else:
-            # Fallback to placeholder value
-            version_after = 0
-        
-        # Calculate timing
         import time
-        elapsed_seconds = time.perf_counter() - start_perf
-        completed_at = started_at + timedelta(seconds=elapsed_seconds)
+
+        dq_metrics = await self._resolve_finalization_dq_metrics(
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            validated_mode=validated_mode,
+        )
+        version_after = await self._resolve_version_after(table_path)
+        completed_at = started_at + timedelta(
+            seconds=time.perf_counter() - start_perf
+        )
         
         # Import here to avoid circular imports
         from bioetl.infrastructure.storage.silver.metadata_operations import (
@@ -464,126 +564,47 @@ class SilverMetadataOperations:
         This method coordinates the finalization of a Silver write operation,
         including DQ metrics calculation, metadata writing, and result construction.
         """
-        # Compute DQ metrics
-        import polars as pl
-        arrow_data = pl.DataFrame(records).to_arrow()
-        dq_metrics = await self.compute_dq_metrics(
-            table_name=table_name,
-            arrow_data=arrow_data,
-            primary_keys=primary_keys,
-            mode="merge",
-            validated_mode=validated_mode,
-        )
-        
-        # Create metadata with DQ metrics
-        from bioetl.domain.models.metadata import SilverMetadata
-        from bioetl.domain.models._metadata_common import (
-            BaseOutputMetadata, EnvironmentMetadata,
-            PipelineMetadata, RuntimeMetadata
-        )
-        from bioetl.domain.models._metadata_silver import (
-            DeltaMetrics, DQSummary, LineageMetadata, SilverOutputExt
-        )
-        
-        # Create metadata with required fields
         from bioetl.domain.models._metadata_common import RunTypeEnum
-        
-        # Extract run_id from records if available
-        run_id = "test_run_id"
-        if records and "_run_id" in records[0]:
-            run_id = str(records[0]["_run_id"])
-        
-        # Convert column stats to column metrics
-        column_metrics_dict = {}
-        if dq_metrics.column_stats:
-            for col_name, col_stat in dq_metrics.column_stats.items():
-                column_metrics_dict[col_name] = col_stat.to_column_metrics()
-        
-        # Convert schema drift info to schema drift
-        schema_drift_obj = None
-        if dq_metrics.schema_drift:
-            schema_drift_obj = dq_metrics.schema_drift.to_schema_drift()
-        
-        metadata = SilverMetadata(
+
+        context = await self._prepare_silver_write_finalization_context(
             table_name=table_name,
-            runtime=RuntimeMetadata(
-                run_id=run_id,
-                run_type=RunTypeEnum.INCREMENTAL,
-                started_at_utc=started_at,
-                completed_at_utc=datetime.now(UTC),
-                duration_seconds=int((datetime.now(UTC) - started_at).total_seconds()),
-            ),
-            pipeline=PipelineMetadata(
-                name="test",
-                provider="test",
-                entity="test",
-                version="1.0",
-            ),
-            lineage=LineageMetadata(
-                source_batch_ids=[source_batch_id] if source_batch_id else [],
-                bronze_paths=[ref.relative_path for ref in bronze_refs] if bronze_refs else [],
-            ),
-            delta=DeltaMetrics(
-                table_path=table_path,
-                operation="merge",
-                primary_key=primary_keys,
-                rows_inserted=len(records),
-                rows_updated=0,
-                rows_deleted=0,
-                files_added=1,
-            ),
-            dq_summary=DQSummary(
-                total_records=dq_metrics.total_records,
-                valid_records=dq_metrics.valid_records,
-                error_records=dq_metrics.error_records,
-                warning_records=dq_metrics.warning_records or 0,
-                error_rate=dq_metrics.error_records / dq_metrics.total_records if dq_metrics.total_records > 0 else 0.0,
-                column_metrics=column_metrics_dict,
-                schema_drift=schema_drift_obj,
-                validation_passed=dq_metrics.error_records == 0,
-            ),
-            output=BaseOutputMetadata(
-                artifact_id=f"{table_name}-{run_id}",
-                record_count=len(records),
-                total_bytes=0,
-                content_hash="placeholder-hash",
-            ),
-            output_ext=SilverOutputExt(
-                delta_version_before=None,
-                delta_version_after=None,
-            ),
-            environment=EnvironmentMetadata(
-                hostname="test-host",
-                bioetl_version="test",
-                python_version="test",
-            ),
+            records=records,
+            table_path=table_path,
+            primary_keys=primary_keys,
+            validated_mode=validated_mode,
+            bronze_refs=bronze_refs,
+            partition_cols=partition_cols,
+            source_batch_id=source_batch_id,
+            started_at=started_at,
+            start_perf=start_perf,
         )
-        
-        # Call the metadata writer if available
-        if self._metadata_writer:
-            # Check which method signature is available
-            if hasattr(self._metadata_writer, 'write_silver_metadata'):
-                try:
-                    # Try with table_path parameter first (newer signature)
-                    await self._metadata_writer.write_silver_metadata(
-                        table_path=table_path,
-                        metadata=metadata,
-                        table_name=table_name,
-                    )
-                except TypeError:
-                    # Fallback to older signature without table_path
-                    await self._metadata_writer.write_silver_metadata(
-                        base_path=table_path,
-                        metadata=metadata,
-                        table_name=table_name,
-                    )
-            else:
-                await self._metadata_writer.write(metadata)
-        
-        # Return basic result
+        run_id = str(records[0]["_run_id"]) if records and "_run_id" in records[0] else "test_run_id"
+        metadata = self._build_silver_metadata(
+            table_name=table_name,
+            table_path=table_path,
+            records=records,
+            dq_metrics=context.dq_metrics,
+            mode="merge",
+            runtime_started_at=started_at,
+            runtime_completed_at=context.completed_at,
+            run_id=run_id,
+            run_type=RunTypeEnum.INCREMENTAL,
+            source_batch_id=source_batch_id,
+            transform_version=None,
+            transform_steps=None,
+            bronze_refs=bronze_refs,
+            primary_keys=primary_keys,
+            version_after=context.version_after,
+            hostname="test-host",
+        )
+        await self._persist_silver_metadata(
+            metadata=metadata,
+            table_name=table_name,
+            table_path=table_path,
+        )
         return SilverWriteResult(
             table_name=table_name,
             table_path=table_path,
-            delta_version=0,  # Default version
+            delta_version=context.version_after or 0,
             record_count=len(records),
         )
