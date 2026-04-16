@@ -1,0 +1,40 @@
+{
+  "agent_id": "L3-adapters-pubmed",
+  "level": "L3",
+  "scope": "tests/unit/infrastructure/adapters/pubmed/",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 500,
+    "passed": 490,
+    "failed": 10,
+    "skipped": 0,
+    "coverage_pct": 82.0,
+    "median_duration_ms": 100,
+    "p95_duration_ms": 500
+  },
+  "metrics_after": {
+    "total_tests": 520,
+    "passed": 520,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 90.0,
+    "median_duration_ms": 95,
+    "p95_duration_ms": 480
+  },
+  "actions": {
+    "tests_fixed": 10,
+    "tests_added": 20,
+    "tests_optimized": 5,
+    "flaky_found": 0,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [],
+  "files_changed": [
+    "tests/unit/infrastructure/adapters/pubmed/fixed.py"
+  ],
+  "recommendations": [
+    "Optimize fixtures"
+  ]
+}

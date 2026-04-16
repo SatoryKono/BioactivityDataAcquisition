@@ -1,0 +1,2 @@
+test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/unit/domain/test_flaky.py::test,5,1,0.2,fixed,Shared state
