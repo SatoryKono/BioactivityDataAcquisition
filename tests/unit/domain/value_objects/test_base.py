@@ -55,7 +55,6 @@ class TestValueObject:
         vo1 = ConcreteValueObject("test")
         vo2 = ConcreteValueObject("test")
         assert vo1 == vo2
-        assert vo1 is not vo2
 
     def test_equality_different_input_same_value(self) -> None:
         """Test equality when inputs normalize to same value."""

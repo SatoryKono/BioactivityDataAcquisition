@@ -27,6 +27,13 @@ OUT_MD = OUT_DIR / "sentence_audit_summary.md"
 OUT_PROMPTS = OUT_DIR / "document_update_prompts.md"
 OUT_PROMPTS_HIGH = OUT_DIR / "document_update_prompts_high_risk.md"
 
+DOC_FIELD = "документ"
+SENTENCE_NUMBER_FIELD = "номер предложения"
+CODE_LINK_FIELD = "ссылка на код (файл строки)"
+CODE_FRAGMENT_FIELD = "код (фрагмент)"
+STATUS_FIELD = "описание соответствует кода (да/нет)"
+REMEDIATION_PLAN_FIELD = "предлагаемый план устранения несоответствий"
+
 STOPWORDS = {
     "и",
     "в",
@@ -402,13 +409,13 @@ def generate() -> None:
                 code_link = f"{rel(evidence.path)}:{evidence.line_no}"
                 code_fragment = evidence.line[:280]
             row = {
-                "документ": rel(doc),
-                "номер предложения": str(i),
+                DOC_FIELD: rel(doc),
+                SENTENCE_NUMBER_FIELD: str(i),
                 "предложение": sentence,
-                "ссылка на код (файл строки)": code_link,
-                "код (фрагмент)": code_fragment,
-                "описание соответствует кода (да/нет)": status,
-                "предлагаемый план устранения несоответствий": plan_for(status),
+                CODE_LINK_FIELD: code_link,
+                CODE_FRAGMENT_FIELD: code_fragment,
+                STATUS_FIELD: status,
+                REMEDIATION_PLAN_FIELD: plan_for(status),
                 "причина": reason,
                 "risk": risk,
             }
@@ -418,19 +425,19 @@ def generate() -> None:
                 if risk == "high":
                     prompt_map_high[rel(doc)].append(row)
 
-    rows.sort(key=lambda row: (row["документ"], int(row["номер предложения"])))
+    rows.sort(key=lambda row: (row[DOC_FIELD], int(row[SENTENCE_NUMBER_FIELD])))
 
     with OUT_CSV.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
             f,
             fieldnames=[
-                "документ",
-                "номер предложения",
+                DOC_FIELD,
+                SENTENCE_NUMBER_FIELD,
                 "предложение",
-                "ссылка на код (файл строки)",
-                "код (фрагмент)",
-                "описание соответствует кода (да/нет)",
-                "предлагаемый план устранения несоответствий",
+                CODE_LINK_FIELD,
+                CODE_FRAGMENT_FIELD,
+                STATUS_FIELD,
+                REMEDIATION_PLAN_FIELD,
                 "причина",
                 "risk",
             ],
@@ -439,13 +446,13 @@ def generate() -> None:
         writer.writerows(rows)
 
     total = len(rows)
-    ok = sum(1 for row in rows if row["описание соответствует кода (да/нет)"] == "да")
+    ok = sum(1 for row in rows if row[STATUS_FIELD] == "да")
     bad = total - ok
     high_total = sum(1 for row in rows if row["risk"] == "high")
     high_ok = sum(
         1
         for row in rows
-        if row["risk"] == "high" and row["описание соответствует кода (да/нет)"] == "да"
+        if row["risk"] == "high" and row[STATUS_FIELD] == "да"
     )
     high_bad = high_total - high_ok
 
@@ -463,9 +470,9 @@ def generate() -> None:
         f.write(f"- Полный CSV: `{rel(OUT_CSV)}`\n\n")
         f.write("## Топ-20 документов с максимальным числом несоответствий\n\n")
         bad_by_doc = Counter(
-            row["документ"]
+            row[DOC_FIELD]
             for row in rows
-            if row["описание соответствует кода (да/нет)"] == "нет"
+            if row[STATUS_FIELD] == "нет"
         )
         f.write("| Документ | Несоответствий |\n")
         f.write("|---|---:|\n")
@@ -477,7 +484,7 @@ def generate() -> None:
         f.write("Ниже шаблоны для каждого документа, где найдены несоответствия.\n\n")
         for doc_name in sorted(prompt_map):
             mismatches = sorted(
-                prompt_map[doc_name], key=lambda item: int(item["номер предложения"])
+                prompt_map[doc_name], key=lambda item: int(item[SENTENCE_NUMBER_FIELD])
             )
             f.write(f"## {doc_name}\n\n")
             f.write("```text\n")
@@ -492,8 +499,8 @@ def generate() -> None:
             )
             for mismatch in mismatches[:50]:
                 f.write(
-                    f"- [{mismatch['номер предложения']}] (risk={mismatch['risk']}) {mismatch['предложение']}\n"
-                    f"  - Текущее доказательство: {mismatch['ссылка на код (файл строки)'] or 'нет'}\n"
+                    f"- [{mismatch[SENTENCE_NUMBER_FIELD]}] (risk={mismatch['risk']}) {mismatch['предложение']}\n"
+                    f"  - Текущее доказательство: {mismatch[CODE_LINK_FIELD] or 'нет'}\n"
                     f"  - Причина статуса: {mismatch['причина']}\n"
                 )
             if len(mismatches) > 50:
@@ -509,7 +516,7 @@ def generate() -> None:
         )
         for doc_name in sorted(prompt_map_high):
             mismatches = sorted(
-                prompt_map_high[doc_name], key=lambda item: int(item["номер предложения"])
+                prompt_map_high[doc_name], key=lambda item: int(item[SENTENCE_NUMBER_FIELD])
             )
             f.write(f"## {doc_name}\n\n")
             f.write("```text\n")
@@ -524,8 +531,8 @@ def generate() -> None:
             )
             for mismatch in mismatches[:50]:
                 f.write(
-                    f"- [{mismatch['номер предложения']}] {mismatch['предложение']}\n"
-                    f"  - Текущее доказательство: {mismatch['ссылка на код (файл строки)'] or 'нет'}\n"
+                    f"- [{mismatch[SENTENCE_NUMBER_FIELD]}] {mismatch['предложение']}\n"
+                    f"  - Текущее доказательство: {mismatch[CODE_LINK_FIELD] or 'нет'}\n"
                     f"  - Причина статуса: {mismatch['причина']}\n"
                 )
             if len(mismatches) > 50:

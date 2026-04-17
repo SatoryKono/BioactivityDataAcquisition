@@ -17,6 +17,7 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.uniprot.fallback_policy import (
     UniProtFallbackPolicy,
 )
+from tests.helpers.async_iterables import async_iterable
 
 
 # ---------------------------------------------------------------------------
@@ -138,7 +139,7 @@ async def test_process_missing_dois_passes_entity_type_to_search_fallback() -> N
     """The entity_type injected at construction must be forwarded to search_fallback."""
     captured_entity: list[str] = []
 
-    async def search_fallback(
+    def search_fallback(
         entity_type: str,
         ids: list[str],
         mapping: dict[str, str],
@@ -148,8 +149,7 @@ async def test_process_missing_dois_passes_entity_type_to_search_fallback() -> N
         del mapping, limit, fetched
         captured_entity.append(entity_type)
         del ids
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     def resolve(ids: list[str], found: set[str], mapping: dict[str, str]) -> list[str]:
         return ids  # pretend all are missing
@@ -178,7 +178,7 @@ async def test_process_missing_dois_passes_limit_and_fetched_to_search() -> None
     """limit and fetched values must reach the search_fallback callable."""
     captured: dict[str, Any] = {}
 
-    async def search_fallback(
+    def search_fallback(
         entity_type: str,
         ids: list[str],
         mapping: dict[str, str],
@@ -188,8 +188,7 @@ async def test_process_missing_dois_passes_limit_and_fetched_to_search() -> None
         del entity_type, ids, mapping
         captured["limit"] = limit
         captured["fetched"] = fetched
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     def resolve(ids: list[str], found: set[str], mapping: dict[str, str]) -> list[str]:
         return ids

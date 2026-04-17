@@ -17,6 +17,7 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
 from bioetl.infrastructure.adapters.openalex.fallback_orchestrator import (
     OpenAlexFallbackOrchestrator,
 )
+from tests.helpers.async_iterables import async_iterable
 
 pytestmark = pytest.mark.unit
 
@@ -108,23 +109,21 @@ async def test_execute_attaches_openalex_phase1_summary_logger() -> None:
     logger = MagicMock()
     logger.info = MagicMock()
 
-    async def capture_execute(
+    def capture_execute(
         request: FallbackFetchRequest,
     ) -> AsyncIterator[BronzeRecord]:
         captured_requests.append(request)
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
     service.execute = capture_execute
     orchestrator = _make_orchestrator(service=service, logger=logger)
 
-    async def primary_fetcher(
+    def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
         del ids, limit
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     await _collect(
         orchestrator,
@@ -157,12 +156,11 @@ async def test_execute_skips_service_for_unsupported_filter_field() -> None:
     logger.warning = MagicMock()
     orchestrator = _make_orchestrator(service=service, logger=logger)
 
-    async def primary_fetcher(
+    def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
         del ids, limit
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     results = await _collect(
         orchestrator,
@@ -188,12 +186,11 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
     """configure_policy() should rebuild the decorator with updated policy settings."""
     captured_requests: list[FallbackFetchRequest] = []
 
-    async def capture_execute(
+    def capture_execute(
         request: FallbackFetchRequest,
     ) -> AsyncIterator[BronzeRecord]:
         captured_requests.append(request)
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
     service.execute = capture_execute
@@ -212,12 +209,11 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
         )
     )
 
-    async def primary_fetcher(
+    def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
         del ids, limit
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     await _collect(
         orchestrator,

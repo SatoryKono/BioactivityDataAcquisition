@@ -17,6 +17,7 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     FallbackFetchOrchestratorService,
     FallbackFetchRequest,
 )
+from tests.helpers.async_iterables import async_iterable
 
 
 def _normalize_default(value: str) -> str:
@@ -88,12 +89,11 @@ async def test_execute_builds_request_from_strategy_defaults() -> None:
         ),
     )
 
-    async def primary_fetcher(
+    def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
         del primary_ids, limit
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     results = await _collect(
         decorator,
@@ -127,23 +127,21 @@ async def test_execute_prefers_explicit_overrides_over_strategy_hooks() -> None:
     )
     override_handler = MagicMock(name="override_handler")
 
-    async def capture_execute(
+    def capture_execute(
         request: FallbackFetchRequest,
     ) -> AsyncIterator[dict[str, object]]:
         captured_requests.append(request)
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
     service.execute = capture_execute
     decorator = _make_decorator(service=service, strategy=strategy)
 
-    async def primary_fetcher(
+    def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
         del primary_ids, limit
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     await _collect(
         decorator,
@@ -180,12 +178,11 @@ async def test_execute_skips_service_for_unsupported_filter_field_when_configure
         logger=logger,
     )
 
-    async def primary_fetcher(
+    def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
         del primary_ids, limit
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     results = await _collect(
         decorator,

@@ -5,6 +5,7 @@ Tests for CrossRefTitleFallbackHandler and title matching functions.
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -17,6 +18,7 @@ from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
     titles_match,
 )
+from tests.helpers.async_iterables import async_iterable
 
 # =============================================================================
 # titles_match Tests
@@ -136,10 +138,9 @@ async def test_search_by_title_no_match(mock_logger):
 async def test_search_by_title_empty_results(mock_logger):
     """Test title search with no results."""
 
-    async def mock_search(query, limit):
+    def mock_search(query, limit) -> AsyncIterator[dict[str, object]]:
         del query, limit
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Nonexistent publication")
@@ -153,11 +154,10 @@ async def test_search_by_title_truncates_long_title(mock_logger):
     long_title = "A" * 300
     query_received = []
 
-    async def mock_search(query, limit):
+    def mock_search(query, limit) -> AsyncIterator[dict[str, object]]:
         query_received.append(query)
         del limit
-        for _ in ():
-            yield {}
+        return async_iterable()
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     await handler.search_by_title(long_title)

@@ -84,19 +84,21 @@ class MockDataSource:
         for record in self._records:
             yield record
 
-    async def health_check(self) -> HealthStatus:
-        await asyncio.sleep(0)
+    def health_check(self) -> asyncio.Future[HealthStatus]:
         self._health_check_call_count += 1
 
         # Check if we should fail on this call
         if self._health_check_call_count - 1 in self._fail_on_calls:
             if self._health_check_error:
-                raise self._health_check_error
+                async def _raise_error() -> HealthStatus:
+                    raise self._health_check_error
 
-        return self._health_status
+                return _raise_error()
 
-    async def aclose(self) -> None:
-        await asyncio.sleep(0)
+        return asyncio.sleep(0, result=self._health_status)
+
+    def aclose(self) -> asyncio.Future[None]:
+        return asyncio.sleep(0)
 
     def set_fetch_error(self, error: Exception, fail_on_calls: list[int]) -> None:
         """Configure fetch to fail on specific calls (0-indexed)."""
