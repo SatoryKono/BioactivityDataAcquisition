@@ -89,11 +89,11 @@ class NoOpMetadataWriter:
 
     async def write_bronze_metadata(
         self,
-        base_path: str | Path,  # noqa: ARG002
-        metadata: BronzeMetadata,  # noqa: ARG002
+        base_path: str | Path,
+        metadata: BronzeMetadata,
         *,
-        provider: str | None = None,  # noqa: ARG002
-        entity: str | None = None,  # noqa: ARG002
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op implementation — discards Bronze metadata and returns empty string.
 
@@ -112,13 +112,13 @@ class NoOpMetadataWriter:
 
     async def write_silver_metadata(
         self,
-        base_path: str | Path,  # noqa: ARG002
-        metadata: SilverMetadata,  # noqa: ARG002
+        base_path: str | Path,
+        metadata: SilverMetadata,
         *,
-        table_name: str | None = None,  # noqa: ARG002
-        flat_structure: bool = False,  # noqa: ARG002
-        provider: str | None = None,  # noqa: ARG002
-        entity: str | None = None,  # noqa: ARG002
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op implementation — discards Silver metadata and returns empty string.
 
@@ -139,15 +139,15 @@ class NoOpMetadataWriter:
 
     async def finalize_silver_metadata(
         self,
-        base_path: str | Path,  # noqa: ARG002
+        base_path: str | Path,
         *,
-        table_name: str | None = None,  # noqa: ARG002
-        flat_structure: bool = False,  # noqa: ARG002
-        provider: str | None = None,  # noqa: ARG002
-        entity: str | None = None,  # noqa: ARG002
-        dq_report_path: str | None = None,  # noqa: ARG002
-        completed_at: datetime | None = None,  # noqa: ARG002
-        delta_version_after: int | None = None,  # noqa: ARG002
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+        dq_report_path: str | None = None,
+        completed_at: datetime | None = None,
+        delta_version_after: int | None = None,
     ) -> str | None:
         """No-op Silver finalization returns empty string when invoked."""
         del base_path, table_name, flat_structure, provider, entity
@@ -157,13 +157,13 @@ class NoOpMetadataWriter:
 
     async def write_gold_metadata(
         self,
-        base_path: str | Path,  # noqa: ARG002
-        metadata: GoldMetadata,  # noqa: ARG002
+        base_path: str | Path,
+        metadata: GoldMetadata,
         *,
-        table_name: str | None = None,  # noqa: ARG002
-        flat_structure: bool = False,  # noqa: ARG002
-        provider: str | None = None,  # noqa: ARG002
-        entity: str | None = None,  # noqa: ARG002
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
     ) -> str:
         """No-op implementation — discards Gold metadata and returns empty string.
 
@@ -184,14 +184,14 @@ class NoOpMetadataWriter:
 
     async def finalize_gold_metadata(
         self,
-        base_path: str | Path,  # noqa: ARG002
+        base_path: str | Path,
         *,
-        table_name: str | None = None,  # noqa: ARG002
-        flat_structure: bool = False,  # noqa: ARG002
-        provider: str | None = None,  # noqa: ARG002
-        entity: str | None = None,  # noqa: ARG002
-        dq_report_path: str | None = None,  # noqa: ARG002
-        completed_at: datetime | None = None,  # noqa: ARG002
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+        dq_report_path: str | None = None,
+        completed_at: datetime | None = None,
     ) -> str | None:
         """No-op Gold finalization returns empty string when invoked."""
         del base_path, table_name, flat_structure, provider, entity
