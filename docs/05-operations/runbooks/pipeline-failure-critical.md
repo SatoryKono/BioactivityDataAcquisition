@@ -47,6 +47,14 @@ Last verified: '2026-04-03'
 - `bioetl run-manifest show <run_id>` status is `SUCCESS`.
 - `make test-integration` for the specific provider passes.
 
+## Recovery
+- If the resumed run fails again, stop retries and restore the last known good local data/control-plane state before retrying further changes.
+- Revert any emergency configuration override or credential rotation that introduced the regression if diagnosis confirms it as the root cause.
+
 ## Post-incident
 - Log the root cause in the monthly stability report.
 - Update circuit breaker settings if necessary.
+
+## Compliance
+- Preserve commands executed, affected `run_id`, and evidence paths in the incident record.
+- Any cleanup or local-file removal MUST remain consistent with ADR-010 Local-Only handling and with the active recovery runbook set.
