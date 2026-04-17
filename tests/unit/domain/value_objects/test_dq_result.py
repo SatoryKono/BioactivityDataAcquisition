@@ -60,11 +60,11 @@ class TestDQResult:
             error_rate=0.01,
             status=DQEvaluationStatus.PASSED,
         )
-        assert result.error_rate == 0.01
+        assert result.error_rate == pytest.approx(0.01)
         assert result.status == DQEvaluationStatus.PASSED
         assert result.anomalies == ()
         assert result.has_critical is False
-        assert result.check_duration_ms == 0.0
+        assert result.check_duration_ms == pytest.approx(0.0)
 
     def test_full_creation(self) -> None:
         """Test creating DQResult with all fields."""
@@ -77,7 +77,7 @@ class TestDQResult:
         )
         assert result.anomalies[0].metric_name == "error_rate"
         assert result.anomalies[1].metric_name == "silver_yield"
-        assert result.check_duration_ms == 45.7
+        assert result.check_duration_ms == pytest.approx(45.7)
 
     def test_list_anomalies_converted_to_tuple(self) -> None:
         """Test that list anomalies are converted to tuple (immutability)."""

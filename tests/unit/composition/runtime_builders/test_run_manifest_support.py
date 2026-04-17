@@ -15,6 +15,7 @@ from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import 
 from bioetl.composition.runtime_builders._run_manifest_support import (
     build_launch_context_snapshot,
     build_run_source_refs,
+    resolve_contract_identity,
     resolve_replay_capability,
 )
 from bioetl.domain.control_plane import ReplayCapability
@@ -201,3 +202,52 @@ def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported()
         launch_context["exact_replay_support_boundary"]
         == "composite_execution_unsupported"
     )
+
+
+@pytest.mark.unit
+def test_resolve_contract_identity_reads_registry_entry(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    registry_dir = tmp_path / "configs" / "base"
+    registry_dir.mkdir(parents=True)
+    registry_path = registry_dir / "contract_registry.yaml"
+    registry_path.write_text(
+        """
+entries:
+  chembl.activity:
+    dq_policy_ref: chembl.activity.policy
+    rule_bundle_version: "2026.04"
+    identity:
+      contract_version: "1.2.3"
+      schema_hash: deadbeef
+""".strip(),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    result = resolve_contract_identity(provider="chembl", entity="activity")
+
+    assert result == (
+        "chembl.activity",
+        "1.2.3",
+        "deadbeef",
+        "chembl.activity.policy",
+        "2026.04",
+    )
+
+
+@pytest.mark.unit
+def test_resolve_contract_identity_falls_back_when_registry_invalid(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    registry_dir = tmp_path / "configs" / "base"
+    registry_dir.mkdir(parents=True)
+    registry_path = registry_dir / "contract_registry.yaml"
+    registry_path.write_text("entries: [invalid", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    result = resolve_contract_identity(provider="chembl", entity="activity")
+
+    assert result == ("chembl.activity", None, None, None, None)

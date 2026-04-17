@@ -47,11 +47,11 @@ class TestDQResultExtended:
         )
 
         # Test basic fields
-        assert result.error_rate == 0.15
+        assert result.error_rate == pytest.approx(0.15)
         assert result.status == DQEvaluationStatus.WARNING
         assert result.anomalies_count == 0
         assert result.has_critical is False
-        assert result.check_duration_ms == 120.5
+        assert result.check_duration_ms == pytest.approx(120.5)
 
         # Test new fields
         assert result.rule_outcomes_count == 2
@@ -70,7 +70,7 @@ class TestDQResultExtended:
             check_duration_ms=80.0,
         )
 
-        assert result.error_rate == 0.05
+        assert result.error_rate == pytest.approx(0.05)
         assert result.status == DQEvaluationStatus.PASSED
         assert result.rule_outcomes_count == 0
         assert result.policy_ref is None

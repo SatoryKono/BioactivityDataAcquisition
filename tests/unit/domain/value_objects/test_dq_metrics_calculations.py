@@ -66,17 +66,17 @@ class TestCalculateNullRate:
     def test_no_nulls(self) -> None:
         """Test zero null rate when no None values."""
         result = calculate_null_rate([1, 2, 3], 3)
-        assert result == 0.0
+        assert result == pytest.approx(0.0)
 
     def test_all_nulls(self) -> None:
         """Test null rate of 1.0 when all values are None."""
         result = calculate_null_rate([None, None], 2)
-        assert result == 1.0
+        assert result == pytest.approx(1.0)
 
     def test_half_nulls(self) -> None:
         """Test null rate of 0.5 when half values are None."""
         result = calculate_null_rate([1, None, 2, None], 4)
-        assert result == 0.5
+        assert result == pytest.approx(0.5)
 
     def test_rounded_to_four_decimals(self) -> None:
         """Test result is rounded to 4 decimal places."""
@@ -244,16 +244,16 @@ class TestComputeNumericStats:
     def test_basic_stats(self) -> None:
         """Test min, max, mean for simple values."""
         min_v, max_v, mean_v = compute_numeric_stats([1.0, 2.0, 3.0])
-        assert min_v == 1.0
-        assert max_v == 3.0
-        assert mean_v == 2.0
+        assert min_v == pytest.approx(1.0)
+        assert max_v == pytest.approx(3.0)
+        assert mean_v == pytest.approx(2.0)
 
     def test_single_value(self) -> None:
         """Test single value yields min=max=mean."""
         min_v, max_v, mean_v = compute_numeric_stats([5.0])
-        assert min_v == 5.0
-        assert max_v == 5.0
-        assert mean_v == 5.0
+        assert min_v == pytest.approx(5.0)
+        assert max_v == pytest.approx(5.0)
+        assert mean_v == pytest.approx(5.0)
 
     def test_empty_returns_none_triple(self) -> None:
         """Test empty list returns (None, None, None)."""
@@ -268,7 +268,7 @@ class TestComputeNumericStats:
     def test_rounded_to_six_decimals(self) -> None:
         """Test results are rounded to 6 decimal places."""
         _, _, mean_v = compute_numeric_stats([1.0, 2.0])
-        assert mean_v == 1.5
+        assert mean_v == pytest.approx(1.5)
         # Verify it uses at most 6 decimal places
         if mean_v is not None:
             decimal_part = str(mean_v).split(".")
@@ -337,7 +337,7 @@ class TestComputeColumnStats:
         """Test column with all None values has null_rate=1.0."""
         records = [{"col": None}, {"col": None}]
         result = compute_column_stats(records)
-        assert result["col"].null_rate == 1.0
+        assert result["col"].null_rate == pytest.approx(1.0)
         assert result["col"].unique_count == 0
 
 
@@ -356,7 +356,7 @@ class TestComputeSingleColumnStats:
         assert stats.min_value == pytest.approx(100.0)
         assert stats.max_value == pytest.approx(300.0)
         assert stats.mean_value == pytest.approx(200.0)
-        assert stats.null_rate == 0.0
+        assert stats.null_rate == pytest.approx(0.0)
 
     def test_string_column_no_numeric_stats(self) -> None:
         """Test string column yields None for numeric stats."""

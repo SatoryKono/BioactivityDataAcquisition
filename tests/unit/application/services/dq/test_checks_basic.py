@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 import polars as pl
+import pytest
 
 from bioetl.application.services.dq._checks_basic import (
     check_completeness,
@@ -44,8 +45,8 @@ class TestCheckCompletenessDirect:
 
         result = check_completeness(df, ["id"], 0.9)
 
-        assert result.required_fields["id"] == 0.0
-        assert result.overall_completeness_score == 0.0
+        assert result.required_fields["id"] == pytest.approx(0.0)
+        assert result.overall_completeness_score == pytest.approx(0.0)
         assert result.status == DQCheckStatus.FAIL
 
     def test_all_missing_required_fields_fail_with_zero_score(self) -> None:
@@ -53,8 +54,10 @@ class TestCheckCompletenessDirect:
 
         result = check_completeness(df, ["missing_a", "missing_b"], 0.8)
 
-        assert result.required_fields == {"missing_a": 0.0, "missing_b": 0.0}
-        assert result.overall_completeness_score == 0.0
+        assert result.required_fields == pytest.approx(
+            {"missing_a": 0.0, "missing_b": 0.0}
+        )
+        assert result.overall_completeness_score == pytest.approx(0.0)
         assert result.status == DQCheckStatus.FAIL
 
 
@@ -76,7 +79,7 @@ class TestCheckDataFreshnessDirect:
         result = check_data_freshness(df, current_time)
 
         assert result.max_updated_at == current_time - timedelta(hours=36)
-        assert result.freshness_lag_hours == 36.0
+        assert result.freshness_lag_hours == pytest.approx(36.0)
         assert result.status == DQCheckStatus.WARN
 
     def test_no_timestamp_columns_returns_default_pass(self) -> None:
@@ -86,5 +89,5 @@ class TestCheckDataFreshnessDirect:
         result = check_data_freshness(df, current_time)
 
         assert result.max_updated_at is None
-        assert result.freshness_lag_seconds == 0.0
+        assert result.freshness_lag_seconds == pytest.approx(0.0)
         assert result.status == DQCheckStatus.PASS

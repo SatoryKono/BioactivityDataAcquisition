@@ -74,6 +74,81 @@ def _render_audit_entry_lines(entries: list[object]) -> list[str]:
     return lines or [_NONE_ENTRY_LINE]
 
 
+def _resolve_replay_view(
+    run_manifest: dict[str, object],
+) -> tuple[dict[str, object] | None, dict[str, object] | None]:
+    """Return manifest metadata plus the preferred replay diagnostics view."""
+    manifest = run_manifest.get("manifest", {})
+    diagnostics = run_manifest.get("diagnostics", {})
+    identity_graph = run_manifest.get("identity_graph", {})
+    replay_view = (
+        identity_graph
+        if isinstance(identity_graph, dict) and identity_graph
+        else diagnostics
+    )
+    return (
+        manifest if isinstance(manifest, dict) else None,
+        replay_view if isinstance(replay_view, dict) else None,
+    )
+
+
+def _extract_persistence_profile_details(
+    replay_view: dict[str, object],
+) -> tuple[object | None, object | None, object | None, object | None]:
+    """Return the operator-facing persistence profile details from replay view."""
+    persistence_profile = replay_view.get("persistence_profile")
+    if not isinstance(persistence_profile, dict):
+        return None, None, None, None
+    return (
+        persistence_profile.get("attained_profile"),
+        persistence_profile.get("composite_resume_reconstructability"),
+        persistence_profile.get("replay_ready_missing_requirements"),
+        persistence_profile.get("forensic_grade_missing_requirements"),
+    )
+
+
+def _render_audit_run_manifest_lines(
+    run_manifest: dict[str, object],
+) -> list[str]:
+    """Render manifest and replay diagnostics lines for audit-run output."""
+    manifest, replay_view = _resolve_replay_view(run_manifest)
+    lines: list[str] = []
+    if manifest is not None:
+        lines.extend(
+            [
+                f"  manifest_id: {manifest.get('manifest_id')}",
+                f"  pipeline_name: {manifest.get('pipeline_name')}",
+            ]
+        )
+    if replay_view is None:
+        return lines
+
+    (
+        attained_profile,
+        composite_resume_reconstructability,
+        replay_ready_missing_requirements,
+        forensic_grade_missing_requirements,
+    ) = _extract_persistence_profile_details(replay_view)
+    lines.extend(
+        [
+            f"  replay_capability: {replay_view.get('replay_capability')}",
+            f"  requested_exact_replay: {replay_view.get('requested_exact_replay')}",
+            f"  exact_replay_support_boundary: {replay_view.get('exact_replay_support_boundary')}",
+            f"  replay_capability_reason: {replay_view.get('replay_capability_reason')}",
+            f"  exact_replay_blockers: {replay_view.get('exact_replay_blockers')}",
+            f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",
+            f"  input_snapshot_identity_fingerprint: {replay_view.get('input_snapshot_identity_fingerprint')}",
+            f"  persistence_profile: {attained_profile}",
+            f"  replay_ready_missing_requirements: {replay_ready_missing_requirements}",
+            f"  forensic_grade_missing_requirements: {forensic_grade_missing_requirements}",
+            f"  composite_resume_reconstructability: {composite_resume_reconstructability}",
+            f"  alert_signals: {replay_view.get('alert_signals')}",
+            f"  next_steps: {replay_view.get('next_steps')}",
+        ]
+    )
+    return lines
+
+
 def _render_audit_run_payload(payload: dict[str, object]) -> str:
     """Render one audit-run inspection payload in human-readable text."""
     audit = payload.get("audit", {})
@@ -85,60 +160,7 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
         f"  audit_entries: {len(entries) if isinstance(entries, list) else 0}",
     ]
     if isinstance(run_manifest, dict):
-        manifest = run_manifest.get("manifest", {})
-        diagnostics = run_manifest.get("diagnostics", {})
-        identity_graph = run_manifest.get("identity_graph", {})
-        replay_view = (
-            identity_graph
-            if isinstance(identity_graph, dict) and identity_graph
-            else diagnostics
-        )
-        if isinstance(manifest, dict):
-            lines.extend(
-                [
-                    f"  manifest_id: {manifest.get('manifest_id')}",
-                    f"  pipeline_name: {manifest.get('pipeline_name')}",
-                ]
-            )
-        if isinstance(replay_view, dict):
-            persistence_profile = replay_view.get("persistence_profile")
-            attained_profile = (
-                persistence_profile.get("attained_profile")
-                if isinstance(persistence_profile, dict)
-                else None
-            )
-            composite_resume_reconstructability = (
-                persistence_profile.get("composite_resume_reconstructability")
-                if isinstance(persistence_profile, dict)
-                else None
-            )
-            replay_ready_missing_requirements = (
-                persistence_profile.get("replay_ready_missing_requirements")
-                if isinstance(persistence_profile, dict)
-                else None
-            )
-            forensic_grade_missing_requirements = (
-                persistence_profile.get("forensic_grade_missing_requirements")
-                if isinstance(persistence_profile, dict)
-                else None
-            )
-            lines.extend(
-                [
-                    f"  replay_capability: {replay_view.get('replay_capability')}",
-                    f"  requested_exact_replay: {replay_view.get('requested_exact_replay')}",
-                    f"  exact_replay_support_boundary: {replay_view.get('exact_replay_support_boundary')}",
-                    f"  replay_capability_reason: {replay_view.get('replay_capability_reason')}",
-                    f"  exact_replay_blockers: {replay_view.get('exact_replay_blockers')}",
-                    f"  input_snapshot_ids: {replay_view.get('input_snapshot_ids')}",
-                    f"  input_snapshot_identity_fingerprint: {replay_view.get('input_snapshot_identity_fingerprint')}",
-                    f"  persistence_profile: {attained_profile}",
-                    f"  replay_ready_missing_requirements: {replay_ready_missing_requirements}",
-                    f"  forensic_grade_missing_requirements: {forensic_grade_missing_requirements}",
-                    f"  composite_resume_reconstructability: {composite_resume_reconstructability}",
-                    f"  alert_signals: {replay_view.get('alert_signals')}",
-                    f"  next_steps: {replay_view.get('next_steps')}",
-                ]
-            )
+        lines.extend(_render_audit_run_manifest_lines(run_manifest))
     lines.extend(["", "Audit Entries"])
     if isinstance(entries, list):
         lines.extend(_render_audit_entry_lines(entries))

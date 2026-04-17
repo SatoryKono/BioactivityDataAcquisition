@@ -24,7 +24,7 @@ class TestSilverThresholdChecker:
             hard_fail_threshold=0.2,
         )
 
-        assert result.current_error_rate == 0.1
+        assert result.current_error_rate == pytest.approx(0.1)
         assert result.threshold_status == DQCheckStatus.WARN
 
     def test_calculate_thresholds_returns_fail_at_hard_threshold(self) -> None:
@@ -38,7 +38,7 @@ class TestSilverThresholdChecker:
             hard_fail_threshold=0.2,
         )
 
-        assert result.current_error_rate == 0.2
+        assert result.current_error_rate == pytest.approx(0.2)
         assert result.threshold_status == DQCheckStatus.FAIL
 
     def test_calculate_thresholds_handles_zero_total_input(self) -> None:
@@ -52,7 +52,7 @@ class TestSilverThresholdChecker:
             hard_fail_threshold=0.2,
         )
 
-        assert result.current_error_rate == 0.0
+        assert result.current_error_rate == pytest.approx(0.0)
         assert result.threshold_status == DQCheckStatus.PASS
 
     def test_check_key_nullability_skips_nullable_and_missing_columns(self) -> None:
