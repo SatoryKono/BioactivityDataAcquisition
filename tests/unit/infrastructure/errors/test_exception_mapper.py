@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import pytest
+
 from bioetl.domain.exceptions import ServiceUnavailableError
 from bioetl.infrastructure.errors.exception_mapper import (
     DomainErrorMappingInput,
@@ -34,5 +36,5 @@ def test_exception_mapper_uses_default_retry_after_for_rate_limit_status() -> No
         )
     )
 
-    assert error.retry_after == 60.0
+    assert error.retry_after == pytest.approx(60.0)
     assert error.service_name == "crossref"

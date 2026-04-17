@@ -70,7 +70,7 @@ class TestAnomalyDetector:
             min_baseline_samples=3,
         )
         assert detector.baseline_window == 7
-        assert detector.z_score_threshold == 2.0
+        assert detector.z_score_threshold == pytest.approx(2.0)
         assert detector.min_baseline_samples == 3
 
     def test_detect_spike_anomaly(self):
@@ -89,7 +89,7 @@ class TestAnomalyDetector:
 
         assert anomaly is not None
         assert anomaly.anomaly_type == AnomalyType.SPIKE
-        assert anomaly.current_value == 0.5
+        assert anomaly.current_value == pytest.approx(0.5)
 
     def test_detect_drop_anomaly(self):
         """Test detection of drop anomalies."""
@@ -107,7 +107,7 @@ class TestAnomalyDetector:
 
         assert anomaly is not None
         assert anomaly.anomaly_type == AnomalyType.DROP
-        assert anomaly.current_value == 30.0
+        assert anomaly.current_value == pytest.approx(30.0)
 
     def test_no_anomaly_within_threshold(self):
         """Test that normal values don't trigger anomalies."""

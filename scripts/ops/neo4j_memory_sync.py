@@ -1050,8 +1050,10 @@ def _include_shard_relation_nodes(filtered: GraphSnapshot, snapshot: GraphSnapsh
 
 def _filtered_snapshot(
     snapshot: GraphSnapshot,
-    selection: SnapshotSelection = SnapshotSelection(),
+    selection: SnapshotSelection | None = None,
 ) -> GraphSnapshot:
+    if selection is None:
+        selection = SnapshotSelection()
     shard_filters = _selected_shard_filters(selection)
     allowed_labels = _build_allowed_labels(
         selection,
@@ -7343,8 +7345,10 @@ def sync_snapshot(
     root: Path,
     http_uri: str | None,
     options: SyncApplyOptions,
-    selection: SnapshotSelection = SnapshotSelection(),
+    selection: SnapshotSelection | None = None,
 ) -> None:
+    if selection is None:
+        selection = SnapshotSelection()
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
     sync_run = _sync_run_id()

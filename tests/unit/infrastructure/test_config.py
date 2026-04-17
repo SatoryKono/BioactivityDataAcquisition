@@ -195,8 +195,8 @@ def test_pipeline_yaml_config_accepts_dq_overrides_key() -> None:
         }
     )
 
-    assert cfg.dq_overrides.soft_fail_threshold == 0.06
-    assert cfg.dq_overrides.hard_fail_threshold == 0.19
+    assert cfg.dq_overrides.soft_fail_threshold == pytest.approx(0.06)
+    assert cfg.dq_overrides.hard_fail_threshold == pytest.approx(0.19)
 
 
 @pytest.mark.unit
