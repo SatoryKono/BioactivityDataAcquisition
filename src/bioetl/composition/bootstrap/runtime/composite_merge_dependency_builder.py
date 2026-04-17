@@ -5,13 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
 from bioetl.application.composite.join_execution import JoinExecutorService
 from bioetl.application.composite.runtime_wiring_api import (
     CoalescePolicyService,
     ColumnOrderService,
-    ColumnPriorityOrderer,
     ColumnRenamer,
     ConflictResolverService,
     DependencyJoinerService,
@@ -51,17 +49,11 @@ def build_merge_dependencies(
     deduplicator = EnricherDeduplicatorService(logger)
     aggregator = EnricherAggregator(logger)
     renamer = ColumnRenamer(logger)
-    priority_orderer = ColumnPriorityOrderer(logger)
-    orderer = ColumnOrderer(
-        logger,
-        column_groups=merge_column_groups if merge_column_groups else None,
-    )
     order_service = ColumnOrderService(
         logger,
         column_groups=merge_column_groups if merge_column_groups else None,
-        priority_orderer=priority_orderer,
     )
-    coalesce_policy = CoalescePolicyService(logger, priority_orderer)
+    coalesce_policy = CoalescePolicyService(logger, order_service=order_service)
     conflict_resolver = ConflictResolverService(
         config.merge,
         logger,
@@ -110,8 +102,8 @@ def build_merge_dependencies(
         deduplicator=deduplicator,
         aggregator=aggregator,
         renamer=renamer,
-        orderer=orderer,
-        priority_orderer=priority_orderer,
+        orderer=order_service,
+        priority_orderer=None,
         order_service=order_service,
         coalesce_policy=coalesce_policy,
         conflict_resolver=conflict_resolver,

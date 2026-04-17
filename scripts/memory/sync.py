@@ -8079,16 +8079,33 @@ def _link_contract_source_dependencies(
     resolved = _resolve_repo_path(context.root, context.registry_path, source_path)
     if resolved is None:
         return
+    _link_contract_source_module(snapshot, context, resolved)
+    _link_contract_imported_modules(snapshot, context, resolved, source_prefixes)
+    schema_classes = _dataframe_model_class_names(resolved)
+    if schema_classes:
+        snapshot.add_node("contract_surface", context.contract_ref, schema_classes=schema_classes)
+
+
+def _link_contract_source_module(
+    snapshot: GraphSnapshot,
+    context: ContractEntryContext,
+    resolved: Path,
+) -> None:
     module_key = NodeKey("module_surface", _rel_path(context.root, resolved))
     if module_key in snapshot.nodes:
         snapshot.add_relation(context.contract, "BACKED_BY", module_key, provenance="impact_contracts")
+
+
+def _link_contract_imported_modules(
+    snapshot: GraphSnapshot,
+    context: ContractEntryContext,
+    resolved: Path,
+    source_prefixes: tuple[str, ...],
+) -> None:
     for imported_module in sorted(_imported_repo_modules(resolved, source_prefixes)):
         dependency_key = _resolve_python_module_surface(context.root, imported_module)
         if dependency_key is not None and dependency_key in snapshot.nodes:
             snapshot.add_relation(context.contract, "DEPENDS_ON", dependency_key, provenance="impact_contracts")
-    schema_classes = _dataframe_model_class_names(resolved)
-    if schema_classes:
-        snapshot.add_node("contract_surface", context.contract_ref, schema_classes=schema_classes)
 
 
 def _add_contract_policy_config(snapshot: GraphSnapshot, context: ContractEntryContext) -> None:
@@ -10204,8 +10221,12 @@ def _link_entity_pipeline_tests(
     ownership: dict[object, object],
 ) -> None:
     for pipeline_key, test_paths in _entity_pipeline_contract_tests(entity_pipeline_index, ownership):
-        for test_path in test_paths:
-            link_test_target(pipeline_key, test_path, "impact_pipeline_tests")
+        _link_pipeline_test_paths(
+            link_test_target,
+            pipeline_key,
+            test_paths,
+            provenance="impact_pipeline_tests",
+        )
 
 
 def _entity_pipeline_contract_tests(
@@ -10236,13 +10257,36 @@ def _link_provider_regression_suite_tests(
     if not enabled or not isinstance(suites, dict):
         return
     for suite_name, provider_targets in _provider_regression_suite_targets(suites):
-        for provider_name, raw_test_path in provider_targets:
-            for pipeline_key in provider_pipeline_index.get(provider_name, []):
-                link_test_target(
-                    pipeline_key,
-                    raw_test_path,
-                    f"impact_pipeline_regression_suite:{suite_name}",
-                )
+        _link_provider_suite_targets(
+            link_test_target,
+            provider_pipeline_index,
+            suite_name=suite_name,
+            provider_targets=provider_targets,
+        )
+
+
+def _link_pipeline_test_paths(
+    link_test_target: Callable[[NodeKey, str, str], None],
+    pipeline_key: NodeKey,
+    test_paths: tuple[str, ...],
+    *,
+    provenance: str,
+) -> None:
+    for test_path in test_paths:
+        link_test_target(pipeline_key, test_path, provenance)
+
+
+def _link_provider_suite_targets(
+    link_test_target: Callable[[NodeKey, str, str], None],
+    provider_pipeline_index: dict[str, list[NodeKey]],
+    *,
+    suite_name: str,
+    provider_targets: tuple[tuple[str, str], ...],
+) -> None:
+    provenance = f"impact_pipeline_regression_suite:{suite_name}"
+    for provider_name, raw_test_path in provider_targets:
+        for pipeline_key in provider_pipeline_index.get(provider_name, []):
+            link_test_target(pipeline_key, raw_test_path, provenance)
 
 
 def _provider_regression_suite_targets(
@@ -10335,7 +10379,7 @@ def _add_alert_rule_file_surfaces(
     payload = _alert_rule_file_payload(rules_path)
     artifact = _add_alert_rules_artifact(snapshot, root, rules_path, today)
     for group in _alert_rule_groups(payload):
-        _add_alert_rule_group_surfaces(
+        _process_alert_rule_group(
             snapshot,
             root,
             project,
@@ -10453,7 +10497,7 @@ def _add_alert_rule_group_surfaces(
 ) -> None:
     group_name = _alert_group_name(group, rules_path)
     for rule in _alert_group_rules(group):
-        _add_single_alert_surface(
+        _process_alert_rule(
             snapshot,
             root,
             project,
@@ -10466,6 +10510,62 @@ def _add_alert_rule_group_surfaces(
             target_context=target_context,
             memory_mapping=memory_mapping,
         )
+
+
+def _process_alert_rule_group(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    rules_path: Path,
+    artifact: NodeKey,
+    group: dict[str, object],
+    *,
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    target_context: AlertTargetContext,
+    memory_mapping: dict[str, object],
+) -> None:
+    _add_alert_rule_group_surfaces(
+        snapshot,
+        root,
+        project,
+        today,
+        rules_path,
+        artifact,
+        group,
+        dashboard_metrics=dashboard_metrics,
+        target_context=target_context,
+        memory_mapping=memory_mapping,
+    )
+
+
+def _process_alert_rule(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    rules_path: Path,
+    artifact: NodeKey,
+    group_name: str,
+    rule: dict[str, object],
+    *,
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    target_context: AlertTargetContext,
+    memory_mapping: dict[str, object],
+) -> None:
+    _add_single_alert_surface(
+        snapshot,
+        root,
+        project,
+        today,
+        rules_path,
+        artifact,
+        group_name,
+        rule,
+        dashboard_metrics=dashboard_metrics,
+        target_context=target_context,
+        memory_mapping=memory_mapping,
+    )
 
 
 def _alert_group_name(group: dict[str, object], rules_path: Path) -> str:
