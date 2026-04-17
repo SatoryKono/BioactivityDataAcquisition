@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Literal
+
 from bioetl.application.core.wiring.runtime import (
     BatchProcessingComponents,
     CheckpointManagerService,
@@ -82,6 +83,7 @@ def create_batch_processing_components(
         lock_validator=lock_validator,
     )
 
+
 def create_checkpoint_manager(
     checkpoint_port: CheckpointPort,
     logger: LoggerPort,
@@ -109,6 +111,7 @@ def create_checkpoint_manager(
         compatibility_policy=compatibility_policy,
     )
 
+
 def create_record_processor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -131,6 +134,7 @@ def create_record_processor_from_pipeline(
         lock_validator=lock_validator,
         tracer=tracer,
     )
+
 
 def create_batch_executor_from_pipeline(
     *,
@@ -174,4 +178,12 @@ def create_batch_executor_from_pipeline(
         batch_id_factory=batch_id_factory,
         domain_event_emitter=domain_event_emitter,
     )
-__all__ = ["BatchProcessingComponents", "create_batch_executor_from_pipeline", "create_batch_processing_components", "create_checkpoint_manager", "create_record_processor_from_pipeline"]
+
+
+__all__ = [
+    "BatchProcessingComponents",
+    "create_batch_executor_from_pipeline",
+    "create_batch_processing_components",
+    "create_checkpoint_manager",
+    "create_record_processor_from_pipeline",
+]

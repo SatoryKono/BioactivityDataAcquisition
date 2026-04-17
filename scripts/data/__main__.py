@@ -8,6 +8,7 @@ Usage:
 Canonical command groups:
     python -m scripts.ops.data <command>
     python -m scripts.engineering.qa.vcr <command>
+    python -m scripts.engineering.baselines <command>
 
 Commands:
     check-vcr-placement    Block VCR cassette anti-patterns

@@ -68,11 +68,16 @@ ______________________________________________________________________
 uv run python -m scripts.engineering.repo check-inventory --check
 uv run python -m scripts.engineering.qa check-c901 --target src/bioetl
 uv run python -m scripts.schema validate-configs
-uv run python -m scripts.data check-vcr-naming
+uv run python -m scripts.engineering.qa.vcr check-naming
+uv run python -m scripts.ops.data check-delta
 uv run python -m scripts.docs check-drift
 uv run python -m scripts.diagrams lint
 uv run python -m scripts.engineering.ci quality-gate
 ```
+
+`scripts.data` остаётся совместимым facade entrypoint для legacy вызовов, но
+канонические data/VCR команды теперь живут в `scripts.ops.data` и
+`scripts.engineering.qa.vcr`.
 
 Каждый скрипт также можно запустить напрямую (см. `scripts/<group>/README.md`).
 
@@ -88,9 +93,9 @@ ______________________________________________________________________
 | `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                  | `make clean` | Очистка кэшей и артефактов                 |
 | `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                  | —            | Консолидированный аудит очистки            |
 | `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                  | —            | Аудит соответствия File Policy             |
-| `vacuum_delta.py`              | scripts/data/        | Нет     | `uv run python -m scripts.data vacuum`             | —            | VACUUM Delta Lake таблиц                   |
-| `dq_baseline_update.py`        | scripts/data/        | Нет     | `uv run python -m scripts.data dq-baseline`        | —            | Пересчёт DQ baseline                       |
-| `verify_checksums.py`          | scripts/data/        | Нет     | `uv run python -m scripts.data checksums`          | —            | Верификация контрольных сумм               |
+| `vacuum_delta.py`              | scripts/ops/data/    | Нет     | `uv run python -m scripts.ops.data vacuum`         | —            | VACUUM Delta Lake таблиц                   |
+| `dq_baseline_update.py`        | scripts/engineering/baselines/ | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | — | Пересчёт DQ baseline |
+| `verify_checksums.py`          | scripts/ops/data/    | Нет     | `uv run python -m scripts.ops.data checksums`      | —            | Верификация контрольных сумм               |
 | `salt_rotate.py`               | scripts/ops/         | Нет     | —                                                  | —            | Ротация PII-соли                           |
 | `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`         | —            | Аудит naming conventions                   |
 | `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`    | —            | Линтер терминологии                        |

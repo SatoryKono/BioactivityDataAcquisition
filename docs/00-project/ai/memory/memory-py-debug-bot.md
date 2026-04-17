@@ -270,10 +270,10 @@ python -m scripts.engineering.diagnostics debug-storage    # Storage health chec
 python -m scripts.engineering.diagnostics inspect-vcr      # VCR cassette inspection
 
 # Data integrity checks
-python -m scripts.data check-vcr-placement     # VCR cassette placement
-python -m scripts.data check-vcr-naming        # VCR naming conventions
-python -m scripts.data check-delta             # Delta table integrity
-python -m scripts.data check-data-dir          # Data directory structure
+python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement
+python -m scripts.engineering.qa.vcr check-naming     # VCR naming conventions
+python -m scripts.ops.data check-delta                # Delta table integrity
+python -m scripts.ops.data check-data-dir             # Data directory structure
 
 # Schema/config validation
 python -m scripts.schema check-invariants --verbose

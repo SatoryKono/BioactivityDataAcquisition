@@ -396,12 +396,12 @@ uv run coverage html -d htmlcov
   exists, moved provider/pipeline paths without policy updates, or replay shape
   changes without review note.
 - **Pre-refresh checks**:
-  - `python -m scripts.data check-vcr-placement`
-  - `python -m scripts.data check-vcr-naming`
+  - `python -m scripts.engineering.qa.vcr check-placement`
+  - `python -m scripts.engineering.qa.vcr check-naming`
 - **Post-refresh checks**:
-  - `python -m scripts.data check-vcr-placement`
-  - `python -m scripts.data check-vcr-naming`
-  - `python -m scripts.data check-vcr-secrets`
+  - `python -m scripts.engineering.qa.vcr check-placement`
+  - `python -m scripts.engineering.qa.vcr check-naming`
+  - `python -m scripts.engineering.qa.vcr check-secrets`
   - `python -m scripts.engineering.qa report-vcr-metadata --check`
 
 ### 4.1. Быстрый старт для рекомендуемого локального прогона
