@@ -248,7 +248,7 @@ class InMemoryQuarantine:
 
     async def aclose(self) -> None:
         """Close quarantine storage (no-op for in-memory)."""
-        return None
+        return
 
     def clear(self) -> None:
         """Clear all records (test utility)."""

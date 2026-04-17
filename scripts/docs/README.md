@@ -9,6 +9,23 @@ python -m scripts.docs --help
 python -m scripts.docs <command> [args...]
 ```
 
+## Internal Structure
+
+The command surface stays compatibility-first at the top level of `scripts/docs/`,
+but shared logic is now consolidated under focused helpers:
+
+- `scripts/docs/checks/`: validation, drift, KPI, verification entrypoints
+- `scripts/docs/build/`: MkDocs build entrypoints
+- `scripts/docs/fixers/`: corrective maintenance and audit entrypoints
+- `scripts/docs/matrix/`: workbook and matrix-oriented entrypoints
+- `scripts/docs/common/paths.py`: repo roots, docs roots, generated-artifact filters
+- `scripts/docs/common/markdown.py`: shared markdown/link/nav regex helpers
+- `scripts/docs/common/xlsx.py`: shared low-level XLSX zip/XML helpers for workbook tooling
+
+Top-level command files remain in place as compatibility shims so existing CI
+jobs, docs, tests, and direct script invocations keep working while source code
+is consolidated incrementally.
+
 ## Commands
 
 | Command                               | Script                                                       | Description                                                                           |

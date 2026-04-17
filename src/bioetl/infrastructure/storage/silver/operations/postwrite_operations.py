@@ -142,6 +142,8 @@ class SilverPostwriteOperations:
             await self._host._maybe_export_csv(
                 table_name=ctx.table_name,
                 arrow_data=payload.arrow_data,
+                mode=ctx.mode,
+                validated_mode=payload.validated_mode,
                 primary_keys=ctx.primary_keys,
             )
         

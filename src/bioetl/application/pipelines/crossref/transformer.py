@@ -184,7 +184,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             raise ValueError("DOI is required for CrossRef Publication")
 
         # Cast to str for type safety (API always returns string DOIs)
-        raw_doi_str = str(raw_doi) if raw_doi else None
+        raw_doi_str = str(raw_doi)
 
         # Validate DOI format using Value Object
         # This catches malformed DOIs like "invalid", "10.1234", etc.

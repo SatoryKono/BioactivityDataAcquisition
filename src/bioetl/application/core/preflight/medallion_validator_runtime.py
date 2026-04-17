@@ -6,6 +6,12 @@ from bioetl.domain.exceptions import PolicyViolationError
 from bioetl.domain.medallion import Layer, MedallionPolicy, WriteMode, WriteModePolicy
 from bioetl.domain.types import ConfigValidationError, RunType
 
+_LAYER_PATHS_FIELD = "storage.paths"
+_UNIQUE_LAYER_PATHS_EXPECTED = "unique paths for each layer"
+_DISTINCT_LAYER_PATHS_RULE = (
+    "Medallion Architecture: layers MUST have distinct paths"
+)
+
 
 def validate_single_write_mode(
     *,
@@ -78,28 +84,28 @@ def validate_path_uniqueness(
     if bronze_path == silver_path:
         errors.append(
             ConfigValidationError(
-                field="storage.paths",
-                expected="unique paths for each layer",
+                field=_LAYER_PATHS_FIELD,
+                expected=_UNIQUE_LAYER_PATHS_EXPECTED,
                 actual=f"bronze_path == silver_path ({bronze_path})",
-                rule="Medallion Architecture: layers MUST have distinct paths",
+                rule=_DISTINCT_LAYER_PATHS_RULE,
             )
         )
     if silver_path == gold_path:
         errors.append(
             ConfigValidationError(
-                field="storage.paths",
-                expected="unique paths for each layer",
+                field=_LAYER_PATHS_FIELD,
+                expected=_UNIQUE_LAYER_PATHS_EXPECTED,
                 actual=f"silver_path == gold_path ({silver_path})",
-                rule="Medallion Architecture: layers MUST have distinct paths",
+                rule=_DISTINCT_LAYER_PATHS_RULE,
             )
         )
     if bronze_path == gold_path:
         errors.append(
             ConfigValidationError(
-                field="storage.paths",
-                expected="unique paths for each layer",
+                field=_LAYER_PATHS_FIELD,
+                expected=_UNIQUE_LAYER_PATHS_EXPECTED,
                 actual=f"bronze_path == gold_path ({bronze_path})",
-                rule="Medallion Architecture: layers MUST have distinct paths",
+                rule=_DISTINCT_LAYER_PATHS_RULE,
             )
         )
     return errors

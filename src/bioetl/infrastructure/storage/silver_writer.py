@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio as _asyncio
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -146,45 +147,39 @@ def _normalize_iso_datetime(value: datetime | str) -> datetime:
     return value
 
 
+def _coerce_silver_write_invocation(
+    *,
+    invocation: _SilverWriteInvocation | None,
+    legacy_kwargs: Mapping[str, object],
+    table_key: str = "table_name",
+) -> _SilverWriteInvocation:
+    """Accept the canonical invocation object while preserving legacy kwargs."""
+    if invocation is not None:
+        if legacy_kwargs:
+            unexpected = ", ".join(sorted(legacy_kwargs))
+            raise TypeError(
+                "unexpected legacy keyword arguments when invocation is provided: "
+                f"{unexpected}"
+            )
+        return invocation
+
+    payload = dict(legacy_kwargs)
+    if table_key != "table_name" and table_key in payload and "table_name" not in payload:
+        payload["table_name"] = payload.pop(table_key)
+    return _SilverWriteInvocation(**payload)  # type: ignore[arg-type]
+
+
 async def _write_single_target(
     writer: SilverWriter,
     *,
-    table_name: str,
-    records: list[BronzeRecord],
-    primary_keys: list[str],
-    schema: pa.Schema,
-    mode: str,
-    partition_cols: list[str] | None,
-    on_schema_mismatch: Literal["error", "evolve", "ignore"],
-    column_order: list[str] | None,
-    bronze_refs: list[BronzeWriteResult] | None,
-    key_nullability_rules: list[KeyNullabilityRule] | None,
-    run_id: RunID | None,
-    run_type: RunType | None,
-    source_batch_id: BatchID | None,
-    ingestion_ts: datetime | None,
+    invocation: _SilverWriteInvocation,
 ) -> SilverWriteResult | None:
     """Execute one physical Silver write target with tracing."""
     started_at, start_perf = datetime.now(UTC), time.perf_counter()
     return await execute_silver_write_with_tracing(
         tracing=writer._tracing,
         module_name=__name__,
-        invocation=_SilverWriteInvocation(
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            schema=schema,
-            mode=mode,
-            partition_cols=partition_cols,
-            on_schema_mismatch=on_schema_mismatch,
-            column_order=column_order,
-            bronze_refs=bronze_refs,
-            key_nullability_rules=key_nullability_rules,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
-        ),
+        invocation=invocation,
         started_at=started_at,
         start_perf=start_perf,
         execute_pipeline=writer._execute_silver_write_pipeline,
@@ -194,27 +189,14 @@ async def _write_single_target(
 async def _write_dual_targets(
     writer: SilverWriter,
     *,
-    logical_table_name: str,
-    records: list[BronzeRecord],
-    primary_keys: list[str],
-    schema: pa.Schema,
-    mode: str,
-    partition_cols: list[str] | None,
-    on_schema_mismatch: Literal["error", "evolve", "ignore"],
-    column_order: list[str] | None,
-    bronze_refs: list[BronzeWriteResult] | None,
-    key_nullability_rules: list[KeyNullabilityRule] | None,
-    run_id: RunID | None,
-    run_type: RunType | None,
-    source_batch_id: BatchID | None,
-    ingestion_ts: datetime | None,
+    invocation: _SilverWriteInvocation,
 ) -> SilverWriteResult | None:
     """Write all versioned Silver targets and fail the logical write on any error."""
     assert writer._contract_rollout_policy is not None  # guarded by caller
 
     active_result: SilverWriteResult | None = None
     write_targets = resolve_write_targets(
-        logical_table_name,
+        invocation.table_name,
         writer._contract_rollout_policy.write_versions,
     )
     for contract_version, physical_table in zip(
@@ -226,26 +208,26 @@ async def _write_dual_targets(
             result = await writer._write_single_target(
                 table_name=physical_table,
                 records=_project_records_for_contract_version(
-                    records,
+                    invocation.records,
                     contract_version=contract_version,
                 ),
-                primary_keys=primary_keys,
-                schema=schema,
-                mode=mode,
-                partition_cols=partition_cols,
-                on_schema_mismatch=on_schema_mismatch,
-                column_order=column_order,
-                bronze_refs=bronze_refs,
-                key_nullability_rules=key_nullability_rules,
-                run_id=run_id,
-                run_type=run_type,
-                source_batch_id=source_batch_id,
-                ingestion_ts=ingestion_ts,
+                primary_keys=invocation.primary_keys,
+                schema=invocation.schema,
+                mode=invocation.mode,
+                partition_cols=invocation.partition_cols,
+                on_schema_mismatch=invocation.on_schema_mismatch,
+                column_order=invocation.column_order,
+                bronze_refs=invocation.bronze_refs,
+                key_nullability_rules=invocation.key_nullability_rules,
+                run_id=invocation.run_id,
+                run_type=invocation.run_type,
+                source_batch_id=invocation.source_batch_id,
+                ingestion_ts=invocation.ingestion_ts,
             )
         except (BioETLError, OSError, RuntimeError, ValueError) as exc:
             writer.logger.error(
                 "silver_dual_write_failed",
-                logical_table=logical_table_name,
+                logical_table=invocation.table_name,
                 failed_contract_version=contract_version,
                 failed_target_table=physical_table,
                 active_contract_version=writer._contract_rollout_policy.active_version,
@@ -623,6 +605,8 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         *,
         table_name: str,
         arrow_data: pa.Table,
+        mode: str,
+        validated_mode: SilverWriteMode,
         primary_keys: list[str],
     ) -> None:
         """Fallback CSV export method for backward compatibility.
@@ -631,6 +615,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         is not available. It's called by postwrite operations as a fallback
         when self._maintenance is None.
         """
+        del table_name, arrow_data, mode, validated_mode, primary_keys
         # No-op implementation - CSV export requires maintenance service
         # This maintains backward compatibility with tests that don't provide
         # full runtime_services but still trigger postwrite operations
@@ -899,75 +884,34 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     async def _write_single_target(
         self,
         *,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        schema: pa.Schema,
-        mode: str,
-        partition_cols: list[str] | None,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        column_order: list[str] | None,
-        bronze_refs: list[BronzeWriteResult] | None,
-        key_nullability_rules: list[KeyNullabilityRule] | None,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
+        invocation: _SilverWriteInvocation | None = None,
+        **legacy_kwargs: object,
     ) -> SilverWriteResult | None:
         """Compatibility seam for direct test patching and dual-write orchestration."""
+        resolved_invocation = _coerce_silver_write_invocation(
+            invocation=invocation,
+            legacy_kwargs=legacy_kwargs,
+        )
         return await _write_single_target(
             self,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            schema=schema,
-            mode=mode,
-            partition_cols=partition_cols,
-            on_schema_mismatch=on_schema_mismatch,
-            column_order=column_order,
-            bronze_refs=bronze_refs,
-            key_nullability_rules=key_nullability_rules,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            invocation=resolved_invocation,
         )
 
     async def _write_dual_targets(
         self,
         *,
-        logical_table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        schema: pa.Schema,
-        mode: str,
-        partition_cols: list[str] | None,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        column_order: list[str] | None,
-        bronze_refs: list[BronzeWriteResult] | None,
-        key_nullability_rules: list[KeyNullabilityRule] | None,
-        run_id: RunID | None,
-        run_type: RunType | None,
-        source_batch_id: BatchID | None,
-        ingestion_ts: datetime | None,
+        invocation: _SilverWriteInvocation | None = None,
+        **legacy_kwargs: object,
     ) -> SilverWriteResult | None:
         """Compatibility seam for direct test patching and dual-write orchestration."""
+        resolved_invocation = _coerce_silver_write_invocation(
+            invocation=invocation,
+            legacy_kwargs=legacy_kwargs,
+            table_key="logical_table_name",
+        )
         return await _write_dual_targets(
             self,
-            logical_table_name=logical_table_name,
-            records=records,
-            primary_keys=primary_keys,
-            schema=schema,
-            mode=mode,
-            partition_cols=partition_cols,
-            on_schema_mismatch=on_schema_mismatch,
-            column_order=column_order,
-            bronze_refs=bronze_refs,
-            key_nullability_rules=key_nullability_rules,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            invocation=resolved_invocation,
         )
 
     def _validate_silver_pandera(
@@ -1180,7 +1124,12 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         # Convert column stats dictionaries to ColumnStats objects
         from bioetl.domain.value_objects.dq_metrics import ColumnStats
         column_stats_objects = {}
-        records_length = len(records) if hasattr(records, '__len__') else (records.height if hasattr(records, 'height') else 0)
+        if hasattr(records, "__len__"):
+            records_length = len(records)
+        elif hasattr(records, "height"):
+            records_length = records.height
+        else:
+            records_length = 0
         for col_name, stats_dict in column_stats.items():
             column_stats_objects[col_name] = ColumnStats(
                 null_rate=stats_dict["null_count"] / records_length if records_length > 0 else 0.0,

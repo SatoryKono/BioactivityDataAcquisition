@@ -48,7 +48,7 @@ class InMemoryCheckpoint:
 
     async def aclose(self) -> None:
         """Close checkpoint storage (no-op for in-memory)."""
-        return None
+        return
 
     def clear(self) -> None:
         """Clear all checkpoints (test utility)."""
