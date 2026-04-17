@@ -21,6 +21,7 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 
 # === Fixed Value Constants ===
 MAPPING_STATUSES = ["found", "not_found", "error", "multiple"]
+_SERIES_BOOL = "Series[bool]"
 
 
 class IDMappingSchema(ETLRecordSchema):
@@ -39,7 +40,7 @@ class IDMappingSchema(ETLRecordSchema):
     @pa.check("target_id", name="target_id_format")
     def _check_target_id(cls, series: Series[str]) -> Series[bool]:
         """Validate ChEMBL target ID format."""
-        return cast("Series[bool]", series.str.match(r"^CHEMBL\d+$"))
+        return cast(_SERIES_BOOL, series.str.match(r"^CHEMBL\d+$"))
 
     # === Mapping Result ===
     uniprot_accession: Series[str] | None = pa.Field(
@@ -51,7 +52,7 @@ class IDMappingSchema(ETLRecordSchema):
     def _check_uniprot_accession(cls, series: Series[str]) -> Series[bool]:
         """Validate UniProt accession format (6-10 alphanumeric chars)."""
         return cast(
-            "Series[bool]", series.isna() | series.str.match(r"^[A-Z0-9]{6,10}$")
+            _SERIES_BOOL, series.isna() | series.str.match(r"^[A-Z0-9]{6,10}$")
         )
 
     mapping_status: Series[str] = pa.Field(
@@ -62,7 +63,7 @@ class IDMappingSchema(ETLRecordSchema):
     @pa.check("mapping_status", name="mapping_status_values")
     def _check_mapping_status(cls, series: Series[str]) -> Series[bool]:
         """Validate mapping status is one of the allowed values."""
-        return cast("Series[bool]", series.isin(MAPPING_STATUSES))
+        return cast(_SERIES_BOOL, series.isin(MAPPING_STATUSES))
 
     # === UniProt Entry Metadata ===
     uniprot_entry_name: Series[str] | None = pa.Field(
