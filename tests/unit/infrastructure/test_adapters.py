@@ -152,7 +152,9 @@ class TestPubChemAdapter:
         )
 
         assert adapter.provider_name == "pubchem"
-        assert adapter.rate_limiter.rate == 5.0  # 5 req/sec per RULES.md
+        assert adapter.rate_limiter.rate == pytest.approx(
+            5.0
+        )  # 5 req/sec per RULES.md
 
     def test_adapter_with_custom_rate(
         self,
@@ -179,7 +181,7 @@ class TestPubChemAdapter:
             fetch_strategies=fetch_strategies,
         )
 
-        assert adapter.rate_limiter.rate == 10.0
+        assert adapter.rate_limiter.rate == pytest.approx(10.0)
 
     def test_thread_pool_injected(
         self,

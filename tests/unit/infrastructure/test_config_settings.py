@@ -35,9 +35,16 @@ class TestPipelineSettings:
         assert settings.silver_metadata_atomic_retry.max_retries == 20
         assert settings.silver_merge_retry.max_retries == 3
         assert settings.silver_merge_timeout.profile == "default"
-        assert settings.silver_merge_timeout.execution_timeout_seconds == 45.0
-        assert settings.silver_merge_timeout.unit_execution_timeout_seconds == 15.0
-        assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == 90.0
+        assert settings.silver_merge_timeout.execution_timeout_seconds == pytest.approx(
+            45.0
+        )
+        assert (
+            settings.silver_merge_timeout.unit_execution_timeout_seconds
+            == pytest.approx(15.0)
+        )
+        assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == pytest.approx(
+            90.0
+        )
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is True
         assert settings.control_plane.checkpoint_compatibility_policy == "soft_fail"
@@ -79,8 +86,12 @@ class TestPipelineSettings:
         assert settings.silver_metadata_atomic_retry.adaptive_backoff is False
         assert settings.silver_merge_retry.max_retries == 1
         assert settings.silver_merge_timeout.profile == "e2e"
-        assert settings.silver_merge_timeout.execution_timeout_seconds == 60.0
-        assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == 120.0
+        assert settings.silver_merge_timeout.execution_timeout_seconds == pytest.approx(
+            60.0
+        )
+        assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == pytest.approx(
+            120.0
+        )
         assert settings.silver_merge_timeout.max_retries == 0
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is False
@@ -337,8 +348,8 @@ class TestYamlConfigToDomain:
         result = yaml_config_to_domain(yaml_config)
 
         assert isinstance(result.dq, DomainDQConfig)
-        assert result.dq.soft_fail_threshold == 0.10
-        assert result.dq.hard_fail_threshold == 0.30
+        assert result.dq.soft_fail_threshold == pytest.approx(0.10)
+        assert result.dq.hard_fail_threshold == pytest.approx(0.30)
 
     def test_pipeline_yaml_config_converter_function(self) -> None:
         """Test converter function maps PipelineYamlConfig consistently."""
@@ -369,7 +380,7 @@ class TestYamlConfigToDomain:
         assert isinstance(result, PipelineConfig)
         assert result.pipeline_name == "test"
         assert result.provider == "test"
-        assert result.dq.soft_fail_threshold == 0.05
+        assert result.dq.soft_fail_threshold == pytest.approx(0.05)
 
     def test_gold_filters_config_to_domain_method(self) -> None:
         """Test GoldFiltersConfig.to_domain() method."""
