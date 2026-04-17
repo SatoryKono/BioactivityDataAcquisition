@@ -42,7 +42,7 @@ is consolidated incrementally.
 | `enrich-matrix-normalization-details` | `scripts/docs/matrix/enrich_normalization_details.py`        | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook  |
 | `filter-matrix-rows`                  | `scripts/docs/matrix/filter_rows.py`                         | Remove rows from the canonical ChEMBL matrix workbook by column value                 |
 | `normalize-matrix-values`             | `scripts/docs/matrix/normalize_values.py`                    | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |
-| `sync-matrix-structural-policy`       | `scripts/docs/sync_chembl_matrix_structural_policy.py`       | Reconcile workbook policy columns with the current structural Silver policy semantics |
+| `sync-matrix-structural-policy`       | `scripts/docs/matrix/sync_structural_policy.py`              | Reconcile workbook policy columns with the current structural Silver policy semantics |
 | `fix-links-auto`                      | `scripts/docs/fix_doc_links_auto.py`                         | Auto-fix broken documentation links                                                   |
 | `fix-links-explicit`                  | `scripts/docs/fix_doc_links_explicit.py`                     | Fix documentation links with explicit rules                                           |
 | `fix-link-warnings`                   | `scripts/docs/fix_link_warnings.py`                          | Fix link warnings in specified files                                                  |

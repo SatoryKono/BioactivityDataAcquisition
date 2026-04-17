@@ -50,7 +50,7 @@ spawn_agent(
 | orchestrator (direct) | `src/bioetl/`, `tests/` | `configs/`, `docs/` |
 | py-architecture-debt-bot | `src/bioetl/`, `tests/`, `reports/quality/`, root task JSON artifacts | `configs/`, `docs/` (edits delegated) |
 | py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
-| py-doc-bot | `docs/`, docstrings, `scripts/agents/diagrams/` | `configs/`, `tests/` |
+| py-doc-bot | `docs/`, docstrings, `docs/00-project/ai/agents/scripts/diagrams/` | `configs/`, `tests/` |
 | py-test-bot | `tests/` | `src/bioetl/`, `configs/` |
 | py-debug-bot | `src/bioetl/`, `tests/` (fixes) | `configs/`, `docs/` |
 | py-audit-bot | — (read-only) | всё |
@@ -64,11 +64,14 @@ spawn_agent(
 
 Перед repo-wide structural выводами, hotspot-программами и package-reorg инициативами сверяйся с текущими evidence packs:
 
-- [Project File Structure Summary](../../../../reports/evidence/project-file-structure/SUMMARY.md)
-- [Project Package Topology Summary](../../../../reports/evidence/project-package-topology/SUMMARY.md)
-- [Project Package Topology Recursive Summary](../../../../reports/evidence/project-package-topology-recursive/SUMMARY.md)
-- [Governance Signals Summary](../../../../reports/evidence/governance-signals/SUMMARY.md)
-- [Governance Signals Decisions](../../../../reports/evidence/governance-signals/04-decisions/SUMMARY.md)
+- [Project File Structure Summary](../../docs/reports/evidence/project-file-structure/SUMMARY.md)
+- [Project File Structure Decisions](../../docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md)
+- [Project Package Topology Summary](../../docs/reports/evidence/project-package-topology/SUMMARY.md)
+- [Project Package Topology Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/SYN-project-package-topology.md)
+- [Topology vs Governance Cross-Synthesis](../../docs/reports/evidence/project-package-topology/03-synthesis/CROSS-SYNTHESIS-topology-vs-governance-signals.md)
+- [Project Package Topology Decisions](../../docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md)
+- [Governance Signals Summary](../../docs/reports/evidence/governance-signals/SUMMARY.md)
+- [Governance Signals Decisions](../../docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md)
 
 Operational defaults:
 - package count сам по себе не является refactor trigger;

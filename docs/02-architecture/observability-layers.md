@@ -223,11 +223,11 @@ Compatibility wrappers may exist for older builder entrypoints, but they must
 delegate back to the canonical bootstrap path rather than reimplementing
 assembly logic.
 
-Composition also owns the sanctioned fallback-resolution helpers for
+Composition also owns the sanctioned fallback-resolution module for
 observability ports:
 
-- `bioetl.composition.observability_resolution.resolve_metrics_port`
-- `bioetl.composition.observability_resolution.resolve_tracing_port`
+- `bioetl.composition.observability_resolution`
+- exported helpers: `resolve_metrics_port(...)` and `resolve_tracing_port(...)`
 
 Null-object fallback selection (`NoOpMetrics`, `NoOpTracing`) must happen in
 these composition-owned seams rather than in application or infrastructure
@@ -302,7 +302,8 @@ All shipped observability must follow these rules:
 - `run_id`, `manifest_id`, payload hashes, filesystem paths, and other
   per-run/per-record identifiers must not appear in Prometheus labels
 - logs keep `run_id`, `pipeline`, and `stage` for correlation
-- traces keep `bioetl.run_id` and phase-specific attributes
+- traces keep the canonical run-correlation attribute defined by the
+  observability contract together with phase-specific attributes
 
 See [observability.md](../04-reference/contracts/observability.md) for the
 canonical runtime contract and [sli-slo-baseline.md](../05-operations/sli-slo-baseline.md)

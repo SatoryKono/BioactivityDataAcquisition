@@ -10,7 +10,7 @@ Last verified: '2026-04-03'
 
 # BioETL Pipeline Documentation
 
-*Updated: 2026-04-03 | Aligned with RULES.md v6.1.0*
+*Updated: 2026-04-17 | Aligned with RULES.md v6.1.2*
 
 This directory contains the active pipeline reference surface for BioETL,
 including composite pipelines.

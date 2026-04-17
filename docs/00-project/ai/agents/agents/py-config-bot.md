@@ -2,14 +2,14 @@
 name: py-config-bot
 description: |
   Создание, обновление и валидация YAML-конфигураций BioETL:
-  pipeline configs, DQ rules, filter rules, composite pipeline configs.
+  unified entity configs, provider configs, composite pipeline configs.
   Единственный субагент, модифицирующий файлы в configs/.
 
   Триггеры:
   - Scaffolding конфигов для нового entity
   - Обновление существующих конфигов
   - Composite pipeline config
-  - DQ migration (inline → externalized)
+  - DQ/filter hierarchy maintenance inside unified configs
   - Config gap remediation
   - Config validation
 model: sonnet
@@ -25,6 +25,7 @@ model: sonnet
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-config-bot.md` — config hierarchy, templates, ADR compliance, composite rules, validation.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
+> Evidence calibration: `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`, `docs/reports/evidence/project-package-topology/SUMMARY.md`
 
 ---
 
@@ -43,8 +44,8 @@ model: sonnet
 - **New pipeline config**: scaffolding полного набора конфигов для нового entity.
 - **Config update**: изменение существующих конфигураций (поля, пороги, пути).
 - **Composite design**: создание/обновление composite pipeline (seed/enrichers/merge).
-- **DQ migration**: миграция inline DQ-правил в externalized-формат (ADR-027).
-- **Gap remediation**: исправление findings из `config_gap_analysis.py`.
+- **Hierarchy cleanup**: нормализация provider/entity overrides внутри unified config hierarchy.
+- **Gap remediation**: исправление findings из `py-config-bot-1.py`.
 - **Validate**: проверка compliance без изменений.
 
 ---
@@ -72,7 +73,7 @@ model: sonnet
 
 ## Обязательные правила
 
-1. Все конфигурации MUST проходить `uv run python scripts/agents/py-config-bot-1.py -v` без critical findings.
+1. Все конфигурации MUST проходить `uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` без critical findings.
 2. DQ и filter настройки являются частью unified hierarchy: `configs/base/*` → `configs/providers/{provider}.yaml` → `configs/entities/{provider}/{entity}.yaml`.
 3. Silver sink MUST содержать `sort_by` (ADR-014).
 4. Composite config MUST содержать `seed`, `enrichers`, `merge` (ADR-026).

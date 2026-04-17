@@ -11,6 +11,22 @@ Last verified: '2026-04-12'
 
 # Neo4j MCP Backend - Recovery Guide
 
+## Trigger
+
+- MCP-backed Neo4j workflows fail because the backend is unhealthy, unreachable, or not fully ready.
+- Use this runbook when Docker Desktop + WSL connectivity appears correct but driver or HTTP readiness checks remain unstable.
+
+## Impact
+
+- Neo4j-backed memory and audit tooling remain unavailable until backend readiness is restored.
+- MCP wrappers may appear healthy while all real graph operations continue to fail.
+
+## Preconditions
+
+- Access to Docker Desktop on Windows and the shared repository checkout.
+- Permission to restart Docker Desktop and recreate the local Neo4j container.
+- This runbook is for auxiliary Neo4j/MCP tooling only; it does not change the BioETL runtime ADR-010 Local-Only posture.
+
 ## Problem Summary
 
 The MCP layer is configured correctly, but the Neo4j backend has shown intermittent startup and runtime instability in Docker Desktop + WSL.
@@ -23,7 +39,9 @@ Confirmed facts:
 
 This guide focuses on backend recovery, not MCP reconfiguration.
 
-## Recommended Recovery Flow
+## Procedure
+
+### Recommended Recovery Flow
 
 ### 1. Restart Docker Desktop
 
@@ -99,6 +117,25 @@ node seed_test_docs_memory.js
 node query_test_docs_memory.js
 ```
 
+## Verification
+
+- `docker ps` shows `bioetl-neo4j` as `Up`
+- `curl http://localhost:7474/` returns `200` or `302`
+- `node test_neo4j_connection.js` succeeds
+- `bash scripts/memory/setup/wsl_startup.sh` succeeds
+- `node seed_test_docs_memory.js` succeeds
+- `node query_test_docs_memory.js` returns counts greater than zero
+
+## Recovery
+
+- If the recreated container remains unstable, stop seed/query operations and revert to the last known working local Docker Desktop state before reattempting MCP usage.
+- If WSL validation fails while Windows validation passes, keep the backend stopped for MCP operations and return to `bash scripts/memory/setup/wsl_startup.sh` diagnostics before additional config changes.
+
+## Post-incident
+
+- Capture the failing Docker logs, readiness checks, and which recovery step restored stability.
+- Update this runbook or the related setup guides if the restored path differs from the documented maintained flow.
+
 ## Maintained Files
 
 | File | Purpose |
@@ -155,18 +192,14 @@ and verify that:
 - TLS is not yet proven as the primary root cause.
 - `/tmp` scripts are not the maintained execution path anymore.
 
-## Success Checklist
-
-- `docker ps` shows `bioetl-neo4j` as `Up`
-- `curl http://localhost:7474/` returns `200` or `302`
-- `node test_neo4j_connection.js` succeeds
-- `bash scripts/memory/setup/wsl_startup.sh` succeeds
-- `node seed_test_docs_memory.js` succeeds
-- `node query_test_docs_memory.js` returns counts greater than zero
-
 ## MCP Status
 
 Once the backend is stable:
 - `neo4j-memory` MCP is already configured
 - no further MCP-layer changes are needed
 - Codex usage can start immediately
+
+## Compliance
+
+- Use this guide only for local Neo4j/MCP auxiliary tooling, not as runtime deployment guidance for BioETL.
+- Preserve the validation evidence from both Windows and WSL before declaring the backend recovered.
