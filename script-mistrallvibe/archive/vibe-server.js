@@ -4,11 +4,11 @@
  * Simple Node.js server for Mistral API proxy
  */
 
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
-const url = require('url');
+const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
+const https = require('node:https');
+const url = require('node:url');
 
 // Configuration
 const PORT = process.env.VIBE_PORT || 5173;

@@ -23,15 +23,15 @@ fi
 
 # Verify API key
 if [[ -z "${GEMINI_API_KEY:-}" ]] || [[ "${GEMINI_API_KEY}" == "your-api-key-here" ]]; then
-    echo "[ERROR] GEMINI_API_KEY not set or invalid in ${ENV_FILE}"
-    echo "[INFO] Please edit .env.gemini and add your API key from: https://aistudio.google.com/app/apikeys"
+    echo "[ERROR] GEMINI_API_KEY not set or invalid in ${ENV_FILE}" >&2
+    echo "[INFO] Please edit .env.gemini and add your API key from: https://aistudio.google.com/app/apikeys" >&2
     exit 1
 fi
 
 # Verify Python3
 if ! command -v python3 >/dev/null 2>&1; then
-    echo "[ERROR] python3 not found"
-    echo "[INFO] Install with: sudo apt-get install python3 python3-pip"
+    echo "[ERROR] python3 not found" >&2
+    echo "[INFO] Install with: sudo apt-get install python3 python3-pip" >&2
     exit 1
 fi
 
@@ -46,8 +46,8 @@ fi
 
 # Verify google-generativeai package
 if ! "${PYTHON_BIN}" -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('google.genai') or importlib.util.find_spec('google.generativeai') else 1)" 2>/dev/null; then
-    echo "[ERROR] Gemini Python SDK not installed"
-    echo "[INFO] Run setup: run-gemini.ps1 setup"
+    echo "[ERROR] Gemini Python SDK not installed" >&2
+    echo "[INFO] Run setup: run-gemini.ps1 setup" >&2
     exit 1
 fi
 

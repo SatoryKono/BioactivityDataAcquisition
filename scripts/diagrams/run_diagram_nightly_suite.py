@@ -83,6 +83,14 @@ def _err(message: str) -> None:
     sys.stderr.write(f"{message}\n")
 
 
+def _ensure_repo_path(path: Path) -> Path:
+    resolved_root = REPO_ROOT.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
+    return resolved_path
+
+
 def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> list[Path]:
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
@@ -627,11 +635,13 @@ def check_diag_t028(
 
 
 def build_alt_css(original_css: Path, target_css: Path) -> None:
-    content = original_css.read_text(encoding="utf-8")
+    safe_original = _ensure_repo_path(original_css)
+    safe_target = _ensure_repo_path(target_css)
+    content = safe_original.read_text(encoding="utf-8")
     content = content.replace("#f5f3ff", "#ede9fe")
     content = content.replace("#fff1f2", "#ffe4e6")
     content = content.replace("#111827", "#0f172a")
-    target_css.write_text(content, encoding="utf-8")
+    safe_target.write_text(content, encoding="utf-8")
 
 
 def check_diag_t029(

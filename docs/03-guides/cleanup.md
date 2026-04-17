@@ -25,13 +25,13 @@ Use the provided cleanup script:
 
 ```bash
 # Dry run (show what would be cleaned)
-python scripts/ops/cleanup_repository.py --dry-run
+python scripts/ops/support/repo/cleanup_repository.py --dry-run
 
 # Actually clean
-python scripts/ops/cleanup_repository.py
+python scripts/ops/support/repo/cleanup_repository.py
 
 # Clean specific categories
-python scripts/ops/cleanup_repository.py --cache --temp
+python scripts/ops/support/repo/cleanup_repository.py --cache --temp
 ```
 
 ### 3. Git LFS Setup
@@ -127,7 +127,7 @@ The repository includes pre-commit hooks that prevent cache files from being com
 
 ## 🎯 Best Practices
 
-1. **Always use dry-run first**: `python scripts/ops/cleanup_repository.py --dry-run`
+1. **Always use dry-run first**: `python scripts/ops/support/repo/cleanup_repository.py --dry-run`
 2. **Commit cleanup changes separately**: Makes reviews easier
 3. **Document exceptions**: If you need to keep a cache file, document why
 4. **Use Git LFS for large files**: Anything >1MB should use LFS

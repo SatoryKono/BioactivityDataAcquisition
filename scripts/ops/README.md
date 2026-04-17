@@ -1,35 +1,33 @@
 # scripts/ops
 
-`scripts/ops/` now separates stable executable tooling from internal helper
-assets and bounded maintenance scripts. Neo4j project-memory tooling lives
-under `scripts/memory/`, while canonical AI-facing setup and MCP operational
-scripts live under `scripts/ai/`.
+`scripts/ops/` now separates stable executable tooling into clear subdomains.
+Neo4j project-memory tooling lives under `scripts/memory/`, while canonical
+AI-facing setup and MCP operational scripts live under `scripts/ai/`.
 
 ## Structure
 
-- Top-level files are the supported executable/operator-facing entrypoints.
-- `support/` contains helper scripts sourced by top-level wrappers.
-- `maintenance/` contains one-off PR/issue wave helpers retained for
-  repeatability, not promoted as stable automation.
+- `launchers/` contains operator-facing launcher entrypoints and setup helpers.
+- `runtime/` contains deployment, health, docker, WSL, and Neo4j runtime helpers.
+- `observability/` contains Grafana/operator-facing observability utilities.
+- `maintenance/` contains bounded Git/GitHub/security maintainer workflows.
+- `support/` contains helper/support utilities that are not promoted as primary
+  entrypoints.
 - Canonical operational docs live under
   `docs/05-operations/tooling/scripts-ops/`.
 
 ## Stable entrypoints
 
-- launchers such as `codex.sh`, `codex.bat`
-- historical Windows/WSL AI launchers retained as compatibility wrappers
-- setup/bootstrap commands such as `setup_plugins.sh`
+- launchers under `launchers/codex/`
+- setup/bootstrap commands such as `launchers/codex/setup_plugins.sh`
 - supported non-memory Python commands exposed through `python -m scripts.ops`
 
-AI-oriented setup/check commands retained in this directory now act as
-compatibility facades that delegate to `scripts/ai/codex/`.
-AI-oriented launch and diagnostic commands retained in this directory also act
-as compatibility facades and delegate to `scripts/ai/codex/`.
+AI-oriented setup/check commands under `launchers/codex/` act as compatibility
+facades that delegate to `scripts/ai/codex/`.
 
 ## Internal-only zones
 
 - `support/load_repo_env.sh`
-- `script-codex/helper/ensure-codex-cli.sh`
+- `support/skills/`
 
 ## Legacy maintenance zone
 

@@ -70,7 +70,7 @@ if command -v rg >/dev/null 2>&1; then
             --glob '!docs/exports/**' \
             --glob '!docs/99-archive/**' \
             --glob '!scripts/check_ai_skills_layout.sh' \
-            --glob '!scripts/ops/check_ai_skills_layout.sh' \
+            --glob '!scripts/ops/support/skills/check_ai_skills_layout.sh' \
             --glob '!scripts/ai/codex/check_skills_layout.sh' \
             "docs/00-project/skills/" \
             "$REPO_ROOT/mkdocs.yml" \

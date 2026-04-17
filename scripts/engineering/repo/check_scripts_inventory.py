@@ -114,12 +114,12 @@ MODULE_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"((?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+)+)"
 )
 SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
-    "scripts/ops/codex-exec.bat": ("scripts/codex-exec.bat",),
-    "scripts/ops/codex.bat": ("scripts/codex.bat",),
-    "scripts/ops/start-wsl-proxy.bat": ("scripts/start-wsl-proxy.bat",),
-    "scripts/codex-exec.bat": ("scripts/ops/codex-exec.bat",),
-    "scripts/codex.bat": ("scripts/ops/codex.bat",),
-    "scripts/start-wsl-proxy.bat": ("scripts/ops/start-wsl-proxy.bat",),
+    "scripts/ops/launchers/codex/codex-exec.bat": ("scripts/codex-exec.bat",),
+    "scripts/ops/launchers/codex/codex.bat": ("scripts/codex.bat",),
+    "scripts/ops/runtime/wsl/start-wsl-proxy.bat": ("scripts/start-wsl-proxy.bat",),
+    "scripts/codex-exec.bat": ("scripts/ops/launchers/codex/codex-exec.bat",),
+    "scripts/codex.bat": ("scripts/ops/launchers/codex/codex.bat",),
+    "scripts/start-wsl-proxy.bat": ("scripts/ops/runtime/wsl/start-wsl-proxy.bat",),
 }
 MANIFEST_DEFAULT: Final[str] = "configs/quality/scripts_inventory_manifest.json"
 DEPRECATION_REPORT_DEFAULT: Final[str] = (
@@ -435,17 +435,17 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
         "scripts/rerender_grafana_screenshots.py",
     }
     legacy_manual_ops_scripts = {
-        "scripts/ops/maintenance/close_superseded_prs.sh",
-        "scripts/ops/maintenance/close_duplicate_prs_wave2.sh",
-        "scripts/ops/maintenance/close_duplicate_prs_wave3.sh",
+        "scripts/ops/maintenance/github/close_superseded_prs.sh",
+        "scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh",
+        "scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh",
     }
     legacy_issue_specific_ops_scripts = {
-        "scripts/ops/maintenance/post_issue_2597_progress.sh",
-        "scripts/ops/maintenance/close_issue_2597.sh",
-        "scripts/ops/maintenance/post_issue_rescope_comments.sh",
-        "scripts/ops/maintenance/update_issue_rescope_bodies.sh",
-        "scripts/ops/maintenance/close_great_expectations_spike_issue.sh",
-        "scripts/ops/maintenance/close_pandera_schema_drift_issue.sh",
+        "scripts/ops/maintenance/github/post_issue_2597_progress.sh",
+        "scripts/ops/maintenance/github/close_issue_2597.sh",
+        "scripts/ops/maintenance/github/post_issue_rescope_comments.sh",
+        "scripts/ops/maintenance/github/update_issue_rescope_bodies.sh",
+        "scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh",
+        "scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh",
     }
     legacy_internal_ai_launchers = {
         "scripts/ai/code-reviewer.sh",

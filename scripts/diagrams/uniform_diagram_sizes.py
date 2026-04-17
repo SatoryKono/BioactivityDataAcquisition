@@ -89,6 +89,14 @@ _UNIFORM_WIDTH_RE = re.compile(
 )
 _NBSP = "&nbsp;"
 
+
+def _ensure_repo_path(path: Path) -> Path:
+    repo_root = SCRIPT_DIR.parents[1].resolve()
+    resolved_path = path.resolve()
+    if repo_root != resolved_path and repo_root not in resolved_path.parents:
+        raise ValueError(f"refusing to process path outside {repo_root}: {resolved_path}")
+    return resolved_path
+
 # Flowchart node patterns:
 #   ID["Label text"]         — rectangle
 #   ID(["Label text"])       — rounded
@@ -802,7 +810,8 @@ def normalize_file(path: Path) -> tuple[str, str, bool]:
     """Normalize a single diagram file.
     Returns (original_content, normalized_content, changed).
     """
-    content = path.read_text(encoding="utf-8")
+    safe_path = _ensure_repo_path(path)
+    content = safe_path.read_text(encoding="utf-8")
     lines = content.splitlines()
     dtype = _detect_diagram_type(lines)
     if dtype == "class":
@@ -824,6 +833,7 @@ def find_diagram_files(targets: list[Path]) -> list[Path]:
     seen: set[Path] = set()
 
     for target in targets:
+        target = _ensure_repo_path(target)
         if target.is_file():
             if target.suffix in SUPPORTED_SUFFIXES and target not in seen:
                 seen.add(target)
@@ -954,7 +964,7 @@ def main() -> int:
             show_diff(path, original, normalized)
             print()
         else:
-            path.write_text(normalized, encoding="utf-8")
+            _ensure_repo_path(path).write_text(normalized, encoding="utf-8")
             print(f"  {GREEN}FIXED{NC}  {path}")
 
     # Summary

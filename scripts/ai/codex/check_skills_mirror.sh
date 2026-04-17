@@ -21,10 +21,29 @@ YELLOW='\033[0;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-log_info() { echo -e "${BLUE}[skills-mirror]${NC} $1"; }
-log_ok() { echo -e "${GREEN}[skills-mirror]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[skills-mirror]${NC} $1"; }
-log_err() { echo -e "${RED}[skills-mirror]${NC} $1"; }
+log_info() {
+    local message="${1}"
+    echo -e "${BLUE}[skills-mirror]${NC} ${message}"
+    return 0
+}
+
+log_ok() {
+    local message="${1}"
+    echo -e "${GREEN}[skills-mirror]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1}"
+    echo -e "${YELLOW}[skills-mirror]${NC} ${message}"
+    return 0
+}
+
+log_err() {
+    local message="${1}"
+    echo -e "${RED}[skills-mirror]${NC} ${message}" >&2
+    return 0
+}
 
 usage() {
     cat <<'EOF'
@@ -95,6 +114,8 @@ while IFS= read -r skill_file; do
     case "$relative_path" in
         agent-orchestration/SKILL.md|documentation-audit/SKILL.md|documentation-cascade-audit/SKILL.md|new-pipeline/SKILL.md|public/architecture-guardian/SKILL.md|py-audit-bot/SKILL.md|py-architecture-debt-bot/SKILL.md|py-code-bot/SKILL.md|py-config-bot/SKILL.md|py-debug-bot/SKILL.md|py-doc-bot/SKILL.md|py-plan-bot/SKILL.md|py-review-orchestrator/SKILL.md|py-test-bot/SKILL.md|py-test-swarm/SKILL.md|technical-designer-mermaid/SKILL.md|vcr-record/SKILL.md|verify-architecture/SKILL.md)
             needs_frontmatter=true
+            ;;
+        *)
             ;;
     esac
 

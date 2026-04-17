@@ -20,13 +20,13 @@ Last verified: '2026-04-12'
    - Ports: 7475 (HTTP), 7688 (Bolt)
    - Auth: neo4j / audit_secure_password
 
-2. ✅ **scripts/ops/start-neo4j-audit.ps1**
+2. ✅ **scripts/ops/runtime/neo4j/start-neo4j-audit.ps1**
    - PowerShell script to manage audit instance
    - Start: `.\scripts\ops\start-neo4j-audit.ps1`
    - Stop: `.\scripts\ops\start-neo4j-audit.ps1 -Stop`
    - Logs: `.\scripts\ops\start-neo4j-audit.ps1 -Logs`
 
-3. ✅ **scripts/ops/start-neo4j-audit.sh**
+3. ✅ **scripts/ops/runtime/neo4j/start-neo4j-audit.sh**
    - Bash version for WSL/Linux
    - Same functionality as PowerShell version
 
@@ -51,7 +51,7 @@ Last verified: '2026-04-12'
 ### Quick Setup (5 minutes)
 
 - [ ] Review docker-compose.neo4j-audit.yml configuration
-- [ ] Review scripts/ops/start-neo4j-audit.ps1 (or .sh for WSL)
+- [ ] Review scripts/ops/runtime/neo4j/start-neo4j-audit.ps1 (or .sh for WSL)
 - [ ] Review src/utils/neo4j_audit.py helper functions
 
 ### Code Integration (30 minutes)
@@ -269,8 +269,8 @@ live --report-fast
 | File | Purpose | Status |
 |------|---------|--------|
 | docker-compose.neo4j-audit.yml | Container config | ✅ Ready |
-| scripts/ops/start-neo4j-audit.ps1 | Start/stop script (PowerShell) | ✅ Ready |
-| scripts/ops/start-neo4j-audit.sh | Start/stop script (Bash) | ✅ Ready |
+| scripts/ops/runtime/neo4j/start-neo4j-audit.ps1 | Start/stop script (PowerShell) | ✅ Ready |
+| scripts/ops/runtime/neo4j/start-neo4j-audit.sh | Start/stop script (Bash) | ✅ Ready |
 | src/utils/neo4j_audit.py | Connection helper | ✅ Ready |
 | NEO4J_AUDIT_INSTANCE_GUIDE.md | User guide | ✅ Ready |
 | This file | Implementation guide | ✅ Ready |

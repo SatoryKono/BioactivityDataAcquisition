@@ -11,5 +11,5 @@ echo.
 echo [compat] Delegating to scripts\ai\codex\launch.bat
 echo.
 
-call "%~dp0..\ai\codex\launch.bat" %*
+call "%~dp0..\..\..\ai\codex\launch.bat" %*
 exit /b %errorlevel%

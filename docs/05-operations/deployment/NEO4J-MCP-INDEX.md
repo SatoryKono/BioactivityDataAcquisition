@@ -68,7 +68,7 @@ codex mcp get neo4j-memory
 bash scripts/ai/mcp/check_neo4j_memory.sh
 
 # (Optional) Quick start helper
-bash scripts/ops/neo4j_quick_start.sh
+bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh
 ```
 
 ### Step 3: Access Neo4j Browser
@@ -103,7 +103,7 @@ bash scripts/ai/mcp/check.sh
 bash scripts/ai/mcp/check_neo4j_memory.sh
 
 # Quick startup with auto-verification
-bash scripts/ops/neo4j_quick_start.sh
+bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh
 ```
 
 ---

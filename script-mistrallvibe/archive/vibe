@@ -19,9 +19,23 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log_error() { echo -e "${RED}[vibe]${NC} ERROR: $1" >&2; }
-log_warn() { echo -e "${YELLOW}[vibe]${NC} $1"; }
-log_info() { echo -e "${BLUE}[vibe]${NC} $1"; }
+log_error() {
+    local message="${1}"
+    echo -e "${RED}[vibe]${NC} ERROR: ${message}" >&2
+    return 0
+}
+
+log_warn() {
+    local message="${1}"
+    echo -e "${YELLOW}[vibe]${NC} ${message}"
+    return 0
+}
+
+log_info() {
+    local message="${1}"
+    echo -e "${BLUE}[vibe]${NC} ${message}"
+    return 0
+}
 
 # Ensure user tools are in PATH
 export PATH="${HOME}/.local/bin:${PATH}"

@@ -13,16 +13,36 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+SEPARATOR="=================================================="
 
-log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
-log_error() { echo -e "${RED}[X]${NC} $1"; }
-log_info() { echo -e "${BLUE}[i]${NC} $1"; }
+log_success() {
+    local message="${1}"
+    echo -e "${GREEN}[✓]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1}"
+    echo -e "${YELLOW}[!]${NC} ${message}"
+    return 0
+}
+
+log_error() {
+    local message="${1}"
+    echo -e "${RED}[X]${NC} ${message}" >&2
+    return 0
+}
+
+log_info() {
+    local message="${1}"
+    echo -e "${BLUE}[i]${NC} ${message}"
+    return 0
+}
 
 echo ""
-echo "=================================================="
+echo "${SEPARATOR}"
 echo "  Mistral Vibe Setup"
-echo "=================================================="
+echo "${SEPARATOR}"
 echo ""
 
 # Step 1: Check Python
@@ -104,23 +124,19 @@ if [[ -d "${LOCAL_BIN}" ]] && ! command -v vibe >/dev/null 2>&1; then
     log_warn "Adding ~/.local/bin to PATH"
     
     # Update bashrc
-    if [[ -f "${HOME}/.bashrc" ]]; then
-        if ! grep -q '.local/bin' "${HOME}/.bashrc"; then
-            echo "" >> "${HOME}/.bashrc"
-            echo "# Add local bin to PATH (added by vibe setup)" >> "${HOME}/.bashrc"
-            echo "export PATH=\"${HOME}/.local/bin:\${PATH}\"" >> "${HOME}/.bashrc"
-            log_success "Updated ~/.bashrc"
-        fi
+    if [[ -f "${HOME}/.bashrc" ]] && ! grep -q '.local/bin' "${HOME}/.bashrc"; then
+        echo "" >> "${HOME}/.bashrc"
+        echo "# Add local bin to PATH (added by vibe setup)" >> "${HOME}/.bashrc"
+        echo "export PATH=\"${HOME}/.local/bin:\${PATH}\"" >> "${HOME}/.bashrc"
+        log_success "Updated ~/.bashrc"
     fi
     
     # Update zshrc if exists
-    if [[ -f "${HOME}/.zshrc" ]]; then
-        if ! grep -q '.local/bin' "${HOME}/.zshrc"; then
-            echo "" >> "${HOME}/.zshrc"
-            echo "# Add local bin to PATH (added by vibe setup)" >> "${HOME}/.zshrc"
-            echo "export PATH=\"${HOME}/.local/bin:\${PATH}\"" >> "${HOME}/.zshrc"
-            log_success "Updated ~/.zshrc"
-        fi
+    if [[ -f "${HOME}/.zshrc" ]] && ! grep -q '.local/bin' "${HOME}/.zshrc"; then
+        echo "" >> "${HOME}/.zshrc"
+        echo "# Add local bin to PATH (added by vibe setup)" >> "${HOME}/.zshrc"
+        echo "export PATH=\"${HOME}/.local/bin:\${PATH}\"" >> "${HOME}/.zshrc"
+        log_success "Updated ~/.zshrc"
     fi
     
     # Apply to current session
@@ -140,9 +156,9 @@ fi
 echo ""
 
 # Step 5: Display next steps
-echo "=================================================="
+echo "${SEPARATOR}"
 log_success "Setup completed successfully!"
-echo "=================================================="
+echo "${SEPARATOR}"
 echo ""
 log_info "Next steps:"
 echo "  1. Get your API key: https://console.mistral.ai/api-keys/"

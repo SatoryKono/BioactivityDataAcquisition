@@ -9,15 +9,21 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
+    local message="${1:-}"
+    echo -e "${RED}[ERROR]${NC} ${message}" >&2
+    return 0
 }
 
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1" >&2
+    local message="${1:-}"
+    echo -e "${BLUE}[INFO]${NC} ${message}" >&2
+    return 0
 }
 
 log_success() {
-    echo -e "${GREEN}[OK]${NC} $1"
+    local message="${1:-}"
+    echo -e "${GREEN}[OK]${NC} ${message}"
+    return 0
 }
 
 print_help() {
@@ -35,6 +41,7 @@ Examples:
   bash scripts/ai/codex/exec.sh "refactor ChemBL parser for performance"
   bash scripts/ai/codex/exec.sh --update "optimize database queries"
 EOF
+    return 0
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

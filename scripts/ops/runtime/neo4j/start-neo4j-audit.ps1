@@ -1,6 +1,6 @@
 #!/usr/bin/env powershell
 # Start Neo4j audit instance for live validation
-# Usage: .\scripts\ops\start-neo4j-audit.ps1
+# Usage: .\scripts\ops\runtime\neo4j\start-neo4j-audit.ps1
 
 param(
     [switch]$Stop,
@@ -42,10 +42,10 @@ if ($status -match "healthy") {
     Write-Host "  live --apply --only-complexity-layer --batch-size 5"
     Write-Host ""
     Write-Host "To view logs:" -ForegroundColor Cyan
-    Write-Host "  .\scripts\ops\start-neo4j-audit.ps1 -Logs"
+    Write-Host "  .\scripts\ops\runtime\neo4j\start-neo4j-audit.ps1 -Logs"
     Write-Host ""
     Write-Host "To stop:" -ForegroundColor Cyan
-    Write-Host "  .\scripts\ops\start-neo4j-audit.ps1 -Stop"
+    Write-Host "  .\scripts\ops\runtime\neo4j\start-neo4j-audit.ps1 -Stop"
 } else {
     Write-Host "❌ Instance failed to start. Check logs:" -ForegroundColor Red
     docker logs $containerName | Select-Object -Last 20

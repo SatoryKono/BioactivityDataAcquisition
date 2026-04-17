@@ -39,43 +39,43 @@ cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
 cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 
 # Interactive mode
-./scripts/ops/codex.sh
+./scripts/ops/launchers/codex/codex.sh
 
 # With a prompt
-./scripts/ops/codex.sh "explain the ChemBL data extraction"
+./scripts/ops/launchers/codex/codex.sh "explain the ChemBL data extraction"
 
 # Auto-execute
-./scripts/ops/codex-exec.sh "refactor the transformer class"
+./scripts/ops/launchers/codex/codex-exec.sh "refactor the transformer class"
 ```
 
 ## Useful Examples
 
 ### Code Analysis & Understanding
 ```bash
-./scripts/ops/codex.sh "explain how the silver layer transformations work"
-./scripts/ops/codex.sh "show me the data flow from bronze to gold layer"
-./scripts/ops/codex.sh "what are the performance bottlenecks in this pipeline"
+./scripts/ops/launchers/codex/codex.sh "explain how the silver layer transformations work"
+./scripts/ops/launchers/codex/codex.sh "show me the data flow from bronze to gold layer"
+./scripts/ops/launchers/codex/codex.sh "what are the performance bottlenecks in this pipeline"
 ```
 
 ### Code Generation & Improvement
 ```bash
-./scripts/ops/codex.sh "generate comprehensive unit tests for ChemBLExtractor"
-./scripts/ops/codex.sh "create Pydantic models for the bronze layer schema"
-./scripts/ops/codex.sh "add comprehensive error handling to data loaders"
+./scripts/ops/launchers/codex/codex.sh "generate comprehensive unit tests for ChemBLExtractor"
+./scripts/ops/launchers/codex/codex.sh "create Pydantic models for the bronze layer schema"
+./scripts/ops/launchers/codex/codex.sh "add comprehensive error handling to data loaders"
 ```
 
 ### Debugging & Problem Solving
 ```bash
-./scripts/ops/codex.sh "debug the gold_sink_disabled warning"
-./scripts/ops/codex.sh "explain why health_check_degraded happens on startup"
-./scripts/ops/codex.sh "analyze the chimbl_degraded_mode behavior"
+./scripts/ops/launchers/codex/codex.sh "debug the gold_sink_disabled warning"
+./scripts/ops/launchers/codex/codex.sh "explain why health_check_degraded happens on startup"
+./scripts/ops/launchers/codex/codex.sh "analyze the chimbl_degraded_mode behavior"
 ```
 
 ### Refactoring & Optimization
 ```bash
-./scripts/ops/codex.sh "optimize database queries for better performance"
-./scripts/ops/codex.sh "refactor compound transformer for vectorized operations"
-./scripts/ops/codex.sh "improve memory efficiency in the data pipeline"
+./scripts/ops/launchers/codex/codex.sh "optimize database queries for better performance"
+./scripts/ops/launchers/codex/codex.sh "refactor compound transformer for vectorized operations"
+./scripts/ops/launchers/codex/codex.sh "improve memory efficiency in the data pipeline"
 ```
 
 ## Files Available
@@ -128,25 +128,25 @@ curl -I https://api.openai.com
 ### "Permission denied" on scripts
 ```bash
 # In WSL, make scripts executable
-chmod +x ./scripts/ops/codex.sh
-chmod +x ./scripts/ops/codex-exec.sh
+chmod +x ./scripts/ops/launchers/codex/codex.sh
+chmod +x ./scripts/ops/launchers/codex/codex-exec.sh
 ```
 
 ## Advanced Options
 
 ### Use Different Model
 ```bash
-./scripts/ops/codex.sh -c model="o3" "analyze code"
+./scripts/ops/launchers/codex/codex.sh -c model="o3" "analyze code"
 ```
 
 ### Read-Only Sandbox (Safe Exploration)
 ```bash
-./scripts/ops/codex.sh -s read-only "review this code"
+./scripts/ops/launchers/codex/codex.sh -s read-only "review this code"
 ```
 
 ### Enable Web Search
 ```bash
-./scripts/ops/codex.sh --search "research ETL best practices"
+./scripts/ops/launchers/codex/codex.sh --search "research ETL best practices"
 ```
 
 ## Important Notes
@@ -161,7 +161,7 @@ chmod +x ./scripts/ops/codex-exec.sh
 
 1. **Try a simple analysis**
    ```bash
-   wsl -- bash ./scripts/ops/codex.sh "what is this project about?"
+   wsl -- bash ./scripts/ops/launchers/codex/codex.sh "what is this project about?"
    ```
 
 2. **Read the documentation**
@@ -224,4 +224,4 @@ source .wsl_proxy_env.sh
 
 You're ready to use Codex for code analysis, generation, and refactoring!
 
-**Start with:** `./scripts/ops/codex.sh "analyze the project"`
+**Start with:** `./scripts/ops/launchers/codex/codex.sh "analyze the project"`

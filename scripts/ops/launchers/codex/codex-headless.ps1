@@ -6,6 +6,6 @@ param(
     [string[]]$Args
 )
 
-$Target = Join-Path $PSScriptRoot "..\ai\codex\headless.ps1"
+$Target = Join-Path $PSScriptRoot "..\..\..\ai\codex\headless.ps1"
 & $Target @Args
 exit $LASTEXITCODE

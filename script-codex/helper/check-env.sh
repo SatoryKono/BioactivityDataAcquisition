@@ -15,10 +15,29 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[⚠]${NC} $1"; }
-log_error() { echo -e "${RED}[✗]${NC} $1" >&2; }
-log_info() { echo -e "${BLUE}[i]${NC} $1"; }
+log_success() {
+    local message="${1:-}"
+    echo -e "${GREEN}[✓]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1:-}"
+    echo -e "${YELLOW}[⚠]${NC} ${message}"
+    return 0
+}
+
+log_error() {
+    local message="${1:-}"
+    echo -e "${RED}[✗]${NC} ${message}" >&2
+    return 0
+}
+
+log_info() {
+    local message="${1:-}"
+    echo -e "${BLUE}[i]${NC} ${message}"
+    return 0
+}
 
 echo ""
 echo "=================================================="

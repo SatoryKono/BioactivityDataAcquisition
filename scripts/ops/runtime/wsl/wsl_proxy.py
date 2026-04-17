@@ -4,9 +4,9 @@ Listens on 0.0.0.0:3128 so WSL2 can reach it via the Windows host IP.
 Supports both HTTP CONNECT (for HTTPS) and plain HTTP forwarding.
 
 Usage:
-    python scripts/ops/wsl_proxy.py          # foreground
-    pythonw scripts/ops/wsl_proxy.py         # background (no console)
-    start /B python scripts/ops/wsl_proxy.py # background via cmd
+    python scripts/ops/runtime/wsl/wsl_proxy.py          # foreground
+    pythonw scripts/ops/runtime/wsl/wsl_proxy.py         # background (no console)
+    start /B python scripts/ops/runtime/wsl/wsl_proxy.py # background via cmd
 """
 
 from __future__ import annotations

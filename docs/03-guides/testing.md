@@ -39,7 +39,7 @@ Canonical local execution paths:
 Wrappers `run_pytest.ps1|.sh` по умолчанию добавляют флаги
 `--cov=src/bioetl --cov-report=term -q --maxfail=1`, если запуск не был вызван
 с `--help` / `--version`. WSL-обёртка дополнительно вызывает
-`scripts/ops/setup_plugins.sh --pytest-only` перед запуском pytest.
+`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest.
 
 Supported policy slice for issue `#2598`:
 

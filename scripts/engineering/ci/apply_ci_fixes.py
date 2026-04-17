@@ -32,6 +32,12 @@ import requests
 OWNER = "SatoryKono"
 REPO = "BioactivityDataAcquisition"
 BASE_BRANCH = "main"
+CHECKOUT_V6 = "actions/checkout@v6"
+CHECKOUT_V4 = "actions/checkout@v4"
+DOCKER_WORKFLOW_PATH = ".github/workflows/docker.yml"
+SECURITY_WORKFLOW_PATH = ".github/workflows/security.yml"
+UPLOAD_ARTIFACT_V3 = "actions/upload-artifact@v3"
+UPLOAD_ARTIFACT_V4 = "actions/upload-artifact@v4"
 
 BRANCHES = {
     "ci-01": "fix/ci-checkout-v4",
@@ -437,10 +443,10 @@ def apply_ci01(api: GitHubAPI) -> None:
             continue
         path = f["path"]
         content, file_sha = api.get_file(path, read_branch)
-        if "actions/checkout@v6" not in content:
+        if CHECKOUT_V6 not in content:
             continue
-        new_content = content.replace("actions/checkout@v6", "actions/checkout@v4")
-        count = content.count("actions/checkout@v6")
+        new_content = content.replace(CHECKOUT_V6, CHECKOUT_V4)
+        count = content.count(CHECKOUT_V6)
         print(f"  Patching {path} ({count} occurrence{'s' if count > 1 else ''})")
         api.update_file(
             path=path,
@@ -695,7 +701,7 @@ def apply_ci03(api: GitHubAPI) -> None:
     else:
         api.create_branch(branch, sha)
 
-    path = ".github/workflows/docker.yml"
+    path = DOCKER_WORKFLOW_PATH
     read_branch = BASE_BRANCH if api.dry_run else branch
     _, file_sha = api.get_file(path, read_branch)
 
@@ -992,7 +998,7 @@ def apply_ci12(api: GitHubAPI) -> None:
     else:
         api.create_branch(branch, sha)
 
-    path = ".github/workflows/security.yml"
+    path = SECURITY_WORKFLOW_PATH
     read_branch = BASE_BRANCH if api.dry_run else branch
     content, file_sha = api.get_file(path, read_branch)
 
@@ -1047,14 +1053,12 @@ def apply_hf_a(api: GitHubAPI) -> None:
     read_branch = BASE_BRANCH if api.dry_run else branch
     content, file_sha = api.get_file(path, read_branch)
 
-    if "actions/upload-artifact@v3" not in content:
+    if UPLOAD_ARTIFACT_V3 not in content:
         print(f"  INFO: upload-artifact@v3 not found in {path} — already fixed?")
         return
 
-    new_content = content.replace(
-        "actions/upload-artifact@v3", "actions/upload-artifact@v4"
-    )
-    count = content.count("actions/upload-artifact@v3")
+    new_content = content.replace(UPLOAD_ARTIFACT_V3, UPLOAD_ARTIFACT_V4)
+    count = content.count(UPLOAD_ARTIFACT_V3)
     print(
         f"  Patching {path}: upgrading upload-artifact@v3 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
     )
@@ -1348,17 +1352,9 @@ def apply_hf_pip_disable(api: GitHubAPI) -> None:
 
 def _remove_paths_ignore_block(content: str, trigger: str) -> str:
     """Remove the paths-ignore block from a push/pull_request trigger that also has paths."""
-    # Match the paths-ignore block inside a push/pull_request trigger
-    # Handles varying indentation (4 or 6 spaces)
-    pattern = (
-        r"(  (?:push|pull_request):\n)"
-        r"((?:    [^\n]*\n)*?)"  # lines before paths-ignore
-        r"(    paths-ignore:\n(?:      [^\n]*\n)+)"  # paths-ignore block
-        r"((?:    [^\n]*\n)*)"  # lines after paths-ignore (branches, paths, etc.)
-    )
     # More targeted: remove just the paths-ignore block under any trigger
     result = _re.sub(
-        r"( {4}paths-ignore:\n(?:      [^\n]+\n)+)",
+        r"( {4}paths-ignore:\n(?: {6}[^\n]+\n)+)",
         "",
         content,
     )
@@ -1384,7 +1380,6 @@ def apply_hf_paths_conflict(api: GitHubAPI) -> None:
 
     for path in files_to_fix:
         content, file_sha = api.get_file(path, read_branch)
-        original = content
         patched = False
 
         # Remove paths-ignore blocks (4-space indented, inside on: triggers)
@@ -1805,43 +1800,33 @@ def main() -> None:
     if args.dry_run:
         print("🔍 DRY-RUN mode — no changes will be made\n")
 
+    operations = {
+        "ci-01": apply_ci01,
+        "ci-02": apply_ci02,
+        "ci-03": apply_ci03,
+        "ci-04": apply_ci04,
+        "ci-06": apply_ci06,
+        "ci-07": apply_ci07,
+        "ci-12": apply_ci12,
+        "hf-a": apply_hf_a,
+        "hf-b": apply_hf_b,
+        "hf-e": apply_hf_e,
+        "hf-lxml": apply_hf_lxml,
+        "hf-pip-disable": apply_hf_pip_disable,
+        "hf-paths-conflict": apply_hf_paths_conflict,
+        "hf-typecheck-warn": apply_hf_typecheck_warn,
+        "hf-pip-skip-editable": apply_hf_pip_skip_editable,
+        "hf-stray-dirs": apply_hf_stray_dirs,
+        "hf-checkout-hygiene": apply_hf_checkout_hygiene,
+        "hf-mcp-allowlist": apply_hf_mcp_allowlist,
+    }
+
     try:
-        if not args.only or args.only == "ci-01":
-            apply_ci01(api)
-        if not args.only or args.only == "ci-02":
-            apply_ci02(api)
-        if not args.only or args.only == "ci-03":
-            apply_ci03(api)
-        if not args.only or args.only == "ci-04":
-            apply_ci04(api)
-        if not args.only or args.only == "ci-06":
-            apply_ci06(api)
-        if not args.only or args.only == "ci-07":
-            apply_ci07(api)
-        if not args.only or args.only == "ci-12":
-            apply_ci12(api)
-        if not args.only or args.only == "hf-a":
-            apply_hf_a(api)
-        if not args.only or args.only == "hf-b":
-            apply_hf_b(api)
-        if not args.only or args.only == "hf-e":
-            apply_hf_e(api)
-        if not args.only or args.only == "hf-lxml":
-            apply_hf_lxml(api)
-        if not args.only or args.only == "hf-pip-disable":
-            apply_hf_pip_disable(api)
-        if not args.only or args.only == "hf-paths-conflict":
-            apply_hf_paths_conflict(api)
-        if not args.only or args.only == "hf-typecheck-warn":
-            apply_hf_typecheck_warn(api)
-        if not args.only or args.only == "hf-pip-skip-editable":
-            apply_hf_pip_skip_editable(api)
-        if not args.only or args.only == "hf-stray-dirs":
-            apply_hf_stray_dirs(api)
-        if not args.only or args.only == "hf-checkout-hygiene":
-            apply_hf_checkout_hygiene(api)
-        if not args.only or args.only == "hf-mcp-allowlist":
-            apply_hf_mcp_allowlist(api)
+        selected_operations = (
+            [args.only] if args.only else list(operations.keys())
+        )
+        for operation_key in selected_operations:
+            operations[operation_key](api)
         print("\n✅ Done!")
     except requests.HTTPError as e:
         print(f"\n❌ GitHub API error: {e}")

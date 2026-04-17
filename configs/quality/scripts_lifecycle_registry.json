@@ -14,73 +14,19 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a root-level compatibility wrapper while tests and docs still assert the historical path; prefer scripts.engineering.qa.generate_architecture_dependency_map as the canonical implementation."
     },
-    "scripts/ops/maintenance/close_superseded_prs.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a historical maintainer helper for already-curated PR cleanup waves; do not extend or use as the basis for new automation."
-    },
-    "scripts/ops/maintenance/close_duplicate_prs_wave2.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only for historical repeatability of the wave-2 duplicate-PR cleanup; prefer a generalized issue/PR maintenance driver for future work."
-    },
-    "scripts/ops/maintenance/close_duplicate_prs_wave3.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only for historical repeatability of the wave-3 duplicate-PR cleanup; prefer a generalized issue/PR maintenance driver for future work."
-    },
-    "scripts/ops/maintenance/post_issue_2597_progress.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded maintainer helper for the already-curated issue #2597 progress update; do not reuse it as a template for future issue automation."
-    },
-    "scripts/ops/maintenance/close_issue_2597.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded maintainer helper for the prepared issue #2597 closeout flow; prefer generalized issue maintenance tooling for future closures."
-    },
-    "scripts/ops/maintenance/post_issue_rescope_comments.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a prepared maintainer helper for the current re-scope comment batch; do not extend this issue-number-specific path for new workflows."
-    },
-    "scripts/ops/maintenance/update_issue_rescope_bodies.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a prepared maintainer helper for the current re-scope body replacement batch; prefer generalized issue editing tooling for future work."
-    },
-    "scripts/ops/maintenance/close_great_expectations_spike_issue.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded maintainer helper for closing issue #2595 after the spike memo; do not treat it as a reusable automation entrypoint."
-    },
-    "scripts/ops/maintenance/close_pandera_schema_drift_issue.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded maintainer helper for closing issue #2594 after the Pandera drift gate summary; do not treat it as a reusable automation entrypoint."
-    },
-    "scripts/ops/neo4j_quick_start.sh": {
+    "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded local Neo4j/MCP bootstrap helper while the Neo4j memory tooling remains an operator-maintained troubleshooting surface; either promote it into a canonical supported workflow or remove it once those setup docs are retired."
     },
-    "scripts/ops/start-neo4j-audit.ps1": {
+    "scripts/ops/runtime/neo4j/start-neo4j-audit.ps1": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Windows-side Neo4j audit/bootstrap helper while the local graph-memory troubleshooting flow remains operator-maintained; either promote it into a documented supported workflow or remove it once the audit path is retired."
     },
-    "scripts/ops/start-neo4j-audit.sh": {
+    "scripts/ops/runtime/neo4j/start-neo4j-audit.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
@@ -90,67 +36,43 @@
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/neo4j-recovery-checklist.ps1 while historical docs and operator habits still reference the legacy root path."
+      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1 while historical docs and operator habits still reference the legacy root path."
     },
     "scripts/restart-docker.ps1": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/restart-docker.ps1 while historical docs and operator habits still reference the legacy root path."
+      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/runtime/docker/restart-docker.ps1 while historical docs and operator habits still reference the legacy root path."
     },
-    "scripts/ops/neo4j-recovery-checklist.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a Windows-side operator recovery checklist for the local Neo4j backend after Docker Desktop restarts; do not extend it into a canonical contributor workflow."
-    },
-    "scripts/ops/restart-docker.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Windows-side Docker Desktop recovery helper for local Neo4j troubleshooting; prefer documented canonical setup flows for routine contributor work."
-    },
-    "scripts/ops/codex-wsl.bat": {
+    "scripts/ops/launchers/codex/codex-wsl.bat": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin Windows launcher that forwards to the canonical Codex bootstrap path for mixed WSL usage; do not expand it into a primary contributor workflow without stronger in-repo call-site evidence."
     },
-    "scripts/ops/start-codex.bat": {
+    "scripts/ops/launchers/codex/start-codex.bat": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a convenience Windows launcher for the mixed WSL Codex bootstrap flow while operators still use batch entrypoints; prefer documented canonical setup commands for normal contributor workflows."
     },
-    "scripts/ops/codex-headless.ps1": {
+    "scripts/ops/launchers/codex/codex-headless.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/headless.ps1 while Windows-side headless entrypoints still reference the scripts.ops path."
     },
-    "scripts/ops/diagnose-codex-wsl.ps1": {
+    "scripts/ops/launchers/codex/diagnose-codex-wsl.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/diagnose_wsl.ps1 while Windows-side diagnostic references still point to the scripts.ops path."
     },
-    "scripts/ops/diagnose-codex-wsl.bat": {
+    "scripts/ops/launchers/codex/diagnose-codex-wsl.bat": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin batch launcher to scripts/ai/codex/diagnose_wsl.bat while mixed Windows/WSL operator flows still reference the scripts.ops path."
-    },
-    "scripts/ops/verify-setup.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/verify_setup.ps1 while historical setup verification references still point to the scripts.ops path."
-    },
-    "scripts/ops/verify-setup.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin batch launcher to scripts/ai/codex/verify_setup.bat while mixed Windows/WSL setup verification flows still reference the scripts.ops path."
     },
     "scripts/ai/vibe/__main__.py": {
       "owner": "@bioetl-platform",
@@ -242,18 +164,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL bootstrap troubleshooting wrapper while mounted-checkout environment setup remains fragile; fold its behavior into canonical dev setup or remove it."
     },
-    "scripts/ops/maintenance/create_runmanifest_runledger_issue.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded maintainer helper for manual run-manifest/run-ledger issue creation; prefer generalized issue automation for any future workflow."
-    },
-    "scripts/ops/start_health_server.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a local operator helper for starting the health server from Windows shells; do not expand it into a canonical contributor workflow without stronger call-site evidence."
-    },
     "scripts/engineering/repo/finalize_docs_issues_2638_2643.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -266,7 +176,7 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
     },
-    "scripts/ops/cleanup_repository.py": {
+    "scripts/ops/support/repo/cleanup_repository.py": {
       "owner": "platform-architecture",
       "decision": "active",
       "next_step": "Retain as the canonical repository cleanup automation script.",
@@ -506,11 +416,65 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as an archived Gemini-era summary helper for historical traceability; do not extend it as part of the current governed AI workflow."
     },
+    "scripts/ops/launchers/codex/setup_agents.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded Codex launcher helper for syncing local agent definitions; do not document it as a primary contributor entrypoint."
+    },
+    "scripts/ops/launchers/codex/setup_skills.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded Codex launcher helper for mirroring local skills into runtime locations; prefer governed skill tooling for routine work."
+    },
+    "scripts/ops/launchers/codex/verify-setup.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin batch launcher for Codex setup verification while mixed Windows/WSL operator flows still depend on batch entrypoints."
+    },
+    "scripts/ops/launchers/codex/verify-setup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin PowerShell launcher for Codex setup verification while Windows-side bootstrap flows still depend on the launcher path."
+    },
+    "scripts/ops/maintenance/github/create_runmanifest_runledger_issue.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded maintainer helper for manual run-manifest/run-ledger issue creation under the maintenance/github namespace; prefer generalized issue automation for future workflows."
+    },
+    "scripts/ops/runtime/docker/restart-docker.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded Windows-side Docker Desktop recovery helper under the runtime/docker namespace for local troubleshooting."
+    },
+    "scripts/ops/runtime/health/start_health_server.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a local operator launcher for starting the health server from Windows shells under the runtime/health namespace."
+    },
+    "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a Windows-side Neo4j recovery checklist under the runtime/neo4j namespace for operator troubleshooting after Docker restarts."
+    },
     "scripts/ops/support/load_repo_env.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a low-level repo-environment loader for compatibility with older ops wrappers; do not document it as a primary user-facing entrypoint."
+    },
+    "scripts/ops/support/skills/check_skills_mirror.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded skills-mirror verification helper while local Codex skill mirroring remains an operator-maintained support surface."
     },
     "scripts/repo/check_scripts_catalog.py": {
       "owner": "@bioetl-platform",

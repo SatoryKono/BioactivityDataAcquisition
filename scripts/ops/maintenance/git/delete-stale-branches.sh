@@ -2,12 +2,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
-# shellcheck source=./support/load_repo_env.sh
-source "${SCRIPT_DIR}/support/load_repo_env.sh"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../../.." && pwd)"
+# shellcheck source=../../support/load_repo_env.sh
+source "${SCRIPT_DIR}/../../support/load_repo_env.sh"
 
-MODE="report"
 REPORT_MODE="report"
+MODE="$REPORT_MODE"
 ASSUME_YES=0
 DO_FETCH=1
 
@@ -51,7 +51,7 @@ DELETE_CANDIDATES=(
 usage() {
   cat <<'EOF'
 Usage:
-  bash scripts/ops/delete-stale-branches.sh [--mode report|delete-local|delete-remote|delete-both] [--yes] [--no-fetch]
+  bash scripts/ops/maintenance/git/delete-stale-branches.sh [--mode report|delete-local|delete-remote|delete-both] [--yes] [--no-fetch]
 
 Modes:
   report         Show cleanup ledger only. Default and non-destructive.
@@ -66,8 +66,8 @@ Safety rules:
   - Non-report modes require --yes.
 
 Examples:
-  bash scripts/ops/delete-stale-branches.sh
-  bash scripts/ops/delete-stale-branches.sh --mode delete-remote --yes
+  bash scripts/ops/maintenance/git/delete-stale-branches.sh
+  bash scripts/ops/maintenance/git/delete-stale-branches.sh --mode delete-remote --yes
 EOF
   return 0
 }
@@ -260,7 +260,7 @@ case "$MODE" in
     ;;
 esac
 
-if [[ "$MODE" != "report" && "$ASSUME_YES" -ne 1 ]]; then
+if [[ "$MODE" != "$REPORT_MODE" && "$ASSUME_YES" -ne 1 ]]; then
   printf "%b[FAIL]%b Non-report modes require --yes\n" "$RED" "$NC" >&2
   exit 1
 fi
@@ -269,7 +269,7 @@ cd "$REPO_ROOT"
 resolve_python_runner
 resolve_tool_variants
 
-if [[ "$MODE" != "report" ]]; then
+if [[ "$MODE" != "$REPORT_MODE" ]]; then
   prepare_git_auth
   validate_github_api_auth
 fi

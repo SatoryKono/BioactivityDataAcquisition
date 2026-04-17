@@ -13,6 +13,8 @@ from bioetl.domain.constants import META_FIELDS
 from bioetl.domain.serialization import serialize_to_json_canonical
 from bioetl.domain.transformations import _normalize_value, generate_content_hash
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
 
 def _legacy_generate_content_hash(record: dict[str, Any], provider: str) -> str:
     """Legacy behavior before include/exclude + _dq_* exclusion support."""
@@ -28,7 +30,7 @@ def _legacy_generate_content_hash(record: dict[str, Any], provider: str) -> str:
 def _load_content_hash_config(
     provider: str, entity: str
 ) -> tuple[set[str] | None, set[str]]:
-    unified_entity_path = Path("configs/entities") / provider / f"{entity}.yaml"
+    unified_entity_path = REPO_ROOT / "configs/entities" / provider / f"{entity}.yaml"
     if unified_entity_path.exists():
         unified_data = yaml.safe_load(unified_entity_path.read_text()) or {}
         schema_section = (
@@ -41,7 +43,7 @@ def _load_content_hash_config(
         )
     else:
         # Legacy fallback kept for historical snapshots.
-        schema_path = Path("configs/schemas") / provider / f"{entity}.yaml"
+        schema_path = REPO_ROOT / "configs/schemas" / provider / f"{entity}.yaml"
         if not schema_path.exists():
             return None, set()
         data = yaml.safe_load(schema_path.read_text()) or {}
@@ -53,8 +55,8 @@ def _load_content_hash_config(
 
 
 def main() -> None:
-    snapshot_path = Path("tests/snapshots/content_hash_records.json")
-    report_path = Path("tests/snapshots/content_hash_comparison.md")
+    snapshot_path = REPO_ROOT / "tests/snapshots/content_hash_records.json"
+    report_path = REPO_ROOT / "tests/snapshots/content_hash_comparison.md"
 
     rows = json.loads(snapshot_path.read_text())
     changed = 0

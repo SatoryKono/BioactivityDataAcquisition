@@ -58,6 +58,14 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def _ensure_repo_path(path: Path) -> Path:
+    root = _repo_root().resolve()
+    resolved_path = path.resolve()
+    if root != resolved_path and root not in resolved_path.parents:
+        raise ValueError(f"refusing to process path outside {root}: {resolved_path}")
+    return resolved_path
+
+
 def _display_path(path: Path) -> str:
     root = _repo_root()
     try:
@@ -86,7 +94,7 @@ def detect_diagram_type(lines: list[str]) -> str | None:
 def _iter_source_files(paths: list[Path]) -> list[Path]:
     files: list[Path] = []
     for raw in paths:
-        path = raw.resolve()
+        path = _ensure_repo_path(raw)
         if path.is_file():
             if path.suffix in SUPPORTED_SUFFIXES:
                 files.append(path)
@@ -133,7 +141,8 @@ def check_file(path: Path) -> FileCheckResult:
 
 def fix_file(path: Path, *, dry_run: bool) -> int:
     """Rewrite a Mermaid file in-place and return replacement count."""
-    lines = path.read_text(encoding="utf-8").splitlines()
+    safe_path = _ensure_repo_path(path)
+    lines = safe_path.read_text(encoding="utf-8").splitlines()
     if detect_diagram_type(lines) not in TARGET_DIAGRAM_TYPES:
         return 0
 
@@ -149,7 +158,7 @@ def fix_file(path: Path, *, dry_run: bool) -> int:
         fixed_lines.append(line.replace("==>>", "-->>").replace("==>", "-->"))
 
     if replaced > 0 and not dry_run:
-        path.write_text("\n".join(fixed_lines) + "\n", encoding="utf-8", newline="\n")
+        safe_path.write_text("\n".join(fixed_lines) + "\n", encoding="utf-8", newline="\n")
 
     return replaced
 

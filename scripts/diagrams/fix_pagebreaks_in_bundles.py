@@ -24,8 +24,17 @@ except ImportError:  # pragma: no cover - direct script execution
 PAGE_BREAK = '\n\\newpage\n\n<div style="page-break-before: always;"></div>\n'
 
 
+def _safe_bundle_path(path: Path) -> Path:
+    resolved_root = DIAGRAM_ROOT.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to modify file outside {resolved_root}: {resolved_path}")
+    return resolved_path
+
+
 def fix_bundle(md_path: Path) -> int:
-    text = md_path.read_text(encoding="utf-8")
+    safe_path = _safe_bundle_path(md_path)
+    text = safe_path.read_text(encoding="utf-8")
 
     # Skip files that already have \newpage markers
     if "\\newpage" in text:
@@ -93,10 +102,10 @@ def fix_bundle(md_path: Path) -> int:
 
     if changes > 0:
         result = "\n".join(out) + "\n"
-        md_path.write_text(result, encoding="utf-8")
-        print(f"[OK] Fixed {changes} items in {md_path.name}")
+        safe_path.write_text(result, encoding="utf-8")
+        print(f"[OK] Fixed {changes} items in {safe_path.name}")
     else:
-        print(f"[SKIP] No changes needed: {md_path.name}")
+        print(f"[SKIP] No changes needed: {safe_path.name}")
     return changes
 
 

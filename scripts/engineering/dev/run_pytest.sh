@@ -37,6 +37,8 @@ for arg in "${PYTEST_ARGS[@]}"; do
         --ignore=.cache|--ignore=.pytest_cache|--ignore=.hypothesis)
             DEFAULT_IGNORES=("${DEFAULT_IGNORES[@]/$arg}")
             ;;
+        *)
+            ;;
     esac
 done
 
@@ -47,6 +49,8 @@ for arg in "${PYTEST_ARGS[@]}"; do
     case "$arg" in
         -q|--quiet|-qq|-qqq)
             QUIET_REQUESTED=1
+            ;;
+        *)
             ;;
     esac
 done
@@ -59,6 +63,8 @@ for arg in "${PYTEST_ARGS[@]}"; do
             ;;
         --collect-only|--co)
             DEFAULT_FLAGS=(-q --maxfail=1)
+            ;;
+        *)
             ;;
     esac
 done
@@ -81,6 +87,8 @@ _should_enable_benchmark_plugin() {
             --benchmark-only|--benchmark-compare)
                 return 0
                 ;;
+            *)
+                ;;
         esac
 
         if [[ "$previous" == "-m" && "$arg" == *benchmark* ]]; then
@@ -98,6 +106,8 @@ _needs_cov_plugin() {
             --cov|--cov=*|--cov-report|--cov-report=*|--cov-config|--cov-config=*|--no-cov)
                 return 0
                 ;;
+            *)
+                ;;
         esac
     done
     return 1
@@ -113,6 +123,8 @@ _needs_xdist_plugin() {
                 ;;
             -n*)
                 [[ "$arg" != "-q" ]] && return 0
+                ;;
+            *)
                 ;;
         esac
         if [[ "$previous" == "-p" && "$arg" == "xdist.plugin" ]]; then
@@ -149,6 +161,8 @@ _collect_selected_test_paths() {
             -*)
                 continue
                 ;;
+            *)
+                ;;
         esac
 
         local candidate="${arg%%::*}"
@@ -156,12 +170,18 @@ _collect_selected_test_paths() {
             tests|tests/*)
                 _SELECTED_TEST_PATHS+=("$candidate")
                 ;;
+            *)
+                ;;
         esac
     done
+    return 0
 }
 
 _has_selected_test_paths() {
-    [[ "${#_SELECTED_TEST_PATHS[@]}" -gt 0 ]]
+    if [[ "${#_SELECTED_TEST_PATHS[@]}" -gt 0 ]]; then
+        return 0
+    fi
+    return 1
 }
 
 _selected_has_exact_test_root() {
@@ -183,6 +203,8 @@ _paths_match_any() {
                 "$prefix"|"$prefix"/*)
                     return 0
                     ;;
+                *)
+                    ;;
             esac
         done
     done
@@ -198,6 +220,8 @@ _selected_dirs_match_any() {
             case "$target" in
                 "$prefix"|"$prefix"/*)
                     return 0
+                    ;;
+                *)
                     ;;
             esac
         done
@@ -409,8 +433,8 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
     fi
 fi
 
-if [[ -f "scripts/ops/setup_plugins.sh" ]]; then
-    bash scripts/ops/setup_plugins.sh --pytest-only
+if [[ -f "scripts/ops/launchers/codex/setup_plugins.sh" ]]; then
+    bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only
 fi
 
 if [[ -f "$PYTEST_RUNTIME_ENV_FILE" ]]; then
@@ -449,7 +473,7 @@ if command -v python3 >/dev/null 2>&1; then
     exec python3 -m pytest "${PYTEST_PLUGIN_ARGS[@]}" "${DEFAULT_IGNORES[@]}" "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"
 fi
 
-echo "[run_pytest][error] Python runtime is not available."
-echo "[run_pytest][hint] Install dependencies first:"
+echo "[run_pytest][error] Python runtime is not available." >&2
+echo "[run_pytest][hint] Install dependencies first:" >&2
 echo "  bash scripts/engineering/dev/setup_env_wsl.sh"
 exit 1

@@ -58,6 +58,14 @@ DEFAULT_DIRS = [
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 
+
+def _ensure_repo_path(path: Path) -> Path:
+    resolved_root = REPO_ROOT.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
+    return resolved_path
+
 # ── Regex constants ───────────────────────────────────────────────────────────
 
 # Node ID: letters/digits/underscore, must start with letter or underscore
@@ -610,11 +618,12 @@ def grandfather_file(path: Path) -> tuple[bool, set[str]]:
     Returns (was_modified, grandfathered_ids).
     """
     try:
-        content = path.read_text(encoding="utf-8")
+        safe_path = _ensure_repo_path(path)
+        content = safe_path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
         return False, set()
 
-    if path.stem.startswith("00-legend"):
+    if safe_path.stem.startswith("00-legend"):
         return False, set()
 
     lines = content.splitlines(keepends=True)
@@ -653,7 +662,7 @@ def grandfather_file(path: Path) -> tuple[bool, set[str]]:
     else:
         new_lines = lines[:insert_idx] + [annotation] + lines[insert_idx:]
 
-    path.write_text("".join(new_lines), encoding="utf-8")
+    safe_path.write_text("".join(new_lines), encoding="utf-8")
     return True, orphans
 
 

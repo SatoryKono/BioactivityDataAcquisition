@@ -28,3 +28,22 @@ def async_iterable(*items: T) -> AsyncIterator[T]:
     """Return an async iterator that yields the provided items."""
 
     return _StaticAsyncIterator(iter(items))
+
+
+class _FailingAsyncIterator(AsyncIterator[T]):
+    """Async iterator that raises the provided error on first iteration."""
+
+    def __init__(self, error: BaseException) -> None:
+        self._error = error
+
+    def __aiter__(self) -> _FailingAsyncIterator[T]:
+        return self
+
+    async def __anext__(self) -> T:
+        raise self._error
+
+
+def failing_async_iterable(error: BaseException) -> AsyncIterator[T]:
+    """Return an async iterator that raises ``error`` when iterated."""
+
+    return _FailingAsyncIterator(error)

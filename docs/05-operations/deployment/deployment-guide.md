@@ -84,7 +84,7 @@ the helper shell flow, set matching overrides before running it:
 
 ```bash
 BIOETL_IMAGE_REGISTRY=your-registry BIOETL_IMAGE_TAG=REPLACE_IMAGE_TAG \
-  scripts/ops/deploy-bioetl.sh deploy dev
+  scripts/ops/runtime/deploy/deploy-bioetl.sh deploy dev
 ```
 
 This extended deployment subtree is still maintained as experimental material.

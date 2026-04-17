@@ -56,8 +56,8 @@ if errorlevel 1 (
 
 echo.
 echo [codex-setup] Complete! You can now use:
-echo   - From WSL: ./scripts/ops/codex.sh
-echo   - From WSL: ./scripts/ops/codex-exec.sh "prompt"
+echo   - From WSL: ./scripts/ops/launchers/codex/codex.sh
+echo   - From WSL: ./scripts/ops/launchers/codex/codex-exec.sh "prompt"
 echo   - From Windows: .\scripts\ops\codex.bat
 echo   - From Windows: .\scripts\ops\codex-exec.bat "prompt"
 echo.

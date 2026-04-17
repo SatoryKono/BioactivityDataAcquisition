@@ -12,29 +12,38 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
+    local message="${1}"
+    echo -e "${RED}[ERROR]${NC} ${message}" >&2
+    return 0
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1" >&2
+    local message="${1}"
+    echo -e "${YELLOW}[WARN]${NC} ${message}" >&2
+    return 0
 }
 
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1" >&2
+    local message="${1}"
+    echo -e "${BLUE}[INFO]${NC} ${message}" >&2
+    return 0
 }
 
 log_success() {
-    echo -e "${GREEN}[✓]${NC} $1"
+    local message="${1}"
+    echo -e "${GREEN}[✓]${NC} ${message}"
+    return 0
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ENSURE_SCRIPT="${SCRIPT_DIR}/support/ensure_codex_cli.sh"
+SEPARATOR="==========================================="
 
 echo ""
-echo "==========================================="
+echo "${SEPARATOR}"
 echo "  WSL Codex Setup (No Sudo)"
-echo "==========================================="
+echo "${SEPARATOR}"
 echo ""
 
 log_info "This setup does NOT require sudo password"
@@ -116,9 +125,9 @@ else
 fi
 echo ""
 
-echo "==========================================="
+echo "${SEPARATOR}"
 echo "  Setup Complete!"
-echo "==========================================="
+echo "${SEPARATOR}"
 echo ""
 echo "What's installed:"
 echo "  • Node.js: $(node --version)"
