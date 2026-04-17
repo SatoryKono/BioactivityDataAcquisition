@@ -122,35 +122,40 @@ def _validate_runtime_normalized_invariants(
         errors.append("pipeline.sink must be a mapping after normalization")
         return errors
 
-    silver_cfg = sink.get("silver")
-    if isinstance(silver_cfg, dict) and silver_cfg.get("enabled", True):
-        silver_format = silver_cfg.get("format")
-        if silver_format != "delta":
-            errors.append(
-                f"sink.silver.format must be 'delta' for runtime (got: {silver_format!r})"
-            )
-
+    errors.extend(_validate_silver_runtime_format(sink))
     for layer in ("silver", "gold"):
-        layer_cfg = sink.get(layer)
-        if not isinstance(layer_cfg, dict):
-            errors.append(f"sink.{layer} must be a mapping after normalization")
-            continue
-        if not layer_cfg.get("enabled", True):
-            continue
+        errors.extend(_validate_enabled_sink_layer(layer, sink.get(layer)))
+    return errors
 
-        sort_by = layer_cfg.get("sort_by")
-        if not isinstance(sort_by, list) or not sort_by:
-            errors.append(
-                f"sink.{layer}.sort_by must be a non-empty list after normalization"
-            )
-            continue
 
-        normalized_columns = [str(col).strip() for col in sort_by]
-        if any(not col for col in normalized_columns):
-            errors.append(f"sink.{layer}.sort_by contains empty column names")
-        if len(normalized_columns) != len(set(normalized_columns)):
-            errors.append(f"sink.{layer}.sort_by contains duplicate columns")
+def _validate_silver_runtime_format(sink: dict[str, Any]) -> list[str]:
+    """Validate runtime format requirement for the silver sink."""
+    silver_cfg = sink.get("silver")
+    if not isinstance(silver_cfg, dict) or not silver_cfg.get("enabled", True):
+        return []
+    silver_format = silver_cfg.get("format")
+    if silver_format == "delta":
+        return []
+    return [
+        f"sink.silver.format must be 'delta' for runtime (got: {silver_format!r})"
+    ]
 
+
+def _validate_enabled_sink_layer(layer: str, layer_cfg: Any) -> list[str]:
+    """Validate one enabled sink layer after runtime normalization."""
+    if not isinstance(layer_cfg, dict):
+        return [f"sink.{layer} must be a mapping after normalization"]
+    if not layer_cfg.get("enabled", True):
+        return []
+    sort_by = layer_cfg.get("sort_by")
+    if not isinstance(sort_by, list) or not sort_by:
+        return [f"sink.{layer}.sort_by must be a non-empty list after normalization"]
+    errors: list[str] = []
+    normalized_columns = [str(col).strip() for col in sort_by]
+    if any(not col for col in normalized_columns):
+        errors.append(f"sink.{layer}.sort_by contains empty column names")
+    if len(normalized_columns) != len(set(normalized_columns)):
+        errors.append(f"sink.{layer}.sort_by contains duplicate columns")
     return errors
 
 
@@ -207,6 +212,87 @@ def _validate_sink_paths_and_sort(pipeline_payload: dict[str, Any]) -> list[str]
     return warnings
 
 
+def _load_yaml_payload(config_path: Path) -> dict[str, Any] | None:
+    """Load a YAML mapping payload from disk."""
+    payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    return payload if isinstance(payload, dict) else None
+
+
+def _append_prefixed(messages: list[str], prefix: Path, items: list[str]) -> None:
+    """Append validation messages with a config path prefix."""
+    messages.extend(f"{prefix}: {item}" for item in items)
+
+
+def _process_entity_config(
+    config_path: Path,
+    *,
+    verbose: bool,
+    pipeline_schema: dict[str, Any],
+    base_pipeline_defaults: dict[str, Any],
+    skip_runtime_normalized_check: bool,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    """Validate one entity config and append findings to shared collections."""
+    if verbose:
+        sys.stdout.write(f"Checking entity: {config_path}\n")
+    try:
+        payload = _load_yaml_payload(config_path)
+    except yaml.YAMLError as exc:
+        errors.append(f"{config_path}: YAML parse error: {exc}")
+        return
+    if payload is None:
+        errors.append(f"{config_path}: entity config must be a YAML mapping")
+        return
+    _append_prefixed(errors, config_path, _validate_entity_config_sections(payload))
+    _append_prefixed(errors, config_path, _validate_provider_entity_consistency(payload))
+    pipeline_payload = payload.get("pipeline")
+    if not isinstance(pipeline_payload, dict):
+        errors.append(f"{config_path}: missing or invalid 'pipeline' section")
+        return
+    valid_pipeline, pipeline_schema_error = _validate_yaml_schema(
+        pipeline_payload, pipeline_schema
+    )
+    if not valid_pipeline:
+        errors.append(f"{config_path}: {pipeline_schema_error}")
+    _append_prefixed(errors, config_path, _validate_pipeline_payload(pipeline_payload))
+    normalized_payload = _build_normalized_pipeline_payload(
+        payload,
+        pipeline_payload,
+        base_pipeline_defaults,
+    )
+    if not skip_runtime_normalized_check:
+        _append_prefixed(
+            errors,
+            config_path,
+            _validate_runtime_normalized_invariants(normalized_payload),
+        )
+    _append_prefixed(warnings, config_path, _validate_sink_paths_and_sort(normalized_payload))
+
+
+def _process_composite_config(
+    config_path: Path,
+    *,
+    verbose: bool,
+    composite_schema: dict[str, Any],
+    errors: list[str],
+) -> None:
+    """Validate one composite config and append findings."""
+    if verbose:
+        sys.stdout.write(f"Checking composite: {config_path}\n")
+    try:
+        payload = _load_yaml_payload(config_path)
+    except yaml.YAMLError as exc:
+        errors.append(f"{config_path}: YAML parse error: {exc}")
+        return
+    if payload is None:
+        errors.append(f"{config_path}: composite config must be a YAML mapping")
+        return
+    valid, err_msg = _validate_yaml_schema(payload, composite_schema)
+    if not valid:
+        errors.append(f"{config_path}: {err_msg}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate unified pipeline configs")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
@@ -235,63 +321,23 @@ def main() -> int:
     warnings: list[str] = []
 
     for config_path in entity_files:
-        if args.verbose:
-            sys.stdout.write(f"Checking entity: {config_path}\n")
-
-        try:
-            payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-        except yaml.YAMLError as exc:
-            errors.append(f"{config_path}: YAML parse error: {exc}")
-            continue
-
-        if not isinstance(payload, dict):
-            errors.append(f"{config_path}: entity config must be a YAML mapping")
-            continue
-
-        for err in _validate_entity_config_sections(payload):
-            errors.append(f"{config_path}: {err}")
-
-        for err in _validate_provider_entity_consistency(payload):
-            errors.append(f"{config_path}: {err}")
-
-        pipeline_payload = payload.get("pipeline")
-        if not isinstance(pipeline_payload, dict):
-            errors.append(f"{config_path}: missing or invalid 'pipeline' section")
-            continue
-
-        valid_pipeline, pipeline_schema_error = _validate_yaml_schema(
-            pipeline_payload, pipeline_schema
+        _process_entity_config(
+            config_path,
+            verbose=args.verbose,
+            pipeline_schema=pipeline_schema,
+            base_pipeline_defaults=base_pipeline_defaults,
+            skip_runtime_normalized_check=args.skip_runtime_normalized_check,
+            errors=errors,
+            warnings=warnings,
         )
-        if not valid_pipeline:
-            errors.append(f"{config_path}: {pipeline_schema_error}")
-
-        for err in _validate_pipeline_payload(pipeline_payload):
-            errors.append(f"{config_path}: {err}")
-
-        normalized_payload = _build_normalized_pipeline_payload(
-            payload,
-            pipeline_payload,
-            base_pipeline_defaults,
-        )
-        if not args.skip_runtime_normalized_check:
-            for err in _validate_runtime_normalized_invariants(normalized_payload):
-                errors.append(f"{config_path}: {err}")
-
-        for warn in _validate_sink_paths_and_sort(normalized_payload):
-            warnings.append(f"{config_path}: {warn}")
 
     for config_path in composite_files:
-        if args.verbose:
-            sys.stdout.write(f"Checking composite: {config_path}\n")
-        try:
-            payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-        except yaml.YAMLError as exc:
-            errors.append(f"{config_path}: YAML parse error: {exc}")
-            continue
-
-        valid, err_msg = _validate_yaml_schema(payload, composite_schema)
-        if not valid:
-            errors.append(f"{config_path}: {err_msg}")
+        _process_composite_config(
+            config_path,
+            verbose=args.verbose,
+            composite_schema=composite_schema,
+            errors=errors,
+        )
 
     if errors:
         sys.stderr.write("\nERRORS:\n")
