@@ -18,6 +18,7 @@ GROUP_ROOTS: dict[str, str] = {
     "data": "ops/data",
     "repo": "engineering/repo",
     "ops": "ops",
+    "archive": "ops/archive",
     "diagnostics": "engineering/diagnostics",
     "migrations": "ops/migrations",
     "diagrams": "diagrams",
@@ -29,17 +30,33 @@ def _scripts_root() -> Path:
     return Path(__file__).resolve().parent
 
 
+def _excluded_group_prefixes(group: str) -> tuple[Path, ...]:
+    current_root = Path(GROUP_ROOTS[group])
+    prefixes: list[Path] = []
+    for other_group, other_root_str in GROUP_ROOTS.items():
+        if other_group == group:
+            continue
+        other_root = Path(other_root_str)
+        if other_root.is_relative_to(current_root):
+            prefixes.append(other_root)
+    return tuple(prefixes)
+
+
 def _iter_group_scripts(group: str) -> list[Path]:
     rel_root = GROUP_ROOTS[group]
     root = _scripts_root() / rel_root
     if not root.exists():
         return []
 
+    excluded_prefixes = _excluded_group_prefixes(group)
     items: list[Path] = []
     for path in root.rglob("*"):
         if not path.is_file():
             continue
         if path.suffix not in {".py", ".sh", ".ps1", ".cmd", ".bat"}:
+            continue
+        rel_path = path.relative_to(_scripts_root())
+        if any(rel_path.is_relative_to(prefix) for prefix in excluded_prefixes):
             continue
         items.append(path)
     return sorted(items)

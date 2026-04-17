@@ -143,6 +143,7 @@ bash scripts/engineering/dev/run_mypy.sh
 | --------------------- | -------------------------------------- | ------------------------------------------ |
 | `scripts.engineering.qa`          | `uv run python -m scripts.engineering.qa`          | Quality checks: naming, C901, terminology  |
 | `scripts.engineering.ci`          | `uv run python -m scripts.engineering.ci`          | CI pipeline: pytest runner, quality gates  |
+| `scripts.engineering.baselines`   | `uv run python -m scripts.engineering.baselines`   | Baseline maintenance for engineering checks |
 | `scripts.schema`      | `uv run python -m scripts.schema`      | Schema/config validation и генерация       |
 | `scripts.ops.data`    | `uv run python -m scripts.ops.data`    | Data integrity: checksums, delta, data dir |
 | `scripts.engineering.qa.vcr` | `uv run python -m scripts.engineering.qa.vcr` | VCR governance: placement, naming, secrets |
@@ -185,6 +186,9 @@ uv run python -m scripts.ops.data checksums --generate
 # CI / Quality gates
 uv run python -m scripts.engineering.ci quality-gate
 uv run python -m scripts.engineering.ci run-tests
+
+# Baselines
+uv run python -m scripts.engineering.baselines dq-baseline --dry-run
 ```
 
 ### Dashboard-specific note

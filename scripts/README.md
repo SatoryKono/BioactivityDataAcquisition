@@ -34,6 +34,7 @@ python -m scripts.docs --help
 python -m scripts.engineering.qa --help
 python -m scripts.engineering.repo --help
 python -m scripts.engineering.dev --help
+python -m scripts.engineering.baselines --help
 python -m scripts.ops --help
 python -m scripts.memory --help
 python -m scripts.diagrams --help
@@ -48,6 +49,7 @@ python -m scripts.engineering.qa report-dep-map --check
 python -m scripts.docs build-site --strict
 python -m scripts.engineering.repo check-catalog --catalog scripts/catalog.yaml
 python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json
+python -m scripts.engineering.baselines dq-baseline --dry-run
 python -m scripts.ops rerender-grafana
 python -m scripts.engineering.dev migrate-deprecated-names src/
 ```

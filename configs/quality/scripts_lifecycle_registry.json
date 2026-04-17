@@ -446,18 +446,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as an archived Gemini-era summary helper for historical traceability; do not extend it as part of the current governed AI workflow."
     },
-    "scripts/ops/launchers/codex/setup_agents.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Codex launcher helper for syncing local agent definitions; do not document it as a primary contributor entrypoint."
-    },
-    "scripts/ops/launchers/codex/setup_skills.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Codex launcher helper for mirroring local skills into runtime locations; prefer governed skill tooling for routine work."
-    },
     "scripts/ops/launchers/codex/verify-setup.bat": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
@@ -499,12 +487,6 @@
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a low-level repo-environment loader for compatibility with older ops wrappers; do not document it as a primary user-facing entrypoint."
-    },
-    "scripts/ops/support/skills/check_skills_mirror.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded skills-mirror verification helper while local Codex skill mirroring remains an operator-maintained support surface."
     }
   }
 }

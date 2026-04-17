@@ -137,11 +137,10 @@ def build_persistence_profile(
             forensic_grade_missing_requirements=forensic_grade_missing_requirements,
         )
     )
-    attained_profile = "degraded_observable"
-    if not replay_ready_missing_requirements:
-        attained_profile = "replay_ready"
-    if not forensic_grade_missing_requirements:
-        attained_profile = "forensic_grade"
+    attained_profile = _resolve_attained_profile(
+        replay_ready_missing_requirements=replay_ready_missing_requirements,
+        forensic_grade_missing_requirements=forensic_grade_missing_requirements,
+    )
     return {
         "attained_profile": attained_profile,
         "required_profile": required_profile,
@@ -182,6 +181,18 @@ def build_persistence_profile(
         },
         "lineage_closure_boundary": lineage_closure_boundary,
     }
+
+
+def _resolve_attained_profile(
+    *,
+    replay_ready_missing_requirements: list[str],
+    forensic_grade_missing_requirements: list[str],
+) -> str:
+    if not forensic_grade_missing_requirements:
+        return "forensic_grade"
+    if not replay_ready_missing_requirements:
+        return "replay_ready"
+    return "degraded_observable"
 
 
 def build_alert_signals(

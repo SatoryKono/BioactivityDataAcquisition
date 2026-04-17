@@ -42,16 +42,6 @@ def _emit_checkpoint_metric(
     )
 
 
-def _strict_disposition(compatible: bool) -> str:
-    """Return the strict-policy checkpoint compatibility disposition label."""
-    return "strict_compatible" if compatible else "strict_incompatible"
-
-
-def _lenient_disposition(compatible: bool) -> str:
-    """Return the lenient-policy checkpoint compatibility disposition label."""
-    return "lenient_compatible" if compatible else "lenient_incompatible"
-
-
 def _validate_dq_contract_compatibility(
     current_metadata: CheckpointMetadata,
     checkpoint_metadata: CheckpointMetadata,
@@ -241,9 +231,9 @@ def _validate_mismatch_reasons(
     reason = execution_identity_result.get("reason")
     if reason == "checkpoint_execution_identity_fallback_mismatch":
         # Only add message if execution fingerprints are actually present
-        if (
-            current_metadata.execution_fingerprint
-            or checkpoint_metadata.execution_fingerprint
+        if _has_execution_fingerprint_metadata(
+            current_metadata,
+            checkpoint_metadata,
         ):
             messages.append(
                 "Checkpoint execution identity fallback mismatch: "
@@ -253,15 +243,32 @@ def _validate_mismatch_reasons(
     elif reason == "degraded_runtime_anchor_fingerprint_mismatch":
         # Runtime anchor fingerprint is computed from metadata fields, not stored directly
         # Add message only if relevant metadata fields are present
-        if (
-            current_metadata.manifest_id
-            or checkpoint_metadata.manifest_id
-            or current_metadata.contract_ref
-            or checkpoint_metadata.contract_ref
-            or current_metadata.effective_config_hash
-            or checkpoint_metadata.effective_config_hash
-        ):
+        if _has_runtime_anchor_metadata(current_metadata, checkpoint_metadata):
             messages.append("Degraded runtime anchor fingerprint mismatch")
+
+
+def _has_execution_fingerprint_metadata(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> bool:
+    return bool(
+        current_metadata.execution_fingerprint
+        or checkpoint_metadata.execution_fingerprint
+    )
+
+
+def _has_runtime_anchor_metadata(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> bool:
+    return bool(
+        current_metadata.manifest_id
+        or checkpoint_metadata.manifest_id
+        or current_metadata.contract_ref
+        or checkpoint_metadata.contract_ref
+        or current_metadata.effective_config_hash
+        or checkpoint_metadata.effective_config_hash
+    )
 
 
 def _validate_metadata_fields(
@@ -492,7 +499,9 @@ class CheckpointCompatibilityService:
         _emit_checkpoint_metric(
             self._metrics,
             pipeline_name=self._pipeline_name,
-            disposition=_strict_disposition(compatible),
+            disposition=(
+                "strict_compatible" if compatible else "strict_incompatible"
+            ),
         )
         if compatible:
             return CheckpointCompatibilityResult.compatible_result()
@@ -533,7 +542,9 @@ class CheckpointCompatibilityService:
         _emit_checkpoint_metric(
             self._metrics,
             pipeline_name=self._pipeline_name,
-            disposition=_lenient_disposition(compatible),
+            disposition=(
+                "lenient_compatible" if compatible else "lenient_incompatible"
+            ),
         )
         return CheckpointCompatibilityResult(
             compatible=compatible,

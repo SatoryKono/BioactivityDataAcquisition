@@ -1,45 +1,25 @@
-"""Centralized constants for schema validation.
+"""Centralized immutable constants for schema validation.
 
-Provides regex patterns and enum values used across multiple schemas.
-All values are immutable (frozenset/tuple) to prevent accidental modification.
-
-Enum values originate from configs/enums/chembl.yaml (single source of truth).
-Sync is enforced by tests/unit/domain/schemas/test_constants_yaml.py.
-
-Usage:
-    from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, ASSAY_TYPES
+Enum values originate from `configs/enums/chembl.yaml` and are kept in sync by
+`tests/unit/domain/schemas/test_constants_yaml.py`.
 """
 
 from __future__ import annotations
 
-# =============================================================================
-# REGEX PATTERNS
-# =============================================================================
-
-# ChEMBL identifiers
-CHEMBL_ID_PATTERN = r"^CHEMBL\d+$"
-
-# Ontology identifiers
-# ChEMBL API returns underscore format (BAO_0000190), not colon format (BAO:0000190)
-BAO_ID_PATTERN = r"^BAO[_:]\d+$"  # BioAssay Ontology (accepts both _ and :)
-UO_ID_PATTERN = r"^UO[_:]\d+$"  # Units Ontology (accepts both _ and :)
-CLO_ID_PATTERN = r"^CLO[_:]\d+$"  # Cell Line Ontology (accepts both _ and :)
-EFO_ID_PATTERN = r"^EFO[_:]\d+$"  # Experimental Factor Ontology (accepts both _ and :)
-BTO_ID_PATTERN = r"^BTO[_:]\d+$"  # BRENDA Tissue Ontology (accepts both _ and :)
-UBERON_ID_PATTERN = (
-    r"^UBERON[_:]\d+$"  # Uber Anatomical Ontology (accepts both _ and :)
+from bioetl.domain.schemas._schema_validation_patterns import (
+    BAO_ID_PATTERN,
+    BTO_ID_PATTERN,
+    CALOHA_ID_PATTERN,
+    CELLOSAURUS_ID_PATTERN,
+    CHEMBL_ID_PATTERN,
+    CLO_ID_PATTERN,
+    EFO_ID_PATTERN,
+    ISO_DATE_PATTERN,
+    ISSN_PATTERN,
+    ORCID_PATTERN,
+    UBERON_ID_PATTERN,
+    UO_ID_PATTERN,
 )
-CALOHA_ID_PATTERN = r"^TS-\d{4}$"  # CALIPHO tissue ontology identifier
-
-# External database identifiers
-CELLOSAURUS_ID_PATTERN = r"^CVCL_[A-Z0-9]+$"
-
-# Date patterns
-ISO_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
-
-# Publication identifier patterns
-ISSN_PATTERN = r"^\d{4}-\d{3}[\dX]$"
-ORCID_PATTERN = r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$"
 
 # =============================================================================
 # CHEMBL ACTIVITY ENUMS
