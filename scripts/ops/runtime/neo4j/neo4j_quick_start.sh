@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Quick start script: Launch Neo4j backend and verify MCP
-# Usage: bash scripts/ops/neo4j_quick_start.sh
+# Usage: bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../../.." && pwd)"
 
 # Color codes
 RED='\033[0;31m'

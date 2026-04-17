@@ -1,6 +1,6 @@
 #!/bin/bash
 # Start Neo4j audit instance for live validation (WSL/Linux version)
-# Usage: ./scripts/ops/start-neo4j-audit.sh [--stop|--logs]
+# Usage: ./scripts/ops/runtime/neo4j/start-neo4j-audit.sh [--stop|--logs]
 
 set -e
 
@@ -39,10 +39,10 @@ case "${1:-}" in
       echo "  live --apply --only-complexity-layer --batch-size 5"
       echo ""
       echo "To view logs:"
-      echo "  ./scripts/ops/start-neo4j-audit.sh --logs"
+      echo "  ./scripts/ops/runtime/neo4j/start-neo4j-audit.sh --logs"
       echo ""
       echo "To stop:"
-      echo "  ./scripts/ops/start-neo4j-audit.sh --stop"
+      echo "  ./scripts/ops/runtime/neo4j/start-neo4j-audit.sh --stop"
     else
       echo "❌ Instance failed to start. Check logs:"
       docker logs "$CONTAINER_NAME" | tail -20

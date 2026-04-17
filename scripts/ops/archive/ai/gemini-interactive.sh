@@ -23,6 +23,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 MENU_BACK_ENTRY="  0. << Back to Main Menu"
 CONTINUE_PROMPT="Press Enter to continue..."
+INVALID_SELECTION_MESSAGE="Invalid selection"
 
 # Create sessions directory
 mkdir -p "${GEMINI_SESSIONS_DIR}"
@@ -197,7 +198,7 @@ mode_chat() {
   
   local profiles=("${GEMINI_HOME}"/agents/py-*.md)
   if [[ ! -f "${profiles[$profile_idx - 1]}" ]]; then
-    print_error "Invalid selection"
+    print_error "${INVALID_SELECTION_MESSAGE}"
     sleep 2
     return 0
   fi
@@ -282,7 +283,7 @@ mode_task() {
     5) task_debug ;;
     6) task_custom ;;
     0) return 0 ;;
-    *) print_error "Invalid selection"; sleep 2 ;;
+    *) print_error "${INVALID_SELECTION_MESSAGE}"; sleep 2 ;;
   esac
   return 0
 }
@@ -318,7 +319,7 @@ task_review() {
       echo "Scope: Entire project"
       ;;
     *)
-      print_error "Invalid selection"
+      print_error "${INVALID_SELECTION_MESSAGE}"
       sleep 2
       return 0
       ;;
@@ -487,7 +488,7 @@ task_architecture() {
     3) focus_name="Layer Isolation" ;;
     4) focus_name="Port Coverage" ;;
     *)
-      print_error "Invalid selection"
+      print_error "${INVALID_SELECTION_MESSAGE}"
       sleep 2
       return 0
       ;;
@@ -664,7 +665,7 @@ mode_review() {
       ;;
     0) return 0 ;;
     *)
-      print_error "Invalid selection"
+      print_error "${INVALID_SELECTION_MESSAGE}"
       sleep 2
       ;;
   esac
@@ -705,7 +706,7 @@ mode_analysis() {
       ;;
     0) return 0 ;;
     *)
-      print_error "Invalid selection"
+      print_error "${INVALID_SELECTION_MESSAGE}"
       sleep 2
       ;;
   esac
@@ -776,7 +777,7 @@ mode_maintenance() {
       ;;
     0) return 0 ;;
     *)
-      print_error "Invalid selection"
+      print_error "${INVALID_SELECTION_MESSAGE}"
       sleep 2
       ;;
   esac
@@ -843,7 +844,7 @@ mode_help() {
       ;;
     0) return 0 ;;
     *)
-      print_error "Invalid selection"
+      print_error "${INVALID_SELECTION_MESSAGE}"
       sleep 2
       ;;
   esac
@@ -882,7 +883,7 @@ main() {
         exit 0
         ;;
       *)
-        print_error "Invalid selection"
+        print_error "${INVALID_SELECTION_MESSAGE}"
         sleep 2
         ;;
     esac

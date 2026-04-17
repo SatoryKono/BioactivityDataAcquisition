@@ -63,7 +63,7 @@ bash ./script-codex/helper/setup-wsl.sh
 bash ./script-codex/helper/verify-setup.sh
 
 # Step 3: Use it
-./scripts/ops/codex.sh "analyze the pipeline"
+./scripts/ops/launchers/codex/codex.sh "analyze the pipeline"
 ```
 
 ### Method 3: Legacy Windows Scripts (Still Works)
@@ -206,32 +206,32 @@ $ bash ./script-codex/helper/verify-setup.sh
 
 ### Analyze Code
 ```bash
-./scripts/ops/codex.sh "explain the ChemBL data extraction pipeline"
-./scripts/ops/codex.sh "identify performance bottlenecks in ETL"
+./scripts/ops/launchers/codex/codex.sh "explain the ChemBL data extraction pipeline"
+./scripts/ops/launchers/codex/codex.sh "identify performance bottlenecks in ETL"
 ```
 
 ### Generate Code
 ```bash
-./scripts/ops/codex.sh "create Pydantic models for bronze layer"
-./scripts/ops/codex.sh "generate unit tests for transformer classes"
+./scripts/ops/launchers/codex/codex.sh "create Pydantic models for bronze layer"
+./scripts/ops/launchers/codex/codex.sh "generate unit tests for transformer classes"
 ```
 
 ### Refactor Code
 ```bash
-./scripts/ops/codex.sh "optimize database queries in bioetl/database.py"
-./scripts/ops/codex.sh "refactor compound transformer for vectorization"
+./scripts/ops/launchers/codex/codex.sh "optimize database queries in bioetl/database.py"
+./scripts/ops/launchers/codex/codex.sh "refactor compound transformer for vectorization"
 ```
 
 ### Debug Issues
 ```bash
-./scripts/ops/codex.sh "debug the gold_sink_disabled warning"
-./scripts/ops/codex.sh "explain why health_check_degraded occurs"
+./scripts/ops/launchers/codex/codex.sh "debug the gold_sink_disabled warning"
+./scripts/ops/launchers/codex/codex.sh "explain why health_check_degraded occurs"
 ```
 
 ### Auto-Apply Changes
 ```bash
-./scripts/ops/codex-exec.sh "add type hints to all modules"
-./scripts/ops/codex-exec.sh "fix all TODO comments"
+./scripts/ops/launchers/codex/codex-exec.sh "add type hints to all modules"
+./scripts/ops/launchers/codex/codex-exec.sh "fix all TODO comments"
 ```
 
 ## 🏗️ Architecture
@@ -311,7 +311,7 @@ policy = "read-only"  # or "workspace-write"
 
 4. **Try it out** (1 minute)
    ```bash
-   ./scripts/ops/codex.sh "what is this project about?"
+   ./scripts/ops/launchers/codex/codex.sh "what is this project about?"
    ```
 
 5. **Explore examples** (5-10 minutes)
@@ -343,5 +343,5 @@ bash ./script-codex/helper/verify-setup.sh
 
 **Then use it:**
 ```bash
-./scripts/ops/codex.sh "analyze the pipeline"
+./scripts/ops/launchers/codex/codex.sh "analyze the pipeline"
 ```

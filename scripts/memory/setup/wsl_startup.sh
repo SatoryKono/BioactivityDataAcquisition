@@ -15,11 +15,35 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-ok() { printf "${GREEN}✓${NC} %s\n" "$1"; }
-fail() { printf "${RED}✗${NC} %s\n" "$1" >&2; }
-warn() { printf "${YELLOW}!${NC} %s\n" "$1"; }
-info() { printf "${BLUE}→${NC} %s\n" "$1"; }
-header() { printf "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n%s\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n" "$1"; }
+ok() {
+  local message="${1}"
+  printf "${GREEN}✓${NC} %s\n" "$message"
+  return 0
+}
+
+fail() {
+  local message="${1}"
+  printf "${RED}✗${NC} %s\n" "$message" >&2
+  return 0
+}
+
+warn() {
+  local message="${1}"
+  printf "${YELLOW}!${NC} %s\n" "$message"
+  return 0
+}
+
+info() {
+  local message="${1}"
+  printf "${BLUE}→${NC} %s\n" "$message"
+  return 0
+}
+
+header() {
+  local message="${1}"
+  printf "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n%s\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n" "$message"
+  return 0
+}
 
 upsert_env_local() {
   local file_path="$1"
@@ -77,6 +101,7 @@ ENV_TYPE=$(detect_env)
 DOCKER_BIN="$(select_docker_bin "$ENV_TYPE" || true)"
 CONTAINER_ALREADY_RUNNING=0
 CONTAINER_RESTARTED=0
+WSL_NEO4J_HOST="host.docker.internal"
 
 header "Neo4j Backend Setup for $ENV_TYPE"
 
@@ -92,19 +117,20 @@ fi
 ok "Docker available via ${DOCKER_BIN}"
 
 # Check if container already exists
-if "${DOCKER_BIN}" ps -a --format "table {{.Names}}" 2>/dev/null | grep -q "^bioetl-neo4j$"; then
-  if "${DOCKER_BIN}" ps --format "table {{.Names}}" 2>/dev/null | grep -q "^bioetl-neo4j$"; then
+if "${DOCKER_BIN}" ps -a --format "table {{.Names}}" 2>/dev/null | grep -q "^bioetl-neo4j$" \
+  && "${DOCKER_BIN}" ps --format "table {{.Names}}" 2>/dev/null | grep -q "^bioetl-neo4j$"; then
     ok "Container bioetl-neo4j already RUNNING"
     "${DOCKER_BIN}" ps 2>/dev/null | grep bioetl-neo4j | sed 's/^/  /'
     CONTAINER_ALREADY_RUNNING=1
+elif "${DOCKER_BIN}" ps -a --format "table {{.Names}}" 2>/dev/null | grep -q "^bioetl-neo4j$"; then
+  warn "Container exists but is stopped"
+  info "Starting container..."
+  "${DOCKER_BIN}" start bioetl-neo4j >/dev/null 2>&1
+  sleep 5
+  ok "Container restarted"
+  CONTAINER_RESTARTED=1
   else
-    warn "Container exists but is stopped"
-    info "Starting container..."
-    "${DOCKER_BIN}" start bioetl-neo4j >/dev/null 2>&1
-    sleep 5
-    ok "Container restarted"
-    CONTAINER_RESTARTED=1
-  fi
+  :
 fi
 
 # ============================================================================
@@ -114,9 +140,9 @@ header "Step 2: Configure for $ENV_TYPE"
 
 case "$ENV_TYPE" in
   wsl)
-    info "WSL detected — Neo4j will be accessible via host.docker.internal"
-    NEO4J_HOST="host.docker.internal"
-    info "From WSL: Use bolt://host.docker.internal:7687"
+    info "WSL detected — Neo4j will be accessible via ${WSL_NEO4J_HOST}"
+    NEO4J_HOST="${WSL_NEO4J_HOST}"
+    info "From WSL: Use bolt://${WSL_NEO4J_HOST}:7687"
     info "From Windows: Use bolt://localhost:7687"
     ;;
   macos)
@@ -258,8 +284,8 @@ sleep 2
 VERIFY_HOST="127.0.0.1"
 VERIFY_LABEL="localhost"
 if [[ "$ENV_TYPE" == "wsl" ]]; then
-  VERIFY_HOST="host.docker.internal"
-  VERIFY_LABEL="host.docker.internal"
+  VERIFY_HOST="${WSL_NEO4J_HOST}"
+  VERIFY_LABEL="${WSL_NEO4J_HOST}"
 fi
 
 if timeout 3 bash -c "echo >/dev/tcp/${VERIFY_HOST}/7687" 2>/dev/null; then

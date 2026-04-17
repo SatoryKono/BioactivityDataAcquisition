@@ -37,7 +37,7 @@ ______________________________________________________________________
 ┌─────────────────────────────────────────────────┐
 │  Windows Host                                   │
 │                                                 │
-│  scripts/ops/wsl_proxy.py ──► VPN ──► Internet  │
+│  scripts/ops/runtime/wsl/wsl_proxy.py ──► VPN ──► Internet  │
 │        ▲  (port 3128)                           │
 │        │                                        │
 │  ┌─────┼───────────────────────────────────┐    │
@@ -241,7 +241,7 @@ Manual refresh:
 bash "$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh"
 ```
 
-**Layer 2: Proxy** (`scripts/ops/wsl_proxy.py`)
+**Layer 2: Proxy** (`scripts/ops/runtime/wsl/wsl_proxy.py`)
 
 Minimal HTTP CONNECT proxy running on Windows, listening on `0.0.0.0:3128`.
 WSL2 routes all HTTP/HTTPS traffic through it via `http_proxy` / `https_proxy`

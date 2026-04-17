@@ -15,23 +15,33 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 ok() {
-  printf "${GREEN}[✓]${NC} %s\n" "$1"
+  local message="${1}"
+  printf "${GREEN}[✓]${NC} %s\n" "$message"
+  return 0
 }
 
 warn() {
-  printf "${YELLOW}[⚠]${NC} %s\n" "$1"
+  local message="${1}"
+  printf "${YELLOW}[⚠]${NC} %s\n" "$message"
+  return 0
 }
 
 fail() {
-  printf "${RED}[✗]${NC} %s\n" "$1" >&2
+  local message="${1}"
+  printf "${RED}[✗]${NC} %s\n" "$message" >&2
+  return 0
 }
 
 info() {
-  printf "${BLUE}[i]${NC} %s\n" "$1"
+  local message="${1}"
+  printf "${BLUE}[i]${NC} %s\n" "$message"
+  return 0
 }
 
 section() {
-  printf "\n${BLUE}=== %s ===${NC}\n" "$1"
+  local message="${1}"
+  printf "\n${BLUE}=== %s ===${NC}\n" "$message"
+  return 0
 }
 
 # shellcheck source=./support/load_repo_env.sh
@@ -39,6 +49,8 @@ source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
 
 status=0
+INDENT_SED='s/^/  /'
+NEO4J_CONTAINER_NAME='bioetl-neo4j'
 
 section "Neo4j Memory MCP Verification"
 
@@ -61,7 +73,7 @@ if grep -Eq "No MCP servers configured|Error:" <<<"$list_out"; then
 fi
 
 info "Registered MCP servers:"
-printf "%s\n" "$list_out" | sed 's/^/  /'
+printf "%s\n" "$list_out" | sed "$INDENT_SED"
 
 if grep -Eq "^neo4j-memory[[:space:]]" <<<"$list_out"; then
   ok "neo4j-memory server is registered"
@@ -73,7 +85,7 @@ fi
 # Check 3: neo4j-memory configuration
 info "Checking neo4j-memory configuration..."
 neo4j_config="$(codex mcp get neo4j-memory 2>&1 || true)"
-printf "%s\n" "$neo4j_config" | sed 's/^/  /'
+printf "%s\n" "$neo4j_config" | sed "$INDENT_SED"
 
 if grep -Fq "mcp_neo4j_memory_wrapper" <<<"$neo4j_config"; then
   ok "neo4j-memory uses correct wrapper script"
@@ -133,12 +145,12 @@ section "Docker Container Status"
 if command -v docker >/dev/null 2>&1; then
   info "Checking Docker containers..."
   
-  if docker ps | grep -q "bioetl-neo4j"; then
+  if docker ps | grep -q "$NEO4J_CONTAINER_NAME"; then
     ok "Neo4j container is RUNNING"
-    docker ps | grep "bioetl-neo4j" | sed 's/^/  /'
-  elif docker ps -a | grep -q "bioetl-neo4j"; then
+    docker ps | grep "$NEO4J_CONTAINER_NAME" | sed "$INDENT_SED"
+  elif docker ps -a | grep -q "$NEO4J_CONTAINER_NAME"; then
     fail "Neo4j container EXISTS but is NOT RUNNING"
-    docker ps -a | grep "bioetl-neo4j" | sed 's/^/  /'
+    docker ps -a | grep "$NEO4J_CONTAINER_NAME" | sed "$INDENT_SED"
     warn "To start the container:"
     printf "  ${BLUE}docker start bioetl-neo4j${NC}\n"
   else

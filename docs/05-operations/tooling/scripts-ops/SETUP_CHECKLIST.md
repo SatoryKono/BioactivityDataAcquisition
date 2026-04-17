@@ -98,7 +98,7 @@ Verification checklist:
 
 ### Step 3: Test Codex
 ```bash
-./scripts/ops/codex.sh --version
+./scripts/ops/launchers/codex/codex.sh --version
 ```
 
 Test checklist:
@@ -110,7 +110,7 @@ Test checklist:
 
 ### First Use - Interactive Mode
 ```bash
-./scripts/ops/codex.sh
+./scripts/ops/launchers/codex/codex.sh
 ```
 
 Expected behavior:
@@ -121,7 +121,7 @@ Expected behavior:
 
 ### Second Use - With Prompt
 ```bash
-./scripts/ops/codex.sh "analyze this codebase"
+./scripts/ops/launchers/codex/codex.sh "analyze this codebase"
 ```
 
 Expected behavior:
@@ -132,7 +132,7 @@ Expected behavior:
 
 ### Third Use - Auto-Execute
 ```bash
-./scripts/ops/codex-exec.sh "add docstrings to all functions"
+./scripts/ops/launchers/codex/codex-exec.sh "add docstrings to all functions"
 ```
 
 Expected behavior:
@@ -147,23 +147,23 @@ Test these commands to familiarize yourself:
 
 ```bash
 # 1. Code Analysis
-./scripts/ops/codex.sh "explain the data pipeline"
+./scripts/ops/launchers/codex/codex.sh "explain the data pipeline"
 - [ ] Generates explanation
 
 # 2. Problem Identification
-./scripts/ops/codex.sh "find performance bottlenecks"
+./scripts/ops/launchers/codex/codex.sh "find performance bottlenecks"
 - [ ] Identifies issues
 
 # 3. Code Generation
-./scripts/ops/codex.sh "create unit tests for the ChemBL parser"
+./scripts/ops/launchers/codex/codex.sh "create unit tests for the ChemBL parser"
 - [ ] Generates test code
 
 # 4. Refactoring
-./scripts/ops/codex.sh "optimize database queries"
+./scripts/ops/launchers/codex/codex.sh "optimize database queries"
 - [ ] Suggests improvements
 
 # 5. Auto-Apply
-./scripts/ops/codex-exec.sh "add type hints to bioetl module"
+./scripts/ops/launchers/codex/codex-exec.sh "add type hints to bioetl module"
 - [ ] Applies changes automatically
 ```
 
@@ -190,7 +190,7 @@ If something doesn't work:
 
 ### "Permission denied"
 - [ ] Check file is executable (in WSL, bash ignores permissions from Windows)
-- [ ] Try explicit: `bash ./scripts/ops/codex.sh`
+- [ ] Try explicit: `bash ./scripts/ops/launchers/codex/codex.sh`
 
 ### "Path not found"
 - [ ] Verify project path exists in WSL:
@@ -216,15 +216,15 @@ bash ./script-codex/helper/verify-setup.sh
 # Should show all green ✓ marks
 
 # 3. ✓ Interactive works
-./scripts/ops/codex.sh
+./scripts/ops/launchers/codex/codex.sh
 # Type 'exit' or Ctrl+C to quit
 
 # 4. ✓ One-shot works
-./scripts/ops/codex.sh "explain this project"
+./scripts/ops/launchers/codex/codex.sh "explain this project"
 # Should show analysis output
 
 # 5. ✓ Auto-exec works (optional, use caution)
-./scripts/ops/codex-exec.sh "analyze code quality"
+./scripts/ops/launchers/codex/codex-exec.sh "analyze code quality"
 # Should apply changes automatically
 ```
 
@@ -268,7 +268,7 @@ Read documentation in this order:
 
 3. **Try first command**
    ```bash
-   ./scripts/ops/codex.sh "what does this project do?"
+   ./scripts/ops/launchers/codex/codex.sh "what does this project do?"
    ```
 
 4. **Read documentation**
@@ -287,9 +287,9 @@ You'll know it's working when:
 
 - ✓ `bash ./script-codex/helper/setup-wsl.sh` completes without errors
 - ✓ `bash ./script-codex/helper/verify-setup.sh` shows all green checkmarks
-- ✓ `./scripts/ops/codex.sh --version` shows Codex version
+- ✓ `./scripts/ops/launchers/codex/codex.sh --version` shows Codex version
 - ✓ `curl -I https://api.openai.com` returns HTTP 200
-- ✓ `./scripts/ops/codex.sh "hello"` generates a response from OpenAI
+- ✓ `./scripts/ops/launchers/codex/codex.sh "hello"` generates a response from OpenAI
 - ✓ All 5 new scripts exist and are accessible
 - ✓ All 5 documentation files are readable
 

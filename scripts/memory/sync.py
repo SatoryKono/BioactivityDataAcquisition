@@ -3183,22 +3183,23 @@ def _add_provider_and_config_graph(
     project: NodeKey,
     today: str,
 ) -> None:
+    provider_nodes = _add_provider_surfaces(snapshot, root, project, today)
+    entity_nodes = _add_entity_config_surfaces(snapshot, root, today, provider_nodes)
+    _add_composite_config_surfaces(snapshot, root, project, today, entity_nodes)
+
+
+def _add_provider_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+) -> dict[str, NodeKey]:
     providers_root = root / "configs" / "providers"
     provider_nodes: dict[str, NodeKey] = {}
-    entity_nodes: dict[str, NodeKey] = {}
     for provider_path in sorted(providers_root.glob(YAML_FILE_GLOB)):
         payload = _read_yaml(provider_path)
         provider_name = str(payload.get("provider", provider_path.stem))
-        provider_config = payload.get("source", {})
-        auth_type = None
-        pagination = None
-        if isinstance(provider_config, dict):
-            provider_config = provider_config.get("provider_config", provider_config)
-            if isinstance(provider_config, dict):
-                auth_type = provider_config.get("auth_type")
-                pagination_data = provider_config.get("pagination")
-                if isinstance(pagination_data, dict):
-                    pagination = pagination_data.get("strategy")
+        auth_type, pagination = _provider_config_properties(payload.get("source", {}))
         provider = snapshot.add_node(
             "provider_surface",
             provider_name,
@@ -3214,34 +3215,47 @@ def _add_provider_and_config_graph(
         )
         provider_nodes[provider_name] = provider
         snapshot.add_relation(project, "HAS_PROVIDER", provider, provenance="provider_config")
-        artifact = snapshot.add_node(
-            "config_artifact",
-            _rel_path(root, provider_path),
+        _link_config_artifact(
+            snapshot,
+            provider,
+            path=_rel_path(root, provider_path),
             summary=f"Provider config for `{provider_name}`.",
-            source_path=_rel_path(root, provider_path),
             source_kind="provider_config",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
+            today=today,
+            provenance="provider_config",
         )
-        snapshot.add_relation(provider, "DEFINED_BY", artifact, provenance="provider_config")
+    return provider_nodes
 
+
+def _provider_config_properties(source_payload: object) -> tuple[object, object]:
+    auth_type = None
+    pagination = None
+    provider_config = source_payload
+    if isinstance(provider_config, dict):
+        provider_config = provider_config.get("provider_config", provider_config)
+        if isinstance(provider_config, dict):
+            auth_type = provider_config.get("auth_type")
+            pagination_data = provider_config.get("pagination")
+            if isinstance(pagination_data, dict):
+                pagination = pagination_data.get("strategy")
+    return auth_type, pagination
+
+
+def _add_entity_config_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    today: str,
+    provider_nodes: dict[str, NodeKey],
+) -> dict[str, NodeKey]:
     entities_root = root / "configs" / "entities"
+    entity_nodes: dict[str, NodeKey] = {}
     for entity_path in sorted(entities_root.rglob(YAML_FILE_GLOB)):
         payload = _read_yaml(entity_path)
-        provider_name = str(payload.get("provider", entity_path.parent.name))
-        entity_name = str(payload.get("entity", entity_path.stem))
-        pipeline = payload.get("pipeline", {})
-        pipeline_name = None
-        pipeline_description = None
-        if isinstance(pipeline, dict):
-            pipeline_name = pipeline.get("pipeline_name")
-            pipeline_description = pipeline.get("description")
-        node_name = str(pipeline_name or f"{provider_name}_{entity_name}")
+        provider_name, entity_name, node_name, summary = _entity_config_identity(entity_path, payload)
         entity = snapshot.add_node(
             "entity_config",
             node_name,
-            summary=str(pipeline_description or f"Entity pipeline config for `{provider_name}/{entity_name}`."),
+            summary=summary,
             source_path=_rel_path(root, entity_path),
             source_kind="entity_config",
             provider=provider_name,
@@ -3254,30 +3268,49 @@ def _add_provider_and_config_graph(
         provider = provider_nodes.get(provider_name)
         if provider is not None:
             snapshot.add_relation(provider, "DEFINES", entity, provenance="entity_config")
-        artifact = snapshot.add_node(
-            "config_artifact",
-            _rel_path(root, entity_path),
+        _link_config_artifact(
+            snapshot,
+            entity,
+            path=_rel_path(root, entity_path),
             summary=f"Entity config for `{provider_name}/{entity_name}`.",
-            source_path=_rel_path(root, entity_path),
             source_kind="entity_config",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
+            today=today,
+            provenance="entity_config",
         )
-        snapshot.add_relation(entity, "DEFINED_BY", artifact, provenance="entity_config")
+    return entity_nodes
 
+
+def _entity_config_identity(
+    entity_path: Path,
+    payload: dict[str, object],
+) -> tuple[str, str, str, str]:
+    provider_name = str(payload.get("provider", entity_path.parent.name))
+    entity_name = str(payload.get("entity", entity_path.stem))
+    pipeline = payload.get("pipeline", {})
+    pipeline_name = None
+    pipeline_description = None
+    if isinstance(pipeline, dict):
+        pipeline_name = pipeline.get("pipeline_name")
+        pipeline_description = pipeline.get("description")
+    node_name = str(pipeline_name or f"{provider_name}_{entity_name}")
+    summary = str(pipeline_description or f"Entity pipeline config for `{provider_name}/{entity_name}`.")
+    return provider_name, entity_name, node_name, summary
+
+
+def _add_composite_config_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    entity_nodes: dict[str, NodeKey],
+) -> None:
     composites_root = root / "configs" / "composites"
     for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
         payload = _read_yaml(composite_path)
-        composite = payload.get("composite", {})
-        composite_name = composite_path.stem
-        summary = f"Composite pipeline config `{composite_name}`."
-        seed_pipeline = None
-        if isinstance(composite, dict):
-            composite_name = str(composite.get("name", composite_name))
-            seed = composite.get("seed")
-            if isinstance(seed, dict):
-                seed_pipeline = seed.get("pipeline")
+        composite_name, summary, composite_payload, seed_pipeline = _composite_config_identity(
+            composite_path,
+            payload,
+        )
         composite_node = snapshot.add_node(
             "composite_config",
             composite_name,
@@ -3289,33 +3322,89 @@ def _add_provider_and_config_graph(
             confidence="high",
         )
         snapshot.add_relation(project, "HAS_COMPOSITE", composite_node, provenance="composite_config")
-        artifact = snapshot.add_node(
-            "config_artifact",
-            _rel_path(root, composite_path),
+        _link_config_artifact(
+            snapshot,
+            composite_node,
+            path=_rel_path(root, composite_path),
             summary=summary,
-            source_path=_rel_path(root, composite_path),
             source_kind="composite_config",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
+            today=today,
+            provenance="composite_config",
         )
-        snapshot.add_relation(composite_node, "DEFINED_BY", artifact, provenance="composite_config")
-        if isinstance(seed_pipeline, str) and seed_pipeline in entity_nodes:
-            snapshot.add_relation(composite_node, "DEPENDS_ON", entity_nodes[seed_pipeline], provenance="composite_seed")
-        dependencies = composite.get("dependencies") if isinstance(composite, dict) else None
-        if isinstance(dependencies, list):
-            for dependency in dependencies:
-                if not isinstance(dependency, dict):
-                    continue
-                dependency_pipeline = dependency.get("pipeline")
-                if isinstance(dependency_pipeline, str) and dependency_pipeline in entity_nodes:
-                    snapshot.add_relation(
-                        composite_node,
-                        "DEPENDS_ON",
-                        entity_nodes[dependency_pipeline],
-                        provenance="composite_dependency",
-                        required=bool(dependency.get("required", False)),
-                    )
+        _link_composite_config_dependencies(
+            snapshot,
+            composite_node,
+            composite_payload,
+            seed_pipeline=seed_pipeline,
+            entity_nodes=entity_nodes,
+        )
+
+
+def _composite_config_identity(
+    composite_path: Path,
+    payload: dict[str, object],
+) -> tuple[str, str, object, str | None]:
+    composite_payload = payload.get("composite", {})
+    composite_name = composite_path.stem
+    summary = f"Composite pipeline config `{composite_name}`."
+    seed_pipeline = None
+    if isinstance(composite_payload, dict):
+        composite_name = str(composite_payload.get("name", composite_name))
+        summary = f"Composite pipeline config `{composite_name}`."
+        seed = composite_payload.get("seed")
+        if isinstance(seed, dict):
+            seed_pipeline = seed.get("pipeline")
+    return composite_name, summary, composite_payload, seed_pipeline
+
+
+def _link_composite_config_dependencies(
+    snapshot: GraphSnapshot,
+    composite_node: NodeKey,
+    composite_payload: object,
+    *,
+    seed_pipeline: str | None,
+    entity_nodes: dict[str, NodeKey],
+) -> None:
+    if isinstance(seed_pipeline, str) and seed_pipeline in entity_nodes:
+        snapshot.add_relation(composite_node, "DEPENDS_ON", entity_nodes[seed_pipeline], provenance="composite_seed")
+    dependencies = composite_payload.get("dependencies") if isinstance(composite_payload, dict) else None
+    if not isinstance(dependencies, list):
+        return
+    for dependency in dependencies:
+        if not isinstance(dependency, dict):
+            continue
+        dependency_pipeline = dependency.get("pipeline")
+        if isinstance(dependency_pipeline, str) and dependency_pipeline in entity_nodes:
+            snapshot.add_relation(
+                composite_node,
+                "DEPENDS_ON",
+                entity_nodes[dependency_pipeline],
+                provenance="composite_dependency",
+                required=bool(dependency.get("required", False)),
+            )
+
+
+def _link_config_artifact(
+    snapshot: GraphSnapshot,
+    target: NodeKey,
+    *,
+    path: str,
+    summary: str,
+    source_kind: str,
+    today: str,
+    provenance: str,
+) -> None:
+    artifact = snapshot.add_node(
+        "config_artifact",
+        path,
+        summary=summary,
+        source_path=path,
+        source_kind=source_kind,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(target, "DEFINED_BY", artifact, provenance=provenance)
 
 
 def _add_dashboard_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
@@ -6072,132 +6161,231 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         if not doc_path.is_file():
             continue
         text = _read_text(doc_path)
-        seen_matches: set[tuple[str, str]] = set()
-        for path_match in path_pattern.finditer(text):
-            match = path_match.group(1)
-            normalized = _normalize_docs_repo_reference(match)
-            if normalized is None:
-                continue
-            target, evidence_kind, confidence = _resolve_docs_reference_target(snapshot, normalized)
-            if target is None or target == node.key:
-                continue
-            dedupe_key = (normalized, target.name)
-            if dedupe_key in seen_matches:
-                continue
-            seen_matches.add(dedupe_key)
-            section_title, section_anchor = _markdown_heading_context(text, path_match.start())
-            line_number = text.count("\n", 0, path_match.start()) + 1
-            snapshot.add_relation(
-                node.key,
-                "DESCRIBES",
-                target,
-                provenance="docs_code_drift",
-                doc_reference=normalized,
-                evidence_kind=evidence_kind,
-                confidence=confidence,
+        _add_doc_path_reference_edges(snapshot, node.key, text, path_pattern)
+        _add_doc_command_reference_edges(snapshot, node.key, text, command_pattern)
+        _add_doc_claim_edges(snapshot, node.key, source_path, text, path_pattern)
+
+
+def _doc_reference_context(text: str, offset: int) -> tuple[str | None, str | None, int]:
+    section_title, section_anchor = _markdown_heading_context(text, offset)
+    line_number = text.count("\n", 0, offset) + 1
+    return section_title, section_anchor, line_number
+
+
+def _add_doc_path_reference_edges(
+    snapshot: GraphSnapshot,
+    source_node: NodeKey,
+    text: str,
+    path_pattern: re.Pattern[str],
+) -> None:
+    seen_matches: set[tuple[str, str]] = set()
+    for path_match in path_pattern.finditer(text):
+        match = path_match.group(1)
+        normalized = _normalize_docs_repo_reference(match)
+        if normalized is None:
+            continue
+        target, evidence_kind, confidence = _resolve_docs_reference_target(snapshot, normalized)
+        if target is None or target == source_node:
+            continue
+        dedupe_key = (normalized, target.name)
+        if dedupe_key in seen_matches:
+            continue
+        seen_matches.add(dedupe_key)
+        section_title, section_anchor, line_number = _doc_reference_context(text, path_match.start())
+        snapshot.add_relation(
+            source_node,
+            "DESCRIBES",
+            target,
+            provenance="docs_code_drift",
+            doc_reference=normalized,
+            evidence_kind=evidence_kind,
+            confidence=confidence,
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+        )
+
+
+def _add_doc_command_reference_edges(
+    snapshot: GraphSnapshot,
+    source_node: NodeKey,
+    text: str,
+    command_pattern: re.Pattern[str],
+) -> None:
+    seen_commands: set[str] = set()
+    for command_match in command_pattern.finditer(text):
+        raw_command = command_match.group(0).strip()
+        command_name = _normalize_cli_command_name(raw_command)
+        if command_name is None or command_name in seen_commands:
+            continue
+        command_key = NodeKey("cli_command_surface", command_name)
+        if command_key not in snapshot.nodes:
+            continue
+        seen_commands.add(command_name)
+        section_title, section_anchor, line_number = _doc_reference_context(text, command_match.start())
+        snapshot.add_relation(
+            source_node,
+            "DESCRIBES",
+            command_key,
+            provenance="docs_code_drift",
+            doc_reference=raw_command,
+            evidence_kind="command_reference",
+            confidence="medium",
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+        )
+
+
+def _is_claim_candidate(stripped_line: str) -> bool:
+    if not stripped_line or len(stripped_line) < 12:
+        return False
+    lowered = stripped_line.lower()
+    return any(token in lowered for token in ("must", "never", "must not", "should not", "required"))
+
+
+def _add_doc_claim_edges(
+    snapshot: GraphSnapshot,
+    source_node: NodeKey,
+    source_path: str,
+    text: str,
+    path_pattern: re.Pattern[str],
+) -> None:
+    for line_number, raw_line in enumerate(text.splitlines(), start=1):
+        stripped = raw_line.strip()
+        if not _is_claim_candidate(stripped):
+            continue
+        line_offset = text.find(raw_line)
+        section_title, section_anchor = _markdown_heading_context(text, line_offset)
+        clean_text = stripped.lstrip("-*0123456789. ").strip()
+        claim = snapshot.add_node(
+            "doc_claim_surface",
+            f"{source_path}#L{line_number}",
+            summary=f"Claim extracted from `{source_path}`.",
+            source_path=source_path,
+            source_kind="doc_claim_surface",
+            claim_text=clean_text,
+            modality=_claim_modality(clean_text),
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+            last_verified=str(date.today()),
+            ingest_wave="repo_sync_v1",
+            confidence="medium",
+        )
+        snapshot.add_relation(source_node, "ASSERTS", claim, provenance="docs_claims")
+        claim_has_target = _add_claim_path_targets(
+            snapshot,
+            claim,
+            source_node,
+            stripped,
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+            path_pattern=path_pattern,
+        )
+        claim_has_target = _add_claim_token_targets(
+            snapshot,
+            claim,
+            clean_text,
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+        ) or claim_has_target
+        if not claim_has_target:
+            _add_claim_fallback_target(
+                snapshot,
+                claim,
+                source_path,
                 section_title=section_title,
                 section_anchor=section_anchor,
                 line_number=line_number,
             )
-        seen_commands: set[str] = set()
-        for command_match in command_pattern.finditer(text):
-            raw_command = command_match.group(0).strip()
-            command_name = _normalize_cli_command_name(raw_command)
-            if command_name is None or command_name in seen_commands:
-                continue
-            command_key = NodeKey("cli_command_surface", command_name)
-            if command_key not in snapshot.nodes:
-                continue
-            seen_commands.add(command_name)
-            section_title, section_anchor = _markdown_heading_context(text, command_match.start())
-            line_number = text.count("\n", 0, command_match.start()) + 1
-            snapshot.add_relation(
-                node.key,
-                "DESCRIBES",
-                command_key,
-                provenance="docs_code_drift",
-                doc_reference=raw_command,
-                evidence_kind="command_reference",
-                confidence="medium",
-                section_title=section_title,
-                section_anchor=section_anchor,
-                line_number=line_number,
-            )
-        for line_number, raw_line in enumerate(text.splitlines(), start=1):
-            stripped = raw_line.strip()
-            if not stripped:
-                continue
-            lowered = stripped.lower()
-            if not any(token in lowered for token in ("must", "never", "must not", "should not", "required")):
-                continue
-            if len(stripped) < 12:
-                continue
-            clean_text = stripped.lstrip("-*0123456789. ").strip()
-            section_title, section_anchor = _markdown_heading_context(text, text.find(raw_line))
-            claim = snapshot.add_node(
-                "doc_claim_surface",
-                f"{source_path}#L{line_number}",
-                summary=f"Claim extracted from `{source_path}`.",
-                source_path=source_path,
-                source_kind="doc_claim_surface",
-                claim_text=clean_text,
-                modality=_claim_modality(clean_text),
-                section_title=section_title,
-                section_anchor=section_anchor,
-                line_number=line_number,
-                last_verified=str(date.today()),
-                ingest_wave="repo_sync_v1",
-                confidence="medium",
-            )
-            snapshot.add_relation(node.key, "ASSERTS", claim, provenance="docs_claims")
-            claim_has_target = False
-            for claim_match in path_pattern.finditer(stripped):
-                normalized = _normalize_docs_repo_reference(claim_match.group(1))
-                if normalized is None:
-                    continue
-                target, evidence_kind, confidence = _resolve_docs_reference_target(snapshot, normalized)
-                if target is None or target == node.key:
-                    continue
-                snapshot.add_relation(
-                    claim,
-                    "ASSERTS_ABOUT",
-                    target,
-                    provenance="docs_claims",
-                    doc_reference=normalized,
-                    evidence_kind=evidence_kind,
-                    confidence=confidence,
-                    section_title=section_title,
-                    section_anchor=section_anchor,
-                    line_number=line_number,
-                )
-                claim_has_target = True
-            for target, evidence_kind, confidence in _resolve_claim_targets(snapshot, clean_text):
-                snapshot.add_relation(
-                    claim,
-                    "ASSERTS_ABOUT",
-                    target,
-                    provenance="docs_claims",
-                    evidence_kind=evidence_kind,
-                    confidence=confidence,
-                    section_title=section_title,
-                    section_anchor=section_anchor,
-                    line_number=line_number,
-                )
-                claim_has_target = True
-            if not claim_has_target:
-                file_surface_key = NodeKey("file_surface", source_path)
-                if file_surface_key in snapshot.nodes:
-                    snapshot.add_relation(
-                        claim,
-                        "ASSERTS_ABOUT",
-                        file_surface_key,
-                        provenance="docs_claims_fallback",
-                        evidence_kind="source_document",
-                        confidence="low",
-                        section_title=section_title,
-                        section_anchor=section_anchor,
-                        line_number=line_number,
-                    )
+
+
+def _add_claim_path_targets(
+    snapshot: GraphSnapshot,
+    claim: NodeKey,
+    source_node: NodeKey,
+    stripped: str,
+    *,
+    section_title: str | None,
+    section_anchor: str | None,
+    line_number: int,
+    path_pattern: re.Pattern[str],
+) -> bool:
+    claim_has_target = False
+    for claim_match in path_pattern.finditer(stripped):
+        normalized = _normalize_docs_repo_reference(claim_match.group(1))
+        if normalized is None:
+            continue
+        target, evidence_kind, confidence = _resolve_docs_reference_target(snapshot, normalized)
+        if target is None or target == source_node:
+            continue
+        snapshot.add_relation(
+            claim,
+            "ASSERTS_ABOUT",
+            target,
+            provenance="docs_claims",
+            doc_reference=normalized,
+            evidence_kind=evidence_kind,
+            confidence=confidence,
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+        )
+        claim_has_target = True
+    return claim_has_target
+
+
+def _add_claim_token_targets(
+    snapshot: GraphSnapshot,
+    claim: NodeKey,
+    clean_text: str,
+    *,
+    section_title: str | None,
+    section_anchor: str | None,
+    line_number: int,
+) -> bool:
+    claim_has_target = False
+    for target, evidence_kind, confidence in _resolve_claim_targets(snapshot, clean_text):
+        snapshot.add_relation(
+            claim,
+            "ASSERTS_ABOUT",
+            target,
+            provenance="docs_claims",
+            evidence_kind=evidence_kind,
+            confidence=confidence,
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+        )
+        claim_has_target = True
+    return claim_has_target
+
+
+def _add_claim_fallback_target(
+    snapshot: GraphSnapshot,
+    claim: NodeKey,
+    source_path: str,
+    *,
+    section_title: str | None,
+    section_anchor: str | None,
+    line_number: int,
+) -> None:
+    file_surface_key = NodeKey("file_surface", source_path)
+    if file_surface_key in snapshot.nodes:
+        snapshot.add_relation(
+            claim,
+            "ASSERTS_ABOUT",
+            file_surface_key,
+            provenance="docs_claims_fallback",
+            evidence_kind="source_document",
+            confidence="low",
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+        )
 
 
 def _add_port_surfaces(
@@ -7284,18 +7472,41 @@ def _add_pipeline_surfaces(
     adapter_nodes: dict[str, NodeKey],
 ) -> dict[str, NodeKey]:
     pipeline_nodes: dict[str, NodeKey] = {}
+    _add_entity_pipeline_surfaces(
+        snapshot,
+        root,
+        project,
+        today,
+        contract_nodes,
+        adapter_nodes,
+        pipeline_nodes,
+    )
+    _add_composite_pipeline_surfaces(
+        snapshot,
+        root,
+        project,
+        today,
+        pipeline_nodes,
+    )
+    return pipeline_nodes
 
+
+def _add_entity_pipeline_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    contract_nodes: dict[str, NodeKey],
+    adapter_nodes: dict[str, NodeKey],
+    pipeline_nodes: dict[str, NodeKey],
+) -> None:
     entities_root = root / "configs" / "entities"
     for entity_path in sorted(entities_root.rglob(YAML_FILE_GLOB)):
         payload = _read_yaml(entity_path)
-        provider_name = str(payload.get("provider", entity_path.parent.name))
-        entity_name = str(payload.get("entity", entity_path.stem))
-        pipeline_payload = payload.get("pipeline")
-        pipeline_name = f"{provider_name}_{entity_name}"
-        pipeline_summary = f"Entity pipeline `{pipeline_name}`."
-        if isinstance(pipeline_payload, dict):
-            pipeline_name = str(pipeline_payload.get("pipeline_name", pipeline_name))
-            pipeline_summary = str(pipeline_payload.get("description", pipeline_summary))
+        provider_name, entity_name, pipeline_name, pipeline_summary = _entity_pipeline_identity(
+            entity_path,
+            payload,
+        )
         pipeline = snapshot.add_node(
             "pipeline_surface",
             pipeline_name,
@@ -7311,27 +7522,68 @@ def _add_pipeline_surfaces(
         )
         pipeline_nodes[pipeline_name] = pipeline
         snapshot.add_relation(project, "HAS_PIPELINE", pipeline, provenance="impact_pipelines")
+        _link_entity_pipeline_dependencies(
+            snapshot,
+            pipeline,
+            pipeline_name=pipeline_name,
+            provider_name=provider_name,
+            entity_name=entity_name,
+            contract_nodes=contract_nodes,
+            adapter_nodes=adapter_nodes,
+        )
 
-        entity_key = NodeKey("entity_config", pipeline_name)
-        if entity_key in snapshot.nodes:
-            snapshot.add_relation(pipeline, "BACKED_BY", entity_key, provenance="impact_pipelines")
-        provider_key = NodeKey("provider_surface", provider_name)
-        if provider_key in snapshot.nodes:
-            snapshot.add_relation(pipeline, "DEPENDS_ON", provider_key, provenance="impact_pipelines")
-        adapter_key = adapter_nodes.get(provider_name)
-        if adapter_key is not None:
-            snapshot.add_relation(pipeline, "DEPENDS_ON", adapter_key, provenance="impact_pipelines")
-        contract_key = contract_nodes.get(f"{provider_name}.{entity_name}")
-        if contract_key is not None:
-            snapshot.add_relation(pipeline, "DEPENDS_ON", contract_key, provenance="impact_pipelines")
 
+def _entity_pipeline_identity(
+    entity_path: Path,
+    payload: dict[str, object],
+) -> tuple[str, str, str, str]:
+    provider_name = str(payload.get("provider", entity_path.parent.name))
+    entity_name = str(payload.get("entity", entity_path.stem))
+    pipeline_payload = payload.get("pipeline")
+    pipeline_name = f"{provider_name}_{entity_name}"
+    pipeline_summary = f"Entity pipeline `{pipeline_name}`."
+    if isinstance(pipeline_payload, dict):
+        pipeline_name = str(pipeline_payload.get("pipeline_name", pipeline_name))
+        pipeline_summary = str(pipeline_payload.get("description", pipeline_summary))
+    return provider_name, entity_name, pipeline_name, pipeline_summary
+
+
+def _link_entity_pipeline_dependencies(
+    snapshot: GraphSnapshot,
+    pipeline: NodeKey,
+    *,
+    pipeline_name: str,
+    provider_name: str,
+    entity_name: str,
+    contract_nodes: dict[str, NodeKey],
+    adapter_nodes: dict[str, NodeKey],
+) -> None:
+    entity_key = NodeKey("entity_config", pipeline_name)
+    if entity_key in snapshot.nodes:
+        snapshot.add_relation(pipeline, "BACKED_BY", entity_key, provenance="impact_pipelines")
+    provider_key = NodeKey("provider_surface", provider_name)
+    if provider_key in snapshot.nodes:
+        snapshot.add_relation(pipeline, "DEPENDS_ON", provider_key, provenance="impact_pipelines")
+    adapter_key = adapter_nodes.get(provider_name)
+    if adapter_key is not None:
+        snapshot.add_relation(pipeline, "DEPENDS_ON", adapter_key, provenance="impact_pipelines")
+    contract_key = contract_nodes.get(f"{provider_name}.{entity_name}")
+    if contract_key is not None:
+        snapshot.add_relation(pipeline, "DEPENDS_ON", contract_key, provenance="impact_pipelines")
+
+
+def _add_composite_pipeline_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    pipeline_nodes: dict[str, NodeKey],
+) -> None:
     composites_root = root / "configs" / "composites"
     for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
         payload = _read_yaml(composite_path)
-        composite = payload.get("composite")
-        composite_name = composite_path.stem
-        if isinstance(composite, dict):
-            composite_name = str(composite.get("name", composite_name))
+        composite_payload = payload.get("composite")
+        composite_name = _composite_pipeline_name(composite_path, composite_payload)
         pipeline = snapshot.add_node(
             "pipeline_surface",
             composite_name,
@@ -7345,37 +7597,54 @@ def _add_pipeline_surfaces(
         )
         pipeline_nodes[composite_name] = pipeline
         snapshot.add_relation(project, "HAS_PIPELINE", pipeline, provenance="impact_pipelines")
-
         composite_key = NodeKey("composite_config", composite_name)
         if composite_key in snapshot.nodes:
             snapshot.add_relation(pipeline, "BACKED_BY", composite_key, provenance="impact_pipelines")
+        _link_composite_pipeline_dependencies(snapshot, pipeline, composite_payload, pipeline_nodes)
 
-        if isinstance(composite, dict):
-            seed = composite.get("seed")
-            if isinstance(seed, dict):
-                seed_pipeline = seed.get("pipeline")
-                if isinstance(seed_pipeline, str) and seed_pipeline in pipeline_nodes:
-                    snapshot.add_relation(
-                        pipeline,
-                        "DEPENDS_ON",
-                        pipeline_nodes[seed_pipeline],
-                        provenance="impact_pipelines",
-                    )
-            dependencies = composite.get("dependencies")
-            if isinstance(dependencies, list):
-                for dependency in dependencies:
-                    if not isinstance(dependency, dict):
-                        continue
-                    dependency_pipeline = dependency.get("pipeline")
-                    if isinstance(dependency_pipeline, str) and dependency_pipeline in pipeline_nodes:
-                        snapshot.add_relation(
-                            pipeline,
-                            "DEPENDS_ON",
-                            pipeline_nodes[dependency_pipeline],
-                            provenance="impact_pipelines",
-                        )
 
-    return pipeline_nodes
+def _composite_pipeline_name(
+    composite_path: Path,
+    composite_payload: object,
+) -> str:
+    composite_name = composite_path.stem
+    if isinstance(composite_payload, dict):
+        composite_name = str(composite_payload.get("name", composite_name))
+    return composite_name
+
+
+def _link_composite_pipeline_dependencies(
+    snapshot: GraphSnapshot,
+    pipeline: NodeKey,
+    composite_payload: object,
+    pipeline_nodes: dict[str, NodeKey],
+) -> None:
+    if not isinstance(composite_payload, dict):
+        return
+    seed = composite_payload.get("seed")
+    if isinstance(seed, dict):
+        seed_pipeline = seed.get("pipeline")
+        if isinstance(seed_pipeline, str) and seed_pipeline in pipeline_nodes:
+            snapshot.add_relation(
+                pipeline,
+                "DEPENDS_ON",
+                pipeline_nodes[seed_pipeline],
+                provenance="impact_pipelines",
+            )
+    dependencies = composite_payload.get("dependencies")
+    if not isinstance(dependencies, list):
+        return
+    for dependency in dependencies:
+        if not isinstance(dependency, dict):
+            continue
+        dependency_pipeline = dependency.get("pipeline")
+        if isinstance(dependency_pipeline, str) and dependency_pipeline in pipeline_nodes:
+            snapshot.add_relation(
+                pipeline,
+                "DEPENDS_ON",
+                pipeline_nodes[dependency_pipeline],
+                provenance="impact_pipelines",
+            )
 
 
 def _add_pipeline_normalization_edges(
@@ -7864,98 +8133,213 @@ def _add_alert_surfaces(
         (key for key in snapshot.nodes if key.label == "provider_surface"),
         key=lambda node: node.name,
     )
+    target_context = AlertTargetContext(
+        snapshot=snapshot,
+        pipeline_nodes=pipeline_nodes,
+        provider_nodes=provider_nodes,
+        contract_nodes=contract_nodes,
+        memory_mapping=memory_mapping,
+    )
     for rules_path in sorted(rules_root.glob("*.y*ml")):
-        payload = _read_yaml(rules_path)
-        artifact = snapshot.add_node(
-            "config_artifact",
-            _rel_path(root, rules_path),
-            summary=f"Prometheus alert rules file `{rules_path.name}`.",
-            source_path=_rel_path(root, rules_path),
-            source_kind="prometheus_rules",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
+        _add_alert_rule_file_surfaces(
+            snapshot,
+            root,
+            project,
+            today,
+            rules_path,
+            dashboard_metrics=dashboard_metrics,
+            target_context=target_context,
+            memory_mapping=memory_mapping,
         )
-        groups = payload.get("groups")
-        if not isinstance(groups, list):
+
+
+def _add_alert_rule_file_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    rules_path: Path,
+    *,
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    target_context: AlertTargetContext,
+    memory_mapping: dict[str, object],
+) -> None:
+    payload = _read_yaml(rules_path)
+    artifact = snapshot.add_node(
+        "config_artifact",
+        _rel_path(root, rules_path),
+        summary=f"Prometheus alert rules file `{rules_path.name}`.",
+        source_path=_rel_path(root, rules_path),
+        source_kind="prometheus_rules",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    groups = payload.get("groups")
+    if not isinstance(groups, list):
+        return
+    for group in groups:
+        if not isinstance(group, dict):
             continue
-        for group in groups:
-            if not isinstance(group, dict):
-                continue
-            group_name = str(group.get("name", rules_path.stem))
-            rules = group.get("rules")
-            if not isinstance(rules, list):
-                continue
-            for rule in rules:
-                if not isinstance(rule, dict):
-                    continue
-                alert_name = rule.get("alert")
-                if not isinstance(alert_name, str):
-                    continue
-                annotations = rule.get("annotations") if isinstance(rule.get("annotations"), dict) else {}
-                labels = rule.get("labels") if isinstance(rule.get("labels"), dict) else {}
-                alert = snapshot.add_node(
-                    "alert_surface",
-                    alert_name,
-                    summary=str(annotations.get("summary", f"Prometheus alert `{alert_name}`.")),
-                    source_path=_rel_path(root, rules_path),
-                    source_kind="prometheus_alert_rule",
-                    group=group_name,
-                    severity=labels.get("severity"),
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="high",
-                )
-                snapshot.add_relation(project, "HAS_ALERT", alert, provenance="impact_alerts")
-                snapshot.add_relation(alert, "BACKED_BY", artifact, provenance="impact_alerts")
+        _add_alert_rule_group_surfaces(
+            snapshot,
+            root,
+            project,
+            today,
+            rules_path,
+            artifact,
+            group,
+            dashboard_metrics=dashboard_metrics,
+            target_context=target_context,
+            memory_mapping=memory_mapping,
+        )
 
-                expr = str(rule.get("expr", ""))
-                dimension_text = " ".join(str(value) for value in annotations.values())
-                dimensions = _runtime_dimensions(expr, dimension_text)
-                selected_pipelines, selected_providers, selected_contracts = _select_alert_targets(
-                    AlertTargetContext(
-                        snapshot=snapshot,
-                        pipeline_nodes=pipeline_nodes,
-                        provider_nodes=provider_nodes,
-                        contract_nodes=contract_nodes,
-                        memory_mapping=memory_mapping,
-                    ),
-                    alert_name,
-                    group_name,
-                    expr,
-                    dimensions,
-                )
-                for pipeline in selected_pipelines:
-                    snapshot.add_relation(alert, "DEPENDS_ON", pipeline, provenance="impact_alerts")
-                for provider in selected_providers:
-                    snapshot.add_relation(alert, "DEPENDS_ON", provider, provenance="impact_alerts")
-                for contract in selected_contracts:
-                    snapshot.add_relation(alert, "DEPENDS_ON", contract, provenance="impact_alerts")
-                for dashboard in _select_alert_dashboards(
-                    alert_name,
-                    group_name,
-                    expr,
-                    dashboard_metrics,
-                    memory_mapping,
-                ):
-                    if dashboard in snapshot.nodes:
-                        snapshot.add_relation(alert, "OBSERVED_BY", dashboard, provenance="impact_alerts")
 
-                runbook = annotations.get("runbook")
-                if isinstance(runbook, str):
-                    runbook_path = root / runbook
-                    if runbook_path.is_file():
-                        doc = snapshot.add_node(
-                            "doc_artifact",
-                            runbook,
-                            summary=f"Runbook referenced by alert `{alert_name}`.",
-                            source_path=runbook,
-                            source_kind="alert_runbook",
-                            last_verified=today,
-                            ingest_wave="repo_sync_v1",
-                            confidence="high",
-                        )
-                        snapshot.add_relation(alert, "DESCRIBED_IN", doc, provenance="impact_alerts")
+def _add_alert_rule_group_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    rules_path: Path,
+    artifact: NodeKey,
+    group: dict[str, object],
+    *,
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    target_context: AlertTargetContext,
+    memory_mapping: dict[str, object],
+) -> None:
+    group_name = str(group.get("name", rules_path.stem))
+    rules = group.get("rules")
+    if not isinstance(rules, list):
+        return
+    for rule in rules:
+        if not isinstance(rule, dict):
+            continue
+        _add_single_alert_surface(
+            snapshot,
+            root,
+            project,
+            today,
+            rules_path,
+            artifact,
+            group_name,
+            rule,
+            dashboard_metrics=dashboard_metrics,
+            target_context=target_context,
+            memory_mapping=memory_mapping,
+        )
+
+
+def _add_single_alert_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    rules_path: Path,
+    artifact: NodeKey,
+    group_name: str,
+    rule: dict[str, object],
+    *,
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    target_context: AlertTargetContext,
+    memory_mapping: dict[str, object],
+) -> None:
+    alert_name = rule.get("alert")
+    if not isinstance(alert_name, str):
+        return
+    annotations = rule.get("annotations") if isinstance(rule.get("annotations"), dict) else {}
+    labels = rule.get("labels") if isinstance(rule.get("labels"), dict) else {}
+    alert = snapshot.add_node(
+        "alert_surface",
+        alert_name,
+        summary=str(annotations.get("summary", f"Prometheus alert `{alert_name}`.")),
+        source_path=_rel_path(root, rules_path),
+        source_kind="prometheus_alert_rule",
+        group=group_name,
+        severity=labels.get("severity"),
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_ALERT", alert, provenance="impact_alerts")
+    snapshot.add_relation(alert, "BACKED_BY", artifact, provenance="impact_alerts")
+    _link_alert_targets(
+        snapshot,
+        alert,
+        alert_name,
+        group_name,
+        rule,
+        dashboard_metrics=dashboard_metrics,
+        target_context=target_context,
+        memory_mapping=memory_mapping,
+    )
+    _link_alert_runbook(snapshot, root, alert, alert_name, annotations, today)
+
+
+def _link_alert_targets(
+    snapshot: GraphSnapshot,
+    alert: NodeKey,
+    alert_name: str,
+    group_name: str,
+    rule: dict[str, object],
+    *,
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    target_context: AlertTargetContext,
+    memory_mapping: dict[str, object],
+) -> None:
+    annotations = rule.get("annotations") if isinstance(rule.get("annotations"), dict) else {}
+    expr = str(rule.get("expr", ""))
+    dimension_text = " ".join(str(value) for value in annotations.values())
+    dimensions = _runtime_dimensions(expr, dimension_text)
+    selected_pipelines, selected_providers, selected_contracts = _select_alert_targets(
+        target_context,
+        alert_name,
+        group_name,
+        expr,
+        dimensions,
+    )
+    for pipeline in selected_pipelines:
+        snapshot.add_relation(alert, "DEPENDS_ON", pipeline, provenance="impact_alerts")
+    for provider in selected_providers:
+        snapshot.add_relation(alert, "DEPENDS_ON", provider, provenance="impact_alerts")
+    for contract in selected_contracts:
+        snapshot.add_relation(alert, "DEPENDS_ON", contract, provenance="impact_alerts")
+    for dashboard in _select_alert_dashboards(
+        alert_name,
+        group_name,
+        expr,
+        dashboard_metrics,
+        memory_mapping,
+    ):
+        if dashboard in snapshot.nodes:
+            snapshot.add_relation(alert, "OBSERVED_BY", dashboard, provenance="impact_alerts")
+
+
+def _link_alert_runbook(
+    snapshot: GraphSnapshot,
+    root: Path,
+    alert: NodeKey,
+    alert_name: str,
+    annotations: dict[str, object],
+    today: str,
+) -> None:
+    runbook = annotations.get("runbook")
+    if not isinstance(runbook, str):
+        return
+    runbook_path = root / runbook
+    if not runbook_path.is_file():
+        return
+    doc = snapshot.add_node(
+        "doc_artifact",
+        runbook,
+        summary=f"Runbook referenced by alert `{alert_name}`.",
+        source_path=runbook,
+        source_kind="alert_runbook",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(alert, "DESCRIBED_IN", doc, provenance="impact_alerts")
 
 
 def _add_governance_edges(

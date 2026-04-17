@@ -65,7 +65,7 @@ For actual step-by-step deployment flow, use
    - namespace and manifest apply steps
    - verification, rollout, backup, troubleshooting
 
-1. `scripts/ops/deploy-bioetl.sh`
+1. `scripts/ops/runtime/deploy/deploy-bioetl.sh`
 
    - helper automation for deploy/update/delete/status/logs
    - convenience wrapper around the experimental manifests
@@ -76,7 +76,7 @@ If you are evaluating this experimental path, the intended reading order is:
 
 1. Read [deployment-guide.md](deployment-guide.md)
 1. Inspect the three YAML manifests
-1. Optionally use `scripts/ops/deploy-bioetl.sh`
+1. Optionally use `scripts/ops/runtime/deploy/deploy-bioetl.sh`
 1. Return to standard runbooks for supported operations work
 
 ## Quick Orientation

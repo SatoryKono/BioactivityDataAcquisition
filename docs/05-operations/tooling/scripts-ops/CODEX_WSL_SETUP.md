@@ -174,13 +174,13 @@ cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
 cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 
 # Interactive mode
-./scripts/ops/codex.sh
+./scripts/ops/launchers/codex/codex.sh
 
 # With a prompt
-./scripts/ops/codex.sh "explain the data pipeline"
+./scripts/ops/launchers/codex/codex.sh "explain the data pipeline"
 
 # Auto-execution
-./scripts/ops/codex-exec.sh "refactor the transformer class"
+./scripts/ops/launchers/codex/codex-exec.sh "refactor the transformer class"
 ```
 
 ### New WSL Wrapper (Windows)
@@ -211,36 +211,36 @@ cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 
 ### Code Analysis
 ```bash
-./scripts/ops/codex.sh "explain the data transformation pipeline"
-./scripts/ops/codex.sh "identify performance bottlenecks in the ETL"
-./scripts/ops/codex.sh "review security of data access patterns"
+./scripts/ops/launchers/codex/codex.sh "explain the data transformation pipeline"
+./scripts/ops/launchers/codex/codex.sh "identify performance bottlenecks in the ETL"
+./scripts/ops/launchers/codex/codex.sh "review security of data access patterns"
 ```
 
 ### Refactoring & Optimization
 ```bash
-./scripts/ops/codex.sh "refactor ChemBL extractor for vectorized operations"
-./scripts/ops/codex.sh "optimize database queries in bioetl/database.py"
-./scripts/ops/codex.sh "add error handling to all data loading functions"
+./scripts/ops/launchers/codex/codex.sh "refactor ChemBL extractor for vectorized operations"
+./scripts/ops/launchers/codex/codex.sh "optimize database queries in bioetl/database.py"
+./scripts/ops/launchers/codex/codex.sh "add error handling to all data loading functions"
 ```
 
 ### Code Generation
 ```bash
-./scripts/ops/codex.sh "generate Pydantic models for bronze layer"
-./scripts/ops/codex.sh "create comprehensive unit tests for ChemBLExtractor"
-./scripts/ops/codex.sh "add docstrings to all public methods"
+./scripts/ops/launchers/codex/codex.sh "generate Pydantic models for bronze layer"
+./scripts/ops/launchers/codex/codex.sh "create comprehensive unit tests for ChemBLExtractor"
+./scripts/ops/launchers/codex/codex.sh "add docstrings to all public methods"
 ```
 
 ### Debugging
 ```bash
-./scripts/ops/codex.sh "debug the gold_sink_disabled warning"
-./scripts/ops/codex.sh "fix the health_check_degraded issue during startup"
-./scripts/ops/codex.sh "analyze the chimbl_degraded_mode behavior"
+./scripts/ops/launchers/codex/codex.sh "debug the gold_sink_disabled warning"
+./scripts/ops/launchers/codex/codex.sh "fix the health_check_degraded issue during startup"
+./scripts/ops/launchers/codex/codex.sh "analyze the chimbl_degraded_mode behavior"
 ```
 
 ### With Auto-Execution
 ```bash
-./scripts/ops/codex-exec.sh "fix all TODO comments in the codebase"
-./scripts/ops/codex-exec.sh "add type hints to bioetl module"
+./scripts/ops/launchers/codex/codex-exec.sh "fix all TODO comments in the codebase"
+./scripts/ops/launchers/codex/codex-exec.sh "add type hints to bioetl module"
 ```
 
 ## Troubleshooting
@@ -277,8 +277,8 @@ timeout 2 bash -c "echo > /dev/tcp/$(ip route show default | awk '{print $3}')/3
 
 Make scripts executable:
 ```bash
-chmod +x ./scripts/ops/codex.sh
-chmod +x ./scripts/ops/codex-exec.sh
+chmod +x ./scripts/ops/launchers/codex/codex.sh
+chmod +x ./scripts/ops/launchers/codex/codex-exec.sh
 chmod +x ./script-codex/helper/setup-wsl.sh
 ```
 
@@ -347,20 +347,20 @@ no_alternate_screen = true
 
 ```bash
 # Use o3 model (if available)
-./scripts/ops/codex.sh -c model="o3" "analyze performance"
+./scripts/ops/launchers/codex/codex.sh -c model="o3" "analyze performance"
 
 # Use gpt-4-turbo
-./scripts/ops/codex.sh -c model="gpt-4-turbo" "generate tests"
+./scripts/ops/launchers/codex/codex.sh -c model="gpt-4-turbo" "generate tests"
 ```
 
 ### Sandbox Modes
 
 ```bash
 # Read-only (safe, no changes)
-./scripts/ops/codex.sh -s read-only "review the code"
+./scripts/ops/launchers/codex/codex.sh -s read-only "review the code"
 
 # Workspace write (Codex can modify files)
-./scripts/ops/codex.sh -s workspace-write "refactor and apply changes"
+./scripts/ops/launchers/codex/codex.sh -s workspace-write "refactor and apply changes"
 ```
 
 ## Best Practices
@@ -376,21 +376,21 @@ no_alternate_screen = true
 ## Next Steps
 
 1. Run setup: `bash ./script-codex/helper/setup-wsl.sh`
-2. Test: `./scripts/ops/codex.sh "explain this pipeline"`
+2. Test: `./scripts/ops/launchers/codex/codex.sh "explain this pipeline"`
 3. Explore: Try the examples in Common Usage Examples section
 4. Integrate: Add Codex to your workflow for code reviews, refactoring, etc.
 
 ## Files Modified by This Setup
 
-- `scripts/ops/codex.sh` (new) - WSL bash launcher
-- `scripts/ops/codex-exec.sh` (new) - WSL auto-exec launcher
-- `scripts/ops/codex-wsl.bat` (new) - Modern Windows wrapper
+- `scripts/ops/launchers/codex/codex.sh` (new) - WSL bash launcher
+- `scripts/ops/launchers/codex/codex-exec.sh` (new) - WSL auto-exec launcher
+- `scripts/ops/launchers/codex/codex-wsl.bat` (new) - Modern Windows wrapper
 - `script-codex/helper/setup-wsl.sh` (new) - Installation script
 
 Original files remain unchanged:
-- `scripts/ops/codex.bat` - Original Windows launcher
-- `scripts/ops/codex-exec.bat` - Original auto-exec
-- `scripts/ops/wsl_proxy.py` - HTTP proxy bridge
+- `scripts/ops/launchers/codex/codex.bat` - Original Windows launcher
+- `scripts/ops/launchers/codex/codex-exec.bat` - Original auto-exec
+- `scripts/ops/runtime/wsl/wsl_proxy.py` - HTTP proxy bridge
 - `.wsl_proxy_env.sh` - Proxy environment config
 
 ---

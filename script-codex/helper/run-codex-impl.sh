@@ -18,8 +18,8 @@ fi
 
 # Verify API key
 if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-    echo "[ERROR] OPENAI_API_KEY not set in ${ENV_FILE}"
-    echo "[INFO] Please edit .env.codex and add your API key from: https://platform.openai.com/api-keys"
+    echo "[ERROR] OPENAI_API_KEY not set in ${ENV_FILE}" >&2
+    echo "[INFO] Please edit .env.codex and add your API key from: https://platform.openai.com/api-keys" >&2
     exit 1
 fi
 
@@ -46,25 +46,25 @@ fi
 
 # If not found anywhere, try to install
 if [[ -z "$CODEX_BIN" ]]; then
-    echo "[INFO] Codex not found, attempting to install..."
+    echo "[INFO] Codex not found, attempting to install..." >&2
     if timeout 180 npm install -g @openai/codex@latest 2>&1 | tail -10; then
         if command -v codex >/dev/null 2>&1; then
             CODEX_BIN="codex"
             echo "[INFO] Codex installed successfully"
         else
-            echo "[ERROR] npm install succeeded but codex not found in PATH"
+            echo "[ERROR] npm install succeeded but codex not found in PATH" >&2
             exit 1
         fi
     else
-        echo "[ERROR] Failed to install Codex"
+        echo "[ERROR] Failed to install Codex" >&2
         exit 1
     fi
 fi
 
 # Verify we found it
-if [[ -z "$CODEX_BIN" ]] || ! command -v $CODEX_BIN >/dev/null 2>&1; then
-    echo "[ERROR] Codex binary not found"
-    echo "[INFO] Try installing manually: npm install -g @openai/codex"
+if [[ -z "$CODEX_BIN" ]] || ! command -v "$CODEX_BIN" >/dev/null 2>&1; then
+    echo "[ERROR] Codex binary not found" >&2
+    echo "[INFO] Try installing manually: npm install -g @openai/codex" >&2
     exit 1
 fi
 
@@ -77,4 +77,4 @@ if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
 fi
 
 # Launch Codex
-exec $CODEX_BIN -C "${REPO_ROOT}" "$@"
+exec "${CODEX_BIN}" -C "${REPO_ROOT}" "$@"

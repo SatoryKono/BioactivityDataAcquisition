@@ -26,25 +26,33 @@ WARN=0
 FAIL=0
 
 check_pass() {
-    echo -e "${GREEN}[✓]${NC} $1"
+    local message="${1:-}"
+    echo -e "${GREEN}[✓]${NC} ${message}"
     ((PASS++))
+    return 0
 }
 
 check_warn() {
-    echo -e "${YELLOW}[⚠]${NC} $1"
+    local message="${1:-}"
+    echo -e "${YELLOW}[⚠]${NC} ${message}"
     ((WARN++))
+    return 0
 }
 
 check_fail() {
-    echo -e "${RED}[✗]${NC} $1"
+    local message="${1:-}"
+    echo -e "${RED}[✗]${NC} ${message}" >&2
     ((FAIL++))
+    return 0
 }
 
 header() {
+    local title="${1:-}"
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}${title}${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    return 0
 }
 
 summary() {
@@ -53,6 +61,7 @@ summary() {
     echo -e "Summary: ${GREEN}$PASS passed${NC} | ${YELLOW}$WARN warnings${NC} | ${RED}$FAIL failed${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
+    return 0
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

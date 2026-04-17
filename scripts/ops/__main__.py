@@ -35,27 +35,27 @@ import sys
 from pathlib import Path
 
 COMMANDS: dict[str, str] = {
-    "salt-rotate": "salt_rotate.py",
-    "fix-grafana": "fix_grafana_dashboards.py",
-    "wsl-proxy": "wsl_proxy.py",
+    "salt-rotate": "maintenance/security/salt_rotate.py",
+    "fix-grafana": "observability/grafana/fix_grafana_dashboards.py",
+    "wsl-proxy": "runtime/wsl/wsl_proxy.py",
 }
 
 SHELL_COMMANDS: dict[str, str] = {
-    "update-issue": "maintenance/update_github_issue.sh",
-    "triage-issues": "maintenance/triage_cleanup_issue_wave.sh",
-    "close-ge-spike": "maintenance/close_great_expectations_spike_issue.sh",
-    "close-schema-drift": "maintenance/close_pandera_schema_drift_issue.sh",
-    "codex": "codex.sh",
-    "codex-exec": "codex-exec.sh",
-    "codex-headless": "codex-headless.sh",
-    "diagnose-codex-wsl": "diagnose-codex-wsl.sh",
-    "setup-agents": "setup_agents.sh",
-    "setup-plugins": "setup_plugins.sh",
-    "setup-skills": "setup_skills.sh",
-    "check-skills": "check_ai_skills_layout.sh",
-    "check-mirror": "check_skills_mirror.sh",
-    "deploy": "deploy-bioetl.sh",
-    "delete-branches": "delete-stale-branches.sh",
+    "update-issue": "maintenance/github/update_github_issue.sh",
+    "triage-issues": "maintenance/github/triage_cleanup_issue_wave.sh",
+    "close-ge-spike": "maintenance/github/close_great_expectations_spike_issue.sh",
+    "close-schema-drift": "maintenance/github/close_pandera_schema_drift_issue.sh",
+    "codex": "launchers/codex/codex.sh",
+    "codex-exec": "launchers/codex/codex-exec.sh",
+    "codex-headless": "launchers/codex/codex-headless.sh",
+    "diagnose-codex-wsl": "launchers/codex/diagnose-codex-wsl.sh",
+    "setup-agents": "launchers/codex/setup_agents.sh",
+    "setup-plugins": "launchers/codex/setup_plugins.sh",
+    "setup-skills": "launchers/codex/setup_skills.sh",
+    "check-skills": "support/skills/check_ai_skills_layout.sh",
+    "check-mirror": "support/skills/check_skills_mirror.sh",
+    "deploy": "runtime/deploy/deploy-bioetl.sh",
+    "delete-branches": "maintenance/git/delete-stale-branches.sh",
 }
 
 _DIR = Path(__file__).parent

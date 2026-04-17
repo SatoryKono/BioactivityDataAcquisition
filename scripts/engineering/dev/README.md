@@ -79,7 +79,7 @@ startup lightweight:
 
 Behavior differs slightly by platform:
 
-- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/setup_plugins.sh --pytest-only`
+- `bash scripts/engineering/dev/run_pytest.sh` runs `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`
   first, so missing pytest plugins can be auto-installed in the selected Python environment.
 - `.\scripts\engineering\dev\run_pytest.ps1` assumes `.venv-win` is already prepared via
   `.\scripts\engineering\dev\setup_env_windows.ps1` or `make setup-plugins`.

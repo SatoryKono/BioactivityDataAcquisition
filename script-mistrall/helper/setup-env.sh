@@ -13,16 +13,36 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+SEPARATOR="=================================================="
 
-log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
-log_error() { echo -e "${RED}[X]${NC} $1"; }
-log_info() { echo -e "${BLUE}[i]${NC} $1"; }
+log_success() {
+    local message="${1}"
+    echo -e "${GREEN}[✓]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1}"
+    echo -e "${YELLOW}[!]${NC} ${message}"
+    return 0
+}
+
+log_error() {
+    local message="${1}"
+    echo -e "${RED}[X]${NC} ${message}" >&2
+    return 0
+}
+
+log_info() {
+    local message="${1}"
+    echo -e "${BLUE}[i]${NC} ${message}"
+    return 0
+}
 
 echo ""
-echo "=================================================="
+echo "${SEPARATOR}"
 echo "  Mistral Setup - Configuration"
-echo "=================================================="
+echo "${SEPARATOR}"
 echo ""
 
 # Step 1: Check Docker
@@ -130,9 +150,9 @@ fi
 echo ""
 
 # Step 6: Display next steps
-echo "=================================================="
+echo "${SEPARATOR}"
 log_success "Setup completed successfully!"
-echo "=================================================="
+echo "${SEPARATOR}"
 echo ""
 log_info "Next steps:"
 echo "  1. Start Mistral: ./run-mistrall.sh start"

@@ -13,19 +13,27 @@ NC='\033[0m' # No Color
 
 # Logging functions
 log_header() {
-    echo -e "${BLUE}[$(date '+%H:%M:%S')]${NC} $1"
+    local message="${1:-}"
+    echo -e "${BLUE}[$(date '+%H:%M:%S')]${NC} ${message}"
+    return 0
 }
 
 log_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    local message="${1:-}"
+    echo -e "${GREEN}✓${NC} ${message}"
+    return 0
 }
 
 log_warn() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    local message="${1:-}"
+    echo -e "${YELLOW}⚠${NC} ${message}"
+    return 0
 }
 
 log_error() {
-    echo -e "${RED}✗${NC} $1"
+    local message="${1:-}"
+    echo -e "${RED}✗${NC} ${message}" >&2
+    return 0
 }
 
 # Detect environment
@@ -38,6 +46,7 @@ check_wsl() {
         log_error "Run from WSL: wsl -- bash ./script-codex/helper/setup-wsl-complete.sh"
         exit 1
     fi
+    return 0
 }
 
 # Setup directories
@@ -45,6 +54,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 CACHE_DIR="${REPO_ROOT}/.cache/tools"
+SEPARATOR="==========================================="
 
 if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
     log_error "Codex bootstrap helper not found: ${ENSURE_SCRIPT}"
@@ -52,9 +62,9 @@ if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
 fi
 
 echo ""
-echo "==========================================="
+echo "${SEPARATOR}"
 echo "  WSL Codex Complete Setup"
-echo "==========================================="
+echo "${SEPARATOR}"
 echo ""
 
 log_header "Step 0: Environment Check"
@@ -209,9 +219,9 @@ else
 fi
 
 echo ""
-echo "==========================================="
+echo "${SEPARATOR}"
 echo "  Setup Complete!"
-echo "==========================================="
+echo "${SEPARATOR}"
 echo ""
 echo "Next steps:"
 echo ""

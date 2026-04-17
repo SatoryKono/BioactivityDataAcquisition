@@ -42,6 +42,14 @@ QUOTED_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
 TAG_RE = re.compile(r"<[^>]+>")
 
 
+def _ensure_repo_path(path: Path) -> Path:
+    resolved_root = REPO_ROOT.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
+    return resolved_path
+
+
 @dataclass(frozen=True)
 class Violation:
     file: str
@@ -76,20 +84,21 @@ def _err(message: str) -> None:
 
 
 def load_manifest(manifest_path: Path) -> list[Path]:
-    if not manifest_path.exists():
-        raise FileNotFoundError(f"Manifest not found: {manifest_path}")
+    safe_manifest = _ensure_repo_path(manifest_path)
+    if not safe_manifest.exists():
+        raise FileNotFoundError(f"Manifest not found: {safe_manifest}")
     files: list[Path] = []
-    for raw in manifest_path.read_text(encoding="utf-8").splitlines():
+    for raw in safe_manifest.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
         candidate = line if line.startswith("/") else (REPO_ROOT / line)
-        path = Path(candidate)
+        path = _ensure_repo_path(Path(candidate))
         if path.suffix not in SUPPORTED_SUFFIXES:
             raise ValueError(f"Manifest entry must be .mmd/.mermaid: {line}")
         files.append(path)
     if not files:
-        raise ValueError(f"Manifest has no diagram entries: {manifest_path}")
+        raise ValueError(f"Manifest has no diagram entries: {safe_manifest}")
     return files
 
 
@@ -98,7 +107,7 @@ def discover_files(targets: list[Path]) -> list[Path]:
     files: list[Path] = []
 
     for target in targets:
-        resolved = target if target.is_absolute() else (REPO_ROOT / target)
+        resolved = _ensure_repo_path(target if target.is_absolute() else (REPO_ROOT / target))
         if resolved.is_file():
             if resolved.suffix in SUPPORTED_SUFFIXES and resolved not in seen:
                 seen.add(resolved)
@@ -358,7 +367,8 @@ def evaluate_file(
     path: Path, *, large_threshold: int, max_label_length: int, max_br: int
 ) -> list[Violation]:
     try:
-        lines = path.read_text(encoding="utf-8").splitlines()
+        safe_path = _ensure_repo_path(path)
+        lines = safe_path.read_text(encoding="utf-8").splitlines()
     except OSError as exc:
         return [
             Violation(

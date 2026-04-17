@@ -14,10 +14,29 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
-log_error() { echo -e "${RED}[X]${NC} $1" >&2; }
-log_info() { echo -e "${BLUE}[i]${NC} $1"; }
+log_success() {
+    local message="${1}"
+    echo -e "${GREEN}[OK]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1}"
+    echo -e "${YELLOW}[!]${NC} ${message}"
+    return 0
+}
+
+log_error() {
+    local message="${1}"
+    echo -e "${RED}[X]${NC} ${message}" >&2
+    return 0
+}
+
+log_info() {
+    local message="${1}"
+    echo -e "${BLUE}[i]${NC} ${message}"
+    return 0
+}
 
 echo ""
 echo "=================================================="
@@ -76,13 +95,11 @@ fi
 echo ""
 
 # If anything missing and not already running setup
-if [[ "$PYTHON_OK" == "false" ]] || [[ "$GEMINI_OK" == "false" ]]; then
-    if [[ "${1:-}" != "setup" ]]; then
-        log_warn "Some components missing"
-        log_info "Run setup first: ./run-gemini.sh setup"
-        echo ""
-        exit 1
-    fi
+if { [[ "$PYTHON_OK" == "false" ]] || [[ "$GEMINI_OK" == "false" ]]; } && [[ "${1:-}" != "setup" ]]; then
+    log_warn "Some components missing"
+    log_info "Run setup first: ./run-gemini.sh setup"
+    echo ""
+    exit 1
 fi
 
 # Process command

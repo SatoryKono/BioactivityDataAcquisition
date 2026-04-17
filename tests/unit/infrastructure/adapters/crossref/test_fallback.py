@@ -18,7 +18,7 @@ from bioetl.infrastructure.adapters.crossref.fallback import (
     CrossRefTitleFallbackHandler,
     titles_match,
 )
-from tests.helpers.async_iterables import async_iterable
+from tests.helpers.async_iterables import async_iterable, failing_async_iterable
 
 # =============================================================================
 # titles_match Tests
@@ -171,9 +171,9 @@ async def test_search_by_title_truncates_long_title(mock_logger):
 async def test_search_by_title_handles_exception(mock_logger):
     """Test that search errors are caught and logged."""
 
-    async def mock_search(query, limit):
+    def mock_search(query, limit) -> AsyncIterator[dict[str, object]]:
         del query, limit
-        raise RuntimeError("Search failed")
+        return failing_async_iterable(RuntimeError("Search failed"))
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Test title")

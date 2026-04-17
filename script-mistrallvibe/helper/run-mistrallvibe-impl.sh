@@ -14,10 +14,29 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[⚠]${NC} $1"; }
-log_error() { echo -e "${RED}[✗]${NC} $1" >&2; }
-log_info() { echo -e "${BLUE}[i]${NC} $1"; }
+log_success() {
+    local message="${1}"
+    echo -e "${GREEN}[✓]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1}"
+    echo -e "${YELLOW}[⚠]${NC} ${message}"
+    return 0
+}
+
+log_error() {
+    local message="${1}"
+    echo -e "${RED}[✗]${NC} ${message}" >&2
+    return 0
+}
+
+log_info() {
+    local message="${1}"
+    echo -e "${BLUE}[i]${NC} ${message}"
+    return 0
+}
 
 # Load environment
 ENV_FILE="${ROOT_DIR}/.env.mistrallvibe"
@@ -31,6 +50,7 @@ VIBE_PORT="${VIBE_PORT:-5173}"
 VIBE_HOST="${VIBE_HOST:-localhost}"
 VIBE_API_KEY="${VIBE_API_KEY:-}"
 SERVER_SCRIPT="${ROOT_DIR}/vibe-server.js"
+SERVER_PROCESS_PATTERN="vibe-server.js"
 
 # Function: Start Vibe server
 start_vibe() {
@@ -61,15 +81,15 @@ start_vibe() {
     export VIBE_HOST
     
     cd "${ROOT_DIR}"
-    exec node vibe-server.js
+    exec node "${SERVER_PROCESS_PATTERN}"
 }
 
 # Function: Stop Vibe
 stop_vibe() {
     log_info "Stopping Mistral Vibe..."
     
-    if pgrep -f "vibe-server.js" > /dev/null 2>&1; then
-        pkill -f "vibe-server.js" || true
+    if pgrep -f "${SERVER_PROCESS_PATTERN}" > /dev/null 2>&1; then
+        pkill -f "${SERVER_PROCESS_PATTERN}" || true
         log_success "Vibe stopped"
     else
         log_warn "Vibe process not found"
@@ -80,7 +100,7 @@ stop_vibe() {
 status_vibe() {
     log_info "Checking Mistral Vibe status..."
     
-    if pgrep -f "vibe-server.js" > /dev/null 2>&1; then
+    if pgrep -f "${SERVER_PROCESS_PATTERN}" > /dev/null 2>&1; then
         log_success "Vibe is RUNNING"
         log_info "Web UI: http://${VIBE_HOST}:${VIBE_PORT}"
     else
@@ -93,7 +113,7 @@ status_vibe() {
 show_logs() {
     log_info "Following Vibe logs (Ctrl+C to exit)..."
     
-    if pgrep -f "vibe-server.js" > /dev/null 2>&1; then
+    if pgrep -f "${SERVER_PROCESS_PATTERN}" > /dev/null 2>&1; then
         tail -f /tmp/vibe.log 2>/dev/null || log_warn "No logs available yet"
     else
         log_warn "Vibe is not running"

@@ -12,8 +12,12 @@ def _project_root() -> Path:
 def test_wsl_launchers_use_local_bootstrap_helper() -> None:
     """Bash launchers should resolve Codex through the repo-local helper."""
     root = _project_root()
-    codex_sh = (root / "scripts" / "ops" / "codex.sh").read_text(encoding="utf-8")
-    codex_exec_sh = (root / "scripts" / "ops" / "codex-exec.sh").read_text(
+    codex_sh = (
+        root / "scripts" / "ops" / "launchers" / "codex" / "codex.sh"
+    ).read_text(encoding="utf-8")
+    codex_exec_sh = (
+        root / "scripts" / "ops" / "launchers" / "codex" / "codex-exec.sh"
+    ).read_text(
         encoding="utf-8"
     )
 
@@ -31,19 +35,23 @@ def test_wsl_launchers_use_local_bootstrap_helper() -> None:
 def test_windows_launchers_delegate_to_wsl_scripts_without_posix_redirects() -> None:
     """Batch launchers should delegate to bash wrappers and avoid `/dev/null`."""
     root = _project_root()
-    codex_bat = (root / "scripts" / "ops" / "codex.bat").read_text(
+    codex_bat = (
+        root / "scripts" / "ops" / "launchers" / "codex" / "codex.bat"
+    ).read_text(
         encoding="utf-8"
     )
-    codex_exec_bat = (root / "scripts" / "ops" / "codex-exec.bat").read_text(
+    codex_exec_bat = (
+        root / "scripts" / "ops" / "launchers" / "codex" / "codex-exec.bat"
+    ).read_text(
         encoding="utf-8"
     )
 
     assert "/dev/null" not in codex_bat
-    assert 'bash "%REPO_WSL%/scripts/ops/codex.sh"' in codex_bat
+    assert 'bash "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh"' in codex_bat
     assert "wslpath -a" in codex_bat
 
     assert "/dev/null" not in codex_exec_bat
-    assert 'bash "%REPO_WSL%/scripts/ops/codex-exec.sh"' in codex_exec_bat
+    assert 'bash "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh"' in codex_exec_bat
     assert "wslpath -a" in codex_exec_bat
 
 

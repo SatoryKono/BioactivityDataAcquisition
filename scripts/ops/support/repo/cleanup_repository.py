@@ -7,13 +7,13 @@ committed to git.
 
 Usage:
     # Dry run (show what would be cleaned)
-    python scripts/ops/cleanup_repository.py --dry-run
+    python scripts/ops/support/repo/cleanup_repository.py --dry-run
     
     # Actually clean
-    python scripts/ops/cleanup_repository.py
+    python scripts/ops/support/repo/cleanup_repository.py
     
     # Clean specific categories
-    python scripts/ops/cleanup_repository.py --cache --temp
+    python scripts/ops/support/repo/cleanup_repository.py --cache --temp
 """
 
 import argparse

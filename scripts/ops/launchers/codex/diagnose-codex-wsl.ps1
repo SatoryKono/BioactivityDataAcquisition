@@ -4,6 +4,6 @@ param(
     [switch]$Verbose = $false
 )
 
-$Target = Join-Path $PSScriptRoot "..\ai\codex\diagnose_wsl.ps1"
+$Target = Join-Path $PSScriptRoot "..\..\..\ai\codex\diagnose_wsl.ps1"
 & $Target -Verbose:$Verbose
 exit $LASTEXITCODE

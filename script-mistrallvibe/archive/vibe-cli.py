@@ -18,6 +18,10 @@ from typing import Optional
 from datetime import datetime
 
 
+class VibeAPIError(RuntimeError):
+    """Raised when the Mistral Vibe API request cannot be completed."""
+
+
 class MistralVibeCLI:
     """Interactive chat interface for Mistral API"""
 
@@ -64,7 +68,7 @@ class MistralVibeCLI:
 
             if response.status_code != 200:
                 error = response.json().get('error', {})
-                raise Exception(f"API Error: {error.get('message', 'Unknown error')}")
+                raise VibeAPIError(f"API Error: {error.get('message', 'Unknown error')}")
 
             data = response.json()
             assistant_message = data['choices'][0]['message']['content']
@@ -77,7 +81,7 @@ class MistralVibeCLI:
             return assistant_message
 
         except requests.exceptions.RequestException as e:
-            raise Exception(f"Request failed: {e}")
+            raise VibeAPIError(f"Request failed: {e}") from e
 
     def print_welcome(self):
         """Print welcome message"""
@@ -85,7 +89,7 @@ class MistralVibeCLI:
         print("  🎯 Mistral Vibe - Interactive Chat CLI")
         print("=" * 60)
         print(f"  Model: {self.model}")
-        print(f"  Type 'help' for commands, 'exit' to quit")
+        print("  Type 'help' for commands, 'exit' to quit")
         print("=" * 60 + "\n")
 
     def print_help(self):
@@ -123,7 +127,7 @@ class MistralVibeCLI:
     def print_info(self):
         """Print conversation info"""
         elapsed = datetime.now() - self.session_start
-        print(f"\nConversation Info:")
+        print("\nConversation Info:")
         print(f"  Model: {self.model}")
         print(f"  Messages: {len(self.conversation)}")
         print(f"  Duration: {elapsed.total_seconds():.1f}s")
@@ -132,6 +136,41 @@ class MistralVibeCLI:
             print(f"  Estimated tokens: ~{tokens_estimate * 1.3:.0f}")
         print()
 
+    def _handle_command(self, user_input: str) -> str | None:
+        """Handle built-in commands and return an action marker when matched."""
+        normalized = user_input.lower()
+
+        if normalized in {'exit', 'quit'}:
+            print("\nGoodbye! 👋\n")
+            return 'exit'
+
+        if normalized == 'help':
+            self.print_help()
+            return 'handled'
+
+        if normalized == 'models':
+            self.print_models()
+            return 'handled'
+
+        if normalized == 'model':
+            print(f"\nCurrent model: {self.model}\n")
+            return 'handled'
+
+        if normalized == 'clear':
+            self.conversation = []
+            print("\n✓ Conversation cleared\n")
+            return 'handled'
+
+        if normalized == 'info':
+            self.print_info()
+            return 'handled'
+
+        if normalized.startswith('switch '):
+            self.switch_model(user_input[7:].strip())
+            return 'handled'
+
+        return None
+
     def run(self):
         """Run interactive chat loop"""
         self.print_welcome()
@@ -139,42 +178,15 @@ class MistralVibeCLI:
         while True:
             try:
                 user_input = input("You: ").strip()
-
                 if not user_input:
                     continue
 
-                # Handle commands
-                if user_input.lower() == 'exit' or user_input.lower() == 'quit':
-                    print("\nGoodbye! 👋\n")
+                action = self._handle_command(user_input)
+                if action == 'exit':
                     break
-
-                if user_input.lower() == 'help':
-                    self.print_help()
+                if action == 'handled':
                     continue
 
-                if user_input.lower() == 'models':
-                    self.print_models()
-                    continue
-
-                if user_input.lower() == 'model':
-                    print(f"\nCurrent model: {self.model}\n")
-                    continue
-
-                if user_input.lower() == 'clear':
-                    self.conversation = []
-                    print("\n✓ Conversation cleared\n")
-                    continue
-
-                if user_input.lower() == 'info':
-                    self.print_info()
-                    continue
-
-                if user_input.lower().startswith('switch '):
-                    model_name = user_input[7:].strip()
-                    self.switch_model(model_name)
-                    continue
-
-                # Send message
                 print("\nMistral: ", end="", flush=True)
                 response = self.send_message(user_input)
                 print(response)

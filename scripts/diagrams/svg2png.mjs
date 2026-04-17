@@ -12,9 +12,9 @@
  *   node scripts/diagrams/svg2png.mjs --scale 3 docs/02-architecture/diagrams/architecture/svg/01-high-level-hexagonal.svg
  */
 
-import {createRequire} from "module";
-import {promises as fs} from "fs";
-import path from "path";
+import {createRequire} from "node:module";
+import {promises as fs} from "node:fs";
+import path from "node:path";
 
 // Resolve puppeteer from mmdc's node_modules
 const require = createRequire(import.meta.url);
@@ -42,9 +42,9 @@ const targets = [];
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--scale" && i + 1 < args.length) {
-    scale = parseInt(args[++i], 10);
+    scale = Number.parseInt(args[++i], 10);
   } else if (args[i] === "--jobs" && i + 1 < args.length) {
-    jobs = parseInt(args[++i], 10);
+    jobs = Number.parseInt(args[++i], 10);
   } else if (args[i] === "--help" || args[i] === "-h") {
     console.log(
       "Usage: node svg2png.mjs [--scale N] [--jobs N] <svg-dir|svg-file> ..."
@@ -121,11 +121,11 @@ async function convertOne(browser, svgPath, idx, total) {
 
   let svgWidth, svgHeight;
   if (viewBoxMatch) {
-    svgWidth = parseFloat(viewBoxMatch[3]);
-    svgHeight = parseFloat(viewBoxMatch[4]);
+    svgWidth = Number.parseFloat(viewBoxMatch[3]);
+    svgHeight = Number.parseFloat(viewBoxMatch[4]);
   } else if (widthMatch && heightMatch) {
-    svgWidth = parseFloat(widthMatch[1]);
-    svgHeight = parseFloat(heightMatch[1]);
+    svgWidth = Number.parseFloat(widthMatch[1]);
+    svgHeight = Number.parseFloat(heightMatch[1]);
   } else {
     svgWidth = 800;
     svgHeight = 600;
@@ -219,7 +219,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+try {
+  await main();
+} catch (err) {
   console.error("Fatal error:", err);
   process.exit(2);
-});
+}

@@ -15,10 +15,29 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[⚠]${NC} $1"; }
-log_error() { echo -e "${RED}[✗]${NC} $1" >&2; }
-log_info() { echo -e "${BLUE}[i]${NC} $1"; }
+log_success() {
+    local message="${1:-}"
+    echo -e "${GREEN}[✓]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1:-}"
+    echo -e "${YELLOW}[⚠]${NC} ${message}"
+    return 0
+}
+
+log_error() {
+    local message="${1:-}"
+    echo -e "${RED}[✗]${NC} ${message}" >&2
+    return 0
+}
+
+log_info() {
+    local message="${1:-}"
+    echo -e "${BLUE}[i]${NC} ${message}"
+    return 0
+}
 
 # Load environment
 ENV_FILE="${ROOT_DIR}/.env.mistrall"
@@ -32,6 +51,7 @@ MISTRALL_PORT="${MISTRALL_PORT:-11434}"
 MISTRALL_MODEL="${MISTRALL_MODEL:-mistral:latest}"
 OLLAMA_CONTAINER="${OLLAMA_CONTAINER:-mistral-ollama}"
 COMPOSE_FILE="${ROOT_DIR}/docker-compose.mistrall.yml"
+CONTAINER_PATTERN="${OLLAMA_CONTAINER}"
 
 # Function: Start service
 start_service() {
@@ -45,6 +65,7 @@ start_service() {
         log_error "Failed to start Mistral"
         return 1
     fi
+    return 0
 }
 
 # Function: Start daemon
@@ -61,6 +82,7 @@ start_daemon() {
         log_error "Failed to start daemon"
         return 1
     fi
+    return 0
 }
 
 # Function: Stop service
@@ -74,14 +96,15 @@ stop_service() {
     else
         log_warn "Container already stopped or not found"
     fi
+    return 0
 }
 
 # Function: Show status
 show_status() {
     log_info "Checking Mistral status..."
     
-    if docker ps -a | grep -q "${OLLAMA_CONTAINER}"; then
-        if docker ps | grep -q "${OLLAMA_CONTAINER}"; then
+    if docker ps -a | grep -q "${CONTAINER_PATTERN}"; then
+        if docker ps | grep -q "${CONTAINER_PATTERN}"; then
             log_success "Mistral container is RUNNING"
             docker ps --filter "name=${OLLAMA_CONTAINER}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
             
@@ -100,6 +123,7 @@ show_status() {
         log_warn "Mistral container not found"
         log_info "Start with: ./run-mistrall.sh daemon"
     fi
+    return 0
 }
 
 # Function: Show logs
@@ -108,6 +132,7 @@ show_logs() {
     
     cd "${ROOT_DIR}"
     docker compose -f "${COMPOSE_FILE}" logs -f
+    return 0
 }
 
 # Function: Shell access
@@ -122,6 +147,7 @@ shell_access() {
     fi
     
     docker exec -it "${CONTAINER_ID}" bash || true
+    return 0
 }
 
 # Function: Pull model
@@ -136,12 +162,13 @@ pull_model() {
         return 1
     fi
     
-    if docker exec -it "${CONTAINER_ID}" ollama pull ${MISTRALL_MODEL}; then
+    if docker exec -it "${CONTAINER_ID}" ollama pull "${MISTRALL_MODEL}"; then
         log_success "Model pulled: ${MISTRALL_MODEL}"
     else
         log_error "Failed to pull model"
         return 1
     fi
+    return 0
 }
 
 # Main dispatcher

@@ -18,8 +18,8 @@ All files are ready to use. No additional setup needed.
 - **docker-compose.neo4j-audit.yml** — Audit instance definition (1024m heap, port 7688)
 
 ### Scripts
-- **scripts/ops/start-neo4j-audit.ps1** — PowerShell: start/stop/logs
-- **scripts/ops/start-neo4j-audit.sh** — Bash: start/stop/logs (WSL)
+- **scripts/ops/runtime/neo4j/start-neo4j-audit.ps1** — PowerShell: start/stop/logs
+- **scripts/ops/runtime/neo4j/start-neo4j-audit.sh** — Bash: start/stop/logs (WSL)
 
 ### Code Integration
 - **src/utils/neo4j_audit.py** — Helper functions for context-aware connections
@@ -49,8 +49,8 @@ Connection details:
 
 ### Start Audit Instance (WSL/Bash)
 ```bash
-chmod +x scripts/ops/start-neo4j-audit.sh
-./scripts/ops/start-neo4j-audit.sh
+chmod +x scripts/ops/runtime/neo4j/start-neo4j-audit.sh
+./scripts/ops/runtime/neo4j/start-neo4j-audit.sh
 ```
 
 ### Run Live Validation
@@ -76,7 +76,7 @@ live --apply --only-complexity-layer --batch-size 5
 or
 
 ```bash
-./scripts/ops/start-neo4j-audit.sh --stop
+./scripts/ops/runtime/neo4j/start-neo4j-audit.sh --stop
 ```
 
 ---

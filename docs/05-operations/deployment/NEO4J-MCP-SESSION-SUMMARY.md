@@ -34,7 +34,7 @@ Created comprehensive guides:
   - Shows Docker container status
   - Validates environment configuration
   
-- **[neo4j_quick_start.sh](../../../scripts/ops/neo4j_quick_start.sh)** - One-command startup
+- **[neo4j_quick_start.sh](../../../scripts/ops/runtime/neo4j/neo4j_quick_start.sh)** - One-command startup
   - Creates/starts Neo4j container
   - Waits for backend readiness
   - Verifies port connectivity
@@ -127,7 +127,7 @@ bash scripts/ai/mcp/check_neo4j_memory.sh
 
 ### New Files
 - `scripts/ai/mcp/check_neo4j_memory.sh` — MCP + backend verification
-- `scripts/ops/neo4j_quick_start.sh` — Quick startup helper
+- `scripts/ops/runtime/neo4j/neo4j_quick_start.sh` — Quick startup helper
 - `docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md` — Startup instructions
 - `docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md` — Completion checklist
 - `docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md` — This file
@@ -151,7 +151,7 @@ bash scripts/ai/mcp/check_neo4j_memory.sh
 | **Stop Container** | `docker stop bioetl-neo4j` |
 | **Remove Container** | `docker rm bioetl-neo4j` |
 | **Verify MCP** | `bash scripts/ai/mcp/check_neo4j_memory.sh` |
-| **Quick Start** | `bash scripts/ops/neo4j_quick_start.sh` |
+| **Quick Start** | `bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh` |
 | **MCP Details** | `codex mcp get neo4j-memory` |
 | **Open Neo4j UI** | http://localhost:7474/browser/ |
 

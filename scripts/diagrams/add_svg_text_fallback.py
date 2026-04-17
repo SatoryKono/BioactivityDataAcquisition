@@ -23,6 +23,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parents[1]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
@@ -39,6 +40,14 @@ _OBJECT_SUFFIX_SPACING_RE = re.compile(
 _CLASS_METHOD_LINE_RE = re.compile(r"^\s*[+\-#~]\s*[A-Za-z_][A-Za-z0-9_]*\s*\(")
 
 SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
+
+
+def _ensure_repo_path(path: Path) -> Path:
+    resolved_root = REPO_ROOT.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
+    return resolved_path
 
 
 def _local_name(tag: str) -> str:
@@ -361,7 +370,8 @@ def _build_fallback_text(
 
 
 def add_fallbacks(path: Path) -> int:
-    tree = ET.parse(path)
+    safe_path = _ensure_repo_path(path)
+    tree = ET.parse(safe_path)
     root = tree.getroot()
 
     inserted = 0
@@ -396,17 +406,18 @@ def add_fallbacks(path: Path) -> int:
             inserted += 1
 
     if inserted > 0 or removed_empty_edge_labels > 0:
-        tree.write(path, encoding="utf-8", xml_declaration=False)
+        tree.write(safe_path, encoding="utf-8", xml_declaration=False)
 
     return inserted + removed_empty_edge_labels
 
 
 def collect_svg_files(files: list[Path] | None, dirs: list[Path] | None) -> list[Path]:
     if files:
-        return files
+        return [_ensure_repo_path(path) for path in files]
     if dirs:
         selected: list[Path] = []
         for d in dirs:
+            d = _ensure_repo_path(d)
             if d.is_dir():
                 selected.extend(sorted(d.glob("*.svg")))
         return selected
@@ -439,21 +450,22 @@ def parse_args() -> argparse.Namespace:
 def process_files(files: list[Path], mode: str) -> int:
     changed = 0
     for path in files:
-        original = path.read_text(encoding="utf-8")
-        inserted = add_fallbacks(path)
+        safe_path = _ensure_repo_path(path)
+        original = safe_path.read_text(encoding="utf-8")
+        inserted = add_fallbacks(safe_path)
         if inserted == 0:
             continue
         changed += 1
 
         if mode == "check":
-            print(f"! {path} (needs fallback text, +{inserted})")
+            print(f"! {safe_path} (needs fallback text, +{inserted})")
         elif mode == "dry-run":
-            print(f"~ {path} (would add fallback text +{inserted})")
+            print(f"~ {safe_path} (would add fallback text +{inserted})")
         else:
-            print(f"+ {path} (added fallback text +{inserted})")
+            print(f"+ {safe_path} (added fallback text +{inserted})")
 
         if mode in ("check", "dry-run"):
-            path.write_text(original, encoding="utf-8")
+            safe_path.write_text(original, encoding="utf-8")
 
     return changed
 

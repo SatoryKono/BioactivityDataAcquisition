@@ -447,7 +447,7 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   `scripts/engineering/dev/setup_env_wsl.sh`. By default they run `pytest` with
   `--cov=src/bioetl --cov-report=term -q --maxfail=1`.
 
-  `bash scripts/engineering/dev/run_pytest.sh` also calls `bash scripts/ops/setup_plugins.sh --pytest-only`
+  `bash scripts/engineering/dev/run_pytest.sh` also calls `bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only`
   before execution, so it can self-heal missing pytest plugins in WSL/Linux.
   `.\scripts\engineering\dev\run_pytest.ps1` does not perform that bootstrap step and expects
   `.venv-win` to be prepared already.

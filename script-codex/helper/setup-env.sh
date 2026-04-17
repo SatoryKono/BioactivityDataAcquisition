@@ -13,16 +13,36 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+SEPARATOR="=================================================="
 
-log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[!]${NC} $1"; }
-log_error() { echo -e "${RED}[X]${NC} $1"; }
-log_info() { echo -e "${BLUE}[i]${NC} $1"; }
+log_success() {
+    local message="${1:-}"
+    echo -e "${GREEN}[✓]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1:-}"
+    echo -e "${YELLOW}[!]${NC} ${message}"
+    return 0
+}
+
+log_error() {
+    local message="${1:-}"
+    echo -e "${RED}[X]${NC} ${message}" >&2
+    return 0
+}
+
+log_info() {
+    local message="${1:-}"
+    echo -e "${BLUE}[i]${NC} ${message}"
+    return 0
+}
 
 echo ""
-echo "=================================================="
+echo "${SEPARATOR}"
 echo "  Codex Setup - Installation"
-echo "=================================================="
+echo "${SEPARATOR}"
 echo ""
 
 # STEP 1: Check Node.js
@@ -88,12 +108,11 @@ for attempt in 1 2 3; do
             log_warn "  Attempt $attempt timed out (124)"
         elif [[ $EXIT_CODE -eq 243 ]]; then
             log_warn "  Attempt $attempt failed with permission error (243) - trying with sudo"
-            if sudo timeout 180 npm install -g @openai/codex@latest 2>&1 | tail -5; then
-                if command -v codex >/dev/null 2>&1; then
-                    log_success "Codex installed via sudo: $(codex --version)"
-                    SUCCESS=1
-                    break
-                fi
+            if sudo timeout 180 npm install -g @openai/codex@latest 2>&1 | tail -5 \
+                && command -v codex >/dev/null 2>&1; then
+                log_success "Codex installed via sudo: $(codex --version)"
+                SUCCESS=1
+                break
             fi
         else
             log_warn "  Attempt $attempt failed (code: $EXIT_CODE)"
@@ -109,7 +128,7 @@ done
 if [[ $SUCCESS -eq 0 ]]; then
     # Last resort - check if it's somewhere in npm
     CODEX_BIN=$(npm list -g @openai/codex 2>/dev/null | grep "@openai/codex" | head -1)
-    if [[ ! -z "$CODEX_BIN" ]]; then
+    if [[ -n "$CODEX_BIN" ]]; then
         log_warn "Codex was installed but not in PATH"
         log_info "Location: $CODEX_BIN"
         log_info "Try running: hash -r && codex"
@@ -120,11 +139,10 @@ if [[ $SUCCESS -eq 0 ]]; then
     log_info "Trying manual installation..."
     
     # Last attempt with sudo
-    if sudo npm install -g @openai/codex@latest 2>&1 | tail -20; then
-        if command -v codex >/dev/null 2>&1; then
-            log_success "Codex installed via sudo"
-            exit 0
-        fi
+    if sudo npm install -g @openai/codex@latest 2>&1 | tail -20 \
+        && command -v codex >/dev/null 2>&1; then
+        log_success "Codex installed via sudo"
+        exit 0
     fi
     
     log_error "Permission issue detected. You may need to:"
@@ -151,9 +169,9 @@ else
 fi
 
 echo ""
-echo "=================================================="
+echo "${SEPARATOR}"
 log_success "Setup completed successfully!"
-echo "=================================================="
+echo "${SEPARATOR}"
 echo ""
 log_info "Next steps:"
 echo "  1. Edit .env.codex and add your OpenAI API key"

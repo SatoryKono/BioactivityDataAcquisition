@@ -112,8 +112,8 @@ Install with: `npm install -g @openai/codex`
 
 ## Files Modified
 
-- `scripts/ops/codex.bat` - Main launcher (interactive & prompt modes)
-- `scripts/ops/codex-exec.bat` - Auto-execution launcher
+- `scripts/ops/launchers/codex/codex.bat` - Main launcher (interactive & prompt modes)
+- `scripts/ops/launchers/codex/codex-exec.bat` - Auto-execution launcher
 - `scripts/engineering/dev/.setup_wsl_codex.sh` - VPN setup (unchanged)
 
 ## Best Practices

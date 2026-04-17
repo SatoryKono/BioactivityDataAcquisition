@@ -32,6 +32,14 @@ DEFAULT_OUTPUT = (
 _FRONTMATTER_DELIMITER = "---"
 
 
+def _ensure_repo_path(path: Path) -> Path:
+    resolved_root = ROOT.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to write outside {resolved_root}: {resolved_path}")
+    return resolved_path
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate/check the compatibility facade snapshot companion file."
@@ -239,7 +247,7 @@ def main() -> int:
         ratchet_violations=ratchet_violations,
         scoped_ratchet_counts=scoped_ratchet_counts,
     )
-    output_path = Path(args.output)
+    output_path = _ensure_repo_path(Path(args.output))
     current = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
     frontmatter, current_body = _split_frontmatter(current)
     if args.check:

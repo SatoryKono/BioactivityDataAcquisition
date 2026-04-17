@@ -12,6 +12,7 @@ Usage: headless.sh [args...]
 Runs Codex without MCP setup. Requires OPENAI_API_KEY to be available
 directly or through .env.codex in the repository root.
 EOF
+    return 0
 }
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
@@ -31,12 +32,12 @@ if [[ -f "${REPO_ROOT}/.env.codex" ]]; then
 fi
 
 if [[ -z "${OPENAI_API_KEY:-}" ]]; then
-    echo "[ERROR] OPENAI_API_KEY not set"
+    echo "[ERROR] OPENAI_API_KEY not set" >&2
     exit 1
 fi
 
 if [[ ! -f "${ENSURE_SCRIPT}" ]]; then
-    echo "[ERROR] Codex bootstrap helper not found: ${ENSURE_SCRIPT}"
+    echo "[ERROR] Codex bootstrap helper not found: ${ENSURE_SCRIPT}" >&2
     exit 1
 fi
 
