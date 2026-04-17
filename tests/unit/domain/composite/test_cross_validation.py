@@ -50,13 +50,13 @@ class TestFieldComparisonSpec:
         spec = FieldComparisonSpec(field_name="doi", method=ComparisonMethod.EXACT)
         assert spec.field_name == "doi"
         assert spec.method == ComparisonMethod.EXACT
-        assert spec.threshold == 0.0
+        assert spec.threshold == pytest.approx(0.0)
 
     def test_fuzzy_with_threshold(self):
         spec = FieldComparisonSpec(
             field_name="title", method=ComparisonMethod.FUZZY, threshold=0.8
         )
-        assert spec.threshold == 0.8
+        assert spec.threshold == pytest.approx(0.8)
 
     def test_numeric_tolerance_with_threshold(self):
         spec = FieldComparisonSpec(
@@ -64,7 +64,7 @@ class TestFieldComparisonSpec:
             method=ComparisonMethod.NUMERIC_TOLERANCE,
             threshold=0.1,
         )
-        assert spec.threshold == 0.1
+        assert spec.threshold == pytest.approx(0.1)
 
     def test_skip_no_threshold(self):
         spec = FieldComparisonSpec(field_name="abstract", method=ComparisonMethod.SKIP)

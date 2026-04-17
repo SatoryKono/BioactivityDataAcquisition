@@ -64,8 +64,8 @@ class TestPipelineConfig:
         dq = DQConfig(soft_fail_threshold=0.10, hard_fail_threshold=0.50)
         config = _make_config(dq=dq)
 
-        assert config.dq.soft_fail_threshold == 0.10
-        assert config.dq.hard_fail_threshold == 0.50
+        assert config.dq.soft_fail_threshold == pytest.approx(0.10)
+        assert config.dq.hard_fail_threshold == pytest.approx(0.50)
 
     def test_fields_tuple(self) -> None:
         """Test fields configuration (converted to tuple)."""
@@ -188,7 +188,7 @@ class TestPipelineConfig:
         assert config.batch_size == 250
         assert config.checkpoint_interval == 2500
         assert len(config.fields) == 4
-        assert config.dq.soft_fail_threshold == 0.02
+        assert config.dq.soft_fail_threshold == pytest.approx(0.02)
         assert config.lock_key == "pipeline:chembl_activity"
 
     def test_equality(self) -> None:

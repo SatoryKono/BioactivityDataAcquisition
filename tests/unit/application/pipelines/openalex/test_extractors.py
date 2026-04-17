@@ -5,6 +5,8 @@ Tests the pure functions in extractors.py module.
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
     extract_author_ids,
@@ -912,7 +914,7 @@ class TestExtractTopics:
         assert len(result) == 1
         assert result[0]["id"] == "T12345"
         assert result[0]["display_name"] == "Organic Synthesis"
-        assert result[0]["score"] == 0.95
+        assert result[0]["score"] == pytest.approx(0.95)
         assert result[0]["subfield"] == "Organic Chemistry"
         assert result[0]["field"] == "Chemistry"
         assert result[0]["domain"] == "Physical Sciences"
@@ -1033,7 +1035,7 @@ class TestExtractTopics:
             }
         ]
         result = extract_topics(topics)
-        assert result[0]["score"] == 0.0
+        assert result[0]["score"] == pytest.approx(0.0)
 
 
 class TestExtractPrimaryTopic:
@@ -1053,7 +1055,7 @@ class TestExtractPrimaryTopic:
         assert result is not None
         assert result["id"] == "T12345"
         assert result["display_name"] == "Organic Synthesis"
-        assert result["score"] == 0.95
+        assert result["score"] == pytest.approx(0.95)
         assert result["subfield"] == "Organic Chemistry"
         assert result["field"] == "Chemistry"
         assert result["domain"] == "Physical Sciences"

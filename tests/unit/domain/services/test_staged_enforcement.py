@@ -146,8 +146,8 @@ def test_diagnostics_helpers_summarize_results_and_policies() -> None:
     assert _passed_checks(results) == 2
     assert _failed_checks(results) == 1
     assert grouped["fixture_governance"][1].message == "bad"
-    assert _calculate_pass_rate(grouped["fixture_governance"]) == 0.5
-    assert _calculate_pass_rate([]) == 0.0
+    assert _calculate_pass_rate(grouped["fixture_governance"]) == pytest.approx(0.5)
+    assert _calculate_pass_rate([]) == pytest.approx(0.0)
     assert _check_details(results)["schema_compatibility"]["passed"] is True
     assert _serialize_policies(policies) == {
         "fixture_governance": {
@@ -168,7 +168,7 @@ def test_diagnostics_helpers_summarize_results_and_policies() -> None:
     assert report["total_checks"] == 3
     assert report["passed_checks"] == 2
     assert report["failed_checks"] == 1
-    assert report["pass_rates"]["fixture_governance"] == 0.5
+    assert report["pass_rates"]["fixture_governance"] == pytest.approx(0.5)
     assert (
         report["enforcement_policies"]["fixture_governance"]["current_stage"]
         == "soft_fail"

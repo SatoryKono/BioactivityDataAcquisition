@@ -107,7 +107,7 @@ class TestRegisterProviderClass:
 
         config = ProviderRegistry.get("http_provider")
         assert config.http_config is not None
-        assert config.http_config.rate == 20.0
+        assert config.http_config.rate == pytest.approx(20.0)
         assert config.http_config.capacity == 40
         assert config.http_config.rate_overrides == {"api_key": 50.0}
 
@@ -248,7 +248,7 @@ class TestRegisterProviderDecorator:
 
         config = ProviderRegistry.get("default_rate_provider")
         assert config.http_config is not None
-        assert config.http_config.rate == 5.0
+        assert config.http_config.rate == pytest.approx(5.0)
 
     def test_decorator_sets_custom_http_rate(self) -> None:
         """Custom http_rate should override the default."""
@@ -261,7 +261,7 @@ class TestRegisterProviderDecorator:
 
         config = ProviderRegistry.get("custom_rate_provider")
         assert config.http_config is not None
-        assert config.http_config.rate == 25.0
+        assert config.http_config.rate == pytest.approx(25.0)
         assert config.http_config.capacity == 50
 
     def test_decorator_with_requires_http_client_false(self) -> None:

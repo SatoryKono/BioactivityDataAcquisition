@@ -153,9 +153,9 @@ class TestBronzeDQAnalyzer:
         )
 
         assert "raw_field_presence" in report.checks
-        assert report.checks["raw_field_presence"]["id"] == 1.0
-        assert report.checks["raw_field_presence"]["name"] == 1.0
-        assert report.checks["raw_field_presence"]["optional"] == 0.5
+        assert report.checks["raw_field_presence"]["id"] == pytest.approx(1.0)
+        assert report.checks["raw_field_presence"]["name"] == pytest.approx(1.0)
+        assert report.checks["raw_field_presence"]["optional"] == pytest.approx(0.5)
 
 
 if __name__ == "__main__":

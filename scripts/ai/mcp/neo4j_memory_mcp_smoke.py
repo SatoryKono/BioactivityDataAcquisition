@@ -25,11 +25,11 @@ class SmokeResult:
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[3]
 
 
 def _default_wrapper_command() -> list[str]:
-    return [str(_repo_root() / "scripts/memory/mcp/wrapper.sh")]
+    return [str(_repo_root() / "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh")]
 
 
 def _encode_frame(payload: dict[str, Any]) -> bytes:

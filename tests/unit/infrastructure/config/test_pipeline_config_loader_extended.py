@@ -153,8 +153,8 @@ class TestFieldValidationToDict:
         loader = self._make_loader()
         fv = self._make_fv(type="range", min=0.0, max=100.0)
         result = loader._field_validation_to_dict(fv)
-        assert result["min"] == 0.0
-        assert result["max"] == 100.0
+        assert result["min"] == pytest.approx(0.0)
+        assert result["max"] == pytest.approx(100.0)
 
     def test_excludes_min_max_when_none(self) -> None:
         """min/max excluded from dict when None."""

@@ -263,7 +263,7 @@ class TestAssayParameters:
             standard_text_value=None,
         )
         assert ap.type == "CONC"
-        assert ap.value == 10.0
+        assert ap.value == pytest.approx(10.0)
         assert ap.comments == "Test comment"
 
     def test_zero_assay_param_id_raises(self) -> None:
@@ -372,7 +372,7 @@ class TestAssayParameters:
             standard_units="nM",
         )
         val, units = ap.get_comparable_value()
-        assert val == 10000.0
+        assert val == pytest.approx(10000.0)
         assert units == "nM"
 
     def test_get_comparable_value_falls_back_to_raw(self) -> None:
@@ -385,7 +385,7 @@ class TestAssayParameters:
             units="uM",
         )
         val, units = ap.get_comparable_value()
-        assert val == 10.0
+        assert val == pytest.approx(10.0)
         assert units == "uM"
 
     def test_get_comparable_value_both_none(self) -> None:

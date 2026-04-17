@@ -338,9 +338,9 @@ class TestRateLimiter:
         """Test token bucket initialization."""
         bucket = TokenBucketRateLimiter(rate=5.0, capacity=10)
 
-        assert bucket.rate == 5.0
+        assert bucket.rate == pytest.approx(5.0)
         assert bucket.capacity == 10
-        assert bucket._tokens == 10.0  # Starts full
+        assert bucket._tokens == pytest.approx(10.0)  # Starts full
 
     def test_try_acquire_success(self):
         """Test successful token acquisition."""

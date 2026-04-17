@@ -171,12 +171,12 @@ class TestRunResult:
 
     def test_duration_seconds(self, sample_result):
         """Test duration_seconds property."""
-        assert sample_result.duration_seconds == 300.0  # 5 minutes
+        assert sample_result.duration_seconds == pytest.approx(300.0)  # 5 minutes
 
     def test_success_rate(self, sample_result):
         """Test success_rate property."""
         # (1000 - 50) / 1000 = 0.95
-        assert sample_result.success_rate == 0.95
+        assert sample_result.success_rate == pytest.approx(0.95)
 
     def test_success_rate_zero_fetched(self):
         """Test success_rate with zero records fetched."""
@@ -187,7 +187,7 @@ class TestRunResult:
             run_type="incremental",
             records_fetched=0,
         )
-        assert result.success_rate == 1.0  # No records = 100% success
+        assert result.success_rate == pytest.approx(1.0)  # No records = 100% success
 
     def test_failed_result(self):
         """Test RunResult with FAILED status."""

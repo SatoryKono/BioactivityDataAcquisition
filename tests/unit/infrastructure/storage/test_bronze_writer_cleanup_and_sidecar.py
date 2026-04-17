@@ -413,7 +413,7 @@ class TestBronzeWriterMetadataSidecar:
         assert metadata.runtime.run_id == str(run_id)
         assert metadata.runtime.run_type.value == "incremental"
         assert metadata.runtime.started_at_utc == ingestion_ts
-        assert metadata.runtime.duration_seconds == 1.5
+        assert metadata.runtime.duration_seconds == pytest.approx(1.5)
 
         # Verify pipeline metadata
         assert metadata.pipeline.name == "chembl_activity"
@@ -715,7 +715,7 @@ class TestBronzeWriteResult:
             checksum_blake2="abc123",
         )
 
-        assert result.compression_ratio == 4.0  # 4000 / 1000
+        assert result.compression_ratio == pytest.approx(4.0)  # 4000 / 1000
 
     def test_bronze_write_result_compression_ratio_zero_uncompressed(
         self, batch_id: BatchID
@@ -731,7 +731,7 @@ class TestBronzeWriteResult:
             checksum_blake2="abc123",
         )
 
-        assert result.compression_ratio == 1.0
+        assert result.compression_ratio == pytest.approx(1.0)
 
     def test_bronze_write_result_validation_negative_record_count(
         self, batch_id: BatchID

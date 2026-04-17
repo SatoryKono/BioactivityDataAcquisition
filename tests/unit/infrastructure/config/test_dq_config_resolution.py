@@ -46,8 +46,8 @@ def test_merge_dq_config_hierarchy_applies_relaxed_thresholds_last() -> None:
         relaxed_dq=True,
     )
 
-    assert merged["thresholds"]["soft_fail"] == 0.99
-    assert merged["thresholds"]["hard_fail"] == 1.0
+    assert merged["thresholds"]["soft_fail"] == pytest.approx(0.99)
+    assert merged["thresholds"]["hard_fail"] == pytest.approx(1.0)
 
 
 @pytest.mark.unit
