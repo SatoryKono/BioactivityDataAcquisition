@@ -216,8 +216,8 @@ class TestDQReportContext:
         assert context.silver_quarantined_count == 0
         assert context.gold_data is None
         assert context.gold_target_table is None
-        assert context.dq_soft_threshold == 0.05
-        assert context.dq_hard_threshold == 0.20
+        assert context.dq_soft_threshold == pytest.approx(0.05)
+        assert context.dq_hard_threshold == pytest.approx(0.20)
 
 
 class TestDQReportService:

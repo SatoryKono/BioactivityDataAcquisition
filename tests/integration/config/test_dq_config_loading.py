@@ -72,15 +72,15 @@ class TestDQConfigIntegration:
         config = dq_loader.load("chembl", "unknown_entity")
 
         # ChEMBL provider has hard_fail: 0.15 (stricter than default 0.20)
-        assert config.hard_fail_threshold == 0.15
+        assert config.hard_fail_threshold == pytest.approx(0.15)
 
     def test_load_defaults_for_unknown(self, dq_loader: DQConfigLoader) -> None:
         """Unknown provider/entity should get defaults."""
         config = dq_loader.load("nonexistent_provider", "nonexistent_entity")
 
         # Should use defaults
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.20
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.20)
 
 
 @pytest.mark.integration
@@ -177,8 +177,8 @@ class TestRealConfigValidation:
         config = dq_loader.load("test", "test")
 
         # Defaults should be set
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.20
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.20)
         assert config.strict_validation is False
 
     def test_provider_configs_have_correct_metadata(

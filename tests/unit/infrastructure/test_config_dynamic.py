@@ -300,7 +300,7 @@ def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
     cfg = load_source_config("chembl")
 
     assert cfg.base_url == "https://example.chembl/api"
-    assert cfg.timeout_sec == 55.0
+    assert cfg.timeout_sec == pytest.approx(55.0)
     assert cfg.max_retries == 4
     assert cfg.page_size == 111
     assert cfg.batch_size == 22
@@ -393,7 +393,7 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
 
     assert source["rate_limit"]["authenticated"] == source["rate_limit"]["with_api_key"]
     assert source["health_check"]["timeout_sec"] == 9
-    assert source["provider_config"]["client"]["timeout_sec"] == 42.0
+    assert source["provider_config"]["client"]["timeout_sec"] == pytest.approx(42.0)
     assert source["provider_config"]["pagination"]["id_batch_size"] == 30
 
 

@@ -129,7 +129,7 @@ class TestExceptions:
         assert isinstance(e, BioETLError)
         assert e.service_name == "test_service"
         assert e.status_code == 500
-        assert e.retry_after == 60.0
+        assert e.retry_after == pytest.approx(60.0)
 
     def test_service_unavailable_error(self) -> None:
         """Test ServiceUnavailableError."""
@@ -152,7 +152,7 @@ class TestExceptions:
         )
         assert isinstance(e, ExternalServiceError)
         assert e.status_code == 429
-        assert e.retry_after == 120.0
+        assert e.retry_after == pytest.approx(120.0)
 
     def test_service_authentication_error(self) -> None:
         """Test ServiceAuthenticationError."""
@@ -181,8 +181,8 @@ class TestExceptions:
     def test_data_quality_threshold_error(self) -> None:
         """Test DataQualityThresholdError."""
         e = DataQualityThresholdError(error_rate=0.25, threshold=0.20)
-        assert e.error_rate == 0.25
-        assert e.threshold == 0.20
+        assert e.error_rate == pytest.approx(0.25)
+        assert e.threshold == pytest.approx(0.20)
         assert "25.00% errors" in str(e)
         assert "20.00%" in str(e)
         assert isinstance(e, BioETLError)

@@ -310,20 +310,47 @@ def resolve_contract_identity(
     registry_path = Path("configs/base/contract_registry.yaml")
     if not registry_path.exists():
         return contract_ref, None, None, None, None
+    entry = _load_contract_registry_entry(registry_path, contract_ref)
+    if entry is None:
+        return contract_ref, None, None, None, None
+    return (contract_ref, *_extract_contract_identity_fields(entry))
+
+
+def _load_contract_registry_entry(
+    registry_path: Path,
+    contract_ref: str,
+) -> dict[str, object] | None:
+    """Load one contract-registry entry when the registry is valid."""
+    payload = _read_contract_registry_payload(registry_path)
+    if payload is None:
+        return None
+    entries = payload.get("entries")
+    if not isinstance(entries, dict):
+        return None
+    entry = entries.get(contract_ref)
+    if not isinstance(entry, dict):
+        return None
+    return entry
+
+
+def _read_contract_registry_payload(
+    registry_path: Path,
+) -> dict[str, object] | None:
+    """Read and validate contract registry payload."""
     try:
         payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
     except (OSError, yaml.YAMLError):
-        return contract_ref, None, None, None, None
+        return None
     if not isinstance(payload, dict):
-        return contract_ref, None, None, None, None
-    entries = payload.get("entries")
-    if not isinstance(entries, dict):
-        return contract_ref, None, None, None, None
-    entry = entries.get(contract_ref)
-    if not isinstance(entry, dict):
-        return contract_ref, None, None, None, None
-    identity = entry.get("identity")
-    identity_payload = identity if isinstance(identity, dict) else {}
+        return None
+    return payload
+
+
+def _extract_contract_identity_fields(
+    entry: dict[str, object],
+) -> tuple[str | None, str | None, str | None, str | None]:
+    """Extract normalized identity fields from one registry entry."""
+    identity_payload = _identity_payload(entry)
     contract_version = _coerce_optional_text(identity_payload.get("contract_version"))
     contract_schema_hash = _coerce_optional_text(identity_payload.get("schema_hash"))
     dq_policy_ref = _coerce_optional_text(
@@ -333,9 +360,16 @@ def resolve_contract_identity(
         identity_payload.get("rule_bundle_version") or entry.get("rule_bundle_version")
     )
     return (
-        contract_ref,
         contract_version,
         contract_schema_hash,
         dq_policy_ref,
         rule_bundle_version,
     )
+
+
+def _identity_payload(entry: Mapping[str, object]) -> Mapping[str, object]:
+    """Return normalized identity payload for one registry entry."""
+    identity = entry.get("identity")
+    if isinstance(identity, Mapping):
+        return identity
+    return {}

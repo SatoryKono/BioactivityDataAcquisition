@@ -20,15 +20,15 @@ class TestDQConfig:
         """Test default threshold values."""
         config = DQConfig()
 
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.20
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.20)
 
     def test_custom_values(self) -> None:
         """Test custom threshold values."""
         config = DQConfig(soft_fail_threshold=0.10, hard_fail_threshold=0.30)
 
-        assert config.soft_fail_threshold == 0.10
-        assert config.hard_fail_threshold == 0.30
+        assert config.soft_fail_threshold == pytest.approx(0.10)
+        assert config.hard_fail_threshold == pytest.approx(0.30)
 
     def test_immutability(self) -> None:
         """Test that DQConfig is frozen (immutable)."""
@@ -58,8 +58,8 @@ class TestDQConfig:
         """Test with zero soft threshold (hard must be greater)."""
         config = DQConfig(soft_fail_threshold=0.0, hard_fail_threshold=0.01)
 
-        assert config.soft_fail_threshold == 0.0
-        assert config.hard_fail_threshold == 0.01
+        assert config.soft_fail_threshold == pytest.approx(0.0)
+        assert config.hard_fail_threshold == pytest.approx(0.01)
 
     def test_invalid_equal_thresholds(self) -> None:
         """Test that equal thresholds raise ValueError."""
@@ -195,13 +195,13 @@ class TestValidationConfig:
 
         assert config.min_publication_year == 1500
         assert config.max_publication_year == 2100
-        assert config.min_molecular_weight == 10.0
-        assert config.max_molecular_weight == 10_000.0
+        assert config.min_molecular_weight == pytest.approx(10.0)
+        assert config.max_molecular_weight == pytest.approx(10_000.0)
         assert config.molecular_weight_precision == 10
         assert config.max_pmid == 10_000_000_000
         assert config.max_taxonomy_id == 10_000_000
-        assert config.min_pchembl_value == 0.0
-        assert config.max_pchembl_value == 15.0
+        assert config.min_pchembl_value == pytest.approx(0.0)
+        assert config.max_pchembl_value == pytest.approx(15.0)
 
     def test_custom_publication_year_range(self) -> None:
         """Test custom publication year range (e.g., for Semantic Scholar)."""
@@ -216,8 +216,8 @@ class TestValidationConfig:
             min_molecular_weight=1.0, max_molecular_weight=50_000.0
         )
 
-        assert config.min_molecular_weight == 1.0
-        assert config.max_molecular_weight == 50_000.0
+        assert config.min_molecular_weight == pytest.approx(1.0)
+        assert config.max_molecular_weight == pytest.approx(50_000.0)
 
     def test_immutability(self) -> None:
         """Test that ValidationConfig is frozen (immutable)."""

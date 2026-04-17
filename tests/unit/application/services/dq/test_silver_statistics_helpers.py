@@ -43,9 +43,9 @@ class TestSilverStatisticsHelpers:
 
         results, overall = check_null_rates_stats(df)
 
-        assert overall == 0.0
+        assert overall == pytest.approx(0.0)
         assert [item.column_name for item in results] == ["id", "name"]
-        assert all(item.null_rate == 0.0 for item in results)
+        assert all(item.null_rate == pytest.approx(0.0) for item in results)
         assert all(item.status == DQCheckStatus.PASS for item in results)
 
     def test_check_uniqueness_stats_warns_when_primary_keys_missing(self) -> None:
@@ -114,9 +114,9 @@ class TestSilverStatisticsHelpers:
         result = profile_numeric_column(df, "score", (RuntimeError,))
 
         assert result is not None
-        assert result.min == 1.0
-        assert result.max == 5.0
-        assert result.median == 3.0
+        assert result.min == pytest.approx(1.0)
+        assert result.max == pytest.approx(5.0)
+        assert result.median == pytest.approx(3.0)
 
     def test_profile_numeric_column_returns_none_for_all_null_values(self) -> None:
         df = pl.DataFrame({"score": [None, None]})
@@ -164,7 +164,7 @@ class TestSilverStatisticsHelpers:
         result = value_distribution_to_dict(payload)
 
         assert result["status"] == DQCheckStatus.PASS.value
-        assert result["numeric_columns"]["score"]["mean"] == 3.0
+        assert result["numeric_columns"]["score"]["mean"] == pytest.approx(3.0)
         assert result["categorical_columns"]["category"]["cardinality"] == 2
         assert (
             result["categorical_columns"]["category"]["top_values"][0]["value"] == "a"

@@ -28,6 +28,7 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_replay_mode,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
+    _FinalSummaryRequest,
     _build_final_summary,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
@@ -188,27 +189,31 @@ def build_diagnostics_summary(
     ) = _process_ledger_entries(ledger_entries)
 
     return _build_final_summary(
-        manifest,
-        base_summary,
-        ledger_entries,
-        family_counter,
-        type_counter,
-        artifact_refs,
-        lineage_fragment_ids,
-        dq_rule_ids,
-        dq_dispositions,
-        dq_report_paths,
-        dq_violation_kinds,
-        cross_validation_rule_ids,
-        cross_validation_config_paths,
-        cross_validation_quarantine_policies,
-        cross_validation_replay_contracts,
-        occurrence_only_diagnostic_scopes,
-        dq_signal_present,
-        cross_validation_signal_present,
-        missing_link_count,
-        correlation_anchor_gaps,
-        resume_diagnostics,
+        _FinalSummaryRequest(
+            manifest=manifest,
+            base_summary=base_summary,
+            ledger_entries=ledger_entries,
+            family_counter=family_counter,
+            type_counter=type_counter,
+            artifact_refs=artifact_refs,
+            lineage_fragment_ids=lineage_fragment_ids,
+            dq_rule_ids=dq_rule_ids,
+            dq_dispositions=dq_dispositions,
+            dq_report_paths=dq_report_paths,
+            dq_violation_kinds=dq_violation_kinds,
+            cross_validation_rule_ids=cross_validation_rule_ids,
+            cross_validation_config_paths=cross_validation_config_paths,
+            cross_validation_quarantine_policies=(
+                cross_validation_quarantine_policies
+            ),
+            cross_validation_replay_contracts=cross_validation_replay_contracts,
+            occurrence_only_diagnostic_scopes=occurrence_only_diagnostic_scopes,
+            dq_signal_present=dq_signal_present,
+            cross_validation_signal_present=cross_validation_signal_present,
+            missing_link_count=missing_link_count,
+            correlation_anchor_gaps=correlation_anchor_gaps,
+            resume_diagnostics=resume_diagnostics,
+        )
     )
 def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
     if entry.event_family != "artifact" and entry.event_type != "artifact_published":
