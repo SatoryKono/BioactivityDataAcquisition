@@ -6,6 +6,7 @@ Tests for FSM state management during merge and completion phases.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from collections.abc import Callable
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
 
@@ -177,9 +178,13 @@ def mock_seed_runner() -> AsyncMock:
     return runner
 
 
-def _seed_runner_factory(seed_runner: AsyncMock) -> AsyncMock:
-    """Return the configured seed runner for runner dependencies."""
-    return seed_runner
+def _seed_runner_factory(seed_runner: AsyncMock) -> Callable[[], AsyncMock]:
+    """Return a zero-argument factory for the configured seed runner."""
+
+    def _factory() -> AsyncMock:
+        return seed_runner
+
+    return _factory
 
 
 def _enricher_runner_factory(name: str, df: pl.DataFrame) -> AsyncMock:
@@ -239,7 +244,7 @@ class TestFSMMergeStateTransitions:
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -303,7 +308,7 @@ class TestFSMMergeStateTransitions:
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -355,7 +360,7 @@ class TestFSMDryRunMode:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -420,7 +425,7 @@ class TestFSMDryRunMode:
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -490,7 +495,7 @@ class TestMergeInputPolicy:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -563,7 +568,7 @@ class TestMergeInputPolicy:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -621,7 +626,7 @@ class TestFSMEnrichmentCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -674,7 +679,7 @@ class TestFSMEnrichmentCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -728,7 +733,7 @@ class TestFSMEnrichmentCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -784,7 +789,7 @@ class TestFSMEnrichmentCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -870,7 +875,7 @@ class TestFSMEnrichmentCompletedTransition:
         checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -927,7 +932,7 @@ class TestFSMDependenciesCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -978,7 +983,7 @@ class TestFSMDependenciesCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -1050,7 +1055,7 @@ class TestFSMDependenciesCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -1099,7 +1104,7 @@ class TestFSMDependenciesCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -1167,7 +1172,7 @@ class TestFSMDependenciesCompletedTransition:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: _seed_runner_factory(mock_seed_runner),
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=_enricher_runner_factory,
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -1448,7 +1453,7 @@ class TestFSMCheckpointDeletion:
         checkpoint_manager.delete = failing_delete  # type: ignore[method-assign]
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: mock_seed_runner,
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -1499,7 +1504,7 @@ class TestFinalizationPolicy:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: mock_seed_runner,
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -1553,7 +1558,7 @@ class TestFinalizationPolicy:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: mock_seed_runner,
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
@@ -1602,7 +1607,7 @@ class TestFinalizationPolicy:
             resume=False,
         )
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: mock_seed_runner,
+            seed_runner_factory=_seed_runner_factory(mock_seed_runner),
             enricher_runner_factory=lambda name, df: AsyncMock(),
             key_extractor=mock_key_extractor,
             coordinator=mock_coordinator,
