@@ -16,7 +16,13 @@ def _project_root() -> Path:
 
 def _load_inventory_module():
     root = _project_root()
-    module_path = root / "scripts" / "repo" / "check_scripts_inventory.py"
+    module_path = (
+        root
+        / "scripts"
+        / "engineering"
+        / "repo"
+        / "check_scripts_inventory.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "check_scripts_inventory_module", module_path
     )

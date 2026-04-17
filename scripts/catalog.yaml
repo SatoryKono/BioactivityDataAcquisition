@@ -1,19 +1,19 @@
 schema_version: "1.0"
 canonical_roots:
   - scripts/ai
-  - scripts/ci
-  - scripts/dev
-  - scripts/qa
+  - scripts/engineering/ci
+  - scripts/engineering/dev
+  - scripts/engineering/qa
   - scripts/docs
   - scripts/schema
   - scripts/data
-  - scripts/repo
+  - scripts/engineering/repo
   - scripts/ops
-  - scripts/diagnostics
+  - scripts/engineering/diagnostics
+  - scripts/engineering/baselines
   - scripts/migrations/active
   - scripts/migrations/oneoff
   - scripts/diagrams
-  - scripts/agents
 
 policies:
   root_allowlist:
@@ -45,13 +45,13 @@ groups:
     path: scripts/ai
     purpose: Canonical AI-facing setup, launcher, and runtime-adjacent tooling
   ci:
-    path: scripts/ci
+    path: scripts/engineering/ci
     purpose: CI orchestration, resiliency runners, periodic quality reports
   dev:
-    path: scripts/dev
+    path: scripts/engineering/dev
     purpose: Local developer setup and test utilities
   qa:
-    path: scripts/qa
+    path: scripts/engineering/qa
     purpose: Architecture and quality-gate checks, debt telemetry
   docs:
     path: scripts/docs
@@ -63,14 +63,17 @@ groups:
     path: scripts/data
     purpose: Data integrity and storage-level operational checks
   repo:
-    path: scripts/repo
+    path: scripts/engineering/repo
     purpose: Repository hygiene and inventory governance tooling
   ops:
     path: scripts/ops
     purpose: Platform/ops automation and skills/tooling checks
   diagnostics:
-    path: scripts/diagnostics
+    path: scripts/engineering/diagnostics
     purpose: Manual diagnostics and investigation helpers
+  baselines:
+    path: scripts/engineering/baselines
+    purpose: Baseline artifacts consumed by engineering quality gates
   migrations_active:
     path: scripts/migrations/active
     purpose: Active repeatable migration scripts
