@@ -58,14 +58,14 @@ class TestPublicationSimilarityTransformer:
         assert result["sim_id"] == 1
         assert result["doc_1"] == 12345
         assert result["doc_2"] == 12346
-        assert result["tid_tani"] == 0.8
-        assert result["mol_tani"] == 0.6
+        assert result["tid_tani"] == pytest.approx(0.8)
+        assert result["mol_tani"] == pytest.approx(0.6)
         # PMID should be normalized to string
         assert result["pubmed_id1"] == "12345678"
         assert result["pubmed_id2"] == "87654321"
         # Verify derived metrics
-        assert result["avg_tani"] == 0.7
-        assert result["max_tani"] == 0.8
+        assert result["avg_tani"] == pytest.approx(0.7)
+        assert result["max_tani"] == pytest.approx(0.8)
         assert "entity_id" in result
         assert "content_hash" in result
         assert "_run_id" in result
@@ -119,8 +119,8 @@ class TestPublicationSimilarityTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["avg_tani"] == 0.7  # (0.8 + 0.6) / 2
-        assert result["max_tani"] == 0.8  # max(0.8, 0.6)
+        assert result["avg_tani"] == pytest.approx(0.7)  # (0.8 + 0.6) / 2
+        assert result["max_tani"] == pytest.approx(0.8)  # max(0.8, 0.6)
 
     @pytest.mark.asyncio
     async def test_transform_only_tid_tani_present(self, transformer, mock_context):
@@ -136,8 +136,8 @@ class TestPublicationSimilarityTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["avg_tani"] == 0.75
-        assert result["max_tani"] == 0.75
+        assert result["avg_tani"] == pytest.approx(0.75)
+        assert result["max_tani"] == pytest.approx(0.75)
 
     @pytest.mark.asyncio
     async def test_transform_only_mol_tani_present(self, transformer, mock_context):
@@ -153,8 +153,8 @@ class TestPublicationSimilarityTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["avg_tani"] == 0.9
-        assert result["max_tani"] == 0.9
+        assert result["avg_tani"] == pytest.approx(0.9)
+        assert result["max_tani"] == pytest.approx(0.9)
 
     @pytest.mark.asyncio
     async def test_transform_no_tanimoto_present(self, transformer, mock_context):
@@ -187,9 +187,9 @@ class TestPublicationSimilarityTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["tid_tani"] == 0.85
-        assert result["mol_tani"] == 0.65
-        assert result["avg_tani"] == 0.75  # (0.85 + 0.65) / 2
+        assert result["tid_tani"] == pytest.approx(0.85)
+        assert result["mol_tani"] == pytest.approx(0.65)
+        assert result["avg_tani"] == pytest.approx(0.75)  # (0.85 + 0.65) / 2
 
     @pytest.mark.asyncio
     async def test_transform_ids_as_string(self, transformer, mock_context):
@@ -294,5 +294,5 @@ class TestPublicationSimilarityTransformer:
 
         assert result is not None
         # Average: (0.123456789 + 0.987654321) / 2 = 0.555555555
-        assert result["avg_tani"] == 0.555556  # Rounded to 6 decimals
-        assert result["max_tani"] == 0.987654  # Rounded to 6 decimals
+        assert result["avg_tani"] == pytest.approx(0.555556)  # Rounded to 6 decimals
+        assert result["max_tani"] == pytest.approx(0.987654)  # Rounded to 6 decimals

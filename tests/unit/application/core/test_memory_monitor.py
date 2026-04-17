@@ -15,17 +15,17 @@ from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 class TestMemoryConfig:
     """Tests for MemoryConfig dataclass."""
 
-    def test_default_values(self):
+    def test_default_values(self) -> None:
         """Test default configuration values."""
         config = MemoryConfig()
 
         assert config.max_batch_memory_mb == 512
-        assert config.memory_pressure_threshold == 0.8
+        assert config.memory_pressure_threshold == pytest.approx(0.8)
         assert config.min_batch_size == 10
         assert config.check_interval_records == 100
         assert config.enable_adaptive_sizing is True
 
-    def test_custom_values(self):
+    def test_custom_values(self) -> None:
         """Test custom configuration values."""
         config = MemoryConfig(
             max_batch_memory_mb=1024,
@@ -36,7 +36,7 @@ class TestMemoryConfig:
         )
 
         assert config.max_batch_memory_mb == 1024
-        assert config.memory_pressure_threshold == 0.9
+        assert config.memory_pressure_threshold == pytest.approx(0.9)
         assert config.min_batch_size == 5
         assert config.check_interval_records == 50
         assert config.enable_adaptive_sizing is False
@@ -46,7 +46,7 @@ class TestMemoryConfig:
 class TestMemoryStats:
     """Tests for MemoryStats dataclass."""
 
-    def test_is_under_pressure_high_usage(self):
+    def test_is_under_pressure_high_usage(self) -> None:
         """Test that high memory usage is detected as pressure."""
         stats = MemoryStats(
             used_mb=7000.0,
@@ -58,7 +58,7 @@ class TestMemoryStats:
 
         assert stats.is_under_pressure is True
 
-    def test_is_under_pressure_low_usage(self):
+    def test_is_under_pressure_low_usage(self) -> None:
         """Test that low memory usage is not pressure."""
         stats = MemoryStats(
             used_mb=4000.0,
@@ -70,7 +70,7 @@ class TestMemoryStats:
 
         assert stats.is_under_pressure is False
 
-    def test_is_under_pressure_boundary(self):
+    def test_is_under_pressure_boundary(self) -> None:
         """Test boundary condition at 80%."""
         stats_exactly_80 = MemoryStats(
             used_mb=6400.0,
@@ -123,7 +123,7 @@ class TestMemoryMonitor:
 
                 stats = monitor.get_memory_stats()
 
-                assert stats.percent_used == 0.5
+                assert stats.percent_used == pytest.approx(0.5)
                 mock_fallback.assert_called_once()
 
     def test_is_under_pressure_disabled(self, mock_logger):
@@ -367,11 +367,11 @@ class TestMemoryMonitorFallback:
         stats = monitor._get_stats_estimate()
 
         # Should return 50% usage (conservative estimate)
-        assert stats.percent_used == 0.5
-        assert stats.total_mb == 8192.0  # 8GB assumed
-        assert stats.used_mb == 4096.0
-        assert stats.available_mb == 4096.0
-        assert stats.process_mb == 256.0  # 256MB assumed
+        assert stats.percent_used == pytest.approx(0.5)
+        assert stats.total_mb == pytest.approx(8192.0)  # 8GB assumed
+        assert stats.used_mb == pytest.approx(4096.0)
+        assert stats.available_mb == pytest.approx(4096.0)
+        assert stats.process_mb == pytest.approx(256.0)  # 256MB assumed
 
     def test_get_stats_estimate_not_zeros(self, mock_logger):
         """Verify fallback doesn't return zeros (regression test for false claim).
@@ -460,7 +460,7 @@ class TestMemoryMonitorRecovery:
             # After 5+ pressure events, reduction should be 0.25
             assert monitor._consecutive_pressure_count >= 5
             # Verify the reduction factor
-            assert monitor._get_reduction_factor() == 0.25
+            assert monitor._get_reduction_factor() == pytest.approx(0.25)
 
 
 @pytest.mark.unit
@@ -484,7 +484,7 @@ class TestMemoryMonitorResourceFallback:
                 stats = monitor._get_stats_fallback()
 
                 # Should use estimate
-                assert stats.percent_used == 0.5
+                assert stats.percent_used == pytest.approx(0.5)
 
     def test_logging_when_psutil_unavailable(self, mock_logger):
         """Test debug log when psutil is not available."""

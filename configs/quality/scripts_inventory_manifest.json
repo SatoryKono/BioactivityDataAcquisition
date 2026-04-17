@@ -7752,7 +7752,7 @@
           "path": "scripts/ops/__main__.py",
           "line": 43,
           "source_group": "scripts",
-          "text": "\"smoke-neo4j-memory-mcp\": \"neo4j_memory_mcp_smoke.py\","
+          "text": "\"smoke-mcp\": \"mcp_smoke.py\","
         }
       ]
     },
@@ -7773,7 +7773,7 @@
           "path": "scripts/ops/__main__.py",
           "line": 42,
           "source_group": "scripts",
-          "text": "\"query-neo4j-memory\": \"neo4j_memory_query.py\","
+          "text": "\"query\": \"query.py\","
         }
       ]
     },
@@ -7794,7 +7794,7 @@
           "path": "scripts/ops/__main__.py",
           "line": 41,
           "source_group": "scripts",
-          "text": "\"sync-neo4j-memory\": \"neo4j_memory_sync.py\","
+          "text": "\"sync\": \"sync.py\","
         }
       ]
     },
