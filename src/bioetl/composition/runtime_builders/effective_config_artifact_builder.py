@@ -13,6 +13,9 @@ from uuid import UUID
 from bioetl.application.services.control_plane.effective_config_service import (
     create_effective_config_service,
 )
+from bioetl.composition.runtime_builders._run_manifest_refs import (
+    control_plane_root as _shared_control_plane_root,
+)
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 from bioetl.infrastructure.control_plane import FileEffectiveConfigArtifactStore
 
@@ -155,7 +158,7 @@ def _build_effective_config_source_refs(
 
 def _control_plane_root(settings: Settings, leaf: str) -> Path:
     """Return the canonical control-plane output root for one leaf namespace."""
-    return Path(getattr(settings, "data_dir", "data")) / "output" / "control" / leaf
+    return _shared_control_plane_root(settings, leaf)
 
 
 def create_and_persist_effective_config_artifact(
@@ -192,21 +195,25 @@ def create_and_persist_effective_config_artifact(
             payload=artifact_payload,
         )
     except (OSError, RuntimeError, ValueError, TypeError) as exc:
-        logger.error(
-            "effective_config_artifact_persist_failed",
+        log_error = getattr(logger, "error", None)
+        if callable(log_error):
+            log_error(
+                "effective_config_artifact_persist_failed",
+                artifact_id=artifact.artifact_id,
+                pipeline_name=ctx.pipeline_name,
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+            )
+        raise
+    log_info = getattr(logger, "info", None)
+    if callable(log_info):
+        log_info(
+            "effective_config_artifact_persisted",
             artifact_id=artifact.artifact_id,
             pipeline_name=ctx.pipeline_name,
-            error_type=type(exc).__name__,
-            error_message=str(exc),
+            effective_config_hash=artifact.effective_config_hash,
+            dq_contract_compatibility_hash=artifact.dq_contract_compatibility_hash,
         )
-        raise
-    logger.info(
-        "effective_config_artifact_persisted",
-        artifact_id=artifact.artifact_id,
-        pipeline_name=ctx.pipeline_name,
-        effective_config_hash=artifact.effective_config_hash,
-        dq_contract_compatibility_hash=artifact.dq_contract_compatibility_hash,
-    )
     return (
         artifact.artifact_id,
         artifact.effective_config_hash,

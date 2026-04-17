@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unified entry point for Codex setup/check scripts.
+"""Unified entry point for Codex setup/check/launch scripts.
 
 Usage:
     python -m scripts.ai.codex <command> [args...]
@@ -11,6 +11,10 @@ Commands:
     setup-skills    Sync Codex skills into CODEX_HOME
     check-skills    Validate the canonical AI skills docs layout
     check-mirror    Verify/sync docs skill mirror from .codex/skills
+    launch          Start Codex interactive launcher
+    exec            Start Codex full-auto launcher
+    headless        Start Codex without MCP servers
+    diagnose-wsl    Run Codex WSL diagnostic checks
 """
 
 from __future__ import annotations
@@ -28,6 +32,10 @@ SHELL_COMMANDS: dict[str, str] = {
     "setup-skills": "setup_skills.sh",
     "check-skills": "check_skills_layout.sh",
     "check-mirror": "check_skills_mirror.sh",
+    "launch": "launch.sh",
+    "exec": "exec.sh",
+    "headless": "headless.sh",
+    "diagnose-wsl": "diagnose_wsl.sh",
 }
 
 _DIR = Path(__file__).parent

@@ -8,6 +8,7 @@ Usage:
 Surfaces:
     codex    Codex setup/check tooling
     mcp      MCP operational tooling
+    vibe     Vibe launch tooling
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ import sys
 MODULES: dict[str, str] = {
     "codex": "codex",
     "mcp": "mcp",
+    "vibe": "vibe",
 }
 
 

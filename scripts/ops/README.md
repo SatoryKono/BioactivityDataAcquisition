@@ -17,12 +17,14 @@ scripts live under `scripts/ai/`.
 ## Stable entrypoints
 
 - launchers such as `codex.sh`, `codex.bat`
-- canonical Mistral Vibe wrappers live under `script-mistrallvibe/`
+- historical Windows/WSL AI launchers retained as compatibility wrappers
 - setup/bootstrap commands such as `setup_plugins.sh`
 - supported non-memory Python commands exposed through `python -m scripts.ops`
 
 AI-oriented setup/check commands retained in this directory now act as
 compatibility facades that delegate to `scripts/ai/codex/`.
+AI-oriented launch and diagnostic commands retained in this directory also act
+as compatibility facades and delegate to `scripts/ai/codex/`.
 
 ## Internal-only zones
 
@@ -41,3 +43,4 @@ See [docs/05-operations/tooling/scripts-ops/INDEX.md](/mnt/e/g-drive/05_AI/githu
 For project-memory tooling, see [scripts/memory/README.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/memory/README.md).
 For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/__main__.py).
 For Codex setup/check tooling, see [scripts/ai/codex/README.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/codex/README.md).
+For Vibe launch tooling, see [scripts/ai/vibe/README.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/vibe/README.md).

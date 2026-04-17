@@ -9,6 +9,10 @@ Stable commands:
     salt-rotate        Rotate PII hashing salt
     fix-grafana        Fix Grafana dashboard configurations
     wsl-proxy          Start WSL proxy helper
+    codex              Launch Codex interactive mode (shell)
+    codex-exec         Launch Codex full-auto mode (shell)
+    codex-headless     Launch Codex without MCP servers (shell)
+    diagnose-codex-wsl Run Codex WSL diagnostic checks (shell)
     setup-agents       Sync Codex agents into CODEX_HOME
     setup-plugins      Setup plugins (shell)
     setup-skills       Setup skills (shell)
@@ -41,6 +45,10 @@ SHELL_COMMANDS: dict[str, str] = {
     "triage-issues": "maintenance/triage_cleanup_issue_wave.sh",
     "close-ge-spike": "maintenance/close_great_expectations_spike_issue.sh",
     "close-schema-drift": "maintenance/close_pandera_schema_drift_issue.sh",
+    "codex": "codex.sh",
+    "codex-exec": "codex-exec.sh",
+    "codex-headless": "codex-headless.sh",
+    "diagnose-codex-wsl": "diagnose-codex-wsl.sh",
     "setup-agents": "setup_agents.sh",
     "setup-plugins": "setup_plugins.sh",
     "setup-skills": "setup_skills.sh",

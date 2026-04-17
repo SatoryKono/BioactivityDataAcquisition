@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
+import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -13,6 +15,28 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 
+def _resolve_data_root(settings: Settings) -> Path:
+    """Resolve a writable data root for control-plane artifacts.
+
+    Explicit `settings.data_dir` values are preserved. When no data directory is
+    configured, try the conventional `data/` under the current working
+    directory, but fall back to `/tmp/bioetl-data` if the checkout is mounted
+    read-only in the current execution environment.
+    """
+    configured_root = getattr(settings, "data_dir", None)
+    if configured_root:
+        return Path(configured_root)
+
+    candidate = Path("data")
+    try:
+        candidate.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return Path(tempfile.gettempdir()) / "bioetl-data"
+    if not os.access(candidate, os.W_OK):
+        return Path(tempfile.gettempdir()) / "bioetl-data"
+    return candidate
+
+
 def build_planned_artifacts(
     *,
     settings: Settings,
@@ -20,7 +44,7 @@ def build_planned_artifacts(
     entity: str,
 ) -> tuple[RunArtifactRef, ...]:
     """Capture planned layer roots for the manifest control-plane snapshot."""
-    output_root = Path(getattr(settings, "data_dir", "data")) / "output"
+    output_root = _resolve_data_root(settings) / "output"
     return (
         RunArtifactRef(
             layer="bronze", path=str(output_root / "bronze" / provider / entity)
@@ -36,7 +60,7 @@ def build_planned_artifacts(
 
 def control_plane_root(settings: Settings, leaf: str) -> Path:
     """Return the canonical control-plane output root for one leaf namespace."""
-    return Path(getattr(settings, "data_dir", "data")) / "output" / "control" / leaf
+    return _resolve_data_root(settings) / "output" / "control" / leaf
 
 
 @dataclass(frozen=True, slots=True)
