@@ -6,6 +6,7 @@ explicit soak opt-in so the promotion-grade baseline can stay lighter.
 
 from __future__ import annotations
 
+import asyncio
 import pytest
 from bioetl.domain.types import JsonDict
 from tests.contract import _semanticscholar_contract_support as semanticscholar_support
@@ -25,6 +26,7 @@ class TestSemanticScholarPilotContract:
         semanticscholar_batch_payload: list[JsonDict | None],
     ) -> None:
         """Verify batch lookup still surfaces DOI identity metadata."""
+        await asyncio.sleep(0)
         data = semanticscholar_batch_payload
         paper = data[0]
         external_ids = paper.get("externalIds", {})
@@ -40,6 +42,7 @@ class TestSemanticScholarPilotContract:
         semanticscholar_search_payload: JsonDict,
     ) -> None:
         """Verify search payload still exposes the minimal health-style shape."""
+        await asyncio.sleep(0)
         data = semanticscholar_search_payload
         assert "data" in data
         assert isinstance(data["data"], list)

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.identifiers import normalize_ontology_id
+from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
+
 from ._chembl_activity_fields import (
     ACTIVITY_STANDARD_TYPES,
     CHEMBL_ACTIVITY_SCHEMA_FIELDS,
@@ -12,11 +15,12 @@ from ._chembl_activity_fields import (
     SET_LIKE_FIELDS,
     STANDARD_RELATIONS,
 )
-from .profile_normalizers import normalize_profile_case, normalize_profile_unit
-from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
-from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from ._standard_profile_builder import build_standard_profile
-from .profile_normalizers import normalize_profile_canonical_smiles
+from .profile_normalizers import (
+    normalize_profile_canonical_smiles,
+    normalize_profile_case,
+    normalize_profile_unit,
+)
 
 __all__ = [
     "ASSAY_TYPES",

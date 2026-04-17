@@ -199,9 +199,7 @@ def _get_otlp_insecure_setting() -> str | None:
     return None
 
 
-def _build_telemetry_exporter() -> (
-    Any
-):  # Any: exporter type depends on runtime-selected telemetry backend.
+def _build_telemetry_exporter() -> Any:  # Any: exporter type depends on runtime-selected telemetry backend.
     # Any: exporter implementation is selected dynamically between console and OTLP classes.
     # Any: exporter class is selected dynamically between console and OTLP implementations.
     """Create the most appropriate tracing exporter for the current runtime."""

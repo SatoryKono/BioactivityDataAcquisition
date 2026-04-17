@@ -12,6 +12,7 @@ Tests the new Template Method pattern and helper methods:
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -40,6 +41,7 @@ class ConcreteTransformer(BaseTransformer):
 
     async def _transform_impl(self, context, record, index):
         """Simple implementation that uses helper methods."""
+        await asyncio.sleep(0)
         pk = self._get_required_field(record, "id")
         return {"id": pk, "value": record.get("value")}
 
@@ -327,6 +329,7 @@ class TestTemplateMethodPattern:
 
         class FailingTransformer(BaseTransformer):
             async def _transform_impl(self, context, record, index):
+                await asyncio.sleep(0)
                 raise ValueError("Entity validation failed")
 
         transformer = FailingTransformer(

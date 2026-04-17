@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
-from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.schemas.chembl.tissue import TissueSchema
 
 __all__ = [

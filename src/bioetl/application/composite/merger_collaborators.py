@@ -12,8 +12,8 @@ if TYPE_CHECKING:
     from bioetl.application.composite.column_priority_orderer import (
         ColumnPriorityOrderer,
     )
-    from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.application.composite.column_renamer import ColumnRenamer
+    from bioetl.application.composite.column_service import ColumnOrderService
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
     from bioetl.application.composite.join_planner import JoinPlannerService

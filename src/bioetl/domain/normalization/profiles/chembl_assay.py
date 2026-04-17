@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.normalization.identifiers import normalize_ontology_id
 from bioetl.domain.normalization.profiles._standard_profile_builder import (
     build_standard_profile,
 )
+from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.schemas.chembl.assay import AssaySchema
 from bioetl.domain.schemas.constants import (
     ASSAY_CATEGORIES,

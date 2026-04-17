@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -474,6 +475,7 @@ class TestCheckpointManagerLoadingStrategy:
         self, mock_checkpoint_port, mock_logger
     ):
         """Test that string loading_strategy is converted to enum."""
+        await asyncio.sleep(0)
         from bioetl.domain.medallion import LoadingStrategy
 
         run_id = uuid4()

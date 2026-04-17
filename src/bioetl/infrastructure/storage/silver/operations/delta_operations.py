@@ -13,19 +13,17 @@ from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
 )
 from bioetl.infrastructure.storage.silver.delta_helpers import (
-    _DeltaWriteRequest,
     _build_dispatch_policy,
+    _DeltaWriteRequest,
     _dispatch_request_by_mode,
     _dispatch_request_with_domain_errors,
     _merge_records_with_timeout,
     _write_plain_delta_request,
 )
 from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
-    _execute_merge_write_request,
-)
-from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
     _emit_merge_final_event,
     _emit_merge_retry_event,
+    _execute_merge_write_request,
 )
 
 if TYPE_CHECKING:

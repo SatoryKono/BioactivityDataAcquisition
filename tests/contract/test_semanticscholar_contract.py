@@ -6,6 +6,7 @@ Richer Semantic Scholar checks live in the pilot-soak companion suite.
 
 from __future__ import annotations
 
+import asyncio
 import os
 
 import pytest
@@ -30,6 +31,7 @@ class TestSemanticScholarContract:
         semanticscholar_search_payload: JsonDict,
     ) -> None:
         """Verify free-text search remains available with paginated shape."""
+        await asyncio.sleep(0)
         data = semanticscholar_search_payload
         assert "data" in data
         assert isinstance(data["data"], list)
@@ -42,6 +44,7 @@ class TestSemanticScholarContract:
         semanticscholar_search_payload: JsonDict,
     ) -> None:
         """Verify free-text search payload matches the managed snapshot."""
+        await asyncio.sleep(0)
         assert_provider_probe_matches_snapshot(
             "semanticscholar",
             "paper_search_endpoint",
@@ -55,6 +58,7 @@ class TestSemanticScholarContract:
         semanticscholar_batch_payload: list[JsonDict | None],
     ) -> None:
         """Verify DOI batch lookup returns a paper-compatible record."""
+        await asyncio.sleep(0)
         data = semanticscholar_batch_payload
         assert isinstance(data, list)
         assert len(data) == 1
@@ -70,6 +74,7 @@ class TestSemanticScholarContract:
         semanticscholar_batch_payload: list[JsonDict | None],
     ) -> None:
         """Verify DOI batch lookup payload matches the managed snapshot."""
+        await asyncio.sleep(0)
         assert_provider_probe_matches_snapshot(
             "semanticscholar",
             "paper_batch_lookup_by_doi",

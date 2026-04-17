@@ -287,6 +287,7 @@ class TestPipelineRunnerSpan:
     @pytest.mark.asyncio
     async def test_pipeline_run_none_tracer_is_rejected(self) -> None:
         """Runner must reject hidden tracer defaults in application layer."""
+        await asyncio.sleep(0)
         with pytest.raises(TypeError, match="requires explicit tracer injection"):
             self._build_runner(tracer=None)
 
@@ -534,6 +535,7 @@ class TestPostrunServiceSpan:
     @pytest.mark.asyncio
     async def test_postrun_run_none_tracer_is_rejected(self) -> None:
         """PostrunService must reject hidden tracer defaults in application layer."""
+        await asyncio.sleep(0)
         with pytest.raises(TypeError, match="requires explicit tracer injection"):
             self._build_postrun_service(tracer=None)
 

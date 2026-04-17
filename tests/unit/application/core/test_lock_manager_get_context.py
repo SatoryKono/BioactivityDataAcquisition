@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -78,6 +79,7 @@ async def test_get_context_before_acquire(
     mock_logger: MagicMock,
     run_id: RunID,
 ) -> None:
+    await asyncio.sleep(0)
     manager = _build_lock_manager(
         mock_lock_port=mock_lock_port,
         mock_shutdown_signal=mock_shutdown_signal,

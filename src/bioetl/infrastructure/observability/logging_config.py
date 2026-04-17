@@ -204,9 +204,7 @@ def _resolve_log_file_path() -> Path | None:
     return _DEFAULT_LOG_FILE
 
 
-def _build_shared_processors() -> list[
-    Any
-]:  # Any: structlog processors have heterogeneous callable signatures.
+def _build_shared_processors() -> list[Any]:  # Any: structlog processors have heterogeneous callable signatures.
     """Build processors shared by structlog and foreign stdlib loggers."""
     return [
         structlog.contextvars.merge_contextvars,

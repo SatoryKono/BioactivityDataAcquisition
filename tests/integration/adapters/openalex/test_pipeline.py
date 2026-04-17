@@ -6,6 +6,7 @@ Full pipeline tests with VCR cassettes are in test_adapter.py.
 
 from __future__ import annotations
 
+import asyncio
 import pytest
 
 
@@ -20,6 +21,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_abstract_reconstruction(self) -> None:
         """Test abstract reconstruction from inverted index."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import (
             reconstruct_abstract,
         )
@@ -38,6 +40,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_author_extraction(self) -> None:
         """Test author extraction from authorships."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import extract_authors
 
         authorships = [
@@ -54,6 +57,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_doi_normalization(self) -> None:
         """Test DOI normalization from various URL formats."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import extract_doi
 
         # HTTPS URL
@@ -74,6 +78,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_openalex_id_extraction(self) -> None:
         """Test OpenAlex ID extraction from URL."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import extract_openalex_id
 
         # Full URL
@@ -86,6 +91,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_journal_info_extraction(self) -> None:
         """Test journal info extraction from primary_location."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import (
             extract_journal_info,
         )
@@ -106,6 +112,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_open_access_extraction(self) -> None:
         """Test Open Access info extraction."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import (
             extract_open_access_info,
         )
@@ -127,6 +134,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_author_orcids_extraction(self) -> None:
         """Test ORCID extraction from authorships."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import (
             extract_author_orcids,
         )
@@ -144,6 +152,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_author_openalex_ids_extraction(self) -> None:
         """Test OpenAlex author ID extraction from authorships."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import extract_author_ids
 
         authorships = [
@@ -159,6 +168,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_institution_ids_extraction(self) -> None:
         """Test institution ID extraction from authorships."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import (
             extract_institution_ids,
         )
@@ -180,6 +190,7 @@ class TestOpenAlexPublicationTransformerIntegration:
     @pytest.mark.asyncio
     async def test_transformer_institution_country_codes_extraction(self) -> None:
         """Test institution country code extraction from authorships."""
+        await asyncio.sleep(0)
         from bioetl.application.pipelines.openalex.extractors import (
             extract_institution_country_codes,
         )

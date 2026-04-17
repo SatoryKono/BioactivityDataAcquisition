@@ -7,6 +7,7 @@ error propagation through spans, and batch ID factory delegation.
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -63,6 +64,7 @@ def mock_services():
 
     # fetch yields nothing by default
     async def _empty_fetch(**kwargs):
+        await asyncio.sleep(0)
         for _ in ():
             yield _  # pragma: no cover
 
