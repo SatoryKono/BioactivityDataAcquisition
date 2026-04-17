@@ -107,7 +107,7 @@ class _PubMedCoreBlock(_PubMedXmlBlock):
         super().__init__(root_resolver)
         self._data_normalizer = data_normalizer
 
-    def extract(self, _record: BronzeRecord) -> JsonDict:
+    def extract(self, record: BronzeRecord) -> JsonDict:
         article, _, _ = self._resolve_article_context()
         if article is None:
             return {}

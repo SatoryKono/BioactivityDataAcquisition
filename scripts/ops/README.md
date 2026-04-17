@@ -2,8 +2,8 @@
 
 `scripts/ops/` now separates stable executable tooling from internal helper
 assets and bounded maintenance scripts. Neo4j project-memory tooling lives
-under `scripts/memory/`, while MCP operational scripts live under
-`scripts/ai/mcp/`.
+under `scripts/memory/`, while canonical AI-facing setup and MCP operational
+scripts live under `scripts/ai/`.
 
 ## Structure
 
@@ -18,9 +18,11 @@ under `scripts/memory/`, while MCP operational scripts live under
 
 - launchers such as `codex.sh`, `codex.bat`
 - canonical Mistral Vibe wrappers live under `script-mistrallvibe/`
-- setup/bootstrap commands such as `setup_agents.sh`, `setup_plugins.sh`,
-  `setup_skills.sh`
+- setup/bootstrap commands such as `setup_plugins.sh`
 - supported non-memory Python commands exposed through `python -m scripts.ops`
+
+AI-oriented setup/check commands retained in this directory now act as
+compatibility facades that delegate to `scripts/ai/codex/`.
 
 ## Internal-only zones
 
@@ -38,3 +40,4 @@ as the basis for new public command surfaces.
 See [docs/05-operations/tooling/scripts-ops/INDEX.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/05-operations/tooling/scripts-ops/INDEX.md).
 For project-memory tooling, see [scripts/memory/README.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/memory/README.md).
 For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/__main__.py).
+For Codex setup/check tooling, see [scripts/ai/codex/README.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/codex/README.md).

@@ -98,6 +98,20 @@ def create_checkpoint_manager(
     )
 
 
+def _seed_runner_factory(seed_runner: AsyncMock):
+    def _factory() -> AsyncMock:
+        return seed_runner
+
+    return _factory
+
+
+def _new_enricher_runner_factory():
+    def _factory(name: str, df: object) -> AsyncMock:
+        return AsyncMock()
+
+    return _factory
+
+
 # ============================================================================
 # Fixtures
 # ============================================================================
@@ -215,8 +229,8 @@ def create_runner(
 ) -> CompositePipelineRunner:
     """Helper to create a runner with all dependencies."""
     deps = CompositeRunnerDependencies(
-        seed_runner_factory=lambda: mock_seed_runner,
-        enricher_runner_factory=lambda name, df: AsyncMock(),
+        seed_runner_factory=_seed_runner_factory(mock_seed_runner),
+        enricher_runner_factory=_new_enricher_runner_factory(),
         key_extractor=mock_key_extractor,
         coordinator=mock_coordinator,
         merger=mock_merger,

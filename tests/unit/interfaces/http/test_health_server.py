@@ -356,7 +356,7 @@ class TestHealthServerHTTP:
         self, port: int, method: str = "GET", path: str = "/health"
     ) -> tuple[int, str, str]:
         """Send HTTP request and return status code, status text, and body."""
-        _reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        reader, writer = await asyncio.open_connection("127.0.0.1", port)
         try:
             request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
             writer.write(request.encode())
@@ -581,7 +581,7 @@ class TestHealthServerQuarantineExplorer:
         self, port: int, method: str, path: str
     ) -> tuple[int, str, str]:
         """Send request and return status code, status text, and body."""
-        _reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        reader, writer = await asyncio.open_connection("127.0.0.1", port)
         try:
             request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
             writer.write(request.encode())
@@ -908,7 +908,7 @@ class TestHealthServerErrorHandling:
             mock_logger.error.assert_called_with(
                 "health_server_error",
                 error="Test error",
-                error_type="Exception",
+                error_type="RuntimeError",
                 reason="request_processing_failed",
                 reason_code="HEALTH_REQUEST_PROCESSING_FAILED",
             )

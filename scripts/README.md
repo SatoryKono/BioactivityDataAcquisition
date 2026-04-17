@@ -5,11 +5,11 @@ This directory contains development and operational scripts for the BioETL proje
 ## Subdirectories
 
 - `dev/` - Development scripts and bootstrap tooling.
-- `ai/` - AI-facing operational tooling, including MCP wrappers and checks.
+- `ai/` - Canonical AI-facing setup, checks, and MCP tooling.
 - `ci/` - CI/CD validation scripts.
 - `deployment/` - Deployment and Docker files.
 - `maintenance/` - Maintenance scripts.
 - `memory/` - Canonical Neo4j project-memory tooling.
-- `ops/` - General operational scripts outside the AI/MCP and memory domains.
+- `ops/` - General operational scripts and compatibility facades outside the AI/MCP and memory domains.
 
 For more information, see the specific script documentation.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Thin facade for backward compatibility.
-# Canonical implementation: scripts/dev/setup_copilot_codex_mcp.py
+# Canonical implementation: scripts/ai/codex/setup_mcp.py
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"

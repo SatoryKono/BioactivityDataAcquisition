@@ -10,7 +10,7 @@ For normal local onboarding, prefer the maintained project entrypoints:
 make install
 make test-deps
 make setup-plugins
-python -m scripts.dev setup-mcp  # optional MCP tooling
+python -m scripts.dev setup-mcp  # optional MCP tooling (compatibility facade)
 ```
 
 `dev_setup.sh` is still wired into `python -m scripts.dev setup`, but it is currently a legacy placeholder rather than the supported bootstrap path. Repository-local references to that path should be treated as compatibility evidence, not as proof that it is a canonical onboarding command.
@@ -152,7 +152,7 @@ python -m scripts.dev <command> [args...]
 | `mock-metrics`   | `scripts/dev/metrics_mock_server.py`     | Start mock metrics server                                        |
 | `mock-quarantine`| `scripts/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |
 | `test-changed`   | `scripts/dev/run_tests.py changed`       | Run tests for changed files only                                 |
-| `setup-mcp`      | `scripts/dev/setup_copilot_codex_mcp.py` | Setup Copilot/Codex MCP integration                              |
+| `setup-mcp`      | `scripts/dev/setup_copilot_codex_mcp.py` | Compatibility facade for canonical Codex MCP setup               |
 
 ## When to Use
 
@@ -168,7 +168,7 @@ python -m scripts.dev <command> [args...]
 | `mock-metrics`   | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data               | Manual, during dashboard development                   |
 | `mock-quarantine`| When validating `5. Silver Reject Explorer` against `/ops/quarantine/*` without real Delta data                     | Manual, during dashboard/API smoke checks              |
 | `test-changed`   | Quick feedback during development; canonical changed-file runner with fast unit fallback                            | Manual, during development                             |
-| `setup-mcp`      | One-time AI tooling setup; configures Copilot/Codex MCP integration                                                 | Manual, initial setup                                  |
+| `setup-mcp`      | One-time AI tooling setup; compatibility facade for canonical `scripts.ai.codex` MCP setup                           | Manual, initial setup                                  |
 
 ## Other Files
 
@@ -184,8 +184,8 @@ python -m scripts.dev <command> [args...]
 | `scripts/dev/run_pytest_sharded.sh`       | Run the recommended path-based pytest shard plan (shell variant)                          |
 | `scripts/dev/quality_gate_probe.py`       | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |
 | `scripts/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks |
-| `scripts/dev/setup_copilot_codex_mcp.sh`  | Setup MCP (shell variant)                                                                 |
-| `scripts/dev/setup_copilot_codex_mcp.ps1` | Setup MCP (PowerShell variant)                                                            |
+| `scripts/dev/setup_copilot_codex_mcp.sh`  | Setup MCP compatibility facade (shell variant)                                            |
+| `scripts/dev/setup_copilot_codex_mcp.ps1` | Setup MCP compatibility facade (PowerShell variant)                                       |
 | `scripts/dev/setup_env_windows.ps1`       | Create/update the stable Windows virtualenv at `.venv-win`                                |
 | `scripts/dev/setup_env_wsl.sh`            | Create/update the stable WSL virtualenv outside the repo (default: `$HOME/.venvs/bioetl`) |
 | `scripts/dev/.wsl-vpn-fix.ps1`            | Recover Windows-side VPN proxy settings for WSL interoperability                          |
