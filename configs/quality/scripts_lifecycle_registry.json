@@ -104,18 +104,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin batch launcher to scripts/ai/codex/diagnose_wsl.bat while mixed Windows/WSL operator flows still reference the scripts.ops path."
     },
-    "scripts/qa/generate_architecture_debt_tasks.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin compatibility facade to scripts/engineering/qa/generate_architecture_debt_tasks.py while historical scripts.qa call-sites converge on the canonical engineering.qa surface."
-    },
-    "scripts/qa/reduce_architecture_debt.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin compatibility facade to scripts/engineering/qa/reduce_architecture_debt.py while historical scripts.qa call-sites converge on the canonical engineering.qa surface."
-    },
     "scripts/ai/vibe/__main__.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",

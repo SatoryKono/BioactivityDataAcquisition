@@ -2813,24 +2813,27 @@ def _imported_repo_modules(path: Path, prefixes: tuple[str, ...]) -> set[str]:
 def _runtime_dimensions(*parts: str) -> set[str]:
     combined = " ".join(parts)
     dimensions = set()
-    for dim in (
-        "pipeline",
-        "provider",
-        "entity",
-        "layer",
-        "run_type",
-        "stage",
-        "table",
-        "metric",
-        "anomaly_type",
-        "event_type",
-        "store",
-        "operation",
-        "ref_type",
-    ):
+    for dim in _RUNTIME_DIMENSIONS:
         if re.search(rf"\b{dim}\b", combined):
             dimensions.add(dim)
     return dimensions
+
+
+_RUNTIME_DIMENSIONS = (
+    "pipeline",
+    "provider",
+    "entity",
+    "layer",
+    "run_type",
+    "stage",
+    "table",
+    "metric",
+    "anomaly_type",
+    "event_type",
+    "store",
+    "operation",
+    "ref_type",
+)
 
 
 def _alert_rule_settings(
@@ -2839,17 +2842,31 @@ def _alert_rule_settings(
     alert_name: str,
     group_name: str,
 ) -> tuple[str, str, str, str]:
-    alerts_config = memory_mapping.get("alerts")
-    groups = alerts_config.get("groups") if isinstance(alerts_config, dict) else {}
-    rules = alerts_config.get("rules") if isinstance(alerts_config, dict) else {}
-    group_rule = groups.get(group_name) if isinstance(groups, dict) and isinstance(groups.get(group_name), dict) else {}
-    alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
+    group_rule, alert_rule = _alert_rule_overrides(
+        memory_mapping,
+        alert_name=alert_name,
+        group_name=group_name,
+    )
     return (
         str(alert_rule.get("pipelines", group_rule.get("pipelines", "auto"))),
         str(alert_rule.get("pipeline_kind", group_rule.get("pipeline_kind", "any"))),
         str(alert_rule.get("providers", group_rule.get("providers", "auto"))),
         str(alert_rule.get("contracts", group_rule.get("contracts", "none"))),
     )
+
+
+def _alert_rule_overrides(
+    memory_mapping: dict[str, object],
+    *,
+    alert_name: str,
+    group_name: str,
+) -> tuple[dict[str, object], dict[str, object]]:
+    alerts_config = memory_mapping.get("alerts")
+    groups = alerts_config.get("groups") if isinstance(alerts_config, dict) else {}
+    rules = alerts_config.get("rules") if isinstance(alerts_config, dict) else {}
+    group_rule = groups.get(group_name) if isinstance(groups, dict) and isinstance(groups.get(group_name), dict) else {}
+    alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
+    return group_rule, alert_rule
 
 
 def _pipeline_targets_for_alert(
@@ -6306,17 +6323,29 @@ def _workflow_repo_path_targets(run_text: str) -> tuple[NodeKey, ...]:
 def _workflow_quality_gates(run_text: str) -> tuple[str, ...]:
     lowered = run_text.lower()
     gates: list[str] = []
-    if "pytest" in lowered:
-        gates.append("pytest")
-    if "mypy" in lowered:
-        gates.append(GATE_MYPY_STRICT)
-    if "scripts.docs" in lowered or "check-links" in lowered or "build_docs_site.sh" in lowered:
-        gates.append(GATE_DOCS_VERIFICATION)
-    if "validate_pipeline_configs" in lowered or "scripts.schema" in lowered or "check_config_invariants" in lowered:
-        gates.append(GATE_CONFIG_VALIDATION)
-    if "neo4j-memory" in lowered:
-        gates.append(GATE_NEO4J_ONTOLOGY_INVARIANTS)
+    for predicate, gate_name in _WORKFLOW_GATE_RULES:
+        if predicate(lowered):
+            gates.append(gate_name)
     return tuple(dict.fromkeys(gates))
+
+
+def _contains_any(text: str, needles: tuple[str, ...]) -> bool:
+    return any(needle in text for needle in needles)
+
+
+_WORKFLOW_GATE_RULES: tuple[tuple[Callable[[str], bool], str], ...] = (
+    (lambda text: "pytest" in text, "pytest"),
+    (lambda text: "mypy" in text, GATE_MYPY_STRICT),
+    (
+        lambda text: _contains_any(text, ("scripts.docs", "check-links", "build_docs_site.sh")),
+        GATE_DOCS_VERIFICATION,
+    ),
+    (
+        lambda text: _contains_any(text, ("validate_pipeline_configs", "scripts.schema", "check_config_invariants")),
+        GATE_CONFIG_VALIDATION,
+    ),
+    (lambda text: "neo4j-memory" in text, GATE_NEO4J_ONTOLOGY_INVARIANTS),
+)
 
 
 def _workflow_family(workflow_name: str, title: str) -> str:
@@ -8008,44 +8037,35 @@ def _link_adapter_ports(
 
 
 def _contract_mapping_config(memory_mapping: dict[str, object]) -> ContractMappingConfig:
-    contracts_mapping = memory_mapping.get("contracts")
+    contracts_mapping = _mapping_dict_or_empty(memory_mapping.get("contracts"))
     return ContractMappingConfig(
-        source_prefixes=tuple(
-            _as_string_list(
-                contracts_mapping.get("registry_source_prefixes")
-                if isinstance(contracts_mapping, dict)
-                else None
-            )
-            or [
-                "bioetl.domain.contracts.gold",
-                "bioetl.domain.schemas",
-            ]
-        ),
-        control_plane_modules=_as_string_list(
-            contracts_mapping.get("control_plane_modules") if isinstance(contracts_mapping, dict) else None
-        ),
-        control_plane_runtime_modules=_as_string_list(
-            contracts_mapping.get("control_plane_runtime_modules") if isinstance(contracts_mapping, dict) else None
-        ),
-        lineage_modules=_as_string_list(
-            contracts_mapping.get("lineage_modules") if isinstance(contracts_mapping, dict) else None
-        ),
-        lineage_runtime_modules=_as_string_list(
-            contracts_mapping.get("lineage_runtime_modules") if isinstance(contracts_mapping, dict) else None
-        ),
-        control_plane_docs=_as_string_list(
-            contracts_mapping.get("control_plane_docs") if isinstance(contracts_mapping, dict) else None
-        ),
-        lineage_docs=_as_string_list(
-            contracts_mapping.get("lineage_docs") if isinstance(contracts_mapping, dict) else None
-        ),
-        control_plane_anchor_fields=_as_string_list(
-            contracts_mapping.get("control_plane_anchor_fields") if isinstance(contracts_mapping, dict) else None
-        ),
-        lineage_anchor_fields=_as_string_list(
-            contracts_mapping.get("lineage_anchor_fields") if isinstance(contracts_mapping, dict) else None
-        ),
+        source_prefixes=_contract_source_prefixes(contracts_mapping),
+        control_plane_modules=_contract_mapping_values(contracts_mapping, "control_plane_modules"),
+        control_plane_runtime_modules=_contract_mapping_values(contracts_mapping, "control_plane_runtime_modules"),
+        lineage_modules=_contract_mapping_values(contracts_mapping, "lineage_modules"),
+        lineage_runtime_modules=_contract_mapping_values(contracts_mapping, "lineage_runtime_modules"),
+        control_plane_docs=_contract_mapping_values(contracts_mapping, "control_plane_docs"),
+        lineage_docs=_contract_mapping_values(contracts_mapping, "lineage_docs"),
+        control_plane_anchor_fields=_contract_mapping_values(contracts_mapping, "control_plane_anchor_fields"),
+        lineage_anchor_fields=_contract_mapping_values(contracts_mapping, "lineage_anchor_fields"),
     )
+
+
+def _contract_source_prefixes(contracts_mapping: dict[str, object]) -> tuple[str, ...]:
+    return tuple(
+        _contract_mapping_values(contracts_mapping, "registry_source_prefixes")
+        or [
+            "bioetl.domain.contracts.gold",
+            "bioetl.domain.schemas",
+        ]
+    )
+
+
+def _contract_mapping_values(
+    contracts_mapping: dict[str, object],
+    key: str,
+) -> list[str]:
+    return _as_string_list(contracts_mapping.get(key))
 
 
 def _link_contract_source_dependencies(
@@ -8246,15 +8266,17 @@ def _add_contract_registry_artifact(
 
 
 def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
-    payload = _read_yaml(root / CONTRACT_REGISTRY_RELATIVE_PATH)
-    entries = payload.get("entries")
-    if not isinstance(entries, dict):
-        return {}
     return {
         contract_ref: raw_entry
-        for contract_ref, raw_entry in sorted(entries.items())
+        for contract_ref, raw_entry in sorted(_contract_registry_payload(root).items())
         if isinstance(contract_ref, str) and isinstance(raw_entry, dict)
     }
+
+
+def _contract_registry_payload(root: Path) -> dict[object, object]:
+    payload = _read_yaml(root / CONTRACT_REGISTRY_RELATIVE_PATH)
+    entries = payload.get("entries")
+    return entries if isinstance(entries, dict) else {}
 
 
 def _link_contract_dependencies(

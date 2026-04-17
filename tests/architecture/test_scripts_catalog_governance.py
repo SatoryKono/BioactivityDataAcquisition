@@ -15,7 +15,13 @@ def _project_root() -> Path:
 
 def _load_catalog_module():
     root = _project_root()
-    module_path = root / "scripts" / "repo" / "check_scripts_catalog.py"
+    module_path = (
+        root
+        / "scripts"
+        / "engineering"
+        / "repo"
+        / "check_scripts_catalog.py"
+    )
     spec = importlib.util.spec_from_file_location(
         "check_scripts_catalog_governance_test", module_path
     )

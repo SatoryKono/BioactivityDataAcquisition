@@ -20,8 +20,6 @@ The `scripts/` root is intentionally compact.
 - `scripts/engineering` — CI, dev, QA, diagnostics, baselines, and repo governance.
 - `scripts/memory` — Neo4j-backed project memory utilities.
 - `scripts/ops` — runtime, maintenance, observability, migration, and support tooling.
-- `scripts/qa` — compatibility facade for historical grouped QA entrypoints.
-- `scripts/repo` — compatibility facade for historical repo-governance entrypoints.
 - `scripts/schema` — schema generation and validation contracts.
 
 ## Canonical Entry Points
@@ -59,8 +57,8 @@ python -m scripts.engineering.dev migrate-deprecated-names src/
 `scripts/catalog.yaml` is the governance manifest for canonical roots and group ownership.
 If you add or relocate script domains, update the catalog and rerun the repo governance checks.
 
-## Compatibility Layer
+## Compatibility Policy
 
-- `scripts/qa/` and `scripts/repo/` are retained as thin compatibility facades.
 - Historical root-level wrappers have been consolidated into canonical domain packages.
 - New integrations should target grouped module commands or canonical package paths only.
+- Historical evidence under `docs/reports/evidence/**` may still mention removed paths; treat those references as archival, not canonical guidance.
