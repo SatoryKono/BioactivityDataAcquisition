@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, TypeGuard
 
 if TYPE_CHECKING:
@@ -183,9 +184,7 @@ def is_valid_numeric(v: object) -> TypeGuard[int | float]:
         return False
     if isinstance(v, bool):
         return False
-    if v != v:
-        return False
-    return abs(v) != float("inf")
+    return math.isfinite(float(v))
 
 
 def extract_numeric_values(

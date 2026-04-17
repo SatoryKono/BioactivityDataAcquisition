@@ -143,13 +143,13 @@ class StorageAdapterMergedMixin:
             preserve_column_order: If True, skip canonical reordering.
             schema: Optional Pandera schema for strict contract validation.
         """
-        schema = self._COMPOSITE_GOLD_SCHEMAS.get(table_name)
+        composite_schema = self._COMPOSITE_GOLD_SCHEMAS.get(table_name)
 
         await self.gold.write_gold_merged(
             table_name,
             records,
             primary_keys,
-            schema=schema,
+            schema=composite_schema,
             completed_at=completed_at,
             run_id=run_id,
             sources_used=sources_used,

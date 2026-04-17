@@ -16,6 +16,7 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
 )
+from bioetl.infrastructure.adapters.filterable_mixin import raising_async_iterator
 from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
     _CrossRefFallbackPolicyMixin,
 )
@@ -172,7 +173,7 @@ class CrossRefAdapter(
         ):
             yield publication
 
-    async def fetch_multi_filtered(
+    def fetch_multi_filtered(
         self,
         entity_type: str,
         filters: dict[str, list[str]],
@@ -180,8 +181,12 @@ class CrossRefAdapter(
     ) -> AsyncIterator[BronzeRecord]:
         """Multi-field filtering is not supported by CrossRef API."""
         del entity_type, filters, limit
-        raise_crossref_multifilter_not_supported()
-        yield {}  # pragma: no cover - keeps AsyncIterator contract
+        return raising_async_iterator(
+            NotImplementedError(
+                "CrossRef API does not support multi-field filtering. "
+                "Use fetch_filtered() with a single filter_field instead."
+            )
+        )
 
     async def fetch_filtered_with_fallback(
         self,

@@ -5,8 +5,8 @@ Architecture and quality-gate checks, debt telemetry, and code hygiene audits.
 ## Unified Entry Point
 
 ```bash
-python -m scripts.qa --help
-python -m scripts.qa <command> [args...]
+python -m scripts.engineering.qa --help
+python -m scripts.engineering.qa <command> [args...]
 ```
 
 ## Commands
@@ -30,7 +30,7 @@ python -m scripts.qa <command> [args...]
 | `report-hotspots`             | `generate_hotspot_degradation_report.py`  | Generate performance hotspot degradation report                                                   |
 | `report-duplication-baseline` | `report_duplication_baseline.py`          | Generate report-only duplication baseline for `composition`/`application`                         |
 | `analyze-duplicate-functions` | `analyze_duplicate_functions.py`          | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |
-| `calibrate-hotspots`          | `scripts/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets                                                                         |
+| `calibrate-hotspots`          | `scripts/engineering/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets                                                                         |
 
 ## When to Use
 
@@ -64,25 +64,25 @@ Important distinction:
 
 Direct script path:
 
-- `scripts/qa/report_duplication_baseline.py` (`python -m scripts.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review.
-- `scripts/qa/generate_architecture_debt_tasks.py` (`python -m scripts.qa generate-debt-tasks`) generates the canonical architecture debt task backlog.
-- `scripts/qa/reduce_architecture_debt.py` (`python -m scripts.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent.
+- `scripts/engineering/qa/report_duplication_baseline.py` (`python -m scripts.engineering.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review.
+- `scripts/engineering/qa/generate_architecture_debt_tasks.py` (`python -m scripts.engineering.qa generate-debt-tasks`) generates the canonical architecture debt task backlog.
+- `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent.
 
 ## Canonical Commands
 
 ```bash
-python scripts/qa/generate_architecture_dependency_map.py --check
-python scripts/qa/generate_architecture_dependency_map.py --update
-python scripts/qa/report_vcr_metadata_catalog.py --check
-python scripts/qa/report_vcr_metadata_catalog.py --update
-python scripts/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking
-python -m scripts.qa report-family-baseline --check
-python -m scripts.qa report-family-baseline --update
-python scripts/qa/report_duplication_baseline.py
-python -m scripts.qa check-architecture
-python -m scripts.qa check-app-deps
-python -m scripts.qa check-constructor-args -- --warn-only
-python -m scripts.qa analyze-duplicate-functions
+python scripts/engineering/qa/generate_architecture_dependency_map.py --check
+python scripts/engineering/qa/generate_architecture_dependency_map.py --update
+python scripts/engineering/qa/report_vcr_metadata_catalog.py --check
+python scripts/engineering/qa/report_vcr_metadata_catalog.py --update
+python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking
+python -m scripts.engineering.qa report-family-baseline --check
+python -m scripts.engineering.qa report-family-baseline --update
+python scripts/engineering/qa/report_duplication_baseline.py
+python -m scripts.engineering.qa check-architecture
+python -m scripts.engineering.qa check-app-deps
+python -m scripts.engineering.qa check-constructor-args -- --warn-only
+python -m scripts.engineering.qa analyze-duplicate-functions
 ```
 
 `scripts/generate_architecture_dependency_map.py` remains a compatibility wrapper only.

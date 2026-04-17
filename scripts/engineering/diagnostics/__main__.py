@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Unified entry point for scripts/diagnostics/ commands.
+"""Unified entry point for scripts/engineering/diagnostics/ commands.
 
 Usage:
-    python -m scripts.diagnostics <command> [args...]
-    python -m scripts.diagnostics --help
+    python -m scripts.engineering.diagnostics <command> [args...]
+    python -m scripts.engineering.diagnostics --help
 
 Commands:
     cleanup            Clean caches, build artifacts, and temp files

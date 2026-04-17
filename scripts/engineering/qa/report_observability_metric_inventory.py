@@ -2,7 +2,7 @@
 """Report registry/runtime/docs drift for public observability metric families.
 
 Usage:
-    python -m scripts.qa report-observability-metric-inventory [--json]
+    python -m scripts.engineering.qa report-observability-metric-inventory [--json]
 
 The report is intentionally static and repo-local. It reconciles:
 - registered public metric families

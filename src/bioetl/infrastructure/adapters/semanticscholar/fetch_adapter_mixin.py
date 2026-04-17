@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.filterable_mixin import raising_async_iterator
 from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
     _SemanticScholarSearchFetchMixin,
 )
@@ -205,7 +206,7 @@ class SemanticScholarFetchAdapterMixin(_SemanticScholarSearchFetchMixin):
         ):
             yield record
 
-    async def fetch_multi_filtered(
+    def fetch_multi_filtered(
         self,
         entity_type: str,
         filters: dict[str, list[str]],
@@ -222,8 +223,9 @@ class SemanticScholarFetchAdapterMixin(_SemanticScholarSearchFetchMixin):
             NotImplementedError: Always; Semantic Scholar supports only DOI filtering.
         """
         del entity_type, filters, limit
-        raise NotImplementedError(
-            "Semantic Scholar adapter supports only DOI filtering. "
-            "Use fetch_filtered() or fetch_filtered_with_fallback()."
+        return raising_async_iterator(
+            NotImplementedError(
+                "Semantic Scholar adapter supports only DOI filtering. "
+                "Use fetch_filtered() or fetch_filtered_with_fallback()."
+            )
         )
-        yield {}

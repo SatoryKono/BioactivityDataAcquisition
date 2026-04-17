@@ -42,7 +42,7 @@ _DEFAULT_LOG_FILE = Path("logs") / "bioetl.log"
 _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (
         re.compile(
-            r"(?i)(api[_-]?key|apikey)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
+            r"(?i)(api[_-]?key)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
         ),
         "[REDACTED_API_KEY]",
     ),

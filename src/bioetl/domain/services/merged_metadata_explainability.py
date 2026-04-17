@@ -52,7 +52,7 @@ class MergedMetadataExplainabilityService:
             source_providers=source_providers,
             merge_strategy="prioritize",
             priority_order=priority_order,
-            final_value_source=source_providers[0] if source_providers else None,
+            final_value_source=next(iter(source_providers), None),
             conflict_resolution="priority_based" if priority_order else None,
             enrichment_applied=_extract_applied_enrichments(composite_metadata),
         )

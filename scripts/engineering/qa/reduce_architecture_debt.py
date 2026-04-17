@@ -66,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
     if tasks_path is None:
         parser.error(
             "No tasks_architecture_metric_exemptions_*.json files found in "
-            "project root. Run `python -m scripts.qa generate-debt-tasks` first."
+            "project root. Run `python -m scripts.engineering.qa generate-debt-tasks` first."
         )
 
     payload = load_architecture_debt_tasks(tasks_path)

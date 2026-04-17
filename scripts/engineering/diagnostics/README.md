@@ -5,21 +5,21 @@ Manual probes, debug helpers, and one-off diagnostic tools.
 ## Unified Entry Point
 
 ```bash
-python -m scripts.diagnostics --help
-python -m scripts.diagnostics <command> [args...]
+python -m scripts.engineering.diagnostics --help
+python -m scripts.engineering.diagnostics <command> [args...]
 ```
 
 ## Commands
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `cleanup` | `scripts/diagnostics/cleanup_project.py` | Clean caches, build artifacts, and temp files |
-| `cleanup-audit` | `scripts/diagnostics/cleanup_consolidate.py` | Consolidated cleanup and quality audit |
-| `audit-structure` | `scripts/diagnostics/audit_structure.py` | Validate project structure against file policy |
-| `ast-inventory` | `scripts/diagnostics/ast_inventory.py` | AST-based code inventory |
-| `debug-pandera` | `scripts/diagnostics/debug_pandera.py` | Debug Pandera schema validation |
-| `debug-storage` | `scripts/diagnostics/debug_storage_health.py` | Debug storage health checks |
-| `inspect-vcr` | `scripts/diagnostics/_tmp_inspect_vcr.py` | Temporary VCR cassette inspector |
+| `cleanup` | `scripts/engineering/diagnostics/cleanup_project.py` | Clean caches, build artifacts, and temp files |
+| `cleanup-audit` | `scripts/engineering/diagnostics/cleanup_consolidate.py` | Consolidated cleanup and quality audit |
+| `audit-structure` | `scripts/engineering/diagnostics/audit_structure.py` | Validate project structure against file policy |
+| `ast-inventory` | `scripts/engineering/diagnostics/ast_inventory.py` | AST-based code inventory |
+| `debug-pandera` | `scripts/engineering/diagnostics/debug_pandera.py` | Debug Pandera schema validation |
+| `debug-storage` | `scripts/engineering/diagnostics/debug_storage_health.py` | Debug storage health checks |
+| `inspect-vcr` | `scripts/engineering/diagnostics/_tmp_inspect_vcr.py` | Temporary VCR cassette inspector |
 
 ## When to Use
 
@@ -42,4 +42,4 @@ workflow command.
 
 | File | Description |
 |------|-------------|
-| `scripts/diagnostics/generate_src_bioetl_refactor_evidence.py` | Generate evidence artifacts for focused `src/bioetl` refactor investigations |
+| `scripts/engineering/diagnostics/generate_src_bioetl_refactor_evidence.py` | Generate evidence artifacts for focused `src/bioetl` refactor investigations |

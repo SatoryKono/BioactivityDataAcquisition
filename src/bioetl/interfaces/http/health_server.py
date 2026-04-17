@@ -149,7 +149,7 @@ async def run_health_server(
         while True:
             await asyncio.sleep(1)
     except asyncio.CancelledError:
-        pass  # Why: shutdown loop exit; CancelledError is the normal stop signal
+        raise
     finally:
         await server.stop()
 
