@@ -71,7 +71,7 @@ class _PubMedIdentifierBlock(_PubMedXmlBlock):
         super().__init__(root_resolver)
         self._data_normalizer = data_normalizer
 
-    def extract(self, _record: BronzeRecord) -> JsonDict:
+    def extract(self, record: BronzeRecord) -> JsonDict:
         root = self._resolve_root()
         if root is None:
             return {"pmid": None}

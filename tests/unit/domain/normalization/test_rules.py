@@ -86,14 +86,17 @@ class TestNormalizeCrossPipelineCase:
 
     def test_none_and_empty(self) -> None:
         """Test None and empty string handling."""
-        assert normalize_cross_pipeline_case(cast(Any, None), "uppercase") is None
+        none_value: str | None = None
+        assert normalize_cross_pipeline_case(none_value, "uppercase") is None
         assert normalize_cross_pipeline_case("", "uppercase") is None
         assert normalize_cross_pipeline_case("   ", "uppercase") is None
 
     def test_non_string(self) -> None:
         """Test non-string input handling."""
-        assert normalize_cross_pipeline_case(cast(Any, 123), "uppercase") is None
-        assert normalize_cross_pipeline_case(cast(Any, []), "uppercase") is None
+        wrong_int = cast(str, 123)
+        wrong_list = cast(str, [])
+        assert normalize_cross_pipeline_case(wrong_int, "uppercase") is None
+        assert normalize_cross_pipeline_case(wrong_list, "uppercase") is None
 
 
 class TestNormalizeEnumCase:

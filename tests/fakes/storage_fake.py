@@ -285,7 +285,7 @@ class InMemoryStorage:
 
     async def aclose(self) -> None:
         """Close storage connection (no-op for in-memory)."""
-        return None
+        return
 
     def clear(self) -> None:
         """Clear all data (test utility)."""

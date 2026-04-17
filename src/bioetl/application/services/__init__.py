@@ -36,15 +36,20 @@ from importlib import import_module
 _OBSERVABILITY_WORKFLOW_SERVICE_MODULE = (
     "bioetl.application.services.observability_workflow_service"
 )
+_EXPORT_SERVICE_MODULE = "bioetl.application.services.export_service"
 _LINEAGE_INSPECTION_SERVICE_MODULE = (
     "bioetl.application.services.lineage.lineage_inspection_service"
 )
 _PIPELINE_RUNNER_SERVICE_MODULE = (
     "bioetl.application.services.execution.pipeline_runner_service"
 )
+_CONTRACT_MIGRATION_SERVICE_MODULE = (
+    "bioetl.application.services.contract_migration_service"
+)
 _RUN_MANIFEST_INSPECTION_SERVICE_MODULE = (
     "bioetl.application.services.control_plane.run_manifest_inspection_service"
 )
+_VACUUM_SERVICE_MODULE = "bioetl.application.services.vacuum_service"
 
 _LAZY_EXPORT_MODULES: dict[str, str] = {
     "AuditInspectionResult": "bioetl.application.services.audit_inspection_service",
@@ -54,21 +59,15 @@ _LAZY_EXPORT_MODULES: dict[str, str] = {
     "BronzeCleanupService": "bioetl.application.services.bronze_cleanup_service",
     "CheckpointAuditWorkflowResult": _OBSERVABILITY_WORKFLOW_SERVICE_MODULE,
     "CheckpointService": "bioetl.application.services.checkpoint_service",
-    "ColumnInfo": "bioetl.application.services.export_service",
+    "ColumnInfo": _EXPORT_SERVICE_MODULE,
     "ConfigService": "bioetl.application.services.config_service",
-    "ContractMigrationAction": (
-        "bioetl.application.services.contract_migration_service"
-    ),
-    "ContractMigrationPlan": "bioetl.application.services.contract_migration_service",
-    "ContractMigrationService": (
-        "bioetl.application.services.contract_migration_service"
-    ),
-    "ContractVersionTransition": (
-        "bioetl.application.services.contract_migration_service"
-    ),
-    "ExportOptions": "bioetl.application.services.export_service",
-    "ExportResult": "bioetl.application.services.export_service",
-    "ExportService": "bioetl.application.services.export_service",
+    "ContractMigrationAction": _CONTRACT_MIGRATION_SERVICE_MODULE,
+    "ContractMigrationPlan": _CONTRACT_MIGRATION_SERVICE_MODULE,
+    "ContractMigrationService": _CONTRACT_MIGRATION_SERVICE_MODULE,
+    "ContractVersionTransition": _CONTRACT_MIGRATION_SERVICE_MODULE,
+    "ExportOptions": _EXPORT_SERVICE_MODULE,
+    "ExportResult": _EXPORT_SERVICE_MODULE,
+    "ExportService": _EXPORT_SERVICE_MODULE,
     "HealthService": "bioetl.application.services.health_service",
     "LineageFragmentInspectionResult": _LINEAGE_INSPECTION_SERVICE_MODULE,
     "LineageInspectionService": _LINEAGE_INSPECTION_SERVICE_MODULE,
@@ -90,11 +89,11 @@ _LAZY_EXPORT_MODULES: dict[str, str] = {
     "RunManifestInspectionService": _RUN_MANIFEST_INSPECTION_SERVICE_MODULE,
     "RunOptions": _PIPELINE_RUNNER_SERVICE_MODULE,
     "RunResult": _PIPELINE_RUNNER_SERVICE_MODULE,
-    "TableInfo": "bioetl.application.services.export_service",
-    "TablePreview": "bioetl.application.services.export_service",
-    "TableVacuumResult": "bioetl.application.services.vacuum_service",
-    "VacuumAllResult": "bioetl.application.services.vacuum_service",
-    "VacuumService": "bioetl.application.services.vacuum_service",
+    "TableInfo": _EXPORT_SERVICE_MODULE,
+    "TablePreview": _EXPORT_SERVICE_MODULE,
+    "TableVacuumResult": _VACUUM_SERVICE_MODULE,
+    "VacuumAllResult": _VACUUM_SERVICE_MODULE,
+    "VacuumService": _VACUUM_SERVICE_MODULE,
 }
 
 __all__ = [
