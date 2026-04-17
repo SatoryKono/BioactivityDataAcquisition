@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -310,6 +311,7 @@ class TestPostrunServiceDQChecks:
         self, postrun_service, mock_executor, mock_dq_service
     ):
         """Test run_dq_checks delegates to DataQualityService."""
+        await asyncio.sleep(0)
         result = postrun_service.run_dq_checks(mock_executor)
 
         assert isinstance(result, DQResult)
@@ -326,6 +328,7 @@ class TestPostrunServiceDQChecks:
         self, postrun_service, mock_executor, mock_dq_service
     ):
         """Test run_dq_checks collects correct batch metrics."""
+        await asyncio.sleep(0)
         postrun_service.run_dq_checks(mock_executor)
 
         call_args = mock_dq_service.evaluate.call_args

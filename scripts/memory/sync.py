@@ -4961,10 +4961,15 @@ def _add_composite_output_layers(
     return layer_nodes, field_nodes_by_layer
 
 
-def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+def _base_pipeline_storage_config(root: Path) -> tuple[dict[str, object], dict[str, object]]:
     base_pipeline_path = root / "configs" / "base" / "pipeline.yaml"
     base_payload = _read_yaml(base_pipeline_path) if base_pipeline_path.is_file() else {}
     base_sink = base_payload.get("sink") if isinstance(base_payload.get("sink"), dict) else {}
+    return base_payload, base_sink
+
+
+def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    base_payload, base_sink = _base_pipeline_storage_config(root)
     schema_fields_by_storage: dict[str, dict[str, NodeKey]] = {}
     _add_entity_storage_data_surfaces(
         snapshot,
@@ -7206,6 +7211,86 @@ def _add_contract_entry_surface(
     )
 
 
+def _add_contract_registry_artifact(
+    snapshot: GraphSnapshot,
+    root: Path,
+    today: str,
+) -> NodeKey | None:
+    registry_path = root / CONTRACT_REGISTRY_RELATIVE_PATH
+    if not registry_path.is_file():
+        return None
+    relative_path = _rel_path(root, registry_path)
+    return snapshot.add_node(
+        "config_artifact",
+        relative_path,
+        summary="Contract registry for published data contracts.",
+        source_path=relative_path,
+        source_kind="contract_registry",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+
+
+def _contract_registry_entries(root: Path) -> dict[str, dict[str, object]]:
+    payload = _read_yaml(root / CONTRACT_REGISTRY_RELATIVE_PATH)
+    entries = payload.get("entries")
+    if not isinstance(entries, dict):
+        return {}
+    return {
+        contract_ref: raw_entry
+        for contract_ref, raw_entry in sorted(entries.items())
+        if isinstance(contract_ref, str) and isinstance(raw_entry, dict)
+    }
+
+
+def _link_contract_dependencies(
+    snapshot: GraphSnapshot,
+    entry_context: ContractEntryContext,
+    mapping_config: ContractMappingConfig,
+) -> None:
+    _link_contract_source_dependencies(snapshot, entry_context, mapping_config.source_prefixes)
+    _add_contract_policy_config(snapshot, entry_context)
+    _add_published_contract_artifacts(snapshot, entry_context)
+
+    for module_paths, provenance in (
+        (mapping_config.control_plane_modules, "impact_contracts_control_plane"),
+        (mapping_config.control_plane_runtime_modules, "impact_contracts_runtime"),
+        (mapping_config.lineage_modules, "impact_contracts_lineage"),
+        (mapping_config.lineage_runtime_modules, "impact_contracts_lineage_runtime"),
+    ):
+        _link_contract_module_dependencies(
+            snapshot,
+            entry_context,
+            module_paths,
+            provenance,
+        )
+
+    for doc_paths, anchor_fields, summary, provenance in (
+        (
+            mapping_config.control_plane_docs,
+            mapping_config.control_plane_anchor_fields,
+            "Control-plane contract reference for `{contract_ref}`.",
+            "impact_contracts_control_plane",
+        ),
+        (
+            mapping_config.lineage_docs,
+            mapping_config.lineage_anchor_fields,
+            "Lineage/traceability contract reference for `{contract_ref}`.",
+            "impact_contracts_lineage",
+        ),
+    ):
+        _link_contract_doc_dependencies(
+            snapshot,
+            entry_context,
+            doc_paths,
+            anchor_fields,
+            summary=summary,
+            source_kind="control_plane_contract_doc" if provenance == "impact_contracts_control_plane" else "lineage_contract_doc",
+            provenance=provenance,
+        )
+
+
 def _add_contract_surfaces(
     snapshot: GraphSnapshot,
     root: Path,
@@ -7213,31 +7298,16 @@ def _add_contract_surfaces(
     today: str,
     memory_mapping: dict[str, object],
 ) -> dict[str, NodeKey]:
-    registry_path = root / "configs" / "base" / "contract_registry.yaml"
-    if not registry_path.is_file():
+    registry_artifact = _add_contract_registry_artifact(snapshot, root, today)
+    if registry_artifact is None:
         return {}
-
-    registry_artifact = snapshot.add_node(
-        "config_artifact",
-        _rel_path(root, registry_path),
-        summary="Contract registry for published data contracts.",
-        source_path=_rel_path(root, registry_path),
-        source_kind="contract_registry",
-        last_verified=today,
-        ingest_wave="repo_sync_v1",
-        confidence="high",
-    )
-
-    payload = _read_yaml(registry_path)
-    entries = payload.get("entries")
-    if not isinstance(entries, dict):
+    entries = _contract_registry_entries(root)
+    if not entries:
         return {}
     mapping_config = _contract_mapping_config(memory_mapping)
 
     contract_nodes: dict[str, NodeKey] = {}
-    for contract_ref, raw_entry in sorted(entries.items()):
-        if not isinstance(contract_ref, str) or not isinstance(raw_entry, dict):
-            continue
+    for contract_ref, raw_entry in entries.items():
         entry_context = _add_contract_entry_surface(
             snapshot,
             root,
@@ -7248,51 +7318,7 @@ def _add_contract_surfaces(
             today=today,
         )
         contract_nodes[contract_ref] = entry_context.contract
-        _link_contract_source_dependencies(snapshot, entry_context, mapping_config.source_prefixes)
-        _add_contract_policy_config(snapshot, entry_context)
-        _add_published_contract_artifacts(snapshot, entry_context)
-        _link_contract_module_dependencies(
-            snapshot,
-            entry_context,
-            mapping_config.control_plane_modules,
-            "impact_contracts_control_plane",
-        )
-        _link_contract_module_dependencies(
-            snapshot,
-            entry_context,
-            mapping_config.control_plane_runtime_modules,
-            "impact_contracts_runtime",
-        )
-        _link_contract_module_dependencies(
-            snapshot,
-            entry_context,
-            mapping_config.lineage_modules,
-            "impact_contracts_lineage",
-        )
-        _link_contract_module_dependencies(
-            snapshot,
-            entry_context,
-            mapping_config.lineage_runtime_modules,
-            "impact_contracts_lineage_runtime",
-        )
-        _link_contract_doc_dependencies(
-            snapshot,
-            entry_context,
-            mapping_config.control_plane_docs,
-            mapping_config.control_plane_anchor_fields,
-            summary="Control-plane contract reference for `{contract_ref}`.",
-            source_kind="control_plane_contract_doc",
-            provenance="impact_contracts_control_plane",
-        )
-        _link_contract_doc_dependencies(
-            snapshot,
-            entry_context,
-            mapping_config.lineage_docs,
-            mapping_config.lineage_anchor_fields,
-            summary="Lineage/traceability contract reference for `{contract_ref}`.",
-            source_kind="lineage_contract_doc",
-            provenance="impact_contracts_lineage",
-        )
+        _link_contract_dependencies(snapshot, entry_context, mapping_config)
 
     return contract_nodes
 
