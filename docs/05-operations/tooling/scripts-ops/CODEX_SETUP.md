@@ -17,7 +17,7 @@ Codex is an AI-powered code assistant that helps analyze, refactor, and improve 
 Run from PowerShell in the project root:
 ```powershell
 cd e:\g-drive\05_AI\github\BioactivityDataAcquisition2
-.\scripts\dev\.setup_wsl_codex.sh
+.\scripts\engineering\dev\.setup_wsl_codex.sh
 ```
 
 ### 2. Interactive Mode
@@ -105,16 +105,16 @@ Install with: `npm install -g @openai/codex`
 
 ### "OpenAI API unreachable"
 - Verify wsl-vpnkit is running: `wsl -d wsl-vpnkit -- /app/wsl-vpnkit &`
-- Re-run VPN setup: `.\scripts\dev\.setup_wsl_codex.sh`
+- Re-run VPN setup: `.\scripts\engineering\dev\.setup_wsl_codex.sh`
 
 ### "Connection timeout"
-- Check: `.\scripts\dev\.setup_wsl_codex.sh` for connectivity status
+- Check: `.\scripts\engineering\dev\.setup_wsl_codex.sh` for connectivity status
 
 ## Files Modified
 
 - `scripts/ops/codex.bat` - Main launcher (interactive & prompt modes)
 - `scripts/ops/codex-exec.bat` - Auto-execution launcher
-- `scripts/dev/.setup_wsl_codex.sh` - VPN setup (unchanged)
+- `scripts/engineering/dev/.setup_wsl_codex.sh` - VPN setup (unchanged)
 
 ## Best Practices
 

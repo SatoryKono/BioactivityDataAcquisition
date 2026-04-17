@@ -64,7 +64,7 @@ jobs:
                 run: python scripts/data/check_vcr_filename_policy.py
 
             -   name: Validate version consistency
-                run: python scripts/repo/check_version_consistency.py
+                run: python scripts/engineering/repo/check_version_consistency.py
 
             -   name: Install uv + cache + dependencies
                 uses: ./.github/actions/setup-python-uv
@@ -138,7 +138,7 @@ jobs:
 
             -   name: Validate quality exemptions registry (owner/reason/expiry metadata)
                 run: |
-                    uv run python scripts/qa/check_quality_exemptions.py \
+                    uv run python scripts/engineering/qa/check_quality_exemptions.py \
                       --registry "${QUALITY_EXEMPTIONS_REGISTRY}" \
                       --scorecard "${QUALITY_EXEMPTIONS_SCORECARD}" \
                       --mode "${QUALITY_EXEMPTIONS_GATE_MODE}" \
@@ -149,7 +149,7 @@ jobs:
 
             -   name: Validate scripts inventory + lifecycle governance
                 run: |
-                    uv run python scripts/repo/check_scripts_inventory.py \
+                    uv run python scripts/engineering/repo/check_scripts_inventory.py \
                       --check \
                       --manifest configs/quality/scripts_inventory_manifest.json \
                       --check-lifecycle \
@@ -157,19 +157,19 @@ jobs:
                       --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
 
             -   name: Validate scripts catalog governance policy
-                run: uv run python scripts/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml
+                run: uv run python scripts/engineering/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml
 
             -   name: Validate deterministic Neo4j memory ontology invariants
-                run: uv run python -m scripts.ci neo4j-memory
+                run: uv run python -m scripts.engineering.ci neo4j-memory
 
             -   name: Validate hotspot-family baseline artifacts
-                run: uv run python -m scripts.qa report-family-baseline --active-only --check
+                run: uv run python -m scripts.engineering.qa report-family-baseline --active-only --check
 
             -   name: Pre-merge naming/package consistency gate
-                run: uv run python scripts/qa/check_naming_package_consistency.py --check
+                run: uv run python scripts/engineering/qa/check_naming_package_consistency.py --check
 
             -   name: DQ consistency validation (fail-fast)
-                run: uv run python scripts/qa/validate_dq_consistency.py
+                run: uv run python scripts/engineering/qa/validate_dq_consistency.py
 
             -   name: "Quality ratchet (fail-fast: domain)"
                 run: |
@@ -221,7 +221,7 @@ jobs:
                     exit 1
 
             -   name: Apply sync and validate live Neo4j audit
-                run: uv run python -m scripts.ci neo4j-memory-live
+                run: uv run python -m scripts.engineering.ci neo4j-memory-live
 
             -   name: Stop local Neo4j
                 if: always()
@@ -268,10 +268,10 @@ jobs:
                 run: uv run python scripts/schema/generate_pipeline_schema.py --check
 
             -   name: Check architecture dependency docs drift
-                run: uv run python scripts/qa/generate_architecture_dependency_map.py --check
+                run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check
 
             -   name: Check docs drift (forbidden patterns)
-                run: uv run python scripts/qa/check_docs_drift.py
+                run: uv run python scripts/engineering/qa/check_docs_drift.py
 
             -   name: Validate docker-compose.yml syntax
                 run: docker compose config > /dev/null
@@ -331,7 +331,7 @@ jobs:
                     python-version: "3.11"
 
             -   name: Run DQ consistency validation
-                run: uv run python scripts/qa/validate_dq_consistency.py
+                run: uv run python scripts/engineering/qa/validate_dq_consistency.py
 
     quality-metrics-gate:
         runs-on: ubuntu-latest
@@ -517,7 +517,7 @@ jobs:
                 run: |
                     mkdir -p reports/performance
                     if [ -f reports/performance/hotspot-observations.jsonl ]; then
-                      uv run python scripts/qa/generate_hotspot_degradation_report.py \
+                      uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \
                         --observations reports/performance/hotspot-observations.jsonl \
                         --budgets tests/performance/hotspot_budgets.json \
                         --window-size 5 \
@@ -595,7 +595,7 @@ jobs:
                     mkdir -p reports/coverage
                     # Canonical serial subset: -m "serial and not e2e and not benchmark"
                     COVERAGE_FILE=reports/coverage/.coverage.serial uv run python \
-                      scripts/ci/run_pytest_resilient.py \
+                      scripts/engineering/ci/run_pytest_resilient.py \
                       --target tests/ \
                       --reports-dir reports/pytest/coverage-verify \
                       --parallel-marker "serial and not e2e and not benchmark" \

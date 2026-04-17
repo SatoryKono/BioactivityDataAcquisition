@@ -6,7 +6,7 @@ import tempfile
 import yaml
 from pathlib import Path
 
-from scripts.qa.validate_dq_consistency import DQConsistencyValidator
+from scripts.engineering.qa.validate_dq_consistency import DQConsistencyValidator
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.types.dq_contracts import DQDisposition, DQViolationKind
 from bioetl.domain.services.dq_policy_resolver import DQPolicyResolver

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.qa.report_normalization_fallback_inventory import _build_payload
-from scripts.qa.report_normalization_fallback_inventory import _fallback_rows
+from scripts.engineering.qa.report_normalization_fallback_inventory import _build_payload
+from scripts.engineering.qa.report_normalization_fallback_inventory import _fallback_rows
 
 FALLBACK_BUSINESS_FIELD_BUDGET = 0
 

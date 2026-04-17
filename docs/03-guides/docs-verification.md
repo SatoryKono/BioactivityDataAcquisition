@@ -120,12 +120,12 @@ If you use the same checkout from both PowerShell and WSL, keep docs/tooling
 execution inside the OS-appropriate environment:
 
 ```powershell
-.\scripts\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
 .\.venv-win\Scripts\python.exe -m scripts.docs check-links --links --specs --configs
 ```
 
 ```bash
-bash scripts/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
 "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m scripts.docs check-links --links --specs --configs
 ```
 
@@ -167,7 +167,7 @@ uv run python -m scripts.docs check-links --links --configs
 
 ```bash
 uv run python -m scripts.docs check-drift --ports --classes
-bash scripts/docs/build_docs_site.sh --strict
+uv run python -m scripts.docs build-site --strict
 ```
 
 ### 3. Provider and entity inventory
@@ -207,7 +207,7 @@ rg -n 'data/output|checkpoints|quarantine|control' \
 
 ```bash
 uv run python -m scripts.docs check-links --links --specs --configs
-bash scripts/docs/build_docs_site.sh --strict
+uv run python -m scripts.docs build-site --strict
 ```
 
 ## Doc-Sync PR Checklist
@@ -219,7 +219,7 @@ repo-only supporting material that feeds active documentation.
 - [ ] Drift-sensitive surfaces were reviewed against the **Live Docs Watchlist** items that match the change.
 - [ ] Any normative conclusion discovered in `reports/**` was migrated into `docs/00-05` before linking the report as supporting evidence.
 - [ ] `uv run python -m scripts.docs check-drift --ports --classes` ran when ports, classes, contracts, or storage/runtime structure changed.
-- [ ] `bash scripts/docs/build_docs_site.sh --strict` passed before merge.
+- [ ] `uv run python -m scripts.docs build-site --strict` passed before merge.
 
 ## Recurring Audit Checklist
 

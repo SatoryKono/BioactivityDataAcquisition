@@ -186,12 +186,12 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("doc_source_surface", "pipeline normalization matrix") in node_keys
     assert ("policy_surface", "integration and VCR execution policy") in node_keys
     assert ("policy_surface", "diagram governance policy") in node_keys
-    assert ("script_surface", "scripts/dev/run_pytest.sh") in node_keys
+    assert ("script_surface", "scripts/engineering/dev/run_pytest.sh") in node_keys
     assert ("script_surface", "scripts/diagrams/__main__.py") in node_keys
     assert ("script_surface", "scripts/docs/__main__.py") in node_keys
     assert ("script_surface", "scripts/schema/__main__.py") in node_keys
     assert ("script_surface", "scripts/memory/__main__.py") in node_keys
-    assert ("script_surface", "scripts/qa/__main__.py") in node_keys
+    assert ("script_surface", "scripts/engineering/qa/__main__.py") in node_keys
     assert ("port_surface", "bioetl.domain.ports") in node_keys
     assert (
         "port_surface",
@@ -247,7 +247,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("execution_path", "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json") in node_keys
     assert (
         "execution_path",
-        "python -m scripts.qa report-normalization-fallback-inventory --limit 20",
+        "python -m scripts.engineering.qa report-normalization-fallback-inventory --limit 20",
     ) in node_keys
     assert ("quality_gate", "diagram quality gates") in node_keys
     assert any(label == "duplication_cluster" for label, _ in node_keys)
@@ -521,8 +521,8 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("cli_command_surface", "scripts.memory sync", "RUNS_VIA", "execution_path", "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/infrastructure/config/_base.py"),
-    ("doc_artifact", "scripts/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/dev/run_pytest.sh"),
-    ("script_surface", "scripts/dev/run_pytest.sh", "PROVIDES", "execution_path", "bash scripts/dev/run_pytest.sh"),
+    ("doc_artifact", "scripts/engineering/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/engineering/dev/run_pytest.sh"),
+    ("script_surface", "scripts/engineering/dev/run_pytest.sh", "PROVIDES", "execution_path", "bash scripts/engineering/dev/run_pytest.sh"),
     ("layer_family", "composition", "CONTAINS", "module_surface", "src/bioetl/composition/control_plane_api.py"),
 )
 
@@ -1046,7 +1046,7 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
         "tests::governance-preflight",
         "RUNS_VIA",
         "script_surface",
-        "scripts/qa/__main__.py",
+        "scripts/engineering/qa/__main__.py",
     ) in relation_keys
     assert (
         "workflow_job_surface",
@@ -1142,7 +1142,7 @@ def test_snapshot_contains_workflow_execution_cli_and_claim_extensions() -> None
 
 def test_workflow_quality_gates_detect_repo_gate_signals() -> None:
     gates = _workflow_quality_gates(
-        "uv run python -m scripts.ci neo4j-memory\n"
+        "uv run python -m scripts.engineering.ci neo4j-memory\n"
         "uv run python -m scripts.schema validate-configs\n"
         "uv run pytest tests/smoke/\n"
     )

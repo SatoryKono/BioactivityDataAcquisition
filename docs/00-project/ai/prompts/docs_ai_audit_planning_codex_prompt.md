@@ -67,7 +67,7 @@
 1. Выполняй RF-\* по одному.
 1. После каждого RF-\* запускай py-test-bot с проверками:
 
-- mkdocs build --strict
+- python -m scripts.docs build-site --strict
 - tests/architecture/test_documentation.py
 - tests/architecture/test_documentation_sync.py
 - tests/architecture/test_docs_version_sync.py

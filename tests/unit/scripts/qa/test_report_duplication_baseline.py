@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import re
 
-from scripts.qa.report_duplication_baseline import _build_payload
-from scripts.qa.report_duplication_baseline import _build_trend_summary
-from scripts.qa.report_duplication_baseline import _filter_clusters_by_module_patterns
-from scripts.qa.report_duplication_baseline import _parse_pylint_duplicate_output
-from scripts.qa.report_duplication_baseline import _render_markdown
-from scripts.qa.report_duplication_baseline import _top_duplicate_pairs
-from scripts.qa.report_duplication_baseline import DuplicateCluster
-from scripts.qa.report_duplication_baseline import DuplicateModuleRef
-from scripts.qa.report_duplication_baseline import TargetDuplicationReport
+from scripts.engineering.qa.report_duplication_baseline import _build_payload
+from scripts.engineering.qa.report_duplication_baseline import _build_trend_summary
+from scripts.engineering.qa.report_duplication_baseline import _filter_clusters_by_module_patterns
+from scripts.engineering.qa.report_duplication_baseline import _parse_pylint_duplicate_output
+from scripts.engineering.qa.report_duplication_baseline import _render_markdown
+from scripts.engineering.qa.report_duplication_baseline import _top_duplicate_pairs
+from scripts.engineering.qa.report_duplication_baseline import DuplicateCluster
+from scripts.engineering.qa.report_duplication_baseline import DuplicateModuleRef
+from scripts.engineering.qa.report_duplication_baseline import TargetDuplicationReport
 
 
 def test_parse_pylint_duplicate_output_extracts_clusters() -> None:

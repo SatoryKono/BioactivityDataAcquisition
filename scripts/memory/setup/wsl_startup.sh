@@ -308,7 +308,7 @@ if command -v codex >/dev/null 2>&1; then
   if codex mcp list 2>/dev/null | grep -q "neo4j-memory"; then
     ok "neo4j-memory is registered in Codex"
   else
-    warn "neo4j-memory not found in Codex (run: uv run python -m scripts.dev setup-mcp)"
+    warn "neo4j-memory not found in Codex (run: uv run python -m scripts.engineering.dev setup-mcp)"
   fi
 else
   warn "Codex CLI not available"

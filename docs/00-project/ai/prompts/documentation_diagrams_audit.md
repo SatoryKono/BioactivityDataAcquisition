@@ -349,7 +349,7 @@ reports/docs-audit/
 - Если обновляется `mkdocs.yml` или publishable docs, после изменений проверить:
 
 ```bash
-mkdocs build --strict
+python -m scripts.docs build-site --strict
 ```
 
 или project-preferred equivalent через текущий env wrapper.

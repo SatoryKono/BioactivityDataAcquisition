@@ -20,7 +20,7 @@ def test_quality_debt_weekly_workflow_runs_report_script() -> None:
         encoding="utf-8"
     )
 
-    assert "scripts/ci/report_quality_debt_weekly.py" in workflow
+    assert "scripts/engineering/ci/report_quality_debt_weekly.py" in workflow
     assert "--json-out reports/quality/debt-weekly.json" in workflow
     assert "--markdown-out reports/quality/debt-weekly.md" in workflow
     assert "GITHUB_STEP_SUMMARY" in workflow

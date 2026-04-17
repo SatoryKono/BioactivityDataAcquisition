@@ -95,13 +95,13 @@ profiles в BioETL.
   этот режим после rebuild удаляет legacy unmanaged nodes для label-семейств,
   которые теперь полностью принадлежат deterministic sync.
   Для CI/snapshot gate используй
-  `python -m scripts.ci neo4j-memory`:
+  `python -m scripts.engineering.ci neo4j-memory`:
   он проверяет ontology invariants без живого Neo4j и падает при drift по
   required labels/relations, protocol-level ports, rich contract metadata,
   runtime links, storage/runtime/workflow coverage, docs-to-code `DESCRIBES`
   edges или orphan nodes в snapshot.
   Для live gate с применением sync в реальный локальный Neo4j используй
-  `python -m scripts.ci neo4j-memory-live`.
+  `python -m scripts.engineering.ci neo4j-memory-live`.
   Для operator-facing ownership shortcuts используй
   `python -m scripts.memory query <profile> <name>`, например:
   `python -m scripts.memory query owner-contract chembl.activity`,

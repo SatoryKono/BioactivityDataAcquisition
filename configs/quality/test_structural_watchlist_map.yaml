@@ -101,7 +101,7 @@ ranked_intersections:
     linked_artifacts:
       - configs/quality/environment_limited_green_policy.yaml
       - configs/quality/test_health_reporting.yaml
-      - scripts/ci/quality_integral_gate.py
+      - scripts/engineering/ci/quality_integral_gate.py
     rationale: >-
       The remaining environment-limited posture is mostly about live adapter execution
       policy, with runtime/bootstrap acting as the reporting and orchestration bridge.

@@ -56,7 +56,7 @@ make test-deps
 make setup-plugins
 ```
 
-`scripts/dev/dev_setup.sh` remains a legacy placeholder and is not the
+`scripts/engineering/dev/dev_setup.sh` remains a legacy placeholder and is not the
 supported onboarding path.
 
 ### Verification (Run frequently)

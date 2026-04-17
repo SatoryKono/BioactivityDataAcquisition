@@ -265,9 +265,9 @@ class MyService:
 
 ```bash
 # Diagnostic tools
-python -m scripts.diagnostics debug-pandera    # Pandera schema validation issues
-python -m scripts.diagnostics debug-storage    # Storage health checks
-python -m scripts.diagnostics inspect-vcr      # VCR cassette inspection
+python -m scripts.engineering.diagnostics debug-pandera    # Pandera schema validation issues
+python -m scripts.engineering.diagnostics debug-storage    # Storage health checks
+python -m scripts.engineering.diagnostics inspect-vcr      # VCR cassette inspection
 
 # Data integrity checks
 python -m scripts.data check-vcr-placement     # VCR cassette placement
@@ -280,11 +280,11 @@ python -m scripts.schema check-invariants --verbose
 python -m scripts.schema validate-configs
 
 # QA checks (for post-fix verification)
-python -m scripts.qa check-naming --check
-python -m scripts.qa check-c901
+python -m scripts.engineering.qa check-naming --check
+python -m scripts.engineering.qa check-c901
 
 # CI test runner
-python -m scripts.ci run-tests
+python -m scripts.engineering.ci run-tests
 ```
 
 ---

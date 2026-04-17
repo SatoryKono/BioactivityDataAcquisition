@@ -25,7 +25,7 @@ else:
     )
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OUTPUT = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-snapshot.md"
 )

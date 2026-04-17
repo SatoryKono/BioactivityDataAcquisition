@@ -58,7 +58,7 @@ def _write_diagnostics(
 
 def main() -> int:
     """Main validation entry point."""
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     registry_path = repo_root / "configs/base/contract_registry.yaml"
     diagnostics_path = repo_root / "contract-registry-diagnostics.json"
 

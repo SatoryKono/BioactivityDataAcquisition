@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from scripts.repo import split_testing_roadmap_issue as module
+from scripts.engineering.repo import split_testing_roadmap_issue as module
 
 
 def test_build_child_issue_templates_tracks_parent_issue() -> None:

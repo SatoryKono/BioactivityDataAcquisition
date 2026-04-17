@@ -148,7 +148,7 @@ class TestIntegrationVcrPolicy:
             in refresh_protocol["post_refresh_checks"]
         )
         assert (
-            "python -m scripts.qa report-vcr-metadata --check"
+            "python -m scripts.engineering.qa report-vcr-metadata --check"
             in refresh_protocol["post_refresh_checks"]
         )
 
@@ -327,7 +327,7 @@ class TestIntegrationVcrPolicy:
         required_guide_anchors = (
             "`partial` rollout",
             "reports/quality/vcr-metadata-catalog.json",
-            "scripts/qa/report_vcr_metadata_catalog.py",
+            "scripts/engineering/qa/report_vcr_metadata_catalog.py",
             "scripts/migrations/active/backfill_vcr_metadata_sidecars.py",
             ".github/vcr-noext-allowlist.txt",
             live_contract["repository_guard"],
@@ -375,7 +375,7 @@ class TestIntegrationVcrPolicy:
         assert "configs/quality/integration_vcr_policy.yaml" in data_readme
         assert "python -m scripts.data check-vcr-placement" in data_readme
         assert "python -m scripts.data check-vcr-secrets" in data_readme
-        assert "python -m scripts.qa report-vcr-metadata --check" in data_readme
+        assert "python -m scripts.engineering.qa report-vcr-metadata --check" in data_readme
 
         assert "docs/03-guides/testing.md" in contributing
         assert "configs/quality/integration_vcr_policy.yaml" in contributing

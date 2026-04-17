@@ -69,7 +69,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--repo-root",
         type=Path,
-        default=Path(__file__).resolve().parents[2],
+        default=Path(__file__).resolve().parents[3],
         help="Repository root",
     )
     parser.add_argument(

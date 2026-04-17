@@ -192,34 +192,34 @@ tracked_suite_inventory:
 execution_paths:
   local:
     windows:
-      bootstrap: scripts/dev/setup_env_windows.ps1
-      pytest_runner: scripts/dev/run_pytest.ps1
+      bootstrap: scripts/engineering/dev/setup_env_windows.ps1
+      pytest_runner: scripts/engineering/dev/run_pytest.ps1
       supported_targets:
         integration: tests\integration\
         e2e: tests\e2e\
       replay_examples:
-        integration: .\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none
+        integration: .\scripts\engineering\dev\run_pytest.ps1 tests\integration\ --vcr-record=none
           -m "integration and not e2e"
-        e2e: .\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none
+        e2e: .\scripts\engineering\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none
       refresh_examples:
-        targeted_integration: .\scripts\dev\run_pytest.ps1 tests\integration\adapters\test_pubmed.py
+        targeted_integration: .\scripts\engineering\dev\run_pytest.ps1 tests\integration\adapters\test_pubmed.py
           --vcr-record=new_episodes -v
-        targeted_e2e: .\scripts\dev\run_pytest.ps1 tests\e2e\test_pubchem_compound_e2e.py
+        targeted_e2e: .\scripts\engineering\dev\run_pytest.ps1 tests\e2e\test_pubchem_compound_e2e.py
           -m e2e --vcr-record=new_episodes -v
     wsl:
-      bootstrap: scripts/dev/setup_env_wsl.sh
-      pytest_runner: scripts/dev/run_pytest.sh
+      bootstrap: scripts/engineering/dev/setup_env_wsl.sh
+      pytest_runner: scripts/engineering/dev/run_pytest.sh
       supported_targets:
         integration: tests/integration/
         e2e: tests/e2e/
       replay_examples:
-        integration: bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none
+        integration: bash scripts/engineering/dev/run_pytest.sh tests/integration/ --vcr-record=none
           -m "integration and not e2e"
-        e2e: bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none
+        e2e: bash scripts/engineering/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none
       refresh_examples:
-        targeted_integration: bash scripts/dev/run_pytest.sh tests/integration/adapters/test_pubmed.py
+        targeted_integration: bash scripts/engineering/dev/run_pytest.sh tests/integration/adapters/test_pubmed.py
           --vcr-record=new_episodes -v
-        targeted_e2e: bash scripts/dev/run_pytest.sh tests/e2e/test_pubchem_compound_e2e.py
+        targeted_e2e: bash scripts/engineering/dev/run_pytest.sh tests/e2e/test_pubchem_compound_e2e.py
           -m e2e --vcr-record=new_episodes -v
     ci_uv:
       workflow_path: .github/workflows/tests.yml
@@ -260,7 +260,7 @@ vcr_policy:
   stale_age_requires_metadata: true
   fixture_governance_rollout_source: configs/quality/fixture_governance_ledger.yaml
   metadata_catalog_path: reports/quality/vcr-metadata-catalog.json
-  metadata_catalog_script: scripts/qa/report_vcr_metadata_catalog.py
+  metadata_catalog_script: scripts/engineering/qa/report_vcr_metadata_catalog.py
   metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
   refresh_protocol:
     pre_refresh_checks:
@@ -272,7 +272,7 @@ vcr_policy:
     - python -m scripts.data check-vcr-placement
     - python -m scripts.data check-vcr-naming
     - python -m scripts.data check-vcr-secrets
-    - python -m scripts.qa report-vcr-metadata --check
+    - python -m scripts.engineering.qa report-vcr-metadata --check
 governance_rules:
   refresh_triggers:
   - missing cassette for an already-supported integration or e2e path

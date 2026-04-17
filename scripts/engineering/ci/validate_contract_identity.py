@@ -151,7 +151,7 @@ def _build_identity_issues(registry: ContractRegistry) -> list[RegistryValidatio
 
 def main() -> int:
     """Validate contract identity and write CI diagnostics."""
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     registry_path = repo_root / "configs" / "base" / "contract_registry.yaml"
     diagnostics_path = repo_root / "contract-identity-diagnostics.json"
 

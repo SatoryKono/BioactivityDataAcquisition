@@ -44,8 +44,8 @@ not because they are preferred long-term root placements.
 Проверка:
 
 ```bash
-python3 scripts/repo/audit_root_cleanliness.py
-python3 scripts/diagnostics/audit_structure.py --path .
+python3 scripts/engineering/repo/audit_root_cleanliness.py
+python3 scripts/engineering/diagnostics/audit_structure.py --path .
 ```
 
 Дополнительные правила маршрутизации:

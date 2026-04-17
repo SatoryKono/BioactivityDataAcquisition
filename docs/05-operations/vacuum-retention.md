@@ -137,7 +137,7 @@ scheduled VACUUM через cron:
 
 ```bash
 #!/bin/bash
-# scripts/repo/scheduled_vacuum.sh (пример пользовательского скрипта)
+# scripts/engineering/repo/scheduled_vacuum.sh (пример пользовательского скрипта)
 
 set -euo pipefail
 

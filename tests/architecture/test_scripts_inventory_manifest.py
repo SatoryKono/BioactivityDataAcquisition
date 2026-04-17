@@ -37,7 +37,7 @@ def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
 
     assert manifest_path.exists(), (
         "Scripts inventory manifest is missing: "
-        f"{manifest_path}. Run scripts/repo/check_scripts_inventory.py --update."
+        f"{manifest_path}. Run scripts/engineering/repo/check_scripts_inventory.py --update."
     )
 
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -72,5 +72,5 @@ def test_scripts_inventory_manifest_drift_check_passes() -> None:
         "Scripts inventory drift check failed.\n"
         f"stdout:\n{stdout.getvalue()}\n"
         f"stderr:\n{stderr.getvalue()}\n"
-        "Run scripts/repo/check_scripts_inventory.py --update to refresh manifest."
+        "Run scripts/engineering/repo/check_scripts_inventory.py --update to refresh manifest."
     )

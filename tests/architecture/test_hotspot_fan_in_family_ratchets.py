@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from scripts.qa.hotspot_family_metrics import (
+from scripts.engineering.qa.hotspot_family_metrics import (
     count_internal_fan_in,
     iter_family_python_files,
     load_scorecard,

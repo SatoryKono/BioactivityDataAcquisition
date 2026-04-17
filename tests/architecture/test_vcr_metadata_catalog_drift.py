@@ -16,7 +16,7 @@ class CatalogModule(Protocol):
 
 
 def _load_catalog_module() -> CatalogModule:
-    script = Path("scripts/qa/report_vcr_metadata_catalog.py")
+    script = Path("scripts/engineering/qa/report_vcr_metadata_catalog.py")
     spec = importlib.util.spec_from_file_location(
         "vcr_metadata_catalog_gen", str(script)
     )

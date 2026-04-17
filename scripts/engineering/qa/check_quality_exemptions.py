@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def _canonical_script() -> Path:
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     return (
         repo_root
         / "docs"

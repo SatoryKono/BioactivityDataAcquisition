@@ -38,12 +38,12 @@ ______________________________________________________________________
 
    ```powershell
    # Mixed Windows + WSL checkout: PowerShell
-   .\scripts\dev\setup_env_windows.ps1
+   .\scripts\engineering\dev\setup_env_windows.ps1
    ```
 
    ```bash
    # Mixed Windows + WSL checkout: WSL/Linux
-   bash scripts/dev/setup_env_wsl.sh
+   bash scripts/engineering/dev/setup_env_wsl.sh
    ```
 
 1. **Environment настроен** (`.env` файл или переменные окружения)
@@ -55,7 +55,7 @@ ______________________________________________________________________
    make test
    ```
 
-   `scripts/dev/dev_setup.sh` остаётся legacy placeholder и не является
+   `scripts/engineering/dev/dev_setup.sh` остаётся legacy placeholder и не является
    поддерживаемым bootstrap path.
 
 > **Note:** BioETL использует **Local-Only** архитектуру (ADR-010).

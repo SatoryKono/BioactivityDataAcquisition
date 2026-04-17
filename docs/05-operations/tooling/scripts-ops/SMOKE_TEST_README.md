@@ -135,7 +135,7 @@ If you run the test while Neo4j is still starting:
 |-------|----------|
 | **"Container is NOT RUNNING"** | Start it: `docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community` |
 | **Ports are closed** | Neo4j is starting. Wait 10-15 seconds and re-run test. |
-| **"neo4j-memory is NOT registered"** | Register MCP: `uv run python -m scripts.dev setup-mcp` |
+| **"neo4j-memory is NOT registered"** | Register MCP: `uv run python -m scripts.engineering.dev setup-mcp` |
 | **Wrapper script not executable** | Fix permissions: `chmod +x scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` |
 | **Cypher query fails** | Check Neo4j logs: `docker logs bioetl-neo4j` |
 
@@ -204,7 +204,7 @@ docker rm bioetl-neo4j
 | File | Purpose |
 |------|---------|
 | `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` | MCP wrapper (tested) |
-| `scripts/dev/setup_copilot_codex_mcp.py` | MCP setup automation (not tested) |
+| `scripts/engineering/dev/setup_copilot_codex_mcp.py` | MCP setup automation (not tested) |
 | `.vscode/mcp.json` | VS Code Copilot config (not tested) |
 | `.env` or `.env.example` | Credentials source (checked) |
 | `docker-compose.yml` | Optional (alternative startup) |

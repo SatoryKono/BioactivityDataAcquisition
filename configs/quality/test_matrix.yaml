@@ -212,7 +212,7 @@ fixture_governance:
   current_silver_schema_snapshot_location: tests/contract/silver_schemas/snapshots/
   contract_snapshot_location: tests/fixtures/contracts/{provider}/v{version}.json
   cassette_metadata_catalog_location: reports/quality/vcr-metadata-catalog.json
-  cassette_metadata_catalog_script: scripts/qa/report_vcr_metadata_catalog.py
+  cassette_metadata_catalog_script: scripts/engineering/qa/report_vcr_metadata_catalog.py
   cassette_metadata_required: false
   cassette_staleness_requires_metadata: true
   canonical_vcr_location: tests/fixtures/vcr/{provider}/
@@ -254,7 +254,7 @@ fixture_governance:
     replay_registry_module: tests/contract/_provider_contract_replay.py
     registry_test_module: tests/contract/test_provider_contract_snapshot_registry.py
     replay_test_module: tests/contract/test_provider_contract_drift_replay.py
-    replay_report_command: python -m scripts.qa report-provider-contract-drift
+    replay_report_command: python -m scripts.engineering.qa report-provider-contract-drift
     update_env_var: UPDATE_SNAPSHOTS
     providers:
       chembl:

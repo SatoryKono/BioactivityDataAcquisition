@@ -6,9 +6,9 @@ on:
       - ".github/workflows/provider-contract-drift.yml"
       - "configs/quality/test_matrix.yaml"
       - "docs/03-guides/testing.md"
-      - "scripts/qa/__main__.py"
-      - "scripts/qa/README.md"
-      - "scripts/qa/report_provider_contract_drift.py"
+      - "scripts/engineering/qa/__main__.py"
+      - "scripts/engineering/qa/README.md"
+      - "scripts/engineering/qa/report_provider_contract_drift.py"
       - "tests/contract/**"
       - "tests/fixtures/contracts/**"
       - "tests/fixtures/vcr/**"
@@ -18,9 +18,9 @@ on:
       - ".github/workflows/provider-contract-drift.yml"
       - "configs/quality/test_matrix.yaml"
       - "docs/03-guides/testing.md"
-      - "scripts/qa/__main__.py"
-      - "scripts/qa/README.md"
-      - "scripts/qa/report_provider_contract_drift.py"
+      - "scripts/engineering/qa/__main__.py"
+      - "scripts/engineering/qa/README.md"
+      - "scripts/engineering/qa/report_provider_contract_drift.py"
       - "tests/contract/**"
       - "tests/fixtures/contracts/**"
       - "tests/fixtures/vcr/**"
@@ -57,7 +57,7 @@ jobs:
 
       - name: Generate provider drift artifact
         run: |
-          uv run python -m scripts.qa report-provider-contract-drift \
+          uv run python -m scripts.engineering.qa report-provider-contract-drift \
             --output provider-contract-drift-report.json \
             --fail-on breaking
 

@@ -263,16 +263,16 @@ make security                               # Security scan
 
 ```bash
 # QA checks (naming, complexity, terminology)
-python -m scripts.qa check-naming --check
-python -m scripts.qa check-c901
-python -m scripts.qa check-naming-pkg --check
-python -m scripts.qa check-terminology --strict --check
+python -m scripts.engineering.qa check-naming --check
+python -m scripts.engineering.qa check-c901
+python -m scripts.engineering.qa check-naming-pkg --check
+python -m scripts.engineering.qa check-terminology --strict --check
 
 # Repo hygiene
-python -m scripts.repo check-inventory --check
-python -m scripts.repo check-catalog
-python -m scripts.repo check-versions
-python -m scripts.repo check-cleanliness --strict-untracked
+python -m scripts.engineering.repo check-inventory --check
+python -m scripts.engineering.repo check-catalog
+python -m scripts.engineering.repo check-versions
+python -m scripts.engineering.repo check-cleanliness --strict-untracked
 
 # Schema/config invariants
 python -m scripts.schema check-invariants --verbose

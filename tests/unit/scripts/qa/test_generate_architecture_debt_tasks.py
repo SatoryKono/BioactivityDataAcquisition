@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 
-from scripts.qa.generate_architecture_debt_tasks import main
+from scripts.engineering.qa.generate_architecture_debt_tasks import main
 
 
 def test_generate_architecture_debt_tasks_script_writes_payload(tmp_path: Path) -> None:

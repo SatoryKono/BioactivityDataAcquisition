@@ -30,11 +30,11 @@ Canonical local execution paths:
 - **CI / single-OS checkout**: `uv run python -m ...` или поддерживаемые
   Make targets (`make test`, `make test-fast`, `make test-architecture`).
 - **Mixed Windows + WSL checkout (PowerShell)**:
-  `.\scripts\dev\setup_env_windows.ps1`,
-  `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`.
+  `.\scripts\engineering\dev\setup_env_windows.ps1`,
+  `.\scripts\engineering\dev\run_pytest.ps1`, `.\scripts\engineering\dev\run_mypy.ps1`.
 - **Mixed Windows + WSL checkout (WSL/Linux)**:
-  `bash scripts/dev/setup_env_wsl.sh`,
-  `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`.
+  `bash scripts/engineering/dev/setup_env_wsl.sh`,
+  `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`.
 
 Wrappers `run_pytest.ps1|.sh` по умолчанию добавляют флаги
 `--cov=src/bioetl --cov-report=term -q --maxfail=1`, если запуск не был вызван
@@ -71,7 +71,7 @@ Supported policy slice for issue `#2598`:
 - VCR cassette metadata (`*_meta.yaml`) перешли в `partial` rollout: в `configs/quality/test_matrix.yaml` теперь явно объявлен current seeded sidecar slice, минимальный provider-coverage rule (`at least one sidecar per VCR-managed provider`) и текущие expected sidecar counts per provider, а canonical backfill tool уже зафиксирован как supported path, но metadata coverage пока не repo-wide и потому enforcement остаётся неполным
 - `vcr_cassette_max_age_days: 90` уже является нормативным stale-age threshold, а repo-wide age rollout теперь `partial`: архитектурные тесты требуют наличие `_meta.yaml` inventory, но CI пока не делает stale-age blocking gate для всего дерева
 - canonical VCR metadata catalog теперь существует как tracked artifact в `reports/quality/vcr-metadata-catalog.json`
-- canonical tooling paths активированы для partial rollout: `scripts/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/migrations/active/backfill_vcr_metadata_sidecars.py` служит canonical backfill entry point; при этом workflow-level automated backfill всё ещё не включён
+- canonical tooling paths активированы для partial rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/migrations/active/backfill_vcr_metadata_sidecars.py` служит canonical backfill entry point; при этом workflow-level automated backfill всё ещё не включён
 - descriptive test-health taxonomy теперь canonical-фиксируется в `configs/quality/test_health_reporting.yaml`; статусы `fully_exercised_green`, `staged_green`, `environment_limited_green` остаются informational и не заменяют merge-blocking CI status
 - monthly `contract-tests.yml` остаётся активным live-network workflow и должен запускать `tests/contract/` с `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и `--network`
 - monthly `contract-tests.yml` выполняется только в canonical repository `SatoryKono/BioactivityDataAcquisition`, а failure issue внутри workflow ссылается на этот guide как на поддерживаемый policy/runbook entry point
@@ -177,9 +177,9 @@ uv run python -m pytest -q tests/unit/application/core/test_dict_transformers.py
 uv run python -m pytest -q tests/architecture/test_domain_unit_test_purity.py
 
 # Mixed Windows + WSL checkout (WSL)
-bash scripts/dev/run_pytest.sh tests/unit/domain/transformations/test_coercion.py
-bash scripts/dev/run_pytest.sh tests/unit/application/core/test_dict_transformers.py
-bash scripts/dev/run_pytest.sh tests/architecture/test_domain_unit_test_purity.py
+bash scripts/engineering/dev/run_pytest.sh tests/unit/domain/transformations/test_coercion.py
+bash scripts/engineering/dev/run_pytest.sh tests/unit/application/core/test_dict_transformers.py
+bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_domain_unit_test_purity.py
 ```
 
 Если изменение затрагивает только pure transformation logic, такой targeted run
@@ -232,10 +232,10 @@ Concrete file-level inventory для canonical integration surface живёт в
 uv run python -m pytest tests/integration/ --vcr-record=none -m "integration and not e2e"
 
 # Windows replay
-.\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"
+.\scripts\engineering\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"
 
 # WSL replay
-bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"
+bash scripts/engineering/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"
 
 # Targeted refresh only
 uv run python -m pytest tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v
@@ -291,10 +291,10 @@ Supported replay/refresh commands:
 uv run python -m pytest tests/e2e/ -m e2e --vcr-record=none -v
 
 # Windows replay
-.\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none
+.\scripts\engineering\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none
 
 # WSL replay
-bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none
+bash scripts/engineering/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none
 
 # Targeted refresh only
 uv run python -m pytest tests/e2e/test_pubchem_compound_e2e.py -m e2e --vcr-record=new_episodes -v
@@ -355,10 +355,10 @@ make test-ci
 uv run python -m pytest tests/e2e/ -m e2e -v
 
 # Mixed Windows + WSL checkout (PowerShell)
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
 
 # Mixed Windows + WSL checkout (WSL/Linux)
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
 
 # Запуск только архитектурных тестов
 make test-architecture
@@ -374,9 +374,9 @@ uv run coverage html -d htmlcov
 
 | Surface | CI / single-OS | Windows PowerShell | WSL/Linux | Notes |
 | ------- | --------------- | ------------------ | --------- | ----- |
-| Integration replay | `uv run python -m pytest tests/integration/ --vcr-record=none -m "integration and not e2e"` | `.\scripts\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"` | `bash scripts/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"` | canonical stable feedback path |
-| E2E replay | `uv run python -m pytest tests/e2e/ -m e2e --vcr-record=none -v` | `.\scripts\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none` | `bash scripts/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none` | local-only execution, no live network |
-| Targeted cassette refresh | `uv run python -m pytest <target> --vcr-record=new_episodes -v` | `.\scripts\dev\run_pytest.ps1 <target> --vcr-record=new_episodes -v` | `bash scripts/dev/run_pytest.sh <target> --vcr-record=new_episodes -v` | supported refresh path |
+| Integration replay | `uv run python -m pytest tests/integration/ --vcr-record=none -m "integration and not e2e"` | `.\scripts\engineering\dev\run_pytest.ps1 tests\integration\ --vcr-record=none -m "integration and not e2e"` | `bash scripts/engineering/dev/run_pytest.sh tests/integration/ --vcr-record=none -m "integration and not e2e"` | canonical stable feedback path |
+| E2E replay | `uv run python -m pytest tests/e2e/ -m e2e --vcr-record=none -v` | `.\scripts\engineering\dev\run_pytest.ps1 tests\e2e\ -m e2e --vcr-record=none` | `bash scripts/engineering/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none` | local-only execution, no live network |
+| Targeted cassette refresh | `uv run python -m pytest <target> --vcr-record=new_episodes -v` | `.\scripts\engineering\dev\run_pytest.ps1 <target> --vcr-record=new_episodes -v` | `bash scripts/engineering/dev/run_pytest.sh <target> --vcr-record=new_episodes -v` | supported refresh path |
 | Live contract verification | `uv run pytest tests/contract/ -v --tb=short --network` | n/a | n/a | scheduled/manual workflow path, separate from replay policy |
 
 ### 4.3. Cassette lifecycle rules
@@ -402,7 +402,7 @@ uv run coverage html -d htmlcov
   - `python -m scripts.data check-vcr-placement`
   - `python -m scripts.data check-vcr-naming`
   - `python -m scripts.data check-vcr-secrets`
-  - `python -m scripts.qa report-vcr-metadata --check`
+  - `python -m scripts.engineering.qa report-vcr-metadata --check`
 
 ### 4.1. Быстрый старт для рекомендуемого локального прогона
 
@@ -578,12 +578,12 @@ make test-deps
 make setup-plugins
 
 # Mixed Windows + WSL checkout
-.\scripts\dev\setup_env_windows.ps1
-bash scripts/dev/setup_env_wsl.sh
+.\scripts\engineering\dev\setup_env_windows.ps1
+bash scripts/engineering/dev/setup_env_wsl.sh
 ```
 
 `make setup-dev` остаётся удобным aggregate target поверх `make install` и
-dependency verification. `scripts/dev/dev_setup.sh` — legacy placeholder и не
+dependency verification. `scripts/engineering/dev/dev_setup.sh` — legacy placeholder и не
 является поддерживаемым onboarding/testing path.
 
 ### 7.2. Smoke-check зависимостей и инструментов

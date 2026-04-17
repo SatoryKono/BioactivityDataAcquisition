@@ -145,7 +145,7 @@ All whitelist patterns **MUST** be in `.gitignore`.
 | `make clean-local-artifacts DRY_RUN=1`         | Preview очистки локальных артефактов                                |
 | `make clean-local-artifacts`                   | Применяет локальную очистку (без удаления `.worktrees/.rollback`)   |
 | `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback`              |
-| `make clean-preflight DRY_RUN=1`               | Preview preflight-очистки через `scripts/repo/preflight_cleanup.sh` |
+| `make clean-preflight DRY_RUN=1`               | Preview preflight-очистки через `scripts/engineering/repo/preflight_cleanup.sh` |
 | `make clean-all`                               | `clean` + удаление логов/временных файлов                           |
 
 ### 4.3. Delta Lake VACUUM (MUST)
@@ -176,7 +176,7 @@ bioetl quarantine purge --pipeline chembl_activity
 | ---------------------- | ------------------------------------------------------------------- |
 | Tests pass             | `pytest -q` (without network)                                       |
 | Smoke tests green      | `pytest tests/smoke/ -q`                                            |
-| Structure policy green | `python3 scripts/repo/audit_root_cleanliness.py --strict-untracked` |
+| Structure policy green | `python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked` |
 | Smoke run              | One pipeline, identical artifacts                                   |
 
 ### 5.2. Structural Verification
@@ -184,8 +184,8 @@ bioetl quarantine purge --pipeline chembl_activity
 After cleanup, verify repository hygiene and structure policy:
 
 ```bash
-python3 scripts/repo/audit_root_cleanliness.py
-python3 scripts/diagnostics/audit_structure.py --path .
+python3 scripts/engineering/repo/audit_root_cleanliness.py
+python3 scripts/engineering/diagnostics/audit_structure.py --path .
 ```
 
 ## 6. Commands
@@ -269,7 +269,7 @@ Enforcement:
 
 ```bash
 # 1. Validate repository hygiene
-python3 scripts/repo/audit_root_cleanliness.py
+python3 scripts/engineering/repo/audit_root_cleanliness.py
 
 # 2. Run cleanup preflight
 make clean-preflight DRY_RUN=1

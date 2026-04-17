@@ -93,26 +93,6 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
             handle_error = cast("Callable[[Exception], NoReturn]", self._handle_error)
             handle_error(error)
 
-    def _calculate_page_limit(self, params: JsonDict, limit: int | None, records_yielded: int) -> int | None:
-        """Calculate the limit for the current page request.
-
-        Args:
-            params: Current request parameters
-            limit: Overall limit for the iteration
-            records_yielded: Records already yielded
-
-        Returns:
-            Limit for this page request, or None if no more records needed
-        """
-        if limit is None or "limit" not in params:
-            return params.get("limit")
-
-        remaining = limit - records_yielded
-        if remaining <= 0:
-            return None  # Signal to stop iteration
-
-        return min(params["limit"], remaining)
-
     def _calculate_page_limit(
         self,
         params: JsonDict,

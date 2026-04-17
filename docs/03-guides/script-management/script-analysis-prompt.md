@@ -115,12 +115,12 @@ grep -r "script_name" tests/
 **Test Runners:**
 ```bash
 # Before: Multiple runners
-scripts/dev/run_pytest.sh
-scripts/dev/run_pytest.ps1  
-scripts/ci/run_pytest_resilient.py
+scripts/engineering/dev/run_pytest.sh
+scripts/engineering/dev/run_pytest.ps1  
+scripts/engineering/ci/run_pytest_resilient.py
 
 # After: Single canonical
-scripts/ci/run_pytest_resilient.py
+scripts/engineering/ci/run_pytest_resilient.py
 ```
 
 **Cross-Platform Wrappers:**
@@ -203,7 +203,7 @@ scripts/ai/mcp/mcp_wrapper.sh  # Canonical
 **Immediate Fixes:**
 ```bash
 # Move to canonical location
-mv scripts/misc/important.sh scripts/qa/important.sh
+mv scripts/misc/important.sh scripts/engineering/qa/important.sh
 
 # Add to catalog
 vim scripts/catalog.yaml
@@ -227,10 +227,10 @@ vim configs/quality/scripts_lifecycle_registry.json
 **Inventory Analysis:**
 ```bash
 # Get comprehensive script inventory
-python3 -m scripts.repo sync-inventory --write
+python3 -m scripts.engineering.repo sync-inventory --write
 
 # Export JSON for analysis
-python3 -m scripts.repo check-inventory --json > inventory.json
+python3 -m scripts.engineering.repo check-inventory --json > inventory.json
 ```
 
 **Reference Analysis:**
@@ -285,7 +285,7 @@ act -j tests
 # (Would test agent workflows)
 
 # Check inventory validation
-python3 -m scripts.repo check-inventory --check
+python3 -m scripts.engineering.repo check-inventory --check
 ```
 
 ### Step 4: Prioritized Action Plan
@@ -370,7 +370,7 @@ python3 -m scripts.repo check-inventory --check
 
 | Script | Violation Type | Fix Required | Owner |
 |--------|----------------|--------------|-------|
-| `scripts/misc/important.sh` | Wrong location | Move to scripts/qa/ | @architecture |
+| `scripts/misc/important.sh` | Wrong location | Move to scripts/engineering/qa/ | @architecture |
 | `scripts/undocumented.py` | No README | Add documentation | @docs |
 | `scripts/untested.sh` | No tests | Add test coverage | @qa |
 
@@ -477,13 +477,13 @@ python3 -m scripts.repo check-inventory --check
 ### Inventory Analysis
 ```bash
 # Sync inventory
-python3 -m scripts.repo sync-inventory --write
+python3 -m scripts.engineering.repo sync-inventory --write
 
 # Check inventory status
-python3 -m scripts.repo check-inventory --check
+python3 -m scripts.engineering.repo check-inventory --check
 
 # Export JSON for analysis
-python3 -m scripts.repo check-inventory --json > analysis.json
+python3 -m scripts.engineering.repo check-inventory --json > analysis.json
 ```
 
 ### Reference Analysis

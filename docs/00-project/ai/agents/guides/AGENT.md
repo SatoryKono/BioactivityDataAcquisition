@@ -121,32 +121,32 @@ make setup-plugins
 Если нужен MCP/Codex tooling setup после install:
 
 ```bash
-uv run python -m scripts.dev setup-mcp
+uv run python -m scripts.engineering.dev setup-mcp
 ```
 
-`scripts/dev/dev_setup.sh` остаётся legacy placeholder и не считается
+`scripts/engineering/dev/dev_setup.sh` остаётся legacy placeholder и не считается
 поддерживаемым onboarding path.
 
 Если один и тот же checkout используется из Windows PowerShell и WSL, не
 дели одну `.venv` между ОС. Используй:
 
-- `.\scripts\dev\setup_env_windows.ps1` → `.venv-win`
-- `bash scripts/dev/setup_env_wsl.sh` → `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`
-- `.\scripts\dev\run_pytest.ps1` / `.\scripts\dev\run_mypy.ps1` в PowerShell
-- `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh` в WSL
+- `.\scripts\engineering\dev\setup_env_windows.ps1` → `.venv-win`
+- `bash scripts/engineering/dev/setup_env_wsl.sh` → `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`
+- `.\scripts\engineering\dev\run_pytest.ps1` / `.\scripts\engineering\dev\run_mypy.ps1` в PowerShell
+- `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` в WSL
 
 Рекомендуемые mixed-checkout проверки:
 
 ```powershell
-.\scripts\dev\setup_env_windows.ps1
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
-.\scripts\dev\run_mypy.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/dev/setup_env_wsl.sh
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-bash scripts/dev/run_mypy.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_mypy.sh
 ```
 
 **Что делает bootstrap path:**

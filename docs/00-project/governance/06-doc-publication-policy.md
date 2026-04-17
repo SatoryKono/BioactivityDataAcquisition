@@ -311,7 +311,7 @@ uv run python -m scripts.docs check-links --not-in-nav-growth
 3. Проверить, что docs-site всё ещё собирается в strict-режиме:
 
 ```bash
-uv run bash scripts/docs/build_docs_site.sh --strict
+uv run python -m scripts.docs build-site --strict
 ```
 
 4. Если менялись active internal-published или repo-only summaries/indexes,

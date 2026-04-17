@@ -79,7 +79,7 @@ repos:
     hooks:
       - id: pip-audit
         name: Check for known vulnerabilities in dependencies
-        entry: python scripts/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict
+        entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict
         language: python
         pass_filenames: false
         # Only run on commit, not on every file change
@@ -98,7 +98,7 @@ repos:
 
       - id: audit-root-cleanliness
         name: Audit repository root layout allowlist
-        entry: python scripts/repo/audit_root_cleanliness.py
+        entry: python scripts/engineering/repo/audit_root_cleanliness.py
         language: python
         pass_filenames: false
         stages: [pre-commit]
@@ -135,19 +135,19 @@ repos:
 
       - id: check-root-vcr-cassettes
         name: Block VCR cassette anti-patterns
-        entry: python scripts/dev/run_project_python.py scripts/data/check_root_vcr_cassettes.py
+        entry: python scripts/engineering/dev/run_project_python.py scripts/data/check_root_vcr_cassettes.py
         language: python
         pass_filenames: false
 
       - id: check-vcr-filename-policy
         name: Enforce VCR filename policy
-        entry: python scripts/dev/run_project_python.py scripts/data/check_vcr_filename_policy.py
+        entry: python scripts/engineering/dev/run_project_python.py scripts/data/check_vcr_filename_policy.py
         language: python
         pass_filenames: false
 
       - id: check-architecture-dependency-map-drift
         name: Check architecture dependency-map docs drift
-        entry: python scripts/qa/generate_architecture_dependency_map.py --check
+        entry: python scripts/engineering/qa/generate_architecture_dependency_map.py --check
         language: python
         pass_filenames: false
-        files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/qa/generate_architecture_dependency_map\.py)$
+        files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/engineering/qa/generate_architecture_dependency_map\.py)$

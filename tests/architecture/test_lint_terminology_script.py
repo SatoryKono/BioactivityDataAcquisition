@@ -12,7 +12,7 @@ def test_lint_terminology_supports_check_without_paths() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     script_path = repo_root / "scripts" / "qa" / "lint_terminology.py"
 
-    assert script_path.exists(), "scripts/qa/lint_terminology.py must exist"
+    assert script_path.exists(), "scripts/engineering/qa/lint_terminology.py must exist"
 
     result = subprocess.run(
         [sys.executable, str(script_path), "--check"],

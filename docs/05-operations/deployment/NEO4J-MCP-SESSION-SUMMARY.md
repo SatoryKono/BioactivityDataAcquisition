@@ -12,7 +12,7 @@
 - **Codex CLI**: `neo4j-memory` registered and configured
 - **VS Code Copilot**: MCP endpoint in `.vscode/mcp.json`
 - **Wrapper Script**: `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` created
-- **Automation**: `scripts/dev/setup_copilot_codex_mcp.py` updated to include Neo4j Memory
+- **Automation**: `scripts/engineering/dev/setup_copilot_codex_mcp.py` updated to include Neo4j Memory
 
 **Verify:**
 ```bash
@@ -135,7 +135,7 @@ bash scripts/ai/mcp/check_neo4j_memory.sh
 ### Updated Files
 - `.env.example` — Added Neo4j configuration section
 - `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` — Already in place
-- `scripts/dev/setup_copilot_codex_mcp.py` — Already configured for Neo4j
+- `scripts/engineering/dev/setup_copilot_codex_mcp.py` — Already configured for Neo4j
 - `.mcp.json` — Already configured for Neo4j
 
 ---

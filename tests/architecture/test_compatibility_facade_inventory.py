@@ -164,10 +164,10 @@ def test_inventory_doc_declares_canonical_sync_commands() -> None:
     required_snippets = (
         "configs/quality/compatibility_facade_inventory.yaml",
         "docs/02-architecture/07-compatibility-facade-snapshot.md",
-        "./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --check",
-        "./.venv/Scripts/python.exe scripts/qa/generate_compatibility_facade_snapshot.py --update",
-        "./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --check",
-        "./.venv/Scripts/python.exe scripts/qa/generate_architecture_dependency_map.py --update",
+        "./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --check",
+        "./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update",
+        "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check",
+        "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update",
         "./.venv/Scripts/python.exe -m pytest tests/architecture/test_compatibility_facade_inventory.py -q",
     )
 

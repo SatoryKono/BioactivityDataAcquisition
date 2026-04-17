@@ -48,7 +48,7 @@ out of the repository root and archived under
 
 4. Register the Neo4j Memory MCP server in Codex and VS Code workspace config:
    ```bash
-   uv run python -m scripts.dev setup-mcp
+   uv run python -m scripts.engineering.dev setup-mcp
    ```
 
 5. Verify MCP registration:
@@ -149,7 +149,7 @@ out of the repository root and archived under
 
 12. To gate ontology drift in CI or locally without a live Neo4j backend, run:
     ```bash
-    python -m scripts.ci neo4j-memory
+    python -m scripts.engineering.ci neo4j-memory
     ```
     This checks snapshot invariants for the managed ontology layer and fails on
     missing required labels/relations, missing protocol-level port surfaces,
@@ -160,7 +160,7 @@ out of the repository root and archived under
 13. To run a full live gate against a real local Neo4j backend, apply the
     deterministic sync, and fail on managed drift, use:
     ```bash
-    python -m scripts.ci neo4j-memory-live
+    python -m scripts.engineering.ci neo4j-memory-live
     ```
 
 14. For operator-facing ownership lookups on the deterministic file-structure

@@ -147,9 +147,9 @@ Notes:
 - Documentation site commands such as `make docs-build` require the separate `docs` extra: `uv sync --extra dev --extra tracing --extra docs` or `pip install -e ".[dev,tracing,docs]"`.
 - `make setup-plugins` configures local pytest/pre-commit tooling.
 - `make setup-skills` syncs repository-local Codex `skills` and their paired `agents` into `$CODEX_HOME` (default `~/.codex`).
-- If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.dev setup-mcp` is also valid.
+- If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
-- `scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
+- `scripts/engineering/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
 #### Mixed Windows + WSL Development
 
@@ -160,11 +160,11 @@ a Windows `.venv` is not valid in WSL.
 Use:
 
 ```powershell
-.\scripts\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
 ```
 
 ```bash
-bash scripts/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
 ```
 
 This creates:
@@ -177,13 +177,13 @@ $HOME/.venvs/bioetl  # WSL/Linux by default
 Then use the OS-specific wrappers:
 
 ```powershell
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
-.\scripts\dev\run_mypy.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-bash scripts/dev/run_mypy.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_mypy.sh
 ```
 
 #### Option B: Manual Setup Without `make`
@@ -280,13 +280,13 @@ Use the OS-appropriate bootstrap path first:
 
 ```powershell
 # Windows PowerShell
-.\scripts\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
 .\.venv-win\Scripts\Activate.ps1
 ```
 
 ```bash
 # WSL/Linux
-bash scripts/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
 source "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/activate"
 ```
 
@@ -338,13 +338,13 @@ If you do not want to activate the environment, call the interpreter directly:
 To configure the core MCP servers for both VS Code Copilot and Codex CLI:
 
 ```bash
-./scripts/dev/setup_copilot_codex_mcp.sh
+./scripts/engineering/dev/setup_copilot_codex_mcp.sh
 ```
 
 Windows PowerShell:
 
 ```powershell
-.\scripts\dev\setup_copilot_codex_mcp.ps1
+.\scripts\engineering\dev\setup_copilot_codex_mcp.ps1
 ```
 
 What this script does:
@@ -433,23 +433,23 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
 - **Quick Check (with dependencies auto-synced and coverage):**
 
   ```bash
-  bash scripts/dev/run_pytest.sh
+  bash scripts/engineering/dev/run_pytest.sh
   ```
 
   Windows PowerShell:
 
   ```powershell
-  .\scripts\dev\run_pytest.ps1
+  .\scripts\engineering\dev\run_pytest.ps1
   ```
 
   The helpers assume you already bootstrapped the OS-appropriate environment with
-  `make install` / `make setup-plugins` or `scripts/dev/setup_env_windows.ps1` /
-  `scripts/dev/setup_env_wsl.sh`. By default they run `pytest` with
+  `make install` / `make setup-plugins` or `scripts/engineering/dev/setup_env_windows.ps1` /
+  `scripts/engineering/dev/setup_env_wsl.sh`. By default they run `pytest` with
   `--cov=src/bioetl --cov-report=term -q --maxfail=1`.
 
-  `bash scripts/dev/run_pytest.sh` also calls `bash scripts/ops/setup_plugins.sh --pytest-only`
+  `bash scripts/engineering/dev/run_pytest.sh` also calls `bash scripts/ops/setup_plugins.sh --pytest-only`
   before execution, so it can self-heal missing pytest plugins in WSL/Linux.
-  `.\scripts\dev\run_pytest.ps1` does not perform that bootstrap step and expects
+  `.\scripts\engineering\dev\run_pytest.ps1` does not perform that bootstrap step and expects
   `.venv-win` to be prepared already.
 
   If you prefer to run the command manually, activate the OS-appropriate virtual environment first to avoid `--cov` argument errors:
@@ -488,7 +488,7 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   uv sync --extra dev --extra tests --extra tracing
   ```
 
-  Скрипт `bash scripts/dev/run_pytest.sh` проверяет наличие плагинов и автоматически доустанавливает их при необходимости.
+  Скрипт `bash scripts/engineering/dev/run_pytest.sh` проверяет наличие плагинов и автоматически доустанавливает их при необходимости.
 
 - **Run All Tests**:
 
@@ -611,7 +611,7 @@ Access the docs at `http://localhost:8000`.
 
 ### Root layout policy
 
-Repository root is protected by `scripts/repo/audit_root_cleanliness.py`
+Repository root is protected by `scripts/engineering/repo/audit_root_cleanliness.py`
 (pre-commit + CI job `root-hygiene`).
 Only approved top-level entries are allowed.
 

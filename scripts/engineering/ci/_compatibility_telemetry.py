@@ -18,7 +18,7 @@ else:
         load_compatibility_registry,
     )
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_INVENTORY_DOC = (
     _REPO_ROOT / "docs" / "02-architecture" / "07-compatibility-facade-inventory.md"
 )

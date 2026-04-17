@@ -31,7 +31,7 @@ import yaml
 
 app = typer.Typer(add_completion=False)
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 PYTHON_CACHE_DIRS: tuple[str, ...] = ("__pycache__",)
 COMPILED_PATTERNS: tuple[str, ...] = ("*.pyc", "*.pyo")

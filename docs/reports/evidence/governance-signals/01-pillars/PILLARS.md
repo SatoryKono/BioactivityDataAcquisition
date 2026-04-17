@@ -12,7 +12,7 @@ Collect traceable repository evidence for three governance questions:
 
 ## In Scope
 
-- `./.venv/Scripts/python.exe -m scripts.qa check-c901`
+- `./.venv/Scripts/python.exe -m scripts.engineering.qa check-c901`
 - `tests/architecture/test_regression_metrics.py`
 - `configs/quality/debt_scorecard.yaml`
 - `configs/quality/architecture_metric_exemptions.yaml`

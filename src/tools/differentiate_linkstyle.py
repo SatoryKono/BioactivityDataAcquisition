@@ -66,6 +66,15 @@ def diagram_type(lines: list[str]) -> str:
     return "unknown"
 
 
+def _ensure_path_within_root(path: Path, root: Path) -> Path:
+    """Resolve and validate that ``path`` stays within ``root``."""
+    resolved_root = root.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to write outside {resolved_root}: {resolved_path}")
+    return resolved_path
+
+
 def build_node_layer_map(lines: list[str]) -> dict[str, str]:
     """Map node_id → subgraph name (layer)."""
     node_layer: dict[str, str] = {}
@@ -249,7 +258,8 @@ def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
     new_content = "\n".join(new_lines).rstrip("\n") + "\n"
 
     if not dry_run:
-        fpath.write_text(new_content, encoding="utf-8")
+        safe_path = _ensure_path_within_root(fpath, MERMAID_DIR)
+        safe_path.write_text(new_content, encoding="utf-8")
 
     details = f"{len(conns)} conn, types={sorted(type_set)}"
     return True, details
@@ -307,7 +317,8 @@ def update_legend(fpath: Path, dry_run: bool = False) -> bool:
     )
     new_content = "\n".join(new_lines).rstrip("\n") + "\n"
     if not dry_run:
-        fpath.write_text(new_content, encoding="utf-8")
+        safe_path = _ensure_path_within_root(fpath, MERMAID_DIR)
+        safe_path.write_text(new_content, encoding="utf-8")
     return True
 
 

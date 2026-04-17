@@ -71,7 +71,7 @@ specific operator-facing subcommand:
 - `bioetl diagnostics checkpoint --pipeline <pipeline>`
 - `bioetl diagnostics manifest <run-id|manifest-id>`
 - `bioetl diagnostics quarantine --pipeline <pipeline>`
-- `python -m scripts.qa report-observability-metric-inventory --json`
+- `python -m scripts.engineering.qa report-observability-metric-inventory --json`
 
 ### 1. Metrics Endpoint / Scrape Surface
 
@@ -110,7 +110,7 @@ cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
   as a runtime outage:
 
 ```bash
-python -m scripts.qa report-observability-metric-inventory --json
+python -m scripts.engineering.qa report-observability-metric-inventory --json
 ```
 
 - Confirm the inventory output still classifies expected families as

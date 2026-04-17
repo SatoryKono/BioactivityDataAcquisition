@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, cast
 
 if __package__ in {None, ""}:
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     sys.path.insert(0, str(repo_root))
     sys.path.insert(0, str(repo_root / "src"))
 

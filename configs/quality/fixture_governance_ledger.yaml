@@ -51,12 +51,12 @@ entries:
     blocking_classification: missing_policy_test_ratchet
     current_evidence_paths:
       - reports/quality/vcr-metadata-catalog.json
-      - scripts/qa/report_vcr_metadata_catalog.py
+      - scripts/engineering/qa/report_vcr_metadata_catalog.py
       - tests/architecture/test_vcr_metadata_catalog_drift.py
       - tests/architecture/test_test_matrix_coverage.py
     artifact_paths:
       - reports/quality/vcr-metadata-catalog.json
-      - scripts/qa/report_vcr_metadata_catalog.py
+      - scripts/engineering/qa/report_vcr_metadata_catalog.py
       - tests/fixtures/vcr
     next_step: >-
       Treat the metadata catalog as the canonical inventory artifact in repeatable

@@ -12,7 +12,7 @@ ModuleNotFoundError: No module named 'respx'
 **Root Cause:** The test environment was not properly set up with development dependencies.
 
 **Solution:**
-- Ran `bash scripts/dev/setup_env_wsl.sh` to create a proper WSL virtual environment
+- Ran `bash scripts/engineering/dev/setup_env_wsl.sh` to create a proper WSL virtual environment
 - This installed all test dependencies including `respx>=0.21`
 - Environment location: `/home/fedor/.venvs/bioetl`
 
@@ -30,11 +30,11 @@ python -c "import respx; print('respx version:', respx.__version__)"
 ModuleNotFoundError: No module named 'hotspot_family_metrics'
 ```
 
-**Root Cause:** The file `scripts/qa/hotspot_family_metrics.py` was missing from the current branch but existed in git history.
+**Root Cause:** The file `scripts/engineering/qa/hotspot_family_metrics.py` was missing from the current branch but existed in git history.
 
 **Solution:**
 - Restored the file from commit `b4c2d5abb`
-- Command used: `git show b4c2d5abb:scripts/qa/hotspot_family_metrics.py > scripts/qa/hotspot_family_metrics.py`
+- Command used: `git show b4c2d5abb:scripts/engineering/qa/hotspot_family_metrics.py > scripts/engineering/qa/hotspot_family_metrics.py`
 - File restored with 10,684 bytes
 
 **File Contents:** Shared hotspot-family metrics helpers for RF-06 governance and reporting, including:
@@ -62,7 +62,7 @@ pytest tests/unit/infrastructure/adapters/uniprot/test_adapter.py::test_fetch_pr
 
 ### Hotspot Family Baseline Tests
 ```bash
-pytest tests/unit/scripts/qa/test_report_hotspot_family_baseline.py -v --asyncio-mode=auto
+pytest tests/unit/scripts/engineering/qa/test_report_hotspot_family_baseline.py -v --asyncio-mode=auto
 # Result: 2 passed
 ```
 
@@ -72,7 +72,7 @@ For future reference, the proper way to set up the development environment:
 
 ```bash
 # For WSL/Linux
-bash scripts/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
 
 # Activate environment
 source /home/fedor/.venvs/bioetl/bin/activate
@@ -83,7 +83,7 @@ python -m pytest tests/... -v --asyncio-mode=auto
 
 ## Files Modified/Created
 
-1. **Restored:** `scripts/qa/hotspot_family_metrics.py` (from git history)
+1. **Restored:** `scripts/engineering/qa/hotspot_family_metrics.py` (from git history)
 2. **Environment:** `/home/fedor/.venvs/bioetl` (created by setup script)
 
 ## Dependencies Installed

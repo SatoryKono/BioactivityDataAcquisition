@@ -34,7 +34,7 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 ## Актуализация текущего состояния
 
 - `configs/quality/compatibility_facade_inventory.yaml` уже является структурированным compatibility ledger.
-- `scripts/ci/_compatibility_registry.py` уже выступает shared loader contract.
-- `scripts/qa/generate_compatibility_facade_snapshot.py` уже владеет generated measured snapshot flow.
+- `scripts/engineering/ci/_compatibility_registry.py` уже выступает shared loader contract.
+- `scripts/engineering/qa/generate_compatibility_facade_snapshot.py` уже владеет generated measured snapshot flow.
 - compatibility snapshot generation/check после `RF-011` остаётся зелёным на текущем дереве.
 - Оставшаяся работа по `CR-02` должна оставаться узкой: извлекать из guardrails только registry-owned semantics там, где есть явный duplication win; не пытаться мигрировать все freeze-guard allowlists в shared loader.

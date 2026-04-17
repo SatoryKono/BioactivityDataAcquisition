@@ -78,12 +78,12 @@ The repository currently supports three practical local execution modes:
 - **CI / single-OS checkout**: use `uv run python -m ...` and maintained Make
   targets such as `make install`, `make test`, `make lint`.
 - **Windows PowerShell in a mixed Windows + WSL checkout**: bootstrap with
-  `.\scripts\dev\setup_env_windows.ps1`, then prefer
-  `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`, or
+  `.\scripts\engineering\dev\setup_env_windows.ps1`, then prefer
+  `.\scripts\engineering\dev\run_pytest.ps1`, `.\scripts\engineering\dev\run_mypy.ps1`, or
   `.\.venv-win\Scripts\python.exe -m ...`.
 - **WSL/Linux in a mixed Windows + WSL checkout**: bootstrap with
-  `bash scripts/dev/setup_env_wsl.sh`, then prefer
-  `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`, or
+  `bash scripts/engineering/dev/setup_env_wsl.sh`, then prefer
+  `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or
   `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`.
 
 Do not reuse the same `.venv` between PowerShell and WSL. The maintained mixed
@@ -148,13 +148,13 @@ make test
 Mixed Windows + WSL checkout shortcuts:
 
 ```powershell
-.\scripts\dev\setup_env_windows.ps1
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
 ```
 
 ```bash
-bash scripts/dev/setup_env_wsl.sh
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
 ```
 
 ______________________________________________________________________

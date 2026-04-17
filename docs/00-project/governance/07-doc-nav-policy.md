@@ -60,7 +60,7 @@ ______________________________________________________________________
 1. `published` documents MUST have a stable nav path in `mkdocs.yml`.
 1. `internal-published` documents SHOULD be grouped under `Internal / Extended` when they are intentionally published in MkDocs.
 1. `archive` documents MUST include an explicit historical/superseded disclaimer.
-1. Any intentional growth of non-nav documents MUST update the baseline file `scripts/baselines/not_in_nav_baseline.txt`.
+1. Any intentional growth of non-nav documents MUST update the baseline file `scripts/engineering/baselines/not_in_nav_baseline.txt`.
 
 ______________________________________________________________________
 
@@ -72,7 +72,7 @@ uv run python -m scripts.docs check-links
 
 # Optional focused checks
 uv run python -m scripts.docs check-links --not-in-nav-growth
-uv run bash scripts/docs/build_docs_site.sh --strict
+uv run python -m scripts.docs build-site --strict
 ```
 
 If non-nav growth is intentional:
@@ -178,7 +178,7 @@ A document SHOULD be promoted when at least two criteria are true:
 1. Ensure every non-promoted cluster has a discoverable index entrypoint.
 1. Re-run:
    - `uv run python -m scripts.docs check-links`
-   - `uv run bash scripts/docs/build_docs_site.sh --strict`
+   - `uv run python -m scripts.docs build-site --strict`
 1. Update baseline only when growth is intentional and justified.
 
 ### 6.4 Historical Backlog Snapshot (2026-03-03, wave-7)

@@ -46,7 +46,7 @@ ALLOWED_MEASURED_ONLY_REVIEW_OUTCOMES = frozenset(
     }
 )
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY_PATH = (
     _REPO_ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
 )

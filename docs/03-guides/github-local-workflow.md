@@ -38,15 +38,15 @@ For mixed Windows + WSL checkout, prefer the OS-specific wrappers instead of a
 shared `.venv`:
 
 ```powershell
-.\scripts\dev\setup_env_windows.ps1
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
-.\scripts\dev\run_mypy.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/dev/setup_env_wsl.sh
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-bash scripts/dev/run_mypy.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_mypy.sh
 ```
 
 `make lint` and `make test` remain valid repository checks. The wrappers are

@@ -619,7 +619,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         # No-op implementation - CSV export requires maintenance service
         # This maintains backward compatibility with tests that don't provide
         # full runtime_services but still trigger postwrite operations
-        pass
 
     async def _prepare_silver_write_finalization_context(
         self,

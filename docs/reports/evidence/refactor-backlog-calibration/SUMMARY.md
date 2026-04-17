@@ -35,7 +35,7 @@ Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `do
 1. **RF-01 — Finish governance baseline**
    Scope now: `scripts inventory` only.
    Verify with:
-   `./.venv/Scripts/python.exe -m scripts.repo check-inventory --check`
+   `./.venv/Scripts/python.exe -m scripts.engineering.repo check-inventory --check`
 
 1. **RF-04 — Focused composition decomposition**
    Primary targets:

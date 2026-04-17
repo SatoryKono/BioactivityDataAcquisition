@@ -5,14 +5,14 @@ Utility scripts for BioETL project maintenance and development.
 ## Structure and conventions
 
 - **Canonical repository helpers** live under `scripts/` and are grouped by domain
-  (`scripts.docs`, `scripts.schema`, `scripts.repo`, etc.).
+  (`scripts.docs`, `scripts.schema`, `scripts.engineering.repo`, etc.).
 - **`src/tools`** contains specialized helper utilities and supporting scripts that are
   not the main operational entry surface for contributors.
 - **Environment setup** is `uv`-first: use `uv sync --extra dev --extra tests --extra tracing`.
 - **Legacy wrappers** should be kept minimal and removed once all call-sites are
   migrated to canonical grouped entrypoints.
 - Legacy `src/tools/scripts/check_*.py` validators should migrate toward
-  grouped commands under `scripts.qa` / `scripts.schema`, with the old direct
+  grouped commands under `scripts.engineering.qa` / `scripts.schema`, with the old direct
   paths kept only as thin compatibility facades during the migration window.
 - **Temporary files** (e.g., `_gen*.py`, `.cursor_tmp_*`) should be reviewed and cleaned up
   explicitly as part of a dedicated cleanup pass.
@@ -300,9 +300,9 @@ Schema / agent-canonical validation flow.
 The following direct paths remain available for compatibility, but new
 integrations should prefer the grouped QA entrypoints:
 
-- `python -m scripts.qa check-architecture`
-- `python -m scripts.qa check-app-deps`
-- `python -m scripts.qa check-constructor-args`
+- `python -m scripts.engineering.qa check-architecture`
+- `python -m scripts.engineering.qa check-app-deps`
+- `python -m scripts.engineering.qa check-constructor-args`
 
 ### duplicate_function_analyzer.py
 
@@ -315,10 +315,10 @@ AST-анализатор дубликатов функций в выбранно
 
 ```bash
 # Default scope
-python -m scripts.qa analyze-duplicate-functions
+python -m scripts.engineering.qa analyze-duplicate-functions
 
 # Custom scope
-python -m scripts.qa analyze-duplicate-functions \
+python -m scripts.engineering.qa analyze-duplicate-functions \
   --pattern src/bioetl/application/**/utils.py \
   --pattern src/bioetl/infrastructure/**/utils.py \
   --report reports/duplicate_function_report.md

@@ -28,7 +28,7 @@ This section is intentionally compact in navigation to avoid exposing empty plac
 ## Docs-as-Code Policy
 
 - Dependency-map drift is validated in CI and pre-commit via
-  `scripts/qa/generate_architecture_dependency_map.py --check`.
+  `scripts/engineering/qa/generate_architecture_dependency_map.py --check`.
 - Generated architecture dependency artifacts are stored in:
   - `docs/02-architecture/generated/module-dependency-map.md`
   - `docs/02-architecture/generated/module-dependency-map.json`

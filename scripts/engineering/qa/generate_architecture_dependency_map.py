@@ -20,7 +20,7 @@ from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_SRC_ROOT = PROJECT_ROOT / "src" / "bioetl"
 DEFAULT_MD_OUTPUT = (
     PROJECT_ROOT / "docs" / "02-architecture" / "generated" / "module-dependency-map.md"

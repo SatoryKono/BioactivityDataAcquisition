@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from scripts.ci.quality_integral_gate import ArchitectureTestStats
-from scripts.ci.quality_integral_gate import (
+from scripts.engineering.ci.quality_integral_gate import ArchitectureTestStats
+from scripts.engineering.ci.quality_integral_gate import (
     TestHealthClassification as HealthClassification,
 )
-from scripts.ci.quality_integral_gate import _build_test_health_payload
-from scripts.ci.quality_integral_gate import _classify_test_health
+from scripts.engineering.ci.quality_integral_gate import _build_test_health_payload
+from scripts.engineering.ci.quality_integral_gate import _classify_test_health
 
 
 def test_classify_test_health_environment_limited_green() -> None:

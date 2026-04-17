@@ -175,7 +175,7 @@ def _parse_args() -> argparse.Namespace:
 def main() -> int:
     """CLI entrypoint."""
     _ = _parse_args()
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     violations = run_checks(repo_root)
 
     if not violations:

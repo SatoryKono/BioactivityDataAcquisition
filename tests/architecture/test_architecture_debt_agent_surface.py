@@ -51,5 +51,5 @@ def test_historical_prompts_reference_new_runtime_surface() -> None:
     for prompt_path in PROMPT_FILES:
         text = prompt_path.read_text(encoding="utf-8")
         assert "py-architecture-debt-bot" in text
-        assert "python -m scripts.qa generate-debt-tasks" in text
-        assert "python -m scripts.qa reduce-architecture-debt" in text
+        assert "python -m scripts.engineering.qa generate-debt-tasks" in text
+        assert "python -m scripts.engineering.qa reduce-architecture-debt" in text

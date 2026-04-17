@@ -169,7 +169,7 @@ class MyAdapter:
 Рекомендуемые проверки:
 
 ```bash
-uv run python -m scripts.qa check-exemptions
+uv run python -m scripts.engineering.qa check-exemptions
 uv run python -m pytest tests/architecture/test_quality_debt_scorecard.py -q
 uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 ```
@@ -1422,7 +1422,7 @@ ratchets.
 - After metrics: `cross_layer_group_edges_total=287`, `composition -> application=149`
 - Gates:
   - `pytest tests/architecture/test_regression_metrics.py -q`
-  - `python scripts/qa/generate_architecture_dependency_map.py --update`
+  - `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`
 - Outcome: `improved`
 ```
 

@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import cast
 
-from scripts.qa.report_normalization_fallback_inventory import (
+from scripts.engineering.qa.report_normalization_fallback_inventory import (
     _build_payload,
     _fallback_rows,
     _render_markdown,

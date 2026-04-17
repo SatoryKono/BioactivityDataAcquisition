@@ -243,7 +243,7 @@ forbidden_domain_entity_aliases:
         reason: ADR-024 direct migration removed the need for a Protein alias in the canonical domain layer.
 
 # Notes on enforcement
-# - scripts/qa/naming_audit.py loads this file as the naming exception registry.
+# - scripts/engineering/qa/naming_audit.py loads this file as the naming exception registry.
 # - Violations against these exceptions should NOT be flagged.
 # - Add new exceptions here with justification and concrete location.
 

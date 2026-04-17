@@ -114,6 +114,15 @@ def build_elk_init(edge_routing: str) -> str:
     return ELK_INIT_TEMPLATE.replace("__EDGE_ROUTING__", edge_routing)
 
 
+def _ensure_path_within_root(path: Path, root: Path) -> Path:
+    """Resolve and validate that ``path`` stays within ``root``."""
+    resolved_root = root.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to write outside {resolved_root}: {resolved_path}")
+    return resolved_path
+
+
 def enforce_edge_routing(
     lines: list[str], edge_routing: str
 ) -> tuple[list[str], bool, bool]:
@@ -200,7 +209,8 @@ def apply_elk(
         return False, "ELK init already present"
     new_content = "\n".join(lines).rstrip("\n") + "\n"
     if not dry_run:
-        fpath.write_text(new_content, encoding="utf-8")
+        safe_path = _ensure_path_within_root(fpath, ARCH_DIR)
+        safe_path.write_text(new_content, encoding="utf-8")
     if "elk_init" in changes:
         return True, f"@nodes={nodes}, changes=[{', '.join(changes)}]"
     return True, f"changes=[{', '.join(changes)}]"
@@ -246,7 +256,8 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    files = sorted(args.dir.glob("*.mmd"))
+    source_dir = _ensure_path_within_root(args.dir, REPO_ROOT)
+    files = sorted(source_dir.glob("*.mmd"))
     auto_direction = not args.no_direction
 
     print("=" * 65)

@@ -5,7 +5,7 @@ Date: 2026-03-21
 ## Method
 
 - Checked current complexity governance with:
-  - `./.venv/Scripts/python.exe -m scripts.qa check-c901`
+  - `./.venv/Scripts/python.exe -m scripts.engineering.qa check-c901`
 - Read ratchet and registry policy from:
   - `configs/quality/debt_scorecard.yaml`
   - `configs/quality/architecture_metric_exemptions.yaml`

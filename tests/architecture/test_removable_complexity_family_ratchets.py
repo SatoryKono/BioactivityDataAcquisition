@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-from scripts.qa.hotspot_family_metrics import (
+from scripts.engineering.qa.hotspot_family_metrics import (
     count_files_ge_loc,
     count_internal_fan_in,
     iter_family_python_files,

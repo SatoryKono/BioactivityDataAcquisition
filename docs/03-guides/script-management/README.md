@@ -59,10 +59,10 @@ The script management guides provide:
 
 ```bash
 # Sync script inventory
-python3 -m scripts.repo sync-inventory --write
+python3 -m scripts.engineering.repo sync-inventory --write
 
 # Check inventory health
-python3 -m scripts.repo check-inventory --check
+python3 -m scripts.engineering.repo check-inventory --check
 
 # Analyze script references
 grep -r "scripts/" .github/workflows/ | sort | uniq -c

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.qa.py_review_orchestrator import ReviewOrchestrator, SectorResult
+from scripts.engineering.qa.py_review_orchestrator import ReviewOrchestrator, SectorResult
 
 
 def test_determine_subsectors_tracks_current_repo_layout(tmp_path: Path) -> None:

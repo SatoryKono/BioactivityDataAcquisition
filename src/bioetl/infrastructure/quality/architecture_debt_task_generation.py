@@ -36,7 +36,7 @@ COMMON_CHECKS: Final[tuple[str, ...]] = (
     "python -m pytest -q "
     "tests/architecture/test_quality_debt_scorecard.py "
     "tests/architecture/test_quality_exemptions_registry.py",
-    "python -m scripts.qa check-exemptions --mode auto --growth-mode auto --trend-report off",
+    "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off",
 )
 
 
