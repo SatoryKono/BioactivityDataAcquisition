@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -116,9 +117,11 @@ class _StageMixinHarness(CompositeRunnerStageMixin):
     # --- seam implementations ---
 
     async def _save_checkpoint_safe(self, state: Any, operation: str) -> bool:
+        await asyncio.sleep(0)
         return True
 
     async def _run_seed(self) -> SeedResult:
+        await asyncio.sleep(0)
         if self._seed_raises is not None:
             raise self._seed_raises
         return self._seed_result

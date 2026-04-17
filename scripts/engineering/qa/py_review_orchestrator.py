@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import ast
 import json
 import os
@@ -12,6 +13,164 @@ from typing import Any
 # Constants
 FILE_THRESHOLD = 40
 LOC_THRESHOLD = 3000
+STATIC_SUBSECTOR_DEFS: dict[str, list[dict[str, Any]]] = {
+    "S2": [
+        {
+            "id": "S2.1",
+            "name": "Pipelines(ChEMBL+Common)",
+            "paths": [
+                "src/bioetl/application/pipelines/chembl",
+                "src/bioetl/application/pipelines/common",
+            ],
+        },
+        {
+            "id": "S2.2",
+            "name": "Pipelines(PubMed+CrossRef+OpenAlex)",
+            "paths": [
+                "src/bioetl/application/pipelines/pubmed",
+                "src/bioetl/application/pipelines/crossref",
+                "src/bioetl/application/pipelines/openalex",
+            ],
+        },
+        {
+            "id": "S2.3",
+            "name": "Pipelines(PubChem+SemanticScholar+UniProt)",
+            "paths": [
+                "src/bioetl/application/pipelines/pubchem",
+                "src/bioetl/application/pipelines/semanticscholar",
+                "src/bioetl/application/pipelines/uniprot",
+            ],
+        },
+        {
+            "id": "S2.4",
+            "name": "Core",
+            "paths": ["src/bioetl/application/core"],
+        },
+        {
+            "id": "S2.5",
+            "name": "Composite+Services+Obs",
+            "paths": [
+                "src/bioetl/application/composite",
+                "src/bioetl/application/services",
+                "src/bioetl/application/observability",
+            ],
+        },
+    ],
+    "S3": [
+        {
+            "id": "S3.1",
+            "name": "Adapters 1",
+            "paths": [
+                "src/bioetl/infrastructure/adapters/chembl",
+                "src/bioetl/infrastructure/adapters/pubmed",
+                "src/bioetl/infrastructure/adapters/crossref",
+            ],
+        },
+        {
+            "id": "S3.2",
+            "name": "Adapters 2",
+            "paths": [
+                "src/bioetl/infrastructure/adapters/pubchem",
+                "src/bioetl/infrastructure/adapters/openalex",
+                "src/bioetl/infrastructure/adapters/semanticscholar",
+                "src/bioetl/infrastructure/adapters/uniprot",
+            ],
+        },
+        {
+            "id": "S3.3",
+            "name": "Adapters Base",
+            "paths": [
+                "src/bioetl/infrastructure/adapters/base",
+                "src/bioetl/infrastructure/adapters/http",
+                "src/bioetl/infrastructure/adapters/common",
+                "src/bioetl/infrastructure/adapters/decorators",
+                "src/bioetl/infrastructure/adapters/input",
+            ],
+        },
+        {
+            "id": "S3.4",
+            "name": "Storage+Config+Schemas",
+            "paths": [
+                "src/bioetl/infrastructure/storage",
+                "src/bioetl/infrastructure/config",
+                "src/bioetl/infrastructure/schemas",
+            ],
+        },
+        {
+            "id": "S3.5",
+            "name": "Observability+Other",
+            "paths": ["src/bioetl/infrastructure/observability"],
+        },
+    ],
+    "S4": [
+        {
+            "id": "S4.1",
+            "name": "Composition",
+            "paths": ["src/bioetl/composition"],
+        },
+        {
+            "id": "S4.2",
+            "name": "Interfaces",
+            "paths": ["src/bioetl/interfaces"],
+        },
+    ],
+    "S5": [
+        {"id": "S5.1", "name": "Cross Domain", "paths": ["src/bioetl/domain"]},
+        {
+            "id": "S5.2",
+            "name": "Cross Application",
+            "paths": ["src/bioetl/application"],
+        },
+        {
+            "id": "S5.3",
+            "name": "Cross Infrastructure",
+            "paths": ["src/bioetl/infrastructure"],
+        },
+        {
+            "id": "S5.4",
+            "name": "Cross Other",
+            "paths": ["src/bioetl/composition", "src/bioetl/interfaces"],
+        },
+    ],
+    "S6": [
+        {"id": "S6.1", "name": "Architecture", "paths": ["tests/architecture"]},
+        {"id": "S6.2", "name": "Unit Domain", "paths": ["tests/unit/domain"]},
+        {
+            "id": "S6.3",
+            "name": "Unit Application",
+            "paths": ["tests/unit/application"],
+        },
+        {
+            "id": "S6.4",
+            "name": "Unit Infrastructure",
+            "paths": ["tests/unit/infrastructure"],
+        },
+        {
+            "id": "S6.5",
+            "name": "Unit Comp+Ifaces",
+            "paths": [
+                "tests/unit/composition",
+                "tests/unit/interfaces",
+                "tests/unit/cli",
+                "tests/unit/contracts",
+                "tests/unit/pipelines",
+            ],
+        },
+        {
+            "id": "S6.6",
+            "name": "Integration+Other",
+            "paths": [
+                "tests/integration",
+                "tests/e2e",
+                "tests/contract",
+                "tests/security",
+                "tests/smoke",
+                "tests/performance",
+                "tests/benchmarks",
+            ],
+        },
+    ],
+}
 
 
 @dataclass
@@ -164,6 +323,186 @@ class ReviewOrchestrator:
                 return match.group(1)
         return "unknown"
 
+    def _today(self) -> str:
+        return datetime.now().strftime("%Y-%m-%d")
+
+    def _sector_report_path(self, result: SectorResult) -> Path:
+        safe_name = result.sector_name.replace("+", "_").replace(" ", "_")
+        return self.reports_dir / f"{result.sector_id}-{safe_name}.md"
+
+    def _category_stats(
+        self, issues: list[Issue]
+    ) -> tuple[dict[str, dict[str, int]], dict[str, float]]:
+        cat_stats: dict[str, dict[str, int]] = {}
+        for issue in issues:
+            cat = issue.category
+            if cat not in cat_stats:
+                cat_stats[cat] = {
+                    "total": 0,
+                    "CRITICAL": 0,
+                    "HIGH": 0,
+                    "MEDIUM": 0,
+                    "LOW": 0,
+                }
+            cat_stats[cat]["total"] += 1
+            cat_stats[cat][issue.severity] += 1
+        _, cat_scores = self.calculate_score(issues)
+        return cat_stats, cat_scores
+
+    def _severity_partition(
+        self, issues: list[Issue]
+    ) -> tuple[list[Issue], list[Issue], list[Issue], list[Issue]]:
+        critical = [issue for issue in issues if issue.severity == "CRITICAL"]
+        high = [issue for issue in issues if issue.severity == "HIGH"]
+        medium = [issue for issue in issues if issue.severity == "MEDIUM"]
+        low = [issue for issue in issues if issue.severity == "LOW"]
+        return critical, high, medium, low
+
+    def _static_subsectors(self, sector_id: str) -> list[dict[str, Any]]:
+        return [dict(item) for item in STATIC_SUBSECTOR_DEFS.get(sector_id, [])]
+
+    def _domain_subsectors(self) -> list[dict[str, Any]]:
+        covered_domain_paths = set(
+            self._existing_paths(
+                "src/bioetl/domain/ports",
+                "src/bioetl/domain/contracts",
+                "src/bioetl/domain/entities",
+                "src/bioetl/domain/value_objects",
+                "src/bioetl/domain/schemas",
+                "src/bioetl/domain/services",
+                "src/bioetl/domain/filtering",
+                "src/bioetl/domain/mapping",
+                "src/bioetl/domain/config",
+                "src/bioetl/domain/composite",
+                "src/bioetl/domain/aggregates",
+                "src/bioetl/domain/registry",
+                "src/bioetl/domain/models",
+                "src/bioetl/domain/exceptions",
+            )
+        )
+        return [
+            {
+                "id": "S1.1",
+                "name": "Ports+Contracts",
+                "paths": self._existing_paths(
+                    "src/bioetl/domain/ports", "src/bioetl/domain/contracts"
+                ),
+            },
+            {
+                "id": "S1.2",
+                "name": "Entities+VOs",
+                "paths": self._existing_paths(
+                    "src/bioetl/domain/entities",
+                    "src/bioetl/domain/value_objects",
+                ),
+            },
+            {
+                "id": "S1.3",
+                "name": "Schemas",
+                "paths": self._existing_paths("src/bioetl/domain/schemas"),
+            },
+            {
+                "id": "S1.4",
+                "name": "Services+Filters+Map",
+                "paths": self._existing_paths(
+                    "src/bioetl/domain/services",
+                    "src/bioetl/domain/filtering",
+                    "src/bioetl/domain/mapping",
+                ),
+            },
+            {
+                "id": "S1.5",
+                "name": "Other",
+                "paths": self._dedupe_paths(
+                    self._existing_paths(
+                        "src/bioetl/domain/config",
+                        "src/bioetl/domain/composite",
+                        "src/bioetl/domain/aggregates",
+                        "src/bioetl/domain/registry",
+                        "src/bioetl/domain/models",
+                        "src/bioetl/domain/exceptions",
+                    )
+                    + self._remaining_subdirs("src/bioetl/domain", covered_domain_paths)
+                ),
+            },
+        ]
+
+    def _config_subsectors(self) -> list[dict[str, Any]]:
+        covered_config_paths = set(
+            self._existing_paths(
+                "configs/entities",
+                "configs/composites",
+                "configs/contracts",
+                "configs/providers",
+                "configs/base",
+                "configs/quality",
+                "configs/_schema",
+                "configs/enums",
+            )
+        )
+        return [
+            {"id": "S7.1", "name": "Entities", "paths": ["configs/entities"]},
+            {
+                "id": "S7.2",
+                "name": "Composites+Contracts+Providers",
+                "paths": self._existing_paths(
+                    "configs/composites",
+                    "configs/contracts",
+                    "configs/providers",
+                ),
+            },
+            {
+                "id": "S7.3",
+                "name": "Other Configs",
+                "paths": self._dedupe_paths(
+                    self._existing_paths(
+                        "configs/base",
+                        "configs/quality",
+                        "configs/_schema",
+                        "configs/enums",
+                    )
+                    + self._remaining_subdirs("configs", covered_config_paths)
+                ),
+            },
+        ]
+
+    def _docs_subsectors(self) -> list[dict[str, Any]]:
+        covered_doc_paths = set(
+            self._existing_paths(
+                "docs/00-project",
+                "docs/01-requirements",
+                "docs/02-architecture",
+                "docs/04-reference",
+            )
+        )
+        return [
+            {
+                "id": "S8.1",
+                "name": "Project+Reqs",
+                "paths": self._existing_paths(
+                    "docs/00-project", "docs/01-requirements"
+                ),
+            },
+            {
+                "id": "S8.2",
+                "name": "Architecture",
+                "paths": self._existing_paths("docs/02-architecture"),
+            },
+            {
+                "id": "S8.3",
+                "name": "Reference",
+                "paths": self._existing_paths("docs/04-reference"),
+            },
+            {
+                "id": "S8.4",
+                "name": "Guides+Other Docs",
+                "paths": self._dedupe_paths(
+                    self._existing_paths("docs/03-guides", "docs/05-operations")
+                    + self._remaining_subdirs("docs", covered_doc_paths)
+                ),
+            },
+        ]
+
     def count_files_and_loc(
         self, paths: list[str], file_exts: set[str]
     ) -> tuple[int, int, list[Path]]:
@@ -216,313 +555,20 @@ class ReviewOrchestrator:
     def determine_subsectors(
         self, sector_id: str, _paths: list[str]
     ) -> list[dict[str, Any]]:
-        # Hardcoded subsectors matching the issue description for simplicity
-        if sector_id == "S1":
-            covered_domain_paths = set(
-                self._existing_paths(
-                    "src/bioetl/domain/ports",
-                    "src/bioetl/domain/contracts",
-                    "src/bioetl/domain/entities",
-                    "src/bioetl/domain/value_objects",
-                    "src/bioetl/domain/schemas",
-                    "src/bioetl/domain/services",
-                    "src/bioetl/domain/filtering",
-                    "src/bioetl/domain/mapping",
-                    "src/bioetl/domain/config",
-                    "src/bioetl/domain/composite",
-                    "src/bioetl/domain/aggregates",
-                    "src/bioetl/domain/registry",
-                    "src/bioetl/domain/models",
-                    "src/bioetl/domain/exceptions",
-                )
-            )
-            return [
-                {
-                    "id": "S1.1",
-                    "name": "Ports+Contracts",
-                    "paths": self._existing_paths(
-                        "src/bioetl/domain/ports", "src/bioetl/domain/contracts"
-                    ),
-                },
-                {
-                    "id": "S1.2",
-                    "name": "Entities+VOs",
-                    "paths": self._existing_paths(
-                        "src/bioetl/domain/entities",
-                        "src/bioetl/domain/value_objects",
-                    ),
-                },
-                {
-                    "id": "S1.3",
-                    "name": "Schemas",
-                    "paths": self._existing_paths("src/bioetl/domain/schemas"),
-                },
-                {
-                    "id": "S1.4",
-                    "name": "Services+Filters+Map",
-                    "paths": self._existing_paths(
-                        "src/bioetl/domain/services",
-                        "src/bioetl/domain/filtering",
-                        "src/bioetl/domain/mapping",
-                    ),
-                },
-                {
-                    "id": "S1.5",
-                    "name": "Other",
-                    "paths": self._dedupe_paths(
-                        self._existing_paths(
-                            "src/bioetl/domain/config",
-                            "src/bioetl/domain/composite",
-                            "src/bioetl/domain/aggregates",
-                            "src/bioetl/domain/registry",
-                            "src/bioetl/domain/models",
-                            "src/bioetl/domain/exceptions",
-                        )
-                        + self._remaining_subdirs(
-                            "src/bioetl/domain", covered_domain_paths
-                        )
-                    ),
-                },
-            ]
-        elif sector_id == "S2":
-            return [
-                {
-                    "id": "S2.1",
-                    "name": "Pipelines(ChEMBL+Common)",
-                    "paths": [
-                        "src/bioetl/application/pipelines/chembl",
-                        "src/bioetl/application/pipelines/common",
-                    ],
-                },
-                {
-                    "id": "S2.2",
-                    "name": "Pipelines(PubMed+CrossRef+OpenAlex)",
-                    "paths": [
-                        "src/bioetl/application/pipelines/pubmed",
-                        "src/bioetl/application/pipelines/crossref",
-                        "src/bioetl/application/pipelines/openalex",
-                    ],
-                },
-                {
-                    "id": "S2.3",
-                    "name": "Pipelines(PubChem+SemanticScholar+UniProt)",
-                    "paths": [
-                        "src/bioetl/application/pipelines/pubchem",
-                        "src/bioetl/application/pipelines/semanticscholar",
-                        "src/bioetl/application/pipelines/uniprot",
-                    ],
-                },
-                {
-                    "id": "S2.4",
-                    "name": "Core",
-                    "paths": ["src/bioetl/application/core"],
-                },
-                {
-                    "id": "S2.5",
-                    "name": "Composite+Services+Obs",
-                    "paths": [
-                        "src/bioetl/application/composite",
-                        "src/bioetl/application/services",
-                        "src/bioetl/application/observability",
-                    ],
-                },
-            ]
-        elif sector_id == "S3":
-            return [
-                {
-                    "id": "S3.1",
-                    "name": "Adapters 1",
-                    "paths": [
-                        "src/bioetl/infrastructure/adapters/chembl",
-                        "src/bioetl/infrastructure/adapters/pubmed",
-                        "src/bioetl/infrastructure/adapters/crossref",
-                    ],
-                },
-                {
-                    "id": "S3.2",
-                    "name": "Adapters 2",
-                    "paths": [
-                        "src/bioetl/infrastructure/adapters/pubchem",
-                        "src/bioetl/infrastructure/adapters/openalex",
-                        "src/bioetl/infrastructure/adapters/semanticscholar",
-                        "src/bioetl/infrastructure/adapters/uniprot",
-                    ],
-                },
-                {
-                    "id": "S3.3",
-                    "name": "Adapters Base",
-                    "paths": [
-                        "src/bioetl/infrastructure/adapters/base",
-                        "src/bioetl/infrastructure/adapters/http",
-                        "src/bioetl/infrastructure/adapters/common",
-                        "src/bioetl/infrastructure/adapters/decorators",
-                        "src/bioetl/infrastructure/adapters/input",
-                    ],
-                },
-                {
-                    "id": "S3.4",
-                    "name": "Storage+Config+Schemas",
-                    "paths": [
-                        "src/bioetl/infrastructure/storage",
-                        "src/bioetl/infrastructure/config",
-                        "src/bioetl/infrastructure/schemas",
-                    ],
-                },
-                {
-                    "id": "S3.5",
-                    "name": "Observability+Other",
-                    "paths": ["src/bioetl/infrastructure/observability"],
-                },
-            ]
-        elif sector_id == "S4":
-            return [
-                {
-                    "id": "S4.1",
-                    "name": "Composition",
-                    "paths": ["src/bioetl/composition"],
-                },
-                {
-                    "id": "S4.2",
-                    "name": "Interfaces",
-                    "paths": ["src/bioetl/interfaces"],
-                },
-            ]
-        elif sector_id == "S5":
-            return [
-                {"id": "S5.1", "name": "Cross Domain", "paths": ["src/bioetl/domain"]},
-                {
-                    "id": "S5.2",
-                    "name": "Cross Application",
-                    "paths": ["src/bioetl/application"],
-                },
-                {
-                    "id": "S5.3",
-                    "name": "Cross Infrastructure",
-                    "paths": ["src/bioetl/infrastructure"],
-                },
-                {
-                    "id": "S5.4",
-                    "name": "Cross Other",
-                    "paths": ["src/bioetl/composition", "src/bioetl/interfaces"],
-                },
-            ]
-        elif sector_id == "S7":
-            covered_config_paths = set(
-                self._existing_paths(
-                    "configs/entities",
-                    "configs/composites",
-                    "configs/contracts",
-                    "configs/providers",
-                    "configs/base",
-                    "configs/quality",
-                    "configs/_schema",
-                    "configs/enums",
-                )
-            )
-            return [
-                {"id": "S7.1", "name": "Entities", "paths": ["configs/entities"]},
-                {
-                    "id": "S7.2",
-                    "name": "Composites+Contracts+Providers",
-                    "paths": self._existing_paths(
-                        "configs/composites",
-                        "configs/contracts",
-                        "configs/providers",
-                    ),
-                },
-                {
-                    "id": "S7.3",
-                    "name": "Other Configs",
-                    "paths": self._dedupe_paths(
-                        self._existing_paths(
-                            "configs/base",
-                            "configs/quality",
-                            "configs/_schema",
-                            "configs/enums",
-                        )
-                        + self._remaining_subdirs("configs", covered_config_paths)
-                    ),
-                },
-            ]
-        elif sector_id == "S6":
-            return [
-                {"id": "S6.1", "name": "Architecture", "paths": ["tests/architecture"]},
-                {"id": "S6.2", "name": "Unit Domain", "paths": ["tests/unit/domain"]},
-                {
-                    "id": "S6.3",
-                    "name": "Unit Application",
-                    "paths": ["tests/unit/application"],
-                },
-                {
-                    "id": "S6.4",
-                    "name": "Unit Infrastructure",
-                    "paths": ["tests/unit/infrastructure"],
-                },
-                {
-                    "id": "S6.5",
-                    "name": "Unit Comp+Ifaces",
-                    "paths": [
-                        "tests/unit/composition",
-                        "tests/unit/interfaces",
-                        "tests/unit/cli",
-                        "tests/unit/contracts",
-                        "tests/unit/pipelines",
-                    ],
-                },
-                {
-                    "id": "S6.6",
-                    "name": "Integration+Other",
-                    "paths": [
-                        "tests/integration",
-                        "tests/e2e",
-                        "tests/contract",
-                        "tests/security",
-                        "tests/smoke",
-                        "tests/performance",
-                        "tests/benchmarks",
-                    ],
-                },
-            ]
-        elif sector_id == "S8":
-            covered_doc_paths = set(
-                self._existing_paths(
-                    "docs/00-project",
-                    "docs/01-requirements",
-                    "docs/02-architecture",
-                    "docs/04-reference",
-                )
-            )
-            return [
-                {
-                    "id": "S8.1",
-                    "name": "Project+Reqs",
-                    "paths": self._existing_paths(
-                        "docs/00-project", "docs/01-requirements"
-                    ),
-                },
-                {
-                    "id": "S8.2",
-                    "name": "Architecture",
-                    "paths": self._existing_paths("docs/02-architecture"),
-                },
-                {
-                    "id": "S8.3",
-                    "name": "Reference",
-                    "paths": self._existing_paths("docs/04-reference"),
-                },
-                {
-                    "id": "S8.4",
-                    "name": "Guides+Other Docs",
-                    "paths": self._dedupe_paths(
-                        self._existing_paths(
-                            "docs/03-guides",
-                            "docs/05-operations",
-                        )
-                        + self._remaining_subdirs("docs", covered_doc_paths)
-                    ),
-                },
-            ]
-        return []
+        subsector_builders = {
+            "S1": self._domain_subsectors,
+            "S2": lambda: self._static_subsectors("S2"),
+            "S3": lambda: self._static_subsectors("S3"),
+            "S4": lambda: self._static_subsectors("S4"),
+            "S5": lambda: self._static_subsectors("S5"),
+            "S6": lambda: self._static_subsectors("S6"),
+            "S7": self._config_subsectors,
+            "S8": self._docs_subsectors,
+        }
+        builder = subsector_builders.get(sector_id)
+        if builder is None:
+            return []
+        return builder()
 
     def analyze_yaml_file(self, file_path: Path, _sector_id: str) -> list[Issue]:
         issues: list[Issue] = []
@@ -1045,11 +1091,8 @@ class ReviewOrchestrator:
         score, _ = self.calculate_score(result.issues)
         status = self.get_status(score)
 
-        crit_count = sum(1 for i in result.issues if i.severity == "CRITICAL")
-        high_count = sum(1 for i in result.issues if i.severity == "HIGH")
-
         report = f"# Code Review Report — {result.sector_id}: {result.sector_name}\n\n"
-        report += f"**Date**: {datetime.now().strftime('%Y-%m-%d')}\n"
+        report += f"**Date**: {self._today()}\n"
         report += f"**Scope**: {', '.join(result.scope_paths)}\n"
         report += f"**Files reviewed**: {result.files_reviewed}\n"
         report += f"**Total LOC**: {result.total_loc}\n"
@@ -1059,21 +1102,7 @@ class ReviewOrchestrator:
         report += "| Category | Issues | CRIT | HIGH | MED | LOW | Score |\n"
         report += "|----------|--------|------|------|-----|-----|-------|\n"
 
-        cat_stats: dict[str, dict[str, int]] = {}
-        for issue in result.issues:
-            cat = issue.category
-            if cat not in cat_stats:
-                cat_stats[cat] = {
-                    "total": 0,
-                    "CRITICAL": 0,
-                    "HIGH": 0,
-                    "MEDIUM": 0,
-                    "LOW": 0,
-                }
-            cat_stats[cat]["total"] += 1
-            cat_stats[cat][issue.severity] += 1
-
-        _, cat_scores = self.calculate_score(result.issues)
+        cat_stats, cat_scores = self._category_stats(result.issues)
 
         for cat in cat_stats:
             stats = cat_stats[cat]
@@ -1095,11 +1124,7 @@ class ReviewOrchestrator:
             report += f"- **Fix**: {issue.suggested_fix}\n"
             report += f"- **Verification**: `{issue.verification}`\n\n"
 
-        report_path = (
-            self.reports_dir
-            / f"{result.sector_id}-{result.sector_name.replace('+', '_').replace(' ', '_')}.md"
-        )
-        report_path.write_text(report, encoding="utf-8")
+        self._sector_report_path(result).write_text(report, encoding="utf-8")
 
     def write_orchestrator_report(self, result: SectorResult) -> None:
         if not result.sub_results:
@@ -1132,7 +1157,7 @@ class ReviewOrchestrator:
         overall_status = self.get_status(weighted_score_sum)
 
         report = f"# Consolidated Review — {result.sector_id}: {result.sector_name}\n\n"
-        report += f"**Date**: {datetime.now().strftime('%Y-%m-%d')}\n"
+        report += f"**Date**: {self._today()}\n"
         report += f"**Sub-reviews**: {len(result.sub_results)} agents\n"
         report += f"**Status**: {overall_status}\n"
         report += f"**Consolidated Score**: {weighted_score_sum:.1f}\n\n"
@@ -1145,11 +1170,7 @@ class ReviewOrchestrator:
         for i, issue in enumerate(all_crit[:20]):  # Limit to 20 for brevity
             report += f"{i + 1}. **{issue.rule_id}** in `{issue.file_path}:{issue.line}` - {issue.description}\n"
 
-        report_path = (
-            self.reports_dir
-            / f"{result.sector_id}-{result.sector_name.replace('+', '_').replace(' ', '_')}.md"
-        )
-        report_path.write_text(report, encoding="utf-8")
+        self._sector_report_path(result).write_text(report, encoding="utf-8")
 
     def write_final_report(self, results: list[SectorResult]) -> None:
         total_files = sum(r.files_reviewed for r in results)
@@ -1195,13 +1216,12 @@ class ReviewOrchestrator:
 
         overall_status = self.get_status(final_score)
 
-        crit_issues = [i for i in all_issues if i.severity == "CRITICAL"]
-        high_issues = [i for i in all_issues if i.severity == "HIGH"]
-        med_issues = [i for i in all_issues if i.severity == "MEDIUM"]
-        low_issues = [i for i in all_issues if i.severity == "LOW"]
+        crit_issues, high_issues, med_issues, low_issues = self._severity_partition(
+            all_issues
+        )
 
         report = "# BioETL — Full Project Review Report\n\n"
-        report += f"**Date**: {datetime.now().strftime('%Y-%m-%d')}\n"
+        report += f"**Date**: {self._today()}\n"
         report += f"**RULES.md Version**: {self._detect_rules_version()}\n"
         report += "**Project Version**: 1.0.0\n"
         report += f"**Total files reviewed**: {total_files}\n"
@@ -1298,6 +1318,33 @@ class ReviewOrchestrator:
         print("Review complete. Reports generated in reports/review/")
 
 
-if __name__ == "__main__":
-    orchestrator = ReviewOrchestrator()
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Run hierarchical BioETL code review orchestration.",
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path.cwd(),
+        help="Repository root to analyze.",
+    )
+    parser.add_argument(
+        "--reports-dir",
+        type=Path,
+        help="Optional directory for generated review reports.",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parser().parse_args(argv)
+    orchestrator = ReviewOrchestrator(
+        repo_root=args.repo_root,
+        reports_dir=args.reports_dir,
+    )
     orchestrator.run()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

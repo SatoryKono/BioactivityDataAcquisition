@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
@@ -100,6 +101,7 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
             raise InvalidStateError("Required enricher failed: req_a")
 
     async def _call_save_checkpoint_safe(self, state: Any, operation: str) -> bool:
+        await asyncio.sleep(0)
         return True
 
     def _transition_state_with_fsm_log(
@@ -121,6 +123,7 @@ class _EnrichmentHarness(_CompositeRunnerStageEnrichmentMixin):
         stage: str,
         error: str,
     ) -> Any:
+        await asyncio.sleep(0)
         return state
 
     def _record_enrichment_stage_started(self, enricher_names: list[str]) -> None:

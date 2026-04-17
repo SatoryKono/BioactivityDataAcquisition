@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
+import asyncio
 from collections.abc import Callable
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
@@ -105,9 +106,11 @@ class _StageSupportHarness(_CompositeRunnerStageSupportMixin):
         state: Any,
         operation: str,
     ) -> bool:
+        await asyncio.sleep(0)
         return True
 
     async def _run_seed(self) -> Any:  # type: ignore[override]
+        await asyncio.sleep(0)
         raise NotImplementedError("inject via test")
 
     def _get_enrichers_to_run(self, state: Any) -> list[Any]:  # type: ignore[override]
