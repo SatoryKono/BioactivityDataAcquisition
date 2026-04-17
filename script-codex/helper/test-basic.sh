@@ -51,7 +51,7 @@ echo ""
 # Test 5: Check project path
 echo "[5] Testing project path..."
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-if [ -d "$REPO_ROOT" ]; then
+if [[ -d "$REPO_ROOT" ]]; then
     echo "✓ Project path accessible: $REPO_ROOT"
 else
     echo "✗ Project path not found"

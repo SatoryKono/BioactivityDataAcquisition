@@ -505,12 +505,6 @@
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded skills-mirror verification helper while local Codex skill mirroring remains an operator-maintained support surface."
-    },
-    "scripts/repo/check_scripts_catalog.py": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a thin legacy facade to scripts/engineering/repo/check_scripts_catalog.py while architecture tests and historical tooling still import the old scripts/repo path."
     }
   }
 }
