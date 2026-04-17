@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T07:58:25.666463+00:00",
+  "generated_at": "2026-04-17T08:08:44.522969+00:00",
   "summary": {
-    "total_scripts": 392,
+    "total_scripts": 393,
     "status_counts": {
-      "active": 307,
+      "active": 308,
       "legacy": 10,
       "orphan": 66,
       "unknown": 9
     },
     "reference_group_coverage": {
-      "agents": 10,
+      "agents": 11,
       "build": 1,
       "ci": 49,
       "docs": 118,
       "scripts": 295,
-      "skills": 8,
+      "skills": 9,
       "tests": 100
     }
   },
@@ -3523,25 +3523,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 472,
+          "line": 475,
           "source_group": "docs",
           "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$svg_out\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 480,
+          "line": 483,
           "source_group": "docs",
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$svg_out\" >/dev/null 2>&1; then"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 528,
+          "line": 535,
           "source_group": "docs",
           "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 536,
+          "line": 543,
           "source_group": "docs",
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
         },
@@ -4392,13 +4392,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 500,
+          "line": 507,
           "source_group": "docs",
           "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/inject_svg_styles.py\" --fix -f \"$svg_out\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 554,
+          "line": 566,
           "source_group": "docs",
           "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/inject_svg_styles.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
         },
@@ -4721,13 +4721,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 484,
+          "line": 487,
           "source_group": "docs",
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py\" --fix -f \"$svg_out\" >/dev/null 2>&1; then"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 541,
+          "line": 548,
           "source_group": "docs",
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
         },
@@ -4805,7 +4805,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 36,
+          "line": 42,
           "source_group": "tests",
           "text": "svg2png_path = \"/\".join([\"scripts\", \"diagrams\", \"svg2png.mjs\"])"
         }
@@ -5804,9 +5804,9 @@
         },
         {
           "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 44,
+          "line": 54,
           "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"ci\" / \"_compatibility_registry.py\","
+          "text": "/ \"_compatibility_registry.py\","
         },
         {
           "path": "tests/architecture/test_compatibility_telemetry_reporting.py",
@@ -10791,6 +10791,65 @@
           "line": 393,
           "source_group": "docs",
           "text": "- `scripts/ops/wsl_proxy.py` - HTTP proxy bridge"
+        }
+      ]
+    },
+    {
+      "path": "scripts/qa/__main__.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [
+        "py-architecture-debt-bot"
+      ],
+      "reference_count": 9,
+      "references": [
+        {
+          "path": ".codex/agents/py-architecture-debt-bot.md",
+          "line": 22,
+          "source_group": "agents",
+          "text": "- Runtime generator: `python -m scripts.qa generate-debt-tasks`"
+        },
+        {
+          "path": ".codex/agents/py-architecture-debt-bot.md",
+          "line": 23,
+          "source_group": "agents",
+          "text": "- Runtime planner: `python -m scripts.qa reduce-architecture-debt`"
+        },
+        {
+          "path": ".codex/agents/py-architecture-debt-bot.md",
+          "line": 24,
+          "source_group": "agents",
+          "text": "- Registry verification gate: `python -m scripts.qa check-exemptions --mode auto --growth-mode auto --trend-report off`"
+        },
+        {
+          "path": ".codex/agents/py-architecture-debt-bot.md",
+          "line": 55,
+          "source_group": "agents",
+          "text": "python -m scripts.qa generate-debt-tasks"
+        },
+        {
+          "path": ".codex/agents/py-architecture-debt-bot.md",
+          "line": 56,
+          "source_group": "agents",
+          "text": "python -m scripts.qa reduce-architecture-debt"
+        },
+        {
+          "path": ".codex/agents/py-architecture-debt-bot.md",
+          "line": 89,
+          "source_group": "agents",
+          "text": "3. Построй/обнови execution plan через `python -m scripts.qa reduce-architecture-debt`."
+        },
+        {
+          "path": ".codex/agents/py-architecture-debt-bot.md",
+          "line": 120,
+          "source_group": "agents",
+          "text": "python -m scripts.qa check-exemptions --mode auto --growth-mode auto --trend-report off"
+        },
+        {
+          "path": ".codex/skills/py-architecture-debt-bot/SKILL.md",
+          "line": 17,
+          "source_group": "skills",
+          "text": "- `python -m scripts.qa generate-debt-tasks`"
         }
       ]
     },
