@@ -63,7 +63,7 @@ out of the repository root and archived under
 
 7. Build and sync the deterministic repo graph:
    ```bash
-   python -m scripts.ops sync-neo4j-memory --apply
+   python -m scripts.memory sync --apply
    ```
    This snapshot now covers repo-derived docs, configs, layers/modules, tests,
    dashboards, execution paths, curated policy surfaces, and a semantic
@@ -95,7 +95,7 @@ out of the repository root and archived under
 8. When you intentionally want to remove stale repo-derived graph nodes from the
    current ingest wave, run the explicit prune mode:
    ```bash
-   python -m scripts.ops sync-neo4j-memory --apply --prune-stale
+   python -m scripts.memory sync --apply --prune-stale
    ```
    This mode is destructive for stale repo-derived nodes and resets managed
    relations between repo-managed nodes before recreating them.
@@ -103,10 +103,10 @@ out of the repository root and archived under
 8a. For selective rebuild/debug of one graph shard without exporting the full
    repo snapshot, use one of the shard filters:
    ```bash
-   python -m scripts.ops sync-neo4j-memory --export /tmp/storage-memory.json --only-storage-layer
-   python -m scripts.ops sync-neo4j-memory --export /tmp/runtime-memory.json --only-runtime-evidence-layer
-   python -m scripts.ops sync-neo4j-memory --export /tmp/workflow-memory.json --only-workflow-graph
-   python -m scripts.ops sync-neo4j-memory --export /tmp/docs-drift-memory.json --only-docs-drift
+   python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer
+   python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer
+   python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph
+   python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift
    ```
    These filters reuse the normal deterministic builder but keep only the
    requested shard plus the minimal relation-linked context needed to inspect
@@ -114,20 +114,20 @@ out of the repository root and archived under
 
 9. When you want an audit snapshot without manual Neo4j inspection, run:
    ```bash
-   python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json
+   python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json
    ```
    The report includes snapshot stats, live managed/unmanaged summaries,
    orphan counts, and label/relation diffs against the current managed wave.
    On Windows-host HTTP sync, prefer the lighter health-check mode:
    ```bash
-   python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json
+   python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json
    ```
    This focuses on critical analysis labels/relations and is less likely to hit
    transport instability on large live-count scans.
 
 10. When you need a full rebuild of the current managed repo graph wave, use:
    ```bash
-   python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave
+   python -m scripts.memory sync --apply --full-reset-managed-wave
    ```
    This mode is more destructive than `--prune-stale`: it deletes the entire
    current managed wave before recreating it from the repository snapshot.
@@ -136,7 +136,7 @@ out of the repository root and archived under
     managed-only state, including cleanup of older unmanaged nodes from earlier
     manual/legacy ingestion waves, run:
     ```bash
-    python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged
+    python -m scripts.memory sync --apply --full-reset-managed-wave --prune-legacy-unmanaged
     ```
     This mode keeps unrelated labels such as `MemoryEntity` intact, but it
     deletes unmanaged legacy nodes for the repo-derived label families now owned
@@ -166,45 +166,45 @@ out of the repository root and archived under
 14. For operator-facing ownership lookups on the deterministic file-structure
     layer, use:
     ```bash
-    python -m scripts.ops query-neo4j-memory owner-contract chembl.activity
-    python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity
-    python -m scripts.ops query-neo4j-memory owner-alert BioETLPipelineRunFailed
-    python -m scripts.ops query-neo4j-memory owner-doc "architecture diagrams hub"
-    python -m scripts.ops query-neo4j-memory owner-storage silver/chembl/activity
-    python -m scripts.ops query-neo4j-memory owner-runtime-evidence run_manifest
-    python -m scripts.ops query-neo4j-memory owner-workflow tests
-    python -m scripts.ops query-neo4j-memory owner-workflow-job tests::governance-preflight
-    python -m scripts.ops query-neo4j-memory owner-cli-command "scripts.ops sync-neo4j-memory"
-    python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity
-    python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed
-    python -m scripts.ops query-neo4j-memory neighbors-storage silver/chembl/activity
-    python -m scripts.ops query-neo4j-memory neighbors-runtime-evidence run_manifest
-    python -m scripts.ops query-neo4j-memory neighbors-run-instance manifest-chain-smoke
-    python -m scripts.ops query-neo4j-memory neighbors-workflow tests
-    python -m scripts.ops query-neo4j-memory neighbors-workflow-job tests::governance-preflight
-    python -m scripts.ops query-neo4j-memory neighbors-cli-command "bioetl run"
-    python -m scripts.ops query-neo4j-memory docs-drift all
-    python -m scripts.ops query-neo4j-memory workflow-gates tests
-    python -m scripts.ops query-neo4j-memory workflow-artifacts tests
-    python -m scripts.ops query-neo4j-memory storage-lineage silver/chembl/activity
-    python -m scripts.ops query-neo4j-memory field-lineage silver/chembl/activity
-    python -m scripts.ops query-neo4j-memory schema-drift silver/chembl/assay
-    python -m scripts.ops query-neo4j-memory run-artifacts manifest-chain-smoke
-    python -m scripts.ops query-neo4j-memory runtime-state all
-    python -m scripts.ops query-neo4j-memory runtime-locks all
-    python -m scripts.ops query-neo4j-memory workflow-execution all
-    python -m scripts.ops query-neo4j-memory claim-trace all
-    python -m scripts.ops query-neo4j-memory cli-semantics "bioetl run"
-    python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608
-    python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer
-    python -m scripts.ops query-neo4j-memory promotion-candidates all
-    python -m scripts.ops query-neo4j-memory dead-code-candidates adapter_layer
-    python -m scripts.ops query-neo4j-memory current-cycle-code adapter_layer
-    python -m scripts.ops query-neo4j-memory overengineered-candidates composite_layer
-    python -m scripts.ops query-neo4j-memory removable-complexity composite_layer
-    python -m scripts.ops query-neo4j-memory simplification-blockers adapter_layer
-    python -m scripts.ops query-neo4j-memory normalization-pipeline chembl_activity
-    python -m scripts.ops query-neo4j-memory fallback-pipelines all
+    python -m scripts.memory query owner-contract chembl.activity
+    python -m scripts.memory query owner-pipeline chembl_activity
+    python -m scripts.memory query owner-alert BioETLPipelineRunFailed
+    python -m scripts.memory query owner-doc "architecture diagrams hub"
+    python -m scripts.memory query owner-storage silver/chembl/activity
+    python -m scripts.memory query owner-runtime-evidence run_manifest
+    python -m scripts.memory query owner-workflow tests
+    python -m scripts.memory query owner-workflow-job tests::governance-preflight
+    python -m scripts.memory query owner-cli-command "scripts.memory sync"
+    python -m scripts.memory query neighbors-pipeline chembl_activity
+    python -m scripts.memory query neighbors-alert BioETLPipelineRunFailed
+    python -m scripts.memory query neighbors-storage silver/chembl/activity
+    python -m scripts.memory query neighbors-runtime-evidence run_manifest
+    python -m scripts.memory query neighbors-run-instance manifest-chain-smoke
+    python -m scripts.memory query neighbors-workflow tests
+    python -m scripts.memory query neighbors-workflow-job tests::governance-preflight
+    python -m scripts.memory query neighbors-cli-command "bioetl run"
+    python -m scripts.memory query docs-drift all
+    python -m scripts.memory query workflow-gates tests
+    python -m scripts.memory query workflow-artifacts tests
+    python -m scripts.memory query storage-lineage silver/chembl/activity
+    python -m scripts.memory query field-lineage silver/chembl/activity
+    python -m scripts.memory query schema-drift silver/chembl/assay
+    python -m scripts.memory query run-artifacts manifest-chain-smoke
+    python -m scripts.memory query runtime-state all
+    python -m scripts.memory query runtime-locks all
+    python -m scripts.memory query workflow-execution all
+    python -m scripts.memory query claim-trace all
+    python -m scripts.memory query cli-semantics "bioetl run"
+    python -m scripts.memory query duplication-cluster adapter_layer:method_surface:de487f71c608
+    python -m scripts.memory query promotion-candidates adapter_layer
+    python -m scripts.memory query promotion-candidates all
+    python -m scripts.memory query dead-code-candidates adapter_layer
+    python -m scripts.memory query current-cycle-code adapter_layer
+    python -m scripts.memory query overengineered-candidates composite_layer
+    python -m scripts.memory query removable-complexity composite_layer
+    python -m scripts.memory query simplification-blockers adapter_layer
+    python -m scripts.memory query normalization-pipeline chembl_activity
+    python -m scripts.memory query fallback-pipelines all
     ```
 
 15. Normalization topology is now refreshed from current shipped evidence during
@@ -215,10 +215,10 @@ out of the repository root and archived under
     normalization changes so future audits query current evidence instead of a
     stale topology snapshot:
     ```bash
-    python -m scripts.ops sync-neo4j-memory --apply
-    python -m scripts.ops sync-neo4j-memory --apply-normalization-evidence-only
-    python -m scripts.ops query-neo4j-memory normalization-pipeline chembl_activity
-    python -m scripts.ops query-neo4j-memory fallback-pipelines all
+    python -m scripts.memory sync --apply
+    python -m scripts.memory sync --apply-normalization-evidence-only
+    python -m scripts.memory query normalization-pipeline chembl_activity
+    python -m scripts.memory query fallback-pipelines all
     ```
     The normalization-only path now emits per-batch progress JSON to stderr and
     returns batch/timing telemetry in its final summary. When a live refresh
@@ -230,16 +230,16 @@ out of the repository root and archived under
     health check and treat targeted analysis-layer syncs as dependent on a
     current base graph:
     ```bash
-    python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json
-    python -m scripts.ops sync-neo4j-memory --apply --only-retirement-layer
-    python -m scripts.ops sync-neo4j-memory --apply --only-complexity-layer
+    python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json
+    python -m scripts.memory sync --apply --only-retirement-layer
+    python -m scripts.memory sync --apply --only-complexity-layer
     ```
     `--report-fast` is the recommended operator path for quick local validation.
     Targeted retirement/complexity syncs assume the live graph already contains
     the required repo anchor nodes from a recent base sync. If the repository
     changed and those anchors are stale or missing, targeted sync now fails fast
     with the exact missing anchor nodes and a
-    `sync-neo4j-memory --apply --prune-stale` remediation hint instead of
+    `python -m scripts.memory sync --apply --prune-stale` remediation hint instead of
     drifting into a late relation-count mismatch. After repeated targeted runs,
     prefer `--apply --prune-stale` over a plain `--apply` so stale managed rows
     from older `sync_run` values do not pollute the next base verification pass.
@@ -247,9 +247,9 @@ out of the repository root and archived under
 17. For a quick local smoke after memory-surface extensions, verify at least
     one path from each high-value coverage block:
     ```bash
-    python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json
-    python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity
-    python -m scripts.ops query-neo4j-memory owner-contract chembl.activity
+    python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json
+    python -m scripts.memory query owner-pipeline chembl_activity
+    python -m scripts.memory query owner-contract chembl.activity
     ```
     Then inspect the exported audit JSON or Neo4j Browser for:
     - `storage_surface` such as `silver/chembl/activity`

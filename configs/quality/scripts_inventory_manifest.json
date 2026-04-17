@@ -4638,7 +4638,7 @@
           "text": "| `scripts/diagrams/svg2png.mjs` | Node.js SVG-to-PNG converter |"
         },
         {
-          "path": "scripts/ops/neo4j_memory_sync.py",
+          "path": "scripts/memory/sync.py",
           "line": 150,
           "source_group": "scripts",
           "text": "\"scripts/diagrams/svg2png.mjs\","
@@ -5420,7 +5420,7 @@
           "text": "\"verify\": \"verify_docs.py\","
         },
         {
-          "path": "scripts/ops/neo4j_memory_sync.py",
+          "path": "scripts/memory/sync.py",
           "line": 519,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
@@ -6233,49 +6233,49 @@
           "path": "docs/00-project/ai/memory/README.md",
           "line": 27,
           "source_group": "docs",
-          "text": "`python -m scripts.ops sync-neo4j-memory`"
+          "text": "`python -m scripts.memory sync`"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
           "line": 68,
           "source_group": "docs",
-          "text": "Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:"
+          "text": "Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
           "line": 72,
           "source_group": "docs",
-          "text": "`python -m scripts.ops sync-neo4j-memory --export /tmp/storage-memory.json --only-storage-layer`,"
+          "text": "`python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
           "line": 73,
           "source_group": "docs",
-          "text": "`python -m scripts.ops sync-neo4j-memory --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
+          "text": "`python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
           "line": 74,
           "source_group": "docs",
-          "text": "`python -m scripts.ops sync-neo4j-memory --export /tmp/workflow-memory.json --only-workflow-graph`,"
+          "text": "`python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
           "line": 75,
           "source_group": "docs",
-          "text": "`python -m scripts.ops sync-neo4j-memory --export /tmp/docs-drift-memory.json --only-docs-drift`."
+          "text": "`python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift`."
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
           "line": 76,
           "source_group": "docs",
-          "text": "Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:"
+          "text": "Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
           "line": 80,
           "source_group": "docs",
-          "text": "`python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json`:"
+          "text": "`python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json`:"
         }
       ]
     },
@@ -6359,7 +6359,7 @@
           "path": "scripts/ops/README.md",
           "line": 19,
           "source_group": "scripts",
-          "text": "- checks and wrappers such as `check_mcp.sh`, `check_neo4j_mcp.sh`,"
+          "text": "- checks and wrappers such as `check_mcp.sh`, `check.sh`,"
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -6370,7 +6370,7 @@
       ]
     },
     {
-      "path": "scripts/ops/check_neo4j_mcp.sh",
+      "path": "scripts/memory/mcp/check.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -6380,49 +6380,49 @@
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 70,
           "source_group": "docs",
-          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 173,
           "source_group": "docs",
-          "text": "3. Run verification: `bash scripts/ops/check_neo4j_mcp.sh`"
+          "text": "3. Run verification: `bash scripts/memory/mcp/check.sh`"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 193,
           "source_group": "docs",
-          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 68,
           "source_group": "docs",
-          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 93,
           "source_group": "docs",
-          "text": "| **check_neo4j_mcp.sh** | `scripts/ops/` | Full MCP + backend health check |"
+          "text": "| **check.sh** | `scripts/ops/` | Full MCP + backend health check |"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 100,
           "source_group": "docs",
-          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 189,
           "source_group": "docs",
-          "text": "bash scripts/ops/check_neo4j_mcp.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
           "line": 30,
           "source_group": "docs",
-          "text": "- **[check_neo4j_mcp.sh](../../../scripts/ops/check_neo4j_mcp.sh)** - Comprehensive MCP + backend health check"
+          "text": "- **[check.sh](../../../scripts/memory/mcp/check.sh)** - Comprehensive MCP + backend health check"
         }
       ]
     },
@@ -7490,7 +7490,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_neo4j_memory_wrapper.ps1",
+      "path": "scripts/memory/mcp/wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7500,12 +7500,12 @@
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 100,
           "source_group": "tests",
-          "text": "assert \"mcp_neo4j_memory_wrapper.ps1\" in servers[\"neo4j-memory\"][\"args\"][-1]"
+          "text": "assert \"wrapper.ps1\" in servers[\"neo4j-memory\"][\"args\"][-1]"
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_neo4j_memory_wrapper.sh",
+      "path": "scripts/memory/mcp/wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7515,49 +7515,49 @@
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
           "line": 74,
           "source_group": "docs",
-          "text": "\"scripts/ops/mcp_neo4j_memory_wrapper.sh\","
+          "text": "\"scripts/memory/mcp/wrapper.sh\","
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 10,
           "source_group": "docs",
-          "text": "- `scripts/ops/mcp_neo4j_memory_wrapper.sh` (wrapper script)"
+          "text": "- `scripts/memory/mcp/wrapper.sh` (wrapper script)"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 63,
           "source_group": "docs",
-          "text": "Command: scripts/ops/mcp_neo4j_memory_wrapper.sh"
+          "text": "Command: scripts/memory/mcp/wrapper.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 126,
           "source_group": "docs",
-          "text": "The wrapper script (`mcp_neo4j_memory_wrapper.sh`) will:"
+          "text": "The wrapper script (`wrapper.sh`) will:"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 172,
           "source_group": "docs",
-          "text": "2. Check wrapper script exists: `ls -la scripts/ops/mcp_neo4j_memory_wrapper.sh`"
+          "text": "2. Check wrapper script exists: `ls -la scripts/memory/mcp/wrapper.sh`"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 46,
           "source_group": "docs",
-          "text": "| `scripts/ops/mcp_neo4j_memory_wrapper.sh` | MCP wrapper script | ✅ Ready |"
+          "text": "| `scripts/memory/mcp/wrapper.sh` | MCP wrapper script | ✅ Ready |"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 113,
           "source_group": "docs",
-          "text": "Used by `mcp_neo4j_memory_wrapper.sh`:"
+          "text": "Used by `wrapper.sh`:"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
           "line": 14,
           "source_group": "docs",
-          "text": "- **Wrapper Script**: `scripts/ops/mcp_neo4j_memory_wrapper.sh` created"
+          "text": "- **Wrapper Script**: `scripts/memory/mcp/wrapper.sh` created"
         }
       ]
     },
@@ -7715,14 +7715,14 @@
       "references": []
     },
     {
-      "path": "scripts/ops/neo4j_memory_mcp_adapter.py",
+      "path": "scripts/memory/mcp_adapter.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
         {
-          "path": "scripts/ops/mcp_neo4j_memory_wrapper.sh",
+          "path": "scripts/memory/mcp/wrapper.sh",
           "line": 54,
           "source_group": "scripts",
           "text": "exec \"${PYTHON_BIN}\" \"${SCRIPT_DIR}/neo4j_memory_mcp_adapter.py\" -- \\"
@@ -7731,7 +7731,7 @@
           "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
           "line": 51,
           "source_group": "tests",
-          "text": "adapter = Path(\"scripts/ops/neo4j_memory_mcp_adapter.py\").resolve()"
+          "text": "adapter = Path(\"scripts/memory/mcp_adapter.py\").resolve()"
         },
         {
           "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
@@ -7742,7 +7742,7 @@
       ]
     },
     {
-      "path": "scripts/ops/neo4j_memory_mcp_smoke.py",
+      "path": "scripts/memory/mcp_smoke.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7757,7 +7757,7 @@
       ]
     },
     {
-      "path": "scripts/ops/neo4j_memory_query.py",
+      "path": "scripts/memory/query.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7767,7 +7767,7 @@
           "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
           "line": 205,
           "source_group": "docs",
-          "text": "- `scripts/ops/neo4j_memory_query.py`"
+          "text": "- `scripts/memory/query.py`"
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -7778,7 +7778,7 @@
       ]
     },
     {
-      "path": "scripts/ops/neo4j_memory_sync.py",
+      "path": "scripts/memory/sync.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -7788,7 +7788,7 @@
           "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
           "line": 206,
           "source_group": "docs",
-          "text": "- `scripts/ops/neo4j_memory_sync.py`"
+          "text": "- `scripts/memory/sync.py`"
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -7844,7 +7844,7 @@
       ]
     },
     {
-      "path": "scripts/ops/print_neo4j_memory_seed.sh",
+      "path": "scripts/memory/prompts/print_seed.sh",
       "type": "sh",
       "status": "orphan",
       "agent_usage": [],
@@ -8033,7 +8033,7 @@
       ]
     },
     {
-      "path": "scripts/ops/smoke_test_neo4j_mcp.sh",
+      "path": "scripts/memory/mcp/check.sh",
       "type": "sh",
       "status": "unknown",
       "agent_usage": [],
@@ -8043,18 +8043,18 @@
           "path": "docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md",
           "line": 37,
           "source_group": "docs",
-          "text": "bash scripts/ops/smoke_test_neo4j_mcp.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md",
           "line": 48,
           "source_group": "docs",
-          "text": "bash scripts/ops/smoke_test_neo4j_mcp.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         }
       ]
     },
     {
-      "path": "scripts/ops/smoke_test_neo4j_mcp_knowall.ps1",
+      "path": "scripts/memory/mcp/check.sh",
       "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
@@ -8062,7 +8062,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/smoke_test_neo4j_mcp_knowall.sh",
+      "path": "scripts/memory/mcp/check.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -8072,49 +8072,49 @@
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 30,
           "source_group": "docs",
-          "text": "1. Run smoke test: bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+          "text": "1. Run smoke test: bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 36,
           "source_group": "docs",
-          "text": "bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 101,
           "source_group": "docs",
-          "text": "| `scripts/ops/smoke_test_neo4j_mcp_knowall.sh` | ⭐ Verify setup (run second) |"
+          "text": "| `scripts/memory/mcp/check.sh` | ⭐ Verify setup (run second) |"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 128,
           "source_group": "docs",
-          "text": "bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 161,
           "source_group": "docs",
-          "text": "bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/verification/neo4j-memory-windows-verification.md",
           "line": 63,
           "source_group": "docs",
-          "text": "You ran `bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh` from PowerShell."
+          "text": "You ran `bash scripts/memory/mcp/check.sh` from PowerShell."
         },
         {
           "path": "scripts/dev/bash/WSL_COMMANDS.sh",
           "line": 21,
           "source_group": "scripts",
-          "text": "bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh"
+          "text": "bash scripts/memory/mcp/check.sh"
         },
         {
-          "path": "scripts/ops/wsl_neo4j_startup.sh",
+          "path": "scripts/memory/setup/wsl_startup.sh",
           "line": 328,
           "source_group": "scripts",
-          "text": "printf \"   ${BLUE}bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh${NC}\\n\\n\""
+          "text": "printf \"   ${BLUE}bash scripts/memory/mcp/check.sh${NC}\\n\\n\""
         }
       ]
     },
@@ -8434,7 +8434,7 @@
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
         {
-          "path": "scripts/ops/mcp_neo4j_memory_wrapper.ps1",
+          "path": "scripts/memory/mcp/wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
@@ -8479,13 +8479,13 @@
           "text": "source \"${SCRIPT_DIR}/support/load_repo_env.sh\""
         },
         {
-          "path": "scripts/ops/check_neo4j_mcp.sh",
+          "path": "scripts/memory/mcp/check.sh",
           "line": 37,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/load_repo_env.sh"
         },
         {
-          "path": "scripts/ops/check_neo4j_mcp.sh",
+          "path": "scripts/memory/mcp/check.sh",
           "line": 38,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/support/load_repo_env.sh\""
@@ -8538,7 +8538,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/wsl_neo4j_startup.sh",
+      "path": "scripts/memory/setup/wsl_startup.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -8548,49 +8548,49 @@
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
           "line": 75,
           "source_group": "docs",
-          "text": "\"scripts/ops/wsl_neo4j_startup.sh\","
+          "text": "\"scripts/memory/setup/wsl_startup.sh\","
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 13,
           "source_group": "docs",
-          "text": "bash scripts/ops/wsl_neo4j_startup.sh"
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 100,
           "source_group": "docs",
-          "text": "| `scripts/ops/wsl_neo4j_startup.sh` | ⭐ Start Neo4j (run first) |"
+          "text": "| `scripts/memory/setup/wsl_startup.sh` | ⭐ Start Neo4j (run first) |"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 120,
           "source_group": "docs",
-          "text": "bash scripts/ops/wsl_neo4j_startup.sh"
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 158,
           "source_group": "docs",
-          "text": "bash scripts/ops/wsl_neo4j_startup.sh"
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 248,
           "source_group": "docs",
-          "text": "# Edit wsl_neo4j_startup.sh and modify:"
+          "text": "# Edit wsl_startup.sh and modify:"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 303,
           "source_group": "docs",
-          "text": "**Ready to start?** Run: `bash scripts/ops/wsl_neo4j_startup.sh`"
+          "text": "**Ready to start?** Run: `bash scripts/memory/setup/wsl_startup.sh`"
         },
         {
           "path": "scripts/dev/bash/WSL_COMMANDS.sh",
           "line": 9,
           "source_group": "scripts",
-          "text": "bash scripts/ops/wsl_neo4j_startup.sh"
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
         }
       ]
     },
@@ -10716,7 +10716,7 @@
       ]
     },
     {
-      "path": "scripts/setup-neo4j-wsl.sh",
+      "path": "scripts/memory/setup/wsl_startup.sh",
       "type": "sh",
       "status": "unknown",
       "agent_usage": [],
@@ -10726,25 +10726,25 @@
           "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
           "line": 85,
           "source_group": "docs",
-          "text": "bash scripts/setup-neo4j-wsl.sh"
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
           "line": 112,
           "source_group": "docs",
-          "text": "| `scripts/setup-neo4j-wsl.sh` | WSL-aware setup and validation path |"
+          "text": "| `scripts/memory/setup/wsl_startup.sh` | WSL-aware setup and validation path |"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
           "line": 144,
           "source_group": "docs",
-          "text": "bash scripts/setup-neo4j-wsl.sh"
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
         },
         {
           "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
           "line": 163,
           "source_group": "docs",
-          "text": "- `bash scripts/setup-neo4j-wsl.sh` succeeds"
+          "text": "- `bash scripts/memory/setup/wsl_startup.sh` succeeds"
         }
       ]
     },

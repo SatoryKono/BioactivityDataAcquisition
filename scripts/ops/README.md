@@ -1,7 +1,8 @@
 # scripts/ops
 
 `scripts/ops/` now separates stable executable tooling from internal helper
-assets and bounded maintenance scripts.
+assets and bounded maintenance scripts. Neo4j project-memory tooling now lives
+under `scripts/memory/`.
 
 ## Structure
 
@@ -16,11 +17,11 @@ assets and bounded maintenance scripts.
 
 - launchers such as `codex.sh`, `codex.bat`
 - canonical Mistral Vibe wrappers live under `script-mistrallvibe/`
-- checks and wrappers such as `check_mcp.sh`, `check_neo4j_mcp.sh`,
+- checks and wrappers such as `check_mcp.sh` and non-memory
   `mcp_*_wrapper.{sh,ps1}`
 - setup/bootstrap commands such as `setup_agents.sh`, `setup_plugins.sh`,
   `setup_skills.sh`
-- supported Python commands exposed through `python -m scripts.ops`
+- supported non-memory Python commands exposed through `python -m scripts.ops`
 
 ## Internal-only zones
 
@@ -37,3 +38,4 @@ as the basis for new public command surfaces.
 ## Canonical docs
 
 See [docs/05-operations/tooling/scripts-ops/INDEX.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/05-operations/tooling/scripts-ops/INDEX.md).
+For project-memory tooling, see [scripts/memory/README.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/memory/README.md).

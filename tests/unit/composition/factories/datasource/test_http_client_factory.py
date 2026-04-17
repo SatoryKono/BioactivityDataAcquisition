@@ -74,15 +74,15 @@ class TestHttpClientFactory:
 
         assert result == "client-from-source"
         kwargs = client_ctor.call_args.kwargs
-        assert kwargs["timeout"] == 42.0
+        assert kwargs["timeout"] == pytest.approx(42.0)
         assert kwargs["provider"] == "chembl"
-        assert kwargs["rate_limiter"].rate == 7.5
+        assert kwargs["rate_limiter"].rate == pytest.approx(7.5)
         assert kwargs["rate_limiter"].capacity == 15
         assert kwargs["circuit_breaker"].failure_threshold == 9
         assert kwargs["circuit_breaker"].recovery_timeout == 120
         assert kwargs["retry_config"].max_attempts == 5
-        assert kwargs["retry_config"].base_delay == 0.5
-        assert kwargs["retry_config"].max_delay == 9.0
+        assert kwargs["retry_config"].base_delay == pytest.approx(0.5)
+        assert kwargs["retry_config"].max_delay == pytest.approx(9.0)
         assert kwargs["max_connections"] == 100
         assert kwargs["max_keepalive_connections"] == 20
         assert kwargs["trust_env"] is False
@@ -120,12 +120,12 @@ class TestHttpClientFactory:
 
         assert result == "client-with-override"
         kwargs = client_ctor.call_args.kwargs
-        assert kwargs["timeout"] == 30.0
-        assert kwargs["rate_limiter"].rate == 12.0
+        assert kwargs["timeout"] == pytest.approx(30.0)
+        assert kwargs["rate_limiter"].rate == pytest.approx(12.0)
         assert kwargs["rate_limiter"].capacity == 24
         assert kwargs["retry_config"].max_attempts == 3
-        assert kwargs["retry_config"].base_delay == 1.0
-        assert kwargs["retry_config"].max_delay == 60.0
+        assert kwargs["retry_config"].base_delay == pytest.approx(1.0)
+        assert kwargs["retry_config"].max_delay == pytest.approx(60.0)
 
     def test_create_uses_explicit_provider_registry_instance(
         self, monkeypatch: pytest.MonkeyPatch
@@ -159,7 +159,7 @@ class TestHttpClientFactory:
         assert result == "client-from-explicit-registry"
         kwargs = client_ctor.call_args.kwargs
         assert kwargs["provider"] == "isolated_provider"
-        assert kwargs["rate_limiter"].rate == 9.0
+        assert kwargs["rate_limiter"].rate == pytest.approx(9.0)
         assert kwargs["rate_limiter"].capacity == 18
 
     def test_check_setting_truthy_and_missing(self) -> None:
@@ -203,14 +203,14 @@ class TestResolvedHttpConfig:
         cfg = HttpClientFactory._resolve_config("chembl", None)
 
         assert isinstance(cfg, ResolvedHttpConfig)
-        assert cfg.rate == 7.5
+        assert cfg.rate == pytest.approx(7.5)
         assert cfg.capacity == 15
         assert cfg.failure_threshold == 9
         assert cfg.recovery_timeout == 120
-        assert cfg.timeout == 42.0
+        assert cfg.timeout == pytest.approx(42.0)
         assert cfg.max_retries == 5
-        assert cfg.base_delay == 0.5
-        assert cfg.max_delay == 9.0
+        assert cfg.base_delay == pytest.approx(0.5)
+        assert cfg.max_delay == pytest.approx(9.0)
         assert cfg.max_connections == 100
         assert cfg.max_keepalive == 20
         assert cfg.trust_env is False
@@ -237,12 +237,12 @@ class TestResolvedHttpConfig:
 
         cfg = HttpClientFactory._resolve_config("test_provider", None)
 
-        assert cfg.rate == 3.0
+        assert cfg.rate == pytest.approx(3.0)
         assert cfg.capacity == 6
-        assert cfg.timeout == 30.0
+        assert cfg.timeout == pytest.approx(30.0)
         assert cfg.max_retries == 3
-        assert cfg.base_delay == 1.0
-        assert cfg.max_delay == 60.0
+        assert cfg.base_delay == pytest.approx(1.0)
+        assert cfg.max_delay == pytest.approx(60.0)
         assert cfg.trust_env is True
 
     def test_resolve_applies_rate_override(
@@ -270,7 +270,7 @@ class TestResolvedHttpConfig:
         settings = SimpleNamespace(pubmed_api_key="non-empty")
         cfg = HttpClientFactory._resolve_config("pubmed", settings)
 
-        assert cfg.rate == 12.0
+        assert cfg.rate == pytest.approx(12.0)
         assert cfg.capacity == 24
 
     def test_resolved_http_config_is_frozen(self) -> None:

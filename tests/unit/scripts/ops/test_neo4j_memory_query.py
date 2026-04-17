@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.ops.neo4j_memory_query import (
+from scripts.memory.query import (
     _claim_trace_statement,
     _cli_semantics_statement,
     _current_cycle_code_statement,

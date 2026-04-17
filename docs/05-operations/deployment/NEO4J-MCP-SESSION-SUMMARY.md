@@ -11,13 +11,13 @@
 ### 1. MCP Server Registration
 - **Codex CLI**: `neo4j-memory` registered and configured
 - **VS Code Copilot**: MCP endpoint in `.vscode/mcp.json`
-- **Wrapper Script**: `scripts/ops/mcp_neo4j_memory_wrapper.sh` created
+- **Wrapper Script**: `scripts/memory/mcp/wrapper.sh` created
 - **Automation**: `scripts/dev/setup_copilot_codex_mcp.py` updated to include Neo4j Memory
 
 **Verify:**
 ```bash
 codex mcp get neo4j-memory
-# Expected: scripts/ops/mcp_neo4j_memory_wrapper.sh
+# Expected: scripts/memory/mcp/wrapper.sh
 ```
 
 ### 2. Documentation
@@ -27,7 +27,7 @@ Created comprehensive guides:
 - **[neo4j-memory-setup.md](./neo4j-memory-setup.md)** - Memory configuration (already existed)
 
 ### 3. Verification Scripts
-- **[check_neo4j_mcp.sh](../../../scripts/ops/check_neo4j_mcp.sh)** - Comprehensive MCP + backend health check
+- **[check.sh](../../../scripts/memory/mcp/check.sh)** - Comprehensive MCP + backend health check
   - Verifies Codex CLI availability
   - Checks MCP server registration
   - Tests Neo4j port connectivity
@@ -79,7 +79,7 @@ docker compose up -d neo4j
 codex mcp get neo4j-memory
 
 # Run full diagnostic
-bash scripts/ops/check_neo4j_mcp.sh
+bash scripts/memory/mcp/check.sh
 ```
 
 **Step 3: Access Neo4j Browser**
@@ -105,7 +105,7 @@ bash scripts/ops/check_neo4j_mcp.sh
 ┌─────────────────────────────────────────────────────┐
 │        MCP Wrapper (Already Registered)             │
 ├─────────────────────────────────────────────────────┤
-│ scripts/ops/mcp_neo4j_memory_wrapper.sh             │
+│ scripts/memory/mcp/wrapper.sh             │
 │  ├─ Loads: NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 │  └─ Runs: @knowall-ai/mcp-neo4j-agent-memory       │
 └─────────────────────────────────────────────────────┘
@@ -126,7 +126,7 @@ bash scripts/ops/check_neo4j_mcp.sh
 ## Files Modified/Created
 
 ### New Files
-- `scripts/ops/check_neo4j_mcp.sh` — MCP + backend verification
+- `scripts/memory/mcp/check.sh` — MCP + backend verification
 - `scripts/ops/neo4j_quick_start.sh` — Quick startup helper
 - `docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md` — Startup instructions
 - `docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md` — Completion checklist
@@ -134,7 +134,7 @@ bash scripts/ops/check_neo4j_mcp.sh
 
 ### Updated Files
 - `.env.example` — Added Neo4j configuration section
-- `scripts/ops/mcp_neo4j_memory_wrapper.sh` — Already in place
+- `scripts/memory/mcp/wrapper.sh` — Already in place
 - `scripts/dev/setup_copilot_codex_mcp.py` — Already configured for Neo4j
 - `.mcp.json` — Already configured for Neo4j
 
@@ -150,7 +150,7 @@ bash scripts/ops/check_neo4j_mcp.sh
 | **View Logs** | `docker logs -f bioetl-neo4j` |
 | **Stop Container** | `docker stop bioetl-neo4j` |
 | **Remove Container** | `docker rm bioetl-neo4j` |
-| **Verify MCP** | `bash scripts/ops/check_neo4j_mcp.sh` |
+| **Verify MCP** | `bash scripts/memory/mcp/check.sh` |
 | **Quick Start** | `bash scripts/ops/neo4j_quick_start.sh` |
 | **MCP Details** | `codex mcp get neo4j-memory` |
 | **Open Neo4j UI** | http://localhost:7474/browser/ |
@@ -159,7 +159,7 @@ bash scripts/ops/check_neo4j_mcp.sh
 
 ## Environment Variables
 
-The wrapper script (`mcp_neo4j_memory_wrapper.sh`) reads from:
+The wrapper script (`wrapper.sh`) reads from:
 
 1. **`.env` file** (if present)
 2. **Shell environment variables**
@@ -196,7 +196,7 @@ export NEO4J_AUTH="neo4j/custom-password"
 - [ ] Port 7687 is available (not in use by another service)
 - [ ] Sufficient disk space for Neo4j volumes
 - [ ] `.env` file exists with Neo4j configuration (optional but recommended)
-- [ ] `scripts/ops/mcp_neo4j_memory_wrapper.sh` has execute permissions
+- [ ] `scripts/memory/mcp/wrapper.sh` has execute permissions
 - [ ] Codex CLI is installed and in PATH (for MCP commands)
 
 **Common Issues**:
@@ -222,7 +222,7 @@ export NEO4J_AUTH="neo4j/custom-password"
 ```
 Priority 1 (Required to activate MCP):
 [ ] Run: docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community
-[ ] Verify: bash scripts/ops/check_neo4j_mcp.sh
+[ ] Verify: bash scripts/memory/mcp/check.sh
 [ ] Test: codex mcp get neo4j-memory
 
 Priority 2 (Optional integrations):

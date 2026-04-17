@@ -8,9 +8,6 @@ Usage:
 Stable commands:
     salt-rotate        Rotate PII hashing salt
     fix-grafana        Fix Grafana dashboard configurations
-    sync-neo4j-memory  Build and optionally sync the deterministic Neo4j repo graph
-    query-neo4j-memory Query deterministic Neo4j memory ownership, neighbor, promotion, retirement, and complexity shortcuts
-    smoke-neo4j-memory-mcp Run a framed stdio smoke check against the neo4j-memory MCP wrapper
     smoke-sonarqube-mcp Run a readiness-aware stdio smoke check against the sonarqube MCP wrapper
     wsl-proxy          Start WSL proxy helper
     setup-agents       Sync Codex agents into CODEX_HOME
@@ -38,9 +35,6 @@ from pathlib import Path
 COMMANDS: dict[str, str] = {
     "salt-rotate": "salt_rotate.py",
     "fix-grafana": "fix_grafana_dashboards.py",
-    "sync-neo4j-memory": "neo4j_memory_sync.py",
-    "query-neo4j-memory": "neo4j_memory_query.py",
-    "smoke-neo4j-memory-mcp": "neo4j_memory_mcp_smoke.py",
     "smoke-sonarqube-mcp": "sonarqube_mcp_smoke.py",
     "wsl-proxy": "wsl_proxy.py",
 }

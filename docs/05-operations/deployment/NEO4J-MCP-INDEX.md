@@ -43,7 +43,7 @@
 |------|---------|--------|
 | `.mcp.json` | Codex CLI MCP servers | ✅ Configured |
 | `.vscode/mcp.json` | VS Code Copilot MCP | ✅ Configured |
-| `scripts/ops/mcp_neo4j_memory_wrapper.sh` | MCP wrapper script | ✅ Ready |
+| `scripts/memory/mcp/wrapper.sh` | MCP wrapper script | ✅ Ready |
 | `scripts/dev/setup_copilot_codex_mcp.py` | MCP setup automation | ✅ Updated |
 | `.env.example` | Environment template | ✅ Updated |
 
@@ -65,7 +65,7 @@ docker run -d --name bioetl-neo4j \
 codex mcp get neo4j-memory
 
 # Run full diagnostic
-bash scripts/ops/check_neo4j_mcp.sh
+bash scripts/memory/mcp/check.sh
 
 # (Optional) Quick start helper
 bash scripts/ops/neo4j_quick_start.sh
@@ -97,7 +97,7 @@ codex interactive
 ### Run checks:
 ```bash
 # Comprehensive Neo4j MCP diagnostic
-bash scripts/ops/check_neo4j_mcp.sh
+bash scripts/memory/mcp/check.sh
 
 # Quick startup with auto-verification
 bash scripts/ops/neo4j_quick_start.sh
@@ -186,7 +186,7 @@ docker run -d --name bioetl-neo4j \
   neo4j:5.15-community
 
 # 2. Verify
-bash scripts/ops/check_neo4j_mcp.sh
+bash scripts/memory/mcp/check.sh
 ```
 
 ---

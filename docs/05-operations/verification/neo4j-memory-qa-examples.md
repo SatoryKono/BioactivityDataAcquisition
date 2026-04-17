@@ -43,7 +43,7 @@ A: Username: `neo4j`, Password: `bioetl_secure_password` (from `NEO4J_AUTH=neo4j
 A: Run:
 ```bash
 codex mcp get neo4j-memory
-bash scripts/ops/check_neo4j_mcp.sh
+bash scripts/memory/mcp/check.sh
 ```
 
 ## Provider Knowledge

@@ -24,7 +24,7 @@ profiles в BioETL.
   — phase-by-phase prompts и structured seed facts для заполнения
   `@neo4j-memory` устойчивыми знаниями о проекте.
 - **Deterministic Neo4j sync tooling**:
-  `python -m scripts.ops sync-neo4j-memory`
+  `python -m scripts.memory sync`
   — строит repo-derived graph snapshot из docs/configs/src/tests/scripts,
   curated policy surfaces, а также semantic impact-analysis layer для
   `port_surface`, `adapter_surface`, `adapter_impl_surface`,
@@ -65,23 +65,23 @@ profiles в BioETL.
   code/config/workflow targets.
   Tooling
   может синхронизировать его в локальный Neo4j backend без ручных prompt waves.
-  Для cleanup-режима используй `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`:
+  Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:
   он пересобирает managed relations и удаляет только stale repo-derived nodes
   текущей ingest wave, а не весь graph.
   Для shard-level selective rebuild используй:
-  `python -m scripts.ops sync-neo4j-memory --export /tmp/storage-memory.json --only-storage-layer`,
-  `python -m scripts.ops sync-neo4j-memory --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,
-  `python -m scripts.ops sync-neo4j-memory --export /tmp/workflow-memory.json --only-workflow-graph`,
-  `python -m scripts.ops sync-neo4j-memory --export /tmp/docs-drift-memory.json --only-docs-drift`.
-  Для audit/report режима используй `python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json`:
+  `python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer`,
+  `python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,
+  `python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph`,
+  `python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift`.
+  Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:
   он пишет JSON-отчет с snapshot stats, live managed/unmanaged summary,
   orphan summary и diff между snapshot и текущим managed graph.
   Для быстрого operator health-check используй
-  `python -m scripts.ops sync-neo4j-memory --report-fast --report /tmp/neo4j-memory-audit.json`:
+  `python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json`:
   этот режим проверяет только critical analysis labels/relations и устойчивее
   для Windows-host HTTP sync.
   Для полного пересоздания текущей managed wave используй
-  `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave`:
+  `python -m scripts.memory sync --apply --full-reset-managed-wave`:
   этот режим сначала удаляет весь repo-managed subgraph текущей волны, а потом
   пересобирает его из текущего состояния репозитория.
   Current-cycle semantics больше не хранятся отдельным legacy label
@@ -91,7 +91,7 @@ profiles в BioETL.
   проблемного analysis label.
   Если нужно довести repo-derived labels до полностью deterministic managed-only
   состояния, используй
-  `python -m scripts.ops sync-neo4j-memory --apply --full-reset-managed-wave --prune-legacy-unmanaged`:
+  `python -m scripts.memory sync --apply --full-reset-managed-wave --prune-legacy-unmanaged`:
   этот режим после rebuild удаляет legacy unmanaged nodes для label-семейств,
   которые теперь полностью принадлежат deterministic sync.
   Для CI/snapshot gate используй
@@ -103,54 +103,54 @@ profiles в BioETL.
   Для live gate с применением sync в реальный локальный Neo4j используй
   `python -m scripts.ci neo4j-memory-live`.
   Для operator-facing ownership shortcuts используй
-  `python -m scripts.ops query-neo4j-memory <profile> <name>`, например:
-  `python -m scripts.ops query-neo4j-memory owner-contract chembl.activity`,
-  `python -m scripts.ops query-neo4j-memory owner-pipeline chembl_activity`,
-  `python -m scripts.ops query-neo4j-memory owner-alert BioETLPipelineRunFailed`,
-  `python -m scripts.ops query-neo4j-memory owner-doc "architecture diagrams hub"`,
-  `python -m scripts.ops query-neo4j-memory owner-storage silver/chembl/activity`,
-  `python -m scripts.ops query-neo4j-memory owner-runtime-evidence run_manifest`,
-  `python -m scripts.ops query-neo4j-memory owner-workflow tests`,
-  `python -m scripts.ops query-neo4j-memory owner-workflow-job tests::governance-preflight`,
-  `python -m scripts.ops query-neo4j-memory owner-cli-command "scripts.ops sync-neo4j-memory"`.
+  `python -m scripts.memory query <profile> <name>`, например:
+  `python -m scripts.memory query owner-contract chembl.activity`,
+  `python -m scripts.memory query owner-pipeline chembl_activity`,
+  `python -m scripts.memory query owner-alert BioETLPipelineRunFailed`,
+  `python -m scripts.memory query owner-doc "architecture diagrams hub"`,
+  `python -m scripts.memory query owner-storage silver/chembl/activity`,
+  `python -m scripts.memory query owner-runtime-evidence run_manifest`,
+  `python -m scripts.memory query owner-workflow tests`,
+  `python -m scripts.memory query owner-workflow-job tests::governance-preflight`,
+  `python -m scripts.memory query owner-cli-command "scripts.memory sync"`.
   Для ближайших semantic edges используй `neighbors-*` профили, например:
-  `python -m scripts.ops query-neo4j-memory neighbors-pipeline chembl_activity`,
-  `python -m scripts.ops query-neo4j-memory neighbors-alert BioETLPipelineRunFailed`,
-  `python -m scripts.ops query-neo4j-memory neighbors-contract chembl.activity`,
-  `python -m scripts.ops query-neo4j-memory neighbors-storage silver/chembl/activity`,
-  `python -m scripts.ops query-neo4j-memory neighbors-runtime-evidence run_manifest`,
-  `python -m scripts.ops query-neo4j-memory neighbors-run-instance manifest-chain-smoke`,
-  `python -m scripts.ops query-neo4j-memory neighbors-workflow tests`,
-  `python -m scripts.ops query-neo4j-memory neighbors-workflow-job tests::governance-preflight`,
-  `python -m scripts.ops query-neo4j-memory neighbors-cli-command "bioetl run"`.
+  `python -m scripts.memory query neighbors-pipeline chembl_activity`,
+  `python -m scripts.memory query neighbors-alert BioETLPipelineRunFailed`,
+  `python -m scripts.memory query neighbors-contract chembl.activity`,
+  `python -m scripts.memory query neighbors-storage silver/chembl/activity`,
+  `python -m scripts.memory query neighbors-runtime-evidence run_manifest`,
+  `python -m scripts.memory query neighbors-run-instance manifest-chain-smoke`,
+  `python -m scripts.memory query neighbors-workflow tests`,
+  `python -m scripts.memory query neighbors-workflow-job tests::governance-preflight`,
+  `python -m scripts.memory query neighbors-cli-command "bioetl run"`.
   Для новых surface-specific shortcuts используй:
-  `python -m scripts.ops query-neo4j-memory docs-drift all`,
-  `python -m scripts.ops query-neo4j-memory workflow-gates tests`,
-  `python -m scripts.ops query-neo4j-memory workflow-artifacts tests`,
-  `python -m scripts.ops query-neo4j-memory storage-lineage silver/chembl/activity`,
-  `python -m scripts.ops query-neo4j-memory field-lineage silver/chembl/activity`,
-  `python -m scripts.ops query-neo4j-memory schema-drift silver/chembl/assay`,
-  `python -m scripts.ops query-neo4j-memory run-artifacts manifest-chain-smoke`,
-  `python -m scripts.ops query-neo4j-memory runtime-state all`,
-  `python -m scripts.ops query-neo4j-memory runtime-locks all`,
-  `python -m scripts.ops query-neo4j-memory workflow-execution all`,
-  `python -m scripts.ops query-neo4j-memory claim-trace all`,
-  `python -m scripts.ops query-neo4j-memory cli-semantics "bioetl run"`.
+  `python -m scripts.memory query docs-drift all`,
+  `python -m scripts.memory query workflow-gates tests`,
+  `python -m scripts.memory query workflow-artifacts tests`,
+  `python -m scripts.memory query storage-lineage silver/chembl/activity`,
+  `python -m scripts.memory query field-lineage silver/chembl/activity`,
+  `python -m scripts.memory query schema-drift silver/chembl/assay`,
+  `python -m scripts.memory query run-artifacts manifest-chain-smoke`,
+  `python -m scripts.memory query runtime-state all`,
+  `python -m scripts.memory query runtime-locks all`,
+  `python -m scripts.memory query workflow-execution all`,
+  `python -m scripts.memory query claim-trace all`,
+  `python -m scripts.memory query cli-semantics "bioetl run"`.
   Для поиска повторяющейся логики и кандидатов на вынос используй:
-  `python -m scripts.ops query-neo4j-memory duplication-cluster adapter_layer:method_surface:de487f71c608`,
-  `python -m scripts.ops query-neo4j-memory promotion-candidates adapter_layer`,
-  `python -m scripts.ops query-neo4j-memory promotion-candidates composite_layer`,
-  `python -m scripts.ops query-neo4j-memory promotion-candidates all`.
+  `python -m scripts.memory query duplication-cluster adapter_layer:method_surface:de487f71c608`,
+  `python -m scripts.memory query promotion-candidates adapter_layer`,
+  `python -m scripts.memory query promotion-candidates composite_layer`,
+  `python -m scripts.memory query promotion-candidates all`.
   Для поиска dead/stale code и отделения его от текущего цикла разработки используй:
-  `python -m scripts.ops query-neo4j-memory dead-code-candidates adapter_layer`,
-  `python -m scripts.ops query-neo4j-memory dead-code-candidates all`,
-  `python -m scripts.ops query-neo4j-memory current-cycle-code adapter_layer`,
-  `python -m scripts.ops query-neo4j-memory current-cycle-code all`.
+  `python -m scripts.memory query dead-code-candidates adapter_layer`,
+  `python -m scripts.memory query dead-code-candidates all`,
+  `python -m scripts.memory query current-cycle-code adapter_layer`,
+  `python -m scripts.memory query current-cycle-code all`.
   Для поиска переусложненной логики и removable complexity используй:
-  `python -m scripts.ops query-neo4j-memory overengineered-candidates composite_layer`,
-  `python -m scripts.ops query-neo4j-memory removable-complexity composite_layer`,
-  `python -m scripts.ops query-neo4j-memory simplification-blockers adapter_layer`,
-  `python -m scripts.ops query-neo4j-memory overengineered-candidates all`.
+  `python -m scripts.memory query overengineered-candidates composite_layer`,
+  `python -m scripts.memory query removable-complexity composite_layer`,
+  `python -m scripts.memory query simplification-blockers adapter_layer`,
+  `python -m scripts.memory query overengineered-candidates all`.
 
 ## Additional Coverage Blocks
 

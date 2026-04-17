@@ -20,7 +20,7 @@ class TestConcentrationUnit:
 
     def test_molar_factor(self) -> None:
         """Test molar conversion factors."""
-        assert ConcentrationUnit.MOLAR.to_molar_factor == 1.0
+        assert ConcentrationUnit.MOLAR.to_molar_factor == pytest.approx(1.0)
         assert ConcentrationUnit.MILLIMOLAR.to_molar_factor == 1e-3
         assert ConcentrationUnit.MICROMOLAR.to_molar_factor == 1e-6
         assert ConcentrationUnit.NANOMOLAR.to_molar_factor == 1e-9
@@ -75,13 +75,13 @@ class TestConcentration:
     def test_creation(self) -> None:
         """Test basic creation."""
         c = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
-        assert c.value == 100.0
+        assert c.value == pytest.approx(100.0)
         assert c.unit == ConcentrationUnit.NANOMOLAR
 
     def test_zero_concentration(self) -> None:
         """Test zero concentration is valid."""
         c = Concentration(value=0.0, unit=ConcentrationUnit.NANOMOLAR)
-        assert c.value == 0.0
+        assert c.value == pytest.approx(0.0)
 
     def test_negative_concentration_raises(self) -> None:
         """Test negative concentration raises ValueError."""
@@ -98,7 +98,7 @@ class TestConcentration:
         """Test conversion to same unit."""
         c = Concentration(value=100.0, unit=ConcentrationUnit.NANOMOLAR)
         result = c.to_unit(ConcentrationUnit.NANOMOLAR)
-        assert result.value == 100.0
+        assert result.value == pytest.approx(100.0)
         assert result.unit == ConcentrationUnit.NANOMOLAR
 
     def test_to_unit_nm_to_um(self) -> None:
@@ -283,17 +283,17 @@ class TestPChemblValue:
     def test_creation(self) -> None:
         """Test basic creation."""
         p = PChemblValue(value=6.5)
-        assert p.value == 6.5
+        assert p.value == pytest.approx(6.5)
 
     def test_zero_is_valid(self) -> None:
         """Test zero pChEMBL value is valid."""
         p = PChemblValue(value=0.0)
-        assert p.value == 0.0
+        assert p.value == pytest.approx(0.0)
 
     def test_max_value_is_valid(self) -> None:
         """Test maximum pChEMBL value (14) is valid."""
         p = PChemblValue(value=14.0)
-        assert p.value == 14.0
+        assert p.value == pytest.approx(14.0)
 
     def test_negative_raises(self) -> None:
         """Test negative pChEMBL value raises ValueError."""
@@ -413,9 +413,9 @@ class TestPChemblValue:
             PChemblValue(value=9.0),
         ]
         sorted_values = sorted(values)
-        assert sorted_values[0].value == 5.0
-        assert sorted_values[1].value == 7.0
-        assert sorted_values[2].value == 9.0
+        assert sorted_values[0].value == pytest.approx(5.0)
+        assert sorted_values[1].value == pytest.approx(7.0)
+        assert sorted_values[2].value == pytest.approx(9.0)
 
     def test_roundtrip_conversion(self) -> None:
         """Test roundtrip conversion pChEMBL -> molar -> pChEMBL."""

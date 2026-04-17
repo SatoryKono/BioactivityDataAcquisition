@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from scripts.ops.neo4j_memory_mcp_smoke import (
+from scripts.memory.mcp_smoke import (
     _encode_frame,
     _parse_frames,
     run_smoke_command,

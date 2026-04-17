@@ -107,7 +107,7 @@ class TestCalculateThresholds:
             hard_fail_threshold=0.20,
         )
         assert result.threshold_status == DQCheckStatus.PASS
-        assert result.current_error_rate == 0.0
+        assert result.current_error_rate == pytest.approx(0.0)
 
     def test_warn_status_at_soft_threshold(self, analyzer: SilverDQAnalyzer) -> None:
         """Error rate at soft threshold → WARN."""
@@ -119,7 +119,7 @@ class TestCalculateThresholds:
             hard_fail_threshold=0.20,
         )
         assert result.threshold_status == DQCheckStatus.WARN
-        assert result.current_error_rate == 0.1
+        assert result.current_error_rate == pytest.approx(0.1)
 
     def test_fail_status_at_hard_threshold(self, analyzer: SilverDQAnalyzer) -> None:
         """Error rate at hard threshold → FAIL."""
@@ -143,7 +143,7 @@ class TestCalculateThresholds:
             soft_fail_threshold=0.05,
             hard_fail_threshold=0.20,
         )
-        assert result.current_error_rate == 0.1
+        assert result.current_error_rate == pytest.approx(0.1)
         assert result.threshold_status == DQCheckStatus.WARN
 
     def test_zero_total_no_division_error(self, analyzer: SilverDQAnalyzer) -> None:
@@ -155,7 +155,7 @@ class TestCalculateThresholds:
             soft_fail_threshold=0.05,
             hard_fail_threshold=0.20,
         )
-        assert result.current_error_rate == 0.0
+        assert result.current_error_rate == pytest.approx(0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -171,7 +171,7 @@ class TestCheckRecordCount:
         result = analyzer._statistics.check_record_count(df, None, 0)
         assert result.status == DQCheckStatus.PASS
         assert result.output_records == 3
-        assert result.quarantine_rate == 0.0
+        assert result.quarantine_rate == pytest.approx(0.0)
 
     def test_warn_high_quarantine_rate(self, analyzer: SilverDQAnalyzer) -> None:
         """More than 10% quarantined → WARN."""
@@ -198,8 +198,8 @@ class TestCheckNullRates:
     def test_no_nulls(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
         results, overall = analyzer._statistics.check_null_rates(df)
-        assert overall == 0.0
-        assert all(r.null_rate == 0.0 for r in results)
+        assert overall == pytest.approx(0.0)
+        assert all(r.null_rate == pytest.approx(0.0) for r in results)
         assert all(r.status == DQCheckStatus.PASS for r in results)
 
     def test_column_with_high_null_rate_warns(self, analyzer: SilverDQAnalyzer) -> None:
@@ -213,12 +213,12 @@ class TestCheckNullRates:
         """Overall rate is total nulls / total cells."""
         df = pl.DataFrame({"a": [None, None], "b": [1, 1]})  # 2 nulls / 4 cells = 0.5
         _, overall = analyzer._statistics.check_null_rates(df)
-        assert overall == 0.5
+        assert overall == pytest.approx(0.5)
 
     def test_empty_dataframe(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"a": pl.Series([], dtype=pl.Int64)})
         results, overall = analyzer._statistics.check_null_rates(df)
-        assert overall == 0.0
+        assert overall == pytest.approx(0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -233,7 +233,7 @@ class TestCheckUniqueness:
         df = pl.DataFrame({"id": [1, 2, 3]})
         result = analyzer._statistics.check_uniqueness(df, ["id"])
         assert result.status == DQCheckStatus.PASS
-        assert result.duplicate_rate == 0.0
+        assert result.duplicate_rate == pytest.approx(0.0)
 
     def test_duplicates_warn(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"id": [1, 1, 2]})
@@ -298,9 +298,9 @@ class TestCheckValueDistribution:
         result = analyzer._statistics.check_value_distribution(df)
         assert "score" in result.numeric_columns
         stat = result.numeric_columns["score"]
-        assert stat.min == 1.0
-        assert stat.max == 5.0
-        assert stat.mean == 3.0
+        assert stat.min == pytest.approx(1.0)
+        assert stat.max == pytest.approx(5.0)
+        assert stat.mean == pytest.approx(3.0)
 
     def test_categorical_columns_profiled(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"category": ["a", "b", "a", "c", "b", "a"]})

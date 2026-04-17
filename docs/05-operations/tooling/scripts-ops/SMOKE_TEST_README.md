@@ -12,7 +12,7 @@ Comprehensive validation of the complete Neo4j Memory MCP chain after backend st
 |------|-----------|
 | 1️⃣ Docker Container | `bioetl-neo4j` container is running |
 | 2️⃣ Network Ports | Bolt (7687) and HTTP (7474) are open |
-| 3️⃣ Wrapper Script | `mcp_neo4j_memory_wrapper.sh` exists and is executable |
+| 3️⃣ Wrapper Script | `wrapper.sh` exists and is executable |
 | 4️⃣ MCP Registration | `neo4j-memory` is registered in Codex CLI |
 | 5️⃣ Environment | Neo4j credentials are properly configured |
 | 6️⃣ Connectivity | Cypher queries can execute against Neo4j |
@@ -34,7 +34,7 @@ docker run -d --name bioetl-neo4j \
 # 2. Wait ~10-15 seconds for startup
 
 # 3. Run smoke test
-bash scripts/ops/smoke_test_neo4j_mcp.sh
+bash scripts/memory/mcp/check.sh
 ```
 
 ---
@@ -45,7 +45,7 @@ bash scripts/ops/smoke_test_neo4j_mcp.sh
 
 ```bash
 cd /path/to/BioactivityDataAcquisition
-bash scripts/ops/smoke_test_neo4j_mcp.sh
+bash scripts/memory/mcp/check.sh
 ```
 
 ### Expected Output (Success)
@@ -75,7 +75,7 @@ TEST 2: Neo4j Ports Accessible
   1. Open Neo4j Browser: http://localhost:7474/browser/
   2. Test MCP in Codex: codex interactive
   3. Verify MCP details: codex mcp get neo4j-memory
-  4. Run comprehensive check: bash scripts/ops/check_neo4j_mcp.sh
+  4. Run comprehensive check: bash scripts/memory/mcp/check.sh
 ```
 
 ### Expected Output (Startup in Progress)
@@ -103,7 +103,7 @@ If you run the test while Neo4j is still starting:
 - Uses `nc` or `/dev/tcp` for platform-agnostic port checking
 
 ### Test 3: Wrapper Script
-- Verifies wrapper exists at `scripts/ops/mcp_neo4j_memory_wrapper.sh`
+- Verifies wrapper exists at `scripts/memory/mcp/wrapper.sh`
 - Checks if script is executable
 - Validates script contains MCP package reference
 - Confirms environment variable setup
@@ -136,7 +136,7 @@ If you run the test while Neo4j is still starting:
 | **"Container is NOT RUNNING"** | Start it: `docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community` |
 | **Ports are closed** | Neo4j is starting. Wait 10-15 seconds and re-run test. |
 | **"neo4j-memory is NOT registered"** | Register MCP: `uv run python -m scripts.dev setup-mcp` |
-| **Wrapper script not executable** | Fix permissions: `chmod +x scripts/ops/mcp_neo4j_memory_wrapper.sh` |
+| **Wrapper script not executable** | Fix permissions: `chmod +x scripts/memory/mcp/wrapper.sh` |
 | **Cypher query fails** | Check Neo4j logs: `docker logs bioetl-neo4j` |
 
 ---
@@ -165,7 +165,7 @@ xdg-open http://localhost:7474/browser/  # Linux
 start http://localhost:7474/browser/  # Windows PowerShell
 
 # Full MCP diagnostic
-bash scripts/ops/check_neo4j_mcp.sh
+bash scripts/memory/mcp/check.sh
 
 # Use in Codex
 codex mcp get neo4j-memory
@@ -203,7 +203,7 @@ docker rm bioetl-neo4j
 
 | File | Purpose |
 |------|---------|
-| `scripts/ops/mcp_neo4j_memory_wrapper.sh` | MCP wrapper (tested) |
+| `scripts/memory/mcp/wrapper.sh` | MCP wrapper (tested) |
 | `scripts/dev/setup_copilot_codex_mcp.py` | MCP setup automation (not tested) |
 | `.vscode/mcp.json` | VS Code Copilot config (not tested) |
 | `.env` or `.env.example` | Credentials source (checked) |

@@ -6,7 +6,7 @@
 # STEP 1: Start Neo4j Backend (WSL-Optimized)
 # ============================================================================
 echo "Starting Neo4j backend..."
-bash scripts/ops/wsl_neo4j_startup.sh
+bash scripts/memory/setup/wsl_startup.sh
 
 # Expected output:
 # ✓ Neo4j backend is running
@@ -18,12 +18,12 @@ bash scripts/ops/wsl_neo4j_startup.sh
 # ============================================================================
 echo ""
 echo "Running verification tests..."
-bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh
+bash scripts/memory/mcp/check.sh
 
 # Expected output:
 # ╔═══════════════════════════════════════════╗
 # ║  ✓ ALL CRITICAL TESTS PASSED            ║
-# ║  Neo4j Memory MCP (@knowall-ai) READY   ║
+# ║  Neo4j Memory MCP READY                 ║
 # ╚═══════════════════════════════════════════╝
 
 # ============================================================================

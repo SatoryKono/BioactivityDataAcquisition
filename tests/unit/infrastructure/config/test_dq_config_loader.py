@@ -120,8 +120,8 @@ class TestDQConfigLoaderBasics:
         """Load for unknown provider should use defaults."""
         config = loader.load("unknown_provider", "unknown_entity")
 
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.20
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.20)
         assert config.strict_validation is False
         # Only common validations (from base/quality.yaml)
         assert len(config.field_validations) == 2  # _content_hash + common_field
@@ -130,8 +130,8 @@ class TestDQConfigLoaderBasics:
         """Load with provider should merge provider config."""
         config = loader.load("test_provider", "unknown_entity")
 
-        assert config.soft_fail_threshold == 0.05  # from defaults
-        assert config.hard_fail_threshold == 0.15  # from provider (override)
+        assert config.soft_fail_threshold == pytest.approx(0.05)  # from defaults
+        assert config.hard_fail_threshold == pytest.approx(0.15)  # from provider (override)
         # common (2) + provider (1)
         assert len(config.field_validations) == 3
 
@@ -139,8 +139,8 @@ class TestDQConfigLoaderBasics:
         """Load with entity should merge all levels."""
         config = loader.load("test_provider", "test_entity")
 
-        assert config.soft_fail_threshold == 0.05  # from defaults
-        assert config.hard_fail_threshold == 0.15  # from provider
+        assert config.soft_fail_threshold == pytest.approx(0.05)  # from defaults
+        assert config.hard_fail_threshold == pytest.approx(0.15)  # from provider
         # common (2) + provider (1) + entity (1)
         assert len(config.field_validations) == 4
         # Cross-field from entity
@@ -167,8 +167,8 @@ common_cross_field_validations: []
 
         loader = DQConfigLoader(tmp_path)
         config = loader.load("missing_provider", "missing_entity")
-        assert config.soft_fail_threshold == 0.07
-        assert config.hard_fail_threshold == 0.19
+        assert config.soft_fail_threshold == pytest.approx(0.07)
+        assert config.hard_fail_threshold == pytest.approx(0.19)
 
     def test_load_provider_layer_from_unified_provider_file(
         self, tmp_path: Path
@@ -207,7 +207,7 @@ quality:
 
         loader = DQConfigLoader(tmp_path)
         config = loader.load("test_provider", "missing_entity")
-        assert config.hard_fail_threshold == 0.12
+        assert config.hard_fail_threshold == pytest.approx(0.12)
         assert "provider_field" in [fv.field for fv in config.field_validations]
 
     def test_load_entity_layer_from_unified_entity_file(self, tmp_path: Path) -> None:
@@ -255,8 +255,8 @@ class TestDQConfigLoaderMerge:
         config = loader.load("test_provider", "unknown_entity")
 
         # soft_fail same, hard_fail overridden
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.15
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.15)
 
     def test_field_validations_concatenate(self, loader: DQConfigLoader) -> None:
         """Field validations should concatenate from all levels."""
@@ -288,7 +288,7 @@ class TestDQConfigLoaderInlineOverrides:
         )
 
         # Override takes precedence
-        assert config.hard_fail_threshold == 0.25
+        assert config.hard_fail_threshold == pytest.approx(0.25)
 
     def test_inline_override_strict_validation(self, loader: DQConfigLoader) -> None:
         """Inline override for strict_validation."""
@@ -313,8 +313,8 @@ class TestDQConfigLoaderInlineOverrides:
             },
         )
 
-        assert config.soft_fail_threshold == 0.08
-        assert config.hard_fail_threshold == 0.30
+        assert config.soft_fail_threshold == pytest.approx(0.08)
+        assert config.hard_fail_threshold == pytest.approx(0.30)
 
     def test_inline_override_additional_validations(
         self, loader: DQConfigLoader
@@ -611,8 +611,8 @@ class TestNormalizeToFileFormat:
 
         assert "soft_fail_threshold" not in result
         assert "hard_fail_threshold" not in result
-        assert result["thresholds"]["soft_fail"] == 0.08
-        assert result["thresholds"]["hard_fail"] == 0.15
+        assert result["thresholds"]["soft_fail"] == pytest.approx(0.08)
+        assert result["thresholds"]["hard_fail"] == pytest.approx(0.15)
 
     def test_flat_validations_to_entity(self, loader: DQConfigLoader) -> None:
         """Canonical entity-level field validations are preserved."""
@@ -664,4 +664,4 @@ common_field_validations: []
 
     loader = DQConfigLoader(tmp_path)
     config = loader.load("missing", "missing")
-    assert config.hard_fail_threshold == 0.11
+    assert config.hard_fail_threshold == pytest.approx(0.11)

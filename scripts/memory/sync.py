@@ -817,23 +817,23 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
         ),
     },
     {
-        "readme_path": "scripts/ops/README.md",
-        "readme_summary": "Operations tooling notes covering Codex/WSL setup and the scripts.ops command surface.",
-        "entrypoint_path": "scripts/ops/__main__.py",
-        "entrypoint_summary": "Unified Python entrypoint for operational helpers such as Neo4j memory sync, Grafana fixes, and shell-based ops tasks.",
+        "readme_path": "scripts/memory/README.md",
+        "readme_summary": "Neo4j project-memory tooling, MCP wrappers, and WSL bootstrap guidance.",
+        "entrypoint_path": "scripts/memory/__main__.py",
+        "entrypoint_summary": "Unified Python entrypoint for deterministic Neo4j memory sync, query, and smoke tooling.",
         "execution_paths": (
             {
-                "name": "python -m scripts.ops",
+                "name": "python -m scripts.memory",
                 "platform": "cross_platform",
-                "summary": "Unified local entrypoint for operational helper commands.",
+                "summary": "Unified local entrypoint for project-memory helper commands.",
             },
             {
-                "name": "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json",
+                "name": "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json",
                 "platform": "cross_platform",
                 "summary": "Canonical audit/report path for the deterministic Neo4j repo graph.",
             },
             {
-                "name": "python -m scripts.ops sync-neo4j-memory --apply",
+                "name": "python -m scripts.memory sync --apply",
                 "platform": "cross_platform",
                 "summary": "Canonical apply path for syncing the deterministic Neo4j repo graph.",
             },
@@ -1323,6 +1323,17 @@ class ContractEntryContext:
     contract_ref: str
     contract: NodeKey
     raw_entry: dict[str, object]
+
+
+@dataclass
+class DuplicationExtractionContext:
+    snapshot: GraphSnapshot
+    root: Path
+    today: str
+    config: dict[str, object]
+    class_descriptors: dict[NodeKey, ClassDescriptor] = field(default_factory=dict)
+    callable_descriptors: dict[NodeKey, CallableDescriptor] = field(default_factory=dict)
+    class_name_index: dict[str, list[NodeKey]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -2305,25 +2316,33 @@ def _runtime_dimensions(*parts: str) -> set[str]:
     return dimensions
 
 
-def _select_alert_targets(
-    context: AlertTargetContext,
+def _alert_rule_settings(
+    memory_mapping: dict[str, object],
+    *,
     alert_name: str,
     group_name: str,
-    expr: str,
-    dimensions: set[str],
-) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
-    normalized = f"{group_name} {expr}".lower()
-    alerts_config = context.memory_mapping.get("alerts")
+) -> tuple[str, str, str, str]:
+    alerts_config = memory_mapping.get("alerts")
     groups = alerts_config.get("groups") if isinstance(alerts_config, dict) else {}
     rules = alerts_config.get("rules") if isinstance(alerts_config, dict) else {}
     group_rule = groups.get(group_name) if isinstance(groups, dict) and isinstance(groups.get(group_name), dict) else {}
     alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
+    return (
+        str(alert_rule.get("pipelines", group_rule.get("pipelines", "auto"))),
+        str(alert_rule.get("pipeline_kind", group_rule.get("pipeline_kind", "any"))),
+        str(alert_rule.get("providers", group_rule.get("providers", "auto"))),
+        str(alert_rule.get("contracts", group_rule.get("contracts", "none"))),
+    )
 
-    pipeline_mode = str(alert_rule.get("pipelines", group_rule.get("pipelines", "auto")))
-    pipeline_kind = str(alert_rule.get("pipeline_kind", group_rule.get("pipeline_kind", "any")))
-    provider_mode = str(alert_rule.get("providers", group_rule.get("providers", "auto")))
-    contract_mode = str(alert_rule.get("contracts", group_rule.get("contracts", "none")))
 
+def _pipeline_targets_for_alert(
+    context: AlertTargetContext,
+    *,
+    pipeline_mode: str,
+    pipeline_kind: str,
+    normalized: str,
+    dimensions: set[str],
+) -> list[NodeKey]:
     pipeline_targets: list[NodeKey] = []
     if pipeline_mode == "all":
         pipeline_targets = list(context.pipeline_nodes.values())
@@ -2349,36 +2368,82 @@ def _select_alert_targets(
             or "bioetl_data_freshness_seconds" in normalized
         ):
             pipeline_kind = "entity"
-
     if pipeline_kind in {"entity", "composite"}:
-        pipeline_targets = [
+        return [
             node
             for node in pipeline_targets
             if context.snapshot.nodes[node].properties.get("pipeline_kind") == pipeline_kind
         ]
+    return pipeline_targets
 
-    provider_targets: list[NodeKey] = []
+
+def _provider_targets_for_alert(
+    context: AlertTargetContext,
+    *,
+    provider_mode: str,
+    normalized: str,
+    dimensions: set[str],
+) -> list[NodeKey]:
     provider_targets_requested = provider_mode == "all" or (
         provider_mode == "auto"
         and (
             "provider" in dimensions or "provider_health" in normalized or "bioetl_health_check_" in normalized
         )
     )
-    if provider_targets_requested:
-        provider_targets = context.provider_nodes
+    return context.provider_nodes if provider_targets_requested else []
 
-    contract_targets: list[NodeKey] = []
+
+def _contract_targets_for_alert(
+    context: AlertTargetContext,
+    *,
+    contract_mode: str,
+    pipeline_targets: list[NodeKey],
+) -> list[NodeKey]:
     if contract_mode == "all":
-        contract_targets = list(context.contract_nodes.values())
-    elif contract_mode == "mapped":
-        mapped_contracts = {
-            relation.target
-            for relation in context.snapshot.relations.values()
-            if relation.source in pipeline_targets
-            and relation.relation_type == "DEPENDS_ON"
-            and relation.target.label == "contract_surface"
-        }
-        contract_targets = sorted(mapped_contracts, key=lambda node: node.name)
+        return list(context.contract_nodes.values())
+    if contract_mode != "mapped":
+        return []
+    mapped_contracts = {
+        relation.target
+        for relation in context.snapshot.relations.values()
+        if relation.source in pipeline_targets
+        and relation.relation_type == "DEPENDS_ON"
+        and relation.target.label == "contract_surface"
+    }
+    return sorted(mapped_contracts, key=lambda node: node.name)
+
+
+def _select_alert_targets(
+    context: AlertTargetContext,
+    alert_name: str,
+    group_name: str,
+    expr: str,
+    dimensions: set[str],
+) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
+    normalized = f"{group_name} {expr}".lower()
+    pipeline_mode, pipeline_kind, provider_mode, contract_mode = _alert_rule_settings(
+        context.memory_mapping,
+        alert_name=alert_name,
+        group_name=group_name,
+    )
+    pipeline_targets = _pipeline_targets_for_alert(
+        context,
+        pipeline_mode=pipeline_mode,
+        pipeline_kind=pipeline_kind,
+        normalized=normalized,
+        dimensions=dimensions,
+    )
+    provider_targets = _provider_targets_for_alert(
+        context,
+        provider_mode=provider_mode,
+        normalized=normalized,
+        dimensions=dimensions,
+    )
+    contract_targets = _contract_targets_for_alert(
+        context,
+        contract_mode=contract_mode,
+        pipeline_targets=pipeline_targets,
+    )
 
     return (
         sorted(set(pipeline_targets), key=lambda node: node.name),
@@ -3059,7 +3124,7 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
                 key=lambda key: key.name,
             )[:5]:
                 snapshot.add_relation(command, "SIDE_EFFECTS_ON", target, provenance="cli_command_graph")
-        if command_name == "scripts.ops sync-neo4j-memory":
+        if command_name == "scripts.memory sync":
             gate_key = NodeKey("quality_gate", GATE_NEO4J_ONTOLOGY_INVARIANTS)
             if gate_key in snapshot.nodes:
                 snapshot.add_relation(command, "SIDE_EFFECTS_ON", gate_key, provenance="cli_command_graph")
@@ -8227,7 +8292,7 @@ def _ensure_targeted_apply_prerequisites(
         raise RuntimeError(
             f"{mode_description} requires pre-existing managed anchor labels in the live graph, "
             f"but these labels are missing or empty: {missing_summary}. "
-            "Run a base sync first (for example `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`)."
+            "Run a base sync first (for example `python -m scripts.memory sync --apply --prune-stale`)."
         )
     external_anchor_keys = _targeted_apply_external_anchor_keys(snapshot)
     missing_anchor_keys = _missing_managed_anchor_keys(
@@ -8244,7 +8309,7 @@ def _ensure_targeted_apply_prerequisites(
         raise RuntimeError(
             f"{mode_description} requires pre-existing managed anchor nodes in the live graph, "
             f"but these nodes are missing: {sample}{remainder_suffix}. "
-            "Run a base sync first (for example `python -m scripts.ops sync-neo4j-memory --apply --prune-stale`)."
+            "Run a base sync first (for example `python -m scripts.memory sync --apply --prune-stale`)."
         )
 
 
@@ -8767,23 +8832,17 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     )
     _append_missing_relation_issues(issues, relation_keys, relation_requirements)
 
-    _append_support_issue(
-        issues,
-        "runtime evidence surfaces without support links",
-        _missing_node_support_names(
-            snapshot,
+    support_specs = (
+        (
+            "runtime evidence surfaces without support links",
             "runtime_evidence_surface",
             lambda key: any(
                 rel.source == key and rel.relation_type in {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"}
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "control-plane artifacts without runtime/storage links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "control-plane artifacts without runtime/storage links",
             "control_plane_artifact_surface",
             lambda key: any(
                 rel.target == key
@@ -8798,12 +8857,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "run instance surfaces without support links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "run instance surfaces without support links",
             "run_instance_surface",
             lambda key: any(
                 rel.target == key
@@ -8818,12 +8873,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "runtime state surfaces without support links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "runtime state surfaces without support links",
             "runtime_state_surface",
             lambda key: any(
                 rel.target == key
@@ -8839,12 +8890,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "storage surfaces without ownership or lineage links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "storage surfaces without ownership or lineage links",
             "storage_surface",
             lambda key: any(
                 (
@@ -8856,12 +8903,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "schema fields without storage/contract/lineage links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "schema fields without storage/contract/lineage links",
             "schema_field_surface",
             lambda key: any(
                 rel.target == key
@@ -8875,24 +8918,16 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "workflow jobs without workflow parent links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "workflow jobs without workflow parent links",
             "workflow_job_surface",
             lambda key: any(
                 rel.target == key and rel.relation_type == "CONTAINS" and rel.source.label == "workflow_surface"
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "cli command surfaces without runtime/support links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "cli command surfaces without runtime/support links",
             "cli_command_surface",
             lambda key: any(
                 (rel.source == key and rel.relation_type in {"RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"})
@@ -8900,12 +8935,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "workflow artifacts without job links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "workflow artifacts without job links",
             "workflow_artifact_surface",
             lambda key: any(
                 rel.target == key
@@ -8914,12 +8945,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "workflow calls without job/workflow links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "workflow calls without job/workflow links",
             "workflow_call_surface",
             lambda key: any(
                 rel.target == key
@@ -8932,12 +8959,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "workflow outputs without workflow/job links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "workflow outputs without workflow/job links",
             "workflow_output_surface",
             lambda key: any(
                 rel.target == key
@@ -8946,12 +8969,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "cli options without command links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "cli options without command links",
             "cli_option_surface",
             lambda key: any(
                 rel.target == key
@@ -8960,12 +8979,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
                 for rel in relations
             ),
         ),
-    )
-    _append_support_issue(
-        issues,
-        "doc claims without doc/target links",
-        _missing_node_support_names(
-            snapshot,
+        (
+            "doc claims without doc/target links",
             "doc_claim_surface",
             lambda key: any(
                 rel.target == key
@@ -8976,6 +8991,12 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
             or any(rel.source == key and rel.relation_type == "ASSERTS_ABOUT" for rel in relations),
         ),
     )
+    for prefix, label, predicate in support_specs:
+        _append_support_issue(
+            issues,
+            prefix,
+            _missing_node_support_names(snapshot, label, predicate),
+        )
 
     ignored_paths = [
         node.key.name
@@ -9334,7 +9355,7 @@ def _selection_from_args(args: argparse.Namespace) -> SnapshotSelection:
     )
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     if args.prune_stale and args.full_reset_managed_wave:
@@ -9346,7 +9367,7 @@ def main(argv: list[str] | None = None) -> None:
             batch_size=args.batch_size,
         )
         print(json.dumps(summary, indent=2))
-        return
+        return 0
     root = args.root.resolve()
     selection = _selection_from_args(args)
     snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
@@ -9384,7 +9405,8 @@ def main(argv: list[str] | None = None) -> None:
         )
         _write_json(args.report, report)
         print(f"Exported audit report to {args.report}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

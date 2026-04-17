@@ -30,6 +30,7 @@ from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.cli_run_orchestration_models import (
+        CliRunPreparationInput,
         RunExecutionRequest,
     )
     from bioetl.application.services.execution.cli_run_orchestration_service import (
@@ -109,52 +110,41 @@ class RunCommandInput:
 def prepare_run_request(
     *,
     service: CliRunOrchestrationService,
-    pipeline: str,
-    run_type: str,
-    resume: bool,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    dry_run: bool,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    debug: bool,
-    health_server: bool,
-    health_port: int,
-    enable_tracing: bool | None,
-    use_cached_bronze: bool,
-    cached_bronze_date: str | None,
-    cached_bronze_path: str | None,
-    replay_of_run_id: str | None,
-    replay_of_manifest_id: str | None,
-    exact_replay: bool,
+    command_input: RunCommandInput,
     exit_func: ExitCallable,
 ) -> RunExecutionRequest:
     """Validate raw CLI inputs and build the prepared request for execution."""
+    from bioetl.application.services.execution.cli_run_orchestration_models import (
+        CliRunOptionsInput,
+        CliRunPreparationInput,
+    )
+
     preparation = service.prepare_execution_request(
-        pipeline=pipeline,
-        run_type=run_type,
-        resume=resume,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        dry_run=dry_run,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        debug=debug,
-        health_server=health_server,
-        health_port=health_port,
-        enable_tracing=enable_tracing,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_date=cached_bronze_date,
-        cached_bronze_path=cached_bronze_path,
-        replay_of_run_id=replay_of_run_id,
-        replay_of_manifest_id=replay_of_manifest_id,
-        exact_replay=exact_replay,
+        CliRunPreparationInput(
+            pipeline=command_input.pipeline,
+            options=CliRunOptionsInput(
+                run_type=command_input.run_type,
+                resume=command_input.resume,
+                start_offset=command_input.start_offset,
+                limit=command_input.limit,
+                input_csv=command_input.input_csv,
+                filter_column=command_input.filter_column,
+                filter_field=command_input.filter_field,
+                dry_run=command_input.dry_run,
+                vacuum_after_run=command_input.vacuum_after_run,
+                vacuum_retention_days=command_input.vacuum_retention_days,
+                debug=command_input.debug,
+                enable_tracing=command_input.enable_tracing,
+                use_cached_bronze=command_input.use_cached_bronze,
+                cached_bronze_date=command_input.cached_bronze_date,
+                cached_bronze_path=command_input.cached_bronze_path,
+                replay_of_run_id=command_input.replay_of_run_id,
+                replay_of_manifest_id=command_input.replay_of_manifest_id,
+                exact_replay=command_input.exact_replay,
+            ),
+            health_server=command_input.health_server,
+            health_port=command_input.health_port,
+        )
     )
     if preparation.request is not None:
         return preparation.request
@@ -280,27 +270,7 @@ def run_command_flow(
 
     request = prepare_run_request(
         service=service,
-        pipeline=cli_input.pipeline,
-        run_type=cli_input.run_type,
-        resume=cli_input.resume,
-        start_offset=cli_input.start_offset,
-        limit=cli_input.limit,
-        input_csv=cli_input.input_csv,
-        filter_column=cli_input.filter_column,
-        filter_field=cli_input.filter_field,
-        dry_run=cli_input.dry_run,
-        vacuum_after_run=cli_input.vacuum_after_run,
-        vacuum_retention_days=cli_input.vacuum_retention_days,
-        debug=cli_input.debug,
-        health_server=cli_input.health_server,
-        health_port=cli_input.health_port,
-        enable_tracing=cli_input.enable_tracing,
-        use_cached_bronze=cli_input.use_cached_bronze,
-        cached_bronze_date=cli_input.cached_bronze_date,
-        cached_bronze_path=cli_input.cached_bronze_path,
-        replay_of_run_id=cli_input.replay_of_run_id,
-        replay_of_manifest_id=cli_input.replay_of_manifest_id,
-        exact_replay=cli_input.exact_replay,
+        command_input=cli_input,
         exit_func=exit_func,
     )
     finalize_cli_execution(

@@ -97,7 +97,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert "mcp_grafana_wrapper.ps1" in servers["grafana"]["args"][-1]
         assert "mcp_brave_search_wrapper.ps1" in servers["brave-search"]["args"][-1]
         assert "mcp_neo4j_cypher_wrapper.ps1" in servers["neo4j-cypher"]["args"][-1]
-        assert "mcp_neo4j_memory_wrapper.ps1" in servers["neo4j-memory"]["args"][-1]
+        assert "wrapper.ps1" in servers["neo4j-memory"]["args"][-1]
     else:
         assert servers["github"]["command"] == "bash"
         assert servers["github"]["args"][-1].endswith(".claude/github-mcp-wrapper.sh")
@@ -139,7 +139,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
             "scripts/ops/mcp_neo4j_cypher_wrapper.sh"
         )
         assert servers["neo4j-memory"]["args"][-1].endswith(
-            "scripts/ops/mcp_neo4j_memory_wrapper.sh"
+            "scripts/ops/wrapper.sh"
         )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"

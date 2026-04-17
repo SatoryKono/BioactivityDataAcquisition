@@ -9,6 +9,8 @@ compatibility with existing imports.
 from __future__ import annotations
 
 __all__ = [
+    "CliRunOptionsInput",
+    "CliRunPreparationInput",
     "CliRunOrchestrationService",
     "MetricsFlushCallable",
     "RunCoroutineCallable",
@@ -25,6 +27,8 @@ from bioetl.application.services.execution.cli_run_orchestration_contracts impor
     RunPreparedPipelineCallable,
 )
 from bioetl.application.services.execution.cli_run_orchestration_models import (
+    CliRunOptionsInput,
+    CliRunPreparationInput,
     RunExecutionRequest,
     RunPreparationResult,
     StartOffsetValidationResult,
@@ -78,113 +82,61 @@ class CliRunOrchestrationService:
 
     def build_options(
         self,
-        *,
-        run_type: str,
-        resume: bool,
-        start_offset: int | None,
-        limit: int | None,
-        input_csv: str | None,
-        filter_column: str | None,
-        filter_field: str | None,
-        dry_run: bool,
-        vacuum_after_run: bool | None,
-        vacuum_retention_days: int | None,
-        debug: bool,
-        use_cached_bronze: bool,
-        cached_bronze_date: str | None,
-        cached_bronze_path: str | None,
-        replay_of_run_id: str | None = None,
-        replay_of_manifest_id: str | None = None,
-        exact_replay: bool = False,
-        enable_tracing: bool | None = None,
+        request: CliRunOptionsInput,
     ) -> RunOptions:
         """Build RunOptions from CLI input.
 
         Args:
-            run_type: Pipeline run type ('incremental', 'backfill', 'rebuild').
-            resume: Whether to resume from a previously interrupted run.
-            start_offset: Optional record offset for incremental runs.
-            limit: Optional maximum number of records to process.
-            input_csv: Optional path to CSV file with input IDs.
-            filter_column: Optional column name to apply ID filtering.
-            filter_field: Optional field name for API-side filtering.
-            dry_run: If True, validate and plan but do not write to storage.
-            vacuum_after_run: If True, vacuum Delta tables after the run.
-            vacuum_retention_days: Number of days for Delta vacuum retention.
-            debug: If True, sets log level to DEBUG.
-            use_cached_bronze: If True, use a previously cached Bronze extract.
-            cached_bronze_date: Date string for the cached Bronze snapshot.
-            cached_bronze_path: File system path to the cached Bronze snapshot.
-            replay_of_run_id: Optional parent run identifier when this run is an exact replay.
-            replay_of_manifest_id: Optional parent manifest identifier when this run is an exact replay.
-            exact_replay: If True, require replay-safe snapshot-backed inputs.
+            request: Normalized CLI option values.
 
         Returns:
             RunOptions populated from the provided CLI parameters.
         """
         return RunOptions(
-            run_type=run_type,
-            resume=resume,
-            start_offset=start_offset,
-            limit=limit,
-            dry_run=dry_run,
-            input_csv=input_csv,
-            filter_column=filter_column,
-            filter_field=filter_field,
-            vacuum_after_run=vacuum_after_run if vacuum_after_run else None,
-            vacuum_retention_days=vacuum_retention_days,
-            log_level="DEBUG" if debug else "INFO",
-            use_cached_bronze=use_cached_bronze,
-            cached_bronze_path=cached_bronze_path,
-            cached_bronze_date=cached_bronze_date,
-            replay_of_run_id=replay_of_run_id,
-            replay_of_manifest_id=replay_of_manifest_id,
-            exact_replay=exact_replay,
-            enable_tracing=enable_tracing,
+            run_type=request.run_type,
+            resume=request.resume,
+            start_offset=request.start_offset,
+            limit=request.limit,
+            dry_run=request.dry_run,
+            input_csv=request.input_csv,
+            filter_column=request.filter_column,
+            filter_field=request.filter_field,
+            vacuum_after_run=(
+                request.vacuum_after_run if request.vacuum_after_run else None
+            ),
+            vacuum_retention_days=request.vacuum_retention_days,
+            log_level="DEBUG" if request.debug else "INFO",
+            use_cached_bronze=request.use_cached_bronze,
+            cached_bronze_path=request.cached_bronze_path,
+            cached_bronze_date=request.cached_bronze_date,
+            replay_of_run_id=request.replay_of_run_id,
+            replay_of_manifest_id=request.replay_of_manifest_id,
+            exact_replay=request.exact_replay,
+            enable_tracing=request.enable_tracing,
         )
 
     def prepare_execution_request(
         self,
-        *,
-        pipeline: str,
-        run_type: str,
-        resume: bool,
-        start_offset: int | None,
-        limit: int | None,
-        input_csv: str | None,
-        filter_column: str | None,
-        filter_field: str | None,
-        dry_run: bool,
-        vacuum_after_run: bool | None,
-        vacuum_retention_days: int | None,
-        debug: bool,
-        health_server: bool,
-        health_port: int,
-        use_cached_bronze: bool,
-        cached_bronze_date: str | None,
-        cached_bronze_path: str | None,
-        replay_of_run_id: str | None = None,
-        replay_of_manifest_id: str | None = None,
-        exact_replay: bool = False,
-        enable_tracing: bool | None = None,
+        request: CliRunPreparationInput,
     ) -> RunPreparationResult:
         """Validate raw CLI inputs and build a prepared execution request."""
         validation = self.validate_start_offset(
-            start_offset=start_offset,
-            run_type=run_type,
-            resume=resume,
+            start_offset=request.options.start_offset,
+            run_type=request.options.run_type,
+            resume=request.options.resume,
         )
         if not validation.is_valid:
             return RunPreparationResult(error_message=validation.error_message)
         if (
-            replay_of_run_id is not None or replay_of_manifest_id is not None
-        ) and not exact_replay:
+            request.options.replay_of_run_id is not None
+            or request.options.replay_of_manifest_id is not None
+        ) and not request.options.exact_replay:
             return RunPreparationResult(
                 error_message=(
                     "--replay-of-run-id/--replay-of-manifest-id require --exact-replay"
                 )
             )
-        if exact_replay and not use_cached_bronze:
+        if request.options.exact_replay and not request.options.use_cached_bronze:
             return RunPreparationResult(
                 error_message=(
                     "--exact-replay currently requires --use-cached-bronze with snapshot-backed Bronze inputs"
@@ -193,29 +145,10 @@ class CliRunOrchestrationService:
 
         return RunPreparationResult(
             request=RunExecutionRequest(
-                pipeline=pipeline,
-                options=self.build_options(
-                    run_type=run_type,
-                    resume=resume,
-                    start_offset=start_offset,
-                    limit=limit,
-                    input_csv=input_csv,
-                    filter_column=filter_column,
-                    filter_field=filter_field,
-                    dry_run=dry_run,
-                    vacuum_after_run=vacuum_after_run,
-                    vacuum_retention_days=vacuum_retention_days,
-                    debug=debug,
-                    enable_tracing=enable_tracing,
-                    use_cached_bronze=use_cached_bronze,
-                    cached_bronze_date=cached_bronze_date,
-                    cached_bronze_path=cached_bronze_path,
-                    replay_of_run_id=replay_of_run_id,
-                    replay_of_manifest_id=replay_of_manifest_id,
-                    exact_replay=exact_replay,
-                ),
-                health_server=health_server,
-                health_port=health_port,
+                pipeline=request.pipeline,
+                options=self.build_options(request.options),
+                health_server=request.health_server,
+                health_port=request.health_port,
             )
         )
 
