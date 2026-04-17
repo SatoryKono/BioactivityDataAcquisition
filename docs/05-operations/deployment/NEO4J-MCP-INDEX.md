@@ -90,7 +90,7 @@ codex interactive
 
 | Script | Location | Purpose |
 |--------|----------|---------|
-| **check_neo4j_mcp.sh** | `scripts/ops/` | Full MCP + backend health check |
+| **check.sh** | `scripts/memory/mcp/` | Full MCP + backend health check |
 | **neo4j_quick_start.sh** | `scripts/ops/` | One-command startup & verification |
 | **check_mcp.sh** | `scripts/ops/` | General MCP validation (all servers) |
 
@@ -110,7 +110,7 @@ bash scripts/ops/check_mcp.sh
 
 ## 🔧 Environment Variables
 
-Used by `mcp_neo4j_memory_wrapper.sh`:
+Used by `wrapper.sh`:
 
 ```bash
 # Required (or defaults used)

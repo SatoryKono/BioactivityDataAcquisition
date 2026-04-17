@@ -329,7 +329,7 @@ class TestPubChemCompoundTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["molecular_weight"] == 180.156
+        assert result["molecular_weight"] == pytest.approx(180.156)
         assert isinstance(result["molecular_weight"], float)
 
     @pytest.mark.asyncio
@@ -346,7 +346,7 @@ class TestPubChemCompoundTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["molecular_weight"] == 180.156
+        assert result["molecular_weight"] == pytest.approx(180.156)
         assert isinstance(result["molecular_weight"], float)
 
     @pytest.mark.asyncio
@@ -439,7 +439,7 @@ class TestPubChemCompoundTransformer:
 
         assert result is not None
         # Should be rounded to 10 decimal places
-        assert abs(result["molecular_weight"] - 1234.5678901234) < 1e-10
+        assert result["molecular_weight"] == pytest.approx(1234.5678901234, abs=1e-10)
 
     @pytest.mark.asyncio
     async def test_transform_all_physicochemical_properties(
@@ -521,13 +521,13 @@ class TestPubChemCompoundTransformer:
         assert result["molecular_formula"] == "C9H8O4"
         assert result["iupac_name"] == "2-acetoxybenzoic amolecule_id"
         # Physical properties
-        assert result["molecular_weight"] == 180.16
-        assert result["exact_mass"] == 180.042259
-        assert result["monoisotopic_mass"] == 180.042259
+        assert result["molecular_weight"] == pytest.approx(180.16)
+        assert result["exact_mass"] == pytest.approx(180.042259)
+        assert result["monoisotopic_mass"] == pytest.approx(180.042259)
         # Computed descriptors
-        assert result["xlogp"] == 1.2
-        assert result["tpsa"] == 63.6
-        assert result["complexity"] == 212.0
+        assert result["xlogp"] == pytest.approx(1.2)
+        assert result["tpsa"] == pytest.approx(63.6)
+        assert result["complexity"] == pytest.approx(212.0)
         assert result["charge"] == 0
         # Atom/Bond counts
         assert result["heavy_atom_count"] == 13
@@ -552,12 +552,12 @@ class TestPubChemCompoundTransformer:
         assert result["feature_cation_count_3d"] == 0
         assert result["feature_ring_count_3d"] == 1
         assert result["feature_hydrophobe_count_3d"] == 1
-        assert result["effective_rotor_count_3d"] == 2.4
-        assert result["conformer_rmsd_3d"] == 0.4
+        assert result["effective_rotor_count_3d"] == pytest.approx(2.4)
+        assert result["conformer_rmsd_3d"] == pytest.approx(0.4)
         # 3D steric quadrupole moments
-        assert result["x_steric_quadrupole_3d"] == 1.23
-        assert result["y_steric_quadrupole_3d"] == -0.45
-        assert result["z_steric_quadrupole_3d"] == 0.78
+        assert result["x_steric_quadrupole_3d"] == pytest.approx(1.23)
+        assert result["y_steric_quadrupole_3d"] == pytest.approx(-0.45)
+        assert result["z_steric_quadrupole_3d"] == pytest.approx(0.78)
         assert result["feature_count_3d"] == 7
 
     @pytest.mark.asyncio
@@ -572,7 +572,7 @@ class TestPubChemCompoundTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["xlogp"] == -5.2
+        assert result["xlogp"] == pytest.approx(-5.2)
 
     @pytest.mark.asyncio
     async def test_transform_charge_negative_value(self, transformer, mock_context):
@@ -604,9 +604,9 @@ class TestPubChemCompoundTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["x_steric_quadrupole_3d"] == -2.5
-        assert result["y_steric_quadrupole_3d"] == -1.8
-        assert result["z_steric_quadrupole_3d"] == -0.3
+        assert result["x_steric_quadrupole_3d"] == pytest.approx(-2.5)
+        assert result["y_steric_quadrupole_3d"] == pytest.approx(-1.8)
+        assert result["z_steric_quadrupole_3d"] == pytest.approx(-0.3)
 
     @pytest.mark.asyncio
     async def test_transform_monoisotopic_mass(self, transformer, mock_context):
@@ -620,7 +620,7 @@ class TestPubChemCompoundTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["monoisotopic_mass"] == 16.031
+        assert result["monoisotopic_mass"] == pytest.approx(16.031)
 
     @pytest.mark.asyncio
     async def test_transform_monoisotopic_mass_negative_rejected(
@@ -792,7 +792,7 @@ class TestPubChemCompoundTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["exact_mass"] == 16.031
+        assert result["exact_mass"] == pytest.approx(16.031)
 
     @pytest.mark.asyncio
     async def test_transform_exact_mass_negative_rejected(

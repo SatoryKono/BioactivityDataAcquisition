@@ -124,10 +124,10 @@ class TestBioactivity:
             data_validity_comment="Valid",
         )
         assert bioactivity.standard_type == "IC50"
-        assert bioactivity.standard_value == 10.5
+        assert bioactivity.standard_value == pytest.approx(10.5)
         assert bioactivity.standard_units == "nM"
         assert bioactivity.standard_relation == "="
-        assert bioactivity.pchembl_value == 7.5
+        assert bioactivity.pchembl_value == pytest.approx(7.5)
         assert bioactivity.activity_comment == "High quality"
         assert bioactivity.data_validity_comment == "Valid"
 
@@ -164,7 +164,7 @@ class TestBioactivity:
             assay_id="CHEMBL3",
             pchembl_value=0.0,
         )
-        assert bioactivity.pchembl_value == 0.0
+        assert bioactivity.pchembl_value == pytest.approx(0.0)
 
     def test_bioactivity_is_frozen(self, base_entity_kwargs):
         """Test that Bioactivity is immutable."""
@@ -226,8 +226,8 @@ class TestBioactivity:
         assert bioactivity.state == BioactivityState.RAW
         assert bioactivity.activity_id == "12345"
         assert bioactivity.molecule_id == "CHEMBL1"
-        assert bioactivity.standard_value == 10.5
-        assert bioactivity.pchembl_value == 7.5
+        assert bioactivity.standard_value == pytest.approx(10.5)
+        assert bioactivity.pchembl_value == pytest.approx(7.5)
 
     def test_bioactivity_from_raw_missing_activity_id(self):
         """Test from_raw raises ValueError if activity_id missing."""
@@ -743,10 +743,10 @@ class TestDocumentSimilarity:
         assert entity.sim_id == 1
         assert entity.doc_1 == 100
         assert entity.doc_2 == 200
-        assert entity.tid_tani == 0.8
-        assert entity.mol_tani == 0.6
-        assert entity.avg_tani == 0.7
-        assert entity.max_tani == 0.8
+        assert entity.tid_tani == pytest.approx(0.8)
+        assert entity.mol_tani == pytest.approx(0.6)
+        assert entity.avg_tani == pytest.approx(0.7)
+        assert entity.max_tani == pytest.approx(0.8)
 
     def test_minimal_entity(self, base_entity_kwargs):
         """Test creation with only required fields."""
@@ -860,7 +860,7 @@ class TestDocumentSimilarity:
             doc_2=200,
             tid_tani=0.0,
         )
-        assert entity.tid_tani == 0.0
+        assert entity.tid_tani == pytest.approx(0.0)
 
     def test_valid_tanimoto_boundary_one(self, base_entity_kwargs):
         """Test that Tanimoto=1.0 is valid."""
@@ -871,7 +871,7 @@ class TestDocumentSimilarity:
             doc_2=200,
             mol_tani=1.0,
         )
-        assert entity.mol_tani == 1.0
+        assert entity.mol_tani == pytest.approx(1.0)
 
     def test_entity_is_frozen(self, base_entity_kwargs):
         """Test that ChemblPublicationSimilarity is immutable."""

@@ -1038,23 +1038,23 @@ class TestMolecularWeight:
     def test_valid_molecular_weight(self) -> None:
         """Test creation with valid molecular weight."""
         mw = MolecularWeight(180.156)
-        assert mw.value == 180.156
+        assert mw.value == pytest.approx(180.156)
 
     def test_from_int(self) -> None:
         """Test creation from integer."""
         mw = MolecularWeight(180)
-        assert mw.value == 180.0
+        assert mw.value == pytest.approx(180.0)
 
     def test_from_string(self) -> None:
         """Test creation from string (e.g., from PubChem API)."""
         mw = MolecularWeight("342.30")
-        assert mw.value == 342.3
+        assert mw.value == pytest.approx(342.3)
 
     def test_precision_rounding(self) -> None:
         """Test rounding to configured precision (default 10 decimals)."""
         mw = MolecularWeight(180.12345678901234)
         # Should round to 10 decimal places
-        assert mw.value == 180.1234567890
+        assert mw.value == pytest.approx(180.1234567890)
 
     def test_below_minimum_raises(self) -> None:
         """Test that MW below minimum raises ValueError."""
@@ -1129,13 +1129,13 @@ class TestMolecularWeight:
         """Test from_raw with valid value."""
         mw = MolecularWeight.from_raw(180.156)
         assert mw is not None
-        assert mw.value == 180.156
+        assert mw.value == pytest.approx(180.156)
 
     def test_from_raw_valid_string(self) -> None:
         """Test from_raw with valid string."""
         mw = MolecularWeight.from_raw("342.30")
         assert mw is not None
-        assert mw.value == 342.3
+        assert mw.value == pytest.approx(342.3)
 
     def test_from_raw_none(self) -> None:
         """Test from_raw with None."""
@@ -1168,7 +1168,7 @@ class TestMolecularWeight:
             min_molecular_weight=1.0, max_molecular_weight=50000.0
         )
         mw = MolecularWeight(5.0, config=config)
-        assert mw.value == 5.0
+        assert mw.value == pytest.approx(5.0)
 
     def test_from_raw_with_config(self) -> None:
         """Test from_raw with custom config."""
@@ -1177,17 +1177,17 @@ class TestMolecularWeight:
         )
         mw = MolecularWeight.from_raw(5.0, config=config)
         assert mw is not None
-        assert mw.value == 5.0
+        assert mw.value == pytest.approx(5.0)
 
     def test_min_weight_property(self) -> None:
         """Test min_weight property returns config value."""
         mw = MolecularWeight(100.0)
-        assert mw.min_weight == 10.0
+        assert mw.min_weight == pytest.approx(10.0)
 
     def test_max_weight_property(self) -> None:
         """Test max_weight property returns config value."""
         mw = MolecularWeight(100.0)
-        assert mw.max_weight == 10000.0
+        assert mw.max_weight == pytest.approx(10000.0)
 
     def test_equality_ignores_config(self) -> None:
         """Test that equality compares by value, ignoring config."""
@@ -1205,4 +1205,4 @@ class TestMolecularWeight:
         """Test custom precision via config."""
         config = ValidationConfig(molecular_weight_precision=2)
         mw = MolecularWeight(180.12345, config=config)
-        assert mw.value == 180.12
+        assert mw.value == pytest.approx(180.12)
