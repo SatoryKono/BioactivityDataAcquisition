@@ -56,3 +56,13 @@ test_query.json
 tinyproxy.conf
 uv.lock
 warp-setup.sh
+AI_TOOLS_COMPLETE.md
+GEMINI_UPDATED.md
+NEO4J-MCP-SETUP.md
+SYNC_COMPLETE.md
+TEST_FIXES_PHASE2_SUMMARY.md
+TEST_FIXES_SUMMARY.md
+TOOLS_COMPARISON.md
+pytest.ini
+sonar-project.properties
+sonar-scanner-cli-5.0.1.3006-linux.zip
