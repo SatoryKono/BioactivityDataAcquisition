@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from types import SimpleNamespace
 
 import pytest
@@ -53,11 +54,13 @@ class _ExecutionHost:
         )
 
     async def _execute_seed_phase(self, state: object) -> tuple[object, SeedResult]:
+        await asyncio.sleep(0)
         assert state is self.initial_state
         self.order.append("seed")
         return self.seed_state, self.seed_result
 
     async def _extract_enrichment_keys(self) -> object:
+        await asyncio.sleep(0)
         self.order.append("keys")
         return self.keys_df
 
@@ -66,6 +69,7 @@ class _ExecutionHost:
         state: object,
         keys_df: object,
     ) -> tuple[object, dict[str, DependencyResult]]:
+        await asyncio.sleep(0)
         assert state is self.seed_state
         assert keys_df is self.keys_df
         self.order.append("dependencies")
@@ -76,12 +80,14 @@ class _ExecutionHost:
         state: object,
         keys_df: object,
     ) -> tuple[object, dict[str, EnrichmentResult]]:
+        await asyncio.sleep(0)
         assert state is self.dependency_state
         assert keys_df is self.keys_df
         self.order.append("enrichment")
         return self.enrichment_state, self.enrichment_results
 
     async def _transition_to_enrichment_completed(self, state: object) -> object:
+        await asyncio.sleep(0)
         assert state is self.enrichment_state
         self.order.append("transition")
         return self.completed_enrichment_state
@@ -99,6 +105,7 @@ class _ExecutionHost:
         enrichment_results: dict[str, EnrichmentResult],
         dependency_results: dict[str, DependencyResult] | None = None,
     ) -> tuple[object, MergeResult | None]:
+        await asyncio.sleep(0)
         assert state is self.completed_enrichment_state
         assert enrichment_results is self.enrichment_results
         assert dependency_results is self.dependency_results

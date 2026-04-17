@@ -143,13 +143,11 @@ class CompositeCheckpointService:
 
 import warnings
 
-from bioetl.composition.monitoring.deprecation_tracker import log_deprecation_warning
-
 class CompositeCheckpointManager(CompositeCheckpointService):
     def __init__(self, *args, **kwargs):
         message = (
             "CompositeCheckpointManager is deprecated and will be removed in v2.0. "
             "Use CompositeCheckpointService instead."
         )
-        log_deprecation_warning(message, stacklevel=3)
+        warnings.warn(message, DeprecationWarning, stacklevel=3)
         super().__init__(*args, **kwargs)

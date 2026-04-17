@@ -307,15 +307,13 @@ class CheckpointManagerService:
 # CheckpointManagerService directly.
 import warnings
 
-from bioetl.composition.monitoring.deprecation_tracker import log_deprecation_warning
-
 class CheckpointManager(CheckpointManagerService):
     def __init__(self, *args, **kwargs):
         message = (
             "CheckpointManager is deprecated and will be removed in v2.0. "
             "Use CheckpointManagerService instead."
         )
-        log_deprecation_warning(message, stacklevel=3)
+        warnings.warn(message, DeprecationWarning, stacklevel=3)
         super().__init__(*args, **kwargs)
 
 __all__ = ["CheckpointManager", "CheckpointManagerService"]

@@ -8,6 +8,7 @@ and TransformerProtocol are properly defined and implementable.
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable
 from typing import Any
 
@@ -43,6 +44,7 @@ class TestTransformCallbackProtocol:
                 """Execute transformation."""
 
                 async def transform() -> dict[str, Any] | None:
+                    await asyncio.sleep(0)
                     return {"transformed": True}
 
                 return transform()
@@ -58,6 +60,7 @@ class TestTransformCallbackProtocol:
             context: PipelineContext, record: dict[str, Any], index: int
         ) -> dict[str, Any] | None:
             """Async transformation function."""
+            await asyncio.sleep(0)
             return {"data": record.get("value")}
 
         # Verify it's callable
@@ -146,6 +149,7 @@ class TestTransformerProtocol:
                 index: int,
             ) -> SilverRecord | None:
                 """Transform a Bronze record to Silver format."""
+                await asyncio.sleep(0)
                 return {"id": record.get("id"), "processed": True}
 
         transformer = ValidTransformer()
@@ -167,6 +171,7 @@ class TestTransformerProtocol:
                 index: int,
             ) -> SilverRecord | None:
                 """Transform ChEMBL activity record."""
+                await asyncio.sleep(0)
                 activity_id = record.get("activity_id")
                 if not activity_id:
                     return None
@@ -264,6 +269,7 @@ class TestMockImplementations:
                 index: int,
             ) -> SilverRecord | None:
                 """Transform record."""
+                await asyncio.sleep(0)
                 if not record.get("id"):
                     return None
                 return {
@@ -307,6 +313,7 @@ class TestMockImplementations:
                 index: int,
             ) -> SilverRecord | None:
                 """Transform record, return None if invalid."""
+                await asyncio.sleep(0)
                 if not record.get("required_field"):
                     return None
                 return {"data": record["required_field"]}
