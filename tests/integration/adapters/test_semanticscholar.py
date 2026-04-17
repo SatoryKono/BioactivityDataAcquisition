@@ -376,6 +376,7 @@ class TestSemanticScholarAdapterRateLimiting:
         mock_logger: MagicMock,
     ) -> None:
         """Test that adapter respects rate limiter configuration."""
+        await asyncio.sleep(0)
         # Create a slow rate limiter
         slow_rate_limiter = TokenBucketRateLimiter(rate=1.0, capacity=2)
         circuit_breaker = CircuitBreakerGuard(provider="semanticscholar_rate_test")

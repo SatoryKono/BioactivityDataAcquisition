@@ -8,6 +8,7 @@ Tests verify that:
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
@@ -137,6 +138,7 @@ def mock_checkpoint_manager() -> AsyncMock:
     manager._saved_states: list[CompositeCheckpointState] = []
 
     async def load_impl() -> CompositeCheckpointState:
+        await asyncio.sleep(0)
         return CompositeCheckpointState(
             composite_name="test_composite",
             run_id="00000000-0000-0000-0000-000000000123",
@@ -145,6 +147,7 @@ def mock_checkpoint_manager() -> AsyncMock:
         )
 
     async def save_impl(state: CompositeCheckpointState) -> None:
+        await asyncio.sleep(0)
         manager._saved_states.append(state)
 
     manager.load = AsyncMock(side_effect=load_impl)

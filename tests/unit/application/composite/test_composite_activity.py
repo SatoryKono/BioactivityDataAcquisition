@@ -8,6 +8,7 @@ See ADR-026 for architectural context.
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
@@ -142,6 +143,7 @@ class TestActivityKeyExtraction:
         Given 3 activities with 2 unique molecule IDs,
         extraction should return only 2 unique IDs.
         """
+        await asyncio.sleep(0)
         unique_ids = (
             activity_seed_keys.select("molecule_id").unique().to_series().to_list()
         )
@@ -155,6 +157,7 @@ class TestActivityKeyExtraction:
         seed_config: SeedConfig,
     ) -> None:
         """Activity seed config extracts multiple output keys."""
+        await asyncio.sleep(0)
         assert "activity_id" in seed_config.output_keys
         assert "molecule_id" in seed_config.output_keys
         assert "assay_id" in seed_config.output_keys
@@ -266,6 +269,7 @@ class TestDependencyWithMoleculeFilter:
         compound_record_dep_config: DependencyConfig,
     ) -> None:
         """Dependency config should specify filter_field for API calls."""
+        await asyncio.sleep(0)
         assert compound_record_dep_config.filter_field == "molecule_id"
         assert compound_record_dep_config.join_keys == ("molecule_id",)
 
@@ -351,6 +355,7 @@ class TestDependencyRequiredFlag:
         compound_record_dep_config: DependencyConfig,
     ) -> None:
         """compound_record dependency should be optional (required=false)."""
+        await asyncio.sleep(0)
         assert compound_record_dep_config.required is False
 
     async def test_optional_dependency_does_not_use_seed_keys_flag(
@@ -358,6 +363,7 @@ class TestDependencyRequiredFlag:
         compound_record_dep_config: DependencyConfig,
     ) -> None:
         """Standard dependency uses seed keys (key_source=None)."""
+        await asyncio.sleep(0)
         assert compound_record_dep_config.key_source is None
         assert compound_record_dep_config.uses_seed_keys is True
 

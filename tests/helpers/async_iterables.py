@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator, Iterator
 from typing import Generic, TypeVar
 
@@ -18,6 +19,7 @@ class _StaticAsyncIterator(AsyncIterator[T], Generic[T]):
         return self
 
     async def __anext__(self) -> T:
+        await asyncio.sleep(0)
         try:
             return next(self._items)
         except StopIteration as exc:
@@ -40,6 +42,7 @@ class _FailingAsyncIterator(AsyncIterator[T]):
         return self
 
     async def __anext__(self) -> T:
+        await asyncio.sleep(0)
         raise self._error
 
 

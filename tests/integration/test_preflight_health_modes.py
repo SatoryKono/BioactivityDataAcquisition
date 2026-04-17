@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from types import SimpleNamespace
 from typing import Literal
 from unittest.mock import MagicMock
@@ -24,16 +25,19 @@ from bioetl.domain.types import HealthStatus, RunType
 
 class _HealthyStorage:
     async def health_check(self) -> HealthStatus:
+        await asyncio.sleep(0)
         return HealthStatus.HEALTHY
 
 
 class _FailingLegacyDataSource:
     async def health_check(self) -> HealthStatus:
+        await asyncio.sleep(0)
         raise OSError("upstream timeout")
 
 
 class _UnhealthyEnhancedDataSource:
     async def check_health(self) -> HealthCheckResult:
+        await asyncio.sleep(0)
         return HealthCheckResult(
             status=HealthStatus.UNHEALTHY,
             latency_ms=42.0,

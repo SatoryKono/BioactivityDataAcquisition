@@ -7,6 +7,7 @@ integrated into preflight_service.py.
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -524,6 +525,7 @@ class TestHealthAggregatorIntegration:
         mock_storage.health_check.return_value = HealthStatus.HEALTHY
 
         async def slow_health_check():
+            await asyncio.sleep(0)
             raise TimeoutError("API health check timed out")
 
         mock_data_source.health_check.side_effect = slow_health_check

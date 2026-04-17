@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -498,6 +499,7 @@ async def test_write_silver_dual_write_fails_logical_write_when_any_target_fails
     observed_targets: list[str] = []
 
     async def _failing_write_single_target(**kwargs: object) -> SimpleNamespace:
+        await asyncio.sleep(0)
         table_name = str(kwargs["table_name"])
         observed_targets.append(table_name)
         if table_name.endswith("__v2_0_0"):

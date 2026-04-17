@@ -26,13 +26,16 @@ class FakeDataSource:
         self.aclose = AsyncMock()
 
     async def __aenter__(self):
+        await asyncio.sleep(0)
         return self
 
     async def __aexit__(self, *args: object) -> None:
         """No cleanup needed for fake data source."""
+        await asyncio.sleep(0)
         pass
 
     async def fetch(self, entity_type: str, limit: int | None = None, **kwargs: object):
+        await asyncio.sleep(0)
         for i in range(self.current_idx, self.total_records):
             if self.fail_at is not None and i == self.fail_at:
                 raise RuntimeError(f"Simulated failure at record {i}")
