@@ -906,7 +906,7 @@ class TestPipelineRunnerLifecycle:
             return services_with_dq
 
         async def services_dq_aexit(self, *args):
-            pass
+            return None
 
         services_with_dq.__aenter__ = services_dq_aenter
         services_with_dq.__aexit__ = services_dq_aexit

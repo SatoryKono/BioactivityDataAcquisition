@@ -219,18 +219,17 @@ class TestStoragePortProtocol:
         # Note: @runtime_checkable protocols only check for method presence,
         # not signatures. Test missing methods instead.
         class InvalidStorage:
-            async def write_bronze(self, *args, **kwargs):
-                await _yield_once()
-                return None
+            def write_bronze(self, *args, **kwargs):
+                del args, kwargs
+                return "bronze"
 
             # Missing write_silver method entirely
-            async def write_gold(self, *args, **kwargs):
+            def write_gold(self, *args, **kwargs):
                 del args, kwargs
-                await _yield_once()
-                return None
+                return "gold"
 
-            async def aclose(self):
-                await _yield_once()
+            def aclose(self):
+                return None
 
         assert not isinstance(InvalidStorage(), StoragePort)
 

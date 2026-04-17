@@ -31,9 +31,6 @@ from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimi
 from bioetl.infrastructure.adapters.semanticscholar import SemanticScholarAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
 
-if TYPE_CHECKING:
-    pass
-
 # VCR cassette directory
 CASSETTE_DIR = (
     Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "semanticscholar"
@@ -74,6 +71,14 @@ def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
     if isinstance(rate_limiter, TokenBucketRateLimiter):
         rate_limiter._tokens = float(rate_limiter.capacity)
         rate_limiter._last_refill = time.monotonic()
+
+
+async def _consume_async_iter(async_iter) -> list[object]:
+    """Drain an async iterable while preserving iteration failures."""
+    items: list[object] = []
+    async for item in async_iter:
+        items.append(item)
+    return items
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -306,11 +311,12 @@ class TestSemanticScholarAdapterEdgeCases:
     ) -> None:
         """Test that invalid entity type raises ValueError."""
         with pytest.raises(ValueError, match=r"publication.*paper"):
-            async for _ in semanticscholar_adapter.fetch(
-                entity_type="invalid_type",
-                query="test",
-            ):
-                pass
+            await _consume_async_iter(
+                semanticscholar_adapter.fetch(
+                    entity_type="invalid_type",
+                    query="test",
+                )
+            )
 
     async def test_fetch_with_limit(
         self,

@@ -71,7 +71,7 @@ class _PubMedIdentifierBlock(_PubMedXmlBlock):
         super().__init__(root_resolver)
         self._data_normalizer = data_normalizer
 
-    def extract(self, record: BronzeRecord) -> JsonDict:
+    def extract(self, _record: BronzeRecord) -> JsonDict:
         root = self._resolve_root()
         if root is None:
             return {"pmid": None}
@@ -107,7 +107,7 @@ class _PubMedCoreBlock(_PubMedXmlBlock):
         super().__init__(root_resolver)
         self._data_normalizer = data_normalizer
 
-    def extract(self, record: BronzeRecord) -> JsonDict:
+    def extract(self, _record: BronzeRecord) -> JsonDict:
         article, _, _ = self._resolve_article_context()
         if article is None:
             return {}
@@ -155,7 +155,7 @@ class _PubMedAuthorBlock(_PubMedXmlBlock):
         self._normalize_author_list = normalize_author_list
         self._normalize_author_keys = normalize_author_keys
 
-    def extract(self, record: BronzeRecord) -> JsonDict:
+    def extract(self, _record: BronzeRecord) -> JsonDict:
         article, _, _ = self._resolve_article_context()
         if article is None:
             return {}
@@ -232,7 +232,7 @@ class _PubMedJournalBlock(_PubMedXmlBlock):
             return None
         return get_text(pubmed_data.find("PublicationStatus"))
 
-    def extract(self, record: BronzeRecord) -> JsonDict:
+    def extract(self, _record: BronzeRecord) -> JsonDict:
         article, medline, pubmed_data = self._resolve_article_context()
         if article is None:
             return {}
@@ -264,7 +264,7 @@ class _PubMedDateBlock(_PubMedXmlBlock):
         self._valid_date_patterns = tuple(valid_date_patterns)
         self._month_map = month_map
 
-    def extract(self, record: BronzeRecord) -> JsonDict:
+    def extract(self, _record: BronzeRecord) -> JsonDict:
         article, medline, pubmed_data = self._resolve_article_context()
         if article is None:
             return {}
@@ -294,7 +294,7 @@ class _PubMedClassificationBlock(_PubMedXmlBlock):
         self._serialize_json_list = serialize_json_list
         self._classify_publication_types = classify_publication_types
 
-    def extract(self, record: BronzeRecord) -> JsonDict:
+    def extract(self, _record: BronzeRecord) -> JsonDict:
         article, medline, _ = self._resolve_article_context()
         if article is None:
             return {}
@@ -328,7 +328,7 @@ class _PubMedClassificationBlock(_PubMedXmlBlock):
 class _PubMedMetricsBlock(_PubMedXmlBlock):
     """Extract simple count-based PubMed metrics."""
 
-    def extract(self, record: BronzeRecord) -> JsonDict:
+    def extract(self, _record: BronzeRecord) -> JsonDict:
         article, _, pubmed_data = self._resolve_article_context()
         if article is None:
             return {}

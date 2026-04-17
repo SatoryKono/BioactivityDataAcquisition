@@ -38,6 +38,16 @@ __all__ = [
     "vacuum_command",
 ]
 
+_VACUUM_DOMAIN_ERROR_TITLE = "Maintenance vacuum failed with domain error"
+_VACUUM_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum"
+_VACUUM_INTERRUPTED_MESSAGE = "Maintenance vacuum interrupted by user (Ctrl+C)"
+
+_VACUUM_ALL_DOMAIN_ERROR_TITLE = "Maintenance vacuum-all failed with domain error"
+_VACUUM_ALL_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum-all"
+_VACUUM_ALL_INTERRUPTED_MESSAGE = (
+    "Maintenance vacuum-all interrupted by user (Ctrl+C)"
+)
+
 
 def get_lifecycle_service() -> MedallionLifecycleService:
     """Load the lifecycle service through composition on demand."""
@@ -140,27 +150,27 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
             exc,
             reason_code="CLI_MAINTENANCE_VACUUM_DOMAIN_ERROR",
             target=table,
-            domain_error_title="Maintenance vacuum failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance vacuum",
-            interrupted_message="Maintenance vacuum interrupted by user (Ctrl+C)",
+            domain_error_title=_VACUUM_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_VACUUM_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_VACUUM_INTERRUPTED_MESSAGE,
         )
     except KeyboardInterrupt as exc:
         _handle_maintenance_failure(
             exc,
             reason_code="CLI_MAINTENANCE_VACUUM_SIGINT",
             target=table,
-            domain_error_title="Maintenance vacuum failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance vacuum",
-            interrupted_message="Maintenance vacuum interrupted by user (Ctrl+C)",
+            domain_error_title=_VACUUM_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_VACUUM_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_VACUUM_INTERRUPTED_MESSAGE,
         )
     except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
         _handle_maintenance_failure(
             exc,
             reason_code="CLI_MAINTENANCE_VACUUM_UNEXPECTED_ERROR",
             target=table,
-            domain_error_title="Maintenance vacuum failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance vacuum",
-            interrupted_message="Maintenance vacuum interrupted by user (Ctrl+C)",
+            domain_error_title=_VACUUM_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_VACUUM_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_VACUUM_INTERRUPTED_MESSAGE,
         )
     finally:
         if getattr(coro, "cr_frame", None) is not None:
@@ -232,27 +242,27 @@ def vacuum_all_command(retention_days: int, dry_run: bool, layer: str) -> None:
             exc,
             reason_code="CLI_MAINTENANCE_VACUUM_ALL_DOMAIN_ERROR",
             target=layer,
-            domain_error_title="Maintenance vacuum-all failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance vacuum-all",
-            interrupted_message="Maintenance vacuum-all interrupted by user (Ctrl+C)",
+            domain_error_title=_VACUUM_ALL_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_VACUUM_ALL_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_VACUUM_ALL_INTERRUPTED_MESSAGE,
         )
     except KeyboardInterrupt as exc:
         _handle_maintenance_failure(
             exc,
             reason_code="CLI_MAINTENANCE_VACUUM_ALL_SIGINT",
             target=layer,
-            domain_error_title="Maintenance vacuum-all failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance vacuum-all",
-            interrupted_message="Maintenance vacuum-all interrupted by user (Ctrl+C)",
+            domain_error_title=_VACUUM_ALL_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_VACUUM_ALL_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_VACUUM_ALL_INTERRUPTED_MESSAGE,
         )
     except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
         _handle_maintenance_failure(
             exc,
             reason_code="CLI_MAINTENANCE_VACUUM_ALL_UNEXPECTED_ERROR",
             target=layer,
-            domain_error_title="Maintenance vacuum-all failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance vacuum-all",
-            interrupted_message="Maintenance vacuum-all interrupted by user (Ctrl+C)",
+            domain_error_title=_VACUUM_ALL_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_VACUUM_ALL_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_VACUUM_ALL_INTERRUPTED_MESSAGE,
         )
     finally:
         if getattr(coro, "cr_frame", None) is not None:
