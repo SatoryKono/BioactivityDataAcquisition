@@ -8799,7 +8799,20 @@ def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:
     return issues
 
 
-def main(argv: list[str] | None = None) -> int:
+def _selection_from_args(args: argparse.Namespace) -> SnapshotSelection:
+    return SnapshotSelection(
+        only_labels=tuple(args.only_label),
+        only_analysis_layer=args.only_analysis_layer,
+        only_retirement_layer=args.only_retirement_layer,
+        only_complexity_layer=args.only_complexity_layer,
+        only_storage_layer=args.only_storage_layer,
+        only_runtime_evidence_layer=args.only_runtime_evidence_layer,
+        only_workflow_graph=args.only_workflow_graph,
+        only_docs_drift=args.only_docs_drift,
+    )
+
+
+def main(argv: list[str] | None = None) -> None:
     parser = _parser()
     args = parser.parse_args(argv)
     if args.prune_stale and args.full_reset_managed_wave:
@@ -8811,19 +8824,10 @@ def main(argv: list[str] | None = None) -> int:
             batch_size=args.batch_size,
         )
         print(json.dumps(summary, indent=2))
-        return 0
+        return
     root = args.root.resolve()
-    snapshot = _filtered_snapshot(
-        build_snapshot(root),
-        only_labels=tuple(args.only_label),
-        only_analysis_layer=args.only_analysis_layer,
-        only_retirement_layer=args.only_retirement_layer,
-        only_complexity_layer=args.only_complexity_layer,
-        only_storage_layer=args.only_storage_layer,
-        only_runtime_evidence_layer=args.only_runtime_evidence_layer,
-        only_workflow_graph=args.only_workflow_graph,
-        only_docs_drift=args.only_docs_drift,
-    )
+    selection = _selection_from_args(args)
+    snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
     stats = snapshot.stats()
     print(json.dumps(stats, indent=2))
     if args.export is not None:
@@ -8834,30 +8838,15 @@ def main(argv: list[str] | None = None) -> int:
             snapshot,
             root,
             args.http_uri,
-            args.batch_size,
-            prune_stale=args.prune_stale,
-            full_reset_managed_wave=args.full_reset_managed_wave,
-            prune_legacy_unmanaged=args.prune_legacy_unmanaged,
-            only_labels=tuple(args.only_label),
-            only_analysis_layer=args.only_analysis_layer,
-            only_retirement_layer=args.only_retirement_layer,
-            only_complexity_layer=args.only_complexity_layer,
-            only_storage_layer=args.only_storage_layer,
-            only_runtime_evidence_layer=args.only_runtime_evidence_layer,
-            only_workflow_graph=args.only_workflow_graph,
-            only_docs_drift=args.only_docs_drift,
+            SyncApplyOptions(
+                batch_size=args.batch_size,
+                prune_stale=args.prune_stale,
+                full_reset_managed_wave=args.full_reset_managed_wave,
+                prune_legacy_unmanaged=args.prune_legacy_unmanaged,
+            ),
+            selection=selection,
         )
-        targeted_mode = (
-            args.only_analysis_layer
-            or args.only_retirement_layer
-            or args.only_complexity_layer
-            or args.only_storage_layer
-            or args.only_runtime_evidence_layer
-            or args.only_workflow_graph
-            or args.only_docs_drift
-            or bool(args.only_label)
-        )
-        if not targeted_mode:
+        if not selection.targeted_mode():
             post_apply_report = build_fast_analysis_audit_report(snapshot, root, args.http_uri)
             critical_issues = _critical_analysis_audit_issues(post_apply_report)
             if critical_issues:
@@ -8873,7 +8862,6 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_json(args.report, report)
         print(f"Exported audit report to {args.report}")
-    return 0
 
 
 if __name__ == "__main__":
