@@ -8,19 +8,20 @@ import subprocess
 import sys
 from pathlib import Path
 
-CANONICAL_GROUPS: tuple[str, ...] = (
-    "ci",
-    "dev",
-    "qa",
-    "docs",
-    "schema",
-    "data",
-    "repo",
-    "ops",
-    "diagnostics",
-    "migrations",
-    "diagrams",
-)
+GROUP_ROOTS: dict[str, str] = {
+    "ci": "engineering/ci",
+    "dev": "engineering/dev",
+    "qa": "engineering/qa",
+    "docs": "docs",
+    "schema": "schema",
+    "data": "ops/data",
+    "repo": "engineering/repo",
+    "ops": "ops",
+    "diagnostics": "engineering/diagnostics",
+    "migrations": "ops/migrations",
+    "diagrams": "diagrams",
+}
+CANONICAL_GROUPS: tuple[str, ...] = tuple(GROUP_ROOTS)
 
 
 def _scripts_root() -> Path:
@@ -28,7 +29,8 @@ def _scripts_root() -> Path:
 
 
 def _iter_group_scripts(group: str) -> list[Path]:
-    root = _scripts_root() / group
+    rel_root = GROUP_ROOTS[group]
+    root = _scripts_root() / rel_root
     if not root.exists():
         return []
 
