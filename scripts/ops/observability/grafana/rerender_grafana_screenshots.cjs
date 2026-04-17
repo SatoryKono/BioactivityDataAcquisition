@@ -10,7 +10,11 @@ const VIEWPORT = { width: 1600, height: 2200 };
 const DASHBOARDS = [
   { uid: "bioetl-overview-v2", title: "1-overview", file: "bioetl-overview-v2.png" },
   { uid: "bioetl-dq-v2", title: "4-data-quality", file: "bioetl-dq-v2.png" },
-  { uid: "bioetl-provider-health-v2", title: "3-provider-health", file: "bioetl-provider-health-v2.png" },
+  {
+    uid: "bioetl-provider-health-v2",
+    title: "3-provider-health",
+    file: "bioetl-provider-health-v2.png",
+  },
   { uid: "bioetl-runtime", title: "2-runtime", file: "bioetl-runtime.png" },
 ];
 

@@ -4999,41 +4999,67 @@ def _add_composite_dependency_surfaces(
     if not isinstance(dependencies, list):
         return source_storage_refs
     for dependency in dependencies:
-        if not isinstance(dependency, dict):
+        storage_ref = _composite_dependency_storage_ref(dependency)
+        if storage_ref is None:
             continue
-        silver_table = dependency.get("silver_table")
-        if not isinstance(silver_table, str) or not silver_table.strip():
-            continue
-        storage_ref = silver_table.strip()
         source_storage_refs.append(storage_ref)
-        dependency_surface = _add_storage_surface(
-            snapshot,
-            project,
-            StorageSurfaceSpec(
-                ref=storage_ref,
-                summary=f"Dependency storage surface for composite pipeline `{context.composite_name}`.",
-                layer="silver",
-                today=context.today,
-                storage_kind="composite_dependency_input",
-                scope=EntityScope(pipeline_name=context.composite_name),
-            ),
-        )
-        if context.pipeline_key in snapshot.nodes:
-            snapshot.add_relation(
-                context.pipeline_key,
-                "DEPENDS_ON",
-                dependency_surface,
-                provenance="storage_surfaces",
-                required=bool(dependency.get("required", False)),
-            )
-        if context.config_artifact in snapshot.nodes:
-            snapshot.add_relation(
-                dependency_surface,
-                "DEFINED_BY",
-                context.config_artifact,
-                provenance="storage_surfaces",
-            )
+        dependency_surface = _add_composite_dependency_surface(snapshot, project, context, dependency, storage_ref)
+        _link_composite_dependency_surface(snapshot, context, dependency_surface, dependency)
     return source_storage_refs
+
+
+def _composite_dependency_storage_ref(dependency: object) -> str | None:
+    if not isinstance(dependency, dict):
+        return None
+    silver_table = dependency.get("silver_table")
+    if not isinstance(silver_table, str) or not silver_table.strip():
+        return None
+    return silver_table.strip()
+
+
+def _add_composite_dependency_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    context: CompositePipelineContext,
+    dependency: object,
+    storage_ref: str,
+) -> NodeKey:
+    return _add_storage_surface(
+        snapshot,
+        project,
+        StorageSurfaceSpec(
+            ref=storage_ref,
+            summary=f"Dependency storage surface for composite pipeline `{context.composite_name}`.",
+            layer="silver",
+            today=context.today,
+            storage_kind="composite_dependency_input",
+            scope=EntityScope(pipeline_name=context.composite_name),
+        ),
+    )
+
+
+def _link_composite_dependency_surface(
+    snapshot: GraphSnapshot,
+    context: CompositePipelineContext,
+    dependency_surface: NodeKey,
+    dependency: object,
+) -> None:
+    required = bool(dependency.get("required", False)) if isinstance(dependency, dict) else False
+    if context.pipeline_key in snapshot.nodes:
+        snapshot.add_relation(
+            context.pipeline_key,
+            "DEPENDS_ON",
+            dependency_surface,
+            provenance="storage_surfaces",
+            required=required,
+        )
+    if context.config_artifact in snapshot.nodes:
+        snapshot.add_relation(
+            dependency_surface,
+            "DEFINED_BY",
+            context.config_artifact,
+            provenance="storage_surfaces",
+        )
 
 
 def _add_composite_output_layers(
