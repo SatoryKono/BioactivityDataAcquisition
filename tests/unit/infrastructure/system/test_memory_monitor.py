@@ -124,10 +124,10 @@ class TestGetMemoryStatsEstimate:
         monitor = _make_monitor()
         stats = monitor._get_stats_estimate()
         assert isinstance(stats, MemoryStats)
-        assert stats.total_mb == 8192.0
-        assert stats.available_mb == 4096.0
-        assert stats.percent_used == 0.5
-        assert stats.process_mb == 256.0
+        assert stats.total_mb == pytest.approx(8192.0)
+        assert stats.available_mb == pytest.approx(4096.0)
+        assert stats.percent_used == pytest.approx(0.5)
+        assert stats.process_mb == pytest.approx(256.0)
 
     def test_fallback_calls_estimate_on_win32(self) -> None:
         """On win32 platform _get_stats_fallback calls estimate."""
@@ -135,7 +135,7 @@ class TestGetMemoryStatsEstimate:
         with patch("sys.platform", "win32"):
             stats = monitor._get_stats_fallback()
         assert isinstance(stats, MemoryStats)
-        assert stats.total_mb == 8192.0
+        assert stats.total_mb == pytest.approx(8192.0)
 
 
 # ---------------------------------------------------------------------------
@@ -174,8 +174,8 @@ class TestGetMemoryStatsPsutil:
             stats = monitor._get_stats_psutil()
 
         assert isinstance(stats, MemoryStats)
-        assert stats.percent_used == 0.6  # 60 / 100
-        assert stats.process_mb == 256.0
+        assert stats.percent_used == pytest.approx(0.6)  # 60 / 100
+        assert stats.process_mb == pytest.approx(256.0)
 
     def test_get_stats_psutil_caches_process(self) -> None:
         """Process instance is cached across calls."""
@@ -307,25 +307,25 @@ class TestGetReductionFactor:
         """Standard 50% reduction for initial pressure."""
         monitor = _make_monitor()
         monitor._consecutive_pressure_count = 1
-        assert monitor._get_reduction_factor() == 0.5
+        assert monitor._get_reduction_factor() == pytest.approx(0.5)
 
     def test_moderate_reduction_at_3_press(self) -> None:
         """Moderate-aggressive 35% reduction at 3 consecutive."""
         monitor = _make_monitor()
         monitor._consecutive_pressure_count = 3
-        assert monitor._get_reduction_factor() == 0.35
+        assert monitor._get_reduction_factor() == pytest.approx(0.35)
 
     def test_aggressive_reduction_at_5_press(self) -> None:
         """Aggressive 25% reduction at 5+ consecutive."""
         monitor = _make_monitor()
         monitor._consecutive_pressure_count = 5
-        assert monitor._get_reduction_factor() == 0.25
+        assert monitor._get_reduction_factor() == pytest.approx(0.25)
 
     def test_aggressive_reduction_at_10_press(self) -> None:
         """Aggressive 25% reduction beyond 5 consecutive."""
         monitor = _make_monitor()
         monitor._consecutive_pressure_count = 10
-        assert monitor._get_reduction_factor() == 0.25
+        assert monitor._get_reduction_factor() == pytest.approx(0.25)
 
 
 # ---------------------------------------------------------------------------
@@ -444,7 +444,7 @@ class TestFallbackResourcePath:
         ):
             stats = monitor._get_stats_fallback()
 
-        assert stats.percent_used == 0.2
+        assert stats.percent_used == pytest.approx(0.2)
         mock_resource.assert_called_once()
 
     def test_resource_reads_proc_meminfo(self) -> None:
@@ -462,11 +462,11 @@ class TestFallbackResourcePath:
         ):
             stats = monitor._get_stats_resource()
 
-        assert stats.total_mb == 8000.0
-        assert stats.available_mb == 4000.0
-        assert stats.used_mb == 4000.0
-        assert stats.percent_used == 0.5
-        assert stats.process_mb == 512.0
+        assert stats.total_mb == pytest.approx(8000.0)
+        assert stats.available_mb == pytest.approx(4000.0)
+        assert stats.used_mb == pytest.approx(4000.0)
+        assert stats.percent_used == pytest.approx(0.5)
+        assert stats.process_mb == pytest.approx(512.0)
 
     def test_resource_falls_back_to_estimate_on_oserror(self) -> None:
         """_get_stats_resource falls back to estimate when /proc access fails."""
@@ -482,8 +482,8 @@ class TestFallbackResourcePath:
         ):
             stats = monitor._get_stats_resource()
 
-        assert stats.total_mb == 8192.0
-        assert stats.percent_used == 0.5
+        assert stats.total_mb == pytest.approx(8192.0)
+        assert stats.percent_used == pytest.approx(0.5)
 
 
 @pytest.mark.unit

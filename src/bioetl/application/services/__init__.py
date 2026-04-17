@@ -33,17 +33,26 @@ from __future__ import annotations
 
 from importlib import import_module
 
+_OBSERVABILITY_WORKFLOW_SERVICE_MODULE = (
+    "bioetl.application.services.observability_workflow_service"
+)
+_LINEAGE_INSPECTION_SERVICE_MODULE = (
+    "bioetl.application.services.lineage.lineage_inspection_service"
+)
+_PIPELINE_RUNNER_SERVICE_MODULE = (
+    "bioetl.application.services.execution.pipeline_runner_service"
+)
+_RUN_MANIFEST_INSPECTION_SERVICE_MODULE = (
+    "bioetl.application.services.control_plane.run_manifest_inspection_service"
+)
+
 _LAZY_EXPORT_MODULES: dict[str, str] = {
     "AuditInspectionResult": "bioetl.application.services.audit_inspection_service",
     "AuditInspectionService": "bioetl.application.services.audit_inspection_service",
-    "AuditRunWorkflowResult": (
-        "bioetl.application.services.observability_workflow_service"
-    ),
+    "AuditRunWorkflowResult": _OBSERVABILITY_WORKFLOW_SERVICE_MODULE,
     "BronzeCleanupResult": "bioetl.application.services.bronze_cleanup_service",
     "BronzeCleanupService": "bioetl.application.services.bronze_cleanup_service",
-    "CheckpointAuditWorkflowResult": (
-        "bioetl.application.services.observability_workflow_service"
-    ),
+    "CheckpointAuditWorkflowResult": _OBSERVABILITY_WORKFLOW_SERVICE_MODULE,
     "CheckpointService": "bioetl.application.services.checkpoint_service",
     "ColumnInfo": "bioetl.application.services.export_service",
     "ConfigService": "bioetl.application.services.config_service",
@@ -61,52 +70,26 @@ _LAZY_EXPORT_MODULES: dict[str, str] = {
     "ExportResult": "bioetl.application.services.export_service",
     "ExportService": "bioetl.application.services.export_service",
     "HealthService": "bioetl.application.services.health_service",
-    "LineageFragmentInspectionResult": (
-        "bioetl.application.services.lineage.lineage_inspection_service"
-    ),
-    "LineageInspectionService": (
-        "bioetl.application.services.lineage.lineage_inspection_service"
-    ),
-    "LineageNodeRelation": (
-        "bioetl.application.services.lineage.lineage_inspection_service"
-    ),
-    "LineageRunExplanationResult": (
-        "bioetl.application.services.lineage.lineage_inspection_service"
-    ),
-    "LineageTraceResult": (
-        "bioetl.application.services.lineage.lineage_inspection_service"
-    ),
+    "LineageFragmentInspectionResult": _LINEAGE_INSPECTION_SERVICE_MODULE,
+    "LineageInspectionService": _LINEAGE_INSPECTION_SERVICE_MODULE,
+    "LineageNodeRelation": _LINEAGE_INSPECTION_SERVICE_MODULE,
+    "LineageRunExplanationResult": _LINEAGE_INSPECTION_SERVICE_MODULE,
+    "LineageTraceResult": _LINEAGE_INSPECTION_SERVICE_MODULE,
     "MetricsService": "bioetl.application.services.metrics_service",
-    "ObservabilityWorkflowService": (
-        "bioetl.application.services.observability_workflow_service"
-    ),
-    "PipelineNotFoundError": (
-        "bioetl.application.services.execution.pipeline_runner_service"
-    ),
+    "ObservabilityWorkflowService": _OBSERVABILITY_WORKFLOW_SERVICE_MODULE,
+    "PipelineNotFoundError": _PIPELINE_RUNNER_SERVICE_MODULE,
     "PipelineRunLifecycleService": (
         "bioetl.application.services.execution.pipeline_run_lifecycle_service"
     ),
-    "PipelineRunResult": (
-        "bioetl.application.services.execution.pipeline_runner_service"
-    ),
-    "PipelineRunnerService": (
-        "bioetl.application.services.execution.pipeline_runner_service"
-    ),
+    "PipelineRunResult": _PIPELINE_RUNNER_SERVICE_MODULE,
+    "PipelineRunnerService": _PIPELINE_RUNNER_SERVICE_MODULE,
     "QuarantineService": "bioetl.application.services.quarantine_service",
-    "RunManifestDiffEntry": (
-        "bioetl.application.services.control_plane.run_manifest_inspection_service"
-    ),
-    "RunManifestDiffResult": (
-        "bioetl.application.services.control_plane.run_manifest_inspection_service"
-    ),
-    "RunManifestInspectionResult": (
-        "bioetl.application.services.control_plane.run_manifest_inspection_service"
-    ),
-    "RunManifestInspectionService": (
-        "bioetl.application.services.control_plane.run_manifest_inspection_service"
-    ),
-    "RunOptions": "bioetl.application.services.execution.pipeline_runner_service",
-    "RunResult": "bioetl.application.services.execution.pipeline_runner_service",
+    "RunManifestDiffEntry": _RUN_MANIFEST_INSPECTION_SERVICE_MODULE,
+    "RunManifestDiffResult": _RUN_MANIFEST_INSPECTION_SERVICE_MODULE,
+    "RunManifestInspectionResult": _RUN_MANIFEST_INSPECTION_SERVICE_MODULE,
+    "RunManifestInspectionService": _RUN_MANIFEST_INSPECTION_SERVICE_MODULE,
+    "RunOptions": _PIPELINE_RUNNER_SERVICE_MODULE,
+    "RunResult": _PIPELINE_RUNNER_SERVICE_MODULE,
     "TableInfo": "bioetl.application.services.export_service",
     "TablePreview": "bioetl.application.services.export_service",
     "TableVacuumResult": "bioetl.application.services.vacuum_service",

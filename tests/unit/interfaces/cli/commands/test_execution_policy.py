@@ -100,6 +100,12 @@ def test_map_success_flag_to_exit_code_matrix() -> None:
 
 @pytest.mark.unit
 def test_execute_with_cli_failure_policy_returns_action_result() -> None:
+    def _raise_if_called(
+        exc: BaseException, subject: str, reason_code: str
+    ) -> None:
+        del subject, reason_code
+        raise exc
+
     result = execute_with_cli_failure_policy(
         lambda: "ok",
         subject="chembl_activity",
@@ -109,7 +115,7 @@ def test_execute_with_cli_failure_policy_returns_action_result() -> None:
             interrupted="INT",
             unexpected="UNX",
         ),
-        failure_handler=lambda exc, subject, reason_code: (_ for _ in ()).throw(exc),
+        failure_handler=_raise_if_called,
     )
 
     assert result == "ok"

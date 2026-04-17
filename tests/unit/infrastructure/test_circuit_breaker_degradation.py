@@ -16,7 +16,6 @@ Per ADR-007 and RULES.md §4.3.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import httpx
@@ -30,8 +29,10 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import (
     is_circuit_breaker_error,
 )
 
-if TYPE_CHECKING:
-    pass
+
+async def _yield_once() -> None:
+    """Exercise async paths in test doubles."""
+    await asyncio.sleep(0)
 
 
 class TestFlappingBehavior:
@@ -51,9 +52,11 @@ class TestFlappingBehavior:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("Provider error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         # Perform 5 cycles of: fail until open, recover, repeat
@@ -89,9 +92,11 @@ class TestFlappingBehavior:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         # Initial state emitted
@@ -128,6 +133,7 @@ class TestFlappingBehavior:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         # Initial open
@@ -158,9 +164,11 @@ class TestSustainedPartialFailure:
         cb = CircuitBreakerGuard(provider="test", failure_threshold=3)
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         # Pattern: 2 fails, 1 success, 2 fails, 1 success
@@ -187,6 +195,7 @@ class TestSustainedPartialFailure:
         successes = 0
 
         async def sometimes_fail(should_fail: bool) -> str:
+            await _yield_once()
             if should_fail:
                 raise RuntimeError("error")
             return "ok"
@@ -223,6 +232,7 @@ class TestRecoveryUnderLoad:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         # Open circuit
@@ -266,9 +276,11 @@ class TestRecoveryUnderLoad:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         # Open and recover
@@ -302,9 +314,11 @@ class TestMultipleConsecutiveTrips:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         expected_trips = 0
@@ -334,6 +348,7 @@ class TestMultipleConsecutiveTrips:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         # Trip the circuit
@@ -403,6 +418,7 @@ class TestMixedErrorTypesDuringDegradation:
         failure_count_before = cb.get_failure_count()
 
         async def raise_error() -> None:
+            await _yield_once()
             raise RuntimeError("any error")
 
         # Any exception counts
@@ -423,6 +439,7 @@ class TestMixedErrorTypesDuringDegradation:
         cb = CircuitBreakerGuard(provider="test", failure_threshold=2)
 
         async def business_error() -> None:
+            await _yield_once()
             raise ValueError("Invalid data")
 
         for _ in range(2):
@@ -450,6 +467,7 @@ class TestConcurrentHalfOpenProbes:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         # Open circuit
@@ -487,9 +505,11 @@ class TestConcurrentHalfOpenProbes:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         # Open circuit
@@ -524,9 +544,11 @@ class TestTimeoutBoundaryConditions:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         # Open circuit
@@ -557,6 +579,7 @@ class TestTimeoutBoundaryConditions:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         # Open circuit
@@ -569,6 +592,7 @@ class TestTimeoutBoundaryConditions:
 
         # Should still be blocked
         async def probe() -> str:
+            await _yield_once()
             return "ok"
 
         with pytest.raises(CircuitBreakerOpenError) as exc_info:
@@ -589,6 +613,7 @@ class TestTimeoutBoundaryConditions:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         # Open circuit
@@ -597,6 +622,7 @@ class TestTimeoutBoundaryConditions:
                 await cb.call(fail)
 
         async def probe() -> str:
+            await _yield_once()
             return "ok"
 
         # First attempt
@@ -633,9 +659,11 @@ class TestGracefulDegradationWithoutMetrics:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         # Test normal operation
@@ -671,9 +699,11 @@ class TestGracefulDegradationWithoutMetrics:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         # Multiple trip cycles
@@ -764,6 +794,7 @@ class TestStateInvariantsUnderStress:
         }
 
         async def random_operation(op: int) -> str:
+            await _yield_once()
             if op % 3 == 0:
                 raise RuntimeError("error")
             return "ok"
@@ -773,7 +804,7 @@ class TestStateInvariantsUnderStress:
             try:
                 await cb.call(lambda i=i: random_operation(i))
             except (RuntimeError, CircuitBreakerOpenError):
-                pass
+                continue
 
             # State should always be valid
             assert cb.get_state() in valid_states
@@ -791,6 +822,7 @@ class TestStateInvariantsUnderStress:
         )
 
         async def sometimes_fail(should_fail: bool) -> str:
+            await _yield_once()
             if should_fail:
                 raise RuntimeError("error")
             return "ok"
@@ -799,7 +831,7 @@ class TestStateInvariantsUnderStress:
             try:
                 await cb.call(lambda i=i: sometimes_fail(i % 2 == 0))
             except (RuntimeError, CircuitBreakerOpenError):
-                pass
+                continue
 
             # Failure count should never be negative
             assert cb.get_failure_count() >= 0
@@ -814,9 +846,11 @@ class TestStateInvariantsUnderStress:
         )
 
         async def fail() -> None:
+            await _yield_once()
             raise RuntimeError("error")
 
         async def succeed() -> str:
+            await _yield_once()
             return "ok"
 
         previous_trips = 0

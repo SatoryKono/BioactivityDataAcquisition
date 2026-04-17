@@ -25,6 +25,10 @@ from __future__ import annotations
 
 from importlib import import_module as _import_module
 
+_RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE = (
+    "bioetl.domain.runtime_observability_publication_contract"
+)
+
 _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
     "DomainEventObservabilityEnvelope": (
         "bioetl.domain.observability_event_mapping",
@@ -51,15 +55,15 @@ _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
         "observability_metric_names",
     ),
     "runtime_observability_publication_contract": (
-        "bioetl.domain.runtime_observability_publication_contract",
+        _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE,
         "runtime_observability_publication_contract",
     ),
     "get_runtime_observability_publication_contract": (
-        "bioetl.domain.runtime_observability_publication_contract",
+        _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE,
         "get_runtime_observability_publication_contract",
     ),
     "is_canonical_runtime_observability_emitter": (
-        "bioetl.domain.runtime_observability_publication_contract",
+        _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE,
         "is_canonical_runtime_observability_emitter",
     ),
     "map_domain_event_to_observability_event": (

@@ -332,7 +332,7 @@ class TestRunCompositeAsync:
             mock_context.return_value.__aenter__ = AsyncMock()
             mock_context.return_value.__aexit__ = AsyncMock()
 
-            success, error = await _run_composite_async(
+            success, _ = await _run_composite_async(
                 "publication",
                 CompositeRuntimeConfig(),
                 health_server_enabled=False,

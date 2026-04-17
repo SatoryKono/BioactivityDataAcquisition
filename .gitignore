@@ -22,6 +22,7 @@ ENV/
 .codex_tmp_issue_*.md
 .env.codex
 .env.gemini
+.env.mistrallvibe
 
 # Prevent root-level test scripts
 /test_*.js
@@ -128,6 +129,7 @@ desktop.ini
 API_KEY.env
 secrets.json
 credentials.json
+!script-mistrallvibe/.env.mistrallvibe
 
 # Docker volumes (RULES.md §8.2)
 docker-data/

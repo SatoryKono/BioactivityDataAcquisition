@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import MagicMock
 
 import pytest
@@ -34,6 +35,7 @@ class TestCircuitBreaker:
         cb = CircuitBreakerGuard(provider="test", failure_threshold=3)
 
         async def success() -> str:
+            await asyncio.sleep(0)
             return "ok"
 
         result = await cb.call(success)
@@ -46,8 +48,8 @@ class TestCircuitBreaker:
         cb = CircuitBreakerGuard(provider="test", failure_threshold=3)
 
         async def fail() -> None:
-            msg = "error"
-            raise RuntimeError(msg)
+            await asyncio.sleep(0)
+            raise RuntimeError("error")
 
         # Fail 3 times to trigger opening
         for _ in range(3):
@@ -65,8 +67,8 @@ class TestCircuitBreaker:
         )
 
         async def fail() -> None:
-            msg = "error"
-            raise RuntimeError(msg)
+            await asyncio.sleep(0)
+            raise RuntimeError("error")
 
         # Open the circuit
         for _ in range(2):
@@ -77,6 +79,7 @@ class TestCircuitBreaker:
 
         # Next call should be blocked
         async def would_succeed() -> str:
+            await asyncio.sleep(0)
             return "ok"
 
         with pytest.raises(CircuitBreakerOpenError) as exc_info:
@@ -95,8 +98,8 @@ class TestCircuitBreaker:
         )
 
         async def fail() -> None:
-            msg = "error"
-            raise RuntimeError(msg)
+            await asyncio.sleep(0)
+            raise RuntimeError("error")
 
         # Open the circuit
         for _ in range(2):
@@ -107,6 +110,7 @@ class TestCircuitBreaker:
 
         # Next call should be allowed (probe request)
         async def success() -> str:
+            await asyncio.sleep(0)
             return "ok"
 
         result = await cb.call(success)
@@ -126,9 +130,9 @@ class TestCircuitBreaker:
 
         async def fail_always() -> None:
             nonlocal call_count
+            await asyncio.sleep(0)
             call_count += 1
-            msg = "error"
-            raise RuntimeError(msg)
+            raise RuntimeError("error")
 
         # Open the circuit
         for _ in range(2):
@@ -151,10 +155,11 @@ class TestCircuitBreaker:
         cb = CircuitBreakerGuard(provider="test", failure_threshold=3)
 
         async def fail() -> None:
-            msg = "error"
-            raise RuntimeError(msg)
+            await asyncio.sleep(0)
+            raise RuntimeError("error")
 
         async def success() -> str:
+            await asyncio.sleep(0)
             return "ok"
 
         # Fail twice (below threshold)
@@ -224,6 +229,7 @@ class TestCircuitBreakerMetrics:
         )
 
         async def fail() -> None:
+            await asyncio.sleep(0)
             raise RuntimeError("error")
 
         # Trigger 3 failures to open the circuit
@@ -273,6 +279,7 @@ class TestCircuitBreakerMetrics:
 
         # Probe request that triggers HALF_OPEN transition
         async def success() -> str:
+            await asyncio.sleep(0)
             return "ok"
 
         await cb.call(success)
@@ -308,6 +315,7 @@ class TestCircuitBreakerMetrics:
         )
 
         async def fail() -> None:
+            await asyncio.sleep(0)
             raise RuntimeError("error")
 
         # Initial emission in __post_init__
@@ -361,10 +369,10 @@ class TestCircuitBreakerMetrics:
         assert len(gauge_calls) >= 2
 
         # First should be HALF_OPEN
-        assert gauge_calls[0][0][1] == 1.0  # HALF_OPEN
+        assert gauge_calls[0][0][1] == pytest.approx(1.0)  # HALF_OPEN
 
         # Second should be OPEN
-        assert gauge_calls[1][0][1] == 2.0  # OPEN
+        assert gauge_calls[1][0][1] == pytest.approx(2.0)  # OPEN
 
         # Should have incremented trip counter (among failure counters)
         trip_calls = [
@@ -428,6 +436,7 @@ class TestCircuitBreakerMetrics:
         )
 
         async def fail() -> None:
+            await asyncio.sleep(0)
             raise RuntimeError("error")
 
         # Fail 2 times (below threshold of 3)
@@ -467,6 +476,7 @@ class TestCircuitBreakerErrorNarrowing:
         cb = CircuitBreakerGuard(provider="test", failure_threshold=1)
 
         async def raise_exc() -> None:
+            await asyncio.sleep(0)
             raise exc_cls("bug")
 
         with pytest.raises(exc_cls):
@@ -488,6 +498,7 @@ class TestCircuitBreakerErrorNarrowing:
         cb = CircuitBreakerGuard(provider="test", failure_threshold=1)
 
         async def raise_exc() -> None:
+            await asyncio.sleep(0)
             raise exc_cls("transient")
 
         with pytest.raises(exc_cls):

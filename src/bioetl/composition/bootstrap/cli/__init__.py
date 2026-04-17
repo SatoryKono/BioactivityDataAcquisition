@@ -32,33 +32,38 @@ if TYPE_CHECKING:
         bootstrap_health_service,
     )
 
+_CLI_HEALTH_MODULE = "bioetl.composition.bootstrap.cli.health"
+_CLI_CHECKPOINT_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"
+_CLI_STORAGE_MODULE = "bioetl.composition.bootstrap.cli.storage"
+_CLI_NOOP_MODULE = "bioetl.composition.bootstrap.cli.noop"
+
 
 _CLI_EXPORT_MODULES = {
-    "HealthServerDependencies": "bioetl.composition.bootstrap.cli.health",
+    "HealthServerDependencies": _CLI_HEALTH_MODULE,
     "bootstrap_adr_service": "bioetl.composition.bootstrap.cli.adr",
-    "bootstrap_audit_inspection_service": "bioetl.composition.bootstrap.cli.checkpoint",
-    "bootstrap_bronze_cleanup_service": "bioetl.composition.bootstrap.cli.storage",
-    "bootstrap_checkpoint_manager": "bioetl.composition.bootstrap.cli.checkpoint",
-    "bootstrap_checkpoint_service": "bioetl.composition.bootstrap.cli.checkpoint",
-    "bootstrap_cleanup_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_audit_inspection_service": _CLI_CHECKPOINT_MODULE,
+    "bootstrap_bronze_cleanup_service": _CLI_STORAGE_MODULE,
+    "bootstrap_checkpoint_manager": _CLI_CHECKPOINT_MODULE,
+    "bootstrap_checkpoint_service": _CLI_CHECKPOINT_MODULE,
+    "bootstrap_cleanup_service": _CLI_STORAGE_MODULE,
     "bootstrap_config_service": "bioetl.composition.bootstrap.cli.config",
-    "bootstrap_contract_migration_service": "bioetl.composition.bootstrap.cli.storage",
-    "bootstrap_export_service": "bioetl.composition.bootstrap.cli.storage",
-    "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
-    "bootstrap_health_service": "bioetl.composition.bootstrap.cli.health",
-    "bootstrap_lifecycle_service": "bioetl.composition.bootstrap.cli.storage",
+    "bootstrap_contract_migration_service": _CLI_STORAGE_MODULE,
+    "bootstrap_export_service": _CLI_STORAGE_MODULE,
+    "bootstrap_health_server_dependencies": _CLI_HEALTH_MODULE,
+    "bootstrap_health_service": _CLI_HEALTH_MODULE,
+    "bootstrap_lifecycle_service": _CLI_STORAGE_MODULE,
     "bootstrap_lineage_service": "bioetl.composition.bootstrap.cli.lineage",
     "bootstrap_lock_service": "bioetl.composition.bootstrap.cli.lock",
     "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli.metrics",
-    "bootstrap_observability_workflow_service": "bioetl.composition.bootstrap.cli.checkpoint",
-    "bootstrap_quarantine_manager": "bioetl.composition.bootstrap.cli.checkpoint",
-    "bootstrap_quarantine_service": "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_observability_workflow_service": _CLI_CHECKPOINT_MODULE,
+    "bootstrap_quarantine_manager": _CLI_CHECKPOINT_MODULE,
+    "bootstrap_quarantine_service": _CLI_CHECKPOINT_MODULE,
     "bootstrap_run_manifest_service": "bioetl.composition.bootstrap.cli.run_manifest",
-    "bootstrap_vacuum_service": "bioetl.composition.bootstrap.cli.storage",
-    "create_noop_logger": "bioetl.composition.bootstrap.cli.noop",
-    "create_noop_metrics": "bioetl.composition.bootstrap.cli.noop",
-    "create_noop_observability_bundle": "bioetl.composition.bootstrap.cli.noop",
-    "create_noop_tracing": "bioetl.composition.bootstrap.cli.noop",
+    "bootstrap_vacuum_service": _CLI_STORAGE_MODULE,
+    "create_noop_logger": _CLI_NOOP_MODULE,
+    "create_noop_metrics": _CLI_NOOP_MODULE,
+    "create_noop_observability_bundle": _CLI_NOOP_MODULE,
+    "create_noop_tracing": _CLI_NOOP_MODULE,
 }
 
 

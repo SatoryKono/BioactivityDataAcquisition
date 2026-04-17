@@ -24,9 +24,17 @@ async function main() {
          OPTIONAL MATCH (p)-[:HAS_TEST_SURFACE]->(ts:test_surface)
          OPTIONAL MATCH (p)-[:HAS_QUALITY_GATE]->(qg:quality_gate)
          OPTIONAL MATCH (p)-[:HAS_DOC_SOURCE_SURFACE]->(ds:doc_source_surface)
+         OPTIONAL MATCH (p)-[:HAS_EXECUTION_PATH]->(ep:execution_path)
          RETURN count(DISTINCT ts) AS test_surfaces,
                 count(DISTINCT qg) AS quality_gates,
-                count(DISTINCT ds) AS doc_sources`,
+                count(DISTINCT ds) AS doc_sources,
+                count(DISTINCT ep) AS execution_paths`,
+      ],
+      [
+        'execution_paths',
+        `MATCH (p:project {name:'BioETL'})-[:HAS_EXECUTION_PATH]->(ep:execution_path)
+         RETURN ep.name AS name, ep.platform AS platform, ep.summary AS summary
+         ORDER BY platform, name`,
       ],
       [
         'vcr_policy',

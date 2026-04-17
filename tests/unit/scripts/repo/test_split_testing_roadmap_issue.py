@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from scripts.repo import split_testing_roadmap_issue as module
 
 
@@ -62,13 +64,13 @@ def test_run_dry_run_json_outputs_planned_items(capsys: object) -> None:
 def test_resolve_retry_delay_uses_retry_after_header() -> None:
     delay = module._resolve_retry_delay_seconds(retry_after="3", attempt=2)
 
-    assert delay == 3.0
+    assert delay == pytest.approx(3.0)
 
 
 def test_resolve_retry_delay_falls_back_to_linear_backoff() -> None:
     delay = module._resolve_retry_delay_seconds(retry_after=None, attempt=3)
 
-    assert delay == 4.5
+    assert delay == pytest.approx(4.5)
 
 
 def test_run_apply_reuses_existing_issues_and_skips_comment(

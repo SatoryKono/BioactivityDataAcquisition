@@ -23,7 +23,7 @@ class TestColumnStats:
     def test_default_values(self) -> None:
         """Test creation with default values."""
         stats = ColumnStats()
-        assert stats.null_rate == 0.0
+        assert stats.null_rate == pytest.approx(0.0)
         assert stats.unique_count is None
         assert stats.min_value is None
         assert stats.max_value is None
@@ -38,11 +38,11 @@ class TestColumnStats:
             max_value=100.0,
             mean_value=50.5,
         )
-        assert stats.null_rate == 0.25
+        assert stats.null_rate == pytest.approx(0.25)
         assert stats.unique_count == 10
-        assert stats.min_value == 1.0
-        assert stats.max_value == 100.0
-        assert stats.mean_value == 50.5
+        assert stats.min_value == pytest.approx(1.0)
+        assert stats.max_value == pytest.approx(100.0)
+        assert stats.mean_value == pytest.approx(50.5)
 
     def test_to_column_metrics(self) -> None:
         """Test conversion to ColumnMetrics model."""
@@ -54,11 +54,11 @@ class TestColumnStats:
             mean_value=5.0,
         )
         metrics = stats.to_column_metrics()
-        assert metrics.null_rate == 0.1
+        assert metrics.null_rate == pytest.approx(0.1)
         assert metrics.unique_count == 5
-        assert metrics.min == 0.0
-        assert metrics.max == 10.0
-        assert metrics.mean == 5.0
+        assert metrics.min == pytest.approx(0.0)
+        assert metrics.max == pytest.approx(10.0)
+        assert metrics.mean == pytest.approx(5.0)
 
     def test_immutability(self) -> None:
         """Test that ColumnStats is immutable."""
@@ -151,12 +151,12 @@ class TestBatchDQMetrics:
             valid_records=95,
             error_records=5,
         )
-        assert metrics.error_rate == 0.05
+        assert metrics.error_rate == pytest.approx(0.05)
 
     def test_error_rate_zero_total(self) -> None:
         """Test error rate is 0 when total_records is 0."""
         metrics = BatchDQMetrics(total_records=0, error_records=0)
-        assert metrics.error_rate == 0.0
+        assert metrics.error_rate == pytest.approx(0.0)
 
     def test_validation_passed(self) -> None:
         """Test validation_passed property."""
@@ -188,7 +188,7 @@ class TestBatchDQMetrics:
         assert summary.valid_records == 95
         assert summary.error_records == 5
         assert summary.warning_records == 3
-        assert summary.error_rate == 0.05
+        assert summary.error_rate == pytest.approx(0.05)
         assert summary.validation_passed is False
 
     def test_to_dq_summary_with_column_stats(self) -> None:
@@ -204,10 +204,10 @@ class TestBatchDQMetrics:
         )
         summary = metrics.to_dq_summary()
         assert len(summary.column_metrics) == 2
-        assert summary.column_metrics["name"].null_rate == 0.1
+        assert summary.column_metrics["name"].null_rate == pytest.approx(0.1)
         assert summary.column_metrics["name"].unique_count == 50
-        assert summary.column_metrics["value"].min == 1.0
-        assert summary.column_metrics["value"].max == 100.0
+        assert summary.column_metrics["value"].min == pytest.approx(1.0)
+        assert summary.column_metrics["value"].max == pytest.approx(100.0)
 
     def test_to_dq_summary_with_schema_drift(self) -> None:
         """Test conversion to DQSummary includes schema drift."""
@@ -275,7 +275,7 @@ class TestBatchDQMetricsFromRecords:
         assert metrics.total_records == 2
         assert metrics.valid_records == 1
         assert metrics.error_records == 1
-        assert metrics.error_rate == 0.5
+        assert metrics.error_rate == pytest.approx(0.5)
 
     def test_with_validation_errors(self) -> None:
         """Test with validation errors."""
@@ -313,10 +313,10 @@ class TestBatchDQMetricsFromRecords:
         # Check value column stats
         value_stats = metrics.column_stats.get("value")
         assert value_stats is not None
-        assert value_stats.null_rate == 0.0
-        assert value_stats.min_value == 10.0
-        assert value_stats.max_value == 30.0
-        assert value_stats.mean_value == 20.0
+        assert value_stats.null_rate == pytest.approx(0.0)
+        assert value_stats.min_value == pytest.approx(10.0)
+        assert value_stats.max_value == pytest.approx(30.0)
+        assert value_stats.mean_value == pytest.approx(20.0)
 
     def test_internal_fields_excluded(self) -> None:
         """Test that internal fields (starting with _) are excluded from stats."""
@@ -344,7 +344,7 @@ class TestComputeColumnStats:
             {"col": None},
         ]
         result = _compute_column_stats(records)
-        assert result["col"].null_rate == 1.0
+        assert result["col"].null_rate == pytest.approx(1.0)
         assert result["col"].unique_count == 0
 
     def test_numeric_column(self) -> None:
@@ -356,9 +356,9 @@ class TestComputeColumnStats:
         ]
         result = _compute_column_stats(records)
         stats = result["value"]
-        assert stats.min_value == 10.0
-        assert stats.max_value == 30.0
-        assert stats.mean_value == 20.0
+        assert stats.min_value == pytest.approx(10.0)
+        assert stats.max_value == pytest.approx(30.0)
+        assert stats.mean_value == pytest.approx(20.0)
 
     def test_mixed_types_column(self) -> None:
         """Test column with mixed types (only numerics counted)."""
@@ -370,8 +370,8 @@ class TestComputeColumnStats:
         result = _compute_column_stats(records)
         stats = result["col"]
         # Only 10 and 30 are numeric
-        assert stats.min_value == 10.0
-        assert stats.max_value == 30.0
+        assert stats.min_value == pytest.approx(10.0)
+        assert stats.max_value == pytest.approx(30.0)
 
     def test_nan_inf_excluded(self) -> None:
         """Test that NaN and Inf values are excluded from numeric stats."""
@@ -383,9 +383,9 @@ class TestComputeColumnStats:
         ]
         result = _compute_column_stats(records)
         stats = result["value"]
-        assert stats.min_value == 10.0
-        assert stats.max_value == 20.0
-        assert stats.mean_value == 15.0
+        assert stats.min_value == pytest.approx(10.0)
+        assert stats.max_value == pytest.approx(20.0)
+        assert stats.mean_value == pytest.approx(15.0)
 
 
 class TestExtractNumericValues:
@@ -398,24 +398,24 @@ class TestExtractNumericValues:
     def test_all_numeric(self) -> None:
         """Test with all numeric values."""
         result = _extract_numeric_values([1, 2.5, 3])
-        assert result == [1.0, 2.5, 3.0]
+        assert result == pytest.approx([1.0, 2.5, 3.0])
 
     def test_mixed_types(self) -> None:
         """Test with mixed types."""
         result = _extract_numeric_values([1, "text", 2, None, 3])
-        assert result == [1.0, 2.0, 3.0]
+        assert result == pytest.approx([1.0, 2.0, 3.0])
 
     def test_bool_excluded(self) -> None:
         """Test that boolean values are excluded."""
         result = _extract_numeric_values([1, True, False, 2])
-        assert result == [1.0, 2.0]
+        assert result == pytest.approx([1.0, 2.0])
 
     def test_nan_inf_excluded(self) -> None:
         """Test that NaN and Inf are excluded."""
         result = _extract_numeric_values([1, float("nan"), float("inf"), 2])
-        assert result == [1.0, 2.0]
+        assert result == pytest.approx([1.0, 2.0])
 
     def test_negative_inf_excluded(self) -> None:
         """Test that negative Inf is excluded."""
         result = _extract_numeric_values([1, float("-inf"), 2])
-        assert result == [1.0, 2.0]
+        assert result == pytest.approx([1.0, 2.0])

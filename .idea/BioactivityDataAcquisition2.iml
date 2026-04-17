@@ -246,6 +246,8 @@
       <excludeFolder url="file://$MODULE_DIR$/MagicMock" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/.gemini" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/gemini" />
+      <excludeFolder url="file://$MODULE_DIR$/scripts/archive/.gemini" />
+      <excludeFolder url="file://$MODULE_DIR$/scripts/archive/tmp" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.13 (BioactivityDataAcquisition2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

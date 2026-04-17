@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 
 _LEDGER_APPEND_OPEN_FLAGS = os.O_APPEND | os.O_CREAT | os.O_WRONLY
+_RUN_LEDGER_MESSAGE_PREFIX = "Run ledger"
 
 
 class _RunLedgerCorruptionError(ValueError):
@@ -174,7 +175,7 @@ class FileRunLedgerStore(RunLedgerPort):
                 status="failed",
             )
             raise build_storage_error(
-                message_prefix="Run ledger",
+                message_prefix=_RUN_LEDGER_MESSAGE_PREFIX,
                 operation="append",
                 path=ledger_path,
                 error=error,
@@ -201,7 +202,7 @@ class FileRunLedgerStore(RunLedgerPort):
         except (OSError, TypeError, ValueError) as error:
             status = "failed"
             raise build_storage_error(
-                message_prefix="Run ledger",
+                message_prefix=_RUN_LEDGER_MESSAGE_PREFIX,
                 operation="list_entries",
                 path=self.base_path / f"{manifest_id}.jsonl",
                 error=error,
@@ -236,7 +237,7 @@ class FileRunLedgerStore(RunLedgerPort):
         except (OSError, TypeError, ValueError) as error:
             status = "failed"
             raise build_storage_error(
-                message_prefix="Run ledger",
+                message_prefix=_RUN_LEDGER_MESSAGE_PREFIX,
                 operation="list_entries_by_run_id",
                 path=self.base_path / "_by_run_id" / f"{run_id}.txt",
                 error=error,
@@ -268,7 +269,7 @@ class FileRunLedgerStore(RunLedgerPort):
         except _RunLedgerCorruptionError as error:
             status = "failed"
             raise build_storage_error(
-                message_prefix="Run ledger",
+                message_prefix=_RUN_LEDGER_MESSAGE_PREFIX,
                 operation="list_entries_after",
                 path=self.base_path / f"{manifest_id}.jsonl",
                 error=error,
@@ -281,7 +282,7 @@ class FileRunLedgerStore(RunLedgerPort):
         except (OSError, TypeError) as error:
             status = "failed"
             raise build_storage_error(
-                message_prefix="Run ledger",
+                message_prefix=_RUN_LEDGER_MESSAGE_PREFIX,
                 operation="list_entries_after",
                 path=self.base_path / f"{manifest_id}.jsonl",
                 error=error,

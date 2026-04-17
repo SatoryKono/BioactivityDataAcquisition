@@ -35,6 +35,8 @@ if TYPE_CHECKING:
 
 from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 
+_AUDIT_STATUS_ATTRIBUTE = "bioetl.audit.status"
+
 
 class FileAuditAdapter:
     """File-based implementation of AuditPort.
@@ -176,7 +178,7 @@ class FileAuditAdapter:
                     status="error",
                     duration_seconds=duration_seconds,
                 )
-                span.set_attribute("bioetl.audit.status", "error")
+                span.set_attribute(_AUDIT_STATUS_ATTRIBUTE, "error")
                 span.record_exception(exc)
                 raise
 
@@ -187,7 +189,7 @@ class FileAuditAdapter:
                 status="success",
                 duration_seconds=duration_seconds,
             )
-            span.set_attribute("bioetl.audit.status", "success")
+            span.set_attribute(_AUDIT_STATUS_ATTRIBUTE, "success")
 
         self.logger.debug(
             "audit_entry_logged",
@@ -300,7 +302,7 @@ class FileAuditAdapter:
                     status="error",
                     duration_seconds=duration_seconds,
                 )
-                span.set_attribute("bioetl.audit.status", "error")
+                span.set_attribute(_AUDIT_STATUS_ATTRIBUTE, "error")
                 span.record_exception(exc)
                 raise
 
@@ -311,7 +313,7 @@ class FileAuditAdapter:
                 duration_seconds=duration_seconds,
             )
             span.set_attribute("bioetl.audit.entries_count", len(entries))
-            span.set_attribute("bioetl.audit.status", "success")
+            span.set_attribute(_AUDIT_STATUS_ATTRIBUTE, "success")
             return entries
 
     async def aclose(self) -> None:
@@ -325,5 +327,5 @@ class FileAuditAdapter:
                 return
 
             self._closed = True
-            span.set_attribute("bioetl.audit.status", "success")
+            span.set_attribute(_AUDIT_STATUS_ATTRIBUTE, "success")
             self.logger.debug("audit_adapter_closed")

@@ -24,6 +24,10 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Any
 
+_BOOTSTRAP_CLI_MODULE = "bioetl.composition.bootstrap.cli"
+_BOOTSTRAP_ASSEMBLY_MODULE = "bioetl.composition.bootstrap.assembly"
+_BOOTSTRAP_RUNTIME_MODULE = "bioetl.composition.bootstrap.runtime"
+
 __all__ = [
     "HealthServerDependencies",
     "bootstrap_adr_service",
@@ -59,38 +63,43 @@ __all__ = [
 ]
 
 _PUBLIC_EXPORTS: dict[str, str] = {
-    "HealthServerDependencies": "bioetl.composition.bootstrap.cli",
-    "bootstrap_adr_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_audit_inspection_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_bronze_cleanup_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_checkpoint_manager": "bioetl.composition.bootstrap.cli",
-    "bootstrap_checkpoint_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_cleanup_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_composite_checkpoint_port": "bioetl.composition.bootstrap.assembly",
-    "bootstrap_composite_runner": "bioetl.composition.bootstrap.runtime",
-    "bootstrap_config_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_contract_migration_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_export_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli",
-    "bootstrap_health_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_lifecycle_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_lineage_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_lock_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_logger_port": "bioetl.composition.bootstrap.runtime",
-    "bootstrap_metrics_port": "bioetl.composition.bootstrap.runtime",
-    "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_observability_workflow_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_pipeline_runner": "bioetl.composition.bootstrap.runtime",
-    "bootstrap_pipeline_runner_service": "bioetl.composition.bootstrap.runtime",
-    "bootstrap_quarantine_manager": "bioetl.composition.bootstrap.cli",
-    "bootstrap_quarantine_port": "bioetl.composition.bootstrap.assembly",
-    "bootstrap_quarantine_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_run_manifest_service": "bioetl.composition.bootstrap.cli",
-    "bootstrap_vacuum_service": "bioetl.composition.bootstrap.cli",
-    "load_composite_config": "bioetl.composition.bootstrap.runtime",
+    "HealthServerDependencies": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_adr_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_audit_inspection_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_bronze_cleanup_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_checkpoint_manager": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_checkpoint_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_cleanup_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_composite_checkpoint_port": _BOOTSTRAP_ASSEMBLY_MODULE,
+    "bootstrap_composite_runner": _BOOTSTRAP_RUNTIME_MODULE,
+    "bootstrap_config_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_contract_migration_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_export_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_health_server_dependencies": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_health_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_lifecycle_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_lineage_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_lock_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_logger_port": _BOOTSTRAP_RUNTIME_MODULE,
+    "bootstrap_metrics_port": _BOOTSTRAP_RUNTIME_MODULE,
+    "bootstrap_metrics_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_observability_workflow_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_pipeline_runner": _BOOTSTRAP_RUNTIME_MODULE,
+    "bootstrap_pipeline_runner_service": _BOOTSTRAP_RUNTIME_MODULE,
+    "bootstrap_quarantine_manager": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_quarantine_port": _BOOTSTRAP_ASSEMBLY_MODULE,
+    "bootstrap_quarantine_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_run_manifest_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_vacuum_service": _BOOTSTRAP_CLI_MODULE,
+    "load_composite_config": _BOOTSTRAP_RUNTIME_MODULE,
     "load_pipeline_config": "bioetl.infrastructure.config.pipeline_config_api",
-    "maybe_start_metrics_server": "bioetl.composition.bootstrap.runtime",
+    "maybe_start_metrics_server": _BOOTSTRAP_RUNTIME_MODULE,
 }
+
+# ``importlib.reload`` preserves the existing module dict. Clear any cached lazy
+# exports so post-reload attribute access still flows through ``__getattr__``.
+for _cached_export_name in tuple(_PUBLIC_EXPORTS):
+    globals().pop(_cached_export_name, None)
 
 
 def __getattr__(name: str) -> Any:  # Any: lazy re-export preserves the original symbol type at lookup time.

@@ -55,21 +55,21 @@ def _build_final_summary(
     canonical_execution_identity_payload = build_execution_identity_payload(
         pipeline_name=manifest.pipeline_name,
         run_type=manifest.run_type.value,
-        pipeline_version=cast("str | None", base_summary.get("pipeline_version")),
+        pipeline_version=cast(str | None, base_summary.get("pipeline_version")),
         effective_config_hash=cast(
-            "str | None", base_summary.get("effective_config_hash")
+            str | None, base_summary.get("effective_config_hash")
         ),
         dq_contract_compatibility_hash=cast(
-            "str | None", base_summary.get("dq_contract_compatibility_hash")
+            str | None, base_summary.get("dq_contract_compatibility_hash")
         ),
-        contract_ref=cast("str | None", base_summary.get("contract_ref")),
-        contract_version=cast("str | None", base_summary.get("contract_version")),
+        contract_ref=cast(str | None, base_summary.get("contract_ref")),
+        contract_version=cast(str | None, base_summary.get("contract_version")),
         effective_config_artifact_id=cast(
-            "str | None", base_summary.get("effective_config_artifact_id")
+            str | None, base_summary.get("effective_config_artifact_id")
         ),
-        exact_replay=cast("bool | None", base_summary.get("requested_exact_replay")),
+        exact_replay=cast(bool | None, base_summary.get("requested_exact_replay")),
         input_snapshot_fingerprint=cast(
-            "str | None", base_summary.get("input_snapshot_identity_fingerprint")
+            str | None, base_summary.get("input_snapshot_identity_fingerprint")
         ),
     )
     degraded_runtime_anchor_payload = {
@@ -158,15 +158,15 @@ def _build_final_summary(
         dq_signal_present=dq_signal_present,
         cross_validation_signal_present=cross_validation_signal_present,
         required_persistence_profile_missing_requirements=cast(
-            "list[str]",
+            list[str],
             persistence_profile.get("required_profile_missing_requirements", []),
         ),
         replay_ready_missing_requirements=cast(
-            "list[str]",
+            list[str],
             persistence_profile.get("replay_ready_missing_requirements", []),
         ),
         forensic_grade_missing_requirements=cast(
-            "list[str]",
+            list[str],
             persistence_profile.get("forensic_grade_missing_requirements", []),
         ),
     )

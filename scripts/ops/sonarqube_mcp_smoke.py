@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import selectors
 import subprocess
 import sys
@@ -190,7 +189,15 @@ def run_smoke_command(
 
             events = selector.select(timeout=1.0)
             for key, _ in events:
-                chunk = os.read(key.fileobj.fileno(), 65536)
+                fileobj = key.fileobj
+                try:
+                    chunk = (
+                        fileobj.read1(65536)
+                        if hasattr(fileobj, "read1")
+                        else fileobj.read(65536)
+                    )
+                except OSError:
+                    chunk = b""
                 if not chunk:
                     continue
                 if key.data == "stderr":
@@ -216,6 +223,7 @@ def run_smoke_command(
             handshake_sent=handshake_sent,
         )
     finally:
+        selector.close()
         process.terminate()
         try:
             process.wait(timeout=5)

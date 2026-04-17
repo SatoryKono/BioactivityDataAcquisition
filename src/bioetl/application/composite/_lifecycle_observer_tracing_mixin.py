@@ -13,6 +13,9 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 
+_PIPELINE_TRACE_NAMESPACE = "bioetl.pipeline"
+
+
 class _CompositeSpanHandleProtocol(Protocol):
     """Minimal span handle surface used by composite lifecycle tracing."""
 
@@ -74,7 +77,7 @@ class CompositeLifecycleTracingMixin:
         """Build bounded trace attributes for one composite run span."""
         pipeline_name = self._pipeline_name(composite_name)
         return {
-            "bioetl.pipeline": pipeline_name,
+            _PIPELINE_TRACE_NAMESPACE: pipeline_name,
             "bioetl.run_id": run_id,
             "bioetl.run_type": "composite",
             "bioetl.composite": composite_name,
@@ -206,7 +209,7 @@ class CompositeLifecycleTracingMixin:
             return
         assert self.tracer is not None
         pipeline_name = self._pipeline_name(composite_name)
-        span = self.tracer.get_tracer("bioetl.pipeline").start_as_current_span(
+        span = self.tracer.get_tracer(_PIPELINE_TRACE_NAMESPACE).start_as_current_span(
             f"pipeline.{pipeline_name}",
             attributes=self._build_run_trace_attributes(
                 composite_name=composite_name,
@@ -236,7 +239,7 @@ class CompositeLifecycleTracingMixin:
         if not self._has_real_tracing():
             return
         assert self.tracer is not None
-        span = self.tracer.get_tracer("bioetl.pipeline").start_as_current_span(
+        span = self.tracer.get_tracer(_PIPELINE_TRACE_NAMESPACE).start_as_current_span(
             f"pipeline.{self._pipeline_name(composite_name)}.{phase_name}",
             attributes=self._build_phase_trace_attributes(
                 composite_name=composite_name,

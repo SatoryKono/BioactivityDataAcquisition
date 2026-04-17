@@ -32,6 +32,8 @@ __all__ = [
     "checkpoint_list",
 ]
 
+_NONE_ENTRY_LINE = "  - none"
+
 
 @click.group()  # type: ignore[untyped-decorator]
 def checkpoint() -> None:
@@ -69,7 +71,7 @@ def _render_audit_entry_lines(entries: list[object]) -> list[str]:
             f"records={item.get('records_count', '?')}"
         )
         lines.append(line)
-    return lines or ["  - none"]
+    return lines or [_NONE_ENTRY_LINE]
 
 
 def _render_audit_run_payload(payload: dict[str, object]) -> str:
@@ -141,7 +143,7 @@ def _render_audit_run_payload(payload: dict[str, object]) -> str:
     if isinstance(entries, list):
         lines.extend(_render_audit_entry_lines(entries))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_ENTRY_LINE)
     return "\n".join(lines)
 
 
@@ -184,7 +186,7 @@ def _render_checkpoint_workflow_payload(payload: dict[str, object]) -> str:
     if isinstance(entries, list):
         lines.extend(_render_audit_entry_lines(entries))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_ENTRY_LINE)
     return "\n".join(lines)
 
 

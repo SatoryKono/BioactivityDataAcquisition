@@ -138,20 +138,20 @@ def _build_base_summary(
         dq_signal_present=False,
         cross_validation_signal_present=False,
         required_persistence_profile_missing_requirements=cast(
-            "list[str]",
+            list[str],
             persistence_profile.get("required_profile_missing_requirements", []),
         ),
         replay_ready_missing_requirements=cast(
-            "list[str]",
+            list[str],
             persistence_profile.get("replay_ready_missing_requirements", []),
         ),
         forensic_grade_missing_requirements=cast(
-            "list[str]",
+            list[str],
             persistence_profile.get("forensic_grade_missing_requirements", []),
         ),
     )
     summary["next_steps"] = build_next_steps(
-        cast("dict[str, bool]", summary["alert_signals"])
+        cast(dict[str, bool], summary["alert_signals"])
     )
     return summary
 

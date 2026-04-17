@@ -107,6 +107,7 @@ async function main() {
       for (const [name, summary, platform] of executionPaths) {
         logStep(`execution-path:${name}`);
         await mergeNamedNode(tx, 'execution_path', name, { summary, platform });
+        await relate(tx, 'project', 'BioETL', 'HAS_EXECUTION_PATH', 'execution_path', name);
       }
 
       await relate(tx, 'execution_path', 'uv run python -m pytest', 'EXECUTES_GATE', 'quality_gate', 'pytest');
