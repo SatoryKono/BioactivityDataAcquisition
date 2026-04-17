@@ -5355,13 +5355,34 @@ def _add_workflow_surface(
 
 
 def _attach_workflow_file_backing(snapshot: GraphSnapshot, workflow: NodeKey, relative_path: str) -> None:
-    parent_dir_relative = str(Path(relative_path).parent)
-    parent_dir_key = NodeKey("directory_surface", parent_dir_relative)
-    if parent_dir_key in snapshot.nodes:
-        snapshot.add_relation(parent_dir_key, "HOUSES", workflow, provenance="file_structure")
-    file_surface_key = NodeKey("file_surface", relative_path)
-    if file_surface_key in snapshot.nodes:
-        snapshot.add_relation(file_surface_key, "BACKS", workflow, provenance="workflow_graph")
+    parent_dir_relative = Path(relative_path).parent.as_posix()
+    parent_dir_candidates = {
+        parent_dir_relative,
+        parent_dir_relative.replace("\\", "/"),
+    }
+    for candidate in sorted(parent_dir_candidates):
+        parent_dir_key = NodeKey("directory_surface", candidate)
+        if parent_dir_key in snapshot.nodes:
+            snapshot.add_relation(
+                parent_dir_key,
+                "HOUSES",
+                workflow,
+                provenance="file_structure",
+            )
+
+    file_surface_candidates = {
+        relative_path,
+        relative_path.replace("\\", "/"),
+    }
+    for candidate in sorted(file_surface_candidates):
+        file_surface_key = NodeKey("file_surface", candidate)
+        if file_surface_key in snapshot.nodes:
+            snapshot.add_relation(
+                file_surface_key,
+                "BACKS",
+                workflow,
+                provenance="workflow_graph",
+            )
 
 
 def _enrich_workflow_surface(
