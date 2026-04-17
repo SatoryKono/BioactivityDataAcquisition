@@ -124,7 +124,7 @@ def test_emit_run_completed_marks_warning_status_when_present() -> None:
     assert event_name == PipelineEvent.COMPLETE
     assert log_kwargs["composite"] == "test_composite"
     assert log_kwargs["run_id"] == "run-123"
-    assert log_kwargs["duration_seconds"] == 12.5
+    assert log_kwargs["duration_seconds"] == pytest.approx(12.5)
     assert log_kwargs["status"] == "completed_with_warnings"
     assert log_kwargs["had_warnings"] is True
     assert log_kwargs["phase"] == "cleanup"

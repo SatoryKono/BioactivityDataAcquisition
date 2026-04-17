@@ -355,11 +355,12 @@ def test_observer_captures_startup_timing_anchor(
     )
 
     with observer:
-        pass
+        assert observer.wall_start_time == started_at
+        assert observer.start_time == pytest.approx(started_monotonic)
 
     capture_anchor_mock.assert_called_once_with()
     assert observer.wall_start_time == started_at
-    assert observer.start_time == started_monotonic
+    assert observer.start_time == pytest.approx(started_monotonic)
 
 
 # ==================== Unified Observability: Lifecycle Event Tests ====================

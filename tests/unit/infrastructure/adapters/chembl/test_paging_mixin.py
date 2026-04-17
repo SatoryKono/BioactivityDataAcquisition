@@ -19,13 +19,11 @@ class TestPageIteratorRefactoring:
         # Mock mapper to return test URL
         self.mixin._mapper.get_resource_url.return_value = "https://test.chembl.org/api"
         
-        # Mock build_params to return standard params
         self.mixin._build_params.return_value = {"limit": 100, "offset": 0, "format": "json"}
         
-        # Mock fetch_page to return test data
         self.mixin._fetch_page.return_value = (
             [{"id": 1, "name": "test1"}, {"id": 2, "name": "test2"}],
-            False  # has_next = False
+            False,
         )
 
     @pytest.mark.asyncio
@@ -40,14 +38,14 @@ class TestPageIteratorRefactoring:
         """Test page limit calculation when records remain within limit."""
         params = {"limit": 100}
         result = self.mixin._calculate_page_limit(params, 200, 50)
-        assert result == 100  # min(100, 150) = 100
+        assert result == 100
 
     @pytest.mark.asyncio
     async def test_calculate_page_limit_partial_page(self):
         """Test page limit when remaining records fit in smaller page."""
         params = {"limit": 100}
         result = self.mixin._calculate_page_limit(params, 200, 150)
-        assert result == 50  # min(100, 50) = 50
+        assert result == 50
 
     @pytest.mark.asyncio
     async def test_calculate_page_limit_exhausted(self):
@@ -131,7 +129,7 @@ class TestPageIteratorRefactoring:
         
         with pytest.raises(Exception, match="API Error"):
             async for _ in self.mixin._page_iterator("activity", limit=10, start_offset=0):
-                pass
+                pytest.fail("Iterator should not yield records after fetch failure")
 
     @pytest.mark.asyncio
     async def test_calculate_page_limit_edge_cases(self):

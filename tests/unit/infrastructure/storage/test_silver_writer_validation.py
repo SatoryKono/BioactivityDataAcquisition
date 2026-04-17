@@ -454,7 +454,6 @@ class TestSilverWriterPreparePayloadExecutor:
         )
         from bioetl.infrastructure.storage.silver.operations.validation_operations import (
             _PreparedSilverWritePayload,
-            SilverValidationOperations,
         )
         from bioetl.domain.medallion import WriteModePolicy
 

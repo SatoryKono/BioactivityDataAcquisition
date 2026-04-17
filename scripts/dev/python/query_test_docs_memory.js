@@ -3,8 +3,9 @@
 const neo4j = require('neo4j-driver');
 
 const uri = process.env.NEO4J_URI || 'bolt://host.docker.internal:7687';
-const username = process.env.NEO4J_USERNAME || (process.env.NEO4J_AUTH && process.env.NEO4J_AUTH.split('/')[0]) || 'neo4j';
-const password = process.env.NEO4J_PASSWORD || process.env.NEO4J_AUTH_PASSWORD || (process.env.NEO4J_AUTH && process.env.NEO4J_AUTH.split('/')[1]) || 'bioetl_secure_password';
+const neo4jAuthParts = process.env.NEO4J_AUTH?.split('/');
+const username = process.env.NEO4J_USERNAME || neo4jAuthParts?.[0] || 'neo4j';
+const password = process.env.NEO4J_PASSWORD || process.env.NEO4J_AUTH_PASSWORD || neo4jAuthParts?.[1] || 'bioetl_secure_password';
 const database = process.env.NEO4J_DATABASE || 'neo4j';
 
 const driver = neo4j.driver(uri, neo4j.auth.basic(username, password), {

@@ -263,7 +263,7 @@ def test_prepare_composite_result_context_when_called_then_preserves_artifacts()
         context = harness._prepare_composite_result_context(artifacts)
 
     assert context.artifacts is artifacts
-    assert context.total_duration == 3.0
+    assert context.total_duration == pytest.approx(3.0)
 
 
 @pytest.mark.unit
@@ -484,7 +484,7 @@ async def test_run_seed_uses_monotonic_derived_completion_timestamp() -> None:
 
     assert result.started_at == started_at
     assert result.completed_at == completed_at
-    assert result.duration_seconds == 6.5
+    assert result.duration_seconds == pytest.approx(6.5)
 
 
 # ---------------------------------------------------------------------------

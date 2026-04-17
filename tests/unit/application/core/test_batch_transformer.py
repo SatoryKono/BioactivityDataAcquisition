@@ -154,7 +154,7 @@ class TestBatchTransformerTransform:
 
         assert isinstance(result, TransformResult)
         assert len(result.silver_records) == 2
-        assert len(result.gold_records) >= 0
+        assert len(result.gold_records) == 2
         assert result.quarantined_count == 0
 
     async def test_transform_batch_empty_records(self, batch_transformer):
@@ -261,8 +261,7 @@ class TestBatchTransformerTransform:
 
         result = await transformer.transform_batch([{"id": "1", "value": 1}], batch_id)
 
-        # assert result.silver_records[0].get("_source_batch_id") == str(batch_id)
-        assert True
+        assert result.silver_records[0].get("_source_batch_id") == str(batch_id)
 
     async def test_transform_batch_quarantines_dq_errors(
         self,
@@ -364,7 +363,7 @@ class TestBatchTransformerTransform:
 
         result = await transformer.transform_batch([{"id": "1"}], BatchID(uuid4()))
 
-        assert result.gold_records or True
+        assert len(result.gold_records) == 1
         assert seen_record.get("publication_doi") == "10.1000/abc"
         assert seen_record.get("publication_date") == "2024-02-29"
         assert seen_record.get("title") == "Example Title"
@@ -441,9 +440,9 @@ class TestBatchTransformerTransform:
             BatchID(uuid4()),
         )
 
-        assert len(result.silver_records) >= 2
-        assert len(result.gold_records) >= 0
-        assert result.quarantined_count >= 0
+        assert len(result.silver_records) == 2
+        assert len(result.gold_records) == 2
+        assert result.quarantined_count == 1
         assert result.filtered_out_count == 0
         mock_quarantine_manager.quarantine_records.assert_called_once()
 
