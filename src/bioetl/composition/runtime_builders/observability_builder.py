@@ -32,6 +32,118 @@ from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 __all__ = ["build_observability_bundle"]
 
 
+def _build_logger_bootstrapper(
+    logger_factory: Callable[..., LoggerPort],
+) -> Callable[[str, RunID, str], LoggerPort]:
+    """Build logger bootstrapper closure for canonical observability bundle."""
+
+    def bootstrap_logger(
+        logger_pipeline: str,
+        logger_run_id: RunID,
+        logger_level: str,
+    ) -> LoggerPort:
+        return logger_factory(
+            pipeline=logger_pipeline,
+            run_id=logger_run_id,
+            log_level=logger_level,
+            json_format=True,
+        )
+
+    return bootstrap_logger
+
+
+def _resolve_tracer_port(
+    *,
+    tracer_settings: Settings,
+    tracer_factory: Callable[[str], TracingPort] | None,
+    noop_tracing_factory: Callable[[], TracingPort] | None,
+) -> TracingPort:
+    """Resolve tracing port using explicit factories or canonical fallbacks."""
+    if tracer_factory is None and noop_tracing_factory is None:
+        return _bootstrap_tracer_port_impl(
+            settings=tracer_settings,
+            service_name="bioetl",
+        )
+    if tracer_settings.observability.tracing_enabled and tracer_factory is not None:
+        return tracer_factory("bioetl")
+    if noop_tracing_factory is not None:
+        return noop_tracing_factory()
+    return resolve_tracing_port(tracer=None, settings=tracer_settings)
+
+
+def _build_tracer_bootstrapper(
+    *,
+    tracer_factory: Callable[[str], TracingPort] | None,
+    noop_tracing_factory: Callable[[], TracingPort] | None,
+) -> Callable[[Settings], TracingPort]:
+    """Build tracer bootstrapper closure for canonical observability bundle."""
+
+    def bootstrap_tracer(tracer_settings: Settings) -> TracingPort:
+        return _resolve_tracer_port(
+            tracer_settings=tracer_settings,
+            tracer_factory=tracer_factory,
+            noop_tracing_factory=noop_tracing_factory,
+        )
+
+    return bootstrap_tracer
+
+
+def _resolve_metrics_port(
+    *,
+    metrics_settings: Settings,
+    metrics_factory: Callable[[], MetricsPort] | None,
+    noop_metrics_factory: Callable[..., MetricsPort] | None,
+) -> MetricsPort:
+    """Resolve metrics port using explicit factories or canonical fallbacks."""
+    if metrics_factory is None and noop_metrics_factory is None:
+        return _bootstrap_metrics_port_impl(
+            settings=metrics_settings,
+        )
+    if metrics_settings.observability.metrics_enabled and metrics_factory is not None:
+        return metrics_factory()
+    if noop_metrics_factory is not None:
+        return noop_metrics_factory(warn_on_use=False)
+    return resolve_metrics_port(metrics=None, settings=metrics_settings)
+
+
+def _build_metrics_bootstrapper(
+    *,
+    metrics_factory: Callable[[], MetricsPort] | None,
+    noop_metrics_factory: Callable[..., MetricsPort] | None,
+) -> Callable[[Settings], MetricsPort]:
+    """Build metrics bootstrapper closure for canonical observability bundle."""
+
+    def bootstrap_metrics(metrics_settings: Settings) -> MetricsPort:
+        return _resolve_metrics_port(
+            metrics_settings=metrics_settings,
+            metrics_factory=metrics_factory,
+            noop_metrics_factory=noop_metrics_factory,
+        )
+
+    return bootstrap_metrics
+
+
+def _build_dq_monitor_bootstrapper(
+    *,
+    dq_monitor_factory: Callable[..., DQMonitorPort],
+    noop_logger_factory: Callable[[], LoggerPort],
+) -> Callable[[Settings, LoggerPort], DQMonitorPort]:
+    """Build DQ monitor bootstrapper closure for canonical observability bundle."""
+
+    def bootstrap_dq_monitor(
+        dq_settings: Settings,
+        dq_logger: LoggerPort,
+    ) -> DQMonitorPort:
+        return _bootstrap_dq_monitor_port_impl(
+            settings=dq_settings,
+            logger=dq_logger,
+            monitor_factory=dq_monitor_factory,
+            noop_logger_factory=noop_logger_factory,
+        )
+
+    return bootstrap_dq_monitor
+
+
 def build_observability_bundle(
     *,
     pipeline: str,
@@ -53,43 +165,17 @@ def build_observability_bundle(
         run_id=run_id,
         settings=settings,
         log_level=log_level,
-        logger_bootstrapper=lambda logger_pipeline, logger_run_id, logger_level: logger_factory(
-            pipeline=logger_pipeline,
-            run_id=logger_run_id,
-            log_level=logger_level,
-            json_format=True,
+        logger_bootstrapper=_build_logger_bootstrapper(logger_factory),
+        tracer_bootstrapper=_build_tracer_bootstrapper(
+            tracer_factory=tracer_factory,
+            noop_tracing_factory=noop_tracing_factory,
         ),
-        tracer_bootstrapper=lambda tracer_settings: _bootstrap_tracer_port_impl(
-            settings=tracer_settings,
-            service_name="bioetl",
-        )
-        if tracer_factory is None and noop_tracing_factory is None
-        else (
-            tracer_factory("bioetl")
-            if tracer_settings.observability.tracing_enabled and tracer_factory is not None
-            else (
-                noop_tracing_factory()
-                if noop_tracing_factory is not None
-                else resolve_tracing_port(tracer=None, settings=tracer_settings)
-            )
+        metrics_bootstrapper=_build_metrics_bootstrapper(
+            metrics_factory=metrics_factory,
+            noop_metrics_factory=noop_metrics_factory,
         ),
-        metrics_bootstrapper=lambda metrics_settings: _bootstrap_metrics_port_impl(
-            settings=metrics_settings,
-        )
-        if metrics_factory is None and noop_metrics_factory is None
-        else (
-            metrics_factory()
-            if metrics_settings.observability.metrics_enabled and metrics_factory is not None
-            else (
-                noop_metrics_factory(warn_on_use=False)
-                if noop_metrics_factory is not None
-                else resolve_metrics_port(metrics=None, settings=metrics_settings)
-            )
-        ),
-        dq_monitor_bootstrapper=lambda dq_settings, dq_logger: _bootstrap_dq_monitor_port_impl(
-            settings=dq_settings,
-            logger=dq_logger,
-            monitor_factory=dq_monitor_factory,
+        dq_monitor_bootstrapper=_build_dq_monitor_bootstrapper(
+            dq_monitor_factory=dq_monitor_factory,
             noop_logger_factory=noop_logger_factory,
         ),
         preflight_validator=validate_observability_preflight_impl,
