@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T05:52:40.320435+00:00",
+  "generated_at": "2026-04-17T05:57:16.338957+00:00",
   "summary": {
-    "total_scripts": 349,
+    "total_scripts": 352,
     "status_counts": {
       "active": 281,
       "legacy": 10,
-      "orphan": 49,
+      "orphan": 52,
       "unknown": 9
     },
     "reference_group_coverage": {
@@ -94,11 +94,11 @@
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 93,
           "source_group": "docs",
-          "text": "| **check.sh** | `scripts/memory/mcp/` | Full MCP + backend health check |"
+          "text": "| **check.sh** | `scripts/ai/mcp/` | General MCP validation across registered servers |"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 106,
+          "line": 100,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check.sh"
         },
@@ -139,7 +139,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 28,
       "references": [
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
@@ -167,13 +167,19 @@
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 100,
+          "line": 94,
+          "source_group": "docs",
+          "text": "| **check_neo4j_memory.sh** | `scripts/ai/mcp/` | Full Neo4j Memory MCP + backend health check |"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 103,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 188,
+          "line": 189,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
@@ -182,12 +188,6 @@
           "line": 30,
           "source_group": "docs",
           "text": "- **[check.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
-          "line": 82,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         }
       ]
     },
@@ -4614,7 +4614,7 @@
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 198,
+          "line": 199,
           "source_group": "docs",
           "text": "- **Project MCP Config**: `scripts/dev/setup_copilot_codex_mcp.py`"
         },
@@ -6715,6 +6715,30 @@
       ]
     },
     {
+      "path": "scripts/docs/common/markdown.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/docs/common/paths.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/docs/common/xlsx.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/docs/enrich_chembl_matrix_normalization_details.py",
       "type": "py",
       "status": "active",
@@ -8237,13 +8261,13 @@
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 94,
+          "line": 95,
           "source_group": "docs",
           "text": "| **neo4j_quick_start.sh** | `scripts/ops/` | One-command startup & verification |"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 103,
+          "line": 106,
           "source_group": "docs",
           "text": "bash scripts/ops/neo4j_quick_start.sh"
         },

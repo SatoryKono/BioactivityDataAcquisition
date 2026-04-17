@@ -36,7 +36,7 @@ class TestStoragePortProtocol:
         from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
         class ValidStorage:
-            async def write_bronze(
+            def write_bronze(
                 self,
                 records: Iterator[bytes],
                 provider: str,
@@ -56,7 +56,7 @@ class TestStoragePortProtocol:
                     checksum="sha256:test",
                 )
 
-            async def write_silver(
+            def write_silver(
                 self,
                 table_name: str,
                 records: list[dict[str, Any]],
@@ -102,7 +102,7 @@ class TestStoragePortProtocol:
                 del layer
                 return Path("/tmp") / table_name
 
-            async def read_silver(
+            def read_silver(
                 self,
                 table_name: str,
                 columns: list[str] | None = None,
@@ -138,19 +138,19 @@ class TestStoragePortProtocol:
             async def aclose(self) -> None:
                 await _yield_once()
 
-            async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+            def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
                 return 0
 
-            async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+            def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
                 return 0
 
-            async def clear_csv(self, table_name: str | None = None) -> int:
+            def clear_csv(self, table_name: str | None = None) -> int:
                 return 0
 
-            async def clear_delta(self, table_name: str | None = None) -> int:
+            def clear_delta(self, table_name: str | None = None) -> int:
                 return 0
 
-            async def vacuum(
+            def vacuum(
                 self,
                 table_name: str,
                 retention_hours: int = 168,
@@ -158,7 +158,7 @@ class TestStoragePortProtocol:
             ) -> int:
                 return 0
 
-            async def archive(
+            def archive(
                 self,
                 table_name: str,
                 target_path: str,
@@ -166,7 +166,7 @@ class TestStoragePortProtocol:
             ) -> int:
                 return 0
 
-            async def health_check(self) -> Any:
+            def health_check(self) -> Any:
                 from bioetl.domain.types import HealthStatus
 
                 return HealthStatus.HEALTHY
@@ -178,7 +178,7 @@ class TestStoragePortProtocol:
             ) -> dict[str, Any]:
                 return {}
 
-            async def optimize(
+            def optimize(
                 self,
                 table_name: str,
                 retention_hours: int = 168,
@@ -194,14 +194,14 @@ class TestStoragePortProtocol:
                 del table_name, layer
                 return True
 
-            async def cleanup_bronze(
+            def cleanup_bronze(
                 self,
                 cutoff_date: Any,
                 dry_run: bool = False,
             ) -> dict[str, int]:
                 return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
 
-            async def deduplicate_silver(
+            def deduplicate_silver(
                 self,
                 table_name: str,
                 primary_keys: list[str],
@@ -225,12 +225,12 @@ class TestStoragePortProtocol:
 
             # Missing write_silver method entirely
             async def write_gold(self, *args, **kwargs):
+                del args, kwargs
                 await _yield_once()
                 return None
 
             async def aclose(self):
                 await _yield_once()
-                return None
 
         assert not isinstance(InvalidStorage(), StoragePort)
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 import pytest
 
 from bioetl.domain.normalization.identifiers import (
@@ -177,7 +179,7 @@ class TestNormalizeOntologyID:
 
     def test_normalize_ontology_id_none_and_empty(self) -> None:
         """Test None and empty string handling."""
-        assert normalize_ontology_id(None) is None
+        assert normalize_ontology_id(cast(Any, None)) is None
         assert normalize_ontology_id("") == ""  # Empty string returns empty string
         assert normalize_ontology_id("   ") is None  # Whitespace-only returns None
 

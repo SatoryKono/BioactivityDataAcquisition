@@ -10,7 +10,7 @@ class TestBootstrapContextsModuleExports:
         """RateLimitContext is importable from bootstrap_contexts."""
         from bioetl.composition.bootstrap_contexts import RateLimitContext
 
-        assert RateLimitContext is not None
+        assert RateLimitContext.__name__ == "RateLimitContext"
 
     def test_legacy_rate_limit_config_not_exported(self) -> None:
         """Legacy RateLimitConfig is not exported from bootstrap_contexts."""

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import argparse
-import re
+import sys
 import zipfile
 from collections import Counter
 from datetime import UTC, datetime
@@ -13,6 +13,17 @@ from typing import Final
 from xml.etree import ElementTree as ET
 
 import yaml
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.docs.common.xlsx import (
+    NS,
+    cell_text,
+    column_index,
+    iter_sheet_targets,
+    load_shared_strings,
+)
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
 DEFAULT_WORKBOOK: Final[Path] = (
@@ -45,13 +56,6 @@ COMPLEX_REVIEW_COLUMNS: Final[frozenset[str]] = frozenset(
         "Validation fail action",
     }
 )
-NS: Final[dict[str, str]] = {
-    "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
-    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-    "pr": "http://schemas.openxmlformats.org/package/2006/relationships",
-}
-COL_RE: Final[re.Pattern[str]] = re.compile(r"[A-Z]+")
-
 TYPE_CANONICAL: Final[dict[str, str]] = {
     "string": "string",
     "text": "string",
@@ -109,57 +113,11 @@ def _arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _column_index(cell_ref: str) -> int:
-    letters = "".join(COL_RE.findall(cell_ref))
-    value = 0
-    for char in letters:
-        value = value * 26 + (ord(char) - ord("A") + 1)
-    return value
-
-
-def _load_shared_strings(archive: zipfile.ZipFile) -> list[str]:
-    try:
-        root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
-    except KeyError:
-        return []
-    return ["".join(node.itertext()) for node in root.findall("a:si", NS)]
-
-
-def _cell_text(cell: ET.Element, shared_strings: list[str]) -> str:
-    cell_type = cell.attrib.get("t")
-    if cell_type == "inlineStr":
-        inline = cell.find("a:is", NS)
-        return "".join(inline.itertext()) if inline is not None else ""
-    value_node = cell.find("a:v", NS)
-    if value_node is None:
-        return ""
-    value = value_node.text or ""
-    if cell_type == "s":
-        return shared_strings[int(value)]
-    return value
-
-
-def _sheet_targets(archive: zipfile.ZipFile) -> list[tuple[str, str]]:
-    workbook = ET.fromstring(archive.read("xl/workbook.xml"))
-    rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    rel_map = {
-        rel.attrib["Id"]: rel.attrib["Target"]
-        for rel in rels.findall("pr:Relationship", NS)
-    }
-    targets: list[tuple[str, str]] = []
-    for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
-        rel_id = sheet.attrib[
-            "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
-        ]
-        targets.append((sheet.attrib["name"], "xl/" + rel_map[rel_id].lstrip("/")))
-    return targets
-
-
 def _read_workbook(path: Path) -> dict[str, list[dict[str, str]]]:
     with zipfile.ZipFile(path) as archive:
-        shared_strings = _load_shared_strings(archive)
+        shared_strings = load_shared_strings(archive)
         workbook_rows: dict[str, list[dict[str, str]]] = {}
-        for sheet_name, target in _sheet_targets(archive):
+        for sheet_name, target in iter_sheet_targets(archive):
             root = ET.fromstring(archive.read(target))
             rows = root.find("a:sheetData", NS).findall("a:row", NS)
             if not rows:
@@ -167,7 +125,7 @@ def _read_workbook(path: Path) -> dict[str, list[dict[str, str]]]:
                 continue
 
             header_map = {
-                _column_index(cell.attrib["r"]): _cell_text(cell, shared_strings)
+                column_index(cell.attrib["r"]): cell_text(cell, shared_strings)
                 for cell in rows[0].findall("a:c", NS)
             }
             ordered_indexes = sorted(header_map)
@@ -176,7 +134,7 @@ def _read_workbook(path: Path) -> dict[str, list[dict[str, str]]]:
             data_rows: list[dict[str, str]] = []
             for row in rows[1:]:
                 row_map = {
-                    _column_index(cell.attrib["r"]): _cell_text(cell, shared_strings)
+                    column_index(cell.attrib["r"]): cell_text(cell, shared_strings)
                     for cell in row.findall("a:c", NS)
                 }
                 data_rows.append(

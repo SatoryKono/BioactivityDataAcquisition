@@ -137,9 +137,10 @@ async def test_process_missing_dois_passes_entity_type_to_search_fallback() -> N
         limit: int | None,
         fetched: int,
     ) -> AsyncIterator[BronzeRecord]:
+        del mapping, limit, fetched
         captured_entity.append(entity_type)
-        return
-        yield
+        if False:
+            yield {}
 
     def resolve(ids: list[str], found: set[str], mapping: dict[str, str]) -> list[str]:
         return ids  # pretend all are missing
@@ -158,7 +159,7 @@ async def test_process_missing_dois_passes_entity_type_to_search_fallback() -> N
         limit=None,
         fetched=0,
     ):
-        pass
+        assert False, "process_missing_dois should not yield when all IDs are found"
 
     assert captured_entity == ["sequence"]
 
@@ -177,8 +178,8 @@ async def test_process_missing_dois_passes_limit_and_fetched_to_search() -> None
     ) -> AsyncIterator[BronzeRecord]:
         captured["limit"] = limit
         captured["fetched"] = fetched
-        return
-        yield
+        if False:
+            yield {}
 
     def resolve(ids: list[str], found: set[str], mapping: dict[str, str]) -> list[str]:
         return ids
@@ -195,7 +196,7 @@ async def test_process_missing_dois_passes_limit_and_fetched_to_search() -> None
         limit=50,
         fetched=10,
     ):
-        pass
+        assert False, "process_missing_dois should not yield fallback rows here"
 
     assert captured["limit"] == 50
     assert captured["fetched"] == 10

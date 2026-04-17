@@ -8,14 +8,19 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-DOCS_ROOT = ROOT / "docs"
-WORKFLOWS_ROOT = ROOT / ".github" / "workflows"
-ACTIVE_DOC_EXCLUDED_PARTS = frozenset({"99-archive", "exports", "reports", "generated"})
-GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
-GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
-    r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.docs.common.paths import (
+    DOCS_DIR,
+    PROJECT_ROOT,
+    WORKFLOWS_ROOT,
+    is_generated_docs_artifact,
 )
+
+ROOT = PROJECT_ROOT
+DOCS_ROOT = DOCS_DIR
+ACTIVE_DOC_EXCLUDED_PARTS = frozenset({"99-archive", "exports", "reports", "generated"})
 
 LEGACY_SLUG_RE = re.compile(r"SatoryKono/BioactivityDataAcquisition2")
 LEGACY_URL_RE = re.compile(
@@ -29,13 +34,7 @@ CANONICAL_URL = "https://github.com/SatoryKono/BioactivityDataAcquisition"
 
 
 def _is_generated_docs_artifact(path: Path, docs_root: Path = DOCS_ROOT) -> bool:
-    rel_path = path.relative_to(docs_root).as_posix()
-    rel_parts = Path(rel_path).parts
-    if rel_parts and rel_parts[0] == "site":
-        return True
-    if GENERATED_EXPORT_MERGED_RE.match(rel_path):
-        return True
-    return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))
+    return is_generated_docs_artifact(path, docs_root=docs_root)
 
 
 def _iter_active_docs_markdown() -> list[Path]:

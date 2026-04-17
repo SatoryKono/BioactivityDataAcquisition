@@ -8,7 +8,6 @@ Tests for:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import click
@@ -43,10 +42,6 @@ from bioetl.interfaces.cli.formatters import (
     echo_warning,
     format_bytes,
 )
-
-if TYPE_CHECKING:
-    pass
-
 
 @pytest.fixture
 def cli_runner() -> CliRunner:

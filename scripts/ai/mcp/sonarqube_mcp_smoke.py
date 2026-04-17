@@ -5,9 +5,10 @@ from __future__ import annotations
 
 import argparse
 import json
-import selectors
+import queue
 import subprocess
 import sys
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -145,6 +146,28 @@ def _find_response(messages: Sequence[dict[str, Any]], request_id: int) -> dict[
     return None
 
 
+def _pipe_reader(
+    stream: Any,
+    channel: str,
+    chunks: "queue.Queue[tuple[str, bytes | None]]",
+) -> None:
+    try:
+        while True:
+            try:
+                chunk = (
+                    stream.read1(65536)
+                    if hasattr(stream, "read1")
+                    else stream.read(65536)
+                )
+            except OSError:
+                chunk = b""
+            if not chunk:
+                break
+            chunks.put((channel, chunk))
+    finally:
+        chunks.put((channel, None))
+
+
 def run_smoke_command(
     command: Sequence[str],
     *,
@@ -164,15 +187,28 @@ def run_smoke_command(
             summary="sonarqube MCP smoke could not open process stdio pipes.",
         )
 
-    selector = selectors.DefaultSelector()
-    selector.register(process.stdout, selectors.EVENT_READ, "stdout")
-    selector.register(process.stderr, selectors.EVENT_READ, "stderr")
-
     stdout_buffer = bytearray()
     stderr_buffer = bytearray()
     responses: dict[int, dict[str, Any]] = {}
     ready_seen = False
     handshake_sent = False
+    chunks: queue.Queue[tuple[str, bytes | None]] = queue.Queue()
+    closed_channels: set[str] = set()
+    readers = [
+        threading.Thread(
+            target=_pipe_reader,
+            args=(process.stdout, "stdout", chunks),
+            daemon=True,
+        ),
+        threading.Thread(
+            target=_pipe_reader,
+            args=(process.stderr, "stderr", chunks),
+            daemon=True,
+        ),
+    ]
+    for reader in readers:
+        reader.start()
+
     start = time.monotonic()
     ready_deadline = start + startup_timeout_seconds
     handshake_deadline: float | None = None
@@ -187,31 +223,35 @@ def run_smoke_command(
             if ready_seen and _INITIALIZE_REQUEST_ID in responses and _TOOLS_LIST_REQUEST_ID in responses:
                 break
 
-            events = selector.select(timeout=1.0)
-            for key, _ in events:
-                fileobj = key.fileobj
-                try:
-                    chunk = (
-                        fileobj.read1(65536)
-                        if hasattr(fileobj, "read1")
-                        else fileobj.read(65536)
-                    )
-                except OSError:
-                    chunk = b""
-                if not chunk:
-                    continue
-                if key.data == "stderr":
-                    stderr_buffer.extend(chunk)
-                    stderr_text = stderr_buffer.decode("utf-8", errors="replace")
-                    if not ready_seen and _READY_MARKER in stderr_text:
-                        ready_seen = True
-                        process.stdin.write(_build_handshake_lines())
-                        process.stdin.flush()
-                        handshake_sent = True
-                        handshake_deadline = time.monotonic() + handshake_timeout_seconds
-                else:
-                    stdout_buffer.extend(chunk)
-                    _drain_stdout_messages(stdout_buffer, responses)
+            timeout = 1.0
+            if not ready_seen:
+                timeout = min(timeout, max(0.0, ready_deadline - now))
+            elif handshake_deadline is not None:
+                timeout = min(timeout, max(0.0, handshake_deadline - now))
+
+            try:
+                channel, chunk = chunks.get(timeout=timeout)
+            except queue.Empty:
+                continue
+
+            if chunk is None:
+                closed_channels.add(channel)
+                if closed_channels == {"stdout", "stderr"}:
+                    break
+                continue
+
+            if channel == "stderr":
+                stderr_buffer.extend(chunk)
+                stderr_text = stderr_buffer.decode("utf-8", errors="replace")
+                if not ready_seen and _READY_MARKER in stderr_text:
+                    ready_seen = True
+                    process.stdin.write(_build_handshake_lines())
+                    process.stdin.flush()
+                    handshake_sent = True
+                    handshake_deadline = time.monotonic() + handshake_timeout_seconds
+            else:
+                stdout_buffer.extend(chunk)
+                _drain_stdout_messages(stdout_buffer, responses)
     except ValueError as exc:
         return SmokeResult(
             ok=False,
@@ -223,13 +263,14 @@ def run_smoke_command(
             handshake_sent=handshake_sent,
         )
     finally:
-        selector.close()
         process.terminate()
         try:
             process.wait(timeout=5)
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait(timeout=5)
+        for reader in readers:
+            reader.join(timeout=1.0)
 
     response_list = tuple(
         responses[request_id]

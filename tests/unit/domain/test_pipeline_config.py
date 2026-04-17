@@ -324,8 +324,8 @@ class TestPipelineConfig:
         # Convenience properties forward correctly
         assert config.effective_silver_table == config.table.silver_table
         assert config.effective_gold_table == config.table.gold_table
-        assert config.table.primary_keys == config.table.primary_keys
-        assert config.table.silver_write_mode == config.table.silver_write_mode
-        assert config.table.gold_write_mode == config.table.gold_write_mode
-        assert config.table.partition_cols == config.table.partition_cols
-        assert config.table.on_schema_mismatch == config.table.on_schema_mismatch
+        assert config.table.primary_keys == ("id",)
+        assert config.table.silver_write_mode == SilverWriteMode.MERGE
+        assert config.table.gold_write_mode == GoldWriteMode.APPEND
+        assert config.table.partition_cols == ()
+        assert config.table.on_schema_mismatch == "error"
