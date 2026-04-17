@@ -82,7 +82,7 @@ class TestMetricsServerPort:
                 return True
 
             def reset(self) -> None:
-                pass
+                return None
 
         assert isinstance(MockServer(), MetricsServerPort)
 

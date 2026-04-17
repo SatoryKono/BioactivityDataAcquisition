@@ -136,7 +136,7 @@ def _collect_orphans(all_docs: list[Path], not_in_nav: set[str]) -> list[str]:
         for line in lines:
             line_for_links = INLINE_CODE_RE.sub("", line)
             for match in MD_LINK_RE.finditer(line_for_links):
-                raw_target = match.group(1).strip()
+                raw_target = match.group(2).strip()
                 if (
                     not raw_target
                     or raw_target.startswith("*")

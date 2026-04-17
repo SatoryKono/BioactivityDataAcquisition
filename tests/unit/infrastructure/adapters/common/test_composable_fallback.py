@@ -84,8 +84,8 @@ async def test_execute_builds_request_from_strategy_defaults() -> None:
     async def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
-        return
-        yield
+        if False:
+            yield {}
 
     results = await _collect(
         decorator,
@@ -123,8 +123,8 @@ async def test_execute_prefers_explicit_overrides_over_strategy_hooks() -> None:
         request: FallbackFetchRequest,
     ) -> AsyncIterator[dict[str, object]]:
         captured_requests.append(request)
-        return
-        yield
+        if False:
+            yield {}
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
     service.execute = capture_execute
@@ -133,8 +133,8 @@ async def test_execute_prefers_explicit_overrides_over_strategy_hooks() -> None:
     async def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
-        return
-        yield
+        if False:
+            yield {}
 
     await _collect(
         decorator,
@@ -174,8 +174,8 @@ async def test_execute_skips_service_for_unsupported_filter_field_when_configure
     async def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
-        return
-        yield
+        if False:
+            yield {}
 
     results = await _collect(
         decorator,

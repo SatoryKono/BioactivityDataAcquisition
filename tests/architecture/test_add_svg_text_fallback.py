@@ -41,7 +41,7 @@ def test_build_fallback_text_emits_multiline_tspans() -> None:
     fallback = module._build_fallback_text(fo)
     assert fallback is not None
 
-    tspans = [child for child in list(fallback) if child.tag.endswith("tspan")]
+    tspans = [child for child in fallback if child.tag.endswith("tspan")]
     assert len(tspans) >= 3
     assert tspans[0].text == "Header"
     assert tspans[1].text == "Line 1"
@@ -81,7 +81,7 @@ def test_add_fallbacks_replaces_old_single_line_text(tmp_path: Path) -> None:
     assert len(fallback_nodes) == 1
     assert fallback_nodes[0].text in (None, "")
 
-    tspans = [child for child in list(fallback_nodes[0]) if child.tag.endswith("tspan")]
+    tspans = [child for child in fallback_nodes[0] if child.tag.endswith("tspan")]
     assert len(tspans) >= 3
     assert [t.text for t in tspans[:3]] == ["Title", "Value 1", "Value 2"]
 

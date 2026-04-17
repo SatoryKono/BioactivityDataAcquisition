@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
-MD_LINK_RE = re.compile(r"\[[^\]]*\]\((?!https?://|mailto:)([^)#]+)")
+MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((?!https?://|mailto:)([^)#]+)")
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
 MD_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*$")
 PYTHON_FENCE_START_RE = re.compile(r"^\s*```(?:python|py|python3)\b", re.IGNORECASE)

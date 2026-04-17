@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import MagicMock
 
 import pytest
@@ -37,10 +38,10 @@ class TestTracedOperation:
 
     def test_creates_span_with_name_and_attributes(self, mock_tracer):
         """Test span is created with correct name and attributes."""
-        tracer, otel_tracer, span = mock_tracer
+        tracer, otel_tracer, _span = mock_tracer
 
-        with traced_operation(tracer, "test_op", {"key": "value"}):
-            pass
+        with traced_operation(tracer, "test_op", {"key": "value"}) as span_ctx:
+            assert span_ctx is not None
 
         tracer.get_tracer.assert_called_once_with("bioetl")
         otel_tracer.start_as_current_span.assert_called_once_with(
@@ -51,8 +52,8 @@ class TestTracedOperation:
         """Test span __enter__ and __exit__ are called."""
         tracer, _, span = mock_tracer
 
-        with traced_operation(tracer, "test_op"):
-            pass
+        with traced_operation(tracer, "test_op") as span_ctx:
+            assert span_ctx is not None
 
         span.__enter__.assert_called_once()
         span.__exit__.assert_called_once_with(None, None, None)
@@ -91,19 +92,19 @@ class TestTracedOperation:
 
     def test_custom_tracer_name(self, mock_tracer):
         """Test custom tracer name is used."""
-        tracer, otel_tracer, span = mock_tracer
+        tracer, otel_tracer, _span = mock_tracer
 
-        with traced_operation(tracer, "test_op", tracer_name="custom.tracer"):
-            pass
+        with traced_operation(tracer, "test_op", tracer_name="custom.tracer") as span_ctx:
+            assert span_ctx is not None
 
         tracer.get_tracer.assert_called_once_with("custom.tracer")
 
     def test_empty_attributes_default(self, mock_tracer):
         """Test empty dict used when no attributes provided."""
-        tracer, otel_tracer, span = mock_tracer
+        tracer, otel_tracer, _span = mock_tracer
 
-        with traced_operation(tracer, "test_op"):
-            pass
+        with traced_operation(tracer, "test_op") as span_ctx:
+            assert span_ctx is not None
 
         otel_tracer.start_as_current_span.assert_called_once_with(
             "test_op", attributes={}
@@ -117,10 +118,11 @@ class TestTracedAsyncOperation:
     @pytest.mark.asyncio
     async def test_creates_span_with_name_and_attributes(self, mock_tracer):
         """Test span is created with correct name and attributes."""
-        tracer, otel_tracer, span = mock_tracer
+        tracer, otel_tracer, _span = mock_tracer
 
-        async with traced_async_operation(tracer, "async_op", {"key": "value"}):
-            pass
+        async with traced_async_operation(tracer, "async_op", {"key": "value"}) as span_ctx:
+            assert span_ctx is not None
+            await asyncio.sleep(0)
 
         tracer.get_tracer.assert_called_once_with("bioetl")
         otel_tracer.start_as_current_span.assert_called_once_with(
@@ -132,8 +134,9 @@ class TestTracedAsyncOperation:
         """Test span __enter__ and __exit__ are called."""
         tracer, _, span = mock_tracer
 
-        async with traced_async_operation(tracer, "async_op"):
-            pass
+        async with traced_async_operation(tracer, "async_op") as span_ctx:
+            assert span_ctx is not None
+            await asyncio.sleep(0)
 
         span.__enter__.assert_called_once()
         span.__exit__.assert_called_once_with(None, None, None)
@@ -175,11 +178,12 @@ class TestTracedAsyncOperation:
     @pytest.mark.asyncio
     async def test_custom_tracer_name(self, mock_tracer):
         """Test custom tracer name is used in async context."""
-        tracer, otel_tracer, span = mock_tracer
+        tracer, otel_tracer, _span = mock_tracer
 
         async with traced_async_operation(
             tracer, "async_op", tracer_name="async.tracer"
-        ):
-            pass
+        ) as span_ctx:
+            assert span_ctx is not None
+            await asyncio.sleep(0)
 
         tracer.get_tracer.assert_called_once_with("async.tracer")

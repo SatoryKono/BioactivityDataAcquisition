@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 import time
 from collections.abc import AsyncIterator
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest

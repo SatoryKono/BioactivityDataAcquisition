@@ -135,8 +135,8 @@ class TestStoragePortProtocol:
                 await _yield_once()
                 del completed_at
 
-            async def aclose(self) -> None:
-                await _yield_once()
+            def aclose(self) -> None:
+                return None
 
             def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
                 return 0
@@ -178,7 +178,7 @@ class TestStoragePortProtocol:
             ) -> dict[str, Any]:
                 return {}
 
-            def optimize(
+            async def optimize(
                 self,
                 table_name: str,
                 retention_hours: int = 168,
@@ -261,7 +261,7 @@ class TestQuarantinePortProtocol:
             async def write_many(self, records: list[dict[str, Any]]) -> None:
                 await _yield_once()
 
-            async def inspect(
+            def inspect(
                 self,
                 pipeline: str,
                 limit: int = 10,
@@ -269,12 +269,12 @@ class TestQuarantinePortProtocol:
             ) -> list[dict[str, Any]]:
                 return []
 
-            async def get_stats(
+            def get_stats(
                 self, pipeline: str, error_code: str | None = None
             ) -> dict[str, Any]:
                 return {}
 
-            async def list_filtered_records(
+            def list_filtered_records(
                 self,
                 *,
                 pipeline: str | None = None,
@@ -291,7 +291,7 @@ class TestQuarantinePortProtocol:
             ) -> dict[str, Any]:
                 return {"items": [], "total": 0, "limit": limit, "offset": offset}
 
-            async def get_filtered_record(
+            def get_filtered_record(
                 self,
                 *,
                 payload_hash: str,
@@ -307,7 +307,7 @@ class TestQuarantinePortProtocol:
             ) -> dict[str, Any] | None:
                 return None
 
-            async def get_filtered_stats(
+            def get_filtered_stats(
                 self,
                 *,
                 pipeline: str | None = None,
@@ -321,7 +321,7 @@ class TestQuarantinePortProtocol:
             ) -> dict[str, Any]:
                 return {"total": 0}
 
-            async def get_filtered_filter_options(
+            def get_filtered_filter_options(
                 self,
                 *,
                 pipeline: str | None = None,
@@ -366,8 +366,8 @@ class TestQuarantinePortProtocol:
             ) -> bool:
                 return True
 
-            async def aclose(self) -> None:
-                await _yield_once()
+            def aclose(self) -> None:
+                return None
 
         assert isinstance(ValidQuarantine(), QuarantinePort)
 
@@ -379,7 +379,7 @@ class TestQuarantinePortProtocol:
 
         class InvalidQuarantine:
             # Missing write method
-            async def inspect(
+            def inspect(
                 self,
                 pipeline: str,
                 limit: int = 10,
@@ -387,7 +387,7 @@ class TestQuarantinePortProtocol:
             ) -> list[dict[str, Any]]:
                 return []
 
-            async def get_stats(
+            def get_stats(
                 self, pipeline: str, error_code: str | None = None
             ) -> dict[str, Any]:
                 return {}
