@@ -60,6 +60,14 @@ def _make_handler(
     )
 
 
+def _normalize_lower(value: str) -> str:
+    return value.lower()
+
+
+def _normalize_identity(value: str) -> str:
+    return value
+
+
 # ---------------------------------------------------------------------------
 # process_missing_dois — forward path (records yielded)
 # ---------------------------------------------------------------------------
@@ -92,7 +100,7 @@ async def test_process_missing_dois_yields_records_for_unresolved_ids() -> None:
         dois=["P12345", "Q98765"],
         found_dois={"p12345"},  # Q98765 is missing
         fallback_mapping={},
-        normalize_fn=lambda x: x.lower(),
+        normalize_fn=_normalize_lower,
         limit=None,
         fetched=0,
     ):
@@ -116,7 +124,7 @@ async def test_process_missing_dois_yields_nothing_when_all_found() -> None:
         dois=["P12345"],
         found_dois={"p12345"},
         fallback_mapping={},
-        normalize_fn=lambda x: x.lower(),
+        normalize_fn=_normalize_lower,
         limit=None,
         fetched=0,
     ):
@@ -155,7 +163,7 @@ async def test_process_missing_dois_passes_entity_type_to_search_fallback() -> N
         dois=["P00001"],
         found_dois=set(),
         fallback_mapping={},
-        normalize_fn=lambda x: x,
+        normalize_fn=_normalize_identity,
         limit=None,
         fetched=0,
     ):
@@ -192,7 +200,7 @@ async def test_process_missing_dois_passes_limit_and_fetched_to_search() -> None
         dois=["P00002"],
         found_dois=set(),
         fallback_mapping={},
-        normalize_fn=lambda x: x,
+        normalize_fn=_normalize_identity,
         limit=50,
         fetched=10,
     ):
@@ -209,7 +217,10 @@ async def test_process_missing_dois_ignores_normalize_fn_parameter() -> None:
     handler = _make_handler()
 
     called: list[bool] = []
-    normalize_fn_called = lambda x: called.append(True) or x  # noqa: E731
+
+    def normalize_fn_called(x: str) -> str:
+        called.append(True)
+        return x
 
     results: list[BronzeRecord] = []
     async for record in handler.process_missing_dois(

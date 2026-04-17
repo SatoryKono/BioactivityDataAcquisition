@@ -194,8 +194,8 @@ def test_diagnostics_metrics_json_uses_operator_profile(
     cli_runner: CliRunner,
     monkeypatch: Any,
 ) -> None:
-    profile = SimpleNamespace(
-        to_dict=lambda: {
+    def _profile_to_dict() -> dict[str, object]:
+        return {
             "metrics_enabled": True,
             "metrics_server_enabled": True,
             "metrics_server_running": False,
@@ -209,6 +209,9 @@ def test_diagnostics_metrics_json_uses_operator_profile(
             "tracing_enabled": False,
             "audit_enabled": False,
         }
+
+    profile = SimpleNamespace(
+        to_dict=_profile_to_dict
     )
     import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
 

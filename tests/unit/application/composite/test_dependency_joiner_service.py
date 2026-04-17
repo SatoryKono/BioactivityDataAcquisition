@@ -10,13 +10,17 @@ import pytest
 from bioetl.application.composite.dependency_joiner import DependencyJoinerService
 
 
+def _no_field_aliases(_pipeline: str) -> None:
+    return None
+
+
 def _make_service() -> DependencyJoinerService:
     return DependencyJoinerService(
         logger=MagicMock(),
         deduplicator=MagicMock(),
         renamer=MagicMock(),
         conflict_resolver=MagicMock(),
-        field_alias_resolver=lambda _pipeline: None,
+        field_alias_resolver=_no_field_aliases,
         join_key_resolver=MagicMock(),
         join_executor=MagicMock(),
         system_columns_to_drop=frozenset(),

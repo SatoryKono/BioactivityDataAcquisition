@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="BaseEntity")
 TEntity_co = TypeVar("TEntity_co", bound="BaseEntity", covariant=True)
 ScalarValue = str | int | float | bool | None
+_DICT_STR_OBJECT = "dict[str, object]"
 
 
 class _EntityConstructor(Protocol[TEntity_co]):
@@ -53,7 +54,7 @@ def serialize_list(values: list[object]) -> ScalarValue:
     if len(values) == 1:
         item = values[0]
         if isinstance(item, dict):
-            return serialize_dict(cast("dict[str, object]", item))
+            return serialize_dict(cast(_DICT_STR_OBJECT, item))
         if isinstance(item, list):
             return (
                 None
@@ -69,7 +70,7 @@ def serialize_json(value: object) -> ScalarValue:
     if value is None:
         return None
     if isinstance(value, dict):
-        return serialize_dict(cast("dict[str, object]", value))
+        return serialize_dict(cast(_DICT_STR_OBJECT, value))
     if isinstance(value, list):
         return serialize_list(cast("list[object]", value))
     return cast("ScalarValue", value)
@@ -140,7 +141,7 @@ def extract_by_path(
     for key in keys:
         if not isinstance(current, dict):
             return default
-        current = cast("dict[str, object]", current).get(key)
+        current = cast(_DICT_STR_OBJECT, current).get(key)
         if current is None:
             return default
     return current

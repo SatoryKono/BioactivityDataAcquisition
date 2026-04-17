@@ -45,12 +45,15 @@ OBSERVABILITY_LEGACY_TO_CANONICAL: Final[dict[str, str]] = {
 _ALLOWED_SEVERITY_VALUES: Final[frozenset[str]] = frozenset(
     {"debug", "info", "warning", "error"}
 )
+_DIAGNOSTIC_FAMILY: Final[str] = "diagnostic"
+_PIPELINE_LIFECYCLE_FAMILY: Final[str] = "pipeline.lifecycle"
+_PIPELINE_PHASE_FAMILY: Final[str] = "pipeline.phase"
 
 _EVENT_FAMILY_EXACT: Final[dict[str, str]] = {
-    "pipeline_started": "pipeline.lifecycle",
-    "pipeline_finished": "pipeline.lifecycle",
-    "pipeline_failed": "pipeline.lifecycle",
-    "pipeline_shutdown": "pipeline.lifecycle",
+    "pipeline_started": _PIPELINE_LIFECYCLE_FAMILY,
+    "pipeline_finished": _PIPELINE_LIFECYCLE_FAMILY,
+    "pipeline_failed": _PIPELINE_LIFECYCLE_FAMILY,
+    "pipeline_shutdown": _PIPELINE_LIFECYCLE_FAMILY,
     "artifact_published": "artifact",
     "vacuum_completed": "artifact",
 }
@@ -64,8 +67,8 @@ _EVENT_FAMILY_PREFIXES: Final[tuple[tuple[str, str], ...]] = (
 )
 
 _EVENT_FAMILY_SUFFIXES: Final[tuple[tuple[str, str], ...]] = (
-    ("_started", "pipeline.phase"),
-    ("_completed", "pipeline.phase"),
+    ("_started", _PIPELINE_PHASE_FAMILY),
+    ("_completed", _PIPELINE_PHASE_FAMILY),
 )
 
 
@@ -124,7 +127,7 @@ def infer_event_family(event_name: object | None) -> str:
     prefix_match = _match_event_family_by_prefix(normalized_event_name)
     if prefix_match is not None:
         return prefix_match
-    return "diagnostic"
+    return _DIAGNOSTIC_FAMILY
 
 
 def normalize_optional_correlation_value(value: object | None) -> str | None:

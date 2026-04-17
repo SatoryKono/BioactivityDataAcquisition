@@ -13,6 +13,18 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
 )
 
 
+def _normalize_strip_lower(value: str) -> str:
+    return value.strip().lower()
+
+
+def _normalize_identity(value: str) -> str:
+    return value
+
+
+def _extract_record_id(record: dict[str, object]) -> str:
+    return str(record.get("id", ""))
+
+
 @pytest.mark.asyncio
 async def test_execute_splits_and_trims_primary_ids(
     monkeypatch: pytest.MonkeyPatch,
@@ -62,8 +74,8 @@ async def test_execute_splits_and_trims_primary_ids(
         filter_ids=["10.1/a", "", "__title_only_0__", "10.2/b"],
         fallback_mapping={"10.1/a": "Title A", "__title_only_0__": "Title Only"},
         primary_record_fetcher=primary_fetcher,
-        normalize_id=lambda value: value.strip().lower(),
-        extract_record_id=lambda record: str(record.get("id", "")),
+        normalize_id=_normalize_strip_lower,
+        extract_record_id=_extract_record_id,
         fallback_handler=None,
         limit=1,
         primary_lookup_method="doi",
@@ -135,8 +147,8 @@ async def test_execute_without_trim_keeps_all_primary_ids(
         filter_ids=["A", "B", ""],
         fallback_mapping={},
         primary_record_fetcher=primary_fetcher,
-        normalize_id=lambda value: value,
-        extract_record_id=lambda record: str(record.get("id", "")),
+        normalize_id=_normalize_identity,
+        extract_record_id=_extract_record_id,
         fallback_handler=None,
         limit=1,
         trim_primary_ids_to_limit=False,
@@ -196,8 +208,8 @@ async def test_execute_records_unified_fallback_metrics(
         filter_ids=["10.1/a", "10.2/b", "__title_only_0__"],
         fallback_mapping={"10.2/b": "Missing title", "__title_only_0__": "Title only"},
         primary_record_fetcher=primary_fetcher,
-        normalize_id=lambda value: value.lower().strip(),
-        extract_record_id=lambda record: str(record.get("id", "")),
+        normalize_id=_normalize_strip_lower,
+        extract_record_id=_extract_record_id,
         fallback_handler=MagicMock(),
         primary_lookup_method="doi",
     )

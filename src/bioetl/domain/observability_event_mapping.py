@@ -26,6 +26,8 @@ __all__ = [
     "map_domain_event_to_observability_event",
 ]
 
+_PIPELINE_LIFECYCLE_FAMILY = "pipeline.lifecycle"
+
 
 @dataclass(frozen=True, slots=True)
 class DomainEventObservabilityEnvelope:
@@ -75,7 +77,7 @@ def _build_pipeline_completed(event: DomainEvent) -> DomainEventObservabilityEnv
     return _build_envelope(
         event_name=PipelineEvent.COMPLETE,
         severity="info",
-        event_family="pipeline.lifecycle",
+        event_family=_PIPELINE_LIFECYCLE_FAMILY,
         phase_hint="cleanup",
         context={
             "run_id": str(typed.run_id),
@@ -92,7 +94,7 @@ def _build_pipeline_failed(event: DomainEvent) -> DomainEventObservabilityEnvelo
     return _build_envelope(
         event_name=PipelineEvent.FAILED,
         severity="error",
-        event_family="pipeline.lifecycle",
+        event_family=_PIPELINE_LIFECYCLE_FAMILY,
         phase_hint="execution",
         context={
             "run_id": str(typed.run_id),
@@ -109,7 +111,7 @@ def _build_pipeline_shutdown(event: DomainEvent) -> DomainEventObservabilityEnve
     return _build_envelope(
         event_name=PipelineEvent.SHUTDOWN,
         severity="warning",
-        event_family="pipeline.lifecycle",
+        event_family=_PIPELINE_LIFECYCLE_FAMILY,
         phase_hint="cleanup",
         context={
             "run_id": str(typed.run_id),

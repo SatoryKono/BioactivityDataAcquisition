@@ -404,11 +404,17 @@ class TestEchoBatchSummary:
         info_messages: list[str] = []
         error_messages: list[str] = []
 
+        def _info_printer(*args: object) -> None:
+            info_messages.extend(str(x) for x in args)
+
+        def _error_printer(*args: object) -> None:
+            error_messages.extend(str(x) for x in args)
+
         echo_batch_summary(
             result=batch,
             dry_run=False,
-            info_printer=lambda *a: info_messages.extend(str(x) for x in a),
-            error_printer=lambda *a: error_messages.extend(str(x) for x in a),
+            info_printer=_info_printer,
+            error_printer=_error_printer,
         )
 
         assert any("chembl_activity" in m for m in error_messages)

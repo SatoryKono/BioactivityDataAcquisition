@@ -74,9 +74,16 @@ def test_is_metrics_port_like_true() -> None:
 @pytest.mark.unit
 def test_is_metrics_port_like_false_missing_method() -> None:
     """is_metrics_port_like returns False when a method is missing."""
+
+    def _observe_histogram() -> None:
+        return None
+
+    def _increment_counter() -> None:
+        return None
+
     candidate = SimpleNamespace(
-        observe_histogram=lambda: None,
-        increment_counter=lambda: None,
+        observe_histogram=_observe_histogram,
+        increment_counter=_increment_counter,
         # missing set_gauge, etc.
     )
     assert is_metrics_port_like(candidate) is False

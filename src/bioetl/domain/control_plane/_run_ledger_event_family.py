@@ -10,15 +10,18 @@ RUN_SHUTDOWN_EVENT = "run_shutdown"
 STAGE_STARTED_EVENT = "stage_started"
 STAGE_COMPLETED_EVENT = "stage_completed"
 ARTIFACT_PUBLISHED_EVENT = "artifact_published"
+_DIAGNOSTIC_FAMILY = "diagnostic"
+_PIPELINE_LIFECYCLE_FAMILY = "pipeline.lifecycle"
+_PIPELINE_PHASE_FAMILY = "pipeline.phase"
 
 _LEDGER_EVENT_FAMILY_EXACT: dict[str, str] = {
-    MANIFEST_CREATED_EVENT: "diagnostic",
-    RUN_STARTED_EVENT: "pipeline.lifecycle",
-    RUN_FINISHED_EVENT: "pipeline.lifecycle",
-    RUN_FAILED_EVENT: "pipeline.lifecycle",
-    RUN_SHUTDOWN_EVENT: "pipeline.lifecycle",
-    STAGE_STARTED_EVENT: "pipeline.phase",
-    STAGE_COMPLETED_EVENT: "pipeline.phase",
+    MANIFEST_CREATED_EVENT: _DIAGNOSTIC_FAMILY,
+    RUN_STARTED_EVENT: _PIPELINE_LIFECYCLE_FAMILY,
+    RUN_FINISHED_EVENT: _PIPELINE_LIFECYCLE_FAMILY,
+    RUN_FAILED_EVENT: _PIPELINE_LIFECYCLE_FAMILY,
+    RUN_SHUTDOWN_EVENT: _PIPELINE_LIFECYCLE_FAMILY,
+    STAGE_STARTED_EVENT: _PIPELINE_PHASE_FAMILY,
+    STAGE_COMPLETED_EVENT: _PIPELINE_PHASE_FAMILY,
     ARTIFACT_PUBLISHED_EVENT: "artifact",
 }
 _LEDGER_EVENT_FAMILY_PREFIXES: tuple[tuple[str, str], ...] = (
@@ -29,8 +32,8 @@ _LEDGER_EVENT_FAMILY_PREFIXES: tuple[tuple[str, str], ...] = (
     ("artifact_", "artifact"),
 )
 _LEDGER_EVENT_FAMILY_SUFFIXES: tuple[tuple[str, str], ...] = (
-    ("_started", "pipeline.phase"),
-    ("_completed", "pipeline.phase"),
+    ("_started", _PIPELINE_PHASE_FAMILY),
+    ("_completed", _PIPELINE_PHASE_FAMILY),
 )
 
 
@@ -52,7 +55,7 @@ def infer_ledger_event_family(event_type: str) -> str:
     """Infer stable event-family taxonomy for ledger entries."""
     normalized_event_type = event_type.strip().lower()
     if not normalized_event_type:
-        return "diagnostic"
+        return _DIAGNOSTIC_FAMILY
     for family in (
         _LEDGER_EVENT_FAMILY_EXACT.get(normalized_event_type),
         _match_ledger_event_family_by_suffix(normalized_event_type),
@@ -60,4 +63,4 @@ def infer_ledger_event_family(event_type: str) -> str:
     ):
         if family is not None:
             return family
-    return "diagnostic"
+    return _DIAGNOSTIC_FAMILY

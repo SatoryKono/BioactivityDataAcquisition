@@ -23,6 +23,8 @@ if TYPE_CHECKING:
         SilverDQConfigPort,
     )
 
+_ANALYZER_OR_WRITER_UNAVAILABLE = "analyzer or writer not available"
+
 
 async def generate_bronze_report(
     *,
@@ -41,7 +43,7 @@ async def generate_bronze_report(
         )
         logger.warning(
             "bronze_dq_report_skipped",
-            reason="analyzer or writer not available",
+            reason=_ANALYZER_OR_WRITER_UNAVAILABLE,
             run_id=context.run_id,
         )
         return None
@@ -109,7 +111,7 @@ async def generate_silver_report(
         )
         logger.warning(
             "silver_dq_report_skipped",
-            reason="analyzer or writer not available",
+            reason=_ANALYZER_OR_WRITER_UNAVAILABLE,
             run_id=context.run_id,
         )
         return None
@@ -183,7 +185,7 @@ async def generate_gold_report(
         )
         logger.warning(
             "gold_dq_report_skipped",
-            reason="analyzer or writer not available",
+            reason=_ANALYZER_OR_WRITER_UNAVAILABLE,
             run_id=context.run_id,
         )
         return None

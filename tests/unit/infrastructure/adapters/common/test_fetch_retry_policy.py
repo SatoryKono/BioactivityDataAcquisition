@@ -17,6 +17,33 @@ from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
     split_filter_ids_for_fallback,
 )
 
+
+def _normalize_identity(value: str) -> str:
+    return value
+
+
+def _normalize_lower_strip(value: str) -> str:
+    return value.lower().strip()
+
+
+def _extract_doi(record: dict[str, object]) -> str:
+    return str(record.get("doi", ""))
+
+
+def _append_phase1_summary(
+    target: list[tuple[int, int]], total: int, found: int
+) -> None:
+    target.append((total, found))
+
+
+def _phase1_summary_logger(
+    target: list[tuple[int, int]],
+):
+    def _log(total: int, found: int) -> None:
+        _append_phase1_summary(target, total, found)
+
+    return _log
+
 _PARTITION_TEST_SETTINGS = settings(
     deadline=None,
     max_examples=40,
@@ -172,13 +199,13 @@ def test_run_fetch_with_fallback_policy_prefix_property(
     async def _collect_ids() -> list[str]:
         rows = [
             record
-            async for record in run_fetch_with_fallback_policy(
+        async for record in run_fetch_with_fallback_policy(
                 primary_records=primary_records(),
                 primary_ids=primary_ids,
                 title_only_entries=title_only_entries,
                 fallback_mapping=fallback_mapping,
-                normalize_id=lambda value: value,
-                extract_record_id=lambda rec: str(rec.get("doi", "")),
+                normalize_id=_normalize_identity,
+                extract_record_id=_extract_doi,
                 fallback_handler=_Policy(),
                 limit=limit,
                 primary_lookup_method="doi",
@@ -240,13 +267,11 @@ async def test_run_fetch_with_fallback_policy_orchestrates_three_phases() -> Non
                 "10.1/a": "Missing title",
                 "__title_only_0__": "Title only",
             },
-            normalize_id=lambda value: value.lower().strip(),
-            extract_record_id=lambda rec: str(rec.get("doi", "")),
+            normalize_id=_normalize_lower_strip,
+            extract_record_id=_extract_doi,
             fallback_handler=fallback,
             primary_lookup_method="doi",
-            phase1_summary_logger=lambda total, found: seen_summary.append(
-                (total, found)
-            ),
+            phase1_summary_logger=_phase1_summary_logger(seen_summary),
         )
     ]
 
@@ -279,8 +304,8 @@ async def test_run_fetch_with_fallback_policy_respects_limit() -> None:
                 "10.1/a": "Missing title",
                 "__title_only_0__": "Title only",
             },
-            normalize_id=lambda value: value.lower().strip(),
-            extract_record_id=lambda rec: str(rec.get("doi", "")),
+            normalize_id=_normalize_lower_strip,
+            extract_record_id=_extract_doi,
             fallback_handler=fallback,
             primary_lookup_method="doi",
             limit=1,
