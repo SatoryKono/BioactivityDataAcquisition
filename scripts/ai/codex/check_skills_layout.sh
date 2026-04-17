@@ -17,9 +17,23 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-log_info() { echo -e "${BLUE}[ai-skills-layout]${NC} $1"; }
-log_ok() { echo -e "${GREEN}[ai-skills-layout]${NC} $1"; }
-log_err() { echo -e "${RED}[ai-skills-layout]${NC} $1"; }
+log_info() {
+    local message="${1:-}"
+    echo -e "${BLUE}[ai-skills-layout]${NC} ${message}"
+    return 0
+}
+
+log_ok() {
+    local message="${1:-}"
+    echo -e "${GREEN}[ai-skills-layout]${NC} ${message}"
+    return 0
+}
+
+log_err() {
+    local message="${1:-}"
+    echo -e "${RED}[ai-skills-layout]${NC} ${message}"
+    return 0
+}
 
 if [[ ! -d "$SKILLS_ROOT" ]]; then
     log_err "Skills root not found: $SKILLS_ROOT"

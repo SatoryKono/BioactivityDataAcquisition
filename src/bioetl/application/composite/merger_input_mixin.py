@@ -38,8 +38,8 @@ class _MergeInputLoaderMixin:
     _logger: LoggerPort
     _storage: MergedStoragePort
     _delta_reader: DeltaReaderPort | None
-    _renamer: Any  # ColumnRenamerService
-    _config: Any  # MergeConfig
+    _renamer: Any  # Any: Host MergeService injects runtime collaborator without importing infra implementation here.
+    _config: Any  # Any: Host MergeService provides config object with richer surface than this mixin needs to declare.
 
     async def _read_optional_merge_input(
         self,

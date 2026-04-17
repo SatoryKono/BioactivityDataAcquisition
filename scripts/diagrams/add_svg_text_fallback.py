@@ -42,11 +42,15 @@ _CLASS_METHOD_LINE_RE = re.compile(r"^\s*[+\-#~]\s*[A-Za-z_][A-Za-z0-9_]*\s*\(")
 SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
 
 
-def _ensure_repo_path(path: Path) -> Path:
+def _ensure_repo_path(path: Path, *, require_repo: bool = True) -> Path:
     resolved_root = REPO_ROOT.resolve()
     resolved_path = path.resolve()
-    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
-        raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
+    if require_repo and (
+        resolved_root != resolved_path and resolved_root not in resolved_path.parents
+    ):
+        raise ValueError(
+            f"refusing to process path outside {resolved_root}: {resolved_path}"
+        )
     return resolved_path
 
 
@@ -370,7 +374,7 @@ def _build_fallback_text(
 
 
 def add_fallbacks(path: Path) -> int:
-    safe_path = _ensure_repo_path(path)
+    safe_path = _ensure_repo_path(path, require_repo=False)
     tree = ET.parse(safe_path)
     root = tree.getroot()
 
@@ -413,7 +417,7 @@ def add_fallbacks(path: Path) -> int:
 
 def collect_svg_files(files: list[Path] | None, dirs: list[Path] | None) -> list[Path]:
     if files:
-        return [_ensure_repo_path(path) for path in files]
+        return [_ensure_repo_path(path, require_repo=False) for path in files]
     if dirs:
         selected: list[Path] = []
         for d in dirs:

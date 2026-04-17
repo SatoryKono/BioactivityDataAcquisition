@@ -57,7 +57,7 @@ export GEMINI_MODEL="${GEMINI_MODEL:-gemini-2.5-flash}"
 
 # Create temporary Python file to run Gemini
 GEMINI_SCRIPT=$(mktemp)
-trap "rm -f ${GEMINI_SCRIPT}" EXIT
+trap 'rm -f "${GEMINI_SCRIPT}"' EXIT
 
 cat > "${GEMINI_SCRIPT}" <<'PYEOF'
 import os
@@ -181,4 +181,4 @@ else:
 PYEOF
 
 # Run Gemini with the correct Python, passing all arguments
-${PYTHON_BIN} "${GEMINI_SCRIPT}" "$@"
+"${PYTHON_BIN}" "${GEMINI_SCRIPT}" "$@"

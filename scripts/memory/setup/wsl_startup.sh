@@ -16,31 +16,31 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 ok() {
-  local message="${1}"
+  local message="${1:-}"
   printf "${GREEN}✓${NC} %s\n" "$message"
   return 0
 }
 
 fail() {
-  local message="${1}"
+  local message="${1:-}"
   printf "${RED}✗${NC} %s\n" "$message" >&2
   return 0
 }
 
 warn() {
-  local message="${1}"
+  local message="${1:-}"
   printf "${YELLOW}!${NC} %s\n" "$message"
   return 0
 }
 
 info() {
-  local message="${1}"
+  local message="${1:-}"
   printf "${BLUE}→${NC} %s\n" "$message"
   return 0
 }
 
 header() {
-  local message="${1}"
+  local message="${1:-}"
   printf "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n%s\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n" "$message"
   return 0
 }

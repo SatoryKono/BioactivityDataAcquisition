@@ -16,25 +16,25 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_success() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${GREEN}[✓]${NC} ${message}"
     return 0
 }
 
 log_warn() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${YELLOW}[⚠]${NC} ${message}"
     return 0
 }
 
 log_error() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${RED}[✗]${NC} ${message}" >&2
     return 0
 }
 
 log_info() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${BLUE}[i]${NC} ${message}"
     return 0
 }
@@ -92,19 +92,18 @@ echo ""
 # Process command
 COMMAND="${1:-start}"
 shift || true
-PROMPT="$@"
 
 case "$COMMAND" in
     start|"")
-        bash "${HELPER_DIR}/run-codex-impl.sh" $PROMPT
+        bash "${HELPER_DIR}/run-codex-impl.sh" "$@"
         ;;
     
     exec)
-        if [[ -z "$PROMPT" ]]; then
+        if [[ $# -eq 0 ]]; then
             log_error "exec mode requires a prompt"
             exit 1
         fi
-        bash "${HELPER_DIR}/run-codex-impl.sh" exec --full-auto $PROMPT
+        bash "${HELPER_DIR}/run-codex-impl.sh" exec --full-auto "$@"
         ;;
     
     login)
@@ -127,7 +126,7 @@ case "$COMMAND" in
     
     *)
         # Treat as prompt
-        bash "${HELPER_DIR}/run-codex-impl.sh" "$COMMAND" $PROMPT
+        bash "${HELPER_DIR}/run-codex-impl.sh" "$COMMAND" "$@"
         ;;
 esac
 

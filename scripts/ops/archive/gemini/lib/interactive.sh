@@ -46,31 +46,31 @@ print_header() {
 }
 
 print_section() {
-  local message="$1"
+  local message="${1:-}"
   echo -e "\n${BLUE}▶ ${message}${NC}"
   return 0
 }
 
 print_success() {
-  local message="$1"
+  local message="${1:-}"
   echo -e "${GREEN}✓ ${message}${NC}"
   return 0
 }
 
 print_error() {
-  local message="$1"
+  local message="${1:-}"
   echo -e "${RED}✗ ${message}${NC}"
   return 0
 }
 
 print_warning() {
-  local message="$1"
+  local message="${1:-}"
   echo -e "${YELLOW}⚠ ${message}${NC}"
   return 0
 }
 
 print_info() {
-  local message="$1"
+  local message="${1:-}"
   echo -e "${CYAN}ℹ ${message}${NC}"
   return 0
 }

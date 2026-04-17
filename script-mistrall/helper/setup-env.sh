@@ -16,25 +16,25 @@ NC='\033[0m'
 SEPARATOR="=================================================="
 
 log_success() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${GREEN}[✓]${NC} ${message}"
     return 0
 }
 
 log_warn() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${YELLOW}[!]${NC} ${message}"
     return 0
 }
 
 log_error() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${RED}[X]${NC} ${message}" >&2
     return 0
 }
 
 log_info() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${BLUE}[i]${NC} ${message}"
     return 0
 }

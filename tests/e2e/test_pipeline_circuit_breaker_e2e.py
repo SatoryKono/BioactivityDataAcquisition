@@ -32,7 +32,7 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import (
 class TestCircuitBreakerStateTransitions:
     """Tests for circuit breaker state transitions."""
 
-    async def test_initial_state_is_closed(self):
+    def test_initial_state_is_closed(self):
         """E2E: Circuit breaker starts in CLOSED state."""
         cb = CircuitBreakerGuard(provider="test_provider")
 
@@ -45,6 +45,7 @@ class TestCircuitBreakerStateTransitions:
         cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         async def success():
+            await asyncio.sleep(0)
             return "ok"
 
         for _ in range(10):
@@ -59,6 +60,7 @@ class TestCircuitBreakerStateTransitions:
         cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Provider error")
 
         for _ in range(3):
@@ -73,6 +75,7 @@ class TestCircuitBreakerStateTransitions:
         cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Provider error")
 
         for _ in range(5):
@@ -91,6 +94,7 @@ class TestCircuitBreakerStateTransitions:
         )
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         # Open the circuit
@@ -102,6 +106,7 @@ class TestCircuitBreakerStateTransitions:
 
         # Next call should be blocked
         async def would_succeed():
+            await asyncio.sleep(0)
             return "success"
 
         with pytest.raises(CircuitBreakerOpenError) as exc_info:
@@ -119,6 +124,7 @@ class TestCircuitBreakerStateTransitions:
         )
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         # Open the circuit
@@ -133,6 +139,7 @@ class TestCircuitBreakerStateTransitions:
 
         # Next successful call should transition to CLOSED
         async def success():
+            await asyncio.sleep(0)
             return "ok"
 
         result = await cb.call(success)
@@ -148,6 +155,7 @@ class TestCircuitBreakerStateTransitions:
         )
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         # Open the circuit
@@ -179,9 +187,11 @@ class TestCircuitBreakerRecovery:
         cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         async def success():
+            await asyncio.sleep(0)
             return "ok"
 
         # Accumulate some failures
@@ -206,6 +216,7 @@ class TestCircuitBreakerRecovery:
         )
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         # Open the circuit
@@ -221,7 +232,7 @@ class TestCircuitBreakerRecovery:
         assert cb.get_state() == CircuitBreakerState.CLOSED
         assert cb.get_failure_count() == 0
 
-    async def test_force_open(self):
+    def test_force_open(self):
         """E2E: force_open() manually opens circuit."""
         cb = CircuitBreakerGuard(provider="test_provider", failure_threshold=5)
 
@@ -305,9 +316,11 @@ class TestCircuitBreakerMetrics:
         )
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         async def success():
+            await asyncio.sleep(0)
             return "ok"
 
         # First trip
@@ -337,6 +350,7 @@ class TestCircuitBreakerMetrics:
         )
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         # Open the circuit
@@ -345,6 +359,7 @@ class TestCircuitBreakerMetrics:
                 await cb.call(fail)
 
         async def probe():
+            await asyncio.sleep(0)
             return "ok"
 
         # Try to call - should get retry_after close to 10
@@ -371,6 +386,7 @@ class TestCircuitBreakerConcurrency:
         failure_count = 0
 
         async def mixed_call(should_fail: bool):
+            await asyncio.sleep(0)
             nonlocal success_count, failure_count
             if should_fail:
                 raise RuntimeError("Error")
@@ -411,6 +427,7 @@ class TestCircuitBreakerConcurrency:
         )
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         # Rapid concurrent failures
@@ -441,9 +458,11 @@ class TestCircuitBreakerProviderIsolation:
         cb_pubchem = CircuitBreakerGuard(provider="pubchem", failure_threshold=3)
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         async def success():
+            await asyncio.sleep(0)
             return "ok"
 
         # Open ChEMBL circuit
@@ -468,6 +487,7 @@ class TestCircuitBreakerProviderIsolation:
         )
 
         async def fail():
+            await asyncio.sleep(0)
             raise RuntimeError("Error")
 
         for _ in range(2):
@@ -475,6 +495,7 @@ class TestCircuitBreakerProviderIsolation:
                 await cb.call(fail)
 
         async def probe():
+            await asyncio.sleep(0)
             return "ok"
 
         with pytest.raises(CircuitBreakerOpenError) as exc_info:

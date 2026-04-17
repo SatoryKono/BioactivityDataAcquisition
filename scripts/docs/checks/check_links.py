@@ -148,6 +148,11 @@ CONTROL_PLANE_COMPATIBILITY_FACADE_PATHS = (
     "src/bioetl/application/services/run_manifest_diagnostics.py",
     "src/bioetl/application/services/run_manifest_inspection_service.py",
 )
+SECTION_SEPARATOR = "=" * 60
+DELIMITED_FRONTMATTER_RE = re.compile(r"_{10,}")
+FRONTMATTER_NESTED_RE = re.compile(r"^[ \t]+([^:]+):\s*(.*)$")
+FRONTMATTER_KEY_VALUE_RE = re.compile(r"^([^:]+):\s*(.*)$")
+LEGACY_DELTA_LOG_TOKEN_RE = re.compile(r"(?<!\w)(?:-delta-log|delta-log)(?!\w)")
 
 
 class DriftRule:
@@ -161,9 +166,7 @@ class DriftRule:
 DRIFT_RULES = (
     DriftRule(
         name="legacy_delta_log_token",
-        pattern=re.compile(
-            r"(?<![A-Za-z0-9_])(?:-delta-log|delta-log)(?![A-Za-z0-9_])"
-        ),
+        pattern=LEGACY_DELTA_LOG_TOKEN_RE,
     ),
     DriftRule(
         name="legacy_config_path",
@@ -287,12 +290,12 @@ def _extract_delimited_header_frontmatter(text: str) -> dict[str, object]:
     while start_index < len(lines) and not lines[start_index].strip():
         start_index += 1
 
-    if start_index >= len(lines) or not re.fullmatch(r"_{10,}", lines[start_index]):
+    if start_index >= len(lines) or not DELIMITED_FRONTMATTER_RE.fullmatch(
+        lines[start_index]
+    ):
         return {}
 
-    end_index = start_index + 1
-    while end_index < len(lines) and not re.fullmatch(r"_{10,}", lines[end_index]):
-        end_index += 1
+    end_index = _find_frontmatter_delimiter_end(lines, start_index + 1)
     if end_index >= len(lines):
         return {}
 
@@ -301,27 +304,46 @@ def _extract_delimited_header_frontmatter(text: str) -> dict[str, object]:
     current_key: str | None = None
 
     for raw_line in metadata_lines:
-        stripped = raw_line.strip()
-        if not stripped:
-            continue
-
-        nested_match = re.match(r"^[ \t]+([^:]+):\s*(.*)$", raw_line)
-        if nested_match:
-            frontmatter[nested_match.group(1).strip()] = nested_match.group(2).strip()
-            continue
-
-        key_value_match = re.match(r"^([^:]+):\s*(.*)$", raw_line)
-        if key_value_match:
-            current_key = key_value_match.group(1).strip()
-            frontmatter[current_key] = key_value_match.group(2).strip()
-            continue
-
-        if current_key == "Reviewers" and stripped.startswith("- "):
-            reviewers = frontmatter.setdefault("Reviewers", [])
-            if isinstance(reviewers, list):
-                reviewers.append(stripped[2:].strip())
+        current_key = _update_delimited_frontmatter(frontmatter, raw_line, current_key)
 
     return frontmatter
+
+
+def _find_frontmatter_delimiter_end(lines: list[str], start_index: int) -> int:
+    end_index = start_index
+    while end_index < len(lines) and not DELIMITED_FRONTMATTER_RE.fullmatch(
+        lines[end_index]
+    ):
+        end_index += 1
+    return end_index
+
+
+def _update_delimited_frontmatter(
+    frontmatter: dict[str, object],
+    raw_line: str,
+    current_key: str | None,
+) -> str | None:
+    stripped = raw_line.strip()
+    if not stripped:
+        return current_key
+
+    nested_match = FRONTMATTER_NESTED_RE.match(raw_line)
+    if nested_match:
+        frontmatter[nested_match.group(1).strip()] = nested_match.group(2).strip()
+        return current_key
+
+    key_value_match = FRONTMATTER_KEY_VALUE_RE.match(raw_line)
+    if key_value_match:
+        current_key = key_value_match.group(1).strip()
+        frontmatter[current_key] = key_value_match.group(2).strip()
+        return current_key
+
+    if current_key == "Reviewers" and stripped.startswith("- "):
+        reviewers = frontmatter.setdefault("Reviewers", [])
+        if isinstance(reviewers, list):
+            reviewers.append(stripped[2:].strip())
+
+    return current_key
 
 
 def _extract_frontmatter(md_file: Path) -> dict[str, object]:
@@ -403,6 +425,73 @@ def _control_plane_contract_spec_files() -> list[Path]:
     return control_plane_files
 
 
+def _append_missing_last_verified_violation(
+    violations: list[tuple[Path, str]],
+    md_file: Path,
+    frontmatter: dict[str, object],
+    label: str,
+) -> None:
+    last_verified = frontmatter.get(LAST_VERIFIED_LABEL)
+    if not isinstance(last_verified, str) or not last_verified.strip():
+        violations.append((md_file, f"{label}: missing {LAST_VERIFIED_LABEL} frontmatter"))
+
+
+def _append_invalid_version_violation(
+    violations: list[tuple[Path, str]],
+    md_file: Path,
+    frontmatter: dict[str, object],
+    label: str,
+) -> None:
+    version = frontmatter.get("Version")
+    version_str = str(version).strip() if version is not None else ""
+    if not SEMVER_RE.fullmatch(version_str):
+        violations.append((md_file, f"{label}: invalid Version SemVer: {version_str!r}"))
+
+
+def _append_governance_metadata_violations(
+    violations: list[tuple[Path, str]],
+    md_file: Path,
+    frontmatter: dict[str, object],
+    label: str,
+) -> None:
+    _append_missing_last_verified_violation(violations, md_file, frontmatter, label)
+    _append_invalid_version_violation(violations, md_file, frontmatter, label)
+
+
+def _append_runbook_section_violations(
+    violations: list[tuple[Path, str]],
+    md_file: Path,
+    headings: set[str],
+) -> None:
+    for section in REQUIRED_RUNBOOK_SECTIONS:
+        if section == "Rollback/Recovery":
+            if _has_any_heading(headings, "Rollback", "Recovery"):
+                continue
+            violations.append((md_file, "runbook: missing required section 'Rollback/Recovery'"))
+            continue
+        if not _has_heading(headings, section):
+            violations.append((md_file, f"runbook: missing required section '{section}'"))
+
+
+def _append_control_plane_section_violations(
+    violations: list[tuple[Path, str]],
+    md_file: Path,
+    headings: set[str],
+) -> None:
+    for section in REQUIRED_CONTROL_PLANE_CONTRACT_SECTIONS:
+        if section == "Inspection surface":
+            if _has_any_heading(headings, "Inspection Surface", "CLI Inspection"):
+                continue
+            violations.append(
+                (md_file, "control-plane contract-spec: missing required section 'Inspection surface'")
+            )
+            continue
+        if not _has_heading(headings, section):
+            violations.append(
+                (md_file, f"control-plane contract-spec: missing required section '{section}'")
+            )
+
+
 def check_provider_spec_governance() -> list[tuple[Path, str]]:
     violations: list[tuple[Path, str]] = []
 
@@ -419,14 +508,9 @@ def check_provider_spec_governance() -> list[tuple[Path, str]]:
         if "compliance" not in " ".join(headings):
             violations.append((md_file, "provider-spec: missing Compliance heading"))
 
-        last_verified = frontmatter.get(LAST_VERIFIED_LABEL)
-        if not isinstance(last_verified, str) or not last_verified.strip():
-            violations.append((md_file, f"provider-spec: missing {LAST_VERIFIED_LABEL} frontmatter"))
-
-        version = frontmatter.get("Version")
-        version_str = str(version).strip() if version is not None else ""
-        if not SEMVER_RE.fullmatch(version_str):
-            violations.append((md_file, f"provider-spec: invalid Version SemVer: {version_str!r}"))
+        _append_governance_metadata_violations(
+            violations, md_file, frontmatter, "provider-spec"
+        )
 
     return violations
 
@@ -438,26 +522,12 @@ def check_runbook_governance() -> list[tuple[Path, str]]:
         headings = _extract_headings(md_file)
         frontmatter = _extract_frontmatter(md_file)
 
-        for section in REQUIRED_RUNBOOK_SECTIONS:
-            if section == "Rollback/Recovery":
-                if _has_any_heading(headings, "Rollback", "Recovery"):
-                    continue
-                violations.append((md_file, "runbook: missing required section 'Rollback/Recovery'"))
-                continue
-            if not _has_heading(headings, section):
-                violations.append((md_file, f"runbook: missing required section '{section}'"))
+        _append_runbook_section_violations(violations, md_file, headings)
 
         if "compliance" not in " ".join(headings):
             violations.append((md_file, "runbook: missing Compliance heading"))
 
-        last_verified = frontmatter.get(LAST_VERIFIED_LABEL)
-        if not isinstance(last_verified, str) or not last_verified.strip():
-            violations.append((md_file, f"runbook: missing {LAST_VERIFIED_LABEL} frontmatter"))
-
-        version = frontmatter.get("Version")
-        version_str = str(version).strip() if version is not None else ""
-        if not SEMVER_RE.fullmatch(version_str):
-            violations.append((md_file, f"runbook: invalid Version SemVer: {version_str!r}"))
+        _append_governance_metadata_violations(violations, md_file, frontmatter, "runbook")
 
     return violations
 
@@ -469,29 +539,10 @@ def check_control_plane_contract_governance() -> list[tuple[Path, str]]:
         headings = _extract_headings(md_file)
         frontmatter = _extract_frontmatter(md_file)
 
-        for section in REQUIRED_CONTROL_PLANE_CONTRACT_SECTIONS:
-            if section == "Inspection surface":
-                if _has_any_heading(headings, "Inspection Surface", "CLI Inspection"):
-                    continue
-                violations.append(
-                    (md_file, "control-plane contract-spec: missing required section 'Inspection surface'")
-                )
-                continue
-            if not _has_heading(headings, section):
-                violations.append(
-                    (md_file, f"control-plane contract-spec: missing required section '{section}'")
-                )
-
-        last_verified = frontmatter.get(LAST_VERIFIED_LABEL)
-        if not isinstance(last_verified, str) or not last_verified.strip():
-            violations.append((md_file, f"control-plane contract-spec: missing {LAST_VERIFIED_LABEL} frontmatter"))
-
-        version = frontmatter.get("Version")
-        version_str = str(version).strip() if version is not None else ""
-        if not SEMVER_RE.fullmatch(version_str):
-            violations.append(
-                (md_file, f"control-plane contract-spec: invalid Version SemVer: {version_str!r}")
-            )
+        _append_control_plane_section_violations(violations, md_file, headings)
+        _append_governance_metadata_violations(
+            violations, md_file, frontmatter, "control-plane contract-spec"
+        )
 
         try:
             text = md_file.read_text(encoding="utf-8", errors="replace")
@@ -517,6 +568,29 @@ def check_control_plane_contract_governance() -> list[tuple[Path, str]]:
     return violations
 
 
+def _iter_markdown_targets(
+    source_file: Path,
+    lines: list[str],
+) -> list[tuple[int, str, str, str, Path]]:
+    targets: list[tuple[int, str, str, str, Path]] = []
+    for line_no, line in enumerate(lines, start=1):
+        line_for_links = INLINE_CODE_RE.sub("", line)
+        for match in MD_LINK_RE.finditer(line_for_links):
+            raw_target = match.group(2).strip()
+            if not raw_target or raw_target.startswith("*") or raw_target.startswith("{"):
+                continue
+            targets.append(
+                (
+                    line_no,
+                    match.group(1),
+                    raw_target,
+                    raw_target.replace("\\", "/"),
+                    (source_file.parent / raw_target).resolve(),
+                )
+            )
+    return targets
+
+
 def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
     broken: list[tuple[Path, int, str, str]] = []
 
@@ -526,20 +600,13 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
         except OSError:
             continue
 
-        for line_no, line in enumerate(lines, start=1):
-            line_for_links = INLINE_CODE_RE.sub("", line)
-            for match in MD_LINK_RE.finditer(line_for_links):
-                link_text = match.group(1)
-                raw_target = match.group(2).strip()
-
-                if raw_target.startswith("*") or raw_target.startswith("{"):
-                    continue
-                if raw_target.endswith((".png", ".svg")):
-                    continue
-
-                resolved = (md_file.parent / raw_target).resolve()
-                if not resolved.exists():
-                    broken.append((md_file, line_no, link_text, raw_target))
+        for line_no, link_text, raw_target, _, resolved in _iter_markdown_targets(
+            md_file, lines
+        ):
+            if raw_target.endswith((".png", ".svg")):
+                continue
+            if not resolved.exists():
+                broken.append((md_file, line_no, link_text, raw_target))
 
     return broken
 
@@ -695,20 +762,33 @@ def check_legacy_paths_in_nav_docs(
             continue
 
         lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()
-        for line_no, line in enumerate(lines, start=1):
-            if ALLOW_LEGACY_MARKER in line:
-                continue
-            for rule in DRIFT_RULES:
-                match = rule.pattern.search(line)
-                if match:
-                    violations.append((md_file, line_no, rule.name, match.group(0)))
+        violations.extend(_collect_file_drift_violations(md_file, lines))
 
-        for line_no, rule_name, matched_text in _check_python_snippet_drift(lines):
-            violations.append((md_file, line_no, rule_name, matched_text))
+    return violations
 
-        for line_no, rule_name, matched_text in _check_path_contracts_for_file(md_file, lines):
-            violations.append((md_file, line_no, rule_name, matched_text))
 
+def _collect_file_drift_violations(
+    md_file: Path,
+    lines: list[str],
+) -> list[tuple[Path, int, str, str]]:
+    violations: list[tuple[Path, int, str, str]] = []
+
+    for line_no, line in enumerate(lines, start=1):
+        if ALLOW_LEGACY_MARKER in line:
+            continue
+        for rule in DRIFT_RULES:
+            match = rule.pattern.search(line)
+            if match:
+                violations.append((md_file, line_no, rule.name, match.group(0)))
+
+    violations.extend(
+        (md_file, line_no, rule_name, matched_text)
+        for line_no, rule_name, matched_text in _check_python_snippet_drift(lines)
+    )
+    violations.extend(
+        (md_file, line_no, rule_name, matched_text)
+        for line_no, rule_name, matched_text in _check_path_contracts_for_file(md_file, lines)
+    )
     return violations
 
 
@@ -721,27 +801,20 @@ def _check_path_contracts_for_file(
     canonical_governance = CANONICAL_GOVERNANCE_DIR.resolve()
     violations: list[tuple[int, str, str]] = []
 
-    for line_no, line in enumerate(lines, start=1):
-        line_for_links = INLINE_CODE_RE.sub("", line)
-        for match in MD_LINK_RE.finditer(line_for_links):
-            raw_target = match.group(2).strip()
-            if not raw_target or raw_target.startswith("*") or raw_target.startswith("{"):
-                continue
+    for line_no, _, _, normalized_target, resolved in _iter_markdown_targets(
+        source_file, lines
+    ):
+        if resolved.name == "REQUIREMENTS.md" and resolved != canonical_requirements:
+            violations.append((line_no, "requirements_path_contract", normalized_target))
 
-            resolved = (source_file.parent / raw_target).resolve()
-            normalized_target = raw_target.replace("\\", "/")
+        if not re.search(r"(^|/)governance/", normalized_target):
+            continue
 
-            if resolved.name == "REQUIREMENTS.md" and resolved != canonical_requirements:
-                violations.append((line_no, "requirements_path_contract", normalized_target))
-
-            if not re.search(r"(^|/)governance/", normalized_target):
-                continue
-
-            try:
-                _ = resolved.relative_to(canonical_governance)
-            except ValueError:
-                if docs_root in resolved.parents:
-                    violations.append((line_no, "governance_path_contract", normalized_target))
+        try:
+            _ = resolved.relative_to(canonical_governance)
+        except ValueError:
+            if docs_root in resolved.parents:
+                violations.append((line_no, "governance_path_contract", normalized_target))
 
     return violations
 
@@ -818,7 +891,7 @@ def check_chembl_provider_overview() -> tuple[list[str], list[str]]:
     return sorted(available - listed), sorted(listed - available)
 
 
-def main() -> int:
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Check documentation links and spec files")
     parser.add_argument("--links", action="store_true", help="Only check broken links")
     parser.add_argument("--specs", action="store_true", help="Only check spec files")
@@ -856,9 +929,222 @@ def main() -> int:
         action="store_true",
         help="Only check doc drift guardrails in all mkdocs nav docs, including internal sections",
     )
+    return parser
+
+
+def _print_section_header(title: str) -> None:
+    print(f"\n{SECTION_SEPARATOR}")
+    print(title)
+    print(SECTION_SEPARATOR)
+
+
+def _print_path_message_violations(
+    title: str,
+    violations: list[tuple[Path, str]],
+) -> int:
+    if not violations:
+        return 0
+    _print_section_header(f"{title} ({len(violations)} found)")
+    for filepath, message in violations:
+        rel = filepath.relative_to(PROJECT_ROOT)
+        print(f"  {rel}: {message}")
+    return len(violations)
+
+
+def _run_links_checks() -> int:
+    violations = 0
+
+    broken = check_broken_links(DOCS_DIR)
+    if broken:
+        _print_section_header(f"BROKEN LINKS ({len(broken)} found)")
+        for filepath, line_no, text, target in broken:
+            rel = filepath.relative_to(PROJECT_ROOT)
+            print(f"  {rel}:{line_no}: [{text}]({target})")
+        violations += len(broken)
+    else:
+        print("Links: OK (no broken relative links found)")
+
+    missing_nav_docs = check_missing_nav_docs()
+    if missing_nav_docs:
+        _print_section_header(f"MISSING NAV DOCS ({len(missing_nav_docs)} found)")
+        for filepath in missing_nav_docs:
+            rel = filepath.relative_to(PROJECT_ROOT)
+            print(f"  {rel}")
+        violations += len(missing_nav_docs)
+    else:
+        print("Nav docs: OK (all mkdocs nav files exist)")
+
+    nav_scope_gaps = check_nav_link_coverage(DOCS_DIR)
+    if nav_scope_gaps:
+        _print_section_header(f"NAV LINK SCOPE GAPS ({len(nav_scope_gaps)} found)")
+        for filepath in nav_scope_gaps:
+            rel = filepath.relative_to(PROJECT_ROOT)
+            print(f"  {rel}")
+        violations += len(nav_scope_gaps)
+    else:
+        print("Nav link scope: OK (all nav docs are included in link checks)")
+
+    unclassified_local_skill_docs = check_local_skill_nav_classification()
+    if unclassified_local_skill_docs:
+        _print_section_header(
+            "LOCAL SKILL NAV CLASSIFICATION VIOLATIONS "
+            f"({len(unclassified_local_skill_docs)} found)"
+        )
+        for rel_path in unclassified_local_skill_docs:
+            print(f"  docs/{rel_path}")
+        print("  Fix by adding the page to mkdocs nav or to mkdocs not_in_nav.")
+        violations += len(unclassified_local_skill_docs)
+    else:
+        print(
+            "Local skill nav classification: OK "
+            "(all local skill pages are in nav or not_in_nav)"
+        )
+
+    return violations
+
+
+def _run_specs_check() -> int:
+    missing_specs = check_spec_files()
+    if not missing_specs:
+        print("Specs: OK (all referenced spec files exist)")
+        return 0
+
+    _print_section_header(f"MISSING SPEC FILES ({len(missing_specs)} found)")
+    for label, path in missing_specs:
+        print(f"  {label} -> {path}")
+    return len(missing_specs)
+
+
+def _run_configs_check() -> int:
+    missing_configs = check_config_existence()
+    if not missing_configs:
+        print("Configs: OK (all convention-based config files exist)")
+        return 0
+
+    _print_section_header(f"MISSING CONFIG FILES ({len(missing_configs)} found)")
+    for pipeline, path in missing_configs:
+        print(f"  {pipeline} -> {path}")
+    return len(missing_configs)
+
+
+def _run_contracts_index_check() -> int:
+    missing_in_doc, extra_in_doc = check_gold_contract_index()
+    if not (missing_in_doc or extra_in_doc):
+        print("Gold contracts index: OK (docs list matches exported JSON files)")
+        return 0
+
+    _print_section_header("GOLD CONTRACT INDEX MISMATCH")
+    if missing_in_doc:
+        print("  Missing in docs/04-reference/contracts/gold-schemas.md:")
+        for item in missing_in_doc:
+            print(f"    - {item}")
+    if extra_in_doc:
+        print("  Listed in docs but missing on disk:")
+        for item in extra_in_doc:
+            print(f"    - {item}")
+    return len(missing_in_doc) + len(extra_in_doc)
+
+
+def _run_provider_overview_check() -> int:
+    missing_in_readme, extra_in_readme = check_chembl_provider_overview()
+    if not (missing_in_readme or extra_in_readme):
+        print("ChEMBL provider overview: OK (README links match provider docs)")
+        return 0
+
+    _print_section_header("CHEMBL PROVIDER OVERVIEW MISMATCH")
+    if missing_in_readme:
+        print("  Missing in docs/04-reference/providers/README.md:")
+        for item in missing_in_readme:
+            print(f"    - chembl/{item}.md")
+    if extra_in_readme:
+        print("  Linked in README but missing on disk:")
+        for item in extra_in_readme:
+            print(f"    - chembl/{item}.md")
+    return len(missing_in_readme) + len(extra_in_readme)
+
+
+def _run_doc_governance_check() -> int:
+    violations = 0
+    governance_checks = (
+        (
+            "PROVIDER SPEC GOVERNANCE VIOLATIONS",
+            check_provider_spec_governance(),
+            "Provider spec governance: OK",
+        ),
+        (
+            "RUNBOOK GOVERNANCE VIOLATIONS",
+            check_runbook_governance(),
+            "Runbook governance: OK",
+        ),
+        (
+            "CONTROL-PLANE CONTRACT GOVERNANCE VIOLATIONS",
+            check_control_plane_contract_governance(),
+            "Control-plane contract governance: OK",
+        ),
+    )
+
+    for title, results, ok_message in governance_checks:
+        count = _print_path_message_violations(title, results)
+        if count:
+            violations += count
+            continue
+        print(ok_message)
+
+    return violations
+
+
+def _run_not_in_nav_growth_check() -> int:
+    current_count, baseline_count, added, removed, baseline_exists = check_not_in_nav_growth()
+    if not baseline_exists:
+        _print_section_header("NOT IN NAV BASELINE MISSING")
+        rel = NOT_IN_NAV_BASELINE_FILE.relative_to(PROJECT_ROOT)
+        print(f"  Missing baseline file: {rel}")
+        print(f"  Current not-in-nav docs: {current_count}")
+        return 1
+
+    if current_count > baseline_count:
+        growth = current_count - baseline_count
+        _print_section_header(f"NOT IN NAV GROWTH (+{growth})")
+        print(f"  baseline: {baseline_count}")
+        print(f"  current:  {current_count}")
+        if added:
+            print("  Added docs outside nav (sample):")
+            for rel_path in added[:30]:
+                print(f"    - {rel_path}")
+            if len(added) > 30:
+                print(f"    ... and {len(added) - 30} more")
+        return growth
+
+    print(
+        "Not-in-nav growth: OK "
+        f"(current {current_count} <= baseline {baseline_count})"
+    )
+    if added and removed:
+        print(
+            "Not-in-nav set changed without growth "
+            f"(added={len(added)}, removed={len(removed)})"
+        )
+    return 0
+
+
+def _run_legacy_paths_check(include_internal: bool) -> int:
+    legacy_hits = check_legacy_paths_in_nav_docs(include_internal=include_internal)
+    if not legacy_hits:
+        print("Doc drift: OK (no guardrail violations in mkdocs nav docs)")
+        return 0
+
+    _print_section_header(f"DOC DRIFT VIOLATIONS ({len(legacy_hits)} found)")
+    for filepath, line_no, rule_name, matched_text in legacy_hits:
+        rel = filepath.relative_to(PROJECT_ROOT)
+        print(f"  {rel}:{line_no}: [{rule_name}] contains '{matched_text}'")
+    return len(legacy_hits)
+
+
+def main() -> int:
+    parser = _build_parser()
     args = parser.parse_args()
 
-    run_all = not (
+    explicit_checks = (
         args.links
         or args.specs
         or args.configs
@@ -869,206 +1155,26 @@ def main() -> int:
         or args.legacy_paths
         or args.legacy_paths_all
     )
+    run_all = not explicit_checks
     violations = 0
 
-    if run_all or args.links:
-        broken = check_broken_links(DOCS_DIR)
-        if broken:
-            print(f"\n{'=' * 60}")
-            print(f"BROKEN LINKS ({len(broken)} found)")
-            print(f"{'=' * 60}")
-            for filepath, line_no, text, target in broken:
-                rel = filepath.relative_to(PROJECT_ROOT)
-                print(f"  {rel}:{line_no}: [{text}]({target})")
-            violations += len(broken)
-        else:
-            print("Links: OK (no broken relative links found)")
+    check_runners = (
+        (run_all or args.links, lambda: _run_links_checks()),
+        (run_all or args.specs, lambda: _run_specs_check()),
+        (run_all or args.configs, lambda: _run_configs_check()),
+        (run_all or args.contracts_index, lambda: _run_contracts_index_check()),
+        (run_all or args.provider_overview, lambda: _run_provider_overview_check()),
+        (run_all or args.doc_governance, lambda: _run_doc_governance_check()),
+        (run_all or args.not_in_nav_growth, lambda: _run_not_in_nav_growth_check()),
+        (
+            run_all or args.legacy_paths or args.legacy_paths_all,
+            lambda: _run_legacy_paths_check(include_internal=args.legacy_paths_all),
+        ),
+    )
 
-        missing_nav_docs = check_missing_nav_docs()
-        if missing_nav_docs:
-            print(f"\n{'=' * 60}")
-            print(f"MISSING NAV DOCS ({len(missing_nav_docs)} found)")
-            print(f"{'=' * 60}")
-            for filepath in missing_nav_docs:
-                rel = filepath.relative_to(PROJECT_ROOT)
-                print(f"  {rel}")
-            violations += len(missing_nav_docs)
-        else:
-            print("Nav docs: OK (all mkdocs nav files exist)")
-
-        nav_scope_gaps = check_nav_link_coverage(DOCS_DIR)
-        if nav_scope_gaps:
-            print(f"\n{'=' * 60}")
-            print(f"NAV LINK SCOPE GAPS ({len(nav_scope_gaps)} found)")
-            print(f"{'=' * 60}")
-            for filepath in nav_scope_gaps:
-                rel = filepath.relative_to(PROJECT_ROOT)
-                print(f"  {rel}")
-            violations += len(nav_scope_gaps)
-        else:
-            print("Nav link scope: OK (all nav docs are included in link checks)")
-
-        unclassified_local_skill_docs = check_local_skill_nav_classification()
-        if unclassified_local_skill_docs:
-            print(f"\n{'=' * 60}")
-            print("LOCAL SKILL NAV CLASSIFICATION VIOLATIONS "
-                  f"({len(unclassified_local_skill_docs)} found)")
-            print(f"{'=' * 60}")
-            for rel_path in unclassified_local_skill_docs:
-                print(f"  docs/{rel_path}")
-            print("  Fix by adding the page to mkdocs nav or to mkdocs not_in_nav.")
-            violations += len(unclassified_local_skill_docs)
-        else:
-            print(
-                "Local skill nav classification: OK "
-                "(all local skill pages are in nav or not_in_nav)"
-            )
-
-    if run_all or args.specs:
-        missing_specs = check_spec_files()
-        if missing_specs:
-            print(f"\n{'=' * 60}")
-            print(f"MISSING SPEC FILES ({len(missing_specs)} found)")
-            print(f"{'=' * 60}")
-            for label, path in missing_specs:
-                print(f"  {label} -> {path}")
-            violations += len(missing_specs)
-        else:
-            print("Specs: OK (all referenced spec files exist)")
-
-    if run_all or args.configs:
-        missing_configs = check_config_existence()
-        if missing_configs:
-            print(f"\n{'=' * 60}")
-            print(f"MISSING CONFIG FILES ({len(missing_configs)} found)")
-            print(f"{'=' * 60}")
-            for pipeline, path in missing_configs:
-                print(f"  {pipeline} -> {path}")
-            violations += len(missing_configs)
-        else:
-            print("Configs: OK (all convention-based config files exist)")
-
-    if run_all or args.contracts_index:
-        missing_in_doc, extra_in_doc = check_gold_contract_index()
-        if missing_in_doc or extra_in_doc:
-            print(f"\n{'=' * 60}")
-            print("GOLD CONTRACT INDEX MISMATCH")
-            print(f"{'=' * 60}")
-            if missing_in_doc:
-                print("  Missing in docs/04-reference/contracts/gold-schemas.md:")
-                for item in missing_in_doc:
-                    print(f"    - {item}")
-            if extra_in_doc:
-                print("  Listed in docs but missing on disk:")
-                for item in extra_in_doc:
-                    print(f"    - {item}")
-            violations += len(missing_in_doc) + len(extra_in_doc)
-        else:
-            print("Gold contracts index: OK (docs list matches exported JSON files)")
-
-    if run_all or args.provider_overview:
-        missing_in_readme, extra_in_readme = check_chembl_provider_overview()
-        if missing_in_readme or extra_in_readme:
-            print(f"\n{'=' * 60}")
-            print("CHEMBL PROVIDER OVERVIEW MISMATCH")
-            print(f"{'=' * 60}")
-            if missing_in_readme:
-                print("  Missing in docs/04-reference/providers/README.md:")
-                for item in missing_in_readme:
-                    print(f"    - chembl/{item}.md")
-            if extra_in_readme:
-                print("  Linked in README but missing on disk:")
-                for item in extra_in_readme:
-                    print(f"    - chembl/{item}.md")
-            violations += len(missing_in_readme) + len(extra_in_readme)
-        else:
-            print("ChEMBL provider overview: OK (README links match provider docs)")
-
-    if run_all or args.doc_governance:
-        provider_doc_violations = check_provider_spec_governance()
-        if provider_doc_violations:
-            print(f"\n{'=' * 60}")
-            print(f"PROVIDER SPEC GOVERNANCE VIOLATIONS ({len(provider_doc_violations)} found)")
-            print(f"{'=' * 60}")
-            for filepath, message in provider_doc_violations:
-                rel = filepath.relative_to(PROJECT_ROOT)
-                print(f"  {rel}: {message}")
-            violations += len(provider_doc_violations)
-        else:
-            print("Provider spec governance: OK")
-
-        runbook_violations = check_runbook_governance()
-        if runbook_violations:
-            print(f"\n{'=' * 60}")
-            print(f"RUNBOOK GOVERNANCE VIOLATIONS ({len(runbook_violations)} found)")
-            print(f"{'=' * 60}")
-            for filepath, message in runbook_violations:
-                rel = filepath.relative_to(PROJECT_ROOT)
-                print(f"  {rel}: {message}")
-            violations += len(runbook_violations)
-        else:
-            print("Runbook governance: OK")
-
-        control_plane_contract_violations = check_control_plane_contract_governance()
-        if control_plane_contract_violations:
-            print(f"\n{'=' * 60}")
-            print("CONTROL-PLANE CONTRACT GOVERNANCE VIOLATIONS "
-                  f"({len(control_plane_contract_violations)} found)")
-            print(f"{'=' * 60}")
-            for filepath, message in control_plane_contract_violations:
-                rel = filepath.relative_to(PROJECT_ROOT)
-                print(f"  {rel}: {message}")
-            violations += len(control_plane_contract_violations)
-        else:
-            print("Control-plane contract governance: OK")
-
-    if run_all or args.not_in_nav_growth:
-        current_count, baseline_count, added, removed, baseline_exists = check_not_in_nav_growth()
-        if not baseline_exists:
-            print(f"\n{'=' * 60}")
-            print("NOT IN NAV BASELINE MISSING")
-            print(f"{'=' * 60}")
-            rel = NOT_IN_NAV_BASELINE_FILE.relative_to(PROJECT_ROOT)
-            print(f"  Missing baseline file: {rel}")
-            print(f"  Current not-in-nav docs: {current_count}")
-            violations += 1
-        elif current_count > baseline_count:
-            growth = current_count - baseline_count
-            print(f"\n{'=' * 60}")
-            print(f"NOT IN NAV GROWTH (+{growth})")
-            print(f"{'=' * 60}")
-            print(f"  baseline: {baseline_count}")
-            print(f"  current:  {current_count}")
-            if added:
-                print("  Added docs outside nav (sample):")
-                for rel_path in added[:30]:
-                    print(f"    - {rel_path}")
-                if len(added) > 30:
-                    print(f"    ... and {len(added) - 30} more")
-            violations += growth
-        else:
-            print(
-                "Not-in-nav growth: OK "
-                f"(current {current_count} <= baseline {baseline_count})"
-            )
-            if added and removed:
-                print(
-                    "Not-in-nav set changed without growth "
-                    f"(added={len(added)}, removed={len(removed)})"
-                )
-
-    if run_all or args.legacy_paths or args.legacy_paths_all:
-        legacy_hits = check_legacy_paths_in_nav_docs(include_internal=args.legacy_paths_all)
-        if legacy_hits:
-            print(f"\n{'=' * 60}")
-            print(f"DOC DRIFT VIOLATIONS ({len(legacy_hits)} found)")
-            print(f"{'=' * 60}")
-            for filepath, line_no, rule_name, matched_text in legacy_hits:
-                rel = filepath.relative_to(PROJECT_ROOT)
-                print(f"  {rel}:{line_no}: [{rule_name}] contains '{matched_text}'")
-            violations += len(legacy_hits)
-        else:
-            print("Doc drift: OK (no guardrail violations in mkdocs nav docs)")
+    for should_run, runner in check_runners:
+        if should_run:
+            violations += runner()
 
     if violations:
         print(f"\nTotal violations: {violations}")

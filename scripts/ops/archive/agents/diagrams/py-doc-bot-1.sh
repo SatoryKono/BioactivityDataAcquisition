@@ -55,14 +55,20 @@ Examples:
   docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile nightly --strict-nightly
   docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile quick
 EOF
+  return 0
 }
 
-log() { printf '[INFO] %s\n' "$*"; }
+log() {
+  local message="${*:-}"
+  printf '[INFO] %s\n' "$message"
+  return 0
+}
 
 cleanup_temp_manifests() {
   [[ -n "$TEMP_SOURCE_MANIFEST" ]] && rm -f "$TEMP_SOURCE_MANIFEST" || true
   [[ -n "$TEMP_RENDER_MANIFEST" ]] && rm -f "$TEMP_RENDER_MANIFEST" || true
   [[ -n "$BUDGET_TMP_DIR" ]] && rm -rf "$BUDGET_TMP_DIR" || true
+  return 0
 }
 
 trap cleanup_temp_manifests EXIT
@@ -74,7 +80,7 @@ ensure_puppeteer_config() {
 
   if [[ -f "$PUPPETEER_CFG" && "$FORCE_WRITE_PUPPETEER" -eq 0 ]]; then
     log "Using existing Puppeteer config: $PUPPETEER_CFG"
-    return
+    return 0
   fi
 
   if [[ -f "$PUPPETEER_CFG" && "$FORCE_WRITE_PUPPETEER" -eq 1 ]]; then
@@ -120,6 +126,7 @@ if exec_path:
 
 cfg_path.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
 PY
+  return 0
 }
 
 validate_puppeteer_config() {
@@ -155,6 +162,7 @@ PY
     echo "Invalid Puppeteer config JSON: $PUPPETEER_CFG" >&2
     exit 2
   fi
+  return 0
 }
 
 run_puppeteer_preflight() {
@@ -213,6 +221,7 @@ PY
     log "Preflight: Puppeteer executablePath not set (auto-discovery mode)."
   fi
   log "Preflight: Puppeteer args include --no-sandbox: $has_no_sandbox"
+  return 0
 }
 
 run_syntax_check() {
@@ -220,7 +229,7 @@ run_syntax_check() {
     bash "$REPO_ROOT/scripts/diagrams/validate_mermaid_syntax.sh" \
       --scope canonical \
       --puppeteer "$PUPPETEER_CFG"
-    return
+    return 0
   fi
 
   if ! command -v mmdc >/dev/null 2>&1; then
@@ -251,6 +260,7 @@ run_syntax_check() {
 
   rm -f "$tmp_svg" "$tmp_err"
   log "Syntax validation passed for $DIAGRAM_PATH"
+  return 0
 }
 
 prepare_diagram_scope() {
@@ -293,6 +303,7 @@ prepare_diagram_scope() {
   SOURCE_MANIFEST="$TEMP_SOURCE_MANIFEST"
   RENDER_MANIFEST="$TEMP_RENDER_MANIFEST"
   log "Single-diagram scope enabled: $DIAGRAM_PATH"
+  return 0
 }
 
 run_lint_check() {
@@ -301,6 +312,7 @@ run_lint_check() {
   else
     python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" "$DIAGRAM_ROOT"
   fi
+  return 0
 }
 
 run_operator_guard() {
@@ -311,6 +323,7 @@ run_operator_guard() {
     python3 "$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py" \
       --check "$DIAGRAM_ROOT"
   fi
+  return 0
 }
 
 run_render_step() {
@@ -329,6 +342,7 @@ run_render_step() {
       --text-layer "$TEXT_LAYER" \
       --puppeteer "$PUPPETEER_CFG"
   fi
+  return 0
 }
 
 run_class_method_integrity_check() {
@@ -347,12 +361,13 @@ run_class_method_integrity_check() {
         log "DIAG-T033: class method integrity skipped (non class-diagram scope)"
         ;;
     esac
-    return
+    return 0
   fi
 
   python3 "$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py" \
     --source-dir "$class_source_dir" \
     --svg-dir "$class_svg_dir"
+  return 0
 }
 
 run_budget_enforcement() {
@@ -377,6 +392,7 @@ run_budget_enforcement() {
   fi
 
   "${cmd[@]}"
+  return 0
 }
 
 run_pr_profile() {
@@ -435,13 +451,14 @@ run_pr_profile() {
 
   log "DIAG-T033: class method render integrity"
   run_class_method_integrity_check
+  return 0
 }
 
 run_nightly_profile() {
   run_pr_profile
 
   log "DIAG-T024..T029: Nightly suite"
-  nightly_cmd=(
+  local nightly_cmd=(
     python3 "$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py"
     --source-manifest "$SOURCE_MANIFEST"
     --render-manifest "$RENDER_MANIFEST"
@@ -466,6 +483,7 @@ run_nightly_profile() {
     log "DIAG-BUDGET: Enforce nightly budget"
     run_budget_enforcement nightly
   fi
+  return 0
 }
 
 run_quick_profile() {
@@ -509,6 +527,7 @@ run_quick_profile() {
     --source-manifest "$SOURCE_MANIFEST" \
     --render-manifest "$RENDER_MANIFEST" \
     --skip-chaos --skip-growth --skip-theme
+  return 0
 }
 
 while [[ $# -gt 0 ]]; do

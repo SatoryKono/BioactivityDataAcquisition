@@ -1460,6 +1460,193 @@ class ComplexityScoreInputs:
     blocked_by_current_cycle: bool
 
 
+CLI_FLAG_DEFINITIONS: tuple[tuple[str, dict[str, object]], ...] = (
+    (
+        "--root",
+        {
+            "type": Path,
+            "default": DEFAULT_ROOT,
+            "help": "Project root directory.",
+        },
+    ),
+    (
+        "--apply",
+        {
+            "action": "store_true",
+            "help": "Write the generated graph into Neo4j.",
+        },
+    ),
+    (
+        "--export",
+        {
+            "type": Path,
+            "help": "Write the generated graph snapshot as JSON.",
+        },
+    ),
+    (
+        "--report",
+        {
+            "type": Path,
+            "help": (
+                "Write an audit report as JSON. "
+                "The report includes snapshot stats, live managed/unmanaged summaries, "
+                "label and relation diffs, and orphan summaries."
+            ),
+        },
+    ),
+    (
+        "--report-fast",
+        {
+            "action": "store_true",
+            "help": (
+                "Use a reduced audit scope focused on critical analysis labels and relation types. "
+                "This is faster and more stable on large live graphs."
+            ),
+        },
+    ),
+    (
+        "--http-uri",
+        {
+            "type": str,
+            "help": "Explicit Neo4j HTTP endpoint, e.g. http://localhost:7474.",
+        },
+    ),
+    (
+        "--batch-size",
+        {
+            "type": int,
+            "default": DEFAULT_BATCH_SIZE,
+            "help": "Maximum statements per Neo4j commit request.",
+        },
+    ),
+    (
+        "--prune-stale",
+        {
+            "action": "store_true",
+            "help": (
+                "Delete stale repo-derived nodes after sync. "
+                "This only targets the current ingest wave and resets managed relations "
+                "between repo-managed nodes before recreating them."
+            ),
+        },
+    ),
+    (
+        "--full-reset-managed-wave",
+        {
+            "action": "store_true",
+            "help": (
+                "Delete the entire current managed ingest wave before rebuilding it. "
+                "This removes all repo-managed nodes for the current wave and any relations "
+                "attached to them, then recreates the wave from the current repository state."
+            ),
+        },
+    ),
+    (
+        "--apply-normalization-evidence-only",
+        {
+            "action": "store_true",
+            "help": (
+                "Refresh only live normalization evidence on existing pipeline_surface and "
+                "entity_config nodes without rebuilding the full repo snapshot."
+            ),
+        },
+    ),
+    (
+        "--prune-legacy-unmanaged",
+        {
+            "action": "store_true",
+            "help": (
+                "Delete unmanaged legacy nodes for repo-derived labels after sync. "
+                "This is intended to converge the repo graph to managed-only state for "
+                "labels now owned by deterministic sync, while leaving unrelated labels "
+                "such as MemoryEntity untouched."
+            ),
+        },
+    ),
+    (
+        "--only-label",
+        {
+            "action": "append",
+            "default": [],
+            "help": (
+                "Limit apply/export/report snapshot operations to one or more node labels. "
+                "Useful for targeted sync debugging, e.g. --only-label complexity_candidate."
+            ),
+        },
+    ),
+    (
+        "--only-analysis-layer",
+        {
+            "action": "store_true",
+            "help": (
+                "Limit apply/export/report snapshot operations to the analysis layer "
+                "(retirement/development-cycle/complexity nodes and their relations)."
+            ),
+        },
+    ),
+    (
+        "--only-retirement-layer",
+        {
+            "action": "store_true",
+            "help": (
+                "Limit apply/export/report snapshot operations to the retirement analysis layer "
+                "(retirement/development-cycle nodes and retirement relations)."
+            ),
+        },
+    ),
+    (
+        "--only-complexity-layer",
+        {
+            "action": "store_true",
+            "help": (
+                "Limit apply/export/report snapshot operations to the complexity analysis layer "
+                "(complexity nodes and complexity relations)."
+            ),
+        },
+    ),
+    (
+        "--only-storage-layer",
+        {
+            "action": "store_true",
+            "help": (
+                "Limit apply/export/report snapshot operations to storage, control-plane artifact, "
+                "and related lineage materialization surfaces."
+            ),
+        },
+    ),
+    (
+        "--only-runtime-evidence-layer",
+        {
+            "action": "store_true",
+            "help": (
+                "Limit apply/export/report snapshot operations to runtime evidence, emitted artifacts, "
+                "and directly supporting module/doc/storage links."
+            ),
+        },
+    ),
+    (
+        "--only-workflow-graph",
+        {
+            "action": "store_true",
+            "help": (
+                "Limit apply/export/report snapshot operations to GitHub workflow/job graph and "
+                "related gate/script/file-structure links."
+            ),
+        },
+    ),
+    (
+        "--only-docs-drift",
+        {
+            "action": "store_true",
+            "help": (
+                "Limit apply/export/report snapshot operations to docs/policies and their "
+                "DESCRIBES drift edges into code/config/workflow surfaces."
+            ),
+        },
+    ),
+)
+
+
 def _build_surface_relation_indexes(snapshot: GraphSnapshot) -> SurfaceRelationIndexes:
     incoming: dict[NodeKey, list[GraphRelation]] = {}
     outgoing: dict[NodeKey, list[GraphRelation]] = {}
@@ -1772,151 +1959,8 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Build and optionally sync a deterministic BioETL graph into Neo4j.",
     )
-    parser.add_argument(
-        "--root",
-        type=Path,
-        default=DEFAULT_ROOT,
-        help="Project root directory.",
-    )
-    parser.add_argument(
-        "--apply",
-        action="store_true",
-        help="Write the generated graph into Neo4j.",
-    )
-    parser.add_argument(
-        "--export",
-        type=Path,
-        help="Write the generated graph snapshot as JSON.",
-    )
-    parser.add_argument(
-        "--report",
-        type=Path,
-        help=(
-            "Write an audit report as JSON. "
-            "The report includes snapshot stats, live managed/unmanaged summaries, "
-            "label and relation diffs, and orphan summaries."
-        ),
-    )
-    parser.add_argument(
-        "--report-fast",
-        action="store_true",
-        help=(
-            "Use a reduced audit scope focused on critical analysis labels and relation types. "
-            "This is faster and more stable on large live graphs."
-        ),
-    )
-    parser.add_argument(
-        "--http-uri",
-        type=str,
-        help="Explicit Neo4j HTTP endpoint, e.g. http://localhost:7474.",
-    )
-    parser.add_argument(
-        "--batch-size",
-        type=int,
-        default=DEFAULT_BATCH_SIZE,
-        help="Maximum statements per Neo4j commit request.",
-    )
-    parser.add_argument(
-        "--prune-stale",
-        action="store_true",
-        help=(
-            "Delete stale repo-derived nodes after sync. "
-            "This only targets the current ingest wave and resets managed relations "
-            "between repo-managed nodes before recreating them."
-        ),
-    )
-    parser.add_argument(
-        "--full-reset-managed-wave",
-        action="store_true",
-        help=(
-            "Delete the entire current managed ingest wave before rebuilding it. "
-            "This removes all repo-managed nodes for the current wave and any relations "
-            "attached to them, then recreates the wave from the current repository state."
-        ),
-    )
-    parser.add_argument(
-        "--apply-normalization-evidence-only",
-        action="store_true",
-        help=(
-            "Refresh only live normalization evidence on existing pipeline_surface and "
-            "entity_config nodes without rebuilding the full repo snapshot."
-        ),
-    )
-    parser.add_argument(
-        "--prune-legacy-unmanaged",
-        action="store_true",
-        help=(
-            "Delete unmanaged legacy nodes for repo-derived labels after sync. "
-            "This is intended to converge the repo graph to managed-only state for "
-            "labels now owned by deterministic sync, while leaving unrelated labels "
-            "such as MemoryEntity untouched."
-        ),
-    )
-    parser.add_argument(
-        "--only-label",
-        action="append",
-        default=[],
-        help=(
-            "Limit apply/export/report snapshot operations to one or more node labels. "
-            "Useful for targeted sync debugging, e.g. --only-label complexity_candidate."
-        ),
-    )
-    parser.add_argument(
-        "--only-analysis-layer",
-        action="store_true",
-        help=(
-            "Limit apply/export/report snapshot operations to the analysis layer "
-            "(retirement/development-cycle/complexity nodes and their relations)."
-        ),
-    )
-    parser.add_argument(
-        "--only-retirement-layer",
-        action="store_true",
-        help=(
-            "Limit apply/export/report snapshot operations to the retirement analysis layer "
-            "(retirement/development-cycle nodes and retirement relations)."
-        ),
-    )
-    parser.add_argument(
-        "--only-complexity-layer",
-        action="store_true",
-        help=(
-            "Limit apply/export/report snapshot operations to the complexity analysis layer "
-            "(complexity nodes and complexity relations)."
-        ),
-    )
-    parser.add_argument(
-        "--only-storage-layer",
-        action="store_true",
-        help=(
-            "Limit apply/export/report snapshot operations to storage, control-plane artifact, "
-            "and related lineage materialization surfaces."
-        ),
-    )
-    parser.add_argument(
-        "--only-runtime-evidence-layer",
-        action="store_true",
-        help=(
-            "Limit apply/export/report snapshot operations to runtime evidence, emitted artifacts, "
-            "and directly supporting module/doc/storage links."
-        ),
-    )
-    parser.add_argument(
-        "--only-workflow-graph",
-        action="store_true",
-        help=(
-            "Limit apply/export/report snapshot operations to GitHub workflow/job graph and "
-            "related gate/script/file-structure links."
-        ),
-    )
-    parser.add_argument(
-        "--only-docs-drift",
-        action="store_true",
-        help=(
-            "Limit apply/export/report snapshot operations to docs/policies and their "
-            "DESCRIBES drift edges into code/config/workflow surfaces."
-        ),
-    )
+    for flag, options in CLI_FLAG_DEFINITIONS:
+        parser.add_argument(flag, **options)
     return parser
 
 
@@ -1945,10 +1989,42 @@ def _load_memory_mapping(root: Path) -> dict[str, object]:
     return _read_yaml(mapping_path)
 
 
+def _mapping_section(memory_mapping: dict[str, object], section: str) -> dict[str, object]:
+    payload = memory_mapping.get(section, {})
+    if isinstance(payload, dict):
+        return payload
+    return {}
+
+
+def _configured_duplicate_families(
+    payload: dict[str, object],
+    duplication_config: dict[str, object],
+) -> tuple[str, ...]:
+    duplication_families = tuple(
+        family.name
+        for family in duplication_config.get("families", ())
+        if isinstance(family, DuplicateFamilyConfig)
+    )
+    configured_families = tuple(
+        family_name
+        for family_name in _as_string_list(payload.get("families"))
+        if family_name in duplication_families
+    )
+    return configured_families or duplication_families
+
+
+def _casefolded_markers(
+    payload: dict[str, object],
+    key: str,
+    defaults: list[str],
+) -> tuple[str, ...]:
+    return tuple(
+        marker.casefold() for marker in (_as_string_list(payload.get(key)) or defaults)
+    )
+
+
 def _file_structure_config(memory_mapping: dict[str, object]) -> dict[str, object]:
-    payload = memory_mapping.get("file_structure", {})
-    if not isinstance(payload, dict):
-        payload = {}
+    payload = _mapping_section(memory_mapping, "file_structure")
 
     raw_repo_zones = payload.get("repo_zones", {})
     repo_zones: dict[str, tuple[str, ...]] = {}
@@ -1974,9 +2050,7 @@ def _file_structure_config(memory_mapping: dict[str, object]) -> dict[str, objec
 
 
 def _duplication_analysis_config(memory_mapping: dict[str, object]) -> dict[str, object]:
-    payload = memory_mapping.get("duplication_analysis", {})
-    if not isinstance(payload, dict):
-        payload = {}
+    payload = _mapping_section(memory_mapping, "duplication_analysis")
 
     raw_families = payload.get("families", {})
     families: list[DuplicateFamilyConfig] = []
@@ -2023,40 +2097,24 @@ def _retirement_analysis_config(
     memory_mapping: dict[str, object],
     duplication_config: dict[str, object],
 ) -> RetirementAnalysisConfig:
-    payload = memory_mapping.get("retirement_analysis", {})
-    if not isinstance(payload, dict):
-        payload = {}
-
-    duplication_families = tuple(
-        family.name
-        for family in duplication_config.get("families", ())
-        if isinstance(family, DuplicateFamilyConfig)
-    )
-    configured_families = tuple(
-        family_name
-        for family_name in _as_string_list(payload.get("families"))
-        if family_name in duplication_families
-    )
+    payload = _mapping_section(memory_mapping, "retirement_analysis")
+    family_names = _configured_duplicate_families(payload, duplication_config)
 
     return RetirementAnalysisConfig(
         enabled=bool(payload.get("enabled", True)),
-        family_names=configured_families or duplication_families,
+        family_names=family_names,
         current_cycle_age_days=int(payload.get("current_cycle_age_days", 45) or 45),
         stale_age_days=int(payload.get("stale_age_days", 180) or 180),
         dead_score_threshold=int(payload.get("dead_score_threshold", 6) or 6),
-        wip_markers=tuple(
-            marker.casefold()
-            for marker in (
-                _as_string_list(payload.get("wip_markers"))
-                or ["todo", "wip", "follow-up", "phase 2", "spike", "temporary"]
-            )
+        wip_markers=_casefolded_markers(
+            payload,
+            "wip_markers",
+            ["todo", "wip", "follow-up", "phase 2", "spike", "temporary"],
         ),
-        deprecation_markers=tuple(
-            marker.casefold()
-            for marker in (
-                _as_string_list(payload.get("deprecation_markers"))
-                or ["deprecated", "legacy", "obsolete", "compat", "remove after", "migration shim"]
-            )
+        deprecation_markers=_casefolded_markers(
+            payload,
+            "deprecation_markers",
+            ["deprecated", "legacy", "obsolete", "compat", "remove after", "migration shim"],
         ),
     )
 
@@ -2066,39 +2124,23 @@ def _complexity_analysis_config(
     duplication_config: dict[str, object],
     retirement_config: RetirementAnalysisConfig,
 ) -> ComplexityAnalysisConfig:
-    payload = memory_mapping.get("complexity_analysis", {})
-    if not isinstance(payload, dict):
-        payload = {}
-
-    duplication_families = tuple(
-        family.name
-        for family in duplication_config.get("families", ())
-        if isinstance(family, DuplicateFamilyConfig)
-    )
-    configured_families = tuple(
-        family_name
-        for family_name in _as_string_list(payload.get("families"))
-        if family_name in duplication_families
-    )
+    payload = _mapping_section(memory_mapping, "complexity_analysis")
+    family_names = _configured_duplicate_families(payload, duplication_config)
 
     return ComplexityAnalysisConfig(
         enabled=bool(payload.get("enabled", True)),
-        family_names=configured_families or retirement_config.family_names or duplication_families,
+        family_names=family_names or retirement_config.family_names,
         complexity_score_threshold=int(payload.get("complexity_score_threshold", 4) or 4),
         removable_score_threshold=int(payload.get("removable_score_threshold", 7) or 7),
-        indirection_markers=tuple(
-            marker.casefold()
-            for marker in (
-                _as_string_list(payload.get("indirection_markers"))
-                or ["helper", "helpers", "mixin", "policy", "codec", "compat", "legacy", "wrapper", "shim"]
-            )
+        indirection_markers=_casefolded_markers(
+            payload,
+            "indirection_markers",
+            ["helper", "helpers", "mixin", "policy", "codec", "compat", "legacy", "wrapper", "shim"],
         ),
-        stateful_markers=tuple(
-            marker.casefold()
-            for marker in (
-                _as_string_list(payload.get("stateful_markers"))
-                or ["checkpoint", "resume", "state", "fsm", "transition", "runner"]
-            )
+        stateful_markers=_casefolded_markers(
+            payload,
+            "stateful_markers",
+            ["checkpoint", "resume", "state", "fsm", "transition", "runner"],
         ),
         deprecation_markers=retirement_config.deprecation_markers,
         blocker_anchor_limit=int(payload.get("blocker_anchor_limit", 3) or 3),
@@ -3534,14 +3576,7 @@ def _add_quality_and_scripts(snapshot: GraphSnapshot, _root: Path, project: Node
                 )
 
 def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
-    execution_to_gates: dict[NodeKey, list[NodeKey]] = {}
-    execution_to_scripts: dict[NodeKey, list[NodeKey]] = {}
-    for relation in snapshot.relations.values():
-        if relation.source.label == "execution_path" and relation.relation_type == "EXECUTES_GATE":
-            execution_to_gates.setdefault(relation.source, []).append(relation.target)
-        if relation.target.label == "execution_path" and relation.relation_type == "PROVIDES":
-            execution_to_scripts.setdefault(relation.target, []).append(relation.source)
-
+    execution_to_gates, execution_to_scripts = _cli_execution_indexes(snapshot)
     for execution in tuple(snapshot.nodes.values()):
         if execution.key.label != "execution_path":
             continue
@@ -3549,14 +3584,7 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
         if command_name is None:
             continue
         backing_scripts = execution_to_scripts.get(execution.key, [])
-        source_path = None
-        if backing_scripts:
-            source_path = backing_scripts[0].name
-        elif command_name.startswith("bioetl "):
-            command_suffix = command_name.split(" ", 1)[1]
-            source_candidate = root / "src/bioetl/interfaces/cli/commands" / f"{command_suffix.replace('-', '_')}.py"
-            if source_candidate.is_file():
-                source_path = _rel_path(root, source_candidate)
+        source_path = _cli_command_source_path(root, command_name, backing_scripts)
         command_options = _extract_cli_options(execution.key.name)
         command = snapshot.add_node(
             "cli_command_surface",
@@ -3577,30 +3605,86 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             snapshot.add_relation(command, "EXECUTES_GATE", gate, provenance="cli_command_graph")
         for script in backing_scripts:
             snapshot.add_relation(command, "DEPENDS_ON", script, provenance="cli_command_graph")
-        for option_name in command_options:
-            option = snapshot.add_node(
-                "cli_option_surface",
-                f"{command_name} {option_name}",
-                summary=f"Observed CLI option `{option_name}` for command `{command_name}`.",
-                source_path=source_path,
-                source_kind="cli_option_surface",
-                command=command_name,
-                option_name=option_name,
-                last_verified=today,
-                ingest_wave="repo_sync_v1",
-                confidence="medium",
-            )
-            snapshot.add_relation(command, "ACCEPTS_OPTION", option, provenance="cli_command_graph")
-        if command_name == "bioetl run":
-            for target in sorted(
-                (key for key in snapshot.nodes if key.label == "pipeline_surface"),
-                key=lambda key: key.name,
-            )[:5]:
-                snapshot.add_relation(command, "SIDE_EFFECTS_ON", target, provenance="cli_command_graph")
-        if command_name == "scripts.memory sync":
-            gate_key = NodeKey("quality_gate", GATE_NEO4J_ONTOLOGY_INVARIANTS)
-            if gate_key in snapshot.nodes:
-                snapshot.add_relation(command, "SIDE_EFFECTS_ON", gate_key, provenance="cli_command_graph")
+        _add_cli_option_surfaces(
+            snapshot,
+            command,
+            command_name=command_name,
+            source_path=source_path,
+            command_options=command_options,
+            today=today,
+        )
+        _link_cli_command_side_effects(snapshot, command, command_name)
+
+
+def _cli_execution_indexes(
+    snapshot: GraphSnapshot,
+) -> tuple[dict[NodeKey, list[NodeKey]], dict[NodeKey, list[NodeKey]]]:
+    execution_to_gates: dict[NodeKey, list[NodeKey]] = {}
+    execution_to_scripts: dict[NodeKey, list[NodeKey]] = {}
+    for relation in snapshot.relations.values():
+        if relation.source.label == "execution_path" and relation.relation_type == "EXECUTES_GATE":
+            execution_to_gates.setdefault(relation.source, []).append(relation.target)
+        if relation.target.label == "execution_path" and relation.relation_type == "PROVIDES":
+            execution_to_scripts.setdefault(relation.target, []).append(relation.source)
+    return execution_to_gates, execution_to_scripts
+
+
+def _cli_command_source_path(
+    root: Path,
+    command_name: str,
+    backing_scripts: list[NodeKey],
+) -> str | None:
+    if backing_scripts:
+        return backing_scripts[0].name
+    if command_name.startswith("bioetl "):
+        command_suffix = command_name.split(" ", 1)[1]
+        source_candidate = root / "src/bioetl/interfaces/cli/commands" / f"{command_suffix.replace('-', '_')}.py"
+        if source_candidate.is_file():
+            return _rel_path(root, source_candidate)
+    return None
+
+
+def _add_cli_option_surfaces(
+    snapshot: GraphSnapshot,
+    command: NodeKey,
+    *,
+    command_name: str,
+    source_path: str | None,
+    command_options: tuple[str, ...],
+    today: str,
+) -> None:
+    for option_name in command_options:
+        option = snapshot.add_node(
+            "cli_option_surface",
+            f"{command_name} {option_name}",
+            summary=f"Observed CLI option `{option_name}` for command `{command_name}`.",
+            source_path=source_path,
+            source_kind="cli_option_surface",
+            command=command_name,
+            option_name=option_name,
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="medium",
+        )
+        snapshot.add_relation(command, "ACCEPTS_OPTION", option, provenance="cli_command_graph")
+
+
+def _link_cli_command_side_effects(
+    snapshot: GraphSnapshot,
+    command: NodeKey,
+    command_name: str,
+) -> None:
+    if command_name == "bioetl run":
+        for target in sorted(
+            (key for key in snapshot.nodes if key.label == "pipeline_surface"),
+            key=lambda key: key.name,
+        )[:5]:
+            snapshot.add_relation(command, "SIDE_EFFECTS_ON", target, provenance="cli_command_graph")
+        return
+    if command_name == "scripts.memory sync":
+        gate_key = NodeKey("quality_gate", GATE_NEO4J_ONTOLOGY_INVARIANTS)
+        if gate_key in snapshot.nodes:
+            snapshot.add_relation(command, "SIDE_EFFECTS_ON", gate_key, provenance="cli_command_graph")
 
 
 def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
@@ -3844,7 +3928,41 @@ def _link_source_backed_file_structure(
     zone_roots: dict[str, tuple[str, ...]],
     config: dict[str, object],
 ) -> None:
-    source_backed_labels = {
+    source_backed_labels = _source_backed_file_structure_labels()
+    for node in tuple(snapshot.nodes.values()):
+        if node.key.label not in source_backed_labels:
+            continue
+        source_path_value = node.properties.get("source_path")
+        if not isinstance(source_path_value, str) or not source_path_value:
+            continue
+        if _is_excluded_file_structure_path(source_path_value, config):
+            continue
+
+        source_path = root / source_path_value
+        if source_path.is_dir():
+            _link_source_backed_directory_structure(
+                snapshot,
+                node.key,
+                source_path_value=source_path_value,
+                config=config,
+            )
+            continue
+        if not source_path.is_file():
+            continue
+        _link_source_backed_file_node(
+            snapshot,
+            root,
+            node.key,
+            source_path,
+            source_path_value=source_path_value,
+            today=today,
+            zone_roots=zone_roots,
+            config=config,
+        )
+
+
+def _source_backed_file_structure_labels() -> set[str]:
+    return {
         "layer_family",
         "package_family",
         "module_surface",
@@ -3869,54 +3987,61 @@ def _link_source_backed_file_structure(
         "workflow_surface",
         "workflow_job_surface",
     }
-    for node in tuple(snapshot.nodes.values()):
-        if node.key.label not in source_backed_labels:
-            continue
-        source_path_value = node.properties.get("source_path")
-        if not isinstance(source_path_value, str) or not source_path_value:
-            continue
-        if _is_excluded_file_structure_path(source_path_value, config):
-            continue
 
-        source_path = root / source_path_value
-        if source_path.is_dir():
-            directory_key = NodeKey("directory_surface", source_path_value)
-            if directory_key in snapshot.nodes:
-                snapshot.add_relation(directory_key, "HOUSES", node.key, provenance="file_structure")
-            for promoted_hub in _promoted_directory_hubs(source_path_value, config):
-                hub_key = NodeKey("directory_surface", promoted_hub)
-                if hub_key in snapshot.nodes:
-                    snapshot.add_relation(hub_key, "HOUSES", node.key, provenance="file_structure")
-            continue
-        if not source_path.is_file():
-            continue
 
-        parent_relative = _rel_path(root, source_path.parent)
-        file_surface = snapshot.add_node(
-            "file_surface",
-            source_path_value,
-            summary=f"Primary repository file `{source_path_value}`.",
-            source_path=source_path_value,
-            source_kind="file_structure_file",
-            repo_zone=_repo_zone_for_path(source_path_value, zone_roots),
-            suffix=source_path.suffix,
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        directory_key = NodeKey("directory_surface", parent_relative)
-        if directory_key in snapshot.nodes:
-            snapshot.add_relation(directory_key, "CONTAINS", file_surface, provenance="file_structure")
-            snapshot.add_relation(directory_key, "HOUSES", node.key, provenance="file_structure")
-        for promoted_hub in _promoted_directory_hubs(parent_relative, config):
-            hub_key = NodeKey("directory_surface", promoted_hub)
-            if hub_key in snapshot.nodes:
-                snapshot.add_relation(hub_key, "HOUSES", node.key, provenance="file_structure")
-        for supplemental_hub in _supplemental_directory_hubs_for_node(node.key, source_path_value):
-            hub_key = NodeKey("directory_surface", supplemental_hub)
-            snapshot.add_relation(hub_key, "CONTAINS", file_surface, provenance="file_structure_promoted")
-            snapshot.add_relation(hub_key, "HOUSES", node.key, provenance="file_structure_promoted")
-        snapshot.add_relation(file_surface, "BACKS", node.key, provenance="file_structure")
+def _link_source_backed_directory_structure(
+    snapshot: GraphSnapshot,
+    node_key: NodeKey,
+    *,
+    source_path_value: str,
+    config: dict[str, object],
+) -> None:
+    directory_key = NodeKey("directory_surface", source_path_value)
+    if directory_key in snapshot.nodes:
+        snapshot.add_relation(directory_key, "HOUSES", node_key, provenance="file_structure")
+    for promoted_hub in _promoted_directory_hubs(source_path_value, config):
+        hub_key = NodeKey("directory_surface", promoted_hub)
+        if hub_key in snapshot.nodes:
+            snapshot.add_relation(hub_key, "HOUSES", node_key, provenance="file_structure")
+
+
+def _link_source_backed_file_node(
+    snapshot: GraphSnapshot,
+    root: Path,
+    node_key: NodeKey,
+    source_path: Path,
+    *,
+    source_path_value: str,
+    today: str,
+    zone_roots: dict[str, tuple[str, ...]],
+    config: dict[str, object],
+) -> None:
+    parent_relative = _rel_path(root, source_path.parent)
+    file_surface = snapshot.add_node(
+        "file_surface",
+        source_path_value,
+        summary=f"Primary repository file `{source_path_value}`.",
+        source_path=source_path_value,
+        source_kind="file_structure_file",
+        repo_zone=_repo_zone_for_path(source_path_value, zone_roots),
+        suffix=source_path.suffix,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    directory_key = NodeKey("directory_surface", parent_relative)
+    if directory_key in snapshot.nodes:
+        snapshot.add_relation(directory_key, "CONTAINS", file_surface, provenance="file_structure")
+        snapshot.add_relation(directory_key, "HOUSES", node_key, provenance="file_structure")
+    for promoted_hub in _promoted_directory_hubs(parent_relative, config):
+        hub_key = NodeKey("directory_surface", promoted_hub)
+        if hub_key in snapshot.nodes:
+            snapshot.add_relation(hub_key, "HOUSES", node_key, provenance="file_structure")
+    for supplemental_hub in _supplemental_directory_hubs_for_node(node_key, source_path_value):
+        hub_key = NodeKey("directory_surface", supplemental_hub)
+        snapshot.add_relation(hub_key, "CONTAINS", file_surface, provenance="file_structure_promoted")
+        snapshot.add_relation(hub_key, "HOUSES", node_key, provenance="file_structure_promoted")
+    snapshot.add_relation(file_surface, "BACKS", node_key, provenance="file_structure")
 
 
 def _link_relation_backed_file_structure(
@@ -7177,47 +7302,19 @@ def _add_retirement_analysis_surfaces(
     if not config.enabled or not config.family_names:
         return
 
-    analysis_labels = {"module_surface", "class_surface", "function_surface", "method_surface"}
-    runtime_labels = {"pipeline_surface", "execution_path", "alert_surface", "adapter_surface", "adapter_impl_surface"}
-    config_labels = {"entity_config", "composite_config", "provider_surface", "contract_surface", "port_surface"}
-    doc_labels = {"policy_surface", "doc_source_surface", "doc_artifact", "dashboard_surface", "quality_gate"}
-    test_labels = {"test_surface", "test_artifact"}
-    ignored_relation_types = {
-        "DECLARES",
-        "OVERRIDES",
-        "SAME_SHAPE_AS",
-        "CONTAINS",
-        "BACKS",
-        "HOUSES",
-        "CANDIDATE_FOR_REMOVAL",
-    }
-    label_sets = AnalysisLabelSets(
-        ignored_relation_types=ignored_relation_types,
-        runtime_labels=runtime_labels,
-        config_labels=config_labels,
-        doc_labels=doc_labels,
-        test_labels=test_labels,
-    )
+    label_sets = _retirement_analysis_label_sets()
     indexes = _build_surface_relation_indexes(snapshot)
     today_date = date.fromisoformat(today)
     text_cache: dict[str, str] = {}
     age_cache: dict[str, int | None] = {}
     family_cache: dict[str, DuplicateFamilyConfig | None] = {}
 
-    candidate_nodes: list[tuple[GraphNode, str, DuplicateFamilyConfig, NodeKey]] = []
-    for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
-        if node.key.label not in analysis_labels:
-            continue
-        source_path = node.properties.get("source_path")
-        if not isinstance(source_path, str) or not source_path.endswith(".py"):
-            continue
-        family = _analysis_family_for_source_path(source_path, duplication_config, family_cache)
-        if family is None or family.name not in config.family_names:
-            continue
-        module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
-        if module_key not in snapshot.nodes:
-            continue
-        candidate_nodes.append((node, source_path, family, module_key))
+    candidate_nodes = _retirement_candidate_nodes(
+        snapshot,
+        duplication_config=duplication_config,
+        family_names=set(config.family_names),
+        family_cache=family_cache,
+    )
 
     _git_last_commit_age_days_bulk(
         root,
@@ -7227,85 +7324,189 @@ def _add_retirement_analysis_surfaces(
     )
 
     for node, source_path, family, module_key in candidate_nodes:
-        anchors = _collect_analysis_anchor_nodes(
+        candidate_payload = _evaluate_retirement_surface(
             snapshot,
-            indexes,
-            node.key,
+            root,
+            node,
+            source_path,
             module_key,
-            label_sets,
-        )
-        runtime_count = len(anchors.runtime)
-        config_count = len(anchors.config)
-        doc_count = len(anchors.docs)
-        test_count = len(anchors.tests)
-
-        source_text = _analysis_read_source_text(root, source_path, text_cache)
-        wip_markers = sorted({marker for marker in config.wip_markers if marker in source_text})
-        deprecation_markers = sorted({marker for marker in config.deprecation_markers if marker in source_text})
-        recent_age_days = age_cache.get(source_path)
-        cycle_score, deletion_score, only_test_referenced = _retirement_scores(
-            config,
-            RetirementScoreInputs(
-                runtime_count=runtime_count,
-                config_count=config_count,
-                doc_count=doc_count,
-                test_count=test_count,
-                recent_age_days=recent_age_days,
-                wip_markers=wip_markers,
-                deprecation_markers=deprecation_markers,
-            ),
-        )
-
-        if cycle_score >= 3:
-            snapshot.add_node(
-                node.key.label,
-                node.key.name,
-                current_cycle_status="current_cycle",
-                current_cycle_score=cycle_score,
-                current_cycle_recent_age_days=recent_age_days,
-                current_cycle_wip_markers=wip_markers,
-                current_cycle_runtime_anchor_count=runtime_count,
-                current_cycle_config_anchor_count=config_count,
-                current_cycle_doc_anchor_count=doc_count,
-                current_cycle_test_anchor_count=test_count,
-            )
-
-        if deletion_score < config.dead_score_threshold:
-            continue
-
-        confidence = "high" if deletion_score >= config.dead_score_threshold + 2 else "medium"
-        candidate = snapshot.add_node(
-            "retirement_candidate",
-            f"{node.key.label}:{node.key.name}",
-            summary=f"Potential dead/stale code candidate `{node.key.name}` in `{family.name}`.",
-            source_path=source_path,
-            source_kind="retirement_candidate",
+            indexes=indexes,
+            label_sets=label_sets,
+            text_cache=text_cache,
+            age_cache=age_cache,
             family_name=family.name,
-            target_label=node.key.label,
-            target_name=node.key.name,
-            deletion_score=deletion_score,
-            deletion_confidence=confidence,
-            recent_age_days=recent_age_days,
-            only_test_referenced=only_test_referenced,
-            deprecation_markers=deprecation_markers,
-            runtime_anchor_count=runtime_count,
-            config_anchor_count=config_count,
-            doc_anchor_count=doc_count,
-            test_anchor_count=test_count,
-            runtime_anchors=sorted(anchor.name for anchor in anchors.runtime),
-            config_anchors=sorted(anchor.name for anchor in anchors.config),
-            doc_anchors=sorted(anchor.name for anchor in anchors.docs),
-            test_anchors=sorted(anchor.name for anchor in anchors.tests),
-            blocked_by_current_cycle=cycle_score >= 3,
-            blocked_by_current_cycle_target_name=node.key.name if cycle_score >= 3 else None,
-            blocked_by_current_cycle_score=cycle_score if cycle_score >= 3 else None,
-            blocked_by_current_cycle_wip_markers=wip_markers if cycle_score >= 3 else None,
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence=confidence,
+            config=config,
         )
-        snapshot.add_relation(project, "CONTAINS", candidate, provenance="retirement_analysis")
-        snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="retirement_analysis")
+        if candidate_payload is None:
+            continue
+        _emit_retirement_candidate(snapshot, project, today, config, node, candidate_payload)
+
+
+def _retirement_analysis_label_sets() -> AnalysisLabelSets:
+    return AnalysisLabelSets(
+        ignored_relation_types={
+            "DECLARES",
+            "OVERRIDES",
+            "SAME_SHAPE_AS",
+            "CONTAINS",
+            "BACKS",
+            "HOUSES",
+            "CANDIDATE_FOR_REMOVAL",
+        },
+        runtime_labels={"pipeline_surface", "execution_path", "alert_surface", "adapter_surface", "adapter_impl_surface"},
+        config_labels={"entity_config", "composite_config", "provider_surface", "contract_surface", "port_surface"},
+        doc_labels={"policy_surface", "doc_source_surface", "doc_artifact", "dashboard_surface", "quality_gate"},
+        test_labels={"test_surface", "test_artifact"},
+    )
+
+
+def _retirement_candidate_nodes(
+    snapshot: GraphSnapshot,
+    *,
+    duplication_config: dict[str, object],
+    family_names: set[str],
+    family_cache: dict[str, DuplicateFamilyConfig | None],
+) -> list[tuple[GraphNode, str, DuplicateFamilyConfig, NodeKey]]:
+    analysis_labels = {"module_surface", "class_surface", "function_surface", "method_surface"}
+    candidate_nodes: list[tuple[GraphNode, str, DuplicateFamilyConfig, NodeKey]] = []
+    for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
+        if node.key.label not in analysis_labels:
+            continue
+        source_path = node.properties.get("source_path")
+        if not isinstance(source_path, str) or not source_path.endswith(".py"):
+            continue
+        family = _analysis_family_for_source_path(source_path, duplication_config, family_cache)
+        if family is None or family.name not in family_names:
+            continue
+        module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
+        if module_key not in snapshot.nodes:
+            continue
+        candidate_nodes.append((node, source_path, family, module_key))
+    return candidate_nodes
+
+
+def _evaluate_retirement_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    node: GraphNode,
+    source_path: str,
+    module_key: NodeKey,
+    *,
+    indexes: SurfaceRelationIndexes,
+    label_sets: AnalysisLabelSets,
+    text_cache: dict[str, str],
+    age_cache: dict[str, int | None],
+    family_name: str,
+    config: RetirementAnalysisConfig,
+) -> dict[str, object] | None:
+    anchors = _collect_analysis_anchor_nodes(
+        snapshot,
+        indexes,
+        node.key,
+        module_key,
+        label_sets,
+    )
+    runtime_count = len(anchors.runtime)
+    config_count = len(anchors.config)
+    doc_count = len(anchors.docs)
+    test_count = len(anchors.tests)
+    source_text = _analysis_read_source_text(root, source_path, text_cache)
+    wip_markers = sorted({marker for marker in config.wip_markers if marker in source_text})
+    deprecation_markers = sorted({marker for marker in config.deprecation_markers if marker in source_text})
+    recent_age_days = age_cache.get(source_path)
+    cycle_score, deletion_score, only_test_referenced = _retirement_scores(
+        config,
+        RetirementScoreInputs(
+            runtime_count=runtime_count,
+            config_count=config_count,
+            doc_count=doc_count,
+            test_count=test_count,
+            recent_age_days=recent_age_days,
+            wip_markers=wip_markers,
+            deprecation_markers=deprecation_markers,
+        ),
+    )
+    return {
+        "family_name": family_name,
+        "anchors": anchors,
+        "runtime_count": runtime_count,
+        "config_count": config_count,
+        "doc_count": doc_count,
+        "test_count": test_count,
+        "wip_markers": wip_markers,
+        "deprecation_markers": deprecation_markers,
+        "recent_age_days": recent_age_days,
+        "cycle_score": cycle_score,
+        "deletion_score": deletion_score,
+        "only_test_referenced": only_test_referenced,
+    }
+
+
+def _emit_retirement_candidate(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    today: str,
+    config: RetirementAnalysisConfig,
+    node: GraphNode,
+    payload: dict[str, object],
+) -> None:
+    cycle_score = int(payload["cycle_score"])
+    runtime_count = int(payload["runtime_count"])
+    config_count = int(payload["config_count"])
+    doc_count = int(payload["doc_count"])
+    test_count = int(payload["test_count"])
+    recent_age_days = payload["recent_age_days"]
+    wip_markers = payload["wip_markers"]
+    deletion_score = int(payload["deletion_score"])
+    if cycle_score >= 3:
+        snapshot.add_node(
+            node.key.label,
+            node.key.name,
+            current_cycle_status="current_cycle",
+            current_cycle_score=cycle_score,
+            current_cycle_recent_age_days=recent_age_days,
+            current_cycle_wip_markers=wip_markers,
+            current_cycle_runtime_anchor_count=runtime_count,
+            current_cycle_config_anchor_count=config_count,
+            current_cycle_doc_anchor_count=doc_count,
+            current_cycle_test_anchor_count=test_count,
+        )
+    if deletion_score < config.dead_score_threshold:
+        return
+    confidence = "high" if deletion_score >= config.dead_score_threshold + 2 else "medium"
+    anchors = payload["anchors"]
+    candidate = snapshot.add_node(
+        "retirement_candidate",
+        f"{node.key.label}:{node.key.name}",
+        summary=f"Potential dead/stale code candidate `{node.key.name}` in `{payload['family_name']}`.",
+        source_path=str(node.properties.get("source_path")),
+        source_kind="retirement_candidate",
+        family_name=str(payload["family_name"]),
+        target_label=node.key.label,
+        target_name=node.key.name,
+        deletion_score=deletion_score,
+        deletion_confidence=confidence,
+        recent_age_days=recent_age_days,
+        only_test_referenced=payload["only_test_referenced"],
+        deprecation_markers=payload["deprecation_markers"],
+        runtime_anchor_count=runtime_count,
+        config_anchor_count=config_count,
+        doc_anchor_count=doc_count,
+        test_anchor_count=test_count,
+        runtime_anchors=sorted(anchor.name for anchor in anchors.runtime),
+        config_anchors=sorted(anchor.name for anchor in anchors.config),
+        doc_anchors=sorted(anchor.name for anchor in anchors.docs),
+        test_anchors=sorted(anchor.name for anchor in anchors.tests),
+        blocked_by_current_cycle=cycle_score >= 3,
+        blocked_by_current_cycle_target_name=node.key.name if cycle_score >= 3 else None,
+        blocked_by_current_cycle_score=cycle_score if cycle_score >= 3 else None,
+        blocked_by_current_cycle_wip_markers=wip_markers if cycle_score >= 3 else None,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence=confidence,
+    )
+    snapshot.add_relation(project, "CONTAINS", candidate, provenance="retirement_analysis")
+    snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="retirement_analysis")
 
 
 def _add_complexity_analysis_surfaces(
@@ -7321,146 +7522,197 @@ def _add_complexity_analysis_surfaces(
     if not config.enabled or not config.family_names:
         return
     family_names = set(config.family_names)
-
-    analysis_labels = {"module_surface", "class_surface", "function_surface", "method_surface"}
-    runtime_labels = {"pipeline_surface", "execution_path", "alert_surface", "adapter_surface", "adapter_impl_surface"}
-    config_labels = {"entity_config", "composite_config", "provider_surface", "contract_surface", "port_surface"}
-    doc_labels = {"policy_surface", "doc_source_surface", "doc_artifact", "dashboard_surface", "quality_gate"}
-    test_labels = {"test_surface", "test_artifact"}
-    ignored_relation_types = {
-        "DECLARES",
-        "OVERRIDES",
-        "SAME_SHAPE_AS",
-        "CONTAINS",
-        "BACKS",
-        "HOUSES",
-        "CANDIDATE_FOR_REMOVAL",
-        "HAS_COMPLEXITY_SIGNAL",
-        "CANDIDATE_FOR_SIMPLIFICATION",
-        "JUSTIFIED_BY_RUNTIME",
-        "BLOCKED_BY_VARIANCE",
-    }
-    label_sets = AnalysisLabelSets(
-        ignored_relation_types=ignored_relation_types,
-        runtime_labels=runtime_labels,
-        config_labels=config_labels,
-        doc_labels=doc_labels,
-        test_labels=test_labels,
-    )
+    label_sets = _complexity_analysis_label_sets()
     indexes = _build_surface_relation_indexes(snapshot)
     text_cache: dict[str, str] = {}
     family_cache: dict[str, DuplicateFamilyConfig | None] = {}
 
     for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
-        if node.key.label not in analysis_labels:
-            continue
-        source_path = node.properties.get("source_path")
-        if not isinstance(source_path, str) or not source_path.endswith(".py"):
-            continue
-        family = _analysis_family_for_source_path(source_path, duplication_config, family_cache)
-        if family is None or family.name not in family_names:
-            continue
-
-        module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
-        if module_key not in snapshot.nodes:
-            continue
-
-        source_text = _analysis_read_source_text(root, source_path, text_cache)
-        anchors = _collect_analysis_anchor_nodes(
+        candidate_payload = _evaluate_complexity_surface(
             snapshot,
-            indexes,
-            node.key,
-            module_key,
-            label_sets,
+            root,
+            node,
+            duplication_config=duplication_config,
+            family_names=family_names,
+            family_cache=family_cache,
+            label_sets=label_sets,
+            indexes=indexes,
+            text_cache=text_cache,
+            config=config,
         )
-        symbol_name = node.key.name.removeprefix(f"{_module_dotted_name(source_path)}.")
-        indirection_markers, stateful_markers, deprecation_markers = _complexity_marker_buckets(
-            config,
-            source_path,
-            symbol_name,
-            source_text,
-        )
-        metrics = _aggregate_surface_complexity_metrics(snapshot, indexes, node.key)
-        runtime_count = len(anchors.runtime)
-        config_count = len(anchors.config)
-        doc_count = len(anchors.docs)
-        test_count = len(anchors.tests)
-        blocked_by_current_cycle = bool(node.properties.get("current_cycle_status"))
-        complexity_score, simplification_score, removable_score = _complexity_scores(
-            metrics,
-            ComplexityScoreInputs(
-                indirection_markers=indirection_markers,
-                stateful_markers=stateful_markers,
-                deprecation_markers=deprecation_markers,
-                runtime_count=runtime_count,
-                config_count=config_count,
-                doc_count=doc_count,
-                test_count=test_count,
-                blocked_by_current_cycle=blocked_by_current_cycle,
-            ),
-        )
-
-        if complexity_score < config.complexity_score_threshold and removable_score < config.removable_score_threshold:
+        if candidate_payload is None:
             continue
+        _emit_complexity_candidate(snapshot, project, today, config, node, candidate_payload)
 
-        classification, removal_confidence = _classify_complexity_candidate(
-            config,
-            removable_score=removable_score,
-            runtime_count=runtime_count,
-            config_count=config_count,
-            doc_count=doc_count,
-            blocked_by_current_cycle=blocked_by_current_cycle,
-        )
 
-        candidate = snapshot.add_node(
-            "complexity_candidate",
-            f"{node.key.label}:{node.key.name}",
-            summary=f"Complexity analysis candidate for `{node.key.name}` in `{family.name}`.",
-            source_path=source_path,
-            source_kind="complexity_candidate",
-            family_name=family.name,
-            target_label=node.key.label,
-            target_name=node.key.name,
-            classification=classification,
-            complexity_score=complexity_score,
-            simplification_score=simplification_score,
-            removable_score=removable_score,
-            simplification_confidence="high" if simplification_score >= config.complexity_score_threshold + 2 else "medium",
-            removal_confidence=removal_confidence,
-            branch_count=metrics.branch_count,
-            nesting_depth=metrics.nesting_depth,
-            call_count=metrics.call_count,
-            helper_call_count=metrics.helper_call_count,
-            abstraction_fanout=metrics.abstraction_fanout,
-            api_surface_to_logic_ratio=metrics.api_surface_to_logic_ratio,
-            runtime_anchor_count=runtime_count,
-            config_anchor_count=config_count,
-            doc_anchor_count=doc_count,
-            test_anchor_count=test_count,
+def _complexity_analysis_label_sets() -> AnalysisLabelSets:
+    return AnalysisLabelSets(
+        ignored_relation_types={
+            "DECLARES",
+            "OVERRIDES",
+            "SAME_SHAPE_AS",
+            "CONTAINS",
+            "BACKS",
+            "HOUSES",
+            "CANDIDATE_FOR_REMOVAL",
+            "HAS_COMPLEXITY_SIGNAL",
+            "CANDIDATE_FOR_SIMPLIFICATION",
+            "JUSTIFIED_BY_RUNTIME",
+            "BLOCKED_BY_VARIANCE",
+        },
+        runtime_labels={"pipeline_surface", "execution_path", "alert_surface", "adapter_surface", "adapter_impl_surface"},
+        config_labels={"entity_config", "composite_config", "provider_surface", "contract_surface", "port_surface"},
+        doc_labels={"policy_surface", "doc_source_surface", "doc_artifact", "dashboard_surface", "quality_gate"},
+        test_labels={"test_surface", "test_artifact"},
+    )
+
+
+def _evaluate_complexity_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    node: GraphNode,
+    *,
+    duplication_config: dict[str, object],
+    family_names: set[str],
+    family_cache: dict[str, DuplicateFamilyConfig | None],
+    label_sets: AnalysisLabelSets,
+    indexes: SurfaceRelationIndexes,
+    text_cache: dict[str, str],
+    config: ComplexityAnalysisConfig,
+) -> dict[str, object] | None:
+    analysis_labels = {"module_surface", "class_surface", "function_surface", "method_surface"}
+    if node.key.label not in analysis_labels:
+        return None
+    source_path = node.properties.get("source_path")
+    if not isinstance(source_path, str) or not source_path.endswith(".py"):
+        return None
+    family = _analysis_family_for_source_path(source_path, duplication_config, family_cache)
+    if family is None or family.name not in family_names:
+        return None
+    module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
+    if module_key not in snapshot.nodes:
+        return None
+    source_text = _analysis_read_source_text(root, source_path, text_cache)
+    anchors = _collect_analysis_anchor_nodes(snapshot, indexes, node.key, module_key, label_sets)
+    symbol_name = node.key.name.removeprefix(f"{_module_dotted_name(source_path)}.")
+    indirection_markers, stateful_markers, deprecation_markers = _complexity_marker_buckets(
+        config,
+        source_path,
+        symbol_name,
+        source_text,
+    )
+    metrics = _aggregate_surface_complexity_metrics(snapshot, indexes, node.key)
+    runtime_count = len(anchors.runtime)
+    config_count = len(anchors.config)
+    doc_count = len(anchors.docs)
+    test_count = len(anchors.tests)
+    blocked_by_current_cycle = bool(node.properties.get("current_cycle_status"))
+    complexity_score, simplification_score, removable_score = _complexity_scores(
+        metrics,
+        ComplexityScoreInputs(
             indirection_markers=indirection_markers,
             stateful_markers=stateful_markers,
             deprecation_markers=deprecation_markers,
+            runtime_count=runtime_count,
+            config_count=config_count,
+            doc_count=doc_count,
+            test_count=test_count,
             blocked_by_current_cycle=blocked_by_current_cycle,
-            blocked_by_current_cycle_target_name=node.key.name if blocked_by_current_cycle else None,
-            blocked_by_current_cycle_score=node.properties.get("current_cycle_score") if blocked_by_current_cycle else None,
-            blocked_by_current_cycle_wip_markers=node.properties.get("current_cycle_wip_markers") if blocked_by_current_cycle else None,
-            runtime_anchors=[anchor.name for anchor in anchors.runtime[: config.blocker_anchor_limit]],
-            config_anchors=[anchor.name for anchor in anchors.config[: config.blocker_anchor_limit]],
-            doc_anchors=[anchor.name for anchor in anchors.docs[: config.blocker_anchor_limit]],
-            test_anchors=[anchor.name for anchor in anchors.tests[: config.blocker_anchor_limit]],
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="medium",
-        )
-        snapshot.add_relation(project, "CONTAINS", candidate, provenance="complexity_analysis")
-        snapshot.add_relation(node.key, "HAS_COMPLEXITY_SIGNAL", candidate, provenance="complexity_analysis")
-        snapshot.add_relation(candidate, "CANDIDATE_FOR_SIMPLIFICATION", node.key, provenance="complexity_analysis")
-        if classification == "removable_complexity":
-            snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="complexity_analysis")
-        for anchor in anchors.runtime[: config.blocker_anchor_limit]:
-            snapshot.add_relation(candidate, "JUSTIFIED_BY_RUNTIME", anchor, provenance="complexity_analysis")
-        for anchor in [*anchors.config[: config.blocker_anchor_limit], *anchors.docs[: config.blocker_anchor_limit]]:
-            snapshot.add_relation(candidate, "BLOCKED_BY_VARIANCE", anchor, provenance="complexity_analysis")
+        ),
+    )
+    if complexity_score < config.complexity_score_threshold and removable_score < config.removable_score_threshold:
+        return None
+    classification, removal_confidence = _classify_complexity_candidate(
+        config,
+        removable_score=removable_score,
+        runtime_count=runtime_count,
+        config_count=config_count,
+        doc_count=doc_count,
+        blocked_by_current_cycle=blocked_by_current_cycle,
+    )
+    return {
+        "source_path": source_path,
+        "family_name": family.name,
+        "anchors": anchors,
+        "metrics": metrics,
+        "indirection_markers": indirection_markers,
+        "stateful_markers": stateful_markers,
+        "deprecation_markers": deprecation_markers,
+        "blocked_by_current_cycle": blocked_by_current_cycle,
+        "classification": classification,
+        "complexity_score": complexity_score,
+        "simplification_score": simplification_score,
+        "removable_score": removable_score,
+        "removal_confidence": removal_confidence,
+    }
+
+
+def _emit_complexity_candidate(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    today: str,
+    config: ComplexityAnalysisConfig,
+    node: GraphNode,
+    payload: dict[str, object],
+) -> None:
+    anchors = payload["anchors"]
+    metrics = payload["metrics"]
+    runtime_anchors = anchors.runtime[: config.blocker_anchor_limit]
+    config_anchors = anchors.config[: config.blocker_anchor_limit]
+    doc_anchors = anchors.docs[: config.blocker_anchor_limit]
+    test_anchors = anchors.tests[: config.blocker_anchor_limit]
+    blocked_by_current_cycle = bool(payload["blocked_by_current_cycle"])
+    simplification_score = float(payload["simplification_score"])
+    classification = str(payload["classification"])
+    candidate = snapshot.add_node(
+        "complexity_candidate",
+        f"{node.key.label}:{node.key.name}",
+        summary=f"Complexity analysis candidate for `{node.key.name}` in `{payload['family_name']}`.",
+        source_path=str(payload["source_path"]),
+        source_kind="complexity_candidate",
+        family_name=str(payload["family_name"]),
+        target_label=node.key.label,
+        target_name=node.key.name,
+        classification=classification,
+        complexity_score=payload["complexity_score"],
+        simplification_score=payload["simplification_score"],
+        removable_score=payload["removable_score"],
+        simplification_confidence="high" if simplification_score >= config.complexity_score_threshold + 2 else "medium",
+        removal_confidence=payload["removal_confidence"],
+        branch_count=metrics.branch_count,
+        nesting_depth=metrics.nesting_depth,
+        call_count=metrics.call_count,
+        helper_call_count=metrics.helper_call_count,
+        abstraction_fanout=metrics.abstraction_fanout,
+        api_surface_to_logic_ratio=metrics.api_surface_to_logic_ratio,
+        runtime_anchor_count=len(anchors.runtime),
+        config_anchor_count=len(anchors.config),
+        doc_anchor_count=len(anchors.docs),
+        test_anchor_count=len(anchors.tests),
+        indirection_markers=payload["indirection_markers"],
+        stateful_markers=payload["stateful_markers"],
+        deprecation_markers=payload["deprecation_markers"],
+        blocked_by_current_cycle=blocked_by_current_cycle,
+        blocked_by_current_cycle_target_name=node.key.name if blocked_by_current_cycle else None,
+        blocked_by_current_cycle_score=node.properties.get("current_cycle_score") if blocked_by_current_cycle else None,
+        blocked_by_current_cycle_wip_markers=node.properties.get("current_cycle_wip_markers") if blocked_by_current_cycle else None,
+        runtime_anchors=[anchor.name for anchor in runtime_anchors],
+        config_anchors=[anchor.name for anchor in config_anchors],
+        doc_anchors=[anchor.name for anchor in doc_anchors],
+        test_anchors=[anchor.name for anchor in test_anchors],
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="medium",
+    )
+    snapshot.add_relation(project, "CONTAINS", candidate, provenance="complexity_analysis")
+    snapshot.add_relation(node.key, "HAS_COMPLEXITY_SIGNAL", candidate, provenance="complexity_analysis")
+    snapshot.add_relation(candidate, "CANDIDATE_FOR_SIMPLIFICATION", node.key, provenance="complexity_analysis")
+    if classification == "removable_complexity":
+        snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="complexity_analysis")
+    for anchor in runtime_anchors:
+        snapshot.add_relation(candidate, "JUSTIFIED_BY_RUNTIME", anchor, provenance="complexity_analysis")
+    for anchor in [*config_anchors, *doc_anchors]:
+        snapshot.add_relation(candidate, "BLOCKED_BY_VARIANCE", anchor, provenance="complexity_analysis")
 
 
 def _add_pipeline_surfaces(
@@ -7656,6 +7908,41 @@ def _add_pipeline_normalization_edges(
     if not isinstance(normalization_mapping, dict):
         return
 
+    (
+        relation_type,
+        entity_relation_type,
+        default_entity_modules,
+        default_composite_modules,
+        pipeline_overrides,
+    ) = _normalization_edge_config(normalization_mapping)
+
+    for pipeline_name, pipeline_key in pipeline_nodes.items():
+        pipeline_node = snapshot.nodes.get(pipeline_key)
+        if pipeline_node is None:
+            continue
+        pipeline_kind = str(pipeline_node.properties.get("pipeline_kind", "entity"))
+        entity_key = NodeKey("entity_config", pipeline_name)
+        modules = _pipeline_normalization_modules(
+            pipeline_name,
+            pipeline_kind,
+            pipeline_overrides,
+            default_entity_modules,
+            default_composite_modules,
+        )
+        _link_pipeline_normalization_modules(
+            snapshot,
+            pipeline_key,
+            entity_key=entity_key,
+            pipeline_kind=pipeline_kind,
+            modules=modules,
+            relation_type=relation_type,
+            entity_relation_type=entity_relation_type,
+        )
+
+
+def _normalization_edge_config(
+    normalization_mapping: dict[str, object],
+) -> tuple[str, str, list[str], list[str], dict[str, object]]:
     relation_type = str(normalization_mapping.get("relation_type", "DEPENDS_ON"))
     entity_relation_type = str(normalization_mapping.get("entity_relation_type", relation_type))
     defaults = normalization_mapping.get("defaults")
@@ -7668,32 +7955,52 @@ def _add_pipeline_normalization_edges(
             default_entity_modules = _as_string_list(entity_defaults.get("modules"))
         if isinstance(composite_defaults, dict):
             default_composite_modules = _as_string_list(composite_defaults.get("modules"))
-
     pipeline_entries = normalization_mapping.get("pipelines")
     pipeline_overrides = pipeline_entries if isinstance(pipeline_entries, dict) else {}
+    return (
+        relation_type,
+        entity_relation_type,
+        default_entity_modules,
+        default_composite_modules,
+        pipeline_overrides,
+    )
 
-    for pipeline_name, pipeline_key in pipeline_nodes.items():
-        pipeline_node = snapshot.nodes.get(pipeline_key)
-        if pipeline_node is None:
+
+def _pipeline_normalization_modules(
+    pipeline_name: str,
+    pipeline_kind: str,
+    pipeline_overrides: dict[str, object],
+    default_entity_modules: list[str],
+    default_composite_modules: list[str],
+) -> list[str]:
+    modules = list(default_entity_modules if pipeline_kind == "entity" else default_composite_modules)
+    pipeline_payload = pipeline_overrides.get(pipeline_name)
+    if isinstance(pipeline_payload, dict):
+        modules.extend(_as_string_list(pipeline_payload.get("modules")))
+    return modules
+
+
+def _link_pipeline_normalization_modules(
+    snapshot: GraphSnapshot,
+    pipeline_key: NodeKey,
+    *,
+    entity_key: NodeKey,
+    pipeline_kind: str,
+    modules: list[str],
+    relation_type: str,
+    entity_relation_type: str,
+) -> None:
+    seen_modules: set[str] = set()
+    for module_path in modules:
+        if module_path in seen_modules:
             continue
-        pipeline_kind = str(pipeline_node.properties.get("pipeline_kind", "entity"))
-        modules = list(default_entity_modules if pipeline_kind == "entity" else default_composite_modules)
-        pipeline_payload = pipeline_overrides.get(pipeline_name)
-        if isinstance(pipeline_payload, dict):
-            modules.extend(_as_string_list(pipeline_payload.get("modules")))
-
-        seen_modules: set[str] = set()
-        entity_key = NodeKey("entity_config", pipeline_name)
-        for module_path in modules:
-            if module_path in seen_modules:
-                continue
-            seen_modules.add(module_path)
-            module_key = NodeKey("module_surface", module_path)
-            if module_key not in snapshot.nodes:
-                continue
-            snapshot.add_relation(pipeline_key, relation_type, module_key, provenance="impact_normalization")
-            if pipeline_kind == "entity" and entity_key in snapshot.nodes:
-                snapshot.add_relation(entity_key, entity_relation_type, module_key, provenance="impact_normalization")
+        seen_modules.add(module_path)
+        module_key = NodeKey("module_surface", module_path)
+        if module_key not in snapshot.nodes:
+            continue
+        snapshot.add_relation(pipeline_key, relation_type, module_key, provenance="impact_normalization")
+        if pipeline_kind == "entity" and entity_key in snapshot.nodes:
+            snapshot.add_relation(entity_key, entity_relation_type, module_key, provenance="impact_normalization")
 
 
 def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
@@ -8377,80 +8684,127 @@ def _add_governance_edges(
                 snapshot.add_relation(observability_policy, "GOVERNS", node_key, provenance="impact_governance")
 
 
+def _pipeline_operational_section(memory_mapping: dict[str, object]) -> dict[str, object]:
+    return _mapping_section(memory_mapping, "pipeline_operational")
+
+
+def _pipeline_dashboard_targets(
+    pipeline_ops: dict[str, object],
+) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
+    dashboards_cfg = pipeline_ops.get("dashboards")
+    if not isinstance(dashboards_cfg, dict):
+        dashboards_cfg = {}
+
+    kind_dashboards = dashboards_cfg.get("by_kind")
+    if not isinstance(kind_dashboards, dict):
+        kind_dashboards = {}
+
+    common_dashboards = _configured_node_keys(
+        "dashboard_surface",
+        dashboards_cfg.get("common"),
+        DEFAULT_COMMON_PIPELINE_DASHBOARDS,
+    )
+    entity_dashboards = _configured_node_keys(
+        "dashboard_surface",
+        kind_dashboards.get("entity"),
+        DEFAULT_ENTITY_PIPELINE_DASHBOARDS,
+    )
+    composite_dashboards = _configured_node_keys(
+        "dashboard_surface",
+        kind_dashboards.get("composite"),
+        DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS,
+    )
+    return common_dashboards, entity_dashboards, composite_dashboards
+
+
+def _pipeline_kind_dashboards(
+    pipeline_kind: object,
+    *,
+    entity_dashboards: list[NodeKey],
+    composite_dashboards: list[NodeKey],
+) -> list[NodeKey]:
+    if pipeline_kind == "entity":
+        return entity_dashboards
+    if pipeline_kind == "composite":
+        return composite_dashboards
+    return []
+
+
+def _link_pipeline_operational_targets(
+    snapshot: GraphSnapshot,
+    pipeline: NodeKey,
+    *,
+    runtime_paths: list[NodeKey],
+    validation_gates: list[NodeKey],
+    common_dashboards: list[NodeKey],
+    kind_dashboards: list[NodeKey],
+) -> None:
+    _link_existing_targets(
+        snapshot,
+        pipeline,
+        "RUNS_VIA",
+        runtime_paths,
+        provenance="impact_pipeline_ops",
+    )
+    _link_existing_targets(
+        snapshot,
+        pipeline,
+        "VALIDATED_BY",
+        validation_gates,
+        provenance="impact_pipeline_ops",
+    )
+    _link_existing_targets(
+        snapshot,
+        pipeline,
+        "OBSERVED_BY",
+        common_dashboards,
+        provenance="impact_pipeline_ops",
+    )
+    if kind_dashboards:
+        _link_existing_targets(
+            snapshot,
+            pipeline,
+            "OBSERVED_BY",
+            kind_dashboards,
+            provenance="impact_pipeline_ops",
+        )
+
+
 def _add_pipeline_operational_edges(
     snapshot: GraphSnapshot,
     pipeline_nodes: dict[str, NodeKey],
     memory_mapping: dict[str, object],
 ) -> None:
-    pipeline_ops = memory_mapping.get("pipeline_operational")
+    pipeline_ops = _pipeline_operational_section(memory_mapping)
     runtime_paths = _configured_node_keys(
         "execution_path",
-        pipeline_ops.get("runtime_paths") if isinstance(pipeline_ops, dict) else None,
+        pipeline_ops.get("runtime_paths"),
         DEFAULT_PIPELINE_RUNTIME_PATHS,
     )
     validation_gates = _configured_node_keys(
         "quality_gate",
-        pipeline_ops.get("validation_gates") if isinstance(pipeline_ops, dict) else None,
+        pipeline_ops.get("validation_gates"),
         DEFAULT_PIPELINE_VALIDATION_GATES,
     )
-    dashboards_cfg = pipeline_ops.get("dashboards") if isinstance(pipeline_ops, dict) else {}
-    common_dashboards = _configured_node_keys(
-        "dashboard_surface",
-        dashboards_cfg.get("common") if isinstance(dashboards_cfg, dict) else None,
-        DEFAULT_COMMON_PIPELINE_DASHBOARDS,
-    )
-    kind_dashboards = dashboards_cfg.get("by_kind") if isinstance(dashboards_cfg, dict) else {}
-    entity_dashboards = _configured_node_keys(
-        "dashboard_surface",
-        kind_dashboards.get("entity") if isinstance(kind_dashboards, dict) else None,
-        DEFAULT_ENTITY_PIPELINE_DASHBOARDS,
-    )
-    composite_dashboards = _configured_node_keys(
-        "dashboard_surface",
-        kind_dashboards.get("composite") if isinstance(kind_dashboards, dict) else None,
-        DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS,
+    common_dashboards, entity_dashboards, composite_dashboards = _pipeline_dashboard_targets(
+        pipeline_ops
     )
 
     for pipeline in sorted(pipeline_nodes.values(), key=lambda node: node.name):
         pipeline_props = snapshot.nodes[pipeline].properties
         pipeline_kind = pipeline_props.get("pipeline_kind")
-        _link_existing_targets(
+        _link_pipeline_operational_targets(
             snapshot,
             pipeline,
-            "RUNS_VIA",
-            runtime_paths,
-            provenance="impact_pipeline_ops",
+            runtime_paths=runtime_paths,
+            validation_gates=validation_gates,
+            common_dashboards=common_dashboards,
+            kind_dashboards=_pipeline_kind_dashboards(
+                pipeline_kind,
+                entity_dashboards=entity_dashboards,
+                composite_dashboards=composite_dashboards,
+            ),
         )
-        _link_existing_targets(
-            snapshot,
-            pipeline,
-            "VALIDATED_BY",
-            validation_gates,
-            provenance="impact_pipeline_ops",
-        )
-        _link_existing_targets(
-            snapshot,
-            pipeline,
-            "OBSERVED_BY",
-            common_dashboards,
-            provenance="impact_pipeline_ops",
-        )
-        if pipeline_kind == "entity":
-            _link_existing_targets(
-                snapshot,
-                pipeline,
-                "OBSERVED_BY",
-                entity_dashboards,
-                provenance="impact_pipeline_ops",
-            )
-        elif pipeline_kind == "composite":
-            _link_existing_targets(
-                snapshot,
-                pipeline,
-                "OBSERVED_BY",
-                composite_dashboards,
-                provenance="impact_pipeline_ops",
-            )
 
 
 class Neo4jHttpClient:
@@ -8781,6 +9135,142 @@ def _prune_legacy_unmanaged_nodes_statement(managed_labels: list[str]) -> dict[s
     }
 
 
+def _resolved_sync_apply_options(
+    options: SyncApplyOptions | int | None,
+    legacy_kwargs: dict[str, object],
+) -> SyncApplyOptions:
+    if isinstance(options, SyncApplyOptions):
+        return options
+
+    legacy_batch_size = legacy_kwargs.get("batch_size")
+    resolved_batch_size = legacy_batch_size if legacy_batch_size is not None else options
+    if not isinstance(resolved_batch_size, int):
+        raise TypeError("sync_snapshot requires batch_size or SyncApplyOptions")
+    return SyncApplyOptions(
+        batch_size=resolved_batch_size,
+        prune_stale=bool(legacy_kwargs.get("prune_stale", False)),
+        full_reset_managed_wave=bool(legacy_kwargs.get("full_reset_managed_wave", False)),
+        prune_legacy_unmanaged=bool(legacy_kwargs.get("prune_legacy_unmanaged", False)),
+    )
+
+
+def _selection_from_legacy_kwargs(legacy_kwargs: dict[str, object]) -> SnapshotSelection:
+    return SnapshotSelection(
+        only_labels=tuple(legacy_kwargs.get("only_labels", ())),
+        only_analysis_layer=bool(legacy_kwargs.get("only_analysis_layer", False)),
+        only_retirement_layer=bool(legacy_kwargs.get("only_retirement_layer", False)),
+        only_complexity_layer=bool(legacy_kwargs.get("only_complexity_layer", False)),
+        only_storage_layer=bool(legacy_kwargs.get("only_storage_layer", False)),
+        only_runtime_evidence_layer=bool(legacy_kwargs.get("only_runtime_evidence_layer", False)),
+        only_workflow_graph=bool(legacy_kwargs.get("only_workflow_graph", False)),
+        only_docs_drift=bool(legacy_kwargs.get("only_docs_drift", False)),
+    )
+
+
+def _statement_groups(
+    snapshot: GraphSnapshot,
+    sync_run: str,
+) -> tuple[
+    list[str],
+    dict[str, list[dict[str, JsonValue]]],
+    dict[str, list[dict[str, JsonValue]]],
+    dict[str, list[dict[str, JsonValue]]],
+    dict[str, list[dict[str, JsonValue]]],
+    dict[str, list[dict[str, JsonValue]]],
+    dict[str, list[dict[str, JsonValue]]],
+]:
+    managed_labels = sorted(
+        {node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS)
+    )
+    node_groups: dict[str, list[dict[str, JsonValue]]] = {}
+    for node in snapshot.nodes.values():
+        node_groups.setdefault(node.key.label, []).append(_node_statement(node, sync_run))
+    relation_groups: dict[str, list[dict[str, JsonValue]]] = {}
+    for relation in snapshot.relations.values():
+        relation_groups.setdefault(relation.relation_type, []).append(
+            _relation_statement(relation, sync_run)
+        )
+    (
+        core_node_groups,
+        analysis_node_groups,
+        core_relation_groups,
+        analysis_relation_groups,
+    ) = _partition_groups(node_groups, relation_groups)
+    return (
+        managed_labels,
+        node_groups,
+        relation_groups,
+        core_node_groups,
+        analysis_node_groups,
+        core_relation_groups,
+        analysis_relation_groups,
+    )
+
+
+def _delete_managed_wave_if_requested(
+    client: Neo4jHttpClient,
+    managed_labels: list[str],
+    options: SyncApplyOptions,
+) -> None:
+    if not options.full_reset_managed_wave:
+        return
+
+    delete_batch_size = max(1, min(options.batch_size, 50))
+    for label in managed_labels:
+        while True:
+            delete_statement = _delete_managed_wave_nodes_statement(label, delete_batch_size)
+            rows = client.query(
+                delete_statement["statement"],
+                delete_statement["parameters"],
+            )
+            deleted = int(rows[0]["deleted"]) if rows else 0
+            if deleted == 0:
+                break
+
+
+def _analysis_node_batch_size(
+    analysis_node_groups: dict[str, list[dict[str, JsonValue]]],
+    batch_size: int,
+) -> int:
+    if "complexity_candidate" in analysis_node_groups:
+        return 1
+    if "retirement_candidate" in analysis_node_groups:
+        return max(1, min(batch_size, 5))
+    return max(1, min(batch_size, 10))
+
+
+def _analysis_relation_batch_size(
+    analysis_relation_groups: dict[str, list[dict[str, JsonValue]]],
+    batch_size: int,
+) -> int:
+    if "CANDIDATE_FOR_REMOVAL" in analysis_relation_groups:
+        return max(1, min(batch_size, 3))
+    return max(1, min(batch_size, 5))
+
+
+def _verification_sync_run(
+    targeted_mode: bool,
+    prune_stale: bool,
+    sync_run: str,
+) -> str | None:
+    if targeted_mode or prune_stale:
+        return sync_run
+    return None
+
+
+def _prune_managed_graph_if_requested(
+    client: Neo4jHttpClient,
+    options: SyncApplyOptions,
+    sync_run: str,
+    managed_labels: list[str],
+) -> None:
+    if options.prune_stale:
+        client.execute([_prune_stale_relations_statement(sync_run)])
+        client.execute([_prune_stale_nodes_statement(sync_run)])
+    if options.prune_legacy_unmanaged:
+        client.execute([_prune_legacy_unmanaged_nodes_statement(managed_labels)])
+
+
 def sync_snapshot(
     snapshot: GraphSnapshot,
     root: Path,
@@ -8789,30 +9279,9 @@ def sync_snapshot(
     selection: SnapshotSelection | None = None,
     **legacy_kwargs: object,
 ) -> None:
-    if isinstance(options, SyncApplyOptions):
-        resolved_options = options
-    else:
-        legacy_batch_size = legacy_kwargs.get("batch_size")
-        resolved_batch_size = legacy_batch_size if legacy_batch_size is not None else options
-        if not isinstance(resolved_batch_size, int):
-            raise TypeError("sync_snapshot requires batch_size or SyncApplyOptions")
-        resolved_options = SyncApplyOptions(
-            batch_size=resolved_batch_size,
-            prune_stale=bool(legacy_kwargs.get("prune_stale", False)),
-            full_reset_managed_wave=bool(legacy_kwargs.get("full_reset_managed_wave", False)),
-            prune_legacy_unmanaged=bool(legacy_kwargs.get("prune_legacy_unmanaged", False)),
-        )
+    resolved_options = _resolved_sync_apply_options(options, legacy_kwargs)
     if selection is None:
-        selection = SnapshotSelection(
-            only_labels=tuple(legacy_kwargs.get("only_labels", ())),
-            only_analysis_layer=bool(legacy_kwargs.get("only_analysis_layer", False)),
-            only_retirement_layer=bool(legacy_kwargs.get("only_retirement_layer", False)),
-            only_complexity_layer=bool(legacy_kwargs.get("only_complexity_layer", False)),
-            only_storage_layer=bool(legacy_kwargs.get("only_storage_layer", False)),
-            only_runtime_evidence_layer=bool(legacy_kwargs.get("only_runtime_evidence_layer", False)),
-            only_workflow_graph=bool(legacy_kwargs.get("only_workflow_graph", False)),
-            only_docs_drift=bool(legacy_kwargs.get("only_docs_drift", False)),
-        )
+        selection = _selection_from_legacy_kwargs(legacy_kwargs)
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
     sync_run = _sync_run_id()
@@ -8824,45 +9293,32 @@ def sync_snapshot(
             snapshot,
             mode_description=selection.mode_description(),
         )
-    managed_labels = sorted({node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS))
-    node_groups: dict[str, list[dict[str, JsonValue]]] = {}
-    for node in snapshot.nodes.values():
-        node_groups.setdefault(node.key.label, []).append(_node_statement(node, sync_run))
-    relation_groups: dict[str, list[dict[str, JsonValue]]] = {}
-    for relation in snapshot.relations.values():
-        relation_groups.setdefault(relation.relation_type, []).append(_relation_statement(relation, sync_run))
-    core_node_groups, analysis_node_groups, core_relation_groups, analysis_relation_groups = _partition_groups(
+    (
+        managed_labels,
         node_groups,
         relation_groups,
+        core_node_groups,
+        analysis_node_groups,
+        core_relation_groups,
+        analysis_relation_groups,
+    ) = _statement_groups(
+        snapshot,
+        sync_run,
     )
-    if resolved_options.full_reset_managed_wave:
-        delete_batch_size = max(1, min(resolved_options.batch_size, 50))
-        for label in managed_labels:
-            while True:
-                delete_statement = _delete_managed_wave_nodes_statement(label, delete_batch_size)
-                rows = client.query(
-                    delete_statement["statement"],
-                    delete_statement["parameters"],
-                )
-                deleted = int(rows[0]["deleted"]) if rows else 0
-                if deleted == 0:
-                    break
+    _delete_managed_wave_if_requested(client, managed_labels, resolved_options)
     _execute_grouped_statements(client, core_node_groups, resolved_options.batch_size, "core node")
-    if "complexity_candidate" in analysis_node_groups:
-        analysis_node_batch_size = 1
-    elif "retirement_candidate" in analysis_node_groups:
-        analysis_node_batch_size = max(1, min(resolved_options.batch_size, 5))
-    else:
-        analysis_node_batch_size = max(1, min(resolved_options.batch_size, 10))
+    analysis_node_batch_size = _analysis_node_batch_size(
+        analysis_node_groups,
+        resolved_options.batch_size,
+    )
     _execute_grouped_statements(client, analysis_node_groups, analysis_node_batch_size, "analysis node")
     if resolved_options.prune_stale and relation_groups:
         relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
         client.execute([_reset_managed_relations_statement(relation_types)])
     _execute_grouped_statements(client, core_relation_groups, resolved_options.batch_size, "core relation")
-    analysis_relation_batch_size = (
-        max(1, min(resolved_options.batch_size, 3))
-        if "CANDIDATE_FOR_REMOVAL" in analysis_relation_groups
-        else max(1, min(resolved_options.batch_size, 5))
+    analysis_relation_batch_size = _analysis_relation_batch_size(
+        analysis_relation_groups,
+        resolved_options.batch_size,
     )
     _execute_grouped_statements(
         client,
@@ -8870,7 +9326,11 @@ def sync_snapshot(
         analysis_relation_batch_size,
         "analysis relation",
     )
-    verification_sync_run = sync_run if (targeted_mode or resolved_options.prune_stale) else None
+    verification_sync_run = _verification_sync_run(
+        targeted_mode,
+        resolved_options.prune_stale,
+        sync_run,
+    )
     _retry_critical_analysis_groups(
         client,
         analysis_node_groups,
@@ -8893,11 +9353,12 @@ def sync_snapshot(
             strict_analysis=False,
             sync_run=verification_sync_run,
         )
-    if resolved_options.prune_stale:
-        client.execute([_prune_stale_relations_statement(sync_run)])
-        client.execute([_prune_stale_nodes_statement(sync_run)])
-    if resolved_options.prune_legacy_unmanaged:
-        client.execute([_prune_legacy_unmanaged_nodes_statement(managed_labels)])
+    _prune_managed_graph_if_requested(
+        client,
+        resolved_options,
+        sync_run,
+        managed_labels,
+    )
 
 
 def _batched(items: list[T], size: int) -> list[list[T]]:
@@ -10133,11 +10594,86 @@ def _selection_from_args(args: argparse.Namespace) -> SnapshotSelection:
     )
 
 
-def main(argv: list[str] | None = None) -> None:
-    parser = _parser()
-    args = parser.parse_args(argv)
+def _validate_cli_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
     if args.prune_stale and args.full_reset_managed_wave:
         parser.error("--prune-stale and --full-reset-managed-wave cannot be used together")
+
+
+def _print_snapshot_stats(snapshot: GraphSnapshot) -> None:
+    print(json.dumps(snapshot.stats(), indent=2))
+
+
+def _export_snapshot_if_requested(
+    snapshot: GraphSnapshot,
+    export_path: Path | None,
+) -> None:
+    if export_path is None:
+        return
+    _write_export(export_path, snapshot)
+    print(f"Exported graph snapshot to {export_path}")
+
+
+def _sync_snapshot_if_requested(
+    args: argparse.Namespace,
+    snapshot: GraphSnapshot,
+    root: Path,
+    selection: SnapshotSelection,
+) -> None:
+    if not args.apply:
+        return
+
+    sync_snapshot(
+        snapshot,
+        root,
+        args.http_uri,
+        SyncApplyOptions(
+            batch_size=args.batch_size,
+            prune_stale=args.prune_stale,
+            full_reset_managed_wave=args.full_reset_managed_wave,
+            prune_legacy_unmanaged=args.prune_legacy_unmanaged,
+        ),
+        selection=selection,
+    )
+    if not selection.targeted_mode():
+        post_apply_report = build_fast_analysis_audit_report(snapshot, root, args.http_uri)
+        critical_issues = _critical_analysis_audit_issues(post_apply_report)
+        if critical_issues:
+            raise RuntimeError(
+                "Post-apply audit failed for critical analysis groups: "
+                + "; ".join(critical_issues)
+            )
+    print("Neo4j sync completed.")
+
+
+def _report_payload(
+    snapshot: GraphSnapshot,
+    root: Path,
+    http_uri: str | None,
+    report_fast: bool,
+) -> dict[str, JsonValue]:
+    if report_fast:
+        return build_fast_analysis_audit_report(snapshot, root, http_uri)
+    return build_audit_report(snapshot, root, http_uri)
+
+
+def _write_report_if_requested(
+    snapshot: GraphSnapshot,
+    root: Path,
+    http_uri: str | None,
+    report_path: Path | None,
+    report_fast: bool,
+) -> None:
+    if report_path is None:
+        return
+    report = _report_payload(snapshot, root, http_uri, report_fast)
+    _write_json(report_path, report)
+    print(f"Exported audit report to {report_path}")
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _parser()
+    args = parser.parse_args(argv)
+    _validate_cli_args(parser, args)
     if args.apply_normalization_evidence_only:
         summary = apply_normalization_evidence_only(
             args.root.resolve(),
@@ -10145,45 +10681,22 @@ def main(argv: list[str] | None = None) -> None:
             batch_size=args.batch_size,
         )
         print(json.dumps(summary, indent=2))
-        return
+        return 0
     root = args.root.resolve()
     selection = _selection_from_args(args)
     snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
-    stats = snapshot.stats()
-    print(json.dumps(stats, indent=2))
-    if args.export is not None:
-        _write_export(args.export, snapshot)
-        print(f"Exported graph snapshot to {args.export}")
-    if args.apply:
-        sync_snapshot(
-            snapshot,
-            root,
-            args.http_uri,
-            SyncApplyOptions(
-                batch_size=args.batch_size,
-                prune_stale=args.prune_stale,
-                full_reset_managed_wave=args.full_reset_managed_wave,
-                prune_legacy_unmanaged=args.prune_legacy_unmanaged,
-            ),
-            selection=selection,
-        )
-        if not selection.targeted_mode():
-            post_apply_report = build_fast_analysis_audit_report(snapshot, root, args.http_uri)
-            critical_issues = _critical_analysis_audit_issues(post_apply_report)
-            if critical_issues:
-                raise RuntimeError(
-                    "Post-apply audit failed for critical analysis groups: " + "; ".join(critical_issues)
-                )
-        print("Neo4j sync completed.")
-    if args.report is not None:
-        report = (
-            build_fast_analysis_audit_report(snapshot, root, args.http_uri)
-            if args.report_fast
-            else build_audit_report(snapshot, root, args.http_uri)
-        )
-        _write_json(args.report, report)
-        print(f"Exported audit report to {args.report}")
+    _print_snapshot_stats(snapshot)
+    _export_snapshot_if_requested(snapshot, args.export)
+    _sync_snapshot_if_requested(args, snapshot, root, selection)
+    _write_report_if_requested(
+        snapshot,
+        root,
+        args.http_uri,
+        args.report,
+        args.report_fast,
+    )
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

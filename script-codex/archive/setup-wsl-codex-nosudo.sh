@@ -12,25 +12,25 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_error() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${RED}[ERROR]${NC} ${message}" >&2
     return 0
 }
 
 log_warn() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${YELLOW}[WARN]${NC} ${message}" >&2
     return 0
 }
 
 log_info() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${BLUE}[INFO]${NC} ${message}" >&2
     return 0
 }
 
 log_success() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${GREEN}[✓]${NC} ${message}"
     return 0
 }
