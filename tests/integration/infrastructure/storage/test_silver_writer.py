@@ -12,6 +12,7 @@ from deltalake import DeltaTable
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.domain.transformations import generate_content_hash
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
     build_silver_writer_runtime_services,
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -357,25 +358,29 @@ async def test_write_silver_dual_write_routes_to_all_versioned_tables(
         base_path=temp_delta_path,
         logger=noop_logger,
         runtime_services=build_silver_writer_runtime_services(
-            csv_exporter=None,
-            tracing=None,
-            write_policy=None,
-            metrics=None,
-            audit=None,
-            silver_validator=None,
-            metadata_writer=None,
-            metadata_coordinator=None,
-            lineage_store=None,
-            dq_calculator=None,
-            merge_resilience_policy=None,
-            contract_rollout_policy=ContractRolloutPolicy(
-                contract_ref="chembl.activity",
-                active_version="2.0.0",
-                mode="dual_read_write",
-                read_order=("2.0.0", "1.0.0"),
-                write_versions=("1.0.0", "2.0.0"),
-                affects_hash=True,
-            ),
+            SilverWriterRuntimeServicesRequest(
+                csv_exporter=None,
+                tracing=None,
+                write_policy=None,
+                metrics=None,
+                audit=None,
+                logger=noop_logger,
+                silver_validator=None,
+                metadata_writer=None,
+                metadata_coordinator=None,
+                lineage_store=None,
+                dq_calculator=None,
+                merge_resilience_policy=None,
+                base_path=temp_delta_path,
+                contract_rollout_policy=ContractRolloutPolicy(
+                    contract_ref="chembl.activity",
+                    active_version="2.0.0",
+                    mode="dual_read_write",
+                    read_order=("2.0.0", "1.0.0"),
+                    write_versions=("1.0.0", "2.0.0"),
+                    affects_hash=True,
+                ),
+            )
         ),
     )
     schema = pa.schema(
@@ -433,25 +438,29 @@ async def test_write_silver_dual_write_fails_logical_write_when_any_target_fails
         base_path=temp_delta_path,
         logger=noop_logger,
         runtime_services=build_silver_writer_runtime_services(
-            csv_exporter=None,
-            tracing=None,
-            write_policy=None,
-            metrics=None,
-            audit=None,
-            silver_validator=None,
-            metadata_writer=None,
-            metadata_coordinator=None,
-            lineage_store=None,
-            dq_calculator=None,
-            merge_resilience_policy=None,
-            contract_rollout_policy=ContractRolloutPolicy(
-                contract_ref="chembl.activity",
-                active_version="2.0.0",
-                mode="dual_read_write",
-                read_order=("2.0.0", "1.0.0"),
-                write_versions=("1.0.0", "2.0.0"),
-                affects_hash=True,
-            ),
+            SilverWriterRuntimeServicesRequest(
+                csv_exporter=None,
+                tracing=None,
+                write_policy=None,
+                metrics=None,
+                audit=None,
+                logger=noop_logger,
+                silver_validator=None,
+                metadata_writer=None,
+                metadata_coordinator=None,
+                lineage_store=None,
+                dq_calculator=None,
+                merge_resilience_policy=None,
+                base_path=temp_delta_path,
+                contract_rollout_policy=ContractRolloutPolicy(
+                    contract_ref="chembl.activity",
+                    active_version="2.0.0",
+                    mode="dual_read_write",
+                    read_order=("2.0.0", "1.0.0"),
+                    write_versions=("1.0.0", "2.0.0"),
+                    affects_hash=True,
+                ),
+            )
         ),
     )
     schema = pa.schema(

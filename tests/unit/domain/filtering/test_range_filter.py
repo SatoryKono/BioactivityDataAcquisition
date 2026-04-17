@@ -21,7 +21,7 @@ class TestGoldRangeFilter:
             min_value=10.0,
         )
         assert filter_obj.column == "price"
-        assert filter_obj.min_value == 10.0
+        assert filter_obj.min_value == pytest.approx(10.0)
         assert filter_obj.max_value is None
         assert filter_obj.include_min is True
         assert filter_obj.include_max is True
@@ -32,7 +32,7 @@ class TestGoldRangeFilter:
             column="score",
             max_value=100.0,
         )
-        assert filter_obj.max_value == 100.0
+        assert filter_obj.max_value == pytest.approx(100.0)
         assert filter_obj.min_value is None
 
     def test_valid_with_both_values(self) -> None:
@@ -42,8 +42,8 @@ class TestGoldRangeFilter:
             min_value=0.0,
             max_value=1000.0,
         )
-        assert filter_obj.min_value == 0.0
-        assert filter_obj.max_value == 1000.0
+        assert filter_obj.min_value == pytest.approx(0.0)
+        assert filter_obj.max_value == pytest.approx(1000.0)
 
     def test_exclusive_bounds(self) -> None:
         """Test filter with exclusive bounds."""
@@ -74,7 +74,7 @@ class TestGoldRangeFilter:
             min_value=-273.15,
             max_value=1000.0,
         )
-        assert filter_obj.min_value == -273.15
+        assert filter_obj.min_value == pytest.approx(-273.15)
 
     def test_zero_values(self) -> None:
         """Test filter with zero as boundary."""
@@ -82,7 +82,7 @@ class TestGoldRangeFilter:
             column="count",
             min_value=0.0,
         )
-        assert filter_obj.min_value == 0.0
+        assert filter_obj.min_value == pytest.approx(0.0)
 
     def test_immutability(self) -> None:
         """Test that filter is immutable (frozen)."""

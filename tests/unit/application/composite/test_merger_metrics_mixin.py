@@ -180,15 +180,15 @@ class TestCalculateFieldCoverage:
         mixin = _make_mixin()
         df = pl.DataFrame({"a": [1, 2], "b": [3, 4]})
         coverage = mixin._calculate_field_coverage(df)
-        assert coverage["a"] == 1.0
-        assert coverage["b"] == 1.0
+        assert coverage["a"] == pytest.approx(1.0)
+        assert coverage["b"] == pytest.approx(1.0)
 
     def test_partial_coverage(self) -> None:
         mixin = _make_mixin()
         df = pl.DataFrame({"a": [1, None, None], "b": [1, 2, 3]})
         coverage = mixin._calculate_field_coverage(df)
-        assert abs(coverage["a"] - 1 / 3) < 0.01
-        assert coverage["b"] == 1.0
+        assert coverage["a"] == pytest.approx(1 / 3, abs=0.01)
+        assert coverage["b"] == pytest.approx(1.0)
 
     def test_skips_private_columns(self) -> None:
         mixin = _make_mixin()

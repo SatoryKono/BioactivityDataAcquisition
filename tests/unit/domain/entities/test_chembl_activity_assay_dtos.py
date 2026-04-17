@@ -54,8 +54,8 @@ class TestActivityRecord:
             action_type="INHIBITOR",
         )
         assert record.standard_type == "IC50"
-        assert record.standard_value == 5.0
-        assert record.pchembl_value == 8.3
+        assert record.standard_value == pytest.approx(5.0)
+        assert record.pchembl_value == pytest.approx(8.3)
         assert record.action_type == "INHIBITOR"
 
     def test_with_ligand_efficiency_metrics(self) -> None:
@@ -68,8 +68,8 @@ class TestActivityRecord:
             ligand_efficiency_lle=3.1,
             ligand_efficiency_sei=10.2,
         )
-        assert record.ligand_efficiency_bei == 23.5
-        assert record.ligand_efficiency_le == 0.42
+        assert record.ligand_efficiency_bei == pytest.approx(23.5)
+        assert record.ligand_efficiency_le == pytest.approx(0.42)
 
     def test_with_target_info_denormalized(self) -> None:
         """Test creation with denormalized target fields."""

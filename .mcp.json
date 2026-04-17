@@ -123,7 +123,7 @@
     "neo4j-memory": {
       "command": "bash",
       "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ops/mcp_neo4j_memory_wrapper.sh"
+        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/memory/mcp/wrapper.sh"
       ]
     },
     "openaiDeveloperDocs": {

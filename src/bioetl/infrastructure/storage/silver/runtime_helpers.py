@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-
-from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Awaitable
 
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
     AuditPort,
     LineageStorePort,
+    LoggerPort,
     MetadataCoordinatorPort,
     MetadataWriterPort,
     MetricsPort,
@@ -43,6 +44,9 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 )
 from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
+if TYPE_CHECKING:
+    import pyarrow as pa
+
 
 @dataclass(frozen=True, slots=True)
 class SilverWriterRuntimeServices:
@@ -68,6 +72,27 @@ class SilverWriterRuntimeServices:
     arrow_operations: SilverArrowOperations | None = None
     merged_operations: SilverMergedOperations | None = None
     postwrite_operations: SilverPostwriteOperations | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class SilverWriterRuntimeServicesRequest:
+    """Inputs required to build grouped Silver runtime collaborators."""
+
+    csv_exporter: CsvExporter | None
+    tracing: TracingPort | None
+    write_policy: WriteModePolicy | None
+    metrics: MetricsPort | None
+    audit: AuditPort | None
+    logger: LoggerPort | None
+    silver_validator: SilverValidatorPort | None
+    metadata_writer: MetadataWriterPort | None
+    metadata_coordinator: MetadataCoordinatorPort | None
+    lineage_store: LineageStorePort | None
+    dq_calculator: DQMetricsCalculator | None
+    merge_resilience_policy: SilverMergeResiliencePolicy | None
+    contract_rollout_policy: ContractRolloutPolicy | None = None
+    base_path: str | Path | None = None
+    pipeline_name: str | None = None
 
 
 def resolve_silver_writer_runtime(
@@ -98,22 +123,7 @@ def resolve_silver_writer_runtime(
 
 
 def build_silver_writer_runtime_services(
-    *,
-    csv_exporter: CsvExporter | None,
-    tracing: TracingPort | None,
-    write_policy: WriteModePolicy | None,
-    metrics: MetricsPort | None,
-    audit: AuditPort | None,
-    logger: LoggerPort | None,
-    silver_validator: SilverValidatorPort | None,
-    metadata_writer: MetadataWriterPort | None,
-    metadata_coordinator: MetadataCoordinatorPort | None,
-    lineage_store: LineageStorePort | None,
-    dq_calculator: DQMetricsCalculator | None,
-    merge_resilience_policy: SilverMergeResiliencePolicy | None,
-    contract_rollout_policy: ContractRolloutPolicy | None = None,
-    base_path: str | Path | None = None,
-    pipeline_name: str | None = None,
+    request: SilverWriterRuntimeServicesRequest,
 ) -> SilverWriterRuntimeServices:
     """Build grouped runtime collaborators while preserving default resolution."""
     (
@@ -124,42 +134,42 @@ def build_silver_writer_runtime_services(
         resolved_dq_calculator,
         resolved_merge_resilience_policy,
     ) = resolve_silver_writer_runtime(
-        tracing=tracing,
-        write_policy=write_policy,
-        silver_validator=silver_validator,
-        metadata_writer=metadata_writer,
-        dq_calculator=dq_calculator,
-        merge_resilience_policy=merge_resilience_policy,
+        tracing=request.tracing,
+        write_policy=request.write_policy,
+        silver_validator=request.silver_validator,
+        metadata_writer=request.metadata_writer,
+        dq_calculator=request.dq_calculator,
+        merge_resilience_policy=request.merge_resilience_policy,
     )
     # Create maintenance operations if needed components are available
     maintenance_ops = None
-    if csv_exporter is not None and base_path is not None:
-        retention_manager = RetentionPolicy(base_path)
+    if request.csv_exporter is not None and request.base_path is not None:
+        retention_manager = RetentionPolicy(request.base_path)
         maintenance_ops = SilverMaintenanceOperations(
-            csv_exporter=csv_exporter,
+            csv_exporter=request.csv_exporter,
             retention_manager=retention_manager,
-            pipeline_name=pipeline_name,
-            metrics=metrics,
-            audit=audit,
+            pipeline_name=request.pipeline_name,
+            metrics=request.metrics,
+            audit=request.audit,
         )
     
     # Create metadata operations if needed components are available
     metadata_ops = None
     if resolved_metadata_writer is not None and resolved_dq_calculator is not None:
         metadata_ops = SilverMetadataOperations(
-            _logger=logger,
-            _metrics=metrics,
-            _audit=audit,
+            _logger=request.logger,
+            _metrics=request.metrics,
+            _audit=request.audit,
             _metadata_writer=resolved_metadata_writer,
-            _metadata_coordinator=metadata_coordinator,
-            _lineage_store=lineage_store,
+            _metadata_coordinator=request.metadata_coordinator,
+            _lineage_store=request.lineage_store,
             _dq_calculator=resolved_dq_calculator,
             _host=None,  # Will be set later in SilverWriter.__init__
         )
     
     # Create validation operations if needed components are available
     validation_ops = None
-    if resolved_silver_validator is not None and base_path is not None:
+    if resolved_silver_validator is not None and request.base_path is not None:
         # Import here to avoid circular imports
         from bioetl.infrastructure.storage.silver.support import (
             get_table_schema,
@@ -172,15 +182,17 @@ def build_silver_writer_runtime_services(
         # when the writer is initialized
         def _get_table_schema_wrapper(table_name: str) -> Awaitable[pa.Schema | None]:
             """Wrapper for get_table_schema that can be patched in tests."""
-            return get_table_schema(base_path, table_name)
-        
+            return get_table_schema(request.base_path, table_name)
+
         validation_ops = SilverValidationOperations(
-            logger=logger,
+            logger=request.logger,
             _write_policy=resolved_write_policy,
-            _metrics=metrics,
+            _metrics=request.metrics,
             _silver_validator=resolved_silver_validator,
             _get_table_schema=_get_table_schema_wrapper,
-            _resolve_table_path=lambda table_name: resolve_table_path(base_path, table_name),
+            _resolve_table_path=lambda table_name: resolve_table_path(
+                request.base_path, table_name
+            ),
             _prepare_arrow_data=prepare_arrow_data,
             _validate_write_mode=_validate_write_mode_impl,
             _deduplicate_by_primary_keys=_deduplicate_by_primary_keys_impl,
@@ -193,8 +205,8 @@ def build_silver_writer_runtime_services(
     delta_ops = None
     if resolved_merge_resilience_policy is not None:
         delta_ops = SilverDeltaOperations(
-            logger=logger,
-            _metrics=metrics,
+            logger=request.logger,
+            _metrics=request.metrics,
             _merge_resilience_policy=resolved_merge_resilience_policy,
         )
     
@@ -203,7 +215,7 @@ def build_silver_writer_runtime_services(
     
     # Create merged operations if needed components are available
     merged_ops = None
-    if csv_exporter is not None and base_path is not None:
+    if request.csv_exporter is not None and request.base_path is not None:
         # Import here to avoid circular imports
         from bioetl.infrastructure.storage.silver.support import resolve_table_path
         from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
@@ -211,10 +223,12 @@ def build_silver_writer_runtime_services(
         # For now, we'll create the merged operations with a placeholder metadata writer
         # The real implementation will be set when SilverWriter is fully initialized
         merged_ops = SilverMergedOperations(
-            logger=logger,
-            csv_exporter=csv_exporter,
+            logger=request.logger,
+            csv_exporter=request.csv_exporter,
             _arrow_converter=ArrowDataConverter(),
-            _resolve_table_path=lambda table_name: resolve_table_path(base_path, table_name),
+            _resolve_table_path=lambda table_name: resolve_table_path(
+                request.base_path, table_name
+            ),
             _write_silver_merged_metadata=lambda **kwargs: None,  # Placeholder
         )
     
@@ -222,18 +236,18 @@ def build_silver_writer_runtime_services(
     postwrite_ops = None
     
     return SilverWriterRuntimeServices(
-        csv_exporter=csv_exporter,
+        csv_exporter=request.csv_exporter,
         tracing=resolved_tracing,
         write_policy=resolved_write_policy,
-        metrics=metrics,
-        audit=audit,
+        metrics=request.metrics,
+        audit=request.audit,
         silver_validator=resolved_silver_validator,
         metadata_writer=resolved_metadata_writer,
-        metadata_coordinator=metadata_coordinator,
-        lineage_store=lineage_store,
+        metadata_coordinator=request.metadata_coordinator,
+        lineage_store=request.lineage_store,
         dq_calculator=resolved_dq_calculator,
         merge_resilience_policy=resolved_merge_resilience_policy,
-        contract_rollout_policy=contract_rollout_policy,
+        contract_rollout_policy=request.contract_rollout_policy,
         maintenance_operations=maintenance_ops,
         metadata_operations=metadata_ops,
         validation_operations=validation_ops,

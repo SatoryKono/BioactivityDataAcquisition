@@ -73,8 +73,8 @@ class TestDQConfigExtended:
 
     def test_default_values(self) -> None:
         dq = DQConfig()
-        assert dq.soft_fail_threshold == 0.05
-        assert dq.hard_fail_threshold == 0.20
+        assert dq.soft_fail_threshold == pytest.approx(0.05)
+        assert dq.hard_fail_threshold == pytest.approx(0.20)
         assert dq.strict_validation is False
         assert dq.invalid_record_policy == "quarantine"
         assert dq.field_validations == ()
@@ -119,8 +119,8 @@ class TestDQConfigExtended:
 
     def test_threshold_boundary_values(self) -> None:
         dq = DQConfig(soft_fail_threshold=0.0, hard_fail_threshold=1.0)
-        assert dq.soft_fail_threshold == 0.0
-        assert dq.hard_fail_threshold == 1.0
+        assert dq.soft_fail_threshold == pytest.approx(0.0)
+        assert dq.hard_fail_threshold == pytest.approx(1.0)
 
     def test_threshold_ordering_violation_raises(self) -> None:
         with pytest.raises(

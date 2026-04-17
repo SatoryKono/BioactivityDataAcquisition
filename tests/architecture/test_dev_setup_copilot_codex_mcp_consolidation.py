@@ -50,6 +50,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "prometheus",
         "grafana",
         "brave-search",
+        "sonarqube",
         "neo4j-cypher",
         "neo4j-memory",
         "openaiDeveloperDocs",
@@ -86,6 +87,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert servers["prometheus"]["command"] == "powershell"
         assert servers["grafana"]["command"] == "powershell"
         assert servers["brave-search"]["command"] == "powershell"
+        assert servers["sonarqube"]["command"] == "powershell"
         assert servers["neo4j-cypher"]["command"] == "powershell"
         assert servers["neo4j-memory"]["command"] == "powershell"
         assert "mcp_docker_wrapper.ps1" in servers["docker"]["args"][-1]
@@ -96,6 +98,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert "mcp_prometheus_wrapper.ps1" in servers["prometheus"]["args"][-1]
         assert "mcp_grafana_wrapper.ps1" in servers["grafana"]["args"][-1]
         assert "mcp_brave_search_wrapper.ps1" in servers["brave-search"]["args"][-1]
+        assert "mcp_sonarqube_wrapper.ps1" in servers["sonarqube"]["args"][-1]
         assert "mcp_neo4j_cypher_wrapper.ps1" in servers["neo4j-cypher"]["args"][-1]
         assert "wrapper.ps1" in servers["neo4j-memory"]["args"][-1]
     else:
@@ -109,6 +112,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert servers["prometheus"]["command"] == "bash"
         assert servers["grafana"]["command"] == "bash"
         assert servers["brave-search"]["command"] == "bash"
+        assert servers["sonarqube"]["command"] == "bash"
         assert servers["neo4j-cypher"]["command"] == "bash"
         assert servers["neo4j-memory"]["command"] == "bash"
         assert servers["docker"]["args"][-1].endswith(
@@ -135,11 +139,14 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert servers["brave-search"]["args"][-1].endswith(
             "scripts/ops/mcp_brave_search_wrapper.sh"
         )
+        assert servers["sonarqube"]["args"][-1].endswith(
+            "scripts/ops/mcp_sonarqube_wrapper.sh"
+        )
         assert servers["neo4j-cypher"]["args"][-1].endswith(
             "scripts/ops/mcp_neo4j_cypher_wrapper.sh"
         )
         assert servers["neo4j-memory"]["args"][-1].endswith(
-            "scripts/ops/wrapper.sh"
+            "scripts/memory/mcp/wrapper.sh"
         )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"

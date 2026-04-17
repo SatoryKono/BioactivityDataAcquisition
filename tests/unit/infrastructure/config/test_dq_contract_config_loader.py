@@ -66,8 +66,8 @@ def test_loader_aligns_identity_from_registry(temp_contract_root: Path) -> None:
     assert dq_config.contract_version == "1.0.0"
     assert dq_config.rule_bundle_version == "dq-rules.v1.0"
     assert dq_config.default_disposition_policy == DQDisposition.WARN
-    assert dq_config.soft_fail_threshold == 0.03
-    assert dq_config.hard_fail_threshold == 0.25
+    assert dq_config.soft_fail_threshold == pytest.approx(0.03)
+    assert dq_config.hard_fail_threshold == pytest.approx(0.25)
 
 
 def test_loader_rejects_registry_identity_mismatch(temp_contract_root: Path) -> None:
@@ -102,8 +102,8 @@ def test_loader_supports_flat_threshold_fields(temp_contract_root: Path) -> None
 
     loader = DQContractConfigLoader(temp_contract_root)
     dq_config = loader.load_dq_config_for_pipeline("chembl_activity")
-    assert dq_config.soft_fail_threshold == 0.04
-    assert dq_config.hard_fail_threshold == 0.31
+    assert dq_config.soft_fail_threshold == pytest.approx(0.04)
+    assert dq_config.hard_fail_threshold == pytest.approx(0.31)
 
 
 def test_loader_does_not_fallback_to_legacy_dq_files(tmp_path: Path) -> None:

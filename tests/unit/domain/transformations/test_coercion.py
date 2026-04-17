@@ -15,22 +15,22 @@ class TestSafeFloat:
     """Tests for safe_float function."""
 
     def test_int_input(self) -> None:
-        assert safe_float(42) == 42.0
+        assert safe_float(42) == pytest.approx(42.0)
 
     def test_float_input(self) -> None:
-        assert safe_float(3.14) == 3.14
+        assert safe_float(3.14) == pytest.approx(3.14)
 
     def test_string_input(self) -> None:
-        assert safe_float("3.14") == 3.14
+        assert safe_float("3.14") == pytest.approx(3.14)
 
     def test_string_with_whitespace(self) -> None:
-        assert safe_float("  3.14  ") == 3.14
+        assert safe_float("  3.14  ") == pytest.approx(3.14)
 
     def test_none_returns_default(self) -> None:
         assert safe_float(None) is None
 
     def test_none_with_custom_default(self) -> None:
-        assert safe_float(None, default=0.0) == 0.0
+        assert safe_float(None, default=0.0) == pytest.approx(0.0)
 
     def test_bool_returns_default(self) -> None:
         assert safe_float(True) is None
@@ -47,7 +47,7 @@ class TestSafeFloat:
         assert safe_float(float("-inf")) is None
 
     def test_custom_default_on_failure(self) -> None:
-        assert safe_float("bad", default=-1.0) == -1.0
+        assert safe_float("bad", default=-1.0) == pytest.approx(-1.0)
 
 
 @pytest.mark.unit

@@ -313,11 +313,11 @@ class TestExponentialBackoff:
             delays.append(delay)
 
         # Verify exponential growth
-        assert delays[0] == 0.01
-        assert delays[1] == 0.02
-        assert delays[2] == 0.04
-        assert delays[3] == 0.08
-        assert delays[4] == 0.16
+        assert delays[0] == pytest.approx(0.01)
+        assert delays[1] == pytest.approx(0.02)
+        assert delays[2] == pytest.approx(0.04)
+        assert delays[3] == pytest.approx(0.08)
+        assert delays[4] == pytest.approx(0.16)
 
     async def test_backoff_capped_at_max(self):
         """E2E: Backoff should be capped at maximum delay."""

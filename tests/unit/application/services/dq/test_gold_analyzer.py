@@ -138,7 +138,7 @@ class TestHelperFunctions:
         """Primitive values are unchanged."""
         assert convert_value(42) == 42
         assert convert_value("test") == "test"
-        assert convert_value(3.14) == 3.14
+        assert convert_value(3.14) == pytest.approx(3.14)
 
     def test_update_counts_pass(self) -> None:
         """Update counts for PASS status."""
@@ -212,7 +212,7 @@ class TestCompletenessCheck:
 
         result = check_completeness(df, ["id", "name"], 0.9)
 
-        assert result.overall_completeness_score == 1.0
+        assert result.overall_completeness_score == pytest.approx(1.0)
         assert result.status == DQCheckStatus.PASS
 
     def test_completeness_fail_low_fill(self) -> None:
@@ -236,10 +236,10 @@ class TestCompletenessCheck:
         result = check_completeness(df, ["id", "missing_field"], 0.9)
 
         # Missing field is tracked with 0.0 fill rate
-        assert result.required_fields["missing_field"] == 0.0
+        assert result.required_fields["missing_field"] == pytest.approx(0.0)
         # But overall score only considers existing columns (id has 100% fill)
         # This is expected behavior - overall score = 1.0 / 1 = 1.0
-        assert result.overall_completeness_score == 1.0
+        assert result.overall_completeness_score == pytest.approx(1.0)
         assert result.status == DQCheckStatus.PASS
 
     def test_completeness_no_required_fields(self) -> None:
@@ -248,7 +248,7 @@ class TestCompletenessCheck:
 
         result = check_completeness(df, [], 0.9)
 
-        assert result.overall_completeness_score == 1.0
+        assert result.overall_completeness_score == pytest.approx(1.0)
         assert result.status == DQCheckStatus.PASS
 
 

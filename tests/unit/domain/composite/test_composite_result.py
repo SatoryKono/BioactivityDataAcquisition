@@ -30,8 +30,8 @@ class TestEnrichmentResult:
         )
         assert result.status == EnrichmentStatus.SUCCESS
         assert result.is_success is True
-        assert result.enrichment_rate == 0.95
-        assert result.not_found_rate == 0.05
+        assert result.enrichment_rate == pytest.approx(0.95)
+        assert result.not_found_rate == pytest.approx(0.05)
 
     def test_failed_factory(self):
         """failed factory should create FAILED result."""
@@ -90,7 +90,7 @@ class TestEnrichmentResult:
             status=EnrichmentStatus.SKIPPED,
             records_input=0,
         )
-        assert result.enrichment_rate == 0.0
+        assert result.enrichment_rate == pytest.approx(0.0)
 
     def test_partial_status_is_success(self):
         """PARTIAL status should be considered success."""
@@ -161,14 +161,14 @@ class TestMergeResult:
             records_from_seed=100,
             records_enriched=75,
         )
-        assert result.enrichment_rate == 0.75
+        assert result.enrichment_rate == pytest.approx(0.75)
 
     def test_merge_result_zero_records(self):
         """Enrichment rate should be 0 for empty merge."""
         result = MergeResult(
             records_merged=0,
         )
-        assert result.enrichment_rate == 0.0
+        assert result.enrichment_rate == pytest.approx(0.0)
 
     def test_merge_result_sources_converted_to_tuple(self):
         """sources_used list should be converted to tuple."""

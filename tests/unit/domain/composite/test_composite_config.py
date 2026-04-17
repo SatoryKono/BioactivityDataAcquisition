@@ -455,8 +455,8 @@ class TestCompositeDQConfig:
             soft_fail_threshold=0.10,
             hard_fail_threshold=0.30,
         )
-        assert config.soft_fail_threshold == 0.10
-        assert config.hard_fail_threshold == 0.30
+        assert config.soft_fail_threshold == pytest.approx(0.10)
+        assert config.hard_fail_threshold == pytest.approx(0.30)
 
     def test_dq_config_with_overrides(self):
         """DQ config with enricher overrides should work."""
@@ -470,11 +470,11 @@ class TestCompositeDQConfig:
                 ),
             },
         )
-        assert config.get_enricher_soft_threshold("semanticscholar") == 0.20
-        assert config.get_enricher_hard_threshold("semanticscholar") == 0.50
+        assert config.get_enricher_soft_threshold("semanticscholar") == pytest.approx(0.20)
+        assert config.get_enricher_hard_threshold("semanticscholar") == pytest.approx(0.50)
         # Non-overridden enrichers use defaults
-        assert config.get_enricher_soft_threshold("crossref") == 0.10
-        assert config.get_enricher_hard_threshold("crossref") == 0.30
+        assert config.get_enricher_soft_threshold("crossref") == pytest.approx(0.10)
+        assert config.get_enricher_hard_threshold("crossref") == pytest.approx(0.30)
 
     def test_dq_config_invalid_thresholds(self):
         """Invalid threshold order should raise ValueError."""

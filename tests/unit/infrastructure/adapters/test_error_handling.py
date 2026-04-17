@@ -287,7 +287,7 @@ class TestErrorService:
 
         assert isinstance(wrapped, RateLimitExceededError)
         assert wrapped.service_name == "chembl"
-        assert wrapped.retry_after == 60.0
+        assert wrapped.retry_after == pytest.approx(60.0)
 
     def test_wrap_error_500_returns_service_unavailable(
         self, handler: ErrorService
@@ -349,7 +349,7 @@ class TestErrorService:
         response.headers = {"Retry-After": "120"}
 
         retry_after = handler.get_retry_after(response)
-        assert retry_after == 120.0
+        assert retry_after == pytest.approx(120.0)
 
     def test_get_retry_after_missing(self, handler: ErrorService) -> None:
         """Return None when Retry-After header is missing."""
@@ -367,7 +367,7 @@ class TestErrorService:
         response.headers = {"Retry-After": "Wed, 21 Oct 2023 07:28:00 GMT"}
 
         retry_after = handler.get_retry_after(response)
-        assert retry_after == 60.0  # Default value
+        assert retry_after == pytest.approx(60.0)  # Default value
 
     # handle_error Integration Tests
 
@@ -457,7 +457,7 @@ class TestAdapterErrorContext:
         assert context.circuit_breaker_state == "OPEN"
         assert context.error_type == ErrorType.TIMEOUT
         assert context.error_category == ErrorCategory.RECOVERABLE
-        assert context.retry_after == 30.0
+        assert context.retry_after == pytest.approx(30.0)
         assert context.extra["batch_id"] == "123"
 
     def test_context_defaults(self) -> None:

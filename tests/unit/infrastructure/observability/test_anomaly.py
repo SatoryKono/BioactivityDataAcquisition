@@ -107,7 +107,7 @@ class TestAnomalyDetector:
         """Test detector initialization with defaults."""
         detector = AnomalyDetector()
         assert detector.baseline_window == 7
-        assert detector.z_score_threshold == 2.0
+        assert detector.z_score_threshold == pytest.approx(2.0)
 
     def test_init_custom_values(self):
         """Test detector initialization with custom values."""
@@ -116,7 +116,7 @@ class TestAnomalyDetector:
             z_score_threshold=3.0,
         )
         assert detector.baseline_window == 14
-        assert detector.z_score_threshold == 3.0
+        assert detector.z_score_threshold == pytest.approx(3.0)
 
     def test_update_baseline(self, detector):
         """Test updating baseline with values."""
@@ -155,7 +155,7 @@ class TestAnomalyDetector:
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.SPIKE
-        assert result.current_value == 500.0
+        assert result.current_value == pytest.approx(500.0)
 
     def test_detect_drop_anomaly(self, detector):
         """Test detection of drop anomaly."""
@@ -165,7 +165,7 @@ class TestAnomalyDetector:
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
-        assert result.current_value == 10.0
+        assert result.current_value == pytest.approx(10.0)
 
     def test_detect_severity_levels(self, detector):
         """Test that severity is determined by z-score."""
@@ -379,7 +379,7 @@ class TestAnomalyDetectorBaselineManagement:
         assert stats is not None
         mean, _stddev, count = stats
         assert count == 3
-        assert mean == 110.0  # Mean of [100, 110, 120]
+        assert mean == pytest.approx(110.0)  # Mean of [100, 110, 120]
 
     def test_get_baseline_stats_nonexistent(self):
         """Test getting stats for nonexistent metric returns None."""

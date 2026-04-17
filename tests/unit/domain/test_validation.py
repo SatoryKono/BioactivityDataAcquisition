@@ -256,11 +256,11 @@ class TestMolecularWeightConstants:
 
     def test_min_molecular_weight_value(self) -> None:
         """Test MIN_MOLECULAR_WEIGHT is set to 0.0."""
-        assert MIN_MOLECULAR_WEIGHT == 0.0
+        assert MIN_MOLECULAR_WEIGHT == pytest.approx(0.0)
 
     def test_max_molecular_weight_value(self) -> None:
         """Test MAX_MOLECULAR_WEIGHT is set to 100000.0."""
-        assert MAX_MOLECULAR_WEIGHT == 100000.0
+        assert MAX_MOLECULAR_WEIGHT == pytest.approx(100000.0)
 
     def test_constants_are_valid_range(self) -> None:
         """Test that min < max for valid range."""
@@ -344,8 +344,10 @@ class TestValidateMolecularWeight:
     def test_string_conversion_from_api(self) -> None:
         """Test string values from PubChem API are properly converted."""
         # PubChem may return molecular weight as string
-        assert validate_molecular_weight("180.156") == 180.156
-        assert validate_molecular_weight("  342.30  ") == 342.3  # Whitespace handled
+        assert validate_molecular_weight("180.156") == pytest.approx(180.156)
+        assert validate_molecular_weight("  342.30  ") == pytest.approx(
+            342.3
+        )  # Whitespace handled
 
     def test_boundary_values(self) -> None:
         """Test boundary values for molecular weight validation."""

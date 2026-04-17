@@ -789,7 +789,7 @@ class TestGoldWriterRead:
 
         # Should only return current record
         assert len(result) == 1
-        assert result[0]["value"] == 7.2
+        assert result[0]["value"] == pytest.approx(7.2)
 
 
 @pytest.mark.unit
@@ -980,9 +980,9 @@ class TestGoldWriterDeterministicBackoff:
         sleep_calls = [call[0][0] for call in mock_sleep.call_args_list]
 
         # Attempt 0: 0.5 * (2**0) + 0.05 = 0.55
-        assert sleep_calls[0] == 0.55
+        assert sleep_calls[0] == pytest.approx(0.55)
         # Attempt 1: 0.5 * (2**1) + 0.05 = 1.05
-        assert sleep_calls[1] == 1.05
+        assert sleep_calls[1] == pytest.approx(1.05)
 
     @patch("bioetl.infrastructure.storage.gold_writer.asyncio.sleep")
     @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
@@ -1030,8 +1030,8 @@ class TestGoldWriterDeterministicBackoff:
         # Verify deterministic backoff delays
         assert mock_sleep.call_count == 2
         sleep_calls = [call[0][0] for call in mock_sleep.call_args_list]
-        assert sleep_calls[0] == 0.55
-        assert sleep_calls[1] == 1.05
+        assert sleep_calls[0] == pytest.approx(0.55)
+        assert sleep_calls[1] == pytest.approx(1.05)
 
 
 @pytest.mark.unit

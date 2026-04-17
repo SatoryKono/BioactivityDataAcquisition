@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 
+import pytest
 
 from bioetl.infrastructure.quality.scoring import (
     _compute_group_counts,
@@ -27,21 +28,21 @@ class TestComputeIntegralDebtScore:
         score = compute_integral_debt_score(
             total_exemptions=0, expired_entries=0, baseline_total=10
         )
-        assert score == 100.0
+        assert score == pytest.approx(100.0)
 
     def test_zero_baseline_returns_zero(self) -> None:
         """Zero baseline_total should return 0.0."""
         score = compute_integral_debt_score(
             total_exemptions=5, expired_entries=0, baseline_total=0
         )
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_negative_baseline_returns_zero(self) -> None:
         """Negative baseline_total should return 0.0."""
         score = compute_integral_debt_score(
             total_exemptions=5, expired_entries=0, baseline_total=-1
         )
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_all_expired(self) -> None:
         """All exemptions expired should reduce score."""
@@ -50,7 +51,7 @@ class TestComputeIntegralDebtScore:
         )
         # debt_reduction = 0 (100% of baseline is exemptions)
         # expiry_health = 0 (all expired)
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_half_exemptions_half_expired(self) -> None:
         """Partial expiry with partial exemptions."""
@@ -60,7 +61,7 @@ class TestComputeIntegralDebtScore:
         # debt_reduction = 100 - (5/10)*100 = 50
         # expiry_health = 100 - (2/5)*100 = 60
         # score = 0.7 * 60 + 0.3 * 50 = 42 + 15 = 57
-        assert score == 57.0
+        assert score == pytest.approx(57.0)
 
     def test_score_is_rounded(self) -> None:
         """Score should be rounded to 2 decimal places."""
