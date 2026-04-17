@@ -14,8 +14,8 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-from bioetl.application.services.admin_runtime_api import QuarantineManagerService
 from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
+from bioetl.application.services.admin_runtime_api import QuarantineManagerService
 from bioetl.application.services.audit_inspection_service import AuditInspectionService
 from bioetl.application.services.checkpoint_service import CheckpointService
 from bioetl.application.services.control_plane.run_manifest_inspection_service import (

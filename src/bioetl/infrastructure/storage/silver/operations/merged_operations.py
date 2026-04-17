@@ -14,10 +14,10 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.silver.merged_operations import (
-    _MergedSilverWriteRequest,
-    _PreparedMergedSilverWrite,
     _export_silver_merged_csv,
+    _MergedSilverWriteRequest,
     _prepare_merged_silver_write,
+    _PreparedMergedSilverWrite,
     _write_silver_merged_delta,
 )
 

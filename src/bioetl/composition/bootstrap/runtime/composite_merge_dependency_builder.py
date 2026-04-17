@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
+from bioetl.application.composite.join_execution import JoinExecutorService
 from bioetl.application.composite.runtime_wiring_api import (
     CoalescePolicyService,
     ColumnOrderService,
@@ -24,7 +25,6 @@ from bioetl.application.composite.runtime_wiring_api import (
     parse_pipeline_name,
     resolve_field_aliases_from_registry,
 )
-from bioetl.application.composite.join_execution import JoinExecutorService
 from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
     MergeDependenciesBundle,
 )

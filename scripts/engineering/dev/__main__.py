@@ -12,6 +12,7 @@ Commands:
     pretest-guardrails Run repository/docs/architecture preflight (shell)
     pytest-sharded     Run the recommended path-based pytest shards (shell)
     install-deps       Install project dependencies
+    migrate-deprecated-names  Rewrite deprecated import/name usage
     probe-quality      Measure narrow pytest/mypy startup and timeout behavior
     run-tests          Run tests (Python)
     mock-metrics       Start mock metrics server
@@ -28,6 +29,7 @@ from pathlib import Path
 
 COMMANDS: dict[str, str] = {
     "install-deps": "install_deps.py",
+    "migrate-deprecated-names": "python/migrate_deprecated_names.py",
     "probe-quality": "quality_gate_probe.py",
     "run-tests": "run_tests.py",
     "mock-metrics": "metrics_mock_server.py",

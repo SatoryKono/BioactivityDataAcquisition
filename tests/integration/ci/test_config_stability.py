@@ -428,21 +428,26 @@ class _InMemoryCheckpointPort:
         run_id: object,
         metadata: dict[str, object],
     ) -> None:
+        await asyncio.sleep(0)
         self._records[pipeline] = (run_id, metadata)
 
     async def load(
         self,
         pipeline: str,
     ) -> tuple[object, dict[str, object]] | None:
+        await asyncio.sleep(0)
         return self._records.get(pipeline)
 
     async def list_all(self) -> list[str]:
+        await asyncio.sleep(0)
         return sorted(self._records)
 
     async def delete(self, pipeline: str) -> None:
+        await asyncio.sleep(0)
         self._records.pop(pipeline, None)
 
     async def aclose(self) -> None:
+        await asyncio.sleep(0)
         return None
 
 

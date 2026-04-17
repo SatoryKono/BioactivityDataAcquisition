@@ -1,15 +1,66 @@
-# Scripts Documentation
+# scripts — Canonical Script Surface
 
-This directory contains development and operational scripts for the BioETL project.
+The `scripts/` root is intentionally compact.
 
-## Subdirectories
+## Root Policy
 
-- `dev/` - Development scripts and bootstrap tooling.
-- `ai/` - Canonical AI-facing setup, launch, diagnostics, checks, and MCP tooling.
-- `ci/` - CI/CD validation scripts.
-- `deployment/` - Deployment and Docker files.
-- `maintenance/` - Maintenance scripts.
-- `memory/` - Canonical Neo4j project-memory tooling.
-- `ops/` - General operational scripts and compatibility facades outside the AI/MCP and memory domains.
+- Root directories are capped and domain-oriented.
+- Root files are capped at three:
+  - `README.md`
+  - `catalog.yaml`
+  - `run.py`
+- Canonical logic lives in subpackages, not in root-level entrypoints.
 
-For more information, see the specific script documentation.
+## Root Directories
+
+- `scripts/ai` — AI launchers, MCP tooling, and agent support.
+- `scripts/data` — compatibility data facade.
+- `scripts/diagrams` — diagram generation, linting, and render quality gates.
+- `scripts/docs` — documentation build, drift checks, fixers, and matrix tooling.
+- `scripts/engineering` — CI, dev, QA, diagnostics, baselines, and repo governance.
+- `scripts/memory` — Neo4j-backed project memory utilities.
+- `scripts/ops` — runtime, maintenance, observability, migration, and support tooling.
+- `scripts/qa` — compatibility facade for historical grouped QA entrypoints.
+- `scripts/repo` — compatibility facade for historical repo-governance entrypoints.
+- `scripts/schema` — schema generation and validation contracts.
+
+## Canonical Entry Points
+
+Use grouped module entrypoints where available:
+
+```bash
+python -m scripts.run --help
+python scripts/run.py --help
+
+python -m scripts.docs --help
+python -m scripts.engineering.qa --help
+python -m scripts.engineering.repo --help
+python -m scripts.engineering.dev --help
+python -m scripts.ops --help
+python -m scripts.memory --help
+python -m scripts.diagrams --help
+python -m scripts.schema --help
+python -m scripts.ai --help
+```
+
+## Frequently Used Commands
+
+```bash
+python -m scripts.engineering.qa report-dep-map --check
+python -m scripts.docs build-site --strict
+python -m scripts.engineering.repo check-catalog --catalog scripts/catalog.yaml
+python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json
+python -m scripts.ops rerender-grafana
+python -m scripts.engineering.dev migrate-deprecated-names src/
+```
+
+## Catalog
+
+`scripts/catalog.yaml` is the governance manifest for canonical roots and group ownership.
+If you add or relocate script domains, update the catalog and rerun the repo governance checks.
+
+## Compatibility Layer
+
+- `scripts/qa/` and `scripts/repo/` are retained as thin compatibility facades.
+- Historical root-level wrappers have been consolidated into canonical domain packages.
+- New integrations should target grouped module commands or canonical package paths only.

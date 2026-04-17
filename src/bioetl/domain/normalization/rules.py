@@ -135,9 +135,7 @@ def _find_case_match(normalized: str, allowed_values: frozenset[str]) -> str | N
     return None
 
 
-def normalize_case(
-    value: Any, allowed_values: frozenset[str] | None = None
-) -> str | None:  # Any: Generic input value from various sources
+def normalize_case(value: Any, allowed_values: frozenset[str] | None = None) -> str | None:  # Any: Generic input value from various sources
     """Normalize case for enum-like fields.
 
     Args:
@@ -163,9 +161,7 @@ def normalize_case(
     return normalized
 
 
-def normalize_unit(
-    value: Any,
-) -> str | None:  # Any: Generic input value from various sources
+def normalize_unit(value: Any) -> str | None:  # Any: Generic input value from various sources
     """Canonicalize unit strings to standard format.
 
     Args:
@@ -189,9 +185,7 @@ def normalize_unit(
     return UNIT_MAPPING.get(normalized, normalized)
 
 
-def normalize_null(
-    value: Any,
-) -> Any:  # Any: Generic input value from various sources, Any: Generic return type to preserve original value type
+def normalize_null(value: Any) -> Any:  # Any: Generic input value from various sources, Any: Generic return type to preserve original value type
     """Convert pseudo-null values to proper None values.
 
     Args:

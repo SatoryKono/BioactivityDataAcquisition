@@ -5,12 +5,11 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.composite.column_service import ColumnOrderService
-
 # ColumnPriorityOrderer imported for backward compatibility during migration
 from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrderer,
 )
+from bioetl.application.composite.column_service import ColumnOrderService
 
 if TYPE_CHECKING:
     import polars as pl

@@ -16,7 +16,6 @@ from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestratorService,
     FallbackPolicyMixin,
 )
-from bioetl.infrastructure.adapters.filterable_mixin import raising_async_iterator
 from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
     _CrossRefFallbackPolicyMixin,
 )
@@ -49,6 +48,7 @@ from bioetl.infrastructure.adapters.crossref.types import (
     CrossRefBatchFetcher,
     CrossRefSearchPaginator,
 )
+from bioetl.infrastructure.adapters.filterable_mixin import raising_async_iterator
 
 __all__ = [
     "CROSSREF_API_BASE",

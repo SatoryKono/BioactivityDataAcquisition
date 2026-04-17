@@ -28,8 +28,8 @@ from bioetl.application.services.control_plane._run_manifest_diagnostics_replay 
     _resolve_replay_mode,
 )
 from bioetl.application.services.control_plane._run_manifest_diagnostics_summary import (
-    _FinalSummaryRequest,
     _build_final_summary,
+    _FinalSummaryRequest,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 

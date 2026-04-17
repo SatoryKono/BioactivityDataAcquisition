@@ -431,8 +431,6 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
     legacy_root_wrappers = {
         "scripts/run_pytest.sh",
         "scripts/run_pytest.ps1",
-        "scripts/generate_architecture_dependency_map.py",
-        "scripts/rerender_grafana_screenshots.py",
     }
     legacy_manual_ops_scripts = {
         "scripts/ops/maintenance/github/close_superseded_prs.sh",

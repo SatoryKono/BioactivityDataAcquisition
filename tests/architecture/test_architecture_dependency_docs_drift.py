@@ -48,14 +48,6 @@ def test_dependency_map_script_exists() -> None:
     assert script.exists(), "Missing dependency map generator script"
 
 
-def test_dependency_map_wrapper_is_compatibility_only() -> None:
-    wrapper = Path("scripts/generate_architecture_dependency_map.py").read_text(
-        encoding="utf-8"
-    )
-    assert "Compatibility wrapper" in wrapper
-    assert "scripts/engineering/qa/generate_architecture_dependency_map.py" in wrapper
-
-
 def test_mkdocs_nav_includes_dependency_map() -> None:
     mkdocs = Path("mkdocs.yml").read_text(encoding="utf-8")
     assert "02-architecture/generated/module-dependency-map.md" in mkdocs

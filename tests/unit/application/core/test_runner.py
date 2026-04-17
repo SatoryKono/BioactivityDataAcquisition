@@ -1027,6 +1027,7 @@ class TestPipelineRunnerCheckDataQuality:
         mock_lifecycle_service,
     ):
         """Test _check_data_quality delegates to PostrunService."""
+        await asyncio.sleep(0)
         from bioetl.application.core.postrun.service import (
             DQEvaluationStatus,
             DQResult,

@@ -16,9 +16,9 @@ import pyarrow as pa
 from deltalake import DeltaTable as _DeltaTable
 from deltalake import write_deltalake as _write_deltalake
 
+from bioetl.domain.config import KeyNullabilityRule
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import SilverWriteMode, WriteMode, WriteModePolicy
-from bioetl.domain.config import KeyNullabilityRule
 from bioetl.domain.ports import (
     AuditPort,
     MetadataCoordinatorPort,
@@ -33,44 +33,44 @@ from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
 )
-from bioetl.infrastructure.storage.silver.maintenance_mixin import (
-    SilverWriterMaintenanceMixin,
-)
 from bioetl.infrastructure.storage.delta.resilience import (
     SilverMergeResiliencePolicy,
 )
+from bioetl.infrastructure.storage.silver.maintenance_mixin import (
+    SilverWriterMaintenanceMixin,
+)
+from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+    SilverPostwriteOperations,
+)
+
+# SilverWriterValidationMixin removed from inheritance (composition pattern)
+# Validation operations now handled by SilverValidationOperations service
+from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+    _build_prepared_silver_write_payload,
+    _PreparedSilverWritePayload,
+    _SilverSchemaPolicyRequest,
+    _SilverWritePreparationRequest,
+)
+
 # SilverWriterArrowMixin removed from inheritance (composition pattern)
 # Arrow operations now handled by SilverArrowOperations service
 # SilverWriterDeltaMixin removed from inheritance (composition pattern)
 # Delta operations now handled by SilverDeltaOperations service
 # SilverWriterMergedMixin removed from inheritance (composition pattern)
 # Merged operations now handled by SilverMergedOperations service
-
 from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     _SilverWriteExecutionContext,
     _SilverWriteInvocation,
     execute_silver_write_pipeline,
     execute_silver_write_with_tracing,
 )
-from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
-    SilverPostwriteOperations,
-)
 
 # SilverWriterPostwriteMixin removed from inheritance (composition pattern)
 # Postwrite operations now handled by SilverPostwriteOperations service
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
-    SilverWriterRuntimeServicesRequest,
     SilverWriterRuntimeServices,
+    SilverWriterRuntimeServicesRequest,
     build_silver_writer_runtime_services,
-)
-
-# SilverWriterValidationMixin removed from inheritance (composition pattern)
-# Validation operations now handled by SilverValidationOperations service
-from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-    _PreparedSilverWritePayload,
-    _SilverSchemaPolicyRequest,
-    _SilverWritePreparationRequest,
-    _build_prepared_silver_write_payload,
 )
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_write_targets,
@@ -413,11 +413,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             and len(self._contract_rollout_policy.write_versions) > 1
         )
 
-    def _get_dispatch_write_method(
-        self,
-    ) -> Callable[
-        ..., Any
-    ]:  # Any: Bound dispatch methods return backend-specific awaitable payloads.
+    def _get_dispatch_write_method(self) -> Callable[..., Any]:  # Any: Bound dispatch methods return backend-specific awaitable payloads.
         """Get the dispatch write method from delta operations service or fallback to mixin."""
         if self._delta:
             return self._delta._dispatch_write_with_domain_errors

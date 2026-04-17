@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
@@ -118,6 +119,7 @@ def export_service(mock_reader, mock_catalog, mock_writer, mock_logger, tmp_path
 @pytest.mark.asyncio
 async def test_list_tables(export_service):
     """Test listing tables."""
+    await asyncio.sleep(0)
     tables = export_service.list_tables(layer="all")
     assert len(tables) == 1
     assert tables[0].name == "chembl.activity"

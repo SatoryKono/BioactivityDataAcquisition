@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from bioetl.application.services.execution.pipeline_runner_service import (
     PipelineNotFoundError,
-    PipelineRunResult,
     PipelineRunnerService,
+    PipelineRunResult,
     RunOptions,
     RunResult,
 )

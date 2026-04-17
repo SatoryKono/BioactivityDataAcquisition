@@ -48,7 +48,7 @@ This guide focuses on backend recovery, not MCP reconfiguration.
 PowerShell:
 
 ```powershell
-.\scripts\restart-docker.ps1
+.\scripts\ops\runtime\docker\restart-docker.ps1
 ```
 
 Or manually:
@@ -145,7 +145,7 @@ node query_test_docs_memory.js
 | `test_neo4j_localhost.js` | Localhost-specific connectivity test |
 | `seed_test_docs_memory.js` | Seed block for test strategy + docs source-of-truth memory |
 | `query_test_docs_memory.js` | Retrieval check for seeded test/docs memory |
-| `scripts/restart-docker.ps1` | Docker Desktop restart helper |
+| `scripts/ops/runtime/docker/restart-docker.ps1` | Docker Desktop restart helper |
 | `scripts/memory/setup/wsl_startup.sh` | WSL-aware setup and validation path |
 
 ## Troubleshooting

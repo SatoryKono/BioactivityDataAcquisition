@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import SilverWriteMode
@@ -484,8 +484,8 @@ class SilverMetadataOperations:
 
         # Use the same validation and building logic as the original mixin
         from bioetl.infrastructure.storage.silver.audit_operations import (
-            _SilverAuditWriteRequest,
             _build_silver_audit_entry,
+            _SilverAuditWriteRequest,
         )
 
         # Create a wrapper that provides the logger attribute expected by audit operations

@@ -38,6 +38,4 @@ class SilverMaintenanceContext:
 
     table_name: str
     operation_type: str  # 'vacuum', 'optimize', 'export'
-    operation_params: dict[
-        str, Any
-    ]  # Any: Flexible operation parameters for different maintenance tasks
+    operation_params: dict[str, Any]  # Any: Flexible operation parameters for different maintenance tasks

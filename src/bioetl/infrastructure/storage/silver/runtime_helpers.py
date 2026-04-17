@@ -26,21 +26,20 @@ from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
     SilverMergeResiliencePolicy,
 )
-from bioetl.infrastructure.storage.support.retention import RetentionPolicy
-from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (
-    SilverMaintenanceOperations,
-)
-from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
-    SilverMetadataOperations,
-)
 from bioetl.infrastructure.storage.silver.operations.arrow_operations import (
     SilverArrowOperations,
 )
 from bioetl.infrastructure.storage.silver.operations.delta_operations import (
     SilverDeltaOperations,
 )
+from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (
+    SilverMaintenanceOperations,
+)
 from bioetl.infrastructure.storage.silver.operations.merged_operations import (
     SilverMergedOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+    SilverMetadataOperations,
 )
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     SilverPostwriteOperations,
@@ -54,6 +53,7 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _validate_key_nullability_impl,
     _validate_write_mode_impl,
 )
+from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 if TYPE_CHECKING:
@@ -229,10 +229,10 @@ def build_silver_writer_runtime_services(
     merged_ops = None
     if request.csv_exporter is not None and request.base_path is not None:
         # Import here to avoid circular imports
-        from bioetl.infrastructure.storage.silver.support import resolve_table_path
         from bioetl.infrastructure.storage.delta.arrow_converter import (
             ArrowDataConverter,
         )
+        from bioetl.infrastructure.storage.silver.support import resolve_table_path
 
         # For now, we'll create the merged operations with a placeholder metadata writer
         # The real implementation will be set when SilverWriter is fully initialized

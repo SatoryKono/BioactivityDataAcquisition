@@ -438,6 +438,7 @@ class TestPipelineRunnerServiceRun:
             called = False
 
             async def run(self) -> None:
+                await asyncio.sleep(0)
                 self.called = True
 
         runner = MinimalRunner()

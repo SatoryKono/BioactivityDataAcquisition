@@ -24,9 +24,8 @@ from bioetl.application.composite.checkpoint import (
     CompositeCheckpointService,
     CompositeCheckpointState,
 )
-
-from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.column_renamer import ColumnRenamer
+from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
 from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,

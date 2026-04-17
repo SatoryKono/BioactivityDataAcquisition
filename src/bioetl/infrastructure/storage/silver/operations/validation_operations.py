@@ -14,9 +14,6 @@ from bioetl.domain.ports import LoggerPort, MetricsPort, SilverValidatorPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
 from bioetl.infrastructure.storage.silver.validation_operations import (
-    _SilverSchemaPolicyRequest,
-    _SilverWritePreparationRequest,
-    _ValidatedSilverWriteContext,
     _build_prepared_silver_write_payload,
     _check_schema_drift,
     _deduplicate_by_primary_keys_impl,
@@ -24,12 +21,15 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _enforce_write_policy,
     _finalize_silver_write_payload,
     _PreparedSilverWritePayload,
+    _SilverSchemaPolicyRequest,
+    _SilverWritePreparationRequest,
     _sync_validate_and_build_arrow,
     _to_policy_write_mode_impl,
     _validate_key_nullability_impl,
     _validate_records,
     _validate_silver_pandera,
     _validate_write_mode_impl,
+    _ValidatedSilverWriteContext,
 )
 
 if TYPE_CHECKING:

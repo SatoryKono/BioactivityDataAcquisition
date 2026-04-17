@@ -85,7 +85,6 @@ python -m scripts.engineering.qa check-constructor-args -- --warn-only
 python -m scripts.engineering.qa analyze-duplicate-functions
 ```
 
-`scripts/generate_architecture_dependency_map.py` remains a compatibility wrapper only.
 The legacy direct paths for the historical architecture, application-deps, and
 constructor-args checks remain supported during the migration window, but new
 integrations should use the grouped QA commands above. The grouped QA commands
