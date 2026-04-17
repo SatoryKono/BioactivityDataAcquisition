@@ -2870,8 +2870,7 @@ def _alert_rule_overrides(
     group_name: str,
 ) -> tuple[dict[str, object], dict[str, object]]:
     alerts_config = _alerts_config_section(memory_mapping)
-    groups = alerts_config.get("groups")
-    rules = alerts_config.get("rules")
+    groups, rules = _alert_override_maps(alerts_config)
     group_rule = groups.get(group_name) if isinstance(groups, dict) and isinstance(groups.get(group_name), dict) else {}
     alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
     return group_rule, alert_rule
@@ -2880,6 +2879,12 @@ def _alert_rule_overrides(
 def _alerts_config_section(memory_mapping: dict[str, object]) -> dict[str, object]:
     alerts_config = memory_mapping.get("alerts")
     return alerts_config if isinstance(alerts_config, dict) else {}
+
+
+def _alert_override_maps(
+    alerts_config: dict[str, object],
+) -> tuple[object, object]:
+    return alerts_config.get("groups"), alerts_config.get("rules")
 
 
 def _pipeline_targets_for_alert(
@@ -3025,7 +3030,7 @@ def _select_alert_targets(
     group_name: str,
     expr: str,
     dimensions: set[str],
-) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
+) -> "AlertTargetSelection":
     pipeline_targets, provider_targets, contract_targets = _raw_alert_targets(
         context,
         alert_name=alert_name,
@@ -3036,8 +3041,8 @@ def _select_alert_targets(
     return _sorted_alert_targets(pipeline_targets, provider_targets, contract_targets)
 
 
-def _sorted_unique_node_keys(nodes: list[NodeKey]) -> list[NodeKey]:
-    return sorted(set(nodes), key=lambda node: node.name)
+def _sorted_unique_node_keys(nodes: Iterable[NodeKey]) -> tuple[NodeKey, ...]:
+    return tuple(sorted(set(nodes), key=lambda node: node.name))
 
 
 def _raw_alert_targets(
@@ -3083,11 +3088,11 @@ def _sorted_alert_targets(
     pipeline_targets: list[NodeKey],
     provider_targets: list[NodeKey],
     contract_targets: list[NodeKey],
-) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
-    return (
-        _sorted_unique_node_keys(pipeline_targets),
-        _sorted_unique_node_keys(provider_targets),
-        _sorted_unique_node_keys(contract_targets),
+) -> "AlertTargetSelection":
+    return AlertTargetSelection(
+        selected_pipelines=_sorted_unique_node_keys(pipeline_targets),
+        selected_providers=_sorted_unique_node_keys(provider_targets),
+        selected_contracts=_sorted_unique_node_keys(contract_targets),
     )
 
 
@@ -3098,15 +3103,13 @@ def _select_alert_dashboards(
     dashboard_metrics: dict[NodeKey, set[str]],
     memory_mapping: dict[str, object],
 ) -> list[NodeKey]:
-    alert_rule, dashboard_fallbacks, fallback_groups = _alert_dashboard_config(
+    config = _alert_dashboard_config(
         memory_mapping,
         alert_name=alert_name,
     )
-    explicit_dashboards = _configured_dashboard_targets(alert_rule.get("dashboards"))
-    common_dashboards = _configured_dashboard_targets(dashboard_fallbacks.get("common"))
-    group_dashboards = _configured_dashboard_targets(
-        fallback_groups.get(group_name) if isinstance(fallback_groups, dict) else None
-    )
+    explicit_dashboards = _configured_dashboard_targets(config.alert_rule.get("dashboards"))
+    common_dashboards = _configured_dashboard_targets(config.dashboard_fallbacks.get("common"))
+    group_dashboards = _configured_dashboard_targets(config.fallback_groups.get(group_name))
     metric_dashboards = _metric_dashboard_targets(expr, dashboard_metrics)
     return _merged_alert_dashboard_targets(
         explicit_dashboards=explicit_dashboards,
@@ -3128,24 +3131,57 @@ def _merged_alert_dashboard_targets(
     if not metric_dashboards:
         selected.update(group_dashboards)
     selected.update(common_dashboards)
-    return sorted(selected, key=lambda node: node.name)
+    return _sorted_node_keys(selected)
+
+
+def _sorted_node_keys(nodes: Iterable[NodeKey]) -> list[NodeKey]:
+    return sorted(nodes, key=lambda node: node.name)
+
+
+@dataclass(frozen=True)
+class AlertDashboardConfig:
+    alert_rule: dict[str, object]
+    dashboard_fallbacks: dict[str, object]
+    fallback_groups: dict[str, object]
 
 
 def _alert_dashboard_config(
     memory_mapping: dict[str, object],
     *,
     alert_name: str,
-) -> tuple[dict[str, object], dict[str, object], dict[str, object] | object]:
+) -> AlertDashboardConfig:
     alerts_config = _alerts_config_section(memory_mapping)
-    rules = alerts_config.get("rules")
-    dashboard_fallbacks = (
-        alerts_config.get("dashboard_fallbacks")
-        if isinstance(alerts_config.get("dashboard_fallbacks"), dict)
-        else {}
+    dashboard_fallbacks = _alert_dashboard_fallbacks(alerts_config)
+    return AlertDashboardConfig(
+        alert_rule=_configured_alert_rule(alerts_config, alert_name),
+        dashboard_fallbacks=dashboard_fallbacks,
+        fallback_groups=_alert_dashboard_fallback_groups(dashboard_fallbacks),
     )
-    alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
-    fallback_groups = dashboard_fallbacks.get("groups") if isinstance(dashboard_fallbacks, dict) else {}
-    return alert_rule, dashboard_fallbacks, fallback_groups
+
+
+def _configured_alert_rule(
+    alerts_config: dict[str, object],
+    alert_name: str,
+) -> dict[str, object]:
+    rules = alerts_config.get("rules")
+    if not isinstance(rules, dict):
+        return {}
+    alert_rule = rules.get(alert_name)
+    return alert_rule if isinstance(alert_rule, dict) else {}
+
+
+def _alert_dashboard_fallbacks(
+    alerts_config: dict[str, object],
+) -> dict[str, object]:
+    dashboard_fallbacks = alerts_config.get("dashboard_fallbacks")
+    return dashboard_fallbacks if isinstance(dashboard_fallbacks, dict) else {}
+
+
+def _alert_dashboard_fallback_groups(
+    dashboard_fallbacks: dict[str, object],
+) -> dict[str, object]:
+    fallback_groups = dashboard_fallbacks.get("groups")
+    return fallback_groups if isinstance(fallback_groups, dict) else {}
 
 
 def _configured_dashboard_targets(values: object) -> set[NodeKey]:
@@ -11223,11 +11259,20 @@ def _entity_pipeline_node_identity(node: GraphNode) -> tuple[str, str] | None:
 
 def _provider_pipeline_test_index(snapshot: GraphSnapshot) -> dict[str, list[NodeKey]]:
     provider_pipeline_index: dict[str, list[NodeKey]] = {}
-    for node in snapshot.nodes.values():
-        provider = _provider_pipeline_index_key(node)
-        if provider is not None:
-            provider_pipeline_index.setdefault(provider, []).append(node.key)
+    for provider, node_key in _provider_pipeline_index_entries(snapshot):
+        provider_pipeline_index.setdefault(provider, []).append(node_key)
     return provider_pipeline_index
+
+
+def _provider_pipeline_index_entries(
+    snapshot: GraphSnapshot,
+) -> tuple[tuple[str, NodeKey], ...]:
+    return tuple(
+        (provider, node.key)
+        for node in snapshot.nodes.values()
+        for provider in [_provider_pipeline_index_key(node)]
+        if provider is not None
+    )
 
 
 def _provider_pipeline_index_key(node: GraphNode) -> str | None:
@@ -11242,12 +11287,16 @@ def _pipeline_test_linker(
     relation_type: str,
 ) -> Callable[[NodeKey, str, str], None]:
     def link_test_target(pipeline_key: NodeKey, test_path: str, provenance: str) -> None:
-        artifact_key = NodeKey("test_artifact", test_path)
+        artifact_key = _test_artifact_key(test_path)
         if artifact_key not in snapshot.nodes:
             return
         _link_pipeline_test_artifact(snapshot, pipeline_key, relation_type, artifact_key, provenance)
         _link_pipeline_test_suite(snapshot, pipeline_key, relation_type, artifact_key, provenance)
     return link_test_target
+
+
+def _test_artifact_key(test_path: str) -> NodeKey:
+    return NodeKey("test_artifact", test_path)
 
 
 def _link_pipeline_test_artifact(
@@ -11267,7 +11316,7 @@ def _link_pipeline_test_suite(
     artifact_key: NodeKey,
     provenance: str,
 ) -> None:
-    suite_name = TEST_SURFACES.get(str(snapshot.nodes[artifact_key].properties.get("suite", "")))
+    suite_name = _pipeline_test_suite_name(snapshot, artifact_key)
     if suite_name is None:
         return
     snapshot.add_relation(
@@ -11278,18 +11327,23 @@ def _link_pipeline_test_suite(
     )
 
 
+def _pipeline_test_suite_name(
+    snapshot: GraphSnapshot,
+    artifact_key: NodeKey,
+) -> str | None:
+    return TEST_SURFACES.get(str(snapshot.nodes[artifact_key].properties.get("suite", "")))
+
+
 def _link_entity_pipeline_tests(
     link_test_target: Callable[[NodeKey, str, str], None],
     entity_pipeline_index: dict[tuple[str, str], NodeKey],
     ownership: dict[object, object],
 ) -> None:
-    for pipeline_key, test_paths in _entity_pipeline_contract_tests(entity_pipeline_index, ownership):
-        _link_pipeline_test_paths(
-            link_test_target,
-            pipeline_key,
-            test_paths,
-            provenance="impact_pipeline_tests",
-        )
+    _link_pipeline_test_targets(
+        link_test_target,
+        _entity_pipeline_contract_tests(entity_pipeline_index, ownership),
+        provenance="impact_pipeline_tests",
+    )
 
 
 def _entity_pipeline_contract_tests(
@@ -11309,16 +11363,23 @@ def _entity_pipeline_contract_target(
     contract_ref: object,
     raw_tests: object,
 ) -> tuple[NodeKey, tuple[str, ...]] | None:
-    if not isinstance(contract_ref, str) or "." not in contract_ref:
+    contract_identity = _contract_ref_identity(contract_ref)
+    if contract_identity is None:
         return None
-    provider_name, entity_name = contract_ref.split(".", 1)
-    pipeline_key = entity_pipeline_index.get((provider_name, entity_name))
+    pipeline_key = entity_pipeline_index.get(contract_identity)
     if pipeline_key is None:
         return None
     test_paths = tuple(_as_string_list(raw_tests))
     if not test_paths:
         return None
     return pipeline_key, test_paths
+
+
+def _contract_ref_identity(contract_ref: object) -> tuple[str, str] | None:
+    if not isinstance(contract_ref, str) or "." not in contract_ref:
+        return None
+    provider_name, entity_name = contract_ref.split(".", 1)
+    return provider_name, entity_name
 
 
 def _link_provider_regression_suite_tests(
@@ -11336,6 +11397,21 @@ def _link_provider_regression_suite_tests(
             provider_pipeline_index,
             suite_name=suite_name,
             provider_targets=provider_targets,
+        )
+
+
+def _link_pipeline_test_targets(
+    link_test_target: Callable[[NodeKey, str, str], None],
+    targets: tuple[tuple[NodeKey, tuple[str, ...]], ...],
+    *,
+    provenance: str,
+) -> None:
+    for pipeline_key, test_paths in targets:
+        _link_pipeline_test_paths(
+            link_test_target,
+            pipeline_key,
+            test_paths,
+            provenance=provenance,
         )
 
 
@@ -11357,10 +11433,14 @@ def _link_provider_suite_targets(
     suite_name: str,
     provider_targets: tuple[tuple[str, str], ...],
 ) -> None:
-    provenance = f"impact_pipeline_regression_suite:{suite_name}"
+    provenance = _provider_suite_provenance(suite_name)
     for provider_name, raw_test_path in provider_targets:
         for pipeline_key in provider_pipeline_index.get(provider_name, []):
             link_test_target(pipeline_key, raw_test_path, provenance)
+
+
+def _provider_suite_provenance(suite_name: str) -> str:
+    return f"impact_pipeline_regression_suite:{suite_name}"
 
 
 def _provider_regression_suite_targets(
@@ -11393,10 +11473,20 @@ def _provider_regression_provider_targets(
     if not isinstance(providers, dict):
         return ()
     return tuple(
-        (provider_name, raw_test_path)
+        target
         for provider_name, raw_test_path in providers.items()
-        if isinstance(provider_name, str) and isinstance(raw_test_path, str)
+        for target in [_provider_regression_provider_target(provider_name, raw_test_path)]
+        if target is not None
     )
+
+
+def _provider_regression_provider_target(
+    provider_name: object,
+    raw_test_path: object,
+) -> tuple[str, str] | None:
+    if isinstance(provider_name, str) and isinstance(raw_test_path, str):
+        return provider_name, raw_test_path
+    return None
 
 
 def _add_alert_surfaces(
@@ -11759,20 +11849,14 @@ def _link_alert_targets(
     memory_mapping: dict[str, object],
 ) -> None:
     expr, dimensions = _alert_target_inputs(rule)
-    selected_pipelines, selected_providers, selected_contracts = _select_alert_targets(
+    selection = _select_alert_targets(
         target_context,
         alert_name,
         group_name,
         expr,
         dimensions,
     )
-    _link_selected_alert_targets(
-        snapshot,
-        alert,
-        selected_pipelines=selected_pipelines,
-        selected_providers=selected_providers,
-        selected_contracts=selected_contracts,
-    )
+    _link_selected_alert_targets(snapshot, alert, selection)
     _link_alert_observer_dashboards(
         snapshot,
         alert,
@@ -11784,10 +11868,27 @@ def _link_alert_targets(
     )
 
 
+@dataclass(frozen=True)
+class AlertTargetInputs:
+    expr: str
+    dimensions: set[str]
+
+
+@dataclass(frozen=True)
+class AlertTargetSelection:
+    selected_pipelines: tuple[NodeKey, ...]
+    selected_providers: tuple[NodeKey, ...]
+    selected_contracts: tuple[NodeKey, ...]
+
+
 def _alert_target_inputs(rule: dict[str, object]) -> tuple[str, set[str]]:
     annotations = _alert_annotations(rule)
     expr = str(rule.get("expr", ""))
-    return expr, _runtime_dimensions(expr, _alert_dimension_text(annotations))
+    context = AlertTargetInputs(
+        expr=expr,
+        dimensions=_runtime_dimensions(expr, _alert_dimension_text(annotations)),
+    )
+    return context.expr, context.dimensions
 
 
 def _alert_annotations(rule: dict[str, object]) -> dict[str, object]:
@@ -11807,29 +11908,23 @@ def _alert_dimension_text(annotations: dict[str, object]) -> str:
 def _link_selected_alert_targets(
     snapshot: GraphSnapshot,
     alert: NodeKey,
-    *,
-    selected_pipelines: tuple[NodeKey, ...],
-    selected_providers: tuple[NodeKey, ...],
-    selected_contracts: tuple[NodeKey, ...],
+    selection: AlertTargetSelection,
 ) -> None:
-    for target_group in _selected_alert_target_groups(
-        selected_pipelines=selected_pipelines,
-        selected_providers=selected_providers,
-        selected_contracts=selected_contracts,
-    ):
+    for target_group in _selected_alert_target_groups(selection):
         _link_alert_target_group(snapshot, alert, target_group)
 
 
 def _selected_alert_target_groups(
-    *,
-    selected_pipelines: tuple[NodeKey, ...],
-    selected_providers: tuple[NodeKey, ...],
-    selected_contracts: tuple[NodeKey, ...],
+    selection: AlertTargetSelection,
 ) -> tuple[tuple[NodeKey, ...], ...]:
-    return (
-        selected_pipelines,
-        selected_providers,
-        selected_contracts,
+    return tuple(
+        targets
+        for targets in (
+            selection.selected_pipelines,
+            selection.selected_providers,
+            selection.selected_contracts,
+        )
+        if targets
     )
 
 
@@ -11851,15 +11946,24 @@ def _link_alert_observer_dashboards(
     dashboard_metrics: dict[NodeKey, frozenset[str]],
     memory_mapping: dict[str, object],
 ) -> None:
-    for dashboard in _selected_alert_dashboards(
-        alert_name,
-        group_name,
-        expr,
-        dashboard_metrics,
-        memory_mapping,
+    for dashboard in _existing_snapshot_nodes(
+        snapshot,
+        _selected_alert_dashboards(
+            alert_name,
+            group_name,
+            expr,
+            dashboard_metrics,
+            memory_mapping,
+        ),
     ):
-        if dashboard in snapshot.nodes:
-            snapshot.add_relation(alert, "OBSERVED_BY", dashboard, provenance="impact_alerts")
+        snapshot.add_relation(alert, "OBSERVED_BY", dashboard, provenance="impact_alerts")
+
+
+def _existing_snapshot_nodes(
+    snapshot: GraphSnapshot,
+    nodes: Iterable[NodeKey],
+) -> tuple[NodeKey, ...]:
+    return tuple(node for node in nodes if node in snapshot.nodes)
 
 
 def _selected_alert_dashboards(
@@ -12034,10 +12138,17 @@ def _governance_policy_spec(
     target_group: Sequence[NodeKey],
     extra_target_group: Sequence[NodeKey] | None = None,
 ) -> tuple[NodeKey, tuple[Sequence[NodeKey], ...]]:
-    target_groups: tuple[Sequence[NodeKey], ...] = (
-        (target_group,) if extra_target_group is None else (target_group, extra_target_group)
+    return NodeKey("policy_surface", policy_name), _governance_target_groups(
+        target_group,
+        extra_target_group,
     )
-    return NodeKey("policy_surface", policy_name), target_groups
+
+
+def _governance_target_groups(
+    target_group: Sequence[NodeKey],
+    extra_target_group: Sequence[NodeKey] | None = None,
+) -> tuple[Sequence[NodeKey], ...]:
+    return (target_group,) if extra_target_group is None else (target_group, extra_target_group)
 
 
 def _link_policy_governance_group(
@@ -13016,6 +13127,27 @@ def _live_managed_relation_count(client: Neo4jHttpClient, relation_type: str) ->
     ).get(relation_type, 0)
 
 
+def _managed_sync_run_clause(
+    alias: str,
+    sync_run: str | None,
+) -> str:
+    return f"AND coalesce({alias}.sync_run, '') = $sync_run " if sync_run else ""
+
+
+def _count_rows_by_key(
+    rows: list[dict[str, JsonValue]],
+    keys: tuple[str, ...],
+    key_field: str,
+) -> dict[str, int]:
+    counts = {key: 0 for key in keys}
+    for row in rows:
+        key_value = row.get(key_field)
+        count = row.get("count")
+        if isinstance(key_value, str) and isinstance(count, (int, float)):
+            counts[key_value] = int(count)
+    return counts
+
+
 def _live_managed_node_counts(
     client: Neo4jHttpClient,
     labels: tuple[str, ...],
@@ -13025,7 +13157,6 @@ def _live_managed_node_counts(
 ) -> dict[str, int]:
     if not labels:
         return {}
-    sync_run_clause = "AND coalesce(n.sync_run, '') = $sync_run " if sync_run else ""
     rows = client.query(
         (
             "UNWIND $labels AS label "
@@ -13033,7 +13164,7 @@ def _live_managed_node_counts(
             "WHERE label IN labels(n) "
             "AND coalesce(n.managed_by, '') = $managed_by "
             "AND coalesce(n.ingest_wave, '') = $ingest_wave "
-            f"{sync_run_clause}"
+            f"{_managed_sync_run_clause('n', sync_run)}"
             "RETURN label, count(n) AS count "
             "ORDER BY label"
         ),
@@ -13045,13 +13176,7 @@ def _live_managed_node_counts(
         },
         context=context,
     )
-    counts = {label: 0 for label in labels}
-    for row in rows:
-        label = row.get("label")
-        count = row.get("count")
-        if isinstance(label, str) and isinstance(count, (int, float)):
-            counts[label] = int(count)
-    return counts
+    return _count_rows_by_key(rows, labels, "label")
 
 
 def _live_managed_relation_counts(
@@ -13063,7 +13188,6 @@ def _live_managed_relation_counts(
 ) -> dict[str, int]:
     if not relation_types:
         return {}
-    sync_run_clause = "AND coalesce(r.sync_run, '') = $sync_run " if sync_run else ""
     rows = client.query(
         (
             "UNWIND $relation_types AS relation_type "
@@ -13071,7 +13195,7 @@ def _live_managed_relation_counts(
             "WHERE type(r) = relation_type "
             "AND coalesce(r.managed_by, '') = $managed_by "
             "AND coalesce(r.ingest_wave, '') = $ingest_wave "
-            f"{sync_run_clause}"
+            f"{_managed_sync_run_clause('r', sync_run)}"
             "RETURN relation_type, count(r) AS count "
             "ORDER BY relation_type"
         ),
@@ -13083,13 +13207,7 @@ def _live_managed_relation_counts(
         },
         context=context,
     )
-    counts = {relation_type: 0 for relation_type in relation_types}
-    for row in rows:
-        relation_type = row.get("relation_type")
-        count = row.get("count")
-        if isinstance(relation_type, str) and isinstance(count, (int, float)):
-            counts[relation_type] = int(count)
-    return counts
+    return _count_rows_by_key(rows, relation_types, "relation_type")
 
 
 def _targeted_apply_required_anchor_labels(snapshot: GraphSnapshot) -> tuple[str, ...]:
@@ -13131,35 +13249,46 @@ def _missing_managed_anchor_keys(
     chunk_size = 250
     for start in range(0, len(anchor_keys), chunk_size):
         chunk = anchor_keys[start : start + chunk_size]
-        rows = client.query(
-            (
-                "UNWIND $anchors AS anchor "
-                "OPTIONAL MATCH (n) "
-                "WHERE anchor.label IN labels(n) "
-                "AND n.name = anchor.name "
-                "AND coalesce(n.managed_by, '') = $managed_by "
-                "AND coalesce(n.ingest_wave, '') = $ingest_wave "
-                "RETURN anchor.label AS label, anchor.name AS name, count(n) AS count "
-                "ORDER BY label, name"
-            ),
-            {
-                "anchors": [{"label": key.label, "name": key.name} for key in chunk],
-                "managed_by": DEFAULT_MANAGED_BY,
-                "ingest_wave": DEFAULT_INGEST_WAVE,
-            },
-            context=context,
-        )
-        live_counts = {
-            NodeKey(str(row["label"]), str(row["name"])): int(row["count"])
-            for row in rows
-            if isinstance(row.get("label"), str)
-            and isinstance(row.get("name"), str)
-            and isinstance(row.get("count"), (int, float))
-        }
-        for key in chunk:
-            if live_counts.get(key, 0) == 0:
-                missing_keys.append(key)
+        missing_keys.extend(_missing_anchor_keys_in_chunk(client, chunk, context=context))
     return tuple(missing_keys)
+
+
+def _missing_anchor_keys_in_chunk(
+    client: Neo4jHttpClient,
+    chunk: tuple[NodeKey, ...],
+    *,
+    context: str,
+) -> list[NodeKey]:
+    rows = client.query(
+        (
+            "UNWIND $anchors AS anchor "
+            "OPTIONAL MATCH (n) "
+            "WHERE anchor.label IN labels(n) "
+            "AND n.name = anchor.name "
+            "AND coalesce(n.managed_by, '') = $managed_by "
+            "AND coalesce(n.ingest_wave, '') = $ingest_wave "
+            "RETURN anchor.label AS label, anchor.name AS name, count(n) AS count "
+            "ORDER BY label, name"
+        ),
+        {
+            "anchors": [{"label": key.label, "name": key.name} for key in chunk],
+            "managed_by": DEFAULT_MANAGED_BY,
+            "ingest_wave": DEFAULT_INGEST_WAVE,
+        },
+        context=context,
+    )
+    live_counts = _anchor_count_rows(rows)
+    return [key for key in chunk if live_counts.get(key, 0) == 0]
+
+
+def _anchor_count_rows(rows: list[dict[str, JsonValue]]) -> dict[NodeKey, int]:
+    return {
+        NodeKey(str(row["label"]), str(row["name"])): int(row["count"])
+        for row in rows
+        if isinstance(row.get("label"), str)
+        and isinstance(row.get("name"), str)
+        and isinstance(row.get("count"), (int, float))
+    }
 
 
 def _ensure_targeted_apply_prerequisites(
@@ -13261,6 +13390,46 @@ def _retry_missing_groups(
     )
 
 
+def _critical_analysis_retry_batch_size(batch_size: int) -> int:
+    return max(1, min(batch_size, 5))
+
+
+def _refresh_node_counts_if_retried(
+    client: Neo4jHttpClient,
+    active_node_labels: list[str],
+    missing_node_labels: list[str],
+    *,
+    sync_run: str | None,
+    live_node_counts: dict[str, int],
+) -> dict[str, int]:
+    if not missing_node_labels:
+        return live_node_counts
+    return _live_managed_node_counts(
+        client,
+        tuple(active_node_labels),
+        context="post-retry critical node verification",
+        sync_run=sync_run,
+    )
+
+
+def _refresh_relation_counts_if_retried(
+    client: Neo4jHttpClient,
+    active_relation_types: list[str],
+    missing_relation_types: list[str],
+    *,
+    sync_run: str | None,
+    live_relation_counts: dict[str, int],
+) -> dict[str, int]:
+    if not missing_relation_types:
+        return live_relation_counts
+    return _live_managed_relation_counts(
+        client,
+        tuple(active_relation_types),
+        context="post-retry critical relation verification",
+        sync_run=sync_run,
+    )
+
+
 def _group_mismatch_messages(
     active_names: list[str],
     grouped_statements: dict[str, list[dict[str, JsonValue]]],
@@ -13278,6 +13447,15 @@ def _group_mismatch_messages(
     return mismatches
 
 
+def _raise_analysis_group_mismatches(
+    mismatches: list[str],
+    *,
+    prefix: str,
+) -> None:
+    if mismatches:
+        raise RuntimeError(prefix + "; ".join(mismatches))
+
+
 def _retry_critical_analysis_groups(
     client: Neo4jHttpClient,
     node_groups: dict[str, list[dict[str, JsonValue]]],
@@ -13285,7 +13463,7 @@ def _retry_critical_analysis_groups(
     batch_size: int,
     sync_run: str | None = None,
 ) -> None:
-    retry_batch_size = max(1, min(batch_size, 5))
+    retry_batch_size = _critical_analysis_retry_batch_size(batch_size)
     active_node_labels = _active_group_names(CRITICAL_ANALYSIS_NODE_LABELS, node_groups)
     active_relation_types = _active_group_names(CRITICAL_ANALYSIS_RELATION_TYPES, relation_groups)
     live_node_counts, live_relation_counts = _critical_analysis_group_counts(
@@ -13307,13 +13485,13 @@ def _retry_critical_analysis_groups(
         retry_batch_size,
         kind="critical node retry",
     )
-    if missing_node_labels:
-        live_node_counts = _live_managed_node_counts(
-            client,
-            tuple(active_node_labels),
-            context="post-retry critical node verification",
-            sync_run=sync_run,
-        )
+    live_node_counts = _refresh_node_counts_if_retried(
+        client,
+        active_node_labels,
+        missing_node_labels,
+        sync_run=sync_run,
+        live_node_counts=live_node_counts,
+    )
 
     missing_relation_types = _missing_group_names(
         active_relation_types,
@@ -13327,13 +13505,13 @@ def _retry_critical_analysis_groups(
         retry_batch_size,
         kind="critical relation retry",
     )
-    if missing_relation_types:
-        live_relation_counts = _live_managed_relation_counts(
-            client,
-            tuple(active_relation_types),
-            context="post-retry critical relation verification",
-            sync_run=sync_run,
-        )
+    live_relation_counts = _refresh_relation_counts_if_retried(
+        client,
+        active_relation_types,
+        missing_relation_types,
+        sync_run=sync_run,
+        live_relation_counts=live_relation_counts,
+    )
 
     missing_after_retry = _critical_analysis_mismatch_messages(
         active_node_labels=active_node_labels,
@@ -13343,11 +13521,10 @@ def _retry_critical_analysis_groups(
         relation_groups=relation_groups,
         live_relation_counts=live_relation_counts,
     )
-    if missing_after_retry:
-        raise RuntimeError(
-            "Post-apply verification failed for critical analysis groups: "
-            + "; ".join(missing_after_retry)
-        )
+    _raise_analysis_group_mismatches(
+        missing_after_retry,
+        prefix="Post-apply verification failed for critical analysis groups: ",
+    )
 
 
 def _critical_analysis_group_counts(
@@ -13455,14 +13632,14 @@ def _verify_expected_group_counts(
             for mismatch in mismatches
             if any(token in mismatch for token in active_tokens)
         ]
-        if critical_mismatches:
-            raise RuntimeError(
-                "Post-apply verification failed for critical analysis groups: "
-                + "; ".join(critical_mismatches)
-            )
-    elif mismatches:
-        raise RuntimeError(
-            "Post-apply verification failed for targeted sync groups: " + "; ".join(mismatches)
+        _raise_analysis_group_mismatches(
+            critical_mismatches,
+            prefix="Post-apply verification failed for critical analysis groups: ",
+        )
+    else:
+        _raise_analysis_group_mismatches(
+            mismatches,
+            prefix="Post-apply verification failed for targeted sync groups: ",
         )
 
 
@@ -13503,6 +13680,10 @@ def _group_count_mismatches(
     return mismatches
 
 
+def _group_names(grouped_statements: dict[str, list[dict[str, JsonValue]]]) -> tuple[str, ...]:
+    return tuple(sorted(grouped_statements))
+
+
 def _expected_group_counts(
     client: Neo4jHttpClient,
     *,
@@ -13513,13 +13694,13 @@ def _expected_group_counts(
     return (
         _live_managed_node_counts(
             client,
-            tuple(sorted(node_groups)),
+            _group_names(node_groups),
             context="post-apply node group verification",
             sync_run=sync_run,
         ),
         _live_managed_relation_counts(
             client,
-            tuple(sorted(relation_groups)),
+            _group_names(relation_groups),
             context="post-apply relation group verification",
             sync_run=sync_run,
         ),
@@ -13593,6 +13774,28 @@ def _missing_node_support_names(
 def _append_support_issue(issues: list[str], prefix: str, names: list[str]) -> None:
     if names:
         issues.append(f"{prefix}: {', '.join(names[:10])}")
+
+
+def _relation_requirement_keys(
+    relations: tuple[GraphRelation, ...],
+) -> set[tuple[str, str, str, str]]:
+    return {
+        (rel.source.label, rel.source.name, rel.relation_type, rel.target.label)
+        for rel in relations
+    }
+
+
+def _append_snapshot_support_issues(
+    issues: list[str],
+    snapshot: GraphSnapshot,
+    relations: tuple[GraphRelation, ...],
+) -> None:
+    for prefix, label, predicate in _snapshot_support_specs():
+        _append_support_issue(
+            issues,
+            prefix,
+            _missing_node_support_names(snapshot, label, lambda key, fn=predicate: fn(relations, key)),
+        )
 
 
 SNAPSHOT_REQUIRED_LABELS = (
@@ -13993,17 +14196,9 @@ def _support_and_relation_issues(
     relations: tuple[GraphRelation, ...],
 ) -> list[str]:
     issues: list[str] = []
-    relation_keys = {
-        (rel.source.label, rel.source.name, rel.relation_type, rel.target.label)
-        for rel in relations
-    }
+    relation_keys = _relation_requirement_keys(relations)
     _append_missing_relation_issues(issues, relation_keys, SNAPSHOT_RELATION_REQUIREMENTS)
-    for prefix, label, predicate in _snapshot_support_specs():
-        _append_support_issue(
-            issues,
-            prefix,
-            _missing_node_support_names(snapshot, label, lambda key, fn=predicate: fn(relations, key)),
-        )
+    _append_snapshot_support_issues(issues, snapshot, relations)
     return issues
 
 

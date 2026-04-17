@@ -22,7 +22,7 @@ _LAZY_MODULE_EXPORTS: dict[str, str] = {
     "observability": "bioetl.interfaces.observability",
 }
 
-__all__ = list(_LAZY_MODULE_EXPORTS)
+__all__ = list(_LAZY_MODULE_EXPORTS.keys())
 
 
 def __getattr__(name: str) -> ModuleType:
