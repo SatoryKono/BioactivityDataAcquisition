@@ -15,14 +15,14 @@ from typing import Any, Protocol
 
 class LoggerPort(Protocol):
     """Logger port protocol for structured logging.
-    
+
     This protocol defines the logging interface that should be implemented
     by all logging adapters in the infrastructure layer.
     """
 
     def error(self, message: str, **kwargs: Any) -> None:  # Any: Generic context data for structured logging
         """Log an error message with context.
-        
+
         Args:
             message: The error message
             **kwargs: Additional context data for structured logging
@@ -31,7 +31,7 @@ class LoggerPort(Protocol):
 
     def warning(self, message: str, **kwargs: Any) -> None:  # Any: Generic context data for structured logging
         """Log a warning message with context.
-        
+
         Args:
             message: The warning message
             **kwargs: Additional context data for structured logging
@@ -40,7 +40,7 @@ class LoggerPort(Protocol):
 
     def info(self, message: str, **kwargs: Any) -> None:  # Any: Generic context data for structured logging
         """Log an informational message with context.
-        
+
         Args:
             message: The informational message
             **kwargs: Additional context data for structured logging
@@ -49,7 +49,7 @@ class LoggerPort(Protocol):
 
     def debug(self, message: str, **kwargs: Any) -> None:  # Any: Generic context data for structured logging
         """Log a debug message with context.
-        
+
         Args:
             message: The debug message
             **kwargs: Additional context data for structured logging

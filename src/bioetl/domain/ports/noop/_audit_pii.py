@@ -25,12 +25,12 @@ class NoOpAudit:
 
     async def get_entries(
         self,
-        run_id: RunID | None = None,  # noqa: ARG002
-        layer: AuditLayer | None = None,  # noqa: ARG002
-        table_name: str | None = None,  # noqa: ARG002
-        start_time: datetime | None = None,  # noqa: ARG002
-        end_time: datetime | None = None,  # noqa: ARG002
-        limit: int = 100,  # noqa: ARG002
+        run_id: RunID | None = None,
+        layer: AuditLayer | None = None,
+        table_name: str | None = None,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+        limit: int = 100,
     ) -> list[AuditEntry]:
         """No-op implementation of get_entries — always returns an empty list.
 
