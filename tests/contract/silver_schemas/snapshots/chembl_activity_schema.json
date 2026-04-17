@@ -335,8 +335,8 @@
       }
     ],
     "coerce": false,
-    "description": "Manual curation flag (0=auto, 1=manual).",
-    "dtype": "int64",
+    "description": "Manual curation flag (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false

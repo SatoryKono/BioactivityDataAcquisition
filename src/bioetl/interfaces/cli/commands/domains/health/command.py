@@ -212,6 +212,11 @@ def _execute_health_server(host: str, port: int) -> None:
     coro = _run_health_server(host=host, port=port)
     try:
         asyncio.run(coro)
+    except asyncio.CancelledError:
+        # Why: tests and shutdown callers may use CancelledError as the stop
+        # signal for the long-lived health server loop. The coroutine already
+        # performs cleanup and emits the shutdown line in its finally block.
+        return
     except BioETLError as exc:
         _handle_health_failure(
             exc,

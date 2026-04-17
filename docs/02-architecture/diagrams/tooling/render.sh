@@ -93,15 +93,17 @@ Options:
   --puppeteer FILE    Puppeteer config JSON   (CI sandboxing; defaults to theme/puppeteer-config.json if present)
   -h, --help          Show this help
 EOF
+  return 0
 }
 
-log_info()  { echo -e "${GREEN}[INFO]${NC}  $*"; }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
-log_err()   { echo -e "${RED}[ERR]${NC}   $*"; }
-log_step()  { echo -e "${CYAN}[STEP]${NC}  $*"; }
+log_info()  { echo -e "${GREEN}[INFO]${NC}  $*"; return 0; }
+log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; return 0; }
+log_err()   { echo -e "${RED}[ERR]${NC}   $*"; return 0; }
+log_step()  { echo -e "${CYAN}[STEP]${NC}  $*"; return 0; }
 
 cleanup_temp_files() {
   [[ -n "$TEMP_PUPPETEER_CFG" ]] && rm -f "$TEMP_PUPPETEER_CFG" || true
+  return 0
 }
 trap cleanup_temp_files EXIT
 
@@ -113,6 +115,7 @@ require_option_value() {
     usage
     exit 1
   fi
+  return 0
 }
 
 resolve_chrome_headless_shell() {
@@ -490,6 +493,10 @@ render_one() {
             return 1
           fi
           ;;
+        *)
+          log_err "Unsupported TEXT_LAYER mode: $TEXT_LAYER"
+          return 1
+          ;;
       esac
       # Optimize SVG with svgo if available
       if [[ $HAS_SVGO -eq 1 ]]; then
@@ -548,6 +555,11 @@ render_one() {
             rm -f "$temp_png_svg"
             return 1
           fi
+          ;;
+        *)
+          echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+          rm -f "$temp_png_svg"
+          return 1
           ;;
       esac
       if [[ -n "$PYTHON_BIN" ]]; then

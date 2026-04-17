@@ -53,9 +53,11 @@ spec:
           requests:
             cpu: 500m
             memory: 1Gi
+            ephemeral-storage: 2Gi
           limits:
             cpu: 2000m
             memory: 4Gi
+            ephemeral-storage: 8Gi
         # Health probes target the /metrics endpoint. Ensure this endpoint is
         # safe for probes (idempotent and low latency) to avoid false failures.
         livenessProbe:

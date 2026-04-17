@@ -45,7 +45,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("ligand_efficiency_le", pa.float64()),
         ("ligand_efficiency_lle", pa.float64()),
         ("ligand_efficiency_sei", pa.float64()),
-        ("manual_curation_flag", pa.int64()),
+        ("manual_curation_flag", pa.float64()),  # Float for nullable int
         ("molecule_id", pa.string()),
         ("molecule_pref_name", pa.string()),
         ("original_activity_id", pa.float64()),  # Float for nullable int

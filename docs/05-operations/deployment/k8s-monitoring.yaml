@@ -49,7 +49,7 @@ spec:
 
       containers:
       - name: prometheus
-        image: prom/prometheus:latest
+        image: prom/prometheus:v2.54.1
         args:
           - '--config.file=/etc/prometheus/prometheus.yml'
           - '--storage.tsdb.path=/prometheus'
@@ -65,9 +65,11 @@ spec:
           requests:
             cpu: 250m
             memory: 512Mi
+            ephemeral-storage: 1Gi
           limits:
             cpu: 1000m
             memory: 2Gi
+            ephemeral-storage: 4Gi
 
         livenessProbe:
           httpGet:
@@ -183,10 +185,11 @@ spec:
         runAsNonRoot: true
         runAsUser: 472
         fsGroup: 472
+      automountServiceAccountToken: false
 
       containers:
       - name: grafana
-        image: grafana/grafana:latest
+        image: grafana/grafana:12.0.0
 
         ports:
         - name: web
@@ -207,9 +210,11 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
+            ephemeral-storage: 512Mi
           limits:
             cpu: 500m
             memory: 512Mi
+            ephemeral-storage: 2Gi
 
         livenessProbe:
           httpGet:

@@ -20,11 +20,9 @@ FROM base AS builder
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Install uv for fast dependency management
-RUN pip install uv
-
-# Install dependencies using uv
-RUN uv pip install --system -e .
+# Install uv and builder dependencies
+RUN pip install uv && \
+    uv pip install --system -e .
 
 # ============ Production Stage ============
 FROM base AS production

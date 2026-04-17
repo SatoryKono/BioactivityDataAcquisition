@@ -24,7 +24,13 @@ HISTORY_DOC = (
     / "history"
     / "compatibility-facade-review-history.md"
 )
-SNAPSHOT_SCRIPT = ROOT / "scripts" / "qa" / "generate_compatibility_facade_snapshot.py"
+SNAPSHOT_SCRIPT = (
+    ROOT
+    / "scripts"
+    / "engineering"
+    / "qa"
+    / "generate_compatibility_facade_snapshot.py"
+)
 COMPOSITION_DOC = ROOT / "docs" / "02-architecture" / "05-composition-layer.md"
 REGISTRY_GUIDE = ROOT / "docs" / "03-guides" / "registry-pattern.md"
 INVENTORY_ROW_CELL_COUNT = 10
@@ -41,7 +47,11 @@ def _load_module(path: Path, module_name: str) -> ModuleType:
 
 def _load_registry_module() -> ModuleType:
     return _load_module(
-        ROOT / "scripts" / "ci" / "_compatibility_registry.py",
+        ROOT
+        / "scripts"
+        / "engineering"
+        / "ci"
+        / "_compatibility_registry.py",
         "compatibility_registry_loader_for_tests",
     )
 
