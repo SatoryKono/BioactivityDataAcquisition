@@ -499,9 +499,7 @@ class CheckpointCompatibilityService:
         _emit_checkpoint_metric(
             self._metrics,
             pipeline_name=self._pipeline_name,
-            disposition=(
-                "strict_compatible" if compatible else "strict_incompatible"
-            ),
+            disposition=("strict_compatible" if compatible else "strict_incompatible"),
         )
         if compatible:
             return CheckpointCompatibilityResult.compatible_result()

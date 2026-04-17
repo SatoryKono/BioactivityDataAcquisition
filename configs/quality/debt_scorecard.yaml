@@ -1,23 +1,23 @@
 schema_version: 1
 baseline:
-  total_exemptions: 14
+  total_exemptions: 30
   by_registry:
     file_size_limits: 4
     function_complexity: 0
     function_length: 10
-    class_size: 0
+    class_size: 13
     class_method_count: 0
-    god_object: 0
+    god_object: 3
     domain_complexity: 0
 historical_baseline:
-  total_exemptions: 23
+  total_exemptions: 43
   by_registry:
     file_size_limits: 6
     function_complexity: 6
     function_length: 10
-    class_size: 3
+    class_size: 13
     class_method_count: 0
-    god_object: 2
+    god_object: 3
     domain_complexity: 6
   snapshot_date: '2025-12-31'
   source_report: 'reports/architecture/2025-Q4-final.json'

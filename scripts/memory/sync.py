@@ -2897,15 +2897,20 @@ def _pipeline_targets_for_alert_mode(
     pipeline_mode: str,
     dimensions: set[str],
 ) -> list[NodeKey]:
+    all_pipelines = _all_pipeline_targets(context)
     if pipeline_mode == "all":
-        return list(context.pipeline_nodes.values())
+        return all_pipelines
     if pipeline_mode == "entity":
-        return _pipeline_targets_matching_kind(context, context.pipeline_nodes.values(), "entity")
+        return _pipeline_targets_matching_kind(context, all_pipelines, "entity")
     if pipeline_mode == "composite":
-        return _pipeline_targets_matching_kind(context, context.pipeline_nodes.values(), "composite")
+        return _pipeline_targets_matching_kind(context, all_pipelines, "composite")
     if pipeline_mode == "auto" and "pipeline" in dimensions:
-        return list(context.pipeline_nodes.values())
+        return all_pipelines
     return []
+
+
+def _all_pipeline_targets(context: AlertTargetContext) -> list[NodeKey]:
+    return list(context.pipeline_nodes.values())
 
 
 def _alert_pipeline_kind_override(
@@ -11207,12 +11212,17 @@ def _entity_pipeline_test_index(
 def _provider_pipeline_test_index(snapshot: GraphSnapshot) -> dict[str, list[NodeKey]]:
     provider_pipeline_index: dict[str, list[NodeKey]] = {}
     for node in snapshot.nodes.values():
-        if node.key.label != "pipeline_surface":
-            continue
-        provider = node.properties.get("provider")
-        if isinstance(provider, str):
+        provider = _provider_pipeline_index_key(node)
+        if provider is not None:
             provider_pipeline_index.setdefault(provider, []).append(node.key)
     return provider_pipeline_index
+
+
+def _provider_pipeline_index_key(node: GraphNode) -> str | None:
+    if node.key.label != "pipeline_surface":
+        return None
+    provider = node.properties.get("provider")
+    return provider if isinstance(provider, str) else None
 
 
 def _pipeline_test_linker(
@@ -11594,15 +11604,15 @@ def _add_alert_rule_group_surfaces(
 ) -> None:
     group_context = _alert_rule_group_context(group, rules_path)
     for rule in group_context.rules:
-        _add_single_alert_surface(
+        _add_alert_surface_from_rule(
             snapshot,
             root,
             project,
             today,
             rules_path,
             artifact,
-            group_context.group_name,
-            rule,
+            group_name=group_context.group_name,
+            rule=rule,
             dashboard_metrics=dashboard_metrics,
             target_context=target_context,
             memory_mapping=memory_mapping,
@@ -11650,11 +11660,9 @@ def _add_single_alert_surface(
     target_context: AlertTargetContext,
     memory_mapping: dict[str, object],
 ) -> None:
-    alert_name = rule.get("alert")
-    if not isinstance(alert_name, str):
+    alert_context = _alert_rule_context(rule)
+    if alert_context is None:
         return
-    annotations = _alert_annotations(rule)
-    labels = _alert_labels(rule)
     alert = _add_alert_surface_node(
         snapshot,
         root,
@@ -11663,21 +11671,68 @@ def _add_single_alert_surface(
         rules_path,
         artifact,
         group_name,
-        alert_name,
-        annotations,
-        labels,
+        alert_context.alert_name,
+        alert_context.annotations,
+        alert_context.labels,
     )
     _link_alert_targets(
         snapshot,
         alert,
-        alert_name,
+        alert_context.alert_name,
         group_name,
         rule,
         dashboard_metrics=dashboard_metrics,
         target_context=target_context,
         memory_mapping=memory_mapping,
     )
-    _link_alert_runbook(snapshot, root, alert, alert_name, annotations, today)
+    _link_alert_runbook(snapshot, root, alert, alert_context.alert_name, alert_context.annotations, today)
+
+
+def _add_alert_surface_from_rule(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    rules_path: Path,
+    artifact: NodeKey,
+    *,
+    group_name: str,
+    rule: dict[str, object],
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    target_context: AlertTargetContext,
+    memory_mapping: dict[str, object],
+) -> None:
+    _add_single_alert_surface(
+        snapshot,
+        root,
+        project,
+        today,
+        rules_path,
+        artifact,
+        group_name,
+        rule,
+        dashboard_metrics=dashboard_metrics,
+        target_context=target_context,
+        memory_mapping=memory_mapping,
+    )
+
+
+@dataclass(frozen=True)
+class AlertRuleContext:
+    alert_name: str
+    annotations: dict[str, object]
+    labels: dict[str, object]
+
+
+def _alert_rule_context(rule: dict[str, object]) -> AlertRuleContext | None:
+    alert_name = rule.get("alert")
+    if not isinstance(alert_name, str):
+        return None
+    return AlertRuleContext(
+        alert_name=alert_name,
+        annotations=_alert_annotations(rule),
+        labels=_alert_labels(rule),
+    )
 
 
 def _link_alert_targets(
@@ -11804,11 +11859,11 @@ def _selected_alert_dashboards(
 ) -> tuple[NodeKey, ...]:
     return tuple(
         _select_alert_dashboards(
-        alert_name,
-        group_name,
-        expr,
-        dashboard_metrics,
-        memory_mapping,
+            alert_name,
+            group_name,
+            expr,
+            dashboard_metrics,
+            memory_mapping,
         )
     )
 
@@ -11934,19 +11989,43 @@ def _governance_policy_specs(
     sorted_contracts: list[NodeKey],
 ) -> list[tuple[NodeKey, tuple[Sequence[NodeKey], ...]]]:
     return [
-        _governance_policy_spec("hexagonal import matrix", sorted_ports, sorted_adapters),
-        _governance_policy_spec("hexagonal package layout", sorted_ports, sorted_adapters),
-        _governance_policy_spec("pipeline assembly model", sorted_pipelines),
-        _governance_policy_spec("medallion storage contract", sorted_contracts, sorted_pipelines),
-        _governance_policy_spec("observability surface model", _alert_surface_nodes(snapshot)),
+        _governance_policy_spec(*policy)
+        for policy in _governance_policy_definitions(
+            snapshot,
+            sorted_ports=sorted_ports,
+            sorted_adapters=sorted_adapters,
+            sorted_pipelines=sorted_pipelines,
+            sorted_contracts=sorted_contracts,
+        )
     ]
+
+
+def _governance_policy_definitions(
+    snapshot: GraphSnapshot,
+    *,
+    sorted_ports: list[NodeKey],
+    sorted_adapters: list[NodeKey],
+    sorted_pipelines: list[NodeKey],
+    sorted_contracts: list[NodeKey],
+) -> tuple[tuple[str, Sequence[NodeKey], Sequence[NodeKey] | None], ...]:
+    return (
+        ("hexagonal import matrix", sorted_ports, sorted_adapters),
+        ("hexagonal package layout", sorted_ports, sorted_adapters),
+        ("pipeline assembly model", sorted_pipelines, None),
+        ("medallion storage contract", sorted_contracts, sorted_pipelines),
+        ("observability surface model", _alert_surface_nodes(snapshot), None),
+    )
 
 
 def _governance_policy_spec(
     policy_name: str,
-    *target_groups: Sequence[NodeKey],
+    target_group: Sequence[NodeKey],
+    extra_target_group: Sequence[NodeKey] | None = None,
 ) -> tuple[NodeKey, tuple[Sequence[NodeKey], ...]]:
-    return NodeKey("policy_surface", policy_name), tuple(target_groups)
+    target_groups: tuple[Sequence[NodeKey], ...] = (
+        (target_group,) if extra_target_group is None else (target_group, extra_target_group)
+    )
+    return NodeKey("policy_surface", policy_name), target_groups
 
 
 def _link_policy_governance_group(
@@ -12184,7 +12263,7 @@ class Neo4jHttpClient:
                         body_text=body_text,
                     )
                 )
-                if exc.code in {429, 502, 503, 504}:
+                if self._should_retry_http_error(exc):
                     last_exc = RuntimeError(
                         self._format_transport_error(
                             exc,
@@ -12193,15 +12272,13 @@ class Neo4jHttpClient:
                             attempt_errors=attempt_errors,
                         )
                     )
-                    if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
-                        self._endpoint = self._fallback_endpoint
-                        self._fallback_endpoint = None
+                    if self._switch_to_fallback_endpoint():
                         continue
                     if endpoint != self._primary_endpoint:
                         raise last_exc from exc
-                    if attempt == 11:
+                    if self._is_last_attempt(attempt):
                         raise last_exc from exc
-                    time.sleep(min(3.0, 0.5 * (attempt + 1)))
+                    self._sleep_before_retry(attempt)
                     continue
                 raise RuntimeError(
                     self._format_query_error(exc, context=context, body_text=body_text)
@@ -12217,9 +12294,7 @@ class Neo4jHttpClient:
                 attempt_errors.append(
                     self._format_transport_attempt(endpoint=endpoint, exc=exc)
                 )
-                if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
-                    self._endpoint = self._fallback_endpoint
-                    self._fallback_endpoint = None
+                if self._switch_to_fallback_endpoint():
                     continue
                 if endpoint != self._primary_endpoint:
                     raise RuntimeError(
@@ -12229,7 +12304,7 @@ class Neo4jHttpClient:
                             attempt_errors=attempt_errors,
                         )
                     ) from exc
-                if attempt == 11:
+                if self._is_last_attempt(attempt):
                     raise RuntimeError(
                         self._format_transport_error(
                             exc,
@@ -12237,7 +12312,7 @@ class Neo4jHttpClient:
                             attempt_errors=attempt_errors,
                         )
                     ) from exc
-                time.sleep(min(3.0, 0.5 * (attempt + 1)))
+                self._sleep_before_retry(attempt)
         else:  # pragma: no cover - loop always breaks or raises
             raise RuntimeError(
                 self._format_transport_error(
@@ -12252,6 +12327,25 @@ class Neo4jHttpClient:
             prefix = self._context_prefix(context)
             raise RuntimeError(f"{prefix}Neo4j query/runtime error: {errors}")
         return body
+
+    @staticmethod
+    def _should_retry_http_error(exc: error.HTTPError) -> bool:
+        return exc.code in {429, 502, 503, 504}
+
+    def _switch_to_fallback_endpoint(self) -> bool:
+        if self._fallback_endpoint and self._endpoint != self._fallback_endpoint:
+            self._endpoint = self._fallback_endpoint
+            self._fallback_endpoint = None
+            return True
+        return False
+
+    @staticmethod
+    def _is_last_attempt(attempt: int) -> bool:
+        return attempt == 11
+
+    @staticmethod
+    def _sleep_before_retry(attempt: int) -> None:
+        time.sleep(min(3.0, 0.5 * (attempt + 1)))
 
     def query(
         self,
@@ -12478,8 +12572,7 @@ def _resolved_sync_apply_options(
     if isinstance(options, SyncApplyOptions):
         return options
 
-    legacy_batch_size = legacy_kwargs.get("batch_size")
-    resolved_batch_size = legacy_batch_size if legacy_batch_size is not None else options
+    resolved_batch_size = _legacy_or_default_batch_size(options, legacy_kwargs)
     if not isinstance(resolved_batch_size, int):
         raise TypeError("sync_snapshot requires batch_size or SyncApplyOptions")
     return SyncApplyOptions(
@@ -12488,6 +12581,14 @@ def _resolved_sync_apply_options(
         full_reset_managed_wave=bool(legacy_kwargs.get("full_reset_managed_wave", False)),
         prune_legacy_unmanaged=bool(legacy_kwargs.get("prune_legacy_unmanaged", False)),
     )
+
+
+def _legacy_or_default_batch_size(
+    options: SyncApplyOptions | int | None,
+    legacy_kwargs: dict[str, object],
+) -> object:
+    legacy_batch_size = legacy_kwargs.get("batch_size")
+    return legacy_batch_size if legacy_batch_size is not None else options
 
 
 def _selection_from_legacy_kwargs(legacy_kwargs: dict[str, object]) -> SnapshotSelection:
@@ -12518,14 +12619,8 @@ def _statement_groups(
     managed_labels = sorted(
         {node.key.label for node in snapshot.nodes.values()} | set(DEFAULT_LEGACY_PRUNE_LABELS)
     )
-    node_groups: dict[str, list[dict[str, JsonValue]]] = {}
-    for node in snapshot.nodes.values():
-        node_groups.setdefault(node.key.label, []).append(_node_statement(node, sync_run))
-    relation_groups: dict[str, list[dict[str, JsonValue]]] = {}
-    for relation in snapshot.relations.values():
-        relation_groups.setdefault(relation.relation_type, []).append(
-            _relation_statement(relation, sync_run)
-        )
+    node_groups = _node_statement_groups(snapshot, sync_run)
+    relation_groups = _relation_statement_groups(snapshot, sync_run)
     (
         core_node_groups,
         analysis_node_groups,
@@ -12543,6 +12638,28 @@ def _statement_groups(
     )
 
 
+def _node_statement_groups(
+    snapshot: GraphSnapshot,
+    sync_run: str,
+) -> dict[str, list[dict[str, JsonValue]]]:
+    node_groups: dict[str, list[dict[str, JsonValue]]] = {}
+    for node in snapshot.nodes.values():
+        node_groups.setdefault(node.key.label, []).append(_node_statement(node, sync_run))
+    return node_groups
+
+
+def _relation_statement_groups(
+    snapshot: GraphSnapshot,
+    sync_run: str,
+) -> dict[str, list[dict[str, JsonValue]]]:
+    relation_groups: dict[str, list[dict[str, JsonValue]]] = {}
+    for relation in snapshot.relations.values():
+        relation_groups.setdefault(relation.relation_type, []).append(
+            _relation_statement(relation, sync_run)
+        )
+    return relation_groups
+
+
 def _delete_managed_wave_if_requested(
     client: Neo4jHttpClient,
     managed_labels: list[str],
@@ -12551,7 +12668,7 @@ def _delete_managed_wave_if_requested(
     if not options.full_reset_managed_wave:
         return
 
-    delete_batch_size = max(1, min(options.batch_size, 50))
+    delete_batch_size = _delete_managed_wave_batch_size(options.batch_size)
     for label in managed_labels:
         while True:
             delete_statement = _delete_managed_wave_nodes_statement(label, delete_batch_size)
@@ -12564,24 +12681,46 @@ def _delete_managed_wave_if_requested(
                 break
 
 
+def _delete_managed_wave_batch_size(batch_size: int) -> int:
+    return max(1, min(batch_size, 50))
+
+
+def _analysis_batch_size(
+    batch_size: int,
+    *,
+    reduced_limit: int,
+    contains_high_priority: bool,
+    high_priority_limit: int,
+) -> int:
+    if contains_high_priority:
+        return max(1, min(batch_size, high_priority_limit))
+    return max(1, min(batch_size, reduced_limit))
+
+
 def _analysis_node_batch_size(
     analysis_node_groups: dict[str, list[dict[str, JsonValue]]],
     batch_size: int,
 ) -> int:
     if "complexity_candidate" in analysis_node_groups:
         return 1
-    if "retirement_candidate" in analysis_node_groups:
-        return max(1, min(batch_size, 5))
-    return max(1, min(batch_size, 10))
+    return _analysis_batch_size(
+        batch_size,
+        reduced_limit=10,
+        contains_high_priority="retirement_candidate" in analysis_node_groups,
+        high_priority_limit=5,
+    )
 
 
 def _analysis_relation_batch_size(
     analysis_relation_groups: dict[str, list[dict[str, JsonValue]]],
     batch_size: int,
 ) -> int:
-    if "CANDIDATE_FOR_REMOVAL" in analysis_relation_groups:
-        return max(1, min(batch_size, 3))
-    return max(1, min(batch_size, 5))
+    return _analysis_batch_size(
+        batch_size,
+        reduced_limit=5,
+        contains_high_priority="CANDIDATE_FOR_REMOVAL" in analysis_relation_groups,
+        high_priority_limit=3,
+    )
 
 
 def _verification_sync_run(
@@ -12601,10 +12740,17 @@ def _prune_managed_graph_if_requested(
     managed_labels: list[str],
 ) -> None:
     if options.prune_stale:
-        client.execute([_prune_stale_relations_statement(sync_run)])
-        client.execute([_prune_stale_nodes_statement(sync_run)])
+        _execute_prune_stale_statements(client, sync_run)
     if options.prune_legacy_unmanaged:
         client.execute([_prune_legacy_unmanaged_nodes_statement(managed_labels)])
+
+
+def _execute_prune_stale_statements(
+    client: Neo4jHttpClient,
+    sync_run: str,
+) -> None:
+    client.execute([_prune_stale_relations_statement(sync_run)])
+    client.execute([_prune_stale_nodes_statement(sync_run)])
 
 
 def sync_snapshot(
