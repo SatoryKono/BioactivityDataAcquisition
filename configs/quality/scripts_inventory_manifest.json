@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T12:45:35.723878+00:00",
+  "generated_at": "2026-04-17T13:24:30.770567+00:00",
   "summary": {
-    "total_scripts": 388,
+    "total_scripts": 389,
     "status_counts": {
-      "active": 307,
+      "active": 308,
       "legacy": 9,
       "orphan": 63,
       "unknown": 9
@@ -13,8 +13,8 @@
       "agents": 10,
       "build": 1,
       "ci": 49,
-      "docs": 116,
-      "scripts": 291,
+      "docs": 118,
+      "scripts": 292,
       "skills": 7,
       "tests": 99
     }
@@ -29,7 +29,7 @@
       "references": [
         {
           "path": "scripts/README.md",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "python -m scripts.ai --help"
         },
@@ -1551,55 +1551,43 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 6,
       "references": [
         {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 71,
+          "path": "docs/04-reference/templates/pipeline-review-checklist.md",
+          "line": 187,
           "source_group": "docs",
-          "text": "uv run python -m scripts.data check-vcr-naming"
+          "text": "- [ ] `uv run python -m scripts.data check-data-dir` проходит без ошибок"
         },
         {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 91,
-          "source_group": "docs",
-          "text": "| `vacuum_delta.py`              | scripts/data/        | Нет     | `uv run python -m scripts.data vacuum`             | —            | VACUUM Delta Lake таблиц                   |"
+          "path": "scripts/data/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "python -m scripts.data --help"
         },
         {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 92,
-          "source_group": "docs",
-          "text": "| `dq_baseline_update.py`        | scripts/data/        | Нет     | `uv run python -m scripts.data dq-baseline`        | —            | Пересчёт DQ baseline                       |"
+          "path": "scripts/data/README.md",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "python -m scripts.data <command> [args...]"
         },
         {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 93,
-          "source_group": "docs",
-          "text": "| `verify_checksums.py`          | scripts/data/        | Нет     | `uv run python -m scripts.data checksums`          | —            | Верификация контрольных сумм               |"
-        },
-        {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "path": "tests/architecture/test_integration_vcr_policy.py",
           "line": 147,
-          "source_group": "docs",
-          "text": "| `scripts.data`        | `uv run python -m scripts.data`        | Data integrity: VCR, checksums, delta      |"
+          "source_group": "tests",
+          "text": "\"python -m scripts.data check-vcr-secrets\""
         },
         {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 181,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.data check-vcr-placement"
+          "path": "tests/architecture/test_integration_vcr_policy.py",
+          "line": 382,
+          "source_group": "tests",
+          "text": "assert \"python -m scripts.data check-vcr-placement\" in data_readme"
         },
         {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 182,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.data checksums --generate"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
-          "line": 273,
-          "source_group": "docs",
-          "text": "python -m scripts.data check-vcr-placement     # VCR cassette placement"
+          "path": "tests/architecture/test_integration_vcr_policy.py",
+          "line": 383,
+          "source_group": "tests",
+          "text": "assert \"python -m scripts.data check-vcr-secrets\" in data_readme"
         }
       ]
     },
@@ -1612,31 +1600,31 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams lint"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 149,
+          "line": 151,
           "source_group": "docs",
           "text": "| `scripts.diagrams`    | `uv run python -m scripts.diagrams`    | Diagram lint, check, fix, render           |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 176,
+          "line": 178,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams lint"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 177,
+          "line": 179,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams check-quality-gates"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 178,
+          "line": 180,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams render-pdf"
         },
@@ -3163,7 +3151,7 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 6484,
+          "line": 6864,
           "source_group": "scripts",
           "text": "lambda text: _contains_any(text, (\"scripts.docs\", \"check-links\", \"build_docs_site.sh\")),"
         }
@@ -3864,35 +3852,92 @@
       ]
     },
     {
+      "path": "scripts/engineering/baselines/__main__.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 97,
+          "source_group": "docs",
+          "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/ | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | — | Пересчёт DQ baseline |"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 146,
+          "source_group": "docs",
+          "text": "| `scripts.engineering.baselines`   | `uv run python -m scripts.engineering.baselines`   | Baseline maintenance for engineering checks |"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 191,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.baselines dq-baseline --dry-run"
+        },
+        {
+          "path": "scripts/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "python -m scripts.engineering.baselines --help"
+        },
+        {
+          "path": "scripts/README.md",
+          "line": 52,
+          "source_group": "scripts",
+          "text": "python -m scripts.engineering.baselines dq-baseline --dry-run"
+        },
+        {
+          "path": "scripts/data/README.md",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "python -m scripts.engineering.baselines --help"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "python -m scripts.engineering.baselines <command>"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/baselines/dq_baseline_update.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 92,
+          "line": 97,
           "source_group": "docs",
-          "text": "| `dq_baseline_update.py`        | scripts/data/        | Нет     | `uv run python -m scripts.data dq-baseline`        | —            | Пересчёт DQ baseline                       |"
+          "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/ | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | — | Пересчёт DQ baseline |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 139,
+          "line": 144,
           "source_group": "docs",
           "text": "| RULES.md §3.4.1                                             | `dq_baseline_update.py`                                        |"
         },
         {
           "path": "scripts/data/README.md",
-          "line": 35,
+          "line": 41,
           "source_group": "scripts",
           "text": "| `dq-baseline`         | `scripts/engineering/baselines/dq_baseline_update.py`                      | Update DQ baseline metrics                          |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"dq-baseline\": \"scripts/engineering/baselines/dq_baseline_update.py\","
+        },
+        {
+          "path": "scripts/engineering/baselines/__main__.py",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "\"dq-baseline\": \"dq_baseline_update.py\","
         }
       ]
     },
@@ -3917,7 +3962,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 74,
+          "line": 75,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.ci quality-gate"
         },
@@ -3941,13 +3986,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 185,
+          "line": 187,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.ci quality-gate"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 186,
+          "line": 188,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.ci run-tests"
         }
@@ -4556,7 +4601,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 152,
+          "line": 154,
           "source_group": "docs",
           "text": "| `scripts.engineering.dev`         | `uv run python -m scripts.engineering.dev`         | Dev setup, test runner, mock metrics       |"
         },
@@ -5736,7 +5781,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 153,
+          "line": 155,
           "source_group": "docs",
           "text": "| `scripts.engineering.diagnostics` | `uv run python -m scripts.engineering.diagnostics` | Debug: cleanup, pandera, storage           |"
         },
@@ -5808,13 +5853,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 90,
+          "line": 95,
           "source_group": "docs",
           "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                  | —            | Аудит соответствия File Policy             |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 135,
+          "line": 140,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md)           | `audit_structure.py`, `create_pipeline.py`                     |"
         },
@@ -5853,7 +5898,7 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 89,
+          "line": 94,
           "source_group": "docs",
           "text": "| `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                  | —            | Консолидированный аудит очистки            |"
         },
@@ -5880,13 +5925,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 88,
+          "line": 93,
           "source_group": "docs",
           "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                  | `make clean` | Очистка кэшей и артефактов                 |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 136,
+          "line": 141,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
@@ -6018,7 +6063,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 95,
+          "line": 100,
           "source_group": "docs",
           "text": "| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`         | —            | Аудит naming conventions                "
         }
@@ -6561,13 +6606,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 96,
+          "line": 101,
           "source_group": "docs",
           "text": "| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`    | —            | Линтер терминологии                     "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 141,
+          "line": 146,
           "source_group": "docs",
           "text": "| [glossary.md](glossary.md)                                  | `lint_terminology.py`                                          |"
         },
@@ -6618,19 +6663,19 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 95,
+          "line": 100,
           "source_group": "docs",
           "text": "| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`         | —            | Аудит naming conventions                "
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 137,
+          "line": 142,
           "source_group": "docs",
           "text": "| RULES.md §2                                                 | `naming_audit.py`                                              |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 155,
+          "line": 157,
           "source_group": "docs",
           "text": "Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/engineering/qa/naming_audit.py`."
         },
@@ -6961,19 +7006,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 17,
       "references": [
         {
-          "path": "scripts/data/README.md",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "python -m scripts.engineering.qa.vcr --help"
+          "path": "docs/00-project/TOOLS.md",
+          "line": 71,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.qa.vcr check-naming"
         },
         {
-          "path": "scripts/data/__main__.py",
-          "line": 10,
-          "source_group": "scripts",
-          "text": "python -m scripts.engineering.qa.vcr <command>"
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 149,
+          "source_group": "docs",
+          "text": "| `scripts.engineering.qa.vcr` | `uv run python -m scripts.engineering.qa.vcr` | VCR governance: placement, naming, secrets |"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 183,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.qa.vcr check-placement"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
+          "line": 273,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
+          "line": 274,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-naming     # VCR naming conventions"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
+          "line": 237,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
+          "line": 238,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-naming     # VCR naming conventions"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 399,
+          "source_group": "docs",
+          "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         }
       ]
     },
@@ -6992,13 +7073,13 @@
         },
         {
           "path": "scripts/data/README.md",
-          "line": 28,
+          "line": 34,
           "source_group": "scripts",
           "text": "| `check-vcr-placement` | `scripts/engineering/qa/vcr/check_root_vcr_cassettes.py`                | Block VCR cassette anti-patterns                    |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"check-vcr-placement\": \"scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\","
         },
@@ -7037,13 +7118,13 @@
         },
         {
           "path": "scripts/data/README.md",
-          "line": 29,
+          "line": 35,
           "source_group": "scripts",
           "text": "| `check-vcr-naming`    | `scripts/engineering/qa/vcr/check_vcr_filename_policy.py`               | Enforce VCR filename policy                         |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"check-vcr-naming\": \"scripts/engineering/qa/vcr/check_vcr_filename_policy.py\","
         },
@@ -7076,13 +7157,13 @@
       "references": [
         {
           "path": "scripts/data/README.md",
-          "line": 30,
+          "line": 36,
           "source_group": "scripts",
           "text": "| `check-vcr-secrets`   | `scripts/engineering/qa/vcr/check_vcr_secrets.py`                       | Detect potential secret leaks in VCR cassettes      |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"check-vcr-secrets\": \"scripts/engineering/qa/vcr/check_vcr_secrets.py\","
         },
@@ -7109,13 +7190,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 150,
+          "line": 152,
           "source_group": "docs",
           "text": "| `scripts.engineering.repo`        | `uv run python -m scripts.engineering.repo`        | Repo hygiene: inventory, catalog, versions |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 163,
+          "line": 165,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
         },
@@ -7713,19 +7794,19 @@
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 151,
+          "line": 153,
           "source_group": "docs",
           "text": "| `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |"
         },
         {
           "path": "scripts/README.md",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "python -m scripts.ops --help"
         },
         {
           "path": "scripts/README.md",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "python -m scripts.ops rerender-grafana"
         },
@@ -9236,19 +9317,55 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 11,
       "references": [
         {
-          "path": "scripts/data/README.md",
-          "line": 20,
-          "source_group": "scripts",
-          "text": "python -m scripts.ops.data --help"
+          "path": "docs/00-project/TOOLS.md",
+          "line": 72,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.ops.data check-delta"
         },
         {
-          "path": "scripts/data/__main__.py",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "python -m scripts.ops.data <command>"
+          "path": "docs/00-project/TOOLS.md",
+          "line": 96,
+          "source_group": "docs",
+          "text": "| `vacuum_delta.py`              | scripts/ops/data/    | Нет     | `uv run python -m scripts.ops.data vacuum`         | —            | VACUUM Delta Lake таблиц                   |"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 98,
+          "source_group": "docs",
+          "text": "| `verify_checksums.py`          | scripts/ops/data/    | Нет     | `uv run python -m scripts.ops.data checksums`      | —            | Верификация контрольных сумм               |"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 148,
+          "source_group": "docs",
+          "text": "| `scripts.ops.data`    | `uv run python -m scripts.ops.data`    | Data integrity: checksums, delta, data dir |"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 184,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.ops.data checksums --generate"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
+          "line": 275,
+          "source_group": "docs",
+          "text": "python -m scripts.ops.data check-delta                # Delta table integrity"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
+          "line": 276,
+          "source_group": "docs",
+          "text": "python -m scripts.ops.data check-data-dir             # Data directory structure"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-test-bot.md",
+          "line": 239,
+          "source_group": "docs",
+          "text": "python -m scripts.ops.data check-delta                # Delta table integrity"
         }
       ]
     },
@@ -9261,13 +9378,13 @@
       "references": [
         {
           "path": "scripts/data/README.md",
-          "line": 31,
+          "line": 37,
           "source_group": "scripts",
           "text": "| `check-delta`         | `scripts/ops/data/check_delta_integrity.py`                   | Check Delta Lake integrity                          |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"check-delta\": \"scripts/ops/data/check_delta_integrity.py\","
         },
@@ -9288,13 +9405,13 @@
       "references": [
         {
           "path": "scripts/data/README.md",
-          "line": 36,
+          "line": 42,
           "source_group": "scripts",
           "text": "| `report-null-fields`  | `scripts/ops/data/extract_null_fields.py`                     | Extract null field statistics                       |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"report-null-fields\": \"scripts/ops/data/extract_null_fields.py\","
         },
@@ -9315,13 +9432,13 @@
       "references": [
         {
           "path": "scripts/data/README.md",
-          "line": 37,
+          "line": 43,
           "source_group": "scripts",
           "text": "| `report-content-hash` | `scripts/ops/data/generate_content_hash_comparison_report.py` | Generate content hash comparison report             |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"report-content-hash\": \"scripts/ops/data/generate_content_hash_comparison_report.py\","
         },
@@ -9342,31 +9459,31 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 91,
+          "line": 96,
           "source_group": "docs",
-          "text": "| `vacuum_delta.py`              | scripts/data/        | Нет     | `uv run python -m scripts.data vacuum`             | —            | VACUUM Delta Lake таблиц                   |"
+          "text": "| `vacuum_delta.py`              | scripts/ops/data/    | Нет     | `uv run python -m scripts.ops.data vacuum`         | —            | VACUUM Delta Lake таблиц                   |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 136,
+          "line": 141,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 138,
+          "line": 143,
           "source_group": "docs",
           "text": "| RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |"
         },
         {
           "path": "scripts/data/README.md",
-          "line": 33,
+          "line": 39,
           "source_group": "scripts",
           "text": "| `vacuum`              | `scripts/ops/data/vacuum_delta.py`                            | Vacuum Delta Lake tables                            |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"vacuum\": \"scripts/ops/data/vacuum_delta.py\","
         },
@@ -9383,23 +9500,17 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
-          "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 192,
-          "source_group": "docs",
-          "text": "uv run python scripts/data/validate_data_dir.py"
-        },
-        {
           "path": "scripts/data/README.md",
-          "line": 32,
+          "line": 38,
           "source_group": "scripts",
           "text": "| `check-data-dir`      | `scripts/ops/data/validate_data_dir.py`                       | Validate data directory structure against allowlist |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"check-data-dir\": \"scripts/ops/data/validate_data_dir.py\","
         },
@@ -9420,25 +9531,25 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 93,
+          "line": 98,
           "source_group": "docs",
-          "text": "| `verify_checksums.py`          | scripts/data/        | Нет     | `uv run python -m scripts.data checksums`          | —            | Верификация контрольных сумм               |"
+          "text": "| `verify_checksums.py`          | scripts/ops/data/    | Нет     | `uv run python -m scripts.ops.data checksums`      | —            | Верификация контрольных сумм               |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 136,
+          "line": 141,
           "source_group": "docs",
           "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |"
         },
         {
           "path": "scripts/data/README.md",
-          "line": 34,
+          "line": 40,
           "source_group": "scripts",
           "text": "| `checksums`           | `scripts/ops/data/verify_checksums.py`                        | Generate/verify file checksums                      |"
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"checksums\": \"scripts/ops/data/verify_checksums.py\","
         },
@@ -10152,13 +10263,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 94,
+          "line": 99,
           "source_group": "docs",
           "text": "| `salt_rotate.py`               | scripts/ops/         | Нет     | —                                                  | —            | Ротация PII-соли                           |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 140,
+          "line": 145,
           "source_group": "docs",
           "text": "| RULES.md §5.4.1                                             | `salt_rotate.py`                                               |"
         },
@@ -10827,31 +10938,31 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 97,
+          "line": 102,
           "source_group": "docs",
           "text": "| `config_gap_analysis.py`       | scripts/schema/      | Нет     | `uv run python -m scripts.schema analyze-gaps`     | —            | Анализ расхождений конфигов                |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 98,
+          "line": 103,
           "source_group": "docs",
           "text": "| `validate_pipeline_configs.py` | scripts/schema/      | Нет     | `uv run python -m scripts.schema validate-configs` | —            | Валидация configs vs JSON Schema           |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 146,
+          "line": 147,
           "source_group": "docs",
           "text": "| `scripts.schema`      | `uv run python -m scripts.schema`      | Schema/config validation и генерация       |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 166,
+          "line": 168,
           "source_group": "docs",
           "text": "uv run python -m scripts.schema validate-configs"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 167,
+          "line": 169,
           "source_group": "docs",
           "text": "uv run python -m scripts.schema check-invariants"
         }
@@ -10947,13 +11058,13 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 97,
+          "line": 102,
           "source_group": "docs",
           "text": "| `config_gap_analysis.py`       | scripts/schema/      | Нет     | `uv run python -m scripts.schema analyze-gaps`     | —            | Анализ расхождений конфигов                |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 142,
+          "line": 147,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md) (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py`       |"
         },
@@ -11277,13 +11388,13 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 98,
+          "line": 103,
           "source_group": "docs",
           "text": "| `validate_pipeline_configs.py` | scripts/schema/      | Нет     | `uv run python -m scripts.schema validate-configs` | —            | Валидация configs vs JSON Schema           |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 142,
+          "line": 147,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md) (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py`       |"
         },
@@ -11475,13 +11586,13 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 85,
+          "line": 90,
           "source_group": "docs",
           "text": "| `create_pipeline.py`           | src/tools/           | Да      | —                                                  | —            | Генерация boilerplate для новых пайплайнов |"
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 135,
+          "line": 140,
           "source_group": "docs",
           "text": "| [03-file-policy.md](governance/03-file-policy.md)           | `audit_structure.py`, `create_pipeline.py`                     |"
         },
@@ -11571,7 +11682,7 @@
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 87,
+          "line": 92,
           "source_group": "docs",
           "text": "| `file_merger.py`               | src/tools/           | Нет     | —                                                  | —            | Объединение файлов с метаданными           |"
         },
@@ -11715,7 +11826,7 @@
         },
         {
           "path": "docs/00-project/TOOLS.md",
-          "line": 86,
+          "line": 91,
           "source_group": "docs",
           "text": "| `verify_schema_parity.py`      | src/tools/           | Да      | —                                                  | —            | Верификация Silver↔Gold schema parity      |"
         },

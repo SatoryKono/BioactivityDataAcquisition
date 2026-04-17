@@ -1,8 +1,4 @@
-"""Health check command for BioETL CLI.
-
-Provides commands for running health checks and starting the health server.
-Uses composition entrypoints for clean layering and proper DI.
-"""
+"""Health-check CLI commands and health-server entrypoints."""
 
 from __future__ import annotations
 

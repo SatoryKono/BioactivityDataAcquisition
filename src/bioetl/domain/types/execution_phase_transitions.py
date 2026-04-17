@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.types._execution_phase_transition_support import (
-    PhaseT,
-    PolicyT,
-    RuleT,
-    TransitionT,
+from bioetl.domain.types._execution_phase_transition_builders import (
     _build_cross_validation_transitions,
     _build_dependency_execution_transitions,
     _build_enrichment_transitions,
@@ -14,8 +10,14 @@ from bioetl.domain.types._execution_phase_transition_support import (
     _build_not_started_transitions,
     _build_preflight_transitions,
     _build_write_finalize_transitions,
-    _ExecutionPhaseNamespace,
     _get_terminal_phases,
+)
+from bioetl.domain.types._execution_phase_transition_support import (
+    PhaseT,
+    PolicyT,
+    RuleT,
+    TransitionT,
+    _ExecutionPhaseNamespace,
     _PhaseTransitionNamespace,
     _PhaseTransitionRuleBuilder,
     _TransitionPolicyNamespace,
