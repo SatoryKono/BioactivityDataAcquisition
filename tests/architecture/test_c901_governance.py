@@ -13,13 +13,13 @@ def test_c901_governance_job_is_declared_in_workflow() -> None:
     assert "c901-governance:" in workflow
     assert "C901 Governance (blocking)" in workflow
     assert "ruff check src/bioetl --select C901" in workflow
-    assert "scripts/qa/check_c901_baseline.py" in workflow
+    assert "scripts/engineering/qa/check_c901_baseline.py" in workflow
     assert "--mode" in workflow
 
 
 def test_c901_baseline_manifest_contains_expected_count() -> None:
     """C901 baseline manifest size is fixed to current approved debt budget."""
-    baseline_path = Path("scripts/baselines/c901_baseline.json")
+    baseline_path = Path("scripts/engineering/baselines/c901_baseline.json")
     payload = json.loads(baseline_path.read_text(encoding="utf-8"))
 
     entries = payload.get("entries", [])
@@ -32,7 +32,7 @@ def test_c901_baseline_manifest_contains_expected_count() -> None:
 
 def test_c901_baseline_entries_are_unique() -> None:
     """Baseline entries must be unique by file/function identity."""
-    baseline_path = Path("scripts/baselines/c901_baseline.json")
+    baseline_path = Path("scripts/engineering/baselines/c901_baseline.json")
     payload = json.loads(baseline_path.read_text(encoding="utf-8"))
 
     entries = payload.get("entries", [])

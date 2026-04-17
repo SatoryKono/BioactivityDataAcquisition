@@ -228,10 +228,10 @@ pytest tests/integration/ --vcr-record=none -v
 
 ```bash
 # CI test execution
-python -m scripts.ci run-tests                 # Resilient pytest runner
-python -m scripts.ci quality-gate              # Quality integral gate
-python -m scripts.ci e2e-skip-rate             # E2E skip rate check
-python -m scripts.ci e2e-rerun                 # E2E rerun stability
+python -m scripts.engineering.ci run-tests                 # Resilient pytest runner
+python -m scripts.engineering.ci quality-gate              # Quality integral gate
+python -m scripts.engineering.ci e2e-skip-rate             # E2E skip rate check
+python -m scripts.engineering.ci e2e-rerun                 # E2E rerun stability
 
 # Data integrity (pre-test validation)
 python -m scripts.data check-vcr-placement     # VCR cassette placement
@@ -243,8 +243,8 @@ python -m scripts.schema validate-configs
 python -m scripts.schema check-invariants --verbose
 
 # Dev shortcuts
-python -m scripts.dev run-tests                # Local test runner
-python -m scripts.dev test-changed             # Tests for changed files only
+python -m scripts.engineering.dev run-tests                # Local test runner
+python -m scripts.engineering.dev test-changed             # Tests for changed files only
 ```
 
 ---

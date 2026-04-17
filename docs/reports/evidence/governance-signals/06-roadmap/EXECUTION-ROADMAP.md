@@ -57,7 +57,7 @@ It is intentionally staged:
 - Duplication gate changes.
 
 **Verification gates**
-- `./.venv/Scripts/python.exe -m scripts.qa check-c901`
+- `./.venv/Scripts/python.exe -m scripts.engineering.qa check-c901`
 - `./.venv/Scripts/python.exe -m pytest -q tests/architecture/test_regression_metrics.py`
 - `./.venv/Scripts/python.exe -m pytest -q tests/architecture/test_documentation_sync.py`
 

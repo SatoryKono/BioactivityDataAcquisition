@@ -62,13 +62,13 @@ make setup-plugins
 If you use Codex or GitHub Copilot MCP, add the optional tooling setup after install:
 
 ```bash
-uv run python -m scripts.dev setup-mcp
+uv run python -m scripts.engineering.dev setup-mcp
 ```
 
-If you activated `.venv` instead of using `uv`, `python -m scripts.dev setup-mcp`
+If you activated `.venv` instead of using `uv`, `python -m scripts.engineering.dev setup-mcp`
 is also valid.
 
-`scripts/dev/dev_setup.sh` remains in the repository as a legacy placeholder and is not the supported onboarding path.
+`scripts/engineering/dev/dev_setup.sh` remains in the repository as a legacy placeholder and is not the supported onboarding path.
 
 ### 2.2. Mixed Windows + WSL Checkout
 
@@ -76,15 +76,15 @@ If you use the same repository from both Windows PowerShell and WSL, bootstrap
 each OS separately instead of sharing one `.venv`:
 
 ```powershell
-.\scripts\dev\setup_env_windows.ps1
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
-.\scripts\dev\run_mypy.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/dev/setup_env_wsl.sh
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-bash scripts/dev/run_mypy.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_mypy.sh
 ```
 
 This path creates `.venv-win` for PowerShell and
@@ -114,7 +114,7 @@ pip install -e .[dev,tracing,docs]
 
 If you prefer the convenience aggregate target, `make setup-dev` is still valid;
 it currently expands to `make install` plus dependency verification. The
-repository-local `scripts/dev/dev_setup.sh` is not part of the supported path.
+repository-local `scripts/engineering/dev/dev_setup.sh` is not part of the supported path.
 
 ## 3. Configuration
 
@@ -160,13 +160,13 @@ make test
 For mixed-checkout day-to-day verification, prefer the OS-specific wrappers:
 
 ```powershell
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
-.\scripts\dev\run_mypy.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-bash scripts/dev/run_mypy.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_mypy.sh
 ```
 
 If all tests pass, your environment is ready!

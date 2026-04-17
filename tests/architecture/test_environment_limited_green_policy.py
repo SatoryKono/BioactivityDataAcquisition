@@ -30,7 +30,7 @@ class TestEnvironmentLimitedGreenPolicy:
         assert (
             policy.get("taxonomy_path") == "configs/quality/test_health_reporting.yaml"
         )
-        assert policy.get("classifier_source") == "scripts/ci/quality_integral_gate.py"
+        assert policy.get("classifier_source") == "scripts/engineering/ci/quality_integral_gate.py"
         assert (ROOT / policy["taxonomy_path"]).exists()
         assert (ROOT / policy["classifier_source"]).exists()
 

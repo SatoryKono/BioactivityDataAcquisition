@@ -46,7 +46,7 @@ BioETL предоставляет комплексную систему observab
 4. `bioetl diagnostics run --run-id <run-id>` или
    `bioetl diagnostics checkpoint --pipeline <pipeline>` — углубиться в
    run/checkpoint diagnostics.
-5. `python -m scripts.qa report-observability-metric-inventory --json` —
+5. `python -m scripts.engineering.qa report-observability-metric-inventory --json` —
    сверить canonical metric vocabulary между runtime emitters, docs и rules.
 6. Сравнить inventory output с
    `grafana/prometheus-rules/bioetl_observability.yml` и shipped Grafana

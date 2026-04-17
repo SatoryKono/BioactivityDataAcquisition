@@ -17,7 +17,7 @@
 
 Контекст проекта:
 - Используй только штатные команды и правила проекта из `AGENTS.md` / `AGENT.md`.
-- Для mixed Windows + WSL checkout в WSL используй `bash scripts/dev/run_pytest.sh`, для CI/single-OS допускается `uv run python -m pytest`.
+- Для mixed Windows + WSL checkout в WSL используй `bash scripts/engineering/dev/run_pytest.sh`, для CI/single-OS допускается `uv run python -m pytest`.
 - В проекте pytest уже настроен с `pytest-xdist`, `pytest-timeout`, маркерами `unit`, `integration`, `e2e`, `architecture`, `benchmark`, `serial`, `slow`.
 - Бенчмарки (`-m benchmark`) и `slow` по умолчанию исключены. Не сравнивай несопоставимые наборы тестов.
 - Любые изменения не должны нарушать архитектурные ограничения и не должны ухудшать достоверность тестов ради скорости.
@@ -27,7 +27,7 @@
 - `pyproject.toml`
 - `tests/`
 - `tests/conftest.py`, локальные `conftest.py`
-- `scripts/dev/run_pytest.sh`, `scripts/dev/run_pytest.ps1`, `scripts/ci/run_pytest_resilient.py`
+- `scripts/engineering/dev/run_pytest.sh`, `scripts/engineering/dev/run_pytest.ps1`, `scripts/engineering/ci/run_pytest_resilient.py`
 - relevant CI workflows в `.github/workflows/`
 - существующие архитектурные тесты, связанные с тестовой стратегией и pytest
 

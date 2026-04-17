@@ -118,7 +118,7 @@ if command -v codex >/dev/null 2>&1; then
     fi
   else
     warn "neo4j-memory not registered in Codex"
-    info "Run: uv run python -m scripts.dev setup-mcp"
+    info "Run: uv run python -m scripts.engineering.dev setup-mcp"
   fi
 else
   info "Codex not available, skipping MCP check"

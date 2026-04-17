@@ -78,7 +78,7 @@ jobs:
           uv-extras: "docs"
 
       - name: Validate version consistency
-        run: python scripts/repo/check_version_consistency.py
+        run: python scripts/engineering/repo/check_version_consistency.py
 
       - name: Run documentation integrity guardrails
         run: uv run python scripts/docs/check_doc_links.py --links --specs --configs
@@ -87,11 +87,11 @@ jobs:
         run: uv run python -m scripts.docs verify
 
       - name: Check architecture dependency docs drift
-        run: uv run python scripts/qa/generate_architecture_dependency_map.py --check
+        run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check
 
       - name: Regenerate architecture dependency docs (PR preflight)
         if: github.event_name == 'pull_request'
-        run: uv run python scripts/qa/generate_architecture_dependency_map.py --update
+        run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update
 
       - name: Assert regenerated dependency docs are committed
         if: github.event_name == 'pull_request'

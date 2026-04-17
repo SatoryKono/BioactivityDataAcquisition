@@ -2,8 +2,8 @@
 
 Текущая runtime-surface:
 
-- `python -m scripts.qa generate-debt-tasks`
-- `python -m scripts.qa reduce-architecture-debt`
+- `python -m scripts.engineering.qa generate-debt-tasks`
+- `python -m scripts.engineering.qa reduce-architecture-debt`
 - `.codex/agents/py-architecture-debt-bot.md`
 - `configs/` изменения выполняются только через `py-config-bot`
 

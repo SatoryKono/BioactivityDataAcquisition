@@ -60,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Files: `docs/02-architecture/architecture-diagrams.md`
 
 - **`dev_setup.sh` major improvements**: Added `--ci` mode (no colors, non-interactive), `--verbose`, `--no-color` flags; step timing and summary table (PASS/WARN/FAIL/SKIP); checks for `gh` CLI, Docker, Node.js/mmdc, AI tools (Claude Code, Codex); `.env` drift detection; corrupted venv auto-repair; `BIOETL_SKIP_PRECOMMIT` and `BIOETL_SKIP_DOCKER` env vars; integrated `setup_plugins.sh`/`setup_skills.sh`; fixed MCP path and RULES.md version ref (v5.21 -> v5.23)
-  - Files: `scripts/dev/dev_setup.sh`, `README.md`, `docs/03-guides/quick-start.md`, `.github/CONTRIBUTING.md`, `scripts/README.md`
+  - Files: `scripts/engineering/dev/dev_setup.sh`, `README.md`, `docs/03-guides/quick-start.md`, `.github/CONTRIBUTING.md`, `scripts/README.md`
 
 - **Cyclomatic complexity reduction in `normalization_dates.py` (CC-REDUCE)**:
   - Extracted `_parse_iso8601()` private helper from `parse_date_field()` — reduces CC of `parse_date_field` from ~9 to ~4 by isolating the ISO-8601 fast-path logic into a dedicated, independently-testable function

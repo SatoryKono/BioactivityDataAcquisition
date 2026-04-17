@@ -21,7 +21,7 @@ def test_scripts_lifecycle_registry_check_passes() -> None:
     result = subprocess.run(
         [
             sys.executable,
-            "scripts/repo/check_scripts_inventory.py",
+            "scripts/engineering/repo/check_scripts_inventory.py",
             "--check-lifecycle",
             "--forbid-evaluate-active",
             "--lifecycle-registry",

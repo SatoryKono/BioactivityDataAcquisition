@@ -37,7 +37,7 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 NAMING_EXCEPTIONS_PATH = REPO_ROOT / "configs" / "naming_exceptions.yaml"
 
 

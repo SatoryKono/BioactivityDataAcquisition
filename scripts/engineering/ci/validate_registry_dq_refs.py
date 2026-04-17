@@ -231,7 +231,7 @@ def _collect_orphan_contract_files(
 
 def main() -> int:
     """Run registry<->DQ consistency validation."""
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     registry_path = repo_root / "configs" / "base" / "contract_registry.yaml"
     diagnostics_path = repo_root / "contract-registry-dq-diagnostics.json"
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from scripts.qa.report_hotspot_family_baseline import _resolve_snapshot_date
+from scripts.engineering.qa.report_hotspot_family_baseline import _resolve_snapshot_date
 
 
 def test_resolve_snapshot_date_prefers_reviewed_scorecard_snapshot() -> None:

@@ -7,7 +7,7 @@
 ### Governance gates
 
 ```text
-./.venv/Scripts/python.exe -m scripts.qa check-c901
+./.venv/Scripts/python.exe -m scripts.engineering.qa check-c901
 Current violations: 0
 Baseline violations: 7
 New violations: 0
@@ -16,20 +16,20 @@ Result: OK (no new C901 structural debt)
 ```
 
 ```text
-./.venv/Scripts/python.exe -m scripts.qa check-naming --check
+./.venv/Scripts/python.exe -m scripts.engineering.qa check-naming --check
 Total violations: 0
 OK: No violations found. All naming conventions are followed.
 ```
 
 ```text
-./.venv/Scripts/python.exe -m scripts.repo check-inventory --check
+./.venv/Scripts/python.exe -m scripts.engineering.repo check-inventory --check
 [FAIL] Scripts inventory drift detected:
 configs/quality/scripts_inventory_manifest.json
 Run with --update to refresh manifest.
 ```
 
 ```text
-./.venv/Scripts/python.exe -m scripts.repo check-inventory
+./.venv/Scripts/python.exe -m scripts.engineering.repo check-inventory
 [INFO] scripts=189 active=89 unknown=14 orphan=80 legacy=6
 ```
 

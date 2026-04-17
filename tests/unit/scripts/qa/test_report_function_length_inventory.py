@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.qa.report_function_length_inventory import _build_payload
-from scripts.qa.report_function_length_inventory import _render_markdown
-from scripts.qa.report_function_length_inventory import _scan_near_threshold_functions
-from scripts.qa.report_function_length_inventory import FunctionLengthEntry
+from scripts.engineering.qa.report_function_length_inventory import _build_payload
+from scripts.engineering.qa.report_function_length_inventory import _render_markdown
+from scripts.engineering.qa.report_function_length_inventory import _scan_near_threshold_functions
+from scripts.engineering.qa.report_function_length_inventory import FunctionLengthEntry
 
 
 def test_scan_near_threshold_functions_returns_sorted_entries(tmp_path: Path) -> None:

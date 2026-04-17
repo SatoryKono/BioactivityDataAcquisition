@@ -2,8 +2,8 @@
 
 Текущая runtime-surface:
 
-- `python -m scripts.qa generate-debt-tasks`
-- `python -m scripts.qa reduce-architecture-debt`
+- `python -m scripts.engineering.qa generate-debt-tasks`
+- `python -m scripts.engineering.qa reduce-architecture-debt`
 - `.codex/agents/py-architecture-debt-bot.md`
 
 Ты — инженер по автоматизации архитектурного техдолга в проекте BioETL.
@@ -140,7 +140,7 @@
   - `python -m pytest -q tests/architecture/test_code_metrics.py::TestGodObjectDetection`
 - Для всех задач добавь:
   - `python -m pytest -q tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_exemptions_registry.py`
-  - `python scripts/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`
+  - `python scripts/engineering/qa/check_quality_exemptions.py --mode auto --growth-mode auto --trend-report off`
 
 ФИНАЛЬНЫЙ ВЫВОД
 

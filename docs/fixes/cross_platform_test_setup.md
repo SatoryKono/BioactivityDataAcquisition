@@ -21,7 +21,7 @@ The error occurs when trying to run Windows tests without the Windows environmen
 cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
 
 # Set up Windows environment
-.\scripts\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
 
 # This will create .venv-win and install all dependencies
 ```
@@ -33,7 +33,7 @@ cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
 cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
 
 # Set up WSL environment
-bash scripts/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
 
 # This creates venv at ~/.venvs/bioetl
 ```
@@ -66,7 +66,7 @@ python -m pytest tests/unit/infrastructure/adapters/uniprot/test_adapter.py -v -
 | **Setup script** | `setup_env_windows.ps1` | `setup_env_wsl.sh` |
 | **Activation** | `.\.venv-win\Scripts\Activate.ps1` | `source ~/.venvs/bioetl/bin/activate` |
 | **Python path** | `.\.venv-win\Scripts\python.exe` | `~/.venvs/bioetl/bin/python` |
-| **Test runner** | `.\scripts\dev\run_pytest.ps1` | `bash scripts/dev/run_pytest.sh` |
+| **Test runner** | `.\scripts\engineering\dev\run_pytest.ps1` | `bash scripts/engineering/dev/run_pytest.sh` |
 
 ## Common Issues
 
@@ -95,7 +95,7 @@ python -m pytest tests/unit/infrastructure/adapters/uniprot/test_adapter.py -v -
 ### For Windows Development
 ```powershell
 # One-time setup
-.\scripts\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
 
 # Daily work
 .\.venv-win\Scripts\Activate.ps1
@@ -105,7 +105,7 @@ python -m pytest tests\... -v --asyncio-mode=auto
 ### For WSL Development
 ```bash
 # One-time setup
-bash scripts/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
 
 # Daily work
 source ~/.venvs/bioetl/bin/activate

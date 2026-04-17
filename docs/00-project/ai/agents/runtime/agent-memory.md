@@ -44,10 +44,10 @@ Last verified: '2026-04-06'
 Если checkout используется из PowerShell и WSL одновременно, не дели одну
 `.venv` между ОС:
 
-- PowerShell: `.\scripts\dev\setup_env_windows.ps1`,
-  `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`
-- WSL/Linux: `bash scripts/dev/setup_env_wsl.sh`,
-  `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`
+- PowerShell: `.\scripts\engineering\dev\setup_env_windows.ps1`,
+  `.\scripts\engineering\dev\run_pytest.ps1`, `.\scripts\engineering\dev\run_mypy.ps1`
+- WSL/Linux: `bash scripts/engineering/dev/setup_env_wsl.sh`,
+  `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`
 - OS-specific runtimes:
   `.venv-win` в PowerShell и
   `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}` в WSL

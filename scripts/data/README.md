@@ -52,7 +52,7 @@ python -m scripts.data check-vcr-placement
 python -m scripts.data check-vcr-naming
 # run targeted pytest with --vcr-record=new_episodes
 python -m scripts.data check-vcr-secrets
-python -m scripts.qa report-vcr-metadata --check
+python -m scripts.engineering.qa report-vcr-metadata --check
 ```
 
 Use explicit replay (`--vcr-record=none`) for ordinary local integration/E2E

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.qa import report_observability_metric_inventory as inventory
+from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 
 def test_collect_metric_inventory_classifies_registry_runtime_and_docs(

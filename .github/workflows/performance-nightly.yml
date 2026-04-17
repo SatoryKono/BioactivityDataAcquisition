@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir -p reports/performance
           if [ -f reports/performance/hotspot-observations.jsonl ]; then
-            uv run python scripts/qa/generate_hotspot_degradation_report.py \
+            uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \
               --observations reports/performance/hotspot-observations.jsonl \
               --budgets tests/performance/hotspot_budgets.json \
               --window-size 5 \

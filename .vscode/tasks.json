@@ -34,7 +34,7 @@
       "type": "shell",
       "command": "bash",
       "args": [
-        "scripts/dev/run_mypy.sh"
+        "scripts/engineering/dev/run_mypy.sh"
       ],
       "windows": {
         "command": "powershell",
@@ -42,7 +42,7 @@
           "-ExecutionPolicy",
           "Bypass",
           "-File",
-          "scripts/dev/run_mypy.ps1"
+          "scripts/engineering/dev/run_mypy.ps1"
         ]
       },
       "group": "test",

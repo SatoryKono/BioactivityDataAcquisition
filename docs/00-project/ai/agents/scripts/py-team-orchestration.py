@@ -2,7 +2,7 @@
 """Thin facade for the canonical terminology linter implementation.
 
 Canonical script:
-- src/tools/scripts/qa/lint_terminology.py
+- src/tools/scripts/engineering/qa/lint_terminology.py
 """
 
 from __future__ import annotations

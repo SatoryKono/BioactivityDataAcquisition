@@ -120,15 +120,15 @@ make run-local     # Сэмпловый pipeline-run (chembl_activity, limit=10)
 Для mixed Windows + WSL checkout предпочитай OS-specific wrappers:
 
 ```powershell
-.\scripts\dev\setup_env_windows.ps1
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
-.\scripts\dev\run_mypy.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/dev/setup_env_wsl.sh
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-bash scripts/dev/run_mypy.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_mypy.sh
 ```
 
 ### Unified Script Entry Points
@@ -141,26 +141,26 @@ bash scripts/dev/run_mypy.sh
 
 | Group                 | Entry Point                            | Назначение                                 |
 | --------------------- | -------------------------------------- | ------------------------------------------ |
-| `scripts.qa`          | `uv run python -m scripts.qa`          | Quality checks: naming, C901, terminology  |
-| `scripts.ci`          | `uv run python -m scripts.ci`          | CI pipeline: pytest runner, quality gates  |
+| `scripts.engineering.qa`          | `uv run python -m scripts.engineering.qa`          | Quality checks: naming, C901, terminology  |
+| `scripts.engineering.ci`          | `uv run python -m scripts.engineering.ci`          | CI pipeline: pytest runner, quality gates  |
 | `scripts.schema`      | `uv run python -m scripts.schema`      | Schema/config validation и генерация       |
 | `scripts.data`        | `uv run python -m scripts.data`        | Data integrity: VCR, checksums, delta      |
 | `scripts.docs`        | `uv run python -m scripts.docs`        | Documentation: links, drift, docstrings    |
 | `scripts.diagrams`    | `uv run python -m scripts.diagrams`    | Diagram lint, check, fix, render           |
-| `scripts.repo`        | `uv run python -m scripts.repo`        | Repo hygiene: inventory, catalog, versions |
+| `scripts.engineering.repo`        | `uv run python -m scripts.engineering.repo`        | Repo hygiene: inventory, catalog, versions |
 | `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |
-| `scripts.dev`         | `uv run python -m scripts.dev`         | Dev setup, test runner, mock metrics       |
-| `scripts.diagnostics` | `uv run python -m scripts.diagnostics` | Debug: cleanup, pandera, storage           |
+| `scripts.engineering.dev`         | `uv run python -m scripts.engineering.dev`         | Dev setup, test runner, mock metrics       |
+| `scripts.engineering.diagnostics` | `uv run python -m scripts.engineering.diagnostics` | Debug: cleanup, pandera, storage           |
 
-Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/qa/naming_audit.py`.
+Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/engineering/qa/naming_audit.py`.
 
 #### Ключевые команды по задачам
 
 ```bash
 # Архитектурная валидация
-uv run python -m scripts.qa check-naming --check
-uv run python -m scripts.qa check-c901
-uv run python -m scripts.repo check-inventory --check
+uv run python -m scripts.engineering.qa check-naming --check
+uv run python -m scripts.engineering.qa check-c901
+uv run python -m scripts.engineering.repo check-inventory --check
 
 # Config/schema
 uv run python -m scripts.schema validate-configs
@@ -182,8 +182,8 @@ uv run python -m scripts.data check-vcr-placement
 uv run python -m scripts.data checksums --generate
 
 # CI / Quality gates
-uv run python -m scripts.ci quality-gate
-uv run python -m scripts.ci run-tests
+uv run python -m scripts.engineering.ci quality-gate
+uv run python -m scripts.engineering.ci run-tests
 ```
 
 ### Dashboard-specific note

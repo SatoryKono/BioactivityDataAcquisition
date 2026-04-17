@@ -41,7 +41,7 @@ make test-deps
 make setup-plugins
 ```
 
-`scripts/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
+`scripts/engineering/dev/dev_setup.sh` is currently a legacy placeholder and is not the supported onboarding path.
 
 `uv` is the preferred package/environment manager for supported bootstrap and
 docs verification flows. `pip` remains the fallback only when `uv` is
@@ -53,15 +53,15 @@ If you open the same repository from both Windows PowerShell and WSL, keep the
 environments separate:
 
 ```powershell
-.\scripts\dev\setup_env_windows.ps1
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
-.\scripts\dev\run_mypy.ps1
+.\scripts\engineering\dev\setup_env_windows.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ```bash
-bash scripts/dev/setup_env_wsl.sh
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-bash scripts/dev/run_mypy.sh
+bash scripts/engineering/dev/setup_env_wsl.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_mypy.sh
 ```
 
 This bootstrap creates `.venv-win` for PowerShell and
@@ -120,8 +120,8 @@ bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 make test
 
 # WSL mixed-checkout wrappers
-bash scripts/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
-bash scripts/dev/run_mypy.sh
+bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n 4 --lf
+bash scripts/engineering/dev/run_mypy.sh
 
 # Check linting / typing
 make lint
@@ -129,8 +129,8 @@ make lint
 
 ```powershell
 # PowerShell mixed-checkout wrappers
-.\scripts\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
-.\scripts\dev\run_mypy.ps1
+.\scripts\engineering\dev\run_pytest.ps1 tests\ --timeout=120 -n 4 --lf
+.\scripts\engineering\dev\run_mypy.ps1
 ```
 
 ## Common Commands

@@ -47,7 +47,7 @@ uv run python -m scripts.docs verify
 uv run python -m scripts.docs check-links --links --specs --configs
 uv run python -m scripts.docs check-drift --ports --classes
 uv run python -m scripts.docs check-docstrings --summary
-bash scripts/docs/build_docs_site.sh --strict
+uv run python -m scripts.docs build-site --strict
 ```
 
 - Preferred end-to-end entrypoint: `uv run python -m scripts.docs verify`
@@ -65,13 +65,13 @@ ______________________________________________________________________
 Полный список команд: `uv run python -m scripts.<group> --help`.
 
 ```bash
-uv run python -m scripts.repo check-inventory --check
-uv run python -m scripts.qa check-c901 --target src/bioetl
+uv run python -m scripts.engineering.repo check-inventory --check
+uv run python -m scripts.engineering.qa check-c901 --target src/bioetl
 uv run python -m scripts.schema validate-configs
 uv run python -m scripts.data check-vcr-naming
 uv run python -m scripts.docs check-drift
 uv run python -m scripts.diagrams lint
-uv run python -m scripts.ci quality-gate
+uv run python -m scripts.engineering.ci quality-gate
 ```
 
 Каждый скрипт также можно запустить напрямую (см. `scripts/<group>/README.md`).
@@ -85,15 +85,15 @@ ______________________________________________________________________
 | `create_pipeline.py`           | src/tools/           | Да      | —                                                  | —            | Генерация boilerplate для новых пайплайнов |
 | `verify_schema_parity.py`      | src/tools/           | Да      | —                                                  | —            | Верификация Silver↔Gold schema parity      |
 | `file_merger.py`               | src/tools/           | Нет     | —                                                  | —            | Объединение файлов с метаданными           |
-| `cleanup_project.py`           | scripts/diagnostics/ | Нет     | —                                                  | `make clean` | Очистка кэшей и артефактов                 |
-| `cleanup_consolidate.py`       | scripts/diagnostics/ | Нет     | —                                                  | —            | Консолидированный аудит очистки            |
-| `audit_structure.py`           | scripts/diagnostics/ | Нет     | —                                                  | —            | Аудит соответствия File Policy             |
+| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                  | `make clean` | Очистка кэшей и артефактов                 |
+| `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                  | —            | Консолидированный аудит очистки            |
+| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | —                                                  | —            | Аудит соответствия File Policy             |
 | `vacuum_delta.py`              | scripts/data/        | Нет     | `uv run python -m scripts.data vacuum`             | —            | VACUUM Delta Lake таблиц                   |
 | `dq_baseline_update.py`        | scripts/data/        | Нет     | `uv run python -m scripts.data dq-baseline`        | —            | Пересчёт DQ baseline                       |
 | `verify_checksums.py`          | scripts/data/        | Нет     | `uv run python -m scripts.data checksums`          | —            | Верификация контрольных сумм               |
 | `salt_rotate.py`               | scripts/ops/         | Нет     | —                                                  | —            | Ротация PII-соли                           |
-| `naming_audit.py`              | scripts/qa/          | Нет     | `uv run python -m scripts.qa check-naming`         | —            | Аудит naming conventions                   |
-| `lint_terminology.py`          | scripts/qa/          | Нет     | `uv run python -m scripts.qa check-terminology`    | —            | Линтер терминологии                        |
+| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`         | —            | Аудит naming conventions                   |
+| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`    | —            | Линтер терминологии                        |
 | `config_gap_analysis.py`       | scripts/schema/      | Нет     | `uv run python -m scripts.schema analyze-gaps`     | —            | Анализ расхождений конфигов                |
 | `validate_pipeline_configs.py` | scripts/schema/      | Нет     | `uv run python -m scripts.schema validate-configs` | —            | Валидация configs vs JSON Schema           |
 

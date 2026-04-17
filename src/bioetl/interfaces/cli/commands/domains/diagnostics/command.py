@@ -109,7 +109,7 @@ def _build_diagnostics_guide_lines() -> list[str]:
         "Observability verification workflow:",
         "  1. bioetl diagnostics metrics [--json]",
         "  2. bioetl diagnostics health [--json]",
-        "  3. python -m scripts.qa report-observability-metric-inventory --json",
+        "  3. python -m scripts.engineering.qa report-observability-metric-inventory --json",
         (
             "  4. compare inventory output with "
             "grafana/prometheus-rules/bioetl_observability.yml and shipped dashboards"
@@ -178,7 +178,7 @@ def _build_metrics_profile_lines(profile: MetricsOperatorProfile) -> list[str]:
         "  inspect provider health: bioetl diagnostics health [--json]",
         (
             "  reconcile metric inventory: "
-            "python -m scripts.qa report-observability-metric-inventory --json"
+            "python -m scripts.engineering.qa report-observability-metric-inventory --json"
         ),
         (
             "  compare rules/dashboards: "

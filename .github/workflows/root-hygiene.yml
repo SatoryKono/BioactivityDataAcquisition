@@ -31,4 +31,4 @@ jobs:
           python-version: '3.11'
 
       - name: Validate repository root allowlist
-        run: python scripts/repo/audit_root_cleanliness.py
+        run: python scripts/engineering/repo/audit_root_cleanliness.py

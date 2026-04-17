@@ -34,7 +34,7 @@ def test_docs_cli_generate_pipeline_normalization_matrix_help_smoke() -> None:
 def test_qa_cli_report_normalization_fallback_inventory_help_smoke() -> None:
     result = _run_command(
         "-m",
-        "scripts.qa",
+        "scripts.engineering.qa",
         "report-normalization-fallback-inventory",
         "--help",
     )
@@ -80,7 +80,7 @@ def test_qa_cli_report_normalization_fallback_inventory_execution_smoke(
 
     result = _run_command(
         "-m",
-        "scripts.qa",
+        "scripts.engineering.qa",
         "report-normalization-fallback-inventory",
         "--limit",
         "5",

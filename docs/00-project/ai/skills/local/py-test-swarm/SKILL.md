@@ -26,8 +26,8 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 
 ## Cross-Platform Runtime Note
 - CI or single-OS checkout: `uv run python -m ...`
-- Windows PowerShell in a mixed checkout: `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`, or `.\.venv-win\Scripts\python.exe -m ...`
-- WSL/Linux in a mixed checkout: `bash scripts/dev/run_pytest.sh`, `bash scripts/dev/run_mypy.sh`, or `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`
+- Windows PowerShell in a mixed checkout: `.\scripts\engineering\dev\run_pytest.ps1`, `.\scripts\engineering\dev\run_mypy.ps1`, or `.\.venv-win\Scripts\python.exe -m ...`
+- WSL/Linux in a mixed checkout: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`
 
 ## L1 Workflow
 1. Run Discovery baseline commands from [l1-playbook.md](references/l1-playbook.md).
@@ -90,7 +90,7 @@ Minimum required outputs:
 ## Constraints
 MUST:
 - Keep architecture boundaries and no I/O in domain.
-- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\scripts\dev\run_pytest.ps1` / `.\scripts\dev\run_mypy.ps1` in PowerShell, and `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh` in WSL.
+- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\scripts\engineering\dev\run_pytest.ps1` / `.\scripts\engineering\dev\run_mypy.ps1` in PowerShell, and `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` in WSL.
 - Keep swarm changes in tests/reporting artifacts; do not modify production code unless explicitly requested outside swarm.
 - Use VCR/respx for HTTP tests; keep secrets out of cassettes.
 - Add regression tests for fixed failures when fixes are applied.

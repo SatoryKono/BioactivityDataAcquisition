@@ -134,7 +134,7 @@ docker ps | grep bioetl-neo4j
 ### MCP not responding in Codex
 ```bash
 # Re-register MCP servers
-uv run python -m scripts.dev setup-mcp
+uv run python -m scripts.engineering.dev setup-mcp
 
 # Verify wrapper is accessible
 test -x scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh && echo "OK"

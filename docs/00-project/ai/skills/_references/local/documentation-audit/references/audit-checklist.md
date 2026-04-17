@@ -64,4 +64,4 @@
 - Verify internal links are valid and relative paths are correct.
 - Confirm RULES.md and REQUIREMENTS.md are synchronized.
 - Ensure ADRs are reflected in top-level docs.
-- Verify strict docs build behavior (`bash scripts/docs/build_docs_site.sh --strict`) and note nav exclusions/warnings.
+- Verify strict docs build behavior (`python -m scripts.docs build-site --strict`) and note nav exclusions/warnings.

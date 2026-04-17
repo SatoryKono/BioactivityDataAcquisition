@@ -39,7 +39,7 @@ target windows, and alert-to-SLI mapping.
 4. `bioetl diagnostics run --run-id <run-id>` или
    `bioetl diagnostics checkpoint --pipeline <pipeline>` — workflow-level
    расследование run/checkpoint state.
-5. `python -m scripts.qa report-observability-metric-inventory --json` —
+5. `python -m scripts.engineering.qa report-observability-metric-inventory --json` —
    reconciliation surface между runtime emitters, docs и Prometheus rules.
 6. Сравните inventory output с
    `grafana/prometheus-rules/bioetl_observability.yml` и shipped dashboard JSON

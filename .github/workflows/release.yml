@@ -34,7 +34,7 @@ jobs:
           python-version: "3.11"
 
       - name: Check version consistency
-        run: python scripts/repo/check_version_consistency.py
+        run: python scripts/engineering/repo/check_version_consistency.py
 
       - name: Install build dependencies
         run: |

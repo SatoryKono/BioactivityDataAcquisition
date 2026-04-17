@@ -117,7 +117,7 @@ def test_inventory_json_output_is_ascii_safe_for_windows_codepages() -> None:
     env["PYTHONIOENCODING"] = "cp1251"
 
     result = subprocess.run(
-        [sys.executable, "scripts/repo/check_scripts_inventory.py", "--json"],
+        [sys.executable, "scripts/engineering/repo/check_scripts_inventory.py", "--json"],
         cwd=root,
         env=env,
         capture_output=True,

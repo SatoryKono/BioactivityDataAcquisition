@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def _legacy_script() -> Path:
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     return repo_root / "src" / "tools" / "scripts" / "duplicate_function_analyzer.py"
 
 

@@ -117,7 +117,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("ligand_efficiency_le", pa.float64()),
         pa.field("ligand_efficiency_lle", pa.float64()),
         pa.field("ligand_efficiency_sei", pa.float64()),
-        pa.field("manual_curation_flag", pa.float64()),  # Float for nullable int
+        pa.field("manual_curation_flag", pa.int64()),
         pa.field("molecule_id", pa.string(), nullable=False),
         pa.field("molecule_pref_name", pa.string()),
         pa.field("original_activity_id", pa.float64()),  # Float for nullable int

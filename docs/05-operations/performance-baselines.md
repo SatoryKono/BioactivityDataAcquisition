@@ -24,7 +24,7 @@ Hotspot regression budgets (relative thresholds for CI stability) are enforced b
 
 - `tests/performance/test_hotspot_budgets.py`
 - `tests/performance/hotspot_budgets.json`
-- `scripts/qa/generate_hotspot_degradation_report.py` (`uv run python -m scripts.qa report-hotspots`, rolling-window degradation report)
+- `scripts/engineering/qa/generate_hotspot_degradation_report.py` (`uv run python -m scripts.engineering.qa report-hotspots`, rolling-window degradation report)
 
 ## Overview
 
@@ -97,14 +97,14 @@ pytest tests/performance/test_hotspot_budgets.py \
   -m "benchmark and performance" \
   -p no:xdist \
   --perf-obs-out /tmp/hotspot-observations.jsonl
-uv run python -m scripts.qa calibrate-hotspots \
+uv run python -m scripts.engineering.qa calibrate-hotspots \
   --observations /tmp/hotspot-observations.jsonl \
   --budgets tests/performance/hotspot_budgets.json \
   --latency-q 1.0 \
   --throughput-q 0.0
 
 # Build rolling-window degradation report (for CI summary/artifacts)
-uv run python -m scripts.qa report-hotspots \
+uv run python -m scripts.engineering.qa report-hotspots \
   --observations /tmp/hotspot-observations.jsonl \
   --budgets tests/performance/hotspot_budgets.json \
   --window-size 5 \

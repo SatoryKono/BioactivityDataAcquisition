@@ -118,7 +118,7 @@ UUID-like values normalize through canonical string conversion.
 | Join-key domain policies | [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) | Pure scalar join-key policies for canonical trim/casing behavior |
 | Join-key application adapters | [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py) | Applies canonical join-key policies to composite runtime/config and DataFrame-oriented flows |
 | Matrix generation | [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) | Deterministically emits multi-pipeline CSV and MD artifacts from schemas, profiles, fallback rules, and join-key seams |
-| Fallback inventory | [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_technical_passthrough` debt from the published matrix for governance and ratchets |
+| Fallback inventory | [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/report_normalization_fallback_inventory.py) | Reports `fallback_business` vs `fallback_technical_passthrough` debt from the published matrix for governance and ratchets |
 
 ## Hash Boundaries
 
@@ -240,7 +240,7 @@ Current evidence bundle on `main`:
 
 - canonical plan: [normalization_plan_P0_P6.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/05-engineering/normalization_plan_P0_P6.md)
 - shipped multi-pipeline matrix: [pipeline_normalization_field_matrix.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md)
-- fallback inventory report: [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/qa/report_normalization_fallback_inventory.py)
+- fallback inventory report: [report_normalization_fallback_inventory.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/engineering/qa/report_normalization_fallback_inventory.py)
 - join-key policy seams: [join_keys.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/domain/normalization/join_keys.py) and [join_key_normalization.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/src/bioetl/application/composite/join_key_normalization.py)
 
 Governance rules:

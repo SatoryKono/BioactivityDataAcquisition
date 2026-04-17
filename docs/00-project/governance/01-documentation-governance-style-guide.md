@@ -252,7 +252,7 @@ control-plane contract docs, MUST быть выполнено:
 
 ```bash
 python scripts/docs/check_doc_links.py
-bash scripts/docs/build_docs_site.sh --strict
+python -m scripts.docs build-site --strict
 ```
 
 Для drift-sensitive documentation surfaces SHOULD дополнительно выполняться:

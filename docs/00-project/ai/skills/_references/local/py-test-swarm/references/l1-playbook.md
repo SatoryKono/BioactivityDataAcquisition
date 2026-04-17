@@ -3,8 +3,8 @@
 Runtime note:
 
 - CI or single-OS checkout: keep the `uv run python -m ...` commands below as-is.
-- Windows PowerShell in a mixed checkout: use `.\scripts\dev\run_pytest.ps1` / `.\scripts\dev\run_mypy.ps1` or `.\.venv-win\Scripts\python.exe -m ...`.
-- WSL/Linux in a mixed checkout: use `bash scripts/dev/run_pytest.sh` / `bash scripts/dev/run_mypy.sh` or `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`.
+- Windows PowerShell in a mixed checkout: use `.\scripts\engineering\dev\run_pytest.ps1` / `.\scripts\engineering\dev\run_mypy.ps1` or `.\.venv-win\Scripts\python.exe -m ...`.
+- WSL/Linux in a mixed checkout: use `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` or `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`.
 
 ## 1) Discovery (mandatory before delegation)
 

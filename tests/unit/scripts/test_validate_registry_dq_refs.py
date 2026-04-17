@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.ci.validate_registry_dq_refs import _validate_entry
+from scripts.engineering.ci.validate_registry_dq_refs import _validate_entry
 
 
 def test_validate_entry_reports_identity_mismatch(tmp_path: Path) -> None:

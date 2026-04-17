@@ -299,7 +299,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate documentation KPI report.")
     parser.add_argument(
         "--baseline-file",
-        default="scripts/baselines/not_in_nav_baseline.txt",
+        default="scripts/engineering/baselines/not_in_nav_baseline.txt",
         help="Path to not-in-nav baseline file.",
     )
     parser.add_argument(

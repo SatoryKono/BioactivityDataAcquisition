@@ -121,7 +121,7 @@ Notes:
 
 ```bash
 # Serial subset for coverage-verify
-COVERAGE_FILE=reports/coverage/.coverage.serial uv run python scripts/ci/run_pytest_resilient.py \
+COVERAGE_FILE=reports/coverage/.coverage.serial uv run python scripts/engineering/ci/run_pytest_resilient.py \
   --target tests/ \
   --reports-dir reports/pytest/coverage-verify \
   --parallel-marker "serial and not e2e and not benchmark" \
@@ -286,7 +286,7 @@ coverage-verify:
         path: reports/coverage
     - run: >
         COVERAGE_FILE=reports/coverage/.coverage.serial uv run python
-        scripts/ci/run_pytest_resilient.py
+        scripts/engineering/ci/run_pytest_resilient.py
         --target tests/
         --reports-dir reports/pytest/coverage-verify
         --parallel-marker "serial and not e2e and not benchmark"

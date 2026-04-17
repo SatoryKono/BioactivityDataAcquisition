@@ -190,7 +190,7 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
 OPS_SCRIPT_HUB_PREFIXES: tuple[str, ...] = (
     "scripts/diagrams/",
     "scripts/docs/",
-    "scripts/qa/",
+    "scripts/engineering/qa/",
     "scripts/schema/",
     "scripts/memory/",
 )
@@ -678,18 +678,18 @@ CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
         "gate": "pytest",
     },
     {
-        "name": "bash scripts/dev/run_pytest.sh",
+        "name": "bash scripts/engineering/dev/run_pytest.sh",
         "platform": "wsl",
         "summary": "WSL/Linux wrapper with default coverage flags and plugin bootstrap.",
         "gate": "pytest",
-        "script_path": "scripts/dev/run_pytest.sh",
+        "script_path": "scripts/engineering/dev/run_pytest.sh",
     },
     {
         "name": ".\\scripts\\dev\\run_pytest.ps1",
         "platform": "windows",
         "summary": "PowerShell wrapper with default coverage flags for .venv-win.",
         "gate": "pytest",
-        "script_path": "scripts/dev/run_pytest.ps1",
+        "script_path": "scripts/engineering/dev/run_pytest.ps1",
     },
     {
         "name": "uv run python -m mypy --strict src/bioetl/",
@@ -698,18 +698,18 @@ CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
         "gate": GATE_MYPY_STRICT,
     },
     {
-        "name": "bash scripts/dev/run_mypy.sh",
+        "name": "bash scripts/engineering/dev/run_mypy.sh",
         "platform": "wsl",
         "summary": "WSL/Linux mypy wrapper for the stable WSL virtualenv.",
         "gate": GATE_MYPY_STRICT,
-        "script_path": "scripts/dev/run_mypy.sh",
+        "script_path": "scripts/engineering/dev/run_mypy.sh",
     },
     {
         "name": ".\\scripts\\dev\\run_mypy.ps1",
         "platform": "windows",
         "summary": "PowerShell mypy wrapper for .venv-win.",
         "gate": GATE_MYPY_STRICT,
-        "script_path": "scripts/dev/run_mypy.ps1",
+        "script_path": "scripts/engineering/dev/run_mypy.ps1",
     },
     {
         "name": "uv run python -m scripts.docs verify",
@@ -726,11 +726,11 @@ CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
         "script_path": "scripts/schema/validate_configs.py",
     },
     {
-        "name": "bash scripts/dev/pretest_guardrails.sh",
+        "name": "bash scripts/engineering/dev/pretest_guardrails.sh",
         "platform": "wsl",
         "summary": "WSL pretest guardrail runner before broad pytest waves.",
         "gate": GATE_PRETEST_GUARDRAILS,
-        "script_path": "scripts/dev/pretest_guardrails.sh",
+        "script_path": "scripts/engineering/dev/pretest_guardrails.sh",
     },
 )
 CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
@@ -790,18 +790,18 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
         ),
     },
     {
-        "readme_path": "scripts/qa/README.md",
+        "readme_path": "scripts/engineering/qa/README.md",
         "readme_summary": "QA tooling catalog covering architecture checks, debt telemetry, and normalization inventory reporting.",
-        "entrypoint_path": "scripts/qa/__main__.py",
+        "entrypoint_path": "scripts/engineering/qa/__main__.py",
         "entrypoint_summary": "Unified Python entrypoint for QA checks and normalization inventory reporting workflows.",
         "execution_paths": (
             {
-                "name": "python -m scripts.qa",
+                "name": "python -m scripts.engineering.qa",
                 "platform": "cross_platform",
                 "summary": "Unified local entrypoint for QA tooling commands.",
             },
             {
-                "name": "python -m scripts.qa report-normalization-fallback-inventory --limit 20",
+                "name": "python -m scripts.engineering.qa report-normalization-fallback-inventory --limit 20",
                 "platform": "cross_platform",
                 "summary": "Canonical report-only inventory path for current fallback normalization debt.",
             },
@@ -3334,9 +3334,9 @@ def _add_quality_and_scripts(snapshot: GraphSnapshot, _root: Path, project: Node
 
     dev_readme = snapshot.add_node(
         "doc_artifact",
-        "scripts/dev/README.md",
+        "scripts/engineering/dev/README.md",
         summary="Developer workflow and wrapper entrypoint guide.",
-        source_path="scripts/dev/README.md",
+        source_path="scripts/engineering/dev/README.md",
         source_kind="ops_doc",
         last_verified=today,
         ingest_wave="repo_sync_v1",
@@ -3372,7 +3372,7 @@ def _add_quality_and_scripts(snapshot: GraphSnapshot, _root: Path, project: Node
                 confidence="high",
             )
             snapshot.add_relation(script, "PROVIDES", execution, provenance="curated_execution")
-            if script_path.startswith("scripts/dev/"):
+            if script_path.startswith("scripts/engineering/dev/"):
                 snapshot.add_relation(dev_readme, "DESCRIBES", execution, provenance="scripts_dev_readme")
 
     for cluster in CURATED_SCRIPT_CLUSTERS:

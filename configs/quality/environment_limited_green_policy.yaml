@@ -1,7 +1,7 @@
 version: 1
 policy_scope: environment_limited_green_interpretation
 taxonomy_path: configs/quality/test_health_reporting.yaml
-classifier_source: scripts/ci/quality_integral_gate.py
+classifier_source: scripts/engineering/ci/quality_integral_gate.py
 current_baseline:
   enforced_provider_count: 7
   accepted_steady_state_reasons:

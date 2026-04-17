@@ -66,7 +66,7 @@ These are fundamentally incompatible at the adapter level. Clear boundary needed
    `reports/quality/vcr-metadata-catalog.json`; generation exists, but coverage and
    workflow automation are still partial
 5. Canonical tooling paths are active for partial rollout at
-   `scripts/qa/report_vcr_metadata_catalog.py` and
+   `scripts/engineering/qa/report_vcr_metadata_catalog.py` and
    `scripts/migrations/active/backfill_vcr_metadata_sidecars.py`; workflow-level
    automation can remain staged even after the tooling exists
 6. Golden master snapshots for transformers live in `tests/fixtures/golden/{provider}/`

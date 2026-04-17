@@ -552,8 +552,8 @@ Execution note:
 
 - `py_compile` по изменённым файлам через проектный интерпретатор, а не через
   системный `python3`
-- `bash scripts/dev/run_mypy.sh --narrow <changed package/file targets>`
-- `bash scripts/dev/run_pytest.sh --narrow <nearest tests>`
+- `bash scripts/engineering/dev/run_mypy.sh --narrow <changed package/file targets>`
+- `bash scripts/engineering/dev/run_pytest.sh --narrow <nearest tests>`
 - повторный package-slice `mypy` для всего затронутого подкластера
 - если менялся `composition` или `infrastructure`, добавлять ближайшие
   `architecture`/`unit` tests, а не ограничиваться file-local smoke

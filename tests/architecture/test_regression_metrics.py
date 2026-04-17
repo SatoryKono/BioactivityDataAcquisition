@@ -491,8 +491,8 @@ def test_class_size_exemption_count() -> None:
 
 def test_e2e_scripts_exist() -> None:
     """E2E health-check scripts must exist."""
-    skip_rate = Path("scripts/ci/check_e2e_matrix_skip_rate.py")
-    rerun = Path("scripts/ci/check_e2e_rerun_stability.py")
+    skip_rate = Path("scripts/engineering/ci/check_e2e_matrix_skip_rate.py")
+    rerun = Path("scripts/engineering/ci/check_e2e_rerun_stability.py")
 
     missing = []
     if not skip_rate.exists():
@@ -564,7 +564,7 @@ def _load_dep_map_module() -> Any | None:
 
     import sys
 
-    script_path = Path("scripts/qa/generate_architecture_dependency_map.py")
+    script_path = Path("scripts/engineering/qa/generate_architecture_dependency_map.py")
     if not script_path.exists():
         return None
 

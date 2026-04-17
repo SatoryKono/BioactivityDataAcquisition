@@ -7,6 +7,7 @@ Usage:
 
 Commands:
     verify             Run the canonical docs verification chain
+    build-site         Build the MkDocs site through the packaged build entrypoint
     check-links        Check documentation links, specs, and configs
     check-drift        Check documentation drift (ports, classes, runtime mirrors, freshness)
     check-docstrings   Check docstring coverage
@@ -33,6 +34,7 @@ import sys
 
 COMMANDS: dict[str, str] = {
     "verify": "scripts.docs.checks.verify",
+    "build-site": "scripts.docs.build.mkdocs_build",
     "check-links": "scripts.docs.checks.check_links",
     "check-drift": "scripts.docs.checks.check_drift",
     "check-docstrings": "scripts.docs.checks.check_docstrings",

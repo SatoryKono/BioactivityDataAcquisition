@@ -19,7 +19,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     result = subprocess.run(
         [
             sys.executable,
-            "scripts/dev/setup_copilot_codex_mcp.py",
+            "scripts/engineering/dev/setup_copilot_codex_mcp.py",
             "--root",
             str(tmp_path),
             "--skip-codex",
@@ -157,19 +157,19 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
 def test_setup_sh_wrapper_delegates_to_backend() -> None:
     """Bash wrapper must stay a thin facade over the Python backend."""
     root = _project_root()
-    content = (root / "scripts/dev/setup_copilot_codex_mcp.sh").read_text(
+    content = (root / "scripts/engineering/dev/setup_copilot_codex_mcp.sh").read_text(
         encoding="utf-8"
     )
-    assert "scripts/dev/setup_copilot_codex_mcp.py" in content
+    assert "scripts/engineering/dev/setup_copilot_codex_mcp.py" in content
 
 
 def test_setup_ps1_wrapper_delegates_to_backend() -> None:
     """PowerShell wrapper must stay a thin facade over the Python backend."""
     root = _project_root()
-    content = (root / "scripts/dev/setup_copilot_codex_mcp.ps1").read_text(
+    content = (root / "scripts/engineering/dev/setup_copilot_codex_mcp.ps1").read_text(
         encoding="utf-8"
     )
-    assert "scripts/dev/setup_copilot_codex_mcp.py" in content
+    assert "scripts/engineering/dev/setup_copilot_codex_mcp.py" in content
 
 
 def test_github_mcp_wrappers_load_repo_env() -> None:

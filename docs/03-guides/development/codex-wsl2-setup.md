@@ -65,7 +65,7 @@ ______________________________________________________________________
 | `start-wsl-proxy.bat`  | `scripts/ops/` | Start proxy in background                |
 | `codex.bat`            | `scripts/ops/` | Launch interactive Codex from Windows    |
 | `codex-exec.bat`       | `scripts/ops/` | Launch full-auto Codex from Windows      |
-| `.setup_wsl_codex.sh`  | `scripts/dev/` | DNS resolver (dig + PowerShell fallback) |
+| `.setup_wsl_codex.sh`  | `scripts/engineering/dev/` | DNS resolver (dig + PowerShell fallback) |
 | `.wsl_proxy_env.sh`    | repo root      | Auto-configure proxy env vars            |
 | `.codex/config.toml`   | repo root      | Project-level Codex config               |
 | `~/.codex/config.toml` | WSL home       | Global Codex config (MCP servers)        |
@@ -225,7 +225,7 @@ WSL2 traffic cannot reach external hosts because:
 
 ### Solution: Two-layer workaround
 
-**Layer 1: DNS** (`scripts/dev/.setup_wsl_codex.sh`)
+**Layer 1: DNS** (`scripts/engineering/dev/.setup_wsl_codex.sh`)
 
 Resolves OpenAI and npm hosts using:
 
@@ -238,7 +238,7 @@ if `api.openai.com` is missing from `/etc/hosts`.
 Manual refresh:
 
 ```bash
-bash "$BIOETL_DIR/scripts/dev/.setup_wsl_codex.sh"
+bash "$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh"
 ```
 
 **Layer 2: Proxy** (`scripts/ops/wsl_proxy.py`)
@@ -264,7 +264,7 @@ alias cxe="cd $BIOETL_DIR && codex exec --full-auto"
 
 # Ensure OpenAI DNS (VPN workaround)
 if ! grep -q "api.openai.com" /etc/hosts 2>/dev/null; then
-  bash "$BIOETL_DIR/scripts/dev/.setup_wsl_codex.sh" 2>/dev/null
+  bash "$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh" 2>/dev/null
 fi
 
 # WSL2 proxy (VPN workaround)
@@ -320,7 +320,7 @@ ______________________________________________________________________
 
 ```bash
 # Refresh DNS cache
-bash "$BIOETL_DIR/scripts/dev/.setup_wsl_codex.sh"
+bash "$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh"
 
 # Verify
 grep openai /etc/hosts

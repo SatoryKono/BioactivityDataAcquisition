@@ -1,6 +1,6 @@
 """Compatibility wrapper for architecture dependency map generation.
 
-Canonical implementation lives in scripts/qa/generate_architecture_dependency_map.py.
+Canonical implementation lives in scripts/engineering/qa/generate_architecture_dependency_map.py.
 This wrapper preserves historical invocation paths used by docs and tooling.
 """
 
@@ -15,7 +15,7 @@ def _load_main() -> Callable[[], int]:
     project_root = Path(__file__).resolve().parents[1]
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
-    from scripts.qa.generate_architecture_dependency_map import main
+    from scripts.engineering.qa.generate_architecture_dependency_map import main
 
     return main
 

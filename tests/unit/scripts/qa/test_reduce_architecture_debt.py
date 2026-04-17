@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts.qa.reduce_architecture_debt import main
+from scripts.engineering.qa.reduce_architecture_debt import main
 
 
 def test_reduce_architecture_debt_script_writes_plan(tmp_path: Path) -> None:

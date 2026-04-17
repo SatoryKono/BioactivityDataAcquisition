@@ -131,44 +131,6 @@ def _validate_execution_identity_compatibility(
     current_metadata: CheckpointMetadata,
     checkpoint_metadata: CheckpointMetadata,
 ) -> tuple[bool, list[str]]:
-    execution_identity_result = check_execution_identity_compatibility(
-        current_composite_run_identity=current_metadata.composite_run_identity,
-        checkpoint_composite_run_identity=checkpoint_metadata.composite_run_identity,
-        current_execution_fingerprint=current_metadata.execution_fingerprint,
-        checkpoint_execution_fingerprint=checkpoint_metadata.execution_fingerprint,
-        current_pipeline_name=current_metadata.pipeline_name,
-        checkpoint_pipeline_name=checkpoint_metadata.pipeline_name,
-        current_run_type=current_metadata.run_type,
-        checkpoint_run_type=checkpoint_metadata.run_type,
-        current_pipeline_version=current_metadata.pipeline_version,
-        checkpoint_pipeline_version=checkpoint_metadata.pipeline_version,
-        current_manifest_id=current_metadata.manifest_id,
-        checkpoint_manifest_id=checkpoint_metadata.manifest_id,
-        current_dq_contract_compatibility_hash=(
-            current_metadata.dq_contract_compatibility_hash
-        ),
-        checkpoint_dq_contract_compatibility_hash=(
-            checkpoint_metadata.dq_contract_compatibility_hash
-        ),
-        current_contract_ref=current_metadata.contract_ref,
-        checkpoint_contract_ref=checkpoint_metadata.contract_ref,
-        current_contract_version=current_metadata.contract_version,
-        checkpoint_contract_version=checkpoint_metadata.contract_version,
-        current_effective_config_hash=current_metadata.effective_config_hash,
-        checkpoint_effective_config_hash=checkpoint_metadata.effective_config_hash,
-        current_effective_config_artifact_id=current_metadata.effective_config_artifact_id,
-        checkpoint_effective_config_artifact_id=checkpoint_metadata.effective_config_artifact_id,
-        current_exact_replay=current_metadata.exact_replay,
-        checkpoint_exact_replay=checkpoint_metadata.exact_replay,
-        current_input_snapshot_fingerprint=current_metadata.input_snapshot_fingerprint,
-        checkpoint_input_snapshot_fingerprint=(
-            checkpoint_metadata.input_snapshot_fingerprint
-        ),
-    )
-def _validate_execution_identity_compatibility(
-    current_metadata: CheckpointMetadata,
-    checkpoint_metadata: CheckpointMetadata,
-) -> tuple[bool, list[str]]:
     messages: list[str] = []
     execution_identity_compatible = True
     execution_identity_result = check_execution_identity_compatibility(

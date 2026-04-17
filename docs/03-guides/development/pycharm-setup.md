@@ -22,7 +22,7 @@
 - **BioETL Run chembl_molecule** — полный запуск ChEMBL Molecule.
 
 ### Качество и Документация (QA & Docs)
-- **Scripts: QA (Check)** — запуск `scripts.qa check` (линтеры, типы).
+- **Scripts: QA (Check)** — запуск `scripts.engineering.qa check` (линтеры, типы).
 - **Scripts: Schema (Validate)** — проверка всех YAML конфигов.
 - **Scripts: Docs (Check Links)** — проверка ссылок и спецификаций в документации.
 - **Mypy Strict** — запуск MyPy в строгом режиме.

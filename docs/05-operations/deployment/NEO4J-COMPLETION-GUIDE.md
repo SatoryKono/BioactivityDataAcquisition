@@ -8,7 +8,7 @@ Configuration files:
 - `.mcp.json` (Codex CLI)
 - `.vscode/mcp.json` (VS Code Copilot)
 - `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` (wrapper script)
-- `scripts/dev/setup_copilot_codex_mcp.py` (setup automation)
+- `scripts/engineering/dev/setup_copilot_codex_mcp.py` (setup automation)
 
 ⏳ **Pending**: Neo4j backend container startup on your machine.
 

@@ -14,8 +14,8 @@ This shard now serves primarily as historical trigger evidence for why the compa
 - The evidence objects remain valid as records of the pre-alignment pressure points.
 - The current repo baseline has already addressed the largest SSOT gap through:
   - `configs/quality/compatibility_facade_inventory.yaml`
-  - `scripts/ci/_compatibility_registry.py`
-  - `scripts/qa/generate_compatibility_facade_snapshot.py`
+  - `scripts/engineering/ci/_compatibility_registry.py`
+  - `scripts/engineering/qa/generate_compatibility_facade_snapshot.py`
 - Freeze guards should now be read more narrowly: they are mostly import-discipline and removal-policy guardrails, not a second curated registry that should be migrated wholesale.
 
 ## Созданные объекты evidence
