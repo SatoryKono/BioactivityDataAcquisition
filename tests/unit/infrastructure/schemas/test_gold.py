@@ -53,9 +53,7 @@ class TestGoldPublicationSchemaDQFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_dq_fields(
-        self, schema_class: SchemaType, name: str
-    ) -> None:
+    def test_schema_has_dq_fields(self, schema_class: SchemaType, name: str) -> None:
         """All Gold publication schemas must have DQ fields."""
         fields = get_schema_fields(schema_class)
         # Check for alias versions (_dq_warn, _dq_error) or regular versions
@@ -96,9 +94,7 @@ class TestGoldPublicationSchemaUnifiedFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_page_fields(
-        self, schema_class: SchemaType, name: str
-    ) -> None:
+    def test_schema_has_page_fields(self, schema_class: SchemaType, name: str) -> None:
         """Gold publication schemas with page data must have page_first and page_last fields."""
         fields = get_schema_fields(schema_class)
         assert "page_first" in fields, f"{name} missing page_first field"
@@ -119,9 +115,7 @@ class TestGoldPublicationSchemaCrossRefFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_doi_field(
-        self, schema_class: SchemaType, name: str
-    ) -> None:
+    def test_schema_has_doi_field(self, schema_class: SchemaType, name: str) -> None:
         """All Gold publication schemas must have doi field."""
         fields = get_schema_fields(schema_class)
         assert "doi" in fields, f"{name} missing doi field"
@@ -136,9 +130,7 @@ class TestGoldPublicationSchemaCrossRefFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_pmid_field(
-        self, schema_class: SchemaType, name: str
-    ) -> None:
+    def test_schema_has_pmid_field(self, schema_class: SchemaType, name: str) -> None:
         """All Gold publication schemas should have pmid field."""
         fields = get_schema_fields(schema_class)
         assert "pmid" in fields, f"{name} missing pmid field"
@@ -153,9 +145,7 @@ class TestGoldPublicationSchemaCrossRefFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_pmc_id_field(
-        self, schema_class: SchemaType, name: str
-    ) -> None:
+    def test_schema_has_pmc_id_field(self, schema_class: SchemaType, name: str) -> None:
         """All Gold publication schemas should have pmc_id field."""
         fields = get_schema_fields(schema_class)
         assert "pmc_id" in fields, f"{name} missing pmc_id field"
@@ -311,9 +301,7 @@ class TestGoldPublicationSchemaMetadataFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_entity_id(
-        self, schema_class: SchemaType, name: str
-    ) -> None:
+    def test_schema_has_entity_id(self, schema_class: SchemaType, name: str) -> None:
         """All Gold schemas must have entity_id field."""
         fields = get_schema_fields(schema_class)
         assert "entity_id" in fields, f"{name} missing entity_id field"
@@ -328,9 +316,7 @@ class TestGoldPublicationSchemaMetadataFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_content_hash(
-        self, schema_class: SchemaType, name: str
-    ) -> None:
+    def test_schema_has_content_hash(self, schema_class: SchemaType, name: str) -> None:
         """All Gold schemas must have content_hash field."""
         fields = get_schema_fields(schema_class)
         assert "content_hash" in fields, f"{name} missing content_hash field"

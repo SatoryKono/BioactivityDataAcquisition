@@ -36,18 +36,22 @@ def test_metrics_adapters_accept_canonical_labels(kind: str) -> None:
     metrics = _build_metrics_adapter(kind)
     assert isinstance(metrics, MetricsPort)
 
-    histogram_variants = (
-        {"labels": {"provider": "chembl", "endpoint": "/molecule"}},
-    )
+    histogram_variants = ({"labels": {"provider": "chembl", "endpoint": "/molecule"}},)
     counter_variants = (
-        {"labels": {"provider": "chembl", "endpoint": "/molecule", "status": "success"}},
+        {
+            "labels": {
+                "provider": "chembl",
+                "endpoint": "/molecule",
+                "status": "success",
+            }
+        },
     )
-    gauge_variants = (
-        {"labels": {"provider": "chembl"}},
-    )
+    gauge_variants = ({"labels": {"provider": "chembl"}},)
 
     for kwargs in histogram_variants:
-        metrics.observe_histogram("bioetl_adapter_request_duration_seconds", 1.0, **kwargs)
+        metrics.observe_histogram(
+            "bioetl_adapter_request_duration_seconds", 1.0, **kwargs
+        )
     for kwargs in counter_variants:
         metrics.increment_counter("bioetl_adapter_requests_total", 1, **kwargs)
     for kwargs in gauge_variants:

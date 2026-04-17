@@ -250,9 +250,11 @@ class CheckpointManagerService:
             return None
 
         checkpoint_metadata = self._resolve_checkpoint_metadata(checkpoint_data)
-        compatible_checkpoint, status_already_emitted = self._validate_loaded_checkpoint(
-            checkpoint_metadata,
-            current_metadata=current_metadata,
+        compatible_checkpoint, status_already_emitted = (
+            self._validate_loaded_checkpoint(
+                checkpoint_metadata,
+                current_metadata=current_metadata,
+            )
         )
         if compatible_checkpoint is None:
             return None
@@ -307,6 +309,7 @@ class CheckpointManagerService:
 # CheckpointManagerService directly.
 import warnings
 
+
 class CheckpointManager(CheckpointManagerService):
     def __init__(self, *args, **kwargs):
         message = (
@@ -315,5 +318,6 @@ class CheckpointManager(CheckpointManagerService):
         )
         warnings.warn(message, DeprecationWarning, stacklevel=3)
         super().__init__(*args, **kwargs)
+
 
 __all__ = ["CheckpointManager", "CheckpointManagerService"]

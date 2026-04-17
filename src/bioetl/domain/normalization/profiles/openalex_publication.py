@@ -17,7 +17,12 @@ _OPENALEX_PUBLICATION_BASE_FIELDS = tuple(
 )
 _OPENALEX_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
     field
-    for field in ("publication_doi", "publication_pmid", "publication_pmc_id", "_source")
+    for field in (
+        "publication_doi",
+        "publication_pmid",
+        "publication_pmc_id",
+        "_source",
+    )
     if field not in _OPENALEX_PUBLICATION_BASE_FIELDS
 )
 OPENALEX_PUBLICATION_SCHEMA_FIELDS = (

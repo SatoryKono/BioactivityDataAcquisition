@@ -52,7 +52,9 @@ from bioetl.infrastructure.storage.silver.pipeline_helpers import (
     execute_silver_write_pipeline,
     execute_silver_write_with_tracing,
 )
-from bioetl.infrastructure.storage.silver.operations.postwrite_operations import SilverPostwriteOperations
+from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+    SilverPostwriteOperations,
+)
 
 # SilverWriterPostwriteMixin removed from inheritance (composition pattern)
 # Postwrite operations now handled by SilverPostwriteOperations service
@@ -61,6 +63,7 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
     build_silver_writer_runtime_services,
 )
+
 # SilverWriterValidationMixin removed from inheritance (composition pattern)
 # Validation operations now handled by SilverValidationOperations service
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
@@ -109,9 +112,7 @@ class _AwaitTrackingAsyncCallable:
 
     def assert_awaited_once_with(self, *args: object, **kwargs: object) -> None:
         if self.await_count != 1:
-            raise AssertionError(
-                f"Expected one await, observed {self.await_count}"
-            )
+            raise AssertionError(f"Expected one await, observed {self.await_count}")
         actual = self.await_args
         if actual is None or actual.args != args or actual.kwargs != kwargs:
             raise AssertionError(
@@ -164,7 +165,11 @@ def _coerce_silver_write_invocation(
         return invocation
 
     payload = dict(legacy_kwargs)
-    if table_key != "table_name" and table_key in payload and "table_name" not in payload:
+    if (
+        table_key != "table_name"
+        and table_key in payload
+        and "table_name" not in payload
+    ):
         payload["table_name"] = payload.pop(table_key)
     return _SilverWriteInvocation(**payload)  # type: ignore[arg-type]
 
@@ -354,38 +359,41 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self._arrow = services.arrow_operations
         self._merged = services.merged_operations
         self._postwrite = services.postwrite_operations
-        
+
         # Update merged operations with the real metadata writer from this instance
         if self._merged is not None:
             # Create a new merged operations instance with the real metadata writer
             from dataclasses import replace
+
             self._merged = replace(
                 self._merged,
                 _write_silver_merged_metadata=self._write_silver_merged_metadata,
             )
-        
+
         # Replace validation operations with a new instance that uses writer's _get_table_schema
         # This ensures that tests with patched DeltaTable work correctly
         if self._validation is not None:
             # Create a new validation operations instance with the writer's _get_table_schema method
             from dataclasses import replace
+
             self._validation = replace(
                 self._validation,
                 _get_table_schema=self._get_table_schema,
             )
-        
+
         # Initialize postwrite operations with this instance as host
         if self._postwrite is None:
             self._postwrite = SilverPostwriteOperations(self)
-        
+
         # Set host for metadata operations
         if self._metadata is not None:
             from dataclasses import replace
+
             self._metadata = replace(
                 self._metadata,
                 _host=self,
             )
-        
+
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
         self._check_schema_drift = _AwaitTrackingAsyncCallable(  # type: ignore[method-assign]
@@ -405,14 +413,23 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             and len(self._contract_rollout_policy.write_versions) > 1
         )
 
-    def _get_dispatch_write_method(self) -> Callable[..., Any]:  # Any: Bound dispatch methods return backend-specific awaitable payloads.
+    def _get_dispatch_write_method(
+        self,
+    ) -> Callable[
+        ..., Any
+    ]:  # Any: Bound dispatch methods return backend-specific awaitable payloads.
         """Get the dispatch write method from delta operations service or fallback to mixin."""
         if self._delta:
             return self._delta._dispatch_write_with_domain_errors
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.delta_mixin import SilverWriterDeltaMixin
-            return SilverWriterDeltaMixin._dispatch_write_with_domain_errors.__get__(self, SilverWriter)
+            from bioetl.infrastructure.storage.silver.delta_mixin import (
+                SilverWriterDeltaMixin,
+            )
+
+            return SilverWriterDeltaMixin._dispatch_write_with_domain_errors.__get__(
+                self, SilverWriter
+            )
 
     def _enforce_write_policy(
         self,
@@ -424,7 +441,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             self._validation._enforce_write_policy(mode, table_name)
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            from bioetl.infrastructure.storage.silver.validation_mixin import (
+                SilverWriterValidationMixin,
+            )
+
             SilverWriterValidationMixin._enforce_write_policy(self, mode, table_name)
 
     def _sync_validate_and_build_arrow(
@@ -436,8 +456,13 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             return self._validation._sync_validate_and_build_arrow(request)
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
-            return SilverWriterValidationMixin._sync_validate_and_build_arrow(self, request)
+            from bioetl.infrastructure.storage.silver.validation_mixin import (
+                SilverWriterValidationMixin,
+            )
+
+            return SilverWriterValidationMixin._sync_validate_and_build_arrow(
+                self, request
+            )
 
     async def _prepare_silver_write_payload(
         self,
@@ -495,7 +520,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             return self._validation._validate_write_mode(mode)
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            from bioetl.infrastructure.storage.silver.validation_mixin import (
+                SilverWriterValidationMixin,
+            )
+
             return SilverWriterValidationMixin._validate_write_mode(self, mode)
 
     def _to_policy_write_mode(self, mode: SilverWriteMode) -> WriteMode:
@@ -504,7 +532,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             return self._validation._to_policy_write_mode(mode)
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
+            from bioetl.infrastructure.storage.silver.validation_mixin import (
+                SilverWriterValidationMixin,
+            )
+
             return SilverWriterValidationMixin._to_policy_write_mode(self, mode)
 
     async def _log_silver_audit(
@@ -531,8 +562,20 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             )
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.metadata_mixin import SilverWriterMetadataMixin
-            return await SilverWriterMetadataMixin._log_silver_audit(self, table_name, records, mode, run_id=run_id, run_type=run_type, source_batch_id=source_batch_id, ingestion_ts=ingestion_ts)
+            from bioetl.infrastructure.storage.silver.metadata_mixin import (
+                SilverWriterMetadataMixin,
+            )
+
+            return await SilverWriterMetadataMixin._log_silver_audit(
+                self,
+                table_name,
+                records,
+                mode,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
+            )
 
     def _should_skip_silver_metadata_write(
         self,
@@ -610,7 +653,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         primary_keys: list[str],
     ) -> None:
         """Fallback CSV export method for backward compatibility.
-        
+
         This method provides a no-op fallback when the maintenance service
         is not available. It's called by postwrite operations as a fallback
         when self._maintenance is None.
@@ -630,7 +673,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         start_perf: float,
     ) -> "_PreparedSilverWriteFinalizationContext":
         """Prepare finalization context for silver write.
-        
+
         This method provides backward compatibility for tests that expect
         this method to exist. It delegates to the metadata operations service
         for the actual implementation.
@@ -647,7 +690,10 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             )
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.metadata_mixin import SilverWriterMetadataMixin
+            from bioetl.infrastructure.storage.silver.metadata_mixin import (
+                SilverWriterMetadataMixin,
+            )
+
             return await SilverWriterMetadataMixin._prepare_silver_write_finalization_context(
                 self,
                 table_name=table_name,
@@ -672,6 +718,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         start_perf: float,
     ) -> SilverWriteResult | None:
         from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
         """Fallback method to finalize silver write result for backward compatibility.
         
         This method provides a fallback when the metadata service is not available.
@@ -713,7 +760,9 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 started_at=started_at,
             )
 
-        from bioetl.infrastructure.storage.silver.metadata_mixin import SilverWriterMetadataMixin
+        from bioetl.infrastructure.storage.silver.metadata_mixin import (
+            SilverWriterMetadataMixin,
+        )
 
         return await SilverWriterMetadataMixin._finalize_silver_write_result(
             self,
@@ -845,7 +894,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         version_after: int | None = None,
     ) -> None:
         """Backward compatibility method for writing Silver metadata.
-        
+
         This method provides the old interface for tests that call _write_silver_metadata
         directly. It delegates to the new metadata operations service.
         """
@@ -923,8 +972,13 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             self._validation._validate_silver_pandera(records, table_name)
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
-            SilverWriterValidationMixin._validate_silver_pandera(self, records, table_name)
+            from bioetl.infrastructure.storage.silver.validation_mixin import (
+                SilverWriterValidationMixin,
+            )
+
+            SilverWriterValidationMixin._validate_silver_pandera(
+                self, records, table_name
+            )
 
     async def _check_schema_drift(
         self,
@@ -934,11 +988,18 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     ) -> None:
         """Delegate schema-drift handling to the validation service."""
         if self._validation:
-            await self._validation._check_schema_drift(table_name, records, on_schema_mismatch)
+            await self._validation._check_schema_drift(
+                table_name, records, on_schema_mismatch
+            )
         else:
             # Fallback to mixin for backward compatibility
-            from bioetl.infrastructure.storage.silver.validation_mixin import SilverWriterValidationMixin
-            await SilverWriterValidationMixin._check_schema_drift(self, table_name, records, on_schema_mismatch)
+            from bioetl.infrastructure.storage.silver.validation_mixin import (
+                SilverWriterValidationMixin,
+            )
+
+            await SilverWriterValidationMixin._check_schema_drift(
+                self, table_name, records, on_schema_mismatch
+            )
 
     async def _detect_schema_drift(
         self,
@@ -946,7 +1007,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         records: list[BronzeRecord],
     ) -> "SchemaDriftInfo | None":
         """Backward compatibility method for schema drift detection.
-        
+
         This method provides the old interface for tests that call _detect_schema_drift
         directly. It uses the writer's own _get_table_schema method for test compatibility.
         """
@@ -955,7 +1016,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             _build_schema_drift_info,
             _build_silver_schema_drift_diff,
         )
-        
+
         # Use the writer's own _get_table_schema method for test compatibility
         existing_schema = await self._get_table_schema(table_name)
         diff = _build_silver_schema_drift_diff(existing_schema, records)
@@ -1054,7 +1115,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         run_id: str | None = None,
     ) -> None:
         """Write merged Silver metadata for a completed table write.
-        
+
         This method is called by SilverMergedOperations after a successful merge.
         It delegates to the metadata mixin implementation.
         """
@@ -1117,11 +1178,12 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             records_list = records.to_dicts()
         else:
             records_list = records
-            
+
         schema_drift = await self._detect_schema_drift(table_name, records_list)
 
         # Convert column stats dictionaries to ColumnStats objects
         from bioetl.domain.value_objects.dq_metrics import ColumnStats
+
         column_stats_objects = {}
         if hasattr(records, "__len__"):
             records_length = len(records)
@@ -1131,7 +1193,9 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             records_length = 0
         for col_name, stats_dict in column_stats.items():
             column_stats_objects[col_name] = ColumnStats(
-                null_rate=stats_dict["null_count"] / records_length if records_length > 0 else 0.0,
+                null_rate=stats_dict["null_count"] / records_length
+                if records_length > 0
+                else 0.0,
                 unique_count=stats_dict["unique_count"],
                 min_value=None,  # Would need actual column data for numeric stats
                 max_value=None,
@@ -1148,13 +1212,13 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
     async def _get_delta_version(self, table_path: str) -> int | None:
         """Get the current Delta Lake version for a table.
-        
+
         This method provides backward compatibility for legacy tests and
         delegates to the metadata service when available.
-        
+
         Args:
             table_path: Path to the Delta Lake table
-            
+
         Returns:
             Current Delta version if table exists, None otherwise
         """
@@ -1166,22 +1230,27 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
     async def _get_table_schema(self, table_name: str) -> pa.Schema | None:
         """Get the schema of an existing Silver table.
-        
+
         This method provides backward compatibility for schema drift detection
         in tests that don't use the full metadata service.
-        
+
         Args:
             table_name: Name of the table
-            
+
         Returns:
             PyArrow schema if table exists, None otherwise
         """
         # For tests with patched DeltaTable, we need to directly use the patched class
         # since the base class implementation doesn't respect the patch
         try:
-            from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+            from deltalake.exceptions import (
+                TableNotFoundError as DeltaTableNotFoundError,
+            )
 
-            from bioetl.infrastructure.storage.base_delta_writer import DeltaTable as PatchedDeltaTable
+            from bioetl.infrastructure.storage.base_delta_writer import (
+                DeltaTable as PatchedDeltaTable,
+            )
+
             table_path = self._resolve_table_path(table_name)
             dt = PatchedDeltaTable(table_path)
             return dt.schema().to_arrow()

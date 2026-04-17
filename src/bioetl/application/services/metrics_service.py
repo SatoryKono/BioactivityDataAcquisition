@@ -317,7 +317,9 @@ class MetricsService:
             tracer_name=self.TRACER_NAME,
         ) as span:
             running = self._server.is_running()
-            self._set_result_attributes(span, success=True, **{"bioetl.running": running})
+            self._set_result_attributes(
+                span, success=True, **{"bioetl.running": running}
+            )
             return MetricsServerStatus(
                 running=running,
                 port=self._port if running else None,
@@ -364,7 +366,9 @@ class MetricsService:
                 run_label=run_label,
                 labels=labels,
             )
-            self._set_result_attributes(span, success=result.success, error=result.error)
+            self._set_result_attributes(
+                span, success=result.success, error=result.error
+            )
             return result
 
     def _push_to_gateway_impl(

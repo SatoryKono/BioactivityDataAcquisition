@@ -135,7 +135,9 @@ def build_record_dedup_key(
         else:
             composite_key = composite_key_builder(record, composite_fields)
         empty_key = "|".join([""] * len(composite_fields))
-        return None if not composite_key or composite_key == empty_key else composite_key
+        return (
+            None if not composite_key or composite_key == empty_key else composite_key
+        )
 
     record_id = str(record.get(primary_field, ""))
     return record_id or None

@@ -159,7 +159,9 @@ def test_create_manifest_persists_explicit_replay_parentage() -> None:
     assert manifest.to_dict()["replay_of_manifest_id"] == "manifest-parent"
 
 
-def test_create_manifest_fails_closed_when_persisted_manifest_is_not_resolvable() -> None:
+def test_create_manifest_fails_closed_when_persisted_manifest_is_not_resolvable() -> (
+    None
+):
     store = _MissingLookupRunManifestStore()
     service = RunManifestService(
         manifest_port=store,

@@ -336,7 +336,9 @@ class TestToSourceMetadata:
 
         assert metadata.total_requests == 3
         assert metadata.total_response_bytes == 6000
-        assert metadata.avg_request_duration_ms == pytest.approx(200.0)  # (100 + 200 + 300) / 3
+        assert metadata.avg_request_duration_ms == pytest.approx(
+            200.0
+        )  # (100 + 200 + 300) / 3
 
     def test_to_source_metadata_with_url(self) -> None:
         """Source metadata includes base URL when provided."""

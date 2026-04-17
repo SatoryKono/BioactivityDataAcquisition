@@ -26,8 +26,8 @@ def test_build_prepared_enricher_join_context_many_to_one_aggregates_and_prepare
     None
 ):
     deduplicator = MagicMock()
-    deduplicator.deduplicate.side_effect = lambda enricher_df, join_keys, enricher_name: (
-        enricher_df
+    deduplicator.deduplicate.side_effect = (
+        lambda enricher_df, join_keys, enricher_name: enricher_df
     )
     aggregator = MagicMock()
     aggregator.aggregate.side_effect = lambda df, agg, pipeline: df
@@ -92,7 +92,10 @@ def test_execute_prepared_enricher_join_resolves_conflicts_and_executes_join() -
     conflict_resolver = MagicMock()
     merged_df = pl.DataFrame({"chembl.publication.doi": ["10.1/a"]})
     enricher_df = pl.DataFrame({"crossref.publication.doi": ["10.1/a"]})
-    conflict_resolver.detect_and_resolve_conflicts.return_value = (merged_df, enricher_df)
+    conflict_resolver.detect_and_resolve_conflicts.return_value = (
+        merged_df,
+        enricher_df,
+    )
     join_executor = MagicMock(return_value=pl.DataFrame({"joined": [1]}))
     prepared = PreparedEnricherJoinContext(
         enricher_pipeline="crossref_publication",

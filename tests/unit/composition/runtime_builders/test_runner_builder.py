@@ -84,9 +84,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
     bronze_day = bronze_root / "2026-01-01"
     bronze_day.mkdir(parents=True)
     (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
-    (bronze_day / "batch_2026-01-01_extra.jsonl.zst").write_bytes(
-        b"snapshot-bytes-2"
-    )
+    (bronze_day / "batch_2026-01-01_extra.jsonl.zst").write_bytes(b"snapshot-bytes-2")
 
     calls: dict[str, object] = {}
 
@@ -563,9 +561,7 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
     bronze_day = bronze_root / "2026-01-01"
     bronze_day.mkdir(parents=True)
     (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
-    (bronze_day / "batch_2026-01-01_extra.jsonl.zst").write_bytes(
-        b"snapshot-bytes-2"
-    )
+    (bronze_day / "batch_2026-01-01_extra.jsonl.zst").write_bytes(b"snapshot-bytes-2")
 
     def _build_context() -> SimpleNamespace:
         return SimpleNamespace(
@@ -633,7 +629,10 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
 
     assert first_manifest["manifest_id"] != second_manifest["manifest_id"]
     assert first_manifest["run_id"] != second_manifest["run_id"]
-    assert first_manifest["execution_fingerprint"] == second_manifest["execution_fingerprint"]
+    assert (
+        first_manifest["execution_fingerprint"]
+        == second_manifest["execution_fingerprint"]
+    )
     assert first_manifest["replay_capability"] == "exact_replay_supported"
     assert second_manifest["replay_capability"] == "exact_replay_supported"
     assert first_manifest["source_refs"] == second_manifest["source_refs"]
@@ -780,9 +779,7 @@ def test_build_pipeline_runner_aborts_before_factory_create_when_manifest_persis
         )
 
     assert fake_factory.kwargs is None
-    assert not (
-        tmp_path / "output" / "control" / "run_ledger"
-    ).exists()
+    assert not (tmp_path / "output" / "control" / "run_ledger").exists()
 
 
 def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
@@ -962,7 +959,9 @@ def test_build_pipeline_runner_requires_manifest_control_plane_when_manifest_dis
                 SimpleNamespace(info=lambda *_, **__: None),
             ),
             assemble_vacuum_settings_fn=lambda **_: None,
-            assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
+            assemble_runtime_config_fn=lambda **_: SimpleNamespace(
+                run_type="incremental"
+            ),
             assemble_filter_config_fn=lambda **_: None,
             assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
         )
@@ -1704,7 +1703,7 @@ def test_canonical_observability_builder_uses_noop_when_disabled() -> None:
                 metrics_enabled=False,
                 dq_monitor_enabled=False,
                 allow_noop_observability_in_prod=False,
-            )
+            ),
         ),
         logger_factory=logger_factory,
         noop_tracing_factory=noop_tracing_factory,
@@ -1741,7 +1740,7 @@ def test_canonical_observability_builder_configures_dq_monitor_thresholds() -> N
             dq_error_rate_max=0.3,
             dq_quality_score_min=0.7,
             allow_noop_observability_in_prod=False,
-        )
+        ),
     )
 
     result = observability_builder.build_observability_bundle(

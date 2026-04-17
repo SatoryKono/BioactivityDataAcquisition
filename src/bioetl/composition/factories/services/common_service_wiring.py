@@ -68,9 +68,7 @@ class CommonServicePortsRequest:
     create_metrics_fn: Callable[[Settings], MetricsPort] = create_metrics
     storage_factory: type[StorageFactory] = StorageFactory
     create_lock_fn: Callable[[], LockPort] = create_lock
-    create_checkpoint_fn: Callable[
-        [StorageContext], CheckpointPort
-    ] = create_checkpoint
+    create_checkpoint_fn: Callable[[StorageContext], CheckpointPort] = create_checkpoint
     create_quarantine_fn: Callable[[Settings], QuarantinePort] = create_quarantine
 
 

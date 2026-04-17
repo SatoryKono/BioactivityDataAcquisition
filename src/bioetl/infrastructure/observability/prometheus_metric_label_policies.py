@@ -173,9 +173,7 @@ def normalize_metric_dispatch_labels(
         return {
             **labels,
             "stage": normalize_dq_stage(str(labels.get("stage", "other"))),
-            "severity": normalize_dq_severity(
-                str(labels.get("severity", "other"))
-            ),
+            "severity": normalize_dq_severity(str(labels.get("severity", "other"))),
         }
     if name == "bioetl_silver_filter_rejections_total":
         return {

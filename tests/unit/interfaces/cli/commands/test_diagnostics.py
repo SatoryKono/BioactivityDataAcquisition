@@ -210,9 +210,7 @@ def test_diagnostics_metrics_json_uses_operator_profile(
             "audit_enabled": False,
         }
 
-    profile = SimpleNamespace(
-        to_dict=_profile_to_dict
-    )
+    profile = SimpleNamespace(to_dict=_profile_to_dict)
     import bioetl.interfaces.cli.commands.diagnostics as diagnostics_module
 
     monkeypatch.setattr(
@@ -264,7 +262,10 @@ def test_diagnostics_metrics_text_displays_operator_workflow(
     assert "BioETL Metrics Diagnostics" in result.output
     assert "metrics_server_mode: auto_managed_during_pipeline_runs" in result.output
     assert "pushgateway_mode: best_effort_on_run_completion" in result.output
-    assert "inspect metrics/admin state: bioetl diagnostics metrics [--json]" in result.output
+    assert (
+        "inspect metrics/admin state: bioetl diagnostics metrics [--json]"
+        in result.output
+    )
     assert "report-observability-metric-inventory" in result.output
 
 
@@ -325,7 +326,9 @@ def test_diagnostics_run_text_outputs_correlated_summary(
         "exact_replay_support_boundary: snapshot_backed_source_runs_only"
         in result.output
     )
-    assert "replay_capability_reason: immutable_input_snapshots_present" in result.output
+    assert (
+        "replay_capability_reason: immutable_input_snapshots_present" in result.output
+    )
     assert workflow_service.audit_run_calls == [
         ("00000000-0000-0000-0000-000000000001", 100)
     ]

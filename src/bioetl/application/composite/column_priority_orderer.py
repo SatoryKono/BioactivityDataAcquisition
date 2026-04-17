@@ -146,18 +146,19 @@ def order_priority_columns(
 
 class ColumnPriorityOrderer:
     """Resolves source column ordering for explicit field priority rules.
-    
+
     .. deprecated:: 2024.2
         Use :class:`ColumnOrderService` instead for unified column ordering functionality.
     """
 
     def __init__(self, logger: LoggerPort) -> None:
         import warnings
+
         warnings.warn(
             "ColumnPriorityOrderer is deprecated and will be removed in a future version. "
             "Use ColumnOrderService instead for unified column ordering functionality.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         self._logger = logger
 

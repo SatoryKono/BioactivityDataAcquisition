@@ -95,7 +95,9 @@ def bootstrap_observability_bundle_impl(
     dq_monitor_bootstrapper: Callable[
         [Settings, LoggerPort | None], DQMonitorPort | None
     ],
-    preflight_validator: Callable[[TracingPort, MetricsPort, str, LoggerPort, bool], None],
+    preflight_validator: Callable[
+        [TracingPort, MetricsPort, str, LoggerPort, bool], None
+    ],
 ) -> ObservabilityBundle:
     """Build validated logger/metrics/tracer/DQ-monitor bundle for a pipeline run.
 

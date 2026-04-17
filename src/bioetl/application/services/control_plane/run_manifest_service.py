@@ -392,6 +392,3 @@ class RunManifestService:
     def _compute_execution_fingerprint(self, *, payload: dict[str, object]) -> str:
         """Compute the canonical execution-identity fingerprint contract."""
         return cast(str, compute_execution_identity_fingerprint(payload))
-
-
-

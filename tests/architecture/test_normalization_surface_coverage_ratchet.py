@@ -74,7 +74,9 @@ def _assert_profile_semantic_budgets(values_by_name: dict[str, float]) -> None:
     )
 
 
-def test_normalization_surface_coverage_does_not_regress_below_reviewed_budgets() -> None:
+def test_normalization_surface_coverage_does_not_regress_below_reviewed_budgets() -> (
+    None
+):
     _assert_surface_coverage_budgets(_coverage_values_by_surface())
 
 

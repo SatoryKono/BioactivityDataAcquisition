@@ -83,10 +83,14 @@ def test_collect_metric_inventory_classifies_registry_runtime_and_docs(
     ]
 
 
-def test_filter_documented_metric_mentions_ignores_generated_series_and_group_names() -> None:
+def test_filter_documented_metric_mentions_ignores_generated_series_and_group_names() -> (
+    None
+):
     filtered = inventory._filter_documented_metric_mentions(
         {
-            "bioetl_dq_check_duration_ms_bucket": ["grafana/prometheus-rules/rules.yml"],
+            "bioetl_dq_check_duration_ms_bucket": [
+                "grafana/prometheus-rules/rules.yml"
+            ],
             "bioetl_dq_check_duration_ms": ["docs/03-guides/metrics-monitoring.md"],
             "bioetl_dq_observability": ["grafana/prometheus-rules/rules.yml"],
             "bioetl_runtime_alert_condition_dq_soft_threshold_15m": [
@@ -164,7 +168,7 @@ def test_collect_metric_inventory_tracks_helper_backed_emitters(
             [
                 'DIRECT_METRIC = "bioetl_direct_live_total"',
                 'HELPER_METRIC = "bioetl_helper_live_total"',
-                'metrics.increment_counter(DIRECT_METRIC, labels={})',
+                "metrics.increment_counter(DIRECT_METRIC, labels={})",
                 "emit_metric(metrics, HELPER_METRIC)",
             ]
         ),

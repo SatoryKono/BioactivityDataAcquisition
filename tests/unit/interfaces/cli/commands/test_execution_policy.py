@@ -100,9 +100,7 @@ def test_map_success_flag_to_exit_code_matrix() -> None:
 
 @pytest.mark.unit
 def test_execute_with_cli_failure_policy_returns_action_result() -> None:
-    def _raise_if_called(
-        exc: BaseException, subject: str, reason_code: str
-    ) -> None:
+    def _raise_if_called(exc: BaseException, subject: str, reason_code: str) -> None:
         del subject, reason_code
         raise exc
 

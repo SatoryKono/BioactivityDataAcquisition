@@ -19,7 +19,9 @@ def test_build_effective_config_source_refs_persists_stable_source_hashes(
     base_config.parent.mkdir(parents=True, exist_ok=True)
     entity_config.parent.mkdir(parents=True, exist_ok=True)
     base_config.write_text("pipeline:\n  version: 1\n", encoding="utf-8")
-    contract_registry.write_text("contracts:\n  chembl.activity: 1.0.0\n", encoding="utf-8")
+    contract_registry.write_text(
+        "contracts:\n  chembl.activity: 1.0.0\n", encoding="utf-8"
+    )
     entity_config.write_text("entity:\n  provider: chembl\n", encoding="utf-8")
 
     refs = _build_effective_config_source_refs(
@@ -49,7 +51,9 @@ def test_build_effective_config_source_refs_is_stable_across_equivalent_calls(
     base_config.parent.mkdir(parents=True, exist_ok=True)
     entity_config.parent.mkdir(parents=True, exist_ok=True)
     base_config.write_text("pipeline:\n  version: 1\n", encoding="utf-8")
-    contract_registry.write_text("contracts:\n  chembl.activity: 1.0.0\n", encoding="utf-8")
+    contract_registry.write_text(
+        "contracts:\n  chembl.activity: 1.0.0\n", encoding="utf-8"
+    )
     entity_config.write_text("entity:\n  provider: chembl\n", encoding="utf-8")
 
     refs_first = _build_effective_config_source_refs(

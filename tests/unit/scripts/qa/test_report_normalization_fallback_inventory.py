@@ -199,10 +199,16 @@ def test_render_markdown_mentions_top_fallback_entries() -> None:
 
     assert "# Normalization Fallback Inventory" in markdown
     assert "- scope: `entity_record_fallback_only`" in markdown
-    assert "Fallback inventory tracks only entity-record fallback normalization debt." in markdown
+    assert (
+        "Fallback inventory tracks only entity-record fallback normalization debt."
+        in markdown
+    )
     assert "## Surface Coverage Context" in markdown
     assert "## Semantic Invariant Context" in markdown
-    assert "- entity_record / explicit_profile_coverage_pct: `70.00%` (`7` / `10`)" in markdown
+    assert (
+        "- entity_record / explicit_profile_coverage_pct: `70.00%` (`7` / `10`)"
+        in markdown
+    )
     assert (
         "- profile_semantics / shipped_profile_meta_passthrough_pct: `100.00%` "
         "(`21` / `21`) Meta passthrough contract."
@@ -226,30 +232,36 @@ def test_main_writes_deterministic_artifacts(tmp_path: Path) -> None:
     json_out = tmp_path / "fallback.json"
     markdown_out = tmp_path / "fallback.md"
 
-    assert main(
-        [
-            "--limit",
-            "5",
-            "--json-out",
-            str(json_out),
-            "--markdown-out",
-            str(markdown_out),
-        ]
-    ) == 0
+    assert (
+        main(
+            [
+                "--limit",
+                "5",
+                "--json-out",
+                str(json_out),
+                "--markdown-out",
+                str(markdown_out),
+            ]
+        )
+        == 0
+    )
 
     first_json = json_out.read_text(encoding="utf-8")
     first_md = markdown_out.read_text(encoding="utf-8")
 
-    assert main(
-        [
-            "--limit",
-            "5",
-            "--json-out",
-            str(json_out),
-            "--markdown-out",
-            str(markdown_out),
-        ]
-    ) == 0
+    assert (
+        main(
+            [
+                "--limit",
+                "5",
+                "--json-out",
+                str(json_out),
+                "--markdown-out",
+                str(markdown_out),
+            ]
+        )
+        == 0
+    )
 
     assert json_out.read_text(encoding="utf-8") == first_json
     assert markdown_out.read_text(encoding="utf-8") == first_md

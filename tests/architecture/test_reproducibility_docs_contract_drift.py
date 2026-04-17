@@ -14,11 +14,16 @@ def _read(relative_path: str) -> str:
 
 
 @pytest.mark.architecture
-def test_chembl_molecule_schema_demotes_occurrence_provenance_from_row_contract() -> None:
+def test_chembl_molecule_schema_demotes_occurrence_provenance_from_row_contract() -> (
+    None
+):
     text = _read("docs/04-reference/schemas/domain/chembl/molecule-schema.md")
 
     assert "## System Fields (Persisted-Row Contract)" in text
-    assert "Occurrence-scoped provenance (`_run_id`, `_run_type`, `_source_batch_id`," in text
+    assert (
+        "Occurrence-scoped provenance (`_run_id`, `_run_type`, `_source_batch_id`,"
+        in text
+    )
     assert "| `_run_id`" not in text
     assert '|  "_run_id":' not in text
     assert '|  "_run_type":' not in text
@@ -40,12 +45,17 @@ def test_publication_provider_docs_mark_occurrence_provenance_as_sidecar_only() 
 
 
 @pytest.mark.architecture
-def test_normalization_matrix_declares_non_contract_scope_and_drops_storage_wording() -> None:
+def test_normalization_matrix_declares_non_contract_scope_and_drops_storage_wording() -> (
+    None
+):
     text = _read(
         "docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md"
     )
 
-    assert "This matrix is a normalization inventory, not a persisted-row publication contract." in text
+    assert (
+        "This matrix is a normalization inventory, not a persisted-row publication contract."
+        in text
+    )
     assert (
         "System/meta field retained for storage but excluded from content_hash."
         not in text
@@ -54,4 +64,3 @@ def test_normalization_matrix_declares_non_contract_scope_and_drops_storage_word
         "Technical field is passed through unchanged when no explicit profile rule is defined."
         not in text
     )
-

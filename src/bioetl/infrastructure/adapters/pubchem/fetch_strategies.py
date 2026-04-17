@@ -168,8 +168,6 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
             provider_name=self._provider_name,
         )
 
-
-
     async def _fetch_cid_batch(self, batch: list[int]) -> list[BronzeRecord]:
         """Fetch a batch of compounds by CID."""
         compounds = await self._fetch_flow.execute(
@@ -208,8 +206,6 @@ class PubChemFetchStrategies(_PubChemSearchFetchMixin):
                     batch_size=len(batch),
                     error=str(error),
                 )
-
-
 
     async def _fetch_single_inchikey(self, inchikey: str) -> list[BronzeRecord]:
         """Fetch compounds for a single InChIKey."""

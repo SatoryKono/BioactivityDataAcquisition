@@ -183,13 +183,13 @@ class _CompositeRunnerStageEnrichmentMixin:
         return cast(
             dict[str, EnrichmentResult],
             add_not_run_results(
-            enrichment_results,
-            context.enrichers_to_run,
-            self._config.enrichers,
-            state.completed_enrichers,
-            self._runtime.required_only,
-            self._config.name,
-            self._logger,
+                enrichment_results,
+                context.enrichers_to_run,
+                self._config.enrichers,
+                state.completed_enrichers,
+                self._runtime.required_only,
+                self._config.name,
+                self._logger,
             ),
         )
 

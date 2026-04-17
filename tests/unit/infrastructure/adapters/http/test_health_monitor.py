@@ -351,7 +351,9 @@ class TestHealthCheckObservabilityCounters:
             0.0455,
             labels={"provider": "chembl"},
         )
-        observed_metric_names = [call.args[0] for call in mock_metrics.observe_histogram.call_args_list]
+        observed_metric_names = [
+            call.args[0] for call in mock_metrics.observe_histogram.call_args_list
+        ]
         assert "bioetl_health_check_latency_ms" not in observed_metric_names
 
 

@@ -95,9 +95,7 @@ def test_resource_management_api_alias_warns_and_reexports_resources_api() -> No
     """Deprecated module alias should warn and forward to resources_api symbols."""
     sys.modules.pop("bioetl.composition.resource_management_api", None)
 
-    with pytest.deprecated_call(
-        match=r"resource_management_api.*resources_api"
-    ):
+    with pytest.deprecated_call(match=r"resource_management_api.*resources_api"):
         alias_module = importlib.import_module(
             "bioetl.composition.resource_management_api"
         )

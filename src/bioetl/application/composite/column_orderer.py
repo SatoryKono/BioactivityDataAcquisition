@@ -130,7 +130,7 @@ def collect_explicit_group_columns(
 
 class ColumnOrderer:
     """Service for ordering columns by semantic groups.
-    
+
     .. deprecated:: 2024.2
         Use :class:`ColumnOrderService` instead for unified column ordering functionality.
     """
@@ -143,11 +143,12 @@ class ColumnOrderer:
     ) -> None:
         """Initialize orderer."""
         import warnings
+
         warnings.warn(
             "ColumnOrderer is deprecated and will be removed in a future version. "
             "Use ColumnOrderService instead for unified column ordering functionality.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER

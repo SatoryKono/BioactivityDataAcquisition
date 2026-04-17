@@ -71,9 +71,7 @@ def _iter_increment_counter_metric_names(tree: ast.AST) -> set[str]:
         if not isinstance(node, ast.Call):
             continue
         func = node.func
-        if not (
-            isinstance(func, ast.Attribute) and func.attr == "increment_counter"
-        ):
+        if not (isinstance(func, ast.Attribute) and func.attr == "increment_counter"):
             continue
         if not node.args:
             continue
@@ -126,9 +124,7 @@ def test_adapter_measure_request_labels_do_not_embed_record_identity() -> None:
             if not isinstance(node, ast.Call):
                 continue
             func = node.func
-            if not (
-                isinstance(func, ast.Attribute) and func.attr == "measure_request"
-            ):
+            if not (isinstance(func, ast.Attribute) and func.attr == "measure_request"):
                 continue
             if not node.args:
                 continue

@@ -4,7 +4,9 @@ from pathlib import Path
 
 from scripts.engineering.qa.report_function_length_inventory import _build_payload
 from scripts.engineering.qa.report_function_length_inventory import _render_markdown
-from scripts.engineering.qa.report_function_length_inventory import _scan_near_threshold_functions
+from scripts.engineering.qa.report_function_length_inventory import (
+    _scan_near_threshold_functions,
+)
 from scripts.engineering.qa.report_function_length_inventory import FunctionLengthEntry
 
 

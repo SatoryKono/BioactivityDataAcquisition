@@ -473,12 +473,15 @@ async def test_run_seed_uses_monotonic_derived_completion_timestamp() -> None:
     started_at = datetime(2026, 4, 13, 9, 0, tzinfo=UTC)
     completed_at = started_at + timedelta(seconds=6.5)
 
-    with patch(
-        "bioetl.application.composite.runner_pkg.runner_support_runtime.capture_runtime_timing_anchor",
-        return_value=(started_at, 10.0),
-    ), patch(
-        "bioetl.application.composite.runner_pkg.runner_support_runtime.derive_completion_timestamp",
-        return_value=(completed_at, 6.5),
+    with (
+        patch(
+            "bioetl.application.composite.runner_pkg.runner_support_runtime.capture_runtime_timing_anchor",
+            return_value=(started_at, 10.0),
+        ),
+        patch(
+            "bioetl.application.composite.runner_pkg.runner_support_runtime.derive_completion_timestamp",
+            return_value=(completed_at, 6.5),
+        ),
     ):
         result = await harness._run_seed()
 

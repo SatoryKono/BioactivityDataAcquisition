@@ -23,7 +23,11 @@ from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrderer,
 )
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
-from bioetl.domain.composite.config import EnricherConfig, ColumnGroupConfig, LayerColumnConfig
+from bioetl.domain.composite.config import (
+    EnricherConfig,
+    ColumnGroupConfig,
+    LayerColumnConfig,
+)
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
     ColumnOrderConfig,

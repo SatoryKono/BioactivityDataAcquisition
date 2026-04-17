@@ -51,14 +51,14 @@ def _iter_optional_control_plane_updates(
 ) -> tuple[tuple[str, str], ...]:
     values = normalize_runtime_anchor_payload(
         {
-        "config_hash": config_hash,
-        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
-        "effective_config_artifact_id": effective_config_artifact_id,
-        "contract_ref": contract_ref,
-        "contract_version": contract_version,
-        "contract_schema_hash": contract_schema_hash,
-        "dq_policy_ref": dq_policy_ref,
-        "rule_bundle_version": rule_bundle_version,
+            "config_hash": config_hash,
+            "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
+            "effective_config_artifact_id": effective_config_artifact_id,
+            "contract_ref": contract_ref,
+            "contract_version": contract_version,
+            "contract_schema_hash": contract_schema_hash,
+            "dq_policy_ref": dq_policy_ref,
+            "rule_bundle_version": rule_bundle_version,
         }
     )
     return tuple(

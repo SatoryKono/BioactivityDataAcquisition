@@ -221,9 +221,7 @@ def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
     assert result.manifest_id == "manifest-1"
     assert result.run_id == str(run_id)
     assert result.fragment_ids == ("silver:fragment-1",)
-    assert result.stored_fragment_ids == (
-        "silver:fragment-1:occurrence:manifest-1",
-    )
+    assert result.stored_fragment_ids == ("silver:fragment-1:occurrence:manifest-1",)
     assert result.produced_datasets[0].node_id == silver_node.node_id
     assert result.transforms[0].node_id == transform_node.node_id
     assert result.source_systems[0].node_id == source_node.node_id

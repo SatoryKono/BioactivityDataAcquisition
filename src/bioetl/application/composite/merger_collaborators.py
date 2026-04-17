@@ -33,4 +33,6 @@ class MergeCollaboratorGroup:
     conflict_resolver: ConflictResolverService
     join_planner: JoinPlannerService
     orderer: ColumnOrderer | None = None  # Deprecated: Use order_service
-    priority_orderer: ColumnPriorityOrderer | None = None  # Deprecated: Use order_service
+    priority_orderer: ColumnPriorityOrderer | None = (
+        None  # Deprecated: Use order_service
+    )

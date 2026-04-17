@@ -13,7 +13,9 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 
 def test_chembl_activity_profile_covers_schema_exactly() -> None:
-    missing, extra = CHEMBL_ACTIVITY_PROFILE.coverage_gaps(CHEMBL_ACTIVITY_SCHEMA_FIELDS)
+    missing, extra = CHEMBL_ACTIVITY_PROFILE.coverage_gaps(
+        CHEMBL_ACTIVITY_SCHEMA_FIELDS
+    )
 
     assert missing == frozenset()
     assert extra == frozenset()
@@ -28,7 +30,9 @@ def test_chembl_activity_profile_marks_meta_fields_outside_hash() -> None:
     assert CHEMBL_ACTIVITY_PROFILE.rule_for("activity_id").include_in_hash is True
 
 
-def test_chembl_activity_profile_snapshot_contains_expected_fields_and_semantics() -> None:
+def test_chembl_activity_profile_snapshot_contains_expected_fields_and_semantics() -> (
+    None
+):
     assert CHEMBL_ACTIVITY_SCHEMA_FIELDS[:10] == (
         "entity_id",
         "content_hash",

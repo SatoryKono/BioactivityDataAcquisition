@@ -33,7 +33,9 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
 )
 
 
-def _row(rows: list[dict[str, str]], pipeline_name: str, field_name: str) -> dict[str, str]:
+def _row(
+    rows: list[dict[str, str]], pipeline_name: str, field_name: str
+) -> dict[str, str]:
     return next(
         row
         for row in rows
@@ -57,9 +59,9 @@ def test_checkpoint_governance_import_contract_is_documented() -> None:
     shim_source = Path(
         "src/bioetl/application/composite/checkpoint/anchor_context.py"
     ).read_text(encoding="utf-8")
-    plan_source = Path(
-        "docs/05-engineering/normalization_plan_P0_P6.md"
-    ).read_text(encoding="utf-8")
+    plan_source = Path("docs/05-engineering/normalization_plan_P0_P6.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "sanctioned public import surface" in facade_source
     assert "compatibility-only shim" in shim_source
@@ -137,7 +139,9 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
 
     chembl_assay_parameters_run_id = _row(rows, "chembl_assay_parameters", "_run_id")
     assert chembl_assay_parameters_run_id["normalization_source"] == "profile"
-    assert chembl_assay_parameters_run_id["normalizer"] == "normalize_profile_passthrough"
+    assert (
+        chembl_assay_parameters_run_id["normalizer"] == "normalize_profile_passthrough"
+    )
     assert chembl_assay_parameters_run_id["include_in_content_hash"] == "false"
 
     chembl_activity_run_id = _row(rows, "chembl_activity", "_run_id")
@@ -169,7 +173,9 @@ def test_build_field_matrix_rows_covers_entity_profile_and_generic_rules() -> No
     assert chembl_publication_similarity_pmid["normalizer"] == "normalize_profile_pmid"
 
 
-def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields() -> None:
+def test_build_field_matrix_rows_marks_composite_join_keys_and_inherited_fields() -> (
+    None
+):
     rows = build_field_matrix_rows()
 
     molecule_id = _row(rows, "composite_activity", "molecule_id")
@@ -193,7 +199,10 @@ def test_build_entity_profile_coverage_kpi_summarizes_entity_rows() -> None:
             {"pipeline_kind": "entity", "normalization_source": "profile"},
             {"pipeline_kind": "entity", "normalization_source": "profile"},
             {"pipeline_kind": "entity", "normalization_source": "fallback_business"},
-            {"pipeline_kind": "composite", "normalization_source": "upstream_inherited"},
+            {
+                "pipeline_kind": "composite",
+                "normalization_source": "upstream_inherited",
+            },
         ]
     )
 
@@ -213,7 +222,9 @@ def test_build_composite_join_key_policy_coverage_kpi_reports_configured_keys() 
     assert float(cast(float, kpi["value_pct"])) == pytest.approx(100.0)
 
 
-def test_build_control_plane_normalization_coverage_kpi_reports_governed_seams() -> None:
+def test_build_control_plane_normalization_coverage_kpi_reports_governed_seams() -> (
+    None
+):
     kpi = build_control_plane_normalization_coverage_kpi()
 
     assert kpi["surface"] == "control_plane_reproducibility"
@@ -246,8 +257,7 @@ def test_build_profile_semantic_invariants_report_reviewed_semantics() -> None:
         PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
     ]
     assert all(
-        float(cast(float, kpi["value_pct"])) == pytest.approx(100.0)
-        for kpi in kpis
+        float(cast(float, kpi["value_pct"])) == pytest.approx(100.0) for kpi in kpis
     )
     assert all(kpi["surface"] == "profile_semantics" for kpi in kpis)
     assert all(list(kpi["regressions"]) == [] for kpi in kpis)

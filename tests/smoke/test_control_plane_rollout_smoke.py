@@ -107,17 +107,17 @@ def test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics(
         / f"{manifest.manifest_id}.json"
     ).exists()
     assert (
-        tmp_path
-        / "output"
-        / "control"
-        / "run_ledger"
-        / f"{manifest.manifest_id}.jsonl"
+        tmp_path / "output" / "control" / "run_ledger" / f"{manifest.manifest_id}.jsonl"
     ).exists()
     assert inspection.diagnostics["latest_status"] == "success"
     assert inspection.diagnostics["latest_event_type"] == "run_finished"
 
-    counter_metric_names = [call.args[0] for call in metrics.increment_counter.call_args_list]
-    histogram_metric_names = [call.args[0] for call in metrics.observe_histogram.call_args_list]
+    counter_metric_names = [
+        call.args[0] for call in metrics.increment_counter.call_args_list
+    ]
+    histogram_metric_names = [
+        call.args[0] for call in metrics.observe_histogram.call_args_list
+    ]
     assert "bioetl_control_plane_manifest_writes_total" in counter_metric_names
     assert "bioetl_control_plane_ledger_appends_total" in counter_metric_names
     assert "bioetl_control_plane_reads_total" in counter_metric_names

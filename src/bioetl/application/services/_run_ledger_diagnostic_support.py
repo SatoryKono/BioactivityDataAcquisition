@@ -136,7 +136,9 @@ def build_run_ledger_diagnostic_details(
         "manifest_id": manifest_id,
         "run_id": str(run_id),
     }
-    effective_config_hash = normalize_control_plane_opaque_hash_ref(effective_config_hash)
+    effective_config_hash = normalize_control_plane_opaque_hash_ref(
+        effective_config_hash
+    )
     contract_ref = normalize_contract_ref(contract_ref)
     contract_version = normalize_contract_version(contract_version)
     _apply_optional_diagnostic_anchor(diagnostic, "pipeline", pipeline_name)

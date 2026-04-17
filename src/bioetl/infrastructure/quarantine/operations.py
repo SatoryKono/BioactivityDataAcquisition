@@ -267,9 +267,6 @@ def replay_records(
         yield record
 
 
-
-
-
 def _process_quarantine_records(
     df: list[dict],
 ) -> tuple[

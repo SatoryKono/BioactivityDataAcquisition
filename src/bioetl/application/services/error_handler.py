@@ -22,7 +22,7 @@ from bioetl.domain.ports import LoggerPort, MetricsPort
 
 class ErrorHandler:
     """Centralized error handling service.
-    
+
     This service provides consistent error handling, logging, and metrics
     collection across the entire application.
     """
@@ -34,7 +34,7 @@ class ErrorHandler:
         service_name: str = "bioetl",
     ) -> None:
         """Initialize error handler.
-        
+
         Args:
             logger: Logger port for structured logging
             metrics: Metrics port for error metrics
@@ -47,25 +47,26 @@ class ErrorHandler:
     def handle_error(
         self,
         exception: Exception,
-        context: Dict[str, Any] | None = None,  # Any: Generic context data from various sources
+        context: Dict[str, Any]
+        | None = None,  # Any: Generic context data from various sources
         reraise: bool = True,
     ) -> None:
         """Handle an exception with logging and metrics.
-        
+
         Args:
             exception: The exception to handle
             context: Additional context for logging
             reraise: Whether to re-raise the exception after handling
-        
+
         Raises:
             The original exception if reraise=True
         """
         # Log the error
         self._log_error(exception, context)
-        
+
         # Record metrics
         self._record_error_metrics(exception)
-        
+
         # Re-raise if requested
         if reraise:
             raise exception
@@ -74,17 +75,18 @@ class ErrorHandler:
         self,
         exception: Exception,
         transform_func: Callable[[Exception], Exception],
-        context: Dict[str, Any] | None = None,  # Any: Generic context data from various sources
+        context: Dict[str, Any]
+        | None = None,  # Any: Generic context data from various sources
         reraise: bool = True,
     ) -> None:
         """Handle an exception and transform it to a domain exception.
-        
+
         Args:
             exception: The original exception
             transform_func: Function to transform exception to domain exception
             context: Additional context for logging
             reraise: Whether to re-raise the transformed exception
-        
+
         Raises:
             The transformed exception if reraise=True
         """
@@ -92,11 +94,11 @@ class ErrorHandler:
         try:
             # Transform the exception
             domain_exception = transform_func(exception)
-            
+
             # Handle the transformed exception
             # Note: handle_error will re-raise the domain_exception if reraise=True
             self.handle_error(domain_exception, context, reraise=reraise)
-            
+
         except Exception as transform_error:
             # Only catch actual transformation errors, not the transformed exception itself
             if domain_exception and isinstance(transform_error, type(domain_exception)):
@@ -124,15 +126,15 @@ class ErrorHandler:
         **kwargs: Any,  # Any: Generic arguments for wrapped functions
     ) -> Any:  # Any: Generic return type from wrapped functions
         """Wrap a function call with error handling.
-        
+
         Args:
             func: Function to wrap
             error_transformer: Optional function to transform exceptions
             **kwargs: Arguments to pass to the function
-        
+
         Returns:
             Result of the function call
-        
+
         Raises:
             Transformed exception if error_transformer is provided
             Original exception otherwise
@@ -157,11 +159,13 @@ class ErrorHandler:
     def _log_error(
         self,
         exception: Exception,
-        context: Dict[str, Any] = None,  # Any: Logging context carries heterogeneous scalar payloads from callers.
+        context: Dict[
+            str, Any
+        ] = None,  # Any: Logging context carries heterogeneous scalar payloads from callers.
     ) -> None:
         """Log an error with full context."""
         log_context = self._prepare_log_context(exception, context)
-        
+
         if isinstance(exception, BioETLIntegrationError) and exception.is_retryable:
             self._logger.warning("Retryable integration error occurred", **log_context)
         else:
@@ -173,7 +177,7 @@ class ErrorHandler:
     ) -> None:
         """Record error metrics."""
         error_type = self._get_error_type(exception)
-        
+
         # Increment error counter
         self._metrics.increment(
             "errors.total",
@@ -182,7 +186,7 @@ class ErrorHandler:
                 "service": self._service_name,
             },
         )
-        
+
         # Record specific error types
         if isinstance(exception, BioETLIntegrationError):
             self._metrics.increment(
@@ -205,21 +209,23 @@ class ErrorHandler:
     ) -> Dict[str, Any]:
         """Prepare context dictionary for logging."""
         log_context = context or {}
-        
+
         # Add basic exception information
-        log_context.update({
-            "error_type": self._get_error_type(exception),
-            "error_message": str(exception),
-            "service": self._service_name,
-        })
-        
+        log_context.update(
+            {
+                "error_type": self._get_error_type(exception),
+                "error_message": str(exception),
+                "service": self._service_name,
+            }
+        )
+
         # Add domain exception context if available (without duplicating basic fields)
         if isinstance(exception, BioETLDomainError):
             domain_context = exception.to_dict()
             # Add only the additional context, not the basic fields
             if "context" in domain_context:
                 log_context.update(domain_context["context"])
-        
+
         return log_context
 
     def _get_error_type(self, exception: Exception) -> str:
@@ -236,11 +242,12 @@ class ErrorHandler:
         message: str,
         field_name: str,
         invalid_value: Any,  # Any: Generic invalid value from various sources
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for validation errors
+        context: Dict[str, Any]
+        | None = None,  # Any: Generic context data for validation errors
     ) -> None:
         """Create and handle a validation error."""
         from bioetl.domain.exceptions.base_exceptions import BioETLValidationError
-        
+
         error = BioETLValidationError(
             message=message,
             field_name=field_name,
@@ -253,11 +260,12 @@ class ErrorHandler:
         self,
         message: str,
         config_key: str,
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for configuration errors
+        context: Dict[str, Any]
+        | None = None,  # Any: Generic context data for configuration errors
     ) -> None:
         """Create and handle a configuration error."""
         from bioetl.domain.exceptions.base_exceptions import BioETLConfigurationError
-        
+
         error = BioETLConfigurationError(
             message=message,
             config_key=config_key,
@@ -270,11 +278,12 @@ class ErrorHandler:
         message: str,
         record_id: str | None = None,
         severity: str = "warning",
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for data quality errors
+        context: Dict[str, Any]
+        | None = None,  # Any: Generic context data for data quality errors
     ) -> None:
         """Create and handle a data quality error."""
         from bioetl.domain.exceptions.base_exceptions import BioETLDataQualityError
-        
+
         error = BioETLDataQualityError(
             message=message,
             record_id=record_id,
@@ -289,7 +298,8 @@ class ErrorHandler:
         service_name: str,
         operation: str,
         is_retryable: bool = True,
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for integration errors
+        context: Dict[str, Any]
+        | None = None,  # Any: Generic context data for integration errors
     ) -> None:
         """Create and handle an integration error."""
         error = BioETLIntegrationError(

@@ -33,9 +33,10 @@ def test_build_field_matrix_rows_covers_schema_and_hash_policy() -> None:
     )
     entity_id = next(row for row in rows if row["field_name"] == "entity_id")
     assert activity_properties["set_like"] == "true"
-    assert (
-        activity_properties["include_in_content_hash"]
-        == ("true" if "activity_properties" in CHEMBL_ACTIVITY_PROFILE.hash_included_fields else "false")
+    assert activity_properties["include_in_content_hash"] == (
+        "true"
+        if "activity_properties" in CHEMBL_ACTIVITY_PROFILE.hash_included_fields
+        else "false"
     )
     assert entity_id["include_in_content_hash"] == "false"
     assert activity_properties["set_like"] == "true"
@@ -48,7 +49,9 @@ def test_build_field_matrix_rows_covers_schema_and_hash_policy() -> None:
         activity_properties["proposed_normalization"]
         == activity_properties["current_normalization"]
     )
-    publication_year = next(row for row in rows if row["field_name"] == "publication_year")
+    publication_year = next(
+        row for row in rows if row["field_name"] == "publication_year"
+    )
     assert publication_year["type"] == str(
         CHEMBL_ACTIVITY_SCHEMA.field("publication_year").type
     )

@@ -5222,9 +5222,36 @@ def _add_runtime_evidence_surface(
         confidence="high",
     )
     snapshot.add_relation(project, "HAS_RUNTIME_EVIDENCE", surface, provenance="runtime_evidence")
+    _link_runtime_evidence_support(snapshot, surface, spec)
+    _add_runtime_evidence_storage_refs(
+        snapshot,
+        project,
+        surface,
+        evidence_name=evidence_name,
+        storage_refs=spec["storage_refs"],
+        today=today,
+    )
+
+
+def _link_runtime_evidence_support(
+    snapshot: GraphSnapshot,
+    surface: NodeKey,
+    spec: dict[str, object],
+) -> None:
     _link_runtime_evidence_docs(snapshot, surface, spec["docs"])
     _link_runtime_evidence_modules(snapshot, surface, spec["modules"])
-    for storage_ref, suffix, key_template in spec["storage_refs"]:
+
+
+def _add_runtime_evidence_storage_refs(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    surface: NodeKey,
+    *,
+    evidence_name: str,
+    storage_refs: object,
+    today: str,
+) -> None:
+    for storage_ref, suffix, key_template in storage_refs:
         _add_runtime_evidence_storage_artifact(
             snapshot,
             project,
@@ -5308,13 +5335,8 @@ def _storage_surface_format(snapshot: GraphSnapshot, storage: NodeKey) -> str | 
     return str(format_value) if format_value is not None else None
 
 
-def _add_control_plane_run_instance_surfaces(
-    snapshot: GraphSnapshot,
-    _root: Path,
-    project: NodeKey,
-    today: str,
-) -> None:
-    run_instance_specs: tuple[dict[str, object], ...] = (
+def _control_plane_run_instance_specs() -> tuple[dict[str, object], ...]:
+    return (
         {
             "manifest_id": "manifest-left",
             "run_id": "00000000-0000-0000-0000-000000000301",
@@ -5419,66 +5441,93 @@ def _add_control_plane_run_instance_surfaces(
         },
     )
 
-    for spec in run_instance_specs:
-        manifest_id = str(spec["manifest_id"])
-        surface = snapshot.add_node(
-            "run_instance_surface",
-            manifest_id,
-            summary=f"Deterministic control-plane run instance surface for `{manifest_id}`.",
-            manifest_id=manifest_id,
-            run_id=_optional_text(spec.get("run_id")),
-            pipeline_name=_optional_text(spec.get("pipeline_name")),
-            provider=_optional_text(spec.get("provider")),
-            entity=_optional_text(spec.get("entity")),
-            run_type=_optional_text(spec.get("run_type")),
-            execution_fingerprint=_optional_text(spec.get("execution_fingerprint")),
-            created_at=_optional_text(spec.get("created_at")),
-            contract_ref=_optional_text(spec.get("contract_ref")),
-            contract_version=_optional_text(spec.get("contract_version")),
-            effective_config_artifact_id=_optional_text(spec.get("effective_config_artifact_id")),
-            config_hash=_optional_text(spec.get("config_hash")),
-            replay_capability=_optional_text(spec.get("replay_capability")),
-            lifecycle_status=_optional_text(spec.get("lifecycle_status")),
-            dq_disposition=_optional_text(spec.get("dq_disposition")),
-            dq_rule_id=_optional_text(spec.get("dq_rule_id")),
-            dq_report_path=_optional_text(spec.get("dq_report_path")),
-            published_dataset_ref=_optional_text(spec.get("published_dataset_ref")),
-            lineage_fragment_id=_optional_text(spec.get("lineage_fragment_id")),
-            replay_contract=_optional_text(spec.get("replay_contract")),
-            diagnostic_scope=_optional_text(spec.get("diagnostic_scope")),
-            last_event_at=_optional_text(spec.get("last_event_at")),
-            surface_kind=_optional_text(spec.get("surface_kind")),
-            source_path=_optional_text(spec.get("source_path")),
-            source_kind="run_instance_surface",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(project, "HAS_RUN_INSTANCE", surface, provenance="runtime_evidence")
 
-        pipeline_key = NodeKey("pipeline_surface", str(spec["pipeline_name"]))
+def _add_run_instance_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    today: str,
+    spec: dict[str, object],
+) -> NodeKey:
+    manifest_id = str(spec["manifest_id"])
+    surface = snapshot.add_node(
+        "run_instance_surface",
+        manifest_id,
+        summary=f"Deterministic control-plane run instance surface for `{manifest_id}`.",
+        manifest_id=manifest_id,
+        run_id=_optional_text(spec.get("run_id")),
+        pipeline_name=_optional_text(spec.get("pipeline_name")),
+        provider=_optional_text(spec.get("provider")),
+        entity=_optional_text(spec.get("entity")),
+        run_type=_optional_text(spec.get("run_type")),
+        execution_fingerprint=_optional_text(spec.get("execution_fingerprint")),
+        created_at=_optional_text(spec.get("created_at")),
+        contract_ref=_optional_text(spec.get("contract_ref")),
+        contract_version=_optional_text(spec.get("contract_version")),
+        effective_config_artifact_id=_optional_text(spec.get("effective_config_artifact_id")),
+        config_hash=_optional_text(spec.get("config_hash")),
+        replay_capability=_optional_text(spec.get("replay_capability")),
+        lifecycle_status=_optional_text(spec.get("lifecycle_status")),
+        dq_disposition=_optional_text(spec.get("dq_disposition")),
+        dq_rule_id=_optional_text(spec.get("dq_rule_id")),
+        dq_report_path=_optional_text(spec.get("dq_report_path")),
+        published_dataset_ref=_optional_text(spec.get("published_dataset_ref")),
+        lineage_fragment_id=_optional_text(spec.get("lineage_fragment_id")),
+        replay_contract=_optional_text(spec.get("replay_contract")),
+        diagnostic_scope=_optional_text(spec.get("diagnostic_scope")),
+        last_event_at=_optional_text(spec.get("last_event_at")),
+        surface_kind=_optional_text(spec.get("surface_kind")),
+        source_path=_optional_text(spec.get("source_path")),
+        source_kind="run_instance_surface",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_RUN_INSTANCE", surface, provenance="runtime_evidence")
+    return surface
+
+
+def _link_run_instance_surface(
+    snapshot: GraphSnapshot,
+    surface: NodeKey,
+    spec: dict[str, object],
+) -> None:
+    pipeline_name = _optional_text(spec.get("pipeline_name"))
+    if pipeline_name is not None:
+        pipeline_key = NodeKey("pipeline_surface", pipeline_name)
         if pipeline_key in snapshot.nodes:
             snapshot.add_relation(surface, "DEPENDS_ON", pipeline_key, provenance="runtime_evidence")
 
-        contract_ref = _optional_text(spec.get("contract_ref"))
-        if contract_ref is not None:
-            contract_key = NodeKey("contract_surface", contract_ref)
-            if contract_key in snapshot.nodes:
-                snapshot.add_relation(surface, "DEPENDS_ON", contract_key, provenance="runtime_evidence")
+    contract_ref = _optional_text(spec.get("contract_ref"))
+    if contract_ref is not None:
+        contract_key = NodeKey("contract_surface", contract_ref)
+        if contract_key in snapshot.nodes:
+            snapshot.add_relation(surface, "DEPENDS_ON", contract_key, provenance="runtime_evidence")
 
-        source_path = _optional_text(spec.get("source_path"))
-        if source_path is not None:
-            test_key = NodeKey("test_artifact", source_path)
-            if test_key in snapshot.nodes:
-                snapshot.add_relation(surface, "DESCRIBED_IN", test_key, provenance="runtime_evidence")
-        for doc_path in spec.get("doc_paths", ()):
-            doc_key = NodeKey("doc_artifact", str(doc_path))
-            if doc_key in snapshot.nodes:
-                snapshot.add_relation(surface, "DESCRIBED_IN", doc_key, provenance="runtime_evidence")
-        for artifact_name in spec.get("artifact_refs", ()):
-            artifact_key = NodeKey("control_plane_artifact_surface", str(artifact_name))
-            if artifact_key in snapshot.nodes:
-                snapshot.add_relation(surface, "REFERENCES_ARTIFACT", artifact_key, provenance="runtime_evidence")
+    source_path = _optional_text(spec.get("source_path"))
+    if source_path is not None:
+        test_key = NodeKey("test_artifact", source_path)
+        if test_key in snapshot.nodes:
+            snapshot.add_relation(surface, "DESCRIBED_IN", test_key, provenance="runtime_evidence")
+
+    for doc_path in spec.get("doc_paths", ()):
+        doc_key = NodeKey("doc_artifact", str(doc_path))
+        if doc_key in snapshot.nodes:
+            snapshot.add_relation(surface, "DESCRIBED_IN", doc_key, provenance="runtime_evidence")
+    for artifact_name in spec.get("artifact_refs", ()):
+        artifact_key = NodeKey("control_plane_artifact_surface", str(artifact_name))
+        if artifact_key in snapshot.nodes:
+            snapshot.add_relation(surface, "REFERENCES_ARTIFACT", artifact_key, provenance="runtime_evidence")
+
+
+def _add_control_plane_run_instance_surfaces(
+    snapshot: GraphSnapshot,
+    _root: Path,
+    project: NodeKey,
+    today: str,
+) -> None:
+    for spec in _control_plane_run_instance_specs():
+        surface = _add_run_instance_surface(snapshot, project, today, spec)
+        _link_run_instance_surface(snapshot, surface, spec)
 
     _add_runtime_state_surfaces(snapshot, project, today)
 

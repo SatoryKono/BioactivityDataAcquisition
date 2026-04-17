@@ -15,7 +15,7 @@ from typing import Any, Dict, Protocol
 
 class MetricsPort(Protocol):
     """Metrics port protocol for collecting application metrics.
-    
+
     This protocol defines the metrics interface that should be implemented
     by all metrics adapters in the infrastructure layer.
     """
@@ -24,10 +24,11 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float = 1.0,
-        tags: Dict[str, Any] | None = None,  # Any: Generic tag values for metric filtering
+        tags: Dict[str, Any]
+        | None = None,  # Any: Generic tag values for metric filtering
     ) -> None:
         """Increment a counter metric.
-        
+
         Args:
             metric_name: Name of the metric
             value: Value to increment by (default: 1.0)
@@ -39,10 +40,11 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[str, Any] | None = None,  # Any: Generic tag values for metric filtering
+        tags: Dict[str, Any]
+        | None = None,  # Any: Generic tag values for metric filtering
     ) -> None:
         """Set a gauge metric to a specific value.
-        
+
         Args:
             metric_name: Name of the metric
             value: Value to set
@@ -54,10 +56,11 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[str, Any] | None = None,  # Any: Generic tag values for metric filtering
+        tags: Dict[str, Any]
+        | None = None,  # Any: Generic tag values for metric filtering
     ) -> None:
         """Record a timing metric.
-        
+
         Args:
             metric_name: Name of the metric
             value: Time value in milliseconds
@@ -69,10 +72,11 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[str, Any] | None = None,  # Any: Generic tag values for metric filtering
+        tags: Dict[str, Any]
+        | None = None,  # Any: Generic tag values for metric filtering
     ) -> None:
         """Record a histogram metric.
-        
+
         Args:
             metric_name: Name of the metric
             value: Value to record

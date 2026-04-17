@@ -239,9 +239,7 @@ def _build_checkpoint_execution_identity_payload(
         input_snapshot_fingerprint=input_snapshot_fingerprint,
     )
     return {
-        key: value
-        for key, value in normalized_payload.items()
-        if value is not None
+        key: value for key, value in normalized_payload.items() if value is not None
     }
 
 

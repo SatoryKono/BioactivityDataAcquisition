@@ -47,11 +47,7 @@ def _load_module(path: Path, module_name: str) -> ModuleType:
 
 def _load_registry_module() -> ModuleType:
     return _load_module(
-        ROOT
-        / "scripts"
-        / "engineering"
-        / "ci"
-        / "_compatibility_registry.py",
+        ROOT / "scripts" / "engineering" / "ci" / "_compatibility_registry.py",
         "compatibility_registry_loader_for_tests",
     )
 

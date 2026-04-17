@@ -760,7 +760,9 @@ class TestBatchTransformerAggregationHelpers:
         assert result.records_quarantine_failed == 1
 
     @pytest.mark.asyncio
-    async def test_finalize_stream_transform_result_builds_result(self, mock_context) -> None:
+    async def test_finalize_stream_transform_result_builds_result(
+        self, mock_context
+    ) -> None:
         """Stream finalizer should validate thresholds and build result."""
         state = create_transform_aggregation_state()
         apply_stream_transform_result_to_state(

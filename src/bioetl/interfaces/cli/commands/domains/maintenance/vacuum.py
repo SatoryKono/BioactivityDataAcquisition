@@ -44,9 +44,7 @@ _VACUUM_INTERRUPTED_MESSAGE = "Maintenance vacuum interrupted by user (Ctrl+C)"
 
 _VACUUM_ALL_DOMAIN_ERROR_TITLE = "Maintenance vacuum-all failed with domain error"
 _VACUUM_ALL_UNEXPECTED_ERROR_TITLE = "Unexpected error during maintenance vacuum-all"
-_VACUUM_ALL_INTERRUPTED_MESSAGE = (
-    "Maintenance vacuum-all interrupted by user (Ctrl+C)"
-)
+_VACUUM_ALL_INTERRUPTED_MESSAGE = "Maintenance vacuum-all interrupted by user (Ctrl+C)"
 
 
 def get_lifecycle_service() -> MedallionLifecycleService:

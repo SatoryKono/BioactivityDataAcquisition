@@ -69,6 +69,7 @@ CHEMBL_FALLBACK_ERRORS = (
     Exception,
 )
 
+
 def _log_single_id_failure(
     logger: LoggerPort,
     provider_name: str,

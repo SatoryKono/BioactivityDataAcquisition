@@ -44,6 +44,7 @@ def _phase1_summary_logger(
 
     return _log
 
+
 _PARTITION_TEST_SETTINGS = settings(
     deadline=None,
     max_examples=40,
@@ -199,7 +200,7 @@ def test_run_fetch_with_fallback_policy_prefix_property(
     async def _collect_ids() -> list[str]:
         rows = [
             record
-        async for record in run_fetch_with_fallback_policy(
+            async for record in run_fetch_with_fallback_policy(
                 primary_records=primary_records(),
                 primary_ids=primary_ids,
                 title_only_entries=title_only_entries,

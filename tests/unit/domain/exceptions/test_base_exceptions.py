@@ -28,7 +28,7 @@ class TestBioETLDomainError:
             message="Test error",
             context={"key": "value"},
         )
-        
+
         assert str(error).startswith("BioETLDomainError: Test error")
         assert error.message == "Test error"
         assert error.context == {"key": "value"}
@@ -41,7 +41,7 @@ class TestBioETLDomainError:
             message="Wrapped error",
             original_exception=original,
         )
-        
+
         assert str(error).endswith("Caused by: Original error")
         assert error.original_exception is original
 
@@ -53,7 +53,7 @@ class TestBioETLDomainError:
             context={"field": "value"},
             original_exception=original,
         )
-        
+
         error_dict = error.to_dict()
         assert error_dict["error_type"] == "BioETLDomainError"
         assert error_dict["message"] == "Test error"
@@ -72,7 +72,7 @@ class TestBioETLValidationError:
             field_name="email",
             invalid_value="invalid@example",
         )
-        
+
         assert error.field_name == "email"
         assert error.invalid_value == "invalid@example"
         assert "field_name" in error.context
@@ -86,7 +86,7 @@ class TestBioETLValidationError:
             invalid_value=-5,
             context={"min_value": 0, "max_value": 120},
         )
-        
+
         assert error.context["field_name"] == "age"
         assert error.context["invalid_value"] == "-5"
         assert error.context["min_value"] == 0
@@ -102,7 +102,7 @@ class TestBioETLConfigurationError:
             message="Missing required configuration",
             config_key="api.endpoint",
         )
-        
+
         assert error.config_key == "api.endpoint"
         assert "config_key" in error.context
 
@@ -117,7 +117,7 @@ class TestBioETLDataQualityError:
             record_id="record-123",
             severity="warning",
         )
-        
+
         assert error.record_id == "record-123"
         assert error.severity == "warning"
         assert "record_id" in error.context
@@ -143,7 +143,7 @@ class TestBioETLIntegrationError:
             operation="fetch_data",
             is_retryable=True,
         )
-        
+
         assert error.service_name == "external-api"
         assert error.operation == "fetch_data"
         assert error.is_retryable is True
@@ -162,7 +162,7 @@ class TestBioETLNotFoundError:
             entity_type="User",
             entity_id="user-123",
         )
-        
+
         assert error.entity_type == "User"
         assert error.entity_id == "user-123"
         assert "entity_type" in error.context
@@ -178,7 +178,7 @@ class TestBioETLConflictError:
             message="Version conflict",
             conflicting_entity="document-v2",
         )
-        
+
         assert error.conflicting_entity == "document-v2"
         assert "conflicting_entity" in error.context
 
@@ -192,7 +192,7 @@ class TestExceptionImmutability:
             message="Test",
             context={"key": "value"},
         )
-        
+
         # Should not be able to modify attributes
         with pytest.raises(Exception):  # dataclass frozen error
             error.message = "New message"  # type: ignore
@@ -203,6 +203,6 @@ class TestExceptionImmutability:
             message="Test",
             field_name="field",
         )
-        
+
         with pytest.raises(Exception):  # dataclass frozen error
             error.field_name = "new_field"  # type: ignore

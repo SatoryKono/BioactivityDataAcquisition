@@ -609,16 +609,12 @@ def test_canonical_checkpoint_execution_identity_fallback_is_used_when_available
         result.details["execution_identity_compatibility"]["reason"]
         == "checkpoint_execution_identity_fallback_mismatch"
     )
-    assert (
-        result.details["current_identity"][
-            "checkpoint_execution_identity_fallback_fingerprint"
-        ]
-    )
-    assert (
-        result.details["checkpoint_identity"][
-            "checkpoint_execution_identity_fallback_fingerprint"
-        ]
-    )
+    assert result.details["current_identity"][
+        "checkpoint_execution_identity_fallback_fingerprint"
+    ]
+    assert result.details["checkpoint_identity"][
+        "checkpoint_execution_identity_fallback_fingerprint"
+    ]
 
 
 def test_schema_version_delta_config():

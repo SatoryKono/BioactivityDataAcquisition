@@ -182,12 +182,14 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     semantic_first = effective_first["semantic_artifact"]
     semantic_second = effective_second["semantic_artifact"]
     assert effective_first["artifact_id"] == effective_second["artifact_id"]
-    assert semantic_first["effective_config_hash"] == semantic_second[
-        "effective_config_hash"
-    ]
-    assert semantic_first["dq_contract_compatibility_hash"] == semantic_second[
-        "dq_contract_compatibility_hash"
-    ]
+    assert (
+        semantic_first["effective_config_hash"]
+        == semantic_second["effective_config_hash"]
+    )
+    assert (
+        semantic_first["dq_contract_compatibility_hash"]
+        == semantic_second["dq_contract_compatibility_hash"]
+    )
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()

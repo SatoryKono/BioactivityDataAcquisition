@@ -28,10 +28,19 @@ from bioetl.domain.normalization.profiles.registry import (
 
 
 def test_registry_contains_canonical_chembl_activity_profile() -> None:
-    assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "activity")] is CHEMBL_ACTIVITY_PROFILE
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("chembl", "activity")]
+        is CHEMBL_ACTIVITY_PROFILE
+    )
     assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "assay")] is CHEMBL_ASSAY_PROFILE
-    assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "molecule")] is CHEMBL_MOLECULE_PROFILE
-    assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "publication")] is CHEMBL_PUBLICATION_PROFILE
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("chembl", "molecule")]
+        is CHEMBL_MOLECULE_PROFILE
+    )
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("chembl", "publication")]
+        is CHEMBL_PUBLICATION_PROFILE
+    )
     assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "target")] is CHEMBL_TARGET_PROFILE
     assert (
         NORMALIZATION_PROFILE_REGISTRY[("crossref", "publication")]
@@ -41,14 +50,26 @@ def test_registry_contains_canonical_chembl_activity_profile() -> None:
         NORMALIZATION_PROFILE_REGISTRY[("openalex", "publication")]
         is OPENALEX_PUBLICATION_PROFILE
     )
-    assert NORMALIZATION_PROFILE_REGISTRY[("pubmed", "publication")] is PUBMED_PUBLICATION_PROFILE
-    assert NORMALIZATION_PROFILE_REGISTRY[("pubchem", "compound")] is PUBCHEM_COMPOUND_PROFILE
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("pubmed", "publication")]
+        is PUBMED_PUBLICATION_PROFILE
+    )
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("pubchem", "compound")]
+        is PUBCHEM_COMPOUND_PROFILE
+    )
     assert (
         NORMALIZATION_PROFILE_REGISTRY[("semanticscholar", "publication")]
         is SEMANTICSCHOLAR_PUBLICATION_PROFILE
     )
-    assert NORMALIZATION_PROFILE_REGISTRY[("uniprot", "idmapping")] is UNIPROT_IDMAPPING_PROFILE
-    assert NORMALIZATION_PROFILE_REGISTRY[("uniprot", "protein")] is UNIPROT_PROTEIN_PROFILE
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("uniprot", "idmapping")]
+        is UNIPROT_IDMAPPING_PROFILE
+    )
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("uniprot", "protein")]
+        is UNIPROT_PROTEIN_PROFILE
+    )
 
 
 def test_build_registry_matches_exported_registry() -> None:
@@ -56,11 +77,15 @@ def test_build_registry_matches_exported_registry() -> None:
 
 
 def test_build_module_paths_match_exported_mapping() -> None:
-    assert build_normalization_profile_module_paths() == NORMALIZATION_PROFILE_MODULE_PATHS
+    assert (
+        build_normalization_profile_module_paths() == NORMALIZATION_PROFILE_MODULE_PATHS
+    )
 
 
 def test_profile_registry_and_module_paths_share_same_coordinates() -> None:
-    assert set(NORMALIZATION_PROFILE_REGISTRY) == set(NORMALIZATION_PROFILE_MODULE_PATHS)
+    assert set(NORMALIZATION_PROFILE_REGISTRY) == set(
+        NORMALIZATION_PROFILE_MODULE_PATHS
+    )
 
 
 def test_registry_exports_canonical_profile_module_paths() -> None:
@@ -79,19 +104,34 @@ def test_registry_exports_canonical_profile_module_paths() -> None:
 
 
 def test_registry_contains_additional_publication_and_compound_profiles() -> None:
-    assert NORMALIZATION_PROFILE_REGISTRY[("crossref", "publication")] is CROSSREF_PUBLICATION_PROFILE
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("crossref", "publication")]
+        is CROSSREF_PUBLICATION_PROFILE
+    )
     assert (
         NORMALIZATION_PROFILE_REGISTRY[("openalex", "publication")]
         is OPENALEX_PUBLICATION_PROFILE
     )
-    assert NORMALIZATION_PROFILE_REGISTRY[("pubmed", "publication")] is PUBMED_PUBLICATION_PROFILE
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("pubmed", "publication")]
+        is PUBMED_PUBLICATION_PROFILE
+    )
     assert (
         NORMALIZATION_PROFILE_REGISTRY[("semanticscholar", "publication")]
         is SEMANTICSCHOLAR_PUBLICATION_PROFILE
     )
-    assert NORMALIZATION_PROFILE_REGISTRY[("pubchem", "compound")] is PUBCHEM_COMPOUND_PROFILE
-    assert NORMALIZATION_PROFILE_REGISTRY[("chembl", "molecule")] is CHEMBL_MOLECULE_PROFILE
-    assert NORMALIZATION_PROFILE_REGISTRY[("uniprot", "protein")] is UNIPROT_PROTEIN_PROFILE
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("pubchem", "compound")]
+        is PUBCHEM_COMPOUND_PROFILE
+    )
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("chembl", "molecule")]
+        is CHEMBL_MOLECULE_PROFILE
+    )
+    assert (
+        NORMALIZATION_PROFILE_REGISTRY[("uniprot", "protein")]
+        is UNIPROT_PROTEIN_PROFILE
+    )
 
 
 def test_normalize_coordinates_trims_and_lowercases() -> None:
@@ -106,14 +146,22 @@ def test_normalize_coordinates_rejects_blank_entity() -> None:
 
 
 def test_resolve_profile_uses_registry_coordinates() -> None:
-    assert resolve_normalization_profile(" ChEMBL ", " Activity ") is CHEMBL_ACTIVITY_PROFILE
+    assert (
+        resolve_normalization_profile(" ChEMBL ", " Activity ")
+        is CHEMBL_ACTIVITY_PROFILE
+    )
     assert resolve_normalization_profile(" ChEMBL ", " Assay ") is CHEMBL_ASSAY_PROFILE
-    assert resolve_normalization_profile(" ChEMBL ", " Molecule ") is CHEMBL_MOLECULE_PROFILE
+    assert (
+        resolve_normalization_profile(" ChEMBL ", " Molecule ")
+        is CHEMBL_MOLECULE_PROFILE
+    )
     assert (
         resolve_normalization_profile(" ChEMBL ", " Publication ")
         is CHEMBL_PUBLICATION_PROFILE
     )
-    assert resolve_normalization_profile(" ChEMBL ", " Target ") is CHEMBL_TARGET_PROFILE
+    assert (
+        resolve_normalization_profile(" ChEMBL ", " Target ") is CHEMBL_TARGET_PROFILE
+    )
     assert (
         resolve_normalization_profile(" CrossRef ", " Publication ")
         is CROSSREF_PUBLICATION_PROFILE
@@ -126,8 +174,14 @@ def test_resolve_profile_uses_registry_coordinates() -> None:
         resolve_normalization_profile(" SemanticScholar ", " Publication ")
         is SEMANTICSCHOLAR_PUBLICATION_PROFILE
     )
-    assert resolve_normalization_profile(" UniProt ", " IdMapping ") is UNIPROT_IDMAPPING_PROFILE
-    assert resolve_normalization_profile(" UniProt ", " Protein ") is UNIPROT_PROTEIN_PROFILE
+    assert (
+        resolve_normalization_profile(" UniProt ", " IdMapping ")
+        is UNIPROT_IDMAPPING_PROFILE
+    )
+    assert (
+        resolve_normalization_profile(" UniProt ", " Protein ")
+        is UNIPROT_PROTEIN_PROFILE
+    )
     assert resolve_normalization_profile("chembl", None) is None
 
 
@@ -147,7 +201,9 @@ def test_profile_and_module_path_resolution_share_coordinate_normalization() -> 
     provider = " ChEMBL "
     entity_type = " Molecule "
 
-    assert resolve_normalization_profile(provider, entity_type) is CHEMBL_MOLECULE_PROFILE
+    assert (
+        resolve_normalization_profile(provider, entity_type) is CHEMBL_MOLECULE_PROFILE
+    )
     assert (
         resolve_normalization_profile_module_path(provider, entity_type)
         == "src/bioetl/domain/normalization/profiles/chembl_molecule.py"

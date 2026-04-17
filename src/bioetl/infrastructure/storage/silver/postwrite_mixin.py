@@ -108,7 +108,7 @@ class SilverWriterPostwriteMixin:
     ) -> SilverWriteResult | None:
         """Run post-write stages: CSV export, audit, and result finalization."""
         # Use maintenance operations if available, otherwise fall back to mixin method
-        if hasattr(self, '_maintenance') and self._maintenance is not None:
+        if hasattr(self, "_maintenance") and self._maintenance is not None:
             await self._maintenance.maybe_export_csv(
                 table_name=ctx.table_name,
                 arrow_data=payload.arrow_data,

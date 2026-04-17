@@ -174,6 +174,7 @@ class TestRegisterProviderClass:
 
     def test_stores_custom_creator_in_config(self) -> None:
         """custom_creator should be stored in ProviderConfig."""
+
         def custom(**_: Any) -> _FakeAdapter:
             return _create_fake_adapter()
 
@@ -313,6 +314,7 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_with_custom_creator(self) -> None:
         """custom_creator kwarg should be stored in config."""
+
         def custom_creator(**_: Any) -> _FakeAdapter:
             return _create_fake_adapter()
 

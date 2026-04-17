@@ -698,9 +698,7 @@ class TestDataQualityServiceMetricsEmission:
         duration_calls = recording_metrics.get_histogram_calls(
             "bioetl_dq_check_duration_ms"
         )
-        assert len(duration_calls) == 1, (
-            "bioetl_dq_check_duration_ms should be emitted"
-        )
+        assert len(duration_calls) == 1, "bioetl_dq_check_duration_ms should be emitted"
 
         # Verify baseline update counters
         baseline_calls = recording_metrics.get_counter_calls(

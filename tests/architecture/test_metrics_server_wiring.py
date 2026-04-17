@@ -15,7 +15,9 @@ RUNTIME_OBSERVABILITY_PATH = Path(
 )
 RUNTIME_INIT_PATH = Path("src/bioetl/composition/bootstrap/runtime/__init__.py")
 PIPELINE_EXECUTION_PATH = Path("src/bioetl/composition/_pipeline_execution.py")
-OBSERVABILITY_RESOLUTION_PATH = Path("src/bioetl/composition/observability_resolution.py")
+OBSERVABILITY_RESOLUTION_PATH = Path(
+    "src/bioetl/composition/observability_resolution.py"
+)
 RUNTIME_OBSERVABILITY_BUILDER_PATH = Path(
     "src/bioetl/composition/runtime_builders/observability_builder.py"
 )
@@ -28,7 +30,9 @@ def _get_function_def(tree: ast.AST, name: str) -> ast.FunctionDef:
     raise AssertionError(f"Function {name} not found")
 
 
-def _collect_called_names_and_attrs(function_node: ast.FunctionDef) -> tuple[set[str], set[str]]:
+def _collect_called_names_and_attrs(
+    function_node: ast.FunctionDef,
+) -> tuple[set[str], set[str]]:
     """Collect direct call names and attribute names from a function body."""
     called_names: set[str] = set()
     called_attrs: set[str] = set()
@@ -58,7 +62,9 @@ def test_runtime_metrics_bootstrap_uses_metrics_service_not_raw_infra_starter() 
             func = node.func
             if isinstance(func, ast.Name) and func.id == "start_metrics_server":
                 forbidden_calls.add(func.id)
-            elif isinstance(func, ast.Attribute) and func.attr == "start_metrics_server":
+            elif (
+                isinstance(func, ast.Attribute) and func.attr == "start_metrics_server"
+            ):
                 forbidden_calls.add(func.attr)
 
     assert not forbidden_imports and not forbidden_calls, (
@@ -114,7 +120,9 @@ def test_observability_api_push_metrics_delegates_via_metrics_service() -> None:
     )
 
 
-def test_runtime_observability_modules_do_not_reexport_raw_start_metrics_server() -> None:
+def test_runtime_observability_modules_do_not_reexport_raw_start_metrics_server() -> (
+    None
+):
     """Legacy raw start_metrics_server exports must stay out of runtime bootstrap surface."""
     for path in (RUNTIME_OBSERVABILITY_PATH, RUNTIME_INIT_PATH):
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -126,7 +134,8 @@ def test_runtime_observability_modules_do_not_reexport_raw_start_metrics_server(
             elif isinstance(node, ast.Assign):
                 for target in node.targets:
                     if not (
-                        isinstance(target, ast.Name) and target.id in {"__all__", "_PUBLIC_EXPORTS"}
+                        isinstance(target, ast.Name)
+                        and target.id in {"__all__", "_PUBLIC_EXPORTS"}
                     ):
                         continue
                     value = node.value
@@ -160,7 +169,9 @@ def test_pipeline_execution_uses_composition_pushgateway_seam() -> None:
     )
 
 
-def test_runtime_observability_builder_delegates_noop_resolution_to_canonical_helper() -> None:
+def test_runtime_observability_builder_delegates_noop_resolution_to_canonical_helper() -> (
+    None
+):
     """Compatibility builder must not reintroduce ad-hoc NoOp observability imports."""
     source = RUNTIME_OBSERVABILITY_BUILDER_PATH.read_text(encoding="utf-8")
     assert "from bioetl.domain.ports.noop" not in source, (

@@ -17,7 +17,10 @@ from bioetl.domain.ports import (
     MetadataWriterPort,
     MetricsPort,
 )
-from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator, DQMetricsInput
+from bioetl.domain.services.dq_metrics_calculator import (
+    DQMetricsCalculator,
+    DQMetricsInput,
+)
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -62,11 +65,11 @@ class _SilverMetadataBuildRequest:
 @dataclass(frozen=True, slots=True)
 class SilverMetadataOperations:
     """Metadata operations for Silver layer storage.
-    
+
     Handles DQ metrics calculation, metadata writing, lineage tracking, and auditing.
     This service replaces SilverWriterMetadataMixin through composition.
     """
-    
+
     _logger: LoggerPort
     _metrics: MetricsPort | None = None
     _audit: AuditPort | None = None
@@ -238,12 +241,16 @@ class SilverMetadataOperations:
             version="1.0",
         )
         lineage_metadata = LineageMetadata(
-            source_batch_ids=[request.source_batch_id] if request.source_batch_id else [],
-            bronze_paths=[
-                ref.relative_path for ref in request.bronze_refs
-            ] if request.bronze_refs else [],
+            source_batch_ids=[request.source_batch_id]
+            if request.source_batch_id
+            else [],
+            bronze_paths=[ref.relative_path for ref in request.bronze_refs]
+            if request.bronze_refs
+            else [],
             transform_version=request.transform_version,
-            transform_steps=list(request.transform_steps) if request.transform_steps else [],
+            transform_steps=list(request.transform_steps)
+            if request.transform_steps
+            else [],
         )
         delta_metadata = DeltaMetrics(
             table_path=request.table_path,
@@ -291,13 +298,13 @@ class SilverMetadataOperations:
                 python_version=request.python_version,
             ),
         )
-    
+
     async def compute_dq_metrics(
         self,
         arrow_data: pa.Table,
     ) -> BatchDQMetrics:
         """Compute data quality metrics for Silver write.
-        
+
         Args:
             arrow_data: PyArrow table with data
 
@@ -306,13 +313,15 @@ class SilverMetadataOperations:
         """
         if self._dq_calculator is None:
             return BatchDQMetrics.empty()
-        
+
         # Convert records to dict format for DQ calculation
-        records_dict = [dict(record) for record in arrow_data.to_pylist()] if arrow_data else []
-        
+        records_dict = (
+            [dict(record) for record in arrow_data.to_pylist()] if arrow_data else []
+        )
+
         # Get existing schema fields for drift detection
         existing_schema_fields = set(arrow_data.column_names) if arrow_data else set()
-        
+
         # Create DQ metrics input
         dq_input = DQMetricsInput(
             records=records_dict,
@@ -320,9 +329,9 @@ class SilverMetadataOperations:
             quarantined_count=0,  # TODO: Get actual quarantined count
             validation_errors=[],  # TODO: Get actual validation errors
         )
-        
+
         return await asyncio.to_thread(self._dq_calculator.calculate, dq_input)
-    
+
     async def write_silver_metadata(
         self,
         table_name: str,
@@ -339,7 +348,7 @@ class SilverMetadataOperations:
         transform_steps: tuple[str, ...] | None = None,
     ) -> SilverWriteResult | None:
         """Write metadata for Silver layer.
-        
+
         Args:
             table_name: Name of the table
             dq_metrics: Data quality metrics
@@ -353,7 +362,7 @@ class SilverMetadataOperations:
             ingestion_ts: Optional ingestion timestamp
             transform_version: Optional transform version
             transform_steps: Optional transform steps
-        
+
         Returns:
             Silver write result or None if metadata writing is disabled
         """
@@ -386,23 +395,25 @@ class SilverMetadataOperations:
             table_name=table_name,
             table_path=table_path_placeholder,
         )
-        
+
         if self._metrics:
             self._metrics.increment_counter("silver.metadata_write_success", 1)
-        
+
         if self._audit:
             self._audit.log_event(
                 "SilverMetadataWrite",
                 {
                     "table": table_name,
                     "records": len(records),
-                    "dq_metrics": dq_metrics.dict() if hasattr(dq_metrics, 'dict') else str(dq_metrics),
-                    "status": "success"
-                }
+                    "dq_metrics": dq_metrics.dict()
+                    if hasattr(dq_metrics, "dict")
+                    else str(dq_metrics),
+                    "status": "success",
+                },
             )
-        
+
         return result
-    
+
     async def log_silver_audit(
         self,
         table_name: str,
@@ -417,7 +428,7 @@ class SilverMetadataOperations:
         error: str | None = None,
     ) -> None:
         """Log Silver write audit event.
-        
+
         Args:
             table_name: Name of the table
             records: Records that were written
@@ -432,15 +443,17 @@ class SilverMetadataOperations:
         """
         if not self._audit:
             return
-        
+
         audit_entry = {
             "table": table_name,
             "records": len(records),
             "mode": mode,
-            "validated_mode": validated_mode.value if hasattr(validated_mode, 'value') else str(validated_mode),
+            "validated_mode": validated_mode.value
+            if hasattr(validated_mode, "value")
+            else str(validated_mode),
             "success": success,
         }
-        
+
         if run_id:
             audit_entry["run_id"] = str(run_id)
         if run_type:
@@ -451,7 +464,7 @@ class SilverMetadataOperations:
             audit_entry["ingestion_ts"] = ingestion_ts.isoformat()
         if error:
             audit_entry["error"] = error
-        
+
         await asyncio.to_thread(self._audit.log_event, "SilverWrite", audit_entry)
 
     async def _log_silver_audit(
@@ -468,24 +481,24 @@ class SilverMetadataOperations:
         """Backward compatibility alias for log_silver_audit."""
         if not self._audit:
             return
-        
+
         # Use the same validation and building logic as the original mixin
         from bioetl.infrastructure.storage.silver.audit_operations import (
             _SilverAuditWriteRequest,
             _build_silver_audit_entry,
         )
-        
+
         # Create a wrapper that provides the logger attribute expected by audit operations
         class AuditHostWrapper:
             def __init__(self, metadata_ops):
                 self.metadata_ops = metadata_ops
-            
+
             @property
             def logger(self):
                 return self.metadata_ops._logger
-        
+
         wrapper = AuditHostWrapper(self)
-        
+
         request = _SilverAuditWriteRequest(
             table_name=table_name,
             records=records,
@@ -495,7 +508,7 @@ class SilverMetadataOperations:
             source_batch_id=source_batch_id,
             ingestion_ts=ingestion_ts,
         )
-        
+
         audit_entry = _build_silver_audit_entry(wrapper, request)
         await self._audit.log_write(audit_entry)
 
@@ -511,7 +524,7 @@ class SilverMetadataOperations:
         start_perf: float,
     ) -> "_PreparedSilverWriteFinalizationContext":
         """Prepare DQ/version/timing context before Silver metadata persistence.
-        
+
         This method computes DQ metrics, gets the Delta version, and calculates
         timing information to prepare the finalization context.
         """
@@ -524,15 +537,13 @@ class SilverMetadataOperations:
             records=records,
         )
         version_after = await self._resolve_version_after(table_path)
-        completed_at = started_at + timedelta(
-            seconds=time.perf_counter() - start_perf
-        )
-        
+        completed_at = started_at + timedelta(seconds=time.perf_counter() - start_perf)
+
         # Import here to avoid circular imports
         from bioetl.infrastructure.storage.silver.metadata_operations import (
             _PreparedSilverWriteFinalizationContext,
         )
-        
+
         return _PreparedSilverWriteFinalizationContext(
             dq_metrics=dq_metrics,
             version_after=version_after,
@@ -554,7 +565,7 @@ class SilverMetadataOperations:
         start_perf: float,
     ) -> SilverWriteResult | None:
         """Compute DQ metrics, write metadata, and build final result.
-        
+
         This method coordinates the finalization of a Silver write operation,
         including DQ metrics calculation, metadata writing, and result construction.
         """
@@ -571,7 +582,11 @@ class SilverMetadataOperations:
             started_at=started_at,
             start_perf=start_perf,
         )
-        run_id = str(records[0]["_run_id"]) if records and "_run_id" in records[0] else "test_run_id"
+        run_id = (
+            str(records[0]["_run_id"])
+            if records and "_run_id" in records[0]
+            else "test_run_id"
+        )
         metadata = self._build_silver_metadata(
             _SilverMetadataBuildRequest(
                 table_name=table_name,

@@ -138,8 +138,12 @@ class TestRetryConfig:
             f"Jitter calculation mismatch. Expected {expected_delay}, got {actual_delay}. "
             "This may indicate the implementation uses Python's hash() instead of MD5."
         )
-        assert config.calculate_delay(attempt=0, url=url) == pytest.approx(expected_delay)
-        assert config.calculate_delay(attempt=0, url=url) == pytest.approx(expected_delay)
+        assert config.calculate_delay(attempt=0, url=url) == pytest.approx(
+            expected_delay
+        )
+        assert config.calculate_delay(attempt=0, url=url) == pytest.approx(
+            expected_delay
+        )
 
     def test_is_last_attempt(self) -> None:
         """Test is_last_attempt method."""

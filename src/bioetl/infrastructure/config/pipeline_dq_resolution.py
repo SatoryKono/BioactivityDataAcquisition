@@ -43,8 +43,12 @@ def has_inline_dq_overrides(yaml_config: PipelineYamlConfig) -> bool:
         dq.field_validations or dq.cross_field_validations or dq.conditional_validations
     )
     has_custom_thresholds = not (
-        math.isclose(dq.soft_fail_threshold, _DEFAULT_SOFT_FAIL_THRESHOLD, abs_tol=1e-12)
-        and math.isclose(dq.hard_fail_threshold, _DEFAULT_HARD_FAIL_THRESHOLD, abs_tol=1e-12)
+        math.isclose(
+            dq.soft_fail_threshold, _DEFAULT_SOFT_FAIL_THRESHOLD, abs_tol=1e-12
+        )
+        and math.isclose(
+            dq.hard_fail_threshold, _DEFAULT_HARD_FAIL_THRESHOLD, abs_tol=1e-12
+        )
     )
     return has_validations or has_custom_thresholds
 

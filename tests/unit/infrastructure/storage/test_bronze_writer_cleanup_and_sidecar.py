@@ -40,7 +40,9 @@ _FIXTURE_IMPORTS = (
 class _BundleCoordinator:
     """Coordinator stub that exposes the canonical bundle API explicitly."""
 
-    def __init__(self, metadata: object, lineage_fragment: object | None = None) -> None:
+    def __init__(
+        self, metadata: object, lineage_fragment: object | None = None
+    ) -> None:
         self.metadata = metadata
         self.lineage_fragment = lineage_fragment
         self.last_input: object | None = None

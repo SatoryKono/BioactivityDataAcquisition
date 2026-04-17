@@ -261,17 +261,23 @@ def test_file_store_fails_closed_on_truncated_tail_line_during_reads(tmp_path) -
     with ledger_path.open("a", encoding="utf-8") as handle:
         handle.write('{"entry_id":"broken-tail"')
 
-    with pytest.raises(StorageError, match="corrupted: truncated tail line") as exc_info:
+    with pytest.raises(
+        StorageError, match="corrupted: truncated tail line"
+    ) as exc_info:
         store.list_entries("manifest-1")
     assert exc_info.value.operation == "list_entries"
     assert exc_info.value.manifest_id == "manifest-1"
 
-    with pytest.raises(StorageError, match="corrupted: truncated tail line") as run_id_exc:
+    with pytest.raises(
+        StorageError, match="corrupted: truncated tail line"
+    ) as run_id_exc:
         store.list_entries_by_run_id(run_id)
     assert run_id_exc.value.operation == "list_entries_by_run_id"
     assert run_id_exc.value.run_id == str(run_id)
 
-    with pytest.raises(StorageError, match="corrupted: truncated tail line") as after_exc:
+    with pytest.raises(
+        StorageError, match="corrupted: truncated tail line"
+    ) as after_exc:
         store.list_entries_after("manifest-1", None)
     assert after_exc.value.operation == "list_entries_after"
     assert after_exc.value.manifest_id == "manifest-1"

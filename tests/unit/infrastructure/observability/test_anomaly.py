@@ -477,12 +477,10 @@ class TestDataQualityMonitor:
         ]
         assert raw_annotation == "list[DQAnomaly]"
 
-        resolved_annotation = get_type_hints(DataQualityMonitorService.check_quality).get(
-            "return"
-        )
-        if resolved_annotation is not None and not isinstance(
-            resolved_annotation, str
-        ):
+        resolved_annotation = get_type_hints(
+            DataQualityMonitorService.check_quality
+        ).get("return")
+        if resolved_annotation is not None and not isinstance(resolved_annotation, str):
             assert resolved_annotation == list[DQAnomaly]
 
     def test_update_baseline_from_metrics_normal(self, mock_logger: MagicMock):

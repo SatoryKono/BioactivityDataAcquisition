@@ -38,6 +38,7 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
     enrichment_status: Series[str] = pa.Field(
         nullable=False, alias="_enrichment_status"
     )
+
     class Config:
         """Pandera configuration."""
 

@@ -18,6 +18,7 @@ from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
 __all__ = ["CompositeLifecycleObserverService"]
 
+
 @dataclass(slots=True)
 class CompositeLifecycleObserverService(CompositeLifecycleTracingMixin):
     """Emit canonical composite lifecycle events through contract-aware seams."""

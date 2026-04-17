@@ -182,7 +182,8 @@ class CheckpointMetadata:
             ),
             manifest_id=cast(
                 _OPTIONAL_STR,
-                data.get("manifest_id") or extract_run_context_anchor(data, "manifest_id"),
+                data.get("manifest_id")
+                or extract_run_context_anchor(data, "manifest_id"),
             ),
             contract_ref=cast(_OPTIONAL_STR, data.get("contract_ref")),
             contract_version=cast(_OPTIONAL_STR, data.get("contract_version")),
@@ -205,7 +206,9 @@ class CheckpointMetadata:
         snapshot_fingerprint = (
             self.input_snapshot_fingerprint
             if self.input_snapshot_fingerprint is not None
-            else compute_input_snapshot_identity_fingerprint(list(self.input_snapshot_ids))
+            else compute_input_snapshot_identity_fingerprint(
+                list(self.input_snapshot_ids)
+            )
         )
         normalized_payload = normalize_execution_identity_payload(
             {
@@ -222,9 +225,7 @@ class CheckpointMetadata:
             }
         )
         return {
-            key: value
-            for key, value in normalized_payload.items()
-            if value is not None
+            key: value for key, value in normalized_payload.items() if value is not None
         }
 
     def checkpoint_execution_identity_fingerprint(self) -> str | None:
@@ -234,6 +235,8 @@ class CheckpointMetadata:
         if not payload:
             return None
         return compute_execution_identity_fingerprint(payload)
+
+
 __all__ = [
     "CheckpointCompatibilityResult",
     "CheckpointMetadata",

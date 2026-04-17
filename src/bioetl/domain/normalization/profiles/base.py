@@ -42,7 +42,9 @@ class NormalizationProfile:
     description: str | None = None
 
     def __post_init__(self) -> None:
-        normalized_rules = dict(sorted(self.field_rules.items(), key=lambda item: item[0]))
+        normalized_rules = dict(
+            sorted(self.field_rules.items(), key=lambda item: item[0])
+        )
         if not normalized_rules:
             raise ValueError("field_rules cannot be empty")
         for field_name, rule in normalized_rules.items():
@@ -88,9 +90,7 @@ class NormalizationProfile:
     def set_like_fields(self) -> frozenset[str]:
         """Return fields whose list-like values are order-insensitive for hashing."""
         return frozenset(
-            field_name
-            for field_name, rule in self.field_rules.items()
-            if rule.set_like
+            field_name for field_name, rule in self.field_rules.items() if rule.set_like
         )
 
     def coverage_gaps(

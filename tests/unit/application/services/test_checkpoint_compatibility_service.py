@@ -264,9 +264,7 @@ class TestCheckpointCompatibilityService:
 
         assert result.compatible is False
         assert result.execution_identity_compatible is False
-        assert any(
-            "Composite run identity mismatch" in msg for msg in result.messages
-        )
+        assert any("Composite run identity mismatch" in msg for msg in result.messages)
 
     def test_validate_composite_run_identity_missing(self) -> None:
         """Missing composite run identity should block strict resume."""
@@ -286,9 +284,7 @@ class TestCheckpointCompatibilityService:
 
         assert result.compatible is False
         assert result.execution_identity_compatible is False
-        assert any(
-            "Composite run identity missing" in msg for msg in result.messages
-        )
+        assert any("Composite run identity missing" in msg for msg in result.messages)
 
     def test_validate_composite_run_identity_mismatch_overrides_matching_fingerprint(
         self,
@@ -313,9 +309,7 @@ class TestCheckpointCompatibilityService:
 
         assert result.compatible is False
         assert result.execution_identity_compatible is False
-        assert any(
-            "Composite run identity mismatch" in msg for msg in result.messages
-        )
+        assert any("Composite run identity mismatch" in msg for msg in result.messages)
         assert not any(
             "Execution fingerprint mismatch" in msg for msg in result.messages
         )
@@ -363,7 +357,10 @@ class TestCheckpointCompatibilityService:
 
         assert result.compatible is False
         assert result.execution_identity_compatible is False
-        assert any("requires checkpoint input snapshot anchors" in msg for msg in result.messages)
+        assert any(
+            "requires checkpoint input snapshot anchors" in msg
+            for msg in result.messages
+        )
 
     def test_validate_input_snapshot_identity_mismatch(self) -> None:
         """Snapshot identity mismatches should block replay-safe resume."""

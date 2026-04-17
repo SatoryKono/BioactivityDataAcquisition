@@ -42,15 +42,15 @@ class TestPipelineSettings:
             settings.silver_merge_timeout.unit_execution_timeout_seconds
             == pytest.approx(15.0)
         )
-        assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == pytest.approx(
-            90.0
+        assert (
+            settings.silver_merge_timeout.e2e_execution_timeout_seconds
+            == pytest.approx(90.0)
         )
         assert settings.control_plane.run_manifest_enabled is True
         assert settings.control_plane.run_ledger_enabled is True
         assert settings.control_plane.checkpoint_compatibility_policy == "soft_fail"
         assert (
-            settings.control_plane.required_persistence_profile
-            == "degraded_observable"
+            settings.control_plane.required_persistence_profile == "degraded_observable"
         )
 
     def test_custom_values(self) -> None:
@@ -89,8 +89,9 @@ class TestPipelineSettings:
         assert settings.silver_merge_timeout.execution_timeout_seconds == pytest.approx(
             60.0
         )
-        assert settings.silver_merge_timeout.e2e_execution_timeout_seconds == pytest.approx(
-            120.0
+        assert (
+            settings.silver_merge_timeout.e2e_execution_timeout_seconds
+            == pytest.approx(120.0)
         )
         assert settings.silver_merge_timeout.max_retries == 0
         assert settings.control_plane.run_manifest_enabled is True

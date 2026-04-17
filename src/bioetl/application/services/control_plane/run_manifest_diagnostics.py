@@ -203,9 +203,7 @@ def build_diagnostics_summary(
             dq_violation_kinds=dq_violation_kinds,
             cross_validation_rule_ids=cross_validation_rule_ids,
             cross_validation_config_paths=cross_validation_config_paths,
-            cross_validation_quarantine_policies=(
-                cross_validation_quarantine_policies
-            ),
+            cross_validation_quarantine_policies=(cross_validation_quarantine_policies),
             cross_validation_replay_contracts=cross_validation_replay_contracts,
             occurrence_only_diagnostic_scopes=occurrence_only_diagnostic_scopes,
             dq_signal_present=dq_signal_present,
@@ -215,6 +213,8 @@ def build_diagnostics_summary(
             resume_diagnostics=resume_diagnostics,
         )
     )
+
+
 def _build_artifact_ref(entry: RunLedgerEntry) -> dict[str, object] | None:
     if entry.event_family != "artifact" and entry.event_type != "artifact_published":
         return None
@@ -274,8 +274,7 @@ def _build_alert_signals(
         "immutable_input_snapshots" in replay_ready_missing_requirements
     )
     strict_replay_boundary_gap = (
-        "strict_replay_execution_context_support"
-        in replay_ready_missing_requirements
+        "strict_replay_execution_context_support" in replay_ready_missing_requirements
     )
     return {
         "run_failed": latest_status_normalized == "failed",
@@ -312,8 +311,7 @@ _NEXT_STEP_MAPPING = {
 def _build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
     """Return operator-oriented next steps based on active alert signals."""
     steps = [
-        msg for key, msg in _NEXT_STEP_MAPPING.items()
-        if alert_signals.get(key, False)
+        msg for key, msg in _NEXT_STEP_MAPPING.items() if alert_signals.get(key, False)
     ]
     if not steps:
         steps.append("No alert signals detected; continue routine monitoring.")

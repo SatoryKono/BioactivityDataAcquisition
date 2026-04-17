@@ -283,10 +283,18 @@ class TestPipelineRunnerTracing:
     def test_composite_phase_helpers_do_not_publish_via_logger_directly(self):
         """Composite phase helpers should not own direct lifecycle publication."""
         helper_paths = [
-            Path("src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py"),
-            Path("src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py"),
-            Path("src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py"),
-            Path("src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py"),
+            Path(
+                "src/bioetl/application/composite/runner_pkg/runner_stage_start_flow.py"
+            ),
+            Path(
+                "src/bioetl/application/composite/runner_pkg/runner_stage_state_flow.py"
+            ),
+            Path(
+                "src/bioetl/application/composite/runner_pkg/runner_stage_dependency_state_flow.py"
+            ),
+            Path(
+                "src/bioetl/application/composite/runner_pkg/runner_merge_stage_runtime.py"
+            ),
             Path("src/bioetl/application/composite/runner_pkg/runner_support_flow.py"),
         ]
 
@@ -431,9 +439,9 @@ class TestOperatorTracingPolicy:
 
     def test_metrics_service_operator_workflows_remain_traced(self):
         """MetricsService admin operations should keep application-owned spans."""
-        source = Path(
-            "src/bioetl/application/services/metrics_service.py"
-        ).read_text(encoding="utf-8")
+        source = Path("src/bioetl/application/services/metrics_service.py").read_text(
+            encoding="utf-8"
+        )
         assert "traced_operation" in source
         for span_name in (
             "metrics.start",

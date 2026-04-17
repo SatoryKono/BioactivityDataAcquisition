@@ -148,7 +148,9 @@ class TestSavePeriodicCheckpoint:
         )
         mock_metrics.observe_histogram.assert_called_once()
         mock_tracer.get_tracer.assert_called_once_with("bioetl.checkpoint")
-        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        )
         mock_span.set_attribute.assert_called_with(
             "bioetl.checkpoint.status",
             "succeeded",
@@ -410,7 +412,9 @@ class TestSaveCheckpointOnShutdown:
             },
         )
         mock_metrics.observe_histogram.assert_called_once()
-        mock_span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        mock_span = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        )
         mock_span.set_attribute.assert_any_call("bioetl.checkpoint.status", "failed")
         mock_span.set_attribute.assert_any_call("error", True)
         mock_span.set_attribute.assert_any_call("error.type", "RuntimeError")

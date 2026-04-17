@@ -33,17 +33,22 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import AuditPort, LineageStorePort, MetadataCoordinatorPort, MetadataWriterPort
+    from bioetl.domain.ports import (
+        AuditPort,
+        LineageStorePort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
+    )
 
 
 @dataclass
 class SilverValidationOperations:
     """Validation operations service for Silver layer writes.
-    
+
     This service encapsulates all validation logic previously in SilverWriterValidationMixin,
     following the composition pattern for better separation of concerns and testability.
     """
-    
+
     logger: LoggerPort
     _write_policy: WriteModePolicy
     _metrics: MetricsPort | None
@@ -68,8 +73,6 @@ class SilverValidationOperations:
         None,
     ]
     _host: object | None = None
-
-
 
     def _sync_validate_and_build_arrow(
         self,

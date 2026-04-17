@@ -8,9 +8,7 @@ from bioetl.domain.types import ConfigValidationError, RunType
 
 _LAYER_PATHS_FIELD = "storage.paths"
 _UNIQUE_LAYER_PATHS_EXPECTED = "unique paths for each layer"
-_DISTINCT_LAYER_PATHS_RULE = (
-    "Medallion Architecture: layers MUST have distinct paths"
-)
+_DISTINCT_LAYER_PATHS_RULE = "Medallion Architecture: layers MUST have distinct paths"
 
 
 def validate_single_write_mode(

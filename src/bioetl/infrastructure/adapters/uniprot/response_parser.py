@@ -31,7 +31,8 @@ def parse_uniprot_protein_response(
     if not isinstance(data, dict):
         return [], None
     results = [
-        record for record in extract_response_items(data, "results")
+        record
+        for record in extract_response_items(data, "results")
         if isinstance(record, dict)
     ]
     cursor = extract_response_text(data, "nextCursor")

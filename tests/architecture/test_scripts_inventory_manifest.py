@@ -42,11 +42,7 @@ def test_scripts_inventory_manifest_drift_check_passes() -> None:
     """Committed manifest must match current scripts inventory."""
     root = _project_root()
     script_path = (
-        root
-        / "scripts"
-        / "engineering"
-        / "repo"
-        / "check_scripts_inventory.py"
+        root / "scripts" / "engineering" / "repo" / "check_scripts_inventory.py"
     )
     result = subprocess.run(
         [

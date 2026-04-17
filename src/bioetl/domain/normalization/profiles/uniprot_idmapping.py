@@ -28,7 +28,9 @@ _META_FIELDS = frozenset(
     }
 )
 _TITLE_FIELDS = frozenset({"protein_name"})
-_INT_FIELDS = frozenset({"annotation_score", "sequence_length", "sequence_mass", "taxonomy_id"})
+_INT_FIELDS = frozenset(
+    {"annotation_score", "sequence_length", "sequence_mass", "taxonomy_id"}
+)
 _JSON_STRING_FIELDS = frozenset({"all_mappings"})
 
 UNIPROT_IDMAPPING_PROFILE = build_standard_profile(

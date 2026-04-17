@@ -78,7 +78,10 @@ def evaluate_attempt(
         )
 
     retry_after = retry_after_seconds(snapshot, now=now)
-    if math.isclose(retry_after, 0.0, abs_tol=1e-12) and snapshot.last_failure_time is not None:
+    if (
+        math.isclose(retry_after, 0.0, abs_tol=1e-12)
+        and snapshot.last_failure_time is not None
+    ):
         return CircuitBreakerAttemptDecision(
             allow_request=True,
             next_state=CircuitBreakerState.HALF_OPEN,

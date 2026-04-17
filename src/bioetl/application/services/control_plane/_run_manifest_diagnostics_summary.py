@@ -63,9 +63,7 @@ def _build_final_summary(
     canonical_execution_identity_payload = build_execution_identity_payload(
         pipeline_name=request.manifest.pipeline_name,
         run_type=request.manifest.run_type.value,
-        pipeline_version=cast(
-            str | None, request.base_summary.get("pipeline_version")
-        ),
+        pipeline_version=cast(str | None, request.base_summary.get("pipeline_version")),
         effective_config_hash=cast(
             str | None, request.base_summary.get("effective_config_hash")
         ),
@@ -74,9 +72,7 @@ def _build_final_summary(
             request.base_summary.get("dq_contract_compatibility_hash"),
         ),
         contract_ref=cast(str | None, request.base_summary.get("contract_ref")),
-        contract_version=cast(
-            str | None, request.base_summary.get("contract_version")
-        ),
+        contract_version=cast(str | None, request.base_summary.get("contract_version")),
         effective_config_artifact_id=cast(
             str | None,
             request.base_summary.get("effective_config_artifact_id"),
@@ -122,9 +118,7 @@ def _build_final_summary(
             "replay_capability_reason"
         ),
         "exact_replay_eligible": request.base_summary.get("exact_replay_eligible"),
-        "exact_replay_blockers": request.base_summary.get(
-            "exact_replay_blockers", []
-        ),
+        "exact_replay_blockers": request.base_summary.get("exact_replay_blockers", []),
         "resume_contract": request.base_summary.get("resume_contract"),
         "resume_diagnostics": request.resume_diagnostics,
         "lineage_closure_boundary": request.base_summary.get(
@@ -250,8 +244,4 @@ def _build_identity_graph_artifact_ref(
     artifact_ref: dict[str, object],
 ) -> dict[str, object]:
     """Return the operator-facing artifact shape used inside identity graph."""
-    return {
-        key: value
-        for key, value in artifact_ref.items()
-        if key != "artifact_id"
-    }
+    return {key: value for key, value in artifact_ref.items() if key != "artifact_id"}

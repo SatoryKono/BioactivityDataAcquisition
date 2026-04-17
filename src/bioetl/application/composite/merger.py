@@ -128,7 +128,9 @@ class MergeService(
         # otherwise fall back to None
         if collaborators.priority_orderer is not None:
             self._priority_orderer = collaborators.priority_orderer
-        elif collaborators.order_service and hasattr(collaborators.order_service, '_priority_orderer'):
+        elif collaborators.order_service and hasattr(
+            collaborators.order_service, "_priority_orderer"
+        ):
             self._priority_orderer = collaborators.order_service._priority_orderer
         else:
             self._priority_orderer = None

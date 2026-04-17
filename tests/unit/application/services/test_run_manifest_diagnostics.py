@@ -123,7 +123,9 @@ def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object
             manifest.code_provenance.effective_config_artifact_id
         ),
     }
-    filtered_payload = {key: value for key, value in payload.items() if value is not None}
+    filtered_payload = {
+        key: value for key, value in payload.items() if value is not None
+    }
     return {
         "compatibility_scope": "legacy_fallback_only",
         "fingerprint": (
@@ -149,9 +151,7 @@ def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         "requested_exact_replay": requested_exact_replay,
         "requested_checkpoint_compatibility_policy": requested_policy,
         "applied_checkpoint_compatibility_policy": (
-            "hard_fail"
-            if requested_exact_replay
-            else requested_policy or "observe"
+            "hard_fail" if requested_exact_replay else requested_policy or "observe"
         ),
         "strict_replay_safe": requested_exact_replay,
         "execution_context": "composite" if is_composite else "ordinary",
@@ -345,9 +345,7 @@ def test_build_diagnostics_summary_without_ledger_returns_provenance_only() -> N
                     "rich_checkpoint_payloads",
                 ],
             },
-            "lineage_closure_boundary": _expected_lineage_closure_boundary(
-                manifest
-            ),
+            "lineage_closure_boundary": _expected_lineage_closure_boundary(manifest),
         },
         "alert_signals": {
             "run_failed": False,
@@ -383,7 +381,9 @@ def test_build_diagnostics_summary_distinguishes_resume_only_runs() -> None:
 
     assert summary["replay_capability"] == "resume_only"
     assert summary["requested_exact_replay"] is False
-    assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    assert (
+        summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    )
     assert summary["replay_family_contract"] == _expected_replay_family_contract(
         manifest
     )
@@ -428,7 +428,9 @@ def test_build_diagnostics_summary_surfaces_required_profile_gap() -> None:
     ]
 
 
-def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact_replay() -> None:
+def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact_replay() -> (
+    None
+):
     manifest = replace(
         _make_manifest(),
         launch_context={"limit": 25, "resume": False, "exact_replay": False},
@@ -453,7 +455,9 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
 
     assert summary["replay_capability"] == "exact_replay_supported"
     assert summary["requested_exact_replay"] is False
-    assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    assert (
+        summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    )
     assert summary["replay_family_contract"] == _expected_replay_family_contract(
         manifest
     )
@@ -463,7 +467,9 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
     assert summary["input_snapshot_ids"] == ["snapshot-1"]
 
 
-def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alone() -> None:
+def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alone() -> (
+    None
+):
     manifest = replace(
         _make_manifest(),
         launch_context={"limit": 25, "resume": False, "exact_replay": True},
@@ -474,7 +480,9 @@ def test_build_diagnostics_summary_does_not_report_exact_replay_from_intent_alon
     summary = build_diagnostics_summary(manifest, ())
 
     assert summary["requested_exact_replay"] is True
-    assert summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    assert (
+        summary["exact_replay_support_boundary"] == "snapshot_backed_source_runs_only"
+    )
     assert summary["replay_family_contract"] == _expected_replay_family_contract(
         manifest
     )
@@ -578,16 +586,16 @@ def test_build_diagnostics_summary_exposes_required_operator_fields(
             "replay_ready": False,
             "forensic_grade": False,
         },
-            "surfaces": {
-                "control_plane_manifest": True,
-                "effective_config_artifact": True,
-                "strict_replay_execution_context_support": True,
-                "immutable_input_snapshots": False,
-                "exact_replay_capability": False,
-                "run_ledger_history": True,
-                "artifact_lineage_links": True,
-                "lineage_closure_boundary_support": True,
-            },
+        "surfaces": {
+            "control_plane_manifest": True,
+            "effective_config_artifact": True,
+            "strict_replay_execution_context_support": True,
+            "immutable_input_snapshots": False,
+            "exact_replay_capability": False,
+            "run_ledger_history": True,
+            "artifact_lineage_links": True,
+            "lineage_closure_boundary_support": True,
+        },
         "required_profile_missing_requirements": [],
         "replay_ready_missing_requirements": [
             "exact_replay_capability",
@@ -698,9 +706,9 @@ def test_build_diagnostics_summary_surfaces_persisted_resume_diagnostics() -> No
     assert summary["identity_graph"]["resume_contract"] == _expected_resume_contract(
         manifest
     )
-    assert summary["identity_graph"]["resume_diagnostics"] == summary[
-        "resume_diagnostics"
-    ]
+    assert (
+        summary["identity_graph"]["resume_diagnostics"] == summary["resume_diagnostics"]
+    )
 
 
 def test_replay_surfaces_ignore_occurrence_only_manifest_drift() -> None:

@@ -8,7 +8,10 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.composition.observability import ObservabilityBundle, ObservabilityContractError
+from bioetl.composition.observability import (
+    ObservabilityBundle,
+    ObservabilityContractError,
+)
 from bioetl.domain.ports.noop import (
     NoOpMetrics,
     NoOpTracing,

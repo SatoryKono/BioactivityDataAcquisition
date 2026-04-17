@@ -298,7 +298,9 @@ class TestMergeServiceJoinKeyNormalization:
         # Non-normalized columns should be unchanged
         assert result["title"].to_list() == ["Title 1", "Title 2"]
 
-    def test_normalize_pmid_validates_family_before_join_canonicalization(self, merge_service):
+    def test_normalize_pmid_validates_family_before_join_canonicalization(
+        self, merge_service
+    ):
         """Test PMID column keeps digits-only IDs and nulls wrong-family identifiers."""
         import polars as pl
 

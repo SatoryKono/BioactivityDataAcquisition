@@ -24,14 +24,14 @@ _PROPERTY_TEST_SETTINGS = settings(suppress_health_check=[HealthCheck.too_slow])
 def _build_resolver() -> JoinKeyResolverService:
     from bioetl.application.composite.join_key_resolution import ResolverHelper
     from unittest.mock import MagicMock
-    
+
     # Create resolver helper with normalization policies (new API)
     mock_logger = MagicMock()
     resolver_helper = ResolverHelper(
         logger=mock_logger,
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
     )
-    
+
     return JoinKeyResolverService(
         resolver_helper=resolver_helper,
         parse_pipeline_name=parse_pipeline_name,

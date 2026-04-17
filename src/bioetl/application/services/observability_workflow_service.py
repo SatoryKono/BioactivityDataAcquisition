@@ -95,14 +95,17 @@ class ObservabilityWorkflowService:
                 "bioetl.component": "observability_workflow_service",
                 "bioetl.operation": "inspect_audit_run",
                 "bioetl.limit": limit,
-                "bioetl.has_run_manifest_service": self.run_manifest_service is not None,
+                "bioetl.has_run_manifest_service": self.run_manifest_service
+                is not None,
             },
             tracer_name=self.TRACER_NAME,
         ) as span:
             result = await self._inspect_audit_run_impl(run_id=run_id, limit=limit)
             span.set_attribute("bioetl.success", True)
             span.set_attribute("bioetl.audit_entries_count", len(result.audit.entries))
-            span.set_attribute("bioetl.has_run_manifest", result.run_manifest is not None)
+            span.set_attribute(
+                "bioetl.has_run_manifest", result.run_manifest is not None
+            )
             return result
 
     async def _inspect_audit_run_impl(
@@ -143,7 +146,8 @@ class ObservabilityWorkflowService:
                 "bioetl.pipeline": pipeline_name,
                 "bioetl.audit_limit": audit_limit,
                 "bioetl.has_explicit_run_id": run_id is not None,
-                "bioetl.has_run_manifest_service": self.run_manifest_service is not None,
+                "bioetl.has_run_manifest_service": self.run_manifest_service
+                is not None,
             },
             tracer_name=self.TRACER_NAME,
         ) as span:
@@ -155,7 +159,9 @@ class ObservabilityWorkflowService:
             span.set_attribute("bioetl.success", True)
             span.set_attribute("bioetl.audit_entries_count", len(result.audit.entries))
             span.set_attribute("bioetl.has_checkpoint", result.checkpoint is not None)
-            span.set_attribute("bioetl.has_run_manifest", result.run_manifest is not None)
+            span.set_attribute(
+                "bioetl.has_run_manifest", result.run_manifest is not None
+            )
             return result
 
     async def _inspect_checkpoint_workflow_impl(

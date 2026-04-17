@@ -451,10 +451,7 @@ class TestRunManifestCommands:
         assert "latest_status: success" in result.output
         assert "contract_version: 1.2.0" in result.output
         assert "dq_policy_ref: chembl_activity.gold" in result.output
-        assert (
-            "requested_exact_replay: true"
-            in result.output
-        )
+        assert "requested_exact_replay: true" in result.output
         assert (
             "exact_replay_support_boundary: snapshot_backed_source_runs_only"
             in result.output

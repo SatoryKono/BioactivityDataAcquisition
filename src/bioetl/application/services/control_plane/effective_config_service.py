@@ -284,7 +284,9 @@ def _semantic_artifact_payload(artifact: EffectiveConfigArtifact) -> JsonDict:
         },
         "runtime_overrides": _to_jsonable(artifact.runtime_overrides),
         "effective_execution_config": {
-            "config_data": _to_jsonable(artifact.effective_execution_config.config_data),
+            "config_data": _to_jsonable(
+                artifact.effective_execution_config.config_data
+            ),
             "effective_hash": artifact.effective_execution_config.effective_hash,
         },
         "resolved_config_hash": artifact.resolved_config_hash,

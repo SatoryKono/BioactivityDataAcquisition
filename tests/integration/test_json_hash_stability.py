@@ -19,24 +19,30 @@ class TestJsonHashStability:
         # Get the assay profile's JSON field rules
         json_fields = []
         for field_name, rule in CHEMBL_ASSAY_PROFILE.field_rules.items():
-            if 'JSON' in rule.notes:
+            if "JSON" in rule.notes:
                 json_fields.append(field_name)
-        
+
         assert len(json_fields) > 0, "Should have JSON fields"
         print(f"JSON fields in assay profile: {json_fields}")
-        
+
         # Test that each JSON field uses the canonical normalizer
         for field_name in json_fields:
             rule = CHEMBL_ASSAY_PROFILE.field_rules[field_name]
-            assert rule.normalizer.__name__ == 'normalize_profile_json_string'
+            assert rule.normalizer.__name__ == "normalize_profile_json_string"
 
     def test_hash_stability_with_different_key_orders(self) -> None:
         """Test that different JSON key orders produce same normalized result."""
         # All should normalize to the same result
-        norm1 = serialize_json_canonical({"year": 2023, "assay_type": "B", "confidence": 9})
-        norm2 = serialize_json_canonical({"confidence": 9, "assay_type": "B", "year": 2023})
-        norm3 = serialize_json_canonical({"assay_type": "B", "year": 2023, "confidence": 9})
-        
+        norm1 = serialize_json_canonical(
+            {"year": 2023, "assay_type": "B", "confidence": 9}
+        )
+        norm2 = serialize_json_canonical(
+            {"confidence": 9, "assay_type": "B", "year": 2023}
+        )
+        norm3 = serialize_json_canonical(
+            {"assay_type": "B", "year": 2023, "confidence": 9}
+        )
+
         assert norm1 == norm2 == norm3
         assert hash(norm1) == hash(norm2) == hash(norm3)
 
@@ -45,16 +51,16 @@ class TestJsonHashStability:
         # Example assay_classifications JSON
         classifications1 = '{"type": "B", "category": "screening"}'
         classifications2 = '{"category": "screening", "type": "B"}'
-        
+
         # Normalize through the profile
         rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_classifications"]
         result1 = rule.normalizer(classifications1)
         result2 = rule.normalizer(classifications2)
-        
+
         # Should produce identical results
         assert result1 == result2
         assert hash(result1) == hash(result2)
-        
+
         # Verify the result is properly formatted
         assert '"category"' in result1
         assert '"type"' in result1
@@ -63,22 +69,22 @@ class TestJsonHashStability:
         """Test that semantically different JSON produces different results."""
         json1 = '{"assay_type": "B"}'
         json2 = '{"assay_type": "F"}'
-        
+
         rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_classifications"]
         result1 = rule.normalizer(json1)
         result2 = rule.normalizer(json2)
-        
+
         # Should be different (semantic difference)
         assert result1 != result2
         assert hash(result1) != hash(result2)
 
     def test_invalid_json_preservation(self) -> None:
         """Test that invalid JSON is preserved as-is."""
-        invalid_json = 'not a valid json string'
-        
+        invalid_json = "not a valid json string"
+
         rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_classifications"]
         result = rule.normalizer(invalid_json)
-        
+
         # Invalid JSON should be preserved
         assert result == invalid_json
 
@@ -88,24 +94,30 @@ class TestCrossPipelineJsonConsistency:
 
     def test_json_normalization_unified(self) -> None:
         """Test that all pipelines use the same JSON normalization."""
-        from bioetl.domain.normalization.profiles.chembl_activity import CHEMBL_ACTIVITY_PROFILE
-        from bioetl.domain.normalization.profiles.chembl_cell_line import CHEMBL_CELL_LINE_PROFILE
-        from bioetl.domain.normalization.profiles.chembl_tissue import CHEMBL_TISSUE_PROFILE
-        
+        from bioetl.domain.normalization.profiles.chembl_activity import (
+            CHEMBL_ACTIVITY_PROFILE,
+        )
+        from bioetl.domain.normalization.profiles.chembl_cell_line import (
+            CHEMBL_CELL_LINE_PROFILE,
+        )
+        from bioetl.domain.normalization.profiles.chembl_tissue import (
+            CHEMBL_TISSUE_PROFILE,
+        )
+
         # Check that all profiles use the same JSON normalizer
         profiles = [
             CHEMBL_ACTIVITY_PROFILE,
             CHEMBL_ASSAY_PROFILE,
             CHEMBL_CELL_LINE_PROFILE,
-            CHEMBL_TISSUE_PROFILE
+            CHEMBL_TISSUE_PROFILE,
         ]
-        
+
         for profile in profiles:
             for field_name, rule in profile.field_rules.items():
-                if 'JSON' in rule.notes:
+                if "JSON" in rule.notes:
                     # All JSON fields should use the same normalizer
-                    assert rule.normalizer.__name__ == 'normalize_profile_json_string'
-                    
+                    assert rule.normalizer.__name__ == "normalize_profile_json_string"
+
                     # Test with sample data
                     test_json = '{"key": "value"}'
                     result = rule.normalizer(test_json)
@@ -118,27 +130,22 @@ class TestCrossPipelineJsonConsistency:
             "text": "Hello World",
             "special": "line1\nline2",
             "quote": 'He said "hello"',
-            "numeric": 42
+            "numeric": 42,
         }
-        
+
         result = serialize_json_canonical(data)
-        
+
         # Should be valid JSON with proper escaping
         parsed = deserialize_json_value(result)
         assert parsed == data
 
     def test_numeric_precision(self) -> None:
         """Test that numeric precision is preserved in JSON."""
-        data = {
-            "float": 3.141592653589793,
-            "large": 1e20,
-            "small": 1e-20,
-            "zero": 0.0
-        }
-        
+        data = {"float": 3.141592653589793, "large": 1e20, "small": 1e-20, "zero": 0.0}
+
         result = serialize_json_canonical(data)
         parsed = deserialize_json_value(result)
-        
+
         # Numeric values should be preserved
         assert parsed["float"] == data["float"]
         assert parsed["large"] == data["large"]

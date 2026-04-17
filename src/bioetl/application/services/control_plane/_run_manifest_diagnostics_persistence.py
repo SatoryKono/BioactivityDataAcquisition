@@ -18,7 +18,10 @@ def missing_replay_ready_requirements(
 ) -> list[str]:
     """Return replay-ready persistence requirements missing for this run."""
     requirements = (
-        ("strict_replay_execution_context_support", strict_replay_execution_context_supported),
+        (
+            "strict_replay_execution_context_support",
+            strict_replay_execution_context_supported,
+        ),
         ("exact_replay_capability", exact_replay_supported),
         ("immutable_input_snapshots", immutable_input_snapshots_present),
         ("effective_config_artifact", effective_config_artifact_present),
@@ -60,7 +63,9 @@ def build_lineage_closure_boundary(
     contract_ref: object,
 ) -> dict[str, object]:
     """Return the published lineage-closure boundary for one manifested run."""
-    execution_context = "composite" if str(provider or "").strip() == "composite" else "source"
+    execution_context = (
+        "composite" if str(provider or "").strip() == "composite" else "source"
+    )
     return _build_lineage_closure_boundary(
         provider=provider,
         entity=entity,
@@ -199,8 +204,7 @@ def build_alert_signals(
         "immutable_input_snapshots" in replay_ready_missing_requirements
     )
     strict_replay_boundary_gap = (
-        "strict_replay_execution_context_support"
-        in replay_ready_missing_requirements
+        "strict_replay_execution_context_support" in replay_ready_missing_requirements
     )
     lineage_closure_boundary_gap = (
         "lineage_closure_boundary_support" in forensic_grade_missing_requirements
@@ -306,7 +310,10 @@ def build_next_steps(alert_signals: dict[str, bool]) -> list[str]:
                 "anchors before retry or quarantine changes."
             ),
         ),
-        ("run_shutdown", "Confirm graceful shutdown reason and resume policy compatibility."),
+        (
+            "run_shutdown",
+            "Confirm graceful shutdown reason and resume policy compatibility.",
+        ),
     )
     steps = [
         message

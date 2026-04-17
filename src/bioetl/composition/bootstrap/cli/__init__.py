@@ -76,6 +76,7 @@ def __getattr__(name: str) -> object:
     module = __import__(module_name, fromlist=[name])
     return getattr(module, name)
 
+
 __all__ = [
     "HealthServerDependencies",
     "bootstrap_adr_service",

@@ -418,9 +418,11 @@ class TestPostrunServiceSpan:
         await service.run(executor=self._make_executor())
 
         mock_tracer.get_tracer.assert_called_with("bioetl.postrun")
-        span_name = mock_tracer.get_tracer.return_value.start_as_current_span.call_args_list[
-            0
-        ].args[0]
+        span_name = (
+            mock_tracer.get_tracer.return_value.start_as_current_span.call_args_list[
+                0
+            ].args[0]
+        )
         assert span_name == "postrun.run"
 
     @pytest.mark.asyncio

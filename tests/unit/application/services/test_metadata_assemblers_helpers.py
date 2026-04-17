@@ -320,7 +320,9 @@ def test_build_runtime_duration_computes_seconds_or_zero() -> None:
 
 
 @pytest.mark.unit
-def test_build_dataset_content_hash_is_order_insensitive_and_excludes_row_hash() -> None:
+def test_build_dataset_content_hash_is_order_insensitive_and_excludes_row_hash() -> (
+    None
+):
     records_a = [
         {"id": 1, "value": "A", "content_hash": "row-hash-a"},
         {"id": 2, "value": "B", "content_hash": "row-hash-b"},

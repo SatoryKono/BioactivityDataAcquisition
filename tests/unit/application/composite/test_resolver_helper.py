@@ -34,16 +34,17 @@ class TestResolverHelper:
     def test_normalize_join_keys(self) -> None:
         """Test join key normalization."""
         # Create test DataFrame with mixed case keys
-        df = pl.DataFrame({
-            "CHEMBL_ID": ["CHEMBL1", "CHEMBL2"],
-            "pubchem_cid": [123, 456],
-            "other_col": ["a", "b"]
-        })
+        df = pl.DataFrame(
+            {
+                "CHEMBL_ID": ["CHEMBL1", "CHEMBL2"],
+                "pubchem_cid": [123, 456],
+                "other_col": ["a", "b"],
+            }
+        )
 
         # Normalize the keys
         result = self.helper.normalize_join_keys(
-            df=df,
-            join_keys=["CHEMBL_ID", "pubchem_cid"]
+            df=df, join_keys=["CHEMBL_ID", "pubchem_cid"]
         )
 
         # Verify normalization occurred - should keep original column names
@@ -69,6 +70,7 @@ class TestResolverHelper:
 
     def test_create_resolver_service(self) -> None:
         """Test creating a resolver service."""
+
         # Create a simple mock service class
         class MockService:
             def __init__(self, logger, normalization_policies, extra_param=None):
@@ -77,10 +79,7 @@ class TestResolverHelper:
                 self.extra_param = extra_param
 
         # Create service using helper
-        service = self.helper.create_resolver_service(
-            MockService,
-            extra_param="test"
-        )
+        service = self.helper.create_resolver_service(MockService, extra_param="test")
 
         # Verify service was created correctly
         assert isinstance(service, MockService)
@@ -97,15 +96,15 @@ class TestResolverHelperIntegration:
         from bioetl.application.composite.dependency_key_resolvers import (
             SeedKeyResolver,
         )
-        
+
         mock_logger = MagicMock()
         helper = create_resolver_helper(mock_logger)
-        
+
         # Create resolver using helper
         resolver = SeedKeyResolver(resolver_helper=helper)
-        
+
         # Verify it has the helper
-        assert hasattr(resolver, '_resolver_helper')
+        assert hasattr(resolver, "_resolver_helper")
         assert resolver._resolver_helper == helper
 
     def test_chained_key_resolver_integration(self) -> None:
@@ -113,15 +112,15 @@ class TestResolverHelperIntegration:
         from bioetl.application.composite.dependency_key_resolvers import (
             ChainedKeyResolver,
         )
-        
+
         mock_logger = MagicMock()
         helper = create_resolver_helper(mock_logger)
-        
+
         # Create resolver using helper
         resolver = ChainedKeyResolver(resolver_helper=helper)
-        
+
         # Verify it has the helper
-        assert hasattr(resolver, '_resolver_helper')
+        assert hasattr(resolver, "_resolver_helper")
         assert resolver._resolver_helper == helper
 
 
@@ -134,19 +133,19 @@ class TestDuplicationReduction:
             SeedKeyResolver,
             ChainedKeyResolver,
         )
-        
+
         # Both resolvers should use the same helper interface
         mock_logger = MagicMock()
         helper = create_resolver_helper(mock_logger)
-        
+
         seed_resolver = SeedKeyResolver(resolver_helper=helper)
         chained_resolver = ChainedKeyResolver(resolver_helper=helper)
-        
+
         # Both should use the same helper instance
         assert seed_resolver._resolver_helper is chained_resolver._resolver_helper
-        
+
         # Both should have access to the same methods
-        assert hasattr(seed_resolver._resolver_helper, 'normalize_join_keys')
-        assert hasattr(seed_resolver._resolver_helper, 'log_info')
-        assert hasattr(chained_resolver._resolver_helper, 'normalize_join_keys')
-        assert hasattr(chained_resolver._resolver_helper, 'log_info')
+        assert hasattr(seed_resolver._resolver_helper, "normalize_join_keys")
+        assert hasattr(seed_resolver._resolver_helper, "log_info")
+        assert hasattr(chained_resolver._resolver_helper, "normalize_join_keys")
+        assert hasattr(chained_resolver._resolver_helper, "log_info")

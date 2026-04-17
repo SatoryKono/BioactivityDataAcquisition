@@ -156,6 +156,7 @@ def build_create_pipeline_with_services_request(
         cached_bronze,
     )
 
+
 def create_transformer_instance(
     *,
     transformer_class: type[BaseTransformer] | None,

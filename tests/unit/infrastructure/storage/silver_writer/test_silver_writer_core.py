@@ -420,13 +420,15 @@ class TestSilverWriterValidation:
             }
         ]
         # Create proper Arrow table with explicit schema to avoid Delta Lake errors
-        schema = pa.schema([
-            pa.field("entity_id", pa.string()),
-            pa.field("_run_id", pa.string()),
-            pa.field("_run_type", pa.string()),
-            pa.field("_source_batch_id", pa.string()),
-            pa.field("_ingestion_ts", pa.string()),
-        ])
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
         payload = _PreparedSilverWritePayload(
             records=payload_records,
             validated_mode=SilverWriteMode.MERGE,

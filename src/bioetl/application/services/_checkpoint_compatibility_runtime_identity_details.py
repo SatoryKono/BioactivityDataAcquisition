@@ -142,7 +142,9 @@ def build_identity_details(request: IdentityDetailsRequest) -> JsonDict:
         "effective_config_hash": request.effective_config_hash,
         "execution_phase": request.execution_phase.value,
         "checkpoint_schema_version": request.checkpoint_schema_version,
-        "composite_run_identity": _identity_detail_value(request.composite_run_identity),
+        "composite_run_identity": _identity_detail_value(
+            request.composite_run_identity
+        ),
         "execution_fingerprint": _identity_detail_value(request.execution_fingerprint),
         "pipeline_name": _identity_detail_value(request.pipeline_name),
         "run_type": _identity_detail_value(request.run_type),
@@ -160,9 +162,7 @@ def build_identity_details(request: IdentityDetailsRequest) -> JsonDict:
         "input_snapshot_fingerprint": request.input_snapshot_fingerprint or "",
         "canonical_execution_identity_payload": canonical_fallback_payload,
         "checkpoint_execution_identity_fallback_fingerprint": (
-            _checkpoint_execution_identity_fallback_detail(
-                canonical_fallback_payload
-            )
+            _checkpoint_execution_identity_fallback_detail(canonical_fallback_payload)
         ),
         "degraded_runtime_anchor_fingerprint": _degraded_runtime_anchor_detail(
             manifest_id=request.manifest_id,

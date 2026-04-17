@@ -164,9 +164,7 @@ def test_normalize_observability_pipeline_label_extracts_table_name_from_path() 
 
 def test_normalize_observability_pipeline_label_rejects_uuid_like_values() -> None:
     assert (
-        normalize_observability_pipeline_label(
-            "123e4567-e89b-12d3-a456-426614174000"
-        )
+        normalize_observability_pipeline_label("123e4567-e89b-12d3-a456-426614174000")
         == "unknown"
     )
 

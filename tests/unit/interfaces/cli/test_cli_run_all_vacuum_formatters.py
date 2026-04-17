@@ -43,6 +43,7 @@ from bioetl.interfaces.cli.formatters import (
     format_bytes,
 )
 
+
 @pytest.fixture
 def cli_runner() -> CliRunner:
     """Create Click's CliRunner for testing CLI commands."""

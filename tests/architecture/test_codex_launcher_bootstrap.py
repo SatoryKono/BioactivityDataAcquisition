@@ -17,9 +17,7 @@ def test_wsl_launchers_use_local_bootstrap_helper() -> None:
     ).read_text(encoding="utf-8")
     codex_exec_sh = (
         root / "scripts" / "ops" / "launchers" / "codex" / "codex-exec.sh"
-    ).read_text(
-        encoding="utf-8"
-    )
+    ).read_text(encoding="utf-8")
 
     assert "ensure-codex-cli.sh" in codex_sh
     assert 'exec "${CODEX_BIN}" -C "${REPO_ROOT}"' in codex_sh
@@ -37,21 +35,19 @@ def test_windows_launchers_delegate_to_wsl_scripts_without_posix_redirects() -> 
     root = _project_root()
     codex_bat = (
         root / "scripts" / "ops" / "launchers" / "codex" / "codex.bat"
-    ).read_text(
-        encoding="utf-8"
-    )
+    ).read_text(encoding="utf-8")
     codex_exec_bat = (
         root / "scripts" / "ops" / "launchers" / "codex" / "codex-exec.bat"
-    ).read_text(
-        encoding="utf-8"
-    )
+    ).read_text(encoding="utf-8")
 
     assert "/dev/null" not in codex_bat
     assert 'bash "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh"' in codex_bat
     assert "wslpath -a" in codex_bat
 
     assert "/dev/null" not in codex_exec_bat
-    assert 'bash "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh"' in codex_exec_bat
+    assert (
+        'bash "%REPO_WSL%/scripts/ops/launchers/codex/codex-exec.sh"' in codex_exec_bat
+    )
     assert "wslpath -a" in codex_exec_bat
 
 

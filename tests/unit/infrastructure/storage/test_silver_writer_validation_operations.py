@@ -92,7 +92,9 @@ class TestDeduplicateByPrimaryKeysImpl:
         result = _deduplicate_by_primary_keys_impl([], ["id"])
         assert result == []
 
-    def test_content_identity_fallback_uses_canonical_hash_identity_contract(self) -> None:
+    def test_content_identity_fallback_uses_canonical_hash_identity_contract(
+        self,
+    ) -> None:
         """Batch dedup fallback must reuse the canonical hash-identity seam."""
         record = {
             "id": 1,

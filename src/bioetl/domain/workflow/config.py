@@ -56,7 +56,9 @@ class WorkflowRunOptionsConfig:
     exact_replay: bool | None = None
     enable_tracing: bool | None = None
 
-    def merged_with(self, override: WorkflowRunOptionsConfig) -> WorkflowRunOptionsConfig:
+    def merged_with(
+        self, override: WorkflowRunOptionsConfig
+    ) -> WorkflowRunOptionsConfig:
         """Return a merged config where non-null override values win."""
         merged_values = _merge_workflow_run_option_values(self, override)
         return WorkflowRunOptionsConfig(**merged_values)
@@ -105,9 +107,7 @@ class WorkflowConfig:
     version: str = "1.0.0"
 
     def __post_init__(self) -> None:
-        topologically_sorted_step_ids(
-            cast("Sequence[_WorkflowStepLike]", self.steps)
-        )
+        topologically_sorted_step_ids(cast("Sequence[_WorkflowStepLike]", self.steps))
 
     @property
     def step_ids(self) -> tuple[str, ...]:

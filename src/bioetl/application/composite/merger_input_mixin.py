@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class _PreparedSeedDataframe:
     """Seed DataFrame with provenance metadata."""
-    
+
     seed_df: pl.DataFrame
     records_from_seed: int
     effective_seed_pipeline: str | None
@@ -33,7 +33,7 @@ class _PreparedSeedDataframe:
 
 class _MergeInputLoaderMixin:
     """Mixin providing input loading methods for MergeService."""
-    
+
     # Host-class attributes (set by MergeService.__init__)
     _logger: LoggerPort
     _storage: MergedStoragePort
@@ -51,7 +51,11 @@ class _MergeInputLoaderMixin:
         try:
             return await self._read_silver_table(table)
         except (StorageError, ValueError, OSError, BioETLError) as exc:
-            reason_code = "unexpected_bioetl_error" if isinstance(exc, BioETLError) else "unexpected_error"
+            reason_code = (
+                "unexpected_bioetl_error"
+                if isinstance(exc, BioETLError)
+                else "unexpected_error"
+            )
             self._logger.warning(
                 f"Skipping {role} input due to read error",
                 pipeline=pipeline,
@@ -71,15 +75,15 @@ class _MergeInputLoaderMixin:
     ) -> _PreparedSeedDataframe:
         """Read and prepare seed DataFrame with pipeline qualification."""
         seed_df = await self._read_silver_table(seed_table)
-        
+
         # Apply column renaming if seed_pipeline is provided
         effective_seed_pipeline = seed_pipeline
-        if seed_pipeline and hasattr(self._renamer, 'rename_dataframe'):
+        if seed_pipeline and hasattr(self._renamer, "rename_dataframe"):
             seed_df = self._renamer.rename_dataframe(seed_df, pipeline=seed_pipeline)
         else:
             # Try to infer pipeline from table name if not provided
             effective_seed_pipeline = None
-        
+
         return _PreparedSeedDataframe(
             seed_df=seed_df,
             records_from_seed=len(seed_df),
@@ -94,7 +98,7 @@ class _MergeInputLoaderMixin:
         """Load DataFrames for successful enrichers only."""
         enricher_dfs: dict[str, pl.DataFrame] = {}
         sources_used: list[str] = []
-        
+
         for enricher in enrichers:
             result = enrichment_results.get(enricher.pipeline)
             if result and result.status == EnrichmentStatus.SUCCESS:
@@ -106,7 +110,7 @@ class _MergeInputLoaderMixin:
                 if df is not None:
                     enricher_dfs[enricher.pipeline] = df
                     sources_used.append(enricher.pipeline)
-        
+
         return enricher_dfs, sources_used
 
     async def _load_dependency_dataframes(
@@ -117,10 +121,10 @@ class _MergeInputLoaderMixin:
         """Load DataFrames for successful dependencies."""
         if not dependencies or not dependency_results:
             return {}, []
-        
+
         dependency_dfs: dict[str, pl.DataFrame] = {}
         sources_used: list[str] = []
-        
+
         for dep in dependencies:
             result = dependency_results.get(dep.pipeline)
             if result and result.status == DependencyStatus.SUCCESS:
@@ -132,7 +136,7 @@ class _MergeInputLoaderMixin:
                 if df is not None:
                     dependency_dfs[dep.pipeline] = df
                     sources_used.append(dep.pipeline)
-        
+
         return dependency_dfs, sources_used
 
     async def _read_silver_table(self, table: str) -> pl.DataFrame:
@@ -141,16 +145,18 @@ class _MergeInputLoaderMixin:
             # Read using Delta Lake
             arrow_table = await self._delta_reader.read_table(table)
             return pl.from_arrow(arrow_table)
-        
+
         # Check if storage fallback is disabled (for test compatibility)
         # If _silver_reader is explicitly set to None, disable storage fallback
-        if hasattr(self, '_silver_reader') and self._silver_reader is None:
+        if hasattr(self, "_silver_reader") and self._silver_reader is None:
             raise RuntimeError(
                 f"Reading Silver table {table} requires delta_reader or silver_reader"
             )
-        
+
         # Fall back to storage adapter - strip "silver/" prefix for storage port
-        storage_table = table.removeprefix("silver/") if table.startswith("silver/") else table
+        storage_table = (
+            table.removeprefix("silver/") if table.startswith("silver/") else table
+        )
         records = await self._storage.read_silver(storage_table)
         if not records:
             return pl.DataFrame()

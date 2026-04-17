@@ -421,7 +421,7 @@ def test_summary_queries_use_zero_fallbacks() -> None:
             "Manifest Write Failures": "or vector(0)",
             "Ledger Append Failures": "or vector(0)",
             "Checkpoint Compatibility Incompatibilities": "or vector(0)",
-            "Control-Plane Read Failures": "or vector(0)"
+            "Control-Plane Read Failures": "or vector(0)",
         },
     }
 
@@ -1350,9 +1350,9 @@ def test_loki_drilldown_uses_grafana_logs_drilldown_entrypoint() -> None:
         assert loki_links, (
             f"{dashboard_name} must expose at least one Logs Drilldown link"
         )
-        assert all("/explore?left=" not in link.get("url", "") for link in loki_links), (
-            f"{dashboard_name} must not keep legacy Loki Explore payload links"
-        )
+        assert all(
+            "/explore?left=" not in link.get("url", "") for link in loki_links
+        ), f"{dashboard_name} must not keep legacy Loki Explore payload links"
 
 
 def test_overview_and_runtime_dashboards_expose_data_quality_handoff() -> None:
@@ -1393,7 +1393,11 @@ def test_data_quality_dashboard_exposes_silver_reject_explorer_handoff() -> None
         "Data Quality handoff must target /d/bioetl-silver-reject-explorer"
     )
     silver_link = next(
-        (link for link in links if link.get("url") == "/d/bioetl-silver-reject-explorer"),
+        (
+            link
+            for link in links
+            if link.get("url") == "/d/bioetl-silver-reject-explorer"
+        ),
         None,
     )
     assert silver_link is not None, "Silver Reject Explorer link must exist"
@@ -1462,7 +1466,9 @@ def test_silver_reject_explorer_summary_panels_use_distinct_projections() -> Non
         "Filtered Records Total must use organize transform to isolate total"
     )
     total_options = total_organize.get("options", {})
-    assert total_options.get("renameByName", {}).get("total") == "filtered_records_total"
+    assert (
+        total_options.get("renameByName", {}).get("total") == "filtered_records_total"
+    )
     assert total_options.get("excludeByName", {}).get("reject_ratio") is True
 
     ratio_panel = panel_map["Reject Rate vs Bronze"]
@@ -1498,7 +1504,9 @@ def test_silver_reject_explorer_summary_panels_use_distinct_projections() -> Non
     )
 
 
-def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter() -> None:
+def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter() -> (
+    None
+):
     """Selected Record Details should not depend on path-bound payload hash."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
@@ -1511,7 +1519,9 @@ def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter
         ),
         None,
     )
-    assert panel is not None, "Silver Reject Explorer must include Selected Record Details"
+    assert panel is not None, (
+        "Silver Reject Explorer must include Selected Record Details"
+    )
 
     targets = panel.get("targets", [])
     assert targets, "Selected Record Details must define at least one query target"
@@ -1531,8 +1541,6 @@ def test_silver_reject_explorer_selected_record_details_uses_safe_payload_filter
     assert target.get("root_selector") == "items", (
         "Selected Record Details must parse list payload via items root selector"
     )
-
-
 
 
 def test_control_plane_dashboard_exposes_working_runbook_link() -> None:

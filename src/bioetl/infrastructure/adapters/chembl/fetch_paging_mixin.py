@@ -94,10 +94,7 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
             handle_error(error)
 
     def _calculate_page_limit(
-        self,
-        params: JsonDict,
-        limit: int | None,
-        records_yielded: int
+        self, params: JsonDict, limit: int | None, records_yielded: int
     ) -> int | None:
         """Calculate the limit for the current page request.
 
@@ -140,7 +137,7 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
 
         while True:
             params = self._build_params(offset, entity_type)
-            
+
             # Apply limit constraint for this page
             page_limit = self._calculate_page_limit(params, limit, records_yielded)
             if page_limit is None:
@@ -154,11 +151,11 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
 
             yield records
             records_yielded += len(records)
-            
+
             # Check if we should continue to next page
             if not has_next or (limit is not None and records_yielded >= limit):
                 break
-                
+
             offset += len(records)
 
 

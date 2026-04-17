@@ -325,7 +325,7 @@ def test_tuned_alerts_use_expected_severities_and_threshold_windows() -> None:
             "increase",
             "clamp_min",
             "[30m]",
-            "status=\"failed\"",
+            'status="failed"',
             "store",
             "operation",
         ],

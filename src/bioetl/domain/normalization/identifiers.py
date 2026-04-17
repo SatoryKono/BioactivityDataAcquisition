@@ -109,12 +109,14 @@ def _normalize_colon_format(value: str) -> str | None:
             return f"{ONTOLOGY_PREFIXES[prefix]}{id_part}"
     return None
 
+
 def _normalize_underscore_format(value: str) -> str | None:
     """Handle underscore format ontology IDs (already correct format)."""
     for prefix in ONTOLOGY_PREFIXES.values():
         if value.startswith(prefix):
             return value
     return None
+
 
 def _normalize_space_format(value: str) -> str | None:
     """Handle space format ontology IDs (UBERON 7 -> UBERON_0000007)."""
@@ -125,6 +127,7 @@ def _normalize_space_format(value: str) -> str | None:
         return f"{prefix}{id_part}"
     return None
 
+
 def _validate_input(value: str) -> str | None:
     """Validate and preprocess input value."""
     if value is None:
@@ -132,6 +135,7 @@ def _validate_input(value: str) -> str | None:
     if not isinstance(value, str):
         return None
     from bioetl.domain.normalization.text import normalize_string
+
     normalized = normalize_string(value)
     # Preserve original behavior: return empty string for empty input, None for None
     if normalized is not None:
@@ -140,6 +144,7 @@ def _validate_input(value: str) -> str | None:
         return ""
     return None
 
+
 def _apply_normalization_strategies(normalized: str) -> str:
     """Apply normalization strategies in priority order."""
     strategies = [
@@ -147,27 +152,28 @@ def _apply_normalization_strategies(normalized: str) -> str:
         _normalize_underscore_format,
         _normalize_space_format,
     ]
-    
+
     for strategy in strategies:
         result = strategy(normalized)
         if result is not None:
             return result
-    
+
     return normalized  # Return as-is (preserves empty string behavior)
+
 
 def normalize_ontology_id(value: str) -> str | None:
     """Canonicalize ontology IDs with consistent prefix format.
-    
+
     This function normalizes various ontology ID formats to a consistent
     underscore-separated format. It handles colon format, underscore format,
     and space format inputs.
-    
+
     Args:
         value: The ontology ID to normalize
-        
+
     Returns:
         Normalized ontology ID or None if invalid
-        
+
     Examples:
         >>> normalize_ontology_id("CLO:0000034")
         "CLO_0000034"
@@ -181,22 +187,22 @@ def normalize_ontology_id(value: str) -> str | None:
     normalized = _validate_input(value)
     if normalized is None:
         return None
-    
+
     return _apply_normalization_strategies(normalized)
 
 
 def normalize_ontology_id_strict(value: str) -> str | None:
     """Strict ontology ID normalization that only accepts known prefixes.
-    
+
     Unlike normalize_ontology_id, this function returns None for unknown
     ontology prefixes, ensuring only valid ontology IDs pass through.
-    
+
     Args:
         value: The ontology ID to normalize
-        
+
     Returns:
         Normalized ontology ID or None if invalid or unknown prefix
-        
+
     Examples:
         >>> normalize_ontology_id_strict("CLO:0000034")
         "CLO_0000034"
@@ -206,12 +212,12 @@ def normalize_ontology_id_strict(value: str) -> str | None:
     result = normalize_ontology_id(value)
     if result is None:
         return None
-    
+
     # Check if result starts with known prefix
     for prefix in ONTOLOGY_PREFIXES.values():
         if result.startswith(prefix):
             return result
-    
+
     # Unknown prefix
     return None
 
@@ -223,6 +229,7 @@ def _get_prefix_from_canonical(id_value: str) -> str | None:
             return prefix
     return None
 
+
 def _get_prefix_from_colon(id_value: str) -> str | None:
     """Extract prefix from colon format."""
     if ":" in id_value:
@@ -231,15 +238,16 @@ def _get_prefix_from_colon(id_value: str) -> str | None:
             return prefix
     return None
 
+
 def get_ontology_prefix(id_value: str) -> str | None:
     """Extract ontology prefix from an ID string.
-    
+
     Args:
         id_value: The ontology ID
-        
+
     Returns:
         Ontology prefix if recognized, None otherwise
-        
+
     Examples:
         >>> get_ontology_prefix("CLO_0000034")
         "CLO"
@@ -248,22 +256,19 @@ def get_ontology_prefix(id_value: str) -> str | None:
     """
     if id_value is None:
         return None
-    
-    return (
-        _get_prefix_from_canonical(id_value) or
-        _get_prefix_from_colon(id_value)
-    )
+
+    return _get_prefix_from_canonical(id_value) or _get_prefix_from_colon(id_value)
 
 
 def is_valid_ontology_id(id_value: str) -> bool:
     """Check if a string is a valid ontology ID.
-    
+
     Args:
         id_value: The string to check
-        
+
     Returns:
         True if valid ontology ID, False otherwise
-        
+
     Examples:
         >>> is_valid_ontology_id("CLO_0000034")
         True
@@ -272,5 +277,5 @@ def is_valid_ontology_id(id_value: str) -> bool:
     """
     if id_value is None or not isinstance(id_value, str):
         return False
-    
+
     return get_ontology_prefix(id_value) is not None

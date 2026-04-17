@@ -39,7 +39,9 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.wiring.runtime import BasePipeline
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterPort,
+    )
     from bioetl.domain.config import DQConfig, MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (

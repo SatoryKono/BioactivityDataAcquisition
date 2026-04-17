@@ -327,7 +327,9 @@ class TestProcessBatchHappyPath:
             query_string=None,
         )
 
-        emitted_events = [call.args[0] for call in event_emitter.emit_domain_event.call_args_list]
+        emitted_events = [
+            call.args[0] for call in event_emitter.emit_domain_event.call_args_list
+        ]
         assert any(isinstance(event, BatchCreated) for event in emitted_events)
         assert any(isinstance(event, BatchSealed) for event in emitted_events)
 

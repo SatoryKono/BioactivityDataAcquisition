@@ -239,7 +239,9 @@ class TestEffectiveConfigService:
         }
         assert "occurrence_envelope" in parsed
 
-    def test_source_class_provenance_marks_external_and_unsupported_classes(self) -> None:
+    def test_source_class_provenance_marks_external_and_unsupported_classes(
+        self,
+    ) -> None:
         """Source-class provenance should distinguish anchored, external, and unsupported inputs."""
         artifact = self.service.create_effective_config_artifact(
             pipeline_name="test_pipeline",
@@ -266,7 +268,9 @@ class TestEffectiveConfigService:
         assert ambient_environment.artifact_surface == "not_persisted"
         assert ambient_environment.anchor_field is None
 
-    def test_semantic_serialization_is_stable_across_occurrence_timestamps(self) -> None:
+    def test_semantic_serialization_is_stable_across_occurrence_timestamps(
+        self,
+    ) -> None:
         """Semantic serialization should ignore occurrence envelope timestamps."""
         kwargs = {
             "pipeline_name": "test_pipeline",
@@ -280,10 +284,9 @@ class TestEffectiveConfigService:
         artifact2 = self.service.create_effective_config_artifact(**kwargs)
 
         assert artifact1.created_at != artifact2.created_at
-        assert (
-            self.service.serialize_semantic_artifact(artifact1)
-            == self.service.serialize_semantic_artifact(artifact2)
-        )
+        assert self.service.serialize_semantic_artifact(
+            artifact1
+        ) == self.service.serialize_semantic_artifact(artifact2)
 
     def test_hash_computation_integration(self) -> None:
         """Test hash computation integration."""

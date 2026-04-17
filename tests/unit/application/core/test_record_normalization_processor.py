@@ -221,11 +221,16 @@ def test_profile_auto_resolves_for_chembl_activity() -> None:
     assert processor.profile is not None
     assert normalized["activity_id"] == "CHEMBL25"
     assert normalized["publication_doi"] == "10.1000/abc"
-    assert normalized["activity_properties"] == '[{"kind":"b","rank":2},{"kind":"a","rank":1}]'
+    assert (
+        normalized["activity_properties"]
+        == '[{"kind":"b","rank":2},{"kind":"a","rank":1}]'
+    )
 
 
 @pytest.mark.unit
-def test_profile_backed_processor_rejects_unprofiled_business_field_by_default() -> None:
+def test_profile_backed_processor_rejects_unprofiled_business_field_by_default() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="chembl",
         entity_type="activity",
@@ -397,7 +402,9 @@ def test_profile_auto_resolves_for_chembl_publication_similarity() -> None:
 
 
 @pytest.mark.unit
-def test_openalex_publication_profile_makes_content_hash_invariant_for_set_like_lists() -> None:
+def test_openalex_publication_profile_makes_content_hash_invariant_for_set_like_lists() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="openalex",
         entity_type="publication",
@@ -448,7 +455,9 @@ def test_openalex_publication_profile_makes_content_hash_invariant_for_set_like_
 
 
 @pytest.mark.unit
-def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_order() -> None:
+def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_order() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="uniprot",
         entity_type="protein",
@@ -495,7 +504,9 @@ def test_uniprot_protein_profile_makes_content_hash_invariant_for_gene_name_orde
 
 
 @pytest.mark.unit
-def test_chembl_activity_profile_makes_content_hash_invariant_for_set_like_json_arrays() -> None:
+def test_chembl_activity_profile_makes_content_hash_invariant_for_set_like_json_arrays() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="chembl",
         entity_type="activity",
@@ -538,9 +549,7 @@ def test_chembl_activity_content_hash_matches_golden_value() -> None:
             "publication_doi": " HTTPS://doi.org/10.1000/ABC ",
             "publication_pmid": " 12345 ",
             "standard_value": "1.2300000000",
-            "activity_properties": (
-                ' [{"kind":"b","rank":2},{"rank":1,"kind":"a"}] '
-            ),
+            "activity_properties": (' [{"kind":"b","rank":2},{"rank":1,"kind":"a"}] '),
             "_run_id": "run-1",
         }
     )
@@ -552,7 +561,9 @@ def test_chembl_activity_content_hash_matches_golden_value() -> None:
 
 
 @pytest.mark.unit
-def test_chembl_activity_content_hash_ignores_meta_fields_and_equivalent_scalars() -> None:
+def test_chembl_activity_content_hash_ignores_meta_fields_and_equivalent_scalars() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="chembl",
         entity_type="activity",
@@ -591,7 +602,9 @@ def test_chembl_activity_content_hash_ignores_meta_fields_and_equivalent_scalars
 
 
 @pytest.mark.unit
-def test_chembl_activity_content_hash_is_stable_for_equivalent_identifier_and_json_forms() -> None:
+def test_chembl_activity_content_hash_is_stable_for_equivalent_identifier_and_json_forms() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="chembl",
         entity_type="activity",
@@ -625,7 +638,9 @@ def test_chembl_activity_content_hash_is_stable_for_equivalent_identifier_and_js
 
 
 @pytest.mark.unit
-def test_chembl_activity_content_hash_treats_blank_identifier_fields_like_none() -> None:
+def test_chembl_activity_content_hash_treats_blank_identifier_fields_like_none() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="chembl",
         entity_type="activity",
@@ -682,7 +697,9 @@ def test_normalize_record_softly_drops_invalid_smiles_from_payload_and_hash() ->
 
 
 @pytest.mark.unit
-def test_chembl_activity_profile_normalizes_canonical_smiles_via_smiles_value_object() -> None:
+def test_chembl_activity_profile_normalizes_canonical_smiles_via_smiles_value_object() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="chembl",
         entity_type="activity",
@@ -743,8 +760,12 @@ def test_chembl_activity_content_hash_is_permutation_invariant_for_set_like_json
 
 
 @pytest.mark.unit
-def test_crossref_publication_profile_stabilizes_identifier_date_and_set_like_content_hash() -> None:
-    processor = RecordNormalizationProcessor(provider="crossref", entity_type="publication")
+def test_crossref_publication_profile_stabilizes_identifier_date_and_set_like_content_hash() -> (
+    None
+):
+    processor = RecordNormalizationProcessor(
+        provider="crossref", entity_type="publication"
+    )
 
     normalized = processor.normalize_business_data(
         {
@@ -772,7 +793,9 @@ def test_crossref_publication_profile_stabilizes_identifier_date_and_set_like_co
 
 
 @pytest.mark.unit
-def test_chembl_assay_profile_makes_content_hash_invariant_for_equivalent_scalar_and_json_forms() -> None:
+def test_chembl_assay_profile_makes_content_hash_invariant_for_equivalent_scalar_and_json_forms() -> (
+    None
+):
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="assay")
     record_a = {
         "entity_id": "chembl:assay-a",
@@ -812,8 +835,12 @@ def test_chembl_assay_profile_makes_content_hash_invariant_for_equivalent_scalar
 
 
 @pytest.mark.unit
-def test_chembl_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_and_date_forms() -> None:
-    processor = RecordNormalizationProcessor(provider="chembl", entity_type="publication")
+def test_chembl_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_and_date_forms() -> (
+    None
+):
+    processor = RecordNormalizationProcessor(
+        provider="chembl", entity_type="publication"
+    )
     record_a = {
         "entity_id": "chembl:publication-a",
         "content_hash": "stale-a",
@@ -877,7 +904,9 @@ def test_chembl_publication_profile_makes_content_hash_invariant_for_equivalent_
 
 
 @pytest.mark.unit
-def test_semanticscholar_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_and_date_forms() -> None:
+def test_semanticscholar_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_and_date_forms() -> (
+    None
+):
     processor = RecordNormalizationProcessor(
         provider="semanticscholar",
         entity_type="publication",
@@ -937,7 +966,9 @@ def test_semanticscholar_publication_profile_makes_content_hash_invariant_for_eq
 
 
 @pytest.mark.unit
-def test_chembl_target_profile_makes_content_hash_invariant_for_equivalent_numeric_anchor_forms() -> None:
+def test_chembl_target_profile_makes_content_hash_invariant_for_equivalent_numeric_anchor_forms() -> (
+    None
+):
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="target")
     record_a = {
         "entity_id": "chembl:target-a",
@@ -971,8 +1002,12 @@ def test_chembl_target_profile_makes_content_hash_invariant_for_equivalent_numer
 
 
 @pytest.mark.unit
-def test_uniprot_idmapping_profile_makes_content_hash_invariant_for_equivalent_numeric_and_title_forms() -> None:
-    processor = RecordNormalizationProcessor(provider="uniprot", entity_type="idmapping")
+def test_uniprot_idmapping_profile_makes_content_hash_invariant_for_equivalent_numeric_and_title_forms() -> (
+    None
+):
+    processor = RecordNormalizationProcessor(
+        provider="uniprot", entity_type="idmapping"
+    )
     record_a = {
         "entity_id": "uniprot:idmapping-a",
         "content_hash": "stale-a",
@@ -1008,7 +1043,9 @@ def test_uniprot_idmapping_profile_makes_content_hash_invariant_for_equivalent_n
 
 @pytest.mark.unit
 def test_pubmed_publication_profile_stabilizes_identifier_and_partial_dates() -> None:
-    processor = RecordNormalizationProcessor(provider="pubmed", entity_type="publication")
+    processor = RecordNormalizationProcessor(
+        provider="pubmed", entity_type="publication"
+    )
 
     normalized = processor.normalize_business_data(
         {
@@ -1024,8 +1061,12 @@ def test_pubmed_publication_profile_stabilizes_identifier_and_partial_dates() ->
 
 
 @pytest.mark.unit
-def test_pubmed_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_date_and_set_like_forms() -> None:
-    processor = RecordNormalizationProcessor(provider="pubmed", entity_type="publication")
+def test_pubmed_publication_profile_makes_content_hash_invariant_for_equivalent_identifier_date_and_set_like_forms() -> (
+    None
+):
+    processor = RecordNormalizationProcessor(
+        provider="pubmed", entity_type="publication"
+    )
     record_a = {
         "entity_id": "pubmed:publication-a",
         "content_hash": "stale-a",

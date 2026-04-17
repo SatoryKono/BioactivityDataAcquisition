@@ -102,7 +102,9 @@ async def test_fetch_batch_with_reduction_yields_records_without_recovery() -> N
 
 
 @pytest.mark.asyncio
-async def test_fetch_batch_with_reduction_uses_single_id_fallback_on_retry_exhausted() -> None:
+async def test_fetch_batch_with_reduction_uses_single_id_fallback_on_retry_exhausted() -> (
+    None
+):
     retry_error = RetryExhaustedError("chembl://target", attempts=3)
     host = _FakeRecoveryHost(deduplicated_error=retry_error)
     host.retry_exhausted_errors.add(retry_error)

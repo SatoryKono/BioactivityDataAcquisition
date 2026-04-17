@@ -63,16 +63,17 @@ _JSON_STRING_FIELDS = frozenset(
 
 def create_case_normalizer(strategy: str = "uppercase"):
     """Create a case normalizer function with the specified strategy.
-    
+
     Args:
         strategy: Case strategy to apply ("uppercase", "lowercase", or "preserve")
-        
+
     Returns:
         A function that normalizes case according to the specified strategy
     """
+
     def normalizer(value: str) -> str | None:
         return normalize_cross_pipeline_case(value, strategy)
-    
+
     return normalizer
 
 

@@ -9,7 +9,9 @@ from bioetl.domain.normalization.json import (
     deserialize_json_value,
     serialize_json_canonical,
 )
-from bioetl.domain.normalization.profiles.profile_normalizers import normalize_profile_json_string
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_json_string,
+)
 
 
 class TestCanonicalJsonSerializer:
@@ -25,7 +27,7 @@ class TestCanonicalJsonSerializer:
         """Test nested structure serialization."""
         data = {
             "authors": ["Charlie", "Alice"],
-            "metadata": {"year": 2023, "tags": ["bio", "chem"]}
+            "metadata": {"year": 2023, "tags": ["bio", "chem"]},
         }
         result = serialize_json_canonical(data)
         # Array elements maintain original order, only dict keys are sorted
@@ -74,21 +76,21 @@ class TestCanonicalizeJsonString:
 
     def test_empty_string(self) -> None:
         """Test empty string handling."""
-        result = canonicalize_json_string('   ')
+        result = canonicalize_json_string("   ")
         assert result is None
 
     def test_invalid_json(self) -> None:
         """Test invalid JSON handling in profile context."""
         # The raw function raises ValueError, but profile normalizer preserves invalid JSON
         # Test the profile-level behavior
-        result = normalize_profile_json_string('invalid json')
+        result = normalize_profile_json_string("invalid json")
         # Profile normalizer preserves invalid JSON as-is
-        assert result == 'invalid json'
+        assert result == "invalid json"
 
     def test_invalid_json_raw_function(self) -> None:
         """Test that raw function raises ValueError for invalid JSON."""
         with pytest.raises(ValueError, match="Invalid JSON"):
-            canonicalize_json_string('invalid json')
+            canonicalize_json_string("invalid json")
 
 
 class TestProfileJsonNormalization:
@@ -109,7 +111,7 @@ class TestProfileJsonNormalization:
         assert normalize_profile_json_string(123) == 123
 
         # Test invalid JSON (should be preserved)
-        assert normalize_profile_json_string('not json') == 'not json'
+        assert normalize_profile_json_string("not json") == "not json"
 
 
 class TestJsonRoundtrip:
@@ -118,30 +120,25 @@ class TestJsonRoundtrip:
     def test_roundtrip_consistency(self) -> None:
         """Test that serialize → deserialize → serialize is idempotent."""
         original = {"b": 2, "a": 1, "c": [3, 1]}
-        
+
         # First serialization
         first = serialize_json_canonical(original)
-        
+
         # Deserialize and serialize again
         parsed = deserialize_json_value(first)
         second = serialize_json_canonical(parsed)
-        
+
         # Should be identical
         assert first == second
 
     def test_nested_roundtrip(self) -> None:
         """Test roundtrip with nested structures."""
-        data = {
-            "level1": {
-                "level2": {"value": 42},
-                "array": [3, 1, 2]
-            }
-        }
-        
+        data = {"level1": {"level2": {"value": 42}, "array": [3, 1, 2]}}
+
         serialized = serialize_json_canonical(data)
         parsed = deserialize_json_value(serialized)
         reserialized = serialize_json_canonical(parsed)
-        
+
         assert serialized == reserialized
 
 
@@ -152,10 +149,10 @@ class TestHashStability:
         """Test that different key orders produce same hash."""
         json1 = '{"year":2023,"authors":["Alice","Bob"]}'
         json2 = '{"authors":["Alice","Bob"],"year":2023}'
-        
+
         norm1 = canonicalize_json_string(json1)
         norm2 = canonicalize_json_string(json2)
-        
+
         # Should be identical
         assert norm1 == norm2
         assert hash(norm1) == hash(norm2)
@@ -164,10 +161,10 @@ class TestHashStability:
         """Test that array element order affects hash (as expected)."""
         json1 = '{"items":["a","b"]}'
         json2 = '{"items":["b","a"]}'
-        
+
         norm1 = canonicalize_json_string(json1)
         norm2 = canonicalize_json_string(json2)
-        
+
         # Should be different (semantic difference)
         assert norm1 != norm2
         assert hash(norm1) != hash(norm2)
@@ -185,12 +182,7 @@ class TestEdgeCases:
 
     def test_numeric_edge_cases(self) -> None:
         """Test numeric edge cases."""
-        data = {
-            "zero": 0,
-            "negative": -42,
-            "float": 3.14159,
-            "large": 1e10
-        }
+        data = {"zero": 0, "negative": -42, "float": 3.14159, "large": 1e10}
         result = serialize_json_canonical(data)
         assert '"zero":0' in result
         assert '"negative":-42' in result

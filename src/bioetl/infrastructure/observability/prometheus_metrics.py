@@ -98,9 +98,9 @@ class PrometheusMetrics(MetricsPort):
             registry=HISTOGRAMS,
             metric_kind="histogram",
         )
-        histogram.labels(**normalize_metric_dispatch_labels(name, resolved_labels)).observe(
-            value
-        )
+        histogram.labels(
+            **normalize_metric_dispatch_labels(name, resolved_labels)
+        ).observe(value)
 
     def increment_counter(
         self,

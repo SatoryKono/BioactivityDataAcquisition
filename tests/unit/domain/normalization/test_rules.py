@@ -27,17 +27,17 @@ class TestNormalizeCase:
     def test_normalize_case_with_allowed_values(self) -> None:
         """Test case normalization with allowed values."""
         allowed = frozenset(["IC50", "EC50", "Ki"])
-        
+
         # Exact match should return original case
         assert normalize_case("IC50", allowed) == "IC50"
         assert normalize_case("EC50", allowed) == "EC50"
         assert normalize_case("Ki", allowed) == "Ki"
-        
+
         # Case-insensitive match should return canonical case
         assert normalize_case("ic50", allowed) == "IC50"
         assert normalize_case("ec50", allowed) == "EC50"
         assert normalize_case("ki", allowed) == "Ki"
-        
+
         # Non-matching values should return None
         assert normalize_case("unknown", allowed) is None
         assert normalize_case("AC50", allowed) is None
@@ -75,7 +75,9 @@ class TestNormalizeCrossPipelineCase:
     def test_preserve_strategy(self) -> None:
         """Test preserve strategy."""
         assert normalize_cross_pipeline_case("Test Value", "preserve") == "Test Value"
-        assert normalize_cross_pipeline_case("  Test Value  ", "preserve") == "Test Value"
+        assert (
+            normalize_cross_pipeline_case("  Test Value  ", "preserve") == "Test Value"
+        )
         assert normalize_cross_pipeline_case("In vivo", "preserve") == "In vivo"
         assert normalize_cross_pipeline_case("  In vivo  ", "preserve") == "In vivo"
 
@@ -105,13 +107,13 @@ class TestNormalizeEnumCase:
     def test_enum_normalization(self) -> None:
         """Test enum value normalization."""
         allowed = frozenset(["IC50", "EC50", "Ki"])
-        
+
         # Valid values should be normalized
         assert normalize_enum_case("IC50", allowed) == "IC50"
         assert normalize_enum_case("ic50", allowed) == "IC50"
         assert normalize_enum_case("Ki", allowed) == "Ki"
         assert normalize_enum_case("ki", allowed) == "Ki"
-        
+
         # Invalid values should return None
         assert normalize_enum_case("unknown", allowed) is None
         assert normalize_enum_case("AC50", allowed) is None
@@ -130,19 +132,47 @@ class TestNormalizeNull:
     def test_null_patterns(self) -> None:
         """Test various null patterns."""
         null_patterns = [
-            "N/A", "NA", "n/a", "na",
-            "None", "NONE", "none",
-            "Null", "NULL", "null",
-            "-", "--", ".", "..", "...",
-            "", " ", "  ", "   ",
-            "\t", "\n", "\r", "\r\n",
-            "<NA>", "<na>", "<NULL>", "<null>",
-            "NAN", "NaN", "nan",
-            "NULL_VALUE", "MISSING", "missing",
-            "UNKNOWN", "unknown", "NOT_AVAILABLE",
-            "not_available", "NOT_APPLICABLE", "not_applicable"
+            "N/A",
+            "NA",
+            "n/a",
+            "na",
+            "None",
+            "NONE",
+            "none",
+            "Null",
+            "NULL",
+            "null",
+            "-",
+            "--",
+            ".",
+            "..",
+            "...",
+            "",
+            " ",
+            "  ",
+            "   ",
+            "\t",
+            "\n",
+            "\r",
+            "\r\n",
+            "<NA>",
+            "<na>",
+            "<NULL>",
+            "<null>",
+            "NAN",
+            "NaN",
+            "nan",
+            "NULL_VALUE",
+            "MISSING",
+            "missing",
+            "UNKNOWN",
+            "unknown",
+            "NOT_AVAILABLE",
+            "not_available",
+            "NOT_APPLICABLE",
+            "not_applicable",
         ]
-        
+
         for pattern in null_patterns:
             assert normalize_null(pattern) is None
 
@@ -150,7 +180,9 @@ class TestNormalizeNull:
         """Test that non-null values are preserved."""
         assert normalize_null("valid") == "valid"
         assert normalize_null("test value") == "test value"
-        assert normalize_null("  valid  ") == "  valid  "  # Whitespace preserved for non-null values
+        assert (
+            normalize_null("  valid  ") == "  valid  "
+        )  # Whitespace preserved for non-null values
         assert normalize_null(123) == 123
         assert normalize_null(["test"]) == ["test"]
 

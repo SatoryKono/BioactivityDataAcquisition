@@ -60,6 +60,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.context import PipelineRunContext
 
+
 def _create_ledger_service(
     inputs: RunnerInputs,
     ctx: PipelineRunContext,
@@ -109,7 +110,9 @@ def _build_manifest_create_request(
         ctx=ctx,
         runtime_config=inputs.runtime_config,
     )
-    control_plane = getattr(getattr(inputs.settings, "pipeline", None), "control_plane", None)
+    control_plane = getattr(
+        getattr(inputs.settings, "pipeline", None), "control_plane", None
+    )
     required_persistence_profile = str(
         getattr(
             control_plane,
@@ -175,6 +178,7 @@ def _validate_required_runtime_persistence_profile(
             f"'{required_persistence_profile}' because immutable input snapshots "
             "and exact replay capability are not available for this run"
         )
+
 
 def create_run_manifest(
     *,

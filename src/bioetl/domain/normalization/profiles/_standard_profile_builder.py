@@ -31,9 +31,12 @@ RuleFamilySpec = tuple[frozenset[str], FieldNormalizer, str]
 __all__ = ["build_standard_profile"]
 
 
-def _normalize_field_collections(*collections: Collection[str]) -> tuple[frozenset[str], ...]:
+def _normalize_field_collections(
+    *collections: Collection[str],
+) -> tuple[frozenset[str], ...]:
     """Normalize multiple field collections to frozensets."""
     return tuple(frozenset(collection) for collection in collections)
+
 
 def _normalize_mapping_fields(
     enum_fields: Mapping[str, frozenset[str]] | None,
@@ -41,6 +44,7 @@ def _normalize_mapping_fields(
 ) -> tuple[Mapping[str, frozenset[str]], Mapping[str, frozenset[str] | None]]:
     """Normalize mapping fields with default empty dicts."""
     return enum_fields or {}, case_fields or {}
+
 
 def _normalize_special_rules(
     special_rules: Mapping[str, RuleComponentSpec] | None,
@@ -52,6 +56,7 @@ def _normalize_special_rules(
         field_name: _coerce_rule_component(field_name=field_name, component=component)
         for field_name, component in special_rules.items()
     }
+
 
 def _build_field_rules(
     schema_fields: Collection[str],
@@ -95,6 +100,7 @@ def _build_field_rules(
         )
         for field_name in schema_fields
     }
+
 
 def build_standard_profile(
     *,
@@ -145,17 +151,17 @@ def build_standard_profile(
         set_like_fields,
         json_string_fields,
     )
-    
+
     # Normalize mapping fields
     normalized_enum_fields, normalized_case_fields = _normalize_mapping_fields(
         enum_fields, case_fields
     )
-    
+
     # Normalize special rules
     normalized_unit_fields = frozenset(unit_fields or ())
     normalized_null_fields = frozenset(null_fields or ())
     normalized_special_rules = _normalize_special_rules(special_rules)
-    
+
     # Build field rules
     field_rules = _build_field_rules(
         schema_fields=schema_fields,
@@ -176,7 +182,7 @@ def build_standard_profile(
         normalized_null_fields=normalized_null_fields,
         normalized_special_rules=normalized_special_rules,
     )
-    
+
     return NormalizationProfile(
         profile_name=profile_name,
         description=description,
@@ -248,7 +254,9 @@ def _coerce_rule_component(
 ) -> RuleComponent:
     """Normalize legacy custom-rule shapes to the canonical (normalizer, notes) form."""
     if callable(component):
-        return _default_custom_rule_component(field_name=field_name, normalizer=component)
+        return _default_custom_rule_component(
+            field_name=field_name, normalizer=component
+        )
     if _is_explicit_rule_component(component):
         return component
     if _is_single_normalizer_rule_component(component):
@@ -285,19 +293,22 @@ def _is_explicit_rule_component(component: RuleComponentSpec) -> bool:
 
 def _is_single_normalizer_rule_component(component: RuleComponentSpec) -> bool:
     return (
-        isinstance(component, tuple)
-        and len(component) == 1
-        and callable(component[0])
+        isinstance(component, tuple) and len(component) == 1 and callable(component[0])
     )
 
 
-def _handle_special_rules(field_name: str, special_rules: Mapping[str, RuleComponent]) -> RuleComponent | None:
+def _handle_special_rules(
+    field_name: str, special_rules: Mapping[str, RuleComponent]
+) -> RuleComponent | None:
     """Handle special rules for specific fields."""
     if field_name in special_rules:
         return special_rules[field_name]
     return None
 
-def _handle_enum_fields(field_name: str, enum_fields: Mapping[str, frozenset[str]]) -> RuleComponent | None:
+
+def _handle_enum_fields(
+    field_name: str, enum_fields: Mapping[str, frozenset[str]]
+) -> RuleComponent | None:
     """Handle enum field normalization."""
     if field_name in enum_fields:
         allowed_values = enum_fields[field_name]
@@ -307,7 +318,10 @@ def _handle_enum_fields(field_name: str, enum_fields: Mapping[str, frozenset[str
         )
     return None
 
-def _handle_case_fields(field_name: str, case_fields: Mapping[str, frozenset[str] | None]) -> RuleComponent | None:
+
+def _handle_case_fields(
+    field_name: str, case_fields: Mapping[str, frozenset[str] | None]
+) -> RuleComponent | None:
     """Handle case field normalization."""
     if field_name in case_fields:
         allowed_values = case_fields[field_name]
@@ -317,7 +331,10 @@ def _handle_case_fields(field_name: str, case_fields: Mapping[str, frozenset[str
         )
     return None
 
-def _handle_unit_fields(field_name: str, unit_fields: frozenset[str]) -> RuleComponent | None:
+
+def _handle_unit_fields(
+    field_name: str, unit_fields: frozenset[str]
+) -> RuleComponent | None:
     """Handle unit field normalization."""
     if field_name in unit_fields:
         return (
@@ -326,7 +343,10 @@ def _handle_unit_fields(field_name: str, unit_fields: frozenset[str]) -> RuleCom
         )
     return None
 
-def _handle_null_fields(field_name: str, null_fields: frozenset[str]) -> RuleComponent | None:
+
+def _handle_null_fields(
+    field_name: str, null_fields: frozenset[str]
+) -> RuleComponent | None:
     """Handle null field normalization."""
     if field_name in null_fields:
         return (
@@ -354,6 +374,7 @@ def _compose_null_aware_rule(
         _normalize,
         f"{base_notes} Pseudo-null values also collapse to None for field '{field_name}'.",
     )
+
 
 def _handle_field_families(
     field_name: str,
@@ -384,6 +405,7 @@ def _handle_field_families(
         if field_name in fields:
             return normalizer, notes
     return None
+
 
 def _rule_components(
     *,

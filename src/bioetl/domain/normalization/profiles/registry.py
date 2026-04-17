@@ -110,6 +110,7 @@ from typing import TypeVar
 
 T = TypeVar("T")
 
+
 def _resolve_normalization_profile_value(
     mapping: Mapping[tuple[str, str], TValue],
     provider: str,
@@ -252,7 +253,9 @@ _NORMALIZATION_PROFILE_DECLARATIONS: tuple[_NormalizationProfileDeclaration, ...
 )
 
 
-def build_normalization_profile_registry() -> Mapping[tuple[str, str], NormalizationProfile]:
+def build_normalization_profile_registry() -> Mapping[
+    tuple[str, str], NormalizationProfile
+]:
     """Return the immutable registry of shipped normalization profiles."""
     return {
         (declaration.provider, declaration.entity_type): declaration.profile

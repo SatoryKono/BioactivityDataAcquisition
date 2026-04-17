@@ -70,9 +70,8 @@ def _looks_like_serialized_json_container(value: str) -> bool:
     stripped = value.strip()
     if len(stripped) < 2:
         return False
-    return (
-        (stripped.startswith("{") and stripped.endswith("}"))
-        or (stripped.startswith("[") and stripped.endswith("]"))
+    return (stripped.startswith("{") and stripped.endswith("}")) or (
+        stripped.startswith("[") and stripped.endswith("]")
     )
 
 
@@ -227,8 +226,7 @@ def _should_sort_nested_hash_sequence(
     sort_nested_sequence_fields: set[str] | None,
 ) -> bool:
     return bool(
-        sort_nested_sequence_fields is not None
-        and key in sort_nested_sequence_fields
+        sort_nested_sequence_fields is not None and key in sort_nested_sequence_fields
     )
 
 

@@ -62,7 +62,10 @@ def _snapshot() -> tuple[Path, object]:
 
 def test_derive_http_uri_from_bolt() -> None:
     assert derive_http_uri("bolt://localhost:7687") == "http://localhost:7474"
-    assert derive_http_uri("neo4j+s://graph.example.com:7687") == "https://graph.example.com:7474"
+    assert (
+        derive_http_uri("neo4j+s://graph.example.com:7687")
+        == "https://graph.example.com:7474"
+    )
 
 
 def test_resolve_neo4j_connection_uses_audit_instance_when_live_audit_mode_enabled(
@@ -144,11 +147,17 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("directory_surface", "scripts/ops") in node_keys
     assert ("directory_surface", "grafana/dashboards") in node_keys
     assert ("directory_surface", ".github/workflows") in node_keys
-    assert ("file_surface", "src/bioetl/application/core/record_normalization_processor.py") in node_keys
+    assert (
+        "file_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+    ) in node_keys
     assert ("file_surface", "configs/entities/chembl/activity.yaml") in node_keys
     assert ("file_surface", "docs/02-architecture/diagrams/README.md") in node_keys
     assert ("file_surface", "scripts/memory/__main__.py") in node_keys
-    assert ("file_surface", "tests/architecture/test_diagram_quality_gates.py") in node_keys
+    assert (
+        "file_surface",
+        "tests/architecture/test_diagram_quality_gates.py",
+    ) in node_keys
     assert ("file_surface", "grafana/dashboards/bioetl-runtime.json") in node_keys
     assert ("file_surface", ".github/workflows/tests.yml") in node_keys
     assert ("layer_family", "domain") in node_keys
@@ -177,8 +186,14 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("storage_surface", "silver/chembl/activity") in node_keys
     assert ("storage_surface", "silver/composite/activity") in node_keys
     assert ("storage_surface", "control/run_manifest/{manifest_id}.json") in node_keys
-    assert ("storage_surface", "control/effective_config/{artifact_id}.json") in node_keys
-    assert ("storage_surface", "control/lineage/fragments/{fragment_hash}.json") in node_keys
+    assert (
+        "storage_surface",
+        "control/effective_config/{artifact_id}.json",
+    ) in node_keys
+    assert (
+        "storage_surface",
+        "control/lineage/fragments/{fragment_hash}.json",
+    ) in node_keys
     assert ("dashboard_surface", "bioetl-overview-v2") in node_keys
     assert ("doc_source_surface", "architecture diagrams hub") in node_keys
     assert ("doc_source_surface", "diagram governance workflow") in node_keys
@@ -210,7 +225,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("runtime_evidence_surface", "effective_config_artifact") in node_keys
     assert ("runtime_evidence_surface", "lineage") in node_keys
     assert ("control_plane_artifact_surface", "run_manifest::json") in node_keys
-    assert ("control_plane_artifact_surface", "effective_config_artifact::json") in node_keys
+    assert (
+        "control_plane_artifact_surface",
+        "effective_config_artifact::json",
+    ) in node_keys
     assert ("control_plane_artifact_surface", "lineage::fragment") in node_keys
     assert ("run_instance_surface", "manifest-left") in node_keys
     assert ("run_instance_surface", "manifest-chain-smoke") in node_keys
@@ -221,7 +239,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("runtime_state_surface", "chembl_activity::composite-lock") in node_keys
     assert ("schema_field_surface", "silver/chembl/activity::activity_id") in node_keys
     assert ("schema_field_surface", "gold/chembl/assay::_version") in node_keys
-    assert ("schema_field_surface", "silver/composite/activity::compound_name") in node_keys
+    assert (
+        "schema_field_surface",
+        "silver/composite/activity::compound_name",
+    ) in node_keys
     assert ("workflow_surface", "tests") in node_keys
     assert ("workflow_job_surface", "tests::governance-preflight") in node_keys
     assert any(label == "workflow_call_surface" for label, _ in node_keys)
@@ -239,12 +260,18 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("execution_path", "uv run python -m bioetl run --pipeline") in node_keys
     assert ("execution_path", "uv run python -m scripts.diagrams lint") in node_keys
     assert ("execution_path", "uv run python -m scripts.docs verify") in node_keys
-    assert ("execution_path", "uv run python -m scripts.schema validate-configs") in node_keys
+    assert (
+        "execution_path",
+        "uv run python -m scripts.schema validate-configs",
+    ) in node_keys
     assert (
         "execution_path",
         "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check",
     ) in node_keys
-    assert ("execution_path", "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json") in node_keys
+    assert (
+        "execution_path",
+        "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json",
+    ) in node_keys
     assert (
         "execution_path",
         "python -m scripts.engineering.qa report-normalization-fallback-inventory --limit 20",
@@ -261,19 +288,27 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("directory_surface", "docs/99-archive") not in node_keys
     assert ("directory_surface", "docs/reports/generated") not in node_keys
     assert ("directory_surface", "scripts/archive") not in node_keys
-    assert ("directory_surface", "docs/02-architecture/diagrams/views/svg") not in node_keys
+    assert (
+        "directory_surface",
+        "docs/02-architecture/diagrams/views/svg",
+    ) not in node_keys
     assert ("package_family", "composition/control_plane_api.py") not in node_keys
     assert ("package_family", "interfaces/test_cli_checkpoint_list.py") not in node_keys
     assert any(
         node.properties.get("current_cycle_status") == "current_cycle"
         for node in snapshot.nodes.values()
-        if node.key.label in {"module_surface", "class_surface", "function_surface", "method_surface"}
+        if node.key.label
+        in {"module_surface", "class_surface", "function_surface", "method_surface"}
     )
 
     silver_assay = snapshot.nodes[NodeKey("storage_surface", "silver/chembl/assay")]
     assert silver_assay.properties["partition_by"] == ["assay_type"]
     assert silver_assay.properties["schema_present"] is True
-    assert silver_assay.properties["schema_include_groups"] == ["system", "business", "dq"]
+    assert silver_assay.properties["schema_include_groups"] == [
+        "system",
+        "business",
+        "dq",
+    ]
     assert silver_assay.properties["quality_version"] == "1.1.0"
     assert silver_assay.properties["retention_days"] == 7
     assert silver_assay.properties["storage_roles"] == ["entity_layer_output"]
@@ -285,13 +320,17 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert gold_assay.properties["valid_from_column"] == "_valid_from"
     assert gold_assay.properties["valid_to_column"] == "_valid_to"
 
-    shared_activity = snapshot.nodes[NodeKey("storage_surface", "silver/chembl/activity")]
+    shared_activity = snapshot.nodes[
+        NodeKey("storage_surface", "silver/chembl/activity")
+    ]
     assert sorted(shared_activity.properties["storage_roles"]) == [
         "composite_seed_input",
         "entity_layer_output",
     ]
 
-    composite_activity = snapshot.nodes[NodeKey("storage_surface", "silver/composite/activity")]
+    composite_activity = snapshot.nodes[
+        NodeKey("storage_surface", "silver/composite/activity")
+    ]
     assert composite_activity.properties["config_version"] == "1.0.0"
     assert composite_activity.properties["merge_strategy"] == "left_outer"
     assert composite_activity.properties["sort_by"] == ["entity_id", "activity_id"]
@@ -302,7 +341,9 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert manifest_left.properties["contract_version"] == "1.0.0"
     assert manifest_left.properties["effective_config_artifact_id"] == "eca-123"
 
-    chain_smoke = snapshot.nodes[NodeKey("run_instance_surface", "manifest-chain-smoke")]
+    chain_smoke = snapshot.nodes[
+        NodeKey("run_instance_surface", "manifest-chain-smoke")
+    ]
     assert chain_smoke.properties["lifecycle_status"] == "success"
     assert chain_smoke.properties["lineage_fragment_id"] == "silver:fragment-smoke-1"
 
@@ -310,7 +351,10 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         NodeKey("run_instance_surface", "manifest-composite-quarantine")
     ]
     assert composite_quarantine.properties["lifecycle_status"] == "quarantined"
-    assert composite_quarantine.properties["replay_contract"] == "excluded_from_exact_replay"
+    assert (
+        composite_quarantine.properties["replay_contract"]
+        == "excluded_from_exact_replay"
+    )
 
     tests_workflow = snapshot.nodes[NodeKey("workflow_surface", "tests")]
     assert tests_workflow.properties["workflow_family"] == "test"
@@ -327,10 +371,18 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert cli_command.properties["source_path"] == "scripts/memory/__main__.py"
     assert cli_command.properties["side_effect_class"] == "mutating"
 
-    cli_option = next(node for node in snapshot.nodes.values() if node.key.label == "cli_option_surface")
+    cli_option = next(
+        node
+        for node in snapshot.nodes.values()
+        if node.key.label == "cli_option_surface"
+    )
     assert cli_option.properties["option_name"] == "--pipeline"
 
-    doc_claim = next(node for node in snapshot.nodes.values() if node.key.label == "doc_claim_surface")
+    doc_claim = next(
+        node
+        for node in snapshot.nodes.values()
+        if node.key.label == "doc_claim_surface"
+    )
     assert doc_claim.properties["modality"] in {"required", "forbidden", "guidance"}
     assert isinstance(doc_claim.properties["claim_text"], str)
     assert doc_claim.properties["claim_text"]
@@ -339,37 +391,57 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         for relation in snapshot.relations.values()
     )
 
-    retry_state = snapshot.nodes[NodeKey("runtime_state_surface", "manifest-chain-2::retry-window")]
+    retry_state = snapshot.nodes[
+        NodeKey("runtime_state_surface", "manifest-chain-2::retry-window")
+    ]
     assert retry_state.properties["state_kind"] == "retry_state"
     assert retry_state.properties["state_status"] == "retrying"
     assert retry_state.properties["retry_count"] == 1
 
-    lock_state = snapshot.nodes[NodeKey("runtime_state_surface", "chembl_activity::composite-lock")]
+    lock_state = snapshot.nodes[
+        NodeKey("runtime_state_surface", "chembl_activity::composite-lock")
+    ]
     assert lock_state.properties["state_kind"] == "lock_state"
     assert lock_state.properties["lock_scope"] == "cross_validation_quarantine"
     assert lock_state.properties["lock_key"] == "composite:activity:cross_validation"
 
-    assay_version_field = snapshot.nodes[NodeKey("schema_field_surface", "gold/chembl/assay::_version")]
+    assay_version_field = snapshot.nodes[
+        NodeKey("schema_field_surface", "gold/chembl/assay::_version")
+    ]
     assert assay_version_field.properties["field_name"] == "_version"
     assert assay_version_field.properties["drift_classification"] == "gold_only"
 
-    activity_field = snapshot.nodes[NodeKey("schema_field_surface", "silver/chembl/activity::activity_id")]
+    activity_field = snapshot.nodes[
+        NodeKey("schema_field_surface", "silver/chembl/activity::activity_id")
+    ]
     assert activity_field.properties["required_in_quality"] is True
     assert activity_field.properties["contract_ref"] == "chembl.activity"
     assert activity_field.properties["drift_classification"] is None
 
-    composite_field = snapshot.nodes[NodeKey("schema_field_surface", "silver/composite/activity::compound_name")]
+    composite_field = snapshot.nodes[
+        NodeKey("schema_field_surface", "silver/composite/activity::compound_name")
+    ]
     assert composite_field.properties["drift_classification"] == "inherited_field"
-    assert "silver/chembl/compound_record" in composite_field.properties["source_storage_refs"]
+    assert (
+        "silver/chembl/compound_record"
+        in composite_field.properties["source_storage_refs"]
+    )
 
     docs_drift_relation = snapshot.relations[
         (
-            NodeKey("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md"),
+            NodeKey(
+                "doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md"
+            ),
             "DESCRIBES",
-            NodeKey("module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
+            NodeKey(
+                "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"
+            ),
         )
     ]
-    assert docs_drift_relation.properties["doc_reference"] == "src/bioetl/domain/control_plane/run_manifest.py"
+    assert (
+        docs_drift_relation.properties["doc_reference"]
+        == "src/bioetl/domain/control_plane/run_manifest.py"
+    )
     assert docs_drift_relation.properties["evidence_kind"] == "direct_path"
     assert docs_drift_relation.properties["confidence"] == "high"
     assert isinstance(docs_drift_relation.properties["line_number"], int)
@@ -384,180 +456,1010 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("project", "BioETL", "HAS_REPO_ZONE", "repo_zone", "src"),
     ("repo_zone", "src", "CONTAINS", "directory_surface", "src"),
     ("directory_surface", "src/bioetl/domain", "HOUSES", "layer_family", "domain"),
-    ("directory_surface", "src/bioetl/domain/config", "HOUSES", "package_family", "domain/config"),
-    ("directory_surface", "src/bioetl/application/core", "HOUSES", "module_surface", "src/bioetl/application/core/record_normalization_processor.py"),
-    ("directory_surface", "src/bioetl/application/core", "CONTAINS", "file_surface", "src/bioetl/application/core/record_normalization_processor.py"),
-    ("file_surface", "src/bioetl/application/core/record_normalization_processor.py", "BACKS", "module_surface", "src/bioetl/application/core/record_normalization_processor.py"),
-    ("directory_surface", "configs/entities/chembl", "CONTAINS", "file_surface", "configs/entities/chembl/activity.yaml"),
-    ("directory_surface", "configs/entities/chembl", "HOUSES", "entity_config", "chembl_activity"),
-    ("file_surface", "configs/entities/chembl/activity.yaml", "BACKS", "entity_config", "chembl_activity"),
-    ("directory_surface", "docs/02-architecture/diagrams", "CONTAINS", "file_surface", "docs/02-architecture/diagrams/README.md"),
-    ("directory_surface", "docs/02-architecture/diagrams", "HOUSES", "doc_source_surface", "architecture diagrams hub"),
-    ("file_surface", "docs/02-architecture/diagrams/README.md", "BACKS", "doc_artifact", "docs/02-architecture/diagrams/README.md"),
-    ("directory_surface", "docs/03-guides", "HOUSES", "doc_source_surface", "testing guide"),
-    ("directory_surface", "docs/03-guides/dashboards", "HOUSES", "doc_source_surface", "dashboard extension guide"),
-    ("directory_surface", "docs/04-reference/contracts", "HOUSES", "doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md"),
-    ("directory_surface", "docs/05-operations/runbooks", "HOUSES", "doc_artifact", "docs/05-operations/runbooks/traceability-signal-ownership.md"),
-    ("directory_surface", "scripts/ops", "CONTAINS", "file_surface", "scripts/memory/__main__.py"),
-    ("directory_surface", "scripts/ops", "HOUSES", "script_surface", "scripts/memory/__main__.py"),
-    ("file_surface", "scripts/memory/__main__.py", "BACKS", "script_surface", "scripts/memory/__main__.py"),
-    ("directory_surface", "tests/architecture", "CONTAINS", "file_surface", "tests/architecture/test_diagram_quality_gates.py"),
-    ("directory_surface", "tests/architecture", "HOUSES", "test_surface", "architecture tests"),
-    ("directory_surface", "tests/architecture", "HOUSES", "test_artifact", "tests/architecture/test_diagram_quality_gates.py"),
-    ("file_surface", "tests/architecture/test_diagram_quality_gates.py", "BACKS", "test_artifact", "tests/architecture/test_diagram_quality_gates.py"),
-    ("directory_surface", "grafana/dashboards", "CONTAINS", "file_surface", "grafana/dashboards/bioetl-runtime.json"),
-    ("directory_surface", "grafana/dashboards", "HOUSES", "dashboard_surface", "bioetl-runtime"),
-    ("file_surface", "grafana/dashboards/bioetl-runtime.json", "BACKS", "dashboard_surface", "bioetl-runtime"),
+    (
+        "directory_surface",
+        "src/bioetl/domain/config",
+        "HOUSES",
+        "package_family",
+        "domain/config",
+    ),
+    (
+        "directory_surface",
+        "src/bioetl/application/core",
+        "HOUSES",
+        "module_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+    ),
+    (
+        "directory_surface",
+        "src/bioetl/application/core",
+        "CONTAINS",
+        "file_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+    ),
+    (
+        "file_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+        "BACKS",
+        "module_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+    ),
+    (
+        "directory_surface",
+        "configs/entities/chembl",
+        "CONTAINS",
+        "file_surface",
+        "configs/entities/chembl/activity.yaml",
+    ),
+    (
+        "directory_surface",
+        "configs/entities/chembl",
+        "HOUSES",
+        "entity_config",
+        "chembl_activity",
+    ),
+    (
+        "file_surface",
+        "configs/entities/chembl/activity.yaml",
+        "BACKS",
+        "entity_config",
+        "chembl_activity",
+    ),
+    (
+        "directory_surface",
+        "docs/02-architecture/diagrams",
+        "CONTAINS",
+        "file_surface",
+        "docs/02-architecture/diagrams/README.md",
+    ),
+    (
+        "directory_surface",
+        "docs/02-architecture/diagrams",
+        "HOUSES",
+        "doc_source_surface",
+        "architecture diagrams hub",
+    ),
+    (
+        "file_surface",
+        "docs/02-architecture/diagrams/README.md",
+        "BACKS",
+        "doc_artifact",
+        "docs/02-architecture/diagrams/README.md",
+    ),
+    (
+        "directory_surface",
+        "docs/03-guides",
+        "HOUSES",
+        "doc_source_surface",
+        "testing guide",
+    ),
+    (
+        "directory_surface",
+        "docs/03-guides/dashboards",
+        "HOUSES",
+        "doc_source_surface",
+        "dashboard extension guide",
+    ),
+    (
+        "directory_surface",
+        "docs/04-reference/contracts",
+        "HOUSES",
+        "doc_artifact",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+    ),
+    (
+        "directory_surface",
+        "docs/05-operations/runbooks",
+        "HOUSES",
+        "doc_artifact",
+        "docs/05-operations/runbooks/traceability-signal-ownership.md",
+    ),
+    (
+        "directory_surface",
+        "scripts/ops",
+        "CONTAINS",
+        "file_surface",
+        "scripts/memory/__main__.py",
+    ),
+    (
+        "directory_surface",
+        "scripts/ops",
+        "HOUSES",
+        "script_surface",
+        "scripts/memory/__main__.py",
+    ),
+    (
+        "file_surface",
+        "scripts/memory/__main__.py",
+        "BACKS",
+        "script_surface",
+        "scripts/memory/__main__.py",
+    ),
+    (
+        "directory_surface",
+        "tests/architecture",
+        "CONTAINS",
+        "file_surface",
+        "tests/architecture/test_diagram_quality_gates.py",
+    ),
+    (
+        "directory_surface",
+        "tests/architecture",
+        "HOUSES",
+        "test_surface",
+        "architecture tests",
+    ),
+    (
+        "directory_surface",
+        "tests/architecture",
+        "HOUSES",
+        "test_artifact",
+        "tests/architecture/test_diagram_quality_gates.py",
+    ),
+    (
+        "file_surface",
+        "tests/architecture/test_diagram_quality_gates.py",
+        "BACKS",
+        "test_artifact",
+        "tests/architecture/test_diagram_quality_gates.py",
+    ),
+    (
+        "directory_surface",
+        "grafana/dashboards",
+        "CONTAINS",
+        "file_surface",
+        "grafana/dashboards/bioetl-runtime.json",
+    ),
+    (
+        "directory_surface",
+        "grafana/dashboards",
+        "HOUSES",
+        "dashboard_surface",
+        "bioetl-runtime",
+    ),
+    (
+        "file_surface",
+        "grafana/dashboards/bioetl-runtime.json",
+        "BACKS",
+        "dashboard_surface",
+        "bioetl-runtime",
+    ),
     ("repo_zone", ".github", "CONTAINS", "directory_surface", ".github"),
-    ("directory_surface", ".github/workflows", "CONTAINS", "file_surface", ".github/workflows/tests.yml"),
+    (
+        "directory_surface",
+        ".github/workflows",
+        "CONTAINS",
+        "file_surface",
+        ".github/workflows/tests.yml",
+    ),
     ("directory_surface", ".github/workflows", "HOUSES", "workflow_surface", "tests"),
-    ("file_surface", ".github/workflows/tests.yml", "BACKS", "workflow_surface", "tests"),
-    ("directory_surface", "configs/contracts", "HOUSES", "contract_surface", "chembl.activity"),
-    ("directory_surface", "configs/contracts/chembl", "HOUSES", "contract_surface", "chembl.activity"),
-    ("directory_surface", "configs/quality", "HOUSES", "policy_surface", "integration and VCR execution policy"),
-    ("module_surface", "src/bioetl/infrastructure/adapters/base.py", "DECLARES", "class_surface", "src.bioetl.infrastructure.adapters.base.BaseHttpAdapter"),
-    ("module_surface", "src/bioetl/domain/normalization/profiles/chembl_activity.py", "DECLARES", "function_surface", "src.bioetl.domain.normalization.profiles.chembl_activity.create_case_normalizer"),
-    ("class_surface", "src.bioetl.application.composite.merger.MergeService", "DECLARES", "method_surface", "src.bioetl.application.composite.merger.MergeService.merge"),
+    (
+        "file_surface",
+        ".github/workflows/tests.yml",
+        "BACKS",
+        "workflow_surface",
+        "tests",
+    ),
+    (
+        "directory_surface",
+        "configs/contracts",
+        "HOUSES",
+        "contract_surface",
+        "chembl.activity",
+    ),
+    (
+        "directory_surface",
+        "configs/contracts/chembl",
+        "HOUSES",
+        "contract_surface",
+        "chembl.activity",
+    ),
+    (
+        "directory_surface",
+        "configs/quality",
+        "HOUSES",
+        "policy_surface",
+        "integration and VCR execution policy",
+    ),
+    (
+        "module_surface",
+        "src/bioetl/infrastructure/adapters/base.py",
+        "DECLARES",
+        "class_surface",
+        "src.bioetl.infrastructure.adapters.base.BaseHttpAdapter",
+    ),
+    (
+        "module_surface",
+        "src/bioetl/domain/normalization/profiles/chembl_activity.py",
+        "DECLARES",
+        "function_surface",
+        "src.bioetl.domain.normalization.profiles.chembl_activity.create_case_normalizer",
+    ),
+    (
+        "class_surface",
+        "src.bioetl.application.composite.merger.MergeService",
+        "DECLARES",
+        "method_surface",
+        "src.bioetl.application.composite.merger.MergeService.merge",
+    ),
     ("project", "BioETL", "HAS_PORT", "port_surface", "bioetl.domain.ports"),
-    ("project", "BioETL", "HAS_ADAPTER", "adapter_surface", "bioetl.infrastructure.adapters.chembl"),
+    (
+        "project",
+        "BioETL",
+        "HAS_ADAPTER",
+        "adapter_surface",
+        "bioetl.infrastructure.adapters.chembl",
+    ),
     ("project", "BioETL", "HAS_PIPELINE", "pipeline_surface", "chembl_activity"),
     ("project", "BioETL", "HAS_CONTRACT", "contract_surface", "chembl.activity"),
     ("project", "BioETL", "HAS_ALERT", "alert_surface", "BioETLPipelineRunFailed"),
     ("project", "BioETL", "HAS_PROVIDER", "provider_surface", "chembl"),
     ("provider_surface", "chembl", "DEFINES", "entity_config", "chembl_activity"),
-    ("composite_config", "composite_activity", "DEPENDS_ON", "entity_config", "chembl_activity"),
-    ("project", "BioETL", "HAS_STORAGE_SURFACE", "storage_surface", "silver/chembl/activity"),
-    ("pipeline_surface", "chembl_activity", "WRITES_TO", "storage_surface", "silver/chembl/activity"),
-    ("pipeline_surface", "composite_activity", "DEPENDS_ON", "storage_surface", "silver/chembl/activity"),
-    ("pipeline_surface", "composite_activity", "WRITES_TO", "storage_surface", "silver/composite/activity"),
-    ("storage_surface", "silver/composite/activity", "PROMOTES_TO", "storage_surface", "gold/composite/activity"),
-    ("package_family", "domain/config", "CONTAINS", "module_surface", "src/bioetl/domain/config/pipeline.py"),
-    ("project", "BioETL", "HAS_DOC_SOURCE_SURFACE", "doc_source_surface", "architecture diagrams hub"),
-    ("policy_surface", "diagram governance policy", "GOVERNS", "quality_gate", "diagram quality gates"),
-    ("policy_surface", "diagram governance policy", "GOVERNS", "test_surface", "architecture tests"),
-    ("policy_surface", "diagram governance policy", "GOVERNS", "doc_source_surface", "diagram governance workflow"),
-    ("project", "BioETL", "HAS_POLICY_SURFACE", "policy_surface", "integration and VCR execution policy"),
-    ("script_surface", "scripts/diagrams/__main__.py", "PROVIDES", "execution_path", "uv run python -m scripts.diagrams lint"),
-    ("execution_path", "uv run python -m scripts.diagrams lint", "EXECUTES_GATE", "quality_gate", "diagram quality gates"),
-    ("script_surface", "scripts/docs/__main__.py", "PROVIDES", "execution_path", "uv run python -m scripts.docs verify"),
-    ("execution_path", "uv run python -m scripts.docs verify", "EXECUTES_GATE", "quality_gate", "docs verification"),
-    ("script_surface", "scripts/schema/__main__.py", "PROVIDES", "execution_path", "uv run python -m scripts.schema validate-configs"),
-    ("execution_path", "uv run python -m scripts.schema validate-configs", "EXECUTES_GATE", "quality_gate", "config validation"),
-    ("script_surface", "scripts/memory/__main__.py", "PROVIDES", "execution_path", "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json"),
-    ("policy_surface", "integration and VCR execution policy", "GOVERNS", "test_surface", "integration tests"),
-    ("adapter_surface", "bioetl.infrastructure.adapters.chembl", "CONTAINS", "adapter_impl_surface", "bioetl.infrastructure.adapters.chembl.client"),
-    ("adapter_impl_surface", "bioetl.infrastructure.adapters.chembl.client", "DEPENDS_ON", "port_surface", "bioetl.domain.ports.observability.logging.LoggerPort"),
-    ("adapter_surface", "bioetl.infrastructure.adapters.chembl", "DEPENDS_ON", "port_surface", "bioetl.domain.ports.observability.logging.LoggerPort"),
-    ("pipeline_surface", "chembl_activity", "DEPENDS_ON", "adapter_surface", "bioetl.infrastructure.adapters.chembl"),
-    ("pipeline_surface", "chembl_activity", "DEPENDS_ON", "contract_surface", "chembl.activity"),
-    ("pipeline_surface", "chembl_activity", "DEPENDS_ON", "module_surface", "src/bioetl/application/core/record_normalization_processor.py"),
-    ("pipeline_surface", "chembl_activity", "DEPENDS_ON", "module_surface", "src/bioetl/domain/normalization/profiles/_chembl_activity_fields.py"),
-    ("entity_config", "chembl_activity", "DEPENDS_ON", "module_surface", "src/bioetl/domain/normalization/chembl.py"),
-    ("pipeline_surface", "crossref_publication", "DEPENDS_ON", "module_surface", "src/bioetl/application/core/record_normalization_processor.py"),
-    ("entity_config", "crossref_publication", "DEPENDS_ON", "module_surface", "src/bioetl/domain/normalization/text.py"),
-    ("pipeline_surface", "composite_activity", "DEPENDS_ON", "module_surface", "src/bioetl/application/composite/join_key_normalization.py"),
-    ("contract_surface", "pubmed.publication", "DEPENDS_ON", "module_surface", "src/bioetl/domain/schemas/common/publication_base.py"),
-    ("contract_surface", "chembl.activity", "BACKED_BY", "config_artifact", "configs/contracts/chembl/activity.yaml"),
-    ("contract_surface", "chembl.activity", "DESCRIBED_IN", "doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md"),
-    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/application/services/run_manifest_service.py"),
-    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py"),
-    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/interfaces/cli/commands/run_manifest.py"),
-    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/application/services/lineage_inspection_service.py"),
-    ("contract_surface", "chembl.activity", "DEPENDS_ON", "module_surface", "src/bioetl/composition/bootstrap/cli/lineage.py"),
-    ("contract_surface", "chembl.activity", "DESCRIBED_IN", "doc_artifact", "docs/05-operations/runbooks/traceability-signal-ownership.md"),
-    ("policy_surface", "pipeline assembly model", "GOVERNS", "pipeline_surface", "chembl_activity"),
-    ("policy_surface", "observability surface model", "GOVERNS", "alert_surface", "BioETLPipelineRunFailed"),
-    ("pipeline_surface", "chembl_activity", "RUNS_VIA", "execution_path", "uv run python -m bioetl run --pipeline"),
+    (
+        "composite_config",
+        "composite_activity",
+        "DEPENDS_ON",
+        "entity_config",
+        "chembl_activity",
+    ),
+    (
+        "project",
+        "BioETL",
+        "HAS_STORAGE_SURFACE",
+        "storage_surface",
+        "silver/chembl/activity",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "WRITES_TO",
+        "storage_surface",
+        "silver/chembl/activity",
+    ),
+    (
+        "pipeline_surface",
+        "composite_activity",
+        "DEPENDS_ON",
+        "storage_surface",
+        "silver/chembl/activity",
+    ),
+    (
+        "pipeline_surface",
+        "composite_activity",
+        "WRITES_TO",
+        "storage_surface",
+        "silver/composite/activity",
+    ),
+    (
+        "storage_surface",
+        "silver/composite/activity",
+        "PROMOTES_TO",
+        "storage_surface",
+        "gold/composite/activity",
+    ),
+    (
+        "package_family",
+        "domain/config",
+        "CONTAINS",
+        "module_surface",
+        "src/bioetl/domain/config/pipeline.py",
+    ),
+    (
+        "project",
+        "BioETL",
+        "HAS_DOC_SOURCE_SURFACE",
+        "doc_source_surface",
+        "architecture diagrams hub",
+    ),
+    (
+        "policy_surface",
+        "diagram governance policy",
+        "GOVERNS",
+        "quality_gate",
+        "diagram quality gates",
+    ),
+    (
+        "policy_surface",
+        "diagram governance policy",
+        "GOVERNS",
+        "test_surface",
+        "architecture tests",
+    ),
+    (
+        "policy_surface",
+        "diagram governance policy",
+        "GOVERNS",
+        "doc_source_surface",
+        "diagram governance workflow",
+    ),
+    (
+        "project",
+        "BioETL",
+        "HAS_POLICY_SURFACE",
+        "policy_surface",
+        "integration and VCR execution policy",
+    ),
+    (
+        "script_surface",
+        "scripts/diagrams/__main__.py",
+        "PROVIDES",
+        "execution_path",
+        "uv run python -m scripts.diagrams lint",
+    ),
+    (
+        "execution_path",
+        "uv run python -m scripts.diagrams lint",
+        "EXECUTES_GATE",
+        "quality_gate",
+        "diagram quality gates",
+    ),
+    (
+        "script_surface",
+        "scripts/docs/__main__.py",
+        "PROVIDES",
+        "execution_path",
+        "uv run python -m scripts.docs verify",
+    ),
+    (
+        "execution_path",
+        "uv run python -m scripts.docs verify",
+        "EXECUTES_GATE",
+        "quality_gate",
+        "docs verification",
+    ),
+    (
+        "script_surface",
+        "scripts/schema/__main__.py",
+        "PROVIDES",
+        "execution_path",
+        "uv run python -m scripts.schema validate-configs",
+    ),
+    (
+        "execution_path",
+        "uv run python -m scripts.schema validate-configs",
+        "EXECUTES_GATE",
+        "quality_gate",
+        "config validation",
+    ),
+    (
+        "script_surface",
+        "scripts/memory/__main__.py",
+        "PROVIDES",
+        "execution_path",
+        "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json",
+    ),
+    (
+        "policy_surface",
+        "integration and VCR execution policy",
+        "GOVERNS",
+        "test_surface",
+        "integration tests",
+    ),
+    (
+        "adapter_surface",
+        "bioetl.infrastructure.adapters.chembl",
+        "CONTAINS",
+        "adapter_impl_surface",
+        "bioetl.infrastructure.adapters.chembl.client",
+    ),
+    (
+        "adapter_impl_surface",
+        "bioetl.infrastructure.adapters.chembl.client",
+        "DEPENDS_ON",
+        "port_surface",
+        "bioetl.domain.ports.observability.logging.LoggerPort",
+    ),
+    (
+        "adapter_surface",
+        "bioetl.infrastructure.adapters.chembl",
+        "DEPENDS_ON",
+        "port_surface",
+        "bioetl.domain.ports.observability.logging.LoggerPort",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "adapter_surface",
+        "bioetl.infrastructure.adapters.chembl",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "contract_surface",
+        "chembl.activity",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/normalization/profiles/_chembl_activity_fields.py",
+    ),
+    (
+        "entity_config",
+        "chembl_activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/normalization/chembl.py",
+    ),
+    (
+        "pipeline_surface",
+        "crossref_publication",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/core/record_normalization_processor.py",
+    ),
+    (
+        "entity_config",
+        "crossref_publication",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/normalization/text.py",
+    ),
+    (
+        "pipeline_surface",
+        "composite_activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/composite/join_key_normalization.py",
+    ),
+    (
+        "contract_surface",
+        "pubmed.publication",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/domain/schemas/common/publication_base.py",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "BACKED_BY",
+        "config_artifact",
+        "configs/contracts/chembl/activity.yaml",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "DESCRIBED_IN",
+        "doc_artifact",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/services/run_manifest_service.py",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/interfaces/cli/commands/run_manifest.py",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/application/services/lineage_inspection_service.py",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "DEPENDS_ON",
+        "module_surface",
+        "src/bioetl/composition/bootstrap/cli/lineage.py",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "DESCRIBED_IN",
+        "doc_artifact",
+        "docs/05-operations/runbooks/traceability-signal-ownership.md",
+    ),
+    (
+        "policy_surface",
+        "pipeline assembly model",
+        "GOVERNS",
+        "pipeline_surface",
+        "chembl_activity",
+    ),
+    (
+        "policy_surface",
+        "observability surface model",
+        "GOVERNS",
+        "alert_surface",
+        "BioETLPipelineRunFailed",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "RUNS_VIA",
+        "execution_path",
+        "uv run python -m bioetl run --pipeline",
+    ),
     ("pipeline_surface", "chembl_activity", "VALIDATED_BY", "quality_gate", "pytest"),
-    ("pipeline_surface", "chembl_activity", "VALIDATED_BY", "quality_gate", "config validation"),
-    ("pipeline_surface", "chembl_activity", "OBSERVED_BY", "dashboard_surface", "bioetl-dq-v2"),
-    ("pipeline_surface", "chembl_activity", "TESTED_BY", "test_artifact", "tests/integration/pipelines/test_chembl_activity.py"),
-    ("pipeline_surface", "chembl_activity", "TESTED_BY", "test_artifact", "tests/unit/infrastructure/adapters/chembl/test_request_metadata.py"),
-    ("pipeline_surface", "chembl_activity", "TESTED_BY", "test_surface", "integration tests"),
-    ("pipeline_surface", "composite_activity", "OBSERVED_BY", "dashboard_surface", "bioetl-control-plane-v1"),
-    ("alert_surface", "BioETLPipelineRunFailed", "DEPENDS_ON", "pipeline_surface", "chembl_activity"),
-    ("alert_surface", "BioETLPipelineRunFailed", "OBSERVED_BY", "dashboard_surface", "bioetl-runtime"),
-    ("alert_surface", "BioETLPipelineRunFailed", "DEPENDS_ON", "contract_surface", "chembl.activity"),
-    ("alert_surface", "BioETLDQSoftThresholdExceeded", "DEPENDS_ON", "pipeline_surface", "chembl_activity"),
-    ("alert_surface", "BioETLProviderFailureRateHigh", "OBSERVED_BY", "dashboard_surface", "bioetl-provider-health-v2"),
-    ("alert_surface", "BioETLProviderFailureRateHigh", "DEPENDS_ON", "provider_surface", "chembl"),
-    ("alert_surface", "BioETLControlPlaneReadFailureRate", "OBSERVED_BY", "dashboard_surface", "bioetl-control-plane-v1"),
-    ("alert_surface", "BioETLControlPlaneReadFailureRate", "DEPENDS_ON", "contract_surface", "chembl.activity"),
-    ("project", "BioETL", "HAS_RUNTIME_EVIDENCE", "runtime_evidence_surface", "run_manifest"),
-    ("runtime_evidence_surface", "run_manifest", "BACKED_BY", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
-    ("runtime_evidence_surface", "run_manifest", "WRITES_TO", "storage_surface", "control/run_manifest/{manifest_id}.json"),
-    ("project", "BioETL", "HAS_CONTROL_PLANE_ARTIFACT", "control_plane_artifact_surface", "run_manifest::json"),
-    ("runtime_evidence_surface", "run_manifest", "EMITS_ARTIFACT", "control_plane_artifact_surface", "run_manifest::json"),
-    ("control_plane_artifact_surface", "run_manifest::json", "MATERIALIZED_AS", "storage_surface", "control/run_manifest/{manifest_id}.json"),
-    ("runtime_evidence_surface", "effective_config_artifact", "WRITES_TO", "storage_surface", "control/effective_config/{artifact_id}.json"),
-    ("runtime_evidence_surface", "effective_config_artifact", "EMITS_ARTIFACT", "control_plane_artifact_surface", "effective_config_artifact::json"),
-    ("control_plane_artifact_surface", "effective_config_artifact::json", "MATERIALIZED_AS", "storage_surface", "control/effective_config/{artifact_id}.json"),
-    ("runtime_evidence_surface", "lineage", "WRITES_TO", "storage_surface", "control/lineage/fragments/{fragment_hash}.json"),
-    ("runtime_evidence_surface", "lineage", "EMITS_ARTIFACT", "control_plane_artifact_surface", "lineage::fragment"),
-    ("control_plane_artifact_surface", "lineage::fragment", "MATERIALIZED_AS", "storage_surface", "control/lineage/fragments/{fragment_hash}.json"),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "VALIDATED_BY",
+        "quality_gate",
+        "config validation",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-dq-v2",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "TESTED_BY",
+        "test_artifact",
+        "tests/integration/pipelines/test_chembl_activity.py",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "TESTED_BY",
+        "test_artifact",
+        "tests/unit/infrastructure/adapters/chembl/test_request_metadata.py",
+    ),
+    (
+        "pipeline_surface",
+        "chembl_activity",
+        "TESTED_BY",
+        "test_surface",
+        "integration tests",
+    ),
+    (
+        "pipeline_surface",
+        "composite_activity",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-control-plane-v1",
+    ),
+    (
+        "alert_surface",
+        "BioETLPipelineRunFailed",
+        "DEPENDS_ON",
+        "pipeline_surface",
+        "chembl_activity",
+    ),
+    (
+        "alert_surface",
+        "BioETLPipelineRunFailed",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-runtime",
+    ),
+    (
+        "alert_surface",
+        "BioETLPipelineRunFailed",
+        "DEPENDS_ON",
+        "contract_surface",
+        "chembl.activity",
+    ),
+    (
+        "alert_surface",
+        "BioETLDQSoftThresholdExceeded",
+        "DEPENDS_ON",
+        "pipeline_surface",
+        "chembl_activity",
+    ),
+    (
+        "alert_surface",
+        "BioETLProviderFailureRateHigh",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-provider-health-v2",
+    ),
+    (
+        "alert_surface",
+        "BioETLProviderFailureRateHigh",
+        "DEPENDS_ON",
+        "provider_surface",
+        "chembl",
+    ),
+    (
+        "alert_surface",
+        "BioETLControlPlaneReadFailureRate",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-control-plane-v1",
+    ),
+    (
+        "alert_surface",
+        "BioETLControlPlaneReadFailureRate",
+        "DEPENDS_ON",
+        "contract_surface",
+        "chembl.activity",
+    ),
+    (
+        "project",
+        "BioETL",
+        "HAS_RUNTIME_EVIDENCE",
+        "runtime_evidence_surface",
+        "run_manifest",
+    ),
+    (
+        "runtime_evidence_surface",
+        "run_manifest",
+        "BACKED_BY",
+        "module_surface",
+        "src/bioetl/domain/control_plane/run_manifest.py",
+    ),
+    (
+        "runtime_evidence_surface",
+        "run_manifest",
+        "WRITES_TO",
+        "storage_surface",
+        "control/run_manifest/{manifest_id}.json",
+    ),
+    (
+        "project",
+        "BioETL",
+        "HAS_CONTROL_PLANE_ARTIFACT",
+        "control_plane_artifact_surface",
+        "run_manifest::json",
+    ),
+    (
+        "runtime_evidence_surface",
+        "run_manifest",
+        "EMITS_ARTIFACT",
+        "control_plane_artifact_surface",
+        "run_manifest::json",
+    ),
+    (
+        "control_plane_artifact_surface",
+        "run_manifest::json",
+        "MATERIALIZED_AS",
+        "storage_surface",
+        "control/run_manifest/{manifest_id}.json",
+    ),
+    (
+        "runtime_evidence_surface",
+        "effective_config_artifact",
+        "WRITES_TO",
+        "storage_surface",
+        "control/effective_config/{artifact_id}.json",
+    ),
+    (
+        "runtime_evidence_surface",
+        "effective_config_artifact",
+        "EMITS_ARTIFACT",
+        "control_plane_artifact_surface",
+        "effective_config_artifact::json",
+    ),
+    (
+        "control_plane_artifact_surface",
+        "effective_config_artifact::json",
+        "MATERIALIZED_AS",
+        "storage_surface",
+        "control/effective_config/{artifact_id}.json",
+    ),
+    (
+        "runtime_evidence_surface",
+        "lineage",
+        "WRITES_TO",
+        "storage_surface",
+        "control/lineage/fragments/{fragment_hash}.json",
+    ),
+    (
+        "runtime_evidence_surface",
+        "lineage",
+        "EMITS_ARTIFACT",
+        "control_plane_artifact_surface",
+        "lineage::fragment",
+    ),
+    (
+        "control_plane_artifact_surface",
+        "lineage::fragment",
+        "MATERIALIZED_AS",
+        "storage_surface",
+        "control/lineage/fragments/{fragment_hash}.json",
+    ),
     ("project", "BioETL", "HAS_RUN_INSTANCE", "run_instance_surface", "manifest-left"),
-    ("run_instance_surface", "manifest-left", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "run_manifest::json"),
-    ("run_instance_surface", "manifest-left", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "effective_config_artifact::json"),
-    ("run_instance_surface", "manifest-chain-smoke", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "run_ledger::jsonl"),
-    ("run_instance_surface", "manifest-chain-2", "DESCRIBED_IN", "test_artifact", "tests/unit/application/services/test_run_manifest_inspection_service.py"),
-    ("run_instance_surface", "manifest-composite-quarantine", "DEPENDS_ON", "contract_surface", "chembl.activity"),
-    ("project", "BioETL", "HAS_RUNTIME_STATE", "runtime_state_surface", "manifest-chain-2::retry-window"),
-    ("run_instance_surface", "manifest-chain-2", "HAS_RUNTIME_STATE", "runtime_state_surface", "manifest-chain-2::retry-window"),
-    ("runtime_state_surface", "manifest-chain-2::retry-window", "DEPENDS_ON", "pipeline_surface", "chembl_activity"),
-    ("runtime_state_surface", "manifest-chain-2::retry-window", "REFERENCES_ARTIFACT", "control_plane_artifact_surface", "run_ledger::jsonl"),
-    ("storage_surface", "silver/chembl/activity", "HAS_SCHEMA_FIELD", "schema_field_surface", "silver/chembl/activity::activity_id"),
-    ("contract_surface", "chembl.activity", "HAS_SCHEMA_FIELD", "schema_field_surface", "silver/chembl/activity::activity_id"),
-    ("schema_field_surface", "silver/chembl/assay::assay_id", "PROMOTES_FIELD_TO", "schema_field_surface", "gold/chembl/assay::assay_id"),
-    ("schema_field_surface", "silver/composite/activity::compound_name", "DERIVES_FIELD_FROM", "schema_field_surface", "silver/chembl/compound_record::compound_name"),
+    (
+        "run_instance_surface",
+        "manifest-left",
+        "REFERENCES_ARTIFACT",
+        "control_plane_artifact_surface",
+        "run_manifest::json",
+    ),
+    (
+        "run_instance_surface",
+        "manifest-left",
+        "REFERENCES_ARTIFACT",
+        "control_plane_artifact_surface",
+        "effective_config_artifact::json",
+    ),
+    (
+        "run_instance_surface",
+        "manifest-chain-smoke",
+        "REFERENCES_ARTIFACT",
+        "control_plane_artifact_surface",
+        "run_ledger::jsonl",
+    ),
+    (
+        "run_instance_surface",
+        "manifest-chain-2",
+        "DESCRIBED_IN",
+        "test_artifact",
+        "tests/unit/application/services/test_run_manifest_inspection_service.py",
+    ),
+    (
+        "run_instance_surface",
+        "manifest-composite-quarantine",
+        "DEPENDS_ON",
+        "contract_surface",
+        "chembl.activity",
+    ),
+    (
+        "project",
+        "BioETL",
+        "HAS_RUNTIME_STATE",
+        "runtime_state_surface",
+        "manifest-chain-2::retry-window",
+    ),
+    (
+        "run_instance_surface",
+        "manifest-chain-2",
+        "HAS_RUNTIME_STATE",
+        "runtime_state_surface",
+        "manifest-chain-2::retry-window",
+    ),
+    (
+        "runtime_state_surface",
+        "manifest-chain-2::retry-window",
+        "DEPENDS_ON",
+        "pipeline_surface",
+        "chembl_activity",
+    ),
+    (
+        "runtime_state_surface",
+        "manifest-chain-2::retry-window",
+        "REFERENCES_ARTIFACT",
+        "control_plane_artifact_surface",
+        "run_ledger::jsonl",
+    ),
+    (
+        "storage_surface",
+        "silver/chembl/activity",
+        "HAS_SCHEMA_FIELD",
+        "schema_field_surface",
+        "silver/chembl/activity::activity_id",
+    ),
+    (
+        "contract_surface",
+        "chembl.activity",
+        "HAS_SCHEMA_FIELD",
+        "schema_field_surface",
+        "silver/chembl/activity::activity_id",
+    ),
+    (
+        "schema_field_surface",
+        "silver/chembl/assay::assay_id",
+        "PROMOTES_FIELD_TO",
+        "schema_field_surface",
+        "gold/chembl/assay::assay_id",
+    ),
+    (
+        "schema_field_surface",
+        "silver/composite/activity::compound_name",
+        "DERIVES_FIELD_FROM",
+        "schema_field_surface",
+        "silver/chembl/compound_record::compound_name",
+    ),
     ("project", "BioETL", "HAS_WORKFLOW", "workflow_surface", "tests"),
-    ("workflow_surface", "tests", "CONTAINS", "workflow_job_surface", "tests::governance-preflight"),
-    ("workflow_job_surface", "tests::governance-preflight", "EXECUTES_GATE", "quality_gate", "deterministic neo4j memory ontology invariants"),
-    ("workflow_job_surface", "tests::smoke-check", "USES_ACTION", "workflow_action_surface", "actions/upload-artifact"),
-    ("workflow_job_surface", "tests::smoke-check", "PUBLISHES_ARTIFACT", "workflow_artifact_surface", "tests::coverage-data-smoke"),
-    ("workflow_job_surface", "docker::docker-push", "REQUIRES_SECRET", "workflow_secret_surface", "GITHUB_TOKEN"),
+    (
+        "workflow_surface",
+        "tests",
+        "CONTAINS",
+        "workflow_job_surface",
+        "tests::governance-preflight",
+    ),
+    (
+        "workflow_job_surface",
+        "tests::governance-preflight",
+        "EXECUTES_GATE",
+        "quality_gate",
+        "deterministic neo4j memory ontology invariants",
+    ),
+    (
+        "workflow_job_surface",
+        "tests::smoke-check",
+        "USES_ACTION",
+        "workflow_action_surface",
+        "actions/upload-artifact",
+    ),
+    (
+        "workflow_job_surface",
+        "tests::smoke-check",
+        "PUBLISHES_ARTIFACT",
+        "workflow_artifact_surface",
+        "tests::coverage-data-smoke",
+    ),
+    (
+        "workflow_job_surface",
+        "docker::docker-push",
+        "REQUIRES_SECRET",
+        "workflow_secret_surface",
+        "GITHUB_TOKEN",
+    ),
     ("project", "BioETL", "HAS_CLI_COMMAND", "cli_command_surface", "bioetl run"),
-    ("cli_command_surface", "bioetl run", "RUNS_VIA", "execution_path", "uv run python -m bioetl run --pipeline"),
-    ("cli_command_surface", "bioetl run", "SIDE_EFFECTS_ON", "pipeline_surface", "chembl_activity"),
-    ("cli_command_surface", "scripts.memory sync", "RUNS_VIA", "execution_path", "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json"),
-    ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
-    ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/infrastructure/config/_base.py"),
-    ("doc_artifact", "scripts/engineering/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/engineering/dev/run_pytest.sh"),
-    ("script_surface", "scripts/engineering/dev/run_pytest.sh", "PROVIDES", "execution_path", "bash scripts/engineering/dev/run_pytest.sh"),
-    ("layer_family", "composition", "CONTAINS", "module_surface", "src/bioetl/composition/control_plane_api.py"),
+    (
+        "cli_command_surface",
+        "bioetl run",
+        "RUNS_VIA",
+        "execution_path",
+        "uv run python -m bioetl run --pipeline",
+    ),
+    (
+        "cli_command_surface",
+        "bioetl run",
+        "SIDE_EFFECTS_ON",
+        "pipeline_surface",
+        "chembl_activity",
+    ),
+    (
+        "cli_command_surface",
+        "scripts.memory sync",
+        "RUNS_VIA",
+        "execution_path",
+        "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json",
+    ),
+    (
+        "doc_artifact",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+        "DESCRIBES",
+        "module_surface",
+        "src/bioetl/domain/control_plane/run_manifest.py",
+    ),
+    (
+        "doc_artifact",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+        "DESCRIBES",
+        "module_surface",
+        "src/bioetl/infrastructure/config/_base.py",
+    ),
+    (
+        "doc_artifact",
+        "scripts/engineering/dev/README.md",
+        "DESCRIBES",
+        "execution_path",
+        "bash scripts/engineering/dev/run_pytest.sh",
+    ),
+    (
+        "script_surface",
+        "scripts/engineering/dev/run_pytest.sh",
+        "PROVIDES",
+        "execution_path",
+        "bash scripts/engineering/dev/run_pytest.sh",
+    ),
+    (
+        "layer_family",
+        "composition",
+        "CONTAINS",
+        "module_surface",
+        "src/bioetl/composition/control_plane_api.py",
+    ),
 )
 
 FORBIDDEN_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("repo_zone", "docs", "CONTAINS", "directory_surface", "docs/99-archive"),
-    ("pipeline_surface", "composite_activity", "OBSERVED_BY", "dashboard_surface", "bioetl-silver-reject-explorer"),
-    ("alert_surface", "BioETLDQSoftThresholdExceeded", "DEPENDS_ON", "pipeline_surface", "composite_activity"),
-    ("test_artifact", "tests/unit/scripts/ops/test_neo4j_memory_sync.py", "TESTS_LAYER", "layer_family", "scripts"),
-    ("test_artifact", "tests/integration/interfaces/test_cli_checkpoint_list.py", "TESTS_PACKAGE_FAMILY", "package_family", "interfaces/test_cli_checkpoint_list.py"),
-    ("test_artifact", "tests/unit/domain/configs/test_base_configs.py", "TESTS_PACKAGE_FAMILY", "package_family", "domain/configs"),
-    ("test_artifact", "tests/unit/domain/hash_policy/test_hash_policy_stability.py", "TESTS_PACKAGE_FAMILY", "package_family", "domain/hash_policy"),
-    ("test_artifact", "tests/unit/infrastructure/factories/test_factories.py", "TESTS_PACKAGE_FAMILY", "package_family", "infrastructure/factories"),
-    ("test_artifact", "tests/unit/interfaces/factories/test_pipeline_factories.py", "TESTS_PACKAGE_FAMILY", "package_family", "interfaces/factories"),
+    (
+        "pipeline_surface",
+        "composite_activity",
+        "OBSERVED_BY",
+        "dashboard_surface",
+        "bioetl-silver-reject-explorer",
+    ),
+    (
+        "alert_surface",
+        "BioETLDQSoftThresholdExceeded",
+        "DEPENDS_ON",
+        "pipeline_surface",
+        "composite_activity",
+    ),
+    (
+        "test_artifact",
+        "tests/unit/scripts/ops/test_neo4j_memory_sync.py",
+        "TESTS_LAYER",
+        "layer_family",
+        "scripts",
+    ),
+    (
+        "test_artifact",
+        "tests/integration/interfaces/test_cli_checkpoint_list.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "interfaces/test_cli_checkpoint_list.py",
+    ),
+    (
+        "test_artifact",
+        "tests/unit/domain/configs/test_base_configs.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "domain/configs",
+    ),
+    (
+        "test_artifact",
+        "tests/unit/domain/hash_policy/test_hash_policy_stability.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "domain/hash_policy",
+    ),
+    (
+        "test_artifact",
+        "tests/unit/infrastructure/factories/test_factories.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "infrastructure/factories",
+    ),
+    (
+        "test_artifact",
+        "tests/unit/interfaces/factories/test_pipeline_factories.py",
+        "TESTS_PACKAGE_FAMILY",
+        "package_family",
+        "interfaces/factories",
+    ),
 )
 
 
 def _relation_keys(snapshot: object) -> set[RelationKey]:
     return {
-        (rel.source.label, rel.source.name, rel.relation_type, rel.target.label, rel.target.name)
+        (
+            rel.source.label,
+            rel.source.name,
+            rel.relation_type,
+            rel.target.label,
+            rel.target.name,
+        )
         for rel in snapshot.relations.values()
     }
 
 
-def _assert_relation_membership(relation_keys: set[RelationKey], expected: tuple[RelationKey, ...]) -> None:
+def _assert_relation_membership(
+    relation_keys: set[RelationKey], expected: tuple[RelationKey, ...]
+) -> None:
     for relation_key in expected:
         assert relation_key in relation_keys
 
 
-def test_normalization_evidence_statements_cover_registry_and_fallback_metrics() -> None:
+def test_normalization_evidence_statements_cover_registry_and_fallback_metrics() -> (
+    None
+):
     statements = _normalization_evidence_statements()
     chembl_activity = next(
-        item for item in statements if item["parameters"]["pipeline_name"] == "chembl_activity"
+        item
+        for item in statements
+        if item["parameters"]["pipeline_name"] == "chembl_activity"
     )
     assay_parameters = next(
-        item for item in statements if item["parameters"]["pipeline_name"] == "chembl_assay_parameters"
+        item
+        for item in statements
+        if item["parameters"]["pipeline_name"] == "chembl_assay_parameters"
     )
 
     chembl_params = chembl_activity["parameters"]
@@ -577,17 +1479,30 @@ def test_normalization_evidence_statements_cover_registry_and_fallback_metrics()
     assert assay_params["fallback_field_count"] == 0
 
 
-def test_apply_normalization_evidence_only_executes_batched_statements(monkeypatch) -> None:
+def test_apply_normalization_evidence_only_executes_batched_statements(
+    monkeypatch,
+) -> None:
     executed_batches: list[list[dict[str, object]]] = []
     batch_contexts: list[str | None] = []
     stub_statements = [
-        {"statement": "RETURN 1 AS ok", "parameters": {"pipeline_name": "chembl_activity"}},
-        {"statement": "RETURN 1 AS ok", "parameters": {"pipeline_name": "pubmed_publication"}},
-        {"statement": "RETURN 1 AS ok", "parameters": {"pipeline_name": "crossref_publication"}},
+        {
+            "statement": "RETURN 1 AS ok",
+            "parameters": {"pipeline_name": "chembl_activity"},
+        },
+        {
+            "statement": "RETURN 1 AS ok",
+            "parameters": {"pipeline_name": "pubmed_publication"},
+        },
+        {
+            "statement": "RETURN 1 AS ok",
+            "parameters": {"pipeline_name": "crossref_publication"},
+        },
     ]
 
     class StubClient:
-        def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
+        def __init__(
+            self, base_uri: str, username: str, password: str, database: str
+        ) -> None:
             self.base_uri = base_uri
             self.username = username
             self.password = password
@@ -649,7 +1564,9 @@ def test_duplication_analysis_config_excludes_normalization_registry_path() -> N
     assert family.name == "normalization_profiles"
 
 
-def _assert_relation_absence(relation_keys: set[RelationKey], forbidden: tuple[RelationKey, ...]) -> None:
+def _assert_relation_absence(
+    relation_keys: set[RelationKey], forbidden: tuple[RelationKey, ...]
+) -> None:
     for relation_key in forbidden:
         assert relation_key not in relation_keys
 
@@ -673,7 +1590,9 @@ def test_snapshot_enriches_current_normalization_topology() -> None:
     )
     assert int(chembl_activity.properties["profile_field_count"]) > 0
 
-    assay_parameters = snapshot.nodes[NodeKey("pipeline_surface", "chembl_assay_parameters")]
+    assay_parameters = snapshot.nodes[
+        NodeKey("pipeline_surface", "chembl_assay_parameters")
+    ]
     assert assay_parameters.properties["normalization_profile_registered"] is True
     assert (
         assay_parameters.properties["normalization_profile_module_path"]
@@ -704,7 +1623,9 @@ def test_snapshot_contains_duplication_clusters_with_promotion_targets() -> None
     _, snapshot = _snapshot()
 
     duplication_clusters = [
-        node for node in snapshot.nodes.values() if node.key.label == "duplication_cluster"
+        node
+        for node in snapshot.nodes.values()
+        if node.key.label == "duplication_cluster"
     ]
     assert duplication_clusters
 
@@ -713,17 +1634,23 @@ def test_snapshot_contains_duplication_clusters_with_promotion_targets() -> None
         for rel in snapshot.relations.values()
         if rel.source.label == "duplication_cluster"
     }
-    assert ("duplication_cluster", "CONTAINS", "method_surface") in cluster_relations or (
+    assert (
+        "duplication_cluster",
+        "CONTAINS",
+        "method_surface",
+    ) in cluster_relations or (
         "duplication_cluster",
         "CONTAINS",
         "function_surface",
     ) in cluster_relations
     assert any(
-        rel.source.label == "duplication_cluster" and rel.relation_type == "CAN_PROMOTE_TO"
+        rel.source.label == "duplication_cluster"
+        and rel.relation_type == "CAN_PROMOTE_TO"
         for rel in snapshot.relations.values()
     )
     assert any(
-        rel.relation_type == "COVERED_BY_TEST" and rel.source.label == "duplication_cluster"
+        rel.relation_type == "COVERED_BY_TEST"
+        and rel.source.label == "duplication_cluster"
         for rel in snapshot.relations.values()
     )
 
@@ -747,11 +1674,14 @@ def test_snapshot_contains_complexity_candidates_with_simplification_links() -> 
     _, snapshot = _snapshot()
 
     complexity_candidates = [
-        node for node in snapshot.nodes.values() if node.key.label == "complexity_candidate"
+        node
+        for node in snapshot.nodes.values()
+        if node.key.label == "complexity_candidate"
     ]
     assert complexity_candidates
     assert any(
-        rel.source.label in {"module_surface", "class_surface", "function_surface", "method_surface"}
+        rel.source.label
+        in {"module_surface", "class_surface", "function_surface", "method_surface"}
         and rel.relation_type == "HAS_COMPLEXITY_SIGNAL"
         and rel.target.label == "complexity_candidate"
         for rel in snapshot.relations.values()
@@ -765,7 +1695,13 @@ def test_snapshot_contains_complexity_candidates_with_simplification_links() -> 
 
 def test_sync_statements_include_management_metadata() -> None:
     _, snapshot = _snapshot()
-    project_node = snapshot.nodes[next(key for key in snapshot.nodes if key.label == "project" and key.name == "BioETL")]
+    project_node = snapshot.nodes[
+        next(
+            key
+            for key in snapshot.nodes
+            if key.label == "project" and key.name == "BioETL"
+        )
+    ]
     relation = next(iter(snapshot.relations.values()))
 
     node_statement = _node_statement(project_node, "sync-run-1")
@@ -787,14 +1723,19 @@ def test_prune_statements_target_repo_sync_subgraph() -> None:
     prune_relations_statement = _prune_stale_relations_statement("sync-run-2")
     prune_nodes_statement = _prune_stale_nodes_statement("sync-run-2")
     full_reset_statement = _delete_managed_wave_nodes_statement("module_surface", 10)
-    legacy_prune_statement = _prune_legacy_unmanaged_nodes_statement(["quality_gate", "execution_path"])
+    legacy_prune_statement = _prune_legacy_unmanaged_nodes_statement(
+        ["quality_gate", "execution_path"]
+    )
 
     assert "type(r) IN $relation_types" in reset_statement["statement"]
     assert reset_statement["parameters"]["relation_types"] == ["CONTAINS", "DEFINED_BY"]
     assert reset_statement["parameters"]["managed_by"] == DEFAULT_MANAGED_BY
     assert reset_statement["parameters"]["ingest_wave"] == DEFAULT_INGEST_WAVE
 
-    assert "coalesce(r.sync_run, '') <> $sync_run" in prune_relations_statement["statement"]
+    assert (
+        "coalesce(r.sync_run, '') <> $sync_run"
+        in prune_relations_statement["statement"]
+    )
     assert prune_relations_statement["parameters"]["managed_by"] == DEFAULT_MANAGED_BY
     assert prune_relations_statement["parameters"]["ingest_wave"] == DEFAULT_INGEST_WAVE
     assert prune_relations_statement["parameters"]["sync_run"] == "sync-run-2"
@@ -807,9 +1748,15 @@ def test_prune_statements_target_repo_sync_subgraph() -> None:
     assert full_reset_statement["parameters"]["ingest_wave"] == DEFAULT_INGEST_WAVE
     assert full_reset_statement["parameters"]["managed_by"] == DEFAULT_MANAGED_BY
 
-    assert "any(label IN labels(n) WHERE label IN $managed_labels)" in legacy_prune_statement["statement"]
+    assert (
+        "any(label IN labels(n) WHERE label IN $managed_labels)"
+        in legacy_prune_statement["statement"]
+    )
     assert "coalesce(n.managed_by, '') = ''" in legacy_prune_statement["statement"]
-    assert legacy_prune_statement["parameters"]["managed_labels"] == ["quality_gate", "execution_path"]
+    assert legacy_prune_statement["parameters"]["managed_labels"] == [
+        "quality_gate",
+        "execution_path",
+    ]
 
 
 def test_default_legacy_prune_labels_cover_repo_managed_surfaces() -> None:
@@ -923,17 +1870,27 @@ def test_storage_surface_helpers_merge_base_and_pipeline_overrides() -> None:
 
 
 def test_storage_ref_from_output_path_normalizes_data_output_prefix() -> None:
-    assert _storage_ref_from_output_path("data/output/silver/composite/activity") == "silver/composite/activity"
-    assert _storage_ref_from_output_path("silver/chembl/activity") == "silver/chembl/activity"
+    assert (
+        _storage_ref_from_output_path("data/output/silver/composite/activity")
+        == "silver/composite/activity"
+    )
+    assert (
+        _storage_ref_from_output_path("silver/chembl/activity")
+        == "silver/chembl/activity"
+    )
 
 
-def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_links() -> None:
+def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_links() -> (
+    None
+):
     _, snapshot = _snapshot()
 
     filtered = _filtered_snapshot(snapshot, only_storage_layer=True)
     relation_keys = _relation_keys(filtered)
 
-    assert ("storage_surface", "silver/chembl/activity") in {(key.label, key.name) for key in filtered.nodes}
+    assert ("storage_surface", "silver/chembl/activity") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
     assert ("control_plane_artifact_surface", "run_manifest::json") in {
         (key.label, key.name) for key in filtered.nodes
     }
@@ -976,13 +1933,17 @@ def test_filtered_snapshot_storage_layer_preserves_storage_runtime_and_artifact_
     ) in relation_keys
 
 
-def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_links() -> None:
+def test_filtered_snapshot_runtime_evidence_layer_preserves_runtime_support_links() -> (
+    None
+):
     _, snapshot = _snapshot()
 
     filtered = _filtered_snapshot(snapshot, only_runtime_evidence_layer=True)
     relation_keys = _relation_keys(filtered)
 
-    assert ("runtime_evidence_surface", "run_manifest") in {(key.label, key.name) for key in filtered.nodes}
+    assert ("runtime_evidence_surface", "run_manifest") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
     assert ("run_instance_surface", "manifest-chain-2") in {
         (key.label, key.name) for key in filtered.nodes
     }
@@ -1021,7 +1982,9 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
     filtered = _filtered_snapshot(snapshot, only_workflow_graph=True)
     relation_keys = _relation_keys(filtered)
 
-    assert ("workflow_surface", "tests") in {(key.label, key.name) for key in filtered.nodes}
+    assert ("workflow_surface", "tests") in {
+        (key.label, key.name) for key in filtered.nodes
+    }
     assert ("workflow_job_surface", "tests::governance-preflight") in {
         (key.label, key.name) for key in filtered.nodes
     }
@@ -1063,15 +2026,18 @@ def test_filtered_snapshot_workflow_graph_preserves_job_gate_and_run_targets() -
         "tests::coverage-data-smoke",
     ) in relation_keys
     assert any(
-        relation_key[2] == "CALLS_WORKFLOW" and relation_key[3] == "workflow_call_surface"
+        relation_key[2] == "CALLS_WORKFLOW"
+        and relation_key[3] == "workflow_call_surface"
         for relation_key in relation_keys
     )
     assert any(
-        relation_key[2] == "HAS_MATRIX_VARIANT" and relation_key[3] == "workflow_matrix_variant_surface"
+        relation_key[2] == "HAS_MATRIX_VARIANT"
+        and relation_key[3] == "workflow_matrix_variant_surface"
         for relation_key in relation_keys
     )
     assert any(
-        relation_key[2] == "EMITS_OUTPUT" and relation_key[3] == "workflow_output_surface"
+        relation_key[2] == "EMITS_OUTPUT"
+        and relation_key[3] == "workflow_output_surface"
         for relation_key in relation_keys
     )
 
@@ -1092,9 +2058,10 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         "module_surface",
         "src/bioetl/domain/control_plane/run_manifest.py",
     ) in relation_keys
-    assert ("doc_claim_surface", "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96") in {
-        (key.label, key.name) for key in filtered.nodes
-    }
+    assert (
+        "doc_claim_surface",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96",
+    ) in {(key.label, key.name) for key in filtered.nodes}
     assert (
         "doc_artifact",
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
@@ -1119,15 +2086,18 @@ def test_snapshot_contains_workflow_execution_cli_and_claim_extensions() -> None
     assert any(key.label == "doc_claim_surface" for key in snapshot.nodes)
 
     assert any(
-        relation_key[0] == "workflow_job_surface" and relation_key[2] == "CALLS_WORKFLOW"
+        relation_key[0] == "workflow_job_surface"
+        and relation_key[2] == "CALLS_WORKFLOW"
         for relation_key in relation_keys
     )
     assert any(
-        relation_key[0] == "workflow_job_surface" and relation_key[2] == "HAS_MATRIX_VARIANT"
+        relation_key[0] == "workflow_job_surface"
+        and relation_key[2] == "HAS_MATRIX_VARIANT"
         for relation_key in relation_keys
     )
     assert any(
-        relation_key[2] == "EMITS_OUTPUT" and relation_key[3] == "workflow_output_surface"
+        relation_key[2] == "EMITS_OUTPUT"
+        and relation_key[3] == "workflow_output_surface"
         for relation_key in relation_keys
     )
     assert any(
@@ -1155,8 +2125,14 @@ def test_workflow_quality_gates_detect_repo_gate_signals() -> None:
 
 
 def test_normalize_docs_repo_reference_strips_globs_and_keeps_repo_paths() -> None:
-    assert _normalize_docs_repo_reference("src/bioetl/domain/control_plane/**") == "src/bioetl/domain/control_plane"
-    assert _normalize_docs_repo_reference("configs/providers/*.yaml") == "configs/providers"
+    assert (
+        _normalize_docs_repo_reference("src/bioetl/domain/control_plane/**")
+        == "src/bioetl/domain/control_plane"
+    )
+    assert (
+        _normalize_docs_repo_reference("configs/providers/*.yaml")
+        == "configs/providers"
+    )
     assert _normalize_docs_repo_reference("README.md") == "README.md"
     assert _normalize_docs_repo_reference("https://example.com/spec") is None
 
@@ -1188,10 +2164,14 @@ def test_targeted_apply_required_anchor_labels_identifies_missing_base_labels() 
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
     class_surface = snapshot.add_node("class_surface", "pkg.Example")
-    complexity_candidate = snapshot.add_node("complexity_candidate", "class_surface:pkg.Example")
+    complexity_candidate = snapshot.add_node(
+        "complexity_candidate", "class_surface:pkg.Example"
+    )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
-    snapshot.add_relation(complexity_candidate, "CANDIDATE_FOR_SIMPLIFICATION", class_surface)
+    snapshot.add_relation(
+        complexity_candidate, "CANDIDATE_FOR_SIMPLIFICATION", class_surface
+    )
 
     filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
 
@@ -1210,7 +2190,9 @@ def test_only_label_filter_does_not_pull_external_analysis_anchors() -> None:
         "function_surface:pkg.normalize",
     )
     snapshot.add_relation(duplication_cluster, "CONTAINS", function_surface)
-    snapshot.add_relation(function_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
+    snapshot.add_relation(
+        function_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate
+    )
 
     filtered = _filtered_snapshot(
         snapshot,
@@ -1234,21 +2216,31 @@ def test_targeted_apply_external_anchor_keys_identifies_missing_base_nodes() -> 
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
     class_surface = snapshot.add_node("class_surface", "pkg.Example")
-    complexity_candidate = snapshot.add_node("complexity_candidate", "class_surface:pkg.Example")
+    complexity_candidate = snapshot.add_node(
+        "complexity_candidate", "class_surface:pkg.Example"
+    )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
-    snapshot.add_relation(complexity_candidate, "CANDIDATE_FOR_SIMPLIFICATION", class_surface)
+    snapshot.add_relation(
+        complexity_candidate, "CANDIDATE_FOR_SIMPLIFICATION", class_surface
+    )
 
     filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
 
-    assert _targeted_apply_external_anchor_keys(filtered) == (NodeKey("class_surface", "pkg.Example"),)
+    assert _targeted_apply_external_anchor_keys(filtered) == (
+        NodeKey("class_surface", "pkg.Example"),
+    )
 
 
-def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_graph_is_empty() -> None:
+def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_graph_is_empty() -> (
+    None
+):
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
     class_surface = snapshot.add_node("class_surface", "pkg.Example")
-    complexity_candidate = snapshot.add_node("complexity_candidate", "class_surface:pkg.Example")
+    complexity_candidate = snapshot.add_node(
+        "complexity_candidate", "class_surface:pkg.Example"
+    )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
     filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
@@ -1263,10 +2255,7 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_anchor_grap
         ) -> list[dict[str, object]]:
             assert context == "complexity-layer targeted sync prerequisite anchor check"
             assert parameters is not None
-            return [
-                {"label": label, "count": 0}
-                for label in parameters["labels"]
-            ]
+            return [{"label": label, "count": 0} for label in parameters["labels"]]
 
     try:
         _ensure_targeted_apply_prerequisites(
@@ -1292,7 +2281,10 @@ def test_missing_managed_anchor_keys_reports_specific_nodes() -> None:
             *,
             context: str | None = None,
         ) -> list[dict[str, object]]:
-            assert context == "complexity-layer targeted sync prerequisite anchor node check"
+            assert (
+                context
+                == "complexity-layer targeted sync prerequisite anchor node check"
+            )
             assert parameters is not None
             assert parameters["anchors"] == [
                 {"label": "class_surface", "name": "pkg.Example"},
@@ -1315,11 +2307,15 @@ def test_missing_managed_anchor_keys_reports_specific_nodes() -> None:
     assert missing == (NodeKey("module_surface", "src/pkg/example.py"),)
 
 
-def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_anchor_nodes_are_missing() -> None:
+def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_anchor_nodes_are_missing() -> (
+    None
+):
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
     class_surface = snapshot.add_node("class_surface", "pkg.Example")
-    complexity_candidate = snapshot.add_node("complexity_candidate", "class_surface:pkg.Example")
+    complexity_candidate = snapshot.add_node(
+        "complexity_candidate", "class_surface:pkg.Example"
+    )
     snapshot.add_relation(project, "CONTAINS", complexity_candidate)
     snapshot.add_relation(class_surface, "HAS_COMPLEXITY_SIGNAL", complexity_candidate)
     filtered = _filtered_snapshot(snapshot, only_complexity_layer=True)
@@ -1335,7 +2331,10 @@ def test_ensure_targeted_apply_prerequisites_raises_clear_error_when_specific_an
             assert parameters is not None
             if context == "complexity-layer targeted sync prerequisite anchor check":
                 return [{"label": "class_surface", "count": 1}]
-            if context == "complexity-layer targeted sync prerequisite anchor node check":
+            if (
+                context
+                == "complexity-layer targeted sync prerequisite anchor node check"
+            ):
                 return [{"label": "class_surface", "name": "pkg.Example", "count": 0}]
             raise AssertionError(f"Unexpected context: {context}")
 
@@ -1454,7 +2453,9 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
     query_calls: list[str] = []
 
     class StubClient:
-        def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
+        def __init__(
+            self, base_uri: str, username: str, password: str, database: str
+        ) -> None:
             self.base_uri = base_uri
             self.username = username
             self.password = password
@@ -1469,17 +2470,28 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
         ) -> list[dict[str, object]]:
             query_calls.append(context or "")
             if "UNWIND $labels AS label" in statement:
-                labels = list(parameters["labels"]) if isinstance(parameters, dict) else []
+                labels = (
+                    list(parameters["labels"]) if isinstance(parameters, dict) else []
+                )
                 return [
-                    {"label": label, "count": int(snapshot.stats()["labels"].get(label, 0))}
+                    {
+                        "label": label,
+                        "count": int(snapshot.stats()["labels"].get(label, 0)),
+                    }
                     for label in labels
                 ]
             if "UNWIND $relation_types AS relation_type" in statement:
-                relation_types = list(parameters["relation_types"]) if isinstance(parameters, dict) else []
+                relation_types = (
+                    list(parameters["relation_types"])
+                    if isinstance(parameters, dict)
+                    else []
+                )
                 return [
                     {
                         "relation_type": relation_type,
-                        "count": int(snapshot.stats()["relation_types"].get(relation_type, 0)),
+                        "count": int(
+                            snapshot.stats()["relation_types"].get(relation_type, 0)
+                        ),
                     }
                     for relation_type in relation_types
                 ]
@@ -1509,7 +2521,9 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
     query_calls: list[str] = []
 
     class StubClient:
-        def __init__(self, base_uri: str, username: str, password: str, database: str) -> None:
+        def __init__(
+            self, base_uri: str, username: str, password: str, database: str
+        ) -> None:
             self.base_uri = base_uri
             self.username = username
             self.password = password
@@ -1525,8 +2539,18 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
             query_calls.append(context or "")
             if context == "full audit label summary":
                 return [
-                    {"label": "complexity_candidate", "total": 2, "managed": 2, "unmanaged": 0},
-                    {"label": "retirement_candidate", "total": 5, "managed": 4, "unmanaged": 1},
+                    {
+                        "label": "complexity_candidate",
+                        "total": 2,
+                        "managed": 2,
+                        "unmanaged": 0,
+                    },
+                    {
+                        "label": "retirement_candidate",
+                        "total": 5,
+                        "managed": 4,
+                        "unmanaged": 1,
+                    },
                 ]
             if context == "full audit relation summary":
                 return [
@@ -1535,15 +2559,25 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
                 ]
             if context == "full audit orphan summary":
                 return [
-                    {"label": "retirement_candidate", "count": 1, "samples": ["stale-module.py"]},
+                    {
+                        "label": "retirement_candidate",
+                        "count": 1,
+                        "samples": ["stale-module.py"],
+                    },
                     {"label": "complexity_candidate", "count": 0, "samples": []},
                 ]
             if context == "full audit unmanaged summary":
                 return [
-                    {"label": "retirement_candidate", "count": 1, "samples": ["legacy-module.py"]},
+                    {
+                        "label": "retirement_candidate",
+                        "count": 1,
+                        "samples": ["legacy-module.py"],
+                    },
                     {"label": "complexity_candidate", "count": 0, "samples": []},
                 ]
-            raise AssertionError(f"Unexpected query context: {context}, statement={statement}")
+            raise AssertionError(
+                f"Unexpected query context: {context}, statement={statement}"
+            )
 
     monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
     root = Path(__file__).resolve().parents[4]
@@ -1561,7 +2595,9 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
     assert report["live"]["managed_relation_total"] == 4
 
 
-def test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks() -> None:
+def test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks() -> (
+    None
+):
     relation_groups = {
         "CANDIDATE_FOR_REMOVAL": [
             {"statement": "RETURN 1", "parameters": {}},
@@ -1599,7 +2635,9 @@ def test_verify_expected_group_counts_uses_sync_run_for_targeted_relation_checks
     assert any(params.get("sync_run") == "run-123" for params in seen_params)
 
 
-def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(monkeypatch, tmp_path: Path) -> None:
+def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(
+    monkeypatch, tmp_path: Path
+) -> None:
     snapshot = GraphSnapshot()
     snapshot.add_node("complexity_candidate", "candidate-1")
     captured_retry_sync_runs: list[str | None] = []
@@ -1609,11 +2647,18 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(monkey
         def execute(self, statements, *, context=None) -> dict[str, object]:
             return {"results": [], "errors": []}
 
-        def query(self, statement, parameters=None, *, context=None) -> list[dict[str, object]]:
+        def query(
+            self, statement, parameters=None, *, context=None
+        ) -> list[dict[str, object]]:
             return []
 
-    monkeypatch.setattr("scripts.memory.sync.resolve_neo4j_connection", lambda root, http_uri: ("http://localhost:7474", "neo4j", "password", "neo4j"))
-    monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", lambda *args, **kwargs: StubClient())
+    monkeypatch.setattr(
+        "scripts.memory.sync.resolve_neo4j_connection",
+        lambda root, http_uri: ("http://localhost:7474", "neo4j", "password", "neo4j"),
+    )
+    monkeypatch.setattr(
+        "scripts.memory.sync.Neo4jHttpClient", lambda *args, **kwargs: StubClient()
+    )
     monkeypatch.setattr("scripts.memory.sync._sync_run_id", lambda: "run-123")
 
     def _retry(*args, **kwargs) -> None:
@@ -1637,13 +2682,17 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(monkey
     assert captured_verify_sync_runs == ["run-123"]
 
 
-def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(monkeypatch, tmp_path: Path) -> None:
+def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(
+    monkeypatch, tmp_path: Path
+) -> None:
     snapshot = GraphSnapshot()
     snapshot.add_node("retirement_candidate", "retire-me.py")
     called: dict[str, int] = {"sync_snapshot": 0, "build_fast_analysis_audit_report": 0}
 
     monkeypatch.setattr("scripts.memory.sync.build_snapshot", lambda root: snapshot)
-    monkeypatch.setattr("scripts.memory.sync._filtered_snapshot", lambda current, **kwargs: current)
+    monkeypatch.setattr(
+        "scripts.memory.sync._filtered_snapshot", lambda current, **kwargs: current
+    )
 
     def _sync_snapshot(*args, **kwargs) -> None:
         called["sync_snapshot"] += 1
@@ -1672,7 +2721,9 @@ def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(monkeypatch, 
     assert called["build_fast_analysis_audit_report"] == 0
 
 
-def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing(monkeypatch) -> None:
+def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing(
+    monkeypatch,
+) -> None:
     snapshot = GraphSnapshot()
     project = snapshot.add_node("project", "BioETL")
     module = snapshot.add_node(
@@ -1709,7 +2760,9 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
     )
 
     def _fail_parse(path: Path) -> None:
-        raise AssertionError(f"AST parsing should not be used for complexity aggregation: {path}")
+        raise AssertionError(
+            f"AST parsing should not be used for complexity aggregation: {path}"
+        )
 
     monkeypatch.setattr("scripts.memory.sync._parse_python_ast", _fail_parse)
 
@@ -1786,16 +2839,24 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
         raise responses.pop(0)
 
     monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_transport_error)
-    client = Neo4jHttpClient("http://host.docker.internal:7474", "neo4j", "password", "neo4j")
+    client = Neo4jHttpClient(
+        "http://host.docker.internal:7474", "neo4j", "password", "neo4j"
+    )
 
     try:
-        client.execute([], context="normalization evidence batch 1/21 pipelines chembl_activity..chembl_activity")
+        client.execute(
+            [],
+            context="normalization evidence batch 1/21 pipelines chembl_activity..chembl_activity",
+        )
     except RuntimeError as exc:
         message = str(exc)
     else:  # pragma: no cover - defensive
         raise AssertionError("Expected RuntimeError")
 
-    assert "normalization evidence batch 1/21 pipelines chembl_activity..chembl_activity" in message
+    assert (
+        "normalization evidence batch 1/21 pipelines chembl_activity..chembl_activity"
+        in message
+    )
     assert "attempts:" in message
     assert "http://host.docker.internal:7474/db/neo4j/tx/commit" in message
     assert "http://localhost:7474/db/neo4j/tx/commit" in message
@@ -1813,7 +2874,8 @@ def test_snapshot_invariants_require_docs_to_code_drift_edges() -> None:
         key
         for key, relation in snapshot.relations.items()
         if relation.relation_type == "DESCRIBES"
-        and relation.source.label in {"doc_source_surface", "doc_artifact", "policy_surface"}
+        and relation.source.label
+        in {"doc_source_surface", "doc_artifact", "policy_surface"}
     ]
     for key in keys_to_delete:
         snapshot.relations.pop(key)
@@ -1837,8 +2899,13 @@ def test_snapshot_invariants_require_workflow_job_parent_links() -> None:
 
     issues = snapshot_invariant_issues(snapshot)
 
-    assert "missing workflow_surface -> CONTAINS -> workflow_job_surface links" in issues
-    assert any(issue.startswith("workflow jobs without workflow parent links:") for issue in issues)
+    assert (
+        "missing workflow_surface -> CONTAINS -> workflow_job_surface links" in issues
+    )
+    assert any(
+        issue.startswith("workflow jobs without workflow parent links:")
+        for issue in issues
+    )
 
 
 def test_snapshot_invariants_require_runtime_evidence_support_links() -> None:
@@ -1854,8 +2921,14 @@ def test_snapshot_invariants_require_runtime_evidence_support_links() -> None:
 
     issues = snapshot_invariant_issues(snapshot)
 
-    assert "missing runtime_evidence_surface -> WRITES_TO -> storage_surface links" in issues
-    assert any(issue.startswith("runtime evidence surfaces without support links:") for issue in issues)
+    assert (
+        "missing runtime_evidence_surface -> WRITES_TO -> storage_surface links"
+        in issues
+    )
+    assert any(
+        issue.startswith("runtime evidence surfaces without support links:")
+        for issue in issues
+    )
 
 
 def test_snapshot_invariants_require_control_plane_artifact_links() -> None:
@@ -1871,8 +2944,14 @@ def test_snapshot_invariants_require_control_plane_artifact_links() -> None:
 
     issues = snapshot_invariant_issues(snapshot)
 
-    assert "missing runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface links" in issues
-    assert any(issue.startswith("control-plane artifacts without runtime/storage links:") for issue in issues)
+    assert (
+        "missing runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface links"
+        in issues
+    )
+    assert any(
+        issue.startswith("control-plane artifacts without runtime/storage links:")
+        for issue in issues
+    )
 
 
 def test_snapshot_invariants_require_run_instance_artifact_links() -> None:
@@ -1888,8 +2967,14 @@ def test_snapshot_invariants_require_run_instance_artifact_links() -> None:
 
     issues = snapshot_invariant_issues(snapshot)
 
-    assert "missing run_instance_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links" in issues
-    assert any(issue.startswith("run instance surfaces without support links:") for issue in issues)
+    assert (
+        "missing run_instance_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links"
+        in issues
+    )
+    assert any(
+        issue.startswith("run instance surfaces without support links:")
+        for issue in issues
+    )
 
 
 def test_snapshot_invariants_require_runtime_state_links() -> None:
@@ -1905,8 +2990,13 @@ def test_snapshot_invariants_require_runtime_state_links() -> None:
 
     issues = snapshot_invariant_issues(snapshot)
 
-    assert "missing project -> HAS_RUNTIME_STATE -> runtime_state_surface links" in issues
-    assert any(issue.startswith("runtime state surfaces without support links:") for issue in issues)
+    assert (
+        "missing project -> HAS_RUNTIME_STATE -> runtime_state_surface links" in issues
+    )
+    assert any(
+        issue.startswith("runtime state surfaces without support links:")
+        for issue in issues
+    )
 
 
 def test_snapshot_invariants_require_schema_field_links() -> None:
@@ -1922,5 +3012,11 @@ def test_snapshot_invariants_require_schema_field_links() -> None:
 
     issues = snapshot_invariant_issues(snapshot)
 
-    assert "missing storage_surface -> HAS_SCHEMA_FIELD -> schema_field_surface links" in issues
-    assert any(issue.startswith("schema fields without storage/contract/lineage links:") for issue in issues)
+    assert (
+        "missing storage_surface -> HAS_SCHEMA_FIELD -> schema_field_surface links"
+        in issues
+    )
+    assert any(
+        issue.startswith("schema fields without storage/contract/lineage links:")
+        for issue in issues
+    )

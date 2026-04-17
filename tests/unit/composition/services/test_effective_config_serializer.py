@@ -116,13 +116,9 @@ class TestEffectiveConfigSerializer:
         # Verify source refs
         semantic = parsed["semantic_artifact"]
         assert len(semantic["source_refs"]) == 2
+        assert semantic["source_refs"][0]["source_path"] == "configs/base/pipeline.yaml"
         assert (
-            semantic["source_refs"][0]["source_path"]
-            == "configs/base/pipeline.yaml"
-        )
-        assert (
-            semantic["source_refs"][1]["source_path"]
-            == "configs/providers/chembl.yaml"
+            semantic["source_refs"][1]["source_path"] == "configs/providers/chembl.yaml"
         )
 
     def test_serialize_artifact_with_dq_policies(self) -> None:
@@ -527,9 +523,7 @@ class TestEffectiveConfigSerializer:
         parsed = json.loads(json_results[0])
         assert parsed["artifact_id"] == "test_artifact"
         assert (
-            parsed["semantic_artifact"]["dq_policy_snapshots"][0][
-                "default_disposition"
-            ]
+            parsed["semantic_artifact"]["dq_policy_snapshots"][0]["default_disposition"]
             == "warn"
         )
 
@@ -582,10 +576,9 @@ class TestEffectiveConfigSerializer:
             created_at=datetime(2025, 1, 1, 12, 0, 0),
         )
 
-        assert (
-            self.serializer.serialize_semantic_artifact(artifact1)
-            == self.serializer.serialize_semantic_artifact(artifact2)
-        )
+        assert self.serializer.serialize_semantic_artifact(
+            artifact1
+        ) == self.serializer.serialize_semantic_artifact(artifact2)
 
 
 class TestHashDeterminism:

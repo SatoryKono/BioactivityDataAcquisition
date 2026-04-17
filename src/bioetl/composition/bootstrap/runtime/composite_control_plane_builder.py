@@ -100,7 +100,9 @@ def build_composite_control_plane_bundle(
     _manifest_enabled, ledger_enabled = resolve_composite_control_plane_flags(
         infra_context.settings
     )
-    control_plane = getattr(getattr(infra_context.settings, "pipeline", None), "control_plane", None)
+    control_plane = getattr(
+        getattr(infra_context.settings, "pipeline", None), "control_plane", None
+    )
     required_profile = getattr(
         control_plane,
         "required_persistence_profile",

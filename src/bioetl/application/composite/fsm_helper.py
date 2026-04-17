@@ -19,6 +19,7 @@ class ResumePhaseInfo:
     phase: CompositePipelineState
     description: str
 
+
 ResumePhasePlan = ResumePhaseInfo
 
 
@@ -242,14 +243,21 @@ class FSMStateHelperService:
 # Backward-compatible alias for iterative NAME-001 migration.
 import warnings
 
+
 class FSMStateHelper(FSMStateHelperService):
     def __init__(self, *args, **kwargs):
         warnings.warn(
             "FSMStateHelper is deprecated and will be removed in v2.0. "
             "Use FSMStateHelperService instead.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         super().__init__(*args, **kwargs)
 
-__all__ = ["FSMStateHelper", "FSMStateHelperService", "ResumePhaseInfo", "ResumePhasePlan"]
+
+__all__ = [
+    "FSMStateHelper",
+    "FSMStateHelperService",
+    "ResumePhaseInfo",
+    "ResumePhasePlan",
+]
