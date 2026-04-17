@@ -18,6 +18,7 @@ __all__ = [
     "FetchFilteredPort",
     "FilterableStubMixin",
     "NotSupportedMultiFilterMixin",
+    "raising_async_iterator",
 ]
 
 
@@ -27,6 +28,24 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
+
+
+class _RaisingAsyncIterator:
+    """Async iterator that raises a provided exception when consumed."""
+
+    def __init__(self, exc: BaseException) -> None:
+        self._exc = exc
+
+    def __aiter__(self) -> "_RaisingAsyncIterator":
+        return self
+
+    async def __anext__(self) -> JsonDict:
+        raise self._exc
+
+
+def raising_async_iterator(exc: BaseException) -> AsyncIterator[JsonDict]:
+    """Return an async iterator that raises ``exc`` on first iteration."""
+    return _RaisingAsyncIterator(exc)
 
 
 @runtime_checkable
@@ -74,7 +93,7 @@ class NotSupportedMultiFilterMixin:
 
     provider_name: str  # Must be defined by the adapter class
 
-    async def fetch_multi_filtered(
+    def fetch_multi_filtered(
         self,
         entity_type: str,
         filters: dict[str, list[str]],
@@ -99,11 +118,12 @@ class NotSupportedMultiFilterMixin:
         # Mark unused parameters
         del entity_type, filters, limit
 
-        raise NotImplementedError(
-            f"{self.provider_name} does not support multi-field filtering. "
-            "Use fetch_filtered() with a single filter_field instead."
+        return raising_async_iterator(
+            NotImplementedError(
+                f"{self.provider_name} does not support multi-field filtering. "
+                "Use fetch_filtered() with a single filter_field instead."
+            )
         )
-        yield {}  # pragma: no cover - keeps AsyncIterator contract
 
 
 class DelegatingFallbackMixin:

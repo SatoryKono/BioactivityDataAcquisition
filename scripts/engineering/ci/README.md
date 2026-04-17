@@ -5,20 +5,20 @@ CI orchestration, resiliency runners, and periodic quality reports.
 ## Unified Entry Point
 
 ```bash
-python -m scripts.ci --help
-python -m scripts.ci <command> [args...]
+python -m scripts.engineering.ci --help
+python -m scripts.engineering.ci <command> [args...]
 ```
 
 ## Commands
 
 | Command | Script | Description |
 |---------|--------|-------------|
-| `run-tests` | `scripts/ci/run_pytest_resilient.py` | Run pytest with resilient retry logic |
-| `quality-gate` | `scripts/ci/quality_integral_gate.py` | Integral quality gate for CI with descriptive test-health classification |
-| `e2e-skip-rate` | `scripts/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold |
-| `e2e-rerun` | `scripts/ci/check_e2e_rerun_stability.py` | Check E2E rerun stability |
-| `debt-report` | `scripts/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report |
-| `apply-ci-fixes` | `scripts/ci/apply_ci_fixes.py` | One-off GitHub-hosted workflow repair helper requiring explicit token input |
+| `run-tests` | `scripts/engineering/ci/run_pytest_resilient.py` | Run pytest with resilient retry logic |
+| `quality-gate` | `scripts/engineering/ci/quality_integral_gate.py` | Integral quality gate for CI with descriptive test-health classification |
+| `e2e-skip-rate` | `scripts/engineering/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold |
+| `e2e-rerun` | `scripts/engineering/ci/check_e2e_rerun_stability.py` | Check E2E rerun stability |
+| `debt-report` | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report |
+| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py` | One-off GitHub-hosted workflow repair helper requiring explicit token input |
 
 ## When to Use
 
@@ -40,7 +40,7 @@ Canonical taxonomy:
 
 | File | Description |
 |------|-------------|
-| `scripts/ci/apply-ci-optimizations.ps1` | PowerShell CI optimization script |
-| `scripts/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization |
-| `scripts/ci/_compatibility_registry.py` | Shared compatibility registry loader used by telemetry/reporting helpers |
-| `scripts/ci/_compatibility_telemetry.py` | Compatibility inventory telemetry helper used by architecture reporting flows |
+| `scripts/engineering/ci/apply-ci-optimizations.ps1` | PowerShell CI optimization script |
+| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization |
+| `scripts/engineering/ci/_compatibility_registry.py` | Shared compatibility registry loader used by telemetry/reporting helpers |
+| `scripts/engineering/ci/_compatibility_telemetry.py` | Compatibility inventory telemetry helper used by architecture reporting flows |

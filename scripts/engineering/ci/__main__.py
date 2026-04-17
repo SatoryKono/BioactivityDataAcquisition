@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Unified entry point for scripts/ci/ commands.
+"""Unified entry point for scripts/engineering/ci/ commands.
 
 Usage:
-    python -m scripts.ci <command> [args...]
-    python -m scripts.ci --help
+    python -m scripts.engineering.ci <command> [args...]
+    python -m scripts.engineering.ci --help
 
 Commands:
     run-tests       Run pytest with resilient retry logic

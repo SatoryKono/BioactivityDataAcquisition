@@ -192,7 +192,7 @@ async def _run_health_server(host: str, port: int) -> None:
         while True:
             await asyncio.sleep(1)
     except asyncio.CancelledError:
-        pass  # Why: shutdown loop exit; CancelledError is the normal stop signal
+        raise
     finally:
         await server.stop()
         if quarantine_service is not None:

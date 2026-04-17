@@ -104,7 +104,6 @@ class UniProtIDMappingClient(
             "Use IDMappingDataSource for pipeline integration, "
             "or call map_ids() directly for ID mapping operations."
         )
-        yield {}  # pragma: no cover - keeps AsyncIterator contract
 
     def __repr__(self) -> str:
         """Return string representation."""

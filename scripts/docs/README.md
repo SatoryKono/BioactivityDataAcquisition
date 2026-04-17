@@ -11,8 +11,7 @@ python -m scripts.docs <command> [args...]
 
 ## Internal Structure
 
-The command surface stays compatibility-first at the top level of `scripts/docs/`,
-but shared logic is now consolidated under focused helpers:
+Canonical implementations now live under focused package subdirectories:
 
 - `scripts/docs/checks/`: validation, drift, KPI, verification entrypoints
 - `scripts/docs/build/`: MkDocs build entrypoints
@@ -22,15 +21,29 @@ but shared logic is now consolidated under focused helpers:
 - `scripts/docs/common/markdown.py`: shared markdown/link/nav regex helpers
 - `scripts/docs/common/xlsx.py`: shared low-level XLSX zip/XML helpers for workbook tooling
 
-Top-level command files remain in place as compatibility shims so existing CI
-jobs, docs, tests, and direct script invocations keep working while source code
-is consolidated incrementally.
+Top-level `scripts/docs/*.py` files now exist primarily as compatibility shims so
+existing CI jobs, docs, tests, and direct script invocations keep working while
+the canonical source of truth lives under `checks/`, `build/`, `fixers/`, and
+`matrix/`.
+
+## Compatibility Layer
+
+Compatibility wrappers are intentionally kept for:
+
+- direct file execution from CI, docs, or local habits such as `python scripts/docs/...`
+- tests that import or monkeypatch historical top-level modules
+- shell-oriented build entrypoints such as `bash scripts/docs/build_docs_site.sh`
+
+The only notable special case is `scripts/docs/check_doc_links.py`: it remains an
+`exec`-based shim so legacy tests can still patch private helpers on the historic
+module surface without changing test semantics.
 
 ## Commands
 
 | Command                               | Script                                                       | Description                                                                           |
 | ------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | `verify`                              | `scripts/docs/checks/verify.py`                              | Run the canonical docs verification chain (links, drift, docstrings, strict build)   |
+| `build-site`                          | `scripts/docs/build/mkdocs_build.py`                         | Build the MkDocs site through the packaged Python entrypoint                          |
 | `check-links`                         | `scripts/docs/checks/check_links.py`                         | Check documentation links, specs, configs, and mkdocs nav classification              |
 | `check-drift`                         | `scripts/docs/checks/check_drift.py`                         | Check documentation drift (ports, classes, runtime mirrors, freshness)                |
 | `check-docstrings`                    | `scripts/docs/checks/check_docstrings.py`                    | Check docstring coverage                                                              |
@@ -43,10 +56,11 @@ is consolidated incrementally.
 | `filter-matrix-rows`                  | `scripts/docs/matrix/filter_rows.py`                         | Remove rows from the canonical ChEMBL matrix workbook by column value                 |
 | `normalize-matrix-values`             | `scripts/docs/matrix/normalize_values.py`                    | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |
 | `sync-matrix-structural-policy`       | `scripts/docs/matrix/sync_structural_policy.py`              | Reconcile workbook policy columns with the current structural Silver policy semantics |
-| `fix-links-auto`                      | `scripts/docs/fix_doc_links_auto.py`                         | Auto-fix broken documentation links                                                   |
-| `fix-links-explicit`                  | `scripts/docs/fix_doc_links_explicit.py`                     | Fix documentation links with explicit rules                                           |
-| `fix-link-warnings`                   | `scripts/docs/fix_link_warnings.py`                          | Fix link warnings in specified files                                                  |
-| `audit-sentence`                      | `scripts/docs/sentence_doc_audit.py`                         | Sentence-level documentation audit                                                    |
+| `fix-links-auto`                      | `scripts/docs/fixers/fix_links_auto.py`                      | Auto-fix broken documentation links                                                   |
+| `fix-links-explicit`                  | `scripts/docs/fixers/fix_links_explicit.py`                  | Fix documentation links with explicit rules                                           |
+| `fix-link-warnings`                   | `scripts/docs/fixers/link_warnings.py`                       | Fix link warnings in specified files                                                  |
+| `audit-sentence`                      | `scripts/docs/fixers/sentence_audit.py`                      | Sentence-level documentation audit                                                    |
+| `sync-repo-identity`                  | `scripts/docs/fixers/repo_identity.py`                       | Normalize active docs and workflow references to the canonical repo identity          |
 
 ## When to Use
 
@@ -54,6 +68,7 @@ is consolidated incrementally.
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | `check-links`                         | After editing docs; validates internal links, spec files, contracts, legacy path guardrails, and ensures each local skill mirror page is explicitly classified in `mkdocs.yml` via `nav` or `not_in_nav` | CI gate (`docs.yml`, every PR)                                             |
 | `verify`                              | After changing active documentation, docs tooling, or MkDocs/runtime-facing references; runs the canonical verification chain end-to-end                                                                 | CI gate (`docs.yml`, doc-sync changes)                                      |
+| `build-site`                          | When you need a deterministic local or CI MkDocs site build without depending on ad-hoc shell wiring                                                                                                    | Manual, pre-merge, or CI-style local smoke                                 |
 | `check-drift`                         | After renaming classes, moving modules, changing ports, or updating active runtime docs; detects doc/code desync, runtime mirror drift, and freshness conflicts                                          | CI gate (`architecture.yml`)                                               |
 | `check-docstrings`                    | After adding new modules/classes/functions; enforces coverage thresholds (modules 100%, classes 95%, functions 90%)                                                                                      | CI gate (`architecture.yml`)                                               |
 | `check-kpi`                           | Weekly documentation health tracking; generates coverage, links, and drift metrics                                                                                                                       | Scheduled weekly (Monday 4:00 UTC)                                         |
@@ -69,6 +84,7 @@ is consolidated incrementally.
 | `fix-links-explicit`                  | When specific broken links need targeted fixes with explicit rules                                                                                                                                       | Manual, on-demand                                                          |
 | `fix-link-warnings`                   | After `check-links` reports warnings; fixes link format issues in specified files                                                                                                                        | Manual, on-demand                                                          |
 | `audit-sentence`                      | Before release or documentation review; audits sentence structure and grammar                                                                                                                            | Manual, pre-release                                                        |
+| `sync-repo-identity`                  | After repository rename, slug cleanup, or workflow/doc drift around canonical GitHub identity                                                                                                           | Manual, after repo identity changes                                        |
 
 ## Canonical Workbook
 
@@ -125,9 +141,10 @@ The exported contract now includes runtime-resolved `field_policy` overlays such
 - `boolean_true_values`
 - `boolean_false_values`
 
-## Other Files
+## Compatibility Files
 
-| File                                                | Description                                                                              |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `scripts/docs/chembl_matrix_structural_contract.py` | Shared runtime export helper used by the ChEMBL matrix structural contract/sync workflow |
-| `scripts/docs/build_docs_site.sh`                   | Build MkDocs documentation site                                                          |
+| File                              | Description                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `scripts/docs/build_docs_site.sh` | Shell wrapper around the packaged MkDocs build entrypoint; kept for docs, CI, and local habits   |
+| `scripts/docs/run_mkdocs_build.py`| Python shim for the packaged MkDocs build entrypoint                                              |
+| `scripts/docs/check_doc_links.py` | Historical special-case shim that preserves the old monkeypatchable module surface for tests      |

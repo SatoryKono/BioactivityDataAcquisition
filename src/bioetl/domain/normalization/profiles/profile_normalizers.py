@@ -256,7 +256,7 @@ def normalize_profile_pmc_id(value: object) -> object:
     return normalize_pmc_id(value)
 
 
-def normalize_profile_smiles(value: object, *, is_canonical: bool) -> object:
+def normalize_profile_smiles(value: object, *, is_canonical: bool) -> str | None:
     """Normalize one SMILES-like value using the domain value object."""
     if value is None or not isinstance(value, str):
         return None
@@ -268,11 +268,11 @@ def normalize_profile_smiles(value: object, *, is_canonical: bool) -> object:
     return str(normalized) if normalized is not None else None
 
 
-def normalize_profile_canonical_smiles(value: object) -> object:
+def normalize_profile_canonical_smiles(value: object) -> str | None:
     """Normalize one canonical-SMILES profile field."""
     return normalize_profile_smiles(value, is_canonical=True)
 
 
-def normalize_profile_isomeric_smiles(value: object) -> object:
+def normalize_profile_isomeric_smiles(value: object) -> str | None:
     """Normalize one isomeric-SMILES profile field."""
     return normalize_profile_smiles(value, is_canonical=False)

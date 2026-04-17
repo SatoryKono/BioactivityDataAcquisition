@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Unified entry point for scripts/qa/ commands.
+"""Unified entry point for scripts/engineering/qa/ commands.
 
 Usage:
-    python -m scripts.qa <command> [args...]
-    python -m scripts.qa --help
+    python -m scripts.engineering.qa <command> [args...]
+    python -m scripts.engineering.qa --help
 
 Commands:
     check-naming         Naming convention audit

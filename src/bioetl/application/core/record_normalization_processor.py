@@ -308,11 +308,10 @@ class RecordNormalizationProcessor:
         return canonicalize_json_like_string(value)
 
     def _normalize_smiles_field(self, field_name: str, value: object) -> str | None:
-        normalized = normalize_profile_smiles(
+        return normalize_profile_smiles(
             value,
             is_canonical=(field_name == "canonical_smiles"),
         )
-        return normalized if isinstance(normalized, str) or normalized is None else None
 
     def _should_forbid_fallback(self, field_name: str) -> bool:
         return (

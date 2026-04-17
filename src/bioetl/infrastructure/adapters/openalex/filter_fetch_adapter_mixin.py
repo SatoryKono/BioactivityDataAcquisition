@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord, JsonDict
+from bioetl.infrastructure.adapters.filterable_mixin import raising_async_iterator
 from bioetl.infrastructure.adapters.openalex._filter_fetch_flow import (
     iterate_fallback_request,
     iterate_fetch_request,
@@ -93,7 +94,7 @@ class OpenAlexAdapterFilterFetchMixin:
         async for work in self._cursor_flow.iter_filtered_by_title(titles, limit):
             yield work
 
-    async def fetch_multi_filtered(
+    def fetch_multi_filtered(
         self,
         entity_type: str,
         filters: dict[str, list[str]],
@@ -101,11 +102,12 @@ class OpenAlexAdapterFilterFetchMixin:
     ) -> AsyncIterator[BronzeRecord]:
         """Multi-field filtering is not supported by OpenAlex."""
         del entity_type, filters, limit
-        raise NotImplementedError(
-            "OpenAlex adapter does not support multi-field filtering. "
-            "Use fetch_filtered() with filter_field='doi' instead."
+        return raising_async_iterator(
+            NotImplementedError(
+                "OpenAlex adapter does not support multi-field filtering. "
+                "Use fetch_filtered() with filter_field='doi' instead."
+            )
         )
-        yield {}  # pragma: no cover - keeps AsyncIterator contract
 
     async def _batch_doi_lookup(
         self,

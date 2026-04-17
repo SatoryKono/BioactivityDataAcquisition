@@ -269,7 +269,7 @@ to the repository root:
 - `.mkdocs-site-verify/`
 
 These directories are MkDocs HTML build outputs and should never be tracked.
-`scripts/repo/audit_root_cleanliness.py` enforces a root-directory allowlist and
+`scripts/engineering/repo/audit_root_cleanliness.py` enforces a root-directory allowlist and
 exits with code 1 when unexpected directories are found, causing two CI workflows
 to fail:
 - **Root Hygiene** (`root-hygiene.yml`)
