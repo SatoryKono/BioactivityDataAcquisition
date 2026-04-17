@@ -56,7 +56,7 @@ class TestProviderHealthState:
         """Test threshold constants from RULES.md §3.5."""
         assert ProviderHealthState.DEGRADED_THRESHOLD == 1
         assert ProviderHealthState.UNHEALTHY_THRESHOLD == 3
-        assert ProviderHealthState.CLEAR_WINDOW_SECONDS == 300.0
+        assert ProviderHealthState.CLEAR_WINDOW_SECONDS == pytest.approx(300.0)
 
 
 class TestProviderHealthMonitorStateTransitions:
@@ -364,7 +364,7 @@ class TestProviderHealthMonitorAdaptiveParams:
         """Test HEALTHY state returns normal parameters."""
         timeout_mult, batch_div = monitor.get_adaptive_params("chembl")
 
-        assert timeout_mult == 1.0
+        assert timeout_mult == pytest.approx(1.0)
         assert batch_div == 1
 
     def test_degraded_returns_doubled_timeout_halved_batch(
@@ -375,7 +375,7 @@ class TestProviderHealthMonitorAdaptiveParams:
 
         timeout_mult, batch_div = monitor.get_adaptive_params("chembl")
 
-        assert timeout_mult == 2.0
+        assert timeout_mult == pytest.approx(2.0)
         assert batch_div == 2
 
     def test_unhealthy_returns_aggressive_throttling(
@@ -388,7 +388,7 @@ class TestProviderHealthMonitorAdaptiveParams:
 
         timeout_mult, batch_div = monitor.get_adaptive_params("chembl")
 
-        assert timeout_mult == 4.0
+        assert timeout_mult == pytest.approx(4.0)
         assert batch_div == 4
 
 
@@ -431,7 +431,7 @@ class TestHealthAdjustedConfig:
             status=HealthStatus.DEGRADED,
         )
 
-        assert config.apply_timeout(30.0) == 60.0
+        assert config.apply_timeout(30.0) == pytest.approx(60.0)
 
     def test_apply_batch_size_divides(self) -> None:
         """Test apply_batch_size divides base batch size."""
@@ -564,7 +564,7 @@ class TestProviderHealthTracker:
         config = tracker.get_adjusted_config()
 
         assert isinstance(config, HealthAdjustedConfig)
-        assert config.timeout_multiplier == 1.0
+        assert config.timeout_multiplier == pytest.approx(1.0)
         assert config.batch_size_divisor == 1
         assert config.status == HealthStatus.HEALTHY
 
@@ -648,7 +648,7 @@ class TestGetAdjustedConfig:
         config = monitor.get_adjusted_config("chembl")
 
         assert isinstance(config, HealthAdjustedConfig)
-        assert config.timeout_multiplier == 1.0
+        assert config.timeout_multiplier == pytest.approx(1.0)
         assert config.batch_size_divisor == 1
         assert config.status == HealthStatus.HEALTHY
 
@@ -658,7 +658,7 @@ class TestGetAdjustedConfig:
 
         config = monitor.get_adjusted_config("chembl")
 
-        assert config.timeout_multiplier == 2.0
+        assert config.timeout_multiplier == pytest.approx(2.0)
         assert config.batch_size_divisor == 2
         assert config.status == HealthStatus.DEGRADED
 
@@ -669,6 +669,6 @@ class TestGetAdjustedConfig:
 
         config = monitor.get_adjusted_config("chembl")
 
-        assert config.timeout_multiplier == 4.0
+        assert config.timeout_multiplier == pytest.approx(4.0)
         assert config.batch_size_divisor == 4
         assert config.status == HealthStatus.UNHEALTHY

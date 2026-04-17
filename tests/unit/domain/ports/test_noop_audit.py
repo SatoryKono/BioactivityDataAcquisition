@@ -76,3 +76,9 @@ class TestNoOpAudit:
         # Entries should still be empty
         entries = await audit.get_entries(run_id=run_id)
         assert entries == []
+
+    def test_log_event_is_sync_noop(self) -> None:
+        """log_event uses the sync no-op shape expected by storage helpers."""
+        audit = NoOpAudit()
+
+        assert audit.log_event("SilverWrite", {"status": "ok"}) is None

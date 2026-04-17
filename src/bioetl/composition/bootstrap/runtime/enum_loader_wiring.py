@@ -30,6 +30,6 @@ def initialize_domain_enum_fields() -> None:
     but this function ensures the dependency injection wiring is available.
     """
     # Create the enum loader to ensure it's available for lazy initialization
-    enum_loader = create_enum_loader_for_domain()
+    create_enum_loader_for_domain()
     # The enum loading is handled lazily by the domain layer when needed
     # This ensures the DI wiring is set up correctly

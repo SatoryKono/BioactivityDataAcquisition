@@ -60,7 +60,7 @@ class TestZScoreDetector:
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.SPIKE
-        assert result.current_value == 300.0
+        assert result.current_value == pytest.approx(300.0)
         assert "std deviations" in result.message
 
     def test_detect_drop_anomaly(self, detector: ZScoreDetector) -> None:
@@ -72,7 +72,7 @@ class TestZScoreDetector:
 
         assert result is not None
         assert result.anomaly_type == AnomalyType.DROP
-        assert result.current_value == -50.0
+        assert result.current_value == pytest.approx(-50.0)
 
 
 @pytest.mark.unit
@@ -87,7 +87,7 @@ class TestZScoreCalculation:
     def test_calculate_z_score_normal(self, detector: ZScoreDetector) -> None:
         """Test Z-score calculation with normal values."""
         z_score = detector._calculate_z_score(value=130.0, mean=100.0, stddev=10.0)
-        assert z_score == 3.0  # (130 - 100) / 10 = 3.0
+        assert z_score == pytest.approx(3.0)  # (130 - 100) / 10 = 3.0
 
     def test_calculate_z_score_zero_stddev_nonzero_mean(
         self, detector: ZScoreDetector
@@ -97,7 +97,7 @@ class TestZScoreCalculation:
         z_score = detector._calculate_z_score(value=150.0, mean=100.0, stddev=0.0)
         # deviation_pct = abs(150 - 100) / abs(100) = 0.5
         # z_score = 0.5 * 2 = 1.0
-        assert z_score == 1.0
+        assert z_score == pytest.approx(1.0)
 
     def test_calculate_z_score_zero_stddev_zero_mean(
         self, detector: ZScoreDetector
@@ -171,10 +171,10 @@ class TestZScoreAnomalyCreation:
         )
 
         assert anomaly.metric_name == "test_metric"
-        assert anomaly.current_value == 200.0
-        assert anomaly.baseline_mean == 100.0
-        assert anomaly.baseline_stddev == 20.0
-        assert anomaly.z_score == 5.0
+        assert anomaly.current_value == pytest.approx(200.0)
+        assert anomaly.baseline_mean == pytest.approx(100.0)
+        assert anomaly.baseline_stddev == pytest.approx(20.0)
+        assert anomaly.z_score == pytest.approx(5.0)
         assert anomaly.anomaly_type == AnomalyType.SPIKE
         assert anomaly.severity == AnomalySeverity.CRITICAL
         assert anomaly.timestamp == ts

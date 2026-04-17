@@ -134,7 +134,11 @@ def _validate_input(value: str) -> str | None:
     from bioetl.domain.normalization.text import normalize_string
     normalized = normalize_string(value)
     # Preserve original behavior: return empty string for empty input, None for None
-    return normalized if normalized is not None else "" if value == "" else None
+    if normalized is not None:
+        return normalized
+    if value == "":
+        return ""
+    return None
 
 def _apply_normalization_strategies(normalized: str) -> str:
     """Apply normalization strategies in priority order."""
