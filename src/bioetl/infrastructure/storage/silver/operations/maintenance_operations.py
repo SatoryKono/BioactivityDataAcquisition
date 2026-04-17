@@ -60,6 +60,7 @@ class SilverMaintenanceOperations:
         """
         if self._csv_exporter is None:
             return
+        _ = export_path
         
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_csv_export_start_total", 1, labels={"table": table_name, "pipeline": self._pipeline_name})
@@ -128,7 +129,7 @@ class SilverMaintenanceOperations:
         
         Args:
             table_name: Name of the table to optimize
-            zorder_by: Columns to use for Z-ordering
+            zorder_by: Columns to use for Z-ordering (currently unused)
             **kwargs: Additional optimize options
         
         Returns:
@@ -137,8 +138,12 @@ class SilverMaintenanceOperations:
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_optimize_start_total", 1)
         
-        # Implementation would use DeltaTable.optimize()
-        result = {"table": table_name, "status": "success"}
+        result = await self._retention_manager.optimize(
+            table_name,
+            target_size=kwargs.get("target_size"),
+            partition_filters=kwargs.get("partition_filters"),
+        )
+        _ = zorder_by
         
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_optimize_success_total", 1)

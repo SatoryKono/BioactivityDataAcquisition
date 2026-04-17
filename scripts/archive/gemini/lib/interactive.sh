@@ -5,7 +5,7 @@
 # Provides menu-driven interface for agent selection, role assignment, and task modes
 
 # Use PROJECT_ROOT from environment, or calculate it
-if [ -z "$PROJECT_ROOT" ]; then
+if [[ -z "$PROJECT_ROOT" ]]; then
   PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 fi
 
@@ -14,6 +14,8 @@ GEMINI_CONFIG="${GEMINI_HOME}/config.toml"
 GEMINI_MCP_SETTINGS="${GEMINI_HOME}/settings.json"
 GEMINI_MEMORY_FILE="${PROJECT_ROOT}/docs/00-project/ai/memory/gemini-memory.json"
 GEMINI_SESSIONS_DIR="${PROJECT_ROOT}/docs/00-project/ai/sessions"
+MENU_BACK_LABEL="  0. << Back to Main Menu"
+PRESS_ENTER_PROMPT="Press Enter to continue..."
 
 # Color codes for terminal output
 RED='\033[0;31m'
@@ -40,26 +42,37 @@ print_header() {
   echo "║                                                                                ║"
   echo "╚════════════════════════════════════════════════════════════════════════════════╝"
   echo -e "${NC}"
+  return 0
 }
 
 print_section() {
-  echo -e "\n${BLUE}▶ $1${NC}"
+  local message="$1"
+  echo -e "\n${BLUE}▶ ${message}${NC}"
+  return 0
 }
 
 print_success() {
-  echo -e "${GREEN}✓ $1${NC}"
+  local message="$1"
+  echo -e "${GREEN}✓ ${message}${NC}"
+  return 0
 }
 
 print_error() {
-  echo -e "${RED}✗ $1${NC}"
+  local message="$1"
+  echo -e "${RED}✗ ${message}${NC}"
+  return 0
 }
 
 print_warning() {
-  echo -e "${YELLOW}⚠ $1${NC}"
+  local message="$1"
+  echo -e "${YELLOW}⚠ ${message}${NC}"
+  return 0
 }
 
 print_info() {
-  echo -e "${CYAN}ℹ $1${NC}"
+  local message="$1"
+  echo -e "${CYAN}ℹ ${message}${NC}"
+  return 0
 }
 
 # Check if environment is ready
@@ -69,7 +82,7 @@ check_environment() {
   local ready=true
   
   # Check Gemini directories
-  if [ ! -d "${GEMINI_HOME}" ]; then
+  if [[ ! -d "${GEMINI_HOME}" ]]; then
     print_error "Gemini home not found: ${GEMINI_HOME}"
     ready=false
   else
@@ -77,25 +90,25 @@ check_environment() {
   fi
   
   # Check config files
-  if [ ! -f "${GEMINI_CONFIG}" ]; then
+  if [[ ! -f "${GEMINI_CONFIG}" ]]; then
     print_error "Config not found: ${GEMINI_CONFIG}"
     ready=false
   else
-    print_success "Config: $(basename ${GEMINI_CONFIG})"
+    print_success "Config: $(basename "${GEMINI_CONFIG}")"
   fi
   
-  if [ ! -f "${GEMINI_MCP_SETTINGS}" ]; then
+  if [[ ! -f "${GEMINI_MCP_SETTINGS}" ]]; then
     print_error "MCP settings not found: ${GEMINI_MCP_SETTINGS}"
     ready=false
   else
-    print_success "MCP settings: $(basename ${GEMINI_MCP_SETTINGS})"
+    print_success "MCP settings: $(basename "${GEMINI_MCP_SETTINGS}")"
   fi
   
   # Check memory file
-  if [ ! -f "${GEMINI_MEMORY_FILE}" ]; then
+  if [[ ! -f "${GEMINI_MEMORY_FILE}" ]]; then
     print_warning "Memory file not found, will be created"
   else
-    print_success "Memory file: $(basename ${GEMINI_MEMORY_FILE})"
+    print_success "Memory file: $(basename "${GEMINI_MEMORY_FILE}")"
   fi
   
   # Check Node.js
@@ -112,7 +125,7 @@ check_environment() {
     print_success "UV: $(uvx --version 2>&1 | head -1)"
   fi
   
-  if [ "$ready" = false ]; then
+  if [[ "$ready" == false ]]; then
     print_error "\nEnvironment check failed. Run setup first:"
     echo "  bash scripts/ai/setup-gemini-wsl.sh"
     return 1
@@ -126,7 +139,7 @@ check_environment() {
 show_profiles() {
   print_section "Available Agent Profiles"
   
-  if [ ! -d "${GEMINI_HOME}/agents" ]; then
+  if [[ ! -d "${GEMINI_HOME}/agents" ]]; then
     print_warning "No agents directory found"
     return
   fi
@@ -134,14 +147,14 @@ show_profiles() {
   local count=0
   echo ""
   for profile in "${GEMINI_HOME}"/agents/py-*.md; do
-    if [ -f "$profile" ]; then
+    if [[ -f "$profile" ]]; then
       local basename=$(basename "$profile" .md)
       local desc=$(head -3 "$profile" | grep -E "^#" | head -1 | sed 's/^[# ]*//g')
       printf "  %2d. %-30s  %s\n" $((++count)) "$basename" "$desc"
     fi
   done
   
-  if [ $count -eq 0 ]; then
+  if [[ $count -eq 0 ]]; then
     print_warning "No profiles found. Run sync:"
     echo "  bash scripts/ai/sync-agents-codex-to-gemini.sh"
   fi
@@ -162,6 +175,7 @@ main_menu() {
   echo "  7. 🚪 Exit"
   echo ""
   read -p "Select option [1-7]: " main_choice
+  return 0
 }
 
 # ============================================================================
@@ -175,15 +189,15 @@ mode_chat() {
   show_profiles
   
   echo ""
-  echo "  0. << Back to Main Menu"
+  echo "${MENU_BACK_LABEL}"
   read -p "Select profile [0-9]: " profile_idx
   
-  if [ "$profile_idx" = "0" ]; then
+  if [[ "$profile_idx" == "0" ]]; then
     return
   fi
   
   local profiles=("${GEMINI_HOME}"/agents/py-*.md)
-  if [ ! -f "${profiles[$profile_idx - 1]}" ]; then
+  if [[ ! -f "${profiles[$profile_idx - 1]}" ]]; then
     print_error "Invalid selection"
     sleep 2
     return
@@ -215,11 +229,11 @@ mode_chat() {
   while true; do
     read -p "You> " user_input
     
-    if [ "$user_input" = "exit" ] || [ "$user_input" = "quit" ]; then
+    if [[ "$user_input" == "exit" ]] || [[ "$user_input" == "quit" ]]; then
       break
     fi
     
-    if [ -z "$user_input" ]; then
+    if [[ -z "$user_input" ]]; then
       continue
     fi
     
@@ -239,6 +253,7 @@ mode_chat() {
   
   print_success "\nSession saved to: $session_file"
   sleep 2
+  return 0
 }
 
 # ============================================================================
@@ -256,7 +271,7 @@ mode_task() {
   echo "  4. Architecture Analysis (py-architecture-debt-bot)"
   echo "  5. Data Engineering (py-debug-bot)"
   echo "  6. Custom Profile"
-  echo "  0. << Back to Main Menu"
+  echo "${MENU_BACK_LABEL}"
   echo ""
   read -p "Select task [0-6]: " task_choice
   
@@ -270,6 +285,7 @@ mode_task() {
     0) return ;;
     *) print_error "Invalid selection"; sleep 2 ;;
   esac
+  return 0
 }
 
 task_review() {
@@ -301,6 +317,11 @@ task_review() {
       ;;
     4)
       echo "Scope: Entire project"
+      ;;
+    *)
+      print_error "Invalid selection"
+      sleep 2
+      return 1
       ;;
   esac
   
@@ -343,6 +364,7 @@ EOF
   print_success "Task file created: $session_file"
   print_info "Ready to run code review. Profile loaded: py-review-orchestrator"
   sleep 2
+  return 0
 }
 
 task_config() {
@@ -388,6 +410,7 @@ EOF
   print_success "Task file created: $session_file"
   print_info "Ready to audit configs/. Profile loaded: py-config-bot"
   sleep 2
+  return 0
 }
 
 task_test() {
@@ -442,6 +465,7 @@ EOF
   print_success "Task file created: $session_file"
   print_info "Ready to generate tests for $test_scope. Target: ${target_cov}%"
   sleep 2
+  return 0
 }
 
 task_architecture() {
@@ -463,6 +487,11 @@ task_architecture() {
     2) focus_name="Dependency Violations" ;;
     3) focus_name="Layer Isolation" ;;
     4) focus_name="Port Coverage" ;;
+    *)
+      print_error "Invalid selection"
+      sleep 2
+      return 1
+      ;;
   esac
   
   local session_file="${GEMINI_SESSIONS_DIR}/arch-analysis-$(date +%s).md"
@@ -507,6 +536,7 @@ EOF
   print_success "Task file created: $session_file"
   print_info "Ready to analyze architecture. Focus: $focus_name"
   sleep 2
+  return 0
 }
 
 task_debug() {
@@ -556,6 +586,7 @@ EOF
   print_success "Task file created: $session_file"
   print_info "Ready to debug issue. Type: $issue_desc"
   sleep 2
+  return 0
 }
 
 task_custom() {
@@ -570,6 +601,11 @@ task_custom() {
   read -p "Task description: " task_desc
   
   local profiles=("${GEMINI_HOME}"/agents/py-*.md)
+  if [[ ! -f "${profiles[$custom_profile_idx - 1]}" ]]; then
+    print_error "Invalid selection"
+    sleep 2
+    return 1
+  fi
   local selected_profile=$(basename "${profiles[$custom_profile_idx - 1]}" .md)
   
   local session_file="${GEMINI_SESSIONS_DIR}/custom-$(date +%s).md"
@@ -596,6 +632,7 @@ EOF
   print_success "Task file created: $session_file"
   print_info "Ready to execute custom task with profile: $selected_profile"
   sleep 2
+  return 0
 }
 
 # ============================================================================
@@ -610,7 +647,7 @@ mode_review() {
   echo "  1. Review staged changes"
   echo "  2. Review specific file"
   echo "  3. Review directory"
-  echo "  0. << Back to Main Menu"
+  echo "${MENU_BACK_LABEL}"
   echo ""
   read -p "Select [0-3]: " review_choice
   
@@ -632,9 +669,15 @@ mode_review() {
       print_info "Reviewing: $dir_path"
       ;;
     0) return ;;
+    *)
+      print_error "Invalid selection"
+      sleep 2
+      return 1
+      ;;
   esac
   
   sleep 2
+  return 0
 }
 
 # ============================================================================
@@ -650,7 +693,7 @@ mode_analysis() {
   echo "  2. Dependency Analysis"
   echo "  3. Test Coverage Analysis"
   echo "  4. Performance Analysis"
-  echo "  0. << Back to Main Menu"
+  echo "${MENU_BACK_LABEL}"
   echo ""
   read -p "Select [0-4]: " analysis_choice
   
@@ -668,9 +711,15 @@ mode_analysis() {
       print_info "Analyzing performance..."
       ;;
     0) return ;;
+    *)
+      print_error "Invalid selection"
+      sleep 2
+      return 1
+      ;;
   esac
   
   sleep 2
+  return 0
 }
 
 # ============================================================================
@@ -687,7 +736,7 @@ mode_maintenance() {
   echo "  3. View Environment Status"
   echo "  4. Clear Memory & Reset"
   echo "  5. Update MCP Servers"
-  echo "  0. << Back to Main Menu"
+  echo "${MENU_BACK_LABEL}"
   echo ""
   read -p "Select [0-5]: " maint_choice
   
@@ -695,12 +744,12 @@ mode_maintenance() {
     1)
       print_info "Running setup..."
       bash scripts/ai/setup-gemini-wsl.sh
-      read -p "Press Enter to continue..."
+      read -p "${PRESS_ENTER_PROMPT}" _
       ;;
     2)
       print_info "Syncing profiles..."
       bash scripts/ai/sync-agents-codex-to-gemini.sh
-      read -p "Press Enter to continue..."
+      read -p "${PRESS_ENTER_PROMPT}" _
       ;;
     3)
       print_section "Environment Status"
@@ -718,23 +767,29 @@ mode_maintenance() {
     4)
       print_warning "This will clear all memory and reset Gemini environment."
       read -p "Continue? (yes/no): " confirm
-      if [ "$confirm" = "yes" ]; then
+      if [[ "$confirm" == "yes" ]]; then
         rm -f "$GEMINI_MEMORY_FILE"
         print_success "Memory cleared"
         bash scripts/ai/setup-gemini-wsl.sh
-        read -p "Press Enter to continue..."
+        read -p "${PRESS_ENTER_PROMPT}" _
       fi
       ;;
     5)
       print_info "Edit .gemini/settings.json to update MCP servers"
       echo "File: $GEMINI_MCP_SETTINGS"
       read -p "Open in editor? (yes/no): " edit_confirm
-      if [ "$edit_confirm" = "yes" ]; then
+      if [[ "$edit_confirm" == "yes" ]]; then
         ${EDITOR:-nano} "$GEMINI_MCP_SETTINGS"
       fi
       ;;
     0) return ;;
+    *)
+      print_error "Invalid selection"
+      sleep 2
+      return 1
+      ;;
   esac
+  return 0
 }
 
 # ============================================================================
@@ -751,13 +806,13 @@ mode_help() {
   echo "  3. View Project Constraints (GEMINI.md)"
   echo "  4. View MCP Configuration"
   echo "  5. List Recent Sessions"
-  echo "  0. << Back to Main Menu"
+  echo "${MENU_BACK_LABEL}"
   echo ""
   read -p "Select [0-5]: " help_choice
   
   case "$help_choice" in
     1)
-      if [ -f "scripts/ai/GEMINI-WSL-SETUP.md" ]; then
+      if [[ -f "scripts/ai/GEMINI-WSL-SETUP.md" ]]; then
         less "scripts/ai/GEMINI-WSL-SETUP.md"
       else
         print_error "Setup guide not found"
@@ -767,10 +822,10 @@ mode_help() {
     2)
       print_section "Available Profiles"
       ls -1 "${GEMINI_HOME}"/agents/py-*.md 2>/dev/null | xargs -I{} basename {} .md | sed 's/^/  - /'
-      read -p "Press Enter to continue..."
+      read -p "${PRESS_ENTER_PROMPT}" _
       ;;
     3)
-      if [ -f "GEMINI.md" ]; then
+      if [[ -f "GEMINI.md" ]]; then
         less "GEMINI.md"
       else
         print_error "GEMINI.md not found"
@@ -778,7 +833,7 @@ mode_help() {
       fi
       ;;
     4)
-      if [ -f "$GEMINI_MCP_SETTINGS" ]; then
+      if [[ -f "$GEMINI_MCP_SETTINGS" ]]; then
         less "$GEMINI_MCP_SETTINGS"
       else
         print_error "MCP settings not found"
@@ -790,13 +845,19 @@ mode_help() {
       ls -1t "${GEMINI_SESSIONS_DIR}"/*.{log,md} 2>/dev/null | head -10 | xargs -I{} basename {} | sed 's/^/  - /'
       echo ""
       read -p "Open session file? Enter filename or press Enter to skip: " session_name
-      if [ ! -z "$session_name" ]; then
+      if [[ -n "$session_name" ]]; then
         less "${GEMINI_SESSIONS_DIR}/$session_name" 2>/dev/null || print_error "Session not found"
       fi
-      read -p "Press Enter to continue..."
+      read -p "${PRESS_ENTER_PROMPT}" _
       ;;
     0) return ;;
+    *)
+      print_error "Invalid selection"
+      sleep 2
+      return 1
+      ;;
   esac
+  return 0
 }
 
 # ============================================================================
