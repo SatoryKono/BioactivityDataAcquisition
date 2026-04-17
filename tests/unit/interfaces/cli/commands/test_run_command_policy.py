@@ -497,7 +497,9 @@ class TestRunCommandFlow:
                 exit_func=exit_func,
             )
 
-        assert service.prepare_execution_request.call_args.kwargs["exact_replay"] is True
+        request_input = service.prepare_execution_request.call_args.args[0]
+        assert isinstance(request_input, CliRunPreparationInput)
+        assert request_input.options.exact_replay is True
 
     def test_forwards_replay_parentage_to_request_preparation(self) -> None:
         service = MagicMock(spec=CliRunOrchestrationService)
@@ -549,9 +551,10 @@ class TestRunCommandFlow:
                 exit_func=exit_func,
             )
 
-        kwargs = service.prepare_execution_request.call_args.kwargs
-        assert kwargs["replay_of_run_id"] == "run-parent"
-        assert kwargs["replay_of_manifest_id"] == "manifest-parent"
+        request_input = service.prepare_execution_request.call_args.args[0]
+        assert isinstance(request_input, CliRunPreparationInput)
+        assert request_input.options.replay_of_run_id == "run-parent"
+        assert request_input.options.replay_of_manifest_id == "manifest-parent"
 
 
 # ---------------------------------------------------------------------------
