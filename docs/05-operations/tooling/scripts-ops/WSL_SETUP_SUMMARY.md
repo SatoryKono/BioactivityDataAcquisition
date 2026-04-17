@@ -7,7 +7,7 @@ Your project has existing Codex scripts for Windows:
 - `scripts/ops/codex-exec.bat` - WSL2-based auto-execution launcher
 - `scripts/ops/start-codex.bat` - Quick start wrapper
 - `scripts/ops/wsl_proxy.py` - HTTP proxy bridge for VPN access
-- `scripts/ops/load_repo_env.ps1` - PowerShell environment loader
+- `scripts/ai/mcp/support/load_repo_env.ps1` - PowerShell environment loader
 - `.wsl_proxy_env.sh` - WSL proxy environment setup
 - Documentation: `CODEX_SETUP.md`, `CODEX_QUICK_REF.md`
 

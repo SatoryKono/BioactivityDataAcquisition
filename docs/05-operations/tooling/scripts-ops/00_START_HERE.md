@@ -11,7 +11,6 @@ Your project has existing Windows-based Codex scripts:
 ├── start-codex.bat     ← Quick start wrapper
 ├── start-wsl-proxy.bat ← Proxy launcher
 ├── wsl_proxy.py        ← HTTP proxy bridge
-├── load_repo_env.ps1   ← PowerShell loader
 ├── CODEX_SETUP.md      ← Original setup guide
 └── CODEX_QUICK_REF.md  ← Original quick reference
 ```
