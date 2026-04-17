@@ -1095,6 +1095,37 @@ class ReviewOrchestrator:
             report += f"- **Fix**: {issue.suggested_fix}\n"
             report += f"- **Verification**: `{issue.verification}`\n\n"
 
+        report += "\n## High Issues\n"
+        for issue in [i for i in result.issues if i.severity == "HIGH"]:
+            report += f"### {issue.rule_id}: {issue.rule_name}\n"
+            report += f"- **Rule**: {issue.rule_id} ({issue.rule_name})\n"
+            report += f"- **Severity**: {issue.severity}\n"
+            report += f"- **File**: `{issue.file_path}:{issue.line}`\n"
+            report += f"- **Description**: {issue.description}\n"
+            report += "- **Code**:\n  ```python\n"
+            report += f"  {issue.code_snippet}\n  ```\n"
+            report += f"- **Fix**: {issue.suggested_fix}\n"
+            report += f"- **Verification**: `{issue.verification}`\n\n"
+
+        report += "\n## Medium Issues\n"
+        for issue in [i for i in result.issues if i.severity == "MEDIUM"]:
+            report += f"### {issue.rule_id}: {issue.rule_name}\n"
+            report += f"- **File**: `{issue.file_path}:{issue.line}`\n"
+            report += f"- **Description**: {issue.description}\n\n"
+
+        report += "\n## Positive Observations\n"
+        if result.positive_observations:
+            for obs in result.positive_observations:
+                report += f"- {obs}\n"
+        else:
+            report += "- No specific positive observations noted.\n"
+
+        report += "\n## Scoring Calculation\n"
+        report += "| Category | Raw Score | Deductions | Weighted |\n"
+        report += "|----------|-----------|------------|----------|\n"
+        for cat, val in cat_scores.items():
+            report += f"| {cat} | 10 | - | {val:.1f} |\n"
+
         report_path = (
             self.reports_dir
             / f"{result.sector_id}-{result.sector_name.replace('+', '_').replace(' ', '_')}.md"
@@ -1144,6 +1175,14 @@ class ReviewOrchestrator:
         report += "## Aggregated Issues\n### Critical (MUST fix)\n"
         for i, issue in enumerate(all_crit[:20]):  # Limit to 20 for brevity
             report += f"{i + 1}. **{issue.rule_id}** in `{issue.file_path}:{issue.line}` - {issue.description}\n"
+        report += "\n### High Issues\n"
+        for i, issue in enumerate(all_high[:20]):
+            report += f"{i + 1}. **{issue.rule_id}** in `{issue.file_path}:{issue.line}` - {issue.description}\n"
+
+        report += "\n## Cross-subzone Observations\n"
+        report += "- Needs manual review of sub-reports to identify cross-subzone patterns.\n"
+        report += "\n## Top Recommendations\n"
+        report += "1. Address CRITICAL issues in sub-reports immediately.\n"
 
         report_path = (
             self.reports_dir
@@ -1226,6 +1265,28 @@ class ReviewOrchestrator:
         report += "---\n\n## Critical Issues (блокируют merge/release)\n"
         for i, issue in enumerate(crit_issues[:50]):
             report += f"- **{issue.rule_id}**: {issue.file_path}:{issue.line} - {issue.description}\n"
+        report += "\n---\n\n## High Issues\n"
+        for i, issue in enumerate(high_issues[:20]):
+            report += f"- **{issue.rule_id}**: {issue.file_path}:{issue.line} - {issue.description}\n"
+
+        report += "\n---\n\n## Cross-cutting Analysis\n"
+        report += "### Повторяющиеся паттерны\n"
+        report += "Необходимо проанализировать индивидуальные отчеты для выявления паттернов.\n"
+
+        report += "\n---\n\n## Recommendations (приоритизированные)\n"
+        report += "### P1 — Немедленно (блокеры)\n"
+        report += "1. Исправить все CRITICAL issues указанные выше.\n"
+
+        report += "\n---\n\n## Positive Highlights\n"
+        report += "Процесс ревью успешно автоматизирован.\n"
+
+        report += "\n---\n\n## Verification Commands\n"
+        report += "```bash\n"
+        report += "pytest tests/architecture/ -v\n"
+        report += "mypy src/bioetl/ --strict\n"
+        report += "pytest --cov=src/bioetl --cov-fail-under=85\n"
+        report += "make lint\n"
+        report += "```\n"
 
         report_path = self.reports_dir / "FINAL-REVIEW.md"
         report_path.write_text(report, encoding="utf-8")
