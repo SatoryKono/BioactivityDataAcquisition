@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -188,6 +189,7 @@ class TestRecordProcessorMetrics:
 
         # Create processor with failing transform callback
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             raise DataQualityError("DQ Fail")
 
         config = RecordProcessorConfig(

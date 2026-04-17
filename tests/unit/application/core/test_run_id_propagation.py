@@ -8,6 +8,7 @@ Verifies that run_id is consistently propagated:
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -149,6 +150,7 @@ class TestRunIdPropagation:
 
         # Canonical transformer output carries only business payload.
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             return {
                 "id": str(record.get("id")),
                 "value": record.get("value"),
@@ -213,6 +215,7 @@ class TestRunIdPropagation:
         """Test that the same run_id is used across multiple batches."""
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             return {
                 "id": str(record.get("id")),
                 "value": record.get("value"),
@@ -284,6 +287,7 @@ class TestRunIdPropagation:
             )
 
             async def transform(ctx, record, index):
+                await asyncio.sleep(0)
                 return {
                     "id": str(record.get("id")),
                     "value": record.get("value"),
