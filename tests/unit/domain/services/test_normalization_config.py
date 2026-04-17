@@ -48,10 +48,10 @@ class TestPChemblRangeConfig:
     def test_default_values(self) -> None:
         """Test default configuration values."""
         config = PChemblRangeConfig()
-        assert config.min_value == 0.0
-        assert config.max_value == 14.0
-        assert config.typical_min == 2.0
-        assert config.typical_max == 12.0
+        assert config.min_value == pytest.approx(0.0)
+        assert config.max_value == pytest.approx(14.0)
+        assert config.typical_min == pytest.approx(2.0)
+        assert config.typical_max == pytest.approx(12.0)
 
     def test_invalid_min_value_raises(self) -> None:
         """Test that negative min_value raises ValueError."""
@@ -83,8 +83,8 @@ class TestNormalizationConfig:
         assert config.default_output_unit == "nM"
         assert config.strict_validation is False
         assert config.default_aggregation_method == "median"
-        assert config.potency_threshold == 5.0
-        assert config.high_potency_threshold == 7.0
+        assert config.potency_threshold == pytest.approx(5.0)
+        assert config.high_potency_threshold == pytest.approx(7.0)
 
     def test_custom_values(self) -> None:
         """Test custom configuration values."""
@@ -98,8 +98,8 @@ class TestNormalizationConfig:
         assert config.default_output_unit == "µM"
         assert config.strict_validation is True
         assert config.default_aggregation_method == "mean"
-        assert config.potency_threshold == 6.0
-        assert config.high_potency_threshold == 8.0
+        assert config.potency_threshold == pytest.approx(6.0)
+        assert config.high_potency_threshold == pytest.approx(8.0)
 
     def test_negative_potency_threshold_raises(self) -> None:
         """Test that negative potency threshold raises ValueError."""
@@ -136,12 +136,12 @@ class TestNormalizationConfigFactories:
         config = NormalizationConfig.for_screening()
         assert config.default_aggregation_method == "mean"
         assert config.strict_validation is False
-        assert config.potency_threshold == 4.0
+        assert config.potency_threshold == pytest.approx(4.0)
 
     def test_for_medicinal_chemistry_factory(self) -> None:
         """Test for_medicinal_chemistry() factory method."""
         config = NormalizationConfig.for_medicinal_chemistry()
         assert config.default_aggregation_method == "median"
         assert config.strict_validation is True
-        assert config.potency_threshold == 6.0
-        assert config.high_potency_threshold == 8.0
+        assert config.potency_threshold == pytest.approx(6.0)
+        assert config.high_potency_threshold == pytest.approx(8.0)

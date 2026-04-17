@@ -10,7 +10,7 @@
 
 ### Step 1: Start Neo4j Backend
 ```bash
-bash scripts/ops/wsl_neo4j_startup.sh
+bash scripts/memory/setup/wsl_startup.sh
 ```
 
 This script:
@@ -27,13 +27,13 @@ This script:
 ✓ Ready for smoke test
 
 Next steps:
-1. Run smoke test: bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh
+1. Run smoke test: bash scripts/memory/mcp/check.sh
 2. Access Neo4j Browser: http://host.docker.internal:7474/browser/
 ```
 
 ### Step 2: Run Smoke Test
 ```bash
-bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh
+bash scripts/memory/mcp/check.sh
 ```
 
 **Expected output:**
@@ -97,9 +97,9 @@ NEO4J_DATABASE=neo4j
 
 | File | Purpose |
 |------|---------|
-| `scripts/ops/wsl_neo4j_startup.sh` | ⭐ Start Neo4j (run first) |
-| `scripts/ops/smoke_test_neo4j_mcp_knowall.sh` | ⭐ Verify setup (run second) |
-| `scripts/ops/mcp_neo4j_memory_wrapper.sh` | MCP wrapper (@knowall-ai) |
+| `scripts/memory/setup/wsl_startup.sh` | ⭐ Start Neo4j (run first) |
+| `scripts/memory/mcp/check.sh` | ⭐ Verify setup (run second) |
+| `scripts/memory/mcp/wrapper.sh` | MCP wrapper (@knowall-ai) |
 | `.env.local` | WSL-specific config (auto-created) |
 | `scripts/ops/support/load_repo_env.sh` | Env variable loader |
 
@@ -117,7 +117,7 @@ docker logs bioetl-neo4j
 
 # Remove broken container and retry
 docker rm -f bioetl-neo4j
-bash scripts/ops/wsl_neo4j_startup.sh
+bash scripts/memory/setup/wsl_startup.sh
 ```
 
 ### Ports showing closed
@@ -125,7 +125,7 @@ bash scripts/ops/wsl_neo4j_startup.sh
 # Neo4j takes 10-15 seconds to start
 # Wait and check again:
 sleep 15
-bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh
+bash scripts/memory/mcp/check.sh
 
 # If still closed, check container:
 docker ps | grep bioetl-neo4j
@@ -137,7 +137,7 @@ docker ps | grep bioetl-neo4j
 uv run python -m scripts.dev setup-mcp
 
 # Verify wrapper is accessible
-test -x scripts/ops/mcp_neo4j_memory_wrapper.sh && echo "OK"
+test -x scripts/memory/mcp/wrapper.sh && echo "OK"
 
 # Check MCP in Codex
 codex mcp get neo4j-memory
@@ -155,10 +155,10 @@ This is rare in WSL. If it happens:
 
 ```bash
 # Start Neo4j (from WSL)
-bash scripts/ops/wsl_neo4j_startup.sh
+bash scripts/memory/setup/wsl_startup.sh
 
 # Run smoke test
-bash scripts/ops/smoke_test_neo4j_mcp_knowall.sh
+bash scripts/memory/mcp/check.sh
 
 # Access Neo4j Browser (from WSL)
 wsl-open http://host.docker.internal:7474/browser/
@@ -245,7 +245,7 @@ After changing: Restart Docker Desktop
 
 If you need higher performance:
 ```bash
-# Edit wsl_neo4j_startup.sh and modify:
+# Edit wsl_startup.sh and modify:
 -e NEO4J_server_memory_heap_max_size=1024m \
 -e NEO4J_server_memory_pagecache_size=512m \
 ```
@@ -300,4 +300,4 @@ The wrapper is correctly configured for the `@knowall-ai` package.
 
 ---
 
-**Ready to start?** Run: `bash scripts/ops/wsl_neo4j_startup.sh`
+**Ready to start?** Run: `bash scripts/memory/setup/wsl_startup.sh`

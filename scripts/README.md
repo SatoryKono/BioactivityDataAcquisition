@@ -1,1 +1,14 @@
-# Scripts Documentation\n\nThis directory contains development and operational scripts for the BioETL project.\n\n## Subdirectories\n- dev/ - Development scripts (Python, Bash, PowerShell)\n- ci/ - CI/CD scripts\n- deployment/ - Deployment and Docker files\n- maintenance/ - Maintenance scripts\n- ops/ - Operations scripts\n\nFor more information, see the specific script documentation.
+# Scripts Documentation
+
+This directory contains development and operational scripts for the BioETL project.
+
+## Subdirectories
+
+- `dev/` - Development scripts and bootstrap tooling.
+- `ci/` - CI/CD validation scripts.
+- `deployment/` - Deployment and Docker files.
+- `maintenance/` - Maintenance scripts.
+- `memory/` - Canonical Neo4j project-memory tooling and MCP wrappers.
+- `ops/` - General operational scripts outside the memory domain.
+
+For more information, see the specific script documentation.

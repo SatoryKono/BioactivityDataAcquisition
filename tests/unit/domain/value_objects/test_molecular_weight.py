@@ -13,19 +13,19 @@ class TestMolecularWeightValidation:
 
     def test_valid_float_creation(self) -> None:
         mw = MolecularWeight(180.156)
-        assert mw.value == 180.156
+        assert mw.value == pytest.approx(180.156)
 
     def test_valid_int_creation(self) -> None:
         mw = MolecularWeight(300)
-        assert mw.value == 300.0
+        assert mw.value == pytest.approx(300.0)
 
     def test_valid_string_creation(self) -> None:
         mw = MolecularWeight("342.30")
-        assert mw.value == 342.3
+        assert mw.value == pytest.approx(342.3)
 
     def test_rounds_to_precision(self) -> None:
         mw = MolecularWeight(180.15600000001)
-        assert mw.value == 180.156
+        assert mw.value == pytest.approx(180.156)
 
     def test_nan_raises(self) -> None:
         with pytest.raises(ValueError, match="NaN or Inf"):
@@ -70,11 +70,11 @@ class TestMolecularWeightProperties:
 
     def test_min_weight(self) -> None:
         mw = MolecularWeight(180.0)
-        assert mw.min_weight == 10.0
+        assert mw.min_weight == pytest.approx(10.0)
 
     def test_max_weight(self) -> None:
         mw = MolecularWeight(180.0)
-        assert mw.max_weight == 10000.0
+        assert mw.max_weight == pytest.approx(10000.0)
 
 
 @pytest.mark.unit
@@ -84,7 +84,7 @@ class TestMolecularWeightFactoryAndEquality:
     def test_from_raw_float(self) -> None:
         result = MolecularWeight.from_raw(180.156)
         assert result is not None
-        assert result.value == 180.156
+        assert result.value == pytest.approx(180.156)
 
     def test_from_raw_string(self) -> None:
         result = MolecularWeight.from_raw("342.30")

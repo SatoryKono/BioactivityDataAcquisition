@@ -8,7 +8,7 @@ from urllib import error
 
 from pathlib import Path
 
-from scripts.ops.neo4j_memory_sync import (
+from scripts.memory.sync import (
     _add_complexity_analysis_surfaces,
     _build_normalization_pipeline_evidence,
     _build_diff_entries,
@@ -147,7 +147,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("file_surface", "src/bioetl/application/core/record_normalization_processor.py") in node_keys
     assert ("file_surface", "configs/entities/chembl/activity.yaml") in node_keys
     assert ("file_surface", "docs/02-architecture/diagrams/README.md") in node_keys
-    assert ("file_surface", "scripts/ops/__main__.py") in node_keys
+    assert ("file_surface", "scripts/memory/__main__.py") in node_keys
     assert ("file_surface", "tests/architecture/test_diagram_quality_gates.py") in node_keys
     assert ("file_surface", "grafana/dashboards/bioetl-runtime.json") in node_keys
     assert ("file_surface", ".github/workflows/tests.yml") in node_keys
@@ -190,7 +190,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("script_surface", "scripts/diagrams/__main__.py") in node_keys
     assert ("script_surface", "scripts/docs/__main__.py") in node_keys
     assert ("script_surface", "scripts/schema/__main__.py") in node_keys
-    assert ("script_surface", "scripts/ops/__main__.py") in node_keys
+    assert ("script_surface", "scripts/memory/__main__.py") in node_keys
     assert ("script_surface", "scripts/qa/__main__.py") in node_keys
     assert ("port_surface", "bioetl.domain.ports") in node_keys
     assert (
@@ -232,7 +232,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     assert ("workflow_artifact_surface", "tests::coverage-data-smoke") in node_keys
     assert ("workflow_secret_surface", "GITHUB_TOKEN") in node_keys
     assert ("cli_command_surface", "bioetl run") in node_keys
-    assert ("cli_command_surface", "scripts.ops sync-neo4j-memory") in node_keys
+    assert ("cli_command_surface", "scripts.memory sync") in node_keys
     assert ("cli_command_surface", "scripts.docs verify") in node_keys
     assert any(label == "cli_option_surface" for label, _ in node_keys)
     assert any(label == "doc_claim_surface" for label, _ in node_keys)
@@ -244,7 +244,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
         "execution_path",
         "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check",
     ) in node_keys
-    assert ("execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json") in node_keys
+    assert ("execution_path", "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json") in node_keys
     assert (
         "execution_path",
         "python -m scripts.qa report-normalization-fallback-inventory --limit 20",
@@ -323,8 +323,8 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     secret_job = snapshot.nodes[NodeKey("workflow_job_surface", "docker::docker-push")]
     assert "GITHUB_TOKEN" in secret_job.properties["secret_usage_hints"]
 
-    cli_command = snapshot.nodes[NodeKey("cli_command_surface", "scripts.ops sync-neo4j-memory")]
-    assert cli_command.properties["source_path"] == "scripts/ops/__main__.py"
+    cli_command = snapshot.nodes[NodeKey("cli_command_surface", "scripts.memory sync")]
+    assert cli_command.properties["source_path"] == "scripts/memory/__main__.py"
     assert cli_command.properties["side_effect_class"] == "mutating"
 
     cli_option = next(node for node in snapshot.nodes.values() if node.key.label == "cli_option_surface")
@@ -398,9 +398,9 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("directory_surface", "docs/03-guides/dashboards", "HOUSES", "doc_source_surface", "dashboard extension guide"),
     ("directory_surface", "docs/04-reference/contracts", "HOUSES", "doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md"),
     ("directory_surface", "docs/05-operations/runbooks", "HOUSES", "doc_artifact", "docs/05-operations/runbooks/traceability-signal-ownership.md"),
-    ("directory_surface", "scripts/ops", "CONTAINS", "file_surface", "scripts/ops/__main__.py"),
-    ("directory_surface", "scripts/ops", "HOUSES", "script_surface", "scripts/ops/__main__.py"),
-    ("file_surface", "scripts/ops/__main__.py", "BACKS", "script_surface", "scripts/ops/__main__.py"),
+    ("directory_surface", "scripts/ops", "CONTAINS", "file_surface", "scripts/memory/__main__.py"),
+    ("directory_surface", "scripts/ops", "HOUSES", "script_surface", "scripts/memory/__main__.py"),
+    ("file_surface", "scripts/memory/__main__.py", "BACKS", "script_surface", "scripts/memory/__main__.py"),
     ("directory_surface", "tests/architecture", "CONTAINS", "file_surface", "tests/architecture/test_diagram_quality_gates.py"),
     ("directory_surface", "tests/architecture", "HOUSES", "test_surface", "architecture tests"),
     ("directory_surface", "tests/architecture", "HOUSES", "test_artifact", "tests/architecture/test_diagram_quality_gates.py"),
@@ -443,7 +443,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("execution_path", "uv run python -m scripts.docs verify", "EXECUTES_GATE", "quality_gate", "docs verification"),
     ("script_surface", "scripts/schema/__main__.py", "PROVIDES", "execution_path", "uv run python -m scripts.schema validate-configs"),
     ("execution_path", "uv run python -m scripts.schema validate-configs", "EXECUTES_GATE", "quality_gate", "config validation"),
-    ("script_surface", "scripts/ops/__main__.py", "PROVIDES", "execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json"),
+    ("script_surface", "scripts/memory/__main__.py", "PROVIDES", "execution_path", "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json"),
     ("policy_surface", "integration and VCR execution policy", "GOVERNS", "test_surface", "integration tests"),
     ("adapter_surface", "bioetl.infrastructure.adapters.chembl", "CONTAINS", "adapter_impl_surface", "bioetl.infrastructure.adapters.chembl.client"),
     ("adapter_impl_surface", "bioetl.infrastructure.adapters.chembl.client", "DEPENDS_ON", "port_surface", "bioetl.domain.ports.observability.logging.LoggerPort"),
@@ -518,7 +518,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
     ("project", "BioETL", "HAS_CLI_COMMAND", "cli_command_surface", "bioetl run"),
     ("cli_command_surface", "bioetl run", "RUNS_VIA", "execution_path", "uv run python -m bioetl run --pipeline"),
     ("cli_command_surface", "bioetl run", "SIDE_EFFECTS_ON", "pipeline_surface", "chembl_activity"),
-    ("cli_command_surface", "scripts.ops sync-neo4j-memory", "RUNS_VIA", "execution_path", "python -m scripts.ops sync-neo4j-memory --report /tmp/neo4j-memory-audit.json"),
+    ("cli_command_surface", "scripts.memory sync", "RUNS_VIA", "execution_path", "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/domain/control_plane/run_manifest.py"),
     ("doc_artifact", "docs/04-reference/contracts/run-manifest-ledger.md", "DESCRIBES", "module_surface", "src/bioetl/infrastructure/config/_base.py"),
     ("doc_artifact", "scripts/dev/README.md", "DESCRIBES", "execution_path", "bash scripts/dev/run_pytest.sh"),
@@ -603,9 +603,9 @@ def test_apply_normalization_evidence_only_executes_batched_statements(monkeypat
             batch_contexts.append(context)
             return {"results": [], "errors": []}
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", StubClient)
+    monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
     monkeypatch.setattr(
-        "scripts.ops.neo4j_memory_sync._normalization_evidence_statements",
+        "scripts.memory.sync._normalization_evidence_statements",
         lambda: list(stub_statements),
     )
     root = Path(__file__).resolve().parents[4]
@@ -1102,7 +1102,7 @@ def test_filtered_snapshot_docs_drift_preserves_describes_edges() -> None:
         "doc_claim_surface",
         "docs/04-reference/pipelines/chembl/05-activity-spec.md#L96",
     ) in relation_keys
-    assert ("cli_command_surface", "scripts.ops sync-neo4j-memory") in {
+    assert ("cli_command_surface", "scripts.memory sync") in {
         (key.label, key.name) for key in filtered.nodes
     }
 
@@ -1414,8 +1414,8 @@ def test_git_last_commit_age_days_bulk_batches_history_lookup(monkeypatch) -> No
             "__TS__1712448000\nsrc/a.py\nsrc/b.py\n\n__TS__1712361600\nsrc/c.py\n",
         )
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.subprocess.run", _run)
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._resolve_git_executable", lambda: "git")
+    monkeypatch.setattr("scripts.memory.sync.subprocess.run", _run)
+    monkeypatch.setattr("scripts.memory.sync._resolve_git_executable", lambda: "git")
 
     cache: dict[str, int | None] = {}
     result = _git_last_commit_age_days_bulk(
@@ -1485,7 +1485,7 @@ def test_build_fast_analysis_audit_report_uses_bulk_count_queries(monkeypatch) -
                 ]
             raise AssertionError(f"Unexpected statement: {statement}")
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", StubClient)
+    monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
     root = Path(__file__).resolve().parents[4]
 
     report = build_fast_analysis_audit_report(snapshot, root, "http://localhost:7474")  # type: ignore[arg-type]
@@ -1545,7 +1545,7 @@ def test_build_audit_report_uses_bulk_summary_queries(monkeypatch) -> None:
                 ]
             raise AssertionError(f"Unexpected query context: {context}, statement={statement}")
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", StubClient)
+    monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", StubClient)
     root = Path(__file__).resolve().parents[4]
 
     report = build_audit_report(snapshot, root, "http://localhost:7474")
@@ -1612,9 +1612,9 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(monkey
         def query(self, statement, parameters=None, *, context=None) -> list[dict[str, object]]:
             return []
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.resolve_neo4j_connection", lambda root, http_uri: ("http://localhost:7474", "neo4j", "password", "neo4j"))
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.Neo4jHttpClient", lambda *args, **kwargs: StubClient())
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._sync_run_id", lambda: "run-123")
+    monkeypatch.setattr("scripts.memory.sync.resolve_neo4j_connection", lambda root, http_uri: ("http://localhost:7474", "neo4j", "password", "neo4j"))
+    monkeypatch.setattr("scripts.memory.sync.Neo4jHttpClient", lambda *args, **kwargs: StubClient())
+    monkeypatch.setattr("scripts.memory.sync._sync_run_id", lambda: "run-123")
 
     def _retry(*args, **kwargs) -> None:
         captured_retry_sync_runs.append(kwargs.get("sync_run"))
@@ -1622,8 +1622,8 @@ def test_sync_snapshot_uses_current_sync_run_for_prune_stale_verification(monkey
     def _verify(*args, **kwargs) -> None:
         captured_verify_sync_runs.append(kwargs.get("sync_run"))
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._retry_critical_analysis_groups", _retry)
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._verify_expected_group_counts", _verify)
+    monkeypatch.setattr("scripts.memory.sync._retry_critical_analysis_groups", _retry)
+    monkeypatch.setattr("scripts.memory.sync._verify_expected_group_counts", _verify)
 
     sync_snapshot(
         snapshot,
@@ -1642,8 +1642,8 @@ def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(monkeypatch, 
     snapshot.add_node("retirement_candidate", "retire-me.py")
     called: dict[str, int] = {"sync_snapshot": 0, "build_fast_analysis_audit_report": 0}
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.build_snapshot", lambda root: snapshot)
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._filtered_snapshot", lambda current, **kwargs: current)
+    monkeypatch.setattr("scripts.memory.sync.build_snapshot", lambda root: snapshot)
+    monkeypatch.setattr("scripts.memory.sync._filtered_snapshot", lambda current, **kwargs: current)
 
     def _sync_snapshot(*args, **kwargs) -> None:
         called["sync_snapshot"] += 1
@@ -1652,9 +1652,9 @@ def test_main_skips_global_post_apply_fast_audit_for_targeted_sync(monkeypatch, 
         called["build_fast_analysis_audit_report"] += 1
         return {}
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.sync_snapshot", _sync_snapshot)
+    monkeypatch.setattr("scripts.memory.sync.sync_snapshot", _sync_snapshot)
     monkeypatch.setattr(
-        "scripts.ops.neo4j_memory_sync.build_fast_analysis_audit_report",
+        "scripts.memory.sync.build_fast_analysis_audit_report",
         _build_fast_analysis_audit_report,
     )
 
@@ -1704,14 +1704,14 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
     snapshot.add_relation(method_surface, "DEPENDS_ON", pipeline)
 
     monkeypatch.setattr(
-        "scripts.ops.neo4j_memory_sync._read_text",
+        "scripts.memory.sync._read_text",
         lambda path: "merge helper compat policy",
     )
 
     def _fail_parse(path: Path) -> None:
         raise AssertionError(f"AST parsing should not be used for complexity aggregation: {path}")
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync._parse_python_ast", _fail_parse)
+    monkeypatch.setattr("scripts.memory.sync._parse_python_ast", _fail_parse)
 
     _add_complexity_analysis_surfaces(
         snapshot,
@@ -1761,7 +1761,7 @@ def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) 
             fp=io.BytesIO(b'{"errors":[{"message":"Cypher failed"}]}'),
         )
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.request.urlopen", _raise_http_error)
+    monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_http_error)
     client = Neo4jHttpClient("http://localhost:7474", "neo4j", "password", "neo4j")
 
     try:
@@ -1785,7 +1785,7 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
     def _raise_transport_error(req: object, timeout: int = 60) -> object:
         raise responses.pop(0)
 
-    monkeypatch.setattr("scripts.ops.neo4j_memory_sync.request.urlopen", _raise_transport_error)
+    monkeypatch.setattr("scripts.memory.sync.request.urlopen", _raise_transport_error)
     client = Neo4jHttpClient("http://host.docker.internal:7474", "neo4j", "password", "neo4j")
 
     try:

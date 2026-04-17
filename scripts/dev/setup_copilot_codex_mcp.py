@@ -70,9 +70,10 @@ def _pdf_server() -> dict[str, object]:
     }
 
 
-def _wrapper_server(root: Path, script_name: str) -> dict[str, object]:
+def _wrapper_server(root: Path, relative_script_path: str) -> dict[str, object]:
+    relative_path = Path(relative_script_path)
     if os.name == "nt":
-        ps1_script_path = root / "scripts" / "ops" / f"{Path(script_name).stem}.ps1"
+        ps1_script_path = root / relative_path.with_suffix(".ps1")
         return {
             "command": "powershell",
             "args": [
@@ -84,7 +85,7 @@ def _wrapper_server(root: Path, script_name: str) -> dict[str, object]:
             ],
         }
 
-    script_path = root / "scripts" / "ops" / script_name
+    script_path = root / relative_path
     return {"command": "bash", "args": [str(script_path.resolve())]}
 
 
@@ -120,17 +121,17 @@ def _core_servers(root: Path) -> dict[str, dict[str, object]]:
         "fetch": _fetch_server(),
         "pdf": _pdf_server(),
         "github": _github_server(root),
-        "docker": _wrapper_server(root, "mcp_docker_wrapper.sh"),
-        "docker-docs": _wrapper_server(root, "mcp_docker_docs_wrapper.sh"),
-        "context7": _wrapper_server(root, "mcp_context7_wrapper.sh"),
-        "paper-search": _wrapper_server(root, "mcp_paper_search_wrapper.sh"),
-        "dockerhub": _wrapper_server(root, "mcp_dockerhub_wrapper.sh"),
-        "prometheus": _wrapper_server(root, "mcp_prometheus_wrapper.sh"),
-        "grafana": _wrapper_server(root, "mcp_grafana_wrapper.sh"),
-        "brave-search": _wrapper_server(root, "mcp_brave_search_wrapper.sh"),
-        "sonarqube": _wrapper_server(root, "mcp_sonarqube_wrapper.sh"),
-        "neo4j-cypher": _wrapper_server(root, "mcp_neo4j_cypher_wrapper.sh"),
-        "neo4j-memory": _wrapper_server(root, "mcp_neo4j_memory_wrapper.sh"),
+        "docker": _wrapper_server(root, "scripts/ops/mcp_docker_wrapper.sh"),
+        "docker-docs": _wrapper_server(root, "scripts/ops/mcp_docker_docs_wrapper.sh"),
+        "context7": _wrapper_server(root, "scripts/ops/mcp_context7_wrapper.sh"),
+        "paper-search": _wrapper_server(root, "scripts/ops/mcp_paper_search_wrapper.sh"),
+        "dockerhub": _wrapper_server(root, "scripts/ops/mcp_dockerhub_wrapper.sh"),
+        "prometheus": _wrapper_server(root, "scripts/ops/mcp_prometheus_wrapper.sh"),
+        "grafana": _wrapper_server(root, "scripts/ops/mcp_grafana_wrapper.sh"),
+        "brave-search": _wrapper_server(root, "scripts/ops/mcp_brave_search_wrapper.sh"),
+        "sonarqube": _wrapper_server(root, "scripts/ops/mcp_sonarqube_wrapper.sh"),
+        "neo4j-cypher": _wrapper_server(root, "scripts/ops/mcp_neo4j_cypher_wrapper.sh"),
+        "neo4j-memory": _wrapper_server(root, "scripts/memory/mcp/wrapper.sh"),
         "openaiDeveloperDocs": {
             "type": "http",
             "url": OPENAI_DEVELOPER_DOCS_URL,

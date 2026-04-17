@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
 __all__ = [
+    "CliRunOptionsInput",
+    "CliRunPreparationInput",
     "RunExecutionRequest",
     "RunPreparationResult",
     "StartOffsetValidationResult",
@@ -19,6 +21,40 @@ class StartOffsetValidationResult:
 
     is_valid: bool
     error_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CliRunOptionsInput:
+    """Normalized raw CLI option values used to build RunOptions."""
+
+    run_type: str
+    resume: bool
+    start_offset: int | None
+    limit: int | None
+    input_csv: str | None
+    filter_column: str | None
+    filter_field: str | None
+    dry_run: bool
+    vacuum_after_run: bool | None
+    vacuum_retention_days: int | None
+    debug: bool
+    use_cached_bronze: bool
+    cached_bronze_date: str | None
+    cached_bronze_path: str | None
+    replay_of_run_id: str | None = None
+    replay_of_manifest_id: str | None = None
+    exact_replay: bool = False
+    enable_tracing: bool | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CliRunPreparationInput:
+    """Validated-or-not raw CLI inputs needed to prepare one execution request."""
+
+    pipeline: str
+    options: CliRunOptionsInput
+    health_server: bool
+    health_port: int
 
 
 @dataclass(frozen=True, slots=True)

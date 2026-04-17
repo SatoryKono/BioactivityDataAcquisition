@@ -35,14 +35,14 @@ class TestBaseDQThresholds:
     def test_default_values(self) -> None:
         """Test default threshold values."""
         config = BaseDQThresholds()
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.20
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.20)
 
     def test_custom_values(self) -> None:
         """Test custom threshold values."""
         config = BaseDQThresholds(soft_fail_threshold=0.10, hard_fail_threshold=0.30)
-        assert config.soft_fail_threshold == 0.10
-        assert config.hard_fail_threshold == 0.30
+        assert config.soft_fail_threshold == pytest.approx(0.10)
+        assert config.hard_fail_threshold == pytest.approx(0.30)
 
     def test_soft_must_be_less_than_hard(self) -> None:
         """Test validation that soft < hard."""
@@ -72,8 +72,8 @@ class TestBaseDQConfig:
     def test_inherits_thresholds(self) -> None:
         """Test that BaseDQConfig inherits from BaseDQThresholds."""
         config = BaseDQConfig()
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.20
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.20)
 
     def test_strict_validation_default(self) -> None:
         """Test strict_validation defaults to False."""
@@ -93,8 +93,8 @@ class TestBaseDQConfig:
             strict_validation=True,
         )
         domain = config.to_domain()
-        assert domain.soft_fail_threshold == 0.08
-        assert domain.hard_fail_threshold == 0.25
+        assert domain.soft_fail_threshold == pytest.approx(0.08)
+        assert domain.hard_fail_threshold == pytest.approx(0.25)
         assert domain.strict_validation is True
 
 
@@ -149,13 +149,13 @@ class TestBaseRateLimitConfig:
     def test_default_values(self) -> None:
         """Test default rate limit values."""
         config = BaseRateLimitConfig()
-        assert config.requests_per_second == 5.0
+        assert config.requests_per_second == pytest.approx(5.0)
         assert config.burst == 10
 
     def test_custom_values(self) -> None:
         """Test custom rate limit values."""
         config = BaseRateLimitConfig(requests_per_second=10.0, burst=20)
-        assert config.requests_per_second == 10.0
+        assert config.requests_per_second == pytest.approx(10.0)
         assert config.burst == 20
 
     def test_rps_minimum(self) -> None:
@@ -186,13 +186,13 @@ class TestHttpClientConfig:
     def test_default_values(self) -> None:
         """Test default client config values."""
         config = HttpClientConfig()
-        assert config.timeout_sec == 30.0
+        assert config.timeout_sec == pytest.approx(30.0)
         assert config.max_retries == 3
 
     def test_custom_values(self) -> None:
         """Test custom client config values."""
         config = HttpClientConfig(timeout_sec=60.0, max_retries=5)
-        assert config.timeout_sec == 60.0
+        assert config.timeout_sec == pytest.approx(60.0)
         assert config.max_retries == 5
 
     def test_timeout_minimum(self) -> None:
@@ -235,7 +235,7 @@ class TestBaseApiConfig:
             timeout=60,
         )
         assert config.base_url == "https://api.example.com"
-        assert config.rate_limit == 10.0
+        assert config.rate_limit == pytest.approx(10.0)
         assert config.timeout == 60
 
     def test_to_domain_with_defaults(self) -> None:
@@ -243,14 +243,14 @@ class TestBaseApiConfig:
         config = BaseApiConfig()
         domain = config.to_domain()
         assert domain.timeout == 30
-        assert domain.rate_limit.requests_per_second == 5.0
+        assert domain.rate_limit.requests_per_second == pytest.approx(5.0)
 
     def test_to_domain_with_custom_values(self) -> None:
         """Test conversion to domain with custom values."""
         config = BaseApiConfig(rate_limit=10.0, timeout=60)
         domain = config.to_domain()
         assert domain.timeout == 60
-        assert domain.rate_limit.requests_per_second == 10.0
+        assert domain.rate_limit.requests_per_second == pytest.approx(10.0)
 
 
 @pytest.mark.unit
@@ -483,8 +483,8 @@ class TestBaseGoldFiltersConfig:
                 "score": BaseGoldRangeFilterConfig(min=0.0, max=100.0),
             },
         )
-        assert config.ranges["score"].min == 0.0
-        assert config.ranges["score"].max == 100.0
+        assert config.ranges["score"].min == pytest.approx(0.0)
+        assert config.ranges["score"].max == pytest.approx(100.0)
 
     def test_list_length_filters(self) -> None:
         """Test list length filter configuration."""

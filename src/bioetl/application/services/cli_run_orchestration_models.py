@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from bioetl.application.services.execution.cli_run_orchestration_models import (
+    CliRunOptionsInput,
+    CliRunPreparationInput,
     RunExecutionRequest,
     RunPreparationResult,
     StartOffsetValidationResult,
@@ -12,6 +14,8 @@ from bioetl.application.services.execution.cli_run_orchestration_models import (
 RunExecutionContext = RunExecutionRequest
 
 __all__ = [
+    "CliRunOptionsInput",
+    "CliRunPreparationInput",
     "RunExecutionRequest",
     "RunPreparationResult",
     "RunExecutionContext",

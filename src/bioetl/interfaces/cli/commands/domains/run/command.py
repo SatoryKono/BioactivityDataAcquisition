@@ -69,6 +69,7 @@ from bioetl.interfaces.cli.formatters import echo_error, echo_warning
 if TYPE_CHECKING:
     from bioetl.application.services import RunOptions, RunResult
     from bioetl.application.services.execution.cli_run_orchestration_models import (
+        CliRunOptionsInput,
         RunExecutionRequest,
     )
     from bioetl.application.services.execution.cli_run_orchestration_service import (
@@ -143,47 +144,9 @@ def validate_options(start_offset: int | None, run_type: str, resume: bool) -> N
         sys.exit(ExitCode.CONFIG_ERROR)
 
 
-def build_run_options(
-    run_type: str,
-    resume: bool,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    dry_run: bool,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    debug: bool,
-    enable_tracing: bool | None,
-    use_cached_bronze: bool,
-    cached_bronze_date: str | None,
-    cached_bronze_path: str | None,
-    replay_of_run_id: str | None = None,
-    replay_of_manifest_id: str | None = None,
-    exact_replay: bool = False,
-) -> RunOptions:
+def build_run_options(options_input: CliRunOptionsInput) -> RunOptions:
     """Build RunOptions from CLI parameters."""
-    return get_cli_run_orchestration_service().build_options(
-        run_type=run_type,
-        resume=resume,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        dry_run=dry_run,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        debug=debug,
-        enable_tracing=enable_tracing,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_date=cached_bronze_date,
-        cached_bronze_path=cached_bronze_path,
-        replay_of_run_id=replay_of_run_id,
-        replay_of_manifest_id=replay_of_manifest_id,
-        exact_replay=exact_replay,
-    )
+    return get_cli_run_orchestration_service().build_options(options_input)
 
 
 def execute_run(

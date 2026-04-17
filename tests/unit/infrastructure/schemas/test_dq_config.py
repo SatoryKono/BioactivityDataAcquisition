@@ -31,14 +31,14 @@ class TestThresholdsConfig:
     def test_default_values(self) -> None:
         """Default thresholds should be 0.05/0.20."""
         config = ThresholdsConfig()
-        assert config.soft_fail == 0.05
-        assert config.hard_fail == 0.20
+        assert config.soft_fail == pytest.approx(0.05)
+        assert config.hard_fail == pytest.approx(0.20)
 
     def test_valid_thresholds(self) -> None:
         """Valid thresholds should pass validation."""
         config = ThresholdsConfig(soft_fail=0.03, hard_fail=0.10)
-        assert config.soft_fail == 0.03
-        assert config.hard_fail == 0.10
+        assert config.soft_fail == pytest.approx(0.03)
+        assert config.hard_fail == pytest.approx(0.10)
 
     def test_soft_must_be_less_than_hard(self) -> None:
         """soft_fail >= hard_fail should raise ValidationError."""
@@ -63,14 +63,14 @@ class TestThresholdsConfig:
     def test_boundary_values_valid(self) -> None:
         """Boundary values 0.0 and 1.0 should be valid when ordered correctly."""
         config = ThresholdsConfig(soft_fail=0.0, hard_fail=1.0)
-        assert config.soft_fail == 0.0
-        assert config.hard_fail == 1.0
+        assert config.soft_fail == pytest.approx(0.0)
+        assert config.hard_fail == pytest.approx(1.0)
 
     def test_very_small_difference_valid(self) -> None:
         """Very small difference between thresholds should be valid."""
         config = ThresholdsConfig(soft_fail=0.05, hard_fail=0.06)
-        assert config.soft_fail == 0.05
-        assert config.hard_fail == 0.06
+        assert config.soft_fail == pytest.approx(0.05)
+        assert config.hard_fail == pytest.approx(0.06)
 
 
 class TestDQConfigFile:
@@ -80,8 +80,8 @@ class TestDQConfigFile:
         """Minimal config with only defaults should be valid."""
         config = DQConfigFile()
         assert config.version == "1.0.0"
-        assert config.thresholds.soft_fail == 0.05
-        assert config.thresholds.hard_fail == 0.20
+        assert config.thresholds.soft_fail == pytest.approx(0.05)
+        assert config.thresholds.hard_fail == pytest.approx(0.20)
         assert config.strict_validation is False
         assert config.invalid_record_policy == "quarantine"
 
@@ -101,8 +101,8 @@ class TestDQConfigFile:
         config = DQConfigFile(
             thresholds=ThresholdsConfig(soft_fail=0.03, hard_fail=0.15),
         )
-        assert config.thresholds.soft_fail == 0.03
-        assert config.thresholds.hard_fail == 0.15
+        assert config.thresholds.soft_fail == pytest.approx(0.03)
+        assert config.thresholds.hard_fail == pytest.approx(0.15)
 
     def test_config_with_field_validations(self) -> None:
         """Config with field validations at different levels."""
@@ -221,8 +221,8 @@ class TestDQConfigFileToDomain:
         config = DQConfigFile()
         domain = config.to_domain()
 
-        assert domain.soft_fail_threshold == 0.05
-        assert domain.hard_fail_threshold == 0.20
+        assert domain.soft_fail_threshold == pytest.approx(0.05)
+        assert domain.hard_fail_threshold == pytest.approx(0.20)
         assert domain.strict_validation is False
         assert domain.invalid_record_policy == "quarantine"
         assert len(domain.field_validations) == 0
@@ -234,8 +234,8 @@ class TestDQConfigFileToDomain:
         )
         domain = config.to_domain()
 
-        assert domain.soft_fail_threshold == 0.03
-        assert domain.hard_fail_threshold == 0.15
+        assert domain.soft_fail_threshold == pytest.approx(0.03)
+        assert domain.hard_fail_threshold == pytest.approx(0.15)
 
     def test_to_domain_merges_field_validations(self) -> None:
         """Field validations from all levels are merged."""
@@ -416,8 +416,8 @@ class TestDQConfigFileToDomain:
         domain = config.to_domain()
 
         fv = domain.field_validations[0]
-        assert fv.min_value == 0.0
-        assert fv.max_value == 100.0
+        assert fv.min_value == pytest.approx(0.0)
+        assert fv.max_value == pytest.approx(100.0)
 
     def test_to_domain_immutable(self) -> None:
         """Domain config should be immutable (frozen dataclass)."""

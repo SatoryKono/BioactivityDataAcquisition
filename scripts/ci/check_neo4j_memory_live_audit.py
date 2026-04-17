@@ -12,7 +12,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.ops.neo4j_memory_sync import (
+from scripts.memory.sync import (
     DEFAULT_BATCH_SIZE,
     build_audit_report,
     build_snapshot,

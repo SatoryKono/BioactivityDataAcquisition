@@ -29,7 +29,7 @@ def _repo_root() -> Path:
 
 
 def _default_wrapper_command() -> list[str]:
-    return [str(_repo_root() / "scripts/ops/mcp_neo4j_memory_wrapper.sh")]
+    return [str(_repo_root() / "scripts/memory/mcp/wrapper.sh")]
 
 
 def _encode_frame(payload: dict[str, Any]) -> bytes:

@@ -74,7 +74,7 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded local Neo4j/MCP bootstrap helper while the Neo4j memory tooling remains an operator-maintained troubleshooting surface; either promote it into a canonical supported workflow or remove it once those setup docs are retired."
     },
-    "scripts/ops/print_neo4j_memory_seed.sh": {
+    "scripts/memory/prompts/print_seed.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
@@ -104,7 +104,7 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/restart-docker.ps1 while historical docs and operator habits still reference the legacy root path."
     },
-    "scripts/setup-neo4j-wsl.sh": {
+    "scripts/memory/setup/wsl_startup.sh": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -128,7 +128,7 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL troubleshooting helper for reaching the Windows-hosted Docker Desktop Neo4j backend from mounted checkouts; either fold it into a canonical cross-platform setup flow or remove it once the mixed Windows-WSL path is stable."
     },
-    "scripts/ops/smoke_test_neo4j_mcp.sh": {
+    "scripts/memory/mcp/check.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
@@ -212,7 +212,7 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway mermaid server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ops/smoke_test_neo4j_mcp_knowall.ps1": {
+    "scripts/memory/mcp/check.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",

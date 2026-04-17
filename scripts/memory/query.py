@@ -14,13 +14,13 @@ if str(DEFAULT_ROOT) not in sys.path:
     sys.path.insert(0, str(DEFAULT_ROOT))
 
 try:
-    from scripts.ops.neo4j_memory_sync import (
+    from scripts.memory.sync import (
         JsonValue,
         Neo4jHttpClient,
         resolve_neo4j_connection,
     )
 except ModuleNotFoundError:  # pragma: no cover - direct script execution path
-    from scripts.ops.neo4j_memory_sync import (
+    from scripts.memory.sync import (
         JsonValue,
         Neo4jHttpClient,
         resolve_neo4j_connection,

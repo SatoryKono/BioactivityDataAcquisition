@@ -82,7 +82,7 @@ Expected:
 ### 4. Validate backend from WSL
 
 ```bash
-bash scripts/setup-neo4j-wsl.sh
+bash scripts/memory/setup/wsl_startup.sh
 ```
 
 This maintained script:
@@ -109,7 +109,7 @@ node query_test_docs_memory.js
 | `seed_test_docs_memory.js` | Seed block for test strategy + docs source-of-truth memory |
 | `query_test_docs_memory.js` | Retrieval check for seeded test/docs memory |
 | `scripts/restart-docker.ps1` | Docker Desktop restart helper |
-| `scripts/setup-neo4j-wsl.sh` | WSL-aware setup and validation path |
+| `scripts/memory/setup/wsl_startup.sh` | WSL-aware setup and validation path |
 
 ## Troubleshooting
 
@@ -141,7 +141,7 @@ This is not enough to declare the integration healthy.
 Run:
 
 ```bash
-bash scripts/setup-neo4j-wsl.sh
+bash scripts/memory/setup/wsl_startup.sh
 ```
 
 and verify that:
@@ -160,7 +160,7 @@ and verify that:
 - `docker ps` shows `bioetl-neo4j` as `Up`
 - `curl http://localhost:7474/` returns `200` or `302`
 - `node test_neo4j_connection.js` succeeds
-- `bash scripts/setup-neo4j-wsl.sh` succeeds
+- `bash scripts/memory/setup/wsl_startup.sh` succeeds
 - `node seed_test_docs_memory.js` succeeds
 - `node query_test_docs_memory.js` returns counts greater than zero
 

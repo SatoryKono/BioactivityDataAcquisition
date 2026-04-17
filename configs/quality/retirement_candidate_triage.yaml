@@ -1,7 +1,7 @@
 schema_version: 1
 snapshot_date: "2026-04-13"
 source:
-  query: "python -m scripts.ops query-neo4j-memory dead-code-candidates all --json"
+  query: "python -m scripts.memory query dead-code-candidates all --json"
   focus: "zero-anchor retirement tranche after the 2026-04-13 cleanup wave and post-refactor false-positive triage"
   owner: "@bioetl-architecture"
 policy:

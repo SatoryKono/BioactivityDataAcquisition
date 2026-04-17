@@ -14,6 +14,8 @@ from bioetl.application.services.cli_run_orchestration_contracts import (
     RunPreparedPipelineCallable as CanonicalRunPreparedPipelineCallable,
 )
 from bioetl.application.services.cli_run_orchestration_models import (
+    CliRunOptionsInput,
+    CliRunPreparationInput,
     RunExecutionRequest as CanonicalRunExecutionRequest,
     RunPreparationResult as CanonicalRunPreparationResult,
     StartOffsetValidationResult as CanonicalStartOffsetValidationResult,
@@ -22,6 +24,8 @@ from bioetl.application.services.cli_run_orchestration_service import (
     CliRunOrchestrationService,
     MetricsFlushCallable,
     RunCoroutineCallable,
+    CliRunOptionsInput as ServiceCliRunOptionsInput,
+    CliRunPreparationInput as ServiceCliRunPreparationInput,
     RunExecutionRequest,
     RunPreparationResult,
     RunPreparedPipelineCallable,
@@ -55,6 +59,8 @@ class TestPrepareExecutionRequest:
         assert RunExecutionRequest is CanonicalRunExecutionRequest
         assert RunPreparationResult is CanonicalRunPreparationResult
         assert StartOffsetValidationResult is CanonicalStartOffsetValidationResult
+        assert ServiceCliRunOptionsInput is CliRunOptionsInput
+        assert ServiceCliRunPreparationInput is CliRunPreparationInput
         assert RunPreparedPipelineCallable is CanonicalRunPreparedPipelineCallable
         assert RunCoroutineCallable is CanonicalRunCoroutineCallable
         assert MetricsFlushCallable is CanonicalMetricsFlushCallable
@@ -63,23 +69,27 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         result = service.prepare_execution_request(
-            pipeline="chembl_activity",
-            run_type="incremental",
-            resume=False,
-            start_offset=10,
-            limit=25,
-            input_csv="filters.csv",
-            filter_column="id",
-            filter_field="molecule_id",
-            dry_run=False,
-            vacuum_after_run=True,
-            vacuum_retention_days=7,
-            debug=True,
-            health_server=False,
-            health_port=8081,
-            use_cached_bronze=True,
-            cached_bronze_date="2026-03-12",
-            cached_bronze_path="/tmp/bronze",
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=10,
+                    limit=25,
+                    input_csv="filters.csv",
+                    filter_column="id",
+                    filter_field="molecule_id",
+                    dry_run=False,
+                    vacuum_after_run=True,
+                    vacuum_retention_days=7,
+                    debug=True,
+                    use_cached_bronze=True,
+                    cached_bronze_date="2026-03-12",
+                    cached_bronze_path="/tmp/bronze",
+                ),
+                health_server=False,
+                health_port=8081,
+            )
         )
 
         assert result.is_valid is True
@@ -101,24 +111,28 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         result = service.prepare_execution_request(
-            pipeline="chembl_activity",
-            run_type="incremental",
-            resume=False,
-            start_offset=None,
-            limit=25,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
-            debug=False,
-            health_server=False,
-            health_port=8081,
-            use_cached_bronze=True,
-            cached_bronze_date="2026-03-12",
-            cached_bronze_path="/tmp/bronze",
-            exact_replay=True,
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=25,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    use_cached_bronze=True,
+                    cached_bronze_date="2026-03-12",
+                    cached_bronze_path="/tmp/bronze",
+                    exact_replay=True,
+                ),
+                health_server=False,
+                health_port=8081,
+            )
         )
 
         assert result.is_valid is True
@@ -132,23 +146,27 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         result = service.prepare_execution_request(
-            pipeline="chembl_activity",
-            run_type="backfill",
-            resume=False,
-            start_offset=5,
-            limit=None,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
-            debug=False,
-            health_server=True,
-            health_port=8080,
-            use_cached_bronze=False,
-            cached_bronze_date=None,
-            cached_bronze_path=None,
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="backfill",
+                    resume=False,
+                    start_offset=5,
+                    limit=None,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    use_cached_bronze=False,
+                    cached_bronze_date=None,
+                    cached_bronze_path=None,
+                ),
+                health_server=True,
+                health_port=8080,
+            )
         )
 
         assert result.is_valid is False
@@ -159,24 +177,28 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         result = service.prepare_execution_request(
-            pipeline="chembl_activity",
-            run_type="incremental",
-            resume=False,
-            start_offset=None,
-            limit=None,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
-            debug=False,
-            health_server=True,
-            health_port=8080,
-            use_cached_bronze=False,
-            cached_bronze_date=None,
-            cached_bronze_path=None,
-            exact_replay=True,
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=None,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    use_cached_bronze=False,
+                    cached_bronze_date=None,
+                    cached_bronze_path=None,
+                    exact_replay=True,
+                ),
+                health_server=True,
+                health_port=8080,
+            )
         )
 
         assert result.is_valid is False
@@ -190,26 +212,30 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         result = service.prepare_execution_request(
-            pipeline="chembl_activity",
-            run_type="incremental",
-            resume=False,
-            start_offset=None,
-            limit=None,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
-            debug=False,
-            health_server=True,
-            health_port=8080,
-            use_cached_bronze=True,
-            cached_bronze_date="2026-03-12",
-            cached_bronze_path="/tmp/bronze",
-            replay_of_run_id="run-parent",
-            replay_of_manifest_id="manifest-parent",
-            exact_replay=False,
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=None,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    use_cached_bronze=True,
+                    cached_bronze_date="2026-03-12",
+                    cached_bronze_path="/tmp/bronze",
+                    replay_of_run_id="run-parent",
+                    replay_of_manifest_id="manifest-parent",
+                    exact_replay=False,
+                ),
+                health_server=True,
+                health_port=8080,
+            )
         )
 
         assert result.is_valid is False
@@ -250,20 +276,22 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         options = service.build_options(
-            run_type="incremental",
-            resume=False,
-            start_offset=None,
-            limit=10,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=False,
-            vacuum_retention_days=7,
-            debug=False,
-            use_cached_bronze=False,
-            cached_bronze_date=None,
-            cached_bronze_path=None,
+            CliRunOptionsInput(
+                run_type="incremental",
+                resume=False,
+                start_offset=None,
+                limit=10,
+                input_csv=None,
+                filter_column=None,
+                filter_field=None,
+                dry_run=False,
+                vacuum_after_run=False,
+                vacuum_retention_days=7,
+                debug=False,
+                use_cached_bronze=False,
+                cached_bronze_date=None,
+                cached_bronze_path=None,
+            )
         )
 
         assert options.vacuum_after_run is None
@@ -272,21 +300,23 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         options = service.build_options(
-            run_type="incremental",
-            resume=False,
-            start_offset=None,
-            limit=10,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
-            debug=False,
-            use_cached_bronze=True,
-            cached_bronze_date="2026-03-12",
-            cached_bronze_path="/tmp/bronze",
-            exact_replay=True,
+            CliRunOptionsInput(
+                run_type="incremental",
+                resume=False,
+                start_offset=None,
+                limit=10,
+                input_csv=None,
+                filter_column=None,
+                filter_field=None,
+                dry_run=False,
+                vacuum_after_run=None,
+                vacuum_retention_days=None,
+                debug=False,
+                use_cached_bronze=True,
+                cached_bronze_date="2026-03-12",
+                cached_bronze_path="/tmp/bronze",
+                exact_replay=True,
+            )
         )
 
         assert options.use_cached_bronze is True
@@ -296,23 +326,25 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         options = service.build_options(
-            run_type="incremental",
-            resume=False,
-            start_offset=None,
-            limit=10,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
-            debug=False,
-            use_cached_bronze=True,
-            cached_bronze_date="2026-03-12",
-            cached_bronze_path="/tmp/bronze",
-            replay_of_run_id="run-parent",
-            replay_of_manifest_id="manifest-parent",
-            exact_replay=True,
+            CliRunOptionsInput(
+                run_type="incremental",
+                resume=False,
+                start_offset=None,
+                limit=10,
+                input_csv=None,
+                filter_column=None,
+                filter_field=None,
+                dry_run=False,
+                vacuum_after_run=None,
+                vacuum_retention_days=None,
+                debug=False,
+                use_cached_bronze=True,
+                cached_bronze_date="2026-03-12",
+                cached_bronze_path="/tmp/bronze",
+                replay_of_run_id="run-parent",
+                replay_of_manifest_id="manifest-parent",
+                exact_replay=True,
+            )
         )
 
         assert options.replay_of_run_id == "run-parent"
@@ -322,26 +354,30 @@ class TestPrepareExecutionRequest:
         service = CliRunOrchestrationService()
 
         result = service.prepare_execution_request(
-            pipeline="chembl_activity",
-            run_type="incremental",
-            resume=False,
-            start_offset=None,
-            limit=25,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
-            debug=False,
-            health_server=False,
-            health_port=8081,
-            use_cached_bronze=True,
-            cached_bronze_date="2026-03-12",
-            cached_bronze_path="/tmp/bronze",
-            replay_of_run_id="run-parent",
-            replay_of_manifest_id="manifest-parent",
-            exact_replay=True,
+            CliRunPreparationInput(
+                pipeline="chembl_activity",
+                options=CliRunOptionsInput(
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=25,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    use_cached_bronze=True,
+                    cached_bronze_date="2026-03-12",
+                    cached_bronze_path="/tmp/bronze",
+                    replay_of_run_id="run-parent",
+                    replay_of_manifest_id="manifest-parent",
+                    exact_replay=True,
+                ),
+                health_server=False,
+                health_port=8081,
+            )
         )
 
         assert result.is_valid is True

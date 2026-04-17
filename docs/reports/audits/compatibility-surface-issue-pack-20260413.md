@@ -202,8 +202,8 @@ Body:
 Neo4j memory currently ranks top duplication clusters but does not always expose their member list. That makes duplication and compatibility-surface audits less explainable: the hotspot score is visible, but the concrete duplicated surface is not.
 
 Relevant scripts:
-- `scripts/ops/neo4j_memory_query.py`
-- `scripts/ops/neo4j_memory_sync.py`
+- `scripts/memory/query.py`
+- `scripts/memory/sync.py`
 
 ## Scope
 

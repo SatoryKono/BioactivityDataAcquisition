@@ -89,7 +89,7 @@ codex mcp get neo4j-memory
 
 **Ожидаемый результат:**
 ```
-neo4j-memory: scripts/ops/mcp_neo4j_memory_wrapper.sh
+neo4j-memory: scripts/memory/mcp/wrapper.sh
 Status: registered
 ```
 
@@ -138,7 +138,7 @@ NEO4J_URI=bolt://localhost:7687
 
 ## Конфигурация MCP Wrapper
 
-Скрипт `scripts/ops/mcp_neo4j_memory_wrapper.sh` автоматически:
+Скрипт `scripts/memory/mcp/wrapper.sh` автоматически:
 
 1. Загружает переменные из `.env`
 2. Парсит `NEO4J_AUTH` в username/password

@@ -19,6 +19,7 @@ from bioetl.application.services import (
     RunResult,
 )
 from bioetl.application.services.cli_run_orchestration_models import (
+    CliRunPreparationInput,
     RunExecutionRequest,
     RunPreparationResult,
 )
@@ -144,32 +145,36 @@ class TestPrepareRunRequest:
 
         result = prepare_run_request(
             service=service,
-            pipeline="chembl_activity",
-            run_type="incremental",
-            resume=False,
-            start_offset=None,
-            limit=None,
-            input_csv=None,
-            filter_column=None,
-            filter_field=None,
-            dry_run=False,
-            vacuum_after_run=None,
-            vacuum_retention_days=None,
-            debug=False,
-            health_server=True,
-            health_port=8081,
-            enable_tracing=None,
-            use_cached_bronze=False,
-            cached_bronze_date=None,
-            cached_bronze_path=None,
-            replay_of_run_id=None,
-            replay_of_manifest_id=None,
-            exact_replay=False,
+            command_input=RunCommandInput(
+                pipeline="chembl_activity",
+                run_type="incremental",
+                resume=False,
+                start_offset=None,
+                limit=None,
+                input_csv=None,
+                filter_column=None,
+                filter_field=None,
+                dry_run=False,
+                yes=True,
+                vacuum_after_run=None,
+                vacuum_retention_days=None,
+                debug=False,
+                health_server=True,
+                health_port=8081,
+                enable_tracing=None,
+                use_cached_bronze=False,
+                cached_bronze_date=None,
+                cached_bronze_path=None,
+            ),
             exit_func=exit_func,
         )
 
         assert result is expected_request
         exit_func.assert_not_called()
+        assert isinstance(
+            service.prepare_execution_request.call_args.args[0],
+            CliRunPreparationInput,
+        )
 
     def test_invalid_request_echoes_error_and_exits(self) -> None:
         service = MagicMock(spec=CliRunOrchestrationService)
@@ -186,27 +191,27 @@ class TestPrepareRunRequest:
         ):
             prepare_run_request(
                 service=service,
-                pipeline="chembl_activity",
-                run_type="incremental",
-                resume=False,
-                start_offset=None,
-                limit=None,
-                input_csv=None,
-                filter_column=None,
-                filter_field=None,
-                dry_run=False,
-                vacuum_after_run=None,
-                vacuum_retention_days=None,
-                debug=False,
-                health_server=True,
-                health_port=8081,
-                enable_tracing=None,
-                use_cached_bronze=False,
-                cached_bronze_date=None,
-                cached_bronze_path=None,
-                replay_of_run_id=None,
-                replay_of_manifest_id=None,
-                exact_replay=False,
+                command_input=RunCommandInput(
+                    pipeline="chembl_activity",
+                    run_type="incremental",
+                    resume=False,
+                    start_offset=None,
+                    limit=None,
+                    input_csv=None,
+                    filter_column=None,
+                    filter_field=None,
+                    dry_run=False,
+                    yes=True,
+                    vacuum_after_run=None,
+                    vacuum_retention_days=None,
+                    debug=False,
+                    health_server=True,
+                    health_port=8081,
+                    enable_tracing=None,
+                    use_cached_bronze=False,
+                    cached_bronze_date=None,
+                    cached_bronze_path=None,
+                ),
                 exit_func=MagicMock(side_effect=SystemExit(ExitCode.CONFIG_ERROR)),
             )
 
