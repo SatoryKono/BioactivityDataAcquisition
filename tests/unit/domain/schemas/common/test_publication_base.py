@@ -132,9 +132,8 @@ class TestPublicationBaseSchemaValidation:
 
         assert len(validated) == 1
         assert validated["publication_year"].iloc[0] == 2024
-        # Use == instead of 'is' for numpy bool comparison
-        assert validated["_dq_warn"].iloc[0] == False  # noqa: E712
-        assert validated["_dq_error"].iloc[0] == False  # noqa: E712
+        assert bool(validated["_dq_warn"].iloc[0]) is False
+        assert bool(validated["_dq_error"].iloc[0]) is False
 
 
 @pytest.mark.unit

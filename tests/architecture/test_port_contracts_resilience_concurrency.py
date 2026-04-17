@@ -533,7 +533,7 @@ class TestCircuitBreakerPortConcurrentAccess:
                 await breaker.call(self._async_fail)
             except RuntimeError:
                 pass
-            except:  # noqa: E722 - catch CircuitBreakerOpenError too
+            except Exception:
                 pass
 
         async def _async_fail():

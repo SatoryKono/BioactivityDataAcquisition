@@ -7,9 +7,6 @@ import argparse
 import subprocess
 import sys
 import tempfile
-from pathlib import Path
-
-_DOCS_DIR = Path(__file__).resolve().parents[1]
 
 
 def _run_step(label: str, argv: list[str]) -> int:
@@ -41,7 +38,8 @@ def main() -> int:
                 "check-links",
                 [
                     sys.executable,
-                    str(_DOCS_DIR / "check_doc_links.py"),
+                    "-m",
+                    "scripts.docs.checks.check_links",
                     "--links",
                     "--specs",
                     "--configs",
@@ -54,7 +52,8 @@ def main() -> int:
                 "check-drift",
                 [
                     sys.executable,
-                    str(_DOCS_DIR / "check_doc_drift.py"),
+                    "-m",
+                    "scripts.docs.checks.check_drift",
                     "--ports",
                     "--classes",
                 ],
@@ -66,7 +65,8 @@ def main() -> int:
                 "check-docstrings",
                 [
                     sys.executable,
-                    str(_DOCS_DIR / "check_docstring_coverage.py"),
+                    "-m",
+                    "scripts.docs.checks.check_docstrings",
                     "--summary",
                 ],
             )

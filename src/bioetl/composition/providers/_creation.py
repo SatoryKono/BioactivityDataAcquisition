@@ -175,6 +175,7 @@ def build_bound_data_source_creator(
     create_data_source: DataSourceCreatorProtocol,
 ) -> DataSourceCreatorProtocol:
     """Return a provider-bound data-source creator closure."""
+    del name
 
     def creator(
         settings: ProviderSettingsProtocol,

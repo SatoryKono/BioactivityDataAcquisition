@@ -35,6 +35,16 @@ __all__ = [
     "preview_pipeline_cleanup",
 ]
 
+_CLEANUP_PREVIEW_DOMAIN_ERROR_TITLE = (
+    "Maintenance cleanup-preview failed with domain error"
+)
+_CLEANUP_PREVIEW_UNEXPECTED_ERROR_TITLE = (
+    "Unexpected error during maintenance cleanup-preview"
+)
+_CLEANUP_PREVIEW_INTERRUPTED_MESSAGE = (
+    "Maintenance cleanup-preview interrupted by user (Ctrl+C)"
+)
+
 
 def _handle_cleanup_failure(
     exc: BaseException,
@@ -155,11 +165,9 @@ def cleanup_preview_command(pipeline: str) -> None:
             reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_DOMAIN_ERROR",
             subject_key="pipeline",
             subject_value=pipeline,
-            domain_error_title="Maintenance cleanup-preview failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance cleanup-preview",
-            interrupted_message=(
-                "Maintenance cleanup-preview interrupted by user (Ctrl+C)"
-            ),
+            domain_error_title=_CLEANUP_PREVIEW_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_CLEANUP_PREVIEW_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_CLEANUP_PREVIEW_INTERRUPTED_MESSAGE,
         )
     except KeyboardInterrupt as exc:
         _handle_cleanup_failure(
@@ -167,11 +175,9 @@ def cleanup_preview_command(pipeline: str) -> None:
             reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_SIGINT",
             subject_key="pipeline",
             subject_value=pipeline,
-            domain_error_title="Maintenance cleanup-preview failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance cleanup-preview",
-            interrupted_message=(
-                "Maintenance cleanup-preview interrupted by user (Ctrl+C)"
-            ),
+            domain_error_title=_CLEANUP_PREVIEW_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_CLEANUP_PREVIEW_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_CLEANUP_PREVIEW_INTERRUPTED_MESSAGE,
         )
     except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
         _handle_cleanup_failure(
@@ -179,11 +185,9 @@ def cleanup_preview_command(pipeline: str) -> None:
             reason_code="CLI_MAINTENANCE_CLEANUP_PREVIEW_UNEXPECTED_ERROR",
             subject_key="pipeline",
             subject_value=pipeline,
-            domain_error_title="Maintenance cleanup-preview failed with domain error",
-            unexpected_error_title="Unexpected error during maintenance cleanup-preview",
-            interrupted_message=(
-                "Maintenance cleanup-preview interrupted by user (Ctrl+C)"
-            ),
+            domain_error_title=_CLEANUP_PREVIEW_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_CLEANUP_PREVIEW_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_CLEANUP_PREVIEW_INTERRUPTED_MESSAGE,
         )
     finally:
         if getattr(coro, "cr_frame", None) is not None:

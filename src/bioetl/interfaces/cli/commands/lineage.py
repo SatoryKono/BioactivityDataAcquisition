@@ -25,6 +25,8 @@ __all__ = [
     "trace_command",
 ]
 
+_NONE_BULLET = "  - none"
+
 
 def get_lineage_service() -> LineageInspectionService:
     """Load the lineage inspection service through composition on demand."""
@@ -45,7 +47,7 @@ def _render_node_lines(nodes: list[object]) -> list[str]:
         label = item.get("label")
         suffix = f" label={label}" if label not in (None, "") else ""
         lines.append(f"  - {node_type}: {node_id}{suffix}")
-    return lines or ["  - none"]
+    return lines or [_NONE_BULLET]
 
 
 def _render_relation_lines(relations: list[object]) -> list[str]:
@@ -71,7 +73,7 @@ def _render_relation_lines(relations: list[object]) -> list[str]:
             )
             continue
         lines.append(f"  - {edge_type} via {fragment_id}{fragment_suffix}: {node}")
-    return lines or ["  - none"]
+    return lines or [_NONE_BULLET]
 
 
 def _render_fragment_payload(payload: dict[str, object]) -> str:
@@ -95,7 +97,7 @@ def _render_fragment_payload(payload: dict[str, object]) -> str:
     if isinstance(nodes, list):
         lines.extend(_render_node_lines(nodes))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_BULLET)
     return "\n".join(lines)
 
 
@@ -119,13 +121,13 @@ def _render_trace_payload(payload: dict[str, object]) -> str:
     if isinstance(upstream, list):
         lines.extend(_render_relation_lines(upstream))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_BULLET)
     lines.extend(["", "Downstream"])
     downstream = payload.get("downstream")
     if isinstance(downstream, list):
         lines.extend(_render_relation_lines(downstream))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_BULLET)
     return "\n".join(lines)
 
 
@@ -151,31 +153,31 @@ def _render_explain_payload(payload: dict[str, object]) -> str:
     if isinstance(produced_datasets, list):
         lines.extend(_render_node_lines(produced_datasets))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_BULLET)
     lines.extend(["", "Produced Bronze Batches"])
     produced_bronze_batches = payload.get("produced_bronze_batches")
     if isinstance(produced_bronze_batches, list):
         lines.extend(_render_node_lines(produced_bronze_batches))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_BULLET)
     lines.extend(["", "Transforms"])
     transforms = payload.get("transforms")
     if isinstance(transforms, list):
         lines.extend(_render_node_lines(transforms))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_BULLET)
     lines.extend(["", "Source Systems"])
     source_systems = payload.get("source_systems")
     if isinstance(source_systems, list):
         lines.extend(_render_node_lines(source_systems))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_BULLET)
     lines.extend(["", "Source Requests"])
     source_requests = payload.get("source_requests")
     if isinstance(source_requests, list):
         lines.extend(_render_node_lines(source_requests))
     else:
-        lines.append("  - none")
+        lines.append(_NONE_BULLET)
     return "\n".join(lines)
 
 
