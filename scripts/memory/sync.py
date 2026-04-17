@@ -3231,33 +3231,56 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
 
 def _add_curated_docs(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     for entry in CURATED_DOC_SOURCES:
-        source_name = entry["name"]
-        source_path = entry["path"]
-        summary = entry["summary"]
-        source_node = snapshot.add_node(
-            "doc_source_surface",
-            source_name,
-            summary=summary,
-            source_path=source_path,
-            source_kind="doc_surface",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(project, "HAS_DOC_SOURCE_SURFACE", source_node, provenance="curated_docs")
-        path = root / source_path
-        if path.is_file():
-            artifact = snapshot.add_node(
-                "doc_artifact",
-                source_path,
-                summary=summary,
-                source_path=source_path,
-                source_kind="doc_artifact",
-                last_verified=today,
-                ingest_wave="repo_sync_v1",
-                confidence="high",
-            )
-            snapshot.add_relation(source_node, "BACKED_BY", artifact, provenance="curated_docs")
+        _add_curated_doc_source(snapshot, root, project, today, entry)
+
+
+def _add_curated_doc_source(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    entry: dict[str, str],
+) -> None:
+    source_name = entry["name"]
+    source_path = entry["path"]
+    summary = entry["summary"]
+    source_node = snapshot.add_node(
+        "doc_source_surface",
+        source_name,
+        summary=summary,
+        source_path=source_path,
+        source_kind="doc_surface",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_DOC_SOURCE_SURFACE", source_node, provenance="curated_docs")
+    _link_curated_doc_artifact(snapshot, root, source_node, source_path=source_path, summary=summary, today=today)
+
+
+def _link_curated_doc_artifact(
+    snapshot: GraphSnapshot,
+    root: Path,
+    source_node: NodeKey,
+    *,
+    source_path: str,
+    summary: str,
+    today: str,
+) -> None:
+    path = root / source_path
+    if not path.is_file():
+        return
+    artifact = snapshot.add_node(
+        "doc_artifact",
+        source_path,
+        summary=summary,
+        source_path=source_path,
+        source_kind="doc_artifact",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(source_node, "BACKED_BY", artifact, provenance="curated_docs")
 
 
 def _evidence_summary_doc(
