@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_abstract,
     normalize_profile_canonical_smiles,
@@ -51,7 +53,7 @@ def test_normalize_profile_int_preserves_invalid_text() -> None:
 
 def test_normalize_profile_float_rounds_and_preserves_unhandled_object() -> None:
     marker = object()
-    assert normalize_profile_float("1.234567890123") == 1.2345678901
+    assert normalize_profile_float("1.234567890123") == pytest.approx(1.2345678901)
     assert normalize_profile_float(marker) is marker
 
 

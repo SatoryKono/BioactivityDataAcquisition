@@ -325,7 +325,7 @@ printf "${GREEN}✓ Ready for smoke test${NC}\n\n"
 
 printf "Next steps:\n\n"
 printf "1. Run MCP verification:\n"
-printf "   ${BLUE}bash scripts/memory/mcp/check.sh${NC}\n\n"
+printf "   ${BLUE}bash scripts/ai/mcp/check_neo4j_memory.sh${NC}\n\n"
 printf "2. Access Neo4j Browser:\n"
 
 case "$ENV_TYPE" in

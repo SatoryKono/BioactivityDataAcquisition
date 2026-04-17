@@ -40,7 +40,7 @@ def test_map_to_domain_error_rate_limit(mapper: DomainInfraExceptionMapper) -> N
         )
     )
     assert isinstance(mapped, RateLimitExceededError)
-    assert mapped.retry_after == 60.0
+    assert mapped.retry_after == pytest.approx(60.0)
     assert mapped.get_reason_code() == "ADAPTER_HTTP_RATE_LIMIT"
     assert mapped.__cause__ is source
     assert mapped.context.get("provider") == "chembl"

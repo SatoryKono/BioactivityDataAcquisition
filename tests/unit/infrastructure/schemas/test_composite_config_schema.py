@@ -164,7 +164,7 @@ def test_merge_and_column_group_validation_paths() -> None:
 
 def test_dq_and_execution_schema_to_domain_paths() -> None:
     override = DQOverrideSchema(soft_fail_threshold=0.1, hard_fail_threshold=0.2)
-    assert override.to_domain().hard_fail_threshold == 0.2
+    assert override.to_domain().hard_fail_threshold == pytest.approx(0.2)
 
     composite_dq = CompositeDQSchema(
         soft_fail_threshold=0.1,

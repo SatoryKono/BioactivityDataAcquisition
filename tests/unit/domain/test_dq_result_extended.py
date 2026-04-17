@@ -171,7 +171,7 @@ class TestDQResultExtended:
         result_dict = asdict(result)
 
         # Check that all fields are serialized
-        assert result_dict["error_rate"] == 0.15
+        assert result_dict["error_rate"] == pytest.approx(0.15)
         assert result_dict["status"] == "warning"
         assert result_dict["policy_ref"]["contract_ref"] == "chembl"
         assert len(result_dict["rule_outcomes"]) == 1

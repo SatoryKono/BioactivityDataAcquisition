@@ -60,7 +60,7 @@ def test_map_rate_limit_status_to_domain_error(
 
     assert isinstance(mapped, RateLimitExceededError)
     assert mapped.service_name == provider
-    assert mapped.retry_after == 60.0
+    assert mapped.retry_after == pytest.approx(60.0)
     assert mapped.get_reason_code() == "ADAPTER_HTTP_RATE_LIMIT"
 
 

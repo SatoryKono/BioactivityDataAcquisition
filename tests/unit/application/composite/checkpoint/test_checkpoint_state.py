@@ -506,7 +506,7 @@ class TestToDict:
         assert d["records_extracted"] == 100
         assert d["records_silver"] == 95
         assert d["keys_generated"] == 90
-        assert d["duration_seconds"] == 10.5
+        assert d["duration_seconds"] == pytest.approx(10.5)
         assert d["resumed"] is False
 
     def test_dependency_results_serialized(self) -> None:

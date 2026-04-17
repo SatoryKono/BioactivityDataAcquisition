@@ -1,6 +1,9 @@
 """Unit tests for UniProt CommentExtractor."""
 
 import json
+
+import pytest
+
 from bioetl.application.pipelines.uniprot.extractors.comments import (
     CommentExtractor,
     _is_comment_of_type,
@@ -125,7 +128,7 @@ class TestCommentExtractor:
         assert result is not None
         parsed = json.loads(result)
         assert parsed["ph_dependence"] == ["Optimum pH is 7."]
-        assert parsed["kinetic_parameters"]["km"][0]["value"] == 1.5
+        assert parsed["kinetic_parameters"]["km"][0]["value"] == pytest.approx(1.5)
 
     def test_extract_induction(self):
         """Test extraction of INDUCTION comments."""

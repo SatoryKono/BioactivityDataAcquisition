@@ -64,7 +64,7 @@ class TestUniquenessResult:
         assert result.primary_key == "id"
         assert result.unique_count == 100
         assert result.total_count == 100
-        assert result.duplicate_rate == 0.0
+        assert result.duplicate_rate == pytest.approx(0.0)
         assert result.status == DQCheckStatus.PASS
 
 

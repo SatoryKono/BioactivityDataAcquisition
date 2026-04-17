@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from scripts.ops.sonarqube_mcp_smoke import (
+from scripts.ai.mcp.sonarqube_mcp_smoke import (
     _STDIO_PROTOCOL_VERSION,
     run_smoke_command,
 )

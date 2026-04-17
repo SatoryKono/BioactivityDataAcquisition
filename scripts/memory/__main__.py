@@ -8,7 +8,6 @@ Usage:
 Commands:
     sync        Build and optionally sync the deterministic Neo4j repo graph
     query       Query deterministic Neo4j memory ownership, neighbors, and analysis shortcuts
-    smoke-mcp   Run a framed stdio smoke check against the neo4j-memory MCP wrapper
 """
 
 from __future__ import annotations
@@ -20,7 +19,6 @@ from pathlib import Path
 COMMANDS: dict[str, str] = {
     "sync": "sync.py",
     "query": "query.py",
-    "smoke-mcp": "mcp_smoke.py",
 }
 
 _DIR = Path(__file__).parent

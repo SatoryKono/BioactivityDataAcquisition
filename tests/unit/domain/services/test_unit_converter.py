@@ -74,13 +74,13 @@ class TestUnitConverter:
         """Test creation of Concentration value object."""
         result = converter.to_concentration(100.0, "nM")
         assert isinstance(result, Concentration)
-        assert result.value == 100.0
+        assert result.value == pytest.approx(100.0)
         assert result.unit == ConcentrationUnit.NANOMOLAR
 
     def test_to_concentration_micromolar(self, converter: UnitConverter) -> None:
         """Test creation with micromolar unit."""
         result = converter.to_concentration(1.5, "uM")
-        assert result.value == 1.5
+        assert result.value == pytest.approx(1.5)
         assert result.unit == ConcentrationUnit.MICROMOLAR
 
     def test_to_concentration_negative_raises(self, converter: UnitConverter) -> None:

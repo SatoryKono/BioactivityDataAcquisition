@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +47,7 @@ def test_entity_pipeline_sink_sort_policy_coverage_is_full() -> None:
 
     covered = total - len(missing)
     coverage = covered / total if total else 1.0
-    assert coverage == 1.0, (
+    assert coverage == pytest.approx(1.0), (
         "Deterministic sink sort policy coverage is incomplete: "
         f"{coverage:.2%} ({covered}/{total}).\n"
         + "\n".join(f"  - {item}" for item in missing)
@@ -76,7 +78,7 @@ def test_composite_merge_sort_policy_coverage_is_full() -> None:
 
     covered = total - len(missing)
     coverage = covered / total if total else 1.0
-    assert coverage == 1.0, (
+    assert coverage == pytest.approx(1.0), (
         "Composite deterministic sort policy coverage is incomplete: "
         f"{coverage:.2%} ({covered}/{total}).\n"
         + "\n".join(f"  - {item}" for item in missing)

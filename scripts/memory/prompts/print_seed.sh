@@ -61,7 +61,7 @@ EOF
 print_operations() {
   cat <<'EOF'
 @neo4j-memory сохрани operational facts for BioETL:
-- neo4j-memory MCP is registered in Codex through scripts/memory/mcp/wrapper.sh.
+- neo4j-memory MCP is registered in Codex through scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh.
 - the wrapper runs @knowall-ai/mcp-neo4j-agent-memory@0.2.5.
 - in WSL, Neo4j is accessed via bolt://host.docker.internal:7687.
 - Docker container name is bioetl-neo4j.

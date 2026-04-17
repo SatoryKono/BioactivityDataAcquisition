@@ -157,7 +157,7 @@ class TestSilverMetadataService:
 
         result = service.assemble(input_data)
 
-        assert result.runtime.duration_seconds == 15.0
+        assert result.runtime.duration_seconds == pytest.approx(15.0)
         assert calls[0]["started_at"] == started_at
         assert result.pipeline.name == "chembl_activity"
         assert set(result.lineage.source_batch_ids) == {"batch-a", "batch-b"}
@@ -243,7 +243,7 @@ class TestGoldMetadataService:
 
         assert calls[0]["started_at"] is None
         assert calls[0]["completed_at"] == completed_at
-        assert calls[0]["duration_seconds"] == 0.0
+        assert calls[0]["duration_seconds"] == pytest.approx(0.0)
         assert result.lineage.source_tables == {"silver.activity": 9}
         assert result.dq_summary.total_records == 1
         assert result.output.artifact_id == "gold:gold.activity"

@@ -65,7 +65,7 @@ class TestPubchemMoleculeRecord:
             canonical_smiles="CC(=O)OC1=CC=CC=C1C(=O)O",
             xlogp=1.2,
         )
-        assert r.molecular_weight == 180.16
+        assert r.molecular_weight == pytest.approx(180.16)
 
 
 @pytest.mark.unit

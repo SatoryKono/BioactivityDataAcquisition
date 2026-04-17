@@ -85,7 +85,7 @@ class TestRunResultModel:
             records_quarantined=10,
         )
 
-        assert result.success_rate == 0.0
+        assert result.success_rate == pytest.approx(0.0)
 
     @pytest.mark.parametrize(
         ("status", "expected"),
@@ -122,7 +122,7 @@ class TestRunResultModel:
             completed_at=completed_at,
         )
 
-        assert result.duration_seconds == 150.0
+        assert result.duration_seconds == pytest.approx(150.0)
 
     def test_manifest_id_is_preserved_when_present(self) -> None:
         result = RunResult(

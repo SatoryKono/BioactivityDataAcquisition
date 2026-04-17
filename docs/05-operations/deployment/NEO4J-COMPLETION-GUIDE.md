@@ -7,7 +7,7 @@
 Configuration files:
 - `.mcp.json` (Codex CLI)
 - `.vscode/mcp.json` (VS Code Copilot)
-- `scripts/memory/mcp/wrapper.sh` (wrapper script)
+- `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` (wrapper script)
 - `scripts/dev/setup_copilot_codex_mcp.py` (setup automation)
 
 ⏳ **Pending**: Neo4j backend container startup on your machine.
@@ -60,14 +60,14 @@ codex mcp get neo4j-memory
 ```
 neo4j-memory:
   Type: command
-  Command: scripts/memory/mcp/wrapper.sh
+  Command: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh
   Status: available
 ```
 
 ### Check 2: Full MCP Diagnostic
 
 ```bash
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 ```
 
 This script verifies:
@@ -169,8 +169,8 @@ The MCP server is registered but not responding.
 
 **Solution:**
 1. Verify Neo4j is running: `docker ps | grep bioetl-neo4j`
-2. Check wrapper script exists: `ls -la scripts/memory/mcp/wrapper.sh`
-3. Run verification: `bash scripts/memory/mcp/check.sh`
+2. Check wrapper script exists: `ls -la scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`
+3. Run verification: `bash scripts/ai/mcp/check_neo4j_memory.sh`
 
 ## Documentation
 
@@ -190,7 +190,7 @@ The MCP server is registered but not responding.
 
 2. **Verify Connection**:
    ```bash
-   bash scripts/memory/mcp/check.sh
+   bash scripts/ai/mcp/check_neo4j_memory.sh
    ```
 
 3. **Access Neo4j Browser**:

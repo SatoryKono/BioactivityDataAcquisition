@@ -163,7 +163,9 @@ class TestPubChemCompoundPipelineTransform:
         assert silver_record is not None
         assert silver_record["molecule_id"] == "2244"  # Now string
         assert silver_record["molecular_formula"] == "C9H8O4"
-        assert silver_record["molecular_weight"] == 180.16  # Now stored as float
+        assert silver_record["molecular_weight"] == pytest.approx(
+            180.16
+        )  # Now stored as float
         assert silver_record["canonical_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
         assert silver_record["inchi_key"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
         assert silver_record["iupac_name"] == "2-acetyloxybenzoic amolecule_id"
@@ -215,7 +217,9 @@ class TestPubChemCompoundPipelineTransform:
 
         assert silver_record is not None
         assert silver_record["molecule_id"] == "123456"  # Now string
-        assert silver_record["molecular_weight"] == 250.5  # Now stored as float
+        assert silver_record["molecular_weight"] == pytest.approx(
+            250.5
+        )  # Now stored as float
         assert silver_record["molecular_formula"] is None
         assert silver_record["canonical_smiles"] == "CCCC"
         assert "entity_id" in silver_record

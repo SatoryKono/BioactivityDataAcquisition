@@ -89,14 +89,14 @@ codex mcp get neo4j-memory
 
 **Ожидаемый результат:**
 ```
-neo4j-memory: scripts/memory/mcp/wrapper.sh
+neo4j-memory: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh
 Status: registered
 ```
 
 ### 2. Запустить полную проверку
 
 ```bash
-bash scripts/ops/check_mcp.sh
+bash scripts/ai/mcp/check.sh
 ```
 
 **Ожидаемые результаты:**
@@ -138,7 +138,7 @@ NEO4J_URI=bolt://localhost:7687
 
 ## Конфигурация MCP Wrapper
 
-Скрипт `scripts/memory/mcp/wrapper.sh` автоматически:
+Скрипт `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` автоматически:
 
 1. Загружает переменные из `.env`
 2. Парсит `NEO4J_AUTH` в username/password
@@ -208,7 +208,7 @@ docker inspect bioetl-neo4j
 
 1. ✅ Запустить Neo4j: `docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community`
 2. ✅ Проверить статус: `codex mcp get neo4j-memory`
-3. ✅ Запустить тест: `bash scripts/ops/check_mcp.sh`
+3. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`
 4. ✅ Открыть Neo4j Browser: http://localhost:7474/browser/
 
 ## Связанные Документы

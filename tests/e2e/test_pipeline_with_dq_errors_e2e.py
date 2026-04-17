@@ -127,7 +127,7 @@ class TestDQSoftThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManager)
+        quarantine_manager = MagicMock(spec=QuarantineManagerService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -206,7 +206,7 @@ class TestDQSoftThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManager)
+        quarantine_manager = MagicMock(spec=QuarantineManagerService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -287,7 +287,7 @@ class TestDQHardThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManager)
+        quarantine_manager = MagicMock(spec=QuarantineManagerService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -319,8 +319,8 @@ class TestDQHardThreshold:
         with pytest.raises(DataQualityThresholdError) as exc_info:
             await transformer.transform_batch(records, batch_id)
 
-        assert exc_info.value.error_rate == 0.25
-        assert exc_info.value.threshold == 0.20
+        assert exc_info.value.error_rate == pytest.approx(0.25)
+        assert exc_info.value.threshold == pytest.approx(0.20)
 
     async def test_hard_threshold_exactly_at_limit(self, e2e_data_dir: Path):
         """E2E: Pipeline fails when error rate equals hard threshold exactly."""
@@ -352,7 +352,7 @@ class TestDQHardThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManager)
+        quarantine_manager = MagicMock(spec=QuarantineManagerService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -414,7 +414,7 @@ class TestDQHardThreshold:
             ),
         )
 
-        quarantine_manager = MagicMock(spec=QuarantineManager)
+        quarantine_manager = MagicMock(spec=QuarantineManagerService)
         quarantine_manager.quarantine_record = AsyncMock()
         quarantine_manager.quarantine_filtered_record = AsyncMock()
 
@@ -485,7 +485,7 @@ class TestDQQuarantineBehavior:
         )
 
         quarantined_records: list[dict] = []
-        quarantine_manager = MagicMock(spec=QuarantineManager)
+        quarantine_manager = MagicMock(spec=QuarantineManagerService)
 
         async def capture_quarantine_records(records, batch_id, **kwargs):
             for record, _error_type, _error_msg in records:

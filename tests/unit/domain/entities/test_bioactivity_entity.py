@@ -66,7 +66,7 @@ class TestBioactivity:
             pchembl_value=7.3,
         )
         assert b.standard_type == "IC50"
-        assert b.pchembl_value == 7.3
+        assert b.pchembl_value == pytest.approx(7.3)
 
     def test_empty_activity_id_raises(self) -> None:
         with pytest.raises(ValueError, match="Activity ID is required"):
@@ -92,7 +92,7 @@ class TestBioactivity:
             molecule_id="CHEMBL25",
             pchembl_value=0.0,
         )
-        assert b.pchembl_value == 0.0
+        assert b.pchembl_value == pytest.approx(0.0)
 
     def test_with_state_returns_new_instance(self) -> None:
         b = Bioactivity(

@@ -520,8 +520,8 @@ class TestMoleculeTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["logp"] == 2.5
-        assert result["mw_freebase"] == 300.5
+        assert result["logp"] == pytest.approx(2.5)
+        assert result["mw_freebase"] == pytest.approx(300.5)
         assert result["ro5_violation_count"] == 1
         assert result["molecular_formula"] == "C15H12O3"
         assert result["ro3_pass"] == "Y"

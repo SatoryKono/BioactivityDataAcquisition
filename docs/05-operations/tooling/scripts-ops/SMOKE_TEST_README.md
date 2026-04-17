@@ -34,7 +34,7 @@ docker run -d --name bioetl-neo4j \
 # 2. Wait ~10-15 seconds for startup
 
 # 3. Run smoke test
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 ```
 
 ---
@@ -45,7 +45,7 @@ bash scripts/memory/mcp/check.sh
 
 ```bash
 cd /path/to/BioactivityDataAcquisition
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 ```
 
 ### Expected Output (Success)
@@ -75,7 +75,7 @@ TEST 2: Neo4j Ports Accessible
   1. Open Neo4j Browser: http://localhost:7474/browser/
   2. Test MCP in Codex: codex interactive
   3. Verify MCP details: codex mcp get neo4j-memory
-  4. Run comprehensive check: bash scripts/memory/mcp/check.sh
+  4. Run comprehensive check: bash scripts/ai/mcp/check_neo4j_memory.sh
 ```
 
 ### Expected Output (Startup in Progress)
@@ -103,7 +103,7 @@ If you run the test while Neo4j is still starting:
 - Uses `nc` or `/dev/tcp` for platform-agnostic port checking
 
 ### Test 3: Wrapper Script
-- Verifies wrapper exists at `scripts/memory/mcp/wrapper.sh`
+- Verifies wrapper exists at `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`
 - Checks if script is executable
 - Validates script contains MCP package reference
 - Confirms environment variable setup
@@ -136,7 +136,7 @@ If you run the test while Neo4j is still starting:
 | **"Container is NOT RUNNING"** | Start it: `docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community` |
 | **Ports are closed** | Neo4j is starting. Wait 10-15 seconds and re-run test. |
 | **"neo4j-memory is NOT registered"** | Register MCP: `uv run python -m scripts.dev setup-mcp` |
-| **Wrapper script not executable** | Fix permissions: `chmod +x scripts/memory/mcp/wrapper.sh` |
+| **Wrapper script not executable** | Fix permissions: `chmod +x scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` |
 | **Cypher query fails** | Check Neo4j logs: `docker logs bioetl-neo4j` |
 
 ---
@@ -165,7 +165,7 @@ xdg-open http://localhost:7474/browser/  # Linux
 start http://localhost:7474/browser/  # Windows PowerShell
 
 # Full MCP diagnostic
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 
 # Use in Codex
 codex mcp get neo4j-memory
@@ -203,7 +203,7 @@ docker rm bioetl-neo4j
 
 | File | Purpose |
 |------|---------|
-| `scripts/memory/mcp/wrapper.sh` | MCP wrapper (tested) |
+| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` | MCP wrapper (tested) |
 | `scripts/dev/setup_copilot_codex_mcp.py` | MCP setup automation (not tested) |
 | `.vscode/mcp.json` | VS Code Copilot config (not tested) |
 | `.env` or `.env.example` | Credentials source (checked) |

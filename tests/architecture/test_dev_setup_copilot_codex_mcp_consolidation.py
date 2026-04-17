@@ -77,7 +77,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     ]
     if os.name == "nt":
         assert servers["github"]["command"] == "powershell"
-        assert ".claude" in servers["github"]["args"][-1]
+        assert "scripts/ai/mcp" in servers["github"]["args"][-1]
         assert "github-mcp-wrapper.ps1" in servers["github"]["args"][-1]
         assert servers["docker"]["command"] == "powershell"
         assert servers["docker-docs"]["command"] == "powershell"
@@ -103,7 +103,9 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert "wrapper.ps1" in servers["neo4j-memory"]["args"][-1]
     else:
         assert servers["github"]["command"] == "bash"
-        assert servers["github"]["args"][-1].endswith(".claude/github-mcp-wrapper.sh")
+        assert servers["github"]["args"][-1].endswith(
+            "scripts/ai/mcp/github-mcp-wrapper.sh"
+        )
         assert servers["docker"]["command"] == "bash"
         assert servers["docker-docs"]["command"] == "bash"
         assert servers["context7"]["command"] == "bash"
@@ -116,37 +118,37 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         assert servers["neo4j-cypher"]["command"] == "bash"
         assert servers["neo4j-memory"]["command"] == "bash"
         assert servers["docker"]["args"][-1].endswith(
-            "scripts/ops/mcp_docker_wrapper.sh"
+            "scripts/ai/mcp/mcp_docker_wrapper.sh"
         )
         assert servers["docker-docs"]["args"][-1].endswith(
-            "scripts/ops/mcp_docker_docs_wrapper.sh"
+            "scripts/ai/mcp/mcp_docker_docs_wrapper.sh"
         )
         assert servers["context7"]["args"][-1].endswith(
-            "scripts/ops/mcp_context7_wrapper.sh"
+            "scripts/ai/mcp/mcp_context7_wrapper.sh"
         )
         assert servers["paper-search"]["args"][-1].endswith(
-            "scripts/ops/mcp_paper_search_wrapper.sh"
+            "scripts/ai/mcp/mcp_paper_search_wrapper.sh"
         )
         assert servers["dockerhub"]["args"][-1].endswith(
-            "scripts/ops/mcp_dockerhub_wrapper.sh"
+            "scripts/ai/mcp/mcp_dockerhub_wrapper.sh"
         )
         assert servers["prometheus"]["args"][-1].endswith(
-            "scripts/ops/mcp_prometheus_wrapper.sh"
+            "scripts/ai/mcp/mcp_prometheus_wrapper.sh"
         )
         assert servers["grafana"]["args"][-1].endswith(
-            "scripts/ops/mcp_grafana_wrapper.sh"
+            "scripts/ai/mcp/mcp_grafana_wrapper.sh"
         )
         assert servers["brave-search"]["args"][-1].endswith(
-            "scripts/ops/mcp_brave_search_wrapper.sh"
+            "scripts/ai/mcp/mcp_brave_search_wrapper.sh"
         )
         assert servers["sonarqube"]["args"][-1].endswith(
-            "scripts/ops/mcp_sonarqube_wrapper.sh"
+            "scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
         )
         assert servers["neo4j-cypher"]["args"][-1].endswith(
-            "scripts/ops/mcp_neo4j_cypher_wrapper.sh"
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
         )
         assert servers["neo4j-memory"]["args"][-1].endswith(
-            "scripts/memory/mcp/wrapper.sh"
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
         )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
@@ -173,8 +175,12 @@ def test_setup_ps1_wrapper_delegates_to_backend() -> None:
 def test_github_mcp_wrappers_load_repo_env() -> None:
     """GitHub MCP wrappers should load repo .env before fallback auth."""
     root = _project_root()
-    sh_content = (root / ".claude/github-mcp-wrapper.sh").read_text(encoding="utf-8")
-    ps_content = (root / ".claude/github-mcp-wrapper.ps1").read_text(encoding="utf-8")
+    sh_content = (root / "scripts/ai/mcp/github-mcp-wrapper.sh").read_text(
+        encoding="utf-8"
+    )
+    ps_content = (root / "scripts/ai/mcp/github-mcp-wrapper.ps1").read_text(
+        encoding="utf-8"
+    )
 
     assert "load_repo_env.sh" in sh_content
     assert "load_repo_env.ps1" in ps_content

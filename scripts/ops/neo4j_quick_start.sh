@@ -136,7 +136,7 @@ printf "  ${BLUE}Password:${NC}  bioetl_secure_password\n"
 
 printf "\n${GREEN}Next steps:${NC}\n"
 printf "  1. Access Neo4j Browser at http://localhost:7474/browser/\n"
-printf "  2. Run verification: ${BLUE}bash scripts/memory/mcp/check.sh${NC}\n"
+printf "  2. Run verification: ${BLUE}bash scripts/ai/mcp/check_neo4j_memory.sh${NC}\n"
 printf "  3. Use in Codex: ${BLUE}codex interactive${NC}\n"
 printf "  4. Stop container: ${BLUE}docker stop bioetl-neo4j${NC}\n"
 printf "  5. Remove container: ${BLUE}docker rm bioetl-neo4j${NC}\n"

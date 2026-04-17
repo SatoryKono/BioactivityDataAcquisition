@@ -6319,7 +6319,7 @@
       ]
     },
     {
-      "path": "scripts/ops/check_mcp.sh",
+      "path": "scripts/ai/mcp/check.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -6335,25 +6335,25 @@
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 106,
           "source_group": "docs",
-          "text": "bash scripts/ops/check_mcp.sh"
+          "text": "bash scripts/ai/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
           "line": 99,
           "source_group": "docs",
-          "text": "bash scripts/ops/check_mcp.sh"
+          "text": "bash scripts/ai/mcp/check.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
           "line": 211,
           "source_group": "docs",
-          "text": "3. ✅ Запустить тест: `bash scripts/ops/check_mcp.sh`"
+          "text": "3. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`"
         },
         {
           "path": "scripts/dev/bash/WSL_COMMANDS.sh",
           "line": 61,
           "source_group": "scripts",
-          "text": "# bash scripts/ops/check_mcp.sh"
+          "text": "# bash scripts/ai/mcp/check.sh"
         },
         {
           "path": "scripts/ops/README.md",
@@ -6370,7 +6370,7 @@
       ]
     },
     {
-      "path": "scripts/memory/mcp/check.sh",
+      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -6380,25 +6380,25 @@
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 70,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 173,
           "source_group": "docs",
-          "text": "3. Run verification: `bash scripts/memory/mcp/check.sh`"
+          "text": "3. Run verification: `bash scripts/ai/mcp/check_neo4j_memory.sh`"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 193,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 68,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
@@ -6410,19 +6410,19 @@
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 100,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 189,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
           "line": 30,
           "source_group": "docs",
-          "text": "- **[check.sh](../../../scripts/memory/mcp/check.sh)** - Comprehensive MCP + backend health check"
+          "text": "- **[check.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check"
         }
       ]
     },
@@ -7164,7 +7164,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_brave_search_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7179,7 +7179,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_brave_search_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7192,21 +7192,21 @@
           "text": "\"brave-search\": _wrapper_server(root, \"mcp_brave_search_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 15,
           "source_group": "scripts",
-          "text": "EXPECTED_BRAVE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_brave_search_wrapper.sh\""
+          "text": "EXPECTED_BRAVE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 136,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_brave_search_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_chembl_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
       "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
@@ -7214,7 +7214,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_chembl_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
       "type": "sh",
       "status": "orphan",
       "agent_usage": [],
@@ -7222,7 +7222,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_context7_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7237,7 +7237,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_context7_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7250,21 +7250,21 @@
           "text": "\"context7\": _wrapper_server(root, \"mcp_context7_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 10,
           "source_group": "scripts",
-          "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_context7_wrapper.sh\""
+          "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 121,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_context7_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_docker_docs_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7279,7 +7279,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_docker_docs_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7292,21 +7292,21 @@
           "text": "\"docker-docs\": _wrapper_server(root, \"mcp_docker_docs_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 9,
           "source_group": "scripts",
-          "text": "EXPECTED_DOCKER_DOCS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_docker_docs_wrapper.sh\""
+          "text": "EXPECTED_DOCKER_DOCS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 118,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_docker_docs_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_docker_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7321,7 +7321,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_docker_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_docker_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7334,21 +7334,21 @@
           "text": "\"docker\": _wrapper_server(root, \"mcp_docker_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 8,
           "source_group": "scripts",
-          "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_docker_wrapper.sh\""
+          "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 115,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_docker_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_dockerhub_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7363,7 +7363,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_dockerhub_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7376,21 +7376,21 @@
           "text": "\"dockerhub\": _wrapper_server(root, \"mcp_dockerhub_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 12,
           "source_group": "scripts",
-          "text": "EXPECTED_DOCKERHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_dockerhub_wrapper.sh\""
+          "text": "EXPECTED_DOCKERHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 127,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_dockerhub_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_grafana_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7405,7 +7405,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_grafana_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_grafana_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7418,21 +7418,21 @@
           "text": "\"grafana\": _wrapper_server(root, \"mcp_grafana_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 14,
           "source_group": "scripts",
-          "text": "EXPECTED_GRAFANA_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_grafana_wrapper.sh\""
+          "text": "EXPECTED_GRAFANA_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 133,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_grafana_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_mermaid_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
       "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
@@ -7440,7 +7440,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_mermaid_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
       "type": "sh",
       "status": "orphan",
       "agent_usage": [],
@@ -7448,7 +7448,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_neo4j_cypher_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7463,7 +7463,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_neo4j_cypher_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7476,21 +7476,21 @@
           "text": "\"neo4j-cypher\": _wrapper_server(root, \"mcp_neo4j_cypher_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 16,
           "source_group": "scripts",
-          "text": "EXPECTED_NEO4J_CYPHER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_neo4j_cypher_wrapper.sh\""
+          "text": "EXPECTED_NEO4J_CYPHER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 139,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_neo4j_cypher_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/memory/mcp/wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7505,7 +7505,7 @@
       ]
     },
     {
-      "path": "scripts/memory/mcp/wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7515,19 +7515,19 @@
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
           "line": 74,
           "source_group": "docs",
-          "text": "\"scripts/memory/mcp/wrapper.sh\","
+          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh\","
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 10,
           "source_group": "docs",
-          "text": "- `scripts/memory/mcp/wrapper.sh` (wrapper script)"
+          "text": "- `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` (wrapper script)"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 63,
           "source_group": "docs",
-          "text": "Command: scripts/memory/mcp/wrapper.sh"
+          "text": "Command: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
@@ -7539,13 +7539,13 @@
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
           "line": 172,
           "source_group": "docs",
-          "text": "2. Check wrapper script exists: `ls -la scripts/memory/mcp/wrapper.sh`"
+          "text": "2. Check wrapper script exists: `ls -la scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 46,
           "source_group": "docs",
-          "text": "| `scripts/memory/mcp/wrapper.sh` | MCP wrapper script | ✅ Ready |"
+          "text": "| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` | MCP wrapper script | ✅ Ready |"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
@@ -7557,12 +7557,12 @@
           "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
           "line": 14,
           "source_group": "docs",
-          "text": "- **Wrapper Script**: `scripts/memory/mcp/wrapper.sh` created"
+          "text": "- **Wrapper Script**: `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` created"
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_paper_search_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_paper_search_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7577,7 +7577,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_paper_search_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_paper_search_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7590,21 +7590,21 @@
           "text": "\"paper-search\": _wrapper_server(root, \"mcp_paper_search_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 11,
           "source_group": "scripts",
-          "text": "EXPECTED_PAPER_SEARCH_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_paper_search_wrapper.sh\""
+          "text": "EXPECTED_PAPER_SEARCH_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 124,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_paper_search_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_prometheus_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
@@ -7619,7 +7619,7 @@
       ]
     },
     {
-      "path": "scripts/ops/mcp_prometheus_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_prometheus_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7632,21 +7632,21 @@
           "text": "\"prometheus\": _wrapper_server(root, \"mcp_prometheus_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 13,
           "source_group": "scripts",
-          "text": "EXPECTED_PROMETHEUS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ops/mcp_prometheus_wrapper.sh\""
+          "text": "EXPECTED_PROMETHEUS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 130,
           "source_group": "tests",
-          "text": "\"scripts/ops/mcp_prometheus_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ops/mcp_pubchem_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
       "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
@@ -7654,7 +7654,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_pubchem_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.sh",
       "type": "sh",
       "status": "orphan",
       "agent_usage": [],
@@ -7662,7 +7662,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_pubmed_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
       "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
@@ -7670,7 +7670,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_pubmed_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.sh",
       "type": "sh",
       "status": "orphan",
       "agent_usage": [],
@@ -7678,7 +7678,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_sonarqube_wrapper.ps1",
+      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
       "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
@@ -7686,7 +7686,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/mcp_sonarqube_wrapper.sh",
+      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -7699,10 +7699,10 @@
           "text": "\"sonarqube\": _wrapper_server(root, \"mcp_sonarqube_wrapper.sh\"),"
         },
         {
-          "path": "scripts/ops/sonarqube_mcp_smoke.py",
+          "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
           "line": 39,
           "source_group": "scripts",
-          "text": "return [str(_repo_root() / \"scripts/ops/mcp_sonarqube_wrapper.sh\")]"
+          "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
         }
       ]
     },
@@ -7715,14 +7715,14 @@
       "references": []
     },
     {
-      "path": "scripts/memory/mcp_adapter.py",
+      "path": "scripts/ai/mcp/neo4j_memory_mcp_adapter.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
         {
-          "path": "scripts/memory/mcp/wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
           "line": 54,
           "source_group": "scripts",
           "text": "exec \"${PYTHON_BIN}\" \"${SCRIPT_DIR}/neo4j_memory_mcp_adapter.py\" -- \\"
@@ -7731,7 +7731,7 @@
           "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
           "line": 51,
           "source_group": "tests",
-          "text": "adapter = Path(\"scripts/memory/mcp_adapter.py\").resolve()"
+          "text": "adapter = Path(\"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\").resolve()"
         },
         {
           "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
@@ -7742,7 +7742,7 @@
       ]
     },
     {
-      "path": "scripts/memory/mcp_smoke.py",
+      "path": "scripts/ai/mcp/neo4j_memory_mcp_smoke.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8033,7 +8033,7 @@
       ]
     },
     {
-      "path": "scripts/memory/mcp/check.sh",
+      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
       "type": "sh",
       "status": "unknown",
       "agent_usage": [],
@@ -8043,18 +8043,18 @@
           "path": "docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md",
           "line": 37,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md",
           "line": 48,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         }
       ]
     },
     {
-      "path": "scripts/memory/mcp/check.sh",
+      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
       "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
@@ -8062,7 +8062,7 @@
       "references": []
     },
     {
-      "path": "scripts/memory/mcp/check.sh",
+      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
@@ -8072,54 +8072,54 @@
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 30,
           "source_group": "docs",
-          "text": "1. Run smoke test: bash scripts/memory/mcp/check.sh"
+          "text": "1. Run smoke test: bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 36,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 101,
           "source_group": "docs",
-          "text": "| `scripts/memory/mcp/check.sh` | ⭐ Verify setup (run second) |"
+          "text": "| `scripts/ai/mcp/check_neo4j_memory.sh` | ⭐ Verify setup (run second) |"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 128,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 161,
           "source_group": "docs",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "docs/05-operations/verification/neo4j-memory-windows-verification.md",
           "line": 63,
           "source_group": "docs",
-          "text": "You ran `bash scripts/memory/mcp/check.sh` from PowerShell."
+          "text": "You ran `bash scripts/ai/mcp/check_neo4j_memory.sh` from PowerShell."
         },
         {
           "path": "scripts/dev/bash/WSL_COMMANDS.sh",
           "line": 21,
           "source_group": "scripts",
-          "text": "bash scripts/memory/mcp/check.sh"
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
         },
         {
           "path": "scripts/memory/setup/wsl_startup.sh",
           "line": 328,
           "source_group": "scripts",
-          "text": "printf \"   ${BLUE}bash scripts/memory/mcp/check.sh${NC}\\n\\n\""
+          "text": "printf \"   ${BLUE}bash scripts/ai/mcp/check_neo4j_memory.sh${NC}\\n\\n\""
         }
       ]
     },
     {
-      "path": "scripts/ops/sonarqube_mcp_smoke.py",
+      "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -8347,37 +8347,37 @@
           "text": "- `support/docker_cli_resolver.sh`"
         },
         {
-          "path": "scripts/ops/mcp_brave_search_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
           "line": 5,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/docker_cli_resolver.sh"
         },
         {
-          "path": "scripts/ops/mcp_brave_search_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
           "line": 6,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
         },
         {
-          "path": "scripts/ops/mcp_chembl_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
           "line": 5,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/docker_cli_resolver.sh"
         },
         {
-          "path": "scripts/ops/mcp_chembl_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
           "line": 6,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
         },
         {
-          "path": "scripts/ops/mcp_context7_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
           "line": 5,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/docker_cli_resolver.sh"
         },
         {
-          "path": "scripts/ops/mcp_context7_wrapper.sh",
+          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
           "line": 6,
           "source_group": "scripts",
           "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
@@ -8410,31 +8410,31 @@
           "text": "- `support/load_repo_env.ps1`"
         },
         {
-          "path": "scripts/ops/mcp_brave_search_wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
         {
-          "path": "scripts/ops/mcp_dockerhub_wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
         {
-          "path": "scripts/ops/mcp_grafana_wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
         {
-          "path": "scripts/ops/mcp_neo4j_cypher_wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
         },
         {
-          "path": "scripts/memory/mcp/wrapper.ps1",
+          "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
           "line": 6,
           "source_group": "scripts",
           "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
@@ -8467,25 +8467,25 @@
           "text": "- `support/load_repo_env.sh`"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 18,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/load_repo_env.sh"
         },
         {
-          "path": "scripts/ops/check_mcp.sh",
+          "path": "scripts/ai/mcp/check.sh",
           "line": 19,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/support/load_repo_env.sh\""
         },
         {
-          "path": "scripts/memory/mcp/check.sh",
+          "path": "scripts/ai/mcp/check_neo4j_memory.sh",
           "line": 37,
           "source_group": "scripts",
           "text": "# shellcheck source=./support/load_repo_env.sh"
         },
         {
-          "path": "scripts/memory/mcp/check.sh",
+          "path": "scripts/ai/mcp/check_neo4j_memory.sh",
           "line": 38,
           "source_group": "scripts",
           "text": "source \"${SCRIPT_DIR}/support/load_repo_env.sh\""

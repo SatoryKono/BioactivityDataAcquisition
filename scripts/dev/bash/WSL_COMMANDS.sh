@@ -18,7 +18,7 @@ bash scripts/memory/setup/wsl_startup.sh
 # ============================================================================
 echo ""
 echo "Running verification tests..."
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 
 # Expected output:
 # ╔═══════════════════════════════════════════╗
@@ -58,7 +58,7 @@ codex interactive
 # codex mcp get neo4j-memory
 
 # Verify all MCP servers:
-# bash scripts/ops/check_mcp.sh
+# bash scripts/ai/mcp/check.sh
 
 # Stop container (keeps data):
 # docker stop bioetl-neo4j

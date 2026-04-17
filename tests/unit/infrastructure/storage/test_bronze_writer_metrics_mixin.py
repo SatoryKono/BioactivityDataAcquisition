@@ -107,4 +107,4 @@ class TestBronzeWriterMetricsMixin:
         host.logger.info.assert_called_once()
         call_args = host.logger.info.call_args
         assert call_args.args[0] == "bronze_write_complete"
-        assert call_args.kwargs["duration_seconds"] == 2.567
+        assert call_args.kwargs["duration_seconds"] == pytest.approx(2.567)

@@ -8,14 +8,12 @@ Usage:
 Stable commands:
     salt-rotate        Rotate PII hashing salt
     fix-grafana        Fix Grafana dashboard configurations
-    smoke-sonarqube-mcp Run a readiness-aware stdio smoke check against the sonarqube MCP wrapper
     wsl-proxy          Start WSL proxy helper
     setup-agents       Sync Codex agents into CODEX_HOME
     setup-plugins      Setup plugins (shell)
     setup-skills       Setup skills (shell)
     check-skills       Check AI skills layout (shell)
     check-mirror       Check skills mirror sync (shell)
-    check-mcp          Check MCP server configuration (shell)
     deploy             Deploy BioETL (shell)
     delete-branches    Delete stale git branches (shell)
 
@@ -35,7 +33,6 @@ from pathlib import Path
 COMMANDS: dict[str, str] = {
     "salt-rotate": "salt_rotate.py",
     "fix-grafana": "fix_grafana_dashboards.py",
-    "smoke-sonarqube-mcp": "sonarqube_mcp_smoke.py",
     "wsl-proxy": "wsl_proxy.py",
 }
 
@@ -49,7 +46,6 @@ SHELL_COMMANDS: dict[str, str] = {
     "setup-skills": "setup_skills.sh",
     "check-skills": "check_ai_skills_layout.sh",
     "check-mirror": "check_skills_mirror.sh",
-    "check-mcp": "check_mcp.sh",
     "deploy": "deploy-bioetl.sh",
     "delete-branches": "delete-stale-branches.sh",
 }

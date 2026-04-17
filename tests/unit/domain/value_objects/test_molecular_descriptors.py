@@ -161,7 +161,7 @@ class TestPolarSurfaceArea:
     def test_valid_zero(self) -> None:
         """Test zero is valid for PSA."""
         psa = PolarSurfaceArea(0.0)
-        assert psa.value == 0.0
+        assert psa.value == pytest.approx(0.0)
 
     def test_valid_positive(self) -> None:
         """Test positive value is valid."""
@@ -206,7 +206,7 @@ class TestLogP:
     def test_valid_zero(self) -> None:
         """Test zero LogP is valid."""
         logp = LogP(0.0)
-        assert logp.value == 0.0
+        assert logp.value == pytest.approx(0.0)
 
     def test_out_of_range_raises(self) -> None:
         """Test out-of-range LogP raises ValueError."""

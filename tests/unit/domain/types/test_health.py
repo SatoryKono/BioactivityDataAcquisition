@@ -50,7 +50,7 @@ class TestComponentHealthResult:
         )
         assert result.component == "storage"
         assert result.status == HealthStatus.HEALTHY
-        assert result.duration_seconds == 0.5
+        assert result.duration_seconds == pytest.approx(0.5)
         assert result.error_message is None
 
     def test_unhealthy_component_with_error(self) -> None:
