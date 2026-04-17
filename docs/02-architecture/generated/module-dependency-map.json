@@ -1,7 +1,7 @@
 {
   "summary": {
-    "scanned_modules": 1598,
-    "total_internal_imports": 6059,
+    "scanned_modules": 1603,
+    "total_internal_imports": 6066,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 288,
@@ -29,7 +29,7 @@
     {
       "source": "composition",
       "target": "composition",
-      "imports": 432,
+      "imports": 433,
       "allowed": true
     },
     {
@@ -47,13 +47,13 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 975,
+      "imports": 982,
       "allowed": true
     },
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 694,
+      "imports": 693,
       "allowed": true
     },
     {
@@ -137,7 +137,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.types",
-      "imports": 58
+      "imports": 57
     },
     {
       "source": "application.services",
