@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import SilverWriteMode
@@ -25,6 +25,9 @@ from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.metadata.builder_base import (
+    _resolve_metadata_timestamp,
+)
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -370,8 +373,10 @@ class SilverMetadataOperations:
 
         if self._metadata_writer is None:
             return None
-        runtime_started_at = ingestion_ts or datetime.now(UTC)
-        runtime_completed_at = datetime.now(UTC)
+        runtime_anchor = _resolve_metadata_timestamp(
+            explicit=ingestion_ts,
+            records=records,
+        )
         table_path_placeholder = self._placeholder_table_path(table_name)
         metadata = self._build_silver_metadata(
             _SilverMetadataBuildRequest(
@@ -380,8 +385,8 @@ class SilverMetadataOperations:
                 records=records,
                 dq_metrics=dq_metrics,
                 mode=mode,
-                runtime_started_at=runtime_started_at,
-                runtime_completed_at=runtime_completed_at,
+                runtime_started_at=runtime_anchor,
+                runtime_completed_at=runtime_anchor,
                 run_id=run_id,
                 run_type=run_type,
                 source_batch_id=source_batch_id,

@@ -18,8 +18,7 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MergedStoragePort
-    from bioetl.domain.ports.delta_reader import DeltaReaderPort
+    from bioetl.domain.ports import DeltaReaderPort, LoggerPort, MergedStoragePort
 
 
 @dataclass(frozen=True)
