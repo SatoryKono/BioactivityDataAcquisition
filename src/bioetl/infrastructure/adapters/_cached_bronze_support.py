@@ -130,8 +130,14 @@ async def iter_batch_records(
     """Iterate records from sorted batch paths."""
     for batch_path in batches:
         logger.debug("cached_bronze_reading_batch", batch_path=batch_path)
-        async for record in reader.read_bronze(batch_path):
-            yield record
+        records = reader.read_bronze(batch_path)
+        try:
+            async for record in records:
+                yield record
+        finally:
+            aclose = getattr(records, "aclose", None)
+            if callable(aclose):
+                await aclose()
 
 
 async def count_batch_records(
@@ -146,7 +152,13 @@ async def count_batch_records(
         batch_count=len(batches),
     )
     for batch_path in batches:
-        async for _ in reader.read_bronze(batch_path):
-            total += 1
+        records = reader.read_bronze(batch_path)
+        try:
+            async for _ in records:
+                total += 1
+        finally:
+            aclose = getattr(records, "aclose", None)
+            if callable(aclose):
+                await aclose()
     logger.info("Total records estimated", total=total)
     return total

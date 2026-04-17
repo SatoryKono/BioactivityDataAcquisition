@@ -117,10 +117,6 @@ def build_merge_service(
     """Create a fully wired MergeService for composite unit tests."""
     from bioetl.application.composite.aggregator import EnricherAggregator
     from bioetl.application.composite.coalesce_policy import CoalescePolicyService
-    from bioetl.application.composite.column_orderer import ColumnOrderer
-    from bioetl.application.composite.column_priority_orderer import (
-        ColumnPriorityOrderer,
-    )
     from bioetl.application.composite.column_renamer import ColumnRenamer
     from bioetl.application.composite.conflict_resolver import ConflictResolverService
     from bioetl.application.composite.deduplication import EnricherDeduplicatorService
@@ -132,9 +128,8 @@ def build_merge_service(
     deduplicator = EnricherDeduplicatorService(logger)
     aggregator = EnricherAggregator(logger)
     renamer = ColumnRenamer(logger)
-    priority_orderer = ColumnPriorityOrderer(logger)
-    orderer = ColumnOrderService(logger, priority_orderer=priority_orderer)
-    coalesce_policy = CoalescePolicyService(logger, priority_orderer)
+    orderer = ColumnOrderService(logger)
+    coalesce_policy = CoalescePolicyService(logger, order_service=orderer)
     conflict_resolver = ConflictResolverService(
         merge_config=merge_config,
         logger=logger,

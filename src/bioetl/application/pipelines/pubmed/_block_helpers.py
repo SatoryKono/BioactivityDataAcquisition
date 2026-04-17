@@ -122,8 +122,12 @@ def extract_journal_data(article: ET.Element) -> dict[str, object]:
         if issn_element is not None
         else None,
         "issn": get_text(issn_element),
-        "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
-        "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
+        "volume": get_text(journal_issue.find("Volume"))
+        if journal_issue is not None
+        else None,
+        "issue": get_text(journal_issue.find("Issue"))
+        if journal_issue is not None
+        else None,
         "page_range": pages,
         "medline_pgn": pages,
         "page_first": first_page,

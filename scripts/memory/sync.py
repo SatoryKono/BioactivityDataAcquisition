@@ -2877,38 +2877,57 @@ def _pipeline_targets_for_alert(
     normalized: str,
     dimensions: set[str],
 ) -> list[NodeKey]:
-    pipeline_targets: list[NodeKey] = []
-    if pipeline_mode == "all":
-        pipeline_targets = list(context.pipeline_nodes.values())
-    elif pipeline_mode == "entity":
-        pipeline_targets = [
-            node
-            for node in context.pipeline_nodes.values()
-            if context.snapshot.nodes[node].properties.get("pipeline_kind") == "entity"
-        ]
-    elif pipeline_mode == "composite":
-        pipeline_targets = [
-            node
-            for node in context.pipeline_nodes.values()
-            if context.snapshot.nodes[node].properties.get("pipeline_kind") == "composite"
-        ]
-    elif pipeline_mode == "auto" and "pipeline" in dimensions:
-        pipeline_targets = list(context.pipeline_nodes.values())
-        if (
-            "entity" in dimensions
-            or "bioetl_dq_" in normalized
-            or "bioetl_silver_" in normalized
-            or 'stage="bronze"' in normalized
-            or "bioetl_data_freshness_seconds" in normalized
-        ):
-            pipeline_kind = "entity"
-    if pipeline_kind in {"entity", "composite"}:
-        return [
-            node
-            for node in pipeline_targets
-            if context.snapshot.nodes[node].properties.get("pipeline_kind") == pipeline_kind
-        ]
+    pipeline_targets = _pipeline_targets_for_alert_mode(context, pipeline_mode, dimensions)
+    effective_kind = _alert_pipeline_kind_override(pipeline_kind, normalized, dimensions)
+    if effective_kind in {"entity", "composite"}:
+        return _pipeline_targets_matching_kind(context, pipeline_targets, effective_kind)
     return pipeline_targets
+
+
+def _pipeline_targets_for_alert_mode(
+    context: AlertTargetContext,
+    pipeline_mode: str,
+    dimensions: set[str],
+) -> list[NodeKey]:
+    if pipeline_mode == "all":
+        return list(context.pipeline_nodes.values())
+    if pipeline_mode == "entity":
+        return _pipeline_targets_matching_kind(context, context.pipeline_nodes.values(), "entity")
+    if pipeline_mode == "composite":
+        return _pipeline_targets_matching_kind(context, context.pipeline_nodes.values(), "composite")
+    if pipeline_mode == "auto" and "pipeline" in dimensions:
+        return list(context.pipeline_nodes.values())
+    return []
+
+
+def _alert_pipeline_kind_override(
+    pipeline_kind: str,
+    normalized: str,
+    dimensions: set[str],
+) -> str:
+    if pipeline_kind in {"entity", "composite"}:
+        return pipeline_kind
+    if (
+        "entity" in dimensions
+        or "bioetl_dq_" in normalized
+        or "bioetl_silver_" in normalized
+        or 'stage="bronze"' in normalized
+        or "bioetl_data_freshness_seconds" in normalized
+    ):
+        return "entity"
+    return pipeline_kind
+
+
+def _pipeline_targets_matching_kind(
+    context: AlertTargetContext,
+    pipeline_targets: Iterable[NodeKey],
+    pipeline_kind: str,
+) -> list[NodeKey]:
+    return [
+        node
+        for node in pipeline_targets
+        if context.snapshot.nodes[node].properties.get("pipeline_kind") == pipeline_kind
+    ]
 
 
 def _provider_targets_for_alert(
@@ -2918,13 +2937,26 @@ def _provider_targets_for_alert(
     normalized: str,
     dimensions: set[str],
 ) -> list[NodeKey]:
-    provider_targets_requested = provider_mode == "all" or (
+    provider_targets_requested = _provider_targets_requested(
+        provider_mode,
+        normalized=normalized,
+        dimensions=dimensions,
+    )
+    return context.provider_nodes if provider_targets_requested else []
+
+
+def _provider_targets_requested(
+    provider_mode: str,
+    *,
+    normalized: str,
+    dimensions: set[str],
+) -> bool:
+    return provider_mode == "all" or (
         provider_mode == "auto"
         and (
             "provider" in dimensions or "provider_health" in normalized or "bioetl_health_check_" in normalized
         )
     )
-    return context.provider_nodes if provider_targets_requested else []
 
 
 def _contract_targets_for_alert(
@@ -2937,18 +2969,47 @@ def _contract_targets_for_alert(
         return list(context.contract_nodes.values())
     if contract_mode != "mapped":
         return []
-    mapped_contracts = {
+    return sorted(_mapped_contract_targets(context, pipeline_targets), key=lambda node: node.name)
+
+
+def _mapped_contract_targets(
+    context: AlertTargetContext,
+    pipeline_targets: Iterable[NodeKey],
+) -> set[NodeKey]:
+    pipeline_target_set = set(pipeline_targets)
+    return {
         relation.target
         for relation in context.snapshot.relations.values()
-        if relation.source in pipeline_targets
+        if relation.source in pipeline_target_set
         and relation.relation_type == "DEPENDS_ON"
         and relation.target.label == "contract_surface"
     }
-    return sorted(mapped_contracts, key=lambda node: node.name)
 
 
 def _select_alert_targets(
     context: AlertTargetContext,
+    alert_name: str,
+    group_name: str,
+    expr: str,
+    dimensions: set[str],
+) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
+    pipeline_targets, provider_targets, contract_targets = _raw_alert_targets(
+        context,
+        alert_name=alert_name,
+        group_name=group_name,
+        expr=expr,
+        dimensions=dimensions,
+    )
+    return _sorted_alert_targets(pipeline_targets, provider_targets, contract_targets)
+
+
+def _sorted_unique_node_keys(nodes: list[NodeKey]) -> list[NodeKey]:
+    return sorted(set(nodes), key=lambda node: node.name)
+
+
+def _raw_alert_targets(
+    context: AlertTargetContext,
+    *,
     alert_name: str,
     group_name: str,
     expr: str,
@@ -2978,16 +3039,19 @@ def _select_alert_targets(
         contract_mode=contract_mode,
         pipeline_targets=pipeline_targets,
     )
+    return pipeline_targets, provider_targets, contract_targets
 
+
+def _sorted_alert_targets(
+    pipeline_targets: list[NodeKey],
+    provider_targets: list[NodeKey],
+    contract_targets: list[NodeKey],
+) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
     return (
         _sorted_unique_node_keys(pipeline_targets),
         _sorted_unique_node_keys(provider_targets),
         _sorted_unique_node_keys(contract_targets),
     )
-
-
-def _sorted_unique_node_keys(nodes: list[NodeKey]) -> list[NodeKey]:
-    return sorted(set(nodes), key=lambda node: node.name)
 
 
 def _select_alert_dashboards(
@@ -3486,34 +3550,53 @@ def _add_provider_surfaces(
     providers_root = root / "configs" / "providers"
     provider_nodes: dict[str, NodeKey] = {}
     for provider_path in sorted(providers_root.glob(YAML_FILE_GLOB)):
-        payload = _read_yaml(provider_path)
-        provider_name = str(payload.get("provider", provider_path.stem))
-        auth_type, pagination = _provider_config_properties(payload.get("source", {}))
-        provider = snapshot.add_node(
-            "provider_surface",
-            provider_name,
-            summary=f"Provider surface for `{provider_name}`.",
-            source_path=_rel_path(root, provider_path),
-            source_kind="provider_config",
-            auth_type=auth_type,
-            pagination_strategy=pagination,
-            entity_count=len(payload.get("entities", [])) if isinstance(payload.get("entities"), list) else None,
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        provider_nodes[provider_name] = provider
-        snapshot.add_relation(project, "HAS_PROVIDER", provider, provenance="provider_config")
-        _link_config_artifact(
+        _add_provider_surface(
             snapshot,
-            provider,
-            path=_rel_path(root, provider_path),
-            summary=f"Provider config for `{provider_name}`.",
-            source_kind="provider_config",
-            today=today,
-            provenance="provider_config",
+            root,
+            project,
+            today,
+            provider_path,
+            provider_nodes=provider_nodes,
         )
     return provider_nodes
+
+
+def _add_provider_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    provider_path: Path,
+    *,
+    provider_nodes: dict[str, NodeKey],
+) -> None:
+    payload = _read_yaml(provider_path)
+    provider_name = str(payload.get("provider", provider_path.stem))
+    auth_type, pagination = _provider_config_properties(payload.get("source", {}))
+    provider = snapshot.add_node(
+        "provider_surface",
+        provider_name,
+        summary=f"Provider surface for `{provider_name}`.",
+        source_path=_rel_path(root, provider_path),
+        source_kind="provider_config",
+        auth_type=auth_type,
+        pagination_strategy=pagination,
+        entity_count=len(payload.get("entities", [])) if isinstance(payload.get("entities"), list) else None,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    provider_nodes[provider_name] = provider
+    snapshot.add_relation(project, "HAS_PROVIDER", provider, provenance="provider_config")
+    _link_config_artifact(
+        snapshot,
+        provider,
+        path=_rel_path(root, provider_path),
+        summary=f"Provider config for `{provider_name}`.",
+        source_kind="provider_config",
+        today=today,
+        provenance="provider_config",
+    )
 
 
 def _provider_config_properties(source_payload: object) -> tuple[object, object]:
@@ -3539,34 +3622,53 @@ def _add_entity_config_surfaces(
     entities_root = root / "configs" / "entities"
     entity_nodes: dict[str, NodeKey] = {}
     for entity_path in sorted(entities_root.rglob(YAML_FILE_GLOB)):
-        payload = _read_yaml(entity_path)
-        provider_name, entity_name, node_name, summary = _entity_config_identity(entity_path, payload)
-        entity = snapshot.add_node(
-            "entity_config",
-            node_name,
-            summary=summary,
-            source_path=_rel_path(root, entity_path),
-            source_kind="entity_config",
-            provider=provider_name,
-            entity=entity_name,
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        entity_nodes[node_name] = entity
-        provider = provider_nodes.get(provider_name)
-        if provider is not None:
-            snapshot.add_relation(provider, "DEFINES", entity, provenance="entity_config")
-        _link_config_artifact(
+        _add_entity_config_surface(
             snapshot,
-            entity,
-            path=_rel_path(root, entity_path),
-            summary=f"Entity config for `{provider_name}/{entity_name}`.",
-            source_kind="entity_config",
-            today=today,
-            provenance="entity_config",
+            root,
+            today,
+            entity_path,
+            provider_nodes=provider_nodes,
+            entity_nodes=entity_nodes,
         )
     return entity_nodes
+
+
+def _add_entity_config_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    today: str,
+    entity_path: Path,
+    *,
+    provider_nodes: dict[str, NodeKey],
+    entity_nodes: dict[str, NodeKey],
+) -> None:
+    payload = _read_yaml(entity_path)
+    provider_name, entity_name, node_name, summary = _entity_config_identity(entity_path, payload)
+    entity = snapshot.add_node(
+        "entity_config",
+        node_name,
+        summary=summary,
+        source_path=_rel_path(root, entity_path),
+        source_kind="entity_config",
+        provider=provider_name,
+        entity=entity_name,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    entity_nodes[node_name] = entity
+    provider = provider_nodes.get(provider_name)
+    if provider is not None:
+        snapshot.add_relation(provider, "DEFINES", entity, provenance="entity_config")
+    _link_config_artifact(
+        snapshot,
+        entity,
+        path=_rel_path(root, entity_path),
+        summary=f"Entity config for `{provider_name}/{entity_name}`.",
+        source_kind="entity_config",
+        today=today,
+        provenance="entity_config",
+    )
 
 
 def _entity_config_identity(
@@ -6350,21 +6452,22 @@ _WORKFLOW_GATE_RULES: tuple[tuple[Callable[[str], bool], str], ...] = (
 
 def _workflow_family(workflow_name: str, title: str) -> str:
     lowered = f"{workflow_name} {title}".lower()
-    if "release" in lowered or "publish" in lowered:
-        return "release"
-    if "docs" in lowered or "doc" in lowered:
-        return "docs"
-    if "governance" in lowered or "schema" in lowered or "quality" in lowered:
-        return "governance"
-    if "docker" in lowered:
-        return "docker"
+    for family_name, needles in _WORKFLOW_FAMILY_RULES:
+        if _contains_any(lowered, needles):
+            return family_name
     return "test"
 
 
+_WORKFLOW_FAMILY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("release", ("release", "publish")),
+    ("docs", ("docs", "doc")),
+    ("governance", ("governance", "schema", "quality")),
+    ("docker", ("docker",)),
+)
+
+
 def _workflow_on_payload(payload: dict[str, object]) -> object:
-    if "on" in payload:
-        return payload.get("on")
-    return payload.get(True)
+    return payload.get("on") if "on" in payload else payload.get(True)
 
 
 def _workflow_trigger_names(payload: dict[str, object]) -> tuple[str, ...]:
@@ -6372,9 +6475,9 @@ def _workflow_trigger_names(payload: dict[str, object]) -> tuple[str, ...]:
     if isinstance(trigger_payload, str):
         return (trigger_payload,)
     if isinstance(trigger_payload, list):
-        return tuple(sorted(str(item) for item in trigger_payload if isinstance(item, str)))
+        return _sorted_string_items(trigger_payload)
     if isinstance(trigger_payload, dict):
-        return tuple(sorted(str(key) for key in trigger_payload))
+        return _sorted_string_items(trigger_payload.keys())
     return ()
 
 
@@ -6382,18 +6485,22 @@ def _workflow_environment_name(job_payload: dict[str, object]) -> str | None:
     environment_payload = job_payload.get("environment")
     if isinstance(environment_payload, str):
         return environment_payload
-    if isinstance(environment_payload, dict):
-        name = environment_payload.get("name")
-        if isinstance(name, str):
-            return name
-    return None
+    return _workflow_environment_mapping_name(environment_payload)
+
+
+def _workflow_environment_mapping_name(environment_payload: object) -> str | None:
+    if not isinstance(environment_payload, dict):
+        return None
+    name = environment_payload.get("name")
+    return name if isinstance(name, str) else None
+
+
+def _sorted_string_items(items: Iterable[object]) -> tuple[str, ...]:
+    return tuple(sorted(str(item) for item in items if isinstance(item, str)))
 
 
 def _workflow_matrix_axes(job_payload: dict[str, object]) -> tuple[str, ...]:
-    strategy_payload = job_payload.get("strategy")
-    if not isinstance(strategy_payload, dict):
-        return ()
-    matrix_payload = strategy_payload.get("matrix")
+    matrix_payload = _workflow_matrix_payload(job_payload)
     if not isinstance(matrix_payload, dict):
         return ()
     return tuple(
@@ -6413,10 +6520,7 @@ def _normalize_workflow_matrix_axis_name(axis_name: str) -> str:
 
 
 def _workflow_matrix_variants(job_payload: dict[str, object]) -> tuple[dict[str, str], ...]:
-    strategy_payload = job_payload.get("strategy")
-    if not isinstance(strategy_payload, dict):
-        return ()
-    matrix_payload = strategy_payload.get("matrix")
+    matrix_payload = _workflow_matrix_payload(job_payload)
     if not isinstance(matrix_payload, dict):
         return ()
 
@@ -6424,6 +6528,13 @@ def _workflow_matrix_variants(job_payload: dict[str, object]) -> tuple[dict[str,
     if base_axes is None or not base_axes:
         return ()
     return _workflow_matrix_variants_with_includes(base_axes, matrix_payload.get("include"))
+
+
+def _workflow_matrix_payload(job_payload: dict[str, object]) -> object:
+    strategy_payload = job_payload.get("strategy")
+    if not isinstance(strategy_payload, dict):
+        return None
+    return strategy_payload.get("matrix")
 
 
 def _workflow_matrix_variants_with_includes(
@@ -6532,21 +6643,25 @@ def _workflow_output_specs(
 ) -> tuple[tuple[str, str | None], ...]:
     if not isinstance(outputs_payload, dict):
         return ()
-    output_specs: list[tuple[str, str | None]] = []
-    for output_name, output_value in outputs_payload.items():
-        expression: str | None = None
-        if isinstance(output_value, str):
-            expression = output_value
-        elif isinstance(output_value, dict):
-            raw_value = output_value.get("value")
-            if isinstance(raw_value, str):
-                expression = raw_value
-            else:
-                description = output_value.get("description")
-                if isinstance(description, str):
-                    expression = description
-        output_specs.append((f"{workflow_name}::{scope}::{owner_name}::{output_name}", expression))
-    return tuple(output_specs)
+    return tuple(
+        (
+            f"{workflow_name}::{scope}::{owner_name}::{output_name}",
+            _workflow_output_expression(output_value),
+        )
+        for output_name, output_value in outputs_payload.items()
+    )
+
+
+def _workflow_output_expression(output_value: object) -> str | None:
+    if isinstance(output_value, str):
+        return output_value
+    if not isinstance(output_value, dict):
+        return None
+    raw_value = output_value.get("value")
+    if isinstance(raw_value, str):
+        return raw_value
+    description = output_value.get("description")
+    return description if isinstance(description, str) else None
 
 
 def _workflow_concurrency_group(payload: dict[str, object]) -> str | None:
@@ -7315,6 +7430,8 @@ _DOCS_REFERENCE_ALLOWED_PREFIXES = (
     GITHUB_PATH_PREFIX,
 )
 
+_DOC_LIKE_LABELS = {"doc_source_surface", "doc_artifact", "policy_surface"}
+
 
 def _trim_docs_reference_candidate(raw_ref: str) -> str:
     return raw_ref.strip().strip("`").rstrip(".,:;)]}")
@@ -7413,21 +7530,38 @@ def _claim_exact_candidates(normalized_token: str) -> tuple[NodeKey, ...]:
 
 
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
-    path_pattern = re.compile(
+    path_pattern = _docs_path_pattern()
+    command_pattern = _docs_command_pattern()
+    for source_node, source_path, text in _docs_drift_sources(snapshot, root):
+        _add_doc_path_reference_edges(snapshot, source_node, text, path_pattern)
+        _add_doc_command_reference_edges(snapshot, source_node, text, command_pattern)
+        _add_doc_claim_edges(snapshot, source_node, source_path, text, path_pattern)
+
+
+def _docs_path_pattern() -> re.Pattern[str]:
+    return re.compile(
         r"(?<![\w./-])("
         r"README\.md|mkdocs\.yml|\.github/[\w./*-]+|"
         r"(?:src|configs|scripts|tests|docs|grafana)/[\w./*-]+"
         r")"
     )
-    command_pattern = re.compile(
+
+
+def _docs_command_pattern() -> re.Pattern[str]:
+    return re.compile(
         r"(?:python3?\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*|"
         r"uv\s+run\s+python3?\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*|"
         r"uv\s+run\s+python\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*"
         r")"
     )
-    doc_like_labels = {"doc_source_surface", "doc_artifact", "policy_surface"}
+
+
+def _docs_drift_sources(
+    snapshot: GraphSnapshot,
+    root: Path,
+) -> Iterator[tuple[NodeKey, str, str]]:
     for node in tuple(snapshot.nodes.values()):
-        if node.key.label not in doc_like_labels:
+        if node.key.label not in _DOC_LIKE_LABELS:
             continue
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str):
@@ -7435,10 +7569,7 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         doc_path = root / source_path
         if not doc_path.is_file():
             continue
-        text = _read_text(doc_path)
-        _add_doc_path_reference_edges(snapshot, node.key, text, path_pattern)
-        _add_doc_command_reference_edges(snapshot, node.key, text, command_pattern)
-        _add_doc_claim_edges(snapshot, node.key, source_path, text, path_pattern)
+        yield node.key, source_path, _read_text(doc_path)
 
 
 def _doc_reference_context(text: str, offset: int) -> tuple[str | None, str | None, int]:
@@ -7466,18 +7597,15 @@ def _add_doc_path_reference_edges(
         if dedupe_key in seen_matches:
             continue
         seen_matches.add(dedupe_key)
-        section_title, section_anchor, line_number = _doc_reference_context(text, path_match.start())
-        snapshot.add_relation(
+        _add_doc_describes_relation(
+            snapshot,
             source_node,
-            "DESCRIBES",
             target,
-            provenance="docs_code_drift",
+            text,
+            path_match.start(),
             doc_reference=normalized,
             evidence_kind=evidence_kind,
             confidence=confidence,
-            section_title=section_title,
-            section_anchor=section_anchor,
-            line_number=line_number,
         )
 
 
@@ -7497,19 +7625,42 @@ def _add_doc_command_reference_edges(
         if command_key not in snapshot.nodes:
             continue
         seen_commands.add(command_name)
-        section_title, section_anchor, line_number = _doc_reference_context(text, command_match.start())
-        snapshot.add_relation(
+        _add_doc_describes_relation(
+            snapshot,
             source_node,
-            "DESCRIBES",
             command_key,
-            provenance="docs_code_drift",
+            text,
+            command_match.start(),
             doc_reference=raw_command,
             evidence_kind="command_reference",
             confidence="medium",
-            section_title=section_title,
-            section_anchor=section_anchor,
-            line_number=line_number,
         )
+
+
+def _add_doc_describes_relation(
+    snapshot: GraphSnapshot,
+    source_node: NodeKey,
+    target: NodeKey,
+    text: str,
+    offset: int,
+    *,
+    doc_reference: str,
+    evidence_kind: str,
+    confidence: str,
+) -> None:
+    section_title, section_anchor, line_number = _doc_reference_context(text, offset)
+    snapshot.add_relation(
+        source_node,
+        "DESCRIBES",
+        target,
+        provenance="docs_code_drift",
+        doc_reference=doc_reference,
+        evidence_kind=evidence_kind,
+        confidence=confidence,
+        section_title=section_title,
+        section_anchor=section_anchor,
+        line_number=line_number,
+    )
 
 
 def _is_claim_candidate(stripped_line: str) -> bool:
@@ -7530,8 +7681,7 @@ def _add_doc_claim_edges(
         stripped = raw_line.strip()
         if not _is_claim_candidate(stripped):
             continue
-        line_offset = text.find(raw_line)
-        section_title, section_anchor = _markdown_heading_context(text, line_offset)
+        section_title, section_anchor = _claim_section_context(text, raw_line)
         clean_text = stripped.lstrip("-*0123456789. ").strip()
         claim = snapshot.add_node(
             "doc_claim_surface",
@@ -7578,6 +7728,11 @@ def _add_doc_claim_edges(
             )
 
 
+def _claim_section_context(text: str, raw_line: str) -> tuple[str | None, str | None]:
+    line_offset = text.find(raw_line)
+    return _markdown_heading_context(text, line_offset)
+
+
 def _add_claim_path_targets(
     snapshot: GraphSnapshot,
     claim: NodeKey,
@@ -7597,17 +7752,17 @@ def _add_claim_path_targets(
         target, evidence_kind, confidence = _resolve_docs_reference_target(snapshot, normalized)
         if target is None or target == source_node:
             continue
-        snapshot.add_relation(
+        _add_claim_target_relation(
+            snapshot,
             claim,
-            "ASSERTS_ABOUT",
             target,
             provenance="docs_claims",
-            doc_reference=normalized,
-            evidence_kind=evidence_kind,
-            confidence=confidence,
             section_title=section_title,
             section_anchor=section_anchor,
             line_number=line_number,
+            doc_reference=normalized,
+            evidence_kind=evidence_kind,
+            confidence=confidence,
         )
         claim_has_target = True
     return claim_has_target
@@ -7624,19 +7779,46 @@ def _add_claim_token_targets(
 ) -> bool:
     claim_has_target = False
     for target, evidence_kind, confidence in _resolve_claim_targets(snapshot, clean_text):
-        snapshot.add_relation(
+        _add_claim_target_relation(
+            snapshot,
             claim,
-            "ASSERTS_ABOUT",
             target,
             provenance="docs_claims",
-            evidence_kind=evidence_kind,
-            confidence=confidence,
             section_title=section_title,
             section_anchor=section_anchor,
             line_number=line_number,
+            evidence_kind=evidence_kind,
+            confidence=confidence,
         )
         claim_has_target = True
     return claim_has_target
+
+
+def _add_claim_target_relation(
+    snapshot: GraphSnapshot,
+    claim: NodeKey,
+    target: NodeKey,
+    *,
+    provenance: str,
+    section_title: str | None,
+    section_anchor: str | None,
+    line_number: int,
+    evidence_kind: str,
+    confidence: str,
+    doc_reference: str | None = None,
+) -> None:
+    snapshot.add_relation(
+        claim,
+        "ASSERTS_ABOUT",
+        target,
+        provenance=provenance,
+        doc_reference=doc_reference,
+        evidence_kind=evidence_kind,
+        confidence=confidence,
+        section_title=section_title,
+        section_anchor=section_anchor,
+        line_number=line_number,
+    )
 
 
 def _add_claim_fallback_target(
@@ -12208,51 +12390,52 @@ SNAPSHOT_RELATION_REQUIREMENTS = (
 
 
 def _support_runtime_evidence_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.source == key and rel.relation_type in {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"}
-        for rel in relations
-    )
+    return _has_outbound_relation(relations, key, {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"})
 
 
 def _support_control_plane_artifact_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key
-        and rel.relation_type == "EMITS_ARTIFACT"
-        and rel.source.label == "runtime_evidence_surface"
-        for rel in relations
-    ) and any(
-        rel.source == key
-        and rel.relation_type == "MATERIALIZED_AS"
-        and rel.target.label == "storage_surface"
-        for rel in relations
+    return _has_inbound_relation(
+        relations,
+        key,
+        {"EMITS_ARTIFACT"},
+        source_labels={"runtime_evidence_surface"},
+    ) and _has_outbound_relation(
+        relations,
+        key,
+        {"MATERIALIZED_AS"},
+        target_labels={"storage_surface"},
     )
 
 
 def _support_run_instance_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key
-        and rel.relation_type == "HAS_RUN_INSTANCE"
-        and rel.source.label == "project"
-        for rel in relations
-    ) and any(
-        rel.source == key
-        and rel.relation_type == "REFERENCES_ARTIFACT"
-        and rel.target.label == "control_plane_artifact_surface"
-        for rel in relations
+    return _has_inbound_relation(
+        relations,
+        key,
+        {"HAS_RUN_INSTANCE"},
+        source_labels={"project"},
+    ) and _has_outbound_relation(
+        relations,
+        key,
+        {"REFERENCES_ARTIFACT"},
+        target_labels={"control_plane_artifact_surface"},
     )
 
 
 def _support_runtime_state_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key
-        and rel.relation_type == "HAS_RUNTIME_STATE"
-        and rel.source.label in {"project", "run_instance_surface"}
-        for rel in relations
-    ) and any(rel.source == key and rel.relation_type == "DEPENDS_ON" for rel in relations) and any(
-        rel.source == key
-        and rel.relation_type == "REFERENCES_ARTIFACT"
-        and rel.target.label == "control_plane_artifact_surface"
-        for rel in relations
+    return _has_inbound_relation(
+        relations,
+        key,
+        {"HAS_RUNTIME_STATE"},
+        source_labels={"project", "run_instance_surface"},
+    ) and _has_outbound_relation(
+        relations,
+        key,
+        {"DEPENDS_ON"},
+    ) and _has_outbound_relation(
+        relations,
+        key,
+        {"REFERENCES_ARTIFACT"},
+        target_labels={"control_plane_artifact_surface"},
     )
 
 
@@ -12282,10 +12465,7 @@ def _support_schema_field_surface(relations: tuple[GraphRelation, ...], key: Nod
 
 
 def _support_workflow_job_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key and rel.relation_type == "CONTAINS" and rel.source.label == "workflow_surface"
-        for rel in relations
-    )
+    return _has_inbound_relation(relations, key, {"CONTAINS"}, source_labels={"workflow_surface"})
 
 
 def _support_cli_command_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
@@ -12297,51 +12477,57 @@ def _support_cli_command_surface(relations: tuple[GraphRelation, ...], key: Node
 
 
 def _support_workflow_artifact_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key
-        and rel.relation_type in {"PUBLISHES_ARTIFACT", "DEPENDS_ON"}
-        and rel.source.label == "workflow_job_surface"
-        for rel in relations
+    return _has_inbound_relation(
+        relations,
+        key,
+        {"PUBLISHES_ARTIFACT", "DEPENDS_ON"},
+        source_labels={"workflow_job_surface"},
     )
 
 
 def _support_workflow_call_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key
-        and rel.relation_type == "CALLS_WORKFLOW"
-        and rel.source.label in {"workflow_surface", "workflow_job_surface"}
-        for rel in relations
-    ) or any(
-        rel.source == key and rel.relation_type == "DEPENDS_ON" and rel.target.label == "workflow_surface"
-        for rel in relations
+    return _has_inbound_relation(
+        relations,
+        key,
+        {"CALLS_WORKFLOW"},
+        source_labels={"workflow_surface", "workflow_job_surface"},
+    ) or _has_outbound_relation(
+        relations,
+        key,
+        {"DEPENDS_ON"},
+        target_labels={"workflow_surface"},
     )
 
 
 def _support_workflow_output_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key
-        and rel.relation_type == "EMITS_OUTPUT"
-        and rel.source.label in {"workflow_surface", "workflow_job_surface"}
-        for rel in relations
+    return _has_inbound_relation(
+        relations,
+        key,
+        {"EMITS_OUTPUT"},
+        source_labels={"workflow_surface", "workflow_job_surface"},
     )
 
 
 def _support_cli_option_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key
-        and rel.relation_type == "ACCEPTS_OPTION"
-        and rel.source.label == "cli_command_surface"
-        for rel in relations
+    return _has_inbound_relation(
+        relations,
+        key,
+        {"ACCEPTS_OPTION"},
+        source_labels={"cli_command_surface"},
     )
 
 
 def _support_doc_claim_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
-    return any(
-        rel.target == key
-        and rel.relation_type == "ASSERTS"
-        and rel.source.label in {"doc_source_surface", "doc_artifact", "policy_surface"}
-        for rel in relations
-    ) or any(rel.source == key and rel.relation_type == "ASSERTS_ABOUT" for rel in relations)
+    return _has_inbound_relation(
+        relations,
+        key,
+        {"ASSERTS"},
+        source_labels={"doc_source_surface", "doc_artifact", "policy_surface"},
+    ) or _has_outbound_relation(
+        relations,
+        key,
+        {"ASSERTS_ABOUT"},
+    )
 
 
 def _snapshot_support_specs() -> tuple[tuple[str, str, Callable[[tuple[GraphRelation, ...], NodeKey], bool]], ...]:
@@ -12364,13 +12550,53 @@ def _snapshot_support_specs() -> tuple[tuple[str, str, Callable[[tuple[GraphRela
 
 def _required_population_issues(stats: dict[str, JsonValue]) -> list[str]:
     issues: list[str] = []
-    for label in SNAPSHOT_REQUIRED_LABELS:
-        if int(stats["labels"].get(label, 0)) <= 0:
-            issues.append(f"missing required label population: {label}")
-    for relation_type in SNAPSHOT_REQUIRED_RELATION_TYPES:
-        if int(stats["relation_types"].get(relation_type, 0)) <= 0:
-            issues.append(f"missing required relation population: {relation_type}")
+    issues.extend(_missing_required_population(stats["labels"], SNAPSHOT_REQUIRED_LABELS, "label"))
+    issues.extend(_missing_required_population(stats["relation_types"], SNAPSHOT_REQUIRED_RELATION_TYPES, "relation"))
     return issues
+
+
+def _has_inbound_relation(
+    relations: tuple[GraphRelation, ...],
+    key: NodeKey,
+    relation_types: set[str],
+    *,
+    source_labels: set[str] | None = None,
+) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type in relation_types
+        and (source_labels is None or rel.source.label in source_labels)
+        for rel in relations
+    )
+
+
+def _has_outbound_relation(
+    relations: tuple[GraphRelation, ...],
+    key: NodeKey,
+    relation_types: set[str],
+    *,
+    target_labels: set[str] | None = None,
+) -> bool:
+    return any(
+        rel.source == key
+        and rel.relation_type in relation_types
+        and (target_labels is None or rel.target.label in target_labels)
+        for rel in relations
+    )
+
+
+def _missing_required_population(
+    counts: object,
+    names: Iterable[str],
+    kind: str,
+) -> list[str]:
+    if not isinstance(counts, dict):
+        return [f"missing required {kind} population: {name}" for name in names]
+    return [
+        f"missing required {kind} population: {name}"
+        for name in names
+        if int(counts.get(name, 0)) <= 0
+    ]
 
 
 def _port_and_contract_metadata_issues(snapshot: GraphSnapshot) -> list[str]:

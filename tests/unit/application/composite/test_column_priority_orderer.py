@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
+from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrderer,
 )
@@ -25,13 +26,13 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.fixture
-def orderer(mock_logger: MagicMock) -> ColumnPriorityOrderer:
+def orderer(mock_logger: MagicMock) -> ColumnOrderService:
     """Create service under test."""
-    return ColumnPriorityOrderer(mock_logger)
+    return ColumnOrderService(mock_logger)
 
 
 def test_collect_field_columns_includes_seed_and_enricher_qualified_columns(
-    orderer: ColumnPriorityOrderer,
+    orderer: ColumnOrderService,
 ) -> None:
     enrichers = (
         EnricherConfig(pipeline="crossref_publication", join_keys=("doi",)),
@@ -54,7 +55,7 @@ def test_collect_field_columns_includes_seed_and_enricher_qualified_columns(
 
 
 def test_collect_field_columns_falls_back_to_legacy_prefix_for_invalid_pipeline_names(
-    orderer: ColumnPriorityOrderer,
+    orderer: ColumnOrderService,
     mock_logger: MagicMock,
 ) -> None:
     enrichers = (EnricherConfig(pipeline="legacycrossref", join_keys=("doi",)),)
@@ -72,7 +73,7 @@ def test_collect_field_columns_falls_back_to_legacy_prefix_for_invalid_pipeline_
 
 
 def test_order_columns_by_priority_respects_seed_qualified_and_provider_order(
-    orderer: ColumnPriorityOrderer,
+    orderer: ColumnOrderService,
 ) -> None:
     columns = [
         "pubchem.compound.title",
@@ -94,7 +95,7 @@ def test_order_columns_by_priority_respects_seed_qualified_and_provider_order(
 
 
 def test_order_columns_by_priority_appends_remaining_columns_in_input_order(
-    orderer: ColumnPriorityOrderer,
+    orderer: ColumnOrderService,
 ) -> None:
     columns = [
         "crossref.publication.title",
@@ -116,7 +117,7 @@ def test_order_columns_by_priority_appends_remaining_columns_in_input_order(
 
 
 def test_filter_compatible_columns_returns_empty_for_no_ordered_columns(
-    orderer: ColumnPriorityOrderer,
+    orderer: ColumnOrderService,
 ) -> None:
     df = pl.DataFrame({"a": [1]})
     compatible, incompatible = orderer.filter_compatible_columns(
@@ -130,7 +131,7 @@ def test_filter_compatible_columns_returns_empty_for_no_ordered_columns(
 
 
 def test_filter_compatible_columns_tracks_incompatible_columns_and_logs(
-    orderer: ColumnPriorityOrderer,
+    orderer: ColumnOrderService,
     mock_logger: MagicMock,
 ) -> None:
     df = pl.DataFrame(

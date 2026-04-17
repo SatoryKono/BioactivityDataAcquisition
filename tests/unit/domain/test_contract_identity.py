@@ -1,6 +1,6 @@
 """Tests for contract identity model."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 from bioetl.domain.types.contract_identity import (
@@ -10,6 +10,11 @@ from bioetl.domain.types.contract_identity import (
     DQContractCompatibility,
     LifecycleStatus,
 )
+
+
+def _utcnow_iso() -> str:
+    """Return an aware UTC timestamp string for test fixtures."""
+    return datetime.now(UTC).isoformat()
 
 
 class TestContractIdentity:
@@ -107,7 +112,7 @@ class TestContractProvenance:
         provenance = ContractProvenance(
             source_file="src/schemas/chembl/molecule.v1.yaml",
             generated_by="schema-generator.v1",
-            generation_time=datetime.utcnow().isoformat(),
+            generation_time=_utcnow_iso(),
             source_commit="abc123def",
         )
 

@@ -8,7 +8,9 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.lifecycle.checkpoint_manager import CheckpointManager
+from bioetl.application.core.lifecycle.checkpoint_manager import (
+    CheckpointManagerService as CheckpointManager,
+)
 from bioetl.domain.types.checkpoint_metadata import (
     CheckpointCompatibilityResult,
     CheckpointMetadata,

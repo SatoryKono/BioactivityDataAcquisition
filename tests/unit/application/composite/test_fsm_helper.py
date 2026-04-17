@@ -12,7 +12,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
-from bioetl.application.composite.fsm_helper import FSMStateHelper
+from bioetl.application.composite.fsm_helper import (
+    FSMStateHelperService as FSMStateHelper,
+)
 from bioetl.domain.composite.state import CompositePipelineState
 
 

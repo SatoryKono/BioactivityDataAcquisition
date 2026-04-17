@@ -153,13 +153,18 @@ async def _yield_phase_records(
     if state.limit_reached():
         return
 
-    async for record in records:
-        if on_record:
-            on_record(record)
-        yield record
-        state.fetched += 1
-        if state.limit_reached():
-            return
+    try:
+        async for record in records:
+            if on_record:
+                on_record(record)
+            yield record
+            state.fetched += 1
+            if state.limit_reached():
+                return
+    finally:
+        aclose = getattr(records, "aclose", None)
+        if callable(aclose):
+            await aclose()
 
 
 async def run_fetch_with_fallback_policy(

@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.application.composite.preflight_validator import (
-    CompositePreflightValidator,
+    CompositePreflightValidationService as CompositePreflightValidator,
     FieldInfo,
     PreflightValidationError,
     PreflightValidationResult,

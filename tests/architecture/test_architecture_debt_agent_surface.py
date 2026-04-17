@@ -29,8 +29,12 @@ def test_architecture_debt_runtime_surfaces_exist() -> None:
     assert CODEX_AGENT.exists()
     assert CLAUDE_AGENT.exists()
     assert SKILL_FILE.exists()
-    assert (ROOT / "scripts" / "qa" / "generate_architecture_debt_tasks.py").exists()
-    assert (ROOT / "scripts" / "qa" / "reduce_architecture_debt.py").exists()
+    assert (
+        ROOT / "scripts" / "engineering" / "qa" / "generate_architecture_debt_tasks.py"
+    ).exists()
+    assert (
+        ROOT / "scripts" / "engineering" / "qa" / "reduce_architecture_debt.py"
+    ).exists()
 
 
 def test_architecture_debt_skill_points_to_claude_surface() -> None:

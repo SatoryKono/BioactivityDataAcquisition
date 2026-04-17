@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 def _merge_runtime_symbols() -> dict[str, object]:
     """Load composite runtime helpers lazily to reduce module-scope import cost."""
     from bioetl.application.composite.aggregator import EnricherAggregator
-    from bioetl.application.composite.deduplication import EnricherDeduplicator
+    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
     from bioetl.application.composite.merger import (
         MergeCollaboratorGroup,
         MergeService,
@@ -39,7 +39,7 @@ def _merge_runtime_symbols() -> dict[str, object]:
 
     return {
         "EnricherAggregator": EnricherAggregator,
-        "EnricherDeduplicator": EnricherDeduplicator,
+        "EnricherDeduplicator": EnricherDeduplicatorService,
         "MergeCollaboratorGroup": MergeCollaboratorGroup,
         "MergeService": MergeService,
         "_path_to_table_name": _path_to_table_name,

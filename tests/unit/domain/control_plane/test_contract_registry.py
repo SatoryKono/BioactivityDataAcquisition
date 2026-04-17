@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 import yaml
@@ -24,6 +24,11 @@ from bioetl.domain.types.contract_identity import (
 )
 
 
+def _utcnow_iso() -> str:
+    """Return an aware UTC timestamp string for test fixtures."""
+    return datetime.now(UTC).isoformat()
+
+
 class TestContractRegistryEntry:
     """Test contract registry entry creation and validation."""
 
@@ -41,7 +46,7 @@ class TestContractRegistryEntry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -65,7 +70,7 @@ class TestContractRegistryEntry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
         assert valid_entry.validate() == []
@@ -98,7 +103,7 @@ class TestContractRegistryEntry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["0.9.0"],  # Missing 1.0.0
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -177,7 +182,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -201,7 +206,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -210,7 +215,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v2.yaml",  # Different source
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -241,7 +246,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -260,7 +265,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v0.yaml",
             supported_versions=["0.9.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -289,7 +294,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -308,7 +313,7 @@ class TestContractRegistry:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/test.v2.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -353,7 +358,7 @@ class TestContractRegistry:
             source_path=str(temp_file.absolute()),  # This exists (absolute path)
             published_artifacts=["missing.json"],  # This doesn't (relative path)
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["test-team"],
         )
 
@@ -594,7 +599,7 @@ class TestRegistryIntegration:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/chembl/molecule.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["chembl-team"],
             dq_policy_ref="chembl.dq.v1",
             rule_bundle_version="dq-rules.v1.0",
@@ -625,7 +630,7 @@ class TestRegistryIntegration:
             status=LifecycleStatus.ACTIVE,
             source_path="src/schemas/chembl/molecule.v1.yaml",
             supported_versions=["1.0.0"],
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=_utcnow_iso(),
             owners=["chembl-team"],
             dq_policy_ref="chembl.dq.v2",  # Different policy
             rule_bundle_version="dq-rules.v1.0",

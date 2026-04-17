@@ -112,18 +112,26 @@ class BatchExtractionLoopService:
             checkpoint_interval=self._checkpoint_interval,
         )
 
-        async for raw_record in self._batch_processing_service.extract_records(
+        records = self._batch_processing_service.extract_records(
             limit=execution_context.limit,
             query=execution_context.query,
             offset=execution_context.offset,
-        ):
-            progress_state.records_fetched = await process_extracted_record_iteration(
-                loop_state=loop_state,
-                raw_record=raw_record,
-                shutdown_requested=self._shutdown_signal.is_requested,
-                records_fetched=progress_state.records_fetched,
-                iteration_context=iteration_context,
-            )
+        )
+        try:
+            async for raw_record in records:
+                progress_state.records_fetched = (
+                    await process_extracted_record_iteration(
+                        loop_state=loop_state,
+                        raw_record=raw_record,
+                        shutdown_requested=self._shutdown_signal.is_requested,
+                        records_fetched=progress_state.records_fetched,
+                        iteration_context=iteration_context,
+                    )
+                )
+        finally:
+            aclose = getattr(records, "aclose", None)
+            if callable(aclose):
+                await aclose()
 
         await flush_remaining_batch(
             loop_state=loop_state,

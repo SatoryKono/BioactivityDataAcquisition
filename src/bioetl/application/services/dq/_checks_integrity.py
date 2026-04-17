@@ -130,7 +130,7 @@ def _build_fk_result(
     ref_values = ref_df[ref_col].unique()
 
     total_refs = len(local_values)
-    valid_refs = int(local_values.is_in(ref_values).sum())
+    valid_refs = int(local_values.is_in(ref_values.implode()).sum())
     orphans = total_refs - valid_refs
     status = _classify_fk_status(orphans, total_refs)
 
@@ -251,7 +251,7 @@ def check_scd_integrity(
     unique_entities = analysis_df[entity_key].n_unique()
     total_records = len(analysis_df)
 
-    version_counts = analysis_df.group_by(entity_key).agg(pl.count().alias("versions"))
+    version_counts = analysis_df.group_by(entity_key).agg(pl.len().alias("versions"))
     entities_with_history = int((version_counts["versions"] > 1).sum())
     avg_versions = total_records / unique_entities if unique_entities > 0 else 1.0
 

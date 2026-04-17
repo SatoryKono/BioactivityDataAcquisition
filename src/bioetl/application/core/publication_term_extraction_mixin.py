@@ -27,19 +27,26 @@ class PublicationTermExtractionMixin:
     ) -> AsyncIterator[BronzeRecord]:
         """Expand a publication stream into term records with optional limit."""
         term_count = 0
-        async for publication in publications:
-            publication_id = publication.get("publication_id") or publication.get(
-                "document_chembl_id"
-            )
-            if not publication_id:
-                continue
+        try:
+            async for publication in publications:
+                publication_id = publication.get("publication_id") or publication.get(
+                    "document_chembl_id"
+                )
+                if not publication_id:
+                    continue
 
-            terms = self._extract_terms_from_publication(publication, publication_id)
-            for term in terms:
-                yield term
-                term_count += 1
-                if limit and term_count >= limit:
-                    return
+                terms = self._extract_terms_from_publication(
+                    publication, publication_id
+                )
+                for term in terms:
+                    yield term
+                    term_count += 1
+                    if limit and term_count >= limit:
+                        return
+        finally:
+            aclose = getattr(publications, "aclose", None)
+            if callable(aclose):
+                await aclose()
 
     async def _fetch_publication_terms(
         self: Any,  # Any: mixin self type is provided structurally by composed adapter class
