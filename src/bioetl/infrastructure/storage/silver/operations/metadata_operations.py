@@ -357,6 +357,8 @@ class SilverMetadataOperations:
         Returns:
             Silver write result or None if metadata writing is disabled
         """
+        del validated_mode
+
         if self._metadata_writer is None:
             return None
         runtime_started_at = ingestion_ts or datetime.now(UTC)
@@ -513,6 +515,8 @@ class SilverMetadataOperations:
         This method computes DQ metrics, gets the Delta version, and calculates
         timing information to prepare the finalization context.
         """
+        del primary_keys, validated_mode
+
         import time
 
         dq_metrics = await self._resolve_finalization_dq_metrics(
@@ -554,6 +558,8 @@ class SilverMetadataOperations:
         This method coordinates the finalization of a Silver write operation,
         including DQ metrics calculation, metadata writing, and result construction.
         """
+        del partition_cols
+
         from bioetl.domain.models._metadata_common import RunTypeEnum
 
         context = await self._prepare_silver_write_finalization_context(

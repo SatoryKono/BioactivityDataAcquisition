@@ -43,83 +43,95 @@ from __future__ import annotations
 
 from importlib import import_module as _import_module
 
+_MODULE_ACADEMIC_IDS = "bioetl.domain.value_objects.academic_ids"
+_MODULE_ACTIVITY = "bioetl.domain.value_objects.activity"
+_MODULE_ACTIVITY_VALUES = "bioetl.domain.value_objects.activity_values"
+_MODULE_CHEMICAL = "bioetl.domain.value_objects.chemical"
+_MODULE_COMPOUND_IDS = "bioetl.domain.value_objects.compound_ids"
+_MODULE_DQ_ANOMALY = "bioetl.domain.value_objects.dq_anomaly"
+_MODULE_DQ_RESULT = "bioetl.domain.value_objects.dq_result"
+_MODULE_IDENTIFIERS = "bioetl.domain.value_objects.identifiers"
+_MODULE_MOLECULAR_DESCRIPTORS = "bioetl.domain.value_objects.molecular_descriptors"
+_MODULE_PUBLICATIONS = "bioetl.domain.value_objects.publications"
+_MODULE_TAXONOMY_ID = "bioetl.domain.value_objects.taxonomy_id"
+
 _LAZY_ATTRIBUTE_EXPORTS: dict[str, tuple[str, str]] = {
-    "DOI": ("bioetl.domain.value_objects.publications", "DOI"),
-    "ISSN": ("bioetl.domain.value_objects.academic_ids", "ISSN"),
-    "ORCID": ("bioetl.domain.value_objects.academic_ids", "ORCID"),
-    "SMILES": ("bioetl.domain.value_objects.chemical", "SMILES"),
-    "ActivityType": ("bioetl.domain.value_objects.activity_values", "ActivityType"),
-    "ActivityValue": ("bioetl.domain.value_objects.activity", "ActivityValue"),
-    "AssayId": ("bioetl.domain.value_objects.compound_ids", "AssayId"),
-    "ChemblId": ("bioetl.domain.value_objects.identifiers", "ChemblId"),
-    "CompoundId": ("bioetl.domain.value_objects.compound_ids", "CompoundId"),
+    "DOI": (_MODULE_PUBLICATIONS, "DOI"),
+    "ISSN": (_MODULE_ACADEMIC_IDS, "ISSN"),
+    "ORCID": (_MODULE_ACADEMIC_IDS, "ORCID"),
+    "SMILES": (_MODULE_CHEMICAL, "SMILES"),
+    "ActivityType": (_MODULE_ACTIVITY_VALUES, "ActivityType"),
+    "ActivityValue": (_MODULE_ACTIVITY, "ActivityValue"),
+    "AssayId": (_MODULE_COMPOUND_IDS, "AssayId"),
+    "ChemblId": (_MODULE_IDENTIFIERS, "ChemblId"),
+    "CompoundId": (_MODULE_COMPOUND_IDS, "CompoundId"),
     "CompoundSource": (
-        "bioetl.domain.value_objects.compound_ids",
+        _MODULE_COMPOUND_IDS,
         "CompoundSource",
     ),
     "Concentration": (
-        "bioetl.domain.value_objects.activity_values",
+        _MODULE_ACTIVITY_VALUES,
         "Concentration",
     ),
     "ConcentrationUnit": (
-        "bioetl.domain.value_objects.activity_values",
+        _MODULE_ACTIVITY_VALUES,
         "ConcentrationUnit",
     ),
-    "ConfidenceScore": ("bioetl.domain.value_objects.activity", "ConfidenceScore"),
-    "DQAnomaly": ("bioetl.domain.value_objects.dq_anomaly", "DQAnomaly"),
+    "ConfidenceScore": (_MODULE_ACTIVITY, "ConfidenceScore"),
+    "DQAnomaly": (_MODULE_DQ_ANOMALY, "DQAnomaly"),
     "DQAnomalySeverity": (
-        "bioetl.domain.value_objects.dq_anomaly",
+        _MODULE_DQ_ANOMALY,
         "DQAnomalySeverity",
     ),
-    "DQAnomalyType": ("bioetl.domain.value_objects.dq_anomaly", "DQAnomalyType"),
+    "DQAnomalyType": (_MODULE_DQ_ANOMALY, "DQAnomalyType"),
     "DQEvaluationStatus": (
-        "bioetl.domain.value_objects.dq_result",
+        _MODULE_DQ_RESULT,
         "DQEvaluationStatus",
     ),
     "HeavyAtomCount": (
-        "bioetl.domain.value_objects.molecular_descriptors",
+        _MODULE_MOLECULAR_DESCRIPTORS,
         "HeavyAtomCount",
     ),
     "HydrogenBondCount": (
-        "bioetl.domain.value_objects.molecular_descriptors",
+        _MODULE_MOLECULAR_DESCRIPTORS,
         "HydrogenBondCount",
     ),
     "InChI": ("bioetl.domain.value_objects.inchi", "InChI"),
-    "InChIKey": ("bioetl.domain.value_objects.chemical", "InChIKey"),
-    "LogP": ("bioetl.domain.value_objects.molecular_descriptors", "LogP"),
+    "InChIKey": (_MODULE_CHEMICAL, "InChIKey"),
+    "LogP": (_MODULE_MOLECULAR_DESCRIPTORS, "LogP"),
     "MolecularWeight": (
-        "bioetl.domain.value_objects.chemical",
+        _MODULE_CHEMICAL,
         "MolecularWeight",
     ),
-    "OpenAlexId": ("bioetl.domain.value_objects.academic_ids", "OpenAlexId"),
-    "PChemblValue": ("bioetl.domain.value_objects.activity_values", "PChemblValue"),
+    "OpenAlexId": (_MODULE_ACADEMIC_IDS, "OpenAlexId"),
+    "PChemblValue": (_MODULE_ACTIVITY_VALUES, "PChemblValue"),
     "PolarSurfaceArea": (
-        "bioetl.domain.value_objects.molecular_descriptors",
+        _MODULE_MOLECULAR_DESCRIPTORS,
         "PolarSurfaceArea",
     ),
-    "PubChemCid": ("bioetl.domain.value_objects.identifiers", "PubChemCid"),
-    "PubMedId": ("bioetl.domain.value_objects.publications", "PubMedId"),
+    "PubChemCid": (_MODULE_IDENTIFIERS, "PubChemCid"),
+    "PubMedId": (_MODULE_PUBLICATIONS, "PubMedId"),
     "PublicationYear": (
-        "bioetl.domain.value_objects.chemical",
+        _MODULE_CHEMICAL,
         "PublicationYear",
     ),
     "RelationOperator": (
-        "bioetl.domain.value_objects.activity",
+        _MODULE_ACTIVITY,
         "RelationOperator",
     ),
     "RotatableBondCount": (
-        "bioetl.domain.value_objects.molecular_descriptors",
+        _MODULE_MOLECULAR_DESCRIPTORS,
         "RotatableBondCount",
     ),
     "SemanticScholarId": (
-        "bioetl.domain.value_objects.academic_ids",
+        _MODULE_ACADEMIC_IDS,
         "SemanticScholarId",
     ),
-    "TaxonomyId": ("bioetl.domain.value_objects.taxonomy_id", "TaxonomyId"),
-    "UniProtId": ("bioetl.domain.value_objects.identifiers", "UniProtId"),
+    "TaxonomyId": (_MODULE_TAXONOMY_ID, "TaxonomyId"),
+    "UniProtId": (_MODULE_IDENTIFIERS, "UniProtId"),
     "ValueObject": ("bioetl.domain.value_objects.base", "ValueObject"),
     "validate_taxonomy_id": (
-        "bioetl.domain.value_objects.taxonomy_id",
+        _MODULE_TAXONOMY_ID,
         "validate_taxonomy_id",
     ),
 }

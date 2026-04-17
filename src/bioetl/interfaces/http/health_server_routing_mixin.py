@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from bioetl.application.services.quarantine_service import QuarantineService
     from bioetl.domain.ports import HealthMonitorPort
 
+_NOT_FOUND_MESSAGE = "Not Found"
+
 
 class _HealthResponseSupport(Protocol):
     """Typed support contract for HTTP response helpers."""
@@ -86,7 +88,7 @@ class HealthServerRoutingMixin:
             )
             return
         response_support = cast(_HealthResponseSupport, self)
-        await response_support._send_response(writer, 404, "Not Found")
+        await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
 
     def _parse_query_params(self, raw_query: str) -> dict[str, str]:
         """Parse query string into a single-value key/value mapping."""
@@ -165,7 +167,7 @@ class HealthServerRoutingMixin:
                     raise ValueError("Missing payload_hash in path")
                 await self._handle_filtered_record_detail(writer, query, payload_hash)
                 return
-            await response_support._send_response(writer, 404, "Not Found")
+            await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
         except ValueError as exc:
             await response_support._send_response(writer, 400, str(exc))
 
@@ -250,7 +252,7 @@ class HealthServerRoutingMixin:
         )
         response_support = cast(_HealthResponseSupport, self)
         if payload is None:
-            await response_support._send_response(writer, 404, "Not Found")
+            await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
             return
         await response_support._send_payload_response(writer, 200, payload)
 

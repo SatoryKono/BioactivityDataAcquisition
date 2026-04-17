@@ -28,9 +28,11 @@ class _ConcreteMaintMixin(SilverWriterMaintenanceMixin):
         self.logger = MagicMock()
         self.csv_exporter = csv_exporter
         self._retention_manager = MagicMock()
-        self.get_table_path = lambda name: tmp_path / name
         self.read_table = AsyncMock(return_value=[])
         self._tmp_path = tmp_path
+
+    def get_table_path(self, name: str) -> Path:
+        return self._tmp_path / name
 
 
 @pytest.mark.unit

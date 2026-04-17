@@ -11,6 +11,7 @@ Lint:
     lint-budget          Enforce diagram quality budget
 
 Check:
+    checks               Run diagram validation profile runner
     check-artifacts      Check diagram artifact manifest
     check-quality-gates  Check diagram quality gates
     check-visual-smoke   Visual smoke test for diagrams
@@ -29,6 +30,7 @@ Fix:
     fix-pagebreaks       Fix pagebreaks in bundles
 
 Render:
+    docs-agent           Run full diagram docs pipeline
     render-pdf           Refresh architecture Markdown bundle (legacy entrypoint)
     render-pdf-desc      Generate PDF with descriptions
     render-docx          Generate DOCX with descriptions
@@ -51,6 +53,7 @@ COMMANDS: dict[str, str] = {
     "lint-summarize": "summarize_diagram_lint.py",
     "lint-budget": "enforce_diagram_quality_budget.py",
     # Check
+    "checks": "run_diagram_checks.sh",
     "check-artifacts": "check_diagram_artifacts.py",
     "check-quality-gates": "check_diagram_quality_gates.py",
     "check-visual-smoke": "check_diagram_visual_smoke.py",
@@ -67,6 +70,7 @@ COMMANDS: dict[str, str] = {
     "fix-sizes": "uniform_diagram_sizes.py",
     "fix-pagebreaks": "fix_pagebreaks_in_bundles.py",
     # Render
+    "docs-agent": "run_diagram_docs_agent.sh",
     "render-pdf": "generate_architecture_bundle.py",
     "render-pdf-desc": "generate_with_descriptions_pdf.py",
     "render-docx": "generate_with_descriptions_docx.py",
@@ -81,7 +85,10 @@ _DIR = Path(__file__).parent
 
 def _run_script(name: str, argv: list[str]) -> int:
     script = _DIR / name
-    result = subprocess.run([sys.executable, str(script), *argv], check=False)
+    command = [sys.executable, str(script), *argv]
+    if script.suffix == ".sh":
+        command = ["bash", str(script), *argv]
+    result = subprocess.run(command, check=False)
     return result.returncode
 
 

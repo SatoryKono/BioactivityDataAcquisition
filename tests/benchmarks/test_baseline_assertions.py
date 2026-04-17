@@ -332,13 +332,13 @@ class TestPolarsBaselines:
         df = pl.DataFrame(records_for_df)
 
         # Warmup
-        _ = df.filter(pl.col("active") == True)  # noqa: E712
+        _ = df.filter(pl.col("active"))
 
         # Measure (10 iterations)
         times = []
         for _ in range(10):
             start = time.perf_counter()
-            _ = df.filter(pl.col("active") == True)  # noqa: E712
+            _ = df.filter(pl.col("active"))
             elapsed = time.perf_counter() - start
             times.append(elapsed * 1000)
 

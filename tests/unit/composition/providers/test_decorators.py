@@ -42,6 +42,11 @@ class _FakeAdapter:
     logger: Any = None
 
 
+def _create_fake_adapter() -> _FakeAdapter:
+    """Return a fresh fake adapter instance for test stubs."""
+    return _FakeAdapter()
+
+
 # ---------------------------------------------------------------------------
 # Tests for _register_provider_class
 # ---------------------------------------------------------------------------
@@ -169,7 +174,8 @@ class TestRegisterProviderClass:
 
     def test_stores_custom_creator_in_config(self) -> None:
         """custom_creator should be stored in ProviderConfig."""
-        custom = lambda **kw: _FakeAdapter()  # noqa: E731
+        def custom(**_: Any) -> _FakeAdapter:
+            return _create_fake_adapter()
 
         _register_provider_class(
             cls=_FakeAdapter,
@@ -307,7 +313,8 @@ class TestRegisterProviderDecorator:
 
     def test_decorator_with_custom_creator(self) -> None:
         """custom_creator kwarg should be stored in config."""
-        custom_creator = lambda **kw: _FakeAdapter()  # noqa: E731
+        def custom_creator(**_: Any) -> _FakeAdapter:
+            return _create_fake_adapter()
 
         @register_provider("custom_creator_decorated", custom_creator=custom_creator)
         @dataclass
