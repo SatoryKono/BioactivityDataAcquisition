@@ -1176,6 +1176,30 @@ class WorkflowJobContext:
 
 
 @dataclass(frozen=True)
+class EntityPipelineContext:
+    provider_name: str
+    entity_name: str
+    pipeline_name: str
+    pipeline_key: NodeKey
+    entity_key: NodeKey
+    config_artifact: NodeKey
+    today: str
+    contract_ref: str
+    retention_days: int | None
+    config_version: str | None
+    quality_version: str | None
+
+
+@dataclass(frozen=True)
+class CompositePipelineContext:
+    composite_name: str
+    pipeline_key: NodeKey
+    config_artifact: NodeKey
+    today: str
+    composite_version: str | None
+
+
+@dataclass(frozen=True)
 class DuplicateFamilyConfig:
     name: str
     roots: tuple[str, ...]
@@ -4733,8 +4757,6 @@ def _add_workflow_surface(
         source_path=relative_path,
         source_kind="github_actions_workflow",
         workflow_title=title,
-        workflow_family=_workflow_family(workflow_name, title),
-        trigger_names=list(_workflow_trigger_names(_read_yaml(Path(relative_path)))) if False else None,
         last_verified=today,
         ingest_wave="repo_sync_v1",
         confidence="high",
@@ -5094,76 +5116,19 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
         workflow_name = workflow_path.stem
         title = payload.get("name") if isinstance(payload.get("name"), str) else workflow_name
         relative_path = _rel_path(root, workflow_path)
-        workflow_family = _workflow_family(workflow_name, title)
-        trigger_names = _workflow_trigger_names(payload)
-        concurrency_group = _workflow_concurrency_group(payload)
-        workflow = snapshot.add_node(
-            "workflow_surface",
-            workflow_name,
-            summary=f"GitHub Actions workflow `{title}`.",
-            source_path=relative_path,
-            source_kind="github_actions_workflow",
-            workflow_title=title,
-            workflow_family=workflow_family,
-            trigger_names=list(trigger_names) if trigger_names else None,
-            concurrency_group=concurrency_group,
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
+        context = _add_workflow_surface(
+            snapshot,
+            project,
+            workflow_name=workflow_name,
+            title=title,
+            relative_path=relative_path,
+            today=today,
         )
-        workflow_nodes[workflow_name] = workflow
-        snapshot.add_relation(project, "HAS_WORKFLOW", workflow, provenance="workflow_graph")
-
-        # Create HOUSES relationship with parent directory
-        parent_dir_relative = str(Path(relative_path).parent)
-        parent_dir_key = NodeKey("directory_surface", parent_dir_relative)
-        if parent_dir_key in snapshot.nodes:
-            snapshot.add_relation(parent_dir_key, "HOUSES", workflow, provenance="file_structure")
-
-        # Create BACKS relationship with file surface
-        file_surface_key = NodeKey("file_surface", relative_path)
-        if file_surface_key in snapshot.nodes:
-            snapshot.add_relation(file_surface_key, "BACKS", workflow, provenance="workflow_graph")
-
-        workflow_call_payload = _workflow_on_payload(payload)
-        workflow_call_entrypoint: NodeKey | None = None
-        if isinstance(workflow_call_payload, dict):
-            reusable_workflow_payload = workflow_call_payload.get("workflow_call")
-            if isinstance(reusable_workflow_payload, dict):
-                workflow_call_entrypoint = snapshot.add_node(
-                    "workflow_call_surface",
-                    f"{workflow_name}::workflow_call",
-                    summary=f"Reusable workflow entrypoint for `{workflow_name}`.",
-                    source_path=relative_path,
-                    source_kind="workflow_call_surface",
-                    workflow=workflow_name,
-                    reusable_kind="workflow_call_trigger",
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="high",
-                )
-                snapshot.add_relation(workflow, "CALLS_WORKFLOW", workflow_call_entrypoint, provenance="workflow_graph")
-                snapshot.add_relation(workflow_call_entrypoint, "DEPENDS_ON", workflow, provenance="workflow_graph")
-                for output_name, expression in _workflow_output_specs(
-                    workflow_name,
-                    workflow_name,
-                    reusable_workflow_payload.get("outputs"),
-                    scope="workflow_call_output",
-                ):
-                    output = snapshot.add_node(
-                        "workflow_output_surface",
-                        output_name,
-                        summary=f"Reusable workflow output `{output_name}`.",
-                        source_path=relative_path,
-                        source_kind="workflow_output_surface",
-                        workflow=workflow_name,
-                        output_scope="workflow_call",
-                        output_expression=expression,
-                        last_verified=today,
-                        ingest_wave="repo_sync_v1",
-                        confidence="high",
-                    )
-                    snapshot.add_relation(workflow, "EMITS_OUTPUT", output, provenance="workflow_graph")
+        _enrich_workflow_surface(snapshot, context, payload)
+        workflow_nodes[workflow_name] = context.workflow
+        snapshot.add_relation(project, "HAS_WORKFLOW", context.workflow, provenance="workflow_graph")
+        _attach_workflow_file_backing(snapshot, context.workflow, relative_path)
+        workflow_call_entrypoint = _add_workflow_call_entrypoint(snapshot, context, payload)
 
         jobs = payload.get("jobs")
         if not isinstance(jobs, dict):
@@ -5171,219 +5136,37 @@ def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
         for job_id, job_payload in jobs.items():
             if not isinstance(job_payload, dict):
                 continue
-            steps = job_payload.get("steps")
-            inline_run_step_count = 0
-            uses_step_count = 0
-            if isinstance(steps, list):
-                inline_run_step_count = sum(
-                    1 for step in steps if isinstance(step, dict) and isinstance(step.get("run"), str)
-                )
-                uses_step_count = sum(
-                    1 for step in steps if isinstance(step, dict) and isinstance(step.get("uses"), str)
-                )
-            secret_usage_hints = _workflow_secret_refs(job_payload)
-            matrix_axes = _workflow_matrix_axes(job_payload)
-            matrix_variants = _workflow_matrix_variants(job_payload)
-            environment_name = _workflow_environment_name(job_payload)
-            concurrency_group = _workflow_concurrency_group(job_payload)
-            job_name = f"{workflow_name}::{job_id}"
-            job = snapshot.add_node(
-                "workflow_job_surface",
-                job_name,
-                summary=f"GitHub Actions job `{job_id}` in workflow `{title}`.",
-                source_path=relative_path,
-                source_kind="github_actions_job",
-                workflow=workflow_name,
+            job_context, matrix_variants, secret_usage_hints = _add_workflow_job_surface(
+                snapshot,
+                context,
                 job_id=str(job_id),
-                runs_on=str(job_payload.get("runs-on")) if job_payload.get("runs-on") is not None else None,
-                inline_run_step_count=inline_run_step_count,
-                uses_step_count=uses_step_count,
-                matrix_axes=list(matrix_axes) if matrix_axes else None,
-                matrix_variant_count=len(matrix_variants) if matrix_variants else None,
-                environment_name=environment_name,
-                secret_usage_hints=list(secret_usage_hints) if secret_usage_hints else None,
-                concurrency_group=concurrency_group,
-                last_verified=today,
-                ingest_wave="repo_sync_v1",
-                confidence="high",
+                job_payload=job_payload,
             )
-            job_nodes[(workflow_name, str(job_id))] = job
-            snapshot.add_relation(workflow, "CONTAINS", job, provenance="workflow_graph")
+            job_nodes[(workflow_name, str(job_id))] = job_context.job
             if workflow_call_entrypoint is not None:
-                snapshot.add_relation(job, "CALLS_WORKFLOW", workflow_call_entrypoint, provenance="workflow_graph")
+                snapshot.add_relation(job_context.job, "CALLS_WORKFLOW", workflow_call_entrypoint, provenance="workflow_graph")
 
             reusable_workflow_ref = job_payload.get("uses")
             if isinstance(reusable_workflow_ref, str):
-                action_key = _workflow_action_key(reusable_workflow_ref)
-                target_workflow_name, reusable_kind = _workflow_reusable_target(reusable_workflow_ref)
-                action = snapshot.add_node(
-                    "workflow_action_surface",
-                    action_key,
-                    summary=f"Workflow action or reusable workflow `{action_key}`.",
-                    source_path=relative_path,
-                    source_kind="github_actions_uses",
-                    uses_ref=reusable_workflow_ref,
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="high",
+                _link_reusable_job_workflow(
+                    snapshot,
+                    workflow_nodes,
+                    workflow_name_by_relative_path,
+                    job_context,
+                    reusable_workflow_ref,
                 )
-                snapshot.add_relation(job, "USES_ACTION", action, provenance="workflow_graph")
-                if target_workflow_name is not None:
-                    workflow_call = snapshot.add_node(
-                        "workflow_call_surface",
-                        f"{job_name}::{action_key}",
-                        summary=f"Reusable workflow call `{action_key}` from job `{job_name}`.",
-                        source_path=relative_path,
-                        source_kind="workflow_call_surface",
-                        workflow=workflow_name,
-                        job_id=str(job_id),
-                        uses_ref=reusable_workflow_ref,
-                        reusable_kind=reusable_kind,
-                        target_workflow=target_workflow_name,
-                        last_verified=today,
-                        ingest_wave="repo_sync_v1",
-                        confidence="high",
-                    )
-                    snapshot.add_relation(job, "CALLS_WORKFLOW", workflow_call, provenance="workflow_graph")
-                    local_relative_path = _workflow_action_key(reusable_workflow_ref).removeprefix("./")
-                    target_key = workflow_nodes.get(target_workflow_name)
-                    if target_key is None:
-                        target_workflow = workflow_name_by_relative_path.get(local_relative_path)
-                        if target_workflow is not None:
-                            target_key = workflow_nodes.get(target_workflow)
-                    if target_key is not None:
-                        snapshot.add_relation(workflow_call, "DEPENDS_ON", target_key, provenance="workflow_graph")
+            _add_secret_requirements(
+                snapshot,
+                job_context.job,
+                secret_usage_hints,
+                relative_path=job_context.relative_path,
+                today=job_context.today,
+            )
+            _add_job_matrix_variants(snapshot, job_context, matrix_variants)
+            _add_job_outputs(snapshot, job_context, job_payload.get("outputs"))
+            _process_workflow_steps(snapshot, job_context, job_payload.get("steps"))
 
-            for secret_name in secret_usage_hints:
-                secret = snapshot.add_node(
-                    "workflow_secret_surface",
-                    secret_name,
-                    summary=f"GitHub Actions secret usage hint `{secret_name}`.",
-                    source_path=relative_path,
-                    source_kind="github_actions_secret",
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="high",
-                )
-                snapshot.add_relation(job, "REQUIRES_SECRET", secret, provenance="workflow_graph")
-
-            for variant_payload in matrix_variants:
-                variant_name = ", ".join(
-                    f"{axis}={value}" for axis, value in sorted(variant_payload.items())
-                )
-                matrix_variant = snapshot.add_node(
-                    "workflow_matrix_variant_surface",
-                    f"{job_name}[{variant_name}]",
-                    summary=f"Expanded matrix variant `{variant_name}` for workflow job `{job_name}`.",
-                    source_path=relative_path,
-                    source_kind="workflow_matrix_variant_surface",
-                    workflow=workflow_name,
-                    job_id=str(job_id),
-                    variant_axes=variant_payload,
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="high",
-                )
-                snapshot.add_relation(job, "HAS_MATRIX_VARIANT", matrix_variant, provenance="workflow_graph")
-
-            for output_name, expression in _workflow_output_specs(
-                workflow_name,
-                str(job_id),
-                job_payload.get("outputs"),
-                scope="job_output",
-            ):
-                output = snapshot.add_node(
-                    "workflow_output_surface",
-                    output_name,
-                    summary=f"Workflow output `{output_name}`.",
-                    source_path=relative_path,
-                    source_kind="workflow_output_surface",
-                    workflow=workflow_name,
-                    job_id=str(job_id),
-                    output_scope="job",
-                    output_expression=expression,
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="high",
-                )
-                snapshot.add_relation(job, "EMITS_OUTPUT", output, provenance="workflow_graph")
-
-            if isinstance(steps, list):
-                for step in steps:
-                    if not isinstance(step, dict):
-                        continue
-                    uses_ref = step.get("uses")
-                    if isinstance(uses_ref, str):
-                        action_key = _workflow_action_key(uses_ref)
-                        action = snapshot.add_node(
-                            "workflow_action_surface",
-                            action_key,
-                            summary=f"Workflow action `{action_key}`.",
-                            source_path=relative_path,
-                            source_kind="github_actions_uses",
-                            uses_ref=uses_ref,
-                            last_verified=today,
-                            ingest_wave="repo_sync_v1",
-                            confidence="high",
-                        )
-                        snapshot.add_relation(job, "USES_ACTION", action, provenance="workflow_graph")
-                        for artifact_name, artifact_relation, artifact_path in _workflow_artifact_specs(
-                            workflow_name,
-                            str(job_id),
-                            step,
-                        ):
-                            artifact = snapshot.add_node(
-                                "workflow_artifact_surface",
-                                artifact_name,
-                                summary=f"Workflow artifact `{artifact_name}`.",
-                                source_path=relative_path,
-                                source_kind="github_actions_artifact",
-                                artifact_path=artifact_path,
-                                workflow=workflow_name,
-                                last_verified=today,
-                                ingest_wave="repo_sync_v1",
-                                confidence="high",
-                            )
-                            snapshot.add_relation(job, artifact_relation, artifact, provenance="workflow_graph")
-                    run_text = step.get("run")
-                    if not isinstance(run_text, str):
-                        continue
-                    for target in sorted(_workflow_script_targets(run_text), key=lambda item: (item.label, item.name)):
-                        if target in snapshot.nodes:
-                            snapshot.add_relation(job, "RUNS_VIA", target, provenance="workflow_graph")
-                    for gate_name in _workflow_quality_gates(run_text):
-                        gate_key = NodeKey("quality_gate", gate_name)
-                        if gate_key in snapshot.nodes:
-                            snapshot.add_relation(job, "EXECUTES_GATE", gate_key, provenance="workflow_graph")
-                    for secret_name in _workflow_secret_refs(step):
-                        secret = snapshot.add_node(
-                            "workflow_secret_surface",
-                            secret_name,
-                            summary=f"GitHub Actions secret usage hint `{secret_name}`.",
-                            source_path=relative_path,
-                            source_kind="github_actions_secret",
-                            last_verified=today,
-                            ingest_wave="repo_sync_v1",
-                            confidence="high",
-                        )
-                        snapshot.add_relation(job, "REQUIRES_SECRET", secret, provenance="workflow_graph")
-
-        for job_id, job_payload in jobs.items():
-            if not isinstance(job_payload, dict):
-                continue
-            job = job_nodes.get((workflow_name, str(job_id)))
-            if job is None:
-                continue
-            needs_payload = job_payload.get("needs")
-            needs: list[str] = []
-            if isinstance(needs_payload, str):
-                needs = [needs_payload]
-            elif isinstance(needs_payload, list):
-                needs = [str(item) for item in needs_payload if isinstance(item, str)]
-            for dependency_id in needs:
-                dependency_key = job_nodes.get((workflow_name, dependency_id))
-                if dependency_key is not None:
-                    snapshot.add_relation(job, "DEPENDS_ON", dependency_key, provenance="workflow_graph")
+        _link_workflow_job_dependencies(snapshot, workflow_name, jobs, job_nodes)
 
 
 def _normalize_docs_repo_reference(raw_ref: str) -> str | None:
