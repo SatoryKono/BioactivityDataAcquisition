@@ -10192,8 +10192,7 @@ def _snapshot_support_specs() -> tuple[tuple[str, str, Callable[[tuple[GraphRela
     )
 
 
-def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
-    stats = snapshot.stats()
+def _required_population_issues(stats: dict[str, JsonValue]) -> list[str]:
     issues: list[str] = []
     for label in SNAPSHOT_REQUIRED_LABELS:
         if int(stats["labels"].get(label, 0)) <= 0:
@@ -10201,7 +10200,11 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     for relation_type in SNAPSHOT_REQUIRED_RELATION_TYPES:
         if int(stats["relation_types"].get(relation_type, 0)) <= 0:
             issues.append(f"missing required relation population: {relation_type}")
+    return issues
 
+
+def _port_and_contract_metadata_issues(snapshot: GraphSnapshot) -> list[str]:
+    issues: list[str] = []
     if NodeKey("port_surface", PORTS_MODULE_PREFIX) not in snapshot.nodes:
         issues.append(f"missing {PORTS_MODULE_PREFIX} facade port surface")
 
@@ -10223,30 +10226,39 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     if not rich_contracts:
         issues.append("missing rich contract metadata on contract surfaces")
 
-    relations = tuple(snapshot.relations.values())
+    return issues
+
+
+def _support_and_relation_issues(
+    snapshot: GraphSnapshot,
+    relations: tuple[GraphRelation, ...],
+) -> list[str]:
+    issues: list[str] = []
     relation_keys = {
         (rel.source.label, rel.source.name, rel.relation_type, rel.target.label)
         for rel in relations
     }
     _append_missing_relation_issues(issues, relation_keys, SNAPSHOT_RELATION_REQUIREMENTS)
-    support_specs = _snapshot_support_specs()
-    for prefix, label, predicate in support_specs:
+    for prefix, label, predicate in _snapshot_support_specs():
         _append_support_issue(
             issues,
             prefix,
             _missing_node_support_names(snapshot, label, lambda key, fn=predicate: fn(relations, key)),
         )
+    return issues
 
-    ignored_paths = [
+
+def _ignored_runtime_paths(snapshot: GraphSnapshot) -> list[str]:
+    return [
         node.key.name
         for node in snapshot.nodes.values()
         if "__pycache__" in node.key.name
-            or "__pycache__" in str(node.properties.get("source_path", ""))
+        or "__pycache__" in str(node.properties.get("source_path", ""))
     ]
-    if ignored_paths:
-        issues.append(f"ignored runtime paths leaked into snapshot: {sorted(set(ignored_paths))[:5]}")
 
-    excluded_file_structure_paths = [
+
+def _excluded_file_structure_paths(snapshot: GraphSnapshot) -> list[str]:
+    return [
         node.key.name
         for node in snapshot.nodes.values()
         if node.key.label in {"directory_surface", "file_surface"}
@@ -10261,20 +10273,43 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
             or "/svg" in node.key.name
         )
     ]
-    if excluded_file_structure_paths:
+
+
+def _path_leak_issues(snapshot: GraphSnapshot) -> list[str]:
+    issues: list[str] = []
+    ignored_paths = _ignored_runtime_paths(snapshot)
+    if ignored_paths:
+        issues.append(f"ignored runtime paths leaked into snapshot: {sorted(set(ignored_paths))[:5]}")
+
+    excluded_paths = _excluded_file_structure_paths(snapshot)
+    if excluded_paths:
         issues.append(
             "excluded file-structure paths leaked into snapshot: "
-            + ", ".join(sorted(set(excluded_file_structure_paths))[:10])
+            + ", ".join(sorted(set(excluded_paths))[:10])
         )
-
-    orphan_nodes = snapshot_orphans(snapshot)
-    if orphan_nodes:
-        issues.append(
-            "snapshot contains orphan nodes: "
-            + ", ".join(f"{node.label}:{node.name}" for node in orphan_nodes[:10])
-        )
-
     return issues
+
+
+def _orphan_node_issues(snapshot: GraphSnapshot) -> list[str]:
+    orphan_nodes = snapshot_orphans(snapshot)
+    if not orphan_nodes:
+        return []
+    return [
+        "snapshot contains orphan nodes: "
+        + ", ".join(f"{node.label}:{node.name}" for node in orphan_nodes[:10])
+    ]
+
+
+def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
+    stats = snapshot.stats()
+    relations = tuple(snapshot.relations.values())
+    return (
+        _required_population_issues(stats)
+        + _port_and_contract_metadata_issues(snapshot)
+        + _support_and_relation_issues(snapshot, relations)
+        + _path_leak_issues(snapshot)
+        + _orphan_node_issues(snapshot)
+    )
 
 
 def _build_diff_entries(snapshot_counts: dict[str, int], live_counts: dict[str, int]) -> list[dict[str, JsonValue]]:
