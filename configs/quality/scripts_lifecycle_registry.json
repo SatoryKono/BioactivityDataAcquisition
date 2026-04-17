@@ -392,24 +392,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded assay profile update helper; remove it once assay profile updates are handled by canonical migration utilities."
     },
-    "scripts/ops/archive/agents/py-team-orchestration.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "archived_duplicate",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an archived historical agent-orchestration snapshot; prefer the governed Codex skill workflow instead of reviving this standalone archive path."
-    },
-    "scripts/ops/archive/ai/TREE.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an archived AI workspace tree snapshot helper; do not revive this path while canonical inventory and docs tooling cover repository topology."
-    },
-    "scripts/ops/archive/gemini/SUMMARY.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an archived Gemini-era summary helper for historical traceability; do not extend it as part of the current governed AI workflow."
-    },
     "scripts/docs/chembl_matrix_structural_contract.py": {
       "owner": "@bioetl-docs",
       "decision": "legacy_manual_utility",
@@ -506,11 +488,35 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded MCP smoke helper for local memory tooling diagnostics; do not expand it into a canonical contributor workflow without stronger call-site evidence."
     },
+    "scripts/ops/archive/agents/py-team-orchestration.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "archived_duplicate",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an archived historical agent-orchestration snapshot; prefer the governed Codex skill workflow instead of reviving this standalone archive path."
+    },
+    "scripts/ops/archive/ai/TREE.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "archived_duplicate",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an archived AI workspace tree snapshot helper; do not revive this path while canonical inventory and docs tooling cover repository topology."
+    },
+    "scripts/ops/archive/gemini/SUMMARY.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "archived_duplicate",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an archived Gemini-era summary helper for historical traceability; do not extend it as part of the current governed AI workflow."
+    },
     "scripts/ops/support/load_repo_env.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a low-level repo-environment loader for compatibility with older ops wrappers; do not document it as a primary user-facing entrypoint."
+    },
+    "scripts/repo/check_scripts_catalog.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a thin legacy facade to scripts/engineering/repo/check_scripts_catalog.py while architecture tests and historical tooling still import the old scripts/repo path."
     }
   }
 }

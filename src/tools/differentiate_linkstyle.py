@@ -221,7 +221,8 @@ def build_linkstyle_block(
 
 def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
     """Process one file. Returns (modified, reason)."""
-    content = fpath.read_text(encoding="utf-8")
+    safe_path = _ensure_path_within_root(fpath, MERMAID_DIR)
+    content = safe_path.read_text(encoding="utf-8")
     lines = content.splitlines()
 
     if diagram_type(lines) != "flowchart":
@@ -258,7 +259,6 @@ def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
     new_content = "\n".join(new_lines).rstrip("\n") + "\n"
 
     if not dry_run:
-        safe_path = _ensure_path_within_root(fpath, MERMAID_DIR)
         safe_path.write_text(new_content, encoding="utf-8")
 
     details = f"{len(conns)} conn, types={sorted(type_set)}"
@@ -285,7 +285,8 @@ LEGEND_LINK_SECTION = """\
 
 
 def update_legend(fpath: Path, dry_run: bool = False) -> bool:
-    content = fpath.read_text(encoding="utf-8")
+    safe_path = _ensure_path_within_root(fpath, MERMAID_DIR)
+    content = safe_path.read_text(encoding="utf-8")
     if "LinkTypes" in content:
         return False  # already updated
 
@@ -317,7 +318,6 @@ def update_legend(fpath: Path, dry_run: bool = False) -> bool:
     )
     new_content = "\n".join(new_lines).rstrip("\n") + "\n"
     if not dry_run:
-        safe_path = _ensure_path_within_root(fpath, MERMAID_DIR)
         safe_path.write_text(new_content, encoding="utf-8")
     return True
 

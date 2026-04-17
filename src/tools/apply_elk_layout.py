@@ -161,7 +161,8 @@ def apply_elk(
     dry_run: bool,
 ) -> tuple[bool, str]:
     """Process one file. Returns (modified, reason)."""
-    content = fpath.read_text(encoding="utf-8")
+    safe_path = _ensure_path_within_root(fpath, ARCH_DIR)
+    content = safe_path.read_text(encoding="utf-8")
     lines = content.splitlines()
     if not is_flowchart(lines):
         return False, "not a flowchart/graph diagram"
@@ -209,7 +210,6 @@ def apply_elk(
         return False, "ELK init already present"
     new_content = "\n".join(lines).rstrip("\n") + "\n"
     if not dry_run:
-        safe_path = _ensure_path_within_root(fpath, ARCH_DIR)
         safe_path.write_text(new_content, encoding="utf-8")
     if "elk_init" in changes:
         return True, f"@nodes={nodes}, changes=[{', '.join(changes)}]"

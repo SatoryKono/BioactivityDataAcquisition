@@ -93,7 +93,7 @@ The repository includes pre-commit hooks that prevent cache files from being com
 2. **Configuration**: `configs/`, `pyproject.toml`, CI/CD files
 3. **Tests**: All test files in `tests/`
 4. **Documentation**: All files in `docs/`
-5. **Historical Archives**: `scripts/archive/`, `docs/99-archive/` (for reference)
+5. **Historical Archives**: `scripts/ops/archive/`, `docs/99-archive/` (for reference)
 
 ## 🔧 Maintenance Schedule
 

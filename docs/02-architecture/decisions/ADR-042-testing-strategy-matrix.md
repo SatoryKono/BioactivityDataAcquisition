@@ -67,7 +67,7 @@ These are fundamentally incompatible at the adapter level. Clear boundary needed
    workflow automation are still partial
 5. Canonical tooling paths are active for partial rollout at
    `scripts/engineering/qa/report_vcr_metadata_catalog.py` and
-   `scripts/migrations/active/backfill_vcr_metadata_sidecars.py`; workflow-level
+   `scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py`; workflow-level
    automation can remain staged even after the tooling exists
 6. Golden master snapshots for transformers live in `tests/fixtures/golden/{provider}/`
    with partial rollout allowed while provider coverage is still being expanded

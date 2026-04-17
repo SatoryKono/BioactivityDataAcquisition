@@ -337,7 +337,7 @@ python3 -m scripts.engineering.repo check-inventory --check
 
 | Script | Last Commit | References | Removal Risk | Savings | Notes |
 |--------|-------------|------------|--------------|---------|-------|
-| `scripts/archive/old_migration.py` | 2023-05-15 | None | Low | 1 script | Historical only |
+| `scripts/ops/archive/old_migration.py` | 2023-05-15 | None | Low | 1 script | Historical only |
 | `scripts/ai/legacy_bot.sh` | 2023-08-20 | None | Low | 1 script | Replaced by skills |
 | `scripts/tmp/setup_temp.sh` | 2023-11-01 | None | Low | 1 script | Temporary setup |
 

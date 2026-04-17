@@ -334,7 +334,7 @@ class TestIntegrationVcrPolicy:
             "`partial` rollout",
             "reports/quality/vcr-metadata-catalog.json",
             "scripts/engineering/qa/report_vcr_metadata_catalog.py",
-            "scripts/migrations/active/backfill_vcr_metadata_sidecars.py",
+            "scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py",
             ".github/vcr-noext-allowlist.txt",
             live_contract["repository_guard"],
             "BIOETL_LIVE_API_TESTS=true",

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import re
+from pathlib import Path
 
 from scripts.docs.common.paths import DOCS_DIR
 
@@ -23,12 +24,12 @@ def fix_links() -> None:
         content = md_file.read_text(encoding="utf-8")
         original_content = content
 
-        def rel_fix(match: re.Match[str]) -> str:
+        def rel_fix(match: re.Match[str], current_md_file: Path = md_file) -> str:
             text = match.group(1)
             raw_target = match.group(2)
 
             if raw_target.startswith("docs/"):
-                depth = len(md_file.relative_to(DOCS_DIR).parent.parts)
+                depth = len(current_md_file.relative_to(DOCS_DIR).parent.parts)
                 rel_prefix = "../" * depth
                 new_target = rel_prefix + raw_target[5:]
                 return f"[{text}]({new_target})"
