@@ -15,25 +15,25 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_success() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${GREEN}[✓]${NC} ${message}"
     return 0
 }
 
 log_warn() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${YELLOW}[⚠]${NC} ${message}"
     return 0
 }
 
 log_error() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${RED}[✗]${NC} ${message}" >&2
     return 0
 }
 
 log_info() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${BLUE}[i]${NC} ${message}"
     return 0
 }
@@ -94,6 +94,7 @@ stop_vibe() {
     else
         log_warn "Vibe process not found"
     fi
+    return 0
 }
 
 # Function: Check status
@@ -107,6 +108,7 @@ status_vibe() {
         log_warn "Vibe is NOT running"
         log_info "Start with: ./run-mistrallvibe.sh start"
     fi
+    return 0
 }
 
 # Function: Show logs
@@ -118,6 +120,7 @@ show_logs() {
     else
         log_warn "Vibe is not running"
     fi
+    return 0
 }
 
 # Function: Show API key
@@ -132,6 +135,7 @@ show_api_key() {
         echo "  ${VIBE_API_KEY:0:10}...${VIBE_API_KEY: -10}"
         log_info "Full key shown in .env.mistrallvibe"
     fi
+    return 0
 }
 
 # Function: Open browser
@@ -145,6 +149,7 @@ open_browser() {
     else
         log_info "Open http://${VIBE_HOST}:${VIBE_PORT} in your browser"
     fi
+    return 0
 }
 
 # Main dispatcher

@@ -28,9 +28,23 @@ BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
 PYTEST_RUNTIME_ENV_FILE="$REPO_ROOT/.pytest_cache/setup_plugins_runtime.sh"
 TEMP_PYTEST_VENV_DIR="/tmp/$(basename "$REPO_ROOT")-pytest-runtime-venv"
 
-log_info() { echo -e "${BLUE}[setup-plugins]${NC} $1"; }
-log_ok() { echo -e "${GREEN}[setup-plugins]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[setup-plugins]${NC} $1"; }
+log_info() {
+    local message="${1:-}"
+    echo -e "${BLUE}[setup-plugins]${NC} ${message}"
+    return 0
+}
+
+log_ok() {
+    local message="${1:-}"
+    echo -e "${GREEN}[setup-plugins]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1:-}"
+    echo -e "${YELLOW}[setup-plugins]${NC} ${message}"
+    return 0
+}
 
 USE_UV=false
 PYTHON_BIN=""

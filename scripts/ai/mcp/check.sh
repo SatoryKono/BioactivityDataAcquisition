@@ -66,15 +66,21 @@ PY
 fi
 
 ok() {
-  printf "[OK] %s\n" "$1"
+  local message="${1:-}"
+  printf "[OK] %s\n" "$message"
+  return 0
 }
 
 warn() {
-  printf "[WARN] %s\n" "$1"
+  local message="${1:-}"
+  printf "[WARN] %s\n" "$message"
+  return 0
 }
 
 fail() {
-  printf "[FAIL] %s\n" "$1" >&2
+  local message="${1:-}"
+  printf "[FAIL] %s\n" "$message" >&2
+  return 0
 }
 
 require_contains() {

@@ -405,7 +405,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             and len(self._contract_rollout_policy.write_versions) > 1
         )
 
-    def _get_dispatch_write_method(self) -> Callable[..., Any]:
+    def _get_dispatch_write_method(self) -> Callable[..., Any]:  # Any: Bound dispatch methods return backend-specific awaitable payloads.
         """Get the dispatch write method from delta operations service or fallback to mixin."""
         if self._delta:
             return self._delta._dispatch_write_with_domain_errors

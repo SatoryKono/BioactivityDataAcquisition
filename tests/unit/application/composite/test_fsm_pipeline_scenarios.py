@@ -111,6 +111,7 @@ class FakeLockPort:
         wait_timeout: float = 10.0,
         exclusive: bool = True,
     ) -> bool:
+        await asyncio.sleep(0)
         self.acquire_calls.append(
             {
                 "key": key,
@@ -126,6 +127,7 @@ class FakeLockPort:
         owner_id: Any,
         exclusive: bool = True,
     ) -> bool:
+        await asyncio.sleep(0)
         self.release_calls.append(
             {
                 "key": key,
@@ -140,6 +142,7 @@ class FakeLockPort:
         owner_id: Any,
         exclusive: bool = False,
     ) -> bool:
+        await asyncio.sleep(0)
         return True
 
 
@@ -178,21 +181,25 @@ class FakeCheckpointManager:
 
     async def load(self) -> CompositeCheckpointState:
         """Return the current state."""
+        await asyncio.sleep(0)
         return self.current_state
 
     async def save(self, state: CompositeCheckpointState) -> None:
         """Save state to in-memory list."""
+        await asyncio.sleep(0)
         self.states.append(state)
         self.current_state = state
 
     async def delete(self) -> None:
         """Mark checkpoint as deleted or raise if error configured."""
+        await asyncio.sleep(0)
         if self.delete_error:
             raise self.delete_error
         self.deleted = True
 
     async def delete_orphaned(self) -> int:
         """No-op orphan cleanup for tests."""
+        await asyncio.sleep(0)
         return 0
 
     def get_state_sequence(self) -> list[CompositePipelineState]:
@@ -248,6 +255,7 @@ class FakePipelineRunner:
         }
 
     async def run(self) -> None:
+        await asyncio.sleep(0)
         self.execution_count += 1
         if self.should_fail:
             raise RuntimeError(self.error_message)
@@ -318,6 +326,7 @@ class FakeKeyExtractorService:
         silver_table: str,
         keys: tuple[str, ...] | list[str],
     ) -> pl.DataFrame:
+        await asyncio.sleep(0)
         return self.keys_df
 
 
@@ -335,6 +344,7 @@ class FakeEnrichmentCoordinator:
         completed: frozenset[str],
         runner_factory: Callable[[str, pl.DataFrame], Any],
     ) -> dict[str, EnrichmentResult]:
+        await asyncio.sleep(0)
         self.execution_count += 1
         return self.results
 
@@ -367,6 +377,7 @@ class FakeMergeService:
         dependencies: Any | None = None,
         dependency_results: Any | None = None,
     ) -> MergeResult:
+        await asyncio.sleep(0)
         self.execution_count += 1
         if self.should_fail:
             raise RuntimeError(self.error_message)

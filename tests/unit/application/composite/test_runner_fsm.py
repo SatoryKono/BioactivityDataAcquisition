@@ -5,6 +5,7 @@ Tests for FSM state management during merge and completion phases.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from collections.abc import Callable
 from unittest.mock import AsyncMock, MagicMock
@@ -68,18 +69,23 @@ class InMemoryCheckpointManager:
         )
 
     async def load(self) -> CompositeCheckpointState:
+        await asyncio.sleep(0)
         return self._state
 
     async def save(self, state: CompositeCheckpointState) -> None:
+        await asyncio.sleep(0)
         self._state = state
 
     async def delete(self) -> None:
+        await asyncio.sleep(0)
         return None
 
     async def delete_orphaned(self) -> int:
+        await asyncio.sleep(0)
         return 0
 
     async def list_all(self) -> list[str]:
+        await asyncio.sleep(0)
         return []
 
 
@@ -1394,6 +1400,7 @@ class TestFSMCheckpointDeletion:
         )
 
         async def failing_delete() -> None:
+            await asyncio.sleep(0)
             raise RecoverableError("checkpoint cleanup unavailable")
 
         checkpoint_manager.delete = failing_delete  # type: ignore[method-assign]
@@ -1448,6 +1455,7 @@ class TestFSMCheckpointDeletion:
 
         # Make delete fail
         async def failing_delete() -> None:
+            await asyncio.sleep(0)
             raise PermissionError("Cannot delete checkpoint")
 
         checkpoint_manager.delete = failing_delete  # type: ignore[method-assign]
@@ -1639,10 +1647,12 @@ class TestFinalizationPolicy:
                 call_order.append("log")
 
         async def generate_reports(result: MergeResult) -> None:
+            await asyncio.sleep(0)
             assert result is merge_result
             call_order.append("dq")
 
         async def write_quarantine(result: MergeResult) -> None:
+            await asyncio.sleep(0)
             assert result is merge_result
             call_order.append("quarantine")
 

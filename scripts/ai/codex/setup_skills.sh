@@ -33,9 +33,23 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
-log_info() { echo -e "${BLUE}[setup-skills]${NC} $1"; }
-log_ok() { echo -e "${GREEN}[setup-skills]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[setup-skills]${NC} $1"; }
+log_info() {
+    local message="${1:-}"
+    echo -e "${BLUE}[setup-skills]${NC} ${message}"
+    return 0
+}
+
+log_ok() {
+    local message="${1:-}"
+    echo -e "${GREEN}[setup-skills]${NC} ${message}"
+    return 0
+}
+
+log_warn() {
+    local message="${1:-}"
+    echo -e "${YELLOW}[setup-skills]${NC} ${message}"
+    return 0
+}
 
 if [[ ! -d "$SOURCE_ROOT" ]]; then
     log_warn "Source skills directory not found: $SOURCE_ROOT"

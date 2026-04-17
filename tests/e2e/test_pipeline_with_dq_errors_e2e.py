@@ -11,6 +11,7 @@ Per RULES.md §4.2:
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from unittest.mock import AsyncMock, MagicMock
@@ -66,6 +67,7 @@ def create_mock_transform_callback(
     call_count = 0
 
     async def transform(ctx: PipelineContext, record: dict[str, Any]) -> dict[str, Any]:
+        await asyncio.sleep(0)
         nonlocal call_count
         call_count += 1
 
@@ -135,6 +137,7 @@ class TestDQSoftThreshold:
         error_count = 0
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             nonlocal error_count
             error_count += 1
             if error_count <= 10:  # First 10 of 100 records fail = 10%
@@ -214,6 +217,7 @@ class TestDQSoftThreshold:
         error_count = 0
 
         async def low_error_transform(ctx, record, index):
+            await asyncio.sleep(0)
             nonlocal error_count
             error_count += 1
             if error_count <= 2:  # 2 of 100 = 2%
@@ -295,6 +299,7 @@ class TestDQHardThreshold:
         error_count = 0
 
         async def high_error_transform(ctx, record, index):
+            await asyncio.sleep(0)
             nonlocal error_count
             error_count += 1
             if error_count <= 25:  # 25 of 100 = 25%
@@ -360,6 +365,7 @@ class TestDQHardThreshold:
         error_count = 0
 
         async def exact_threshold_transform(ctx, record, index):
+            await asyncio.sleep(0)
             nonlocal error_count
             error_count += 1
             if error_count <= 20:  # 20 of 100 = exactly 20%
@@ -422,6 +428,7 @@ class TestDQHardThreshold:
         error_count = 0
 
         async def below_hard_transform(ctx, record, index):
+            await asyncio.sleep(0)
             nonlocal error_count
             error_count += 1
             if error_count <= 19:  # 19 of 100 = 19%
@@ -488,6 +495,7 @@ class TestDQQuarantineBehavior:
         quarantine_manager = MagicMock(spec=QuarantineManagerService)
 
         async def capture_quarantine_records(records, batch_id, **kwargs):
+            await asyncio.sleep(0)
             for record, _error_type, _error_msg in records:
                 quarantined_records.append(record)
 
@@ -500,6 +508,7 @@ class TestDQQuarantineBehavior:
         failed_ids = {"2", "5", "7"}
 
         async def selective_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record["id"] in failed_ids:
                 raise ForcedDQError(record["id"])
             return {"entity_id": f"entity_{record['id']}", "value": 1}

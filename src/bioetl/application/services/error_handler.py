@@ -157,7 +157,7 @@ class ErrorHandler:
     def _log_error(
         self,
         exception: Exception,
-        context: Dict[str, Any] = None,
+        context: Dict[str, Any] = None,  # Any: Logging context carries heterogeneous scalar payloads from callers.
     ) -> None:
         """Log an error with full context."""
         log_context = self._prepare_log_context(exception, context)

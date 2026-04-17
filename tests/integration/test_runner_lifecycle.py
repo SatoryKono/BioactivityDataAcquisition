@@ -113,10 +113,12 @@ def mock_services_with_recorder(call_recorder):
 
     # Context manager support (self is passed when called as a method)
     async def services_aenter(self):
+        await asyncio.sleep(0)
         call_recorder.record("services.__aenter__")
         return services
 
     async def services_aexit(self, *args):
+        await asyncio.sleep(0)
         call_recorder.record("services.__aexit__")
 
     services.__aenter__ = services_aenter
@@ -138,6 +140,7 @@ def mock_checkpoint_manager_with_recorder(call_recorder):
         call_recorder.record("checkpoint.load")
 
     async def delete_checkpoint():
+        await asyncio.sleep(0)
         call_recorder.record("checkpoint.delete")
 
     manager.load_checkpoint = load_checkpoint
@@ -151,6 +154,7 @@ def mock_executor_with_recorder(call_recorder):
     executor = AsyncMock()
 
     async def execute(*args, **kwargs):
+        await asyncio.sleep(0)
         call_recorder.record("executor.execute")
 
     executor.execute = execute
@@ -233,7 +237,7 @@ def mock_lifecycle_service(call_recorder, mock_lifecycle_service_with_recorder):
             policy=MedallionPolicy.for_run_type(runtime.run_type),
         )
 
-    async def finalize_run(config, runtime, metrics=None):
+    def finalize_run(config, runtime, metrics=None):
         return VacuumResult(silver_files_removed=0, gold_files_removed=0, skipped=True)
 
     service.prepare_for_run = AsyncMock(side_effect=prepare_for_run)
@@ -246,7 +250,7 @@ def mock_preflight_service(call_recorder):
     """Create a mock preflight service."""
     service = MagicMock(spec=PreflightService)
 
-    async def validate_infrastructure(services):
+    def validate_infrastructure(services):
         call_recorder.record("preflight.validate_infrastructure")
 
     service.validate_infrastructure = AsyncMock(side_effect=validate_infrastructure)
@@ -271,7 +275,7 @@ def mock_postrun_service(call_recorder):
 
     service = MagicMock(spec=PostrunService)
 
-    async def run(executor, dq_context=None):
+    def run(executor, dq_context=None):
         """Mock run that records DQ checks and vacuum calls."""
         call_recorder.record("postrun.dq_checks")
         call_recorder.record("postrun.vacuum")
@@ -292,10 +296,10 @@ def mock_postrun_service(call_recorder):
     def run_dq_checks(executor):
         call_recorder.record("postrun.dq_checks")
 
-    async def run_vacuum_if_enabled():
+    def run_vacuum_if_enabled():
         call_recorder.record("postrun.vacuum")
 
-    async def cleanup(tracer):
+    def cleanup(tracer):
         call_recorder.record("postrun.cleanup")
 
     service.run = AsyncMock(side_effect=run)
@@ -380,10 +384,12 @@ class TestPipelineRunnerLifecycle:
         lock_manager = MagicMock()
 
         async def lm_aenter(self):
+            await asyncio.sleep(0)
             call_recorder.record("lock_manager.__aenter__")
             return lock_manager
 
         async def lm_aexit(self, *args):
+            await asyncio.sleep(0)
             call_recorder.record("lock_manager.__aexit__")
 
         lock_manager.__aenter__ = lm_aenter
@@ -547,10 +553,12 @@ class TestPipelineRunnerLifecycle:
         lock_manager = MagicMock()
 
         async def lm_aenter(self):
+            await asyncio.sleep(0)
             call_recorder.record("lock_manager.__aenter__")
             return lock_manager
 
         async def lm_aexit(self, *args):
+            await asyncio.sleep(0)
             call_recorder.record("lock_manager.__aexit__")
 
         lock_manager.__aenter__ = lm_aenter
@@ -619,7 +627,7 @@ class TestPipelineRunnerLifecycle:
         from bioetl.application.services.medallion_lifecycle import ClearResult
         from bioetl.domain.medallion import MedallionPolicy
 
-        async def prepare_for_run_with_recording(config, runtime):
+        def prepare_for_run_with_recording(config, runtime):
             call_recorder.record("lifecycle.clear")
             call_recorder.record("storage.clear_silver")
             call_recorder.record("storage.clear_gold")
@@ -707,10 +715,12 @@ class TestPipelineRunnerLifecycle:
         lock_manager = MagicMock()
 
         async def lm_aenter(self):
+            await asyncio.sleep(0)
             call_recorder.record("lock_manager.__aenter__")
             return lock_manager
 
         async def lm_aexit(self, *args):
+            await asyncio.sleep(0)
             call_recorder.record("lock_manager.__aexit__")
 
         lock_manager.__aenter__ = lm_aenter
@@ -789,12 +799,14 @@ class TestPipelineRunnerLifecycle:
         checkpoint_manager = AsyncMock()
 
         async def load_checkpoint(*, current_metadata=None):
+            await asyncio.sleep(0)
             nonlocal checkpoint_loaded
             checkpoint_loaded = True
             call_recorder.record("checkpoint.load")
             return saved_metadata
 
         async def delete_checkpoint():
+            await asyncio.sleep(0)
             call_recorder.record("checkpoint.delete")
 
         checkpoint_manager.load_checkpoint = load_checkpoint
@@ -919,7 +931,7 @@ class TestPipelineRunnerLifecycle:
         from bioetl.application.services.medallion_lifecycle import VacuumResult
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
-        async def run_with_dq(executor, dq_context=None):
+        def run_with_dq(executor, dq_context=None):
             call_recorder.record("postrun.dq_checks")
             # Simulate DQ check logic
             anomalies = dq_monitor.check_quality()
@@ -1015,7 +1027,7 @@ class TestPipelineRunnerLifecycle:
         from bioetl.application.services.medallion_lifecycle import VacuumResult
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
-        async def run_with_vacuum(executor, dq_context=None):
+        def run_with_vacuum(executor, dq_context=None):
             call_recorder.record("postrun.dq_checks")
             call_recorder.record("postrun.vacuum")
             return PostrunResult(
@@ -1093,6 +1105,7 @@ class TestPipelineRunnerLifecycle:
 
         # Simulate 3 consecutive failures to trip the circuit
         async def failing_func():
+            await asyncio.sleep(0)
             raise RuntimeError("Simulated failure")
 
         for _ in range(3):
@@ -1115,6 +1128,7 @@ class TestPipelineRunnerLifecycle:
         with mock_patch("time.monotonic", return_value=mock_time):
             # Circuit should transition to HALF_OPEN and allow probe request
             async def success_func():
+                await asyncio.sleep(0)
                 return "success"
 
             result = await cb.call(success_func)

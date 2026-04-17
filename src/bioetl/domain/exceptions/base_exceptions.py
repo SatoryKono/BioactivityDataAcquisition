@@ -38,7 +38,7 @@ class BioETLDomainError(BioETLError):
         original_exception: Original exception that caused this error (if any)
     """
     message: str
-    context: Dict[str, Any] = None
+    context: Dict[str, Any] = None  # Any: Domain exception context stores JSON-serializable payload values of mixed types.
     original_exception: Optional[Exception] = None
 
     def __str__(self) -> str:

@@ -51,6 +51,7 @@ class TestConnectionTimeout:
         max_retries = 3
 
         async def flaky_operation():
+            await asyncio.sleep(0)
             nonlocal retry_count
             retry_count += 1
             if retry_count < max_retries:
@@ -78,6 +79,7 @@ class TestConnectionTimeout:
         max_retries = 3
 
         async def always_timeout():
+            await asyncio.sleep(0)
             nonlocal retry_count
             retry_count += 1
             raise TimeoutError("Connection timed out")
@@ -107,6 +109,7 @@ class TestRateLimitHandling:
         backoff_delays: list[float] = []
 
         async def rate_limited_api():
+            await asyncio.sleep(0)
             nonlocal call_count
             call_count += 1
             if call_count < 3:
@@ -142,6 +145,7 @@ class TestRateLimitHandling:
         waited_time = 0.0
 
         async def rate_limited_with_header():
+            await asyncio.sleep(0)
             nonlocal waited_time
             if waited_time < retry_after_value:
                 request = httpx.Request("GET", "https://api.example.com")
@@ -182,6 +186,7 @@ class TestServerErrorHandling:
         error_codes = [502, 503, 504]
 
         async def server_error_api():
+            await asyncio.sleep(0)
             nonlocal call_count
             call_count += 1
             if call_count <= len(error_codes):
@@ -214,6 +219,7 @@ class TestServerErrorHandling:
         call_count = 0
 
         async def internal_error():
+            await asyncio.sleep(0)
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -249,6 +255,7 @@ class TestRetryExhaustion:
         call_count = 0
 
         async def always_fail():
+            await asyncio.sleep(0)
             nonlocal call_count
             call_count += 1
             request = httpx.Request("GET", "https://api.example.com")
@@ -274,6 +281,7 @@ class TestRetryExhaustion:
         retry_metrics = {"attempts": 0, "successes": 0, "failures": 0}
 
         async def tracked_operation():
+            await asyncio.sleep(0)
             retry_metrics["attempts"] += 1
             if retry_metrics["attempts"] < 3:
                 raise ConnectionError("Connection failed")
@@ -300,7 +308,7 @@ class TestRetryExhaustion:
 class TestExponentialBackoff:
     """Tests for exponential backoff behavior."""
 
-    async def test_backoff_increases_exponentially(self):
+    def test_backoff_increases_exponentially(self):
         """E2E: Backoff delay should increase exponentially."""
         base_delay = 0.01
         multiplier = 2.0
@@ -319,7 +327,7 @@ class TestExponentialBackoff:
         assert delays[3] == pytest.approx(0.08)
         assert delays[4] == pytest.approx(0.16)
 
-    async def test_backoff_capped_at_max(self):
+    def test_backoff_capped_at_max(self):
         """E2E: Backoff should be capped at maximum delay."""
         base_delay = 0.1
         multiplier = 2.0

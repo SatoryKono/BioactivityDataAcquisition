@@ -246,6 +246,7 @@
       <excludeFolder url="file://$MODULE_DIR$/MagicMock" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/.gemini" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/gemini" />
+      <excludeFolder url="file://$MODULE_DIR$/.codex/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/archive/.gemini" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/archive/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/docs/build" />

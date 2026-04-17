@@ -20,19 +20,19 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_error() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${RED}[vibe]${NC} ERROR: ${message}" >&2
     return 0
 }
 
 log_warn() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${YELLOW}[vibe]${NC} ${message}"
     return 0
 }
 
 log_info() {
-    local message="${1}"
+    local message="${1:-}"
     echo -e "${BLUE}[vibe]${NC} ${message}"
     return 0
 }
