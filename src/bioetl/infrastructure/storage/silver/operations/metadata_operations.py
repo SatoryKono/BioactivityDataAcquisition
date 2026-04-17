@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timedelta, UTC
 from typing import TYPE_CHECKING
@@ -166,8 +167,6 @@ class SilverMetadataOperations:
         *,
         table_name: str,
         records: list[BronzeRecord],
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
     ) -> BatchDQMetrics:
         """Resolve DQ metrics via host override when present, otherwise compute them."""
         host_compute_dq_metrics = getattr(self._host, "_compute_dq_metrics", None)
@@ -179,9 +178,7 @@ class SilverMetadataOperations:
         import polars as pl
 
         arrow_data = pl.DataFrame(records).to_arrow()
-        return await self.compute_dq_metrics(
-            arrow_data=arrow_data,
-        )
+        return await self.compute_dq_metrics(arrow_data=arrow_data)
 
     async def _resolve_version_after(self, table_path: str) -> int | None:
         """Read Delta version via host helper when available."""
@@ -324,7 +321,7 @@ class SilverMetadataOperations:
             validation_errors=[],  # TODO: Get actual validation errors
         )
         
-        return self._dq_calculator.calculate(dq_input)
+        return await asyncio.to_thread(self._dq_calculator.calculate, dq_input)
     
     async def write_silver_metadata(
         self,
@@ -453,7 +450,7 @@ class SilverMetadataOperations:
         if error:
             audit_entry["error"] = error
         
-        self._audit.log_event("SilverWrite", audit_entry)
+        await asyncio.to_thread(self._audit.log_event, "SilverWrite", audit_entry)
 
     async def _log_silver_audit(
         self,
@@ -521,8 +518,6 @@ class SilverMetadataOperations:
         dq_metrics = await self._resolve_finalization_dq_metrics(
             table_name=table_name,
             records=records,
-            primary_keys=primary_keys,
-            validated_mode=validated_mode,
         )
         version_after = await self._resolve_version_after(table_path)
         completed_at = started_at + timedelta(
