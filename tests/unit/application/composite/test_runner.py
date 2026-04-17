@@ -182,6 +182,27 @@ def create_mock_merger() -> AsyncMock:
     return merger
 
 
+def _seed_runner_factory(seed_runner: MockPipelineRunner):
+    def _factory() -> MockPipelineRunner:
+        return seed_runner
+
+    return _factory
+
+
+def _new_seed_runner_factory():
+    def _factory() -> MockPipelineRunner:
+        return MockPipelineRunner()
+
+    return _factory
+
+
+def _new_enricher_runner_factory():
+    def _factory(name: str, df: object) -> MockPipelineRunner:
+        return MockPipelineRunner()
+
+    return _factory
+
+
 def create_mock_fsm_state_helper(
     logger: MagicMock,
     config: MockCompositeConfig | None = None,
@@ -214,8 +235,8 @@ def create_runner(
     run_id = str(uuid4())
 
     deps = CompositeRunnerDependencies(
-        seed_runner_factory=lambda: seed_runner,
-        enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+        seed_runner_factory=_seed_runner_factory(seed_runner),
+        enricher_runner_factory=_new_enricher_runner_factory(),
         key_extractor=create_mock_key_extractor(),
         coordinator=create_mock_coordinator(),
         merger=create_mock_merger(),
@@ -495,8 +516,8 @@ class TestFSMSeedFailure:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: seed_runner,
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_seed_runner_factory(seed_runner),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -640,8 +661,8 @@ class TestFSMSeedResume:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: MockPipelineRunner(),
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_new_seed_runner_factory(),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -671,8 +692,8 @@ class TestFSMSeedResume:
         """Seed resume helper should normalize old checkpoint state and emit seed_resume transition."""
         logger = create_mock_logger()
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: MockPipelineRunner(),
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_new_seed_runner_factory(),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -735,8 +756,8 @@ class TestFSMSeedResume:
         logger = create_mock_logger()
         run_id = str(uuid4())
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: MockPipelineRunner(),
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_new_seed_runner_factory(),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -829,8 +850,8 @@ class TestFSMTransitionLogging:
         """Transition to SEED_RUNNING should be logged."""
         logger = create_mock_logger()
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: MockPipelineRunner(),
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_new_seed_runner_factory(),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -858,8 +879,8 @@ class TestFSMTransitionLogging:
         """Transition to SEED_COMPLETED should be logged."""
         logger = create_mock_logger()
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: MockPipelineRunner(),
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_new_seed_runner_factory(),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -888,8 +909,8 @@ class TestFSMTransitionLogging:
         logger = create_mock_logger()
         seed_runner = MockPipelineRunner(should_fail=True)
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: seed_runner,
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_seed_runner_factory(seed_runner),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -928,8 +949,8 @@ class TestCheckpointSaveErrorHandling:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: MockPipelineRunner(),
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_new_seed_runner_factory(),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -967,8 +988,8 @@ class TestCheckpointSaveErrorHandling:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=lambda: MockPipelineRunner(),
-            enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+            seed_runner_factory=_new_seed_runner_factory(),
+            enricher_runner_factory=_new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),

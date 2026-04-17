@@ -1,5 +1,6 @@
 schema_version: "1.0"
 canonical_roots:
+  - scripts/ai
   - scripts/ci
   - scripts/dev
   - scripts/qa
@@ -40,6 +41,9 @@ lifecycle:
   enforce_known_registry_paths: true
 
 groups:
+  ai:
+    path: scripts/ai
+    purpose: Canonical AI-facing setup, launcher, and runtime-adjacent tooling
   ci:
     path: scripts/ci
     purpose: CI orchestration, resiliency runners, periodic quality reports

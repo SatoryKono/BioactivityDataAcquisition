@@ -30,17 +30,17 @@ is consolidated incrementally.
 
 | Command                               | Script                                                       | Description                                                                           |
 | ------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| `verify`                              | `scripts/docs/verify_docs.py`                                | Run the canonical docs verification chain (links, drift, docstrings, strict build)   |
-| `check-links`                         | `scripts/docs/check_doc_links.py`                            | Check documentation links, specs, configs, and mkdocs nav classification              |
-| `check-drift`                         | `scripts/docs/check_doc_drift.py`                            | Check documentation drift (ports, classes, runtime mirrors, freshness)                |
-| `check-docstrings`                    | `scripts/docs/check_docstring_coverage.py`                   | Check docstring coverage                                                              |
-| `check-kpi`                           | `scripts/docs/report_docs_kpi.py`                            | Report documentation KPI metrics                                                      |
-| `export-matrix-structural-contract`   | `scripts/docs/export_chembl_matrix_structural_contract.py`   | Export the canonical runtime structural contract for ChEMBL workbook sync             |
-| `generate-field-matrix`               | `scripts/docs/generate_chembl_activity_field_matrix.py`      | Generate deterministic ChemBL Activity field-matrix artifacts directly from code      |
+| `verify`                              | `scripts/docs/checks/verify.py`                              | Run the canonical docs verification chain (links, drift, docstrings, strict build)   |
+| `check-links`                         | `scripts/docs/checks/check_links.py`                         | Check documentation links, specs, configs, and mkdocs nav classification              |
+| `check-drift`                         | `scripts/docs/checks/check_drift.py`                         | Check documentation drift (ports, classes, runtime mirrors, freshness)                |
+| `check-docstrings`                    | `scripts/docs/checks/check_docstrings.py`                    | Check docstring coverage                                                              |
+| `check-kpi`                           | `scripts/docs/checks/report_docs_kpi.py`                     | Report documentation KPI metrics                                                      |
+| `export-matrix-structural-contract`   | `scripts/docs/matrix/export_structural_contract.py`          | Export the canonical runtime structural contract for ChEMBL workbook sync             |
+| `generate-field-matrix`               | `scripts/docs/matrix/generate_field_matrix.py`               | Generate deterministic ChemBL Activity field-matrix artifacts directly from code      |
 | `generate-pipeline-normalization-matrix` | `scripts/docs/generate_pipeline_normalization_field_matrix.py` | Generate deterministic normalization field-matrix artifacts for all entity and composite pipelines |
-| `build-matrix-dicts`                  | `scripts/docs/generate_chembl_matrix_dictionaries.py`        | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook     |
+| `build-matrix-dicts`                  | `scripts/docs/matrix/build_matrix_dicts.py`                  | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook     |
 | `enrich-matrix-normalization-details` | `scripts/docs/enrich_chembl_matrix_normalization_details.py` | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook  |
-| `filter-matrix-rows`                  | `scripts/docs/filter_chembl_matrix_rows.py`                  | Remove rows from the canonical ChEMBL matrix workbook by column value                 |
+| `filter-matrix-rows`                  | `scripts/docs/matrix/filter_rows.py`                         | Remove rows from the canonical ChEMBL matrix workbook by column value                 |
 | `normalize-matrix-values`             | `scripts/docs/normalize_chembl_matrix_workbook.py`           | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |
 | `sync-matrix-structural-policy`       | `scripts/docs/sync_chembl_matrix_structural_policy.py`       | Reconcile workbook policy columns with the current structural Silver policy semantics |
 | `fix-links-auto`                      | `scripts/docs/fix_doc_links_auto.py`                         | Auto-fix broken documentation links                                                   |

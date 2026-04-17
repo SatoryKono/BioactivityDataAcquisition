@@ -35,6 +35,24 @@ def _make_lock(*, acquire_ok: bool = True, heartbeat_ok: bool = True) -> AsyncMo
     return lock
 
 
+def _seed_runner_factory(seed_runner: MagicMock):
+    def _factory() -> MagicMock:
+        return seed_runner
+
+    return _factory
+
+
+def _same_runner_factory(runner: MagicMock):
+    def _factory(name: str, df: object) -> MagicMock:
+        return runner
+
+    return _factory
+
+
+def _failing_seed_runner_factory() -> MagicMock:
+    return _failing_runner()
+
+
 def _make_runner(
     lock: AsyncMock | None = None,
     **overrides: object,
@@ -112,8 +130,8 @@ def _make_runner(
     fsm = FSMStateHelperService(config=config, logger=logger, run_id=run_id)
 
     deps = CompositeRunnerDependencies(
-        seed_runner_factory=lambda: seed_runner,
-        enricher_runner_factory=lambda name, df: seed_runner,
+        seed_runner_factory=_seed_runner_factory(seed_runner),
+        enricher_runner_factory=_same_runner_factory(seed_runner),
         key_extractor=key_extractor,
         coordinator=coordinator,
         merger=merger,
@@ -185,7 +203,7 @@ class TestCompositeRunnerHeartbeat:
         runner = _make_runner(lock=lock)
 
         # Make seed fail
-        runner._seed_runner_factory = lambda: _failing_runner()
+        runner._seed_runner_factory = _failing_seed_runner_factory
 
         with pytest.raises(RuntimeError, match="seed exploded"):
             await runner.run()

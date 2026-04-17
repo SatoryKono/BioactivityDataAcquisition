@@ -152,6 +152,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a convenience Windows launcher for the mixed WSL Codex bootstrap flow while operators still use batch entrypoints; prefer documented canonical setup commands for normal contributor workflows."
     },
+    "scripts/ai/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a top-level scripts.ai router during the AI tooling consolidation window; either add stable external call-sites so it becomes active or remove it if direct module entry remains unnecessary."
+    },
     "scripts/ai/mcp/mcp_chembl_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",

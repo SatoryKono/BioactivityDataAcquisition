@@ -198,6 +198,20 @@ def create_mock_merger() -> AsyncMock:
     return merger
 
 
+def _seed_runner_factory(seed_runner: MockPipelineRunner):
+    def _factory() -> MockPipelineRunner:
+        return seed_runner
+
+    return _factory
+
+
+def _new_enricher_runner_factory():
+    def _factory(name: str, df: object) -> MockPipelineRunner:
+        return MockPipelineRunner()
+
+    return _factory
+
+
 def create_runner(
     config: MockCompositeConfig | None = None,
     seed_runner: MockPipelineRunner | None = None,
@@ -224,8 +238,8 @@ def create_runner(
         runtime = CompositeRuntimeConfig()
 
     deps = CompositeRunnerDependencies(
-        seed_runner_factory=lambda: seed_runner,
-        enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+        seed_runner_factory=_seed_runner_factory(seed_runner),
+        enricher_runner_factory=_new_enricher_runner_factory(),
         key_extractor=create_mock_key_extractor(),
         coordinator=coordinator,
         merger=merger,

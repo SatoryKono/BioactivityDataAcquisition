@@ -2,7 +2,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 # Thin facade for backward compatibility.
-# Canonical implementation: scripts/dev/setup_copilot_codex_mcp.py
+# Canonical implementation: scripts/ai/codex/setup_mcp.py
 
 $rootDir = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
 Set-Location $rootDir
