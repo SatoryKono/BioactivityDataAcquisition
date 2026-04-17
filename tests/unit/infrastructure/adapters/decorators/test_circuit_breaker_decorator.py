@@ -436,7 +436,7 @@ class TestCircuitBreakerDecoratorRecoveryTimeout:
             with pytest.raises(CircuitBreakerOpenError) as exc_info:
                 _ = [r async for r in decorator.fetch("activity")]
 
-        assert exc_info.value.retry_after == 120.0
+        assert exc_info.value.retry_after == pytest.approx(120.0)
 
     @pytest.mark.asyncio
     async def test_retry_after_defaults_when_no_recovery_timeout_attr(
@@ -458,7 +458,7 @@ class TestCircuitBreakerDecoratorRecoveryTimeout:
             with pytest.raises(CircuitBreakerOpenError) as exc_info:
                 _ = [r async for r in decorator.fetch("activity")]
 
-        assert exc_info.value.retry_after == 60.0
+        assert exc_info.value.retry_after == pytest.approx(60.0)
 
     @pytest.mark.asyncio
     async def test_fetch_allows_probe_after_recovery_timeout_elapsed(

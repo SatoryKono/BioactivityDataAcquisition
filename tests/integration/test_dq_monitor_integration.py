@@ -105,7 +105,7 @@ class TestDQMonitorAnomalyDetection:
         assert stats is not None
         mean, _stddev, count = stats
         assert count == 1
-        assert mean == 1000.0
+        assert mean == pytest.approx(1000.0)
 
         # Second update
         monitor.update_baseline_from_metrics({"record_count": 2000.0})
@@ -114,7 +114,7 @@ class TestDQMonitorAnomalyDetection:
         assert stats is not None
         mean, _stddev, count = stats
         assert count == 2
-        assert mean == 1500.0  # Average of 1000 and 2000
+        assert mean == pytest.approx(1500.0)  # Average of 1000 and 2000
 
 
 @pytest.mark.integration

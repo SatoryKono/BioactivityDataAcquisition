@@ -345,7 +345,7 @@ class TestComputeStats:
     def test_empty_stats(self, service: OrganismClassificationService) -> None:
         stats = service.compute_stats([])
         assert stats.total == 0
-        assert stats.resolution_rate == 0.0
+        assert stats.resolution_rate == pytest.approx(0.0)
 
     def test_all_resolved(self, service: OrganismClassificationService) -> None:
         records = [
@@ -355,7 +355,7 @@ class TestComputeStats:
         paired = service.classify_records(records)
         results = [r for _, r in paired]
         stats = service.compute_stats(results)
-        assert stats.resolution_rate == 1.0
+        assert stats.resolution_rate == pytest.approx(1.0)
         assert stats.unresolved == 0
 
 

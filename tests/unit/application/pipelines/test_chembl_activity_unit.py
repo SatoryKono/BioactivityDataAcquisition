@@ -79,7 +79,7 @@ async def test_chembl_transform_bronze_to_silver_happy_path(chembl_pipeline):
     transformed = await chembl_pipeline.transform_bronze_to_silver(context, record)
     assert transformed is not None
     assert transformed["activity_id"] == "123"
-    assert transformed["standard_value"] == 10.5
+    assert transformed["standard_value"] == pytest.approx(10.5)
     assert transformed["_run_id"] == str(context.run_id)
     assert transformed["_run_type"] == context.run_type.value
     assert "_source_batch_id" in transformed

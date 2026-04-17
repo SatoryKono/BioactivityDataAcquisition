@@ -213,4 +213,4 @@ class TestMetricsServerAdapterDefaults:
             adapter.start()
 
             call_kwargs = mock_start.call_args[1]
-            assert call_kwargs["retry_delay"] == 1.0
+            assert call_kwargs["retry_delay"] == pytest.approx(1.0)

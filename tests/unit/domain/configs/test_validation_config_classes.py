@@ -29,8 +29,8 @@ class TestFieldValidation:
             min_value=0.0,
             max_value=100.0,
         )
-        assert fv.min_value == 0.0
-        assert fv.max_value == 100.0
+        assert fv.min_value == pytest.approx(0.0)
+        assert fv.max_value == pytest.approx(100.0)
 
     def test_creation_pattern_type(self) -> None:
         fv = FieldValidation(

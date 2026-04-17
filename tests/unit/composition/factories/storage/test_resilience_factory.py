@@ -53,8 +53,8 @@ def test_create_silver_atomic_retry_policy_uses_settings_values() -> None:
     settings = _build_settings()
     policy = create_silver_atomic_retry_policy(settings)  # type: ignore[arg-type]
     assert policy.max_retries == 5
-    assert policy.base_delay_seconds == 0.01
-    assert policy.max_delay_seconds == 0.08
+    assert policy.base_delay_seconds == pytest.approx(0.01)
+    assert policy.max_delay_seconds == pytest.approx(0.08)
     assert policy.adaptive is False
 
 

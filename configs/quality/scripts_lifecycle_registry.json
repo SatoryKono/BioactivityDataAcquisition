@@ -128,7 +128,7 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL troubleshooting helper for reaching the Windows-hosted Docker Desktop Neo4j backend from mounted checkouts; either fold it into a canonical cross-platform setup flow or remove it once the mixed Windows-WSL path is stable."
     },
-    "scripts/memory/mcp/check.sh": {
+    "scripts/ai/mcp/check_neo4j_memory.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
@@ -164,55 +164,55 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a convenience Windows launcher for the mixed WSL Codex bootstrap flow while operators still use batch entrypoints; prefer documented canonical setup commands for normal contributor workflows."
     },
-    "scripts/ops/mcp_chembl_wrapper.sh": {
+    "scripts/ai/mcp/mcp_chembl_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin shell launcher for the Docker MCP gateway chembl server while local MCP configs and operator workflows still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ops/mcp_chembl_wrapper.ps1": {
+    "scripts/ai/mcp/mcp_chembl_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway chembl server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ops/mcp_pubchem_wrapper.sh": {
+    "scripts/ai/mcp/mcp_pubchem_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin shell launcher for the Docker MCP gateway pubchem server while local MCP configs and operator workflows still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ops/mcp_pubchem_wrapper.ps1": {
+    "scripts/ai/mcp/mcp_pubchem_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway pubchem server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ops/mcp_pubmed_wrapper.sh": {
+    "scripts/ai/mcp/mcp_pubmed_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin shell launcher for the Docker MCP gateway pubmed server while local MCP configs and operator workflows still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ops/mcp_pubmed_wrapper.ps1": {
+    "scripts/ai/mcp/mcp_pubmed_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway pubmed server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ops/mcp_mermaid_wrapper.sh": {
+    "scripts/ai/mcp/mcp_mermaid_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin shell launcher for the Docker MCP gateway mermaid server while local MCP configs and operator workflows still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ops/mcp_mermaid_wrapper.ps1": {
+    "scripts/ai/mcp/mcp_mermaid_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway mermaid server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/memory/mcp/check.sh": {
+    "scripts/ai/mcp/check_neo4j_memory.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",

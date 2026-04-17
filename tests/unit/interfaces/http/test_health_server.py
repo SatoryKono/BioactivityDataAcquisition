@@ -83,7 +83,7 @@ class TestHealthServer:
         """Test uptime tracking."""
         server = HealthServer(host="127.0.0.1", port=0)
 
-        assert server.uptime_seconds == 0.0
+        assert server.uptime_seconds == pytest.approx(0.0)
 
         await server.start()
         assert server._start_time is not None

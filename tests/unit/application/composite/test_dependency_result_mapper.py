@@ -53,7 +53,7 @@ def test_build_success_result_uses_runner_execution_metrics(
     assert result.status == DependencyStatus.SUCCESS
     assert result.records_extracted == 7
     assert result.records_silver == 5
-    assert result.duration_seconds == 3.0
+    assert result.duration_seconds == pytest.approx(3.0)
     mock_logger.info.assert_called_once()
 
 

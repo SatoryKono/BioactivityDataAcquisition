@@ -126,11 +126,11 @@ scripts/ci/run_pytest_resilient.py
 **Cross-Platform Wrappers:**
 ```bash
 # Before: Platform-specific duplicates
-scripts/ops/mcp_wrapper.ps1
-scripts/ops/mcp_wrapper.sh
+scripts/ai/mcp/mcp_wrapper.ps1
+scripts/ai/mcp/mcp_wrapper.sh
 
 # After: Single cross-platform or documented choice
-scripts/ops/mcp_wrapper.sh  # Canonical
+scripts/ai/mcp/mcp_wrapper.sh  # Canonical
 ```
 
 ---

@@ -43,7 +43,7 @@ A: Username: `neo4j`, Password: `[REDACTED]` (from `NEO4J_AUTH=neo4j/[REDACTED]`
 A: Run:
 ```bash
 codex mcp get neo4j-memory
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 ```
 
 ## Provider Knowledge

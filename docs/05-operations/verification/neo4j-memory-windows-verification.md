@@ -60,7 +60,7 @@ codex mcp get neo4j-memory
 
 ## Why Bash Script Failed
 
-You ran `bash scripts/memory/mcp/check.sh` from PowerShell.
+You ran `bash scripts/ai/mcp/check_neo4j_memory.sh` from PowerShell.
 
 **The issue**: Bash (WSL) doesn't see Docker from Windows.
 

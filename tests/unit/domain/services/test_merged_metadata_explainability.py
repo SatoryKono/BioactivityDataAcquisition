@@ -240,9 +240,9 @@ class TestMergedMetadataExplainabilityService:
         assert summary["source_provider_distribution"] == {}
         assert summary["merge_strategy_distribution"] == {}
         assert summary["conflict_summary"]["total_conflicts"] == 0
-        assert summary["conflict_summary"]["conflict_rate"] == 0.0
+        assert summary["conflict_summary"]["conflict_rate"] == pytest.approx(0.0)
         assert summary["enrichment_summary"]["total_enrichments"] == 0
-        assert summary["enrichment_summary"]["enrichment_rate"] == 0.0
+        assert summary["enrichment_summary"]["enrichment_rate"] == pytest.approx(0.0)
 
     def test_generate_explainability_summary_with_data(
         self,

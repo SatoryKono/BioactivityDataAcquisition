@@ -77,7 +77,7 @@ async def test_transform_valid_record(chembl_pipeline, context):
     result = await chembl_pipeline.transform_bronze_to_silver(context, record)
     assert result is not None
     assert result["activity_id"] == "100"
-    assert result["pchembl_value"] == 5.5
+    assert result["pchembl_value"] == pytest.approx(5.5)
     assert result["_run_id"] == str(context.run_id)
     assert result["_run_type"] == context.run_type.value
     assert "_ingestion_ts" in result

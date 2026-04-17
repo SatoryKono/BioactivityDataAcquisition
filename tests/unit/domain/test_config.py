@@ -286,4 +286,4 @@ class TestValidationConfig:
         assert ss_config.min_publication_year == 1500
         # Other values remain at defaults
         assert ss_config.max_publication_year == 2100
-        assert ss_config.min_molecular_weight == 10.0
+        assert ss_config.min_molecular_weight == pytest.approx(10.0)

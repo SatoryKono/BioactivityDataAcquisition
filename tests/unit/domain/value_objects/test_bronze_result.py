@@ -105,7 +105,7 @@ class TestBronzeWriteResultProperties:
     def test_compression_ratio_zero_uncompressed(self) -> None:
         """Test compression ratio returns 1.0 when uncompressed_size is 0."""
         result = _make_valid_result(compressed_size=50000, uncompressed_size=0)
-        assert result.compression_ratio == 1.0
+        assert result.compression_ratio == pytest.approx(1.0)
 
     def test_exists_method_removed_from_domain_vo(self) -> None:
         """BronzeWriteResult must not perform filesystem I/O in domain layer."""

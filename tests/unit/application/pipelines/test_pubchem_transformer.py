@@ -544,7 +544,7 @@ class TestPubChemCompoundTransformer:
         assert result["isotope_atom_count"] == 0
         assert result["covalent_unit_count"] == 1
         # 3D properties
-        assert result["volume_3d"] == 158.5
+        assert result["volume_3d"] == pytest.approx(158.5)
         assert result["conformer_count_3d"] == 1
         assert result["feature_acceptor_count_3d"] == 3
         assert result["feature_donor_count_3d"] == 1

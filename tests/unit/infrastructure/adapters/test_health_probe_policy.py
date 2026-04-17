@@ -13,7 +13,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_is_slow_health_probe_uses_default_threshold() -> None:
-    assert DEFAULT_SLOW_HEALTH_PROBE_THRESHOLD_SECONDS == 5.0
+    assert DEFAULT_SLOW_HEALTH_PROBE_THRESHOLD_SECONDS == pytest.approx(5.0)
     assert not is_slow_health_probe(elapsed_seconds=5.0)
     assert is_slow_health_probe(elapsed_seconds=5.01)
 

@@ -146,8 +146,8 @@ class TestDomainConfig:
         from bioetl.domain.config import DQConfig
 
         config = DQConfig()
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.20
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.20)
 
     def test_runtime_config_defaults(self) -> None:
         """RuntimeConfig has expected defaults."""

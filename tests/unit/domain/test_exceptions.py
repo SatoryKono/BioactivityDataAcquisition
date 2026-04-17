@@ -338,7 +338,7 @@ class TestErrorContext:
         ctx = err.context
 
         assert ctx["provider"] == "chembl"
-        assert ctx["retry_after"] == 60.0
+        assert ctx["retry_after"] == pytest.approx(60.0)
         assert len(ctx) == 2
 
     def test_context_excludes_private_attributes(self) -> None:

@@ -8,6 +8,7 @@ Tests covering gaps identified in coverage analysis:
 from __future__ import annotations
 
 import polars as pl
+import pytest
 
 from bioetl.application.services.dq._checks_statistical import (
     check_anomaly_detection,
@@ -187,7 +188,7 @@ class TestAnomalyDetectionExtended:
         null_metric = next(
             m for m in result.metrics_monitored if m.metric == "null_rate"
         )
-        assert null_metric.zscore == 0.0
+        assert null_metric.zscore == pytest.approx(0.0)
 
     def test_current_day_attribute(self) -> None:
         df = pl.DataFrame({"id": [1]})

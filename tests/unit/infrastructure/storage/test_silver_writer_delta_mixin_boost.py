@@ -791,4 +791,4 @@ class TestMergeExecutionTimeoutError:
         """Timeout error includes seconds."""
         err = _MergeExecutionTimeoutError(45.0)
         assert "45" in str(err)
-        assert err.timeout_seconds == 45.0
+        assert err.timeout_seconds == pytest.approx(45.0)

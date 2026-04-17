@@ -128,7 +128,7 @@ async def test_deduplicate_removes_duplicates(tmp_delta_dir: Path) -> None:
     rows = result.to_pylist()
     id1_rows = [r for r in rows if r["activity_id"] == "1"]
     assert len(id1_rows) == 1
-    assert id1_rows[0]["value"] == 10.0
+    assert id1_rows[0]["value"] == pytest.approx(10.0)
 
 
 @pytest.mark.asyncio

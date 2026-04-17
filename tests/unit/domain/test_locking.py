@@ -70,7 +70,7 @@ class TestFencingToken:
         assert token.sequence == 1
         assert token.key == "lock:chembl_activity"
         assert token.owner_id == run_id
-        assert token.issued_at == 100.0
+        assert token.issued_at == pytest.approx(100.0)
 
     def test_immutability(self, run_id: RunID) -> None:
         """Test that FencingToken is immutable (frozen dataclass)."""

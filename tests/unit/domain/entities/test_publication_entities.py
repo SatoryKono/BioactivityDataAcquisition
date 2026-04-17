@@ -112,7 +112,7 @@ class TestOpenAlexPublicationEntity:
             is_retracted=False,
         )
         assert len(entity.subject_topics) == 1
-        assert entity.fwci == 1.5
+        assert entity.fwci == pytest.approx(1.5)
         assert entity.is_retracted is False
 
     def test_empty_openalex_id_raises(self) -> None:

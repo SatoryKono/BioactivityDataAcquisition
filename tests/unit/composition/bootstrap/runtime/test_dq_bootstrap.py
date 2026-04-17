@@ -106,7 +106,9 @@ class TestBootstrapDqMonitorPort:
             monitor_factory=mock_monitor_factory,
         )
 
-        assert mock_monitor_factory.call_args.kwargs["z_score_threshold"] == 3.0
+        assert mock_monitor_factory.call_args.kwargs["z_score_threshold"] == pytest.approx(
+            3.0
+        )
 
     def test_configures_min_baseline_samples(self) -> None:
         mock_monitor = MagicMock(spec=DQMonitorPort)
@@ -172,4 +174,4 @@ class TestBootstrapDqMonitorPort:
         kwargs = mock_monitor_factory.call_args.kwargs
         assert "logger" in kwargs
         assert kwargs["baseline_window"] == 10
-        assert kwargs["z_score_threshold"] == 2.0
+        assert kwargs["z_score_threshold"] == pytest.approx(2.0)

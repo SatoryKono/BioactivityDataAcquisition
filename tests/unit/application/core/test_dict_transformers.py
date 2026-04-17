@@ -385,7 +385,7 @@ class TestSafeFloatReExport:
 
     def test_valid_string(self):
         """Test float conversion from string."""
-        assert safe_float("3.14") == 3.14
+        assert safe_float("3.14") == pytest.approx(3.14)
 
     def test_none_returns_none(self):
         """Test None returns None."""

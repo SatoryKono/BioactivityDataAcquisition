@@ -34,7 +34,7 @@ class TestHealthResult:
         )
         assert result.provider == "chembl"
         assert result.status == "healthy"
-        assert result.latency_ms == 150.5
+        assert result.latency_ms == pytest.approx(150.5)
         assert result.endpoint == "https://www.ebi.ac.uk/chembl/api/data/status.json"
 
     def test_health_result_default_values(self) -> None:

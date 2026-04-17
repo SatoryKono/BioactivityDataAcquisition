@@ -411,7 +411,7 @@ class TestDebtScorecardResult:
             expired_entries=0,
         )
         assert result.quarter == "2025-Q1"
-        assert result.integral_score == 85.5
+        assert result.integral_score == pytest.approx(85.5)
         assert result.active_grace_windows == ("RF-001",)
 
     def test_frozen(self) -> None:

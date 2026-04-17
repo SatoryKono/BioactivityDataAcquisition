@@ -50,7 +50,7 @@ class TestUnifiedHTTPClientInit:
             rate_limiter=mock_rate_limiter,
             circuit_breaker=mock_circuit_breaker,
         )
-        assert client.timeout == 30.0
+        assert client.timeout == pytest.approx(30.0)
         assert client.run_id is None
         assert client.user_agent == "BioETL/5.0.0"
         assert client.contact_email is None

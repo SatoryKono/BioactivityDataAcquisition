@@ -11,6 +11,7 @@ from datetime import datetime
 
 import polars as pl
 import pyarrow as pa
+import pytest
 
 from bioetl.application.services.dq._checks_integrity import (
     check_referential_integrity,
@@ -176,7 +177,7 @@ class TestCheckSCDIntegrityExtended:
         scd_config = {"type": 2, "entity_key": "entity_id"}
         result = check_scd_integrity(df, scd_config)
         # 3 records / 2 unique entities = 1.5
-        assert result.avg_versions_per_entity == 1.5
+        assert result.avg_versions_per_entity == pytest.approx(1.5)
 
     def test_entities_with_history_counted(self) -> None:
         df = pl.DataFrame(

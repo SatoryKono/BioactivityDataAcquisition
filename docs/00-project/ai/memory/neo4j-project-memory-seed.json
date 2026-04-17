@@ -71,7 +71,7 @@
         "Shell-provided env vars override repo env files."
       ],
       "sources": [
-        "scripts/memory/mcp/wrapper.sh",
+        "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
         "scripts/memory/setup/wsl_startup.sh",
         "scripts/ops/support/load_repo_env.sh",
         "docs/05-operations/deployment/WSL-NEO4J-SETUP.md"

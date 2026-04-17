@@ -26,7 +26,7 @@ class TestSilverStatisticsCalculator:
         assert result.value == 80
         assert result.input_records == 100
         assert result.quarantined_records == 20
-        assert result.quarantine_rate == 0.2
+        assert result.quarantine_rate == pytest.approx(0.2)
         assert result.status == DQCheckStatus.WARN
 
     def test_check_value_distribution_limits_processing_to_first_twenty_columns(

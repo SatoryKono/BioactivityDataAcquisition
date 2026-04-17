@@ -167,4 +167,4 @@ class TestBuildMergeResult:
         assert result.records_from_seed == 1
         assert result.output_silver_path == "silver/composite/pub"
         assert result.output_gold_path == "gold/pub_enriched"
-        assert result.duration_seconds == 1.5
+        assert result.duration_seconds == pytest.approx(1.5)

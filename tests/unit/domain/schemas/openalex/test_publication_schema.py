@@ -298,13 +298,13 @@ class TestOpenAlexPublicationSchema:
         valid_record["fwci"] = 1.5
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["fwci"].iloc[0] == 1.5
+        assert validated["fwci"].iloc[0] == pytest.approx(1.5)
 
         # Zero is valid
         valid_record["fwci"] = 0.0
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["fwci"].iloc[0] == 0.0
+        assert validated["fwci"].iloc[0] == pytest.approx(0.0)
 
         # Negative fwci
         valid_record["fwci"] = -1.0

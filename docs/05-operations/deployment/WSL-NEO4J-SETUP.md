@@ -27,13 +27,13 @@ This script:
 ✓ Ready for verification
 
 Next steps:
-1. Run verification: bash scripts/memory/mcp/check.sh
+1. Run verification: bash scripts/ai/mcp/check_neo4j_memory.sh
 2. Access Neo4j Browser: http://host.docker.internal:7474/browser/
 ```
 
 ### Step 2: Run Verification
 ```bash
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 ```
 
 **Expected output:**
@@ -98,8 +98,8 @@ NEO4J_DATABASE=neo4j
 | File | Purpose |
 |------|---------|
 | `scripts/memory/setup/wsl_startup.sh` | ⭐ Start Neo4j (run first) |
-| `scripts/memory/mcp/check.sh` | ⭐ Verify setup (run second) |
-| `scripts/memory/mcp/wrapper.sh` | MCP wrapper (@knowall-ai) |
+| `scripts/ai/mcp/check_neo4j_memory.sh` | ⭐ Verify setup (run second) |
+| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` | MCP wrapper (@knowall-ai) |
 | `.env.local` | WSL-specific config (auto-created) |
 | `scripts/ops/support/load_repo_env.sh` | Env variable loader |
 
@@ -125,7 +125,7 @@ bash scripts/memory/setup/wsl_startup.sh
 # Neo4j takes 10-15 seconds to start
 # Wait and check again:
 sleep 15
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 
 # If still closed, check container:
 docker ps | grep bioetl-neo4j
@@ -137,7 +137,7 @@ docker ps | grep bioetl-neo4j
 uv run python -m scripts.dev setup-mcp
 
 # Verify wrapper is accessible
-test -x scripts/memory/mcp/wrapper.sh && echo "OK"
+test -x scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh && echo "OK"
 
 # Check MCP in Codex
 codex mcp get neo4j-memory
@@ -158,7 +158,7 @@ This is rare in WSL. If it happens:
 bash scripts/memory/setup/wsl_startup.sh
 
 # Run verification
-bash scripts/memory/mcp/check.sh
+bash scripts/ai/mcp/check_neo4j_memory.sh
 
 # Access Neo4j Browser (from WSL)
 wsl-open http://host.docker.internal:7474/browser/

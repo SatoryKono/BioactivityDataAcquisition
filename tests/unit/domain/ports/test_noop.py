@@ -206,7 +206,7 @@ class TestNoOpMemoryMonitor:
         # 1000 records * 1024 bytes * 2.5 overhead / 1024^2 = 2.44 MB
         result = monitor.estimate_batch_memory_mb(1000, 1024)
         expected = (1000 * 1024 * 2.5) / (1024 * 1024)
-        assert abs(result - expected) < 0.01
+        assert result == pytest.approx(expected, abs=0.01)
 
     def test_calculate_max_batch_size_returns_large(self) -> None:
         """Test calculate_max_batch_size returns 10000."""

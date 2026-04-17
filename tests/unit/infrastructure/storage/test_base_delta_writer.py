@@ -55,7 +55,7 @@ class TestSerializeValue:
         """Test scalar values are returned unchanged."""
         assert _serialize_value("hello", is_string_field=True) == "hello"
         assert _serialize_value(123, is_string_field=False) == 123
-        assert _serialize_value(45.67, is_string_field=False) == 45.67
+        assert _serialize_value(45.67, is_string_field=False) == pytest.approx(45.67)
 
     def test_json_sorted_keys(self) -> None:
         """Test JSON serialization uses sorted keys for determinism."""

@@ -251,7 +251,7 @@ class TestPushMetricsToGateway:
 
         mock_push.assert_called_once()
         assert mock_push.call_args[0][0] == "localhost:9091"
-        assert mock_push.call_args[1]["timeout"] == 1.0
+        assert mock_push.call_args[1]["timeout"] == pytest.approx(1.0)
 
     def test_push_failure_oserror(self):
         """Should return False on OSError."""

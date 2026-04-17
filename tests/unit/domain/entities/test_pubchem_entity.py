@@ -84,7 +84,7 @@ class TestPubchemMolecule:
             h_bond_acceptor_count=4,
             rotatable_bond_count=3,
         )
-        assert m.molecular_weight == 180.16
+        assert m.molecular_weight == pytest.approx(180.16)
         assert m.h_bond_donor_count == 1
 
     def test_valid_creation_with_3d_properties(self) -> None:
@@ -96,7 +96,7 @@ class TestPubchemMolecule:
             conformer_count_3d=1,
             feature_acceptor_count_3d=2,
         )
-        assert m.volume_3d == 150.5
+        assert m.volume_3d == pytest.approx(150.5)
 
     def test_immutable(self) -> None:
         m = PubchemMolecule(
