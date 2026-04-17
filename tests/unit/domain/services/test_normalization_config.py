@@ -17,14 +17,14 @@ class TestConcentrationRangeConfig:
     def test_default_values(self) -> None:
         """Test default configuration values."""
         config = ConcentrationRangeConfig()
-        assert config.min_molar == 1e-15
-        assert config.max_molar == 1e-1
+        assert config.min_molar == pytest.approx(1e-15)
+        assert config.max_molar == pytest.approx(1e-1)
 
     def test_custom_values(self) -> None:
         """Test custom configuration values."""
         config = ConcentrationRangeConfig(min_molar=1e-12, max_molar=1e-3)
-        assert config.min_molar == 1e-12
-        assert config.max_molar == 1e-3
+        assert config.min_molar == pytest.approx(1e-12)
+        assert config.max_molar == pytest.approx(1e-3)
 
     def test_invalid_min_molar_raises(self) -> None:
         """Test that non-positive min_molar raises ValueError."""

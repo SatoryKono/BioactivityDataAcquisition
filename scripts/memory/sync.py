@@ -4099,6 +4099,25 @@ def _add_storage_surface(
     primary_pipeline_name = (
         _optional_text(existing.properties.get("pipeline_name")) if existing is not None else None
     ) or pipeline_name
+
+    # Merge curated semantic properties with the normalized top-level storage fields
+    # without passing duplicate keyword arguments into add_node().
+    semantic_properties = dict(spec.semantic_properties)
+    explicit_semantic_fields: dict[str, JsonValue] = {
+        "partition_by": spec.partition_by,
+        "sort_by": spec.sort_by,
+        "on_schema_mismatch": spec.on_schema_mismatch,
+        "versioning_mode": spec.versioning_mode,
+        "version_column": spec.version_column,
+        "current_flag_column": spec.current_flag_column,
+        "valid_from_column": spec.valid_from_column,
+        "valid_to_column": spec.valid_to_column,
+        "merge_strategy": spec.merge_strategy,
+    }
+    for field_name, field_value in explicit_semantic_fields.items():
+        if field_value is not None:
+            semantic_properties[field_name] = field_value
+
     surface = snapshot.add_node(
         "storage_surface",
         spec.ref,
@@ -4116,19 +4135,10 @@ def _add_storage_surface(
         retention_days=spec.retention_days,
         config_version=spec.config_version,
         quality_version=spec.quality_version,
-        partition_by=spec.partition_by,
-        sort_by=spec.sort_by,
-        on_schema_mismatch=spec.on_schema_mismatch,
-        versioning_mode=spec.versioning_mode,
-        version_column=spec.version_column,
-        current_flag_column=spec.current_flag_column,
-        valid_from_column=spec.valid_from_column,
-        valid_to_column=spec.valid_to_column,
-        merge_strategy=spec.merge_strategy,
         last_verified=spec.today,
         ingest_wave="repo_sync_v1",
         confidence="high",
-        **spec.semantic_properties,
+        **semantic_properties,
     )
     snapshot.add_relation(project, "HAS_STORAGE_SURFACE", surface, provenance="storage_surfaces")
     return surface

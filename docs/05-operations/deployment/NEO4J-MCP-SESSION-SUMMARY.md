@@ -27,7 +27,7 @@ Created comprehensive guides:
 - **[neo4j-memory-setup.md](./neo4j-memory-setup.md)** - Memory configuration (already existed)
 
 ### 3. Verification Scripts
-- **[check.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check
+- **[check_neo4j_memory.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check
   - Verifies Codex CLI availability
   - Checks MCP server registration
   - Tests Neo4j port connectivity

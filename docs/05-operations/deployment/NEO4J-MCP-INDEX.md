@@ -90,20 +90,20 @@ codex interactive
 
 | Script | Location | Purpose |
 |--------|----------|---------|
-| **check.sh** | `scripts/memory/mcp/` | Full MCP + backend health check |
+| **check.sh** | `scripts/ai/mcp/` | General MCP validation across registered servers |
+| **check_neo4j_memory.sh** | `scripts/ai/mcp/` | Full Neo4j Memory MCP + backend health check |
 | **neo4j_quick_start.sh** | `scripts/ops/` | One-command startup & verification |
-| **check_mcp.sh** | `scripts/ops/` | General MCP validation (all servers) |
 
 ### Run checks:
 ```bash
+# General MCP validation
+bash scripts/ai/mcp/check.sh
+
 # Comprehensive Neo4j MCP diagnostic
 bash scripts/ai/mcp/check_neo4j_memory.sh
 
 # Quick startup with auto-verification
 bash scripts/ops/neo4j_quick_start.sh
-
-# General MCP validation
-bash scripts/ai/mcp/check.sh
 ```
 
 ---
@@ -149,8 +149,9 @@ Set via:
         ┌────────────┴──────────────┐
         │                           │
         ↓                           ↓
- scripts/memory/mcp/   wrapper reads env
- wrapper.sh            (NEO4J_URI, etc.)
+ scripts/ai/mcp/       wrapper reads env
+ mcp_neo4j_memory_     (NEO4J_URI, etc.)
+ wrapper.sh
         │
         └──→ @knowall-ai/mcp-neo4j-agent-memory
              │

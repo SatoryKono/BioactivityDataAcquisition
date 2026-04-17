@@ -17,23 +17,21 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from collections import Counter
 from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DOCS_DIR = PROJECT_ROOT / "docs"
-MKDOCS_FILE = PROJECT_ROOT / "mkdocs.yml"
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
-MD_LINK_RE = re.compile(r"\[[^\]]*\]\((?!https?://|mailto:)([^)#]+)")
-INLINE_CODE_RE = re.compile(r"`[^`]*`")
-GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
-GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
-    r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
+from scripts.docs.common.markdown import INLINE_CODE_RE, MD_LINK_RE, load_nav_docs
+from scripts.docs.common.paths import (
+    DOCS_DIR,
+    MKDOCS_FILE,
+    PROJECT_ROOT,
+    is_generated_docs_artifact,
 )
 ORPHAN_EXCLUDED_PREFIXES = (
     "00-project/ai/",
@@ -62,13 +60,7 @@ DEFAULT_TARGET_DEADLINE = "2026-06-30"
 
 def _is_generated_docs_artifact(path: Path) -> bool:
     """Return True for generated docs artifacts that must be excluded from KPI."""
-    rel_path = path.relative_to(DOCS_DIR).as_posix()
-    rel_parts = Path(rel_path).parts
-    if bool(rel_parts) and rel_parts[0] == "site":
-        return True
-    if GENERATED_EXPORT_MERGED_RE.match(rel_path):
-        return True
-    return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))
+    return is_generated_docs_artifact(path, docs_root=DOCS_DIR)
 
 
 @dataclass(frozen=True)
@@ -95,8 +87,7 @@ class DocsKpiMetrics:
 
 def _load_nav_docs() -> set[str]:
     """Return markdown docs referenced by mkdocs navigation."""
-    text = MKDOCS_FILE.read_text(encoding="utf-8", errors="replace")
-    return set(MD_PATH_RE.findall(text))
+    return load_nav_docs(MKDOCS_FILE)
 
 
 def _collect_all_docs() -> list[Path]:

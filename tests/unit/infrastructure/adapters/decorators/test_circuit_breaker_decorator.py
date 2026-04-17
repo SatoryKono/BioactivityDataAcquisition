@@ -53,7 +53,8 @@ class MockDataSource:
         exc_val: BaseException | None,
         exc_tb: Any,
     ) -> None:
-        pass
+        del exc_type, exc_val, exc_tb
+        return None
 
     async def fetch(
         self,
@@ -64,6 +65,7 @@ class MockDataSource:
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
+        del entity_type, limit, query, filter_ids, filter_field, offset
         self._fetch_call_count += 1
         for record in self._records:
             yield record
@@ -73,7 +75,7 @@ class MockDataSource:
         return self._health_status
 
     async def aclose(self) -> None:
-        pass
+        return None
 
 
 class MockCircuitBreaker:

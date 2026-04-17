@@ -139,6 +139,7 @@ class InMemoryQuarantine:
         sort: str = "ingestion_ts_desc",
     ) -> dict[str, Any]:
         """Return a minimal filtered-record list for tests."""
+        del run_type, reason_code, field, from_ts, to_ts, sort
         if pipeline and pipeline.strip().lower() not in {"*", "all", "__all", ".*"}:
             pipelines = [item.strip() for item in pipeline.split(",") if item.strip()]
         else:
@@ -232,6 +233,7 @@ class InMemoryQuarantine:
         to_ts: str | None = None,
     ) -> dict[str, Any]:
         """Return empty filter options by default."""
+        del run_type, reason_code, field, run_id, from_ts, to_ts
         if pipeline and pipeline.strip().lower() not in {"*", "all", "__all", ".*"}:
             pipelines = [item.strip() for item in pipeline.split(",") if item.strip()]
         else:
@@ -246,7 +248,7 @@ class InMemoryQuarantine:
 
     async def aclose(self) -> None:
         """Close quarantine storage (no-op for in-memory)."""
-        pass
+        return None
 
     def clear(self) -> None:
         """Clear all records (test utility)."""

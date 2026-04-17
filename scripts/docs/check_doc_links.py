@@ -58,8 +58,19 @@ from pathlib import Path
 
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DOCS_DIR = PROJECT_ROOT / "docs"
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.docs.common.markdown import (
+    FENCE_END_RE,
+    INLINE_CODE_RE,
+    MD_HEADING_RE,
+    MD_LINK_RE,
+    MD_PATH_RE,
+    PYTHON_FENCE_START_RE,
+)
+from scripts.docs.common.paths import DOCS_DIR, PROJECT_ROOT, is_generated_docs_artifact
+
 PIPELINES_DIR = DOCS_DIR / "04-reference" / "pipelines"
 GOLD_SCHEMAS_DOC = DOCS_DIR / "04-reference" / "contracts" / "gold-schemas.md"
 GOLD_CONTRACTS_DIR = DOCS_DIR / "04-reference" / "contracts" / "gold"
@@ -97,19 +108,8 @@ SKIP_DIRS = frozenset(
     }
 )
 
-# Regex to match markdown relative links: [text](path) — excludes http(s)
-MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((?!https?://|mailto:)([^)#]+)")
-INLINE_CODE_RE = re.compile(r"`[^`]*`")
-MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
-MD_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*$")
-PYTHON_FENCE_START_RE = re.compile(r"^\s*```(?:python|py|python3)\b", re.IGNORECASE)
-FENCE_END_RE = re.compile(r"^\s*```")
 GOLD_CONTRACT_RE = re.compile(r"`([a-z0-9_]+_v1\.0\.json)`")
 CHEMBL_PROVIDER_LINK_RE = re.compile(r"\(chembl/([a-z0-9-]+)\.md\)")
-GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
-GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
-    r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
-)
 
 # Directories skipped by default for drift guardrails in nav docs.
 # These sections are mostly historical/internal and can be audited with
@@ -252,13 +252,7 @@ def _should_skip(path: Path) -> bool:
 
 def _is_generated_docs_artifact(path: Path, root: Path = DOCS_DIR) -> bool:
     """Return True for generated docs artifacts excluded from nav-growth checks."""
-    rel_path = path.relative_to(root).as_posix()
-    rel_parts = Path(rel_path).parts
-    if bool(rel_parts) and rel_parts[0] == "site":
-        return True
-    if GENERATED_EXPORT_MERGED_RE.match(rel_path):
-        return True
-    return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))
+    return is_generated_docs_artifact(path, docs_root=root)
 
 
 def _should_skip_drift(path: Path) -> bool:

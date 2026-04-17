@@ -133,16 +133,17 @@ async def test_fetch_batch_with_reduction_reraises_non_retry_service_error() -> 
     host = _FakeRecoveryHost(deduplicated_error=service_error)
 
     with pytest.raises(ExternalServiceError, match="temporary upstream issue"):
-        async for _ in fetch_batch_with_reduction(
-            host,
-            "target",
-            ["CHEMBL1", "CHEMBL2"],
-            "target_chembl_id",
-            None,
-            set(),
-            "target_id",
-        ):
-            pass
+        await anext(
+            fetch_batch_with_reduction(
+                host,
+                "target",
+                ["CHEMBL1", "CHEMBL2"],
+                "target_chembl_id",
+                None,
+                set(),
+                "target_id",
+            )
+        )
 
 
 @pytest.mark.asyncio

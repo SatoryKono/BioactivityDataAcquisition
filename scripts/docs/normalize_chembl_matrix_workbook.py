@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 import copy
-import re
+import sys
 import zipfile
 from collections import Counter
 from datetime import UTC, datetime
@@ -14,6 +14,19 @@ from typing import Final
 from xml.etree import ElementTree as ET
 
 import yaml
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from scripts.docs.common.xlsx import (
+    MAIN_NS,
+    NS,
+    cell_text,
+    column_index,
+    load_shared_strings,
+    set_cell_text,
+    sheet_target_paths,
+)
 
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
 DEFAULT_INPUT: Final[Path] = (
@@ -40,15 +53,6 @@ TARGET_COLUMNS: Final[tuple[str, ...]] = (
     "Source_Field_Validation",
     "Validation fail action",
 )
-NS: Final[dict[str, str]] = {
-    "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
-    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-    "pr": "http://schemas.openxmlformats.org/package/2006/relationships",
-}
-MAIN_NS: Final[str] = NS["a"]
-REL_NS: Final[str] = NS["r"]
-COL_RE: Final[re.Pattern[str]] = re.compile(r"[A-Z]+")
-
 TYPE_MAP: Final[dict[str, str]] = {
     "string": "string",
     "text": "string",
@@ -433,63 +437,6 @@ def _arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _column_index(cell_ref: str) -> int:
-    letters = "".join(COL_RE.findall(cell_ref))
-    value = 0
-    for char in letters:
-        value = value * 26 + (ord(char) - ord("A") + 1)
-    return value
-
-
-def _load_shared_strings(archive: zipfile.ZipFile) -> list[str]:
-    try:
-        root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
-    except KeyError:
-        return []
-    return ["".join(node.itertext()) for node in root.findall("a:si", NS)]
-
-
-def _sheet_targets(archive: zipfile.ZipFile) -> dict[str, str]:
-    workbook = ET.fromstring(archive.read("xl/workbook.xml"))
-    rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    rel_map = {
-        rel.attrib["Id"]: rel.attrib["Target"]
-        for rel in rels.findall("pr:Relationship", NS)
-    }
-    targets: dict[str, str] = {}
-    for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
-        rel_id = sheet.attrib[f"{{{REL_NS}}}id"]
-        targets[sheet.attrib["name"]] = "xl/" + rel_map[rel_id].lstrip("/")
-    return targets
-
-
-def _cell_text(cell: ET.Element, shared_strings: list[str]) -> str:
-    cell_type = cell.attrib.get("t")
-    if cell_type == "inlineStr":
-        inline = cell.find("a:is", NS)
-        return "".join(inline.itertext()) if inline is not None else ""
-    value_node = cell.find("a:v", NS)
-    if value_node is None:
-        return ""
-    value = value_node.text or ""
-    if cell_type == "s":
-        return shared_strings[int(value)]
-    return value
-
-
-def _set_cell_text(cell: ET.Element, value: str) -> None:
-    for child in list(cell):
-        if child.tag in {f"{{{MAIN_NS}}}v", f"{{{MAIN_NS}}}is"}:
-            cell.remove(child)
-    cell.set("t", "inlineStr")
-    is_node = ET.Element(f"{{{MAIN_NS}}}is")
-    text_node = ET.SubElement(is_node, f"{{{MAIN_NS}}}t")
-    if value.startswith(" ") or value.endswith(" "):
-        text_node.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
-    text_node.text = value
-    cell.append(is_node)
-
-
 def _normalize_required(value: str) -> str:
     lowered = " ".join(value.strip().split()).lower()
     if not lowered:
@@ -657,8 +604,8 @@ def main() -> int:
     mapping_output.parent.mkdir(parents=True, exist_ok=True)
 
     with zipfile.ZipFile(input_path) as zin:
-        shared_strings = _load_shared_strings(zin)
-        sheet_targets = set(_sheet_targets(zin).values())
+        shared_strings = load_shared_strings(zin)
+        sheet_targets = sheet_target_paths(zin)
         applied_counter: dict[str, Counter[str]] = {
             column: Counter() for column in TARGET_COLUMNS
         }
@@ -680,21 +627,21 @@ def main() -> int:
 
                 header_by_index: dict[int, str] = {}
                 for cell in rows[0].findall("a:c", NS):
-                    header_by_index[_column_index(cell.attrib["r"])] = _cell_text(
+                    header_by_index[column_index(cell.attrib["r"])] = cell_text(
                         cell, shared_strings
                     )
 
                 for row in rows[1:]:
                     for cell in row.findall("a:c", NS):
-                        index = _column_index(cell.attrib["r"])
+                        index = column_index(cell.attrib["r"])
                         header = header_by_index.get(index)
                         if header not in TARGET_COLUMNS:
                             continue
-                        raw = _cell_text(cell, shared_strings)
+                        raw = cell_text(cell, shared_strings)
                         canonical = _canonicalize(header, raw)
                         applied_counter[header][canonical] += 1
                         if canonical != raw:
-                            _set_cell_text(cell, canonical)
+                            set_cell_text(cell, canonical)
 
                 zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
 

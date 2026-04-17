@@ -22,7 +22,7 @@ class TestAdapterMetrics:
         )
 
         with adapter_metrics.measure_request("/activity"):
-            pass  # Simulate successful request
+            assert True
 
         # Verify histogram was observed
         mock_metrics.observe_histogram.assert_called_once()
@@ -39,7 +39,7 @@ class TestAdapterMetrics:
         )
 
         with adapter_metrics.measure_request("/protein"):
-            pass
+            assert True
 
         # Verify counter was incremented with success status
         mock_metrics.increment_counter.assert_called_once()
@@ -89,14 +89,14 @@ class TestAdapterMetrics:
 
         # Should not raise any exceptions
         with adapter_metrics.measure_request("/activity"):
-            pass
+            assert True
 
     def test_measure_request_without_metrics_is_best_effort(self):
         """Missing metrics port should not break adapter request flow."""
         adapter_metrics = AdapterMetricsRecorder(metrics=None, provider="chembl")
 
         with adapter_metrics.measure_request("/activity"):
-            pass
+            assert True
 
     def test_record_batch_size(self):
         """Test that record_batch_size records histogram metric."""
@@ -121,10 +121,10 @@ class TestAdapterMetrics:
         )
 
         with adapter_metrics.measure_request("/uniprotkb/search"):
-            pass
+            assert True
 
         with adapter_metrics.measure_request("/uniprotkb/stream"):
-            pass
+            assert True
 
         # Verify two different endpoints were recorded
         assert mock_metrics.observe_histogram.call_count == 2
@@ -138,13 +138,13 @@ class TestAdapterMetrics:
 
         chembl_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="chembl")
         with chembl_metrics.measure_request("/activity"):
-            pass
+            assert True
 
         uniprot_metrics = AdapterMetricsRecorder(
             metrics=mock_metrics, provider="uniprot"
         )
         with uniprot_metrics.measure_request("/protein"):
-            pass
+            assert True
 
         calls = mock_metrics.observe_histogram.call_args_list
         assert calls[0][0][2]["provider"] == "chembl"
@@ -158,7 +158,7 @@ class TestAdapterMetrics:
         )
 
         with adapter_metrics.measure_request("/activity"):
-            pass
+            assert True
 
         mock_metrics.set_gauge.assert_called_once()
         call_args = mock_metrics.set_gauge.call_args
@@ -174,7 +174,7 @@ class TestAdapterMetrics:
         )
 
         with adapter_metrics.measure_request("/works/123456789"):
-            pass
+            assert True
 
         histogram_call = mock_metrics.observe_histogram.call_args
         assert histogram_call[0][2] == {

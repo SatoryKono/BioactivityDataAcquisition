@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_MCP_CONFIG="${REPO_ROOT}/.mcp.json"
 EXPECTED_MEMORY_PATH="${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
 EXPECTED_GITHUB_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/github-mcp-wrapper.sh"
 EXPECTED_DOCKER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh"
@@ -16,10 +17,53 @@ EXPECTED_BRAVE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrappe
 EXPECTED_SONARQUBE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
 EXPECTED_NEO4J_CYPHER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
 EXPECTED_NEO4J_MEMORY_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+EXPECTED_FILESYSTEM_SCOPE="${REPO_ROOT}"
 # shellcheck source=./support/load_repo_env.sh
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 
 load_repo_env_if_present
+
+if command -v python3 >/dev/null 2>&1 && [[ -f "$PROJECT_MCP_CONFIG" ]]; then
+  expected_values="$(
+    python3 - "$PROJECT_MCP_CONFIG" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+config_path = Path(sys.argv[1])
+data = json.loads(config_path.read_text(encoding="utf-8"))
+servers = data.get("mcpServers", {})
+
+keys = [
+    ("EXPECTED_MEMORY_PATH", ("memory", "env", "MEMORY_FILE_PATH")),
+    ("EXPECTED_GITHUB_WRAPPER_PATH", ("github", "args", 0)),
+    ("EXPECTED_DOCKER_WRAPPER_PATH", ("docker", "args", 0)),
+    ("EXPECTED_DOCKER_DOCS_WRAPPER_PATH", ("docker-docs", "args", 0)),
+    ("EXPECTED_CONTEXT7_WRAPPER_PATH", ("context7", "args", 0)),
+    ("EXPECTED_PAPER_SEARCH_WRAPPER_PATH", ("paper-search", "args", 0)),
+    ("EXPECTED_DOCKERHUB_WRAPPER_PATH", ("dockerhub", "args", 0)),
+    ("EXPECTED_PROMETHEUS_WRAPPER_PATH", ("prometheus", "args", 0)),
+    ("EXPECTED_GRAFANA_WRAPPER_PATH", ("grafana", "args", 0)),
+    ("EXPECTED_BRAVE_WRAPPER_PATH", ("brave-search", "args", 0)),
+    ("EXPECTED_SONARQUBE_WRAPPER_PATH", ("sonarqube", "args", 0)),
+    ("EXPECTED_NEO4J_CYPHER_WRAPPER_PATH", ("neo4j-cypher", "args", 0)),
+    ("EXPECTED_NEO4J_MEMORY_WRAPPER_PATH", ("neo4j-memory", "args", 0)),
+    ("EXPECTED_FILESYSTEM_SCOPE", ("filesystem", "args", 2)),
+]
+
+for env_name, path in keys:
+    value = servers
+    for segment in path:
+        value = value[segment]
+    print(f"{env_name}={value}")
+PY
+  )"
+
+  while IFS='=' read -r name value; do
+    [[ -n "${name}" ]] || continue
+    printf -v "${name}" '%s' "${value}"
+  done <<<"$expected_values"
+fi
 
 ok() {
   printf "[OK] %s\n" "$1"
@@ -77,6 +121,13 @@ for server in memory filesystem sequential-thinking fetch pdf github docker dock
   fi
 done
 
+if grep -Eq "^sonarqube[[:space:]]" <<<"$list_out"; then
+  ok "Server 'sonarqube' is registered"
+else
+  fail "Server 'sonarqube' is missing"
+  status=1
+fi
+
 memory_out="$(codex mcp get memory 2>&1 || true)"
 filesystem_out="$(codex mcp get filesystem 2>&1 || true)"
 sequential_out="$(codex mcp get sequential-thinking 2>&1 || true)"
@@ -115,10 +166,10 @@ require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "
 require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
 require_contains "$openai_docs_out" "https://developers.openai.com/mcp" "openaiDeveloperDocs points to official OpenAI MCP endpoint" || status=1
 
-if grep -Fq -- "${REPO_ROOT}" <<<"$filesystem_out"; then
+if grep -Fq -- "${EXPECTED_FILESYSTEM_SCOPE}" <<<"$filesystem_out"; then
   ok "filesystem scope is restricted to repo root"
 else
-  fail "filesystem scope is not restricted to ${REPO_ROOT}"
+  fail "filesystem scope is not restricted to ${EXPECTED_FILESYSTEM_SCOPE}"
   status=1
 fi
 

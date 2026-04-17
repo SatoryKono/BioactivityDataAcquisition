@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
@@ -22,8 +23,9 @@ from tests.helpers.transformer_dependencies import (
 
 class ConcretePipeline(BasePipeline):
     async def transform_bronze_to_silver(
-        self, _context: PipelineContext, record: dict
+        self, _context: PipelineContext, record: dict, index: int = 0
     ) -> dict | None:
+        await asyncio.sleep(0)
         return record
 
 
@@ -36,7 +38,8 @@ class MockTransformer(BaseTransformer):
             dependencies=build_test_transformer_dependencies(),
         )
 
-    async def _transform_impl(self, context, record):
+    async def _transform_impl(self, context, record, index):
+        await asyncio.sleep(0)
         return record
 
 
@@ -90,7 +93,7 @@ def mock_pipeline(shutdown_signal: ShutdownSignal):
     return pipeline
 
 
-async def test_base_pipeline_initialization(mock_pipeline):
+def test_base_pipeline_initialization(mock_pipeline):
     """Test that the BasePipeline initializes correctly."""
     assert mock_pipeline.pipeline_name == "test_pipeline"
     assert mock_pipeline.provider == "test_provider"
@@ -101,7 +104,7 @@ async def test_base_pipeline_initialization(mock_pipeline):
     assert mock_pipeline.context.logger is not None
 
 
-async def test_base_pipeline_accepts_five_params():
+def test_base_pipeline_accepts_five_params():
     """Test that BasePipeline.__init__ accepts explicit shutdown signal injection."""
     config = PipelineConfig(
         pipeline_name="test",
@@ -144,7 +147,7 @@ async def test_base_pipeline_accepts_five_params():
     assert pipeline.transformer == transformer
 
 
-async def test_base_pipeline_properties(mock_pipeline):
+def test_base_pipeline_properties(mock_pipeline):
     """Test all convenience properties."""
     # Test run_id property
     assert mock_pipeline.run_id is not None
@@ -168,7 +171,7 @@ async def test_base_pipeline_properties(mock_pipeline):
     assert mock_pipeline.limit is None
 
 
-async def test_run_id_propagation_is_consistent():
+def test_run_id_propagation_is_consistent():
     """Test that run_id from constructor is used consistently across all components.
 
     This test ensures that the run_id passed to BasePipeline is the same run_id
@@ -224,7 +227,7 @@ async def test_run_id_propagation_is_consistent():
     )
 
 
-async def test_base_pipeline_uses_injected_shutdown_signal():
+def test_base_pipeline_uses_injected_shutdown_signal():
     """BasePipeline should support ShutdownSignal injection for DI compliance."""
     config = PipelineConfig(
         pipeline_name="test_pipeline",
@@ -262,7 +265,7 @@ async def test_base_pipeline_uses_injected_shutdown_signal():
     assert pipeline.shutdown_signal is injected_signal
 
 
-async def test_exact_replay_pipeline_context_uses_deterministic_replay_anchor() -> None:
+def test_exact_replay_pipeline_context_uses_deterministic_replay_anchor() -> None:
     """Exact replay should bind a stable DQ/report timestamp anchor into context."""
     config = PipelineConfig(
         pipeline_name="test_pipeline",

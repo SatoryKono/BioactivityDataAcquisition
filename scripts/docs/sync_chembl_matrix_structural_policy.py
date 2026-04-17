@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import copy
-import re
 import sys
 import zipfile
 from collections import Counter
@@ -16,6 +15,15 @@ from xml.etree import ElementTree as ET
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from scripts.docs.common.xlsx import (
+    MAIN_NS,
+    NS,
+    cell_text,
+    column_index,
+    load_shared_strings,
+    set_cell_text,
+    sheet_target_paths,
+)
 from scripts.docs.chembl_matrix_structural_contract import (
     DEFAULT_CONTRACT_EXPORT,
     INVALID_TYPE_TO_NULL,
@@ -48,14 +56,6 @@ DEFAULT_INPUT: Final[Path] = (
 DEFAULT_OUTPUT: Final[Path] = (
     PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
 )
-NS: Final[dict[str, str]] = {
-    "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
-    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-    "pr": "http://schemas.openxmlformats.org/package/2006/relationships",
-}
-MAIN_NS: Final[str] = NS["a"]
-REL_NS: Final[str] = NS["r"]
-COL_RE: Final[re.Pattern[str]] = re.compile(r"[A-Z]+")
 SYSTEM_FIELDS: Final[frozenset[str]] = frozenset(
     {
         "_run_id",
@@ -140,63 +140,6 @@ def _arg_parser() -> argparse.ArgumentParser:
         help="Exit with status 1 if the workbook would change, without rewriting it.",
     )
     return parser
-
-
-def _column_index(cell_ref: str) -> int:
-    letters = "".join(COL_RE.findall(cell_ref))
-    value = 0
-    for char in letters:
-        value = value * 26 + (ord(char) - ord("A") + 1)
-    return value
-
-
-def _load_shared_strings(archive: zipfile.ZipFile) -> list[str]:
-    try:
-        root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
-    except KeyError:
-        return []
-    return ["".join(node.itertext()) for node in root.findall("a:si", NS)]
-
-
-def _sheet_targets(archive: zipfile.ZipFile) -> set[str]:
-    workbook = ET.fromstring(archive.read("xl/workbook.xml"))
-    rels = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    rel_map = {
-        rel.attrib["Id"]: rel.attrib["Target"]
-        for rel in rels.findall("pr:Relationship", NS)
-    }
-    targets: set[str] = set()
-    for sheet in workbook.find("a:sheets", NS).findall("a:sheet", NS):
-        rel_id = sheet.attrib[f"{{{REL_NS}}}id"]
-        targets.add("xl/" + rel_map[rel_id].lstrip("/"))
-    return targets
-
-
-def _cell_text(cell: ET.Element, shared_strings: list[str]) -> str:
-    cell_type = cell.attrib.get("t")
-    if cell_type == "inlineStr":
-        inline = cell.find("a:is", NS)
-        return "".join(inline.itertext()) if inline is not None else ""
-    value_node = cell.find("a:v", NS)
-    if value_node is None:
-        return ""
-    value = value_node.text or ""
-    if cell_type == "s":
-        return shared_strings[int(value)]
-    return value
-
-
-def _set_cell_text(cell: ET.Element, value: str) -> None:
-    for child in list(cell):
-        if child.tag in {f"{{{MAIN_NS}}}v", f"{{{MAIN_NS}}}is"}:
-            cell.remove(child)
-    cell.set("t", "inlineStr")
-    is_node = ET.Element(f"{{{MAIN_NS}}}is")
-    text_node = ET.SubElement(is_node, f"{{{MAIN_NS}}}t")
-    if value.startswith(" ") or value.endswith(" "):
-        text_node.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
-    text_node.text = value
-    cell.append(is_node)
 
 
 def _parse_tokens(
@@ -358,8 +301,8 @@ def main() -> int:
     )
 
     with zipfile.ZipFile(input_path) as zin:
-        shared_strings = _load_shared_strings(zin)
-        sheet_targets = _sheet_targets(zin)
+        shared_strings = load_shared_strings(zin)
+        sheet_targets = sheet_target_paths(zin)
         change_counter: Counter[str] = Counter()
 
         with zipfile.ZipFile(
@@ -379,7 +322,7 @@ def main() -> int:
 
                 header_by_index: dict[int, str] = {}
                 for cell in rows[0].findall("a:c", NS):
-                    header_by_index[_column_index(cell.attrib["r"])] = _cell_text(
+                    header_by_index[column_index(cell.attrib["r"])] = cell_text(
                         cell, shared_strings
                     )
                 index_by_header = {
@@ -388,11 +331,11 @@ def main() -> int:
 
                 for row in rows[1:]:
                     row_map = {
-                        header_by_index[_column_index(cell.attrib["r"])]: _cell_text(
+                        header_by_index[column_index(cell.attrib["r"])]: cell_text(
                             cell, shared_strings
                         )
                         for cell in row.findall("a:c", NS)
-                        if _column_index(cell.attrib["r"]) in header_by_index
+                        if column_index(cell.attrib["r"]) in header_by_index
                     }
                     updated = _update_row(row_map, contract_index=contract_index)
                     for header, new_value in updated.items():
@@ -402,16 +345,16 @@ def main() -> int:
                         target_ref = None
                         target_cell = None
                         for cell in row.findall("a:c", NS):
-                            if _column_index(cell.attrib["r"]) == index:
+                            if column_index(cell.attrib["r"]) == index:
                                 target_cell = cell
                                 target_ref = cell.attrib["r"]
                                 break
                         if target_cell is None:
                             continue
-                        raw_value = _cell_text(target_cell, shared_strings)
+                        raw_value = cell_text(target_cell, shared_strings)
                         if raw_value == new_value:
                             continue
-                        _set_cell_text(target_cell, new_value)
+                        set_cell_text(target_cell, new_value)
                         change_counter[header] += 1
 
                 zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))

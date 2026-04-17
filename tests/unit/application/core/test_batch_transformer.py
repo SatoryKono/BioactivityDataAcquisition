@@ -81,6 +81,7 @@ def transform_callback():
     """Create mock transform callback."""
 
     async def transform(ctx, record, index):
+        await asyncio.sleep(0)
         return {"entity_id": record.get("id", "unknown"), "value": record.get("value")}
 
     return transform
@@ -185,6 +186,7 @@ class TestBatchTransformerTransform:
 
         async def blocking_transform(ctx, record, index):
             nonlocal saw_background_progress
+            await asyncio.sleep(0)
             if index > 0 and marker_event.is_set():
                 saw_background_progress = True
             deadline = time.perf_counter() + 0.003
@@ -235,6 +237,7 @@ class TestBatchTransformerTransform:
         """Per-record transform context should carry the active batch identifier."""
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             return {
                 "entity_id": record.get("id", "unknown"),
                 "value": record.get("value", 0),
@@ -275,6 +278,7 @@ class TestBatchTransformerTransform:
         """Test that data quality errors result in quarantine."""
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -320,6 +324,7 @@ class TestBatchTransformerTransform:
         """Gold filter should see finalized staged payloads after normalization."""
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             return PreSilverRecord(
                 entity_id="crossref:10.1000/abc",
                 business_data={
@@ -392,6 +397,7 @@ class TestBatchTransformerTransform:
         """Normalization should not change batch counts or quarantine semantics."""
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record["id"] == "bad":
                 raise DataQualityError("Invalid data")
             return PreSilverRecord(
@@ -459,6 +465,7 @@ class TestBatchTransformerTransform:
         from bioetl.domain.exceptions import LockLostError
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             raise LockLostError("resource_key", "test_run_id")
 
         config = RecordProcessorConfig(
@@ -499,6 +506,7 @@ class TestBatchTransformerTransform:
         from bioetl.application.core.base_transformer import FilteredOutError
 
         async def filtered_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "filtered":
                 raise FilteredOutError(
                     "Record excluded by silver filters",
@@ -568,6 +576,7 @@ class TestBatchTransformerTransform:
         from bioetl.application.core.base_transformer import FilteredOutError
 
         async def filtered_transform(ctx, record, index):
+            await asyncio.sleep(0)
             raise FilteredOutError("Record excluded by silver filters")
 
         mock_quarantine_manager.quarantine_filtered_records.side_effect = RuntimeError(
@@ -611,6 +620,7 @@ class TestBatchTransformerTransform:
         """DQ quarantine write failure should not fail batch transformation."""
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -799,6 +809,7 @@ class TestBatchTransformerDQThresholds:
         """Test that exceeding hard threshold raises DataQualityThresholdError."""
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -845,6 +856,7 @@ class TestBatchTransformerDQThresholds:
         """Test that exceeding soft threshold logs warning but doesn't raise."""
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -894,6 +906,7 @@ class TestBatchTransformerDQThresholds:
         """Test that below thresholds results in no warnings."""
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         config = RecordProcessorConfig(

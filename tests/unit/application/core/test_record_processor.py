@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
@@ -158,6 +159,7 @@ def transform_callback():
     """
 
     async def transform(ctx, record, index):
+        await asyncio.sleep(0)
         return {
             "entity_id": record.get("id", "unknown"),
             "value": record.get("value"),
@@ -351,6 +353,7 @@ class TestRecordProcessorProcessBatch:
         """Silver writer should receive finalized staged records after normalization."""
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             return PreSilverRecord(
                 entity_id="crossref:10.1000/abc",
                 business_data={
@@ -416,6 +419,7 @@ class TestRecordProcessorProcessBatch:
         """Equivalent DOI inputs should converge to the same final content hash."""
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             return PreSilverRecord(
                 entity_id=f"crossref:{record['id']}",
                 business_data={
@@ -470,6 +474,7 @@ class TestRecordProcessorProcessBatch:
         """Test that transform errors result in quarantine."""
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid data")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -516,6 +521,7 @@ class TestRecordProcessorProcessBatch:
         from bioetl.domain.exceptions import LockLostError
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             raise LockLostError("resource_key", "test_run_id")
 
         config = RecordProcessorConfig(
@@ -577,6 +583,7 @@ class TestRecordProcessorProcessBatch:
         config = get_pipeline_config(pipeline_name)
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -632,6 +639,7 @@ class TestRecordProcessorProcessBatch:
         config = get_pipeline_config(pipeline_name)
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}

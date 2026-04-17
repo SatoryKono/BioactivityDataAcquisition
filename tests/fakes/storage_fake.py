@@ -153,6 +153,7 @@ class InMemoryStorage:
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
     ) -> None:
         """Write aggregated records to the Gold layer."""
+        del schema, primary_keys
         if mode == "overwrite":
             self.gold[table_name] = list(records)
         elif mode == "append":
@@ -190,10 +191,12 @@ class InMemoryStorage:
 
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files (no-op for in-memory)."""
+        del table_name
         return 0
 
     async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables (no-op for in-memory)."""
+        del table_name
         return 0
 
     async def vacuum(
@@ -282,7 +285,7 @@ class InMemoryStorage:
 
     async def aclose(self) -> None:
         """Close storage connection (no-op for in-memory)."""
-        pass
+        return None
 
     def clear(self) -> None:
         """Clear all data (test utility)."""

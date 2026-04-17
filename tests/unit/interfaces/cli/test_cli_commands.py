@@ -253,9 +253,9 @@ class MockSettingsInfo:
     metrics_enabled: bool = True
     metrics_port: int = 8000
     batch_size: int = 100
-    additional: dict = None
+    additional: dict[str, object] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.additional is None:
             self.additional = {}
 

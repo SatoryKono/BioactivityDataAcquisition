@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any, cast
@@ -76,6 +77,7 @@ class _ExecutionHost:
         self.vacuum_layers: list[str] = []
 
     async def _resolve_execution_offset(self) -> int | None:
+        await asyncio.sleep(0)
         self.order.append("resolve_offset")
         return self.offset
 
@@ -93,6 +95,7 @@ class _ExecutionHost:
         *,
         raise_on_unhealthy: bool = True,
     ) -> HealthReport:
+        await asyncio.sleep(0)
         assert services is self._services
         assert raise_on_unhealthy is False
         self.order.append("validate_infrastructure")
@@ -115,6 +118,7 @@ class _ExecutionHost:
         self.order.append(f"assert_infrastructure_healthy:{report.is_healthy}")
 
     async def _prepare_for_run(self, *, config: object, runtime: object) -> None:
+        await asyncio.sleep(0)
         assert config is self._config
         assert runtime is self._runtime
         self.order.append("prepare_medallion_layers")
@@ -126,12 +130,14 @@ class _ExecutionHost:
         query: str | None,
         offset: int | None,
     ) -> None:
+        await asyncio.sleep(0)
         self.execute_calls.append((limit, offset, query))
         self.order.append("execute_pipeline")
 
     async def _run_postrun(
         self, *, executor: object, dq_context: object
     ) -> PostrunResult:
+        await asyncio.sleep(0)
         self.postrun_calls.append((executor, dq_context))
         self.order.append("postrun")
         return PostrunResult(
@@ -164,6 +170,7 @@ class _ExecutionHost:
         )
 
     async def _delete_checkpoint(self) -> None:
+        await asyncio.sleep(0)
         self.order.append("checkpoint_finalize")
 
     def _emit_phase_started(self, phase: LifecyclePhase, **_: object) -> float:
@@ -297,6 +304,7 @@ async def test_tracked_stage_emits_failed_phase_completion() -> None:
     host = _ExecutionHost()
 
     async def _boom() -> None:
+        await asyncio.sleep(0)
         host.order.append("boom")
         raise RuntimeError("forced")
 
@@ -329,6 +337,7 @@ async def test_run_execution_cycle_hands_resolved_context_to_named_stage_runner(
         observed_host: object,
         context: object,
     ) -> None:
+        await asyncio.sleep(0)
         nonlocal observed_context
         assert observed_host is host
         observed_context = context

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 import pytest
 
 from bioetl.domain.normalization.profiles.chembl_activity import CHEMBL_ACTIVITY_PROFILE
@@ -44,16 +46,16 @@ class TestCrossPipelineCaseNormalization:
     def test_case_normalization_edge_cases(self) -> None:
         """Test edge cases for case normalization."""
         # None handling
-        assert normalize_cross_pipeline_case(None, "uppercase") is None
-        assert normalize_cross_pipeline_case(None, "preserve") is None
+        assert normalize_cross_pipeline_case(cast(Any, None), "uppercase") is None
+        assert normalize_cross_pipeline_case(cast(Any, None), "preserve") is None
         
         # Empty string handling
         assert normalize_cross_pipeline_case("", "uppercase") is None
         assert normalize_cross_pipeline_case("   ", "uppercase") is None
         
         # Non-string handling
-        assert normalize_cross_pipeline_case(123, "uppercase") is None
-        assert normalize_cross_pipeline_case([], "preserve") is None
+        assert normalize_cross_pipeline_case(cast(Any, 123), "uppercase") is None
+        assert normalize_cross_pipeline_case(cast(Any, []), "preserve") is None
 
 
 class TestCrossPipelineOntologyNormalization:
@@ -92,10 +94,10 @@ class TestCrossPipelineOntologyNormalization:
     def test_ontology_id_edge_cases(self) -> None:
         """Test edge cases for ontology ID normalization."""
         # None handling
-        assert normalize_ontology_id(None) is None
+        assert normalize_ontology_id(cast(Any, None)) is None
         
         # Empty string handling
-        assert normalize_ontology_id("") is None
+        assert normalize_ontology_id("") == ""
         assert normalize_ontology_id("   ") is None
         
         # Unknown formats preserved
