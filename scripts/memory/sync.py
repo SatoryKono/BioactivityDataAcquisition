@@ -4202,40 +4202,65 @@ def _link_cli_command_side_effects(
 def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     tests_root = root / "tests"
     for suite_dir, suite_name in TEST_SURFACES.items():
-        suite = snapshot.add_node(
-            "test_surface",
-            suite_name,
-            summary=f"`tests/{suite_dir}/` coverage surface.",
-            source_path=f"tests/{suite_dir}",
-            source_kind="test_surface",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(project, "HAS_TEST_SURFACE", suite, provenance="test_graph")
+        _add_test_suite_surface(snapshot, project, today, suite_dir=suite_dir, suite_name=suite_name)
 
     for test_path in sorted(tests_root.rglob("test_*.py")):
-        relative_path = _rel_path(root, test_path)
-        parts = Path(relative_path).parts
-        if len(parts) < 2:
-            continue
-        suite_dir = parts[1]
-        suite_name = TEST_SURFACES.get(suite_dir)
-        if suite_name is None:
-            continue
-        artifact = snapshot.add_node(
-            "test_artifact",
-            relative_path,
-            summary=f"Test artifact `{relative_path}`.",
-            source_path=relative_path,
-            source_kind="test_artifact",
-            suite=suite_dir,
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(NodeKey("test_surface", suite_name), "CONTAINS", artifact, provenance="test_graph")
-        _link_test_artifact_scope(snapshot, artifact, parts)
+        _add_test_artifact_surface(snapshot, root, today, test_path)
+
+
+def _add_test_suite_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    today: str,
+    *,
+    suite_dir: str,
+    suite_name: str,
+) -> None:
+    suite = snapshot.add_node(
+        "test_surface",
+        suite_name,
+        summary=f"`tests/{suite_dir}/` coverage surface.",
+        source_path=f"tests/{suite_dir}",
+        source_kind="test_surface",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_TEST_SURFACE", suite, provenance="test_graph")
+
+
+def _add_test_artifact_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    today: str,
+    test_path: Path,
+) -> None:
+    relative_path = _rel_path(root, test_path)
+    parts = Path(relative_path).parts
+    suite_name = _test_suite_name(parts)
+    if suite_name is None:
+        return
+    suite_dir = parts[1]
+    artifact = snapshot.add_node(
+        "test_artifact",
+        relative_path,
+        summary=f"Test artifact `{relative_path}`.",
+        source_path=relative_path,
+        source_kind="test_artifact",
+        suite=suite_dir,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(NodeKey("test_surface", suite_name), "CONTAINS", artifact, provenance="test_graph")
+    _link_test_artifact_scope(snapshot, artifact, parts)
+
+
+def _test_suite_name(parts: tuple[str, ...]) -> str | None:
+    if len(parts) < 2:
+        return None
+    suite_dir = parts[1]
+    return TEST_SURFACES.get(suite_dir)
 
 
 def _link_test_artifact_scope(snapshot: GraphSnapshot, artifact: NodeKey, parts: tuple[str, ...]) -> None:
@@ -4257,11 +4282,20 @@ def _link_test_artifact_scope(snapshot: GraphSnapshot, artifact: NodeKey, parts:
 
 def _add_policy_surfaces(snapshot: GraphSnapshot, _root: Path, project: NodeKey, today: str) -> None:
     for policy_payload in CURATED_POLICY_SURFACES:
-        policy = _add_policy_surface(snapshot, policy_payload, today)
-        snapshot.add_relation(project, "HAS_POLICY_SURFACE", policy, provenance="curated_policy")
-        artifact = _add_policy_artifact(snapshot, policy_payload, today)
-        snapshot.add_relation(policy, "BACKED_BY", artifact, provenance="curated_policy")
-        _link_policy_governance_targets(snapshot, policy, policy_payload)
+        _add_policy_surface_entry(snapshot, project, today, policy_payload)
+
+
+def _add_policy_surface_entry(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    today: str,
+    policy_payload: dict[str, object],
+) -> None:
+    policy = _add_policy_surface(snapshot, policy_payload, today)
+    snapshot.add_relation(project, "HAS_POLICY_SURFACE", policy, provenance="curated_policy")
+    artifact = _add_policy_artifact(snapshot, policy_payload, today)
+    snapshot.add_relation(policy, "BACKED_BY", artifact, provenance="curated_policy")
+    _link_policy_governance_targets(snapshot, policy, policy_payload)
 
 
 def _add_policy_surface(
@@ -4321,10 +4355,13 @@ def _link_policy_governance_targets(
 
 def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     memory_mapping = _load_memory_mapping(root)
-    port_nodes = _add_port_surfaces(snapshot, root, project, today)
-    adapter_nodes = _add_adapter_surfaces(snapshot, root, project, today, port_nodes, memory_mapping)
-    contract_nodes = _add_contract_surfaces(snapshot, root, project, today, memory_mapping)
-    pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
+    port_nodes, adapter_nodes, contract_nodes, pipeline_nodes = _impact_analysis_context(
+        snapshot,
+        root,
+        project,
+        today,
+        memory_mapping,
+    )
     _add_pipeline_normalization_edges(snapshot, pipeline_nodes, memory_mapping)
     _add_pipeline_normalization_evidence(snapshot, pipeline_nodes)
     _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
@@ -4332,6 +4369,20 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     _add_governance_edges(snapshot, port_nodes, adapter_nodes, pipeline_nodes, contract_nodes)
     _add_pipeline_operational_edges(snapshot, pipeline_nodes, memory_mapping)
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
+
+
+def _impact_analysis_context(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    memory_mapping: dict[str, object],
+) -> tuple[set[NodeKey], dict[str, NodeKey], dict[str, NodeKey], dict[str, NodeKey]]:
+    port_nodes = _add_port_surfaces(snapshot, root, project, today)
+    adapter_nodes = _add_adapter_surfaces(snapshot, root, project, today, port_nodes, memory_mapping)
+    contract_nodes = _add_contract_surfaces(snapshot, root, project, today, memory_mapping)
+    pipeline_nodes = _add_pipeline_surfaces(snapshot, root, project, today, contract_nodes, adapter_nodes)
+    return port_nodes, adapter_nodes, contract_nodes, pipeline_nodes
 
 
 def _is_doc_artifact_file(relative_file: str, file_extension: str) -> bool:
@@ -4758,6 +4809,17 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
     memory_mapping = _load_memory_mapping(root)
     config = _file_structure_config(memory_mapping)
     zone_roots = _file_structure_zone_roots(config)
+    _materialize_file_structure(snapshot, root, project, today, zone_roots, config)
+
+
+def _materialize_file_structure(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    zone_roots: dict[str, tuple[str, ...]],
+    config: dict[str, object],
+) -> None:
     _add_file_structure_zones(snapshot, root, project, today, zone_roots, config)
     _link_source_backed_file_structure(snapshot, root, today, zone_roots, config)
     _link_relation_backed_file_structure(snapshot, root, config)
@@ -7427,9 +7489,49 @@ def _process_workflow_job(
         job_id=job_id,
         job_payload=job_payload,
     )
+    _register_workflow_job(
+        snapshot,
+        context=context,
+        job_id=job_id,
+        job_context=job_context,
+        workflow_call_entrypoint=workflow_call_entrypoint,
+        job_nodes=job_nodes,
+    )
+    _populate_workflow_job_surface(
+        snapshot,
+        workflow_nodes=workflow_nodes,
+        workflow_name_by_relative_path=workflow_name_by_relative_path,
+        job_context=job_context,
+        job_payload=job_payload,
+        matrix_variants=matrix_variants,
+        secret_usage_hints=secret_usage_hints,
+    )
+
+
+def _register_workflow_job(
+    snapshot: GraphSnapshot,
+    *,
+    context: WorkflowContext,
+    job_id: str,
+    job_context: WorkflowJobContext,
+    workflow_call_entrypoint: NodeKey | None,
+    job_nodes: dict[tuple[str, str], NodeKey],
+) -> None:
     job_nodes[(context.workflow_name, job_id)] = job_context.job
     if workflow_call_entrypoint is not None:
         snapshot.add_relation(job_context.job, "CALLS_WORKFLOW", workflow_call_entrypoint, provenance="workflow_graph")
+
+
+def _populate_workflow_job_surface(
+    snapshot: GraphSnapshot,
+    *,
+    workflow_nodes: dict[str, NodeKey],
+    workflow_name_by_relative_path: dict[str, str],
+    job_context: WorkflowJobContext,
+    job_payload: dict[str, object],
+    matrix_variants: tuple[dict[str, str], ...],
+    secret_usage_hints: tuple[str, ...],
+) -> None:
     _link_workflow_job_reusable_target(
         snapshot,
         workflow_nodes,
@@ -10841,7 +10943,8 @@ def _add_single_alert_surface(
     alert_name = rule.get("alert")
     if not isinstance(alert_name, str):
         return
-    annotations, labels = _alert_surface_annotations_and_labels(rule)
+    annotations = _alert_annotations(rule)
+    labels = _alert_labels(rule)
     alert = _add_alert_surface_node(
         snapshot,
         root,
@@ -10878,9 +10981,9 @@ def _link_alert_targets(
     target_context: AlertTargetContext,
     memory_mapping: dict[str, object],
 ) -> None:
-    annotations = rule.get("annotations") if isinstance(rule.get("annotations"), dict) else {}
+    annotations = _alert_annotations(rule)
     expr = str(rule.get("expr", ""))
-    dimension_text = " ".join(str(value) for value in annotations.values())
+    dimension_text = _alert_dimension_text(annotations)
     dimensions = _runtime_dimensions(expr, dimension_text)
     selected_pipelines, selected_providers, selected_contracts = _select_alert_targets(
         target_context,
@@ -10889,7 +10992,13 @@ def _link_alert_targets(
         expr,
         dimensions,
     )
-    _link_alert_target_nodes(snapshot, alert, selected_pipelines, selected_providers, selected_contracts)
+    _link_selected_alert_targets(
+        snapshot,
+        alert,
+        selected_pipelines=selected_pipelines,
+        selected_providers=selected_providers,
+        selected_contracts=selected_contracts,
+    )
     _link_alert_observer_dashboards(
         snapshot,
         alert,
@@ -10898,6 +11007,37 @@ def _link_alert_targets(
         expr,
         dashboard_metrics,
         memory_mapping,
+    )
+
+
+def _alert_annotations(rule: dict[str, object]) -> dict[str, object]:
+    annotations = rule.get("annotations")
+    return annotations if isinstance(annotations, dict) else {}
+
+
+def _alert_labels(rule: dict[str, object]) -> dict[str, object]:
+    labels = rule.get("labels")
+    return labels if isinstance(labels, dict) else {}
+
+
+def _alert_dimension_text(annotations: dict[str, object]) -> str:
+    return " ".join(str(value) for value in annotations.values())
+
+
+def _link_selected_alert_targets(
+    snapshot: GraphSnapshot,
+    alert: NodeKey,
+    *,
+    selected_pipelines: tuple[NodeKey, ...],
+    selected_providers: tuple[NodeKey, ...],
+    selected_contracts: tuple[NodeKey, ...],
+) -> None:
+    _link_alert_target_nodes(
+        snapshot,
+        alert,
+        selected_pipelines,
+        selected_providers,
+        selected_contracts,
     )
 
 
@@ -11017,10 +11157,44 @@ def _governance_policy_targets(
     pipeline_nodes: dict[str, NodeKey],
     contract_nodes: dict[str, NodeKey],
 ) -> tuple[tuple[NodeKey, tuple[Sequence[NodeKey], ...]], ...]:
-    sorted_ports = sorted(port_nodes, key=lambda node: node.name)
-    sorted_adapters = sorted(adapter_nodes.values(), key=lambda node: node.name)
-    sorted_pipelines = sorted(pipeline_nodes.values(), key=lambda node: node.name)
-    sorted_contracts = sorted(contract_nodes.values(), key=lambda node: node.name)
+    sorted_ports, sorted_adapters, sorted_pipelines, sorted_contracts = _sorted_governance_targets(
+        port_nodes=port_nodes,
+        adapter_nodes=adapter_nodes,
+        pipeline_nodes=pipeline_nodes,
+        contract_nodes=contract_nodes,
+    )
+    return _governance_policy_specs(
+        snapshot,
+        sorted_ports=sorted_ports,
+        sorted_adapters=sorted_adapters,
+        sorted_pipelines=sorted_pipelines,
+        sorted_contracts=sorted_contracts,
+    )
+
+
+def _sorted_governance_targets(
+    *,
+    port_nodes: set[NodeKey],
+    adapter_nodes: dict[str, NodeKey],
+    pipeline_nodes: dict[str, NodeKey],
+    contract_nodes: dict[str, NodeKey],
+) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey], list[NodeKey]]:
+    return (
+        sorted(port_nodes, key=lambda node: node.name),
+        sorted(adapter_nodes.values(), key=lambda node: node.name),
+        sorted(pipeline_nodes.values(), key=lambda node: node.name),
+        sorted(contract_nodes.values(), key=lambda node: node.name),
+    )
+
+
+def _governance_policy_specs(
+    snapshot: GraphSnapshot,
+    *,
+    sorted_ports: list[NodeKey],
+    sorted_adapters: list[NodeKey],
+    sorted_pipelines: list[NodeKey],
+    sorted_contracts: list[NodeKey],
+) -> tuple[tuple[NodeKey, tuple[Sequence[NodeKey], ...]], ...]:
     return (
         (NodeKey("policy_surface", "hexagonal import matrix"), (sorted_ports, sorted_adapters)),
         (NodeKey("policy_surface", "hexagonal package layout"), (sorted_ports, sorted_adapters)),
@@ -11154,19 +11328,14 @@ def _add_pipeline_operational_edges(
     )
 
     for pipeline in _sorted_pipeline_nodes(pipeline_nodes):
-        pipeline_props = snapshot.nodes[pipeline].properties
-        pipeline_kind = pipeline_props.get("pipeline_kind")
-        _link_pipeline_operational_targets(
+        _link_pipeline_operational_for_pipeline(
             snapshot,
             pipeline,
             runtime_paths=runtime_paths,
             validation_gates=validation_gates,
             common_dashboards=common_dashboards,
-            kind_dashboards=_pipeline_kind_dashboards(
-                pipeline_kind,
-                entity_dashboards=entity_dashboards,
-                composite_dashboards=composite_dashboards,
-            ),
+            entity_dashboards=entity_dashboards,
+            composite_dashboards=composite_dashboards,
         )
 
 
@@ -11188,6 +11357,32 @@ def _pipeline_operational_targets_config(
 
 def _sorted_pipeline_nodes(pipeline_nodes: dict[str, NodeKey]) -> list[NodeKey]:
     return sorted(pipeline_nodes.values(), key=lambda node: node.name)
+
+
+def _link_pipeline_operational_for_pipeline(
+    snapshot: GraphSnapshot,
+    pipeline: NodeKey,
+    *,
+    runtime_paths: list[NodeKey],
+    validation_gates: list[NodeKey],
+    common_dashboards: list[NodeKey],
+    entity_dashboards: list[NodeKey],
+    composite_dashboards: list[NodeKey],
+) -> None:
+    pipeline_props = snapshot.nodes[pipeline].properties
+    pipeline_kind = pipeline_props.get("pipeline_kind")
+    _link_pipeline_operational_targets(
+        snapshot,
+        pipeline,
+        runtime_paths=runtime_paths,
+        validation_gates=validation_gates,
+        common_dashboards=common_dashboards,
+        kind_dashboards=_pipeline_kind_dashboards(
+            pipeline_kind,
+            entity_dashboards=entity_dashboards,
+            composite_dashboards=composite_dashboards,
+        ),
+    )
 
 
 class Neo4jHttpClient:

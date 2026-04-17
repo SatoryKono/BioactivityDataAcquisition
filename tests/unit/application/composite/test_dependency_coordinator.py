@@ -6,6 +6,7 @@ See ADR-026 for architectural context.
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
