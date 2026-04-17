@@ -171,9 +171,9 @@ class TestExtractPhysicochemicalFields:
     def test_all_fields_present(self, full_compound: MagicMock) -> None:
         result = _extract_physicochemical_fields(full_compound)
         assert result["molecular_formula"] == "C9H8O4"
-        assert result["molecular_weight"] == 180.16
-        assert result["xlogp"] == 1.2
-        assert result["tpsa"] == 63.6
+        assert result["molecular_weight"] == pytest.approx(180.16)
+        assert result["xlogp"] == pytest.approx(1.2)
+        assert result["tpsa"] == pytest.approx(63.6)
         assert result["charge"] == 0
         assert result["h_bond_donor_count"] == 1
 

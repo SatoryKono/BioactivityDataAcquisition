@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Final
 
 from bioetl.domain.normalization import (
@@ -25,6 +26,22 @@ _CANONICAL_ONLY_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
         "input_snapshot_fingerprint",
     }
 )
+
+
+@dataclass(frozen=True, slots=True)
+class _CheckpointExecutionIdentityFallbackInput:
+    """Canonical inputs for checkpoint execution-identity fallback comparison."""
+
+    pipeline_name: str | None
+    run_type: str | None
+    pipeline_version: str | None
+    effective_config_hash: str | None
+    dq_contract_compatibility_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    effective_config_artifact_id: str | None
+    exact_replay: bool | None
+    input_snapshot_fingerprint: str | None
 
 
 def check_execution_identity_compatibility(
@@ -74,28 +91,30 @@ def check_execution_identity_compatibility(
         return execution_fingerprint_result
 
     checkpoint_fallback_result = _check_checkpoint_execution_identity_fallback(
-        current_pipeline_name=current_pipeline_name,
-        checkpoint_pipeline_name=checkpoint_pipeline_name,
-        current_run_type=current_run_type,
-        checkpoint_run_type=checkpoint_run_type,
-        current_pipeline_version=current_pipeline_version,
-        checkpoint_pipeline_version=checkpoint_pipeline_version,
-        current_effective_config_hash=current_effective_config_hash,
-        checkpoint_effective_config_hash=checkpoint_effective_config_hash,
-        current_dq_contract_compatibility_hash=current_dq_contract_compatibility_hash,
-        checkpoint_dq_contract_compatibility_hash=(
-            checkpoint_dq_contract_compatibility_hash
+        current=_CheckpointExecutionIdentityFallbackInput(
+            pipeline_name=current_pipeline_name,
+            run_type=current_run_type,
+            pipeline_version=current_pipeline_version,
+            effective_config_hash=current_effective_config_hash,
+            dq_contract_compatibility_hash=current_dq_contract_compatibility_hash,
+            contract_ref=current_contract_ref,
+            contract_version=current_contract_version,
+            effective_config_artifact_id=current_effective_config_artifact_id,
+            exact_replay=current_exact_replay,
+            input_snapshot_fingerprint=current_input_snapshot_fingerprint,
         ),
-        current_contract_ref=current_contract_ref,
-        checkpoint_contract_ref=checkpoint_contract_ref,
-        current_contract_version=current_contract_version,
-        checkpoint_contract_version=checkpoint_contract_version,
-        current_effective_config_artifact_id=current_effective_config_artifact_id,
-        checkpoint_effective_config_artifact_id=checkpoint_effective_config_artifact_id,
-        current_exact_replay=current_exact_replay,
-        checkpoint_exact_replay=checkpoint_exact_replay,
-        current_input_snapshot_fingerprint=current_input_snapshot_fingerprint,
-        checkpoint_input_snapshot_fingerprint=checkpoint_input_snapshot_fingerprint,
+        checkpoint=_CheckpointExecutionIdentityFallbackInput(
+            pipeline_name=checkpoint_pipeline_name,
+            run_type=checkpoint_run_type,
+            pipeline_version=checkpoint_pipeline_version,
+            effective_config_hash=checkpoint_effective_config_hash,
+            dq_contract_compatibility_hash=checkpoint_dq_contract_compatibility_hash,
+            contract_ref=checkpoint_contract_ref,
+            contract_version=checkpoint_contract_version,
+            effective_config_artifact_id=checkpoint_effective_config_artifact_id,
+            exact_replay=checkpoint_exact_replay,
+            input_snapshot_fingerprint=checkpoint_input_snapshot_fingerprint,
+        ),
     )
     if checkpoint_fallback_result is not None:
         return checkpoint_fallback_result
@@ -227,30 +246,20 @@ def _build_checkpoint_execution_identity_payload(
 
 
 def _compute_checkpoint_execution_identity_fallback_fingerprint(
-    *,
-    pipeline_name: str | None,
-    run_type: str | None,
-    pipeline_version: str | None,
-    effective_config_hash: str | None,
-    dq_contract_compatibility_hash: str | None,
-    contract_ref: str | None,
-    contract_version: str | None,
-    effective_config_artifact_id: str | None,
-    exact_replay: bool | None,
-    input_snapshot_fingerprint: str | None,
+    request: _CheckpointExecutionIdentityFallbackInput,
 ) -> str | None:
     """Build the canonical checkpoint execution-identity fallback fingerprint."""
     payload = _build_checkpoint_execution_identity_payload(
-        pipeline_name=pipeline_name,
-        run_type=run_type,
-        pipeline_version=pipeline_version,
-        effective_config_hash=effective_config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        effective_config_artifact_id=effective_config_artifact_id,
-        exact_replay=exact_replay,
-        input_snapshot_fingerprint=input_snapshot_fingerprint,
+        pipeline_name=request.pipeline_name,
+        run_type=request.run_type,
+        pipeline_version=request.pipeline_version,
+        effective_config_hash=request.effective_config_hash,
+        dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
+        contract_ref=request.contract_ref,
+        contract_version=request.contract_version,
+        effective_config_artifact_id=request.effective_config_artifact_id,
+        exact_replay=request.exact_replay,
+        input_snapshot_fingerprint=request.input_snapshot_fingerprint,
     )
     if not payload or not any(
         field in payload for field in _CANONICAL_ONLY_IDENTITY_FIELDS
@@ -261,51 +270,15 @@ def _compute_checkpoint_execution_identity_fallback_fingerprint(
 
 def _check_checkpoint_execution_identity_fallback(
     *,
-    current_pipeline_name: str | None,
-    checkpoint_pipeline_name: str | None,
-    current_run_type: str | None,
-    checkpoint_run_type: str | None,
-    current_pipeline_version: str | None,
-    checkpoint_pipeline_version: str | None,
-    current_effective_config_hash: str | None,
-    checkpoint_effective_config_hash: str | None,
-    current_dq_contract_compatibility_hash: str | None,
-    checkpoint_dq_contract_compatibility_hash: str | None,
-    current_contract_ref: str | None,
-    checkpoint_contract_ref: str | None,
-    current_contract_version: str | None,
-    checkpoint_contract_version: str | None,
-    current_effective_config_artifact_id: str | None,
-    checkpoint_effective_config_artifact_id: str | None,
-    current_exact_replay: bool | None,
-    checkpoint_exact_replay: bool | None,
-    current_input_snapshot_fingerprint: str | None,
-    checkpoint_input_snapshot_fingerprint: str | None,
+    current: _CheckpointExecutionIdentityFallbackInput,
+    checkpoint: _CheckpointExecutionIdentityFallbackInput,
 ) -> JsonDict | None:
     """Compare canonical checkpoint execution-identity fallback fingerprints."""
     current_fingerprint = _compute_checkpoint_execution_identity_fallback_fingerprint(
-        pipeline_name=current_pipeline_name,
-        run_type=current_run_type,
-        pipeline_version=current_pipeline_version,
-        effective_config_hash=current_effective_config_hash,
-        dq_contract_compatibility_hash=current_dq_contract_compatibility_hash,
-        contract_ref=current_contract_ref,
-        contract_version=current_contract_version,
-        effective_config_artifact_id=current_effective_config_artifact_id,
-        exact_replay=current_exact_replay,
-        input_snapshot_fingerprint=current_input_snapshot_fingerprint,
+        current
     )
-    checkpoint_fingerprint = _compute_checkpoint_execution_identity_fallback_fingerprint(
-        pipeline_name=checkpoint_pipeline_name,
-        run_type=checkpoint_run_type,
-        pipeline_version=checkpoint_pipeline_version,
-        effective_config_hash=checkpoint_effective_config_hash,
-        dq_contract_compatibility_hash=checkpoint_dq_contract_compatibility_hash,
-        contract_ref=checkpoint_contract_ref,
-        contract_version=checkpoint_contract_version,
-        effective_config_artifact_id=checkpoint_effective_config_artifact_id,
-        exact_replay=checkpoint_exact_replay,
-        input_snapshot_fingerprint=checkpoint_input_snapshot_fingerprint,
+    checkpoint_fingerprint = (
+        _compute_checkpoint_execution_identity_fallback_fingerprint(checkpoint)
     )
     return _compare_optional_identity_fingerprints(
         current_fingerprint,

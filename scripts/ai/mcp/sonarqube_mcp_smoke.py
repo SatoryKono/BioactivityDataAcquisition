@@ -31,11 +31,11 @@ class SmokeResult:
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[3]
 
 
 def _default_wrapper_command() -> list[str]:
-    return [str(_repo_root() / "scripts/ops/mcp_sonarqube_wrapper.sh")]
+    return [str(_repo_root() / "scripts/ai/mcp/mcp_sonarqube_wrapper.sh")]
 
 
 def _build_handshake_lines() -> bytes:

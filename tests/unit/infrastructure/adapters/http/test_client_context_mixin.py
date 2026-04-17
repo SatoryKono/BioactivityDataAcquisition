@@ -90,7 +90,7 @@ async def test_read_timeout_uses_default_multiplier() -> None:
 
     assert client._transport._pool._ssl_context is not None or True
     # httpx stores timeout as Timeout object
-    assert client.timeout.read == 30.0  # 15.0 * 2.0
+    assert client.timeout.read == pytest.approx(30.0)  # 15.0 * 2.0
 
     await harness.__aexit__(None, None, None)
 
@@ -102,7 +102,7 @@ async def test_read_timeout_uses_custom_multiplier() -> None:
     await harness.__aenter__()
     client = harness._get_client()
 
-    assert client.timeout.read == 30.0  # 10.0 * 3.0
+    assert client.timeout.read == pytest.approx(30.0)  # 10.0 * 3.0
 
     await harness.__aexit__(None, None, None)
 

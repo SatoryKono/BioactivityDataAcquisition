@@ -540,7 +540,7 @@ class TestSerializeJson:
     def test_single_float_unwrapped(self) -> None:
         """Test unwraps single-element list containing float."""
         result = BaseTransformer.serialize_json([3.14])
-        assert result == 3.14
+        assert result == pytest.approx(3.14)
         assert isinstance(result, float)
 
     def test_single_bool_true_unwrapped(self) -> None:
@@ -653,7 +653,7 @@ class TestSerializeJson:
     def test_float_passthrough(self) -> None:
         """Test float input is returned as-is."""
         result = BaseTransformer.serialize_json(3.14)
-        assert result == 3.14
+        assert result == pytest.approx(3.14)
         assert isinstance(result, float)
 
     def test_bool_passthrough(self) -> None:
@@ -696,7 +696,7 @@ class TestSerializeJson:
     def test_float_zero_unwrapped(self) -> None:
         """Test float zero is unwrapped correctly."""
         result = BaseTransformer.serialize_json([0.0])
-        assert result == 0.0
+        assert result == pytest.approx(0.0)
         assert isinstance(result, float)
 
 

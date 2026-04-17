@@ -263,7 +263,7 @@ class TestNormalizationServiceWithConfig:
         config = NormalizationConfig.for_screening()
         service = NormalizationService(config=config)
         assert service.config.default_aggregation_method == "mean"
-        assert service.config.potency_threshold == 4.0
+        assert service.config.potency_threshold == pytest.approx(4.0)
 
     def test_medicinal_chemistry_config(self) -> None:
         """Test with medicinal chemistry configuration."""
@@ -283,7 +283,7 @@ class TestNormalizationResult:
             value=100.0,
             unit="nM",
         )
-        assert result.value == 100.0
+        assert result.value == pytest.approx(100.0)
         assert result.unit == "nM"
         assert result.pchembl is None
         assert result.is_valid is True
@@ -302,5 +302,5 @@ class TestNormalizationResult:
             validation_message=None,
             is_potent=True,
         )
-        assert result.pchembl.value == 7.0
+        assert result.pchembl.value == pytest.approx(7.0)
         assert result.is_potent is True

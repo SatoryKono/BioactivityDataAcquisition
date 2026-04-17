@@ -20,12 +20,12 @@ class TestRateLimitConfig:
 
     def test_default_values(self) -> None:
         config = RateLimitConfig()
-        assert config.requests_per_second == 5.0
+        assert config.requests_per_second == pytest.approx(5.0)
         assert config.burst == 10
 
     def test_custom_values(self) -> None:
         config = RateLimitConfig(requests_per_second=10.0, burst=20)
-        assert config.requests_per_second == 10.0
+        assert config.requests_per_second == pytest.approx(10.0)
         assert config.burst == 20
 
     def test_zero_rps_raises(self) -> None:
@@ -71,7 +71,7 @@ class TestBaseClientConfig:
     def test_custom_rate_limit(self) -> None:
         rl = RateLimitConfig(requests_per_second=20.0, burst=50)
         config = BaseClientConfig(rate_limit=rl)
-        assert config.rate_limit.requests_per_second == 20.0
+        assert config.rate_limit.requests_per_second == pytest.approx(20.0)
 
 
 @pytest.mark.unit

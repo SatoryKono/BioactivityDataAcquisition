@@ -34,8 +34,8 @@ section() {
   printf "\n${BLUE}=== %s ===${NC}\n" "$1"
 }
 
-# shellcheck source=../../ops/support/load_repo_env.sh
-source "${REPO_ROOT}/scripts/ops/support/load_repo_env.sh"
+# shellcheck source=./support/load_repo_env.sh
+source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
 
 status=0
@@ -204,7 +204,7 @@ else
   printf "       ${BLUE}-e NEO4J_AUTH=neo4j/bioetl_secure_password \\${NC}\n"
   printf "       ${BLUE}neo4j:5.15-community${NC}\n"
   printf "  2. Re-run this check:\n"
-  printf "     ${BLUE}bash scripts/memory/mcp/check.sh${NC}\n"
+  printf "     ${BLUE}bash scripts/ai/mcp/check_neo4j_memory.sh${NC}\n"
 fi
 
 exit "$status"

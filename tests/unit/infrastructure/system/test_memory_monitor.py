@@ -348,14 +348,14 @@ class TestEstimateBatchMemoryMb:
         monitor = _make_monitor()
         est_100 = monitor.estimate_batch_memory_mb(100)
         est_200 = monitor.estimate_batch_memory_mb(200)
-        assert abs(est_200 / est_100 - 2.0) < 0.001
+        assert est_200 / est_100 == pytest.approx(2.0, abs=0.001)
 
     def test_estimate_scales_with_record_size(self) -> None:
         """Estimate scales with avg_record_size_bytes."""
         monitor = _make_monitor()
         est_1k = monitor.estimate_batch_memory_mb(100, avg_record_size_bytes=1024)
         est_2k = monitor.estimate_batch_memory_mb(100, avg_record_size_bytes=2048)
-        assert abs(est_2k / est_1k - 2.0) < 0.001
+        assert est_2k / est_1k == pytest.approx(2.0, abs=0.001)
 
     def test_estimate_uses_overhead_factor(self) -> None:
         """Estimate applies 2.5x overhead factor."""
@@ -363,7 +363,7 @@ class TestEstimateBatchMemoryMb:
         # 100 records * 1024 bytes * 2.5 / (1024*1024) = 0.244140625 MB
         expected = (100 * 1024 * 2.5) / (1024 * 1024)
         result = monitor.estimate_batch_memory_mb(100, avg_record_size_bytes=1024)
-        assert abs(result - expected) < 0.001
+        assert result == pytest.approx(expected, abs=0.001)
 
 
 # ---------------------------------------------------------------------------

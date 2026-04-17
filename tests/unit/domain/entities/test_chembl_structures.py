@@ -179,7 +179,7 @@ class TestMolecule:
         )
         assert m.pref_name == "Aspirin"
         assert m.max_phase == 4
-        assert m.molecular_weight == 180.16
+        assert m.molecular_weight == pytest.approx(180.16)
 
     def test_empty_molecule_id_raises(self) -> None:
         from bioetl.domain.entities.chembl_structures import Molecule
@@ -286,8 +286,8 @@ class TestDocumentSimilarity:
             tid_tani=0.75,
             mol_tani=0.80,
         )
-        assert ds.tid_tani == 0.75
-        assert ds.mol_tani == 0.80
+        assert ds.tid_tani == pytest.approx(0.75)
+        assert ds.mol_tani == pytest.approx(0.80)
 
     def test_zero_sim_id_raises(self) -> None:
         from bioetl.domain.entities.chembl_structures import ChemblPublicationSimilarity

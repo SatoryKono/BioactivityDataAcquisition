@@ -304,7 +304,7 @@ class TestSecretFilterProcessor:
         result = secret_filter_processor(None, "info", event_dict)
 
         assert result["count"] == 100
-        assert result["ratio"] == 0.5
+        assert result["ratio"] == pytest.approx(0.5)
         assert result["enabled"] is True
 
     def test_handles_nested_dict(self) -> None:
@@ -417,7 +417,7 @@ class TestMaskSecrets:
         from bioetl.infrastructure.observability.logging_config import _mask_secrets
 
         assert _mask_secrets(123) == 123
-        assert _mask_secrets(45.67) == 45.67
+        assert _mask_secrets(45.67) == pytest.approx(45.67)
         assert _mask_secrets(True) is True
         assert _mask_secrets(None) is None
         assert _mask_secrets([1, 2, 3]) == [1, 2, 3]

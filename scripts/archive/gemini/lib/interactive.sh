@@ -346,7 +346,7 @@ Review code against BioETL standards defined in GEMINI.md:
 - Error handling patterns
 
 ## Focus Areas
-- $([ "$focus" != "all" ] && echo "$focus" || echo "Complete review")
+- $([[ "$focus" != "all" ]] && echo "$focus" || echo "Complete review")
 
 ## Context Files
 - GEMINI.md (project constraints)
@@ -755,14 +755,14 @@ mode_maintenance() {
       print_section "Environment Status"
       echo ""
       echo "Gemini Home: $GEMINI_HOME"
-      echo "Config: $([ -f $GEMINI_CONFIG ] && echo '✓' || echo '✗') $GEMINI_CONFIG"
-      echo "MCP Settings: $([ -f $GEMINI_MCP_SETTINGS ] && echo '✓' || echo '✗') $GEMINI_MCP_SETTINGS"
-      echo "Memory File: $([ -f $GEMINI_MEMORY_FILE ] && echo '✓' || echo '✗') $GEMINI_MEMORY_FILE"
+      echo "Config: $([[ -f \"$GEMINI_CONFIG\" ]] && echo '✓' || echo '✗') $GEMINI_CONFIG"
+      echo "MCP Settings: $([[ -f \"$GEMINI_MCP_SETTINGS\" ]] && echo '✓' || echo '✗') $GEMINI_MCP_SETTINGS"
+      echo "Memory File: $([[ -f \"$GEMINI_MEMORY_FILE\" ]] && echo '✓' || echo '✗') $GEMINI_MEMORY_FILE"
       echo ""
       echo "Sessions dir: $GEMINI_SESSIONS_DIR"
       echo "Total sessions: $(ls -1 ${GEMINI_SESSIONS_DIR}/*.{log,md} 2>/dev/null | wc -l)"
       echo ""
-      read -p "Press Enter to continue..."
+      read -p "${PRESS_ENTER_PROMPT}" _
       ;;
     4)
       print_warning "This will clear all memory and reset Gemini environment."

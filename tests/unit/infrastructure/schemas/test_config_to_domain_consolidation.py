@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 
 class TestConsolidationPattern:
     """Tests for to_domain mapping behavior on infrastructure schemas."""
@@ -18,8 +20,8 @@ class TestConsolidationPattern:
         )
         domain_config = pydantic_config.to_domain()
 
-        assert domain_config.soft_fail_threshold == 0.10
-        assert domain_config.hard_fail_threshold == 0.30
+        assert domain_config.soft_fail_threshold == pytest.approx(0.10)
+        assert domain_config.hard_fail_threshold == pytest.approx(0.30)
         assert domain_config.strict_validation is True
 
     def test_circuit_breaker_to_domain(self) -> None:

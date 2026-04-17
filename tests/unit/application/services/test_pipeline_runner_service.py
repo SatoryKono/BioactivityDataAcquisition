@@ -174,7 +174,7 @@ class TestRunResult:
 
         assert result.status == PipelineRunResult.SUCCESS
         assert result.is_success is True
-        assert result.success_rate == 0.95
+        assert result.success_rate == pytest.approx(0.95)
         assert result.error_message is None
 
     def test_failed_result(self):
@@ -231,7 +231,7 @@ class TestRunResult:
             completed_at=completed,
         )
 
-        assert result.duration_seconds == 330.0  # 5 minutes 30 seconds
+        assert result.duration_seconds == pytest.approx(330.0)  # 5 minutes 30 seconds
 
     def test_success_rate_zero_fetched(self):
         """Test success_rate when no records fetched."""
@@ -244,7 +244,7 @@ class TestRunResult:
             records_quarantined=0,
         )
 
-        assert result.success_rate == 1.0
+        assert result.success_rate == pytest.approx(1.0)
 
 
 @pytest.mark.unit

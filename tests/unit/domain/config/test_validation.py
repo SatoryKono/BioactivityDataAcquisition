@@ -24,12 +24,12 @@ class TestValidationConfig:
         config = ValidationConfig()
         assert config.min_publication_year == 1500
         assert config.max_publication_year == 2100
-        assert config.min_molecular_weight == 10.0
+        assert config.min_molecular_weight == pytest.approx(10.0)
         assert config.max_molecular_weight == 10_000.0
         assert config.max_pmid == 10_000_000_000
         assert config.max_taxonomy_id == 10_000_000
-        assert config.min_pchembl_value == 0.0
-        assert config.max_pchembl_value == 15.0
+        assert config.min_pchembl_value == pytest.approx(0.0)
+        assert config.max_pchembl_value == pytest.approx(15.0)
         assert config.molecular_weight_precision == 10
 
     def test_custom_values(self) -> None:

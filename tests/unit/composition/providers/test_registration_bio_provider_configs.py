@@ -58,11 +58,11 @@ class TestGetBioProviderConfigs:
         uniprot_idmapping = configs["uniprot_idmapping"]
 
         assert uniprot.http_config is not None
-        assert uniprot.http_config.rate == 8.0
+        assert uniprot.http_config.rate == pytest.approx(8.0)
         assert uniprot.http_config.capacity == 16
         assert uniprot.http_config.rate_overrides == {"uniprot_api_key": 100.0}
         assert uniprot_idmapping.http_config is not None
-        assert uniprot_idmapping.http_config.rate == 8.0
+        assert uniprot_idmapping.http_config.rate == pytest.approx(8.0)
         assert uniprot_idmapping.http_config.capacity == 16
 
     @patch("bioetl.composition.providers.registration_bio._get_rate_limits_from_config")
@@ -80,7 +80,7 @@ class TestGetBioProviderConfigs:
         pubchem = configs["pubchem"]
 
         assert pubchem.http_config is not None
-        assert pubchem.http_config.rate == 5.0
+        assert pubchem.http_config.rate == pytest.approx(5.0)
         assert pubchem.http_config.capacity == 10
         assert pubchem.custom_creator is _create_pubchem_adapter
         assert pubchem.requires_http_client is False

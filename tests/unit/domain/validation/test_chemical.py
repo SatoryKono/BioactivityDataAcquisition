@@ -65,7 +65,7 @@ class TestValidateMolecularWeight:
     def test_valid_int(self) -> None:
         result = validate_molecular_weight(500)
         assert result is not None
-        assert result == 500.0
+        assert result == pytest.approx(500.0)
 
     def test_valid_string(self) -> None:
         result = validate_molecular_weight("250.5")
@@ -137,5 +137,5 @@ class TestValidateInchiKey:
         assert INCHI_KEY_REGEX_PATTERN == r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
 
     def test_constants_exported(self) -> None:
-        assert MIN_MOLECULAR_WEIGHT == 0.0
-        assert MAX_MOLECULAR_WEIGHT == 100000.0
+        assert MIN_MOLECULAR_WEIGHT == pytest.approx(0.0)
+        assert MAX_MOLECULAR_WEIGHT == pytest.approx(100000.0)
