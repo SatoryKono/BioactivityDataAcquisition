@@ -33,8 +33,10 @@ def create_audit_port(
         return NoOpAudit()
 
     base_path = observability.audit_base_path
-    resolved_path = Path(base_path) if base_path is not None else _default_audit_path(
-        settings=settings
+    resolved_path = (
+        Path(base_path)
+        if base_path is not None
+        else _default_audit_path(settings=settings)
     )
     return FileAuditAdapter(
         base_path=resolved_path,

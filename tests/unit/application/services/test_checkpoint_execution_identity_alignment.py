@@ -113,7 +113,9 @@ def test_legacy_and_v2_align_when_execution_fingerprint_mismatches() -> None:
 
     assert legacy_result.compatible is False
     assert legacy_result.execution_identity_compatible is False
-    assert any("Execution fingerprint mismatch" in msg for msg in legacy_result.messages)
+    assert any(
+        "Execution fingerprint mismatch" in msg for msg in legacy_result.messages
+    )
     assert v2_result.verdict == CompatibilityVerdict.MAJOR_INCOMPATIBLE
     assert (
         v2_result.details["execution_identity_compatibility"]["reason"]

@@ -132,9 +132,7 @@ class TestLineageCommands:
         assert result.exit_code == 0
         payload = json.loads(result.output)
         assert payload["dataset_ref"] == "silver:chembl.activity@12"
-        assert payload["stored_fragment_ids"] == [
-            "silver:fragment-1:occurrence:abc123"
-        ]
+        assert payload["stored_fragment_ids"] == ["silver:fragment-1:occurrence:abc123"]
         assert payload["upstream"][0]["node"]["node_id"] == "bronze_batch:batch-1"
         assert payload["upstream"][0]["stored_fragment_id"] == (
             "silver:fragment-1:occurrence:abc123"

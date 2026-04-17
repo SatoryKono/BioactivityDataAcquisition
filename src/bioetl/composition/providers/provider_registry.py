@@ -4,6 +4,7 @@ Retained compatibility obligations are intentionally narrow:
 - class-level ``DefaultRegistryMethod`` mirror for legacy call sites;
 - ``register_default_provider_config()`` and ``ensure_provider_registry_ready()``.
 """
+
 from __future__ import annotations
 
 import threading

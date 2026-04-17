@@ -9,7 +9,9 @@ from scripts.ai.mcp.sonarqube_mcp_smoke import (
 )
 
 
-def test_run_smoke_command_succeeds_against_ready_then_line_delimited_stub(tmp_path: Path) -> None:
+def test_run_smoke_command_succeeds_against_ready_then_line_delimited_stub(
+    tmp_path: Path,
+) -> None:
     server = tmp_path / "sonar_line_stub_server.py"
     server.write_text(
         f"""
@@ -98,7 +100,9 @@ time.sleep(10)
     assert "did not receive initialize/tools/list" in result.summary
 
 
-def test_run_smoke_command_rejects_unframed_stdout_preamble_after_ready(tmp_path: Path) -> None:
+def test_run_smoke_command_rejects_unframed_stdout_preamble_after_ready(
+    tmp_path: Path,
+) -> None:
     server = tmp_path / "sonar_bad_stdout.py"
     server.write_text(
         """

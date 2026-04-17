@@ -103,9 +103,7 @@ class DataQualityService:
         """
         error_rate = metrics.get("error_rate", 0.0)
         freshness_anchor = self._resolve_freshness_anchor_timestamp(metrics)
-        canonical_dq_timestamp = self._resolve_canonical_dq_timestamp(
-            freshness_anchor
-        )
+        canonical_dq_timestamp = self._resolve_canonical_dq_timestamp(freshness_anchor)
 
         # Emit validation score gauge (1.0 - error_rate)
         if self._metrics:

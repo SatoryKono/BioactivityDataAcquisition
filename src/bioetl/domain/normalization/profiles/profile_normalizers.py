@@ -11,7 +11,11 @@ from bioetl.domain.normalization.identifiers import (
     normalize_pmid,
 )
 from bioetl.domain.normalization.json import canonicalize_json_string
-from bioetl.domain.normalization.rules import normalize_case, normalize_null, normalize_unit
+from bioetl.domain.normalization.rules import (
+    normalize_case,
+    normalize_null,
+    normalize_unit,
+)
 from bioetl.domain.normalization.text import normalize_abstract as _normalize_abstract
 from bioetl.domain.normalization.text import normalize_string
 from bioetl.domain.normalization.text import normalize_title as _normalize_title
@@ -43,10 +47,10 @@ _UNHANDLED = object()
 
 def normalize_profile_null(value: object) -> object:
     """Convert pseudo-null values to proper None in profile fields.
-    
+
     Args:
         value: The value to check for null patterns
-        
+
     Returns:
         None if value matches null patterns, original value otherwise
     """
@@ -58,13 +62,15 @@ def normalize_profile_passthrough(value: object) -> object:
     return value
 
 
-def normalize_profile_case(value: object, *, allowed_values: frozenset[str] | None = None) -> object:
+def normalize_profile_case(
+    value: object, *, allowed_values: frozenset[str] | None = None
+) -> object:
     """Normalize case for enum-like profile fields.
-    
+
     Args:
         value: The value to normalize
         allowed_values: Optional set of allowed values for validation
-        
+
     Returns:
         Normalized uppercase value if valid, None otherwise
     """
@@ -73,10 +79,10 @@ def normalize_profile_case(value: object, *, allowed_values: frozenset[str] | No
 
 def normalize_profile_unit(value: object) -> object:
     """Canonicalize unit strings in profile fields.
-    
+
     Args:
         value: The unit value to normalize
-        
+
     Returns:
         Canonical unit string or None if invalid
     """
@@ -85,11 +91,11 @@ def normalize_profile_unit(value: object) -> object:
 
 def normalize_profile_enum(value: object, *, allowed_values: frozenset[str]) -> object:
     """Normalize one enum-like profile field against allowed values.
-    
+
     Args:
         value: The value to normalize
         allowed_values: Frozenset of allowed enum values
-        
+
     Returns:
         Normalized value if it's in allowed_values, None otherwise
     """

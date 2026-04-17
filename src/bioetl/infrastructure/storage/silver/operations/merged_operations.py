@@ -22,7 +22,9 @@ from bioetl.infrastructure.storage.silver.merged_operations import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.storage.silver.metadata_mixin import _MergedSilverMetadataWriterProtocol
+    from bioetl.infrastructure.storage.silver.metadata_mixin import (
+        _MergedSilverMetadataWriterProtocol,
+    )
 
 
 class _MergedSilverMetadataWriterProtocol(Protocol):
@@ -44,11 +46,11 @@ class _MergedSilverMetadataWriterProtocol(Protocol):
 @dataclass(frozen=True, slots=True)
 class SilverMergedOperations:
     """Merged operations service for Silver layer writes.
-    
+
     This service encapsulates merged write logic previously in SilverWriterMergedMixin,
     following the composition pattern for better separation of concerns and testability.
     """
-    
+
     logger: LoggerPort
     csv_exporter: CsvExporter | None
     _arrow_converter: ArrowDataConverter
@@ -98,7 +100,9 @@ class SilverMergedOperations:
             table_name: Logical table name used as the CSV export target.
             arrow_table: PyArrow Table containing the merged records to export.
         """
-        await _export_silver_merged_csv(self, table_name=table_name, arrow_table=arrow_table)
+        await _export_silver_merged_csv(
+            self, table_name=table_name, arrow_table=arrow_table
+        )
 
     async def write_silver_merged(
         self,

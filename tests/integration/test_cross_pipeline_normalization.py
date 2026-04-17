@@ -8,7 +8,9 @@ import pytest
 
 from bioetl.domain.normalization.profiles.chembl_activity import CHEMBL_ACTIVITY_PROFILE
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
-from bioetl.domain.normalization.profiles.chembl_cell_line import CHEMBL_CELL_LINE_PROFILE
+from bioetl.domain.normalization.profiles.chembl_cell_line import (
+    CHEMBL_CELL_LINE_PROFILE,
+)
 from bioetl.domain.normalization.profiles.chembl_tissue import CHEMBL_TISSUE_PROFILE
 from bioetl.domain.normalization.rules import normalize_cross_pipeline_case
 from bioetl.domain.normalization.identifiers import normalize_ontology_id
@@ -22,11 +24,11 @@ class TestCrossPipelineCaseNormalization:
         # Test the core function
         assert normalize_cross_pipeline_case("test", "uppercase") == "TEST"
         assert normalize_cross_pipeline_case("Test", "uppercase") == "TEST"
-        
+
         # Test that assay profile uses uppercase for appropriate fields
         assay_type_rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_type"]
         assert "uppercase" in assay_type_rule.notes.lower()
-        
+
         relationship_type_rule = CHEMBL_ASSAY_PROFILE.field_rules["relationship_type"]
         assert "uppercase" in relationship_type_rule.notes.lower()
 
@@ -35,11 +37,11 @@ class TestCrossPipelineCaseNormalization:
         # Test the core function
         assert normalize_cross_pipeline_case("In vivo", "preserve") == "In vivo"
         assert normalize_cross_pipeline_case("  In vivo  ", "preserve") == "In vivo"
-        
+
         # Test that assay profile uses preserve for appropriate fields
         assay_test_type_rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_test_type"]
         assert "preserving" in assay_test_type_rule.notes.lower()
-        
+
         assay_category_rule = CHEMBL_ASSAY_PROFILE.field_rules["assay_category"]
         assert "preserving" in assay_category_rule.notes.lower()
 
@@ -48,11 +50,11 @@ class TestCrossPipelineCaseNormalization:
         # None handling
         assert normalize_cross_pipeline_case(cast(Any, None), "uppercase") is None
         assert normalize_cross_pipeline_case(cast(Any, None), "preserve") is None
-        
+
         # Empty string handling
         assert normalize_cross_pipeline_case("", "uppercase") is None
         assert normalize_cross_pipeline_case("   ", "uppercase") is None
-        
+
         # Non-string handling
         assert normalize_cross_pipeline_case(cast(Any, 123), "uppercase") is None
         assert normalize_cross_pipeline_case(cast(Any, []), "preserve") is None
@@ -75,7 +77,7 @@ class TestCrossPipelineOntologyNormalization:
         # Check that CLO and EFO fields have ontology normalization rules
         clo_rule = CHEMBL_CELL_LINE_PROFILE.field_rules["clo_id"]
         assert "ontology" in clo_rule.notes.lower()
-        
+
         efo_rule = CHEMBL_CELL_LINE_PROFILE.field_rules["efo_id"]
         assert "ontology" in efo_rule.notes.lower()
 
@@ -84,10 +86,10 @@ class TestCrossPipelineOntologyNormalization:
         # Check that ontology fields have appropriate normalization rules
         bto_rule = CHEMBL_TISSUE_PROFILE.field_rules["bto_id"]
         assert "ontology" in bto_rule.notes.lower()
-        
+
         efo_rule = CHEMBL_TISSUE_PROFILE.field_rules["efo_id"]
         assert "ontology" in efo_rule.notes.lower()
-        
+
         uberon_rule = CHEMBL_TISSUE_PROFILE.field_rules["uberon_id"]
         assert "ontology" in uberon_rule.notes.lower()
 
@@ -95,11 +97,11 @@ class TestCrossPipelineOntologyNormalization:
         """Test edge cases for ontology ID normalization."""
         # None handling
         assert normalize_ontology_id(cast(Any, None)) is None
-        
+
         # Empty string handling
         assert normalize_ontology_id("") == ""
         assert normalize_ontology_id("   ") is None
-        
+
         # Unknown formats preserved
         assert normalize_ontology_id("unknown") == "unknown"
         assert normalize_ontology_id("ABC123") == "ABC123"
@@ -111,41 +113,55 @@ class TestProfileSpecialRulesCoverage:
     def test_assay_profile_special_rules(self) -> None:
         """Test that assay profile has expected special rules."""
         special_rules = {
-            field_name: rule for field_name, rule in CHEMBL_ASSAY_PROFILE.field_rules.items()
+            field_name: rule
+            for field_name, rule in CHEMBL_ASSAY_PROFILE.field_rules.items()
             if any(keyword in rule.notes for keyword in ["Normalize", "normalize"])
         }
-        
+
         # Should have rules for enum fields
-        expected_fields = {"assay_type", "assay_test_type", "assay_category", "relationship_type"}
+        expected_fields = {
+            "assay_type",
+            "assay_test_type",
+            "assay_category",
+            "relationship_type",
+        }
         actual_fields = set(special_rules.keys())
-        
-        assert expected_fields.issubset(actual_fields), f"Missing special rules for: {expected_fields - actual_fields}"
+
+        assert expected_fields.issubset(actual_fields), (
+            f"Missing special rules for: {expected_fields - actual_fields}"
+        )
 
     def test_cell_line_profile_special_rules(self) -> None:
         """Test that cell line profile has expected special rules."""
         special_rules = {
-            field_name: rule for field_name, rule in CHEMBL_CELL_LINE_PROFILE.field_rules.items()
+            field_name: rule
+            for field_name, rule in CHEMBL_CELL_LINE_PROFILE.field_rules.items()
             if any(keyword in rule.notes for keyword in ["Normalize", "normalize"])
         }
-        
+
         # Should have rules for ontology fields
         expected_fields = {"clo_id", "efo_id"}
         actual_fields = set(special_rules.keys())
-        
-        assert expected_fields.issubset(actual_fields), f"Missing special rules for: {expected_fields - actual_fields}"
+
+        assert expected_fields.issubset(actual_fields), (
+            f"Missing special rules for: {expected_fields - actual_fields}"
+        )
 
     def test_tissue_profile_special_rules(self) -> None:
         """Test that tissue profile has expected special rules."""
         special_rules = {
-            field_name: rule for field_name, rule in CHEMBL_TISSUE_PROFILE.field_rules.items()
+            field_name: rule
+            for field_name, rule in CHEMBL_TISSUE_PROFILE.field_rules.items()
             if any(keyword in rule.notes for keyword in ["Normalize", "normalize"])
         }
-        
+
         # Should have rules for ontology fields
         expected_fields = {"bto_id", "efo_id", "uberon_id"}
         actual_fields = set(special_rules.keys())
-        
-        assert expected_fields.issubset(actual_fields), f"Missing special rules for: {expected_fields - actual_fields}"
+
+        assert expected_fields.issubset(actual_fields), (
+            f"Missing special rules for: {expected_fields - actual_fields}"
+        )
 
 
 class TestNormalizationFunctionIntegration:
@@ -153,13 +169,15 @@ class TestNormalizationFunctionIntegration:
 
     def test_case_normalizer_integration(self) -> None:
         """Test that case normalizer function works with profile rules."""
-        from bioetl.domain.normalization.profiles.chembl_assay import create_case_normalizer
-        
+        from bioetl.domain.normalization.profiles.chembl_assay import (
+            create_case_normalizer,
+        )
+
         # Test the helper function
         upper_normalizer = create_case_normalizer("uppercase")
         assert upper_normalizer("test") == "TEST"
         assert upper_normalizer("  test  ") == "TEST"
-        
+
         preserve_normalizer = create_case_normalizer("preserve")
         assert preserve_normalizer("In vivo") == "In vivo"
         assert preserve_normalizer("  In vivo  ") == "In vivo"
@@ -173,6 +191,6 @@ class TestNormalizationFunctionIntegration:
             ("UBERON:0002107", "UBERON_0002107"),
             ("GO:0008150", "GO_0008150"),
         ]
-        
+
         for input_id, expected in test_cases:
             assert normalize_ontology_id(input_id) == expected

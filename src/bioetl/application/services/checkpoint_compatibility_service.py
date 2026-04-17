@@ -187,18 +187,14 @@ def _validate_execution_identity_compatibility(
                 f"checkpoint={checkpoint_metadata.execution_fingerprint}"
             )
         return execution_identity_compatible, messages
-    if (
-        execution_identity_result["reason"] == "composite_run_identity_missing"
-    ):
+    if execution_identity_result["reason"] == "composite_run_identity_missing":
         execution_identity_compatible = False
         messages.append(
             "Composite run identity missing: "
             f"current={current_metadata.composite_run_identity}, "
             f"checkpoint={checkpoint_metadata.composite_run_identity}"
         )
-    elif (
-        execution_identity_result["reason"] == "composite_run_identity_mismatch"
-    ):
+    elif execution_identity_result["reason"] == "composite_run_identity_mismatch":
         execution_identity_compatible = False
         messages.append(
             "Composite run identity mismatch: "
@@ -214,9 +210,13 @@ def _validate_execution_identity_compatibility(
     ):
         execution_identity_compatible = False
 
-    _validate_mismatch_reasons(current_metadata, checkpoint_metadata, execution_identity_result, messages)
+    _validate_mismatch_reasons(
+        current_metadata, checkpoint_metadata, execution_identity_result, messages
+    )
     _validate_metadata_fields(current_metadata, checkpoint_metadata, messages)
-    execution_identity_compatible = _validate_exact_replay_and_snapshots(current_metadata, checkpoint_metadata, messages, execution_identity_compatible)
+    execution_identity_compatible = _validate_exact_replay_and_snapshots(
+        current_metadata, checkpoint_metadata, messages, execution_identity_compatible
+    )
 
     final_messages = [
         *reason_messages,
@@ -241,7 +241,10 @@ def _validate_mismatch_reasons(
     reason = execution_identity_result.get("reason")
     if reason == "checkpoint_execution_identity_fallback_mismatch":
         # Only add message if execution fingerprints are actually present
-        if current_metadata.execution_fingerprint or checkpoint_metadata.execution_fingerprint:
+        if (
+            current_metadata.execution_fingerprint
+            or checkpoint_metadata.execution_fingerprint
+        ):
             messages.append(
                 "Checkpoint execution identity fallback mismatch: "
                 f"current={current_metadata.execution_fingerprint}, "
@@ -251,9 +254,12 @@ def _validate_mismatch_reasons(
         # Runtime anchor fingerprint is computed from metadata fields, not stored directly
         # Add message only if relevant metadata fields are present
         if (
-            current_metadata.manifest_id or checkpoint_metadata.manifest_id
-            or current_metadata.contract_ref or checkpoint_metadata.contract_ref
-            or current_metadata.effective_config_hash or checkpoint_metadata.effective_config_hash
+            current_metadata.manifest_id
+            or checkpoint_metadata.manifest_id
+            or current_metadata.contract_ref
+            or checkpoint_metadata.contract_ref
+            or current_metadata.effective_config_hash
+            or checkpoint_metadata.effective_config_hash
         ):
             messages.append("Degraded runtime anchor fingerprint mismatch")
 
@@ -265,23 +271,35 @@ def _validate_metadata_fields(
 ) -> None:
     """Validate metadata field compatibility and add mismatch messages."""
     # Check manifest ID compatibility
-    if current_metadata.manifest_id and checkpoint_metadata.manifest_id and current_metadata.manifest_id != checkpoint_metadata.manifest_id:
+    if (
+        current_metadata.manifest_id
+        and checkpoint_metadata.manifest_id
+        and current_metadata.manifest_id != checkpoint_metadata.manifest_id
+    ):
         messages.append(
             "Manifest identity mismatch: "
             f"current={current_metadata.manifest_id}, "
             f"checkpoint={checkpoint_metadata.manifest_id}"
         )
-    
+
     # Check contract reference compatibility
-    if current_metadata.contract_ref and checkpoint_metadata.contract_ref and current_metadata.contract_ref != checkpoint_metadata.contract_ref:
+    if (
+        current_metadata.contract_ref
+        and checkpoint_metadata.contract_ref
+        and current_metadata.contract_ref != checkpoint_metadata.contract_ref
+    ):
         messages.append(
             "Contract reference mismatch: "
             f"current={current_metadata.contract_ref}, "
             f"checkpoint={checkpoint_metadata.contract_ref}"
         )
-    
+
     # Check contract version compatibility
-    if current_metadata.contract_version and checkpoint_metadata.contract_version and current_metadata.contract_version != checkpoint_metadata.contract_version:
+    if (
+        current_metadata.contract_version
+        and checkpoint_metadata.contract_version
+        and current_metadata.contract_version != checkpoint_metadata.contract_version
+    ):
         messages.append(
             "Contract version mismatch: "
             f"current={current_metadata.contract_version}, "
@@ -297,7 +315,7 @@ def _validate_exact_replay_and_snapshots(
 ) -> bool:
     """Validate exact replay and snapshot compatibility."""
     compatible = execution_identity_compatible
-    
+
     # Check exact replay requirements
     if current_metadata.exact_replay:
         if checkpoint_metadata.exact_replay is not True:
@@ -313,7 +331,8 @@ def _validate_exact_replay_and_snapshots(
             compatible = False
         elif (
             current_metadata.input_snapshot_ids
-            and current_metadata.input_snapshot_ids != checkpoint_metadata.input_snapshot_ids
+            and current_metadata.input_snapshot_ids
+            != checkpoint_metadata.input_snapshot_ids
         ):
             messages.append(
                 "Input snapshot identity mismatch: "
@@ -321,7 +340,7 @@ def _validate_exact_replay_and_snapshots(
                 f"checkpoint={list(checkpoint_metadata.input_snapshot_ids)}"
             )
             compatible = False
-    
+
     return compatible
 
 
@@ -336,6 +355,7 @@ def _execution_identity_reason_messages(
         checkpoint_metadata,
         execution_identity_result,
     )
+
 
 def _validate_lenient_dq_compatibility(
     current_metadata: CheckpointMetadata,

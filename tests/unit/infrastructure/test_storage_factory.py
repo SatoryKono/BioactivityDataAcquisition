@@ -88,8 +88,12 @@ def mock_config_minimal():
     config.provider = "chembl"
     config.entity_type = "activity"
     bronze_config = MagicMock(save_json=False, save_metadata=False, path=None)
-    silver_config = MagicMock(csv_export=MagicMock(enabled=False), save_metadata=False, path=None)
-    gold_config = MagicMock(csv_export=MagicMock(enabled=False), save_metadata=False, path=None)
+    silver_config = MagicMock(
+        csv_export=MagicMock(enabled=False), save_metadata=False, path=None
+    )
+    gold_config = MagicMock(
+        csv_export=MagicMock(enabled=False), save_metadata=False, path=None
+    )
     config.sink = {
         "bronze": bronze_config,
         "silver": silver_config,
@@ -107,7 +111,9 @@ def mock_config_with_exports():
 
     bronze_config = MagicMock()
     bronze_config.save_json = True
-    bronze_config.save_metadata = False  # Disable metadata to avoid requiring MetadataCoordinator
+    bronze_config.save_metadata = (
+        False  # Disable metadata to avoid requiring MetadataCoordinator
+    )
     bronze_config.path = None  # Use settings fallback
 
     silver_csv = MagicMock()
@@ -227,11 +233,19 @@ class TestStorageFactoryLocal:
         config.provider = "chembl"
         config.entity_type = "activity"
         config.sink = {
-            "bronze": MagicMock(save_json=False, save_metadata=False, path="custom/bronze"),
-            "silver": MagicMock(
-                csv_export=MagicMock(enabled=False), save_metadata=False, path="custom/silver"
+            "bronze": MagicMock(
+                save_json=False, save_metadata=False, path="custom/bronze"
             ),
-            "gold": MagicMock(csv_export=MagicMock(enabled=False), save_metadata=False, path="custom/gold"),
+            "silver": MagicMock(
+                csv_export=MagicMock(enabled=False),
+                save_metadata=False,
+                path="custom/silver",
+            ),
+            "gold": MagicMock(
+                csv_export=MagicMock(enabled=False),
+                save_metadata=False,
+                path="custom/gold",
+            ),
         }
         mock_settings.test_mode = False
 

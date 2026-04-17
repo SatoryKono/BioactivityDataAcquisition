@@ -40,7 +40,9 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_transformer import BatchTransformer
     from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterPort,
+    )
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 

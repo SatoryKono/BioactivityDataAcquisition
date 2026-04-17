@@ -83,7 +83,10 @@ def _merge_input_snapshots(
     merged: list[InputSnapshotRef] = []
     seen: set[tuple[str, str, str | None]] = set()
 
-    for snapshot in [*(source.input_snapshots if source is not None else []), *input_snapshots]:
+    for snapshot in [
+        *(source.input_snapshots if source is not None else []),
+        *input_snapshots,
+    ]:
         key = (snapshot.snapshot_id, snapshot.content_hash, snapshot.immutable_uri)
         if key in seen:
             continue

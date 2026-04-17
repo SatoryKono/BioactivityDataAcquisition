@@ -41,9 +41,7 @@ _DEFAULT_LOG_FILE = Path("logs") / "bioetl.log"
 # Patterns for secret detection in log values
 _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (
-        re.compile(
-            r"(?i)(api[_-]?key)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE
-        ),
+        re.compile(r"(?i)(api[_-]?key)['\"]?\s*[:=]\s*['\"]?[\w-]+", re.IGNORECASE),
         "[REDACTED_API_KEY]",
     ),
     (
@@ -206,7 +204,9 @@ def _resolve_log_file_path() -> Path | None:
     return _DEFAULT_LOG_FILE
 
 
-def _build_shared_processors() -> list[Any]:  # Any: structlog processors have heterogeneous callable signatures.
+def _build_shared_processors() -> list[
+    Any
+]:  # Any: structlog processors have heterogeneous callable signatures.
     """Build processors shared by structlog and foreign stdlib loggers."""
     return [
         structlog.contextvars.merge_contextvars,

@@ -89,9 +89,7 @@ class RunManifestDiffResult:
             "occurrence_only": self.occurrence_only,
             "occurrence_difference_fields": list(self.occurrence_difference_fields),
             "semantic_difference_fields": list(self.semantic_difference_fields),
-            "noncanonical_difference_fields": list(
-                self.noncanonical_difference_fields
-            ),
+            "noncanonical_difference_fields": list(self.noncanonical_difference_fields),
             "replay_relationship": self.replay_relationship,
             "differences": [entry.to_dict() for entry in self.differences],
         }
@@ -275,7 +273,9 @@ class RunManifestInspectionService:
                 "input_snapshot_content_hashes",
                 [],
             ),
-            "input_snapshot_identity_fingerprint": diagnostics.get("input_snapshot_identity_fingerprint"),
+            "input_snapshot_identity_fingerprint": diagnostics.get(
+                "input_snapshot_identity_fingerprint"
+            ),
             "replay_mode": diagnostics.get("replay_mode", "rebuild"),
             "input_snapshot_count": diagnostics.get("input_snapshot_count", 0),
             "input_snapshots": diagnostics.get("input_snapshots", []),
@@ -353,7 +353,7 @@ class RunManifestInspectionService:
             "semantic_difference_fields": non_occurrence_fields or diff_fields,
             "noncanonical_difference_fields": (),
             "replay_relationship": replay_relationship,
-            }
+        }
 
     @staticmethod
     def _semantic_equivalent_diff_payload(

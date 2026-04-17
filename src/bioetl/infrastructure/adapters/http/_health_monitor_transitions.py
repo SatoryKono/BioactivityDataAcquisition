@@ -98,4 +98,3 @@ def record_health_check_transition(
 def get_adaptive_params_for_status(status: HealthStatus) -> tuple[float, int]:
     """Return timeout and batch-size adjustments for a health status."""
     return _ADAPTIVE_PARAMS_BY_STATUS[status]
-

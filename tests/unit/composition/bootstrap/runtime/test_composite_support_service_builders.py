@@ -271,10 +271,12 @@ def test_build_runtime_management_services_propagates_config_hash_when_available
 @pytest.mark.unit
 def test_build_merge_dependencies_creates_required_services() -> None:
     """Test that build_merge_dependencies creates all required services without errors."""
-    from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import MergeDependenciesBundle
-    
+    from bioetl.composition.bootstrap.runtime.composite_support_service_bundles import (
+        MergeDependenciesBundle,
+    )
+
     logger = MagicMock()
-    
+
     # Test that the function runs without errors and returns a valid bundle
     result = build_merge_dependencies(
         config=_make_config(column_groups=("priority",)),
@@ -288,16 +290,16 @@ def test_build_merge_dependencies_creates_required_services() -> None:
 
     # Verify that all required services are created and have the expected types
     assert isinstance(result, MergeDependenciesBundle)
-    assert hasattr(result, 'deduplicator')
-    assert hasattr(result, 'aggregator')
-    assert hasattr(result, 'renamer')
-    assert hasattr(result, 'orderer')
-    assert hasattr(result, 'priority_orderer')
-    assert hasattr(result, 'coalesce_policy')
-    assert hasattr(result, 'conflict_resolver')
-    assert hasattr(result, 'join_planner')
-    assert hasattr(result, 'order_service')
-    
+    assert hasattr(result, "deduplicator")
+    assert hasattr(result, "aggregator")
+    assert hasattr(result, "renamer")
+    assert hasattr(result, "orderer")
+    assert hasattr(result, "priority_orderer")
+    assert hasattr(result, "coalesce_policy")
+    assert hasattr(result, "conflict_resolver")
+    assert hasattr(result, "join_planner")
+    assert hasattr(result, "order_service")
+
     # Verify that services are properly initialized (not None)
     assert result.deduplicator is not None
     assert result.aggregator is not None

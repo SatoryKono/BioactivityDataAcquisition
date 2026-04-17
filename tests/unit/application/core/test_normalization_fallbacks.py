@@ -34,8 +34,14 @@ def test_json_like_string_detection_and_canonicalization() -> None:
 
 def test_named_text_fallback_normalizers_use_rule_buckets() -> None:
     rules = NormalizationRulesPolicy()
-    assert normalize_named_text_field("title", "  Example <b>Title</b>  ", rule_set=rules) == "Example Title"
-    assert normalize_named_text_field("abstract", "  Example   abstract  ", rule_set=rules) == "Example abstract"
+    assert (
+        normalize_named_text_field("title", "  Example <b>Title</b>  ", rule_set=rules)
+        == "Example Title"
+    )
+    assert (
+        normalize_named_text_field("abstract", "  Example   abstract  ", rule_set=rules)
+        == "Example abstract"
+    )
     assert normalize_named_text_field("oa_status", " GOLD ", rule_set=rules) == "gold"
     assert normalize_named_text_field("other", " value ", rule_set=rules) is None
 
@@ -50,7 +56,20 @@ def test_special_fallback_normalizers_delegate_to_canonical_helpers() -> None:
         )
         == "10.1000/abc"
     )
-    assert normalize_special_fallback_field("publication_pmid", " PMID:12345 ", rule_set=rules) == "12345"
-    assert normalize_special_fallback_field("publication_date", "2024-02", rule_set=rules) == "2024-02-29"
-    assert normalize_special_fallback_field("canonical_smiles", "C", rule_set=rules) == "C"
-    assert normalize_special_fallback_field("other", "value", rule_set=rules) is UNHANDLED_FALLBACK_NORMALIZATION
+    assert (
+        normalize_special_fallback_field(
+            "publication_pmid", " PMID:12345 ", rule_set=rules
+        )
+        == "12345"
+    )
+    assert (
+        normalize_special_fallback_field("publication_date", "2024-02", rule_set=rules)
+        == "2024-02-29"
+    )
+    assert (
+        normalize_special_fallback_field("canonical_smiles", "C", rule_set=rules) == "C"
+    )
+    assert (
+        normalize_special_fallback_field("other", "value", rule_set=rules)
+        is UNHANDLED_FALLBACK_NORMALIZATION
+    )

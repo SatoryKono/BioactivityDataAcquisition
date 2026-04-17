@@ -84,7 +84,9 @@ def _expected_degraded_runtime_anchor(manifest: RunManifest) -> dict[str, object
             manifest.code_provenance.effective_config_artifact_id
         ),
     }
-    filtered_payload = {key: value for key, value in payload.items() if value is not None}
+    filtered_payload = {
+        key: value for key, value in payload.items() if value is not None
+    }
     return {
         "compatibility_scope": "legacy_fallback_only",
         "fingerprint": (
@@ -110,9 +112,7 @@ def _expected_resume_contract(manifest: RunManifest) -> dict[str, object]:
         "requested_exact_replay": requested_exact_replay,
         "requested_checkpoint_compatibility_policy": requested_policy,
         "applied_checkpoint_compatibility_policy": (
-            "hard_fail"
-            if requested_exact_replay
-            else requested_policy or "observe"
+            "hard_fail" if requested_exact_replay else requested_policy or "observe"
         ),
         "strict_replay_safe": requested_exact_replay,
         "execution_context": "composite" if is_composite else "ordinary",
@@ -376,7 +376,10 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
         "dq_signal_present": False,
         "cross_validation_signal_present": False,
     }
-    assert result.diagnostics["persistence_profile"]["attained_profile"] == "forensic_grade"
+    assert (
+        result.diagnostics["persistence_profile"]["attained_profile"]
+        == "forensic_grade"
+    )
     assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is True
     assert result.diagnostics["next_steps"] == [
         "No alert signals detected; continue routine monitoring.",
@@ -443,12 +446,13 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
         "published_artifacts": [],
         "occurrence_only_diagnostics": [],
     }
-    assert result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
-    assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is True
     assert (
-        result.diagnostics["persistence_profile"]["forensic_grade_missing_requirements"]
-        == ["run_ledger_history"]
+        result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
     )
+    assert result.diagnostics["persistence_profile"]["claims"]["replay_ready"] is True
+    assert result.diagnostics["persistence_profile"][
+        "forensic_grade_missing_requirements"
+    ] == ["run_ledger_history"]
     assert result.diagnostics == {
         "manifest_id": "manifest-no-ledger",
         "run_id": str(run_id),
@@ -583,9 +587,9 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
         result.diagnostics["exact_replay_support_boundary"]
         == "snapshot_backed_source_runs_only"
     )
-    assert result.diagnostics["replay_family_contract"] == _expected_replay_family_contract(
-        manifest
-    )
+    assert result.diagnostics[
+        "replay_family_contract"
+    ] == _expected_replay_family_contract(manifest)
     assert (
         result.diagnostics["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
@@ -604,9 +608,9 @@ def test_show_resume_only_manifest_reports_resume_mode() -> None:
         result.identity_graph["exact_replay_support_boundary"]
         == "snapshot_backed_source_runs_only"
     )
-    assert result.identity_graph["replay_family_contract"] == _expected_replay_family_contract(
-        manifest
-    )
+    assert result.identity_graph[
+        "replay_family_contract"
+    ] == _expected_replay_family_contract(manifest)
     assert (
         result.identity_graph["replay_capability_reason"]
         == "resume_requested_without_snapshot_backed_inputs"
@@ -708,9 +712,10 @@ def test_show_surfaces_persisted_resume_diagnostics() -> None:
     assert result.identity_graph["resume_contract"] == _expected_resume_contract(
         manifest
     )
-    assert result.identity_graph["resume_diagnostics"] == result.diagnostics[
-        "resume_diagnostics"
-    ]
+    assert (
+        result.identity_graph["resume_diagnostics"]
+        == result.diagnostics["resume_diagnostics"]
+    )
 
 
 def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() -> None:
@@ -740,25 +745,23 @@ def test_show_composite_manifest_surfaces_bounded_reconstructability_contract() 
     assert result.diagnostics["exact_replay_support_boundary"] == (
         "composite_execution_unsupported"
     )
-    assert result.diagnostics["replay_family_contract"] == _expected_replay_family_contract(
-        manifest
-    )
+    assert result.diagnostics[
+        "replay_family_contract"
+    ] == _expected_replay_family_contract(manifest)
     assert (
         result.diagnostics["alert_signals"]["composite_resume_reconstructability_gap"]
         is True
     )
     assert (
-        result.diagnostics["persistence_profile"]["composite_resume_reconstructability"][
-            "scope"
-        ]
+        result.diagnostics["persistence_profile"][
+            "composite_resume_reconstructability"
+        ]["scope"]
         == "coarse_grained_composite_resume"
     )
-    assert (
-        any(
-            "Treat composite resume as checkpoint snapshot plus ledger suffix replay only;"
-            in step
-            for step in result.diagnostics["next_steps"]
-        )
+    assert any(
+        "Treat composite resume as checkpoint snapshot plus ledger suffix replay only;"
+        in step
+        for step in result.diagnostics["next_steps"]
     )
     assert result.identity_graph["input_snapshot_ids"] == []
     assert result.identity_graph["input_snapshot_content_hashes"] == []
@@ -799,12 +802,12 @@ def test_show_snapshot_backed_manifest_reports_non_replay_snapshot_mode() -> Non
     assert result.diagnostics["replay_mode"] == "same_data_state_recovery"
     assert result.identity_graph["requested_exact_replay"] is False
     assert result.identity_graph["replay_mode"] == "same_data_state_recovery"
-    assert result.diagnostics["replay_family_contract"] == _expected_replay_family_contract(
-        manifest
-    )
-    assert result.identity_graph["replay_family_contract"] == _expected_replay_family_contract(
-        manifest
-    )
+    assert result.diagnostics[
+        "replay_family_contract"
+    ] == _expected_replay_family_contract(manifest)
+    assert result.identity_graph[
+        "replay_family_contract"
+    ] == _expected_replay_family_contract(manifest)
 
 
 def test_show_does_not_report_exact_replay_from_intent_alone() -> None:
@@ -826,12 +829,12 @@ def test_show_does_not_report_exact_replay_from_intent_alone() -> None:
     assert result.diagnostics["replay_mode"] == "rebuild"
     assert result.identity_graph["requested_exact_replay"] is True
     assert result.identity_graph["replay_mode"] == "rebuild"
-    assert result.diagnostics["replay_family_contract"] == _expected_replay_family_contract(
-        manifest
-    )
-    assert result.identity_graph["replay_family_contract"] == _expected_replay_family_contract(
-        manifest
-    )
+    assert result.diagnostics[
+        "replay_family_contract"
+    ] == _expected_replay_family_contract(manifest)
+    assert result.identity_graph[
+        "replay_family_contract"
+    ] == _expected_replay_family_contract(manifest)
 
 
 def test_show_collects_artifact_diagnostic_links() -> None:
@@ -928,8 +931,12 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
     result = service.show("manifest-3")
 
     assert result.diagnostics["missing_artifact_links"] == 1
-    assert result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
-    assert result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is False
+    assert (
+        result.diagnostics["persistence_profile"]["attained_profile"] == "replay_ready"
+    )
+    assert (
+        result.diagnostics["persistence_profile"]["claims"]["forensic_grade"] is False
+    )
     assert result.diagnostics["alert_signals"]["artifact_linkage_gap"] is True
     assert result.diagnostics["next_steps"] == [
         "Validate artifact publication metadata and repair dataset/lineage links.",

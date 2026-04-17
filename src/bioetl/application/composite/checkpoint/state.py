@@ -142,9 +142,13 @@ class CompositeCheckpointState:
             seed_completed=data.get("seed_completed", False),
             seed_result=_parse_seed_result(data.get("seed_result")),
             completed_dependencies=frozenset(data.get("completed_dependencies", [])),
-            dependency_results=_parse_dependency_results(data.get("dependency_results")),
+            dependency_results=_parse_dependency_results(
+                data.get("dependency_results")
+            ),
             completed_enrichers=frozenset(data.get("completed_enrichers", [])),
-            enrichment_results=_parse_enrichment_results(data.get("enrichment_results")),
+            enrichment_results=_parse_enrichment_results(
+                data.get("enrichment_results")
+            ),
             merge_completed=data.get("merge_completed", False),
             merge_result=data.get("merge_result"),
             checkpoint_schema_version=data.get("checkpoint_schema_version", "1.0.0"),

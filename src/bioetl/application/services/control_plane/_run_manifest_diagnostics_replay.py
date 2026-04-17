@@ -242,9 +242,7 @@ def _collect_input_snapshot_ids(input_snapshots: list[dict[str, object]]) -> lis
     """Return deterministic snapshot identities for resume/exact-replay anchors."""
     return [
         str(snapshot_id)
-        for snapshot_id in (
-            snapshot.get("snapshot_id") for snapshot in input_snapshots
-        )
+        for snapshot_id in (snapshot.get("snapshot_id") for snapshot in input_snapshots)
         if snapshot_id is not None
     ]
 

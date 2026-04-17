@@ -40,7 +40,9 @@ class _ExecutionHost:
             effective_silver_table="silver.test_runner_pipeline",
             effective_gold_table="gold.test_runner_pipeline",
         )
-        self._runtime = SimpleNamespace(limit=11, query="kinase", health_check_mode="strict")
+        self._runtime = SimpleNamespace(
+            limit=11, query="kinase", health_check_mode="strict"
+        )
         self._services = SimpleNamespace()
         self._executor = SimpleNamespace(
             execute=self._execute_pipeline,

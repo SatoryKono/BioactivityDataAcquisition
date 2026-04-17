@@ -107,4 +107,5 @@ class PostrunMetadataWriteService:
             ),
         )
 
+
 __all__ = ["PostrunMetadataWriteService"]

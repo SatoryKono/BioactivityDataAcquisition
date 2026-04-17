@@ -107,7 +107,9 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
     # Verify logs: start and finish
     assert logger_mock.info.call_count == 2
     terminal_call = next(
-        call for call in logger_mock.info.call_args_list if call.args[0] == "pipeline_finished"
+        call
+        for call in logger_mock.info.call_args_list
+        if call.args[0] == "pipeline_finished"
     )
     assert terminal_call.kwargs["records_processed"] == 42
     assert terminal_call.kwargs["stages_count"] == 0
@@ -271,7 +273,10 @@ def test_observer_graceful_shutdown(metrics_mock, logger_mock, tracer_mock, run_
 
 def test_observer_exposes_canonical_runtime_publication_contract() -> None:
     assert PipelineObserver.CANONICAL_LIFECYCLE_EMITTER == CANONICAL_LIFECYCLE_EMITTER
-    assert PipelineObserver.CANONICAL_DOMAIN_EVENT_EMITTER == CANONICAL_DOMAIN_EVENT_EMITTER
+    assert (
+        PipelineObserver.CANONICAL_DOMAIN_EVENT_EMITTER
+        == CANONICAL_DOMAIN_EVENT_EMITTER
+    )
 
 
 def test_observer_handles_close_error(metrics_mock, logger_mock, tracer_mock, run_id):
@@ -339,7 +344,9 @@ def test_pipeline_result_timestamp_requires_wall_start_time() -> None:
         PipelineObserver._build_pipeline_result_timestamp(None, 1.0)
 
 
-@patch("bioetl.application.observability.observer_context_mixin.capture_runtime_timing_anchor")
+@patch(
+    "bioetl.application.observability.observer_context_mixin.capture_runtime_timing_anchor"
+)
 def test_observer_captures_startup_timing_anchor(
     capture_anchor_mock: MagicMock,
     metrics_mock: MagicMock,
@@ -907,9 +914,7 @@ class TestObserverSmokeTest:
         # Verify vacuum counter
         counter_calls = metrics_mock.increment_counter.call_args_list
         vacuum_counters = [
-            c
-            for c in counter_calls
-            if c[0][0] == "bioetl_vacuum_files_removed_total"
+            c for c in counter_calls if c[0][0] == "bioetl_vacuum_files_removed_total"
         ]
         assert len(vacuum_counters) == 1
 

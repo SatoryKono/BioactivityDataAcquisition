@@ -220,8 +220,8 @@ def resolve_health_check_mode(*, settings: Settings) -> Literal["strict", "probe
     return cast(
         Literal["strict", "probe"],
         _resolve_health_check_mode_policy(
-        settings=settings,
-        default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
+            settings=settings,
+            default_health_check_mode=_DEFAULT_HEALTH_CHECK_MODE,
         ),
     )
 

@@ -139,8 +139,7 @@ def test_normalize_run_manifest_spec_orders_input_snapshots_by_snapshot_id() -> 
     normalized = normalize_run_manifest_spec(payload)
 
     assert [
-        item["snapshot_id"]
-        for item in normalized["source_refs"][0]["input_snapshots"]
+        item["snapshot_id"] for item in normalized["source_refs"][0]["input_snapshots"]
     ] == ["a-snapshot", "z-snapshot"]
 
 
@@ -199,7 +198,9 @@ def test_normalize_runtime_anchor_payload_coerces_canonical_contract_fields() ->
     }
 
 
-def test_normalize_execution_identity_payload_coerces_canonical_identity_fields() -> None:
+def test_normalize_execution_identity_payload_coerces_canonical_identity_fields() -> (
+    None
+):
     normalized = normalize_execution_identity_payload(
         {
             "pipeline_name": " chembl_activity ",
@@ -229,15 +230,23 @@ def test_normalize_execution_identity_payload_coerces_canonical_identity_fields(
     }
 
 
-def test_normalize_control_plane_opaque_hash_ref_keeps_legacy_non_strict_values() -> None:
+def test_normalize_control_plane_opaque_hash_ref_keeps_legacy_non_strict_values() -> (
+    None
+):
     assert normalize_control_plane_opaque_hash_ref(" SHA256:FACE ") == "sha256:face"
-    assert normalize_control_plane_opaque_hash_ref(" compat-hash-123 ") == "compat-hash-123"
+    assert (
+        normalize_control_plane_opaque_hash_ref(" compat-hash-123 ")
+        == "compat-hash-123"
+    )
 
 
 def test_normalize_control_plane_strict_sha256_requires_lowercase_hex_payload() -> None:
-    assert normalize_control_plane_strict_sha256(
-        " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "
-    ) == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    assert (
+        normalize_control_plane_strict_sha256(
+            " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "
+        )
+        == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    )
 
     with pytest.raises(ValueError, match="Invalid SHA256 format"):
         normalize_control_plane_strict_sha256("sha256:not-hex")

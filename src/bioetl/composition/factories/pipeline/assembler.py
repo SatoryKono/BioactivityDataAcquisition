@@ -1,4 +1,5 @@
 """Assemble pipelines and runners from composition-layer factory inputs."""
+
 from __future__ import annotations
 
 from typing import Generic, TypeVar
@@ -62,6 +63,7 @@ TPipeline = TypeVar("TPipeline", bound="BasePipeline")
 _extract_entity_type, _extract_dq_configs = extract_entity_type, extract_dq_configs
 _assemble_runner_impl = assemble_runner_impl
 
+
 class GenericPipelineFactory(Generic[TPipeline]):
     """Composition-layer factory that assembles pipelines and runners."""
 
@@ -92,7 +94,10 @@ class GenericPipelineFactory(Generic[TPipeline]):
             gold_schema,
             pandera_silver_schema,
         )
-        self.transformer_class, self.provider_registry = transformer_class, provider_registry
+        self.transformer_class, self.provider_registry = (
+            transformer_class,
+            provider_registry,
+        )
         self._create_data_source = resolve_data_source_creator(
             provider=provider,
             provider_registry=provider_registry,
@@ -251,8 +256,15 @@ def create_pipeline_factory(
 ) -> GenericPipelineFactory[TPipeline]:
     """Construct a `GenericPipelineFactory` with optional wiring overrides."""
     return GenericPipelineFactory(
-        pipeline_name, pipeline_class, provider, silver_schema, gold_schema,
-        pandera_silver_schema, None, transformer_class, provider_registry,
+        pipeline_name,
+        pipeline_class,
+        provider,
+        silver_schema,
+        gold_schema,
+        pandera_silver_schema,
+        None,
+        transformer_class,
+        provider_registry,
     )
 
 

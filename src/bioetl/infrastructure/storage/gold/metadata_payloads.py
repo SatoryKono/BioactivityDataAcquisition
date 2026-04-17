@@ -190,7 +190,7 @@ def build_gold_metadata_via_coordinator(
         fallback_factory=lambda: _raise_missing_gold_metadata_bundle(
             table_path=table_path,
             table_name=table_name,
-        )
+        ),
     )
     return metadata
 

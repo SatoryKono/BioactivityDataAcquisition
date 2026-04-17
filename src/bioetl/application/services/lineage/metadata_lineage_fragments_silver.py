@@ -145,10 +145,10 @@ def _build_silver_edges(
 
     edges: list[LineageEdge] = list(
         manifest_edges(
-        manifest=manifest_node(run_context),
-        run=run,
-        created_at=created_at,
-        run_context=run_context,
+            manifest=manifest_node(run_context),
+            run=run,
+            created_at=created_at,
+            run_context=run_context,
         )
     )
 

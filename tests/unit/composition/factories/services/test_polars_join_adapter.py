@@ -16,27 +16,31 @@ from bioetl.composition.factories.services.polars_join_adapter import PolarsJoin
 def test_polars_join_adapter_is_join_executor_service() -> None:
     """Adapter remains a thin DI-friendly alias over JoinExecutorService."""
     from bioetl.application.composite.join_execution import JoinExecutorService
+
     mock_join_service = MagicMock(spec=JoinExecutorService)
     mock_join_service.get_polars_join_type.return_value = "left"
-    
+
     adapter = PolarsJoinAdapter(join_service=mock_join_service)
 
     # Adapter is now a wrapper around JoinExecutorService, not an instance of it
-    assert hasattr(adapter, 'get_polars_join_type')
-    assert hasattr(adapter, 'execute_polars_join')
+    assert hasattr(adapter, "get_polars_join_type")
+    assert hasattr(adapter, "execute_polars_join")
 
 
 @pytest.mark.unit
 def test_polars_join_adapter_executes_inherited_join_logic() -> None:
     """Adapter exposes inherited join execution behavior unchanged."""
     from bioetl.application.composite.join_execution import JoinExecutorService
+
     mock_join_service = MagicMock(spec=JoinExecutorService)
     mock_join_service.get_polars_join_type.return_value = "left"
-    
+
     # Mock the execute_polars_join method to return expected result
-    expected_result = pl.DataFrame({"seed_id": ["A"], "seed_value": [1], "dep_value": [2]})
+    expected_result = pl.DataFrame(
+        {"seed_id": ["A"], "seed_value": [1], "dep_value": [2]}
+    )
     mock_join_service.execute_polars_join.return_value = expected_result
-    
+
     adapter = PolarsJoinAdapter(join_service=mock_join_service)
     left_df = pl.DataFrame({"seed_id": ["A"], "seed_value": [1]})
     right_df = pl.DataFrame({"dep_id": ["A"], "dep_value": [2]})

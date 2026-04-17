@@ -126,4 +126,3 @@ def execute_prepared_enricher_join(
         prepared_context.metadata.enricher_join_key,
         prepared_context.enricher_pipeline,
     )
-

@@ -381,7 +381,10 @@ class TestIntegrationVcrPolicy:
         assert "configs/quality/integration_vcr_policy.yaml" in data_readme
         assert "python -m scripts.data check-vcr-placement" in data_readme
         assert "python -m scripts.data check-vcr-secrets" in data_readme
-        assert "python -m scripts.engineering.qa report-vcr-metadata --check" in data_readme
+        assert (
+            "python -m scripts.engineering.qa report-vcr-metadata --check"
+            in data_readme
+        )
 
         assert "docs/03-guides/testing.md" in contributing
         assert "configs/quality/integration_vcr_policy.yaml" in contributing

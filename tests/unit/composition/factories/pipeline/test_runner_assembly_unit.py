@@ -215,7 +215,9 @@ def test_build_checkpoint_manager_fallbacks_to_soft_fail_on_invalid_policy() -> 
 
 
 @pytest.mark.unit
-def test_build_checkpoint_manager_coerces_observe_to_hard_fail_for_exact_replay() -> None:
+def test_build_checkpoint_manager_coerces_observe_to_hard_fail_for_exact_replay() -> (
+    None
+):
     pipeline = cast(Any, _make_pipeline())
     logger = MagicMock()
     pipeline.runtime.exact_replay = True
@@ -244,7 +246,9 @@ def test_build_checkpoint_manager_coerces_observe_to_hard_fail_for_exact_replay(
 
 
 @pytest.mark.unit
-def test_build_checkpoint_manager_coerces_soft_fail_to_hard_fail_for_exact_replay() -> None:
+def test_build_checkpoint_manager_coerces_soft_fail_to_hard_fail_for_exact_replay() -> (
+    None
+):
     pipeline = cast(Any, _make_pipeline())
     logger = MagicMock()
     pipeline.runtime.exact_replay = True

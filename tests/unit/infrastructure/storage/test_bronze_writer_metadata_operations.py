@@ -36,9 +36,7 @@ class _BundleCoordinator:
 
 @pytest.mark.unit
 class TestPrepareBronzeMetadataWrite:
-    def test_raises_when_coordinator_missing(
-        self, tmp_path: Path
-    ) -> None:
+    def test_raises_when_coordinator_missing(self, tmp_path: Path) -> None:
         host = _Host(tmp_path)
         output_path = "chembl/activity/file.jsonl.zst"
         full_path = tmp_path / output_path

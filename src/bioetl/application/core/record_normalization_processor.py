@@ -103,9 +103,7 @@ class RecordNormalizationProcessor:
                 include_fields=include_fields,
                 exclude_fields=exclude_fields,
                 set_like_fields=(
-                    None
-                    if self.profile is None
-                    else set(self.profile.set_like_fields)
+                    None if self.profile is None else set(self.profile.set_like_fields)
                 ),
             )
         )

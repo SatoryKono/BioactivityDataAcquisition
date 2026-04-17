@@ -129,7 +129,9 @@ def normalize_metric_count(value: object) -> int:
     raise TypeError(f"Unsupported metric snapshot value: {type(value).__name__}")
 
 
-def normalize_run_ledger_metrics_snapshot(value: object | None) -> dict[str, int] | None:
+def normalize_run_ledger_metrics_snapshot(
+    value: object | None,
+) -> dict[str, int] | None:
     """Normalize metrics snapshots into sorted integer mappings."""
     if not isinstance(value, Mapping):
         return None

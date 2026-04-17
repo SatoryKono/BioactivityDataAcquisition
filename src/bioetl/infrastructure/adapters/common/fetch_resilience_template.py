@@ -61,6 +61,7 @@ class FilteredBatchRecoveryHost(Protocol):
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]: ...
 
+
 __all__ = [
     "FilteredBatchRecoveryHost",
     "fetch_batch_with_reduction",
@@ -136,17 +137,15 @@ async def retry_with_split_batches(
     async for record in run_retry_exhausted_recovery_policy(
         id_batch=id_batch,
         retry_error=error,
-        on_split=lambda first_half, second_half, retry_error: (
-            log_batch_reduction_retry(
-                host._logger,
-                host.provider_name,
-                entity_type=entity_type,
-                filter_field=filter_field,
-                id_batch=id_batch,
-                first_half=first_half,
-                second_half=second_half,
-                error=retry_error,
-            )
+        on_split=lambda first_half, second_half, retry_error: log_batch_reduction_retry(
+            host._logger,
+            host.provider_name,
+            entity_type=entity_type,
+            filter_field=filter_field,
+            id_batch=id_batch,
+            first_half=first_half,
+            second_half=second_half,
+            error=retry_error,
         ),
         fetch_reduced_batch=_fetch_reduced_batch,
         fetch_single_fallback=_fetch_single_fallback,

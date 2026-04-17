@@ -67,6 +67,7 @@ class _BronzeMetadataWriteHostProtocol(Protocol):
     _flat_structure: bool
     base_path: Path
 
+
 def prepare_bronze_metadata_write(
     host: _BronzeMetadataWriteHostProtocol,
     request: BronzeMetadataWriteRequest,
@@ -139,9 +140,7 @@ def _build_bronze_metadata_input_request(
 ) -> BronzeMetadataInputRequest:
     """Build normalized Bronze metadata input payload for coordinator-backed flow."""
     input_snapshots = (
-        ()
-        if source_metadata is None
-        else tuple(source_metadata.input_snapshots)
+        () if source_metadata is None else tuple(source_metadata.input_snapshots)
     )
     if live_snapshot is not None and source_metadata is None:
         input_snapshots = (live_snapshot,)
@@ -161,11 +160,15 @@ def _resolve_bronze_metadata_bundle_factory(
     coordinator: MetadataCoordinatorPort,
 ) -> object:
     """Return bundle factory only when the coordinator exposes the override hook."""
-    if "create_bronze_metadata_bundle" not in vars(coordinator) and getattr(
-        type(coordinator),
-        "create_bronze_metadata_bundle",
-        None,
-    ) is None:
+    if (
+        "create_bronze_metadata_bundle" not in vars(coordinator)
+        and getattr(
+            type(coordinator),
+            "create_bronze_metadata_bundle",
+            None,
+        )
+        is None
+    ):
         return None
     return getattr(coordinator, "create_bronze_metadata_bundle", None)
 

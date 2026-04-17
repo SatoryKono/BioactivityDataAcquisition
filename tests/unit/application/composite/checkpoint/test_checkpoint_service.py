@@ -1161,8 +1161,9 @@ class TestListAll:
 
     def test_default_threshold_is_24_hours(self) -> None:
         """Default stale threshold is 24 hours."""
-        assert CompositeCheckpointService._DEFAULT_STALE_THRESHOLD_HOURS == pytest.approx(
-            24.0
+        assert (
+            CompositeCheckpointService._DEFAULT_STALE_THRESHOLD_HOURS
+            == pytest.approx(24.0)
         )
 
 

@@ -118,9 +118,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
 
         """
         metrics_port = (
-            dependency_context.metrics
-            if dependency_context is not None
-            else metrics
+            dependency_context.metrics if dependency_context is not None else metrics
         )
         resolved_error_handler = (
             dependency_context.error_handler

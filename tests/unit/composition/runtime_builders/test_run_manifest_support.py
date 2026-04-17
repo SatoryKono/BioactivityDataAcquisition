@@ -74,7 +74,9 @@ def test_cached_bronze_snapshot_refs_are_sorted_by_snapshot_identity(
 
 
 @pytest.mark.unit
-def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots() -> None:
+def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots() -> (
+    None
+):
     settings = SimpleNamespace(bronze_path=Path("/unused"))
     ctx = SimpleNamespace(
         pipeline_name="chembl_activity",
@@ -101,7 +103,9 @@ def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots()
 
 
 @pytest.mark.unit
-def test_resolve_replay_capability_requires_persisted_snapshots_for_exact_replay() -> None:
+def test_resolve_replay_capability_requires_persisted_snapshots_for_exact_replay() -> (
+    None
+):
     no_snapshot_refs = (
         SimpleNamespace(provider="chembl", entity="activity", input_snapshots=()),
     )
@@ -170,7 +174,9 @@ def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
 
 
 @pytest.mark.unit
-def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported() -> None:
+def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported() -> (
+    None
+):
     ctx = SimpleNamespace(
         pipeline_name="chembl_activity",
         resume=False,
@@ -195,9 +201,7 @@ def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported()
     )
 
     assert launch_context["execution_context"] == "composite"
-    assert (
-        launch_context["required_persistence_profile"] == "degraded_observable"
-    )
+    assert launch_context["required_persistence_profile"] == "degraded_observable"
     assert (
         launch_context["exact_replay_support_boundary"]
         == "composite_execution_unsupported"

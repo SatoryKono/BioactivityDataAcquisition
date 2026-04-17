@@ -51,9 +51,7 @@ class IDMappingSchema(ETLRecordSchema):
     @pa.check("uniprot_accession", name="uniprot_accession_format")
     def _check_uniprot_accession(cls, series: Series[str]) -> Series[bool]:
         """Validate UniProt accession format (6-10 alphanumeric chars)."""
-        return cast(
-            _SERIES_BOOL, series.isna() | series.str.match(r"^[A-Z0-9]{6,10}$")
-        )
+        return cast(_SERIES_BOOL, series.isna() | series.str.match(r"^[A-Z0-9]{6,10}$"))
 
     mapping_status: Series[str] = pa.Field(
         nullable=False,

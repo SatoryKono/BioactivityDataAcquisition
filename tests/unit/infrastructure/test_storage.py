@@ -349,7 +349,7 @@ class TestSilverWriter:
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
         writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
-        
+
         # Mock the _get_table_schema method to return None (no existing table)
         writer._get_table_schema = AsyncMock(return_value=None)
 

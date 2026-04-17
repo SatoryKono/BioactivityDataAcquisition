@@ -142,7 +142,9 @@ def _normalize_manifest_set_like_field(
     raw_value = payload.get(field_name)
     if not _is_non_string_sequence(raw_value):
         return
-    normalized[field_name] = canonicalize_container(normalize_set_like_sequence(raw_value))
+    normalized[field_name] = canonicalize_container(
+        normalize_set_like_sequence(raw_value)
+    )
 
 
 def _is_non_string_sequence(value: object) -> bool:
@@ -154,7 +156,9 @@ def _normalize_manifest_source_ref(item: object) -> object:
         return item
     normalized = normalize_mapping(item)
     raw_snapshots = item.get("input_snapshots")
-    if isinstance(raw_snapshots, Sequence) and not isinstance(raw_snapshots, (str, bytes)):
+    if isinstance(raw_snapshots, Sequence) and not isinstance(
+        raw_snapshots, (str, bytes)
+    ):
         normalized["input_snapshots"] = canonicalize_container(
             _normalize_manifest_input_snapshots(raw_snapshots)
         )
@@ -165,7 +169,10 @@ def _normalize_manifest_input_snapshots(
     raw_snapshots: Sequence[object],
 ) -> list[object]:
     """Normalize manifest snapshots with deterministic identity-first ordering."""
-    normalized = [normalize_mapping(item) if isinstance(item, Mapping) else item for item in raw_snapshots]
+    normalized = [
+        normalize_mapping(item) if isinstance(item, Mapping) else item
+        for item in raw_snapshots
+    ]
     return sorted(
         normalized,
         key=lambda item: (

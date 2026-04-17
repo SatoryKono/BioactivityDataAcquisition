@@ -24,7 +24,9 @@ from bioetl.domain.ports import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterPort,
+    )
 
 
 def build_components_and_processing_service(

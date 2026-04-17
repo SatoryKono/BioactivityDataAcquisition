@@ -4,8 +4,12 @@ import re
 
 from scripts.engineering.qa.report_duplication_baseline import _build_payload
 from scripts.engineering.qa.report_duplication_baseline import _build_trend_summary
-from scripts.engineering.qa.report_duplication_baseline import _filter_clusters_by_module_patterns
-from scripts.engineering.qa.report_duplication_baseline import _parse_pylint_duplicate_output
+from scripts.engineering.qa.report_duplication_baseline import (
+    _filter_clusters_by_module_patterns,
+)
+from scripts.engineering.qa.report_duplication_baseline import (
+    _parse_pylint_duplicate_output,
+)
 from scripts.engineering.qa.report_duplication_baseline import _render_markdown
 from scripts.engineering.qa.report_duplication_baseline import _top_duplicate_pairs
 from scripts.engineering.qa.report_duplication_baseline import DuplicateCluster

@@ -28,7 +28,9 @@ def test_docs_cli_generate_pipeline_normalization_matrix_help_smoke() -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    assert "Generate deterministic normalization field-matrix artifacts" in result.stdout
+    assert (
+        "Generate deterministic normalization field-matrix artifacts" in result.stdout
+    )
 
 
 def test_qa_cli_report_normalization_fallback_inventory_help_smoke() -> None:
@@ -40,7 +42,10 @@ def test_qa_cli_report_normalization_fallback_inventory_help_smoke() -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    assert "Generate a report-only inventory of fields still using fallback normalization." in result.stdout
+    assert (
+        "Generate a report-only inventory of fields still using fallback normalization."
+        in result.stdout
+    )
 
 
 def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(

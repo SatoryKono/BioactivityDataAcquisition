@@ -176,8 +176,7 @@ class PipelineSettings(BaseSettings):
                     "pipeline.control_plane.run_manifest_enabled"
                 )
             if (
-                self.required_persistence_profile
-                in {"replay_ready", "forensic_grade"}
+                self.required_persistence_profile in {"replay_ready", "forensic_grade"}
                 and not self.run_manifest_enabled
             ):
                 raise ValueError(

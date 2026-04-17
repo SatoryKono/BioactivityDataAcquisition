@@ -146,9 +146,7 @@ class RunManifest:
             resolved_config=_load_object_mapping(payload.get("resolved_config")),
             code_provenance=_load_code_provenance(payload.get("code_provenance")),
             replay_of_run_id=_load_optional_str(payload, "replay_of_run_id"),
-            replay_of_manifest_id=_load_optional_str(
-                payload, "replay_of_manifest_id"
-            ),
+            replay_of_manifest_id=_load_optional_str(payload, "replay_of_manifest_id"),
             replay_capability=_load_replay_capability(payload.get("replay_capability")),
             source_refs=_load_source_refs(payload.get("source_refs")),
             planned_artifacts=_load_artifacts(payload.get("planned_artifacts")),

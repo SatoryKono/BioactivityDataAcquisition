@@ -10,7 +10,10 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.services.lineage import MetadataCoordinator, MetadataLineageBundle
+from bioetl.application.services.lineage import (
+    MetadataCoordinator,
+    MetadataLineageBundle,
+)
 from bioetl.domain.lineage import LineageEdgeType, LineageNodeType
 from bioetl.domain.medallion import GoldWriteMode, Layer, SilverWriteMode
 from bioetl.domain.models.metadata import (
@@ -1701,7 +1704,9 @@ class TestLineageFragments:
         bundle = coordinator.create_bronze_metadata_bundle(input_data)
 
         assert isinstance(bundle, MetadataLineageBundle)
-        assert bundle.metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
+        assert (
+            bundle.metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
+        )
         assert (
             bundle.metadata.output.lineage_fragment_id
             == bundle.lineage_fragment.fragment_id

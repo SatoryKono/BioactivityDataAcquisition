@@ -19,7 +19,9 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 
 def test_crossref_publication_profile_covers_schema_exactly() -> None:
-    CROSSREF_PUBLICATION_PROFILE.assert_covers_schema(CROSSREF_PUBLICATION_SCHEMA_FIELDS)
+    CROSSREF_PUBLICATION_PROFILE.assert_covers_schema(
+        CROSSREF_PUBLICATION_SCHEMA_FIELDS
+    )
 
 
 def test_pubmed_publication_profile_covers_schema_exactly() -> None:

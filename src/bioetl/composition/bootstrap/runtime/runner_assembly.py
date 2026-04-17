@@ -50,7 +50,11 @@ if TYPE_CHECKING:
 CompositeRunnerFactory = Callable[..., CompositePipelineRunnerService]
 
 
-__all__ = ["bootstrap_composite_runner", "create_composite_runner", "create_composite_runner_service"]
+__all__ = [
+    "bootstrap_composite_runner",
+    "create_composite_runner",
+    "create_composite_runner_service",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -305,7 +309,8 @@ def bootstrap_composite_runner(
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
     bootstrap_runtime_basics_fn: Callable[
-        ..., tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
+        ...,
+        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort],
     ],
     build_runner_factories_fn: Callable[
         ...,

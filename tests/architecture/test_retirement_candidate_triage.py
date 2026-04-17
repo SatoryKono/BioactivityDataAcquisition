@@ -64,7 +64,9 @@ def _file_imports_module(path: Path, module_name: str) -> bool:
 
 def _count_src_importers(module_name: str) -> int:
     return sum(
-        1 for path in _iter_src_python_files() if _file_imports_module(path, module_name)
+        1
+        for path in _iter_src_python_files()
+        if _file_imports_module(path, module_name)
     )
 
 
@@ -167,7 +169,10 @@ def test_neo4j_memory_calibration_candidates_match_triage_decisions() -> None:
     calibration = scorecard.get("neo4j_memory_calibration", {})
     assert isinstance(calibration, dict)
     assert calibration.get("snapshot_date") == "2026-04-13"
-    assert isinstance(calibration.get("update_policy"), str) and calibration["update_policy"]
+    assert (
+        isinstance(calibration.get("update_policy"), str)
+        and calibration["update_policy"]
+    )
 
     families = calibration.get("families", [])
     assert isinstance(families, list) and families

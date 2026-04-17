@@ -14,7 +14,10 @@ from bioetl.domain.normalization.join_keys import (
 
 
 def test_normalize_join_key_text_applies_trim_and_lowercase_for_doi() -> None:
-    assert normalize_join_key_text(" https://doi.org/10.1000/ABC ", key="doi") == "10.1000/abc"
+    assert (
+        normalize_join_key_text(" https://doi.org/10.1000/ABC ", key="doi")
+        == "10.1000/abc"
+    )
 
 
 def test_normalize_join_key_scalar_preserves_non_string_values() -> None:

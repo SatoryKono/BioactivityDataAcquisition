@@ -29,9 +29,7 @@ _META_FIELDS = frozenset(
         "_dq_warn",
     }
 )
-_INT_FIELDS = frozenset(
-    {"component_id", "taxonomy_id", "protein_classification_id"}
-)
+_INT_FIELDS = frozenset({"component_id", "taxonomy_id", "protein_classification_id"})
 _JSON_STRING_FIELDS = frozenset(
     {"protein_classification_ids", "target_component_xrefs"}
 )

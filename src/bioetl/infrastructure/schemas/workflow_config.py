@@ -83,7 +83,9 @@ class WorkflowRunOptionsSchema(BaseModel):
             ),
             fallback_column=self.fallback_column,
             fallback_mapping=(
-                dict(self.fallback_mapping) if self.fallback_mapping is not None else None
+                dict(self.fallback_mapping)
+                if self.fallback_mapping is not None
+                else None
             ),
             vacuum_after_run=self.vacuum_after_run,
             vacuum_retention_days=self.vacuum_retention_days,

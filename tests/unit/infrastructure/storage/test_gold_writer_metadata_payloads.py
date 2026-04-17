@@ -104,7 +104,9 @@ class TestBuildGoldMergedMetadataInput:
         assert result.completed_at is not None
         assert result.completed_at.month == 6
 
-    def test_ignores_lineage_created_at_without_explicit_or_ingestion_anchor(self) -> None:
+    def test_ignores_lineage_created_at_without_explicit_or_ingestion_anchor(
+        self,
+    ) -> None:
         result = build_gold_merged_metadata_input(
             table_path="gold/publication",
             table_name="composite.publication",

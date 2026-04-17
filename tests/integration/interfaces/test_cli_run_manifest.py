@@ -86,7 +86,9 @@ class _FakeRunManifestService:
             },
         )
 
-    def diff(self, left_identifier: str, right_identifier: str) -> RunManifestDiffResult:
+    def diff(
+        self, left_identifier: str, right_identifier: str
+    ) -> RunManifestDiffResult:
         if "missing" in {left_identifier, right_identifier}:
             raise ValueError("missing")
         return RunManifestDiffResult(

@@ -220,7 +220,9 @@ class PostrunService:
             self._logger.info("postrun_phase_completed", **log_payload)
 
     @staticmethod
-    def _resolve_postrun_phase_log_level(status: str) -> Literal["info", "warning", "error"]:
+    def _resolve_postrun_phase_log_level(
+        status: str,
+    ) -> Literal["info", "warning", "error"]:
         """Map bounded postrun status values to structured log levels."""
         if status == "failed":
             return "error"

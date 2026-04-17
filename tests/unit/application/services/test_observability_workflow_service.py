@@ -99,7 +99,9 @@ async def test_checkpoint_workflow_returns_empty_audit_without_run_context() -> 
         tracer=_make_mock_tracer(),
     )
 
-    result = await service.inspect_checkpoint_workflow("chembl_activity", audit_limit=11)
+    result = await service.inspect_checkpoint_workflow(
+        "chembl_activity", audit_limit=11
+    )
 
     assert result.audit.entries == ()
     assert result.run_manifest is None

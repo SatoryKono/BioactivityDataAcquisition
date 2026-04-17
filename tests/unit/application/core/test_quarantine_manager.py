@@ -229,8 +229,12 @@ class TestQuarantineManagerBulkWrites:
             ingestion_ts=ingestion_ts,
         )
 
-        emitted_events = [call.args[0] for call in event_emitter.emit_domain_event.call_args_list]
-        assert any(isinstance(event, QuarantineEntryCreated) for event in emitted_events)
+        emitted_events = [
+            call.args[0] for call in event_emitter.emit_domain_event.call_args_list
+        ]
+        assert any(
+            isinstance(event, QuarantineEntryCreated) for event in emitted_events
+        )
         assert any(isinstance(event, RecordQuarantined) for event in emitted_events)
 
     @pytest.mark.asyncio

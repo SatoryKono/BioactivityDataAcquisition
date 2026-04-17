@@ -129,9 +129,7 @@ class HealthServerRoutingMixin:
             return default
         parsed = int(raw)
         if parsed < minimum:
-            raise ValueError(
-                f"Invalid query parameter: {name} must be >= {minimum}"
-            )
+            raise ValueError(f"Invalid query parameter: {name} must be >= {minimum}")
         return parsed
 
     async def _route_quarantine_request(

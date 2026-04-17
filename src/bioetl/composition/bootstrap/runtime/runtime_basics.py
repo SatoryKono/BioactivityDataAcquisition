@@ -79,13 +79,14 @@ def bootstrap_runtime_basics(
     effective_run_id = run_id or str(uuid_factory())
     settings = settings_provider()
     logger = logger_bootstrapper(config.name, UUID(effective_run_id), "INFO")
-    
+
     # Initialize domain layer enum fields with proper dependency injection
     from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
         initialize_domain_enum_fields,
     )
+
     initialize_domain_enum_fields()
-    
+
     metrics = create_metrics(settings)
     tracer = tracer_bootstrapper(settings)
     storage = storage_bootstrapper(enable_csv_export=True)

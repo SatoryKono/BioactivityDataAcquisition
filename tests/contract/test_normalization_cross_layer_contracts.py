@@ -6,8 +6,12 @@ import pandas as pd
 import pandera as pa
 import pytest
 
-from scripts.docs.generate_pipeline_normalization_field_matrix import build_field_matrix_rows
-from bioetl.application.core.field_specs import normalize_pmid as normalize_pmid_field_spec
+from scripts.docs.generate_pipeline_normalization_field_matrix import (
+    build_field_matrix_rows,
+)
+from bioetl.application.core.field_specs import (
+    normalize_pmid as normalize_pmid_field_spec,
+)
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
 )
@@ -62,7 +66,9 @@ def test_pmid_contract_agrees_across_active_layers(
     raw_value = " 00012345 "
     expected = "12345"
 
-    pubmed_processor = RecordNormalizationProcessor(provider="pubmed", entity_type="publication")
+    pubmed_processor = RecordNormalizationProcessor(
+        provider="pubmed", entity_type="publication"
+    )
 
     assert normalize_pmid(raw_value) == expected
     assert normalize_pmid_field_spec(raw_value) == expected
@@ -72,7 +78,10 @@ def test_pmid_contract_agrees_across_active_layers(
     assert normalized_vo is not None
     assert str(normalized_vo) == expected
 
-    assert pubmed_processor.normalize_business_data({"pmid": raw_value})["pmid"] == expected
+    assert (
+        pubmed_processor.normalize_business_data({"pmid": raw_value})["pmid"]
+        == expected
+    )
 
     schema_df = minimal_pubmed_publication_df.copy()
     schema_df["pmid"] = expected
@@ -86,7 +95,9 @@ def test_pmid_invalid_upper_bound_fails_across_active_layers(
     """Oversized PMID values must fail closed across the same active seams."""
     oversized = "10000000000"
 
-    pubmed_processor = RecordNormalizationProcessor(provider="pubmed", entity_type="publication")
+    pubmed_processor = RecordNormalizationProcessor(
+        provider="pubmed", entity_type="publication"
+    )
 
     assert normalize_pmid(oversized) is None
     assert normalize_pmid_field_spec(oversized) is None
@@ -104,7 +115,9 @@ def test_doi_and_pmc_id_contracts_agree_across_active_layers(
     minimal_crossref_publication_df: pd.DataFrame,
 ) -> None:
     """DOI/PMC normalization should converge before schema and processor stages."""
-    crossref_processor = RecordNormalizationProcessor(provider="crossref", entity_type="publication")
+    crossref_processor = RecordNormalizationProcessor(
+        provider="crossref", entity_type="publication"
+    )
 
     raw_doi = " https://doi.org/10.1000/XYZ "
     expected_doi = "10.1000/xyz"
@@ -113,7 +126,10 @@ def test_doi_and_pmc_id_contracts_agree_across_active_layers(
     normalized_doi = DOI.from_raw(raw_doi)
     assert normalized_doi is not None
     assert str(normalized_doi) == expected_doi
-    assert crossref_processor.normalize_business_data({"doi": raw_doi})["doi"] == expected_doi
+    assert (
+        crossref_processor.normalize_business_data({"doi": raw_doi})["doi"]
+        == expected_doi
+    )
 
     doi_df = minimal_crossref_publication_df.copy()
     doi_df["doi"] = expected_doi
@@ -124,7 +140,10 @@ def test_doi_and_pmc_id_contracts_agree_across_active_layers(
     expected_pmc_id = "PMC12345"
     assert normalize_pmc_id(raw_pmc_id) == expected_pmc_id
     assert normalize_profile_pmc_id(raw_pmc_id) == expected_pmc_id
-    assert crossref_processor.normalize_business_data({"pmc_id": raw_pmc_id})["pmc_id"] == expected_pmc_id
+    assert (
+        crossref_processor.normalize_business_data({"pmc_id": raw_pmc_id})["pmc_id"]
+        == expected_pmc_id
+    )
 
     pmc_df = minimal_crossref_publication_df.copy()
     pmc_df["pmc_id"] = expected_pmc_id
@@ -165,8 +184,9 @@ def test_checkpoint_execution_identity_payload_matches_domain_contract() -> None
     assert metadata.checkpoint_execution_identity_payload() == {
         key: value for key, value in expected_payload.items() if value is not None
     }
-    assert metadata.checkpoint_execution_identity_fingerprint() == compute_execution_identity_fingerprint(
-        expected_payload
+    assert (
+        metadata.checkpoint_execution_identity_fingerprint()
+        == compute_execution_identity_fingerprint(expected_payload)
     )
 
 
@@ -191,7 +211,9 @@ def test_runtime_anchor_service_path_matches_domain_degraded_fingerprint() -> No
         manifest_id=raw_current_payload["manifest_id"],
         contract_ref=raw_current_payload["contract_ref"],
         contract_version=raw_current_payload["contract_version"],
-        effective_config_artifact_id=raw_current_payload["effective_config_artifact_id"],
+        effective_config_artifact_id=raw_current_payload[
+            "effective_config_artifact_id"
+        ],
     )
     checkpoint_identity = CheckpointIdentity(
         effective_config_hash=_HASH_A,
@@ -210,13 +232,21 @@ def test_runtime_anchor_service_path_matches_domain_degraded_fingerprint() -> No
         result.details["execution_identity_compatibility"]["reason"]
         == "identical_degraded_runtime_anchor_fingerprint"
     )
-    assert result.details["current_identity"]["degraded_runtime_anchor_fingerprint"] == expected_fingerprint
-    assert result.details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"] == expected_fingerprint
+    assert (
+        result.details["current_identity"]["degraded_runtime_anchor_fingerprint"]
+        == expected_fingerprint
+    )
+    assert (
+        result.details["checkpoint_identity"]["degraded_runtime_anchor_fingerprint"]
+        == expected_fingerprint
+    )
 
 
 def test_record_normalization_processor_keeps_equivalent_payloads_hash_stable() -> None:
     """Processor/profile path must collapse equivalent identifiers, JSON, and dates before hashing."""
-    processor = RecordNormalizationProcessor(provider="crossref", entity_type="publication")
+    processor = RecordNormalizationProcessor(
+        provider="crossref", entity_type="publication"
+    )
 
     dirty_record = {
         "doi": " HTTPS://doi.org/10.1000/XYZ ",
@@ -241,21 +271,31 @@ def test_record_normalization_processor_keeps_equivalent_payloads_hash_stable() 
     normalized_clean = processor.normalize_business_data(clean_record)
 
     assert normalized_dirty == normalized_clean
-    assert normalized_dirty["authors"] == canonicalize_json_string(clean_record["authors"])
-    assert normalized_dirty["publication_date"] == "2024-03-31"
-    assert processor.compute_content_hash(normalized_dirty) == processor.compute_content_hash(
-        normalized_clean
+    assert normalized_dirty["authors"] == canonicalize_json_string(
+        clean_record["authors"]
     )
+    assert normalized_dirty["publication_date"] == "2024-03-31"
+    assert processor.compute_content_hash(
+        normalized_dirty
+    ) == processor.compute_content_hash(normalized_clean)
 
 
-def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> None:
+def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_matrix_and_processor() -> (
+    None
+):
     """chembl_activity meta fields must stay passthrough across all active seams."""
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
     raw_run_id = "  run-001  "
     raw_entity_id = " entity-42 "
 
-    assert CHEMBL_ACTIVITY_PROFILE.rule_for("_run_id").normalizer is normalize_profile_passthrough
-    assert CHEMBL_ACTIVITY_PROFILE.rule_for("entity_id").normalizer is normalize_profile_passthrough
+    assert (
+        CHEMBL_ACTIVITY_PROFILE.rule_for("_run_id").normalizer
+        is normalize_profile_passthrough
+    )
+    assert (
+        CHEMBL_ACTIVITY_PROFILE.rule_for("entity_id").normalizer
+        is normalize_profile_passthrough
+    )
 
     run_id_row = _matrix_row("chembl_activity", "_run_id")
     entity_id_row = _matrix_row("chembl_activity", "entity_id")
@@ -271,11 +311,16 @@ def test_chembl_activity_meta_passthrough_contract_is_aligned_across_profile_mat
     assert normalized["entity_id"] == raw_entity_id
 
 
-def test_chembl_activity_business_and_set_like_fields_follow_profile_family_contracts() -> None:
+def test_chembl_activity_business_and_set_like_fields_follow_profile_family_contracts() -> (
+    None
+):
     """chembl_activity business text and set-like fields must align across profile/matrix/runtime."""
     processor = RecordNormalizationProcessor(provider="chembl", entity_type="activity")
 
-    assert CHEMBL_ACTIVITY_PROFILE.rule_for("activity_id").normalizer is normalize_profile_text
+    assert (
+        CHEMBL_ACTIVITY_PROFILE.rule_for("activity_id").normalizer
+        is normalize_profile_text
+    )
     assert (
         CHEMBL_ACTIVITY_PROFILE.rule_for("activity_properties").normalizer
         is normalize_profile_json_string

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from scripts.engineering.ci.validate_schema_classifier_gate import _major_transition_issues
+from scripts.engineering.ci.validate_schema_classifier_gate import (
+    _major_transition_issues,
+)
 
 
 def test_major_transition_requires_major_bump_and_migration_key() -> None:

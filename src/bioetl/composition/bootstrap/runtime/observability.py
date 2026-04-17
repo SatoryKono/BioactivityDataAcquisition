@@ -173,9 +173,7 @@ def start_metrics_server(
     logger: LoggerPort | None = None,
 ) -> bool:
     """Compatibility patch-point delegating to the composition observability seam."""
-    observability_api = import_module(
-        "bioetl.composition.observability_api"
-    )
+    observability_api = import_module("bioetl.composition.observability_api")
     return observability_api.start_metrics_server(
         port=port,
         addr=addr,

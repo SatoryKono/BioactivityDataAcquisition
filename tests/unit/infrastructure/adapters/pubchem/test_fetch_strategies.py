@@ -378,9 +378,7 @@ class TestFetchByCids:
         # Create list with more CIDs than batch size
         molecule_id_list = [str(i) for i in range(120)]
         await collect_async_iterator(
-            fetch_strategies.fetch_by_cids(
-                molecule_id_list, limit=None, batch_size=50
-            )
+            fetch_strategies.fetch_by_cids(molecule_id_list, limit=None, batch_size=50)
         )
 
         # Should have made 3 batches (50 + 50 + 20)
@@ -396,9 +394,7 @@ class TestFetchByCids:
 
         molecule_id_list = [str(i) for i in range(100)]
         results = await collect_async_iterator(
-            fetch_strategies.fetch_by_cids(
-                molecule_id_list, limit=5, batch_size=50
-            )
+            fetch_strategies.fetch_by_cids(molecule_id_list, limit=5, batch_size=50)
         )
 
         assert len(results) == 5

@@ -165,7 +165,9 @@ def build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetad
         records_processed=0,
         pipeline_name=pipeline.config.pipeline_name,
         run_type=run_type_value,
-        dq_contract_compatibility_hash=identity_payload["dq_contract_compatibility_hash"],
+        dq_contract_compatibility_hash=identity_payload[
+            "dq_contract_compatibility_hash"
+        ],
         pipeline_version=identity_payload["pipeline_version"],
         effective_config_hash=identity_payload["effective_config_hash"],
         effective_config_artifact_id=effective_config_artifact_id,

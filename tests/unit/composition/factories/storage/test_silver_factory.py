@@ -30,18 +30,18 @@ class TestCreateSilverWriter:
         with pytest.raises(TypeError):
             create_silver_writer(
                 CreateSilverWriterRequest(
-                writer_cls=writer_cls,
-                base_path=Path("/data/silver"),
-                config=None,
-                logger=MagicMock(),
-                tracing=None,
-                csv_exporter=None,
-                metadata_coordinator=None,
-                audit=NoOpAudit(),
-                transform_version=None,
-                transform_steps=None,
-                flat_structure=False,
-                silver_validator=None,
+                    writer_cls=writer_cls,
+                    base_path=Path("/data/silver"),
+                    config=None,
+                    logger=MagicMock(),
+                    tracing=None,
+                    csv_exporter=None,
+                    metadata_coordinator=None,
+                    audit=NoOpAudit(),
+                    transform_version=None,
+                    transform_steps=None,
+                    flat_structure=False,
+                    silver_validator=None,
                 )
             )
 
@@ -54,18 +54,18 @@ class TestCreateSilverWriter:
 
         create_silver_writer(
             CreateSilverWriterRequest(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=config,
-            logger=MagicMock(),
-            tracing=MagicMock(),
-            csv_exporter=None,
-            metadata_coordinator=None,
-            audit=NoOpAudit(),
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=None,
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=config,
+                logger=MagicMock(),
+                tracing=MagicMock(),
+                csv_exporter=None,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=None,
             )
         )
 
@@ -82,18 +82,18 @@ class TestCreateSilverWriter:
 
         create_silver_writer(
             CreateSilverWriterRequest(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=None,
-            logger=MagicMock(),
-            tracing=tracer,
-            csv_exporter=None,
-            metadata_coordinator=None,
-            audit=NoOpAudit(),
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=None,
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=None,
+                logger=MagicMock(),
+                tracing=tracer,
+                csv_exporter=None,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=None,
             )
         )
 
@@ -107,18 +107,18 @@ class TestCreateSilverWriter:
 
         create_silver_writer(
             CreateSilverWriterRequest(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=None,
-            logger=MagicMock(),
-            tracing=MagicMock(),
-            csv_exporter=None,
-            metadata_coordinator=None,
-            audit=NoOpAudit(),
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=validator,
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=None,
+                logger=MagicMock(),
+                tracing=MagicMock(),
+                csv_exporter=None,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=validator,
             )
         )
 
@@ -133,20 +133,20 @@ class TestCreateSilverWriter:
 
         create_silver_writer(
             CreateSilverWriterRequest(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=None,
-            logger=MagicMock(),
-            tracing=MagicMock(),
-            csv_exporter=None,
-            metadata_coordinator=None,
-            audit=NoOpAudit(),
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=None,
-            metadata_atomic_retry_policy=retry_policy,
-            merge_resilience_policy=merge_policy,
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=None,
+                logger=MagicMock(),
+                tracing=MagicMock(),
+                csv_exporter=None,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=None,
+                metadata_atomic_retry_policy=retry_policy,
+                merge_resilience_policy=merge_policy,
             )
         )
 
@@ -161,19 +161,19 @@ class TestCreateSilverWriter:
 
         create_silver_writer(
             CreateSilverWriterRequest(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=config,
-            logger=MagicMock(),
-            tracing=MagicMock(),
-            csv_exporter=None,
-            metadata_coordinator=None,
-            audit=NoOpAudit(),
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=None,
-            metrics=metrics,
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=config,
+                logger=MagicMock(),
+                tracing=MagicMock(),
+                csv_exporter=None,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=None,
+                metrics=metrics,
             )
         )
 
@@ -187,18 +187,18 @@ class TestCreateSilverWriter:
 
         create_silver_writer(
             CreateSilverWriterRequest(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=None,
-            logger=MagicMock(),
-            tracing=MagicMock(),
-            csv_exporter=csv,
-            metadata_coordinator=None,
-            audit=NoOpAudit(),
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=None,
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=None,
+                logger=MagicMock(),
+                tracing=MagicMock(),
+                csv_exporter=csv,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=None,
             )
         )
 
@@ -219,19 +219,19 @@ class TestCreateSilverWriter:
 
         create_silver_writer(
             CreateSilverWriterRequest(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=None,
-            logger=MagicMock(),
-            tracing=MagicMock(),
-            csv_exporter=None,
-            metadata_coordinator=None,
-            audit=NoOpAudit(),
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=None,
-            contract_rollout_policy=rollout_policy,
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=None,
+                logger=MagicMock(),
+                tracing=MagicMock(),
+                csv_exporter=None,
+                metadata_coordinator=None,
+                audit=NoOpAudit(),
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=None,
+                contract_rollout_policy=rollout_policy,
             )
         )
 
@@ -245,18 +245,18 @@ class TestCreateSilverWriter:
 
         create_silver_writer(
             CreateSilverWriterRequest(
-            writer_cls=writer_cls,
-            base_path=Path("/data/silver"),
-            config=None,
-            logger=MagicMock(),
-            tracing=MagicMock(),
-            csv_exporter=None,
-            metadata_coordinator=None,
-            audit=audit,
-            transform_version=None,
-            transform_steps=None,
-            flat_structure=False,
-            silver_validator=None,
+                writer_cls=writer_cls,
+                base_path=Path("/data/silver"),
+                config=None,
+                logger=MagicMock(),
+                tracing=MagicMock(),
+                csv_exporter=None,
+                metadata_coordinator=None,
+                audit=audit,
+                transform_version=None,
+                transform_steps=None,
+                flat_structure=False,
+                silver_validator=None,
             )
         )
 

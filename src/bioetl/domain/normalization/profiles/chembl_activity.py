@@ -34,16 +34,17 @@ ASSAY_TYPES = frozenset(["B", "F", "A", "T", "P", "U"])
 
 def create_case_normalizer(strategy: str = "uppercase"):
     """Create a case normalizer function for profile use.
-    
+
     Args:
         strategy: Case strategy ("uppercase", "lowercase", or "preserve")
-        
+
     Returns:
         Normalizer function suitable for profile special_rules
     """
+
     def normalizer(value):
         return normalize_cross_pipeline_case(value, strategy)
-    
+
     return normalizer
 
 
@@ -79,26 +80,28 @@ _SPECIAL_RULE_COMPONENTS = {
 
 
 # Fields that commonly contain pseudo-null values and should be normalized
-NULL_FIELDS = frozenset([
-    "standard_value",
-    "value",
-    "upper_value",
-    "standard_upper_value",
-    "pchembl_value",
-    "data_validity_comment",
-    "assay_description",
-    "target_relation",
-    "target_organism",
-    "target_taxonomy",
-    "cell_line",
-    "tissue",
-    "assay_type",
-    "assay_test_type",
-    "assay_category",
-    "bao_format",
-    "bao_label",
-    "bao_endpoint",
-])
+NULL_FIELDS = frozenset(
+    [
+        "standard_value",
+        "value",
+        "upper_value",
+        "standard_upper_value",
+        "pchembl_value",
+        "data_validity_comment",
+        "assay_description",
+        "target_relation",
+        "target_organism",
+        "target_taxonomy",
+        "cell_line",
+        "tissue",
+        "assay_type",
+        "assay_test_type",
+        "assay_category",
+        "bao_format",
+        "bao_label",
+        "bao_endpoint",
+    ]
+)
 
 CHEMBL_ACTIVITY_PROFILE = build_standard_profile(
     profile_name="chembl.activity",

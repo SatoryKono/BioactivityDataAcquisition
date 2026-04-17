@@ -34,7 +34,9 @@ if TYPE_CHECKING:
         ShutdownSignal,
         TransformCallback,
     )
-    from bioetl.application.observability.domain_event_emitter import DomainEventEmitterPort
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterPort,
+    )
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
@@ -50,6 +52,8 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types import GoldSchemaType, RunID
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+
+
 def create_batch_processing_components(
     *,
     services: PipelineService,
@@ -78,6 +82,8 @@ def create_batch_processing_components(
         domain_event_emitter=domain_event_emitter,
         lock_validator=lock_validator,
     )
+
+
 def create_checkpoint_manager(
     checkpoint_port: CheckpointPort,
     logger: LoggerPort,
@@ -104,6 +110,8 @@ def create_checkpoint_manager(
         current_metadata=current_metadata,
         compatibility_policy=compatibility_policy,
     )
+
+
 def create_record_processor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -126,6 +134,8 @@ def create_record_processor_from_pipeline(
         lock_validator=lock_validator,
         tracer=tracer,
     )
+
+
 def create_batch_executor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -168,6 +178,8 @@ def create_batch_executor_from_pipeline(
         batch_id_factory=batch_id_factory,
         domain_event_emitter=domain_event_emitter,
     )
+
+
 __all__ = [
     "BatchProcessingComponents",
     "create_batch_executor_from_pipeline",

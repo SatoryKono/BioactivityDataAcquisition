@@ -102,7 +102,9 @@ _LEGACY_SYMBOL_TARGETS: dict[str, str] = {
 }
 
 
-def __getattr__(name: str) -> Any:  # Any: lazy compatibility exports resolve to heterogeneous symbol types.
+def __getattr__(
+    name: str,
+) -> Any:  # Any: lazy compatibility exports resolve to heterogeneous symbol types.
     """Resolve public and deprecated entrypoint symbols lazily."""
     module_name = _PUBLIC_SYMBOL_TARGETS.get(name)
     if module_name is not None:

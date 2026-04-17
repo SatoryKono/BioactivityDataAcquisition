@@ -70,7 +70,8 @@ def _build_bootstrap_support_services(
 def _resolve_bootstrap_runtime_basics(
     *,
     bootstrap_runtime_basics_fn: Callable[
-        ..., tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
+        ...,
+        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort],
     ],
     config: CompositeConfig,
     run_id: str | None,
@@ -157,7 +158,8 @@ def bootstrap_composite_runner_via_wiring(
     runtime: CompositeRuntimeConfig,
     run_id: str | None,
     bootstrap_runtime_basics_fn: Callable[
-        ..., tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort]
+        ...,
+        tuple[str, Settings, LoggerPort, MetricsPort, TracingPort, object, LockPort],
     ],
     build_runner_factories_fn: Callable[
         ...,

@@ -27,6 +27,7 @@ def __getattr__(name: str) -> object:
         return _bundle.build_pipeline_services
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
+
 __all__ = [
     "GenericPipelineFactory",
     "assemble_runner",

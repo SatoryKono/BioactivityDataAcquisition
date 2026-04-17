@@ -116,7 +116,9 @@ def _build_not_started_transitions(
     execution_phase: _ExecutionPhaseNamespace[PhaseT],
     phase_transition: _PhaseTransitionNamespace[TransitionT],
     transition_policy: _TransitionPolicyNamespace[PolicyT],
-    phase_transition_rule: _PhaseTransitionRuleBuilder[PhaseT, TransitionT, PolicyT, RuleT],
+    phase_transition_rule: _PhaseTransitionRuleBuilder[
+        PhaseT, TransitionT, PolicyT, RuleT
+    ],
 ) -> list[RuleT]:
     return [
         phase_transition_rule(
@@ -133,7 +135,9 @@ def _build_preflight_transitions(
     execution_phase: _ExecutionPhaseNamespace[PhaseT],
     phase_transition: _PhaseTransitionNamespace[TransitionT],
     transition_policy: _TransitionPolicyNamespace[PolicyT],
-    phase_transition_rule: _PhaseTransitionRuleBuilder[PhaseT, TransitionT, PolicyT, RuleT],
+    phase_transition_rule: _PhaseTransitionRuleBuilder[
+        PhaseT, TransitionT, PolicyT, RuleT
+    ],
 ) -> list[RuleT]:
     return [
         phase_transition_rule(
@@ -157,7 +161,9 @@ def _build_dependency_execution_transitions(
     execution_phase: _ExecutionPhaseNamespace[PhaseT],
     phase_transition: _PhaseTransitionNamespace[TransitionT],
     transition_policy: _TransitionPolicyNamespace[PolicyT],
-    phase_transition_rule: _PhaseTransitionRuleBuilder[PhaseT, TransitionT, PolicyT, RuleT],
+    phase_transition_rule: _PhaseTransitionRuleBuilder[
+        PhaseT, TransitionT, PolicyT, RuleT
+    ],
 ) -> list[RuleT]:
     return [
         phase_transition_rule(
@@ -182,7 +188,9 @@ def _build_enrichment_transitions(
     execution_phase: _ExecutionPhaseNamespace[PhaseT],
     phase_transition: _PhaseTransitionNamespace[TransitionT],
     transition_policy: _TransitionPolicyNamespace[PolicyT],
-    phase_transition_rule: _PhaseTransitionRuleBuilder[PhaseT, TransitionT, PolicyT, RuleT],
+    phase_transition_rule: _PhaseTransitionRuleBuilder[
+        PhaseT, TransitionT, PolicyT, RuleT
+    ],
 ) -> list[RuleT]:
     return [
         phase_transition_rule(
@@ -207,7 +215,9 @@ def _build_merge_transitions(
     execution_phase: _ExecutionPhaseNamespace[PhaseT],
     phase_transition: _PhaseTransitionNamespace[TransitionT],
     transition_policy: _TransitionPolicyNamespace[PolicyT],
-    phase_transition_rule: _PhaseTransitionRuleBuilder[PhaseT, TransitionT, PolicyT, RuleT],
+    phase_transition_rule: _PhaseTransitionRuleBuilder[
+        PhaseT, TransitionT, PolicyT, RuleT
+    ],
 ) -> list[RuleT]:
     return [
         phase_transition_rule(
@@ -231,7 +241,9 @@ def _build_cross_validation_transitions(
     execution_phase: _ExecutionPhaseNamespace[PhaseT],
     phase_transition: _PhaseTransitionNamespace[TransitionT],
     transition_policy: _TransitionPolicyNamespace[PolicyT],
-    phase_transition_rule: _PhaseTransitionRuleBuilder[PhaseT, TransitionT, PolicyT, RuleT],
+    phase_transition_rule: _PhaseTransitionRuleBuilder[
+        PhaseT, TransitionT, PolicyT, RuleT
+    ],
 ) -> list[RuleT]:
     return [
         phase_transition_rule(
@@ -263,7 +275,9 @@ def _build_write_finalize_transitions(
     execution_phase: _ExecutionPhaseNamespace[PhaseT],
     phase_transition: _PhaseTransitionNamespace[TransitionT],
     transition_policy: _TransitionPolicyNamespace[PolicyT],
-    phase_transition_rule: _PhaseTransitionRuleBuilder[PhaseT, TransitionT, PolicyT, RuleT],
+    phase_transition_rule: _PhaseTransitionRuleBuilder[
+        PhaseT, TransitionT, PolicyT, RuleT
+    ],
 ) -> list[RuleT]:
     return [
         phase_transition_rule(
@@ -284,7 +298,7 @@ def _build_write_finalize_transitions(
 
 
 def _get_terminal_phases(
-    execution_phase: _ExecutionPhaseNamespace[PhaseT]
+    execution_phase: _ExecutionPhaseNamespace[PhaseT],
 ) -> list[PhaseT]:
     return [
         execution_phase.COMPLETED_SUCCESS,

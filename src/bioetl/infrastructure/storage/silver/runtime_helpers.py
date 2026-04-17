@@ -30,12 +30,24 @@ from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (
     SilverMaintenanceOperations,
 )
-from bioetl.infrastructure.storage.silver.operations.metadata_operations import SilverMetadataOperations
-from bioetl.infrastructure.storage.silver.operations.arrow_operations import SilverArrowOperations
-from bioetl.infrastructure.storage.silver.operations.delta_operations import SilverDeltaOperations
-from bioetl.infrastructure.storage.silver.operations.merged_operations import SilverMergedOperations
-from bioetl.infrastructure.storage.silver.operations.postwrite_operations import SilverPostwriteOperations
-from bioetl.infrastructure.storage.silver.operations.validation_operations import SilverValidationOperations
+from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+    SilverMetadataOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.arrow_operations import (
+    SilverArrowOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.delta_operations import (
+    SilverDeltaOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+    SilverMergedOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+    SilverPostwriteOperations,
+)
+from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+    SilverValidationOperations,
+)
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _deduplicate_by_primary_keys_impl,
     _to_policy_write_mode_impl,
@@ -152,7 +164,7 @@ def build_silver_writer_runtime_services(
             metrics=request.metrics,
             audit=request.audit,
         )
-    
+
     # Create metadata operations if needed components are available
     metadata_ops = None
     if resolved_metadata_writer is not None and resolved_dq_calculator is not None:
@@ -166,7 +178,7 @@ def build_silver_writer_runtime_services(
             _dq_calculator=resolved_dq_calculator,
             _host=None,  # Will be set later in SilverWriter.__init__
         )
-    
+
     # Create validation operations if needed components are available
     validation_ops = None
     if resolved_silver_validator is not None and request.base_path is not None:
@@ -176,7 +188,7 @@ def build_silver_writer_runtime_services(
             prepare_arrow_data,
             resolve_table_path,
         )
-        
+
         # Create a wrapper for get_table_schema that can be overridden in tests
         # This wrapper will be replaced by the writer's _get_table_schema method
         # when the writer is initialized
@@ -200,7 +212,7 @@ def build_silver_writer_runtime_services(
             _validate_key_nullability=_validate_key_nullability_impl,
             _host=None,
         )
-    
+
     # Create delta operations if needed components are available
     delta_ops = None
     if resolved_merge_resilience_policy is not None:
@@ -209,17 +221,19 @@ def build_silver_writer_runtime_services(
             _metrics=request.metrics,
             _merge_resilience_policy=resolved_merge_resilience_policy,
         )
-    
+
     # Create arrow operations (always available since it's stateless)
     arrow_ops = SilverArrowOperations()
-    
+
     # Create merged operations if needed components are available
     merged_ops = None
     if request.csv_exporter is not None and request.base_path is not None:
         # Import here to avoid circular imports
         from bioetl.infrastructure.storage.silver.support import resolve_table_path
-        from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
-        
+        from bioetl.infrastructure.storage.delta.arrow_converter import (
+            ArrowDataConverter,
+        )
+
         # For now, we'll create the merged operations with a placeholder metadata writer
         # The real implementation will be set when SilverWriter is fully initialized
         merged_ops = SilverMergedOperations(
@@ -231,10 +245,10 @@ def build_silver_writer_runtime_services(
             ),
             _write_silver_merged_metadata=lambda **kwargs: None,  # Placeholder
         )
-    
+
     # Create postwrite operations (will be initialized with host in SilverWriter.__init__)
     postwrite_ops = None
-    
+
     return SilverWriterRuntimeServices(
         csv_exporter=request.csv_exporter,
         tracing=resolved_tracing,

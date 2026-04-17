@@ -219,12 +219,13 @@ class CompositePreflightValidationService(
 # Backward-compatible alias for iterative NAME-001 migration.
 import warnings
 
+
 class CompositePreflightValidator(CompositePreflightValidationService):
     def __init__(self, *args, **kwargs):
         warnings.warn(
             "CompositePreflightValidator is deprecated and will be removed in v2.0. "
             "Use CompositePreflightValidationService instead.",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         super().__init__(*args, **kwargs)

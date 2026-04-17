@@ -28,7 +28,9 @@ def _build_payload() -> dict[str, str | None]:
     )
 
 
-def test_execution_identity_fingerprint_is_deterministic_for_equivalent_payloads() -> None:
+def test_execution_identity_fingerprint_is_deterministic_for_equivalent_payloads() -> (
+    None
+):
     payload = _build_payload()
     reordered = {
         "input_snapshot_fingerprint": payload["input_snapshot_fingerprint"],

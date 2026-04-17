@@ -27,9 +27,7 @@ def test_contract_freezes_canonical_emitters() -> None:
 
 
 def test_contract_marks_only_pipeline_observer_emitters_as_canonical() -> None:
-    assert is_canonical_runtime_observability_emitter(
-        "PipelineObserver.emit_event"
-    )
+    assert is_canonical_runtime_observability_emitter("PipelineObserver.emit_event")
     assert is_canonical_runtime_observability_emitter(
         "PipelineObserver.emit_domain_event"
     )

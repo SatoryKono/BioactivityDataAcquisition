@@ -226,7 +226,10 @@ async def test_write_silver_merge_ignores_metadata_only_rerun(
 
     dt = DeltaTable(f"{temp_delta_path}/test_merge_metadata_only_rerun")
     first_rows = (
-        dt.to_pandas().sort_values("id").reset_index(drop=True).to_dict(orient="records")
+        dt.to_pandas()
+        .sort_values("id")
+        .reset_index(drop=True)
+        .to_dict(orient="records")
     )
 
     await silver_writer.write_silver(
@@ -238,7 +241,10 @@ async def test_write_silver_merge_ignores_metadata_only_rerun(
 
     dt = DeltaTable(f"{temp_delta_path}/test_merge_metadata_only_rerun")
     second_rows = (
-        dt.to_pandas().sort_values("id").reset_index(drop=True).to_dict(orient="records")
+        dt.to_pandas()
+        .sort_values("id")
+        .reset_index(drop=True)
+        .to_dict(orient="records")
     )
 
     assert second_rows == first_rows

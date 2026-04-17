@@ -24,7 +24,9 @@ class ResolverHelper:
         self,
         *,
         logger: LoggerPort,
-        normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+        normalization_policies: Mapping[
+            str, JoinKeyNormalizationPolicy
+        ] = JOIN_KEY_NORMALIZATION_POLICIES,
     ) -> None:
         self._logger = logger
         self._normalization_policies = normalization_policies
@@ -114,7 +116,9 @@ class ResolverHelper:
 
 def create_resolver_helper(
     logger: LoggerPort,
-    normalization_policies: Mapping[str, JoinKeyNormalizationPolicy] = JOIN_KEY_NORMALIZATION_POLICIES,
+    normalization_policies: Mapping[
+        str, JoinKeyNormalizationPolicy
+    ] = JOIN_KEY_NORMALIZATION_POLICIES,
 ) -> ResolverHelper:
     """Create a resolver helper with default configuration.
 

@@ -29,7 +29,9 @@ class _ChemblFetchPagingFilteredMixin:
         pk_fields: tuple[str, ...] | None = None,
     ) -> Iterator[BronzeRecord]:
         """Yield records while tracking seen IDs for deduplication."""
-        composite_fields = pk_fields if pk_fields is not None and len(pk_fields) > 1 else None
+        composite_fields = (
+            pk_fields if pk_fields is not None and len(pk_fields) > 1 else None
+        )
         logger = getattr(self, "_logger", None)
         metrics = getattr(self, "_adapter_metrics", None)
         yield from iter_deduplicated_records(

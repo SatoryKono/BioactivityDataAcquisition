@@ -131,7 +131,9 @@ class TestDQConfigLoaderBasics:
         config = loader.load("test_provider", "unknown_entity")
 
         assert config.soft_fail_threshold == pytest.approx(0.05)  # from defaults
-        assert config.hard_fail_threshold == pytest.approx(0.15)  # from provider (override)
+        assert config.hard_fail_threshold == pytest.approx(
+            0.15
+        )  # from provider (override)
         # common (2) + provider (1)
         assert len(config.field_validations) == 3
 

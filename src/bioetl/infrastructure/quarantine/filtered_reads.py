@@ -143,16 +143,22 @@ def _resolve_run_manifest_root(base_path: str) -> Path | None:
 
 def _resolve_manifest_id(run_index_root: Path, run_id: str) -> str | None:
     try:
-        return (run_index_root / f"{run_id}.txt").read_text(encoding="utf-8").strip() or None
+        return (run_index_root / f"{run_id}.txt").read_text(
+            encoding="utf-8"
+        ).strip() or None
     except OSError:
         return None
 
+
 def _resolve_manifest_run_type(manifest_root: Path, manifest_id: str) -> str | None:
     try:
-        payload = json.loads((manifest_root / f"{manifest_id}.json").read_text(encoding="utf-8"))
+        payload = json.loads(
+            (manifest_root / f"{manifest_id}.json").read_text(encoding="utf-8")
+        )
         return _parse_run_type_from_manifest_payload(payload)
     except (OSError, json.JSONDecodeError):
         return None
+
 
 def _build_run_type_lookup(
     table_records: list[JsonDict],
@@ -181,7 +187,9 @@ def _build_run_type_lookup(
             continue
 
         if manifest_id not in manifest_run_type_cache:
-            manifest_run_type_cache[manifest_id] = _resolve_manifest_run_type(manifest_root, manifest_id)
+            manifest_run_type_cache[manifest_id] = _resolve_manifest_run_type(
+                manifest_root, manifest_id
+            )
 
         run_type = manifest_run_type_cache.get(manifest_id)
         if run_type:

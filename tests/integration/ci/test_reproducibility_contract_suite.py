@@ -227,8 +227,9 @@ def test_reproducibility_contract_manifest_diff_classifies_occurrence_only() -> 
     assert result.occurrence_difference_fields == ("manifest_id", "run_id")
 
 
-def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_only(
-) -> None:
+def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_only() -> (
+    None
+):
     store = _InMemoryRunManifestStore()
     left = _make_manifest(
         manifest_id="manifest-left-created-at",
@@ -252,7 +253,11 @@ def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_
     assert result.classification == "occurrence_only"
     assert result.semantic_equivalent is True
     assert result.occurrence_only is True
-    assert result.occurrence_difference_fields == ("created_at", "manifest_id", "run_id")
+    assert result.occurrence_difference_fields == (
+        "created_at",
+        "manifest_id",
+        "run_id",
+    )
 
 
 def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> None:
@@ -282,7 +287,9 @@ def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> N
     assert "code_provenance" in result.semantic_difference_fields
 
 
-def test_reproducibility_contract_manifest_diff_exposes_exact_replay_parentage() -> None:
+def test_reproducibility_contract_manifest_diff_exposes_exact_replay_parentage() -> (
+    None
+):
     store = _InMemoryRunManifestStore()
     parent_run_id = RunID(UUID("00000000-0000-0000-0000-000000000305"))
     child_run_id = RunID(UUID("00000000-0000-0000-0000-000000000306"))
@@ -380,13 +387,15 @@ def test_reproducibility_contract_effective_config_semantic_payload_is_stable() 
     first = service.create_effective_config_artifact(**kwargs)
     second = service.create_effective_config_artifact(**kwargs)
 
-    assert service.serialize_semantic_artifact(first) == service.serialize_semantic_artifact(
-        second
-    )
+    assert service.serialize_semantic_artifact(
+        first
+    ) == service.serialize_semantic_artifact(second)
     assert first.effective_config_hash == second.effective_config_hash
 
 
-def test_reproducibility_contract_bronze_bundle_has_canonical_artifact_identity() -> None:
+def test_reproducibility_contract_bronze_bundle_has_canonical_artifact_identity() -> (
+    None
+):
     started_at = datetime(2025, 1, 1, tzinfo=UTC)
     context = RunContext.create(
         run_id=RunID(uuid4()),
@@ -408,10 +417,15 @@ def test_reproducibility_contract_bronze_bundle_has_canonical_artifact_identity(
     )
 
     assert bundle.metadata.output.artifact_id == "bronze_batch:batch-1"
-    assert bundle.metadata.output.lineage_fragment_id == bundle.lineage_fragment.fragment_id
+    assert (
+        bundle.metadata.output.lineage_fragment_id
+        == bundle.lineage_fragment.fragment_id
+    )
 
 
-def test_reproducibility_contract_silver_bundle_keeps_sidecar_and_fragment_identity_aligned() -> None:
+def test_reproducibility_contract_silver_bundle_keeps_sidecar_and_fragment_identity_aligned() -> (
+    None
+):
     started_at = datetime(2025, 1, 1, tzinfo=UTC)
     context = RunContext.create(
         run_id=RunID(uuid4()),
@@ -438,14 +452,19 @@ def test_reproducibility_contract_silver_bundle_keeps_sidecar_and_fragment_ident
     )
 
     assert bundle.metadata.output.artifact_id == "silver:chembl.activity@4"
-    assert bundle.metadata.output.lineage_fragment_id == bundle.lineage_fragment.fragment_id
+    assert (
+        bundle.metadata.output.lineage_fragment_id
+        == bundle.lineage_fragment.fragment_id
+    )
     assert any(
         node.node_id == bundle.metadata.output.artifact_id
         for node in bundle.lineage_fragment.nodes
     )
 
 
-def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identity_aligned() -> None:
+def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identity_aligned() -> (
+    None
+):
     started_at = datetime(2025, 1, 1, tzinfo=UTC)
     context = RunContext.create(
         run_id=RunID(uuid4()),
@@ -475,14 +494,19 @@ def test_reproducibility_contract_gold_bundle_keeps_sidecar_and_fragment_identit
     )
 
     assert bundle.metadata.output.artifact_id == "gold:chembl.activity"
-    assert bundle.metadata.output.lineage_fragment_id == bundle.lineage_fragment.fragment_id
+    assert (
+        bundle.metadata.output.lineage_fragment_id
+        == bundle.lineage_fragment.fragment_id
+    )
     assert any(
         node.node_id == bundle.metadata.output.artifact_id
         for node in bundle.lineage_fragment.nodes
     )
 
 
-def test_reproducibility_contract_supported_gold_trace_path_resolves_run_context() -> None:
+def test_reproducibility_contract_supported_gold_trace_path_resolves_run_context() -> (
+    None
+):
     started_at = datetime(2025, 1, 1, tzinfo=UTC)
     run_id = RunID(UUID("00000000-0000-0000-0000-000000000411"))
     context = RunContext.create(
@@ -640,24 +664,33 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained(
         "supported_families": list(_PUBLISHED_SUPPORTED_FAMILIES),
     }
     assert result.diagnostics["replay_family_contract"]["family"] == family
-    assert result.diagnostics["replay_family_contract"][
-        "strict_exact_replay_supported"
-    ] is True
+    assert (
+        result.diagnostics["replay_family_contract"]["strict_exact_replay_supported"]
+        is True
+    )
     assert result.diagnostics["persistence_profile"]["attained_profile"] == (
         "forensic_grade"
     )
     assert result.diagnostics["persistence_profile"]["required_profile"] == (
         "forensic_grade"
     )
-    assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is True
     assert (
-        result.diagnostics["persistence_profile"]["required_profile_missing_requirements"]
+        result.diagnostics["persistence_profile"]["required_profile_satisfied"] is True
+    )
+    assert (
+        result.diagnostics["persistence_profile"][
+            "required_profile_missing_requirements"
+        ]
         == []
     )
-    assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is False
+    assert (
+        result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is False
+    )
 
 
-def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_inputs() -> None:
+def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_inputs() -> (
+    None
+):
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
     run_id = RunID(UUID("00000000-0000-0000-0000-000000000413"))
@@ -680,15 +713,21 @@ def test_reproducibility_contract_replay_ready_profile_requires_snapshot_backed_
     assert result.diagnostics["persistence_profile"]["attained_profile"] == (
         "degraded_observable"
     )
-    assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    assert (
+        result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    )
     assert result.diagnostics["persistence_profile"][
         "required_profile_missing_requirements"
     ] == ["exact_replay_capability", "immutable_input_snapshots"]
-    assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+    assert (
+        result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+    )
     assert result.diagnostics["alert_signals"]["immutable_input_snapshot_gap"] is True
 
 
-def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed() -> None:
+def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed() -> (
+    None
+):
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
     run_id = RunID(UUID("00000000-0000-0000-0000-000000000414"))
@@ -715,7 +754,9 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
     assert result.diagnostics["exact_replay_support_boundary"] == (
         "composite_execution_unsupported"
     )
-    assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    assert (
+        result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    )
     assert result.diagnostics["persistence_profile"][
         "required_profile_missing_requirements"
     ] == [
@@ -724,10 +765,14 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
         "immutable_input_snapshots",
     ]
     assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is True
-    assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+    assert (
+        result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+    )
 
 
-def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_lineage_family() -> None:
+def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_lineage_family() -> (
+    None
+):
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
     run_id = RunID(UUID("00000000-0000-0000-0000-000000000415"))
@@ -789,9 +834,10 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
         "supported_families": list(_PUBLISHED_SUPPORTED_FAMILIES),
     }
     assert result.diagnostics["replay_family_contract"]["family"] == "openalex.works"
-    assert result.diagnostics["replay_family_contract"][
-        "strict_exact_replay_supported"
-    ] is False
+    assert (
+        result.diagnostics["replay_family_contract"]["strict_exact_replay_supported"]
+        is False
+    )
     assert (
         result.diagnostics["persistence_profile"]["attained_profile"]
         == "degraded_observable"
@@ -799,7 +845,9 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
     assert result.diagnostics["persistence_profile"]["required_profile"] == (
         "forensic_grade"
     )
-    assert result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    assert (
+        result.diagnostics["persistence_profile"]["required_profile_satisfied"] is False
+    )
     assert result.diagnostics["persistence_profile"][
         "required_profile_missing_requirements"
     ] == [
@@ -817,7 +865,9 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
     ]
     assert result.diagnostics["alert_signals"]["strict_replay_boundary_gap"] is True
     assert result.diagnostics["alert_signals"]["lineage_closure_boundary_gap"] is True
-    assert result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+    assert (
+        result.diagnostics["alert_signals"]["required_persistence_profile_gap"] is True
+    )
 
 
 def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> None:
@@ -858,24 +908,24 @@ def test_reproducibility_contract_composite_rows_exclude_runtime_anchors() -> No
 
 
 @pytest.mark.asyncio
-async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_deterministic() -> None:
+async def test_reproducibility_contract_composite_quarantine_replay_anchor_is_deterministic() -> (
+    None
+):
     host = _CompositeReplayHost()
 
-    await host._write_cv_quarantine(
-        MergeResult(quarantine_payloads=({"id": "cv-1"},))
-    )
+    await host._write_cv_quarantine(MergeResult(quarantine_payloads=({"id": "cv-1"},)))
 
     host._quarantine_port.write.assert_awaited_once()
     write_kwargs = host._quarantine_port.write.await_args.kwargs
     assert write_kwargs["pipeline"] == "composite:publication"
     assert write_kwargs["ingestion_ts"] == datetime(2025, 2, 3, 0, 0, tzinfo=UTC)
     assert write_kwargs["metadata"]["artifact_policy"] == "occurrence_only_diagnostic"
-    assert (
-        write_kwargs["metadata"]["replay_contract"] == "excluded_from_exact_replay"
-    )
+    assert write_kwargs["metadata"]["replay_contract"] == "excluded_from_exact_replay"
 
 
-def test_reproducibility_contract_composite_quarantine_is_explicitly_occurrence_only() -> None:
+def test_reproducibility_contract_composite_quarantine_is_explicitly_occurrence_only() -> (
+    None
+):
     manifest_store = _InMemoryRunManifestStore()
     ledger_store = _InMemoryRunLedgerStore()
     run_id = RunID(UUID("00000000-0000-0000-0000-000000000402"))

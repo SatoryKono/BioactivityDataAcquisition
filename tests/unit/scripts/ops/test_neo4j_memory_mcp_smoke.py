@@ -27,7 +27,9 @@ def test_parse_frames_round_trips_multiple_messages() -> None:
 
 
 def test_parse_frames_rejects_unframed_stdout_preamble() -> None:
-    payload = b"oops\n" + _encode_frame({"jsonrpc": "2.0", "id": 1, "result": {"ok": True}})
+    payload = b"oops\n" + _encode_frame(
+        {"jsonrpc": "2.0", "id": 1, "result": {"ok": True}}
+    )
 
     try:
         _parse_frames(payload)

@@ -477,11 +477,15 @@ class TestSilverWriterPreparePayloadExecutor:
             ]
         )
         expected_table = pa.Table.from_pylist(records, schema=schema)
-        
+
         # Create validation operations service with proper mocking
-        from bioetl.infrastructure.storage.silver.operations.validation_operations import SilverValidationOperations
-        from bioetl.infrastructure.storage.silver.pipeline_helpers import execute_silver_write_pipeline
-        
+        from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+            SilverValidationOperations,
+        )
+        from bioetl.infrastructure.storage.silver.pipeline_helpers import (
+            execute_silver_write_pipeline,
+        )
+
         # Create a minimal validation operations instance
         validation_ops = SilverValidationOperations(
             logger=noop_logger,
@@ -496,7 +500,7 @@ class TestSilverWriterPreparePayloadExecutor:
             _to_policy_write_mode=lambda x: WriteMode.APPEND,
             _validate_key_nullability=lambda *args, **kwargs: None,
         )
-        
+
         # Set up the writer with validation operations
         writer._validation = validation_ops
 

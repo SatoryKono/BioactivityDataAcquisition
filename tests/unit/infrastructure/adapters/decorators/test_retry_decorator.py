@@ -90,6 +90,7 @@ class MockDataSource:
         # Check if we should fail on this call
         if self._health_check_call_count - 1 in self._fail_on_calls:
             if self._health_check_error:
+
                 async def _raise_error() -> HealthStatus:
                     raise self._health_check_error
 
@@ -413,9 +414,7 @@ class TestRetryingDataSourceDecoratorMetrics:
         calls = mock_metrics.increment_counter.call_args_list
 
         # Should have retry counter call
-        retry_call = [
-            c for c in calls if c[0][0] == "bioetl_data_source_retries_total"
-        ]
+        retry_call = [c for c in calls if c[0][0] == "bioetl_data_source_retries_total"]
         assert len(retry_call) == 1
         assert retry_call[0][0][1] == 2  # 2 retries
 
@@ -445,8 +444,6 @@ class TestRetryingDataSourceDecoratorMetrics:
         # Verify exhaustion metric was recorded
         calls = mock_metrics.increment_counter.call_args_list
         exhaustion_call = [
-            c
-            for c in calls
-            if c[0][0] == "bioetl_data_source_retry_exhausted_total"
+            c for c in calls if c[0][0] == "bioetl_data_source_retry_exhausted_total"
         ]
         assert len(exhaustion_call) == 1

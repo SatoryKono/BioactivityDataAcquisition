@@ -21,8 +21,11 @@ def create_resolver_helper(
     """Create a ResolverHelper instance with optional normalization policies."""
     return ResolverHelper(
         logger=logger,
-        normalization_policies=normalization_policies or JOIN_KEY_NORMALIZATION_POLICIES,
+        normalization_policies=normalization_policies
+        or JOIN_KEY_NORMALIZATION_POLICIES,
     )
+
+
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     JoinKeyNormalizationPolicy,

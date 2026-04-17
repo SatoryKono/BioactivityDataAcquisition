@@ -17,7 +17,12 @@ _CHEMBL_PUBLICATION_BASE_FIELDS = tuple(
 )
 _CHEMBL_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
     field
-    for field in ("publication_doi", "publication_pmid", "publication_pmc_id", "_source")
+    for field in (
+        "publication_doi",
+        "publication_pmid",
+        "publication_pmc_id",
+        "_source",
+    )
     if field not in _CHEMBL_PUBLICATION_BASE_FIELDS
 )
 CHEMBL_PUBLICATION_SCHEMA_FIELDS = (
@@ -46,7 +51,9 @@ _DOI_FIELDS = frozenset({"doi", "publication_doi"})
 _PMID_FIELDS = frozenset({"pmid", "publication_pmid"})
 _PMC_ID_FIELDS = frozenset({"pmc_id", "publication_pmc_id"})
 _DATE_FIELDS = frozenset({"publication_date", "creation_date"})
-_INT_FIELDS = frozenset({"publication_year", "src_id", "citations_received", "citations_made"})
+_INT_FIELDS = frozenset(
+    {"publication_year", "src_id", "citations_received", "citations_made"}
+)
 _JSON_STRING_FIELDS = frozenset({"authors", "affiliation_list", "author_orcids"})
 
 CHEMBL_PUBLICATION_PROFILE = build_standard_profile(

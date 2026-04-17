@@ -81,14 +81,8 @@ def _build_diagnostics_guide_lines() -> list[str]:
     return [
         "BioETL Diagnostics Guide",
         "  start_here: bioetl diagnostics guide",
-        (
-            "  metrics/admin: bioetl diagnostics metrics "
-            "[--json]",
-        ),
-        (
-            "  health: bioetl diagnostics health "
-            "[--provider <provider>] [--json]"
-        ),
+        ("  metrics/admin: bioetl diagnostics metrics [--json]",),
+        ("  health: bioetl diagnostics health [--provider <provider>] [--json]"),
         (
             "  run: bioetl diagnostics run --run-id <run-id> "
             "[--limit 100] [--format text|json|yaml]"
@@ -257,7 +251,9 @@ def diagnostics_run(run_id: str, limit: int, output_format: str) -> None:
 
     async def _inspect() -> None:
         try:
-            result = await bundle.workflow_service.inspect_audit_run(run_id, limit=limit)
+            result = await bundle.workflow_service.inspect_audit_run(
+                run_id, limit=limit
+            )
         except ValueError as exc:
             echo_error("Run diagnostics failed", str(exc))
             return
@@ -317,7 +313,11 @@ def diagnostics_checkpoint(
 @diagnostics.command("manifest")  # type: ignore[untyped-decorator]
 @click.argument("identifier")  # type: ignore[untyped-decorator]
 @click.option(  # type: ignore[untyped-decorator]
-    "--format", "output_format", type=click.Choice(["text", "json", "yaml"]), default="text", help="Output format"
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "yaml"]),
+    default="text",
+    help="Output format",
 )
 def diagnostics_manifest(identifier: str, output_format: str) -> None:
     """Inspect one run manifest and its ledger diagnostics."""

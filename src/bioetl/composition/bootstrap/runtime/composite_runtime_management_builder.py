@@ -108,9 +108,12 @@ def _resolve_expected_effective_config_hash(config: CompositeConfig) -> str:
     if not isinstance(payload, dict):
         return ""
     try:
-        return normalize_control_plane_sha256(
-            compute_config_hash(cast(dict[str, object], payload))
-        ) or ""
+        return (
+            normalize_control_plane_sha256(
+                compute_config_hash(cast(dict[str, object], payload))
+            )
+            or ""
+        )
     except (TypeError, ValueError):
         return ""
 

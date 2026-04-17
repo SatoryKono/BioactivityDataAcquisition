@@ -188,7 +188,9 @@ class _BatchExecutorDQMixin:
         plain scalars/strings across rows. For such columns we stringify values so
         the dataframe builder sees a single consistent type.
         """
-        return cast(list[dict[str, object]] | None, normalize_records_for_polars(records))
+        return cast(
+            list[dict[str, object]] | None, normalize_records_for_polars(records)
+        )
 
     def _get_dq_thresholds(self) -> tuple[float, float]:
         """Resolve DQ thresholds from config, falling back to defaults."""

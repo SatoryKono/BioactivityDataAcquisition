@@ -152,8 +152,7 @@ def handle_incompatible_checkpoint(
         "pipeline": pipeline_name,
         "compatibility_policy": compatibility_policy,
         "compatibility_disposition": disposition,
-        "resume_rejected": compatibility_policy != "observe"
-        or forced_resume_rejection,
+        "resume_rejected": compatibility_policy != "observe" or forced_resume_rejection,
         "execution_identity_compatible": execution_identity_compatible,
         "identity_mismatch_forces_rejection": forced_resume_rejection,
         "messages": messages,

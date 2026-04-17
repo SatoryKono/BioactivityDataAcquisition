@@ -104,14 +104,14 @@ class _SilverPostwriteHostProtocol(Protocol):
 
 class SilverPostwriteOperations:
     """Postwrite operations service for Silver layer writes.
-    
+
     This service encapsulates post-write orchestration logic previously in SilverWriterPostwriteMixin,
     following the composition pattern for better separation of concerns and testability.
     """
 
     def __init__(self, host: _SilverPostwriteHostProtocol) -> None:
         """Initialize postwrite operations with host dependencies.
-        
+
         Args:
             host: Host object providing access to maintenance, metadata services,
                   and fallback methods.
@@ -125,11 +125,11 @@ class SilverPostwriteOperations:
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
         """Run post-write stages: CSV export, audit, and result finalization.
-        
+
         Uses maintenance operations if available, otherwise falls back to host methods.
         """
         # Use maintenance operations if available, otherwise fall back to host method
-        if hasattr(self._host, '_maintenance') and self._host._maintenance is not None:
+        if hasattr(self._host, "_maintenance") and self._host._maintenance is not None:
             # Construct export path from base_path and table_name
             export_path = str(Path(self._host.base_path) / f"{ctx.table_name}.csv")
             await self._host._maintenance.maybe_export_csv(
@@ -146,8 +146,8 @@ class SilverPostwriteOperations:
                 validated_mode=payload.validated_mode,
                 primary_keys=ctx.primary_keys,
             )
-        
-        if hasattr(self._host, '_metadata') and self._host._metadata is not None:
+
+        if hasattr(self._host, "_metadata") and self._host._metadata is not None:
             await self._host._metadata.log_silver_audit(
                 table_name=ctx.table_name,
                 records=payload.records,
@@ -158,7 +158,7 @@ class SilverPostwriteOperations:
                 source_batch_id=ctx.source_batch_id,
                 ingestion_ts=ctx.ingestion_ts,
             )
-        
+
         return await self._host._finalize_silver_write_result(
             table_name=ctx.table_name,
             records=payload.records,

@@ -146,7 +146,9 @@ def bootstrap_observability_workflow_service() -> ObservabilityWorkflowService:
     settings = get_settings()
     checkpoint_service = bootstrap_checkpoint_service()
     audit_service = bootstrap_audit_inspection_service()
-    run_manifest_service: RunManifestInspectionService = bootstrap_run_manifest_service()
+    run_manifest_service: RunManifestInspectionService = (
+        bootstrap_run_manifest_service()
+    )
     return ObservabilityWorkflowService(
         audit_service=audit_service,
         checkpoint_service=checkpoint_service,

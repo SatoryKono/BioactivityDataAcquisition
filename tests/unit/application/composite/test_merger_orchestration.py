@@ -73,9 +73,9 @@ class TestMergeInputContext:
 class TestMergeExecutionRequestHelpers:
     """Test canonical request/context helpers for merge execution."""
 
-    def test_build_merge_execution_request_when_called_then_binds_all_fields(self) -> (
-        None
-    ):
+    def test_build_merge_execution_request_when_called_then_binds_all_fields(
+        self,
+    ) -> None:
         request = build_merge_execution_request(
             seed_table="silver/seed",
             seed_pipeline="seed_pipeline",
@@ -93,9 +93,9 @@ class TestMergeExecutionRequestHelpers:
     def test_resolve_merge_metadata_timestamp_when_none_then_returns_none(self) -> None:
         assert resolve_merge_metadata_timestamp(None) is None
 
-    def test_resolve_merge_metadata_timestamp_when_iso_date_then_returns_utc_midnight(self) -> (
-        None
-    ):
+    def test_resolve_merge_metadata_timestamp_when_iso_date_then_returns_utc_midnight(
+        self,
+    ) -> None:
         assert resolve_merge_metadata_timestamp("2026-04-10") == datetime(
             2026,
             4,
@@ -107,9 +107,9 @@ class TestMergeExecutionRequestHelpers:
         )
 
     @pytest.mark.asyncio
-    async def test_prepare_merge_execution_context_when_called_then_loads_inputs_once(self) -> (
-        None
-    ):
+    async def test_prepare_merge_execution_context_when_called_then_loads_inputs_once(
+        self,
+    ) -> None:
         host = _make_host()
         request = build_merge_execution_request(
             seed_table="silver/chembl",

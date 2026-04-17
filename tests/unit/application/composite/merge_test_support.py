@@ -68,11 +68,12 @@ def build_join_planner_service(
 
     # Create ResolverHelper with normalization policies (new API)
     from bioetl.application.composite.join_key_resolution import ResolverHelper
+
     resolver_helper = ResolverHelper(
         logger=logger,
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
     )
-    
+
     join_key_resolver = JoinKeyResolverService(
         resolver_helper=resolver_helper,
         parse_pipeline_name=JoinPlannerService._parse_pipeline_name,

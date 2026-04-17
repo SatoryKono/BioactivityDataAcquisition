@@ -26,7 +26,9 @@ UO_ID_PATTERN = r"^UO[_:]\d+$"  # Units Ontology (accepts both _ and :)
 CLO_ID_PATTERN = r"^CLO[_:]\d+$"  # Cell Line Ontology (accepts both _ and :)
 EFO_ID_PATTERN = r"^EFO[_:]\d+$"  # Experimental Factor Ontology (accepts both _ and :)
 BTO_ID_PATTERN = r"^BTO[_:]\d+$"  # BRENDA Tissue Ontology (accepts both _ and :)
-UBERON_ID_PATTERN = r"^UBERON[_:]\d+$"  # Uber Anatomical Ontology (accepts both _ and :)
+UBERON_ID_PATTERN = (
+    r"^UBERON[_:]\d+$"  # Uber Anatomical Ontology (accepts both _ and :)
+)
 CALOHA_ID_PATTERN = r"^TS-\d{4}$"  # CALIPHO tissue ontology identifier
 
 # External database identifiers

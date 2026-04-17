@@ -142,7 +142,9 @@ class TestNormalizeOntologyID:
         """Test CLO ontology ID normalization."""
         assert normalize_ontology_id("CLO:0000045") == "CLO_0000045"
         assert normalize_ontology_id("clo:0000045") == "CLO_0000045"
-        assert normalize_ontology_id("cl:0000045") == "CL_0000045"  # CL prefix preserved
+        assert (
+            normalize_ontology_id("cl:0000045") == "CL_0000045"
+        )  # CL prefix preserved
 
     def test_normalize_ontology_id_efo(self) -> None:
         """Test EFO ontology ID normalization."""
@@ -157,25 +159,39 @@ class TestNormalizeOntologyID:
 
     def test_normalize_ontology_id_chebi(self) -> None:
         """Test CHEBI ontology ID normalization."""
-        assert normalize_ontology_id("CHEBI:12345") == "CHEBI_12345"  # No zero-padding for colon format
+        assert (
+            normalize_ontology_id("CHEBI:12345") == "CHEBI_12345"
+        )  # No zero-padding for colon format
         assert normalize_ontology_id("chebi:12345") == "CHEBI_12345"
 
     def test_normalize_ontology_id_bto(self) -> None:
         """Test BTO ontology ID normalization."""
-        assert normalize_ontology_id("BTO:0000089") == "BTO:0000089"  # Keeps colon format (not in prefix list)
-        assert normalize_ontology_id("bto:0000089") == "bto:0000089"  # Unknown prefix preserved
+        assert (
+            normalize_ontology_id("BTO:0000089") == "BTO:0000089"
+        )  # Keeps colon format (not in prefix list)
+        assert (
+            normalize_ontology_id("bto:0000089") == "bto:0000089"
+        )  # Unknown prefix preserved
 
     def test_normalize_ontology_id_caloha(self) -> None:
         """Test CALOHA ID normalization."""
-        assert normalize_ontology_id("TS-1234") == "TS-1234"  # Keeps original format (not in prefix list)
+        assert (
+            normalize_ontology_id("TS-1234") == "TS-1234"
+        )  # Keeps original format (not in prefix list)
         assert normalize_ontology_id("ts-1234") == "ts-1234"  # Unknown prefix preserved
 
     def test_normalize_ontology_id_zero_padding(self) -> None:
         """Test zero-padding for space format IDs."""
-        assert normalize_ontology_id("GO:12345") == "GO_12345"  # Colon format no padding
+        assert (
+            normalize_ontology_id("GO:12345") == "GO_12345"
+        )  # Colon format no padding
         assert normalize_ontology_id("CL:123") == "CL_123"  # Colon format no padding
-        assert normalize_ontology_id("EFO 1") == "EFO_0000001"  # Space format gets padding
-        assert normalize_ontology_id("UBERON 7") == "UBERON_0000007"  # Space format gets padding
+        assert (
+            normalize_ontology_id("EFO 1") == "EFO_0000001"
+        )  # Space format gets padding
+        assert (
+            normalize_ontology_id("UBERON 7") == "UBERON_0000007"
+        )  # Space format gets padding
 
     def test_normalize_ontology_id_none_and_empty(self) -> None:
         """Test None and empty string handling."""

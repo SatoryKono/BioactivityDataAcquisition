@@ -208,9 +208,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     @pa.check("protein_existence", name="protein_existence_values")
     def _check_protein_existence(cls, series: Series[str]) -> Series[bool]:
         """Validate protein existence values."""
-        return cast(
-            _SERIES_BOOL, series.isna() | series.isin(PROTEIN_EXISTENCE_LEVELS)
-        )
+        return cast(_SERIES_BOOL, series.isna() | series.isin(PROTEIN_EXISTENCE_LEVELS))
 
     annotation_score: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Annotation quality (1-5 stars)"

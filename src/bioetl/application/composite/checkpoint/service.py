@@ -143,6 +143,7 @@ class CompositeCheckpointService:
 
 import warnings
 
+
 class CompositeCheckpointManager(CompositeCheckpointService):
     def __init__(self, *args, **kwargs):
         message = (

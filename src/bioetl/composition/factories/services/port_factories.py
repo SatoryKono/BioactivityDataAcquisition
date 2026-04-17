@@ -40,9 +40,7 @@ def create_lock() -> LockPort:
 
 def create_checkpoint(storage_ctx: object) -> CheckpointPort:
     """Create local filesystem checkpoint."""
-    checkpoint = LocalCheckpointAdapter(
-        base_path=storage_ctx.checkpoints_path
-    )
+    checkpoint = LocalCheckpointAdapter(base_path=storage_ctx.checkpoints_path)
     assert isinstance(checkpoint, CheckpointPort), (
         f"LocalCheckpointAdapter must implement CheckpointPort, got {type(checkpoint)}"
     )

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
     from bioetl.domain.composite.config import CompositeConfig
 
+
 def iter_configured_join_keys(config: CompositeConfig) -> Iterable[str]:
     """Yield every configured join key from enrichers and dependencies."""
     for enricher in config.enrichers:
@@ -66,20 +67,19 @@ def build_join_key_normalization_expr(
 
     expr = pl.col(column).cast(pl.String)
     if policy.domain_canonicalizer is not None:
-        return (
-            expr.map_elements(
-                lambda value: None
+        return expr.map_elements(
+            lambda value: (
+                None
                 if value is None
                 else normalize_join_key_text(
                     value,
                     key=key,
                     normalization_policies=normalization_policies,
-                ),
-                return_dtype=pl.String,
-                skip_nulls=False,
-            )
-            .alias(column)
-        )
+                )
+            ),
+            return_dtype=pl.String,
+            skip_nulls=False,
+        ).alias(column)
     if policy.trim:
         expr = expr.str.strip_chars()
     if policy.lowercase:

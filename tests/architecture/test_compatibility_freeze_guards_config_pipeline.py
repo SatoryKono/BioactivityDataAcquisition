@@ -329,8 +329,8 @@ def test_metadata_builder_compat_module_is_confined_to_dedicated_tests(
 @pytest.mark.architecture
 def test_metadata_builder_module_file_has_been_removed() -> None:
     """Legacy storage metadata builder module should stay deleted."""
-    metadata_builder_path = (
-        Path("src/bioetl/infrastructure/storage/metadata_builder.py")
+    metadata_builder_path = Path(
+        "src/bioetl/infrastructure/storage/metadata_builder.py"
     )
     assert not metadata_builder_path.exists(), (
         "Legacy storage metadata builder must stay removed: "

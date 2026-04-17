@@ -12,7 +12,7 @@ import pyarrow as pa
 @dataclass(frozen=True, slots=True)
 class ValidatedSilverWriteContext:
     """Context containing validated data ready for Silver layer write."""
-    
+
     arrow_table: pa.Table
     metadata: dict[str, Any]  # Any: Flexible metadata structure from various sources
     validation_timestamp: datetime
@@ -23,7 +23,7 @@ class ValidatedSilverWriteContext:
 @dataclass(frozen=True, slots=True)
 class SilverWriteResult:
     """Result of a Silver layer write operation."""
-    
+
     table_name: str
     records_written: int
     records_updated: int | None = None
@@ -35,7 +35,9 @@ class SilverWriteResult:
 @dataclass(frozen=True, slots=True)
 class SilverMaintenanceContext:
     """Context for Silver layer maintenance operations."""
-    
+
     table_name: str
     operation_type: str  # 'vacuum', 'optimize', 'export'
-    operation_params: dict[str, Any]  # Any: Flexible operation parameters for different maintenance tasks
+    operation_params: dict[
+        str, Any
+    ]  # Any: Flexible operation parameters for different maintenance tasks

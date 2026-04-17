@@ -271,6 +271,7 @@ class TestActivityAggregatorFilterAndAggregate:
         result = aggregator.filter_and_aggregate(values, "mean")
         assert result == pytest.approx(200.0)
 
+
 class TestAggregationMethodEnum:
     """Tests for AggregationMethod enum."""
 

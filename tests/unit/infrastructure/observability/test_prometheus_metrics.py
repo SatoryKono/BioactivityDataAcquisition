@@ -40,7 +40,9 @@ class TestPrometheusMetrics:
                 },
             )
 
-            HISTOGRAMS["bioetl_pipeline_duration_seconds"].labels.assert_called_once_with(
+            HISTOGRAMS[
+                "bioetl_pipeline_duration_seconds"
+            ].labels.assert_called_once_with(
                 pipeline_name="test", status="success", run_type="full"
             )
             HISTOGRAMS[
@@ -71,9 +73,9 @@ class TestPrometheusMetrics:
             COUNTERS["bioetl_records_processed_total"].labels.assert_called_once_with(
                 pipeline_name="test", status="success"
             )
-            COUNTERS["bioetl_records_processed_total"].labels().inc.assert_called_once_with(
-                100
-            )
+            COUNTERS[
+                "bioetl_records_processed_total"
+            ].labels().inc.assert_called_once_with(100)
 
     def test_increment_counter_unknown_metric(self, prometheus_metrics):
         """Unknown counter names must fail loudly."""
@@ -270,12 +272,12 @@ class TestPrometheusCounterLabelNormalization:
                 pipeline="chembl_activity",
                 reason="other",
             )
-            COUNTERS["bioetl_quarantine_records_total"].labels().inc.assert_called_once_with(2)
+            COUNTERS[
+                "bioetl_quarantine_records_total"
+            ].labels().inc.assert_called_once_with(2)
 
     def test_dq_validation_failures_total_normalizes_labels(self, prometheus_metrics):
-        with patch.dict(
-            COUNTERS, {"bioetl_dq_validation_failures_total": MagicMock()}
-        ):
+        with patch.dict(COUNTERS, {"bioetl_dq_validation_failures_total": MagicMock()}):
             prometheus_metrics.increment_counter(
                 "bioetl_dq_validation_failures_total",
                 1,
@@ -332,9 +334,7 @@ class TestObservabilityMetricContract:
     """Tests for observability_events_total label schema normalization."""
 
     def test_observability_counter_ignores_legacy_labels(self, prometheus_metrics):
-        with patch.dict(
-            COUNTERS, {"bioetl_observability_events_total": MagicMock()}
-        ):
+        with patch.dict(COUNTERS, {"bioetl_observability_events_total": MagicMock()}):
             prometheus_metrics.increment_counter(
                 name="bioetl_observability_events_total",
                 value=1,
@@ -346,7 +346,9 @@ class TestObservabilityMetricContract:
                 },
             )
 
-            COUNTERS["bioetl_observability_events_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_observability_events_total"
+            ].labels.assert_called_once_with(
                 event="unknown_event",
                 provider="unknown",
                 pipeline="unknown",
@@ -357,9 +359,7 @@ class TestObservabilityMetricContract:
     def test_observability_counter_normalizes_path_like_pipeline_labels(
         self, prometheus_metrics
     ) -> None:
-        with patch.dict(
-            COUNTERS, {"bioetl_observability_events_total": MagicMock()}
-        ):
+        with patch.dict(COUNTERS, {"bioetl_observability_events_total": MagicMock()}):
             prometheus_metrics.increment_counter(
                 name="bioetl_observability_events_total",
                 value=1,
@@ -372,7 +372,9 @@ class TestObservabilityMetricContract:
                 },
             )
 
-            COUNTERS["bioetl_observability_events_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_observability_events_total"
+            ].labels.assert_called_once_with(
                 event="silver_merge_retry",
                 provider="storage",
                 pipeline="chembl_activity",
@@ -386,16 +388,16 @@ class TestMetricLabelContract:
     """Metrics adapters accept only canonical labels payloads."""
 
     def test_observability_counter_always_has_required_labels(self, prometheus_metrics):
-        with patch.dict(
-            COUNTERS, {"bioetl_observability_events_total": MagicMock()}
-        ):
+        with patch.dict(COUNTERS, {"bioetl_observability_events_total": MagicMock()}):
             prometheus_metrics.increment_counter(
                 name="bioetl_observability_events_total",
                 value=1,
                 labels={},
             )
 
-            COUNTERS["bioetl_observability_events_total"].labels.assert_called_once_with(
+            COUNTERS[
+                "bioetl_observability_events_total"
+            ].labels.assert_called_once_with(
                 event="unknown_event",
                 provider="unknown",
                 pipeline="unknown",

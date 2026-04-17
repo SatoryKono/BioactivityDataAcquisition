@@ -470,8 +470,12 @@ class TestCompositeDQConfig:
                 ),
             },
         )
-        assert config.get_enricher_soft_threshold("semanticscholar") == pytest.approx(0.20)
-        assert config.get_enricher_hard_threshold("semanticscholar") == pytest.approx(0.50)
+        assert config.get_enricher_soft_threshold("semanticscholar") == pytest.approx(
+            0.20
+        )
+        assert config.get_enricher_hard_threshold("semanticscholar") == pytest.approx(
+            0.50
+        )
         # Non-overridden enrichers use defaults
         assert config.get_enricher_soft_threshold("crossref") == pytest.approx(0.10)
         assert config.get_enricher_hard_threshold("crossref") == pytest.approx(0.30)

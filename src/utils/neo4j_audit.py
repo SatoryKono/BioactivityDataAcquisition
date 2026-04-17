@@ -3,7 +3,7 @@ Neo4j connection helper for audit workload.
 
 Usage:
     from src.utils.neo4j_audit import get_neo4j_uri, get_neo4j_auth
-    
+
     # Automatically uses audit instance if LIVE_AUDIT_MODE is set
     uri = get_neo4j_uri()
     auth = get_neo4j_auth()
@@ -16,37 +16,37 @@ from typing import Tuple
 def get_neo4j_uri() -> str:
     """
     Get Neo4j URI based on execution context.
-    
+
     Returns:
         - bolt://localhost:7688 if LIVE_AUDIT_MODE env var is set (audit instance)
         - bolt://localhost:7687 otherwise (MCP instance)
     """
-    if os.getenv('LIVE_AUDIT_MODE'):
+    if os.getenv("LIVE_AUDIT_MODE"):
         # Audit instance: higher memory (1024m), port 7688
-        return 'bolt://localhost:7688'
+        return "bolt://localhost:7688"
     else:
         # MCP instance: standard port 7687
-        return 'bolt://localhost:7687'
+        return "bolt://localhost:7687"
 
 
 def get_neo4j_auth() -> Tuple[str, str]:
     """
     Get Neo4j credentials based on execution context.
-    
+
     Returns:
         Tuple of (username, password)
     """
-    if os.getenv('LIVE_AUDIT_MODE'):
+    if os.getenv("LIVE_AUDIT_MODE"):
         # Audit instance has separate credentials
-        return ('neo4j', 'audit_secure_password')
+        return ("neo4j", "audit_secure_password")
     else:
         # MCP instance
-        return ('neo4j', os.getenv('NEO4J_PASSWORD', 'bioetl_secure_password'))
+        return ("neo4j", os.getenv("NEO4J_PASSWORD", "bioetl_secure_password"))
 
 
 def is_audit_mode() -> bool:
     """Check if running in audit mode."""
-    return bool(os.getenv('LIVE_AUDIT_MODE'))
+    return bool(os.getenv("LIVE_AUDIT_MODE"))
 
 
 def get_heap_info() -> str:

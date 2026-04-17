@@ -37,11 +37,11 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class SilverDeltaOperations:
     """Delta operations service for Silver layer writes.
-    
+
     This service encapsulates all Delta Lake write/merge operations previously in SilverWriterDeltaMixin,
     following the composition pattern for better separation of concerns and testability.
     """
-    
+
     logger: LoggerPort
     _metrics: MetricsPort | None
     _merge_resilience_policy: SilverMergeResiliencePolicy
@@ -49,6 +49,7 @@ class SilverDeltaOperations:
     def _load_silver_writer_module(self) -> Any:  # Any: return type varies at runtime
         """Load silver_writer module for backward-compatible patch points."""
         from bioetl.infrastructure.storage import silver_writer as silver_writer_module
+
         return silver_writer_module
 
     @property
