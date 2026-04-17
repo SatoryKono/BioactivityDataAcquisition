@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T07:16:29.105828+00:00",
+  "generated_at": "2026-04-17T07:31:18.280883+00:00",
   "summary": {
-    "total_scripts": 394,
+    "total_scripts": 392,
     "status_counts": {
-      "active": 308,
+      "active": 306,
       "legacy": 10,
       "orphan": 67,
       "unknown": 9
@@ -14,54 +14,12 @@
       "build": 1,
       "ci": 49,
       "docs": 119,
-      "scripts": 296,
+      "scripts": 294,
       "skills": 9,
       "tests": 100
     }
   },
   "scripts": [
-    {
-      "path": "scripts/.cache/tools/codex-cli/npm-global/codex.cmd",
-      "type": "cmd",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/.cache/tools/codex-cli/npm-cache/_logs/2026-04-15T13_52_29_681Z-debug-0.log",
-          "line": 55,
-          "source_group": "scripts",
-          "text": "51 silly reify   'E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\scripts\\\\.cache\\\\tools\\\\codex-cli\\\\npm-global\\\\codex.cmd',"
-        },
-        {
-          "path": "scripts/.cache/tools/codex-cli/npm-cache/_logs/2026-04-15T13_52_29_681Z-debug-0.log",
-          "line": 61,
-          "source_group": "scripts",
-          "text": "52 silly reify   'E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\scripts\\\\.cache\\\\tools\\\\codex-cli\\\\npm-global\\\\codex.cmd': 'E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\scripts\\"
-        }
-      ]
-    },
-    {
-      "path": "scripts/.cache/tools/codex-cli/npm-global/codex.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/.cache/tools/codex-cli/npm-cache/_logs/2026-04-15T13_52_29_681Z-debug-0.log",
-          "line": 56,
-          "source_group": "scripts",
-          "text": "51 silly reify   'E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\scripts\\\\.cache\\\\tools\\\\codex-cli\\\\npm-global\\\\codex.ps1'"
-        },
-        {
-          "path": "scripts/.cache/tools/codex-cli/npm-cache/_logs/2026-04-15T13_52_29_681Z-debug-0.log",
-          "line": 62,
-          "source_group": "scripts",
-          "text": "52 silly reify   'E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\scripts\\\\.cache\\\\tools\\\\codex-cli\\\\npm-global\\\\codex.ps1': 'E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\scripts\\"
-        }
-      ]
-    },
     {
       "path": "scripts/ai/__main__.py",
       "type": "py",
@@ -7713,10 +7671,17 @@
     {
       "path": "scripts/docs/matrix/normalize_values.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 44,
+          "source_group": "scripts",
+          "text": "| `normalize-matrix-values`             | `scripts/docs/matrix/normalize_values.py`                    | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/structural_contract.py",
@@ -7737,17 +7702,10 @@
     {
       "path": "scripts/docs/normalize_chembl_matrix_workbook.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 44,
-          "source_group": "scripts",
-          "text": "| `normalize-matrix-values`             | `scripts/docs/normalize_chembl_matrix_workbook.py`           | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/docs/report_docs_kpi.py",
@@ -7883,7 +7841,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 428,
+          "line": 434,
           "source_group": "scripts",
           "text": "\"scripts/generate_architecture_dependency_map.py\","
         },
@@ -8774,7 +8732,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 433,
+          "line": 439,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/close_duplicate_prs_wave2.sh\","
         }
@@ -8789,7 +8747,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 434,
+          "line": 440,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/close_duplicate_prs_wave3.sh\","
         }
@@ -8810,7 +8768,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 441,
+          "line": 447,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/close_great_expectations_spike_issue.sh\","
         }
@@ -8825,7 +8783,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 438,
+          "line": 444,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/close_issue_2597.sh\","
         }
@@ -8846,7 +8804,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 442,
+          "line": 448,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/close_pandera_schema_drift_issue.sh\","
         }
@@ -8861,7 +8819,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 432,
+          "line": 438,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/close_superseded_prs.sh\","
         }
@@ -8884,7 +8842,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 437,
+          "line": 443,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/post_issue_2597_progress.sh\","
         }
@@ -8899,7 +8857,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 439,
+          "line": 445,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/post_issue_rescope_comments.sh\","
         }
@@ -8968,7 +8926,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 440,
+          "line": 446,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/update_issue_rescope_bodies.sh\","
         }
@@ -9042,7 +9000,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 429,
+          "line": 435,
           "source_group": "scripts",
           "text": "\"scripts/rerender_grafana_screenshots.py\","
         }
@@ -9579,7 +9537,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 467,
+          "line": 473,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_application_deps.py\","
         },
@@ -9624,7 +9582,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 466,
+          "line": 472,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_architecture.py\","
         },
@@ -9702,7 +9660,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 468,
+          "line": 474,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_constructor_args.py\","
         },
@@ -11194,7 +11152,7 @@
         },
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 460,
+          "line": 466,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
@@ -11473,7 +11431,7 @@
       "references": [
         {
           "path": "scripts/repo/check_scripts_inventory.py",
-          "line": 462,
+          "line": 468,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/validate_unified_configs.py\","
         },
