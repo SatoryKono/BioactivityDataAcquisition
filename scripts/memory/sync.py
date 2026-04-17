@@ -3852,73 +3852,192 @@ def _add_repo_zone_file_structure(
         zone_root = root / relative_root
         if not zone_root.is_dir():
             continue
-        for current_dir, dirnames, filenames in os.walk(zone_root):
-            current_path = Path(current_dir)
-            relative_dir = _rel_path(root, current_path)
-            if _is_excluded_file_structure_path(relative_dir, config):
-                dirnames[:] = []
-                filenames[:] = []
-                continue
+        _walk_repo_zone_file_structure(
+            snapshot,
+            root,
+            project,
+            zone,
+            today,
+            zone_name=zone_name,
+            relative_root=relative_root,
+            zone_root=zone_root,
+            config=config,
+        )
 
-            dirnames[:] = sorted(
-                name
-                for name in dirnames
-                if not _is_excluded_file_structure_path(_rel_path(root, current_path / name), config)
-            )
-            directory = snapshot.add_node(
-                "directory_surface",
-                relative_dir,
-                summary=f"Primary repository directory `{relative_dir}`.",
-                source_path=relative_dir,
-                source_kind="file_structure_directory",
-                repo_zone=zone_name,
-                depth=len(Path(relative_dir).parts),
-                is_primary=True,
-                last_verified=today,
-                ingest_wave="repo_sync_v1",
-                confidence="high",
-            )
-            if relative_dir == relative_root:
-                snapshot.add_relation(zone, "CONTAINS", directory, provenance="file_structure")
-            else:
-                parent_key = NodeKey("directory_surface", _rel_path(root, current_path.parent))
-                snapshot.add_relation(parent_key, "CONTAINS", directory, provenance="file_structure")
 
-            for filename in sorted(filenames):
-                file_path = current_path / filename
-                relative_file = _rel_path(root, file_path)
-                if _is_excluded_file_structure_path(relative_file, config):
-                    continue
+def _walk_repo_zone_file_structure(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    zone: NodeKey,
+    today: str,
+    *,
+    zone_name: str,
+    relative_root: str,
+    zone_root: Path,
+    config: dict[str, object],
+) -> None:
+    for current_dir, dirnames, filenames in os.walk(zone_root):
+        current_path = Path(current_dir)
+        relative_dir = _rel_path(root, current_path)
+        if _is_excluded_file_structure_path(relative_dir, config):
+            dirnames[:] = []
+            filenames[:] = []
+            continue
+        dirnames[:] = _included_file_structure_dirs(root, current_path, dirnames, config)
+        directory = _add_repo_zone_directory_surface(
+            snapshot,
+            root,
+            zone,
+            today,
+            zone_name=zone_name,
+            relative_root=relative_root,
+            current_path=current_path,
+            relative_dir=relative_dir,
+        )
+        _add_repo_zone_directory_files(
+            snapshot,
+            root,
+            project,
+            directory,
+            current_path,
+            filenames,
+            today,
+            zone_name=zone_name,
+            config=config,
+        )
 
-                file_surface = snapshot.add_node(
-                    "file_surface",
-                    relative_file,
-                    summary=f"Repository file `{relative_file}`.",
-                    source_path=relative_file,
-                    source_kind="file_structure_file",
-                    repo_zone=zone_name,
-                    file_extension=Path(filename).suffix[1:] if Path(filename).suffix else None,
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="high",
-                )
-                snapshot.add_relation(directory, "CONTAINS", file_surface, provenance="file_structure")
-                file_extension = Path(filename).suffix.lower()
-                if not _is_doc_artifact_file(relative_file, file_extension):
-                    continue
-                doc_artifact = snapshot.add_node(
-                    "doc_artifact",
-                    relative_file,
-                    summary=f"Documentation artifact `{relative_file}`.",
-                    source_path=relative_file,
-                    source_kind="doc_artifact",
-                    repo_zone=zone_name,
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="medium",
-                )
-                snapshot.add_relation(project, "HAS_DOC_ARTIFACT", doc_artifact, provenance="file_structure")
-                snapshot.add_relation(doc_artifact, "BACKED_BY", file_surface, provenance="file_structure")
+
+def _included_file_structure_dirs(
+    root: Path,
+    current_path: Path,
+    dirnames: list[str],
+    config: dict[str, object],
+) -> list[str]:
+    return sorted(
+        name
+        for name in dirnames
+        if not _is_excluded_file_structure_path(_rel_path(root, current_path / name), config)
+    )
+
+
+def _add_repo_zone_directory_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    zone: NodeKey,
+    today: str,
+    *,
+    zone_name: str,
+    relative_root: str,
+    current_path: Path,
+    relative_dir: str,
+) -> NodeKey:
+    directory = snapshot.add_node(
+        "directory_surface",
+        relative_dir,
+        summary=f"Primary repository directory `{relative_dir}`.",
+        source_path=relative_dir,
+        source_kind="file_structure_directory",
+        repo_zone=zone_name,
+        depth=len(Path(relative_dir).parts),
+        is_primary=True,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    if relative_dir == relative_root:
+        snapshot.add_relation(zone, "CONTAINS", directory, provenance="file_structure")
+    else:
+        parent_key = NodeKey("directory_surface", _rel_path(root, current_path.parent))
+        snapshot.add_relation(parent_key, "CONTAINS", directory, provenance="file_structure")
+    return directory
+
+
+def _add_repo_zone_directory_files(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    directory: NodeKey,
+    current_path: Path,
+    filenames: list[str],
+    today: str,
+    *,
+    zone_name: str,
+    config: dict[str, object],
+) -> None:
+    for filename in sorted(filenames):
+        file_path = current_path / filename
+        relative_file = _rel_path(root, file_path)
+        if _is_excluded_file_structure_path(relative_file, config):
+            continue
+        file_surface = _add_repo_zone_file_surface(
+            snapshot,
+            directory,
+            relative_file,
+            today,
+            zone_name=zone_name,
+            filename=filename,
+        )
+        _add_repo_zone_doc_artifact(
+            snapshot,
+            project,
+            file_surface,
+            relative_file,
+            today,
+            zone_name=zone_name,
+        )
+
+
+def _add_repo_zone_file_surface(
+    snapshot: GraphSnapshot,
+    directory: NodeKey,
+    relative_file: str,
+    today: str,
+    *,
+    zone_name: str,
+    filename: str,
+) -> NodeKey:
+    file_surface = snapshot.add_node(
+        "file_surface",
+        relative_file,
+        summary=f"Repository file `{relative_file}`.",
+        source_path=relative_file,
+        source_kind="file_structure_file",
+        repo_zone=zone_name,
+        file_extension=Path(filename).suffix[1:] if Path(filename).suffix else None,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(directory, "CONTAINS", file_surface, provenance="file_structure")
+    return file_surface
+
+
+def _add_repo_zone_doc_artifact(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    file_surface: NodeKey,
+    relative_file: str,
+    today: str,
+    *,
+    zone_name: str,
+) -> None:
+    file_extension = Path(relative_file).suffix.lower()
+    if not _is_doc_artifact_file(relative_file, file_extension):
+        return
+    doc_artifact = snapshot.add_node(
+        "doc_artifact",
+        relative_file,
+        summary=f"Documentation artifact `{relative_file}`.",
+        source_path=relative_file,
+        source_kind="doc_artifact",
+        repo_zone=zone_name,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="medium",
+    )
+    snapshot.add_relation(project, "HAS_DOC_ARTIFACT", doc_artifact, provenance="file_structure")
+    snapshot.add_relation(doc_artifact, "BACKED_BY", file_surface, provenance="file_structure")
 
 
 def _link_source_backed_file_structure(
@@ -10457,6 +10576,125 @@ def _live_scalar(client: Neo4jHttpClient, statement: str, parameters: dict[str, 
     return int(value) if isinstance(value, (int, float)) else 0
 
 
+def _row_int_total(rows: list[dict[str, JsonValue]], key: str) -> int:
+    return sum(int(row[key]) for row in rows if isinstance(row.get(key), (int, float)))
+
+
+def _managed_label_counts_from_rows(
+    rows: list[dict[str, JsonValue]],
+) -> dict[str, int]:
+    return {
+        str(row["label"]): int(row["managed"])
+        for row in rows
+        if isinstance(row.get("label"), str)
+    }
+
+
+def _managed_relation_counts_from_rows(
+    rows: list[dict[str, JsonValue]],
+) -> dict[str, int]:
+    return {
+        str(row["relation_type"]): int(row["total"])
+        for row in rows
+        if isinstance(row.get("relation_type"), str)
+    }
+
+
+def _snapshot_count_map(
+    snapshot_stats: dict[str, JsonValue],
+    key: str,
+) -> dict[str, int]:
+    raw_counts = snapshot_stats[key]
+    if not isinstance(raw_counts, dict):
+        return {}
+    return {str(name): int(count) for name, count in raw_counts.items()}
+
+
+def _snapshot_subset_count_map(
+    snapshot_stats: dict[str, JsonValue],
+    key: str,
+    names: tuple[str, ...],
+) -> dict[str, int]:
+    raw_counts = snapshot_stats[key]
+    if not isinstance(raw_counts, dict):
+        return {}
+    return {name: int(raw_counts.get(name, 0)) for name in names}
+
+
+def _managed_label_summary_from_counts(
+    label_counts: dict[str, int],
+) -> list[dict[str, JsonValue]]:
+    return [
+        {
+            "label": label,
+            "managed": count,
+            "count": count,
+            "unmanaged": 0,
+        }
+        for label, count in label_counts.items()
+    ]
+
+
+def _managed_relation_summary_from_counts(
+    relation_counts: dict[str, int],
+) -> list[dict[str, JsonValue]]:
+    return [
+        {"relation_type": relation_type, "total": total}
+        for relation_type, total in relation_counts.items()
+    ]
+
+
+def _audit_live_summary(
+    *,
+    managed_node_total: int,
+    managed_relation_total: int,
+    unmanaged_repo_node_total: int,
+    label_summary: list[dict[str, JsonValue]],
+    managed_relation_summary: list[dict[str, JsonValue]],
+    orphan_summary: list[dict[str, JsonValue]],
+    unmanaged_summary: list[dict[str, JsonValue]],
+) -> dict[str, JsonValue]:
+    return {
+        "managed_node_total": managed_node_total,
+        "managed_relation_total": managed_relation_total,
+        "unmanaged_repo_node_total": unmanaged_repo_node_total,
+        "label_summary": label_summary,
+        "managed_relation_summary": managed_relation_summary,
+        "orphan_summary": {
+            "total": _row_int_total(orphan_summary, "count"),
+            "by_label": orphan_summary,
+        },
+        "unmanaged_summary": {
+            "total": unmanaged_repo_node_total,
+            "by_label": unmanaged_summary,
+        },
+    }
+
+
+def _audit_report_payload(
+    *,
+    snapshot_payload: dict[str, JsonValue],
+    managed_labels: list[str],
+    live_summary: dict[str, JsonValue],
+    snapshot_label_counts: dict[str, int],
+    live_managed_label_counts: dict[str, int],
+    snapshot_relation_counts: dict[str, int],
+    live_managed_relation_counts: dict[str, int],
+) -> dict[str, JsonValue]:
+    return {
+        "generated_at": _sync_run_id(),
+        "managed_by": DEFAULT_MANAGED_BY,
+        "ingest_wave": DEFAULT_INGEST_WAVE,
+        "snapshot": snapshot_payload,
+        "managed_labels": managed_labels,
+        "live": live_summary,
+        "diff": {
+            "labels": _build_diff_entries(snapshot_label_counts, live_managed_label_counts),
+            "relation_types": _build_diff_entries(snapshot_relation_counts, live_managed_relation_counts),
+        },
+    }
+
+
 def build_audit_report(
     snapshot: GraphSnapshot,
     root: Path,
@@ -10472,55 +10710,29 @@ def build_audit_report(
     orphan_rows = _live_orphan_rows(client, managed_labels)
     unmanaged_rows = _live_unmanaged_repo_rows(client, managed_labels)
 
-    live_managed_label_counts = {
-        str(row["label"]): int(row["managed"])
-        for row in live_label_rows
-        if isinstance(row.get("label"), str)
-    }
-    live_managed_relation_counts = {
-        str(row["relation_type"]): int(row["total"])
-        for row in live_relation_rows
-        if isinstance(row.get("relation_type"), str)
-    }
-    managed_node_total = sum(int(row["managed"]) for row in live_label_rows if isinstance(row.get("managed"), (int, float)))
-    unmanaged_repo_node_total = sum(
-        int(row["count"]) for row in unmanaged_rows if isinstance(row.get("count"), (int, float))
-    )
+    live_managed_label_counts = _managed_label_counts_from_rows(live_label_rows)
+    live_managed_relation_counts = _managed_relation_counts_from_rows(live_relation_rows)
+    managed_node_total = _row_int_total(live_label_rows, "managed")
+    unmanaged_repo_node_total = _row_int_total(unmanaged_rows, "count")
     managed_relation_total = sum(live_managed_relation_counts.values())
-    orphan_total = sum(int(row["count"]) for row in orphan_rows if isinstance(row.get("count"), (int, float)))
-
-    return {
-        "generated_at": _sync_run_id(),
-        "managed_by": DEFAULT_MANAGED_BY,
-        "ingest_wave": DEFAULT_INGEST_WAVE,
-        "snapshot": snapshot_stats,
-        "managed_labels": managed_labels,
-        "live": {
-            "managed_node_total": managed_node_total,
-            "managed_relation_total": managed_relation_total,
-            "unmanaged_repo_node_total": unmanaged_repo_node_total,
-            "label_summary": live_label_rows,
-            "managed_relation_summary": live_relation_rows,
-            "orphan_summary": {
-                "total": orphan_total,
-                "by_label": orphan_rows,
-            },
-            "unmanaged_summary": {
-                "total": unmanaged_repo_node_total,
-                "by_label": unmanaged_rows,
-            },
-        },
-        "diff": {
-            "labels": _build_diff_entries(
-                {str(name): int(count) for name, count in snapshot_stats["labels"].items()},
-                live_managed_label_counts,
-            ),
-            "relation_types": _build_diff_entries(
-                {str(name): int(count) for name, count in snapshot_stats["relation_types"].items()},
-                live_managed_relation_counts,
-            ),
-        },
-    }
+    live_summary = _audit_live_summary(
+        managed_node_total=managed_node_total,
+        managed_relation_total=managed_relation_total,
+        unmanaged_repo_node_total=unmanaged_repo_node_total,
+        label_summary=live_label_rows,
+        managed_relation_summary=live_relation_rows,
+        orphan_summary=orphan_rows,
+        unmanaged_summary=unmanaged_rows,
+    )
+    return _audit_report_payload(
+        snapshot_payload=snapshot_stats,
+        managed_labels=managed_labels,
+        live_summary=live_summary,
+        snapshot_label_counts=_snapshot_count_map(snapshot_stats, "labels"),
+        live_managed_label_counts=live_managed_label_counts,
+        snapshot_relation_counts=_snapshot_count_map(snapshot_stats, "relation_types"),
+        live_managed_relation_counts=live_managed_relation_counts,
+    )
 
 
 def build_fast_analysis_audit_report(
@@ -10540,11 +10752,12 @@ def build_fast_analysis_audit_report(
         for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
         if int(snapshot_stats["relation_types"].get(relation_type, 0)) > 0
     )
-    snapshot_label_counts = {label: int(snapshot_stats["labels"].get(label, 0)) for label in active_labels}
-    snapshot_relation_counts = {
-        relation_type: int(snapshot_stats["relation_types"].get(relation_type, 0))
-        for relation_type in active_relation_types
-    }
+    snapshot_label_counts = _snapshot_subset_count_map(snapshot_stats, "labels", active_labels)
+    snapshot_relation_counts = _snapshot_subset_count_map(
+        snapshot_stats,
+        "relation_types",
+        active_relation_types,
+    )
     live_managed_label_counts = _live_managed_node_counts(
         client,
         active_labels,
@@ -10555,38 +10768,31 @@ def build_fast_analysis_audit_report(
         active_relation_types,
         context="fast audit relation summary",
     )
-
-    return {
-        "generated_at": _sync_run_id(),
-        "managed_by": DEFAULT_MANAGED_BY,
-        "ingest_wave": DEFAULT_INGEST_WAVE,
-        "snapshot": {
+    live_summary = _audit_live_summary(
+        managed_node_total=sum(live_managed_label_counts.values()),
+        managed_relation_total=sum(live_managed_relation_counts.values()),
+        unmanaged_repo_node_total=0,
+        label_summary=_managed_label_summary_from_counts(live_managed_label_counts),
+        managed_relation_summary=_managed_relation_summary_from_counts(
+            live_managed_relation_counts
+        ),
+        orphan_summary=[],
+        unmanaged_summary=[],
+    )
+    return _audit_report_payload(
+        snapshot_payload={
             "node_count": sum(snapshot_label_counts.values()),
             "relation_count": sum(snapshot_relation_counts.values()),
             "labels": snapshot_label_counts,
             "relation_types": snapshot_relation_counts,
         },
-        "managed_labels": list(active_labels),
-        "live": {
-            "managed_node_total": sum(live_managed_label_counts.values()),
-            "managed_relation_total": sum(live_managed_relation_counts.values()),
-            "unmanaged_repo_node_total": 0,
-            "label_summary": [
-                {"label": label, "managed": live_managed_label_counts[label], "count": live_managed_label_counts[label], "unmanaged": 0}
-                for label in active_labels
-            ],
-            "managed_relation_summary": [
-                {"relation_type": relation_type, "total": live_managed_relation_counts[relation_type]}
-                for relation_type in active_relation_types
-            ],
-            "orphan_summary": {"total": 0, "by_label": []},
-            "unmanaged_summary": {"total": 0, "by_label": []},
-        },
-        "diff": {
-            "labels": _build_diff_entries(snapshot_label_counts, live_managed_label_counts),
-            "relation_types": _build_diff_entries(snapshot_relation_counts, live_managed_relation_counts),
-        },
-    }
+        managed_labels=list(active_labels),
+        live_summary=live_summary,
+        snapshot_label_counts=snapshot_label_counts,
+        live_managed_label_counts=live_managed_label_counts,
+        snapshot_relation_counts=snapshot_relation_counts,
+        live_managed_relation_counts=live_managed_relation_counts,
+    )
 
 
 def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:
