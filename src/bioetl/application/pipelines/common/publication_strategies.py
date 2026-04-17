@@ -30,7 +30,13 @@ class DefaultIdentifierResolver(IdentifierResolverStrategy):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars at the strategy seam.
+    ) -> (
+        tuple[
+            str,
+            Any,  # Any: primary ID values remain provider-specific scalars at the strategy seam.
+        ]
+        | None
+    ):
         """Validate primary-id presence and return the `(field, value)` pair."""
         primary_id = business_data.get(self._primary_id_field)
         if not primary_id:

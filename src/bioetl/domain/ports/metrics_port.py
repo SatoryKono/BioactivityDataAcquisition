@@ -24,7 +24,11 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float = 1.0,
-        tags: Dict[str, Any] | None = None,  # Any: Generic tag values for metric filtering
+        tags: Dict[
+            str,
+            Any,  # Any: Generic tag values for metric filtering
+        ]
+        | None = None,
     ) -> None:
         """Increment a counter metric.
 
@@ -39,7 +43,11 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[str, Any] | None = None,  # Any: Generic tag values for metric filtering
+        tags: Dict[
+            str,
+            Any,  # Any: Generic tag values for metric filtering
+        ]
+        | None = None,
     ) -> None:
         """Set a gauge metric to a specific value.
 
@@ -54,7 +62,11 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[str, Any] | None = None,  # Any: Generic tag values for metric filtering
+        tags: Dict[
+            str,
+            Any,  # Any: Generic tag values for metric filtering
+        ]
+        | None = None,
     ) -> None:
         """Record a timing metric.
 
@@ -69,7 +81,11 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[str, Any] | None = None,  # Any: Generic tag values for metric filtering
+        tags: Dict[
+            str,
+            Any,  # Any: Generic tag values for metric filtering
+        ]
+        | None = None,
     ) -> None:
         """Record a histogram metric.
 

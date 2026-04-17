@@ -40,7 +40,10 @@ class BioETLDomainError(BioETLError):
     """
 
     message: str
-    context: Dict[str, Any] = None  # Any: Domain exception context stores JSON-serializable payload values of mixed types.
+    context: Dict[
+        str,
+        Any,  # Any: Domain exception context stores JSON-serializable payload values of mixed types.
+    ] = None
     original_exception: Optional[Exception] = None
 
     def __str__(self) -> str:
@@ -52,7 +55,12 @@ class BioETLDomainError(BioETLError):
             base_msg += f" | Caused by: {self.original_exception}"
         return base_msg
 
-    def to_dict(self) -> Dict[str, Any]:  # Any: Generic dictionary for structured logging
+    def to_dict(
+        self,
+    ) -> Dict[
+        str,
+        Any,  # Any: Generic dictionary for structured logging
+    ]:
         """Convert exception to dictionary for structured logging."""
         result = {
             "error_type": self.__class__.__name__,
@@ -75,7 +83,9 @@ class BioETLValidationError(BioETLDomainError):
     """
 
     field_name: Optional[str] = None
-    invalid_value: Optional[Any] = None  # Any: Generic invalid value from various sources
+    invalid_value: Optional[
+        Any  # Any: Generic invalid value from various sources
+    ] = None
 
     def __post_init__(self):
         """Ensure context includes field and value information."""

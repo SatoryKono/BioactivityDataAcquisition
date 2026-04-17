@@ -2,17 +2,59 @@
   "schema_version": "1.0",
   "description": "Lifecycle decisions for non-active scripts (orphan/legacy).",
   "entries": {
-    "scripts/migrate_deprecated_names.py": {
+    "scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh": {
       "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
+      "decision": "legacy_issue_workflow",
       "review_by": "2026-07-15",
-      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/engineering/dev/python/migrate_deprecated_names.py while historical references converge on the canonical dev path."
+      "next_step": "Retain only as a bounded issue-wave helper for historical GitHub cleanup execution; do not promote it into the canonical ops command surface unless the duplicate-PR wave is revived with active call-sites."
     },
-    "scripts/generate_architecture_dependency_map.py": {
-      "owner": "@bioetl-architecture",
-      "decision": "compatibility_wrapper",
+    "scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_issue_workflow",
       "review_by": "2026-07-15",
-      "next_step": "Retain as a root-level compatibility wrapper while tests and docs still assert the historical path; prefer scripts.engineering.qa.generate_architecture_dependency_map as the canonical implementation."
+      "next_step": "Retain only as a bounded issue-wave helper for historical GitHub cleanup execution; do not promote it into the canonical ops command surface unless the duplicate-PR wave is revived with active call-sites."
+    },
+    "scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_issue_workflow",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub closure flow; remove it once the spike-era maintenance surface is explicitly sunset."
+    },
+    "scripts/ops/maintenance/github/close_issue_2597.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_issue_workflow",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub closure flow; remove it once the related cleanup thread is fully retired."
+    },
+    "scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_issue_workflow",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub closure flow; remove it once the schema-drift follow-up is fully retired."
+    },
+    "scripts/ops/maintenance/github/close_superseded_prs.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_issue_workflow",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded PR-cleanup helper for historical maintenance waves; do not expand it into a canonical repo-governance workflow without renewed in-repo call-site evidence."
+    },
+    "scripts/ops/maintenance/github/post_issue_2597_progress.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_issue_workflow",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical GitHub reporting flow; remove it once the related progress-post workflow is retired."
+    },
+    "scripts/ops/maintenance/github/post_issue_rescope_comments.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_issue_workflow",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical rescope-comment flow; remove it once the associated maintenance package is retired."
+    },
+    "scripts/ops/maintenance/github/update_issue_rescope_bodies.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_issue_workflow",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded issue-specific maintenance helper tied to a historical rescope-body update flow; remove it once the associated maintenance package is retired."
     },
     "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
       "owner": "@bioetl-platform",
@@ -31,18 +73,6 @@
       "decision": "temporary_diagnostic",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded shell-side Neo4j audit/bootstrap helper while the local graph-memory troubleshooting flow remains operator-maintained; either promote it into a documented supported workflow or remove it once the audit path is retired."
-    },
-    "scripts/neo4j-recovery-checklist.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1 while historical docs and operator habits still reference the legacy root path."
-    },
-    "scripts/restart-docker.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/runtime/docker/restart-docker.ps1 while historical docs and operator habits still reference the legacy root path."
     },
     "scripts/ops/launchers/codex/codex-wsl.bat": {
       "owner": "@bioetl-platform",
@@ -73,6 +103,18 @@
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin batch launcher to scripts/ai/codex/diagnose_wsl.bat while mixed Windows/WSL operator flows still reference the scripts.ops path."
+    },
+    "scripts/qa/generate_architecture_debt_tasks.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin compatibility facade to scripts/engineering/qa/generate_architecture_debt_tasks.py while historical scripts.qa call-sites converge on the canonical engineering.qa surface."
+    },
+    "scripts/qa/reduce_architecture_debt.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin compatibility facade to scripts/engineering/qa/reduce_architecture_debt.py while historical scripts.qa call-sites converge on the canonical engineering.qa surface."
     },
     "scripts/ai/vibe/__main__.py": {
       "owner": "@bioetl-platform",

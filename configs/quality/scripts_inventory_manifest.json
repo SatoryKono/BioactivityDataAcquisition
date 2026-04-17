@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T12:12:39.081815+00:00",
+  "generated_at": "2026-04-17T12:16:58.857234+00:00",
   "summary": {
     "total_scripts": 392,
     "status_counts": {
@@ -3163,7 +3163,7 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 6121,
+          "line": 6206,
           "source_group": "scripts",
           "text": "if \"scripts.docs\" in lowered or \"check-links\" in lowered or \"build_docs_site.sh\" in lowered:"
         }

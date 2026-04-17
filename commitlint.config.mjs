@@ -1,7 +1,7 @@
 export default {
   extends: ['@commitlint/config-conventional'],
   ignores: [
-    (message) => /^Merge/.test(message),
+     (message) => message.startsWith('Merge'),
     // Ignore non-conventional commits from merged feature branches
     // (historical commits that cannot be rewritten)
     (message) => !/^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)[\(:]/.test(message),

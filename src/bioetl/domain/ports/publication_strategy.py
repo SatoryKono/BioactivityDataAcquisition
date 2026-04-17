@@ -50,7 +50,13 @@ class IdentifierResolverStrategy(Protocol):
         context: PipelineContext,
         business_data: JsonDict,
         index: int,
-    ) -> tuple[str, Any] | None:  # Any: primary ID values remain provider-specific scalars across providers.
+    ) -> (
+        tuple[
+            str,
+            Any,  # Any: primary ID values remain provider-specific scalars across providers.
+        ]
+        | None
+    ):
         """Validate primary ID presence.
 
         Returns:
