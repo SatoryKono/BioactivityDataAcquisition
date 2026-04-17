@@ -34,6 +34,12 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings
 
+_HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
+_HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
+_HEALTH_SERVER_INTERRUPTED_MESSAGE = "Health server interrupted by user (Ctrl+C)"
+_HEALTH_CHECKS_ERROR_TITLE = "Error running health checks"
+_HEALTH_CHECKS_INTERRUPTED_MESSAGE = "Health checks interrupted by user (Ctrl+C)"
+
 
 def get_health_service() -> HealthService:
     """Load the health service through composition on demand."""
@@ -209,18 +215,18 @@ def _execute_health_server(host: str, port: int) -> None:
             exc,
             reason_code="CLI_HEALTH_SERVER_DOMAIN_ERROR",
             target=f"{host}:{port}",
-            domain_error_title="Health server failed with domain error",
-            unexpected_error_title="Unexpected error in health server command",
-            interrupted_message="Health server interrupted by user (Ctrl+C)",
+            domain_error_title=_HEALTH_SERVER_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_HEALTH_SERVER_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_HEALTH_SERVER_INTERRUPTED_MESSAGE,
         )
     except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
         _handle_health_failure(
             exc,
             reason_code="CLI_HEALTH_SERVER_UNEXPECTED_ERROR",
             target=f"{host}:{port}",
-            domain_error_title="Health server failed with domain error",
-            unexpected_error_title="Unexpected error in health server command",
-            interrupted_message="Health server interrupted by user (Ctrl+C)",
+            domain_error_title=_HEALTH_SERVER_DOMAIN_ERROR_TITLE,
+            unexpected_error_title=_HEALTH_SERVER_UNEXPECTED_ERROR_TITLE,
+            interrupted_message=_HEALTH_SERVER_INTERRUPTED_MESSAGE,
         )
     except KeyboardInterrupt:
         click.echo("\nShutting down...")
@@ -267,27 +273,27 @@ def _execute_health_checks(
             exc,
             reason_code="CLI_HEALTH_CHECK_DOMAIN_ERROR",
             target=providers_subject,
-            domain_error_title="Error running health checks",
-            unexpected_error_title="Error running health checks",
-            interrupted_message="Health checks interrupted by user (Ctrl+C)",
+            domain_error_title=_HEALTH_CHECKS_ERROR_TITLE,
+            unexpected_error_title=_HEALTH_CHECKS_ERROR_TITLE,
+            interrupted_message=_HEALTH_CHECKS_INTERRUPTED_MESSAGE,
         )
     except KeyboardInterrupt as exc:
         _handle_health_failure(
             exc,
             reason_code="CLI_HEALTH_CHECK_SIGINT",
             target=providers_subject,
-            domain_error_title="Error running health checks",
-            unexpected_error_title="Error running health checks",
-            interrupted_message="Health checks interrupted by user (Ctrl+C)",
+            domain_error_title=_HEALTH_CHECKS_ERROR_TITLE,
+            unexpected_error_title=_HEALTH_CHECKS_ERROR_TITLE,
+            interrupted_message=_HEALTH_CHECKS_INTERRUPTED_MESSAGE,
         )
     except CLI_ENTRYPOINT_TYPED_ERRORS as exc:
         _handle_health_failure(
             exc,
             reason_code="CLI_HEALTH_CHECK_UNEXPECTED_ERROR",
             target=providers_subject,
-            domain_error_title="Error running health checks",
-            unexpected_error_title="Error running health checks",
-            interrupted_message="Health checks interrupted by user (Ctrl+C)",
+            domain_error_title=_HEALTH_CHECKS_ERROR_TITLE,
+            unexpected_error_title=_HEALTH_CHECKS_ERROR_TITLE,
+            interrupted_message=_HEALTH_CHECKS_INTERRUPTED_MESSAGE,
         )
     finally:
         if getattr(coro, "cr_frame", None) is not None:

@@ -88,6 +88,7 @@ class BronzeWriterMetadataMixin:
         Returns:
             BronzeMetadata instance populated with runtime, pipeline, source, and output fields.
         """
+        del batch_id
         return build_full_bronze_metadata(
             BronzeMetadataPayloadRequest(
                 run_id=run_id,

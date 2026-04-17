@@ -134,6 +134,7 @@ def build_gold_metadata_payload(
     transform_steps: tuple[str, ...],
 ) -> GoldMetadata:
     """Build standard Gold metadata via the coordinator contract only."""
+    del run_id
     if coordinator is None:
         raise RuntimeError(
             "MetadataCoordinator is required for build_gold_metadata_payload: "

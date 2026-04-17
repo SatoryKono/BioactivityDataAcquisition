@@ -352,13 +352,13 @@ class TestOpenAlexPublicationSchema:
         valid_record["is_retracted"] = False
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["is_retracted"].iloc[0] == False  # noqa: E712
+        assert bool(validated["is_retracted"].iloc[0]) is False
 
         # True (retracted)
         valid_record["is_retracted"] = True
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["is_retracted"].iloc[0] == True  # noqa: E712
+        assert bool(validated["is_retracted"].iloc[0]) is True
 
     def test_subject_topics_nullable(self, valid_record: dict) -> None:
         """Should allow null subject_topics."""

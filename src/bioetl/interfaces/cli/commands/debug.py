@@ -208,5 +208,6 @@ async def _run_debug_session(
     Returns:
         RunResult from pipeline execution.
     """
+    del mode, enabled_breakpoints
     service = get_pipeline_runner_service(registry=registry)
     return await service.run(pipeline, options=options)

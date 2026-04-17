@@ -206,6 +206,7 @@ def extract_date_data(
     month_map: dict[str, int],
 ) -> dict[str, object]:
     """Extract normalized publication date fields from PubMed XML."""
+    del pubmed_data
     journal = article.find(".//Journal")
     journal_issue = journal.find("JournalIssue") if journal is not None else None
     pub_date_node = journal_issue.find("PubDate") if journal_issue is not None else None

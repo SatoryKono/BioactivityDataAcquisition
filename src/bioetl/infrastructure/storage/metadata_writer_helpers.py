@@ -164,6 +164,7 @@ def _resolve_existing_metadata_path(
     entity: str | None = None,
 ) -> Path:
     """Resolve an existing sidecar path without requiring a metadata payload."""
+    del layer
     path = Path(base_path)
     if provider and entity:
         return path / _resolve_metadata_filename(provider, entity)
