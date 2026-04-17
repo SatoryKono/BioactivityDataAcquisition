@@ -163,9 +163,9 @@ The following field names have been renamed:
 - `structure-standard-inchi` → `standard-inchi`
 - `structure-standard-inchi-key` → `inchi-key`
 
-For legacy datasets created before v5.10.x, the historical migration reference is
-`scripts/archive/migrations/rename_structure_fields.py`. This is not part of the
-standard operational path for new deployments.
+For legacy datasets created before v5.10.x, structure field renames were handled by
+a historical archive-only migration workflow. This is not part of the standard
+operational path for new deployments.
 
 ______________________________________________________________________
 

@@ -1496,6 +1496,40 @@ def _analysis_family_for_source_path(
     return family_cache[relative_path]
 
 
+def _analysis_package_name(snapshot: GraphSnapshot, module_key: NodeKey) -> str | None:
+    module_node = snapshot.nodes.get(module_key)
+    if module_node is None:
+        return None
+    package_raw = module_node.properties.get("family_name")
+    if isinstance(package_raw, str) and package_raw:
+        return package_raw
+    return None
+
+
+def _analysis_keys_to_scan(
+    snapshot: GraphSnapshot,
+    surface_key: NodeKey,
+    module_key: NodeKey,
+) -> set[NodeKey]:
+    keys_to_scan = {surface_key, module_key}
+    package_name = _analysis_package_name(snapshot, module_key)
+    if package_name is not None:
+        keys_to_scan.add(NodeKey("package_family", package_name))
+    return keys_to_scan
+
+
+def _anchor_bucket_for_label(label: str, label_sets: AnalysisLabelSets) -> str | None:
+    if label in label_sets.runtime_labels:
+        return "runtime"
+    if label in label_sets.config_labels:
+        return "config"
+    if label in label_sets.doc_labels:
+        return "docs"
+    if label in label_sets.test_labels:
+        return "tests"
+    return None
+
+
 def _collect_analysis_anchor_nodes(
     snapshot: GraphSnapshot,
     indexes: SurfaceRelationIndexes,
@@ -1509,30 +1543,14 @@ def _collect_analysis_anchor_nodes(
         "docs": set(),
         "tests": set(),
     }
-    package_name: str | None = None
-    module_node = snapshot.nodes.get(module_key)
-    if module_node is not None:
-        package_raw = module_node.properties.get("family_name")
-        if isinstance(package_raw, str) and package_raw:
-            package_name = package_raw
-
-    keys_to_scan = {surface_key, module_key}
-    if package_name is not None:
-        keys_to_scan.add(NodeKey("package_family", package_name))
-
-    for key in keys_to_scan:
+    for key in _analysis_keys_to_scan(snapshot, surface_key, module_key):
         for relation in [*indexes.incoming.get(key, ()), *indexes.outgoing.get(key, ())]:
             if relation.relation_type in label_sets.ignored_relation_types:
                 continue
             other = relation.source if relation.target == key else relation.target
-            if other.label in label_sets.runtime_labels:
-                buckets["runtime"].add(other)
-            elif other.label in label_sets.config_labels:
-                buckets["config"].add(other)
-            elif other.label in label_sets.doc_labels:
-                buckets["docs"].add(other)
-            elif other.label in label_sets.test_labels:
-                buckets["tests"].add(other)
+            bucket = _anchor_bucket_for_label(other.label, label_sets)
+            if bucket is not None:
+                buckets[bucket].add(other)
     return AnalysisAnchors(
         runtime=tuple(sorted(buckets["runtime"], key=lambda item: (item.label, item.name))),
         config=tuple(sorted(buckets["config"], key=lambda item: (item.label, item.name))),
@@ -2640,6 +2658,14 @@ def _resolve_python_module_surface(root: Path, module_name: str) -> NodeKey | No
     return None
 
 
+def _matching_imported_module_names(node: ast.AST, prefixes: tuple[str, ...]) -> tuple[str, ...]:
+    if isinstance(node, ast.Import):
+        return tuple(alias.name for alias in node.names if alias.name.startswith(prefixes))
+    if isinstance(node, ast.ImportFrom) and node.module is not None and node.module.startswith(prefixes):
+        return (node.module,)
+    return ()
+
+
 def _imported_repo_modules(path: Path, prefixes: tuple[str, ...]) -> set[str]:
     tree = _parse_python_ast(path)
     if tree is None:
@@ -2647,13 +2673,7 @@ def _imported_repo_modules(path: Path, prefixes: tuple[str, ...]) -> set[str]:
 
     imported: set[str] = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.name.startswith(prefixes):
-                    imported.add(alias.name)
-        elif isinstance(node, ast.ImportFrom) and node.module is not None:
-            if node.module.startswith(prefixes):
-                imported.add(node.module)
+        imported.update(_matching_imported_module_names(node, prefixes))
     return imported
 
 
@@ -3530,19 +3550,24 @@ def _add_test_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today
             confidence="high",
         )
         snapshot.add_relation(NodeKey("test_surface", suite_name), "CONTAINS", artifact, provenance="test_graph")
-        layer_name = parts[2] if len(parts) > 2 and parts[2] in KNOWN_LAYERS else None
-        if layer_name is not None:
-            snapshot.add_relation(artifact, "TESTS_LAYER", NodeKey("layer_family", layer_name), provenance="test_graph")
-            if len(parts) > 4:
-                family_name = f"{layer_name}/{parts[3]}"
-                family_key = NodeKey("package_family", family_name)
-                if family_key in snapshot.nodes:
-                    snapshot.add_relation(
-                        artifact,
-                        "TESTS_PACKAGE_FAMILY",
-                        family_key,
-                        provenance="test_graph",
-                    )
+        _link_test_artifact_scope(snapshot, artifact, parts)
+
+
+def _link_test_artifact_scope(snapshot: GraphSnapshot, artifact: NodeKey, parts: tuple[str, ...]) -> None:
+    layer_name = parts[2] if len(parts) > 2 and parts[2] in KNOWN_LAYERS else None
+    if layer_name is None:
+        return
+    snapshot.add_relation(artifact, "TESTS_LAYER", NodeKey("layer_family", layer_name), provenance="test_graph")
+    if len(parts) <= 4:
+        return
+    family_key = NodeKey("package_family", f"{layer_name}/{parts[3]}")
+    if family_key in snapshot.nodes:
+        snapshot.add_relation(
+            artifact,
+            "TESTS_PACKAGE_FAMILY",
+            family_key,
+            provenance="test_graph",
+        )
 
 
 def _add_policy_surfaces(snapshot: GraphSnapshot, _root: Path, project: NodeKey, today: str) -> None:
@@ -5136,9 +5161,9 @@ def _add_runtime_state_surfaces(snapshot: GraphSnapshot, project: NodeKey, today
 
 def _workflow_script_targets(run_text: str) -> set[NodeKey]:
     targets: set[NodeKey] = set()
-    module_pattern = re.compile(r"(?:uv\s+run\s+)?python(?:3)?\s+-m\s+scripts\.(\w+)")
+    module_pattern = re.compile(r"(?:uv\s+run\s+)?python(?:3)?\s+-m\s+scripts\.([\w.]+)")
     for match in module_pattern.finditer(run_text):
-        script_path = f"scripts/{match.group(1)}/{MAIN_PY}"
+        script_path = f"scripts/{match.group(1).replace('.', '/')}/{MAIN_PY}"
         targets.add(NodeKey("script_surface", script_path))
 
     path_pattern = re.compile(r"(?<![\w./-])((?:scripts|tests|configs|src|docs|grafana|\.github)/[\w./-]+)")

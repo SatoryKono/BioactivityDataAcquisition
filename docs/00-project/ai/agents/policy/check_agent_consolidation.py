@@ -131,7 +131,6 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     files = sorted(AGENTS_DIR.glob("sp-*.md"))
-    names = {p.stem for p in files}
 
     alias_count = 0
     canonical_count = 0
