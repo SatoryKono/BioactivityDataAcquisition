@@ -123,13 +123,15 @@ def collect_explicit_group_columns(
     ordered: list[str] = []
     used: set[str] = set()
 
+    extracted_fields = {col: extract_field_fn(col) for col in available}
+
     for field_name in group.fields:
         field_matches: list[str] = []
         aliases = resolve_aliases_fn(field_name)
         for column in available:
             if column in used:
                 continue
-            extracted = extract_field_fn(column)
+            extracted = extracted_fields[column]
             if extracted in aliases or column in aliases:
                 field_matches.append(column)
                 used.add(column)
