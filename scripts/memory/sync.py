@@ -2966,10 +2966,14 @@ def _contract_targets_for_alert(
     pipeline_targets: list[NodeKey],
 ) -> list[NodeKey]:
     if contract_mode == "all":
-        return list(context.contract_nodes.values())
+        return _all_contract_targets(context)
     if contract_mode != "mapped":
         return []
     return sorted(_mapped_contract_targets(context, pipeline_targets), key=lambda node: node.name)
+
+
+def _all_contract_targets(context: AlertTargetContext) -> list[NodeKey]:
+    return list(context.contract_nodes.values())
 
 
 def _mapped_contract_targets(
@@ -3015,7 +3019,7 @@ def _raw_alert_targets(
     expr: str,
     dimensions: set[str],
 ) -> tuple[list[NodeKey], list[NodeKey], list[NodeKey]]:
-    normalized = f"{group_name} {expr}".lower()
+    normalized = _normalized_alert_selector(group_name, expr)
     pipeline_mode, pipeline_kind, provider_mode, contract_mode = _alert_rule_settings(
         context.memory_mapping,
         alert_name=alert_name,
@@ -3040,6 +3044,10 @@ def _raw_alert_targets(
         pipeline_targets=pipeline_targets,
     )
     return pipeline_targets, provider_targets, contract_targets
+
+
+def _normalized_alert_selector(group_name: str, expr: str) -> str:
+    return f"{group_name} {expr}".lower()
 
 
 def _sorted_alert_targets(
@@ -3741,7 +3749,7 @@ def _add_composite_config_surfaces(
     entity_nodes: dict[str, NodeKey],
 ) -> None:
     composites_root = root / "configs" / "composites"
-    for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
+    for composite_path in _composite_config_paths(composites_root):
         _add_composite_config_surface(
             snapshot,
             root,
@@ -3750,6 +3758,10 @@ def _add_composite_config_surfaces(
             composite_path,
             entity_nodes=entity_nodes,
         )
+
+
+def _composite_config_paths(composites_root: Path) -> tuple[Path, ...]:
+    return tuple(sorted(composites_root.glob(YAML_FILE_GLOB)))
 
 
 def _composite_config_identity(
@@ -3821,11 +3833,17 @@ def _link_composite_config_dependencies(
     entity_nodes: dict[str, NodeKey],
 ) -> None:
     _link_composite_seed_dependency(snapshot, composite_node, seed_pipeline=seed_pipeline, entity_nodes=entity_nodes)
+    for dependency in _composite_config_dependency_entries(composite_payload):
+        _link_composite_dependency(snapshot, composite_node, dependency, entity_nodes)
+
+
+def _composite_config_dependency_entries(
+    composite_payload: object,
+) -> tuple[object, ...]:
     dependencies = composite_payload.get("dependencies") if isinstance(composite_payload, dict) else None
     if not isinstance(dependencies, list):
-        return
-    for dependency in dependencies:
-        _link_composite_dependency(snapshot, composite_node, dependency, entity_nodes)
+        return ()
+    return tuple(dependencies)
 
 
 def _link_composite_seed_dependency(

@@ -7,7 +7,9 @@ from unittest.mock import MagicMock
 import polars as pl
 import pytest
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_service import (
+    ColumnOrderService as ColumnOrderer,
+)
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,

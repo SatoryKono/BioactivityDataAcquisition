@@ -305,14 +305,14 @@ class TestCheckpointMetadata:
     async def test_checkpoint_has_timestamp(self, e2e_data_dir: Path):
         """E2E: Checkpoint includes timestamp."""
         await asyncio.sleep(0)
-        from datetime import datetime
+        from datetime import UTC, datetime
 
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
         checkpoint_data = {
             "offset": 100,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
         checkpoint_file = checkpoint_dir / "test.json"

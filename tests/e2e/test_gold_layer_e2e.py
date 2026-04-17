@@ -120,11 +120,11 @@ class TestGoldAuditFields:
 
     def test_gold_has_ingestion_timestamp(self):
         """E2E: Gold records should have ingestion timestamp."""
-        from datetime import datetime
+        from datetime import UTC, datetime
 
         gold_record = {
             "entity_id": "test_123",
-            "_ingestion_ts": datetime.utcnow().isoformat(),
+            "_ingestion_ts": datetime.now(UTC).isoformat(),
         }
 
         assert "_ingestion_ts" in gold_record
