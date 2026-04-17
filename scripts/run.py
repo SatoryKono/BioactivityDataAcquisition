@@ -12,6 +12,7 @@ GROUP_ROOTS: dict[str, str] = {
     "ci": "engineering/ci",
     "dev": "engineering/dev",
     "qa": "engineering/qa",
+    "baselines": "engineering/baselines",
     "docs": "docs",
     "schema": "schema",
     "data": "ops/data",
@@ -68,7 +69,7 @@ def _print_find(pattern: str) -> int:
 
 
 def _exec_script(group: str, script_name: str, script_args: list[str]) -> int:
-    group_root = _scripts_root() / group
+    group_root = _scripts_root() / GROUP_ROOTS[group]
     if not group_root.exists():
         print(f"Group not found: {group}", file=sys.stderr)
         return 2
