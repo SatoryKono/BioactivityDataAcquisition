@@ -56,6 +56,7 @@ from bioetl.infrastructure.storage.silver.operations.postwrite_operations import
 # SilverWriterPostwriteMixin removed from inheritance (composition pattern)
 # Postwrite operations now handled by SilverPostwriteOperations service
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
     SilverWriterRuntimeServices,
     build_silver_writer_runtime_services,
 )
@@ -333,20 +334,24 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
         super().__init__(base_path, logger, flat_structure=flat_structure)
         services = runtime_services or build_silver_writer_runtime_services(
-            csv_exporter=csv_exporter,
-            tracing=tracing,
-            write_policy=write_policy,
-            metrics=metrics,
-            audit=audit,
-            logger=self.logger,
-            silver_validator=silver_validator,
-            metadata_writer=metadata_writer,
-            metadata_coordinator=metadata_coordinator,
-            lineage_store=lineage_store,
-            dq_calculator=dq_calculator,
-            merge_resilience_policy=merge_resilience_policy,
-            base_path=base_path,
-            pipeline_name=self._pipeline_name if hasattr(self, '_pipeline_name') else None,
+            SilverWriterRuntimeServicesRequest(
+                csv_exporter=csv_exporter,
+                tracing=tracing,
+                write_policy=write_policy,
+                metrics=metrics,
+                audit=audit,
+                logger=self.logger,
+                silver_validator=silver_validator,
+                metadata_writer=metadata_writer,
+                metadata_coordinator=metadata_coordinator,
+                lineage_store=lineage_store,
+                dq_calculator=dq_calculator,
+                merge_resilience_policy=merge_resilience_policy,
+                base_path=base_path,
+                pipeline_name=(
+                    self._pipeline_name if hasattr(self, "_pipeline_name") else None
+                ),
+            )
         )
         self.csv_exporter = services.csv_exporter
         self._metrics = services.metrics

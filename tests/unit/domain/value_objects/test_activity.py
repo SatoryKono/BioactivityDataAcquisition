@@ -223,7 +223,7 @@ class TestActivityValue:
     def test_creation_basic(self) -> None:
         """Test basic creation."""
         av = ActivityValue(value=100.0, unit="nM")
-        assert av.value == 100.0
+        assert av.value == pytest.approx(100.0)
         assert av.unit == "nM"
         assert av.relation == RelationOperator.EQUAL
 
@@ -232,14 +232,14 @@ class TestActivityValue:
         av = ActivityValue(
             value=10.0, unit="μM", relation=RelationOperator.GREATER_THAN
         )
-        assert av.value == 10.0
+        assert av.value == pytest.approx(10.0)
         assert av.unit == "μM"
         assert av.relation == RelationOperator.GREATER_THAN
 
     def test_zero_value_valid(self) -> None:
         """Test zero value is valid."""
         av = ActivityValue(value=0.0, unit="nM")
-        assert av.value == 0.0
+        assert av.value == pytest.approx(0.0)
 
     def test_negative_value_raises(self) -> None:
         """Test negative value raises ValueError."""
@@ -273,7 +273,7 @@ class TestActivityValue:
         """Test from_raw with all values."""
         av = ActivityValue.from_raw(value=50.0, unit="μM", relation=">")
         assert av is not None
-        assert av.value == 50.0
+        assert av.value == pytest.approx(50.0)
         assert av.unit == "μM"
         assert av.relation == RelationOperator.GREATER_THAN
 
@@ -295,7 +295,7 @@ class TestActivityValue:
         """Test conversion to Concentration."""
         av = ActivityValue(value=100.0, unit="nM")
         conc = av.to_concentration()
-        assert conc.value == 100.0
+        assert conc.value == pytest.approx(100.0)
         from bioetl.domain.value_objects import ConcentrationUnit
 
         assert conc.unit == ConcentrationUnit.NANOMOLAR

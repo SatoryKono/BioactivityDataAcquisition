@@ -49,55 +49,65 @@ class CommonServicePorts:
     dq_services: JsonDict
 
 
+@dataclass(frozen=True, slots=True)
+class CommonServicePortsRequest:
+    """Inputs required to resolve the shared ports for one pipeline service."""
+
+    settings: Settings
+    logger: LoggerPort
+    pipeline_config: PipelineYamlConfig
+    pipeline_name: str
+    create_dq_services_fn: Callable[
+        [Settings, PipelineYamlConfig, LoggerPort, MetricsPort | None],
+        JsonDict,
+    ]
+    metrics: MetricsPort | None = None
+    tracer: TracingPort | None = None
+    metadata_coordinator: MetadataCoordinator | None = None
+    silver_validator: SilverValidatorPort | None = None
+    create_metrics_fn: Callable[[Settings], MetricsPort] = create_metrics
+    storage_factory: type[StorageFactory] = StorageFactory
+    create_lock_fn: Callable[[], LockPort] = create_lock
+    create_checkpoint_fn: Callable[
+        [StorageContext], CheckpointPort
+    ] = create_checkpoint
+    create_quarantine_fn: Callable[[Settings], QuarantinePort] = create_quarantine
+
+
 def resolve_tracer(tracer: TracingPort | None) -> TracingPort:
     """Return the provided tracer or a NoOpTracing fallback."""
     return _resolve_tracing_port(tracer=tracer)
 
 
 def build_common_service_ports(
-    *,
-    settings: Settings,
-    logger: LoggerPort,
-    pipeline_config: PipelineYamlConfig,
-    pipeline_name: str,
-    metrics: MetricsPort | None = None,
-    tracer: TracingPort | None = None,
-    metadata_coordinator: MetadataCoordinator | None = None,
-    silver_validator: SilverValidatorPort | None = None,
-    create_dq_services_fn: Callable[
-        [Settings, PipelineYamlConfig, LoggerPort, MetricsPort | None],
-        JsonDict,
-    ],
-    create_metrics_fn: Callable[[Settings], MetricsPort] = create_metrics,
-    storage_factory: type[StorageFactory] = StorageFactory,
-    create_lock_fn: Callable[[], LockPort] = create_lock,
-    create_checkpoint_fn: Callable[
-        [StorageContext], CheckpointPort
-    ] = create_checkpoint,
-    create_quarantine_fn: Callable[[Settings], QuarantinePort] = create_quarantine,
+    request: CommonServicePortsRequest,
 ) -> CommonServicePorts:
     """Create the reusable common ports shared by pipeline services."""
-    metrics_port = metrics if metrics is not None else create_metrics_fn(settings)
-    storage_ctx = storage_factory.create(
-        settings,
-        pipeline_config,
-        logger,
+    metrics_port = (
+        request.metrics
+        if request.metrics is not None
+        else request.create_metrics_fn(request.settings)
+    )
+    storage_ctx = request.storage_factory.create(
+        request.settings,
+        request.pipeline_config,
+        request.logger,
         metrics=metrics_port,
-        metadata_coordinator=metadata_coordinator,
-        silver_validator=silver_validator,
-        pipeline_name=pipeline_name,
+        metadata_coordinator=request.metadata_coordinator,
+        silver_validator=request.silver_validator,
+        pipeline_name=request.pipeline_name,
     )
     return CommonServicePorts(
         storage_ctx=storage_ctx,
-        lock=create_lock_fn(),
-        checkpoint=create_checkpoint_fn(storage_ctx),
-        quarantine=create_quarantine_fn(settings),
+        lock=request.create_lock_fn(),
+        checkpoint=request.create_checkpoint_fn(storage_ctx),
+        quarantine=request.create_quarantine_fn(request.settings),
         metrics_port=metrics_port,
-        tracer=resolve_tracer(tracer),
-        dq_services=create_dq_services_fn(
-            settings,
-            pipeline_config,
-            logger,
+        tracer=resolve_tracer(request.tracer),
+        dq_services=request.create_dq_services_fn(
+            request.settings,
+            request.pipeline_config,
+            request.logger,
             metrics_port,
         ),
     )

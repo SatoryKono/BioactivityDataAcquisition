@@ -149,9 +149,8 @@ Set via:
         ┌────────────┴──────────────┐
         │                           │
         ↓                           ↓
- scripts/ops/          wrapper reads env
- mcp_neo4j_memory_     (NEO4J_URI, etc.)
- wrapper.sh
+ scripts/memory/mcp/   wrapper reads env
+ wrapper.sh            (NEO4J_URI, etc.)
         │
         └──→ @knowall-ai/mcp-neo4j-agent-memory
              │

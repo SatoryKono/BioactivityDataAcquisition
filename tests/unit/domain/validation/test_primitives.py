@@ -53,14 +53,14 @@ class TestValidateNonNegative:
     """Tests for validate_non_negative function."""
 
     def test_zero_is_valid(self) -> None:
-        assert validate_non_negative(0.0) == 0.0
+        assert validate_non_negative(0.0) == pytest.approx(0.0)
 
     def test_positive_float(self) -> None:
-        assert validate_non_negative(42.5) == 42.5
+        assert validate_non_negative(42.5) == pytest.approx(42.5)
 
     def test_positive_int(self) -> None:
         result = validate_non_negative(10)
-        assert result == 10.0
+        assert result == pytest.approx(10.0)
 
     def test_negative_returns_none(self) -> None:
         assert validate_non_negative(-1.0) is None
@@ -76,10 +76,10 @@ class TestValidateNonNegative:
         assert validate_non_negative("invalid") is None
 
     def test_valid_string_number(self) -> None:
-        assert validate_non_negative("42.5") == 42.5
+        assert validate_non_negative("42.5") == pytest.approx(42.5)
 
     def test_whitespace_string(self) -> None:
-        assert validate_non_negative("  42  ") == 42.0
+        assert validate_non_negative("  42  ") == pytest.approx(42.0)
 
 
 @pytest.mark.unit

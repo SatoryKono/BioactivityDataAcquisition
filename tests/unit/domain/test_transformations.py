@@ -285,22 +285,22 @@ class TestDataQuality:
     def test_perfect_quality(self):
         """All valid records → score 1.0."""
         score = calculate_dq_score(100, 100)
-        assert score == 1.0
+        assert score == pytest.approx(1.0)
 
     def test_partial_quality(self):
         """95 valid out of 100 → score 0.95."""
         score = calculate_dq_score(95, 100)
-        assert score == 0.95
+        assert score == pytest.approx(0.95)
 
     def test_zero_quality(self):
         """All invalid → score 0.0."""
         score = calculate_dq_score(0, 100)
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_empty_batch(self):
         """Empty batch → score 1.0 (no errors)."""
         score = calculate_dq_score(0, 0)
-        assert score == 1.0
+        assert score == pytest.approx(1.0)
 
     def test_soft_threshold_exceeded(self):
         """REQ-THRESHOLD-001: >5% errors → soft threshold."""

@@ -122,12 +122,12 @@ def test_load_composite_config_merges_external_dq_with_inline_precedence(
     config = load_composite_config("publication", config_dir=composites_dir)
 
     assert config.name == "composite_publication"
-    assert config.dq.soft_fail_threshold == 0.10
-    assert config.dq.hard_fail_threshold == 0.25
+    assert config.dq.soft_fail_threshold == pytest.approx(0.10)
+    assert config.dq.hard_fail_threshold == pytest.approx(0.25)
     assert config.dq.required_fields == ("publication_id",)
     override = config.dq.enricher_overrides["crossref_publication"]
-    assert override.soft_fail_threshold == 0.15
-    assert override.hard_fail_threshold == 0.50
+    assert override.soft_fail_threshold == pytest.approx(0.15)
+    assert override.hard_fail_threshold == pytest.approx(0.50)
 
 
 @pytest.mark.unit

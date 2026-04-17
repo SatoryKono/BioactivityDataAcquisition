@@ -14,11 +14,13 @@ from bioetl.application.services._checkpoint_compatibility_runtime_identity impo
     check_execution_identity_compatibility,
 )
 from bioetl.application.services._checkpoint_compatibility_runtime_identity_details import (
+    IdentityDetailsRequest,
     build_identity_details,
     generate_details,
 )
 
 __all__ = [
+    "IdentityDetailsRequest",
     "build_identity_details",
     "check_config_compatibility",
     "check_execution_identity_compatibility",

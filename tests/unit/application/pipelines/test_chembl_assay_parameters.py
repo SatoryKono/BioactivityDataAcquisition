@@ -73,9 +73,9 @@ class TestAssayParametersEntity:
 
         entity = AssayParameters(**valid_params)
 
-        assert entity.value == 10.0
+        assert entity.value == pytest.approx(10.0)
         assert entity.units == "uM"
-        assert entity.standard_value == 10000.0
+        assert entity.standard_value == pytest.approx(10000.0)
         assert entity.standard_units == "nM"
 
     def test_invalid_assay_param_id_zero(self, valid_params: dict) -> None:
@@ -159,7 +159,7 @@ class TestAssayParametersEntity:
         entity = AssayParameters(**valid_params)
         value, units = entity.get_comparable_value()
 
-        assert value == 10000.0
+        assert value == pytest.approx(10000.0)
         assert units == "nM"
 
     def test_get_comparable_value_falls_back_to_raw(self, valid_params: dict) -> None:
@@ -170,7 +170,7 @@ class TestAssayParametersEntity:
         entity = AssayParameters(**valid_params)
         value, units = entity.get_comparable_value()
 
-        assert value == 10.0
+        assert value == pytest.approx(10.0)
         assert units == "uM"
 
     def test_get_comparable_value_returns_none(self, valid_params: dict) -> None:
@@ -250,8 +250,8 @@ class TestAssayParametersTransformer:
         assert result["assay_param_id"] == 12345
         assert result["assay_id"] == "CHEMBL1217643"
         assert result["type"] == "CONC"
-        assert result["value"] == 10.0
-        assert result["standard_value"] == 10000.0
+        assert result["value"] == pytest.approx(10.0)
+        assert result["standard_value"] == pytest.approx(10000.0)
         assert "entity_id" in result
         assert "content_hash" in result
         assert "_run_id" in result

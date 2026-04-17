@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from bioetl.application.services.checkpoint_compatibility_runtime import (
+    IdentityDetailsRequest,
     build_identity_details,
     check_config_compatibility,
     check_execution_identity_compatibility,
@@ -163,42 +164,46 @@ class CheckpointCompatibilityV2Service:
             max_schema_version_delta=self.config.max_schema_version_delta,
         )
         current_identity_details = build_identity_details(
-            effective_config_hash=current_identity.effective_config_hash,
-            execution_phase=current_identity.execution_phase,
-            checkpoint_schema_version=current_identity.checkpoint_schema_version,
-            composite_run_identity=current_identity.composite_run_identity,
-            execution_fingerprint=current_identity.execution_fingerprint,
-            pipeline_name=current_identity.pipeline_name,
-            run_type=current_identity.run_type,
-            pipeline_version=current_identity.pipeline_version,
-            manifest_id=current_identity.manifest_id,
-            dq_contract_compatibility_hash=(
-                current_identity.dq_contract_compatibility_hash
-            ),
-            contract_ref=current_identity.contract_ref,
-            contract_version=current_identity.contract_version,
-            effective_config_artifact_id=current_identity.effective_config_artifact_id,
-            exact_replay=current_identity.exact_replay,
-            input_snapshot_fingerprint=current_identity.input_snapshot_fingerprint,
+            IdentityDetailsRequest(
+                effective_config_hash=current_identity.effective_config_hash,
+                execution_phase=current_identity.execution_phase,
+                checkpoint_schema_version=current_identity.checkpoint_schema_version,
+                composite_run_identity=current_identity.composite_run_identity,
+                execution_fingerprint=current_identity.execution_fingerprint,
+                pipeline_name=current_identity.pipeline_name,
+                run_type=current_identity.run_type,
+                pipeline_version=current_identity.pipeline_version,
+                manifest_id=current_identity.manifest_id,
+                dq_contract_compatibility_hash=(
+                    current_identity.dq_contract_compatibility_hash
+                ),
+                contract_ref=current_identity.contract_ref,
+                contract_version=current_identity.contract_version,
+                effective_config_artifact_id=current_identity.effective_config_artifact_id,
+                exact_replay=current_identity.exact_replay,
+                input_snapshot_fingerprint=current_identity.input_snapshot_fingerprint,
+            )
         )
         checkpoint_identity_details = build_identity_details(
-            effective_config_hash=checkpoint_identity.effective_config_hash,
-            execution_phase=checkpoint_identity.execution_phase,
-            checkpoint_schema_version=checkpoint_identity.checkpoint_schema_version,
-            composite_run_identity=checkpoint_identity.composite_run_identity,
-            execution_fingerprint=checkpoint_identity.execution_fingerprint,
-            pipeline_name=checkpoint_identity.pipeline_name,
-            run_type=checkpoint_identity.run_type,
-            pipeline_version=checkpoint_identity.pipeline_version,
-            manifest_id=checkpoint_identity.manifest_id,
-            dq_contract_compatibility_hash=(
-                checkpoint_identity.dq_contract_compatibility_hash
-            ),
-            contract_ref=checkpoint_identity.contract_ref,
-            contract_version=checkpoint_identity.contract_version,
-            effective_config_artifact_id=checkpoint_identity.effective_config_artifact_id,
-            exact_replay=checkpoint_identity.exact_replay,
-            input_snapshot_fingerprint=checkpoint_identity.input_snapshot_fingerprint,
+            IdentityDetailsRequest(
+                effective_config_hash=checkpoint_identity.effective_config_hash,
+                execution_phase=checkpoint_identity.execution_phase,
+                checkpoint_schema_version=checkpoint_identity.checkpoint_schema_version,
+                composite_run_identity=checkpoint_identity.composite_run_identity,
+                execution_fingerprint=checkpoint_identity.execution_fingerprint,
+                pipeline_name=checkpoint_identity.pipeline_name,
+                run_type=checkpoint_identity.run_type,
+                pipeline_version=checkpoint_identity.pipeline_version,
+                manifest_id=checkpoint_identity.manifest_id,
+                dq_contract_compatibility_hash=(
+                    checkpoint_identity.dq_contract_compatibility_hash
+                ),
+                contract_ref=checkpoint_identity.contract_ref,
+                contract_version=checkpoint_identity.contract_version,
+                effective_config_artifact_id=checkpoint_identity.effective_config_artifact_id,
+                exact_replay=checkpoint_identity.exact_replay,
+                input_snapshot_fingerprint=checkpoint_identity.input_snapshot_fingerprint,
+            )
         )
 
         return CheckpointCompatibilityResult(

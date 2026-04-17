@@ -61,5 +61,5 @@ for raw_line in sys.stdin:
 def test_wrapper_routes_neo4j_memory_through_adapter() -> None:
     wrapper = Path("scripts/memory/mcp/wrapper.sh").read_text(encoding="utf-8")
 
-    assert "neo4j_memory_mcp_adapter.py" in wrapper
+    assert "scripts/memory/mcp_adapter.py" in wrapper
     assert "@knowall-ai/mcp-neo4j-agent-memory@0.2.5" in wrapper

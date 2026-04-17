@@ -58,8 +58,8 @@ class TestDQConfig:
 
     def test_default_values(self) -> None:
         config = DQConfig()
-        assert config.soft_fail_threshold == 0.05
-        assert config.hard_fail_threshold == 0.20
+        assert config.soft_fail_threshold == pytest.approx(0.05)
+        assert config.hard_fail_threshold == pytest.approx(0.20)
         assert config.strict_validation is False
         assert config.field_validations == ()
         assert config.cross_field_validations == ()
@@ -69,8 +69,8 @@ class TestDQConfig:
 
     def test_custom_thresholds(self) -> None:
         config = DQConfig(soft_fail_threshold=0.01, hard_fail_threshold=0.10)
-        assert config.soft_fail_threshold == 0.01
-        assert config.hard_fail_threshold == 0.10
+        assert config.soft_fail_threshold == pytest.approx(0.01)
+        assert config.hard_fail_threshold == pytest.approx(0.10)
 
     def test_soft_exceeds_hard_raises(self) -> None:
         with pytest.raises(

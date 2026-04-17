@@ -187,6 +187,22 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "scripts/archive",
 )
 DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
+OPS_SCRIPT_HUB_PREFIXES: tuple[str, ...] = (
+    "scripts/diagrams/",
+    "scripts/docs/",
+    "scripts/qa/",
+    "scripts/schema/",
+    "scripts/memory/",
+)
+DEFAULT_PIPELINE_RUNTIME_PATHS: tuple[str, ...] = (
+    "uv run python -m bioetl run --pipeline",
+    "\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m bioetl run --pipeline",
+    ".\\.venv-win\\Scripts\\python.exe -m bioetl run --pipeline",
+)
+DEFAULT_PIPELINE_VALIDATION_GATES: tuple[str, ...] = ("pytest", GATE_CONFIG_VALIDATION)
+DEFAULT_COMMON_PIPELINE_DASHBOARDS: tuple[str, ...] = ("bioetl-overview-v2", "bioetl-runtime")
+DEFAULT_ENTITY_PIPELINE_DASHBOARDS: tuple[str, ...] = ("bioetl-dq-v2", "bioetl-silver-reject-explorer")
+DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS: tuple[str, ...] = ("bioetl-control-plane-v1",)
 KNOWN_LAYERS = ("domain", "application", "infrastructure", "composition", "interfaces")
 TEST_SURFACES: dict[str, str] = {
     "unit": "unit tests",
@@ -1051,26 +1067,18 @@ def _include_shard_relation_nodes(filtered: GraphSnapshot, snapshot: GraphSnapsh
 def _filtered_snapshot(
     snapshot: GraphSnapshot,
     selection: SnapshotSelection | None = None,
-    *,
-    only_labels: tuple[str, ...] = (),
-    only_analysis_layer: bool = False,
-    only_retirement_layer: bool = False,
-    only_complexity_layer: bool = False,
-    only_storage_layer: bool = False,
-    only_runtime_evidence_layer: bool = False,
-    only_workflow_graph: bool = False,
-    only_docs_drift: bool = False,
+    **legacy_selection: object,
 ) -> GraphSnapshot:
     if selection is None:
         selection = SnapshotSelection(
-            only_labels=only_labels,
-            only_analysis_layer=only_analysis_layer,
-            only_retirement_layer=only_retirement_layer,
-            only_complexity_layer=only_complexity_layer,
-            only_storage_layer=only_storage_layer,
-            only_runtime_evidence_layer=only_runtime_evidence_layer,
-            only_workflow_graph=only_workflow_graph,
-            only_docs_drift=only_docs_drift,
+            only_labels=tuple(legacy_selection.get("only_labels", ())),
+            only_analysis_layer=bool(legacy_selection.get("only_analysis_layer", False)),
+            only_retirement_layer=bool(legacy_selection.get("only_retirement_layer", False)),
+            only_complexity_layer=bool(legacy_selection.get("only_complexity_layer", False)),
+            only_storage_layer=bool(legacy_selection.get("only_storage_layer", False)),
+            only_runtime_evidence_layer=bool(legacy_selection.get("only_runtime_evidence_layer", False)),
+            only_workflow_graph=bool(legacy_selection.get("only_workflow_graph", False)),
+            only_docs_drift=bool(legacy_selection.get("only_docs_drift", False)),
         )
     shard_filters = _selected_shard_filters(selection)
     allowed_labels = _build_allowed_labels(
@@ -1419,6 +1427,38 @@ class ComplexityMetrics:
     api_surface_to_logic_ratio: float
 
 
+@dataclass(frozen=True)
+class AnalysisLabelSets:
+    ignored_relation_types: set[str]
+    runtime_labels: set[str]
+    config_labels: set[str]
+    doc_labels: set[str]
+    test_labels: set[str]
+
+
+@dataclass(frozen=True)
+class RetirementScoreInputs:
+    runtime_count: int
+    config_count: int
+    doc_count: int
+    test_count: int
+    recent_age_days: int | None
+    wip_markers: list[str]
+    deprecation_markers: list[str]
+
+
+@dataclass(frozen=True)
+class ComplexityScoreInputs:
+    indirection_markers: list[str]
+    stateful_markers: list[str]
+    deprecation_markers: list[str]
+    runtime_count: int
+    config_count: int
+    doc_count: int
+    test_count: int
+    blocked_by_current_cycle: bool
+
+
 def _build_surface_relation_indexes(snapshot: GraphSnapshot) -> SurfaceRelationIndexes:
     incoming: dict[NodeKey, list[GraphRelation]] = {}
     outgoing: dict[NodeKey, list[GraphRelation]] = {}
@@ -1460,12 +1500,7 @@ def _collect_analysis_anchor_nodes(
     indexes: SurfaceRelationIndexes,
     surface_key: NodeKey,
     module_key: NodeKey,
-    *,
-    ignored_relation_types: set[str],
-    runtime_labels: set[str],
-    config_labels: set[str],
-    doc_labels: set[str],
-    test_labels: set[str],
+    label_sets: AnalysisLabelSets,
 ) -> AnalysisAnchors:
     buckets: dict[str, set[NodeKey]] = {
         "runtime": set(),
@@ -1486,16 +1521,16 @@ def _collect_analysis_anchor_nodes(
 
     for key in keys_to_scan:
         for relation in [*indexes.incoming.get(key, ()), *indexes.outgoing.get(key, ())]:
-            if relation.relation_type in ignored_relation_types:
+            if relation.relation_type in label_sets.ignored_relation_types:
                 continue
             other = relation.source if relation.target == key else relation.target
-            if other.label in runtime_labels:
+            if other.label in label_sets.runtime_labels:
                 buckets["runtime"].add(other)
-            elif other.label in config_labels:
+            elif other.label in label_sets.config_labels:
                 buckets["config"].add(other)
-            elif other.label in doc_labels:
+            elif other.label in label_sets.doc_labels:
                 buckets["docs"].add(other)
-            elif other.label in test_labels:
+            elif other.label in label_sets.test_labels:
                 buckets["tests"].add(other)
     return AnalysisAnchors(
         runtime=tuple(sorted(buckets["runtime"], key=lambda item: (item.label, item.name))),
@@ -1522,58 +1557,80 @@ def _aggregate_callable_metrics(snapshot: GraphSnapshot, node_key: NodeKey) -> t
     )
 
 
+def _callable_surface_complexity_metrics(snapshot: GraphSnapshot, surface_key: NodeKey) -> ComplexityMetrics:
+    branch_count, nesting_depth, call_count, helper_call_count = _aggregate_callable_metrics(snapshot, surface_key)
+    abstraction_fanout = max(1, call_count)
+    return ComplexityMetrics(
+        branch_count=branch_count,
+        nesting_depth=nesting_depth,
+        call_count=call_count,
+        helper_call_count=helper_call_count,
+        abstraction_fanout=abstraction_fanout,
+        api_surface_to_logic_ratio=round(call_count / max(1, branch_count + nesting_depth), 2),
+    )
+
+
+def _class_surface_complexity_metrics(
+    snapshot: GraphSnapshot,
+    indexes: SurfaceRelationIndexes,
+    surface_key: NodeKey,
+) -> ComplexityMetrics:
+    methods = [child for child in indexes.declared_children.get(surface_key, ()) if child.label == "method_surface"]
+    method_metrics = [_aggregate_callable_metrics(snapshot, method_key) for method_key in methods]
+    branch_count = sum(metric[0] for metric in method_metrics)
+    return ComplexityMetrics(
+        branch_count=branch_count,
+        nesting_depth=max((metric[1] for metric in method_metrics), default=0),
+        call_count=sum(metric[2] for metric in method_metrics),
+        helper_call_count=sum(metric[3] for metric in method_metrics),
+        abstraction_fanout=len(methods),
+        api_surface_to_logic_ratio=round(len(methods) / max(1, branch_count + 1), 2),
+    )
+
+
+def _module_surface_complexity_metrics(
+    snapshot: GraphSnapshot,
+    indexes: SurfaceRelationIndexes,
+    surface_key: NodeKey,
+) -> ComplexityMetrics:
+    children = indexes.declared_children.get(surface_key, ())
+    functions = [child for child in children if child.label == "function_surface"]
+    classes = [child for child in children if child.label == "class_surface"]
+    methods = [
+        method_key
+        for class_key in classes
+        for method_key in indexes.declared_children.get(class_key, ())
+        if method_key.label == "method_surface"
+    ]
+    callable_metrics = [
+        *[_aggregate_callable_metrics(snapshot, function_key) for function_key in functions],
+        *[_aggregate_callable_metrics(snapshot, method_key) for method_key in methods],
+    ]
+    branch_count = sum(metric[0] for metric in callable_metrics)
+    abstraction_fanout = len(functions) + len(classes)
+    return ComplexityMetrics(
+        branch_count=branch_count,
+        nesting_depth=max((metric[1] for metric in callable_metrics), default=0),
+        call_count=sum(metric[2] for metric in callable_metrics),
+        helper_call_count=sum(metric[3] for metric in callable_metrics),
+        abstraction_fanout=abstraction_fanout,
+        api_surface_to_logic_ratio=round(abstraction_fanout / max(1, branch_count + 1), 2),
+    )
+
+
 def _aggregate_surface_complexity_metrics(
     snapshot: GraphSnapshot,
     indexes: SurfaceRelationIndexes,
     surface_key: NodeKey,
 ) -> ComplexityMetrics:
     if surface_key.label in {"function_surface", "method_surface"}:
-        branch_count, nesting_depth, call_count, helper_call_count = _aggregate_callable_metrics(snapshot, surface_key)
-        abstraction_fanout = max(1, call_count)
-        return ComplexityMetrics(
-            branch_count=branch_count,
-            nesting_depth=nesting_depth,
-            call_count=call_count,
-            helper_call_count=helper_call_count,
-            abstraction_fanout=abstraction_fanout,
-            api_surface_to_logic_ratio=round(call_count / max(1, branch_count + nesting_depth), 2),
-        )
+        return _callable_surface_complexity_metrics(snapshot, surface_key)
 
     if surface_key.label == "class_surface":
-        methods = [child for child in indexes.declared_children.get(surface_key, ()) if child.label == "method_surface"]
-        method_metrics = [_aggregate_callable_metrics(snapshot, method_key) for method_key in methods]
-        return ComplexityMetrics(
-            branch_count=sum(metric[0] for metric in method_metrics),
-            nesting_depth=max((metric[1] for metric in method_metrics), default=0),
-            call_count=sum(metric[2] for metric in method_metrics),
-            helper_call_count=sum(metric[3] for metric in method_metrics),
-            abstraction_fanout=len(methods),
-            api_surface_to_logic_ratio=round(len(methods) / max(1, sum(metric[0] for metric in method_metrics) + 1), 2),
-        )
+        return _class_surface_complexity_metrics(snapshot, indexes, surface_key)
 
     if surface_key.label == "module_surface":
-        children = indexes.declared_children.get(surface_key, ())
-        functions = [child for child in children if child.label == "function_surface"]
-        classes = [child for child in children if child.label == "class_surface"]
-        methods = [
-            method_key
-            for class_key in classes
-            for method_key in indexes.declared_children.get(class_key, ())
-            if method_key.label == "method_surface"
-        ]
-        callable_metrics = [
-            *[_aggregate_callable_metrics(snapshot, function_key) for function_key in functions],
-            *[_aggregate_callable_metrics(snapshot, method_key) for method_key in methods],
-        ]
-        abstraction_fanout = len(functions) + len(classes)
-        return ComplexityMetrics(
-            branch_count=sum(metric[0] for metric in callable_metrics),
-            nesting_depth=max((metric[1] for metric in callable_metrics), default=0),
-            call_count=sum(metric[2] for metric in callable_metrics),
-            helper_call_count=sum(metric[3] for metric in callable_metrics),
-            abstraction_fanout=abstraction_fanout,
-            api_surface_to_logic_ratio=round(abstraction_fanout / max(1, sum(metric[0] for metric in callable_metrics) + 1), 2),
-        )
+        return _module_surface_complexity_metrics(snapshot, indexes, surface_key)
 
     return ComplexityMetrics(0, 0, 0, 0, 0, 0.0)
 
@@ -1589,6 +1646,107 @@ def _complexity_marker_buckets(
     stateful = sorted({marker for marker in config.stateful_markers if marker in normalized or marker in source_text})
     deprecation = sorted({marker for marker in config.deprecation_markers if marker in normalized or marker in source_text})
     return indirection, stateful, deprecation
+
+
+def _retirement_scores(
+    config: RetirementAnalysisConfig,
+    inputs: RetirementScoreInputs,
+) -> tuple[int, int, bool]:
+    only_test_referenced = (
+        inputs.test_count > 0
+        and inputs.runtime_count == 0
+        and inputs.config_count == 0
+        and inputs.doc_count == 0
+    )
+    cycle_score = 0
+    if inputs.recent_age_days is not None and inputs.recent_age_days <= config.current_cycle_age_days:
+        cycle_score += 2
+    if inputs.wip_markers:
+        cycle_score += 3
+    if inputs.doc_count > 0 and inputs.runtime_count == 0:
+        cycle_score += 1
+
+    deletion_score = 0
+    if inputs.runtime_count == 0:
+        deletion_score += 3
+    if inputs.config_count == 0:
+        deletion_score += 2
+    if inputs.doc_count == 0:
+        deletion_score += 1
+    if only_test_referenced:
+        deletion_score += 2
+    if inputs.deprecation_markers:
+        deletion_score += 2
+    if inputs.recent_age_days is not None and inputs.recent_age_days >= config.stale_age_days:
+        deletion_score += 2
+    return cycle_score, deletion_score - cycle_score, only_test_referenced
+
+
+def _complexity_scores(
+    metrics: ComplexityMetrics,
+    inputs: ComplexityScoreInputs,
+) -> tuple[int, int, int]:
+    complexity_score = 0
+    complexity_score += _threshold_score(metrics.branch_count, medium=3, high=6)
+    complexity_score += _threshold_score(metrics.nesting_depth, medium=3, high=4)
+    complexity_score += _threshold_score(metrics.helper_call_count, medium=2, high=4)
+    complexity_score += _presence_score(len(inputs.indirection_markers))
+    complexity_score += _presence_score(len(inputs.stateful_markers))
+    complexity_score += _threshold_score(metrics.abstraction_fanout, medium=3, high=6)
+
+    removable_score = complexity_score
+    if inputs.runtime_count == 0:
+        removable_score += 2
+    if inputs.config_count == 0:
+        removable_score += 2
+    if inputs.doc_count == 0:
+        removable_score += 1
+    if inputs.test_count == 0:
+        removable_score += 1
+    if inputs.deprecation_markers:
+        removable_score += 2
+    if inputs.blocked_by_current_cycle:
+        removable_score -= 3
+    return complexity_score, complexity_score, removable_score
+
+
+def _classify_complexity_candidate(
+    config: ComplexityAnalysisConfig,
+    *,
+    removable_score: int,
+    runtime_count: int,
+    config_count: int,
+    doc_count: int,
+    blocked_by_current_cycle: bool,
+) -> tuple[str, str]:
+    if removable_score >= config.removable_score_threshold and not blocked_by_current_cycle:
+        removal_confidence = "high" if removable_score >= config.removable_score_threshold + 2 else "medium"
+        return "removable_complexity", removal_confidence
+    if runtime_count == 0 and config_count == 0 and doc_count == 0:
+        return "overengineered_stale", "medium"
+    return "overengineered_active", "low"
+
+
+def _configured_node_keys(
+    label: str,
+    values: object,
+    default_names: tuple[str, ...],
+) -> list[NodeKey]:
+    names = _as_string_list(values) or list(default_names)
+    return [NodeKey(label, name) for name in names]
+
+
+def _link_existing_targets(
+    snapshot: GraphSnapshot,
+    source: NodeKey,
+    relation_type: str,
+    targets: list[NodeKey],
+    *,
+    provenance: str,
+) -> None:
+    for target in targets:
+        if target in snapshot.nodes:
+            snapshot.add_relation(source, relation_type, target, provenance=provenance)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -1978,6 +2136,14 @@ def _promoted_directory_hubs(relative_path: str, config: dict[str, object]) -> l
         if candidate in promoted:
             matches.append(candidate)
     return matches
+
+
+def _supplemental_directory_hubs_for_node(node_key: NodeKey, source_path_value: str) -> tuple[str, ...]:
+    if node_key.label == "script_surface" and any(
+        source_path_value.startswith(prefix) for prefix in OPS_SCRIPT_HUB_PREFIXES
+    ):
+        return ("scripts/ops",)
+    return ()
 
 
 def _resolve_repo_path(root: Path, base_path: Path, raw_path: str) -> Path | None:
@@ -3441,100 +3607,128 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
     _extract_code_duplication_surfaces(snapshot, root, project, today, memory_mapping)
 
 
-def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
-    memory_mapping = _load_memory_mapping(root)
-    config = _file_structure_config(memory_mapping)
-    zone_roots = config["repo_zones"]
+def _is_doc_artifact_file(relative_file: str, file_extension: str) -> bool:
+    return file_extension in {".md", ".yml", ".yaml"} and (
+        relative_file in {"README.md", "mkdocs.yml"}
+        or relative_file.startswith("docs/")
+        or relative_file.startswith(GITHUB_PATH_PREFIX)
+    )
 
-    for zone_name, relative_roots in zone_roots.items():
-        zone = snapshot.add_node(
-            "repo_zone",
-            zone_name,
-            summary=f"Primary repository zone `{zone_name}`.",
-            source_kind="file_structure_zone",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(project, "HAS_REPO_ZONE", zone, provenance="file_structure")
 
-        for relative_root in relative_roots:
-            zone_root = root / relative_root
-            if not zone_root.is_dir():
+def _repo_zone_for_path(source_path_value: str, zone_roots: dict[str, tuple[str, ...]]) -> str | None:
+    return next(
+        (
+            zone_name
+            for zone_name, relative_roots in zone_roots.items()
+            if any(
+                source_path_value == zone_root or source_path_value.startswith(f"{zone_root}/")
+                for zone_root in relative_roots
+            )
+        ),
+        None,
+    )
+
+
+def _add_repo_zone_file_structure(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    zone_name: str,
+    relative_roots: tuple[str, ...],
+    config: dict[str, object],
+) -> None:
+    zone = snapshot.add_node(
+        "repo_zone",
+        zone_name,
+        summary=f"Primary repository zone `{zone_name}`.",
+        source_kind="file_structure_zone",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_REPO_ZONE", zone, provenance="file_structure")
+
+    for relative_root in relative_roots:
+        zone_root = root / relative_root
+        if not zone_root.is_dir():
+            continue
+        for current_dir, dirnames, filenames in os.walk(zone_root):
+            current_path = Path(current_dir)
+            relative_dir = _rel_path(root, current_path)
+            if _is_excluded_file_structure_path(relative_dir, config):
+                dirnames[:] = []
+                filenames[:] = []
                 continue
-            for current_dir, dirnames, filenames in os.walk(zone_root):
-                current_path = Path(current_dir)
-                relative_dir = _rel_path(root, current_path)
-                if _is_excluded_file_structure_path(relative_dir, config):
-                    dirnames[:] = []
-                    filenames[:] = []
+
+            dirnames[:] = sorted(
+                name
+                for name in dirnames
+                if not _is_excluded_file_structure_path(_rel_path(root, current_path / name), config)
+            )
+            directory = snapshot.add_node(
+                "directory_surface",
+                relative_dir,
+                summary=f"Primary repository directory `{relative_dir}`.",
+                source_path=relative_dir,
+                source_kind="file_structure_directory",
+                repo_zone=zone_name,
+                depth=len(Path(relative_dir).parts),
+                is_primary=True,
+                last_verified=today,
+                ingest_wave="repo_sync_v1",
+                confidence="high",
+            )
+            if relative_dir == relative_root:
+                snapshot.add_relation(zone, "CONTAINS", directory, provenance="file_structure")
+            else:
+                parent_key = NodeKey("directory_surface", _rel_path(root, current_path.parent))
+                snapshot.add_relation(parent_key, "CONTAINS", directory, provenance="file_structure")
+
+            for filename in sorted(filenames):
+                file_path = current_path / filename
+                relative_file = _rel_path(root, file_path)
+                if _is_excluded_file_structure_path(relative_file, config):
                     continue
 
-                dirnames[:] = sorted(
-                    name
-                    for name in dirnames
-                    if not _is_excluded_file_structure_path(_rel_path(root, current_path / name), config)
-                )
-                directory = snapshot.add_node(
-                    "directory_surface",
-                    relative_dir,
-                    summary=f"Primary repository directory `{relative_dir}`.",
-                    source_path=relative_dir,
-                    source_kind="file_structure_directory",
+                file_surface = snapshot.add_node(
+                    "file_surface",
+                    relative_file,
+                    summary=f"Repository file `{relative_file}`.",
+                    source_path=relative_file,
+                    source_kind="file_structure_file",
                     repo_zone=zone_name,
-                    depth=len(Path(relative_dir).parts),
-                    is_primary=True,
+                    file_extension=Path(filename).suffix[1:] if Path(filename).suffix else None,
                     last_verified=today,
                     ingest_wave="repo_sync_v1",
                     confidence="high",
                 )
-                if relative_dir == relative_root:
-                    snapshot.add_relation(zone, "CONTAINS", directory, provenance="file_structure")
-                else:
-                    parent_key = NodeKey("directory_surface", _rel_path(root, current_path.parent))
-                    snapshot.add_relation(parent_key, "CONTAINS", directory, provenance="file_structure")
+                snapshot.add_relation(directory, "CONTAINS", file_surface, provenance="file_structure")
+                file_extension = Path(filename).suffix.lower()
+                if not _is_doc_artifact_file(relative_file, file_extension):
+                    continue
+                doc_artifact = snapshot.add_node(
+                    "doc_artifact",
+                    relative_file,
+                    summary=f"Documentation artifact `{relative_file}`.",
+                    source_path=relative_file,
+                    source_kind="doc_artifact",
+                    repo_zone=zone_name,
+                    last_verified=today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="medium",
+                )
+                snapshot.add_relation(project, "HAS_DOC_ARTIFACT", doc_artifact, provenance="file_structure")
+                snapshot.add_relation(doc_artifact, "BACKED_BY", file_surface, provenance="file_structure")
 
-                # Create file surfaces for all files in this directory
-                for filename in sorted(filenames):
-                    file_path = current_path / filename
-                    relative_file = _rel_path(root, file_path)
-                    if _is_excluded_file_structure_path(relative_file, config):
-                        continue
 
-                    file_surface = snapshot.add_node(
-                        "file_surface",
-                        relative_file,
-                        summary=f"Repository file `{relative_file}`.",
-                        source_path=relative_file,
-                        source_kind="file_structure_file",
-                        repo_zone=zone_name,
-                        file_extension=Path(filename).suffix[1:] if Path(filename).suffix else None,
-                        last_verified=today,
-                        ingest_wave="repo_sync_v1",
-                        confidence="high",
-                    )
-                    snapshot.add_relation(directory, "CONTAINS", file_surface, provenance="file_structure")
-                    file_extension = Path(filename).suffix.lower()
-                    is_doc_artifact = file_extension in {".md", ".yml", ".yaml"} and (
-                        relative_file in {"README.md", "mkdocs.yml"}
-                        or relative_file.startswith("docs/")
-                        or relative_file.startswith(GITHUB_PATH_PREFIX)
-                    )
-                    if is_doc_artifact:
-                        doc_artifact = snapshot.add_node(
-                            "doc_artifact",
-                            relative_file,
-                            summary=f"Documentation artifact `{relative_file}`.",
-                            source_path=relative_file,
-                            source_kind="doc_artifact",
-                            repo_zone=zone_name,
-                            last_verified=today,
-                            ingest_wave="repo_sync_v1",
-                            confidence="medium",
-                        )
-                        snapshot.add_relation(project, "HAS_DOC_ARTIFACT", doc_artifact, provenance="file_structure")
-                        snapshot.add_relation(doc_artifact, "BACKED_BY", file_surface, provenance="file_structure")
-
+def _link_source_backed_file_structure(
+    snapshot: GraphSnapshot,
+    root: Path,
+    today: str,
+    zone_roots: dict[str, tuple[str, ...]],
+    config: dict[str, object],
+) -> None:
     source_backed_labels = {
         "layer_family",
         "package_family",
@@ -3589,17 +3783,7 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
             summary=f"Primary repository file `{source_path_value}`.",
             source_path=source_path_value,
             source_kind="file_structure_file",
-            repo_zone=next(
-                (
-                    zone_name
-                    for zone_name, relative_roots in zone_roots.items()
-                    if any(
-                        source_path_value == zone_root or source_path_value.startswith(f"{zone_root}/")
-                        for zone_root in relative_roots
-                    )
-                ),
-                None,
-            ),
+            repo_zone=_repo_zone_for_path(source_path_value, zone_roots),
             suffix=source_path.suffix,
             last_verified=today,
             ingest_wave="repo_sync_v1",
@@ -3613,14 +3797,22 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
             hub_key = NodeKey("directory_surface", promoted_hub)
             if hub_key in snapshot.nodes:
                 snapshot.add_relation(hub_key, "HOUSES", node.key, provenance="file_structure")
+        for supplemental_hub in _supplemental_directory_hubs_for_node(node.key, source_path_value):
+            hub_key = NodeKey("directory_surface", supplemental_hub)
+            snapshot.add_relation(hub_key, "CONTAINS", file_surface, provenance="file_structure_promoted")
+            snapshot.add_relation(hub_key, "HOUSES", node.key, provenance="file_structure_promoted")
         snapshot.add_relation(file_surface, "BACKS", node.key, provenance="file_structure")
 
+
+def _link_relation_backed_file_structure(
+    snapshot: GraphSnapshot,
+    root: Path,
+    config: dict[str, object],
+) -> None:
     relation_backed_types = {"BACKED_BY", "DESCRIBED_IN", "DEFINED_BY"}
     file_backed_labels = {"doc_artifact", "config_artifact", "module_surface", "script_surface", "test_artifact"}
     for relation in tuple(snapshot.relations.values()):
-        if relation.relation_type not in relation_backed_types:
-            continue
-        if relation.target.label not in file_backed_labels:
+        if relation.relation_type not in relation_backed_types or relation.target.label not in file_backed_labels:
             continue
         target_node = snapshot.nodes.get(relation.target)
         if target_node is None:
@@ -3646,6 +3838,24 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
             hub_key = NodeKey("directory_surface", promoted_hub)
             if hub_key in snapshot.nodes:
                 snapshot.add_relation(hub_key, "HOUSES", relation.source, provenance="file_structure_inferred")
+
+
+def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    memory_mapping = _load_memory_mapping(root)
+    config = _file_structure_config(memory_mapping)
+    zone_roots = config["repo_zones"]
+    for zone_name, relative_roots in zone_roots.items():
+        _add_repo_zone_file_structure(
+            snapshot,
+            root,
+            project,
+            today,
+            zone_name,
+            relative_roots,
+            config,
+        )
+    _link_source_backed_file_structure(snapshot, root, today, zone_roots, config)
+    _link_relation_backed_file_structure(snapshot, root, config)
 
 
 def _merge_storage_layer_config(
@@ -6565,67 +6775,18 @@ def _add_retirement_analysis_surfaces(
         "HOUSES",
         "CANDIDATE_FOR_REMOVAL",
     }
-
-    incoming: dict[NodeKey, list[GraphRelation]] = {}
-    outgoing: dict[NodeKey, list[GraphRelation]] = {}
-    for relation in snapshot.relations.values():
-        incoming.setdefault(relation.target, []).append(relation)
-        outgoing.setdefault(relation.source, []).append(relation)
-
+    label_sets = AnalysisLabelSets(
+        ignored_relation_types=ignored_relation_types,
+        runtime_labels=runtime_labels,
+        config_labels=config_labels,
+        doc_labels=doc_labels,
+        test_labels=test_labels,
+    )
+    indexes = _build_surface_relation_indexes(snapshot)
     today_date = date.fromisoformat(today)
     text_cache: dict[str, str] = {}
     age_cache: dict[str, int | None] = {}
     family_cache: dict[str, DuplicateFamilyConfig | None] = {}
-
-    def read_source_text(relative_path: str) -> str:
-        if relative_path not in text_cache:
-            path = root / relative_path
-            try:
-                text_cache[relative_path] = _read_text(path).casefold()
-            except OSError:
-                text_cache[relative_path] = ""
-        return text_cache[relative_path]
-
-    def family_for_source_path(relative_path: str) -> DuplicateFamilyConfig | None:
-        if relative_path not in family_cache:
-            family_cache[relative_path] = _family_for_path(relative_path, duplication_config)
-        return family_cache[relative_path]
-
-    def collect_anchor_names(
-        surface_key: NodeKey,
-        module_key: NodeKey,
-    ) -> dict[str, set[str]]:
-        buckets = {
-            "runtime": set(),
-            "config": set(),
-            "docs": set(),
-            "tests": set(),
-        }
-        package_name: str | None = None
-        module_node = snapshot.nodes.get(module_key)
-        if module_node is not None:
-            package_raw = module_node.properties.get("family_name")
-            if isinstance(package_raw, str) and package_raw:
-                package_name = package_raw
-
-        keys_to_scan = {surface_key, module_key}
-        if package_name is not None:
-            keys_to_scan.add(NodeKey("package_family", package_name))
-
-        for key in keys_to_scan:
-            for relation in [*incoming.get(key, ()), *outgoing.get(key, ())]:
-                if relation.relation_type in ignored_relation_types:
-                    continue
-                other = relation.source if relation.target == key else relation.target
-                if other.label in runtime_labels:
-                    buckets["runtime"].add(other.name)
-                elif other.label in config_labels:
-                    buckets["config"].add(other.name)
-                elif other.label in doc_labels:
-                    buckets["docs"].add(other.name)
-                elif other.label in test_labels:
-                    buckets["tests"].add(other.name)
-        return buckets
 
     candidate_nodes: list[tuple[GraphNode, str, DuplicateFamilyConfig, NodeKey]] = []
     for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
@@ -6634,7 +6795,7 @@ def _add_retirement_analysis_surfaces(
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str) or not source_path.endswith(".py"):
             continue
-        family = family_for_source_path(source_path)
+        family = _analysis_family_for_source_path(source_path, duplication_config, family_cache)
         if family is None or family.name not in config.family_names:
             continue
         module_key = node.key if node.key.label == "module_surface" else NodeKey("module_surface", source_path)
@@ -6650,40 +6811,35 @@ def _add_retirement_analysis_surfaces(
     )
 
     for node, source_path, family, module_key in candidate_nodes:
-        anchor_names = collect_anchor_names(node.key, module_key)
-        runtime_count = len(anchor_names["runtime"])
-        config_count = len(anchor_names["config"])
-        doc_count = len(anchor_names["docs"])
-        test_count = len(anchor_names["tests"])
+        anchors = _collect_analysis_anchor_nodes(
+            snapshot,
+            indexes,
+            node.key,
+            module_key,
+            label_sets,
+        )
+        runtime_count = len(anchors.runtime)
+        config_count = len(anchors.config)
+        doc_count = len(anchors.docs)
+        test_count = len(anchors.tests)
         only_test_referenced = test_count > 0 and runtime_count == 0 and config_count == 0 and doc_count == 0
 
-        source_text = read_source_text(source_path)
+        source_text = _analysis_read_source_text(root, source_path, text_cache)
         wip_markers = sorted({marker for marker in config.wip_markers if marker in source_text})
         deprecation_markers = sorted({marker for marker in config.deprecation_markers if marker in source_text})
         recent_age_days = age_cache.get(source_path)
-
-        cycle_score = 0
-        if recent_age_days is not None and recent_age_days <= config.current_cycle_age_days:
-            cycle_score += 2
-        if wip_markers:
-            cycle_score += 3
-        if doc_count > 0 and runtime_count == 0:
-            cycle_score += 1
-
-        deletion_score = 0
-        if runtime_count == 0:
-            deletion_score += 3
-        if config_count == 0:
-            deletion_score += 2
-        if doc_count == 0:
-            deletion_score += 1
-        if only_test_referenced:
-            deletion_score += 2
-        if deprecation_markers:
-            deletion_score += 2
-        if recent_age_days is not None and recent_age_days >= config.stale_age_days:
-            deletion_score += 2
-        deletion_score -= cycle_score
+        cycle_score, deletion_score, only_test_referenced = _retirement_scores(
+            config,
+            RetirementScoreInputs(
+                runtime_count=runtime_count,
+                config_count=config_count,
+                doc_count=doc_count,
+                test_count=test_count,
+                recent_age_days=recent_age_days,
+                wip_markers=wip_markers,
+                deprecation_markers=deprecation_markers,
+            ),
+        )
 
         if cycle_score >= 3:
             snapshot.add_node(
@@ -6721,10 +6877,10 @@ def _add_retirement_analysis_surfaces(
             config_anchor_count=config_count,
             doc_anchor_count=doc_count,
             test_anchor_count=test_count,
-            runtime_anchors=sorted(anchor_names["runtime"]),
-            config_anchors=sorted(anchor_names["config"]),
-            doc_anchors=sorted(anchor_names["docs"]),
-            test_anchors=sorted(anchor_names["tests"]),
+            runtime_anchors=sorted(anchor.name for anchor in anchors.runtime),
+            config_anchors=sorted(anchor.name for anchor in anchors.config),
+            doc_anchors=sorted(anchor.name for anchor in anchors.docs),
+            test_anchors=sorted(anchor.name for anchor in anchors.tests),
             blocked_by_current_cycle=cycle_score >= 3,
             blocked_by_current_cycle_target_name=node.key.name if cycle_score >= 3 else None,
             blocked_by_current_cycle_score=cycle_score if cycle_score >= 3 else None,
@@ -6769,153 +6925,16 @@ def _add_complexity_analysis_surfaces(
         "JUSTIFIED_BY_RUNTIME",
         "BLOCKED_BY_VARIANCE",
     }
-
-    incoming: dict[NodeKey, list[GraphRelation]] = {}
-    outgoing: dict[NodeKey, list[GraphRelation]] = {}
-    declared_children: dict[NodeKey, list[NodeKey]] = {}
-    for relation in snapshot.relations.values():
-        incoming.setdefault(relation.target, []).append(relation)
-        outgoing.setdefault(relation.source, []).append(relation)
-        if relation.relation_type == "DECLARES":
-            declared_children.setdefault(relation.source, []).append(relation.target)
-
+    label_sets = AnalysisLabelSets(
+        ignored_relation_types=ignored_relation_types,
+        runtime_labels=runtime_labels,
+        config_labels=config_labels,
+        doc_labels=doc_labels,
+        test_labels=test_labels,
+    )
+    indexes = _build_surface_relation_indexes(snapshot)
     text_cache: dict[str, str] = {}
     family_cache: dict[str, DuplicateFamilyConfig | None] = {}
-
-    def read_source_text(relative_path: str) -> str:
-        if relative_path not in text_cache:
-            path = root / relative_path
-            try:
-                text_cache[relative_path] = _read_text(path).casefold()
-            except OSError:
-                text_cache[relative_path] = ""
-        return text_cache[relative_path]
-
-    def family_for_source_path(relative_path: str) -> DuplicateFamilyConfig | None:
-        if relative_path not in family_cache:
-            family_cache[relative_path] = _family_for_path(relative_path, duplication_config)
-        return family_cache[relative_path]
-
-    def collect_anchor_nodes(surface_key: NodeKey, module_key: NodeKey) -> dict[str, list[NodeKey]]:
-        buckets: dict[str, set[NodeKey]] = {
-            "runtime": set(),
-            "config": set(),
-            "docs": set(),
-            "tests": set(),
-        }
-        package_name: str | None = None
-        module_node = snapshot.nodes.get(module_key)
-        if module_node is not None:
-            package_raw = module_node.properties.get("family_name")
-            if isinstance(package_raw, str) and package_raw:
-                package_name = package_raw
-
-        keys_to_scan = {surface_key, module_key}
-        if package_name is not None:
-            keys_to_scan.add(NodeKey("package_family", package_name))
-
-        for key in keys_to_scan:
-            for relation in [*incoming.get(key, ()), *outgoing.get(key, ())]:
-                if relation.relation_type in ignored_relation_types:
-                    continue
-                other = relation.source if relation.target == key else relation.target
-                if other.label in runtime_labels:
-                    buckets["runtime"].add(other)
-                elif other.label in config_labels:
-                    buckets["config"].add(other)
-                elif other.label in doc_labels:
-                    buckets["docs"].add(other)
-                elif other.label in test_labels:
-                    buckets["tests"].add(other)
-        return {
-            name: sorted(values, key=lambda item: (item.label, item.name))
-            for name, values in buckets.items()
-        }
-
-    def int_property(node_key: NodeKey, property_name: str) -> int:
-        node = snapshot.nodes.get(node_key)
-        if node is None:
-            return 0
-        raw_value = node.properties.get(property_name)
-        return int(raw_value) if isinstance(raw_value, int | float) else 0
-
-    def aggregate_callable_metrics(node_key: NodeKey) -> tuple[int, int, int, int]:
-        return (
-            int_property(node_key, "branch_count"),
-            int_property(node_key, "nesting_depth"),
-            int_property(node_key, "call_count"),
-            int_property(node_key, "helper_call_count"),
-        )
-
-    def aggregate_declared_metrics(surface_key: NodeKey) -> tuple[int, int, int, int, int, float]:
-        if surface_key.label in {"function_surface", "method_surface"}:
-            branch_count, nesting_depth, call_count, helper_call_count = aggregate_callable_metrics(surface_key)
-            abstraction_fanout = max(1, call_count)
-            api_surface_to_logic_ratio = round(call_count / max(1, branch_count + nesting_depth), 2)
-            return (
-                branch_count,
-                nesting_depth,
-                call_count,
-                helper_call_count,
-                abstraction_fanout,
-                api_surface_to_logic_ratio,
-            )
-
-        if surface_key.label == "class_surface":
-            methods = [child for child in declared_children.get(surface_key, ()) if child.label == "method_surface"]
-            method_metrics = [aggregate_callable_metrics(method_key) for method_key in methods]
-            branch_count = sum(metric[0] for metric in method_metrics)
-            nesting_depth = max((metric[1] for metric in method_metrics), default=0)
-            call_count = sum(metric[2] for metric in method_metrics)
-            helper_call_count = sum(metric[3] for metric in method_metrics)
-            abstraction_fanout = len(methods)
-            api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
-            return (
-                branch_count,
-                nesting_depth,
-                call_count,
-                helper_call_count,
-                abstraction_fanout,
-                api_surface_to_logic_ratio,
-            )
-
-        if surface_key.label == "module_surface":
-            children = declared_children.get(surface_key, ())
-            functions = [child for child in children if child.label == "function_surface"]
-            classes = [child for child in children if child.label == "class_surface"]
-            methods = [
-                method_key
-                for class_key in classes
-                for method_key in declared_children.get(class_key, ())
-                if method_key.label == "method_surface"
-            ]
-            callable_metrics = [
-                *[aggregate_callable_metrics(function_key) for function_key in functions],
-                *[aggregate_callable_metrics(method_key) for method_key in methods],
-            ]
-            branch_count = sum(metric[0] for metric in callable_metrics)
-            nesting_depth = max((metric[1] for metric in callable_metrics), default=0)
-            call_count = sum(metric[2] for metric in callable_metrics)
-            helper_call_count = sum(metric[3] for metric in callable_metrics)
-            abstraction_fanout = len(functions) + len(classes)
-            api_surface_to_logic_ratio = round(abstraction_fanout / max(1, branch_count + 1), 2)
-            return (
-                branch_count,
-                nesting_depth,
-                call_count,
-                helper_call_count,
-                abstraction_fanout,
-                api_surface_to_logic_ratio,
-            )
-
-        return (0, 0, 0, 0, 0, 0.0)
-
-    def complexity_marker_buckets(relative_path: str, symbol_name: str, source_text: str) -> tuple[list[str], list[str], list[str]]:
-        normalized = f"{relative_path} {symbol_name}".casefold()
-        indirection = sorted({marker for marker in config.indirection_markers if marker in normalized or marker in source_text})
-        stateful = sorted({marker for marker in config.stateful_markers if marker in normalized or marker in source_text})
-        deprecation = sorted({marker for marker in config.deprecation_markers if marker in normalized or marker in source_text})
-        return indirection, stateful, deprecation
 
     for node in sorted(snapshot.nodes.values(), key=lambda item: (item.key.label, item.key.name)):
         if node.key.label not in analysis_labels:
@@ -6923,7 +6942,7 @@ def _add_complexity_analysis_surfaces(
         source_path = node.properties.get("source_path")
         if not isinstance(source_path, str) or not source_path.endswith(".py"):
             continue
-        family = family_for_source_path(source_path)
+        family = _analysis_family_for_source_path(source_path, duplication_config, family_cache)
         if family is None or family.name not in family_names:
             continue
 
@@ -6931,69 +6950,52 @@ def _add_complexity_analysis_surfaces(
         if module_key not in snapshot.nodes:
             continue
 
-        source_text = read_source_text(source_path)
-        anchor_nodes = collect_anchor_nodes(node.key, module_key)
-        runtime_anchors = anchor_nodes["runtime"]
-        config_anchors = anchor_nodes["config"]
-        doc_anchors = anchor_nodes["docs"]
-        test_anchors = anchor_nodes["tests"]
-        runtime_count = len(runtime_anchors)
-        config_count = len(config_anchors)
-        doc_count = len(doc_anchors)
-        test_count = len(test_anchors)
-
+        source_text = _analysis_read_source_text(root, source_path, text_cache)
+        anchors = _collect_analysis_anchor_nodes(
+            snapshot,
+            indexes,
+            node.key,
+            module_key,
+            label_sets,
+        )
         symbol_name = node.key.name.removeprefix(f"{_module_dotted_name(source_path)}.")
-        indirection_markers, stateful_markers, deprecation_markers = complexity_marker_buckets(
+        indirection_markers, stateful_markers, deprecation_markers = _complexity_marker_buckets(
+            config,
             source_path,
             symbol_name,
             source_text,
         )
-
-        (
-            branch_count,
-            nesting_depth,
-            call_count,
-            helper_call_count,
-            abstraction_fanout,
-            api_surface_to_logic_ratio,
-        ) = aggregate_declared_metrics(node.key)
-
-        complexity_score = 0
-        complexity_score += _threshold_score(branch_count, medium=3, high=6)
-        complexity_score += _threshold_score(nesting_depth, medium=3, high=4)
-        complexity_score += _threshold_score(helper_call_count, medium=2, high=4)
-        complexity_score += _presence_score(len(indirection_markers))
-        complexity_score += _presence_score(len(stateful_markers))
-        complexity_score += _threshold_score(abstraction_fanout, medium=3, high=6)
-
-        simplification_score = complexity_score
-        removable_score = complexity_score
-        if runtime_count == 0:
-            removable_score += 2
-        if config_count == 0:
-            removable_score += 2
-        if doc_count == 0:
-            removable_score += 1
-        if test_count == 0:
-            removable_score += 1
-        if deprecation_markers:
-            removable_score += 2
-
+        metrics = _aggregate_surface_complexity_metrics(snapshot, indexes, node.key)
+        runtime_count = len(anchors.runtime)
+        config_count = len(anchors.config)
+        doc_count = len(anchors.docs)
+        test_count = len(anchors.tests)
         blocked_by_current_cycle = bool(node.properties.get("current_cycle_status"))
-        if blocked_by_current_cycle:
-            removable_score -= 3
+        complexity_score, simplification_score, removable_score = _complexity_scores(
+            metrics,
+            ComplexityScoreInputs(
+                indirection_markers=indirection_markers,
+                stateful_markers=stateful_markers,
+                deprecation_markers=deprecation_markers,
+                runtime_count=runtime_count,
+                config_count=config_count,
+                doc_count=doc_count,
+                test_count=test_count,
+                blocked_by_current_cycle=blocked_by_current_cycle,
+            ),
+        )
 
         if complexity_score < config.complexity_score_threshold and removable_score < config.removable_score_threshold:
             continue
 
-        classification = "overengineered_active"
-        removal_confidence = "low"
-        if removable_score >= config.removable_score_threshold and not blocked_by_current_cycle:
-            classification = "removable_complexity"
-            removal_confidence = "high" if removable_score >= config.removable_score_threshold + 2 else "medium"
-        elif runtime_count == 0 and config_count == 0 and doc_count == 0:
-            classification = "overengineered_stale"
-            removal_confidence = "medium"
+        classification, removal_confidence = _classify_complexity_candidate(
+            config,
+            removable_score=removable_score,
+            runtime_count=runtime_count,
+            config_count=config_count,
+            doc_count=doc_count,
+            blocked_by_current_cycle=blocked_by_current_cycle,
+        )
 
         candidate = snapshot.add_node(
             "complexity_candidate",
@@ -7010,12 +7012,12 @@ def _add_complexity_analysis_surfaces(
             removable_score=removable_score,
             simplification_confidence="high" if simplification_score >= config.complexity_score_threshold + 2 else "medium",
             removal_confidence=removal_confidence,
-            branch_count=branch_count,
-            nesting_depth=nesting_depth,
-            call_count=call_count,
-            helper_call_count=helper_call_count,
-            abstraction_fanout=abstraction_fanout,
-            api_surface_to_logic_ratio=api_surface_to_logic_ratio,
+            branch_count=metrics.branch_count,
+            nesting_depth=metrics.nesting_depth,
+            call_count=metrics.call_count,
+            helper_call_count=metrics.helper_call_count,
+            abstraction_fanout=metrics.abstraction_fanout,
+            api_surface_to_logic_ratio=metrics.api_surface_to_logic_ratio,
             runtime_anchor_count=runtime_count,
             config_anchor_count=config_count,
             doc_anchor_count=doc_count,
@@ -7027,10 +7029,10 @@ def _add_complexity_analysis_surfaces(
             blocked_by_current_cycle_target_name=node.key.name if blocked_by_current_cycle else None,
             blocked_by_current_cycle_score=node.properties.get("current_cycle_score") if blocked_by_current_cycle else None,
             blocked_by_current_cycle_wip_markers=node.properties.get("current_cycle_wip_markers") if blocked_by_current_cycle else None,
-            runtime_anchors=[anchor.name for anchor in runtime_anchors[: config.blocker_anchor_limit]],
-            config_anchors=[anchor.name for anchor in config_anchors[: config.blocker_anchor_limit]],
-            doc_anchors=[anchor.name for anchor in doc_anchors[: config.blocker_anchor_limit]],
-            test_anchors=[anchor.name for anchor in test_anchors[: config.blocker_anchor_limit]],
+            runtime_anchors=[anchor.name for anchor in anchors.runtime[: config.blocker_anchor_limit]],
+            config_anchors=[anchor.name for anchor in anchors.config[: config.blocker_anchor_limit]],
+            doc_anchors=[anchor.name for anchor in anchors.docs[: config.blocker_anchor_limit]],
+            test_anchors=[anchor.name for anchor in anchors.tests[: config.blocker_anchor_limit]],
             last_verified=today,
             ingest_wave="repo_sync_v1",
             confidence="medium",
@@ -7040,9 +7042,9 @@ def _add_complexity_analysis_surfaces(
         snapshot.add_relation(candidate, "CANDIDATE_FOR_SIMPLIFICATION", node.key, provenance="complexity_analysis")
         if classification == "removable_complexity":
             snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", node.key, provenance="complexity_analysis")
-        for anchor in runtime_anchors[: config.blocker_anchor_limit]:
+        for anchor in anchors.runtime[: config.blocker_anchor_limit]:
             snapshot.add_relation(candidate, "JUSTIFIED_BY_RUNTIME", anchor, provenance="complexity_analysis")
-        for anchor in [*config_anchors[: config.blocker_anchor_limit], *doc_anchors[: config.blocker_anchor_limit]]:
+        for anchor in [*anchors.config[: config.blocker_anchor_limit], *anchors.docs[: config.blocker_anchor_limit]]:
             snapshot.add_relation(candidate, "BLOCKED_BY_VARIANCE", anchor, provenance="complexity_analysis")
 
 
@@ -7731,71 +7733,74 @@ def _add_pipeline_operational_edges(
     memory_mapping: dict[str, object],
 ) -> None:
     pipeline_ops = memory_mapping.get("pipeline_operational")
-    runtime_paths = [
-        NodeKey("execution_path", name)
-        for name in _as_string_list(
-            pipeline_ops.get("runtime_paths") if isinstance(pipeline_ops, dict) else None
-        )
-    ] or [
-        NodeKey("execution_path", "uv run python -m bioetl run --pipeline"),
-        NodeKey(
-            "execution_path",
-            "\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m bioetl run --pipeline",
-        ),
-        NodeKey("execution_path", ".\\.venv-win\\Scripts\\python.exe -m bioetl run --pipeline"),
-    ]
-    validation_gates = [
-        NodeKey("quality_gate", name)
-        for name in _as_string_list(
-            pipeline_ops.get("validation_gates") if isinstance(pipeline_ops, dict) else None
-        )
-    ] or [
-        NodeKey("quality_gate", "pytest"),
-        NodeKey("quality_gate", GATE_CONFIG_VALIDATION),
-    ]
+    runtime_paths = _configured_node_keys(
+        "execution_path",
+        pipeline_ops.get("runtime_paths") if isinstance(pipeline_ops, dict) else None,
+        DEFAULT_PIPELINE_RUNTIME_PATHS,
+    )
+    validation_gates = _configured_node_keys(
+        "quality_gate",
+        pipeline_ops.get("validation_gates") if isinstance(pipeline_ops, dict) else None,
+        DEFAULT_PIPELINE_VALIDATION_GATES,
+    )
     dashboards_cfg = pipeline_ops.get("dashboards") if isinstance(pipeline_ops, dict) else {}
-    common_dashboards = [
-        NodeKey("dashboard_surface", name)
-        for name in _as_string_list(dashboards_cfg.get("common") if isinstance(dashboards_cfg, dict) else None)
-    ] or [
-        NodeKey("dashboard_surface", "bioetl-overview-v2"),
-        NodeKey("dashboard_surface", "bioetl-runtime"),
-    ]
+    common_dashboards = _configured_node_keys(
+        "dashboard_surface",
+        dashboards_cfg.get("common") if isinstance(dashboards_cfg, dict) else None,
+        DEFAULT_COMMON_PIPELINE_DASHBOARDS,
+    )
     kind_dashboards = dashboards_cfg.get("by_kind") if isinstance(dashboards_cfg, dict) else {}
-    entity_dashboards = [
-        NodeKey("dashboard_surface", name)
-        for name in _as_string_list(kind_dashboards.get("entity") if isinstance(kind_dashboards, dict) else None)
-    ] or [
-        NodeKey("dashboard_surface", "bioetl-dq-v2"),
-        NodeKey("dashboard_surface", "bioetl-silver-reject-explorer"),
-    ]
-    composite_dashboards = [
-        NodeKey("dashboard_surface", name)
-        for name in _as_string_list(kind_dashboards.get("composite") if isinstance(kind_dashboards, dict) else None)
-    ] or [
-        NodeKey("dashboard_surface", "bioetl-control-plane-v1"),
-    ]
+    entity_dashboards = _configured_node_keys(
+        "dashboard_surface",
+        kind_dashboards.get("entity") if isinstance(kind_dashboards, dict) else None,
+        DEFAULT_ENTITY_PIPELINE_DASHBOARDS,
+    )
+    composite_dashboards = _configured_node_keys(
+        "dashboard_surface",
+        kind_dashboards.get("composite") if isinstance(kind_dashboards, dict) else None,
+        DEFAULT_COMPOSITE_PIPELINE_DASHBOARDS,
+    )
 
     for pipeline in sorted(pipeline_nodes.values(), key=lambda node: node.name):
         pipeline_props = snapshot.nodes[pipeline].properties
         pipeline_kind = pipeline_props.get("pipeline_kind")
-        for execution_path in runtime_paths:
-            if execution_path in snapshot.nodes:
-                snapshot.add_relation(pipeline, "RUNS_VIA", execution_path, provenance="impact_pipeline_ops")
-        for gate in validation_gates:
-            if gate in snapshot.nodes:
-                snapshot.add_relation(pipeline, "VALIDATED_BY", gate, provenance="impact_pipeline_ops")
-        for dashboard in common_dashboards:
-            if dashboard in snapshot.nodes:
-                snapshot.add_relation(pipeline, "OBSERVED_BY", dashboard, provenance="impact_pipeline_ops")
+        _link_existing_targets(
+            snapshot,
+            pipeline,
+            "RUNS_VIA",
+            runtime_paths,
+            provenance="impact_pipeline_ops",
+        )
+        _link_existing_targets(
+            snapshot,
+            pipeline,
+            "VALIDATED_BY",
+            validation_gates,
+            provenance="impact_pipeline_ops",
+        )
+        _link_existing_targets(
+            snapshot,
+            pipeline,
+            "OBSERVED_BY",
+            common_dashboards,
+            provenance="impact_pipeline_ops",
+        )
         if pipeline_kind == "entity":
-            for dashboard in entity_dashboards:
-                if dashboard in snapshot.nodes:
-                    snapshot.add_relation(pipeline, "OBSERVED_BY", dashboard, provenance="impact_pipeline_ops")
+            _link_existing_targets(
+                snapshot,
+                pipeline,
+                "OBSERVED_BY",
+                entity_dashboards,
+                provenance="impact_pipeline_ops",
+            )
         elif pipeline_kind == "composite":
-            for dashboard in composite_dashboards:
-                if dashboard in snapshot.nodes:
-                    snapshot.add_relation(pipeline, "OBSERVED_BY", dashboard, provenance="impact_pipeline_ops")
+            _link_existing_targets(
+                snapshot,
+                pipeline,
+                "OBSERVED_BY",
+                composite_dashboards,
+                provenance="impact_pipeline_ops",
+            )
 
 
 class Neo4jHttpClient:
@@ -8132,42 +8137,31 @@ def sync_snapshot(
     http_uri: str | None,
     options: SyncApplyOptions | int | None = None,
     selection: SnapshotSelection | None = None,
-    *,
-    batch_size: int | None = None,
-    prune_stale: bool = False,
-    full_reset_managed_wave: bool = False,
-    prune_legacy_unmanaged: bool = False,
-    only_labels: tuple[str, ...] = (),
-    only_analysis_layer: bool = False,
-    only_retirement_layer: bool = False,
-    only_complexity_layer: bool = False,
-    only_storage_layer: bool = False,
-    only_runtime_evidence_layer: bool = False,
-    only_workflow_graph: bool = False,
-    only_docs_drift: bool = False,
+    **legacy_kwargs: object,
 ) -> None:
     if isinstance(options, SyncApplyOptions):
         resolved_options = options
     else:
-        resolved_batch_size = batch_size if batch_size is not None else options
+        legacy_batch_size = legacy_kwargs.get("batch_size")
+        resolved_batch_size = legacy_batch_size if legacy_batch_size is not None else options
         if not isinstance(resolved_batch_size, int):
             raise TypeError("sync_snapshot requires batch_size or SyncApplyOptions")
         resolved_options = SyncApplyOptions(
             batch_size=resolved_batch_size,
-            prune_stale=prune_stale,
-            full_reset_managed_wave=full_reset_managed_wave,
-            prune_legacy_unmanaged=prune_legacy_unmanaged,
+            prune_stale=bool(legacy_kwargs.get("prune_stale", False)),
+            full_reset_managed_wave=bool(legacy_kwargs.get("full_reset_managed_wave", False)),
+            prune_legacy_unmanaged=bool(legacy_kwargs.get("prune_legacy_unmanaged", False)),
         )
     if selection is None:
         selection = SnapshotSelection(
-            only_labels=only_labels,
-            only_analysis_layer=only_analysis_layer,
-            only_retirement_layer=only_retirement_layer,
-            only_complexity_layer=only_complexity_layer,
-            only_storage_layer=only_storage_layer,
-            only_runtime_evidence_layer=only_runtime_evidence_layer,
-            only_workflow_graph=only_workflow_graph,
-            only_docs_drift=only_docs_drift,
+            only_labels=tuple(legacy_kwargs.get("only_labels", ())),
+            only_analysis_layer=bool(legacy_kwargs.get("only_analysis_layer", False)),
+            only_retirement_layer=bool(legacy_kwargs.get("only_retirement_layer", False)),
+            only_complexity_layer=bool(legacy_kwargs.get("only_complexity_layer", False)),
+            only_storage_layer=bool(legacy_kwargs.get("only_storage_layer", False)),
+            only_runtime_evidence_layer=bool(legacy_kwargs.get("only_runtime_evidence_layer", False)),
+            only_workflow_graph=bool(legacy_kwargs.get("only_workflow_graph", False)),
+            only_docs_drift=bool(legacy_kwargs.get("only_docs_drift", False)),
         )
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
@@ -8781,91 +8775,319 @@ def _append_support_issue(issues: list[str], prefix: str, names: list[str]) -> N
         issues.append(f"{prefix}: {', '.join(names[:10])}")
 
 
+SNAPSHOT_REQUIRED_LABELS = (
+    "repo_zone",
+    "directory_surface",
+    "file_surface",
+    "class_surface",
+    "function_surface",
+    "method_surface",
+    "duplication_cluster",
+    "complexity_candidate",
+    "port_surface",
+    "adapter_surface",
+    "adapter_impl_surface",
+    "pipeline_surface",
+    "contract_surface",
+    "alert_surface",
+    "execution_path",
+    "quality_gate",
+    "dashboard_surface",
+    "storage_surface",
+    "runtime_evidence_surface",
+    "control_plane_artifact_surface",
+    "run_instance_surface",
+    "runtime_state_surface",
+    "schema_field_surface",
+    "workflow_surface",
+    "workflow_job_surface",
+    "workflow_call_surface",
+    "workflow_matrix_variant_surface",
+    "workflow_output_surface",
+    "workflow_action_surface",
+    "workflow_artifact_surface",
+    "workflow_secret_surface",
+    "cli_command_surface",
+    "cli_option_surface",
+    "doc_claim_surface",
+)
+SNAPSHOT_REQUIRED_RELATION_TYPES = (
+    "BACKS",
+    "HOUSES",
+    "DECLARES",
+    "DEPENDS_ON",
+    "GOVERNS",
+    "RUNS_VIA",
+    "VALIDATED_BY",
+    "OBSERVED_BY",
+    "TESTED_BY",
+    "SAME_SHAPE_AS",
+    "CAN_PROMOTE_TO",
+    "COVERED_BY_TEST",
+    "HAS_COMPLEXITY_SIGNAL",
+    "CANDIDATE_FOR_SIMPLIFICATION",
+    "DESCRIBES",
+    "WRITES_TO",
+    "PROMOTES_TO",
+    "HAS_RUNTIME_EVIDENCE",
+    "HAS_CONTROL_PLANE_ARTIFACT",
+    "HAS_RUN_INSTANCE",
+    "HAS_RUNTIME_STATE",
+    "HAS_WORKFLOW",
+    "HAS_CLI_COMMAND",
+    "HAS_SCHEMA_FIELD",
+    "CALLS_WORKFLOW",
+    "HAS_MATRIX_VARIANT",
+    "EMITS_OUTPUT",
+    "ACCEPTS_OPTION",
+    "SIDE_EFFECTS_ON",
+    "ASSERTS",
+    "ASSERTS_ABOUT",
+    "EXECUTES_GATE",
+    "EMITS_ARTIFACT",
+    "MATERIALIZED_AS",
+    "REFERENCES_ARTIFACT",
+    "PROMOTES_FIELD_TO",
+    "DERIVES_FIELD_FROM",
+    "USES_ACTION",
+    "PUBLISHES_ARTIFACT",
+    "REQUIRES_SECRET",
+)
+SNAPSHOT_RELATION_REQUIREMENTS = (
+    ("missing project -> HAS_REPO_ZONE -> repo_zone links", {"project"}, "HAS_REPO_ZONE", {"repo_zone"}),
+    ("missing directory_surface -> CONTAINS -> file_surface links", {"directory_surface"}, "CONTAINS", {"file_surface"}),
+    ("missing file_surface -> BACKS -> module_surface links", {"file_surface"}, "BACKS", {"module_surface"}),
+    ("missing directory_surface -> HOUSES -> package_family links", {"directory_surface"}, "HOUSES", {"package_family"}),
+    ("missing directory_surface -> HOUSES -> entity_config links", {"directory_surface"}, "HOUSES", {"entity_config"}),
+    ("missing directory_surface -> HOUSES -> doc_source_surface links", {"directory_surface"}, "HOUSES", {"doc_source_surface"}),
+    ("missing directory_surface -> HOUSES -> test_artifact links", {"directory_surface"}, "HOUSES", {"test_artifact"}),
+    ("missing module_surface -> DECLARES -> class_surface links", {"module_surface"}, "DECLARES", {"class_surface"}),
+    ("missing class_surface -> DECLARES -> method_surface links", {"class_surface"}, "DECLARES", {"method_surface"}),
+    ("missing module_surface -> DECLARES -> function_surface links", {"module_surface"}, "DECLARES", {"function_surface"}),
+    ("missing duplication_cluster promotion targets", {"duplication_cluster"}, "CAN_PROMOTE_TO", None),
+    (
+        "missing duplication_cluster -> CONTAINS -> callable surface links",
+        {"duplication_cluster"},
+        "CONTAINS",
+        {"method_surface", "function_surface"},
+    ),
+    ("missing callable duplication links", {"method_surface", "function_surface"}, "SAME_SHAPE_AS", None),
+    (
+        "missing code surface -> HAS_COMPLEXITY_SIGNAL -> complexity_candidate links",
+        {"module_surface", "class_surface", "function_surface", "method_surface"},
+        "HAS_COMPLEXITY_SIGNAL",
+        {"complexity_candidate"},
+    ),
+    ("missing complexity simplification candidates", {"complexity_candidate"}, "CANDIDATE_FOR_SIMPLIFICATION", None),
+    ("missing contract_surface -> DEPENDS_ON -> module_surface relations", {"contract_surface"}, "DEPENDS_ON", {"module_surface"}),
+    ("missing contract_surface -> DESCRIBED_IN -> doc_artifact relations", {"contract_surface"}, "DESCRIBED_IN", {"doc_artifact"}),
+    ("missing pipeline_surface operational runtime links", {"pipeline_surface"}, "RUNS_VIA", {"execution_path"}),
+    ("missing pipeline_surface direct test coverage links", {"pipeline_surface"}, "TESTED_BY", {"test_artifact"}),
+    ("missing pipeline_surface -> DEPENDS_ON -> module_surface links", {"pipeline_surface"}, "DEPENDS_ON", {"module_surface"}),
+    ("missing entity_config -> DEPENDS_ON -> module_surface links", {"entity_config"}, "DEPENDS_ON", {"module_surface"}),
+    ("missing alert_surface dependency links", {"alert_surface"}, "DEPENDS_ON", {"pipeline_surface", "provider_surface"}),
+    ("missing alert_surface -> DEPENDS_ON -> contract_surface links", {"alert_surface"}, "DEPENDS_ON", {"contract_surface"}),
+    ("missing alert_surface -> OBSERVED_BY -> dashboard_surface links", {"alert_surface"}, "OBSERVED_BY", {"dashboard_surface"}),
+    ("missing project -> HAS_RUNTIME_EVIDENCE -> runtime_evidence_surface links", {"project"}, "HAS_RUNTIME_EVIDENCE", {"runtime_evidence_surface"}),
+    ("missing project -> HAS_CONTROL_PLANE_ARTIFACT -> control_plane_artifact_surface links", {"project"}, "HAS_CONTROL_PLANE_ARTIFACT", {"control_plane_artifact_surface"}),
+    ("missing project -> HAS_RUN_INSTANCE -> run_instance_surface links", {"project"}, "HAS_RUN_INSTANCE", {"run_instance_surface"}),
+    ("missing project -> HAS_RUNTIME_STATE -> runtime_state_surface links", {"project"}, "HAS_RUNTIME_STATE", {"runtime_state_surface"}),
+    ("missing project -> HAS_WORKFLOW -> workflow_surface links", {"project"}, "HAS_WORKFLOW", {"workflow_surface"}),
+    ("missing project -> HAS_CLI_COMMAND -> cli_command_surface links", {"project"}, "HAS_CLI_COMMAND", {"cli_command_surface"}),
+    ("missing workflow_surface -> CONTAINS -> workflow_job_surface links", {"workflow_surface"}, "CONTAINS", {"workflow_job_surface"}),
+    ("missing workflow/workflow_job -> CALLS_WORKFLOW -> workflow_call_surface links", {"workflow_surface", "workflow_job_surface"}, "CALLS_WORKFLOW", {"workflow_call_surface"}),
+    ("missing workflow_job_surface -> HAS_MATRIX_VARIANT -> workflow_matrix_variant_surface links", {"workflow_job_surface"}, "HAS_MATRIX_VARIANT", {"workflow_matrix_variant_surface"}),
+    ("missing workflow/workflow_job -> EMITS_OUTPUT -> workflow_output_surface links", {"workflow_surface", "workflow_job_surface"}, "EMITS_OUTPUT", {"workflow_output_surface"}),
+    ("missing workflow_job_surface -> RUNS_VIA operational target links", {"workflow_job_surface"}, "RUNS_VIA", {"script_surface", "file_surface", "directory_surface"}),
+    ("missing workflow_job_surface -> EXECUTES_GATE -> quality_gate links", {"workflow_job_surface"}, "EXECUTES_GATE", {"quality_gate"}),
+    ("missing workflow_job_surface -> USES_ACTION -> workflow_action_surface links", {"workflow_job_surface"}, "USES_ACTION", {"workflow_action_surface"}),
+    ("missing workflow_job_surface -> PUBLISHES_ARTIFACT -> workflow_artifact_surface links", {"workflow_job_surface"}, "PUBLISHES_ARTIFACT", {"workflow_artifact_surface"}),
+    ("missing workflow_job_surface -> REQUIRES_SECRET -> workflow_secret_surface links", {"workflow_job_surface"}, "REQUIRES_SECRET", {"workflow_secret_surface"}),
+    ("missing cli_command_surface -> RUNS_VIA -> execution_path links", {"cli_command_surface"}, "RUNS_VIA", {"execution_path"}),
+    ("missing cli_command_surface -> ACCEPTS_OPTION -> cli_option_surface links", {"cli_command_surface"}, "ACCEPTS_OPTION", {"cli_option_surface"}),
+    ("missing cli_command_surface side effect links", {"cli_command_surface"}, "SIDE_EFFECTS_ON", None),
+    ("missing storage_surface -> HAS_SCHEMA_FIELD -> schema_field_surface links", {"storage_surface"}, "HAS_SCHEMA_FIELD", {"schema_field_surface"}),
+    ("missing contract_surface -> HAS_SCHEMA_FIELD -> schema_field_surface links", {"contract_surface"}, "HAS_SCHEMA_FIELD", {"schema_field_surface"}),
+    ("missing pipeline_surface -> WRITES_TO -> storage_surface links", {"pipeline_surface"}, "WRITES_TO", {"storage_surface"}),
+    ("missing storage_surface promotion links", {"storage_surface"}, "PROMOTES_TO", {"storage_surface"}),
+    ("missing runtime_evidence_surface -> WRITES_TO -> storage_surface links", {"runtime_evidence_surface"}, "WRITES_TO", {"storage_surface"}),
+    ("missing runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface links", {"runtime_evidence_surface"}, "EMITS_ARTIFACT", {"control_plane_artifact_surface"}),
+    ("missing control_plane_artifact_surface -> MATERIALIZED_AS -> storage_surface links", {"control_plane_artifact_surface"}, "MATERIALIZED_AS", {"storage_surface"}),
+    ("missing run_instance_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links", {"run_instance_surface"}, "REFERENCES_ARTIFACT", {"control_plane_artifact_surface"}),
+    ("missing run_instance_surface -> HAS_RUNTIME_STATE -> runtime_state_surface links", {"run_instance_surface"}, "HAS_RUNTIME_STATE", {"runtime_state_surface"}),
+    ("missing runtime_state_surface dependency links", {"runtime_state_surface"}, "DEPENDS_ON", {"pipeline_surface", "workflow_surface", "runtime_evidence_surface"}),
+    ("missing runtime_state_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links", {"runtime_state_surface"}, "REFERENCES_ARTIFACT", {"control_plane_artifact_surface"}),
+    ("missing schema_field_surface promotion links", {"schema_field_surface"}, "PROMOTES_FIELD_TO", {"schema_field_surface"}),
+    ("missing schema_field_surface derivation links", {"schema_field_surface"}, "DERIVES_FIELD_FROM", {"schema_field_surface"}),
+    ("missing docs-to-code drift edges", {"doc_source_surface", "doc_artifact", "policy_surface"}, "DESCRIBES", {"module_surface", "script_surface", "config_artifact", "workflow_surface", "cli_command_surface", "file_surface", "directory_surface", "execution_path"}),
+    ("missing doc claim extraction edges", {"doc_source_surface", "doc_artifact", "policy_surface"}, "ASSERTS", {"doc_claim_surface"}),
+    ("missing doc claim traceability edges", {"doc_claim_surface"}, "ASSERTS_ABOUT", {"module_surface", "script_surface", "config_artifact", "workflow_surface", "cli_command_surface", "file_surface", "directory_surface", "execution_path"}),
+    ("missing adapter_surface -> CONTAINS -> adapter_impl_surface links", {"adapter_surface"}, "CONTAINS", {"adapter_impl_surface"}),
+)
+
+
+def _support_runtime_evidence_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.source == key and rel.relation_type in {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"}
+        for rel in relations
+    )
+
+
+def _support_control_plane_artifact_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type == "EMITS_ARTIFACT"
+        and rel.source.label == "runtime_evidence_surface"
+        for rel in relations
+    ) and any(
+        rel.source == key
+        and rel.relation_type == "MATERIALIZED_AS"
+        and rel.target.label == "storage_surface"
+        for rel in relations
+    )
+
+
+def _support_run_instance_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type == "HAS_RUN_INSTANCE"
+        and rel.source.label == "project"
+        for rel in relations
+    ) and any(
+        rel.source == key
+        and rel.relation_type == "REFERENCES_ARTIFACT"
+        and rel.target.label == "control_plane_artifact_surface"
+        for rel in relations
+    )
+
+
+def _support_runtime_state_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type == "HAS_RUNTIME_STATE"
+        and rel.source.label in {"project", "run_instance_surface"}
+        for rel in relations
+    ) and any(rel.source == key and rel.relation_type == "DEPENDS_ON" for rel in relations) and any(
+        rel.source == key
+        and rel.relation_type == "REFERENCES_ARTIFACT"
+        and rel.target.label == "control_plane_artifact_surface"
+        for rel in relations
+    )
+
+
+def _support_storage_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        (
+            rel.target == key
+            and rel.relation_type in {"WRITES_TO", "DEPENDS_ON", "DEFINED_BY"}
+            and rel.source.label in {"pipeline_surface", "entity_config", "runtime_evidence_surface", "storage_surface"}
+        )
+        or (rel.source == key and rel.relation_type in {"PROMOTES_TO", "DEFINED_BY"})
+        for rel in relations
+    )
+
+
+def _support_schema_field_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type == "HAS_SCHEMA_FIELD"
+        and rel.source.label in {"storage_surface", "contract_surface"}
+        for rel in relations
+    ) and any(
+        rel.source == key
+        and rel.relation_type in {"DEFINED_BY", "PROMOTES_FIELD_TO", "DERIVES_FIELD_FROM"}
+        for rel in relations
+    )
+
+
+def _support_workflow_job_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key and rel.relation_type == "CONTAINS" and rel.source.label == "workflow_surface"
+        for rel in relations
+    )
+
+
+def _support_cli_command_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        (rel.source == key and rel.relation_type in {"RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"})
+        or (rel.target == key and rel.relation_type == "HAS_CLI_COMMAND" and rel.source.label == "project")
+        for rel in relations
+    )
+
+
+def _support_workflow_artifact_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type in {"PUBLISHES_ARTIFACT", "DEPENDS_ON"}
+        and rel.source.label == "workflow_job_surface"
+        for rel in relations
+    )
+
+
+def _support_workflow_call_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type == "CALLS_WORKFLOW"
+        and rel.source.label in {"workflow_surface", "workflow_job_surface"}
+        for rel in relations
+    ) or any(
+        rel.source == key and rel.relation_type == "DEPENDS_ON" and rel.target.label == "workflow_surface"
+        for rel in relations
+    )
+
+
+def _support_workflow_output_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type == "EMITS_OUTPUT"
+        and rel.source.label in {"workflow_surface", "workflow_job_surface"}
+        for rel in relations
+    )
+
+
+def _support_cli_option_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type == "ACCEPTS_OPTION"
+        and rel.source.label == "cli_command_surface"
+        for rel in relations
+    )
+
+
+def _support_doc_claim_surface(relations: tuple[GraphRelation, ...], key: NodeKey) -> bool:
+    return any(
+        rel.target == key
+        and rel.relation_type == "ASSERTS"
+        and rel.source.label in {"doc_source_surface", "doc_artifact", "policy_surface"}
+        for rel in relations
+    ) or any(rel.source == key and rel.relation_type == "ASSERTS_ABOUT" for rel in relations)
+
+
+def _snapshot_support_specs() -> tuple[tuple[str, str, Callable[[tuple[GraphRelation, ...], NodeKey], bool]], ...]:
+    return (
+        ("runtime evidence surfaces without support links", "runtime_evidence_surface", _support_runtime_evidence_surface),
+        ("control-plane artifacts without runtime/storage links", "control_plane_artifact_surface", _support_control_plane_artifact_surface),
+        ("run instance surfaces without support links", "run_instance_surface", _support_run_instance_surface),
+        ("runtime state surfaces without support links", "runtime_state_surface", _support_runtime_state_surface),
+        ("storage surfaces without ownership or lineage links", "storage_surface", _support_storage_surface),
+        ("schema fields without storage/contract/lineage links", "schema_field_surface", _support_schema_field_surface),
+        ("workflow jobs without workflow parent links", "workflow_job_surface", _support_workflow_job_surface),
+        ("cli command surfaces without runtime/support links", "cli_command_surface", _support_cli_command_surface),
+        ("workflow artifacts without job links", "workflow_artifact_surface", _support_workflow_artifact_surface),
+        ("workflow calls without job/workflow links", "workflow_call_surface", _support_workflow_call_surface),
+        ("workflow outputs without workflow/job links", "workflow_output_surface", _support_workflow_output_surface),
+        ("cli options without command links", "cli_option_surface", _support_cli_option_surface),
+        ("doc claims without doc/target links", "doc_claim_surface", _support_doc_claim_surface),
+    )
+
+
 def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
     stats = snapshot.stats()
     issues: list[str] = []
-    required_labels = (
-        "repo_zone",
-        "directory_surface",
-        "file_surface",
-        "class_surface",
-        "function_surface",
-        "method_surface",
-        "duplication_cluster",
-        "complexity_candidate",
-        "port_surface",
-        "adapter_surface",
-        "adapter_impl_surface",
-        "pipeline_surface",
-        "contract_surface",
-        "alert_surface",
-        "execution_path",
-        "quality_gate",
-        "dashboard_surface",
-        "storage_surface",
-        "runtime_evidence_surface",
-        "control_plane_artifact_surface",
-        "run_instance_surface",
-        "runtime_state_surface",
-        "schema_field_surface",
-        "workflow_surface",
-        "workflow_job_surface",
-        "workflow_call_surface",
-        "workflow_matrix_variant_surface",
-        "workflow_output_surface",
-        "workflow_action_surface",
-        "workflow_artifact_surface",
-        "workflow_secret_surface",
-        "cli_command_surface",
-        "cli_option_surface",
-        "doc_claim_surface",
-    )
-    required_relation_types = (
-        "BACKS",
-        "HOUSES",
-        "DECLARES",
-        "DEPENDS_ON",
-        "GOVERNS",
-        "RUNS_VIA",
-        "VALIDATED_BY",
-        "OBSERVED_BY",
-        "TESTED_BY",
-        "SAME_SHAPE_AS",
-        "CAN_PROMOTE_TO",
-        "COVERED_BY_TEST",
-        "HAS_COMPLEXITY_SIGNAL",
-        "CANDIDATE_FOR_SIMPLIFICATION",
-        "DESCRIBES",
-        "WRITES_TO",
-        "PROMOTES_TO",
-        "HAS_RUNTIME_EVIDENCE",
-        "HAS_CONTROL_PLANE_ARTIFACT",
-        "HAS_RUN_INSTANCE",
-        "HAS_RUNTIME_STATE",
-        "HAS_WORKFLOW",
-        "HAS_CLI_COMMAND",
-        "HAS_SCHEMA_FIELD",
-        "CALLS_WORKFLOW",
-        "HAS_MATRIX_VARIANT",
-        "EMITS_OUTPUT",
-        "ACCEPTS_OPTION",
-        "SIDE_EFFECTS_ON",
-        "ASSERTS",
-        "ASSERTS_ABOUT",
-        "EXECUTES_GATE",
-        "EMITS_ARTIFACT",
-        "MATERIALIZED_AS",
-        "REFERENCES_ARTIFACT",
-        "PROMOTES_FIELD_TO",
-        "DERIVES_FIELD_FROM",
-        "USES_ACTION",
-        "PUBLISHES_ARTIFACT",
-        "REQUIRES_SECRET",
-    )
-    for label in required_labels:
+    for label in SNAPSHOT_REQUIRED_LABELS:
         if int(stats["labels"].get(label, 0)) <= 0:
             issues.append(f"missing required label population: {label}")
-    for relation_type in required_relation_types:
+    for relation_type in SNAPSHOT_REQUIRED_RELATION_TYPES:
         if int(stats["relation_types"].get(relation_type, 0)) <= 0:
             issues.append(f"missing required relation population: {relation_type}")
 
@@ -8895,343 +9117,13 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         (rel.source.label, rel.source.name, rel.relation_type, rel.target.label)
         for rel in relations
     }
-    relation_requirements = (
-        ("missing project -> HAS_REPO_ZONE -> repo_zone links", {"project"}, "HAS_REPO_ZONE", {"repo_zone"}),
-        ("missing directory_surface -> CONTAINS -> file_surface links", {"directory_surface"}, "CONTAINS", {"file_surface"}),
-        ("missing file_surface -> BACKS -> module_surface links", {"file_surface"}, "BACKS", {"module_surface"}),
-        ("missing directory_surface -> HOUSES -> package_family links", {"directory_surface"}, "HOUSES", {"package_family"}),
-        ("missing directory_surface -> HOUSES -> entity_config links", {"directory_surface"}, "HOUSES", {"entity_config"}),
-        ("missing directory_surface -> HOUSES -> doc_source_surface links", {"directory_surface"}, "HOUSES", {"doc_source_surface"}),
-        ("missing directory_surface -> HOUSES -> test_artifact links", {"directory_surface"}, "HOUSES", {"test_artifact"}),
-        ("missing module_surface -> DECLARES -> class_surface links", {"module_surface"}, "DECLARES", {"class_surface"}),
-        ("missing class_surface -> DECLARES -> method_surface links", {"class_surface"}, "DECLARES", {"method_surface"}),
-        ("missing module_surface -> DECLARES -> function_surface links", {"module_surface"}, "DECLARES", {"function_surface"}),
-        ("missing duplication_cluster promotion targets", {"duplication_cluster"}, "CAN_PROMOTE_TO", None),
-        (
-            "missing duplication_cluster -> CONTAINS -> callable surface links",
-            {"duplication_cluster"},
-            "CONTAINS",
-            {"method_surface", "function_surface"},
-        ),
-        ("missing callable duplication links", {"method_surface", "function_surface"}, "SAME_SHAPE_AS", None),
-        (
-            "missing code surface -> HAS_COMPLEXITY_SIGNAL -> complexity_candidate links",
-            {"module_surface", "class_surface", "function_surface", "method_surface"},
-            "HAS_COMPLEXITY_SIGNAL",
-            {"complexity_candidate"},
-        ),
-        ("missing complexity simplification candidates", {"complexity_candidate"}, "CANDIDATE_FOR_SIMPLIFICATION", None),
-        (
-            "missing contract_surface -> DEPENDS_ON -> module_surface relations",
-            {"contract_surface"},
-            "DEPENDS_ON",
-            {"module_surface"},
-        ),
-        (
-            "missing contract_surface -> DESCRIBED_IN -> doc_artifact relations",
-            {"contract_surface"},
-            "DESCRIBED_IN",
-            {"doc_artifact"},
-        ),
-        ("missing pipeline_surface operational runtime links", {"pipeline_surface"}, "RUNS_VIA", {"execution_path"}),
-        ("missing pipeline_surface direct test coverage links", {"pipeline_surface"}, "TESTED_BY", {"test_artifact"}),
-        ("missing pipeline_surface -> DEPENDS_ON -> module_surface links", {"pipeline_surface"}, "DEPENDS_ON", {"module_surface"}),
-        ("missing entity_config -> DEPENDS_ON -> module_surface links", {"entity_config"}, "DEPENDS_ON", {"module_surface"}),
-        ("missing alert_surface dependency links", {"alert_surface"}, "DEPENDS_ON", {"pipeline_surface", "provider_surface"}),
-        ("missing alert_surface -> DEPENDS_ON -> contract_surface links", {"alert_surface"}, "DEPENDS_ON", {"contract_surface"}),
-        ("missing alert_surface -> OBSERVED_BY -> dashboard_surface links", {"alert_surface"}, "OBSERVED_BY", {"dashboard_surface"}),
-        (
-            "missing project -> HAS_RUNTIME_EVIDENCE -> runtime_evidence_surface links",
-            {"project"},
-            "HAS_RUNTIME_EVIDENCE",
-            {"runtime_evidence_surface"},
-        ),
-        (
-            "missing project -> HAS_CONTROL_PLANE_ARTIFACT -> control_plane_artifact_surface links",
-            {"project"},
-            "HAS_CONTROL_PLANE_ARTIFACT",
-            {"control_plane_artifact_surface"},
-        ),
-        ("missing project -> HAS_RUN_INSTANCE -> run_instance_surface links", {"project"}, "HAS_RUN_INSTANCE", {"run_instance_surface"}),
-        ("missing project -> HAS_RUNTIME_STATE -> runtime_state_surface links", {"project"}, "HAS_RUNTIME_STATE", {"runtime_state_surface"}),
-        ("missing project -> HAS_WORKFLOW -> workflow_surface links", {"project"}, "HAS_WORKFLOW", {"workflow_surface"}),
-        ("missing project -> HAS_CLI_COMMAND -> cli_command_surface links", {"project"}, "HAS_CLI_COMMAND", {"cli_command_surface"}),
-        ("missing workflow_surface -> CONTAINS -> workflow_job_surface links", {"workflow_surface"}, "CONTAINS", {"workflow_job_surface"}),
-        (
-            "missing workflow/workflow_job -> CALLS_WORKFLOW -> workflow_call_surface links",
-            {"workflow_surface", "workflow_job_surface"},
-            "CALLS_WORKFLOW",
-            {"workflow_call_surface"},
-        ),
-        (
-            "missing workflow_job_surface -> HAS_MATRIX_VARIANT -> workflow_matrix_variant_surface links",
-            {"workflow_job_surface"},
-            "HAS_MATRIX_VARIANT",
-            {"workflow_matrix_variant_surface"},
-        ),
-        (
-            "missing workflow/workflow_job -> EMITS_OUTPUT -> workflow_output_surface links",
-            {"workflow_surface", "workflow_job_surface"},
-            "EMITS_OUTPUT",
-            {"workflow_output_surface"},
-        ),
-        (
-            "missing workflow_job_surface -> RUNS_VIA operational target links",
-            {"workflow_job_surface"},
-            "RUNS_VIA",
-            {"script_surface", "file_surface", "directory_surface"},
-        ),
-        ("missing workflow_job_surface -> EXECUTES_GATE -> quality_gate links", {"workflow_job_surface"}, "EXECUTES_GATE", {"quality_gate"}),
-        ("missing workflow_job_surface -> USES_ACTION -> workflow_action_surface links", {"workflow_job_surface"}, "USES_ACTION", {"workflow_action_surface"}),
-        (
-            "missing workflow_job_surface -> PUBLISHES_ARTIFACT -> workflow_artifact_surface links",
-            {"workflow_job_surface"},
-            "PUBLISHES_ARTIFACT",
-            {"workflow_artifact_surface"},
-        ),
-        (
-            "missing workflow_job_surface -> REQUIRES_SECRET -> workflow_secret_surface links",
-            {"workflow_job_surface"},
-            "REQUIRES_SECRET",
-            {"workflow_secret_surface"},
-        ),
-        ("missing cli_command_surface -> RUNS_VIA -> execution_path links", {"cli_command_surface"}, "RUNS_VIA", {"execution_path"}),
-        ("missing cli_command_surface -> ACCEPTS_OPTION -> cli_option_surface links", {"cli_command_surface"}, "ACCEPTS_OPTION", {"cli_option_surface"}),
-        ("missing cli_command_surface side effect links", {"cli_command_surface"}, "SIDE_EFFECTS_ON", None),
-        ("missing storage_surface -> HAS_SCHEMA_FIELD -> schema_field_surface links", {"storage_surface"}, "HAS_SCHEMA_FIELD", {"schema_field_surface"}),
-        ("missing contract_surface -> HAS_SCHEMA_FIELD -> schema_field_surface links", {"contract_surface"}, "HAS_SCHEMA_FIELD", {"schema_field_surface"}),
-        ("missing pipeline_surface -> WRITES_TO -> storage_surface links", {"pipeline_surface"}, "WRITES_TO", {"storage_surface"}),
-        ("missing storage_surface promotion links", {"storage_surface"}, "PROMOTES_TO", {"storage_surface"}),
-        (
-            "missing runtime_evidence_surface -> WRITES_TO -> storage_surface links",
-            {"runtime_evidence_surface"},
-            "WRITES_TO",
-            {"storage_surface"},
-        ),
-        (
-            "missing runtime_evidence_surface -> EMITS_ARTIFACT -> control_plane_artifact_surface links",
-            {"runtime_evidence_surface"},
-            "EMITS_ARTIFACT",
-            {"control_plane_artifact_surface"},
-        ),
-        (
-            "missing control_plane_artifact_surface -> MATERIALIZED_AS -> storage_surface links",
-            {"control_plane_artifact_surface"},
-            "MATERIALIZED_AS",
-            {"storage_surface"},
-        ),
-        (
-            "missing run_instance_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links",
-            {"run_instance_surface"},
-            "REFERENCES_ARTIFACT",
-            {"control_plane_artifact_surface"},
-        ),
-        ("missing run_instance_surface -> HAS_RUNTIME_STATE -> runtime_state_surface links", {"run_instance_surface"}, "HAS_RUNTIME_STATE", {"runtime_state_surface"}),
-        (
-            "missing runtime_state_surface dependency links",
-            {"runtime_state_surface"},
-            "DEPENDS_ON",
-            {"pipeline_surface", "workflow_surface", "runtime_evidence_surface"},
-        ),
-        (
-            "missing runtime_state_surface -> REFERENCES_ARTIFACT -> control_plane_artifact_surface links",
-            {"runtime_state_surface"},
-            "REFERENCES_ARTIFACT",
-            {"control_plane_artifact_surface"},
-        ),
-        ("missing schema_field_surface promotion links", {"schema_field_surface"}, "PROMOTES_FIELD_TO", {"schema_field_surface"}),
-        ("missing schema_field_surface derivation links", {"schema_field_surface"}, "DERIVES_FIELD_FROM", {"schema_field_surface"}),
-        (
-            "missing docs-to-code drift edges",
-            {"doc_source_surface", "doc_artifact", "policy_surface"},
-            "DESCRIBES",
-            {"module_surface", "script_surface", "config_artifact", "workflow_surface", "cli_command_surface", "file_surface", "directory_surface", "execution_path"},
-        ),
-        (
-            "missing doc claim extraction edges",
-            {"doc_source_surface", "doc_artifact", "policy_surface"},
-            "ASSERTS",
-            {"doc_claim_surface"},
-        ),
-        (
-            "missing doc claim traceability edges",
-            {"doc_claim_surface"},
-            "ASSERTS_ABOUT",
-            {"module_surface", "script_surface", "config_artifact", "workflow_surface", "cli_command_surface", "file_surface", "directory_surface", "execution_path"},
-        ),
-        (
-            "missing adapter_surface -> CONTAINS -> adapter_impl_surface links",
-            {"adapter_surface"},
-            "CONTAINS",
-            {"adapter_impl_surface"},
-        ),
-    )
-    _append_missing_relation_issues(issues, relation_keys, relation_requirements)
-
-    support_specs = (
-        (
-            "runtime evidence surfaces without support links",
-            "runtime_evidence_surface",
-            lambda key: any(
-                rel.source == key and rel.relation_type in {"BACKED_BY", "DESCRIBED_IN", "WRITES_TO"}
-                for rel in relations
-            ),
-        ),
-        (
-            "control-plane artifacts without runtime/storage links",
-            "control_plane_artifact_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type == "EMITS_ARTIFACT"
-                and rel.source.label == "runtime_evidence_surface"
-                for rel in relations
-            )
-            and any(
-                rel.source == key
-                and rel.relation_type == "MATERIALIZED_AS"
-                and rel.target.label == "storage_surface"
-                for rel in relations
-            ),
-        ),
-        (
-            "run instance surfaces without support links",
-            "run_instance_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type == "HAS_RUN_INSTANCE"
-                and rel.source.label == "project"
-                for rel in relations
-            )
-            and any(
-                rel.source == key
-                and rel.relation_type == "REFERENCES_ARTIFACT"
-                and rel.target.label == "control_plane_artifact_surface"
-                for rel in relations
-            ),
-        ),
-        (
-            "runtime state surfaces without support links",
-            "runtime_state_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type == "HAS_RUNTIME_STATE"
-                and rel.source.label in {"project", "run_instance_surface"}
-                for rel in relations
-            )
-            and any(rel.source == key and rel.relation_type == "DEPENDS_ON" for rel in relations)
-            and any(
-                rel.source == key
-                and rel.relation_type == "REFERENCES_ARTIFACT"
-                and rel.target.label == "control_plane_artifact_surface"
-                for rel in relations
-            ),
-        ),
-        (
-            "storage surfaces without ownership or lineage links",
-            "storage_surface",
-            lambda key: any(
-                (
-                    rel.target == key
-                    and rel.relation_type in {"WRITES_TO", "DEPENDS_ON", "DEFINED_BY"}
-                    and rel.source.label in {"pipeline_surface", "entity_config", "runtime_evidence_surface", "storage_surface"}
-                )
-                or (rel.source == key and rel.relation_type in {"PROMOTES_TO", "DEFINED_BY"})
-                for rel in relations
-            ),
-        ),
-        (
-            "schema fields without storage/contract/lineage links",
-            "schema_field_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type == "HAS_SCHEMA_FIELD"
-                and rel.source.label in {"storage_surface", "contract_surface"}
-                for rel in relations
-            )
-            and any(
-                rel.source == key
-                and rel.relation_type in {"DEFINED_BY", "PROMOTES_FIELD_TO", "DERIVES_FIELD_FROM"}
-                for rel in relations
-            ),
-        ),
-        (
-            "workflow jobs without workflow parent links",
-            "workflow_job_surface",
-            lambda key: any(
-                rel.target == key and rel.relation_type == "CONTAINS" and rel.source.label == "workflow_surface"
-                for rel in relations
-            ),
-        ),
-        (
-            "cli command surfaces without runtime/support links",
-            "cli_command_surface",
-            lambda key: any(
-                (rel.source == key and rel.relation_type in {"RUNS_VIA", "EXECUTES_GATE", "DEPENDS_ON"})
-                or (rel.target == key and rel.relation_type == "HAS_CLI_COMMAND" and rel.source.label == "project")
-                for rel in relations
-            ),
-        ),
-        (
-            "workflow artifacts without job links",
-            "workflow_artifact_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type in {"PUBLISHES_ARTIFACT", "DEPENDS_ON"}
-                and rel.source.label == "workflow_job_surface"
-                for rel in relations
-            ),
-        ),
-        (
-            "workflow calls without job/workflow links",
-            "workflow_call_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type == "CALLS_WORKFLOW"
-                and rel.source.label in {"workflow_surface", "workflow_job_surface"}
-                for rel in relations
-            )
-            or any(
-                rel.source == key and rel.relation_type == "DEPENDS_ON" and rel.target.label == "workflow_surface"
-                for rel in relations
-            ),
-        ),
-        (
-            "workflow outputs without workflow/job links",
-            "workflow_output_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type == "EMITS_OUTPUT"
-                and rel.source.label in {"workflow_surface", "workflow_job_surface"}
-                for rel in relations
-            ),
-        ),
-        (
-            "cli options without command links",
-            "cli_option_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type == "ACCEPTS_OPTION"
-                and rel.source.label == "cli_command_surface"
-                for rel in relations
-            ),
-        ),
-        (
-            "doc claims without doc/target links",
-            "doc_claim_surface",
-            lambda key: any(
-                rel.target == key
-                and rel.relation_type == "ASSERTS"
-                and rel.source.label in {"doc_source_surface", "doc_artifact", "policy_surface"}
-                for rel in relations
-            )
-            or any(rel.source == key and rel.relation_type == "ASSERTS_ABOUT" for rel in relations),
-        ),
-    )
+    _append_missing_relation_issues(issues, relation_keys, SNAPSHOT_RELATION_REQUIREMENTS)
+    support_specs = _snapshot_support_specs()
     for prefix, label, predicate in support_specs:
         _append_support_issue(
             issues,
             prefix,
-            _missing_node_support_names(snapshot, label, predicate),
+            _missing_node_support_names(snapshot, label, lambda key, fn=predicate: fn(relations, key)),
         )
 
     ignored_paths = [

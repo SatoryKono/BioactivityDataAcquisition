@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.composition.factories.services.common_service_wiring import (
     CommonServicePorts,
+    CommonServicePortsRequest,
     assemble_pipeline_service,
     build_common_service_ports,
     resolve_tracer,
@@ -48,15 +49,17 @@ class TestBuildCommonServicePorts:
         dq_services: dict[str, object] = {"bronze_analyzer": MagicMock()}
 
         result = build_common_service_ports(
-            settings=MagicMock(),
-            logger=MagicMock(),
-            pipeline_config=MagicMock(),
-            pipeline_name="test_pipeline",
-            create_dq_services_fn=MagicMock(return_value=dq_services),
-            storage_factory=storage_factory,
-            create_lock_fn=lambda: lock,
-            create_checkpoint_fn=lambda _ctx: checkpoint,
-            create_quarantine_fn=lambda _s: quarantine,
+            CommonServicePortsRequest(
+                settings=MagicMock(),
+                logger=MagicMock(),
+                pipeline_config=MagicMock(),
+                pipeline_name="test_pipeline",
+                create_dq_services_fn=MagicMock(return_value=dq_services),
+                storage_factory=storage_factory,
+                create_lock_fn=lambda: lock,
+                create_checkpoint_fn=lambda _ctx: checkpoint,
+                create_quarantine_fn=lambda _s: quarantine,
+            )
         )
 
         assert isinstance(result, CommonServicePorts)
@@ -72,16 +75,18 @@ class TestBuildCommonServicePorts:
         storage_factory.create.return_value = SimpleNamespace(adapter=MagicMock())
 
         result = build_common_service_ports(
-            settings=MagicMock(),
-            logger=MagicMock(),
-            pipeline_config=MagicMock(),
-            pipeline_name="test_pipeline",
-            metrics=provided_metrics,
-            create_dq_services_fn=MagicMock(return_value={}),
-            storage_factory=storage_factory,
-            create_lock_fn=MagicMock(return_value=MagicMock()),
-            create_checkpoint_fn=MagicMock(return_value=MagicMock()),
-            create_quarantine_fn=MagicMock(return_value=MagicMock()),
+            CommonServicePortsRequest(
+                settings=MagicMock(),
+                logger=MagicMock(),
+                pipeline_config=MagicMock(),
+                pipeline_name="test_pipeline",
+                metrics=provided_metrics,
+                create_dq_services_fn=MagicMock(return_value={}),
+                storage_factory=storage_factory,
+                create_lock_fn=MagicMock(return_value=MagicMock()),
+                create_checkpoint_fn=MagicMock(return_value=MagicMock()),
+                create_quarantine_fn=MagicMock(return_value=MagicMock()),
+            )
         )
 
         assert result.metrics_port is provided_metrics
@@ -93,17 +98,19 @@ class TestBuildCommonServicePorts:
         storage_factory.create.return_value = SimpleNamespace(adapter=MagicMock())
 
         result = build_common_service_ports(
-            settings=MagicMock(),
-            logger=MagicMock(),
-            pipeline_config=MagicMock(),
-            pipeline_name="test_pipeline",
-            metrics=None,
-            create_dq_services_fn=MagicMock(return_value={}),
-            create_metrics_fn=lambda _s: created_metrics,
-            storage_factory=storage_factory,
-            create_lock_fn=MagicMock(return_value=MagicMock()),
-            create_checkpoint_fn=MagicMock(return_value=MagicMock()),
-            create_quarantine_fn=MagicMock(return_value=MagicMock()),
+            CommonServicePortsRequest(
+                settings=MagicMock(),
+                logger=MagicMock(),
+                pipeline_config=MagicMock(),
+                pipeline_name="test_pipeline",
+                metrics=None,
+                create_dq_services_fn=MagicMock(return_value={}),
+                create_metrics_fn=lambda _s: created_metrics,
+                storage_factory=storage_factory,
+                create_lock_fn=MagicMock(return_value=MagicMock()),
+                create_checkpoint_fn=MagicMock(return_value=MagicMock()),
+                create_quarantine_fn=MagicMock(return_value=MagicMock()),
+            )
         )
 
         assert result.metrics_port is created_metrics

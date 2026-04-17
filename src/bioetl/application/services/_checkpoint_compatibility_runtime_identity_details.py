@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.domain.normalization import (
     build_execution_identity_payload,
     compute_degraded_runtime_anchor_fingerprint,
@@ -10,6 +12,27 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.execution_phase import ExecutionPhase
+
+
+@dataclass(frozen=True, slots=True)
+class IdentityDetailsRequest:
+    """Inputs required to build one structured identity-details payload."""
+
+    effective_config_hash: str
+    execution_phase: ExecutionPhase
+    checkpoint_schema_version: str
+    composite_run_identity: str | None
+    execution_fingerprint: str | None
+    pipeline_name: str | None
+    run_type: str | None
+    pipeline_version: str | None
+    manifest_id: str | None
+    dq_contract_compatibility_hash: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    effective_config_artifact_id: str | None
+    exact_replay: bool | None
+    input_snapshot_fingerprint: str | None
 
 
 def _identity_detail_value(value: str | None) -> str:
@@ -101,57 +124,40 @@ def _degraded_runtime_anchor_detail(
     )
 
 
-def build_identity_details(
-    *,
-    effective_config_hash: str,
-    execution_phase: ExecutionPhase,
-    checkpoint_schema_version: str,
-    composite_run_identity: str | None,
-    execution_fingerprint: str | None,
-    pipeline_name: str | None,
-    run_type: str | None,
-    pipeline_version: str | None,
-    manifest_id: str | None,
-    dq_contract_compatibility_hash: str | None,
-    contract_ref: str | None,
-    contract_version: str | None,
-    effective_config_artifact_id: str | None,
-    exact_replay: bool | None,
-    input_snapshot_fingerprint: str | None,
-) -> JsonDict:
+def build_identity_details(request: IdentityDetailsRequest) -> JsonDict:
     """Build canonical identity details payload."""
     canonical_fallback_payload = _canonical_execution_identity_payload(
-        pipeline_name=pipeline_name,
-        run_type=run_type,
-        pipeline_version=pipeline_version,
-        effective_config_hash=effective_config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        effective_config_artifact_id=effective_config_artifact_id,
-        exact_replay=exact_replay,
-        input_snapshot_fingerprint=input_snapshot_fingerprint,
+        pipeline_name=request.pipeline_name,
+        run_type=request.run_type,
+        pipeline_version=request.pipeline_version,
+        effective_config_hash=request.effective_config_hash,
+        dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
+        contract_ref=request.contract_ref,
+        contract_version=request.contract_version,
+        effective_config_artifact_id=request.effective_config_artifact_id,
+        exact_replay=request.exact_replay,
+        input_snapshot_fingerprint=request.input_snapshot_fingerprint,
     )
     return {
-        "effective_config_hash": effective_config_hash,
-        "execution_phase": execution_phase.value,
-        "checkpoint_schema_version": checkpoint_schema_version,
-        "composite_run_identity": _identity_detail_value(composite_run_identity),
-        "execution_fingerprint": _identity_detail_value(execution_fingerprint),
-        "pipeline_name": _identity_detail_value(pipeline_name),
-        "run_type": _identity_detail_value(run_type),
-        "pipeline_version": _identity_detail_value(pipeline_version),
-        "manifest_id": _identity_detail_value(manifest_id),
+        "effective_config_hash": request.effective_config_hash,
+        "execution_phase": request.execution_phase.value,
+        "checkpoint_schema_version": request.checkpoint_schema_version,
+        "composite_run_identity": _identity_detail_value(request.composite_run_identity),
+        "execution_fingerprint": _identity_detail_value(request.execution_fingerprint),
+        "pipeline_name": _identity_detail_value(request.pipeline_name),
+        "run_type": _identity_detail_value(request.run_type),
+        "pipeline_version": _identity_detail_value(request.pipeline_version),
+        "manifest_id": _identity_detail_value(request.manifest_id),
         "dq_contract_compatibility_hash": _identity_detail_value(
-            dq_contract_compatibility_hash
+            request.dq_contract_compatibility_hash
         ),
-        "contract_ref": _identity_detail_value(contract_ref),
-        "contract_version": _identity_detail_value(contract_version),
+        "contract_ref": _identity_detail_value(request.contract_ref),
+        "contract_version": _identity_detail_value(request.contract_version),
         "effective_config_artifact_id": _identity_detail_value(
-            effective_config_artifact_id
+            request.effective_config_artifact_id
         ),
-        "exact_replay": _identity_detail_bool(exact_replay),
-        "input_snapshot_fingerprint": input_snapshot_fingerprint or "",
+        "exact_replay": _identity_detail_bool(request.exact_replay),
+        "input_snapshot_fingerprint": request.input_snapshot_fingerprint or "",
         "canonical_execution_identity_payload": canonical_fallback_payload,
         "checkpoint_execution_identity_fallback_fingerprint": (
             _checkpoint_execution_identity_fallback_detail(
@@ -159,11 +165,11 @@ def build_identity_details(
             )
         ),
         "degraded_runtime_anchor_fingerprint": _degraded_runtime_anchor_detail(
-            manifest_id=manifest_id,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            effective_config_hash=effective_config_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
+            manifest_id=request.manifest_id,
+            contract_ref=request.contract_ref,
+            contract_version=request.contract_version,
+            effective_config_hash=request.effective_config_hash,
+            effective_config_artifact_id=request.effective_config_artifact_id,
         ),
     }
 

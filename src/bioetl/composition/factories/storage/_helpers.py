@@ -29,7 +29,7 @@ from ._resilience import (
     create_silver_atomic_retry_policy,
     create_silver_merge_resilience_policy,
 )
-from ._silver import create_silver_writer
+from ._silver import CreateSilverWriterRequest, create_silver_writer
 from .adapter import StorageAdapter
 
 if TYPE_CHECKING:
@@ -221,28 +221,30 @@ def _create_silver_layer_writer(
         flat_structure=ctx.silver_flat,
     )
     return create_silver_writer(
-        writer_cls=silver_writer_cls,
-        base_path=resolve_delta_writer_base_path(
-            ctx.silver_path,
-            provider=config.provider,
-            entity_type=config.entity_type,
+        CreateSilverWriterRequest(
+            writer_cls=silver_writer_cls,
+            base_path=resolve_delta_writer_base_path(
+                ctx.silver_path,
+                provider=config.provider,
+                entity_type=config.entity_type,
+                flat_structure=silver_writer_flat,
+            ),
+            config=ctx.silver_config,
+            logger=logger,
+            tracing=tracing,
+            csv_exporter=ctx.silver_csv_exporter,
+            metadata_coordinator=metadata_coordinator,
+            audit=audit,
+            transform_version=config.transform.version,
+            transform_steps=tuple(config.transform.steps),
             flat_structure=silver_writer_flat,
-        ),
-        config=ctx.silver_config,
-        logger=logger,
-        tracing=tracing,
-        csv_exporter=ctx.silver_csv_exporter,
-        metadata_coordinator=metadata_coordinator,
-        audit=audit,
-        transform_version=config.transform.version,
-        transform_steps=tuple(config.transform.steps),
-        flat_structure=silver_writer_flat,
-        silver_validator=silver_validator,
-        metrics=metrics,
-        metadata_atomic_retry_policy=metadata_atomic_retry_policy,
-        merge_resilience_policy=merge_resilience_policy,
-        contract_rollout_policy=_load_contract_rollout_policy(config),
-        pipeline_name=ctx.pipeline_name,
+            silver_validator=silver_validator,
+            metrics=metrics,
+            metadata_atomic_retry_policy=metadata_atomic_retry_policy,
+            merge_resilience_policy=merge_resilience_policy,
+            contract_rollout_policy=_load_contract_rollout_policy(config),
+            pipeline_name=ctx.pipeline_name,
+        )
     )
 
 

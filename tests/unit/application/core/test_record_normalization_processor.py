@@ -314,7 +314,7 @@ def test_profile_auto_resolves_for_chembl_molecule() -> None:
     assert normalized["molecule_id"] == "CHEMBL25"
     assert normalized["pref_name"] == "Example Molecule"
     assert normalized["canonical_smiles"] == "CCO"
-    assert normalized["molecular_weight"] == 123.45
+    assert normalized["molecular_weight"] == pytest.approx(123.45)
 
 
 @pytest.mark.unit
@@ -393,7 +393,7 @@ def test_profile_auto_resolves_for_chembl_publication_similarity() -> None:
     assert normalized["doc_2"] == 11
     assert normalized["pubmed_id1"] == "12345"
     assert normalized["pubmed_id2"] == "67890"
-    assert normalized["avg_tani"] == 0.75
+    assert normalized["avg_tani"] == pytest.approx(0.75)
 
 
 @pytest.mark.unit
@@ -806,7 +806,7 @@ def test_chembl_assay_profile_makes_content_hash_invariant_for_equivalent_scalar
 
     assert normalized_a["assay_pref_name"] == "Example Assay"
     assert normalized_a["confidence_score"] == 7
-    assert normalized_a["assay_taxonomy_id"] == 9606.0
+    assert normalized_a["assay_taxonomy_id"] == pytest.approx(9606.0)
     assert normalized_a["variant_sequence_json"] == '{"a":1,"b":2}'
     assert normalized_a["content_hash"] == normalized_b["content_hash"]
 
@@ -964,8 +964,8 @@ def test_chembl_target_profile_makes_content_hash_invariant_for_equivalent_numer
     normalized_b = processor.normalize_record(record_b)
 
     assert normalized_a["pref_name"] == "Example Target"
-    assert normalized_a["primary_component_id"] == 123.0
-    assert normalized_a["taxonomy_id"] == 9606.0
+    assert normalized_a["primary_component_id"] == pytest.approx(123.0)
+    assert normalized_a["taxonomy_id"] == pytest.approx(9606.0)
     assert normalized_a["cross_references"] == '{"a":1,"b":2}'
     assert normalized_a["content_hash"] == normalized_b["content_hash"]
 
@@ -1098,7 +1098,7 @@ def test_pubchem_compound_profile_stabilizes_numeric_and_smiles_equivalence() ->
     )
 
     assert normalized["canonical_smiles"] == "C"
-    assert normalized["molecular_weight"] == 12.34
+    assert normalized["molecular_weight"] == pytest.approx(12.34)
 
 
 _NEXT_WAVE_PROFILE_HASH_CASES = (

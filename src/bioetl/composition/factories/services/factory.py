@@ -31,6 +31,7 @@ from bioetl.composition.factories.services.callbacks import (
 )
 from bioetl.composition.factories.services.common_service_wiring import (
     CommonServicePorts,
+    CommonServicePortsRequest,
     assemble_pipeline_service,
     build_common_service_ports,
     resolve_tracer,
@@ -109,20 +110,22 @@ class BaseServicesFactory:
         """
         cls._ensure_prod_silver_validator(settings, pipeline_config, silver_validator)
         common_ports = build_common_service_ports(
-            settings=settings,
-            logger=logger,
-            pipeline_config=pipeline_config,
-            pipeline_name=pipeline_name,
-            metrics=metrics,
-            tracer=tracer,
-            metadata_coordinator=metadata_coordinator,
-            silver_validator=silver_validator,
-            create_dq_services_fn=cls._create_dq_services,
-            create_metrics_fn=create_metrics,
-            storage_factory=StorageFactory,
-            create_lock_fn=create_lock,
-            create_checkpoint_fn=create_checkpoint,
-            create_quarantine_fn=create_quarantine,
+            CommonServicePortsRequest(
+                settings=settings,
+                logger=logger,
+                pipeline_config=pipeline_config,
+                pipeline_name=pipeline_name,
+                metrics=metrics,
+                tracer=tracer,
+                metadata_coordinator=metadata_coordinator,
+                silver_validator=silver_validator,
+                create_dq_services_fn=cls._create_dq_services,
+                create_metrics_fn=create_metrics,
+                storage_factory=StorageFactory,
+                create_lock_fn=create_lock,
+                create_checkpoint_fn=create_checkpoint,
+                create_quarantine_fn=create_quarantine,
+            )
         )
         return assemble_pipeline_service(
             data_source=data_source,

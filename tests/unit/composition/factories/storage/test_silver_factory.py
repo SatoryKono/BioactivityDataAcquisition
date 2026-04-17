@@ -8,7 +8,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from bioetl.composition.factories.storage._silver import create_silver_writer
+from bioetl.composition.factories.storage._silver import (
+    CreateSilverWriterRequest,
+    create_silver_writer,
+)
 from bioetl.domain.ports.noop import (
     NoOpAudit,
     NoOpMetadataWriter,
@@ -26,6 +29,7 @@ class TestCreateSilverWriter:
 
         with pytest.raises(TypeError):
             create_silver_writer(
+                CreateSilverWriterRequest(
                 writer_cls=writer_cls,
                 base_path=Path("/data/silver"),
                 config=None,
@@ -38,6 +42,7 @@ class TestCreateSilverWriter:
                 transform_steps=None,
                 flat_structure=False,
                 silver_validator=None,
+                )
             )
 
         writer_cls.assert_not_called()
@@ -48,6 +53,7 @@ class TestCreateSilverWriter:
         config = SimpleNamespace(save_metadata=True)
 
         create_silver_writer(
+            CreateSilverWriterRequest(
             writer_cls=writer_cls,
             base_path=Path("/data/silver"),
             config=config,
@@ -60,6 +66,7 @@ class TestCreateSilverWriter:
             transform_steps=None,
             flat_structure=False,
             silver_validator=None,
+            )
         )
 
         call_kwargs = writer_cls.call_args[1]
@@ -74,6 +81,7 @@ class TestCreateSilverWriter:
         tracer = MagicMock()
 
         create_silver_writer(
+            CreateSilverWriterRequest(
             writer_cls=writer_cls,
             base_path=Path("/data/silver"),
             config=None,
@@ -86,6 +94,7 @@ class TestCreateSilverWriter:
             transform_steps=None,
             flat_structure=False,
             silver_validator=None,
+            )
         )
 
         call_kwargs = writer_cls.call_args[1]
@@ -97,6 +106,7 @@ class TestCreateSilverWriter:
         validator = MagicMock()
 
         create_silver_writer(
+            CreateSilverWriterRequest(
             writer_cls=writer_cls,
             base_path=Path("/data/silver"),
             config=None,
@@ -109,6 +119,7 @@ class TestCreateSilverWriter:
             transform_steps=None,
             flat_structure=False,
             silver_validator=validator,
+            )
         )
 
         call_kwargs = writer_cls.call_args[1]
@@ -121,6 +132,7 @@ class TestCreateSilverWriter:
         merge_policy = MagicMock()
 
         create_silver_writer(
+            CreateSilverWriterRequest(
             writer_cls=writer_cls,
             base_path=Path("/data/silver"),
             config=None,
@@ -135,6 +147,7 @@ class TestCreateSilverWriter:
             silver_validator=None,
             metadata_atomic_retry_policy=retry_policy,
             merge_resilience_policy=merge_policy,
+            )
         )
 
         call_kwargs = writer_cls.call_args[1]
@@ -147,6 +160,7 @@ class TestCreateSilverWriter:
         metrics = MagicMock()
 
         create_silver_writer(
+            CreateSilverWriterRequest(
             writer_cls=writer_cls,
             base_path=Path("/data/silver"),
             config=config,
@@ -160,6 +174,7 @@ class TestCreateSilverWriter:
             flat_structure=False,
             silver_validator=None,
             metrics=metrics,
+            )
         )
 
         # Writer is created - verify it passed through
@@ -171,6 +186,7 @@ class TestCreateSilverWriter:
         csv = MagicMock()
 
         create_silver_writer(
+            CreateSilverWriterRequest(
             writer_cls=writer_cls,
             base_path=Path("/data/silver"),
             config=None,
@@ -183,6 +199,7 @@ class TestCreateSilverWriter:
             transform_steps=None,
             flat_structure=False,
             silver_validator=None,
+            )
         )
 
         call_kwargs = writer_cls.call_args[1]
@@ -201,6 +218,7 @@ class TestCreateSilverWriter:
         )
 
         create_silver_writer(
+            CreateSilverWriterRequest(
             writer_cls=writer_cls,
             base_path=Path("/data/silver"),
             config=None,
@@ -214,6 +232,7 @@ class TestCreateSilverWriter:
             flat_structure=False,
             silver_validator=None,
             contract_rollout_policy=rollout_policy,
+            )
         )
 
         call_kwargs = writer_cls.call_args[1]
@@ -225,6 +244,7 @@ class TestCreateSilverWriter:
         audit = MagicMock()
 
         create_silver_writer(
+            CreateSilverWriterRequest(
             writer_cls=writer_cls,
             base_path=Path("/data/silver"),
             config=None,
@@ -237,6 +257,7 @@ class TestCreateSilverWriter:
             transform_steps=None,
             flat_structure=False,
             silver_validator=None,
+            )
         )
 
         call_kwargs = writer_cls.call_args[1]

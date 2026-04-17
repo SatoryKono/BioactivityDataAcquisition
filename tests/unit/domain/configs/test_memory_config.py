@@ -14,7 +14,7 @@ class TestMemoryConfig:
     def test_default_values(self) -> None:
         mc = MemoryConfig()
         assert mc.max_batch_memory_mb == 512
-        assert mc.memory_pressure_threshold == 0.8
+        assert mc.memory_pressure_threshold == pytest.approx(0.8)
         assert mc.min_batch_size == 10
         assert mc.check_interval_records == 100
         assert mc.enable_adaptive_sizing is True
@@ -28,7 +28,7 @@ class TestMemoryConfig:
             enable_adaptive_sizing=False,
         )
         assert mc.max_batch_memory_mb == 1024
-        assert mc.memory_pressure_threshold == 0.9
+        assert mc.memory_pressure_threshold == pytest.approx(0.9)
         assert mc.enable_adaptive_sizing is False
 
     def test_immutable(self) -> None:
@@ -54,8 +54,8 @@ class TestMemoryConfig:
 
     def test_edge_case_zero_threshold(self) -> None:
         mc = MemoryConfig(memory_pressure_threshold=0.0)
-        assert mc.memory_pressure_threshold == 0.0
+        assert mc.memory_pressure_threshold == pytest.approx(0.0)
 
     def test_edge_case_one_threshold(self) -> None:
         mc = MemoryConfig(memory_pressure_threshold=1.0)
-        assert mc.memory_pressure_threshold == 1.0
+        assert mc.memory_pressure_threshold == pytest.approx(1.0)

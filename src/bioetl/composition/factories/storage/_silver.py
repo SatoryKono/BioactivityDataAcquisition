@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -10,6 +11,7 @@ from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
     build_silver_writer_runtime_services,
 )
 
@@ -33,26 +35,30 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 
-def create_silver_writer(
-    *,
-    writer_cls: type[SilverWriter],
-    base_path: Path,
-    config: SinkLayerConfig | None,
-    logger: LoggerPort,
-    tracing: TracingPort,
-    csv_exporter: CsvExporter | None,
-    metadata_coordinator: MetadataCoordinator | None,
-    audit: AuditPort,
-    transform_version: str | None,
-    transform_steps: tuple[str, ...] | None,
-    flat_structure: bool,
-    silver_validator: SilverValidatorPort | None,
-    metrics: MetricsPort | None = None,
-    metadata_atomic_retry_policy: AdaptiveRetryPolicy | None = None,
-    merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
-    contract_rollout_policy: ContractRolloutPolicy | None = None,
-    pipeline_name: str | None = None,
-) -> SilverWriter:
+@dataclass(frozen=True, slots=True)
+class CreateSilverWriterRequest:
+    """Inputs required to build a configured Silver writer instance."""
+
+    writer_cls: type[SilverWriter]
+    base_path: Path
+    config: SinkLayerConfig | None
+    logger: LoggerPort
+    tracing: TracingPort
+    csv_exporter: CsvExporter | None
+    metadata_coordinator: MetadataCoordinator | None
+    audit: AuditPort
+    transform_version: str | None
+    transform_steps: tuple[str, ...] | None
+    flat_structure: bool
+    silver_validator: SilverValidatorPort | None
+    metrics: MetricsPort | None = None
+    metadata_atomic_retry_policy: AdaptiveRetryPolicy | None = None
+    merge_resilience_policy: SilverMergeResiliencePolicy | None = None
+    contract_rollout_policy: ContractRolloutPolicy | None = None
+    pipeline_name: str | None = None
+
+
+def create_silver_writer(request: CreateSilverWriterRequest) -> SilverWriter:
     """Create configured Silver writer.
 
     Args:
@@ -76,51 +82,53 @@ def create_silver_writer(
     Returns:
         Configured SilverWriter instance for the Silver storage layer.
     """
-    save_metadata = config.save_metadata if config else False
+    save_metadata = request.config.save_metadata if request.config else False
     lineage_store = (
-        FileLineageStore(base_path=base_path.parent / "control" / "lineage")
+        FileLineageStore(base_path=request.base_path.parent / "control" / "lineage")
         if save_metadata
         else None
     )
     metadata_writer = (
         MetadataWriter(
-            logger=logger,
-            atomic_replace_retry_policy=metadata_atomic_retry_policy,
-            metrics=metrics,
+            logger=request.logger,
+            atomic_replace_retry_policy=request.metadata_atomic_retry_policy,
+            metrics=request.metrics,
         )
         if save_metadata
         else NoOpMetadataWriter()
     )
-    if tracing is None:
+    if request.tracing is None:
         raise TypeError(
             "SilverWriter requires explicit tracing injection. "
             "Build NoOpTracing in composition when tracing is disabled."
         )
     runtime_services = build_silver_writer_runtime_services(
-        csv_exporter=csv_exporter,
-        tracing=tracing,
-        write_policy=None,
-        metrics=metrics,
-        audit=audit,
-        logger=logger,
-        silver_validator=silver_validator,
-        metadata_writer=metadata_writer,
-        metadata_coordinator=metadata_coordinator,
-        lineage_store=lineage_store,
-        dq_calculator=None,
-        merge_resilience_policy=merge_resilience_policy,
-        contract_rollout_policy=contract_rollout_policy,
-        base_path=base_path,
-        pipeline_name=pipeline_name,
+        SilverWriterRuntimeServicesRequest(
+            csv_exporter=request.csv_exporter,
+            tracing=request.tracing,
+            write_policy=None,
+            metrics=request.metrics,
+            audit=request.audit,
+            logger=request.logger,
+            silver_validator=request.silver_validator,
+            metadata_writer=metadata_writer,
+            metadata_coordinator=request.metadata_coordinator,
+            lineage_store=lineage_store,
+            dq_calculator=None,
+            merge_resilience_policy=request.merge_resilience_policy,
+            contract_rollout_policy=request.contract_rollout_policy,
+            base_path=request.base_path,
+            pipeline_name=request.pipeline_name,
+        )
     )
-    return writer_cls(
-        base_path=base_path,
-        logger=logger,
-        transform_version=transform_version,
-        transform_steps=transform_steps,
+    return request.writer_cls(
+        base_path=request.base_path,
+        logger=request.logger,
+        transform_version=request.transform_version,
+        transform_steps=request.transform_steps,
         runtime_services=runtime_services,
-        pipeline_name=pipeline_name,
+        pipeline_name=request.pipeline_name,
         # Keep legacy kwarg for constructor-call compatibility in tests and shims.
-        csv_exporter=csv_exporter,
-        flat_structure=flat_structure,
+        csv_exporter=request.csv_exporter,
+        flat_structure=request.flat_structure,
     )

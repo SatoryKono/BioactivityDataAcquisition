@@ -19,12 +19,12 @@ class TestRateLimitConfig:
 
     def test_default_values(self) -> None:
         config = RateLimitConfig()
-        assert config.requests_per_second == 5.0
+        assert config.requests_per_second == pytest.approx(5.0)
         assert config.burst == 10
 
     def test_custom_values(self) -> None:
         config = RateLimitConfig(requests_per_second=10.0, burst=20)
-        assert config.requests_per_second == 10.0
+        assert config.requests_per_second == pytest.approx(10.0)
         assert config.burst == 20
 
     def test_validation_requests_per_second_positive(self) -> None:
@@ -52,7 +52,7 @@ class TestBaseClientConfig:
         config = BaseClientConfig()
         assert config.base_url is None
         assert config.timeout == 30
-        assert config.rate_limit.requests_per_second == 5.0
+        assert config.rate_limit.requests_per_second == pytest.approx(5.0)
         assert config.rate_limit.burst == 10
 
     def test_custom_values(self) -> None:
@@ -64,7 +64,7 @@ class TestBaseClientConfig:
         )
         assert config.base_url == "https://api.example.com"
         assert config.timeout == 60
-        assert config.rate_limit.requests_per_second == 10.0
+        assert config.rate_limit.requests_per_second == pytest.approx(10.0)
 
     def test_validation_timeout_positive(self) -> None:
         with pytest.raises(ValueError, match="timeout must be positive"):
@@ -85,7 +85,7 @@ class TestBaseProviderConfig:
         config = BaseProviderConfig()
         assert config.base_url is None
         assert config.timeout == 30
-        assert config.rate_limit.requests_per_second == 5.0
+        assert config.rate_limit.requests_per_second == pytest.approx(5.0)
         assert config.batch_size == 100
         assert config.api_key is None
 
@@ -100,7 +100,7 @@ class TestBaseProviderConfig:
         )
         assert config.base_url == "https://www.ebi.ac.uk/chembl/api/data"
         assert config.timeout == 120
-        assert config.rate_limit.requests_per_second == 20.0
+        assert config.rate_limit.requests_per_second == pytest.approx(20.0)
         assert config.batch_size == 1000
         assert config.api_key == "secret-key"
 

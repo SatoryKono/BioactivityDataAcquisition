@@ -195,7 +195,7 @@ class TestBronzeMetadata:
         assert metadata.runtime.run_type == RunTypeEnum.INCREMENTAL
         assert metadata.runtime.started_at_utc == started_at
         assert metadata.runtime.completed_at_utc == completed_at
-        assert metadata.runtime.duration_seconds == 3.0
+        assert metadata.runtime.duration_seconds == pytest.approx(3.0)
         assert metadata.output.artifact_id == f"bronze_batch:{input_data.batch_id}"
 
     def test_bronze_pipeline_metadata(self, coordinator: MetadataCoordinator) -> None:
@@ -573,7 +573,7 @@ class TestSilverMetadata:
         assert metadata.dq_summary.error_records == 1
         assert metadata.dq_summary.valid_records == 1
         assert metadata.dq_summary.validation_passed is False
-        assert metadata.dq_summary.error_rate == 0.5
+        assert metadata.dq_summary.error_rate == pytest.approx(0.5)
         assert metadata.dq_summary.rule_provenance == [
             {
                 "rule_id": "composite.cross_validation.warning",
@@ -1802,8 +1802,10 @@ class TestGovernanceMetadata:
         assert "validated" in metadata.governance.tags
         assert metadata.governance.lineage.source_layer == "bronze"
         assert "deduplication" in metadata.governance.lineage.transformations
-        assert metadata.governance.quality_expectations.completeness == 0.95
-        assert metadata.governance.quality_expectations.accuracy == 0.99
+        assert metadata.governance.quality_expectations.completeness == pytest.approx(
+            0.95
+        )
+        assert metadata.governance.quality_expectations.accuracy == pytest.approx(0.99)
 
     def test_gold_metadata_with_governance(
         self, coordinator: MetadataCoordinator

@@ -13,6 +13,7 @@ from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
     SilverWriterRuntimeServices,
     build_silver_writer_runtime_services,
 )
@@ -72,20 +73,25 @@ def _make_record(
 def _build_rollout_runtime_services(
     *,
     affects_hash: bool,
+    base_path: Path,
 ) -> SilverWriterRuntimeServices:
     return build_silver_writer_runtime_services(
-        csv_exporter=None,
-        tracing=None,
-        write_policy=None,
-        metrics=None,
-        audit=None,
-        silver_validator=None,
-        metadata_writer=None,
-        metadata_coordinator=None,
-        lineage_store=None,
-        dq_calculator=None,
-        merge_resilience_policy=None,
-        contract_rollout_policy=_make_rollout_policy(affects_hash=affects_hash),
+        SilverWriterRuntimeServicesRequest(
+            csv_exporter=None,
+            tracing=None,
+            write_policy=None,
+            metrics=None,
+            audit=None,
+            logger=None,
+            silver_validator=None,
+            metadata_writer=None,
+            metadata_coordinator=None,
+            lineage_store=None,
+            dq_calculator=None,
+            merge_resilience_policy=None,
+            base_path=base_path,
+            contract_rollout_policy=_make_rollout_policy(affects_hash=affects_hash),
+        )
     )
 
 
@@ -107,7 +113,10 @@ async def test_contract_rollout_affects_hash_false_dual_write_keeps_same_hash(
     writer = SilverWriter(
         base_path=e2e_data_dir / "silver",
         logger=NoOpLogger(),
-        runtime_services=_build_rollout_runtime_services(affects_hash=False),
+        runtime_services=_build_rollout_runtime_services(
+            affects_hash=False,
+            base_path=e2e_data_dir / "silver",
+        ),
     )
 
     await writer.write_silver(
@@ -143,7 +152,10 @@ async def test_contract_rollout_affects_hash_true_dual_write_projects_version_ha
     writer = SilverWriter(
         base_path=e2e_data_dir / "silver",
         logger=NoOpLogger(),
-        runtime_services=_build_rollout_runtime_services(affects_hash=True),
+        runtime_services=_build_rollout_runtime_services(
+            affects_hash=True,
+            base_path=e2e_data_dir / "silver",
+        ),
     )
 
     await writer.write_silver(

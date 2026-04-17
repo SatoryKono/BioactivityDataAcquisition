@@ -24,14 +24,14 @@ This script:
 ```
 ✓ Neo4j backend is running
 ✓ MCP wrapper is configured
-✓ Ready for smoke test
+✓ Ready for verification
 
 Next steps:
-1. Run smoke test: bash scripts/memory/mcp/check.sh
+1. Run verification: bash scripts/memory/mcp/check.sh
 2. Access Neo4j Browser: http://host.docker.internal:7474/browser/
 ```
 
-### Step 2: Run Smoke Test
+### Step 2: Run Verification
 ```bash
 bash scripts/memory/mcp/check.sh
 ```
@@ -157,7 +157,7 @@ This is rare in WSL. If it happens:
 # Start Neo4j (from WSL)
 bash scripts/memory/setup/wsl_startup.sh
 
-# Run smoke test
+# Run verification
 bash scripts/memory/mcp/check.sh
 
 # Access Neo4j Browser (from WSL)

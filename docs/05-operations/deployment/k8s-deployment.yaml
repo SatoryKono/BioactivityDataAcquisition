@@ -27,8 +27,13 @@ spec:
         fsGroup: 1000
       containers:
       - name: bioetl
+        # Replace image with a fully qualified image reference before apply.
+        # Example: myregistry.example.com/org/bioetl:1.2.3
         image: bioetl:REPLACE_IMAGE_TAG  # Update registry and tag before apply
         imagePullPolicy: IfNotPresent
+        # Optional: uncomment and set an ImagePullSecret if using a private registry
+        # imagePullSecrets:
+        # - name: my-registry-credentials
         ports:
         - name: metrics
           containerPort: 8000
@@ -51,6 +56,8 @@ spec:
           limits:
             cpu: 2000m
             memory: 4Gi
+        # Health probes target the /metrics endpoint. Ensure this endpoint is
+        # safe for probes (idempotent and low latency) to avoid false failures.
         livenessProbe:
           httpGet:
             path: /metrics
@@ -116,8 +123,10 @@ spec:
   resources:
     requests:
       storage: 50Gi  # Adjust based on your data volume needs
-  # Uncomment to use a specific storage class
+  # Uncomment to use a specific storage class provided by your cluster
   # storageClassName: fast-ssd
+  # Note: ensure a matching StorageClass exists in the cluster, or leave commented
+  # to use the default storage class.
 ---
 apiVersion: v1
 kind: ConfigMap
