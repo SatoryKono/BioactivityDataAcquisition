@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -135,6 +136,7 @@ class TestIDMappingDataSourceFetch:
         mock_logger: MagicMock,
     ) -> None:
         """Test priority: seed_ids > filter_ids > source reader."""
+        await asyncio.sleep(0)
         mock_client.map_ids = AsyncMock(
             return_value={"CHEMBL1": {"uniprot_accession": "P00001"}}
         )
@@ -168,6 +170,7 @@ class TestIDMappingDataSourceFetch:
         mock_logger: MagicMock,
     ) -> None:
         """Test filter_ids are used when seed_ids are absent."""
+        await asyncio.sleep(0)
         ds = IDMappingDataSource(
             idmapping_client=mock_client,
             id_source_reader=mock_reader,
@@ -196,6 +199,7 @@ class TestIDMappingDataSourceFetch:
         mock_logger: MagicMock,
     ) -> None:
         """Test source reader is used in standalone mode."""
+        await asyncio.sleep(0)
         ds = IDMappingDataSource(
             idmapping_client=mock_client,
             id_source_reader=mock_reader,
@@ -216,6 +220,7 @@ class TestIDMappingDataSourceFetch:
     @pytest.mark.asyncio
     async def test_fetch_applies_limit(self, data_source: IDMappingDataSource) -> None:
         """Test limit truncates IDs before mapping."""
+        await asyncio.sleep(0)
         records = [record async for record in data_source.fetch("idmapping", limit=2)]
         assert len(records) == 2
 
@@ -226,6 +231,7 @@ class TestIDMappingDataSourceFetch:
         mock_logger: MagicMock,
     ) -> None:
         """Test warning when entity_type is not idmapping."""
+        await asyncio.sleep(0)
         _ = [record async for record in data_source.fetch("unexpected")]
 
         mock_logger.warning.assert_any_call(
@@ -242,6 +248,7 @@ class TestIDMappingDataSourceFetch:
         mock_logger: MagicMock,
     ) -> None:
         """Test no map request when source has no IDs."""
+        await asyncio.sleep(0)
         mock_reader.read_ids = AsyncMock(return_value=[])
         ds = IDMappingDataSource(
             idmapping_client=mock_client,
@@ -266,6 +273,7 @@ class TestIDMappingDataSourceFetch:
         mock_logger: MagicMock,
     ) -> None:
         """Test FileNotFoundError from reader is propagated."""
+        await asyncio.sleep(0)
         mock_reader.read_ids = AsyncMock(side_effect=FileNotFoundError("missing"))
         ds = IDMappingDataSource(
             idmapping_client=mock_client,

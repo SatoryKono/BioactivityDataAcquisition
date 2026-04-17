@@ -85,7 +85,7 @@ RUNBOOKS_DIR = DOCS_DIR / "05-operations" / "runbooks"
 CANONICAL_REQUIREMENTS_FILE = DOCS_DIR / "01-requirements" / "REQUIREMENTS.md"
 CANONICAL_GOVERNANCE_DIR = DOCS_DIR / "00-project" / "governance"
 NOT_IN_NAV_BASELINE_FILE = (
-    PROJECT_ROOT / "scripts" / "baselines" / "not_in_nav_baseline.txt"
+    PROJECT_ROOT / "scripts" / "engineering" / "baselines" / "not_in_nav_baseline.txt"
 )
 LOCAL_SKILLS_DIR = DOCS_DIR / "00-project" / "ai" / "skills" / "local"
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import pytest
 
 from bioetl.application.core._data_source_mixins import (
@@ -59,6 +60,7 @@ class _FetchRecordingAdapter:
         self.fetch_calls: list[dict[str, object]] = []
 
     async def fetch(self, **kwargs: object):
+        await asyncio.sleep(0)
         self.fetch_calls.append(kwargs)
         yield {"id": "1"}
         yield {"id": "2"}
@@ -66,6 +68,7 @@ class _FetchRecordingAdapter:
 
 @pytest.mark.asyncio
 async def test_yield_wrapped_fetch_records_forwards_explicit_optional_kwargs() -> None:
+    await asyncio.sleep(0)
     adapter = _FetchRecordingAdapter()
 
     records = [
@@ -96,6 +99,7 @@ async def test_yield_wrapped_fetch_records_forwards_explicit_optional_kwargs() -
 
 @pytest.mark.asyncio
 async def test_yield_plain_wrapped_fetch_records_omits_filter_kwargs() -> None:
+    await asyncio.sleep(0)
     adapter = _FetchRecordingAdapter()
 
     records = [

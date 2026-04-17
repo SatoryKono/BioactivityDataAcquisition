@@ -68,6 +68,7 @@ def transform_callback():
     """Create transform callback."""
 
     async def transform(ctx, record, index):
+        await asyncio.sleep(0)
         return {"entity_id": record.get("id", "unknown"), "value": record.get("value")}
 
     return transform
@@ -163,6 +164,7 @@ class TestTransformSingle:
         """Test quarantine on DQ error."""
 
         async def failing_transform(ctx, record, index):
+            await asyncio.sleep(0)
             raise DataQualityError("Invalid data")
 
         config = RecordProcessorConfig(
@@ -211,6 +213,7 @@ class TestTransformSingle:
         from bioetl.application.core.base_transformer import FilteredOutError
 
         async def filtered_transform(ctx, record, index):
+            await asyncio.sleep(0)
             raise FilteredOutError(
                 "Record excluded by silver filters",
                 details={
@@ -299,6 +302,7 @@ class TestTransformStream:
             marker_event.set()
 
         async def blocking_transform(ctx, record, index):
+            await asyncio.sleep(0)
             nonlocal saw_background_progress
             if index > 0 and marker_event.is_set():
                 saw_background_progress = True
@@ -350,6 +354,7 @@ class TestTransformStream:
         """Test streaming handles errors correctly."""
 
         async def selective_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "bad":
                 raise DataQualityError("Invalid")
             return {"entity_id": record.get("id"), "value": record.get("value")}
@@ -402,6 +407,7 @@ class TestTransformStream:
         from bioetl.application.core.base_transformer import FilteredOutError
 
         async def selective_transform(ctx, record, index):
+            await asyncio.sleep(0)
             if record.get("id") == "filtered":
                 raise FilteredOutError(
                     "Record excluded by silver filters",
@@ -575,6 +581,7 @@ class TestIntegration:
         """Test processing a larger batch efficiently."""
 
         async def transform(ctx, record, index):
+            await asyncio.sleep(0)
             return {"entity_id": record["id"], "value": record["value"]}
 
         def gold_filter(ctx, record):
