@@ -6,6 +6,7 @@ for the PipelineRunnerService.
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -280,6 +281,7 @@ class TestRunnerFactoryCreate:
             run_id = "run-123"
 
             async def run(self) -> None:
+                await asyncio.sleep(0)
                 return None
 
         with (

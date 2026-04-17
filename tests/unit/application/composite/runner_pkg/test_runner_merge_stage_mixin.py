@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any
@@ -94,12 +95,15 @@ class _MergeHarness(CompositeRunnerMergeStageMixin):
         self._quarantine_called = False
 
     async def _save_checkpoint_safe(self, state: Any, operation: str) -> bool:
+        await asyncio.sleep(0)
         return True
 
     async def _generate_dq_reports(self, merge_result: Any) -> None:
+        await asyncio.sleep(0)
         self._dq_reports_called = True
 
     async def _write_cv_quarantine(self, merge_result: Any) -> None:
+        await asyncio.sleep(0)
         self._quarantine_called = True
 
 

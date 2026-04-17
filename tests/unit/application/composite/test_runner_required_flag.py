@@ -8,6 +8,7 @@ Tests for:
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
@@ -123,6 +124,7 @@ class MockPipelineRunner:
         }
 
     async def run(self):
+        await asyncio.sleep(0)
         self.run_called = True
         if self._should_fail:
             raise RuntimeError(self._error_message)
