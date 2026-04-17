@@ -12,7 +12,9 @@ from unittest.mock import MagicMock
 import pytest
 import yaml
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_service import (
+    ColumnOrderService as ColumnOrderer,
+)
 from bioetl.domain.composite.config import ColumnGroupConfig
 
 

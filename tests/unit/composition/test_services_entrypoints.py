@@ -1,7 +1,7 @@
 """Unit tests for public composition service entrypoints.
 
 Tests the service entrypoint functions exposed via
-``bioetl.composition.entrypoints``. Dedicated entrypoint-boundary coverage is
+``bioetl.composition.services_api``. Dedicated entrypoint-boundary coverage is
 allowed to patch the internal ``bioetl.composition._services`` seam directly.
 """
 
@@ -44,7 +44,7 @@ class TestGetCheckpointService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_checkpoint_service
+            from bioetl.composition.services_api import get_checkpoint_service
 
             result = get_checkpoint_service()
 
@@ -73,7 +73,7 @@ class TestGetQuarantineService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_quarantine_service
+            from bioetl.composition.services_api import get_quarantine_service
 
             result = get_quarantine_service()
 
@@ -102,7 +102,7 @@ class TestGetBronzeCleanupService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_bronze_cleanup_service
+            from bioetl.composition.services_api import get_bronze_cleanup_service
 
             result = get_bronze_cleanup_service()
 
@@ -131,7 +131,7 @@ class TestGetVacuumService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_vacuum_service
+            from bioetl.composition.services_api import get_vacuum_service
 
             result = get_vacuum_service()
 
@@ -160,7 +160,7 @@ class TestGetExportService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_export_service
+            from bioetl.composition.services_api import get_export_service
 
             result = get_export_service()
 
@@ -189,7 +189,7 @@ class TestGetLockService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_lock_service
+            from bioetl.composition.services_api import get_lock_service
 
             result = get_lock_service()
 
@@ -222,7 +222,7 @@ class TestCleanupBronze:
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition.entrypoints import cleanup_bronze
+            from bioetl.composition.services_api import cleanup_bronze
 
             result = await cleanup_bronze(retention_days=90, dry_run=False)
 
@@ -244,7 +244,7 @@ class TestCleanupBronze:
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition.entrypoints import cleanup_bronze
+            from bioetl.composition.services_api import cleanup_bronze
 
             await cleanup_bronze()
 
@@ -264,7 +264,7 @@ class TestCleanupBronze:
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition.entrypoints import cleanup_bronze
+            from bioetl.composition.services_api import cleanup_bronze
 
             await cleanup_bronze(retention_days=30, dry_run=True)
 
@@ -293,7 +293,7 @@ class TestGetPipelineRunnerService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_pipeline_runner_service
+            from bioetl.composition.services_api import get_pipeline_runner_service
 
             result = get_pipeline_runner_service()
 
@@ -313,7 +313,7 @@ class TestGetPipelineRunnerService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_pipeline_runner_service
+            from bioetl.composition.services_api import get_pipeline_runner_service
 
             result = get_pipeline_runner_service(registry=registry)
 
@@ -342,7 +342,7 @@ class TestGetConfigService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_config_service
+            from bioetl.composition.services_api import get_config_service
 
             result = get_config_service()
 
@@ -371,7 +371,7 @@ class TestGetHealthService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_health_service
+            from bioetl.composition.services_api import get_health_service
 
             result = get_health_service()
 
@@ -400,7 +400,7 @@ class TestGetHealthServerDependencies:
                 return_value=mock_deps,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_health_server_dependencies
+            from bioetl.composition.services_api import get_health_server_dependencies
 
             result = get_health_server_dependencies()
 
@@ -429,7 +429,7 @@ class TestGetMetricsService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_metrics_service
+            from bioetl.composition.services_api import get_metrics_service
 
             result = get_metrics_service()
 
@@ -458,7 +458,7 @@ class TestGetAdrService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_adr_service
+            from bioetl.composition.services_api import get_adr_service
 
             result = get_adr_service()
 
@@ -487,7 +487,7 @@ class TestGetQuarantinePort:
                 return_value=mock_port,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.entrypoints import get_quarantine_port
+            from bioetl.composition.services_api import get_quarantine_port
 
             result = get_quarantine_port()
 
@@ -505,7 +505,7 @@ class TestGetQuarantinePort:
                 return_value=mock_port,
             ),
         ):
-            from bioetl.composition.entrypoints import get_quarantine_port
+            from bioetl.composition.services_api import get_quarantine_port
 
             result = get_quarantine_port()
             assert result is mock_port

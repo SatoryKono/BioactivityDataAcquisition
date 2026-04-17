@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T12:32:29.710689+00:00",
+  "generated_at": "2026-04-17T12:42:14.518189+00:00",
   "summary": {
     "total_scripts": 388,
     "status_counts": {
@@ -3163,7 +3163,7 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 6340,
+          "line": 6442,
           "source_group": "scripts",
           "text": "lambda text: _contains_any(text, (\"scripts.docs\", \"check-links\", \"build_docs_site.sh\")),"
         }
@@ -6360,9 +6360,9 @@
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 32,
+          "line": 37,
           "source_group": "tests",
-          "text": "assert (ROOT / \"scripts\" / \"qa\" / \"generate_architecture_debt_tasks.py\").exists()"
+          "text": "/ \"generate_architecture_debt_tasks.py\""
         }
       ]
     },
@@ -6701,9 +6701,9 @@
         },
         {
           "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 33,
+          "line": 44,
           "source_group": "tests",
-          "text": "assert (ROOT / \"scripts\" / \"qa\" / \"reduce_architecture_debt.py\").exists()"
+          "text": "/ \"reduce_architecture_debt.py\""
         }
       ]
     },

@@ -206,6 +206,7 @@ class TestPersistGoldMetadataWrite:
     async def test_calls_write_gold_metadata_file(self) -> None:
         """Should delegate to host._write_gold_metadata_file."""
         host = AsyncMock()
+        host._metrics = None
         metadata = _make_bundle_safe_metadata()
 
         from bioetl.domain.medallion import GoldWriteMode
@@ -233,6 +234,7 @@ class TestPersistGoldMetadataWrite:
         """Prepared lineage fragments should be written after metadata handoff."""
         host = AsyncMock()
         host._lineage_store = MagicMock()
+        host._metrics = None
         metadata = _make_bundle_safe_metadata()
         fragment = LineageGraphFragment(
             fragment_id="gold:fragment-2",

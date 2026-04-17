@@ -62,22 +62,27 @@ async def extract_unique_fraction_records(
     seen_fractions.clear()
     records: dict[str, JsonDict] = {}  # Any: heterogeneous record values
 
-    async for assay in assays:
-        fraction = normalize_fraction(assay.get("assay_subcellular_fraction"))
-        if not fraction:
-            continue
+    try:
+        async for assay in assays:
+            fraction = normalize_fraction(assay.get("assay_subcellular_fraction"))
+            if not fraction:
+                continue
 
-        key = fraction.lower()
-        record = records.get(key)
-        if record is None:
-            record = create_fraction_record(assay, fraction)
-            records[key] = record
-            seen_fractions.add(key)
-            if limit and len(records) >= limit:
-                break
-            continue
+            key = fraction.lower()
+            record = records.get(key)
+            if record is None:
+                record = create_fraction_record(assay, fraction)
+                records[key] = record
+                seen_fractions.add(key)
+                if limit and len(records) >= limit:
+                    break
+                continue
 
-        update_fraction_record(record, assay)
+            update_fraction_record(record, assay)
+    finally:
+        aclose = getattr(assays, "aclose", None)
+        if callable(aclose):
+            await aclose()
 
     for record in records.values():
         yield record

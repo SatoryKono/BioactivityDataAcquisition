@@ -1,10 +1,11 @@
-"""Tests for ColumnOrderer service."""
+from unittest.mock import MagicMock
 
 import polars as pl
 import pytest
-from unittest.mock import MagicMock
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.application.composite.column_service import (
+    ColumnOrderService as ColumnOrderer,
+)
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.value_objects.column_order import (
     ColumnOrderConfig,

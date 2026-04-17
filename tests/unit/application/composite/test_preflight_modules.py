@@ -12,13 +12,15 @@ from bioetl.application.composite._preflight_orchestration import (
 from bioetl.application.composite._preflight_reporting import (
     PreflightValidationReportingMixin,
 )
-from bioetl.application.composite.preflight_validator import CompositePreflightValidator
 from bioetl.application.composite._preflight_types import (
     FieldInfo,
     PreflightValidationError,
     PreflightValidationResult,
     SchemaFields,
     ValidationIssue,
+)
+from bioetl.application.composite.preflight_validator import (
+    CompositePreflightValidationService as CompositePreflightValidator,
 )
 
 

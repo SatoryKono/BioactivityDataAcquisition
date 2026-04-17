@@ -7,11 +7,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.application.composite.runtime_wiring_api import (
     CompositeCheckpointService,
     CompositeLifecycleObserverService,
-    CompositePipelineRunnerService,
     CompositeRunnerDependencies,
     DependencyCoordinatorService,
     EnrichmentCoordinatorService,
@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 
-CompositeRunnerFactory = Callable[..., CompositePipelineRunnerService]
+CompositeRunnerFactory = Callable[..., CompositePipelineRunner]
 
 
 __all__ = [
@@ -166,7 +166,7 @@ def _invoke_composite_runner_factory(
     *,
     runner_factory: CompositeRunnerFactory,
     inputs: _CompositeRunnerServiceInputs,
-) -> CompositePipelineRunnerService:
+) -> CompositePipelineRunner:
     """Invoke the final runner factory from a typed assembly payload."""
     return runner_factory(
         config=inputs.config,
@@ -196,10 +196,10 @@ def _invoke_composite_runner_factory(
 
 def _create_composite_runner_service_from_inputs(
     inputs: _CompositeRunnerServiceInputs,
-) -> CompositePipelineRunnerService:
+) -> CompositePipelineRunner:
     """Construct CompositePipelineRunnerService from a pre-expanded payload."""
     deps = _build_composite_runner_dependencies(inputs)
-    return CompositePipelineRunnerService(
+    return CompositePipelineRunner(
         config=inputs.config,
         runtime=inputs.runtime,
         deps=deps,

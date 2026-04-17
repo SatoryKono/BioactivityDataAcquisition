@@ -488,7 +488,6 @@ class TestSaveCheckpointNow:
 
 
 @pytest.mark.unit
-@pytest.mark.asyncio
 class TestTotalProcessed:
     """Tests for BatchCheckpointRecoveryService._total_processed static method."""
 

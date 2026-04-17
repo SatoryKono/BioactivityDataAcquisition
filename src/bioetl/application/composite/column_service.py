@@ -215,6 +215,11 @@ class _ColumnPriorityOrderingAdapter:
 
         return compatible_cols, incompatible_cols
 
+    @staticmethod
+    def get_enricher_prefix(enricher_pipeline: str) -> str:
+        """Expose legacy prefix helper for compatibility call sites."""
+        return ColumnPriorityOrderer.get_enricher_prefix(enricher_pipeline)
+
 
 class ColumnOrderService:
     """Unified service for column ordering supporting semantic and priority strategies."""
@@ -224,7 +229,9 @@ class ColumnOrderService:
         logger: LoggerPort,
         config: ColumnOrderConfig | None = None,
         column_groups: Sequence[ColumnGroupConfig] | None = None,
-        priority_orderer: ColumnPriorityOrderer | _ColumnPriorityOrderingAdapter | None = None,
+        priority_orderer: ColumnPriorityOrderer
+        | _ColumnPriorityOrderingAdapter
+        | None = None,
     ) -> None:
         """Initialize unified column ordering service."""
         self._logger = logger
