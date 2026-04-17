@@ -5,7 +5,7 @@ This directory contains development and operational scripts for the BioETL proje
 ## Subdirectories
 
 - `dev/` - Development scripts and bootstrap tooling.
-- `ai/` - Canonical AI-facing setup, checks, and MCP tooling.
+- `ai/` - Canonical AI-facing setup, launch, diagnostics, checks, and MCP tooling.
 - `ci/` - CI/CD validation scripts.
 - `deployment/` - Deployment and Docker files.
 - `maintenance/` - Maintenance scripts.

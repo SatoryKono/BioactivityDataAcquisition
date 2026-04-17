@@ -152,11 +152,53 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a convenience Windows launcher for the mixed WSL Codex bootstrap flow while operators still use batch entrypoints; prefer documented canonical setup commands for normal contributor workflows."
     },
-    "scripts/ai/__main__.py": {
+    "scripts/ops/codex-headless.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin shell launcher to scripts/ai/codex/headless.sh while historical headless entrypoints still reference the scripts.ops path."
+    },
+    "scripts/ops/codex-headless.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/headless.ps1 while Windows-side headless entrypoints still reference the scripts.ops path."
+    },
+    "scripts/ops/diagnose-codex-wsl.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin shell launcher to scripts/ai/codex/diagnose_wsl.sh while historical diagnostic references still point to the scripts.ops path."
+    },
+    "scripts/ops/diagnose-codex-wsl.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/diagnose_wsl.ps1 while Windows-side diagnostic references still point to the scripts.ops path."
+    },
+    "scripts/ops/diagnose-codex-wsl.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin batch launcher to scripts/ai/codex/diagnose_wsl.bat while mixed Windows/WSL operator flows still reference the scripts.ops path."
+    },
+    "scripts/ops/verify-setup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/verify_setup.ps1 while historical setup verification references still point to the scripts.ops path."
+    },
+    "scripts/ops/verify-setup.bat": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin batch launcher to scripts/ai/codex/verify_setup.bat while mixed Windows/WSL setup verification flows still reference the scripts.ops path."
+    },
+    "scripts/ai/vibe/__main__.py": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
-      "next_step": "Retain as a top-level scripts.ai router during the AI tooling consolidation window; either add stable external call-sites so it becomes active or remove it if direct module entry remains unnecessary."
+      "next_step": "Retain as the top-level scripts.ai.vibe module router during the Vibe tooling consolidation window; either add stable external call-sites so it becomes active or remove it if the bash launcher remains the only supported entrypoint."
     },
     "scripts/ai/mcp/mcp_chembl_wrapper.sh": {
       "owner": "@bioetl-platform",

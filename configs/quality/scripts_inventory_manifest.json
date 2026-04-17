@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T06:57:24.377978+00:00",
+  "generated_at": "2026-04-17T07:16:29.105828+00:00",
   "summary": {
-    "total_scripts": 380,
+    "total_scripts": 394,
     "status_counts": {
-      "active": 290,
+      "active": 308,
       "legacy": 10,
-      "orphan": 71,
+      "orphan": 67,
       "unknown": 9
     },
     "reference_group_coverage": {
@@ -14,7 +14,7 @@
       "build": 1,
       "ci": 49,
       "docs": 119,
-      "scripts": 279,
+      "scripts": 296,
       "skills": 9,
       "tests": 100
     }
@@ -65,53 +65,90 @@
     {
       "path": "scripts/ai/__main__.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/VIBE.md",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "python -m scripts.ai vibe --help"
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 82,
+          "source_group": "scripts",
+          "text": "python -m scripts.ai vibe --help"
+        },
+        {
+          "path": "scripts/ai/vibe/README.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "- Stable `python -m scripts.ai vibe` entrypoint"
+        },
+        {
+          "path": "scripts/ai/vibe/README.md",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "python -m scripts.ai vibe --help"
+        }
+      ]
     },
     {
       "path": "scripts/ai/codex/__main__.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 10,
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 15,
+          "line": 17,
           "source_group": "scripts",
           "text": "python -m scripts.ai.codex --help"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 16,
+          "line": 18,
           "source_group": "scripts",
           "text": "python -m scripts.ai.codex setup-mcp"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 17,
+          "line": 19,
           "source_group": "scripts",
           "text": "python -m scripts.ai.codex setup-agents"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 18,
+          "line": 20,
           "source_group": "scripts",
           "text": "python -m scripts.ai.codex setup-skills"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 19,
+          "line": 21,
           "source_group": "scripts",
           "text": "python -m scripts.ai.codex check-skills"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 20,
+          "line": 22,
           "source_group": "scripts",
           "text": "python -m scripts.ai.codex check-mirror"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "python -m scripts.ai.codex launch --help"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "python -m scripts.ai.codex exec --help"
         }
       ]
     },
@@ -124,7 +161,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/__main__.py",
-          "line": 29,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"check-skills\": \"check_skills_layout.sh\","
         },
@@ -145,7 +182,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/__main__.py",
-          "line": 30,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"check-mirror\": \"check_skills_mirror.sh\","
         },
@@ -158,6 +195,255 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/diagnose_wsl.bat",
+      "type": "bat",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/diagnose-codex-wsl.bat",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "call \"%~dp0..\\ai\\codex\\diagnose_wsl.bat\" %*"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/diagnose_wsl.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/diagnose-codex-wsl.ps1",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "$Target = Join-Path $PSScriptRoot \"..\\ai\\codex\\diagnose_wsl.ps1\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/diagnose_wsl.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/ai/codex/__main__.py",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "\"diagnose-wsl\": \"diagnose_wsl.sh\","
+        },
+        {
+          "path": "scripts/ai/codex/diagnose_wsl.bat",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ai/codex/diagnose_wsl.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/diagnose_wsl.ps1",
+          "line": 44,
+          "source_group": "scripts",
+          "text": "$diagnosticScript = \"$repoWSL/scripts/ai/codex/diagnose_wsl.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/verify_setup.bat",
+          "line": 53,
+          "source_group": "scripts",
+          "text": "wsl -d %WSL_DISTRO% -- bash \"!REPO_WSL!/scripts/ai/codex/diagnose_wsl.sh\" 2>&1"
+        },
+        {
+          "path": "scripts/ai/codex/verify_setup.ps1",
+          "line": 59,
+          "source_group": "scripts",
+          "text": "wsl bash \"$repoWSL/scripts/ai/codex/diagnose_wsl.sh\" 2>&1"
+        },
+        {
+          "path": "scripts/ops/diagnose-codex-wsl.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "exec bash \"${REPO_ROOT}/scripts/ai/codex/diagnose_wsl.sh\" \"$@\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/exec.bat",
+      "type": "bat",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/codex/launch.bat",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "echo   exec.bat \"your prompt\""
+        },
+        {
+          "path": "scripts/ops/codex-exec.bat",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "call \"%~dp0..\\ai\\codex\\exec.bat\" %*"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/exec.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/codex/__main__.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "\"exec\": \"exec.sh\","
+        },
+        {
+          "path": "scripts/ai/codex/diagnose_wsl.sh",
+          "line": 152,
+          "source_group": "scripts",
+          "text": "\"${SCRIPT_DIR}/exec.sh\" \\"
+        },
+        {
+          "path": "scripts/ai/codex/exec.bat",
+          "line": 31,
+          "source_group": "scripts",
+          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ai/codex/exec.sh\" %*"
+        },
+        {
+          "path": "scripts/ops/codex-exec.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "exec bash \"${REPO_ROOT}/scripts/ai/codex/exec.sh\" \"$@\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/headless.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/codex-headless.ps1",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "$Target = Join-Path $PSScriptRoot \"..\\ai\\codex\\headless.ps1\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/headless.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/codex/__main__.py",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "\"headless\": \"headless.sh\","
+        },
+        {
+          "path": "scripts/ai/codex/headless.ps1",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "wsl -e bash \"$RepoWSL/scripts/ai/codex/headless.sh\" @Args 2>&1"
+        },
+        {
+          "path": "scripts/ops/codex-headless.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "exec bash \"${REPO_ROOT}/scripts/ai/codex/headless.sh\" \"$@\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/launch.bat",
+      "type": "bat",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/ai/codex/exec.bat",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "echo   launch.bat \"your prompt\""
+        },
+        {
+          "path": "scripts/ops/codex-wsl.bat",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "call \"%~dp0..\\ai\\codex\\launch.bat\" %*"
+        },
+        {
+          "path": "scripts/ops/codex.bat",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "call \"%~dp0..\\ai\\codex\\launch.bat\" %*"
+        },
+        {
+          "path": "scripts/ops/start-codex.bat",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "echo [compat] Delegating to scripts\\ai\\codex\\launch.bat"
+        },
+        {
+          "path": "scripts/ops/start-codex.bat",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "call \"%~dp0..\\ai\\codex\\launch.bat\" %*"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/launch.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/ai/codex/__main__.py",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "\"launch\": \"launch.sh\","
+        },
+        {
+          "path": "scripts/ai/codex/diagnose_wsl.sh",
+          "line": 151,
+          "source_group": "scripts",
+          "text": "\"${SCRIPT_DIR}/launch.sh\" \\"
+        },
+        {
+          "path": "scripts/ai/codex/launch.bat",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ai/codex/launch.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/launch.bat",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ai/codex/launch.sh\" !ARGS!"
+        },
+        {
+          "path": "scripts/ops/codex.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "exec bash \"${REPO_ROOT}/scripts/ai/codex/launch.sh\" \"$@\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/codex/setup_agents.sh",
       "type": "sh",
       "status": "active",
@@ -166,7 +452,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/__main__.py",
-          "line": 27,
+          "line": 31,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"setup_agents.sh\","
         },
@@ -193,7 +479,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/__main__.py",
-          "line": 23,
+          "line": 27,
           "source_group": "scripts",
           "text": "\"setup-mcp\": \"setup_mcp.py\","
         },
@@ -220,7 +506,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/__main__.py",
-          "line": 28,
+          "line": 32,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"setup_skills.sh\","
         },
@@ -229,6 +515,42 @@
           "line": 8,
           "source_group": "scripts",
           "text": "exec bash \"$REPO_ROOT/scripts/ai/codex/setup_skills.sh\" \"$@\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/verify_setup.bat",
+      "type": "bat",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/verify-setup.bat",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "call \"%~dp0..\\ai\\codex\\verify_setup.bat\" %*"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/verify_setup.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/codex/verify_setup.bat",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "echo   .\\scripts\\ai\\codex\\verify_setup.ps1"
+        },
+        {
+          "path": "scripts/ops/verify-setup.ps1",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "$Target = Join-Path $PSScriptRoot \"..\\ai\\codex\\verify_setup.ps1\""
         }
       ]
     },
@@ -247,7 +569,7 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/__main__.py)."
         }
@@ -1225,6 +1547,110 @@
           "line": 30,
           "source_group": "scripts",
           "text": "\"test-env-loading\": \"test_env_loading.sh\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/vibe/__main__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/vibe/launch.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/VIBE.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "- `scripts/ai/vibe/launch.ps1` — Canonical PowerShell launcher (Windows via WSL)"
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 26,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\vibe\\launch.ps1"
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 27,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\vibe\\launch.ps1 \"explain this code\""
+        },
+        {
+          "path": "scripts/ai/vibe/README.md",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "pwsh -File scripts/ai/vibe/launch.ps1 --help"
+        },
+        {
+          "path": "scripts/vibe.ps1",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "$Target = Join-Path $PSScriptRoot \"ai\\vibe\\launch.ps1\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/vibe/launch.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 10,
+      "references": [
+        {
+          "path": "scripts/VIBE.md",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "- `scripts/ai/vibe/launch.sh` — Canonical Bash launcher (Linux/WSL)"
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/vibe/launch.sh"
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/vibe/launch.sh \"explain this code\""
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 60,
+          "source_group": "scripts",
+          "text": "chmod +x scripts/ai/vibe/launch.sh"
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 67,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/vibe/launch.sh"
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/vibe/launch.sh \"refactor this function for better performance\""
+        },
+        {
+          "path": "scripts/VIBE.md",
+          "line": 77,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/vibe/launch.sh \"analyze security issues in this code\""
+        },
+        {
+          "path": "scripts/ai/vibe/README.md",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "bash scripts/ai/vibe/launch.sh --help"
         }
       ]
     },
@@ -6747,7 +7173,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/00-project/governance/01-documentation-governance-style-guide.md",
@@ -6774,12 +7200,6 @@
           "text": "- `uv run python scripts/docs/check_doc_drift.py --runtime-mirrors --freshness`"
         },
         {
-          "path": "scripts/docs/README.md",
-          "line": 35,
-          "source_group": "scripts",
-          "text": "| `check-drift`                         | `scripts/docs/check_doc_drift.py`                            | Check documentation drift (ports, classes, runtime mirrors, freshness)                |"
-        },
-        {
           "path": "scripts/docs/checks/check_drift.py",
           "line": 2,
           "source_group": "scripts",
@@ -6796,6 +7216,12 @@
           "line": 17,
           "source_group": "scripts",
           "text": "python scripts/check_doc_drift.py --ports       # Only port drift"
+        },
+        {
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "python scripts/check_doc_drift.py --classes     # Only class drift"
         }
       ]
     },
@@ -6804,7 +7230,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 26,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -6861,14 +7287,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "| `check-docstrings`                    | `scripts/docs/check_docstring_coverage.py`                   | Check docstring coverage                                                              |"
-        },
         {
           "path": "scripts/docs/checks/check_docstrings.py",
           "line": 2,
@@ -6904,26 +7324,46 @@
     {
       "path": "scripts/docs/checks/check_docstrings.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "| `check-docstrings`                    | `scripts/docs/checks/check_docstrings.py`                    | Check docstring coverage                                                              |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/checks/check_drift.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "| `check-drift`                         | `scripts/docs/checks/check_drift.py`                         | Check documentation drift (ports, classes, runtime mirrors, freshness)                |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/checks/check_links.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "| `check-links`                         | `scripts/docs/checks/check_links.py`                         | Check documentation links, specs, configs, and mkdocs nav classification              |"
+        },
         {
           "path": "scripts/docs/check_doc_links.py",
           "line": 14,
@@ -6935,18 +7375,32 @@
     {
       "path": "scripts/docs/checks/report_docs_kpi.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "| `check-kpi`                           | `scripts/docs/checks/report_docs_kpi.py`                     | Report documentation KPI metrics                                                      |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/checks/verify.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "| `verify`                              | `scripts/docs/checks/verify.py`                              | Run the canonical docs verification chain (links, drift, docstrings, strict build)   |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/chembl_matrix_structural_contract.py",
@@ -7011,47 +7465,26 @@
     {
       "path": "scripts/docs/enrich_chembl_matrix_normalization_details.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 42,
-          "source_group": "scripts",
-          "text": "| `enrich-matrix-normalization-details` | `scripts/docs/enrich_chembl_matrix_normalization_details.py` | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook  |"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/docs/export_chembl_matrix_structural_contract.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 38,
-          "source_group": "scripts",
-          "text": "| `export-matrix-structural-contract`   | `scripts/docs/export_chembl_matrix_structural_contract.py`   | Export the canonical runtime structural contract for ChEMBL workbook sync             |"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/docs/filter_chembl_matrix_rows.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 43,
-          "source_group": "scripts",
-          "text": "| `filter-matrix-rows`                  | `scripts/docs/filter_chembl_matrix_rows.py`                  | Remove rows from the canonical ChEMBL matrix workbook by column value                 |"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/docs/fix_doc_links_auto.py",
@@ -7141,39 +7574,25 @@
     {
       "path": "scripts/docs/generate_chembl_activity_field_matrix.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 39,
-          "source_group": "scripts",
-          "text": "| `generate-field-matrix`               | `scripts/docs/generate_chembl_activity_field_matrix.py`      | Generate deterministic ChemBL Activity field-matrix artifacts directly from code      |"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/docs/generate_chembl_matrix_dictionaries.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 41,
-          "source_group": "scripts",
-          "text": "| `build-matrix-dicts`                  | `scripts/docs/generate_chembl_matrix_dictionaries.py`        | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook     |"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/docs/generate_pipeline_normalization_field_matrix.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
@@ -7194,12 +7613,6 @@
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },
         {
-          "path": "scripts/docs/README.md",
-          "line": 40,
-          "source_group": "scripts",
-          "text": "| `generate-pipeline-normalization-matrix` | `scripts/docs/generate_pipeline_normalization_field_matrix.py` | Generate deterministic normalization field-matrix artifacts for all entity and composite p"
-        },
-        {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
           "line": 46,
           "source_group": "tests",
@@ -7210,50 +7623,92 @@
     {
       "path": "scripts/docs/matrix/build_matrix_dicts.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "| `build-matrix-dicts`                  | `scripts/docs/matrix/build_matrix_dicts.py`                  | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook     |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/enrich_normalization_details.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 42,
+          "source_group": "scripts",
+          "text": "| `enrich-matrix-normalization-details` | `scripts/docs/matrix/enrich_normalization_details.py`        | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook  |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/export_structural_contract.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "| `export-matrix-structural-contract`   | `scripts/docs/matrix/export_structural_contract.py`          | Export the canonical runtime structural contract for ChEMBL workbook sync             |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/filter_rows.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 43,
+          "source_group": "scripts",
+          "text": "| `filter-matrix-rows`                  | `scripts/docs/matrix/filter_rows.py`                         | Remove rows from the canonical ChEMBL matrix workbook by column value                 |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/generate_field_matrix.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 39,
+          "source_group": "scripts",
+          "text": "| `generate-field-matrix`               | `scripts/docs/matrix/generate_field_matrix.py`               | Generate deterministic ChemBL Activity field-matrix artifacts directly from code      |"
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "| `generate-pipeline-normalization-matrix` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | Generate deterministic normalization field-matrix artifacts for all entity and composite "
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/normalize_values.py",
@@ -7329,7 +7784,7 @@
           "path": "scripts/docs/README.md",
           "line": 37,
           "source_group": "scripts",
-          "text": "| `check-kpi`                           | `scripts/docs/report_docs_kpi.py`                            | Report documentation KPI metrics                                                      |"
+          "text": "| `check-kpi`                           | `scripts/docs/checks/report_docs_kpi.py`                     | Report documentation KPI metrics                                                      |"
         },
         {
           "path": "tests/architecture/test_docs_kpi_workflow.py",
@@ -7397,14 +7852,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 33,
-          "source_group": "scripts",
-          "text": "| `verify`                              | `scripts/docs/verify_docs.py`                                | Run the canonical docs verification chain (links, drift, docstrings, strict build)   |"
-        },
         {
           "path": "scripts/memory/sync.py",
           "line": 719,
@@ -7749,7 +8198,7 @@
         },
         {
           "path": "scripts/ops/README.md",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/__main__.py)."
         }
@@ -7806,7 +8255,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 47,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"check-skills\": \"check_ai_skills_layout.sh\","
         }
@@ -7857,7 +8306,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 48,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"check-mirror\": \"check_skills_mirror.sh\","
         }
@@ -7901,7 +8350,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -7958,7 +8407,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 30,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -8026,10 +8475,10 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/ops/codex-headless.ps1",
-          "line": 22,
+          "path": "scripts/ops/__main__.py",
+          "line": 50,
           "source_group": "scripts",
-          "text": "wsl -e bash \"$repoWSL/scripts/ops/codex-headless.sh\" 2>&1"
+          "text": "\"codex-headless\": \"codex-headless.sh\","
         }
       ]
     },
@@ -8095,7 +8544,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 71,
+      "reference_count": 68,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -8152,7 +8601,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 103,
+      "reference_count": 98,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -8213,7 +8662,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 50,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"delete-branches\": \"delete-stale-branches.sh\","
         }
@@ -8264,7 +8713,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 49,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"deploy\": \"deploy-bioetl.sh\","
         }
@@ -8291,31 +8740,13 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 1,
       "references": [
         {
-          "path": "scripts/ops/diagnose-codex-wsl.bat",
-          "line": 35,
+          "path": "scripts/ops/__main__.py",
+          "line": 51,
           "source_group": "scripts",
-          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ops/diagnose-codex-wsl.sh\""
-        },
-        {
-          "path": "scripts/ops/diagnose-codex-wsl.ps1",
-          "line": 49,
-          "source_group": "scripts",
-          "text": "$diagnosticScript = \"$repoWSL/scripts/ops/diagnose-codex-wsl.sh\""
-        },
-        {
-          "path": "scripts/ops/verify-setup.bat",
-          "line": 60,
-          "source_group": "scripts",
-          "text": "wsl -d %WSL_DISTRO% -- bash \"!REPO_WSL!/scripts/ops/diagnose-codex-wsl.sh\" 2>&1"
-        },
-        {
-          "path": "scripts/ops/verify-setup.ps1",
-          "line": 72,
-          "source_group": "scripts",
-          "text": "wsl bash \"$repoWSL/scripts/ops/diagnose-codex-wsl.sh\" 2>&1"
+          "text": "\"diagnose-codex-wsl\": \"diagnose-codex-wsl.sh\","
         }
       ]
     },
@@ -8328,7 +8759,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 35,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"fix-grafana\": \"fix_grafana_dashboards.py\","
         }
@@ -8373,7 +8804,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 42,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"close-ge-spike\": \"maintenance/close_great_expectations_spike_issue.sh\","
         },
@@ -8409,7 +8840,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 43,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"close-schema-drift\": \"maintenance/close_pandera_schema_drift_issue.sh\","
         },
@@ -8483,7 +8914,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 41,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"triage-issues\": \"maintenance/triage_cleanup_issue_wave.sh\","
         }
@@ -8498,7 +8929,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 40,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"update-issue\": \"maintenance/update_github_issue.sh\","
         },
@@ -8646,7 +9077,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 34,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"salt_rotate.py\","
         }
@@ -8661,7 +9092,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 44,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"setup_agents.sh\","
         },
@@ -8718,7 +9149,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 45,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"setup-plugins\": \"setup_plugins.sh\","
         },
@@ -8739,7 +9170,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 46,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"setup_skills.sh\","
         },
@@ -8885,7 +9316,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -8964,17 +9395,10 @@
     {
       "path": "scripts/ops/verify-setup.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/verify-setup.bat",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "echo   .\\scripts\\ops\\verify-setup.ps1"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ops/wsl_proxy.py",
@@ -11102,31 +11526,19 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/VIBE.md",
-          "line": 8,
+          "line": 11,
           "source_group": "scripts",
-          "text": "- `scripts/vibe.ps1` — PowerShell wrapper (Windows)"
+          "text": "- `scripts/vibe.ps1` — Compatibility PowerShell wrapper"
         },
         {
           "path": "scripts/VIBE.md",
-          "line": 23,
+          "line": 28,
           "source_group": "scripts",
-          "text": ".\\scripts\\vibe.ps1                    # Interactive mode"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 24,
-          "source_group": "scripts",
-          "text": ".\\scripts\\vibe.ps1 \"explain this code\" # Send prompt"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 25,
-          "source_group": "scripts",
-          "text": ".\\scripts\\vibe.ps1 --help             # Show vibe help"
+          "text": ".\\scripts\\vibe.ps1 --help"
         }
       ]
     },

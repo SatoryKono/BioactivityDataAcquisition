@@ -105,6 +105,45 @@ def test_normalize_run_manifest_spec_is_deterministic_for_set_like_refs() -> Non
     ]
 
 
+def test_normalize_run_manifest_spec_orders_input_snapshots_by_snapshot_id() -> None:
+    payload = {
+        "schema_version": "1.0",
+        "run_type": "incremental",
+        "pipeline_name": "chembl_activity",
+        "provider": "chembl",
+        "entity": "activity",
+        "launch_context": {"resume": False},
+        "runtime_config": {"run_type": "incremental"},
+        "resolved_config": {"provider": "chembl", "entity_type": "activity"},
+        "source_refs": [
+            {
+                "provider": "chembl",
+                "entity": "activity",
+                "pipeline_name": "chembl_activity",
+                "input_snapshots": [
+                    {
+                        "snapshot_id": "z-snapshot",
+                        "content_hash": "aaa",
+                        "immutable_uri": "file:///snapshots/a.jsonl",
+                    },
+                    {
+                        "snapshot_id": "a-snapshot",
+                        "content_hash": "zzz",
+                        "immutable_uri": "file:///snapshots/z.jsonl",
+                    },
+                ],
+            }
+        ],
+    }
+
+    normalized = normalize_run_manifest_spec(payload)
+
+    assert [
+        item["snapshot_id"]
+        for item in normalized["source_refs"][0]["input_snapshots"]
+    ] == ["a-snapshot", "z-snapshot"]
+
+
 def test_normalize_run_ledger_payload_is_idempotent() -> None:
     occurred_at = datetime(2026, 4, 8, 12, 53, 47, tzinfo=UTC)
     payload = {

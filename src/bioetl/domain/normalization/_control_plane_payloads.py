@@ -156,9 +156,23 @@ def _normalize_manifest_source_ref(item: object) -> object:
     raw_snapshots = item.get("input_snapshots")
     if isinstance(raw_snapshots, Sequence) and not isinstance(raw_snapshots, (str, bytes)):
         normalized["input_snapshots"] = canonicalize_container(
-            normalize_set_like_sequence(raw_snapshots)
+            _normalize_manifest_input_snapshots(raw_snapshots)
         )
     return normalized
+
+
+def _normalize_manifest_input_snapshots(
+    raw_snapshots: Sequence[object],
+) -> list[object]:
+    """Normalize manifest snapshots with deterministic identity-first ordering."""
+    normalized = [normalize_mapping(item) if isinstance(item, Mapping) else item for item in raw_snapshots]
+    return sorted(
+        normalized,
+        key=lambda item: (
+            item.get("snapshot_id", "") if isinstance(item, Mapping) else "",
+            str(item),
+        ),
+    )
 
 
 def _normalize_optional_text(value: object | None) -> str | None:
