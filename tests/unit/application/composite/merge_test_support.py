@@ -30,6 +30,14 @@ def _default_join_type_resolver() -> JoinHow:
     return "left"
 
 
+def _default_field_alias_resolver_for_merge(_pipeline: str) -> dict[str, str] | None:
+    return None
+
+
+def _default_join_type_for_merge() -> JoinHow:
+    return "left"
+
+
 def build_join_planner_service(
     *,
     merge_config: MergeConfig,
@@ -138,8 +146,8 @@ def build_merge_service(
         aggregator=aggregator,
         renamer=renamer,
         conflict_resolver=conflict_resolver,
-        field_alias_resolver=lambda _pipeline: None,
-        join_type_resolver=lambda: "left",
+        field_alias_resolver=_default_field_alias_resolver_for_merge,
+        join_type_resolver=_default_join_type_for_merge,
     )
     return MergeService(
         merge_config=merge_config,

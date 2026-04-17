@@ -170,10 +170,20 @@ def test_finalize_cli_execution_runs_health_execute_and_finalizer_in_order() -> 
 def test_finalize_cli_execution_skips_finalizer_when_execution_is_handled() -> None:
     calls: list[str] = []
 
+    def _health() -> None:
+        calls.append("health")
+
+    def _execute() -> None:
+        calls.append("execute")
+        return None
+
+    def _finalize(result: object) -> None:
+        calls.append(f"finalize:{result}")
+
     finalize_cli_execution(
-        health_info_presenter=lambda: calls.append("health"),
-        execute=lambda: calls.append("execute") or None,
-        result_finalizer=lambda result: calls.append(f"finalize:{result}"),
+        health_info_presenter=_health,
+        execute=_execute,
+        result_finalizer=_finalize,
     )
 
     assert calls == ["health", "execute"]

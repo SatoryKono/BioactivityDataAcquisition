@@ -28,6 +28,8 @@ __all__ = [
     "plan_command",
 ]
 
+_NONE_LINE = "  none"
+
 
 def get_contract_migration_service() -> ContractMigrationService:
     """Load the contract migration service through composition on demand."""
@@ -85,7 +87,7 @@ def _append_transitions(lines: list[str], transitions: object) -> None:
         lines.append("")
     lines.append("Transitions")
     if not transitions:
-        lines.append("  none")
+        lines.append(_NONE_LINE)
         return
     for entry in transitions:
         if not isinstance(entry, dict):
@@ -110,7 +112,7 @@ def _append_required_actions(lines: list[str], required_actions: object) -> None
         lines.append("")
     lines.append("Required Actions")
     if not required_actions:
-        lines.append("  none")
+        lines.append(_NONE_LINE)
         return
     for action in required_actions:
         if not isinstance(action, dict):
@@ -130,7 +132,7 @@ def _append_notes(lines: list[str], notes: object) -> None:
         lines.append("")
     lines.append("Notes")
     if not notes:
-        lines.append("  none")
+        lines.append(_NONE_LINE)
         return
     for note in notes:
         lines.append(f"  - {_format_scalar(note)}")

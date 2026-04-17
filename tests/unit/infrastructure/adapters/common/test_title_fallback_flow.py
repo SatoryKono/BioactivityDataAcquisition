@@ -15,6 +15,34 @@ from bioetl.infrastructure.adapters.common._title_fallback_flow import (
 )
 
 
+def _normalize_doi_lower(doi: str) -> str:
+    return doi.lower()
+
+
+def _result_identifier(result: dict[str, Any]) -> tuple[str, str]:
+    return ("found_id", str(result["id"]))
+
+
+def _process_found_title_fallback(result: dict[str, Any], doi: str) -> dict[str, Any]:
+    return {
+        **result,
+        "_lookup_method": "title_fallback",
+        "_original_id": doi,
+    }
+
+
+def _process_title_only_result(result: dict[str, Any]) -> dict[str, Any]:
+    return {
+        **result,
+        "_lookup_method": "title_only",
+    }
+
+
+def _identity_found_result(result: dict[str, Any], doi: str) -> dict[str, Any]:
+    del doi
+    return result
+
+
 @pytest.mark.unit
 def test_get_fallback_title_uses_normalized_key_when_original_missing() -> None:
     """Normalized identifier fallback should work when original key is absent."""
@@ -54,18 +82,14 @@ async def test_iter_missing_doi_fallback_records_yields_processed_records_and_re
                 "doi-1": "Alpha Title",
                 "doi-2": "Beta Title",
             },
-            normalize_fn=lambda doi: doi.lower(),
+            normalize_fn=_normalize_doi_lower,
             limit=1,
             fetched=0,
             get_fallback_title=get_fallback_title,
             truncate_title=truncate_title,
             search_by_title=search_by_title,
-            get_result_identifier=lambda result: ("found_id", str(result["id"])),
-            process_found_result=lambda result, doi: {
-                **result,
-                "_lookup_method": "title_fallback",
-                "_original_id": doi,
-            },
+            get_result_identifier=_result_identifier,
+            process_found_result=_process_found_title_fallback,
             logger=logger,
             event_no_fallback_title="no_fallback_title",
             event_fallback_attempt="title_fallback_attempt",
@@ -103,14 +127,14 @@ async def test_iter_missing_doi_fallback_records_logs_missing_title_and_not_foun
             dois=["DOI-1", "DOI-2", "DOI-3"],
             found_dois={"doi-1"},
             fallback_mapping={"DOI-2": "Known Title"},
-            normalize_fn=lambda doi: doi.lower(),
+            normalize_fn=_normalize_doi_lower,
             limit=None,
             fetched=0,
             get_fallback_title=get_fallback_title,
             truncate_title=truncate_title,
             search_by_title=search_by_title,
-            get_result_identifier=lambda result: ("found_id", str(result["id"])),
-            process_found_result=lambda result, doi: result,
+            get_result_identifier=_result_identifier,
+            process_found_result=_identity_found_result,
             logger=logger,
             event_no_fallback_title="no_fallback_title",
             event_fallback_attempt="title_fallback_attempt",
@@ -148,11 +172,8 @@ async def test_iter_title_only_fallback_records_supports_marker_and_empty_entry_
             fetched=0,
             truncate_title=truncate_title,
             search_by_title=search_by_title,
-            get_result_identifier=lambda result: ("found_id", str(result["id"])),
-            process_title_only_result=lambda result: {
-                **result,
-                "_lookup_method": "title_only",
-            },
+            get_result_identifier=_result_identifier,
+            process_title_only_result=_process_title_only_result,
             logger=logger,
             event_title_only_attempt="title_only_attempt",
             event_title_only_success="title_only_success",

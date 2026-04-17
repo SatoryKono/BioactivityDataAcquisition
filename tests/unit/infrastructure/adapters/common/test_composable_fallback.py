@@ -19,6 +19,14 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
 )
 
 
+def _normalize_default(value: str) -> str:
+    return value.strip().lower()
+
+
+def _extract_record_id_default(record: dict[str, object]) -> str:
+    return str(record.get("id", ""))
+
+
 def _make_strategy(
     *,
     normalize_id: Any = None,
@@ -26,9 +34,8 @@ def _make_strategy(
     fallback_handler: Any = None,
 ) -> DefaultFallbackExecution:
     return DefaultFallbackExecution(
-        normalize_id_hook=normalize_id or (lambda value: value.strip().lower()),
-        extract_record_id_hook=extract_record_id
-        or (lambda record: str(record.get("id", ""))),
+        normalize_id_hook=normalize_id or _normalize_default,
+        extract_record_id_hook=extract_record_id or _extract_record_id_default,
         fallback_handler_hook=fallback_handler or MagicMock(name="fallback_handler"),
     )
 

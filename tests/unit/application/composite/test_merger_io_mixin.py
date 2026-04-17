@@ -11,6 +11,14 @@ from bioetl.application.composite.merger_io_mixin import MergeIOMixin
 from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
 
 
+def _empty_field_coverage(_df: pl.DataFrame) -> dict[str, int]:
+    return {}
+
+
+def _zero_fully_enriched(_df: pl.DataFrame, _enrichers: object) -> int:
+    return 0
+
+
 def _make_mixin(**overrides: object) -> MergeIOMixin:
     """Build a minimal MergeIOMixin with mock collaborators."""
     mixin = MergeIOMixin.__new__(MergeIOMixin)
@@ -22,8 +30,8 @@ def _make_mixin(**overrides: object) -> MergeIOMixin:
     mixin._cross_validator = None
     mixin._gold_schema = None
     mixin._join_planner = MagicMock()
-    mixin._calculate_field_coverage = lambda df: {}
-    mixin._count_fully_enriched = lambda df, enrichers: 0
+    mixin._calculate_field_coverage = _empty_field_coverage
+    mixin._count_fully_enriched = _zero_fully_enriched
     mixin._storage = AsyncMock()
     mixin._delta_reader = None
     mixin._renamer = MagicMock()

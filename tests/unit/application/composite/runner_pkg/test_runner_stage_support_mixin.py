@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from collections.abc import Callable
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
@@ -52,6 +53,21 @@ def _success_dep(name: str) -> DependencyResult:
 
 def _failed_dep(name: str) -> DependencyResult:
     return DependencyResult(pipeline_name=name, status=DependencyStatus.FAILED)
+
+
+def _dep_cfg_lookup(dep_cfg: SimpleNamespace, name: str) -> SimpleNamespace | None:
+    if name == dep_cfg.pipeline:
+        return dep_cfg
+    return None
+
+
+def _make_dependency_lookup(
+    dep_cfg: SimpleNamespace,
+) -> Callable[[str], SimpleNamespace | None]:
+    def _lookup(name: str) -> SimpleNamespace | None:
+        return _dep_cfg_lookup(dep_cfg, name)
+
+    return _lookup
 
 
 class _StageSupportHarness(_CompositeRunnerStageSupportMixin):
@@ -166,7 +182,7 @@ def test_find_required_failures_when_all_succeed_then_empty_list() -> None:
     dep_cfg = _make_dependency_cfg("dep_a", required=True)
     harness = _StageSupportHarness()
     harness._config.dependencies = [dep_cfg]
-    harness._config.get_dependency = lambda name: dep_cfg if name == "dep_a" else None
+    harness._config.get_dependency = _make_dependency_lookup(dep_cfg)
     results = {"dep_a": _success_dep("dep_a")}
 
     failed = harness._find_required_failures(results)
@@ -178,7 +194,7 @@ def test_find_required_failures_when_all_succeed_then_empty_list() -> None:
 def test_find_required_failures_when_required_dep_fails_then_included() -> None:
     dep_cfg = _make_dependency_cfg("dep_a", required=True)
     harness = _StageSupportHarness()
-    harness._config.get_dependency = lambda name: dep_cfg if name == "dep_a" else None
+    harness._config.get_dependency = _make_dependency_lookup(dep_cfg)
     results = {"dep_a": _failed_dep("dep_a")}
 
     failed = harness._find_required_failures(results)
@@ -190,7 +206,7 @@ def test_find_required_failures_when_required_dep_fails_then_included() -> None:
 def test_find_required_failures_when_optional_dep_fails_then_not_included() -> None:
     dep_cfg = _make_dependency_cfg("opt_dep", required=False)
     harness = _StageSupportHarness()
-    harness._config.get_dependency = lambda name: dep_cfg if name == "opt_dep" else None
+    harness._config.get_dependency = _make_dependency_lookup(dep_cfg)
     results = {"opt_dep": _failed_dep("opt_dep")}
 
     failed = harness._find_required_failures(results)
