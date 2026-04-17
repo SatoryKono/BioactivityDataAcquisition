@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -19,6 +20,7 @@ class NoOpAudit:
         Args:
             _entry: Audit entry to log; intentionally ignored by this no-op.
         """
+        await asyncio.sleep(0)
         return None
 
     async def get_entries(
@@ -43,10 +45,13 @@ class NoOpAudit:
         Returns:
             Empty list.
         """
+        del run_id, layer, table_name, start_time, end_time, limit
+        await asyncio.sleep(0)
         return []
 
     async def aclose(self) -> None:
         """No-op implementation of aclose — no resources to release."""
+        await asyncio.sleep(0)
         return None
 
     def log_event(

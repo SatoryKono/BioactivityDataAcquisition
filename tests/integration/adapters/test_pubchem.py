@@ -116,6 +116,14 @@ def pubchem_adapter(
     )
 
 
+async def _consume_async_iter(async_iter) -> list[object]:
+    """Drain an async iterable while preserving iteration failures."""
+    items: list[object] = []
+    async for item in async_iter:
+        items.append(item)
+    return items
+
+
 # ---------------------------------------------------------------------------
 # Basic adapter properties
 # ---------------------------------------------------------------------------
@@ -239,8 +247,9 @@ class TestPubChemFetchByQuery:
     ) -> None:
         """fetch() without query should raise ValueError."""
         with pytest.raises(ValueError, match="Query is required"):
-            async for _ in pubchem_adapter.fetch(entity_type="compound", query=None):
-                pass
+            await _consume_async_iter(
+                pubchem_adapter.fetch(entity_type="compound", query=None)
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -537,42 +546,44 @@ class TestPubChemErrorCases:
     ) -> None:
         """fetch() with unsupported entity type should raise ValueError."""
         with pytest.raises(ValueError, match="Unsupported entity type"):
-            async for _ in pubchem_adapter.fetch(
-                entity_type="invalid_entity", query="test"
-            ):
-                pass
+            await _consume_async_iter(
+                pubchem_adapter.fetch(entity_type="invalid_entity", query="test")
+            )
 
     async def test_fetch_filtered_non_compound_entity_raises(
         self, pubchem_adapter: PubChemAdapter
     ) -> None:
         """fetch_filtered() only supports 'compound' entity type."""
         with pytest.raises(ValueError, match="fetch_filtered only supports"):
-            async for _ in pubchem_adapter.fetch_filtered(
-                entity_type="substance",
-                filter_ids=["123"],
-                filter_field="cid",
-            ):
-                pass
+            await _consume_async_iter(
+                pubchem_adapter.fetch_filtered(
+                    entity_type="substance",
+                    filter_ids=["123"],
+                    filter_field="cid",
+                )
+            )
 
     async def test_fetch_filtered_unsupported_filter_field_raises(
         self, pubchem_adapter: PubChemAdapter
     ) -> None:
         """fetch_filtered() with unsupported filter_field should raise ValueError."""
         with pytest.raises(ValueError, match="Unsupported filter_field"):
-            async for _ in pubchem_adapter.fetch_filtered(
-                entity_type="compound",
-                filter_ids=["123"],
-                filter_field="unsupported_field",
-            ):
-                pass
+            await _consume_async_iter(
+                pubchem_adapter.fetch_filtered(
+                    entity_type="compound",
+                    filter_ids=["123"],
+                    filter_field="unsupported_field",
+                )
+            )
 
     async def test_fetch_compound_empty_query_raises(
         self, pubchem_adapter: PubChemAdapter
     ) -> None:
         """fetch() with empty string query should raise ValueError."""
         with pytest.raises(ValueError, match="Query is required"):
-            async for _ in pubchem_adapter.fetch(entity_type="compound", query=""):
-                pass
+            await _consume_async_iter(
+                pubchem_adapter.fetch(entity_type="compound", query="")
+            )
 
 
 # ---------------------------------------------------------------------------

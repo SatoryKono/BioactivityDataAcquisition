@@ -48,6 +48,14 @@ def pubmed_adapter(mock_logger) -> PubMedAdapter:
     )
 
 
+async def _consume_async_iter(async_iter) -> list[object]:
+    """Drain an async iterable while preserving iteration failures."""
+    items: list[object] = []
+    async for item in async_iter:
+        items.append(item)
+    return items
+
+
 @pytest.mark.integration
 async def test_fetch_filtered(pubmed_adapter: PubMedAdapter):
     mock_xml = """<?xml version="1.0"?>
@@ -76,8 +84,9 @@ async def test_fetch_filtered(pubmed_adapter: PubMedAdapter):
 
     # Test error category for invalid entity type
     with pytest.raises(ValueError, match="PubMedAdapter only supports 'publication'"):
-        async for _ in pubmed_adapter.fetch_filtered("invalid", ["12345"], "pmid"):
-            pass
+        await _consume_async_iter(
+            pubmed_adapter.fetch_filtered("invalid", ["12345"], "pmid")
+        )
 
 
 @pytest.mark.integration
@@ -176,7 +185,7 @@ async def test_fetch_as_models(pubmed_adapter: PubMedAdapter):
 
 
 @pytest.mark.integration
-async def test_adapter_factory(mock_logger):
+def test_adapter_factory(mock_logger):
     settings = MagicMock()
     settings.default_email = "factory@example.com"
     settings.pubmed_api_key = SecretStr("test_key")
@@ -201,7 +210,7 @@ async def test_adapter_factory(mock_logger):
 
 
 @pytest.mark.integration
-async def test_adapter_factory_missing_args():
+def test_adapter_factory_missing_args():
     with pytest.raises(ValueError, match="PubMed adapter requires email"):
         create_pubmed_adapter(None, None, None)
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -105,6 +106,8 @@ class NoOpMetadataWriter:
         Returns:
             Empty string.
         """
+        del base_path, metadata, provider, entity
+        await asyncio.sleep(0)
         return ""
 
     async def write_silver_metadata(
@@ -130,6 +133,8 @@ class NoOpMetadataWriter:
         Returns:
             Empty string.
         """
+        del base_path, metadata, table_name, flat_structure, provider, entity
+        await asyncio.sleep(0)
         return ""
 
     async def finalize_silver_metadata(
@@ -145,6 +150,9 @@ class NoOpMetadataWriter:
         delta_version_after: int | None = None,  # noqa: ARG002
     ) -> str | None:
         """No-op Silver finalization returns empty string when invoked."""
+        del base_path, table_name, flat_structure, provider, entity
+        del dq_report_path, completed_at, delta_version_after
+        await asyncio.sleep(0)
         return ""
 
     async def write_gold_metadata(
@@ -170,6 +178,8 @@ class NoOpMetadataWriter:
         Returns:
             Empty string.
         """
+        del base_path, metadata, table_name, flat_structure, provider, entity
+        await asyncio.sleep(0)
         return ""
 
     async def finalize_gold_metadata(
@@ -184,8 +194,12 @@ class NoOpMetadataWriter:
         completed_at: datetime | None = None,  # noqa: ARG002
     ) -> str | None:
         """No-op Gold finalization returns empty string when invoked."""
+        del base_path, table_name, flat_structure, provider, entity
+        del dq_report_path, completed_at
+        await asyncio.sleep(0)
         return ""
 
     async def aclose(self) -> None:
         """No-op implementation of aclose — no resources to release."""
+        await asyncio.sleep(0)
         return None
