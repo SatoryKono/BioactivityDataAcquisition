@@ -171,6 +171,45 @@ def gh_api_graphql(
     return _run_json(cmd, stdin=QUERY)
 
 
+def _build_pr_meta(pr: dict[str, Any], owner: str, repo: str) -> dict[str, Any]:
+    """Build PR metadata payload from the first GraphQL page."""
+    return {
+        "number": pr["number"],
+        "url": pr["url"],
+        "title": pr["title"],
+        "state": pr["state"],
+        "owner": owner,
+        "repo": repo,
+    }
+
+
+def _consume_page(
+    pr: dict[str, Any],
+    conversation_comments: list[dict[str, Any]],
+    reviews: list[dict[str, Any]],
+    review_threads: list[dict[str, Any]],
+) -> tuple[str | None, str | None, str | None]:
+    """Append one GraphQL page and return next cursors."""
+    comments = pr["comments"]
+    review_nodes = pr["reviews"]
+    threads = pr["reviewThreads"]
+    conversation_comments.extend(comments.get("nodes") or [])
+    reviews.extend(review_nodes.get("nodes") or [])
+    review_threads.extend(threads.get("nodes") or [])
+    comments_cursor = (
+        comments["pageInfo"]["endCursor"] if comments["pageInfo"]["hasNextPage"] else None
+    )
+    reviews_cursor = (
+        review_nodes["pageInfo"]["endCursor"]
+        if review_nodes["pageInfo"]["hasNextPage"]
+        else None
+    )
+    threads_cursor = (
+        threads["pageInfo"]["endCursor"] if threads["pageInfo"]["hasNextPage"] else None
+    )
+    return comments_cursor, reviews_cursor, threads_cursor
+
+
 def fetch_all(owner: str, repo: str, number: int) -> dict[str, Any]:
     conversation_comments: list[dict[str, Any]] = []
     reviews: list[dict[str, Any]] = []
@@ -199,31 +238,13 @@ def fetch_all(owner: str, repo: str, number: int) -> dict[str, Any]:
 
         pr = payload["data"]["repository"]["pullRequest"]
         if pr_meta is None:
-            pr_meta = {
-                "number": pr["number"],
-                "url": pr["url"],
-                "title": pr["title"],
-                "state": pr["state"],
-                "owner": owner,
-                "repo": repo,
-            }
+            pr_meta = _build_pr_meta(pr, owner, repo)
 
-        c = pr["comments"]
-        r = pr["reviews"]
-        t = pr["reviewThreads"]
-
-        conversation_comments.extend(c.get("nodes") or [])
-        reviews.extend(r.get("nodes") or [])
-        review_threads.extend(t.get("nodes") or [])
-
-        comments_cursor = (
-            c["pageInfo"]["endCursor"] if c["pageInfo"]["hasNextPage"] else None
-        )
-        reviews_cursor = (
-            r["pageInfo"]["endCursor"] if r["pageInfo"]["hasNextPage"] else None
-        )
-        threads_cursor = (
-            t["pageInfo"]["endCursor"] if t["pageInfo"]["hasNextPage"] else None
+        comments_cursor, reviews_cursor, threads_cursor = _consume_page(
+            pr,
+            conversation_comments,
+            reviews,
+            review_threads,
         )
 
         if not (comments_cursor or reviews_cursor or threads_cursor):
