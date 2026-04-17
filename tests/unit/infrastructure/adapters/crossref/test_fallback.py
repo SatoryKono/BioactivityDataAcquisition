@@ -28,57 +28,49 @@ class TestTitlesMatch:
 
     def test_exact_match(self):
         """Test exact title match."""
-        assert (
-            titles_match(
-                "Crystal structure of rhodopsin", "Crystal structure of rhodopsin"
-            )
-            is True
+        assert titles_match(
+            "Crystal structure of rhodopsin",
+            "Crystal structure of rhodopsin",
         )
 
     def test_case_insensitive_match(self):
         """Test case-insensitive matching."""
-        assert (
-            titles_match(
-                "Crystal Structure of Rhodopsin", "crystal structure of rhodopsin"
-            )
-            is True
+        assert titles_match(
+            "Crystal Structure of Rhodopsin",
+            "crystal structure of rhodopsin",
         )
 
     def test_whitespace_handling(self):
         """Test whitespace is stripped."""
-        assert titles_match("  Crystal structure  ", "Crystal structure") is True
+        assert titles_match("  Crystal structure  ", "Crystal structure")
 
     def test_substring_query_in_found(self):
         """Test query is substring of found title."""
-        assert (
-            titles_match(
-                "Crystal structure", "Crystal structure of rhodopsin bound to arrestin"
-            )
-            is True
+        assert titles_match(
+            "Crystal structure",
+            "Crystal structure of rhodopsin bound to arrestin",
         )
 
     def test_substring_found_in_query(self):
         """Test found title is substring of query."""
-        assert (
-            titles_match(
-                "Crystal structure of rhodopsin bound to arrestin", "Crystal structure"
-            )
-            is True
+        assert titles_match(
+            "Crystal structure of rhodopsin bound to arrestin",
+            "Crystal structure",
         )
 
     def test_no_match(self):
         """Test non-matching titles."""
-        assert (
-            titles_match("Crystal structure of rhodopsin", "Protein folding mechanisms")
-            is False
+        assert not titles_match(
+            "Crystal structure of rhodopsin",
+            "Protein folding mechanisms",
         )
 
     def test_empty_strings(self):
         """Test empty string handling."""
-        assert titles_match("", "") is True  # Both empty = match
+        assert titles_match("", "")  # Both empty = match
         # Empty string is substring of any string, so this returns True
-        assert titles_match("Title", "") is True  # Empty is substring of "title"
-        assert titles_match("", "Title") is True  # Empty is substring of "title"
+        assert titles_match("Title", "")  # Empty is substring of "title"
+        assert titles_match("", "Title")  # Empty is substring of "title"
 
 
 # =============================================================================
@@ -145,7 +137,8 @@ async def test_search_by_title_empty_results(mock_logger):
     """Test title search with no results."""
 
     async def mock_search(query, limit):
-        if False:
+        del query, limit
+        for _ in ():
             yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
@@ -162,7 +155,8 @@ async def test_search_by_title_truncates_long_title(mock_logger):
 
     async def mock_search(query, limit):
         query_received.append(query)
-        if False:
+        del limit
+        for _ in ():
             yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
@@ -178,9 +172,8 @@ async def test_search_by_title_handles_exception(mock_logger):
     """Test that search errors are caught and logged."""
 
     async def mock_search(query, limit):
+        del query, limit
         raise RuntimeError("Search failed")
-        if False:
-            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Test title")
@@ -282,9 +275,10 @@ async def test_process_missing_dois_skips_found(mock_logger):
     search_called = []
 
     async def mock_search(query, limit):
+        del limit
         search_called.append(query)
-        return
-        yield
+        for _ in ():
+            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
@@ -308,8 +302,9 @@ async def test_process_missing_dois_no_fallback_title(mock_logger):
     """Test behavior when no fallback title is available."""
 
     async def mock_search(query, limit):
-        return
-        yield
+        del query, limit
+        for _ in ():
+            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
@@ -363,8 +358,9 @@ async def test_process_missing_dois_logs_not_found(mock_logger):
     """Test that failed fallback search is logged."""
 
     async def mock_search(query, limit):
-        return
-        yield
+        del query, limit
+        for _ in ():
+            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
@@ -444,8 +440,9 @@ async def test_process_title_only_entries_no_mapping(mock_logger):
     """Test title-only processing with no title mapping."""
 
     async def mock_search(query, limit):
-        return
-        yield
+        del query, limit
+        for _ in ():
+            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 
@@ -493,8 +490,9 @@ async def test_process_title_only_entries_not_found(mock_logger):
     """Test title-only processing when search returns no results."""
 
     async def mock_search(query, limit):
-        return
-        yield
+        del query, limit
+        for _ in ():
+            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
 

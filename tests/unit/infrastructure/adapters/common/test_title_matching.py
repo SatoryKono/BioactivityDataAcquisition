@@ -54,46 +54,34 @@ class TestTitlesMatchExact:
 
     def test_exact_match(self):
         """Test exact title match."""
-        assert (
-            titles_match(
-                "Crystal structure of rhodopsin",
-                "Crystal structure of rhodopsin",
-                method="exact",
-            )
-            is True
+        assert titles_match(
+            "Crystal structure of rhodopsin",
+            "Crystal structure of rhodopsin",
+            method="exact",
         )
 
     def test_exact_case_insensitive(self):
         """Test exact match is case insensitive."""
-        assert (
-            titles_match(
-                "Crystal Structure",
-                "crystal structure",
-                method="exact",
-            )
-            is True
+        assert titles_match(
+            "Crystal Structure",
+            "crystal structure",
+            method="exact",
         )
 
     def test_exact_no_match(self):
         """Test exact match fails for different titles."""
-        assert (
-            titles_match(
-                "Crystal structure",
-                "Protein folding",
-                method="exact",
-            )
-            is False
+        assert not titles_match(
+            "Crystal structure",
+            "Protein folding",
+            method="exact",
         )
 
     def test_exact_substring_not_allowed(self):
         """Test that substring doesn't count as exact match."""
-        assert (
-            titles_match(
-                "Crystal structure",
-                "Crystal structure of rhodopsin",
-                method="exact",
-            )
-            is False
+        assert not titles_match(
+            "Crystal structure",
+            "Crystal structure of rhodopsin",
+            method="exact",
         )
 
 
@@ -107,64 +95,49 @@ class TestTitlesMatchSubstring:
 
     def test_exact_match_as_substring(self):
         """Test exact match also works with substring method."""
-        assert (
-            titles_match(
-                "Crystal structure of rhodopsin",
-                "Crystal structure of rhodopsin",
-                method="substring",
-            )
-            is True
+        assert titles_match(
+            "Crystal structure of rhodopsin",
+            "Crystal structure of rhodopsin",
+            method="substring",
         )
 
     def test_query_is_substring_of_found(self):
         """Test query is substring of found title."""
-        assert (
-            titles_match(
-                "Crystal structure",
-                "Crystal structure of rhodopsin bound to arrestin",
-                method="substring",
-            )
-            is True
+        assert titles_match(
+            "Crystal structure",
+            "Crystal structure of rhodopsin bound to arrestin",
+            method="substring",
         )
 
     def test_found_is_substring_of_query(self):
         """Test found title is substring of query."""
-        assert (
-            titles_match(
-                "Crystal structure of rhodopsin bound to arrestin",
-                "Crystal structure",
-                method="substring",
-            )
-            is True
+        assert titles_match(
+            "Crystal structure of rhodopsin bound to arrestin",
+            "Crystal structure",
+            method="substring",
         )
 
     def test_no_substring_match(self):
         """Test non-matching titles."""
-        assert (
-            titles_match(
-                "Crystal structure of rhodopsin",
-                "Protein folding mechanisms",
-                method="substring",
-            )
-            is False
+        assert not titles_match(
+            "Crystal structure of rhodopsin",
+            "Protein folding mechanisms",
+            method="substring",
         )
 
     def test_default_method_is_substring(self):
         """Test that default method is substring."""
         # Same assertion without explicit method
-        assert (
-            titles_match(
-                "Crystal structure",
-                "Crystal structure of rhodopsin",
-            )
-            is True
+        assert titles_match(
+            "Crystal structure",
+            "Crystal structure of rhodopsin",
         )
 
     def test_empty_string_handling(self):
         """Test empty string handling - empty is substring of anything."""
-        assert titles_match("", "") is True
-        assert titles_match("Title", "") is True
-        assert titles_match("", "Title") is True
+        assert titles_match("", "")
+        assert titles_match("Title", "")
+        assert titles_match("", "Title")
 
 
 # =============================================================================
@@ -177,26 +150,20 @@ class TestTitlesMatchFuzzy:
 
     def test_fuzzy_identical_titles(self):
         """Test fuzzy match with identical titles."""
-        assert (
-            titles_match(
-                "Crystal structure of rhodopsin",
-                "Crystal structure of rhodopsin",
-                method="fuzzy",
-            )
-            is True
+        assert titles_match(
+            "Crystal structure of rhodopsin",
+            "Crystal structure of rhodopsin",
+            method="fuzzy",
         )
 
     def test_fuzzy_similar_titles(self):
         """Test fuzzy match with similar titles."""
         # "structure crystal rhodopsin" vs "crystal structure rhodopsin"
         # Same words, different order -> Jaccard = 1.0
-        assert (
-            titles_match(
-                "Structure crystal rhodopsin",
-                "Crystal structure rhodopsin",
-                method="fuzzy",
-            )
-            is True
+        assert titles_match(
+            "Structure crystal rhodopsin",
+            "Crystal structure rhodopsin",
+            method="fuzzy",
         )
 
     def test_fuzzy_partial_overlap(self):
@@ -206,56 +173,44 @@ class TestTitlesMatchFuzzy:
         # Intersection: {crystal} = 1
         # Union: {crystal, structure, rhodopsin} = 3
         # Jaccard: 1/3 = 0.33 < 0.8 default threshold
-        assert (
-            titles_match(
-                "Crystal structure",
-                "Crystal rhodopsin",
-                method="fuzzy",
-            )
-            is False
+        assert not titles_match(
+            "Crystal structure",
+            "Crystal rhodopsin",
+            method="fuzzy",
         )
 
     def test_fuzzy_custom_threshold(self):
         """Test fuzzy match with custom threshold."""
         # Same partial overlap but lower threshold
-        assert (
-            titles_match(
-                "Crystal structure",
-                "Crystal rhodopsin",
-                method="fuzzy",
-                threshold=0.3,
-            )
-            is True
+        assert titles_match(
+            "Crystal structure",
+            "Crystal rhodopsin",
+            method="fuzzy",
+            threshold=0.3,
         )
 
     def test_fuzzy_completely_different(self):
         """Test fuzzy match with completely different titles."""
-        assert (
-            titles_match(
-                "Crystal structure",
-                "Protein folding",
-                method="fuzzy",
-            )
-            is False
+        assert not titles_match(
+            "Crystal structure",
+            "Protein folding",
+            method="fuzzy",
         )
 
     def test_fuzzy_empty_strings(self):
         """Test fuzzy match with empty strings returns False."""
-        assert titles_match("", "Title", method="fuzzy") is False
-        assert titles_match("Title", "", method="fuzzy") is False
-        assert titles_match("", "", method="fuzzy") is False
+        assert not titles_match("", "Title", method="fuzzy")
+        assert not titles_match("Title", "", method="fuzzy")
+        assert not titles_match("", "", method="fuzzy")
 
     def test_fuzzy_high_threshold(self):
         """Test fuzzy match with high threshold."""
         # Same title should still pass even with 1.0 threshold
-        assert (
-            titles_match(
-                "Crystal structure",
-                "Crystal structure",
-                method="fuzzy",
-                threshold=1.0,
-            )
-            is True
+        assert titles_match(
+            "Crystal structure",
+            "Crystal structure",
+            method="fuzzy",
+            threshold=1.0,
         )
 
 

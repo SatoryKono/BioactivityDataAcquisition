@@ -7,6 +7,7 @@ REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 
 MODE="report"
+REPORT_MODE="report"
 ASSUME_YES=0
 DO_FETCH=1
 
@@ -68,6 +69,7 @@ Examples:
   bash scripts/ops/delete-stale-branches.sh
   bash scripts/ops/delete-stale-branches.sh --mode delete-remote --yes
 EOF
+  return 0
 }
 
 contains() {
@@ -83,7 +85,11 @@ contains() {
 }
 
 have_command() {
-  command -v "$1" >/dev/null 2>&1
+  local command_name="$1"
+  if command -v "$command_name" >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
 }
 
 resolve_python_runner() {
@@ -94,6 +100,7 @@ resolve_python_runner() {
   elif have_command py; then
     PYTHON_RUNNER=(py -3)
   fi
+  return 0
 }
 
 resolve_tool_variants() {
@@ -108,6 +115,7 @@ resolve_tool_variants() {
   elif have_command curl.exe; then
     CURL_CMD="curl.exe"
   fi
+  return 0
 }
 
 prepare_git_auth() {
@@ -191,6 +199,7 @@ print_status() {
   local color="$1"
   local text="$2"
   printf "%b%s%b" "$color" "$text" "$NC"
+  return 0
 }
 
 resolve_repo_slug() {
@@ -199,6 +208,7 @@ resolve_repo_slug() {
   if [[ "$remote_url" =~ github\.com[:/]+([^/]+/[^/.]+)(\.git)?$ ]]; then
     printf "%s\n" "${BASH_REMATCH[1]}"
   fi
+  return 0
 }
 
 REMOTE_REPO_SLUG="$(resolve_repo_slug)"
@@ -275,6 +285,7 @@ cleanup() {
   rm -f "$OPEN_PR_CACHE_FILE"
   rm -f "$OPEN_PR_API_RAW_FILE"
   rm -f "$TEMP_GIT_ASKPASS"
+  return 0
 }
 trap cleanup EXIT
 
@@ -327,15 +338,20 @@ PY
 }
 
 remote_branch_exists() {
-  git show-ref --verify --quiet "refs/remotes/origin/$1"
+  local branch="$1"
+  git show-ref --verify --quiet "refs/remotes/origin/$branch"
+  return $?
 }
 
 local_branch_exists() {
-  git show-ref --verify --quiet "refs/heads/$1"
+  local branch="$1"
+  git show-ref --verify --quiet "refs/heads/$branch"
+  return $?
 }
 
 current_branch() {
   git symbolic-ref --quiet --short HEAD 2>/dev/null || true
+  return 0
 }
 
 branch_is_merged_remote() {
@@ -348,6 +364,7 @@ branch_ahead_count() {
   local left_right
   left_right="$(git rev-list --left-right --count "origin/main...origin/$branch" 2>/dev/null || printf '0\t999999')"
   printf "%s\n" "${left_right#*	}"
+  return 0
 }
 
 recommendation_for_branch() {
@@ -391,6 +408,7 @@ print_header() {
     "------" "-------" "-------" "--------" \
     "------------------------" \
     "------------------------------"
+  return 0
 }
 
 delete_local_branch() {
@@ -404,6 +422,7 @@ delete_local_branch() {
   if local_branch_exists "$branch"; then
     git branch -D "$branch"
   fi
+  return 0
 }
 
 delete_remote_branch() {
@@ -425,6 +444,7 @@ delete_remote_branch() {
   fi
 
   git push origin --delete "$branch"
+  return 0
 }
 
 print_header
@@ -488,7 +508,7 @@ for branch in "${DELETE_CANDIDATES[@]}"; do
   printf "%-58s %-6s %-7s %-7s %-8s %-24b %s\n" \
     "$branch" "$local_state" "$remote_state" "$merged_state" "$ahead_state" "$rec_display" "$details"
 
-  if [[ "$MODE" == "report" ]]; then
+  if [[ "$MODE" == "$REPORT_MODE" ]]; then
     continue
   fi
 

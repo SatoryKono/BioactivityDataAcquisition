@@ -11,6 +11,7 @@ Tests cover:
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from typing import Any
 from unittest.mock import MagicMock
@@ -50,6 +51,7 @@ class MockDataSource:
         return self._provider_name
 
     async def __aenter__(self) -> MockDataSource:
+        await asyncio.sleep(0)
         return self
 
     async def __aexit__(
@@ -59,7 +61,7 @@ class MockDataSource:
         exc_tb: Any,
     ) -> None:
         del exc_type, exc_val, exc_tb
-        return None
+        await asyncio.sleep(0)
 
     async def fetch(
         self,
@@ -83,6 +85,7 @@ class MockDataSource:
             yield record
 
     async def health_check(self) -> HealthStatus:
+        await asyncio.sleep(0)
         self._health_check_call_count += 1
 
         # Check if we should fail on this call
@@ -93,7 +96,7 @@ class MockDataSource:
         return self._health_status
 
     async def aclose(self) -> None:
-        return None
+        await asyncio.sleep(0)
 
     def set_fetch_error(self, error: Exception, fail_on_calls: list[int]) -> None:
         """Configure fetch to fail on specific calls (0-indexed)."""
@@ -142,8 +145,7 @@ def mock_metrics() -> MagicMock:
 class TestRetryingDataSourceDecoratorBasics:
     """Test basic delegation and property access."""
 
-    @pytest.mark.asyncio
-    async def test_provider_name_delegated(
+    def test_provider_name_delegated(
         self, mock_data_source: MockDataSource, retry_config: RetryConfig
     ) -> None:
         """Test that provider_name is delegated to wrapped data source."""

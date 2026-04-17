@@ -213,8 +213,8 @@ execution_paths:
         integration: tests/integration/
         e2e: tests/e2e/
       replay_examples:
-        integration: bash scripts/engineering/dev/run_pytest.sh tests/integration/ --vcr-record=none
-          -m "integration and not e2e"
+        integration: bash scripts/engineering/dev/run_pytest.sh tests/integration/
+          --vcr-record=none -m "integration and not e2e"
         e2e: bash scripts/engineering/dev/run_pytest.sh tests/e2e/ -m e2e --vcr-record=none
       refresh_examples:
         targeted_integration: bash scripts/engineering/dev/run_pytest.sh tests/integration/adapters/test_pubmed.py
@@ -245,9 +245,9 @@ vcr_policy:
   forbidden_locations:
   - tests/fixtures/vcr_cassettes/
   placement_checks:
-  - scripts/data/check_root_vcr_cassettes.py
-  - scripts/data/check_vcr_filename_policy.py
-  - scripts/data/check_vcr_secrets.py
+  - scripts/engineering/qa/vcr/check_root_vcr_cassettes.py
+  - scripts/engineering/qa/vcr/check_vcr_filename_policy.py
+  - scripts/engineering/qa/vcr/check_vcr_secrets.py
   default_record_modes:
     ci: none
     local: once
@@ -261,7 +261,7 @@ vcr_policy:
   fixture_governance_rollout_source: configs/quality/fixture_governance_ledger.yaml
   metadata_catalog_path: reports/quality/vcr-metadata-catalog.json
   metadata_catalog_script: scripts/engineering/qa/report_vcr_metadata_catalog.py
-  metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+  metadata_backfill_script: scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
   refresh_protocol:
     pre_refresh_checks:
     - python -m scripts.data check-vcr-placement

@@ -91,7 +91,8 @@ async def test_execute_builds_request_from_strategy_defaults() -> None:
     async def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
-        if False:
+        del primary_ids, limit
+        for _ in ():
             yield {}
 
     results = await _collect(
@@ -109,7 +110,7 @@ async def test_execute_builds_request_from_strategy_defaults() -> None:
     assert request.fallback_mapping == {"10.1/a": "Title A"}
     assert request.limit == 3
     assert request.primary_lookup_method == "doi"
-    assert request.trim_primary_ids_to_limit is True
+    assert request.trim_primary_ids_to_limit
     assert request.fallback_operation == "fallback_flow"
     assert request.resolve_normalize_id()(" 10.1/A ") == "10.1/a"
     assert request.resolve_extract_record_id()({"id": "rec-1"}) == "rec-1"
@@ -130,7 +131,7 @@ async def test_execute_prefers_explicit_overrides_over_strategy_hooks() -> None:
         request: FallbackFetchRequest,
     ) -> AsyncIterator[dict[str, object]]:
         captured_requests.append(request)
-        if False:
+        for _ in ():
             yield {}
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
@@ -140,7 +141,8 @@ async def test_execute_prefers_explicit_overrides_over_strategy_hooks() -> None:
     async def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
-        if False:
+        del primary_ids, limit
+        for _ in ():
             yield {}
 
     await _collect(
@@ -181,7 +183,8 @@ async def test_execute_skips_service_for_unsupported_filter_field_when_configure
     async def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
-        if False:
+        del primary_ids, limit
+        for _ in ():
             yield {}
 
     results = await _collect(
@@ -232,8 +235,9 @@ async def test_execute_logs_but_continues_when_unsupported_filter_is_permissive(
     async def primary_fetcher(
         primary_ids: list[str], limit: int | None
     ) -> AsyncIterator[dict[str, object]]:
-        return
-        yield
+        del primary_ids, limit
+        for _ in ():
+            yield {}
 
     results = await _collect(
         decorator,
@@ -267,7 +271,7 @@ def test_resolve_fallback_policy_returns_defaults_when_policy_missing() -> None:
 
     enabled, resolved = resolve_fallback_policy(None, defaults=defaults)
 
-    assert enabled is True
+    assert enabled
     assert resolved is defaults
 
 
@@ -294,7 +298,7 @@ def test_resolve_fallback_policy_sanitizes_partial_policy_values() -> None:
 
     enabled, resolved = resolve_fallback_policy(policy, defaults=defaults)
 
-    assert enabled is False
+    assert not enabled
     assert resolved == FallbackDecoratorConfig(
         supported_filter_field="pmid",
         unsupported_filter_event="custom_event",
@@ -333,5 +337,5 @@ def test_resolve_fallback_policy_falls_back_for_blank_or_invalid_values() -> Non
         default_enabled=False,
     )
 
-    assert enabled is False
+    assert not enabled
     assert resolved == defaults

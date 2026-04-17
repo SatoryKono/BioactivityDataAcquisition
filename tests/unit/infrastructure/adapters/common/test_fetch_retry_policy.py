@@ -94,9 +94,9 @@ def test_is_retry_exhausted_error_direct_and_wrapped() -> None:
     wrapped.__cause__ = retry_error
     unrelated = ValueError("nope")
 
-    assert is_retry_exhausted_error(retry_error) is True
-    assert is_retry_exhausted_error(wrapped) is True
-    assert is_retry_exhausted_error(unrelated) is False
+    assert is_retry_exhausted_error(retry_error)
+    assert is_retry_exhausted_error(wrapped)
+    assert not is_retry_exhausted_error(unrelated)
 
 
 @st.composite

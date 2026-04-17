@@ -71,11 +71,14 @@ from scripts.docs.common.markdown import (
 )
 from scripts.docs.common.paths import DOCS_DIR, PROJECT_ROOT, is_generated_docs_artifact
 
+README_FILENAME = "README.md"
+LAST_VERIFIED_LABEL = "Last verified"
+
 PIPELINES_DIR = DOCS_DIR / "04-reference" / "pipelines"
 GOLD_SCHEMAS_DOC = DOCS_DIR / "04-reference" / "contracts" / "gold-schemas.md"
 GOLD_CONTRACTS_DIR = DOCS_DIR / "04-reference" / "contracts" / "gold"
 CONTRACTS_DOC_DIR = DOCS_DIR / "04-reference" / "contracts"
-PROVIDERS_OVERVIEW_DOC = DOCS_DIR / "04-reference" / "providers" / "README.md"
+PROVIDERS_OVERVIEW_DOC = DOCS_DIR / "04-reference" / "providers" / README_FILENAME
 PROVIDERS_SPECS_DIR = DOCS_DIR / "04-reference" / "providers"
 CHEMBL_PROVIDERS_DIR = DOCS_DIR / "04-reference" / "providers" / "chembl"
 RUNBOOKS_DIR = DOCS_DIR / "05-operations" / "runbooks"
@@ -105,7 +108,7 @@ SKIP_DIRS = frozenset(
     }
 )
 
-GOLD_CONTRACT_RE = re.compile(r"`([a-z0-9_]+_v1\.0\.json)`")
+GOLD_CONTRACT_RE = re.compile(r"`([\w]+_v1\.0\.json)`")
 CHEMBL_PROVIDER_LINK_RE = re.compile(r"\(chembl/([a-z0-9-]+)\.md\)")
 
 DRIFT_SKIP_DIRS = frozenset({"99-archive", "reports", "plans", "skills"})
@@ -173,7 +176,7 @@ DRIFT_RULES = (
     DriftRule(
         name="old_run_syntax",
         pattern=re.compile(
-            r"\bbioetl\s+run\s+(?!--pipeline\b)([A-Za-z0-9_][A-Za-z0-9_-]*)"
+            r"\bbioetl\s+run\s+(?!--pipeline\b)([\w][\w-]*)"
         ),
     ),
     DriftRule(
@@ -416,9 +419,9 @@ def check_provider_spec_governance() -> list[tuple[Path, str]]:
         if "compliance" not in " ".join(headings):
             violations.append((md_file, "provider-spec: missing Compliance heading"))
 
-        last_verified = frontmatter.get("Last verified")
+        last_verified = frontmatter.get(LAST_VERIFIED_LABEL)
         if not isinstance(last_verified, str) or not last_verified.strip():
-            violations.append((md_file, "provider-spec: missing Last verified frontmatter"))
+            violations.append((md_file, f"provider-spec: missing {LAST_VERIFIED_LABEL} frontmatter"))
 
         version = frontmatter.get("Version")
         version_str = str(version).strip() if version is not None else ""
@@ -447,9 +450,9 @@ def check_runbook_governance() -> list[tuple[Path, str]]:
         if "compliance" not in " ".join(headings):
             violations.append((md_file, "runbook: missing Compliance heading"))
 
-        last_verified = frontmatter.get("Last verified")
+        last_verified = frontmatter.get(LAST_VERIFIED_LABEL)
         if not isinstance(last_verified, str) or not last_verified.strip():
-            violations.append((md_file, "runbook: missing Last verified frontmatter"))
+            violations.append((md_file, f"runbook: missing {LAST_VERIFIED_LABEL} frontmatter"))
 
         version = frontmatter.get("Version")
         version_str = str(version).strip() if version is not None else ""
@@ -479,9 +482,9 @@ def check_control_plane_contract_governance() -> list[tuple[Path, str]]:
                     (md_file, f"control-plane contract-spec: missing required section '{section}'")
                 )
 
-        last_verified = frontmatter.get("Last verified")
+        last_verified = frontmatter.get(LAST_VERIFIED_LABEL)
         if not isinstance(last_verified, str) or not last_verified.strip():
-            violations.append((md_file, "control-plane contract-spec: missing Last verified frontmatter"))
+            violations.append((md_file, f"control-plane contract-spec: missing {LAST_VERIFIED_LABEL} frontmatter"))
 
         version = frontmatter.get("Version")
         version_str = str(version).strip() if version is not None else ""
@@ -744,9 +747,9 @@ def _check_path_contracts_for_file(
 
 
 def check_spec_files() -> list[tuple[str, str]]:
-    readme = PIPELINES_DIR / "README.md"
+    readme = PIPELINES_DIR / README_FILENAME
     if not readme.exists():
-        return [("README.md", str(readme))]
+        return [(README_FILENAME, str(readme))]
 
     missing: list[tuple[str, str]] = []
     text = readme.read_text(encoding="utf-8", errors="replace")

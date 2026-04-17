@@ -5,6 +5,7 @@ Implements QuarantinePort interface without filesystem I/O.
 
 from __future__ import annotations
 
+import asyncio
 from collections import defaultdict
 from datetime import UTC, datetime  # UTC used in add_record
 from typing import Any
@@ -36,6 +37,7 @@ class InMemoryQuarantine:
         ingestion_ts: datetime,
     ) -> None:
         """Write record to quarantine."""
+        await asyncio.sleep(0)
         meta = metadata or {}
 
         record = {
@@ -72,6 +74,7 @@ class InMemoryQuarantine:
         dq_status: QuarantineRecordStatus | None = None,
     ) -> list[dict[str, Any]]:
         """Inspect quarantine records."""
+        await asyncio.sleep(0)
         records = self._records.get(pipeline, [])
 
         # Apply filters
@@ -88,6 +91,7 @@ class InMemoryQuarantine:
         error_code: str | None = None,
     ) -> dict[str, Any]:
         """Get quarantine statistics for a pipeline."""
+        await asyncio.sleep(0)
         records = self._records.get(pipeline, [])
         if error_code:
             records = [
@@ -140,6 +144,7 @@ class InMemoryQuarantine:
     ) -> dict[str, Any]:
         """Return a minimal filtered-record list for tests."""
         del run_type, reason_code, field, from_ts, to_ts, sort
+        await asyncio.sleep(0)
         if pipeline and pipeline.strip().lower() not in {"*", "all", "__all", ".*"}:
             pipelines = [item.strip() for item in pipeline.split(",") if item.strip()]
         else:
@@ -176,6 +181,7 @@ class InMemoryQuarantine:
         pipeline: str | None = None,
     ) -> dict[str, Any] | None:
         """Return one filtered record by payload hash."""
+        await asyncio.sleep(0)
         pipelines = [pipeline] if pipeline else list(self._records.keys())
         for pipeline_name in pipelines:
             for record in self._records.get(pipeline_name, []):
@@ -184,7 +190,6 @@ class InMemoryQuarantine:
                     and record.get("payload_hash") == payload_hash
                 ):
                     return dict(record)
-        return None
 
     async def get_filtered_stats(
         self,
@@ -234,6 +239,7 @@ class InMemoryQuarantine:
     ) -> dict[str, Any]:
         """Return empty filter options by default."""
         del run_type, reason_code, field, run_id, from_ts, to_ts
+        await asyncio.sleep(0)
         if pipeline and pipeline.strip().lower() not in {"*", "all", "__all", ".*"}:
             pipelines = [item.strip() for item in pipeline.split(",") if item.strip()]
         else:
@@ -248,7 +254,7 @@ class InMemoryQuarantine:
 
     async def aclose(self) -> None:
         """Close quarantine storage (no-op for in-memory)."""
-        return
+        await asyncio.sleep(0)
 
     def clear(self) -> None:
         """Clear all records (test utility)."""

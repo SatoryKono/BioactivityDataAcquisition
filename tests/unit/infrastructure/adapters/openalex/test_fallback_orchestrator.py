@@ -112,7 +112,7 @@ async def test_execute_attaches_openalex_phase1_summary_logger() -> None:
         request: FallbackFetchRequest,
     ) -> AsyncIterator[BronzeRecord]:
         captured_requests.append(request)
-        if False:
+        for _ in ():
             yield {}
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
@@ -122,7 +122,8 @@ async def test_execute_attaches_openalex_phase1_summary_logger() -> None:
     async def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        if False:
+        del ids, limit
+        for _ in ():
             yield {}
 
     await _collect(
@@ -134,7 +135,7 @@ async def test_execute_attaches_openalex_phase1_summary_logger() -> None:
     )
 
     summary_logger = captured_requests[0].phase1_summary_logger
-    assert summary_logger is not None
+    assert callable(summary_logger)
 
     summary_logger(total=10, found=7)
 
@@ -159,7 +160,8 @@ async def test_execute_skips_service_for_unsupported_filter_field() -> None:
     async def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        if False:
+        del ids, limit
+        for _ in ():
             yield {}
 
     results = await _collect(
@@ -190,7 +192,7 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
         request: FallbackFetchRequest,
     ) -> AsyncIterator[BronzeRecord]:
         captured_requests.append(request)
-        if False:
+        for _ in ():
             yield {}
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
@@ -213,7 +215,8 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
     async def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        if False:
+        del ids, limit
+        for _ in ():
             yield {}
 
     await _collect(
@@ -225,7 +228,7 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
     )
 
     request = captured_requests[0]
-    assert orchestrator.fallback_enabled is False
+    assert not orchestrator.fallback_enabled
     assert request.resolve_fallback_handler() is None
     assert orchestrator._decorator.config.supported_filter_field == "doi"
     assert orchestrator._decorator.config.primary_lookup_method == "doi"

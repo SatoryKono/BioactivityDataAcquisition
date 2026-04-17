@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 from urllib.parse import parse_qsl, urlparse
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 VCR_ROOT = ROOT / "tests" / "fixtures" / "vcr"
 
 QUERY_KEYS = {"api_key", "apikey", "token", "key", "access_token", "refresh_token"}

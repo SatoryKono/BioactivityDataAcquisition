@@ -65,7 +65,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def _project_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return Path(__file__).resolve().parents[3]
 
 
 def _discover_modules() -> tuple[dict[str, list[ModuleInfo]], dict[str, ModuleInfo]]:

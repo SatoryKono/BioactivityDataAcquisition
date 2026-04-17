@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# Compatibility facade for the canonical Vibe launcher.
+# Compatibility wrapper for the canonical Vibe launcher.
 
 param(
     [Parameter(ValueFromRemainingArguments = $true)]

@@ -5,6 +5,7 @@ Implements StoragePort interface without filesystem I/O.
 
 from __future__ import annotations
 
+import asyncio
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -63,6 +64,7 @@ class InMemoryStorage:
         Returns:
             Path: Relative path to the written file.
         """
+        await asyncio.sleep(0)
         key = f"v1/{provider}/{entity}/{date.strftime('%Y-%m-%d')}/{batch_id}.jsonl.zst"
         record_list = list(records)
         self.bronze[key].extend(record_list)
@@ -111,6 +113,7 @@ class InMemoryStorage:
             source_batch_id,
             ingestion_ts,
         )
+        await asyncio.sleep(0)
         if mode == "merge":
             # Simple merge: replace by primary keys
             pk_set = set(primary_keys)
@@ -154,6 +157,7 @@ class InMemoryStorage:
     ) -> None:
         """Write aggregated records to the Gold layer."""
         del schema, primary_keys
+        await asyncio.sleep(0)
         if mode == "overwrite":
             self.gold[table_name] = list(records)
         elif mode == "append":
@@ -173,6 +177,7 @@ class InMemoryStorage:
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Silver layer data for a specific table."""
+        await asyncio.sleep(0)
         if table_name in self.silver:
             count = len(self.silver[table_name])
             if not dry_run:
@@ -182,6 +187,7 @@ class InMemoryStorage:
 
     async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
         """Clear Gold layer data for a specific table."""
+        await asyncio.sleep(0)
         if table_name in self.gold:
             count = len(self.gold[table_name])
             if not dry_run:
@@ -192,11 +198,13 @@ class InMemoryStorage:
     async def clear_csv(self, table_name: str | None = None) -> int:
         """Clear CSV export files (no-op for in-memory)."""
         del table_name
+        await asyncio.sleep(0)
         return 0
 
     async def clear_delta(self, table_name: str | None = None) -> int:
         """Clear Delta tables (no-op for in-memory)."""
         del table_name
+        await asyncio.sleep(0)
         return 0
 
     async def vacuum(
@@ -209,6 +217,7 @@ class InMemoryStorage:
 
         Returns simulated file count based on table content.
         """
+        await asyncio.sleep(0)
         # In-memory storage doesn't have old files, return 0
         self.operations.append(
             {
@@ -230,6 +239,7 @@ class InMemoryStorage:
 
         Returns count of records as simulated file count.
         """
+        await asyncio.sleep(0)
         file_count = 0
 
         # Count Silver records as "files"
@@ -285,7 +295,7 @@ class InMemoryStorage:
 
     async def aclose(self) -> None:
         """Close storage connection (no-op for in-memory)."""
-        return
+        await asyncio.sleep(0)
 
     def clear(self) -> None:
         """Clear all data (test utility)."""

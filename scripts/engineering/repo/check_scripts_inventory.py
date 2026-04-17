@@ -452,11 +452,6 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
         "scripts/ai/data-engineer.sh",
         "scripts/ai/literature-researcher.sh",
     }
-    legacy_archive_scripts = {
-        "scripts/archive/migrations/migrate_openalex_citation_count.py",
-        "scripts/archive/migrations/migrate_pmid_to_string.py",
-        "scripts/archive/migrations/rename_structure_fields.py",
-    }
     legacy_named_scripts = {
         "scripts/engineering/dev/dev_setup.sh",
         "scripts/engineering/diagnostics/_tmp_inspect_vcr.py",
@@ -482,7 +477,7 @@ def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
         return "active" if groups & strong_active_groups else "legacy"
     if script_rel in legacy_internal_ai_launchers:
         return "active" if groups & strong_active_groups else "legacy"
-    if script_rel in legacy_archive_scripts or script_rel in legacy_named_scripts:
+    if script_rel in legacy_named_scripts:
         return "active" if groups & strong_active_groups else "legacy"
     if script_rel in legacy_src_tools_wrappers:
         return "active" if groups & strong_active_groups else "legacy"

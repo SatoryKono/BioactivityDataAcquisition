@@ -5,6 +5,7 @@ Implements CheckpointPort interface without filesystem I/O.
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -28,27 +29,32 @@ class InMemoryCheckpoint:
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Save checkpoint to memory."""
+        await asyncio.sleep(0)
         self._checkpoints[pipeline] = (run_id, metadata or {})
 
     async def load(self, pipeline: str) -> tuple[RunID, dict[str, Any]] | None:
         """Load checkpoint from memory."""
+        await asyncio.sleep(0)
         return self._checkpoints.get(pipeline)
 
     async def delete(self, pipeline: str) -> None:
         """Delete checkpoint from memory."""
+        await asyncio.sleep(0)
         self._checkpoints.pop(pipeline, None)
 
     async def list_all(self) -> list[str]:
         """List all pipelines with checkpoints."""
+        await asyncio.sleep(0)
         return sorted(self._checkpoints.keys())
 
     async def exists(self, pipeline: str) -> bool:
         """Check if checkpoint exists."""
+        await asyncio.sleep(0)
         return pipeline in self._checkpoints
 
     async def aclose(self) -> None:
         """Close checkpoint storage (no-op for in-memory)."""
-        return
+        await asyncio.sleep(0)
 
     def clear(self) -> None:
         """Clear all checkpoints (test utility)."""

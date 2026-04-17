@@ -17,7 +17,7 @@ entries:
     artifact_paths:
       - tests/fixtures/vcr
       - reports/quality/vcr-metadata-catalog.json
-      - scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+      - scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
     next_step: >-
       Expand *_meta.yaml coverage from the matrix-declared seeded sidecar slice
       into the managed VCR inventory and ratchet cassette_metadata_required only
@@ -36,7 +36,7 @@ entries:
       - tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain_meta.yaml
     artifact_paths:
       - tests/fixtures/vcr
-      - scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+      - scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
       - .github/workflows/tests.yml
     next_step: >-
       Move stale-age checking from seeded metadata proof to canonical managed
@@ -69,12 +69,12 @@ entries:
     owner: "@bioetl-platform"
     blocking_classification: missing_metadata_backfill
     current_evidence_paths:
-      - scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+      - scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
       - tests/architecture/test_vcr_metadata_seed_registry.py
       - tests/fixtures/vcr/chembl/test_all_chembl_pipelines_chain_meta.yaml
       - tests/architecture/test_test_matrix_coverage.py
     artifact_paths:
-      - scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+      - scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
       - tests/fixtures/vcr
       - .github/workflows/tests.yml
     next_step: >-
@@ -160,7 +160,7 @@ entries:
     artifact_paths:
       - .github/vcr-noext-allowlist.txt
       - tests/fixtures/vcr
-      - scripts/data/check_vcr_filename_policy.py
+      - scripts/engineering/qa/vcr/check_vcr_filename_policy.py
     next_step: >-
       Keep the root VCR guard and filename policy checks active so extensionless
       cassettes cannot regress back into the repository.

@@ -58,10 +58,10 @@ jobs:
                     python-version: "3.11"
 
             -   name: Validate VCR cassette placement
-                run: python scripts/data/check_root_vcr_cassettes.py
+                run: python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py
 
             -   name: Validate VCR filename policy
-                run: python scripts/data/check_vcr_filename_policy.py
+                run: python scripts/engineering/qa/vcr/check_vcr_filename_policy.py
 
             -   name: Validate version consistency
                 run: python scripts/engineering/repo/check_version_consistency.py
