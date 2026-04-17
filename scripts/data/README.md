@@ -19,7 +19,13 @@ python -m scripts.data --help
 python -m scripts.data <command> [args...]
 python -m scripts.ops.data --help
 python -m scripts.engineering.qa.vcr --help
+python -m scripts.engineering.baselines --help
 ```
+
+`scripts.data` is retained for compatibility. Prefer canonical commands from
+`scripts.ops.data`, `scripts.engineering.qa.vcr`, and
+`scripts.engineering.baselines` in new docs, CI snippets, and operator
+runbooks.
 
 ## Commands
 
@@ -56,10 +62,10 @@ python -m scripts.engineering.qa.vcr --help
 For cassette work, the supported lightweight sequence is:
 
 ```bash
-python -m scripts.data check-vcr-placement
-python -m scripts.data check-vcr-naming
+python -m scripts.engineering.qa.vcr check-placement
+python -m scripts.engineering.qa.vcr check-naming
 # run targeted pytest with --vcr-record=new_episodes
-python -m scripts.data check-vcr-secrets
+python -m scripts.engineering.qa.vcr check-secrets
 python -m scripts.engineering.qa report-vcr-metadata --check
 ```
 

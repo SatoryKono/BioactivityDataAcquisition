@@ -144,7 +144,8 @@ bash scripts/engineering/dev/run_mypy.sh
 | `scripts.engineering.qa`          | `uv run python -m scripts.engineering.qa`          | Quality checks: naming, C901, terminology  |
 | `scripts.engineering.ci`          | `uv run python -m scripts.engineering.ci`          | CI pipeline: pytest runner, quality gates  |
 | `scripts.schema`      | `uv run python -m scripts.schema`      | Schema/config validation и генерация       |
-| `scripts.data`        | `uv run python -m scripts.data`        | Data integrity: VCR, checksums, delta      |
+| `scripts.ops.data`    | `uv run python -m scripts.ops.data`    | Data integrity: checksums, delta, data dir |
+| `scripts.engineering.qa.vcr` | `uv run python -m scripts.engineering.qa.vcr` | VCR governance: placement, naming, secrets |
 | `scripts.docs`        | `uv run python -m scripts.docs`        | Documentation: links, drift, docstrings    |
 | `scripts.diagrams`    | `uv run python -m scripts.diagrams`    | Diagram lint, check, fix, render           |
 | `scripts.engineering.repo`        | `uv run python -m scripts.engineering.repo`        | Repo hygiene: inventory, catalog, versions |
@@ -178,8 +179,8 @@ uv run python -m scripts.diagrams check-quality-gates
 uv run python -m scripts.diagrams render-pdf
 
 # Data integrity
-uv run python -m scripts.data check-vcr-placement
-uv run python -m scripts.data checksums --generate
+uv run python -m scripts.engineering.qa.vcr check-placement
+uv run python -m scripts.ops.data checksums --generate
 
 # CI / Quality gates
 uv run python -m scripts.engineering.ci quality-gate

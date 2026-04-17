@@ -3071,7 +3071,21 @@ def _select_alert_dashboards(
         fallback_groups.get(group_name) if isinstance(fallback_groups, dict) else None
     )
     metric_dashboards = _metric_dashboard_targets(expr, dashboard_metrics)
+    return _merged_alert_dashboard_targets(
+        explicit_dashboards=explicit_dashboards,
+        metric_dashboards=metric_dashboards,
+        group_dashboards=group_dashboards,
+        common_dashboards=common_dashboards,
+    )
 
+
+def _merged_alert_dashboard_targets(
+    *,
+    explicit_dashboards: set[NodeKey],
+    metric_dashboards: set[NodeKey],
+    group_dashboards: set[NodeKey],
+    common_dashboards: set[NodeKey],
+) -> list[NodeKey]:
     selected = set(explicit_dashboards)
     selected.update(metric_dashboards)
     if not metric_dashboards:
@@ -3572,7 +3586,7 @@ def _add_provider_surfaces(
 ) -> dict[str, NodeKey]:
     providers_root = root / "configs" / "providers"
     provider_nodes: dict[str, NodeKey] = {}
-    for provider_path in sorted(providers_root.glob(YAML_FILE_GLOB)):
+    for provider_path in _provider_config_paths(providers_root):
         _add_provider_surface(
             snapshot,
             root,
@@ -3582,6 +3596,10 @@ def _add_provider_surfaces(
             provider_nodes=provider_nodes,
         )
     return provider_nodes
+
+
+def _provider_config_paths(providers_root: Path) -> tuple[Path, ...]:
+    return tuple(sorted(providers_root.glob(YAML_FILE_GLOB)))
 
 
 def _add_provider_surface(
@@ -3644,7 +3662,7 @@ def _add_entity_config_surfaces(
 ) -> dict[str, NodeKey]:
     entities_root = root / "configs" / "entities"
     entity_nodes: dict[str, NodeKey] = {}
-    for entity_path in sorted(entities_root.rglob(YAML_FILE_GLOB)):
+    for entity_path in _entity_config_paths(entities_root):
         _add_entity_config_surface(
             snapshot,
             root,
@@ -3654,6 +3672,10 @@ def _add_entity_config_surfaces(
             entity_nodes=entity_nodes,
         )
     return entity_nodes
+
+
+def _entity_config_paths(entities_root: Path) -> tuple[Path, ...]:
+    return tuple(sorted(entities_root.rglob(YAML_FILE_GLOB)))
 
 
 def _add_entity_config_surface(
@@ -4281,8 +4303,12 @@ def _link_test_artifact_scope(snapshot: GraphSnapshot, artifact: NodeKey, parts:
 
 
 def _add_policy_surfaces(snapshot: GraphSnapshot, _root: Path, project: NodeKey, today: str) -> None:
-    for policy_payload in CURATED_POLICY_SURFACES:
+    for policy_payload in _curated_policy_surfaces():
         _add_policy_surface_entry(snapshot, project, today, policy_payload)
+
+
+def _curated_policy_surfaces() -> tuple[dict[str, object], ...]:
+    return tuple(CURATED_POLICY_SURFACES)
 
 
 def _add_policy_surface_entry(
@@ -4362,6 +4388,31 @@ def _add_impact_analysis_surfaces(snapshot: GraphSnapshot, root: Path, project: 
         today,
         memory_mapping,
     )
+    _run_impact_analysis_passes(
+        snapshot,
+        root,
+        project,
+        today,
+        memory_mapping=memory_mapping,
+        port_nodes=port_nodes,
+        adapter_nodes=adapter_nodes,
+        contract_nodes=contract_nodes,
+        pipeline_nodes=pipeline_nodes,
+    )
+
+
+def _run_impact_analysis_passes(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    *,
+    memory_mapping: dict[str, object],
+    port_nodes: set[NodeKey],
+    adapter_nodes: dict[str, NodeKey],
+    contract_nodes: dict[str, NodeKey],
+    pipeline_nodes: dict[str, NodeKey],
+) -> None:
     _add_pipeline_normalization_edges(snapshot, pipeline_nodes, memory_mapping)
     _add_pipeline_normalization_evidence(snapshot, pipeline_nodes)
     _add_pipeline_test_edges(snapshot, root, pipeline_nodes, memory_mapping)
@@ -4428,10 +4479,7 @@ def _add_repo_zone_file_structure(
     snapshot.add_relation(project, "HAS_REPO_ZONE", zone, provenance="file_structure")
 
     for relative_root in relative_roots:
-        zone_root = root / relative_root
-        if not zone_root.is_dir():
-            continue
-        _walk_repo_zone_file_structure(
+        _walk_repo_zone_root(
             snapshot,
             root,
             project,
@@ -4439,9 +4487,35 @@ def _add_repo_zone_file_structure(
             today,
             zone_name=zone_name,
             relative_root=relative_root,
-            zone_root=zone_root,
             config=config,
         )
+
+
+def _walk_repo_zone_root(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    zone: NodeKey,
+    today: str,
+    *,
+    zone_name: str,
+    relative_root: str,
+    config: dict[str, object],
+) -> None:
+    zone_root = root / relative_root
+    if not zone_root.is_dir():
+        return
+    _walk_repo_zone_file_structure(
+        snapshot,
+        root,
+        project,
+        zone,
+        today,
+        zone_name=zone_name,
+        relative_root=relative_root,
+        zone_root=zone_root,
+        config=config,
+    )
 
 
 def _walk_repo_zone_file_structure(
@@ -4545,26 +4619,51 @@ def _add_repo_zone_directory_files(
     config: dict[str, object],
 ) -> None:
     for filename in sorted(filenames):
-        file_path = current_path / filename
-        relative_file = _rel_path(root, file_path)
-        if _is_excluded_file_structure_path(relative_file, config):
-            continue
-        file_surface = _add_repo_zone_file_surface(
+        _add_repo_zone_directory_file(
             snapshot,
-            directory,
-            relative_file,
-            today,
-            zone_name=zone_name,
-            filename=filename,
-        )
-        _add_repo_zone_doc_artifact(
-            snapshot,
+            root,
             project,
-            file_surface,
-            relative_file,
+            directory,
+            current_path,
+            filename,
             today,
             zone_name=zone_name,
+            config=config,
         )
+
+
+def _add_repo_zone_directory_file(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    directory: NodeKey,
+    current_path: Path,
+    filename: str,
+    today: str,
+    *,
+    zone_name: str,
+    config: dict[str, object],
+) -> None:
+    file_path = current_path / filename
+    relative_file = _rel_path(root, file_path)
+    if _is_excluded_file_structure_path(relative_file, config):
+        return
+    file_surface = _add_repo_zone_file_surface(
+        snapshot,
+        directory,
+        relative_file,
+        today,
+        zone_name=zone_name,
+        filename=filename,
+    )
+    _add_repo_zone_doc_artifact(
+        snapshot,
+        project,
+        file_surface,
+        relative_file,
+        today,
+        zone_name=zone_name,
+    )
 
 
 def _add_repo_zone_file_surface(
@@ -4628,35 +4727,56 @@ def _link_source_backed_file_structure(
 ) -> None:
     source_backed_labels = _source_backed_file_structure_labels()
     for node in tuple(snapshot.nodes.values()):
-        if node.key.label not in source_backed_labels:
-            continue
-        source_path_value = node.properties.get("source_path")
-        if not isinstance(source_path_value, str) or not source_path_value:
-            continue
-        if _is_excluded_file_structure_path(source_path_value, config):
-            continue
-
-        source_path = root / source_path_value
-        if source_path.is_dir():
-            _link_source_backed_directory_structure(
-                snapshot,
-                node.key,
-                source_path_value=source_path_value,
-                config=config,
-            )
-            continue
-        if not source_path.is_file():
-            continue
-        _link_source_backed_file_node(
+        _link_source_backed_node_structure(
             snapshot,
             root,
-            node.key,
-            source_path,
-            source_path_value=source_path_value,
+            node,
+            source_backed_labels=source_backed_labels,
             today=today,
             zone_roots=zone_roots,
             config=config,
         )
+
+
+def _link_source_backed_node_structure(
+    snapshot: GraphSnapshot,
+    root: Path,
+    node: GraphNode,
+    *,
+    source_backed_labels: set[str],
+    today: str,
+    zone_roots: dict[str, tuple[str, ...]],
+    config: dict[str, object],
+) -> None:
+    if node.key.label not in source_backed_labels:
+        return
+    source_path_value = node.properties.get("source_path")
+    if not isinstance(source_path_value, str) or not source_path_value:
+        return
+    if _is_excluded_file_structure_path(source_path_value, config):
+        return
+
+    source_path = root / source_path_value
+    if source_path.is_dir():
+        _link_source_backed_directory_structure(
+            snapshot,
+            node.key,
+            source_path_value=source_path_value,
+            config=config,
+        )
+        return
+    if not source_path.is_file():
+        return
+    _link_source_backed_file_node(
+        snapshot,
+        root,
+        node.key,
+        source_path,
+        source_path_value=source_path_value,
+        today=today,
+        zone_roots=zone_roots,
+        config=config,
+    )
 
 
 def _source_backed_file_structure_labels() -> set[str]:
@@ -4750,26 +4870,45 @@ def _link_relation_backed_file_structure(
     relation_backed_types = _relation_backed_file_structure_types()
     file_backed_labels = _relation_backed_file_structure_labels()
     for relation in tuple(snapshot.relations.values()):
-        if relation.relation_type not in relation_backed_types or relation.target.label not in file_backed_labels:
-            continue
-        target_node = snapshot.nodes.get(relation.target)
-        if target_node is None:
-            continue
-        source_path_value = target_node.properties.get("source_path")
-        if not isinstance(source_path_value, str) or not source_path_value:
-            continue
-        if _is_excluded_file_structure_path(source_path_value, config):
-            continue
-
-        parent_relative = _relation_backed_parent_relative(root, source_path_value)
-        if parent_relative is None:
-            continue
-        _link_relation_backed_directory_housing(
+        _link_relation_backed_structure_for_relation(
             snapshot,
-            relation.source,
-            parent_relative=parent_relative,
+            root,
+            relation,
+            relation_backed_types=relation_backed_types,
+            file_backed_labels=file_backed_labels,
             config=config,
         )
+
+
+def _link_relation_backed_structure_for_relation(
+    snapshot: GraphSnapshot,
+    root: Path,
+    relation: GraphRelation,
+    *,
+    relation_backed_types: set[str],
+    file_backed_labels: set[str],
+    config: dict[str, object],
+) -> None:
+    if relation.relation_type not in relation_backed_types or relation.target.label not in file_backed_labels:
+        return
+    target_node = snapshot.nodes.get(relation.target)
+    if target_node is None:
+        return
+    source_path_value = target_node.properties.get("source_path")
+    if not isinstance(source_path_value, str) or not source_path_value:
+        return
+    if _is_excluded_file_structure_path(source_path_value, config):
+        return
+
+    parent_relative = _relation_backed_parent_relative(root, source_path_value)
+    if parent_relative is None:
+        return
+    _link_relation_backed_directory_housing(
+        snapshot,
+        relation.source,
+        parent_relative=parent_relative,
+        config=config,
+    )
 
 
 def _relation_backed_file_structure_types() -> set[str]:
@@ -4838,7 +4977,7 @@ def _add_file_structure_zones(
     config: dict[str, object],
 ) -> None:
     for zone_name, relative_roots in zone_roots.items():
-        _add_repo_zone_file_structure(
+        _add_file_structure_zone(
             snapshot,
             root,
             project,
@@ -4847,6 +4986,26 @@ def _add_file_structure_zones(
             relative_roots,
             config,
         )
+
+
+def _add_file_structure_zone(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    zone_name: str,
+    relative_roots: tuple[str, ...],
+    config: dict[str, object],
+) -> None:
+    _add_repo_zone_file_structure(
+        snapshot,
+        root,
+        project,
+        today,
+        zone_name,
+        relative_roots,
+        config,
+    )
 
 
 def _merge_storage_layer_config(
@@ -4968,31 +5127,45 @@ def _field_quality_index(payload: dict[str, object]) -> dict[str, dict[str, Json
     field_validations = quality_payload.get("entity_field_validations")
     if isinstance(field_validations, list):
         for item in field_validations:
-            if not isinstance(item, dict):
-                continue
-            field_name = _optional_text(item.get("field"))
-            if field_name is None:
-                continue
-            entry = index.setdefault(field_name, {})
-            validation_types = set(_normalized_text_list(entry.get("validation_types")) or [])
-            validation_type = _optional_text(item.get("type"))
-            if validation_type is not None:
-                validation_types.add(validation_type)
-            entry["validation_types"] = sorted(validation_types) if validation_types else None
-            if validation_type == "required" and item.get("nullable") is False:
-                entry["required_in_quality"] = True
+            _merge_field_validation_item(index, item)
     key_nullability = quality_payload.get("key_nullability")
     if isinstance(key_nullability, list):
         for item in key_nullability:
-            if not isinstance(item, dict):
-                continue
-            field_name = _optional_text(item.get("field"))
-            if field_name is None:
-                continue
-            if item.get("nullable") is False:
-                entry = index.setdefault(field_name, {})
-                entry["required_in_quality"] = True
+            _merge_key_nullability_item(index, item)
     return index
+
+
+def _merge_field_validation_item(
+    index: dict[str, dict[str, JsonValue]],
+    item: object,
+) -> None:
+    if not isinstance(item, dict):
+        return
+    field_name = _optional_text(item.get("field"))
+    if field_name is None:
+        return
+    entry = index.setdefault(field_name, {})
+    validation_types = set(_normalized_text_list(entry.get("validation_types")) or [])
+    validation_type = _optional_text(item.get("type"))
+    if validation_type is not None:
+        validation_types.add(validation_type)
+    entry["validation_types"] = sorted(validation_types) if validation_types else None
+    if validation_type == "required" and item.get("nullable") is False:
+        entry["required_in_quality"] = True
+
+
+def _merge_key_nullability_item(
+    index: dict[str, dict[str, JsonValue]],
+    item: object,
+) -> None:
+    if not isinstance(item, dict):
+        return
+    field_name = _optional_text(item.get("field"))
+    if field_name is None:
+        return
+    if item.get("nullable") is False:
+        entry = index.setdefault(field_name, {})
+        entry["required_in_quality"] = True
 
 
 def _add_schema_field_surface(
@@ -5202,49 +5375,102 @@ def _add_entity_layer_field_nodes(
     scope = _entity_pipeline_scope(context.provider_name, context.entity_name, context.pipeline_name)
     drift_classification = "staging_projection" if layer_context.layer_name == "bronze" else None
     for field_group, field_name in _filtered_group_fields(layer_context.payload, layer_name=layer_context.layer_name):
-        field_quality = layer_context.quality_index.get(field_name, {})
-        field_node = _add_schema_field_surface(
+        _add_entity_regular_field_node(
             snapshot,
             project,
-            layer_context.surface,
-            field_name=field_name,
+            context,
+            layer_context,
+            scope=scope,
             field_group=field_group,
-            today=context.today,
-            spec=SchemaFieldSpec(
-                contract_ref=context.contract_ref,
-                scope=scope,
-                required_in_quality=(
-                    bool(field_quality.get("required_in_quality"))
-                    if field_quality.get("required_in_quality") is not None
-                    else None
-                ),
-                validation_types=_normalized_text_list(field_quality.get("validation_types")),
-                drift_classification=drift_classification,
-            ),
+            field_name=field_name,
+            drift_classification=drift_classification,
+            layer_field_nodes=layer_field_nodes,
         )
-        layer_field_nodes[field_name] = field_node
-        if context.config_artifact in snapshot.nodes:
-            snapshot.add_relation(field_node, "DEFINED_BY", context.config_artifact, provenance="schema_fields")
     for metadata_field in _scd_config_columns(layer_context.layer_config).values():
-        if metadata_field is None or metadata_field in layer_field_nodes:
-            continue
-        field_node = _add_schema_field_surface(
+        _add_entity_metadata_field_node(
             snapshot,
             project,
-            layer_context.surface,
-            field_name=metadata_field,
-            field_group="system",
-            today=context.today,
-            spec=SchemaFieldSpec(
-                contract_ref=context.contract_ref,
-                scope=scope,
-                drift_classification="runtime_metadata",
-            ),
+            context,
+            layer_context,
+            scope=scope,
+            metadata_field=metadata_field,
+            layer_field_nodes=layer_field_nodes,
         )
-        layer_field_nodes[metadata_field] = field_node
-        if context.config_artifact in snapshot.nodes:
-            snapshot.add_relation(field_node, "DEFINED_BY", context.config_artifact, provenance="schema_fields")
     return layer_field_nodes
+
+
+def _add_entity_regular_field_node(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    context: EntityPipelineContext,
+    layer_context: EntityLayerFieldContext,
+    *,
+    scope: EntityScope,
+    field_group: str,
+    field_name: str,
+    drift_classification: str | None,
+    layer_field_nodes: dict[str, NodeKey],
+) -> None:
+    field_quality = layer_context.quality_index.get(field_name, {})
+    field_node = _add_schema_field_surface(
+        snapshot,
+        project,
+        layer_context.surface,
+        field_name=field_name,
+        field_group=field_group,
+        today=context.today,
+        spec=SchemaFieldSpec(
+            contract_ref=context.contract_ref,
+            scope=scope,
+            required_in_quality=(
+                bool(field_quality.get("required_in_quality"))
+                if field_quality.get("required_in_quality") is not None
+                else None
+            ),
+            validation_types=_normalized_text_list(field_quality.get("validation_types")),
+            drift_classification=drift_classification,
+        ),
+    )
+    layer_field_nodes[field_name] = field_node
+    _link_schema_field_definition(snapshot, field_node, context.config_artifact)
+
+
+def _add_entity_metadata_field_node(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    context: EntityPipelineContext,
+    layer_context: EntityLayerFieldContext,
+    *,
+    scope: EntityScope,
+    metadata_field: str | None,
+    layer_field_nodes: dict[str, NodeKey],
+) -> None:
+    if metadata_field is None or metadata_field in layer_field_nodes:
+        return
+    field_node = _add_schema_field_surface(
+        snapshot,
+        project,
+        layer_context.surface,
+        field_name=metadata_field,
+        field_group="system",
+        today=context.today,
+        spec=SchemaFieldSpec(
+            contract_ref=context.contract_ref,
+            scope=scope,
+            drift_classification="runtime_metadata",
+        ),
+    )
+    layer_field_nodes[metadata_field] = field_node
+    _link_schema_field_definition(snapshot, field_node, context.config_artifact)
+
+
+def _link_schema_field_definition(
+    snapshot: GraphSnapshot,
+    field_node: NodeKey,
+    config_artifact: NodeKey,
+) -> None:
+    if config_artifact in snapshot.nodes:
+        snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
 
 
 def _add_entity_storage_layers(
@@ -5260,57 +5486,94 @@ def _add_entity_storage_layers(
     field_nodes_by_layer: dict[str, dict[str, NodeKey]] = {}
     scope = _entity_pipeline_scope(context.provider_name, context.entity_name, context.pipeline_name)
     for layer_name in ("bronze", "silver", "gold"):
-        layer_config = _merge_storage_layer_config(base_sink, pipeline_sink, layer_name)
-        enabled = bool(layer_config.get("enabled", True))
-        if layer_name == "gold" and not enabled:
-            continue
-        storage_ref = f"{layer_name}/{context.provider_name}/{context.entity_name}"
-        surface = _add_storage_surface(
-            snapshot,
-            project,
-            StorageSurfaceSpec(
-                ref=storage_ref,
-                summary=f"{layer_name.title()} storage surface for `{context.pipeline_name}`.",
-                layer=layer_name,
-                today=context.today,
-                storage_kind="entity_layer_output",
-                scope=scope,
-                format_name=str(layer_config.get("format")) if layer_config.get("format") is not None else None,
-                mode=str(layer_config.get("mode")) if layer_config.get("mode") is not None else None,
-                enabled=enabled,
-                retention_days=context.retention_days,
-                config_version=context.config_version,
-                quality_version=context.quality_version,
-                partition_by=_normalized_text_list(layer_config.get("partition_by")),
-                sort_by=_normalized_text_list(layer_config.get("sort_by")),
-                on_schema_mismatch=_optional_text(layer_config.get("on_schema_mismatch")),
-                versioning_mode=_optional_text(layer_config.get("mode")),
-                semantic_properties={
-                    **_scd_config_columns(layer_config),
-                    **_storage_schema_properties(payload, layer_name=layer_name),
-                },
-            ),
-        )
-        layer_nodes[layer_name] = surface
-        if context.pipeline_key in snapshot.nodes:
-            snapshot.add_relation(context.pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
-        if context.entity_key in snapshot.nodes:
-            snapshot.add_relation(context.entity_key, "WRITES_TO", surface, provenance="storage_surfaces")
-        if context.config_artifact in snapshot.nodes:
-            snapshot.add_relation(surface, "DEFINED_BY", context.config_artifact, provenance="storage_surfaces")
-        field_nodes_by_layer[layer_name] = _add_entity_layer_field_nodes(
+        _add_entity_storage_layer(
             snapshot,
             project,
             context,
-            EntityLayerFieldContext(
-                payload=payload,
-                surface=surface,
-                layer_name=layer_name,
-                quality_index=quality_index,
-                layer_config=layer_config,
-            ),
+            payload,
+            base_sink,
+            pipeline_sink,
+            quality_index,
+            scope=scope,
+            layer_name=layer_name,
+            layer_nodes=layer_nodes,
+            field_nodes_by_layer=field_nodes_by_layer,
         )
     return layer_nodes, field_nodes_by_layer
+
+
+def _add_entity_storage_layer(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    context: EntityPipelineContext,
+    payload: dict[str, object],
+    base_sink: dict[str, object],
+    pipeline_sink: dict[str, object],
+    quality_index: dict[str, dict[str, JsonValue]],
+    *,
+    scope: EntityScope,
+    layer_name: str,
+    layer_nodes: dict[str, NodeKey],
+    field_nodes_by_layer: dict[str, dict[str, NodeKey]],
+) -> None:
+    layer_config = _merge_storage_layer_config(base_sink, pipeline_sink, layer_name)
+    enabled = bool(layer_config.get("enabled", True))
+    if layer_name == "gold" and not enabled:
+        return
+    storage_ref = f"{layer_name}/{context.provider_name}/{context.entity_name}"
+    surface = _add_storage_surface(
+        snapshot,
+        project,
+        StorageSurfaceSpec(
+            ref=storage_ref,
+            summary=f"{layer_name.title()} storage surface for `{context.pipeline_name}`.",
+            layer=layer_name,
+            today=context.today,
+            storage_kind="entity_layer_output",
+            scope=scope,
+            format_name=str(layer_config.get("format")) if layer_config.get("format") is not None else None,
+            mode=str(layer_config.get("mode")) if layer_config.get("mode") is not None else None,
+            enabled=enabled,
+            retention_days=context.retention_days,
+            config_version=context.config_version,
+            quality_version=context.quality_version,
+            partition_by=_normalized_text_list(layer_config.get("partition_by")),
+            sort_by=_normalized_text_list(layer_config.get("sort_by")),
+            on_schema_mismatch=_optional_text(layer_config.get("on_schema_mismatch")),
+            versioning_mode=_optional_text(layer_config.get("mode")),
+            semantic_properties={
+                **_scd_config_columns(layer_config),
+                **_storage_schema_properties(payload, layer_name=layer_name),
+            },
+        ),
+    )
+    layer_nodes[layer_name] = surface
+    _link_entity_storage_layer_backing(snapshot, context, surface)
+    field_nodes_by_layer[layer_name] = _add_entity_layer_field_nodes(
+        snapshot,
+        project,
+        context,
+        EntityLayerFieldContext(
+            payload=payload,
+            surface=surface,
+            layer_name=layer_name,
+            quality_index=quality_index,
+            layer_config=layer_config,
+        ),
+    )
+
+
+def _link_entity_storage_layer_backing(
+    snapshot: GraphSnapshot,
+    context: EntityPipelineContext,
+    surface: NodeKey,
+) -> None:
+    if context.pipeline_key in snapshot.nodes:
+        snapshot.add_relation(context.pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
+    if context.entity_key in snapshot.nodes:
+        snapshot.add_relation(context.entity_key, "WRITES_TO", surface, provenance="storage_surfaces")
+    if context.config_artifact in snapshot.nodes:
+        snapshot.add_relation(surface, "DEFINED_BY", context.config_artifact, provenance="storage_surfaces")
 
 
 def _link_entity_storage_promotions(
@@ -5321,24 +5584,36 @@ def _link_entity_storage_promotions(
     bronze_fields = field_nodes_by_layer.get("bronze", {})
     silver_fields = field_nodes_by_layer.get("silver", {})
     gold_fields = field_nodes_by_layer.get("gold", {})
-    if "bronze" in layer_nodes and "silver" in layer_nodes:
+    for source_name, target_name, source_fields, target_fields in _entity_storage_promotion_pairs(
+        layer_nodes,
+        bronze_fields=bronze_fields,
+        silver_fields=silver_fields,
+        gold_fields=gold_fields,
+    ):
         _link_storage_layer_promotion(
             snapshot,
-            layer_nodes["bronze"],
-            layer_nodes["silver"],
-            bronze_fields,
-            silver_fields,
+            layer_nodes[source_name],
+            layer_nodes[target_name],
+            source_fields,
+            target_fields,
         )
-    if "silver" not in layer_nodes or "gold" not in layer_nodes:
-        return
-    _link_storage_layer_promotion(
-        snapshot,
-        layer_nodes["silver"],
-        layer_nodes["gold"],
-        silver_fields,
-        gold_fields,
-    )
-    _classify_projected_storage_fields(snapshot, silver_fields, gold_fields)
+    if "silver" in layer_nodes and "gold" in layer_nodes:
+        _classify_projected_storage_fields(snapshot, silver_fields, gold_fields)
+
+
+def _entity_storage_promotion_pairs(
+    layer_nodes: dict[str, NodeKey],
+    *,
+    bronze_fields: dict[str, NodeKey],
+    silver_fields: dict[str, NodeKey],
+    gold_fields: dict[str, NodeKey],
+) -> tuple[tuple[str, str, dict[str, NodeKey], dict[str, NodeKey]], ...]:
+    pairs: list[tuple[str, str, dict[str, NodeKey], dict[str, NodeKey]]] = []
+    if "bronze" in layer_nodes and "silver" in layer_nodes:
+        pairs.append(("bronze", "silver", bronze_fields, silver_fields))
+    if "silver" in layer_nodes and "gold" in layer_nodes:
+        pairs.append(("silver", "gold", silver_fields, gold_fields))
+    return tuple(pairs)
 
 
 def _link_storage_layer_promotion(
@@ -8420,14 +8695,26 @@ def _link_contract_source_dependencies(
     context: ContractEntryContext,
     source_prefixes: tuple[str, ...],
 ) -> None:
-    source_path = context.raw_entry.get("source_path")
-    if not isinstance(source_path, str):
-        return
-    resolved = _resolve_repo_path(context.root, context.registry_path, source_path)
+    resolved = _contract_source_resolved_path(context)
     if resolved is None:
         return
     _link_contract_source_module(snapshot, context, resolved)
     _link_contract_imported_modules(snapshot, context, resolved, source_prefixes)
+    _update_contract_schema_classes(snapshot, context, resolved)
+
+
+def _contract_source_resolved_path(context: ContractEntryContext) -> Path | None:
+    source_path = context.raw_entry.get("source_path")
+    if not isinstance(source_path, str):
+        return None
+    return _resolve_repo_path(context.root, context.registry_path, source_path)
+
+
+def _update_contract_schema_classes(
+    snapshot: GraphSnapshot,
+    context: ContractEntryContext,
+    resolved: Path,
+) -> None:
     schema_classes = _dataframe_model_class_names(resolved)
     if schema_classes:
         snapshot.add_node("contract_surface", context.contract_ref, schema_classes=schema_classes)
@@ -8456,57 +8743,88 @@ def _link_contract_imported_modules(
 
 
 def _add_contract_policy_config(snapshot: GraphSnapshot, context: ContractEntryContext) -> None:
-    contract_config_path = (context.root / "configs" / "contracts" / context.contract_ref.replace(".", "/")).with_suffix(
-        ".yaml"
-    )
+    contract_config_path = _contract_policy_config_path(context)
     if not contract_config_path.is_file():
         return
     contract_config = _read_yaml(contract_config_path)
-    snapshot.add_node(
-        "contract_surface",
-        context.contract_ref,
-        contract_config_version=contract_config.get("contract_version"),
-        contract_config_ref=contract_config.get("contract_ref"),
-        soft_fail_threshold=contract_config.get("soft_fail_threshold"),
-        hard_fail_threshold=contract_config.get("hard_fail_threshold"),
-        strict_validation=contract_config.get("strict_validation"),
-        invalid_record_policy=contract_config.get("invalid_record_policy"),
-        default_disposition_policy=contract_config.get("default_disposition_policy"),
+    snapshot.add_node("contract_surface", context.contract_ref, **_contract_policy_fields(contract_config))
+    artifact = _add_contract_policy_artifact(
+        snapshot,
+        context=context,
+        contract_config_path=contract_config_path,
     )
-    artifact = snapshot.add_node(
+    snapshot.add_relation(context.contract, "BACKED_BY", artifact, provenance="impact_contracts")
+
+
+def _contract_policy_config_path(context: ContractEntryContext) -> Path:
+    return (context.root / "configs" / "contracts" / context.contract_ref.replace(".", "/")).with_suffix(".yaml")
+
+
+def _contract_policy_fields(contract_config: dict[str, object]) -> dict[str, object]:
+    return {
+        "contract_config_version": contract_config.get("contract_version"),
+        "contract_config_ref": contract_config.get("contract_ref"),
+        "soft_fail_threshold": contract_config.get("soft_fail_threshold"),
+        "hard_fail_threshold": contract_config.get("hard_fail_threshold"),
+        "strict_validation": contract_config.get("strict_validation"),
+        "invalid_record_policy": contract_config.get("invalid_record_policy"),
+        "default_disposition_policy": contract_config.get("default_disposition_policy"),
+    }
+
+
+def _add_contract_policy_artifact(
+    snapshot: GraphSnapshot,
+    *,
+    context: ContractEntryContext,
+    contract_config_path: Path,
+) -> NodeKey:
+    relative_path = _rel_path(context.root, contract_config_path)
+    return snapshot.add_node(
         "config_artifact",
-        _rel_path(context.root, contract_config_path),
+        relative_path,
         summary=f"Contract policy config for `{context.contract_ref}`.",
-        source_path=_rel_path(context.root, contract_config_path),
+        source_path=relative_path,
         source_kind="contract_config",
         last_verified=context.today,
         ingest_wave="repo_sync_v1",
         confidence="high",
     )
-    snapshot.add_relation(context.contract, "BACKED_BY", artifact, provenance="impact_contracts")
 
 
 def _add_published_contract_artifacts(snapshot: GraphSnapshot, context: ContractEntryContext) -> None:
+    for published_path in _published_contract_artifact_paths(context):
+        artifact = _published_contract_artifact_key(snapshot, context, published_path)
+        if artifact is None:
+            continue
+        snapshot.add_relation(context.contract, "BACKED_BY", artifact, provenance="impact_contracts")
+
+
+def _published_contract_artifact_paths(context: ContractEntryContext) -> tuple[str, ...]:
     published_artifacts = context.raw_entry.get("published_artifacts")
     if not isinstance(published_artifacts, list):
-        return
-    for published_path in published_artifacts:
-        if not isinstance(published_path, str):
-            continue
-        resolved = _resolve_repo_path(context.root, context.registry_path, published_path)
-        if resolved is None:
-            continue
-        artifact = snapshot.add_node(
-            "doc_artifact",
-            _rel_path(context.root, resolved),
-            summary=f"Published contract artifact for `{context.contract_ref}`.",
-            source_path=_rel_path(context.root, resolved),
-            source_kind="published_contract",
-            last_verified=context.today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(context.contract, "BACKED_BY", artifact, provenance="impact_contracts")
+        return ()
+    return tuple(path for path in published_artifacts if isinstance(path, str))
+
+
+def _published_contract_artifact_key(
+    snapshot: GraphSnapshot,
+    context: ContractEntryContext,
+    published_path: str,
+) -> NodeKey | None:
+    resolved = _resolve_repo_path(context.root, context.registry_path, published_path)
+    if resolved is None:
+        return None
+    relative_path = _rel_path(context.root, resolved)
+    return snapshot.add_node(
+        "doc_artifact",
+        relative_path,
+        summary=f"Published contract artifact for `{context.contract_ref}`.",
+        source_path=relative_path,
+        source_kind="published_contract",
+        last_verified=context.today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
 
 
 def _link_contract_module_dependencies(
@@ -8516,12 +8834,25 @@ def _link_contract_module_dependencies(
     provenance: str,
 ) -> None:
     for module_path in module_paths:
-        resolved_module = context.root / module_path
-        if not resolved_module.is_file():
-            continue
-        module_key = NodeKey("module_surface", _rel_path(context.root, resolved_module))
-        if module_key in snapshot.nodes:
-            snapshot.add_relation(context.contract, "DEPENDS_ON", module_key, provenance=provenance)
+        _link_contract_dependency_module(snapshot, context, module_path, provenance)
+
+
+def _contract_dependency_module_key(root: Path, module_path: str) -> NodeKey | None:
+    resolved_module = root / module_path
+    if not resolved_module.is_file():
+        return None
+    return NodeKey("module_surface", _rel_path(root, resolved_module))
+
+
+def _link_contract_dependency_module(
+    snapshot: GraphSnapshot,
+    context: ContractEntryContext,
+    module_path: str,
+    provenance: str,
+) -> None:
+    module_key = _contract_dependency_module_key(context.root, module_path)
+    if module_key is not None and module_key in snapshot.nodes:
+        snapshot.add_relation(context.contract, "DEPENDS_ON", module_key, provenance=provenance)
 
 
 def _link_contract_doc_dependencies(
@@ -8538,17 +8869,34 @@ def _link_contract_doc_dependencies(
         resolved_doc = _contract_dependency_doc_path(context.root, doc_path, anchor_fields)
         if resolved_doc is None:
             continue
-        artifact = snapshot.add_node(
-            "doc_artifact",
-            doc_path,
-            summary=summary.format(contract_ref=context.contract_ref),
-            source_path=doc_path,
+        artifact = _add_contract_doc_dependency(
+            snapshot,
+            context=context,
+            doc_path=doc_path,
+            summary=summary,
             source_kind=source_kind,
-            last_verified=context.today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
         )
         snapshot.add_relation(context.contract, "DESCRIBED_IN", artifact, provenance=provenance)
+
+
+def _add_contract_doc_dependency(
+    snapshot: GraphSnapshot,
+    *,
+    context: ContractEntryContext,
+    doc_path: str,
+    summary: str,
+    source_kind: str,
+) -> NodeKey:
+    return snapshot.add_node(
+        "doc_artifact",
+        doc_path,
+        summary=summary.format(contract_ref=context.contract_ref),
+        source_path=doc_path,
+        source_kind=source_kind,
+        last_verified=context.today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
 
 
 def _contract_dependency_doc_path(
@@ -8594,10 +8942,7 @@ def _add_contract_entry_surface(
     )
     snapshot.add_relation(project, "HAS_CONTRACT", contract, provenance="impact_contracts")
     snapshot.add_relation(contract, "BACKED_BY", registry_artifact, provenance="impact_contracts")
-    provider_name = contract_ref.split(".", 1)[0]
-    provider_key = NodeKey("provider_surface", provider_name)
-    if provider_key in snapshot.nodes:
-        snapshot.add_relation(provider_key, "DEFINES", contract, provenance="impact_contracts")
+    _link_contract_provider(snapshot, contract_ref, contract)
     return ContractEntryContext(
         root=root,
         registry_path=registry_path,
@@ -8606,6 +8951,17 @@ def _add_contract_entry_surface(
         contract=contract,
         raw_entry=raw_entry,
     )
+
+
+def _link_contract_provider(
+    snapshot: GraphSnapshot,
+    contract_ref: str,
+    contract: NodeKey,
+) -> None:
+    provider_name = contract_ref.split(".", 1)[0]
+    provider_key = NodeKey("provider_surface", provider_name)
+    if provider_key in snapshot.nodes:
+        snapshot.add_relation(provider_key, "DEFINES", contract, provenance="impact_contracts")
 
 
 def _add_contract_registry_artifact(
@@ -9938,32 +10294,50 @@ def _link_composite_pipeline_dependencies(
     composite_payload: object,
     pipeline_nodes: dict[str, NodeKey],
 ) -> None:
+    for dependency_key in _composite_pipeline_dependency_keys(composite_payload, pipeline_nodes):
+        snapshot.add_relation(
+            pipeline,
+            "DEPENDS_ON",
+            dependency_key,
+            provenance="impact_pipelines",
+        )
+
+
+def _composite_pipeline_dependency_keys(
+    composite_payload: object,
+    pipeline_nodes: dict[str, NodeKey],
+) -> tuple[NodeKey, ...]:
     if not isinstance(composite_payload, dict):
-        return
-    seed = composite_payload.get("seed")
-    if isinstance(seed, dict):
-        seed_pipeline = seed.get("pipeline")
-        if isinstance(seed_pipeline, str) and seed_pipeline in pipeline_nodes:
-            snapshot.add_relation(
-                pipeline,
-                "DEPENDS_ON",
-                pipeline_nodes[seed_pipeline],
-                provenance="impact_pipelines",
-            )
-    dependencies = composite_payload.get("dependencies")
+        return ()
+    keys: list[NodeKey] = []
+    seed_pipeline = _composite_seed_pipeline_name(composite_payload.get("seed"))
+    if seed_pipeline is not None and seed_pipeline in pipeline_nodes:
+        keys.append(pipeline_nodes[seed_pipeline])
+    keys.extend(_composite_dependency_pipeline_keys(composite_payload.get("dependencies"), pipeline_nodes))
+    return tuple(keys)
+
+
+def _composite_seed_pipeline_name(seed: object) -> str | None:
+    if not isinstance(seed, dict):
+        return None
+    seed_pipeline = seed.get("pipeline")
+    return seed_pipeline if isinstance(seed_pipeline, str) else None
+
+
+def _composite_dependency_pipeline_keys(
+    dependencies: object,
+    pipeline_nodes: dict[str, NodeKey],
+) -> tuple[NodeKey, ...]:
     if not isinstance(dependencies, list):
-        return
+        return ()
+    keys: list[NodeKey] = []
     for dependency in dependencies:
         if not isinstance(dependency, dict):
             continue
         dependency_pipeline = dependency.get("pipeline")
         if isinstance(dependency_pipeline, str) and dependency_pipeline in pipeline_nodes:
-            snapshot.add_relation(
-                pipeline,
-                "DEPENDS_ON",
-                pipeline_nodes[dependency_pipeline],
-                provenance="impact_pipelines",
-            )
+            keys.append(pipeline_nodes[dependency_pipeline])
+    return tuple(keys)
 
 
 def _add_pipeline_normalization_edges(
@@ -9983,12 +10357,10 @@ def _add_pipeline_normalization_edges(
         pipeline_overrides,
     ) = _normalization_edge_config(normalization_mapping)
 
-    for pipeline_name, pipeline_key in pipeline_nodes.items():
-        pipeline_node = snapshot.nodes.get(pipeline_key)
-        if pipeline_node is None:
-            continue
-        pipeline_kind = str(pipeline_node.properties.get("pipeline_kind", "entity"))
-        entity_key = NodeKey("entity_config", pipeline_name)
+    for pipeline_name, pipeline_key, pipeline_kind, entity_key in _pipeline_normalization_targets(
+        snapshot,
+        pipeline_nodes,
+    ):
         modules = _pipeline_normalization_modules(
             pipeline_name,
             pipeline_kind,
@@ -10005,6 +10377,20 @@ def _add_pipeline_normalization_edges(
             relation_type=relation_type,
             entity_relation_type=entity_relation_type,
         )
+
+
+def _pipeline_normalization_targets(
+    snapshot: GraphSnapshot,
+    pipeline_nodes: dict[str, NodeKey],
+) -> tuple[tuple[str, NodeKey, str, NodeKey], ...]:
+    targets: list[tuple[str, NodeKey, str, NodeKey]] = []
+    for pipeline_name, pipeline_key in pipeline_nodes.items():
+        pipeline_node = snapshot.nodes.get(pipeline_key)
+        if pipeline_node is None:
+            continue
+        pipeline_kind = str(pipeline_node.properties.get("pipeline_kind", "entity"))
+        targets.append((pipeline_name, pipeline_key, pipeline_kind, NodeKey("entity_config", pipeline_name)))
+    return tuple(targets)
 
 
 def _normalization_edge_config(
@@ -10158,13 +10544,11 @@ def _add_pipeline_normalization_evidence(
     pipeline_nodes: dict[str, NodeKey],
 ) -> None:
     evidence_by_pipeline = _build_normalization_pipeline_evidence()
-
-    for pipeline_name, evidence in evidence_by_pipeline.items():
-        pipeline_key = pipeline_nodes.get(pipeline_name)
-        if pipeline_key is None:
-            continue
-        entity_key = NodeKey("entity_config", pipeline_name)
-        update_payload = _normalization_evidence_update_payload(evidence)
+    for pipeline_name, entity_key, update_payload in _iter_normalization_evidence_updates(
+        snapshot,
+        pipeline_nodes,
+        evidence_by_pipeline,
+    ):
         pipeline = snapshot.add_node("pipeline_surface", pipeline_name, **update_payload)
         if entity_key in snapshot.nodes:
             snapshot.add_node("entity_config", pipeline_name, **update_payload)
@@ -10174,6 +10558,25 @@ def _add_pipeline_normalization_evidence(
             entity_key=entity_key,
             module_path=update_payload["normalization_profile_module_path"],
         )
+
+
+def _iter_normalization_evidence_updates(
+    snapshot: GraphSnapshot,
+    pipeline_nodes: dict[str, NodeKey],
+    evidence_by_pipeline: dict[str, dict[str, JsonValue]],
+) -> tuple[tuple[str, NodeKey, dict[str, JsonValue]], ...]:
+    updates: list[tuple[str, NodeKey, dict[str, JsonValue]]] = []
+    for pipeline_name, evidence in evidence_by_pipeline.items():
+        if pipeline_nodes.get(pipeline_name) is None:
+            continue
+        updates.append(
+            (
+                pipeline_name,
+                NodeKey("entity_config", pipeline_name),
+                _normalization_evidence_update_payload(evidence),
+            )
+        )
+    return tuple(updates)
 
 
 def _normalization_evidence_update_payload(
@@ -10219,14 +10622,18 @@ def _normalization_evidence_statements() -> list[dict[str, JsonValue]]:
     evidence_by_pipeline = _build_normalization_pipeline_evidence()
     statements: list[dict[str, JsonValue]] = []
     for pipeline_name, evidence in sorted(evidence_by_pipeline.items()):
-        params = _normalization_statement_params(pipeline_name, evidence)
-        statements.append(
-            {
-                "statement": _NORMALIZATION_EVIDENCE_STATEMENT,
-                "parameters": params,
-            }
-        )
+        statements.append(_normalization_statement(pipeline_name, evidence))
     return statements
+
+
+def _normalization_statement(
+    pipeline_name: str,
+    evidence: dict[str, JsonValue],
+) -> dict[str, JsonValue]:
+    return {
+        "statement": _NORMALIZATION_EVIDENCE_STATEMENT,
+        "parameters": _normalization_statement_params(pipeline_name, evidence),
+    }
 
 
 _NORMALIZATION_EVIDENCE_STATEMENT = """
@@ -10408,11 +10815,11 @@ def _execute_normalization_evidence_batch(
     batch_count: int,
 ) -> dict[str, JsonValue]:
     pipeline_start, pipeline_end = _normalization_batch_pipeline_span(batch)
-    _emit_normalization_apply_progress(
+    _emit_normalization_batch_progress(
         event="batch_start",
+        batch=batch,
         batch_index=batch_index,
         batch_count=batch_count,
-        statement_count=len(batch),
         pipeline_start=pipeline_start,
         pipeline_end=pipeline_end,
     )
@@ -10426,21 +10833,59 @@ def _execute_normalization_evidence_batch(
         ),
     )
     batch_elapsed = time.perf_counter() - batch_started
-    _emit_normalization_apply_progress(
+    _emit_normalization_batch_progress(
         event="batch_complete",
+        batch=batch,
+        batch_index=batch_index,
+        batch_count=batch_count,
+        pipeline_start=pipeline_start,
+        pipeline_end=pipeline_end,
+        elapsed_seconds=batch_elapsed,
+    )
+    return _normalization_batch_summary(
+        batch=batch,
+        batch_index=batch_index,
+        pipeline_start=pipeline_start,
+        pipeline_end=pipeline_end,
+        elapsed_seconds=batch_elapsed,
+    )
+
+
+def _emit_normalization_batch_progress(
+    *,
+    event: str,
+    batch: list[dict[str, JsonValue]],
+    batch_index: int,
+    batch_count: int,
+    pipeline_start: str | None,
+    pipeline_end: str | None,
+    elapsed_seconds: float | None = None,
+) -> None:
+    _emit_normalization_apply_progress(
+        event=event,
         batch_index=batch_index,
         batch_count=batch_count,
         statement_count=len(batch),
         pipeline_start=pipeline_start,
         pipeline_end=pipeline_end,
-        elapsed_seconds=batch_elapsed,
+        elapsed_seconds=elapsed_seconds,
     )
+
+
+def _normalization_batch_summary(
+    *,
+    batch: list[dict[str, JsonValue]],
+    batch_index: int,
+    pipeline_start: str | None,
+    pipeline_end: str | None,
+    elapsed_seconds: float,
+) -> dict[str, JsonValue]:
     return {
         "batch_index": batch_index,
         "statement_count": len(batch),
         "pipeline_start": pipeline_start,
         "pipeline_end": pipeline_end,
-        "elapsed_seconds": round(batch_elapsed, 3),
+        "elapsed_seconds": round(elapsed_seconds, 3),
     }
 
 
@@ -10450,21 +10895,52 @@ def _add_pipeline_test_edges(
     _pipeline_nodes: dict[str, NodeKey],
     memory_mapping: dict[str, object],
 ) -> None:
-    tests_mapping = memory_mapping.get("pipeline_tests")
+    test_context = _pipeline_test_context(snapshot, root, memory_mapping.get("pipeline_tests"))
+    if test_context is None:
+        return
+    test_linker = _pipeline_test_linker(snapshot, test_context.relation_type)
+    _link_entity_pipeline_tests(
+        test_linker,
+        test_context.entity_pipeline_index,
+        test_context.ownership,
+    )
+    _link_provider_regression_suite_tests(
+        test_linker,
+        test_context.provider_pipeline_index,
+        suites=test_context.provider_regression_suites,
+        enabled=test_context.include_provider_regression_suites,
+    )
+
+
+@dataclass(frozen=True)
+class PipelineTestContext:
+    relation_type: str
+    ownership: dict[object, object]
+    provider_regression_suites: object
+    include_provider_regression_suites: bool
+    entity_pipeline_index: dict[tuple[str, str], NodeKey]
+    provider_pipeline_index: dict[str, list[NodeKey]]
+
+
+def _pipeline_test_context(
+    snapshot: GraphSnapshot,
+    root: Path,
+    tests_mapping: object,
+) -> PipelineTestContext | None:
     relation_type, ownership_config, include_provider_regression_suites = _pipeline_test_mapping_config(
         tests_mapping
     )
     payload, ownership = _pipeline_test_payload(root, ownership_config)
     if payload is None or ownership is None:
-        return
+        return None
     entity_pipeline_index, provider_pipeline_index = _pipeline_test_indexes(snapshot)
-    test_linker = _pipeline_test_linker(snapshot, relation_type)
-    _link_entity_pipeline_tests(test_linker, entity_pipeline_index, ownership)
-    _link_provider_regression_suite_tests(
-        test_linker,
-        provider_pipeline_index,
-        suites=payload.get("provider_regression_suites"),
-        enabled=include_provider_regression_suites,
+    return PipelineTestContext(
+        relation_type=relation_type,
+        ownership=ownership,
+        provider_regression_suites=payload.get("provider_regression_suites"),
+        include_provider_regression_suites=include_provider_regression_suites,
+        entity_pipeline_index=entity_pipeline_index,
+        provider_pipeline_index=provider_pipeline_index,
     )
 
 
@@ -10472,14 +10948,20 @@ def _pipeline_test_payload(
     root: Path,
     ownership_config: str,
 ) -> tuple[dict[str, object] | None, dict[object, object] | None]:
-    ownership_path = root / ownership_config
+    ownership_path = _pipeline_test_ownership_path(root, ownership_config)
     if not ownership_path.is_file():
         return None, None
     payload = _read_yaml(ownership_path)
+    return payload, _pipeline_test_ownership(payload)
+
+
+def _pipeline_test_ownership_path(root: Path, ownership_config: str) -> Path:
+    return root / ownership_config
+
+
+def _pipeline_test_ownership(payload: dict[str, object]) -> dict[object, object] | None:
     ownership = payload.get("entity_test_ownership")
-    if not isinstance(ownership, dict):
-        return payload, None
-    return payload, ownership
+    return ownership if isinstance(ownership, dict) else None
 
 
 def _pipeline_test_mapping_config(
@@ -10582,16 +11064,27 @@ def _entity_pipeline_contract_tests(
 ) -> tuple[tuple[NodeKey, tuple[str, ...]], ...]:
     targets: list[tuple[NodeKey, tuple[str, ...]]] = []
     for contract_ref, raw_tests in ownership.items():
-        if not isinstance(contract_ref, str) or "." not in contract_ref:
-            continue
-        provider_name, entity_name = contract_ref.split(".", 1)
-        pipeline_key = entity_pipeline_index.get((provider_name, entity_name))
-        if pipeline_key is None:
-            continue
-        test_paths = tuple(_as_string_list(raw_tests))
-        if test_paths:
-            targets.append((pipeline_key, test_paths))
+        target = _entity_pipeline_contract_target(entity_pipeline_index, contract_ref, raw_tests)
+        if target is not None:
+            targets.append(target)
     return tuple(targets)
+
+
+def _entity_pipeline_contract_target(
+    entity_pipeline_index: dict[tuple[str, str], NodeKey],
+    contract_ref: object,
+    raw_tests: object,
+) -> tuple[NodeKey, tuple[str, ...]] | None:
+    if not isinstance(contract_ref, str) or "." not in contract_ref:
+        return None
+    provider_name, entity_name = contract_ref.split(".", 1)
+    pipeline_key = entity_pipeline_index.get((provider_name, entity_name))
+    if pipeline_key is None:
+        return None
+    test_paths = tuple(_as_string_list(raw_tests))
+    if not test_paths:
+        return None
+    return pipeline_key, test_paths
 
 
 def _link_provider_regression_suite_tests(
@@ -10641,19 +11134,35 @@ def _provider_regression_suite_targets(
 ) -> tuple[tuple[str, tuple[tuple[str, str], ...]], ...]:
     targets: list[tuple[str, tuple[tuple[str, str], ...]]] = []
     for suite_name, suite_payload in suites.items():
-        if not isinstance(suite_name, str) or not isinstance(suite_payload, dict):
-            continue
-        providers = suite_payload.get("providers")
-        if not isinstance(providers, dict):
-            continue
-        provider_targets = tuple(
-            (provider_name, raw_test_path)
-            for provider_name, raw_test_path in providers.items()
-            if isinstance(provider_name, str) and isinstance(raw_test_path, str)
-        )
-        if provider_targets:
-            targets.append((suite_name, provider_targets))
+        suite_target = _provider_regression_suite_target(suite_name, suite_payload)
+        if suite_target is not None:
+            targets.append(suite_target)
     return tuple(targets)
+
+
+def _provider_regression_suite_target(
+    suite_name: object,
+    suite_payload: object,
+) -> tuple[str, tuple[tuple[str, str], ...]] | None:
+    if not isinstance(suite_name, str) or not isinstance(suite_payload, dict):
+        return None
+    provider_targets = _provider_regression_provider_targets(suite_payload)
+    if not provider_targets:
+        return None
+    return suite_name, provider_targets
+
+
+def _provider_regression_provider_targets(
+    suite_payload: dict[str, object],
+) -> tuple[tuple[str, str], ...]:
+    providers = suite_payload.get("providers")
+    if not isinstance(providers, dict):
+        return ()
+    return tuple(
+        (provider_name, raw_test_path)
+        for provider_name, raw_test_path in providers.items()
+        if isinstance(provider_name, str) and isinstance(raw_test_path, str)
+    )
 
 
 def _add_alert_surfaces(
@@ -10669,14 +11178,14 @@ def _add_alert_surfaces(
     if not rules_root.is_dir():
         return
 
-    dashboard_metrics = _dashboard_metric_index(root)
-    target_context = _alert_target_context(
+    dashboard_metrics, target_context = _alert_surface_context(
         snapshot,
+        root,
         pipeline_nodes=pipeline_nodes,
         contract_nodes=contract_nodes,
         memory_mapping=memory_mapping,
     )
-    for rules_path in sorted(rules_root.glob("*.y*ml")):
+    for rules_path in _alert_rules_paths(rules_root):
         _add_alert_rule_file_surfaces(
             snapshot,
             root,
@@ -10687,6 +11196,29 @@ def _add_alert_surfaces(
             target_context=target_context,
             memory_mapping=memory_mapping,
         )
+
+
+def _alert_rules_paths(rules_root: Path) -> tuple[Path, ...]:
+    return tuple(sorted(rules_root.glob("*.y*ml")))
+
+
+def _alert_surface_context(
+    snapshot: GraphSnapshot,
+    root: Path,
+    *,
+    pipeline_nodes: dict[str, NodeKey],
+    contract_nodes: dict[str, NodeKey],
+    memory_mapping: dict[str, object],
+) -> tuple[dict[NodeKey, frozenset[str]], AlertTargetContext]:
+    return (
+        _dashboard_metric_index(root),
+        _alert_target_context(
+            snapshot,
+            pipeline_nodes=pipeline_nodes,
+            contract_nodes=contract_nodes,
+            memory_mapping=memory_mapping,
+        ),
+    )
 
 
 def _alert_target_context(
@@ -10726,7 +11258,7 @@ def _add_alert_rule_file_surfaces(
     payload = _alert_rule_file_payload(rules_path)
     artifact = _add_alert_rules_artifact(snapshot, root, rules_path, today)
     for group in _alert_rule_groups(payload):
-        _process_alert_rule_group(
+        _add_alert_rule_group_surfaces(
             snapshot,
             root,
             project,
@@ -10789,17 +11321,6 @@ def _alert_rule_groups(
     return tuple(group for group in groups if isinstance(group, dict))
 
 
-def _alert_surface_annotations_and_labels(
-    rule: dict[str, object],
-) -> tuple[dict[str, object], dict[str, object]]:
-    annotations = rule.get("annotations")
-    labels = rule.get("labels")
-    return (
-        annotations if isinstance(annotations, dict) else {},
-        labels if isinstance(labels, dict) else {},
-    )
-
-
 def _add_alert_surface_node(
     snapshot: GraphSnapshot,
     root: Path,
@@ -10844,7 +11365,7 @@ def _add_alert_rule_group_surfaces(
 ) -> None:
     group_name = _alert_group_name(group, rules_path)
     for rule in _alert_group_rules(group):
-        _process_alert_rule(
+        _add_single_alert_surface(
             snapshot,
             root,
             project,
@@ -10857,62 +11378,6 @@ def _add_alert_rule_group_surfaces(
             target_context=target_context,
             memory_mapping=memory_mapping,
         )
-
-
-def _process_alert_rule_group(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    artifact: NodeKey,
-    group: dict[str, object],
-    *,
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    _add_alert_rule_group_surfaces(
-        snapshot,
-        root,
-        project,
-        today,
-        rules_path,
-        artifact,
-        group,
-        dashboard_metrics=dashboard_metrics,
-        target_context=target_context,
-        memory_mapping=memory_mapping,
-    )
-
-
-def _process_alert_rule(
-    snapshot: GraphSnapshot,
-    root: Path,
-    project: NodeKey,
-    today: str,
-    rules_path: Path,
-    artifact: NodeKey,
-    group_name: str,
-    rule: dict[str, object],
-    *,
-    dashboard_metrics: dict[NodeKey, frozenset[str]],
-    target_context: AlertTargetContext,
-    memory_mapping: dict[str, object],
-) -> None:
-    _add_single_alert_surface(
-        snapshot,
-        root,
-        project,
-        today,
-        rules_path,
-        artifact,
-        group_name,
-        rule,
-        dashboard_metrics=dashboard_metrics,
-        target_context=target_context,
-        memory_mapping=memory_mapping,
-    )
 
 
 def _alert_group_name(group: dict[str, object], rules_path: Path) -> str:
@@ -11032,28 +11497,34 @@ def _link_selected_alert_targets(
     selected_providers: tuple[NodeKey, ...],
     selected_contracts: tuple[NodeKey, ...],
 ) -> None:
-    _link_alert_target_nodes(
-        snapshot,
-        alert,
+    for target_group in _selected_alert_target_groups(
+        selected_pipelines=selected_pipelines,
+        selected_providers=selected_providers,
+        selected_contracts=selected_contracts,
+    ):
+        _link_alert_target_group(snapshot, alert, target_group)
+
+
+def _selected_alert_target_groups(
+    *,
+    selected_pipelines: tuple[NodeKey, ...],
+    selected_providers: tuple[NodeKey, ...],
+    selected_contracts: tuple[NodeKey, ...],
+) -> tuple[tuple[NodeKey, ...], ...]:
+    return (
         selected_pipelines,
         selected_providers,
         selected_contracts,
     )
 
 
-def _link_alert_target_nodes(
+def _link_alert_target_group(
     snapshot: GraphSnapshot,
     alert: NodeKey,
-    selected_pipelines: tuple[NodeKey, ...],
-    selected_providers: tuple[NodeKey, ...],
-    selected_contracts: tuple[NodeKey, ...],
+    targets: tuple[NodeKey, ...],
 ) -> None:
-    for pipeline in selected_pipelines:
-        snapshot.add_relation(alert, "DEPENDS_ON", pipeline, provenance="impact_alerts")
-    for provider in selected_providers:
-        snapshot.add_relation(alert, "DEPENDS_ON", provider, provenance="impact_alerts")
-    for contract in selected_contracts:
-        snapshot.add_relation(alert, "DEPENDS_ON", contract, provenance="impact_alerts")
+    for target in targets:
+        snapshot.add_relation(alert, "DEPENDS_ON", target, provenance="impact_alerts")
 
 
 def _link_alert_observer_dashboards(
@@ -11082,13 +11553,15 @@ def _selected_alert_dashboards(
     expr: str,
     dashboard_metrics: dict[NodeKey, frozenset[str]],
     memory_mapping: dict[str, object],
-) -> list[NodeKey]:
-    return _select_alert_dashboards(
+) -> tuple[NodeKey, ...]:
+    return tuple(
+        _select_alert_dashboards(
         alert_name,
         group_name,
         expr,
         dashboard_metrics,
         memory_mapping,
+        )
     )
 
 
@@ -11163,12 +11636,14 @@ def _governance_policy_targets(
         pipeline_nodes=pipeline_nodes,
         contract_nodes=contract_nodes,
     )
-    return _governance_policy_specs(
-        snapshot,
-        sorted_ports=sorted_ports,
-        sorted_adapters=sorted_adapters,
-        sorted_pipelines=sorted_pipelines,
-        sorted_contracts=sorted_contracts,
+    return tuple(
+        _governance_policy_specs(
+            snapshot,
+            sorted_ports=sorted_ports,
+            sorted_adapters=sorted_adapters,
+            sorted_pipelines=sorted_pipelines,
+            sorted_contracts=sorted_contracts,
+        )
     )
 
 
@@ -11194,14 +11669,21 @@ def _governance_policy_specs(
     sorted_adapters: list[NodeKey],
     sorted_pipelines: list[NodeKey],
     sorted_contracts: list[NodeKey],
-) -> tuple[tuple[NodeKey, tuple[Sequence[NodeKey], ...]], ...]:
-    return (
-        (NodeKey("policy_surface", "hexagonal import matrix"), (sorted_ports, sorted_adapters)),
-        (NodeKey("policy_surface", "hexagonal package layout"), (sorted_ports, sorted_adapters)),
-        (NodeKey("policy_surface", "pipeline assembly model"), (sorted_pipelines,)),
-        (NodeKey("policy_surface", "medallion storage contract"), (sorted_contracts, sorted_pipelines)),
-        (NodeKey("policy_surface", "observability surface model"), (_alert_surface_nodes(snapshot),)),
-    )
+) -> list[tuple[NodeKey, tuple[Sequence[NodeKey], ...]]]:
+    return [
+        _governance_policy_spec("hexagonal import matrix", sorted_ports, sorted_adapters),
+        _governance_policy_spec("hexagonal package layout", sorted_ports, sorted_adapters),
+        _governance_policy_spec("pipeline assembly model", sorted_pipelines),
+        _governance_policy_spec("medallion storage contract", sorted_contracts, sorted_pipelines),
+        _governance_policy_spec("observability surface model", _alert_surface_nodes(snapshot)),
+    ]
+
+
+def _governance_policy_spec(
+    policy_name: str,
+    *target_groups: Sequence[NodeKey],
+) -> tuple[NodeKey, tuple[Sequence[NodeKey], ...]]:
+    return NodeKey("policy_surface", policy_name), tuple(target_groups)
 
 
 def _link_policy_governance_group(
@@ -11276,6 +11758,15 @@ def _pipeline_kind_dashboards(
     return []
 
 
+@dataclass(frozen=True)
+class PipelineOperationalContext:
+    runtime_paths: list[NodeKey]
+    validation_gates: list[NodeKey]
+    common_dashboards: list[NodeKey]
+    entity_dashboards: list[NodeKey]
+    composite_dashboards: list[NodeKey]
+
+
 def _link_pipeline_operational_targets(
     snapshot: GraphSnapshot,
     pipeline: NodeKey,
@@ -11321,22 +11812,30 @@ def _add_pipeline_operational_edges(
     pipeline_nodes: dict[str, NodeKey],
     memory_mapping: dict[str, object],
 ) -> None:
+    operational_context = _pipeline_operational_context(memory_mapping)
+    for pipeline in _sorted_pipeline_nodes(pipeline_nodes):
+        _link_pipeline_operational_for_pipeline(
+            snapshot,
+            pipeline,
+            operational_context=operational_context,
+        )
+
+
+def _pipeline_operational_context(
+    memory_mapping: dict[str, object],
+) -> PipelineOperationalContext:
     pipeline_ops = _pipeline_operational_section(memory_mapping)
     runtime_paths, validation_gates = _pipeline_operational_targets_config(pipeline_ops)
     common_dashboards, entity_dashboards, composite_dashboards = _pipeline_dashboard_targets(
         pipeline_ops
     )
-
-    for pipeline in _sorted_pipeline_nodes(pipeline_nodes):
-        _link_pipeline_operational_for_pipeline(
-            snapshot,
-            pipeline,
-            runtime_paths=runtime_paths,
-            validation_gates=validation_gates,
-            common_dashboards=common_dashboards,
-            entity_dashboards=entity_dashboards,
-            composite_dashboards=composite_dashboards,
-        )
+    return PipelineOperationalContext(
+        runtime_paths=runtime_paths,
+        validation_gates=validation_gates,
+        common_dashboards=common_dashboards,
+        entity_dashboards=entity_dashboards,
+        composite_dashboards=composite_dashboards,
+    )
 
 
 def _pipeline_operational_targets_config(
@@ -11363,24 +11862,20 @@ def _link_pipeline_operational_for_pipeline(
     snapshot: GraphSnapshot,
     pipeline: NodeKey,
     *,
-    runtime_paths: list[NodeKey],
-    validation_gates: list[NodeKey],
-    common_dashboards: list[NodeKey],
-    entity_dashboards: list[NodeKey],
-    composite_dashboards: list[NodeKey],
+    operational_context: PipelineOperationalContext,
 ) -> None:
     pipeline_props = snapshot.nodes[pipeline].properties
     pipeline_kind = pipeline_props.get("pipeline_kind")
     _link_pipeline_operational_targets(
         snapshot,
         pipeline,
-        runtime_paths=runtime_paths,
-        validation_gates=validation_gates,
-        common_dashboards=common_dashboards,
+        runtime_paths=operational_context.runtime_paths,
+        validation_gates=operational_context.validation_gates,
+        common_dashboards=operational_context.common_dashboards,
         kind_dashboards=_pipeline_kind_dashboards(
             pipeline_kind,
-            entity_dashboards=entity_dashboards,
-            composite_dashboards=composite_dashboards,
+            entity_dashboards=operational_context.entity_dashboards,
+            composite_dashboards=operational_context.composite_dashboards,
         ),
     )
 

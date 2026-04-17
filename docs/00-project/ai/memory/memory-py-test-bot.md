@@ -234,9 +234,9 @@ python -m scripts.engineering.ci e2e-skip-rate             # E2E skip rate check
 python -m scripts.engineering.ci e2e-rerun                 # E2E rerun stability
 
 # Data integrity (pre-test validation)
-python -m scripts.data check-vcr-placement     # VCR cassette placement
-python -m scripts.data check-vcr-naming        # VCR naming conventions
-python -m scripts.data check-delta             # Delta table integrity
+python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement
+python -m scripts.engineering.qa.vcr check-naming     # VCR naming conventions
+python -m scripts.ops.data check-delta                # Delta table integrity
 
 # Schema validation (config tests)
 python -m scripts.schema validate-configs

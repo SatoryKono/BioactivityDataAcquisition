@@ -189,7 +189,7 @@ sink:
 - Перед релизом запускать allowlist-проверку:
 
 ```bash
-uv run python scripts/data/validate_data_dir.py
+uv run python -m scripts.ops.data check-data-dir
 ```
 
 ----------------------------------------------------------------------
