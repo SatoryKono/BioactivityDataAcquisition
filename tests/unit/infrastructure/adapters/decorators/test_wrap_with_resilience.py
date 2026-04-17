@@ -59,12 +59,11 @@ class MockDataSource:
         del entity_type, limit, query, filter_ids, filter_field, offset
         yield {"id": 1}
 
-    async def health_check(self) -> HealthStatus:
-        await asyncio.sleep(0)
-        return HealthStatus.HEALTHY
+    def health_check(self) -> asyncio.Future[HealthStatus]:
+        return asyncio.sleep(0, result=HealthStatus.HEALTHY)
 
-    async def aclose(self) -> None:
-        await asyncio.sleep(0)
+    def aclose(self) -> asyncio.Future[None]:
+        return asyncio.sleep(0)
 
 
 class MockCircuitBreaker:

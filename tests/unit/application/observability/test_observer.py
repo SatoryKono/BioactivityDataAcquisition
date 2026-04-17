@@ -85,8 +85,8 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
         logger=logger_mock,
     )
 
-    with observer:
-        observer.capture_execution_metrics({"records_gold": 42})
+    with observer as active_observer:
+        active_observer.capture_execution_metrics({"records_gold": 42})
 
     # Verify metrics
     metrics_mock.observe_histogram.assert_called_once()
@@ -172,8 +172,10 @@ def test_observer_records_duration(metrics_mock, logger_mock, run_id):
         logger=logger_mock,
     )
 
-    with observer:
-        pass
+    entered_context = False
+    with observer as active_observer:
+        entered_context = active_observer.start_time is not None
+    assert entered_context
 
     # Verify histogram was called with correct metric name
     metrics_mock.observe_histogram.assert_called_once()
@@ -238,8 +240,10 @@ def test_observer_graceful_shutdown(metrics_mock, logger_mock, tracer_mock, run_
         tracer=tracer_mock,
     )
 
-    with observer:
-        pass
+    span_opened = False
+    with observer as active_observer:
+        span_opened = bool(active_observer.span)
+    assert span_opened
 
     # Verify span was created and ended properly
     tracer_mock.get_tracer.assert_called_once_with("bioetl.pipeline")
@@ -286,8 +290,10 @@ def test_observer_handles_close_error(metrics_mock, logger_mock, tracer_mock, ru
     )
 
     # Should not raise despite tracer error
-    with observer:
-        pass
+    close_attempted = False
+    with observer as active_observer:
+        close_attempted = active_observer.start_time is not None
+    assert close_attempted
 
     # Pipeline should still record success metrics
     metrics_mock.observe_histogram.assert_called_once()

@@ -72,13 +72,12 @@ class MockDataSource:
         for record in self._records:
             yield record
 
-    async def health_check(self) -> HealthStatus:
-        await asyncio.sleep(0)
+    def health_check(self) -> asyncio.Future[HealthStatus]:
         self._health_check_call_count += 1
-        return self._health_status
+        return asyncio.sleep(0, result=self._health_status)
 
-    async def aclose(self) -> None:
-        await asyncio.sleep(0)
+    def aclose(self) -> asyncio.Future[None]:
+        return asyncio.sleep(0)
 
 
 class MockCircuitBreaker:

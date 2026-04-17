@@ -21,8 +21,11 @@ class TestAdapterMetrics:
             metrics=mock_metrics, provider="chembl"
         )
 
+        entered_context = False
         with adapter_metrics.measure_request("/activity"):
-            pass
+            entered_context = True
+
+        assert entered_context
 
         # Verify histogram was observed
         mock_metrics.observe_histogram.assert_called_once()
@@ -38,8 +41,11 @@ class TestAdapterMetrics:
             metrics=mock_metrics, provider="uniprot"
         )
 
+        entered_context = False
         with adapter_metrics.measure_request("/protein"):
-            pass
+            entered_context = True
+
+        assert entered_context
 
         # Verify counter was incremented with success status
         mock_metrics.increment_counter.assert_called_once()

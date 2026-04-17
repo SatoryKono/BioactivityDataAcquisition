@@ -903,14 +903,13 @@ class TestPipelineRunnerLifecycle:
         services_with_dq.dq_monitor = dq_monitor
 
         # Properly set up async context manager
-        async def services_dq_aenter(self):
+        def services_dq_aenter(self):
             del self
-            await asyncio.sleep(0)
-            return services_with_dq
+            return asyncio.sleep(0, result=services_with_dq)
 
-        async def services_dq_aexit(self, *args):
+        def services_dq_aexit(self, *args):
             del args
-            await asyncio.sleep(0)
+            return asyncio.sleep(0)
 
         services_with_dq.__aenter__ = services_dq_aenter
         services_with_dq.__aexit__ = services_dq_aexit
