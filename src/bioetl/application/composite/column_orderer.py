@@ -17,6 +17,7 @@ from bioetl.application.composite.column_orderer_semantic import (
     get_ordered_columns,
     group_columns,
 )
+from bioetl.application.composite.column_service import collect_explicit_group_columns
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
     ColumnOrderConfig,
@@ -102,38 +103,11 @@ def collect_pattern_columns(
     return sort_fn(pattern_matches, group.provider_order)
 
 
-def collect_explicit_group_columns(
-    available: set[str],
-    group: ColumnGroupConfig,
-    sort_fn: _SortFn,
-    extract_field_fn: Callable[[str], str],
-    resolve_aliases_fn: Callable[[str], set[str]],
-) -> tuple[list[str], set[str]]:
-    """Collect explicit field matches for a YAML group in declared field order."""
-    ordered: list[str] = []
-    used: set[str] = set()
-
-    # Pre-compute extracted fields to transform O(N*M) into O(N)
-    extracted_fields = {col: extract_field_fn(col) for col in available}
-
-    for field_name in group.fields:
-        field_matches: list[str] = []
-        aliases = resolve_aliases_fn(field_name)
-        for column in available:
-            if column in used:
-                continue
-            extracted = extracted_fields[column]
-            if extracted in aliases or column in aliases:
-                field_matches.append(column)
-                used.add(column)
-        ordered.extend(sort_fn(field_matches, group.provider_order))
-
-    return ordered, used
 
 
 class ColumnOrderer:
     """Service for ordering columns by semantic groups.
-    
+
     .. deprecated:: 2024.2
         Use :class:`ColumnOrderService` instead for unified column ordering functionality.
     """
