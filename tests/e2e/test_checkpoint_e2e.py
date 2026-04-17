@@ -279,6 +279,7 @@ class TestCheckpointConcurrency:
 
     async def test_checkpoint_per_pipeline_isolation(self, e2e_data_dir: Path):
         """E2E: Each pipeline has its own checkpoint file."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -303,6 +304,7 @@ class TestCheckpointMetadata:
 
     async def test_checkpoint_has_timestamp(self, e2e_data_dir: Path):
         """E2E: Checkpoint includes timestamp."""
+        await asyncio.sleep(0)
         from datetime import datetime
 
         checkpoint_dir = e2e_data_dir / "checkpoints"
@@ -321,6 +323,7 @@ class TestCheckpointMetadata:
 
     async def test_checkpoint_has_batch_info(self, e2e_data_dir: Path):
         """E2E: Checkpoint includes batch information."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -339,6 +342,7 @@ class TestCheckpointMetadata:
 
     async def test_checkpoint_has_statistics(self, e2e_data_dir: Path):
         """E2E: Checkpoint can include processing statistics."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 

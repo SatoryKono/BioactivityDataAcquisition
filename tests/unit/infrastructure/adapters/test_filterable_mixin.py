@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 
 import pytest
@@ -25,6 +26,7 @@ class _DummyDelegatingAdapter(DelegatingFallbackMixin):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, str]]:
+        await asyncio.sleep(0)
         del entity_type, filter_field, limit
         for item in filter_ids:
             yield {"id": item}
@@ -33,6 +35,7 @@ class _DummyDelegatingAdapter(DelegatingFallbackMixin):
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_multi_filter_stub_raises_with_provider_name() -> None:
+    await asyncio.sleep(0)
     adapter = _DummyUnsupportedAdapter()
 
     with pytest.raises(NotImplementedError, match="dummy-provider"):
@@ -47,6 +50,7 @@ async def test_multi_filter_stub_raises_with_provider_name() -> None:
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_fallback_mixin_delegates_to_fetch_filtered() -> None:
+    await asyncio.sleep(0)
     adapter = _DummyDelegatingAdapter()
 
     result: list[dict[str, str]] = []

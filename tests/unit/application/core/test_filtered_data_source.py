@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -28,6 +29,7 @@ class MockDataSource:
         self.fetch_calls: list[dict[str, object]] = []
 
     async def fetch(self, *args, **kwargs):
+        await asyncio.sleep(0)
         self.fetch_calls.append({"args": args, "kwargs": kwargs})
         for record in [{"id": "1"}, {"id": "2"}, {"id": "3"}]:
             yield record
@@ -52,6 +54,7 @@ class MockFilterableDataSource:
         self.fetch_filtered_with_fallback_calls: list[dict[str, object]] = []
 
     async def fetch(self, *args, **kwargs):
+        await asyncio.sleep(0)
         self.fetch_calls.append({"args": args, "kwargs": kwargs})
         for record in [{"id": "1"}, {"id": "2"}, {"id": "3"}]:
             yield record
@@ -63,6 +66,7 @@ class MockFilterableDataSource:
         filter_field: str,
         limit: int | None = None,
     ):
+        await asyncio.sleep(0)
         self.fetch_filtered_calls.append(
             {
                 "entity_type": entity_type,
@@ -80,6 +84,7 @@ class MockFilterableDataSource:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ):
+        await asyncio.sleep(0)
         self.fetch_multi_filtered_calls.append(
             {
                 "entity_type": entity_type,
@@ -98,6 +103,7 @@ class MockFilterableDataSource:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ):
+        await asyncio.sleep(0)
         self.fetch_filtered_with_fallback_calls.append(
             {
                 "entity_type": entity_type,
@@ -653,6 +659,7 @@ class TestFilteredDataSourceMultiColumn:
                 filters: dict[str, list[str]],
                 limit: int | None = None,
             ):
+                await asyncio.sleep(0)
                 self.fetch_multi_filtered_calls.append(
                     {
                         "entity_type": entity_type,

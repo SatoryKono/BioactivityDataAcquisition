@@ -38,12 +38,14 @@ class TestShutdownSignal:
 
     async def test_shutdown_signal_initial_state(self):
         """E2E: ShutdownSignal starts in non-requested state."""
+        await asyncio.sleep(0)
         signal = ShutdownSignal()
 
         assert signal.is_requested is False
 
     async def test_shutdown_signal_request_sets_state(self):
         """E2E: Requesting shutdown sets the signal state."""
+        await asyncio.sleep(0)
         shutdown = ShutdownSignal()
 
         shutdown.request()
@@ -52,6 +54,7 @@ class TestShutdownSignal:
 
     async def test_shutdown_signal_request_is_idempotent(self):
         """E2E: Multiple request() calls have no additional effect."""
+        await asyncio.sleep(0)
         shutdown = ShutdownSignal()
 
         shutdown.request()
@@ -75,6 +78,7 @@ class TestShutdownSignal:
 
     async def test_shutdown_signal_reset(self):
         """E2E: reset() clears the signal for reuse."""
+        await asyncio.sleep(0)
         shutdown = ShutdownSignal()
 
         shutdown.request()
@@ -175,6 +179,7 @@ class TestCheckpointSavingOnShutdown:
 
         async def save_checkpoint(path: Path, state: dict):
             nonlocal checkpoint_saved
+            await asyncio.sleep(0)
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text('{"offset": 100}')
             checkpoint_saved = True
@@ -228,6 +233,7 @@ class TestPipelineShutdownError:
 
     async def test_pipeline_shutdown_error_is_exception(self):
         """E2E: PipelineShutdownError is a proper exception."""
+        await asyncio.sleep(0)
         error = PipelineShutdownError()
 
         assert isinstance(error, Exception)
@@ -237,6 +243,7 @@ class TestPipelineShutdownError:
         caught = False
 
         async def pipeline_that_shuts_down():
+            await asyncio.sleep(0)
             raise PipelineShutdownError()
 
         try:
@@ -251,6 +258,7 @@ class TestPipelineShutdownError:
         shutdown = ShutdownSignal()
 
         async def check_shutdown():
+            await asyncio.sleep(0)
             if shutdown.is_requested:
                 raise PipelineShutdownError()
 

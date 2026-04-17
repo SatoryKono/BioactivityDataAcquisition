@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, call
 
@@ -119,6 +120,7 @@ class TestDataQualityServiceThresholds:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that error rate exceeding hard threshold raises DataQualityThresholdError."""
+        await asyncio.sleep(0)
         service = DataQualityService(
             dq_monitor=None,
             config=dq_config,
@@ -155,6 +157,7 @@ class TestDataQualityServiceThresholds:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that error rate exactly at hard threshold raises DataQualityThresholdError."""
+        await asyncio.sleep(0)
         service = DataQualityService(
             dq_monitor=None,
             config=dq_config,
@@ -188,6 +191,7 @@ class TestDataQualityServiceThresholds:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that error rate exceeding soft threshold logs warning and emits metric."""
+        await asyncio.sleep(0)
         service = DataQualityService(
             dq_monitor=None,
             config=dq_config,
@@ -236,6 +240,7 @@ class TestDataQualityServiceThresholds:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that error rate exactly at soft threshold logs warning."""
+        await asyncio.sleep(0)
         service = DataQualityService(
             dq_monitor=None,
             config=dq_config,
@@ -276,6 +281,7 @@ class TestDataQualityServiceThresholds:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that error rate below soft threshold passes without warning."""
+        await asyncio.sleep(0)
         service = DataQualityService(
             dq_monitor=None,
             config=dq_config,
@@ -321,6 +327,7 @@ class TestDataQualityServiceGracefulDegradation:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that without dq_monitor, service returns result without anomalies."""
+        await asyncio.sleep(0)
         service = DataQualityService(
             dq_monitor=None,
             config=dq_config,
@@ -356,6 +363,7 @@ class TestDataQualityServiceGracefulDegradation:
     @pytest.mark.asyncio
     async def test_no_metrics_port_still_logs_warning(self, mock_logger, dq_config):
         """Test that soft threshold logs warning even when metrics port is None."""
+        await asyncio.sleep(0)
         service = DataQualityService(
             dq_monitor=None,
             config=dq_config,
@@ -387,6 +395,7 @@ class TestDataQualityServiceAnomalyDetection:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test anomaly detection with no anomalies detected."""
+        await asyncio.sleep(0)
         mock_dq_monitor = MagicMock()
         mock_dq_monitor.check_quality = MagicMock(return_value=[])
         mock_dq_monitor.update_baseline_from_metrics = MagicMock()
@@ -420,6 +429,7 @@ class TestDataQualityServiceAnomalyDetection:
         self, mock_logger, mock_metrics, dq_config
     ) -> None:
         """DQ monitor calls should use the application-owned freshness anchor."""
+        await asyncio.sleep(0)
         mock_dq_monitor = MagicMock()
         mock_dq_monitor.check_quality = MagicMock(return_value=[])
         mock_dq_monitor.update_baseline_from_metrics = MagicMock()
@@ -456,6 +466,7 @@ class TestDataQualityServiceAnomalyDetection:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test anomaly detection with anomalies detected."""
+        await asyncio.sleep(0)
         from bioetl.infrastructure.observability.anomaly.types import (
             AnomalyRecord,
             AnomalySeverity,
@@ -504,6 +515,7 @@ class TestDataQualityServiceAnomalyDetection:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test anomaly detection with critical anomaly."""
+        await asyncio.sleep(0)
         from bioetl.infrastructure.observability.anomaly.types import (
             AnomalyRecord,
             AnomalySeverity,
@@ -551,6 +563,7 @@ class TestDataQualityServiceAnomalyDetection:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that check duration metric is emitted."""
+        await asyncio.sleep(0)
         mock_dq_monitor = MagicMock()
         mock_dq_monitor.check_quality = MagicMock(return_value=[])
         mock_dq_monitor.update_baseline_from_metrics = MagicMock()
@@ -586,6 +599,7 @@ class TestDataQualityServiceBaselineUpdates:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that baseline update counter is incremented for each metric."""
+        await asyncio.sleep(0)
         mock_dq_monitor = MagicMock()
         mock_dq_monitor.check_quality = MagicMock(return_value=[])
         mock_dq_monitor.update_baseline_from_metrics = MagicMock()
@@ -619,6 +633,7 @@ class TestDataQualityServiceBaselineUpdates:
     async def test_baseline_samples_gauge_reflects_monitor_stats(
         self, mock_logger, mock_metrics, dq_config
     ) -> None:
+        await asyncio.sleep(0)
         mock_dq_monitor = MagicMock()
         mock_dq_monitor.check_quality = MagicMock(return_value=[])
         mock_dq_monitor.update_baseline_from_metrics = MagicMock()
@@ -675,6 +690,7 @@ class TestDataQualityServiceBaselineUpdates:
         self, mock_logger, mock_metrics, dq_config
     ):
         """Test that baseline is not updated when critical anomaly detected."""
+        await asyncio.sleep(0)
         from bioetl.infrastructure.observability.anomaly.types import (
             AnomalyRecord,
             AnomalySeverity,

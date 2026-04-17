@@ -4966,6 +4966,34 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
     base_payload = _read_yaml(base_pipeline_path) if base_pipeline_path.is_file() else {}
     base_sink = base_payload.get("sink") if isinstance(base_payload.get("sink"), dict) else {}
     schema_fields_by_storage: dict[str, dict[str, NodeKey]] = {}
+    _add_entity_storage_data_surfaces(
+        snapshot,
+        root,
+        project,
+        today,
+        base_payload=base_payload,
+        base_sink=base_sink,
+        schema_fields_by_storage=schema_fields_by_storage,
+    )
+    _add_composite_storage_data_surfaces(
+        snapshot,
+        root,
+        project,
+        today,
+        schema_fields_by_storage=schema_fields_by_storage,
+    )
+
+
+def _add_entity_storage_data_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    *,
+    base_payload: dict[str, object],
+    base_sink: dict[str, object],
+    schema_fields_by_storage: dict[str, dict[str, NodeKey]],
+) -> None:
 
     entities_root = root / "configs" / "entities"
     for entity_path in sorted(entities_root.rglob(YAML_FILE_GLOB)):
@@ -5011,6 +5039,15 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
             schema_fields_by_storage[surface.name] = field_nodes_by_layer.get(layer_name, {})
         _link_entity_storage_promotions(snapshot, layer_nodes, field_nodes_by_layer)
 
+
+def _add_composite_storage_data_surfaces(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    *,
+    schema_fields_by_storage: dict[str, dict[str, NodeKey]],
+) -> None:
     composites_root = root / "configs" / "composites"
     for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
         payload = _read_yaml(composite_path)
@@ -6686,6 +6723,29 @@ def _add_port_surfaces(
 
     family = NodeKey("package_family", "domain/ports")
     port_nodes: set[NodeKey] = set()
+    facade = _add_port_facade_surface(snapshot, project, family, today)
+    port_nodes.add(facade)
+
+    descriptors, _, _ = _build_port_surface_catalog(root)
+    for descriptor in descriptors:
+        port = _add_protocol_port_surface(
+            snapshot,
+            project,
+            facade,
+            family,
+            descriptor,
+            today,
+        )
+        port_nodes.add(port)
+    return port_nodes
+
+
+def _add_port_facade_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    family: NodeKey,
+    today: str,
+) -> NodeKey:
     facade = snapshot.add_node(
         "port_surface",
         PORTS_MODULE_PREFIX,
@@ -6697,38 +6757,44 @@ def _add_port_surfaces(
         ingest_wave="repo_sync_v1",
         confidence="high",
     )
-    port_nodes.add(facade)
     snapshot.add_relation(project, "HAS_PORT", facade, provenance="impact_ports")
     if family in snapshot.nodes:
         snapshot.add_relation(family, "CONTAINS", facade, provenance="impact_ports")
     facade_module = NodeKey("module_surface", PORTS_FACADE_SOURCE_PATH)
     if facade_module in snapshot.nodes:
         snapshot.add_relation(facade, "BACKED_BY", facade_module, provenance="impact_ports")
+    return facade
 
-    descriptors, _, _ = _build_port_surface_catalog(root)
-    for descriptor in descriptors:
-        port = snapshot.add_node(
-            "port_surface",
-            descriptor.surface_name,
-            summary=f"Domain port protocol `{descriptor.class_name}`.",
-            source_path=descriptor.source_path,
-            source_kind="domain_port_protocol",
-            port_name=descriptor.class_name,
-            port_module=descriptor.module_name,
-            granularity="protocol_class",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        port_nodes.add(port)
-        snapshot.add_relation(project, "HAS_PORT", port, provenance="impact_ports")
-        snapshot.add_relation(facade, "CONTAINS", port, provenance="impact_ports")
-        if family in snapshot.nodes:
-            snapshot.add_relation(family, "CONTAINS", port, provenance="impact_ports")
-        module_key = NodeKey("module_surface", descriptor.source_path)
-        if module_key in snapshot.nodes:
-            snapshot.add_relation(port, "BACKED_BY", module_key, provenance="impact_ports")
-    return port_nodes
+
+def _add_protocol_port_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    facade: NodeKey,
+    family: NodeKey,
+    descriptor: PortSurfaceDescriptor,
+    today: str,
+) -> NodeKey:
+    port = snapshot.add_node(
+        "port_surface",
+        descriptor.surface_name,
+        summary=f"Domain port protocol `{descriptor.class_name}`.",
+        source_path=descriptor.source_path,
+        source_kind="domain_port_protocol",
+        port_name=descriptor.class_name,
+        port_module=descriptor.module_name,
+        granularity="protocol_class",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_PORT", port, provenance="impact_ports")
+    snapshot.add_relation(facade, "CONTAINS", port, provenance="impact_ports")
+    if family in snapshot.nodes:
+        snapshot.add_relation(family, "CONTAINS", port, provenance="impact_ports")
+    module_key = NodeKey("module_surface", descriptor.source_path)
+    if module_key in snapshot.nodes:
+        snapshot.add_relation(port, "BACKED_BY", module_key, provenance="impact_ports")
+    return port
 
 
 def _add_adapter_surfaces(
@@ -6756,106 +6822,182 @@ def _add_adapter_surfaces(
         if _is_ignored_repo_path(child) or child.name.startswith("_"):
             continue
         if child.is_dir():
-            relative_path = _rel_path(root, child)
-            surface_name = relative_path.replace("/", ".").removeprefix("src.")
-            adapter = snapshot.add_node(
-                "adapter_surface",
-                surface_name,
-                summary=f"Immediate adapter package surface `{surface_name}`.",
-                source_path=relative_path,
-                source_kind="adapter_package",
-                adapter_kind="package",
-                granularity="immediate_child",
-                last_verified=today,
-                ingest_wave="repo_sync_v1",
-                confidence="high",
+            adapter = _add_adapter_package_surface(
+                snapshot,
+                root,
+                project,
+                adapter_family,
+                child,
+                today,
             )
             adapter_nodes[child.name] = adapter
-            snapshot.add_relation(project, "HAS_ADAPTER", adapter, provenance="impact_adapters")
-            if adapter_family in snapshot.nodes:
-                snapshot.add_relation(adapter_family, "CONTAINS", adapter, provenance="impact_adapters")
             provider_key = NodeKey("provider_surface", child.name)
             if provider_key in snapshot.nodes:
                 snapshot.add_relation(provider_key, "PROVIDES", adapter, provenance="impact_adapters")
-            imported_ports: set[str] = set()
-            for module_path in sorted(child.rglob("*.py")):
-                if _is_ignored_repo_path(module_path):
-                    continue
-                if fine_grained_enabled and module_path.name != INIT_PY:
-                    impl_relative_path = _rel_path(root, module_path)
-                    impl_surface_name = _python_surface_name(impl_relative_path)
-                    impl_node = snapshot.add_node(
-                        "adapter_impl_surface",
-                        impl_surface_name,
-                        summary=f"Concrete adapter implementation `{impl_surface_name}`.",
-                        source_path=impl_relative_path,
-                        source_kind="adapter_impl_module",
-                        adapter_kind="implementation_module",
-                        granularity="concrete_module",
-                        last_verified=today,
-                        ingest_wave="repo_sync_v1",
-                        confidence="high",
-                    )
-                    snapshot.add_relation(adapter, "CONTAINS", impl_node, provenance="impact_adapter_impls")
-                    impl_module_key = NodeKey("module_surface", impl_relative_path)
-                    if impl_module_key in snapshot.nodes:
-                        snapshot.add_relation(impl_node, "BACKED_BY", impl_module_key, provenance="impact_adapter_impls")
-                    for port_name in sorted(
-                        _imported_port_surfaces(module_path, port_module_surfaces, port_symbol_index)
-                    ):
-                        if port_name in port_names:
-                            snapshot.add_relation(
-                                impl_node,
-                                "DEPENDS_ON",
-                                NodeKey("port_surface", port_name),
-                                provenance="impact_adapter_impls",
-                            )
-                imported_ports.update(
-                    _imported_port_surfaces(module_path, port_module_surfaces, port_symbol_index)
-                )
-            for port_name in sorted(imported_ports):
-                if port_name in port_names:
-                    snapshot.add_relation(
-                        adapter,
-                        "DEPENDS_ON",
-                        NodeKey("port_surface", port_name),
-                        provenance="impact_adapters",
-                    )
+            imported_ports = _add_adapter_package_impls(
+                snapshot,
+                root,
+                adapter,
+                child,
+                port_module_surfaces,
+                port_symbol_index,
+                port_names,
+                today,
+                fine_grained_enabled=fine_grained_enabled,
+            )
+            _link_adapter_ports(snapshot, adapter, imported_ports, port_names, provenance="impact_adapters")
             continue
 
         if child.suffix != ".py" or child.name == INIT_PY:
             continue
-        relative_path = _rel_path(root, child)
-        surface_name = _python_surface_name(relative_path)
-        adapter = snapshot.add_node(
-            "adapter_surface",
-            surface_name,
-            summary=f"Immediate adapter module surface `{surface_name}`.",
-            source_path=relative_path,
-            source_kind="adapter_module",
-            adapter_kind="module",
-            granularity="immediate_child",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
+        adapter = _add_adapter_module_surface(
+            snapshot,
+            root,
+            project,
+            adapter_family,
+            child,
+            today,
         )
         adapter_nodes[child.stem] = adapter
-        snapshot.add_relation(project, "HAS_ADAPTER", adapter, provenance="impact_adapters")
-        if adapter_family in snapshot.nodes:
-            snapshot.add_relation(adapter_family, "CONTAINS", adapter, provenance="impact_adapters")
-        module_key = NodeKey("module_surface", relative_path)
-        if module_key in snapshot.nodes:
-            snapshot.add_relation(adapter, "BACKED_BY", module_key, provenance="impact_adapters")
-        for port_name in sorted(_imported_port_surfaces(child, port_module_surfaces, port_symbol_index)):
-            if port_name in port_names:
-                snapshot.add_relation(
-                    adapter,
-                    "DEPENDS_ON",
-                    NodeKey("port_surface", port_name),
-                    provenance="impact_adapters",
-                )
+        imported_ports = _imported_port_surfaces(child, port_module_surfaces, port_symbol_index)
+        _link_adapter_ports(snapshot, adapter, imported_ports, port_names, provenance="impact_adapters")
 
     return adapter_nodes
+
+
+def _add_adapter_package_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    adapter_family: NodeKey,
+    child: Path,
+    today: str,
+) -> NodeKey:
+    relative_path = _rel_path(root, child)
+    surface_name = relative_path.replace("/", ".").removeprefix("src.")
+    adapter = snapshot.add_node(
+        "adapter_surface",
+        surface_name,
+        summary=f"Immediate adapter package surface `{surface_name}`.",
+        source_path=relative_path,
+        source_kind="adapter_package",
+        adapter_kind="package",
+        granularity="immediate_child",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_ADAPTER", adapter, provenance="impact_adapters")
+    if adapter_family in snapshot.nodes:
+        snapshot.add_relation(adapter_family, "CONTAINS", adapter, provenance="impact_adapters")
+    return adapter
+
+
+def _add_adapter_package_impls(
+    snapshot: GraphSnapshot,
+    root: Path,
+    adapter: NodeKey,
+    child: Path,
+    port_module_surfaces: dict[str, set[str]],
+    port_symbol_index: dict[str, set[str]],
+    port_names: set[str],
+    today: str,
+    *,
+    fine_grained_enabled: bool,
+) -> set[str]:
+    imported_ports: set[str] = set()
+    for module_path in sorted(child.rglob("*.py")):
+        if _is_ignored_repo_path(module_path):
+            continue
+        module_ports = _imported_port_surfaces(module_path, port_module_surfaces, port_symbol_index)
+        if fine_grained_enabled and module_path.name != INIT_PY:
+            impl_node = _add_adapter_impl_surface(snapshot, root, adapter, module_path, today)
+            _link_adapter_ports(
+                snapshot,
+                impl_node,
+                module_ports,
+                port_names,
+                provenance="impact_adapter_impls",
+            )
+        imported_ports.update(module_ports)
+    return imported_ports
+
+
+def _add_adapter_impl_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    adapter: NodeKey,
+    module_path: Path,
+    today: str,
+) -> NodeKey:
+    impl_relative_path = _rel_path(root, module_path)
+    impl_surface_name = _python_surface_name(impl_relative_path)
+    impl_node = snapshot.add_node(
+        "adapter_impl_surface",
+        impl_surface_name,
+        summary=f"Concrete adapter implementation `{impl_surface_name}`.",
+        source_path=impl_relative_path,
+        source_kind="adapter_impl_module",
+        adapter_kind="implementation_module",
+        granularity="concrete_module",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(adapter, "CONTAINS", impl_node, provenance="impact_adapter_impls")
+    impl_module_key = NodeKey("module_surface", impl_relative_path)
+    if impl_module_key in snapshot.nodes:
+        snapshot.add_relation(impl_node, "BACKED_BY", impl_module_key, provenance="impact_adapter_impls")
+    return impl_node
+
+
+def _add_adapter_module_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    adapter_family: NodeKey,
+    child: Path,
+    today: str,
+) -> NodeKey:
+    relative_path = _rel_path(root, child)
+    surface_name = _python_surface_name(relative_path)
+    adapter = snapshot.add_node(
+        "adapter_surface",
+        surface_name,
+        summary=f"Immediate adapter module surface `{surface_name}`.",
+        source_path=relative_path,
+        source_kind="adapter_module",
+        adapter_kind="module",
+        granularity="immediate_child",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_ADAPTER", adapter, provenance="impact_adapters")
+    if adapter_family in snapshot.nodes:
+        snapshot.add_relation(adapter_family, "CONTAINS", adapter, provenance="impact_adapters")
+    module_key = NodeKey("module_surface", relative_path)
+    if module_key in snapshot.nodes:
+        snapshot.add_relation(adapter, "BACKED_BY", module_key, provenance="impact_adapters")
+    return adapter
+
+
+def _link_adapter_ports(
+    snapshot: GraphSnapshot,
+    source: NodeKey,
+    imported_ports: set[str],
+    port_names: set[str],
+    *,
+    provenance: str,
+) -> None:
+    for port_name in sorted(imported_ports):
+        if port_name in port_names:
+            snapshot.add_relation(
+                source,
+                "DEPENDS_ON",
+                NodeKey("port_surface", port_name),
+                provenance=provenance,
+            )
 
 
 def _contract_mapping_config(memory_mapping: dict[str, object]) -> ContractMappingConfig:
@@ -8176,54 +8318,75 @@ def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
     )
 
     evidence: dict[str, dict[str, JsonValue]] = {}
-    for row in build_field_matrix_rows():
+    _accumulate_field_matrix_evidence(
+        evidence,
+        build_field_matrix_rows(),
+        fallback_business=FALLBACK_BUSINESS,
+        fallback_technical_passthrough=FALLBACK_TECHNICAL_PASSTHROUGH,
+    )
+    _enrich_registry_normalization_evidence(
+        evidence,
+        NORMALIZATION_PROFILE_REGISTRY,
+        resolve_normalization_profile_module_path,
+    )
+    _finalize_normalization_evidence_defaults(evidence)
+    return evidence
+
+
+def _empty_normalization_evidence_payload() -> dict[str, JsonValue]:
+    return {
+        "profile_field_count": 0,
+        "fallback_field_count": 0,
+        "fallback_business_field_count": 0,
+        "fallback_technical_passthrough_field_count": 0,
+    }
+
+
+def _accumulate_field_matrix_evidence(
+    evidence: dict[str, dict[str, JsonValue]],
+    rows: list[dict[str, object]],
+    *,
+    fallback_business: str,
+    fallback_technical_passthrough: str,
+) -> None:
+    for row in rows:
         pipeline_name = str(row.get("pipeline_name", "")).strip()
         pipeline_kind = str(row.get("pipeline_kind", "")).strip()
         if not pipeline_name or pipeline_kind != "entity":
             continue
-        payload = evidence.setdefault(
-            pipeline_name,
-            {
-                "profile_field_count": 0,
-                "fallback_field_count": 0,
-                "fallback_business_field_count": 0,
-                "fallback_technical_passthrough_field_count": 0,
-            },
-        )
+        payload = evidence.setdefault(pipeline_name, _empty_normalization_evidence_payload())
         source = str(row.get("normalization_source", "")).strip()
         if source == "profile":
             payload["profile_field_count"] = int(payload["profile_field_count"]) + 1
             continue
         payload["fallback_field_count"] = int(payload["fallback_field_count"]) + 1
-        if source == FALLBACK_BUSINESS:
-            payload["fallback_business_field_count"] = (
-                int(payload["fallback_business_field_count"]) + 1
-            )
-        elif source == FALLBACK_TECHNICAL_PASSTHROUGH:
+        if source == fallback_business:
+            payload["fallback_business_field_count"] = int(payload["fallback_business_field_count"]) + 1
+        elif source == fallback_technical_passthrough:
             payload["fallback_technical_passthrough_field_count"] = (
                 int(payload["fallback_technical_passthrough_field_count"]) + 1
             )
 
-    for provider, entity in NORMALIZATION_PROFILE_REGISTRY:
+
+def _enrich_registry_normalization_evidence(
+    evidence: dict[str, dict[str, JsonValue]],
+    registry: list[tuple[str, str]],
+    resolve_module_path: Callable[[str, str], str | None],
+) -> None:
+    for provider, entity in registry:
         pipeline_name = f"{provider}_{entity}"
-        payload = evidence.setdefault(
-            pipeline_name,
-            {
-                "profile_field_count": 0,
-                "fallback_field_count": 0,
-                "fallback_business_field_count": 0,
-                "fallback_technical_passthrough_field_count": 0,
-            },
-        )
+        payload = evidence.setdefault(pipeline_name, _empty_normalization_evidence_payload())
         payload["normalization_profile_registered"] = True
-        module_path = resolve_normalization_profile_module_path(provider, entity)
+        module_path = resolve_module_path(provider, entity)
         if module_path is not None:
             payload["normalization_profile_module_path"] = module_path
 
+
+def _finalize_normalization_evidence_defaults(
+    evidence: dict[str, dict[str, JsonValue]],
+) -> None:
     for payload in evidence.values():
         payload.setdefault("normalization_profile_registered", False)
-
-    return evidence
 
 
 def _add_pipeline_normalization_evidence(
@@ -8236,56 +8399,56 @@ def _add_pipeline_normalization_evidence(
         pipeline_key = pipeline_nodes.get(pipeline_name)
         if pipeline_key is None:
             continue
-
-        module_path = evidence.get("normalization_profile_module_path")
-        pipeline = snapshot.add_node(
-            "pipeline_surface",
-            pipeline_name,
-            normalization_profile_registered=bool(
-                evidence.get("normalization_profile_registered", False)
-            ),
-            normalization_profile_module_path=(
-                str(module_path) if isinstance(module_path, str) and module_path else None
-            ),
-            profile_field_count=int(evidence.get("profile_field_count", 0)),
-            fallback_field_count=int(evidence.get("fallback_field_count", 0)),
-            fallback_business_field_count=int(
-                evidence.get("fallback_business_field_count", 0)
-            ),
-            fallback_technical_passthrough_field_count=int(
-                evidence.get("fallback_technical_passthrough_field_count", 0)
-            ),
+        entity_key = NodeKey("entity_config", pipeline_name)
+        update_payload = _normalization_evidence_update_payload(evidence)
+        pipeline = snapshot.add_node("pipeline_surface", pipeline_name, **update_payload)
+        if entity_key in snapshot.nodes:
+            snapshot.add_node("entity_config", pipeline_name, **update_payload)
+        _link_normalization_registry_module(
+            snapshot,
+            pipeline,
+            entity_key=entity_key,
+            module_path=update_payload["normalization_profile_module_path"],
         )
 
-        entity_key = NodeKey("entity_config", pipeline_name)
-        if entity_key in snapshot.nodes:
-            snapshot.add_node(
-                "entity_config",
-                pipeline_name,
-                normalization_profile_registered=bool(
-                    evidence.get("normalization_profile_registered", False)
-                ),
-                normalization_profile_module_path=(
-                    str(module_path) if isinstance(module_path, str) and module_path else None
-                ),
-                profile_field_count=int(evidence.get("profile_field_count", 0)),
-                fallback_field_count=int(evidence.get("fallback_field_count", 0)),
-                fallback_business_field_count=int(
-                    evidence.get("fallback_business_field_count", 0)
-                ),
-                fallback_technical_passthrough_field_count=int(
-                    evidence.get("fallback_technical_passthrough_field_count", 0)
-                ),
-            )
 
-        if not isinstance(module_path, str) or not module_path:
-            continue
-        module_key = NodeKey("module_surface", module_path)
-        if module_key not in snapshot.nodes:
-            continue
-        snapshot.add_relation(pipeline, "DEPENDS_ON", module_key, provenance="normalization_registry")
-        if entity_key in snapshot.nodes:
-            snapshot.add_relation(entity_key, "DEPENDS_ON", module_key, provenance="normalization_registry")
+def _normalization_evidence_update_payload(
+    evidence: dict[str, JsonValue],
+) -> dict[str, JsonValue]:
+    module_path = evidence.get("normalization_profile_module_path")
+    return {
+        "normalization_profile_registered": bool(
+            evidence.get("normalization_profile_registered", False)
+        ),
+        "normalization_profile_module_path": (
+            str(module_path) if isinstance(module_path, str) and module_path else None
+        ),
+        "profile_field_count": int(evidence.get("profile_field_count", 0)),
+        "fallback_field_count": int(evidence.get("fallback_field_count", 0)),
+        "fallback_business_field_count": int(
+            evidence.get("fallback_business_field_count", 0)
+        ),
+        "fallback_technical_passthrough_field_count": int(
+            evidence.get("fallback_technical_passthrough_field_count", 0)
+        ),
+    }
+
+
+def _link_normalization_registry_module(
+    snapshot: GraphSnapshot,
+    pipeline: NodeKey,
+    *,
+    entity_key: NodeKey,
+    module_path: JsonValue,
+) -> None:
+    if not isinstance(module_path, str) or not module_path:
+        return
+    module_key = NodeKey("module_surface", module_path)
+    if module_key not in snapshot.nodes:
+        return
+    snapshot.add_relation(pipeline, "DEPENDS_ON", module_key, provenance="normalization_registry")
+    if entity_key in snapshot.nodes:
+        snapshot.add_relation(entity_key, "DEPENDS_ON", module_key, provenance="normalization_registry")
 
 
 def _normalization_evidence_statements() -> list[dict[str, JsonValue]]:
@@ -8403,48 +8566,19 @@ def apply_normalization_evidence_only(
     evidence_started = time.perf_counter()
     statements = _normalization_evidence_statements()
     evidence_build_seconds = time.perf_counter() - evidence_started
-    batches = _batched(statements, batch_size)
+    batches = _normalization_evidence_batches(statements, batch_size)
     batch_summaries: list[dict[str, JsonValue]] = []
     completed_statement_count = 0
 
     for batch_index, batch in enumerate(batches, start=1):
-        pipeline_start, pipeline_end = _normalization_batch_pipeline_span(batch)
-        _emit_normalization_apply_progress(
-            event="batch_start",
-            batch_index=batch_index,
-            batch_count=len(batches),
-            statement_count=len(batch),
-            pipeline_start=pipeline_start,
-            pipeline_end=pipeline_end,
-        )
-        batch_started = time.perf_counter()
-        client.execute(
+        batch_summary = _execute_normalization_evidence_batch(
+            client,
             batch,
-            context=(
-                "normalization evidence batch "
-                f"{batch_index}/{len(batches)} "
-                f"pipelines {pipeline_start or '?'}..{pipeline_end or '?'}"
-            ),
-        )
-        batch_elapsed = time.perf_counter() - batch_started
-        completed_statement_count += len(batch)
-        batch_summary: dict[str, JsonValue] = {
-            "batch_index": batch_index,
-            "statement_count": len(batch),
-            "pipeline_start": pipeline_start,
-            "pipeline_end": pipeline_end,
-            "elapsed_seconds": round(batch_elapsed, 3),
-        }
-        batch_summaries.append(batch_summary)
-        _emit_normalization_apply_progress(
-            event="batch_complete",
             batch_index=batch_index,
             batch_count=len(batches),
-            statement_count=len(batch),
-            pipeline_start=pipeline_start,
-            pipeline_end=pipeline_end,
-            elapsed_seconds=batch_elapsed,
         )
+        completed_statement_count += len(batch)
+        batch_summaries.append(batch_summary)
 
     total_seconds = time.perf_counter() - overall_started
     return {
@@ -8457,6 +8591,57 @@ def apply_normalization_evidence_only(
         "total_seconds": round(total_seconds, 3),
         "batches": batch_summaries,
         "updated_at": datetime.now(tz=UTC).isoformat(),
+    }
+
+
+def _normalization_evidence_batches(
+    statements: list[dict[str, JsonValue]],
+    batch_size: int,
+) -> list[list[dict[str, JsonValue]]]:
+    return _batched(statements, batch_size)
+
+
+def _execute_normalization_evidence_batch(
+    client: Neo4jHttpClient,
+    batch: list[dict[str, JsonValue]],
+    *,
+    batch_index: int,
+    batch_count: int,
+) -> dict[str, JsonValue]:
+    pipeline_start, pipeline_end = _normalization_batch_pipeline_span(batch)
+    _emit_normalization_apply_progress(
+        event="batch_start",
+        batch_index=batch_index,
+        batch_count=batch_count,
+        statement_count=len(batch),
+        pipeline_start=pipeline_start,
+        pipeline_end=pipeline_end,
+    )
+    batch_started = time.perf_counter()
+    client.execute(
+        batch,
+        context=(
+            "normalization evidence batch "
+            f"{batch_index}/{batch_count} "
+            f"pipelines {pipeline_start or '?'}..{pipeline_end or '?'}"
+        ),
+    )
+    batch_elapsed = time.perf_counter() - batch_started
+    _emit_normalization_apply_progress(
+        event="batch_complete",
+        batch_index=batch_index,
+        batch_count=batch_count,
+        statement_count=len(batch),
+        pipeline_start=pipeline_start,
+        pipeline_end=pipeline_end,
+        elapsed_seconds=batch_elapsed,
+    )
+    return {
+        "batch_index": batch_index,
+        "statement_count": len(batch),
+        "pipeline_start": pipeline_start,
+        "pipeline_end": pipeline_end,
+        "elapsed_seconds": round(batch_elapsed, 3),
     }
 
 
@@ -9815,6 +10000,60 @@ def _ensure_targeted_apply_prerequisites(
         )
 
 
+def _active_group_names(
+    ordered_names: tuple[str, ...],
+    grouped_statements: dict[str, list[dict[str, JsonValue]]],
+) -> list[str]:
+    return [name for name in ordered_names if name in grouped_statements]
+
+
+def _missing_group_names(
+    active_names: list[str],
+    grouped_statements: dict[str, list[dict[str, JsonValue]]],
+    live_counts: dict[str, int],
+) -> list[str]:
+    return [
+        name
+        for name in active_names
+        if live_counts.get(name, 0) != len(grouped_statements[name])
+    ]
+
+
+def _retry_missing_groups(
+    client: Neo4jHttpClient,
+    grouped_statements: dict[str, list[dict[str, JsonValue]]],
+    missing_names: list[str],
+    retry_batch_size: int,
+    *,
+    kind: str,
+) -> None:
+    if not missing_names:
+        return
+    _execute_grouped_statements(
+        client,
+        {name: grouped_statements[name] for name in missing_names},
+        retry_batch_size,
+        kind,
+    )
+
+
+def _group_mismatch_messages(
+    active_names: list[str],
+    grouped_statements: dict[str, list[dict[str, JsonValue]]],
+    live_counts: dict[str, int],
+    *,
+    noun: str,
+) -> list[str]:
+    mismatches: list[str] = []
+    for name in active_names:
+        live_count = live_counts.get(name, 0)
+        expected = len(grouped_statements[name])
+        if live_count == expected:
+            continue
+        mismatches.append(f"{noun} `{name}` expected {expected}, live managed {live_count}")
+    return mismatches
+
+
 def _retry_critical_analysis_groups(
     client: Neo4jHttpClient,
     node_groups: dict[str, list[dict[str, JsonValue]]],
@@ -9823,10 +10062,8 @@ def _retry_critical_analysis_groups(
     sync_run: str | None = None,
 ) -> None:
     retry_batch_size = max(1, min(batch_size, 5))
-    active_node_labels = [label for label in CRITICAL_ANALYSIS_NODE_LABELS if label in node_groups]
-    active_relation_types = [
-        relation_type for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES if relation_type in relation_groups
-    ]
+    active_node_labels = _active_group_names(CRITICAL_ANALYSIS_NODE_LABELS, node_groups)
+    active_relation_types = _active_group_names(CRITICAL_ANALYSIS_RELATION_TYPES, relation_groups)
     live_node_counts = _live_managed_node_counts(
         client,
         tuple(active_node_labels),
@@ -9840,18 +10077,19 @@ def _retry_critical_analysis_groups(
         sync_run=sync_run,
     )
 
-    missing_node_labels = [
-        label
-        for label in active_node_labels
-        if live_node_counts.get(label, 0) != len(node_groups[label])
-    ]
+    missing_node_labels = _missing_group_names(
+        active_node_labels,
+        node_groups,
+        live_node_counts,
+    )
+    _retry_missing_groups(
+        client,
+        node_groups,
+        missing_node_labels,
+        retry_batch_size,
+        kind="critical node retry",
+    )
     if missing_node_labels:
-        _execute_grouped_statements(
-            client,
-            {label: node_groups[label] for label in missing_node_labels},
-            retry_batch_size,
-            "critical node retry",
-        )
         live_node_counts = _live_managed_node_counts(
             client,
             tuple(active_node_labels),
@@ -9859,18 +10097,19 @@ def _retry_critical_analysis_groups(
             sync_run=sync_run,
         )
 
-    missing_relation_types = [
-        relation_type
-        for relation_type in active_relation_types
-        if live_relation_counts.get(relation_type, 0) != len(relation_groups[relation_type])
-    ]
+    missing_relation_types = _missing_group_names(
+        active_relation_types,
+        relation_groups,
+        live_relation_counts,
+    )
+    _retry_missing_groups(
+        client,
+        relation_groups,
+        missing_relation_types,
+        retry_batch_size,
+        kind="critical relation retry",
+    )
     if missing_relation_types:
-        _execute_grouped_statements(
-            client,
-            {relation_type: relation_groups[relation_type] for relation_type in missing_relation_types},
-            retry_batch_size,
-            "critical relation retry",
-        )
         live_relation_counts = _live_managed_relation_counts(
             client,
             tuple(active_relation_types),
@@ -9878,21 +10117,20 @@ def _retry_critical_analysis_groups(
             sync_run=sync_run,
         )
 
-    missing_after_retry: list[str] = []
-    for label in active_node_labels:
-        live_count = live_node_counts.get(label, 0)
-        expected = len(node_groups[label])
-        if live_count != expected:
-            missing_after_retry.append(
-                f"label `{label}` expected {expected}, live managed {live_count}"
-            )
-    for relation_type in active_relation_types:
-        live_count = live_relation_counts.get(relation_type, 0)
-        expected = len(relation_groups[relation_type])
-        if live_count != expected:
-            missing_after_retry.append(
-                f"relation `{relation_type}` expected {expected}, live managed {live_count}"
-            )
+    missing_after_retry = _group_mismatch_messages(
+        active_node_labels,
+        node_groups,
+        live_node_counts,
+        noun="label",
+    )
+    missing_after_retry.extend(
+        _group_mismatch_messages(
+            active_relation_types,
+            relation_groups,
+            live_relation_counts,
+            noun="relation",
+        )
+    )
     if missing_after_retry:
         raise RuntimeError(
             "Post-apply verification failed for critical analysis groups: "

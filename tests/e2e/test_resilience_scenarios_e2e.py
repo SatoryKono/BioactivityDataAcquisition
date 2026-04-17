@@ -33,6 +33,7 @@ async def test_memory_monitor_adaptive_batching(e2e_data_dir: Path):
     - Batch size should be reduced when memory usage exceeds threshold
     - Pipeline should continue processing with smaller batches
     """
+    await asyncio.sleep(0)
     from bioetl.domain.config import MemoryConfig
     from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
@@ -65,6 +66,7 @@ async def test_memory_monitor_graceful_degradation():
     - MemoryMonitor returns conservative estimates when psutil unavailable
     - This is intentional graceful degradation, not a bug
     """
+    await asyncio.sleep(0)
     from bioetl.domain.config import MemoryConfig
     from bioetl.infrastructure.system.memory_monitor import MemoryMonitor
 
@@ -256,6 +258,7 @@ async def test_circuit_breaker_opens_on_failures():
     - 5 consecutive failures should open the circuit
     - Open circuit should reject requests immediately
     """
+    await asyncio.sleep(0)
     from bioetl.domain.types import CircuitBreakerState
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 
@@ -304,6 +307,7 @@ async def test_circuit_breaker_half_open_recovery():
     # Call should_attempt to trigger transition to half-open
     # This happens internally when making a request
     async def dummy_func() -> str:
+        await asyncio.sleep(0)
         return "success"
 
     # The call() method triggers state transitions
@@ -328,6 +332,7 @@ async def test_retry_policy_deterministic_jitter():
     - Jitter should be deterministic for debugging
     - Same inputs should produce same delay
     """
+    await asyncio.sleep(0)
     from bioetl.domain.resilience import RetryConfig
 
     policy = RetryConfig(
@@ -352,6 +357,7 @@ async def test_retry_policy_exponential_backoff():
 
     Delays should increase exponentially with each attempt.
     """
+    await asyncio.sleep(0)
     from bioetl.domain.resilience import RetryConfig
 
     policy = RetryConfig(

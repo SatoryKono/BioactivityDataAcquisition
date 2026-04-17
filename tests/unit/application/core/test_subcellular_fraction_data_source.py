@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -27,6 +28,7 @@ class MockDataSource:
         self.aclose = AsyncMock()
 
     async def fetch(self, entity_type: str, **kwargs):
+        await asyncio.sleep(0)
         self.fetch_calls.append({"entity_type": entity_type, **kwargs})
         for assay in self._assays:
             yield assay
@@ -45,6 +47,7 @@ class MockFilterableDataSource:
         self.aclose = AsyncMock()
 
     async def fetch(self, entity_type: str, **kwargs):
+        await asyncio.sleep(0)
         for assay in self._assays:
             yield assay
 
@@ -55,6 +58,7 @@ class MockFilterableDataSource:
         filter_field: str,
         limit: int | None = None,
     ):
+        await asyncio.sleep(0)
         for assay in self._assays:
             yield assay
 
@@ -64,6 +68,7 @@ class MockFilterableDataSource:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ):
+        await asyncio.sleep(0)
         for assay in self._assays:
             yield assay
 
@@ -75,6 +80,7 @@ class MockFilterableDataSource:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ):
+        await asyncio.sleep(0)
         for assay in self._assays:
             yield assay
 
@@ -661,6 +667,7 @@ class TestSubcellularFractionFilterable:
                 fallback_mapping: dict[str, str],
                 limit: int | None = None,
             ):
+                await asyncio.sleep(0)
                 self.fallback_calls.append(
                     {
                         "entity_type": entity_type,
