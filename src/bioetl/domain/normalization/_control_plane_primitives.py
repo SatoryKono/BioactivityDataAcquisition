@@ -15,6 +15,8 @@ from bioetl.domain.normalization.json import (
     serialize_json_canonical,
 )
 
+_MAPPING_STR_OBJECT = "Mapping[str, object]"
+
 
 def normalize_control_plane_uuid(value: UUID | str) -> str:
     """Return one canonical UUID string representation."""
@@ -64,7 +66,7 @@ def _canonical_sort_key(value: object) -> str:
 def _normalize_dataclass(value: object) -> dict[str, object] | None:
     if not is_dataclass(value) or isinstance(value, type):
         return None
-    return normalize_mapping(cast("Mapping[str, object]", asdict(value)))
+    return normalize_mapping(cast(_MAPPING_STR_OBJECT, asdict(value)))
 
 
 def _normalize_scalar(value: object) -> object:
@@ -105,7 +107,7 @@ def normalize_canonical_object(value: object) -> object:
     if dataclass_value is not None:
         return dataclass_value
     if isinstance(value, Mapping):
-        return normalize_mapping(cast("Mapping[str, object]", value))
+        return normalize_mapping(cast(_MAPPING_STR_OBJECT, value))
     if isinstance(value, (list, tuple)):
         return _normalize_sequence(value)
     if isinstance(value, (set, frozenset)):
@@ -141,4 +143,4 @@ def normalize_run_ledger_details(value: object | None) -> dict[str, object] | No
     """Normalize nested diagnostic details when the payload provides them."""
     if not isinstance(value, Mapping):
         return None
-    return normalize_mapping(cast("Mapping[str, object]", value))
+    return normalize_mapping(cast(_MAPPING_STR_OBJECT, value))
