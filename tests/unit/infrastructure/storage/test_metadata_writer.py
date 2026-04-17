@@ -300,7 +300,7 @@ class TestMetadataWriter:
 
         assert "dq_summary" in content
         assert content["dq_summary"]["total_records"] == 15000
-        assert content["dq_summary"]["error_rate"] == 0.05
+        assert content["dq_summary"]["error_rate"] == pytest.approx(0.05)
 
     @pytest.mark.asyncio
     async def test_write_gold_metadata_creates_file(
@@ -672,8 +672,8 @@ class TestMetadataModels:
         )
 
         null_rates = dq.null_rates
-        assert null_rates["activity_id"] == 0.0
-        assert null_rates["standard_value"] == 0.12
+        assert null_rates["activity_id"] == pytest.approx(0.0)
+        assert null_rates["standard_value"] == pytest.approx(0.12)
 
     def test_runtime_metadata_datetime_serialization(self) -> None:
         """Test datetime fields are serialized as ISO strings."""

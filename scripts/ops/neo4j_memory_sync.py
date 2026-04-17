@@ -1157,6 +1157,25 @@ class SyncApplyOptions:
 
 
 @dataclass(frozen=True)
+class WorkflowContext:
+    workflow_name: str
+    title: str
+    relative_path: str
+    today: str
+    workflow: NodeKey
+
+
+@dataclass(frozen=True)
+class WorkflowJobContext:
+    workflow_name: str
+    job_id: str
+    job_name: str
+    relative_path: str
+    today: str
+    job: NodeKey
+
+
+@dataclass(frozen=True)
 class DuplicateFamilyConfig:
     name: str
     roots: tuple[str, ...]
@@ -3529,6 +3548,363 @@ def _add_control_plane_artifact_surface(
     return artifact
 
 
+def _entity_pipeline_scope(provider_name: str, entity_name: str, pipeline_name: str) -> EntityScope:
+    return EntityScope(provider=provider_name, entity=entity_name, pipeline_name=pipeline_name)
+
+
+def _scd_config_columns(layer_config: dict[str, object]) -> dict[str, str | None]:
+    scd_config = layer_config.get("scd_config") if isinstance(layer_config.get("scd_config"), dict) else {}
+    return {
+        "version_column": _optional_text(scd_config.get("version_col")),
+        "current_flag_column": _optional_text(scd_config.get("current_flag_col")),
+        "valid_from_column": _optional_text(scd_config.get("valid_from_col")),
+        "valid_to_column": _optional_text(scd_config.get("valid_to_col")),
+    }
+
+
+def _add_entity_layer_field_nodes(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    *,
+    payload: dict[str, object],
+    surface: NodeKey,
+    layer_name: str,
+    provider_name: str,
+    entity_name: str,
+    pipeline_name: str,
+    today: str,
+    contract_ref: str,
+    quality_index: dict[str, dict[str, JsonValue]],
+    config_artifact: NodeKey,
+    layer_config: dict[str, object],
+) -> dict[str, NodeKey]:
+    layer_field_nodes: dict[str, NodeKey] = {}
+    scope = _entity_pipeline_scope(provider_name, entity_name, pipeline_name)
+    drift_classification = "staging_projection" if layer_name == "bronze" else None
+    for field_group, field_name in _filtered_group_fields(payload, layer_name=layer_name):
+        field_quality = quality_index.get(field_name, {})
+        field_node = _add_schema_field_surface(
+            snapshot,
+            project,
+            surface,
+            field_name=field_name,
+            field_group=field_group,
+            today=today,
+            contract_ref=contract_ref,
+            scope=scope,
+            required_in_quality=(
+                bool(field_quality.get("required_in_quality"))
+                if field_quality.get("required_in_quality") is not None
+                else None
+            ),
+            validation_types=_normalized_text_list(field_quality.get("validation_types")),
+            drift_classification=drift_classification,
+        )
+        layer_field_nodes[field_name] = field_node
+        if config_artifact in snapshot.nodes:
+            snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
+    for metadata_field in _scd_config_columns(layer_config).values():
+        if metadata_field is None or metadata_field in layer_field_nodes:
+            continue
+        field_node = _add_schema_field_surface(
+            snapshot,
+            project,
+            surface,
+            field_name=metadata_field,
+            field_group="system",
+            today=today,
+            contract_ref=contract_ref,
+            scope=scope,
+            drift_classification="runtime_metadata",
+        )
+        layer_field_nodes[metadata_field] = field_node
+        if config_artifact in snapshot.nodes:
+            snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
+    return layer_field_nodes
+
+
+def _add_entity_storage_layers(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    *,
+    payload: dict[str, object],
+    base_sink: dict[str, object],
+    pipeline_sink: dict[str, object],
+    provider_name: str,
+    entity_name: str,
+    pipeline_name: str,
+    pipeline_key: NodeKey,
+    entity_key: NodeKey,
+    config_artifact: NodeKey,
+    today: str,
+    retention_days: int | None,
+    config_version: str | None,
+    quality_version: str | None,
+    contract_ref: str,
+    quality_index: dict[str, dict[str, JsonValue]],
+) -> tuple[dict[str, NodeKey], dict[str, dict[str, NodeKey]]]:
+    layer_nodes: dict[str, NodeKey] = {}
+    field_nodes_by_layer: dict[str, dict[str, NodeKey]] = {}
+    scope = _entity_pipeline_scope(provider_name, entity_name, pipeline_name)
+    for layer_name in ("bronze", "silver", "gold"):
+        layer_config = _merge_storage_layer_config(base_sink, pipeline_sink, layer_name)
+        enabled = bool(layer_config.get("enabled", True))
+        if layer_name == "gold" and not enabled:
+            continue
+        storage_ref = f"{layer_name}/{provider_name}/{entity_name}"
+        surface = _add_storage_surface(
+            snapshot,
+            project,
+            storage_ref,
+            summary=f"{layer_name.title()} storage surface for `{pipeline_name}`.",
+            layer=layer_name,
+            today=today,
+            storage_kind="entity_layer_output",
+            scope=scope,
+            format_name=str(layer_config.get("format")) if layer_config.get("format") is not None else None,
+            mode=str(layer_config.get("mode")) if layer_config.get("mode") is not None else None,
+            enabled=enabled,
+            retention_days=retention_days,
+            config_version=config_version,
+            quality_version=quality_version,
+            partition_by=_normalized_text_list(layer_config.get("partition_by")),
+            sort_by=_normalized_text_list(layer_config.get("sort_by")),
+            on_schema_mismatch=_optional_text(layer_config.get("on_schema_mismatch")),
+            versioning_mode=_optional_text(layer_config.get("mode")),
+            **_scd_config_columns(layer_config),
+            **_storage_schema_properties(payload, layer_name=layer_name),
+        )
+        layer_nodes[layer_name] = surface
+        if pipeline_key in snapshot.nodes:
+            snapshot.add_relation(pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
+        if entity_key in snapshot.nodes:
+            snapshot.add_relation(entity_key, "WRITES_TO", surface, provenance="storage_surfaces")
+        if config_artifact in snapshot.nodes:
+            snapshot.add_relation(surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
+        field_nodes_by_layer[layer_name] = _add_entity_layer_field_nodes(
+            snapshot,
+            project,
+            payload=payload,
+            surface=surface,
+            layer_name=layer_name,
+            provider_name=provider_name,
+            entity_name=entity_name,
+            pipeline_name=pipeline_name,
+            today=today,
+            contract_ref=contract_ref,
+            quality_index=quality_index,
+            config_artifact=config_artifact,
+            layer_config=layer_config,
+        )
+    return layer_nodes, field_nodes_by_layer
+
+
+def _link_entity_storage_promotions(
+    snapshot: GraphSnapshot,
+    layer_nodes: dict[str, NodeKey],
+    field_nodes_by_layer: dict[str, dict[str, NodeKey]],
+) -> None:
+    bronze_fields = field_nodes_by_layer.get("bronze", {})
+    silver_fields = field_nodes_by_layer.get("silver", {})
+    gold_fields = field_nodes_by_layer.get("gold", {})
+    if "bronze" in layer_nodes and "silver" in layer_nodes:
+        snapshot.add_relation(layer_nodes["bronze"], "PROMOTES_TO", layer_nodes["silver"], provenance="storage_surfaces")
+        for field_name, bronze_field in bronze_fields.items():
+            silver_field = silver_fields.get(field_name)
+            if silver_field is not None:
+                snapshot.add_relation(bronze_field, "PROMOTES_FIELD_TO", silver_field, provenance="schema_fields")
+    if "silver" not in layer_nodes or "gold" not in layer_nodes:
+        return
+    snapshot.add_relation(layer_nodes["silver"], "PROMOTES_TO", layer_nodes["gold"], provenance="storage_surfaces")
+    for field_name, silver_field in silver_fields.items():
+        silver_node = snapshot.nodes.get(silver_field)
+        if silver_node is None:
+            continue
+        gold_field = gold_fields.get(field_name)
+        if gold_field is not None:
+            snapshot.add_relation(silver_field, "PROMOTES_FIELD_TO", gold_field, provenance="schema_fields")
+            silver_node.properties["drift_classification"] = "projected_to_gold"
+            continue
+        silver_node.properties["drift_classification"] = "silver_only"
+    for field_name, gold_field in gold_fields.items():
+        gold_node = snapshot.nodes.get(gold_field)
+        if gold_node is None:
+            continue
+        gold_node.properties["drift_classification"] = (
+            "promoted_from_silver" if field_name in silver_fields else "gold_only"
+        )
+
+
+def _composite_group_fields(merge_payload: dict[str, object]) -> list[tuple[str, str]]:
+    group_fields: list[tuple[str, str]] = []
+    column_groups = merge_payload.get("column_groups")
+    if not isinstance(column_groups, list):
+        return group_fields
+    for item in column_groups:
+        if not isinstance(item, dict):
+            continue
+        group_name = _optional_text(item.get("name"))
+        if group_name is None:
+            continue
+        for field_name in _normalized_text_list(item.get("fields")) or []:
+            group_fields.append((group_name, field_name))
+    return group_fields
+
+
+def _add_composite_seed_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    *,
+    composite_name: str,
+    pipeline_key: NodeKey,
+    config_artifact: NodeKey,
+    composite_payload: dict[str, object],
+    today: str,
+    has_dependency_pipelines: bool,
+) -> list[str]:
+    seed_payload = composite_payload.get("seed") if isinstance(composite_payload.get("seed"), dict) else {}
+    seed_table = seed_payload.get("silver_table")
+    if not isinstance(seed_table, str) or not seed_table.strip():
+        return []
+    seed_storage_ref = seed_table.strip()
+    seed_surface = NodeKey("storage_surface", seed_storage_ref)
+    if has_dependency_pipelines or seed_surface not in snapshot.nodes:
+        seed_surface = _add_storage_surface(
+            snapshot,
+            project,
+            seed_storage_ref,
+            summary=f"Seed storage surface for composite pipeline `{composite_name}`.",
+            layer="silver",
+            today=today,
+            storage_kind="composite_seed_input",
+            scope=EntityScope(pipeline_name=composite_name),
+        )
+    if pipeline_key in snapshot.nodes:
+        snapshot.add_relation(pipeline_key, "DEPENDS_ON", seed_surface, provenance="storage_surfaces")
+    if config_artifact in snapshot.nodes:
+        snapshot.add_relation(seed_surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
+    return [seed_storage_ref]
+
+
+def _add_composite_dependency_surfaces(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    *,
+    composite_name: str,
+    pipeline_key: NodeKey,
+    config_artifact: NodeKey,
+    dependencies: object,
+    today: str,
+) -> list[str]:
+    source_storage_refs: list[str] = []
+    if not isinstance(dependencies, list):
+        return source_storage_refs
+    for dependency in dependencies:
+        if not isinstance(dependency, dict):
+            continue
+        silver_table = dependency.get("silver_table")
+        if not isinstance(silver_table, str) or not silver_table.strip():
+            continue
+        storage_ref = silver_table.strip()
+        source_storage_refs.append(storage_ref)
+        dependency_surface = _add_storage_surface(
+            snapshot,
+            project,
+            storage_ref,
+            summary=f"Dependency storage surface for composite pipeline `{composite_name}`.",
+            layer="silver",
+            today=today,
+            storage_kind="composite_dependency_input",
+            scope=EntityScope(pipeline_name=composite_name),
+        )
+        if pipeline_key in snapshot.nodes:
+            snapshot.add_relation(
+                pipeline_key,
+                "DEPENDS_ON",
+                dependency_surface,
+                provenance="storage_surfaces",
+                required=bool(dependency.get("required", False)),
+            )
+        if config_artifact in snapshot.nodes:
+            snapshot.add_relation(dependency_surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
+    return source_storage_refs
+
+
+def _add_composite_output_layers(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    *,
+    composite_name: str,
+    pipeline_key: NodeKey,
+    config_artifact: NodeKey,
+    today: str,
+    composite_version: str | None,
+    merge_payload: dict[str, object],
+    output_payload: dict[str, object],
+    group_fields: list[tuple[str, str]],
+    source_storage_refs: list[str],
+    schema_fields_by_storage: dict[str, dict[str, NodeKey]],
+) -> tuple[dict[str, NodeKey], dict[str, dict[str, NodeKey]]]:
+    layer_nodes: dict[str, NodeKey] = {}
+    field_nodes_by_layer: dict[str, dict[str, NodeKey]] = {}
+    composite_scope = EntityScope(
+        provider="composite",
+        entity=composite_name.removeprefix("composite_"),
+        pipeline_name=composite_name,
+    )
+    for layer_name in ("silver", "gold"):
+        output_path = output_payload.get(layer_name)
+        if not isinstance(output_path, str) or not output_path.strip():
+            continue
+        storage_ref = _storage_ref_from_output_path(output_path)
+        surface = _add_storage_surface(
+            snapshot,
+            project,
+            storage_ref,
+            summary=f"{layer_name.title()} output surface for composite pipeline `{composite_name}`.",
+            layer=layer_name,
+            today=today,
+            storage_kind="composite_layer_output",
+            scope=EntityScope(pipeline_name=composite_name),
+            config_version=composite_version,
+            merge_strategy=_optional_text(merge_payload.get("strategy")),
+            sort_by=_normalized_text_list(
+                merge_payload.get("sort_by", {}).get(layer_name)
+                if isinstance(merge_payload.get("sort_by"), dict)
+                else None
+            ),
+        )
+        layer_nodes[layer_name] = surface
+        if pipeline_key in snapshot.nodes:
+            snapshot.add_relation(pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
+        if config_artifact in snapshot.nodes:
+            snapshot.add_relation(surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
+
+        layer_field_nodes: dict[str, NodeKey] = {}
+        for field_group, field_name in group_fields:
+            candidate_sources = [ref for ref in source_storage_refs if field_name in schema_fields_by_storage.get(ref, {})]
+            field_node = _add_schema_field_surface(
+                snapshot,
+                project,
+                surface,
+                field_name=field_name,
+                field_group=field_group,
+                today=today,
+                scope=composite_scope,
+                drift_classification="inherited_field" if candidate_sources else "composite_only",
+                source_storage_refs=candidate_sources if candidate_sources else None,
+            )
+            layer_field_nodes[field_name] = field_node
+            if config_artifact in snapshot.nodes:
+                snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
+            for source_ref in candidate_sources:
+                source_field = schema_fields_by_storage.get(source_ref, {}).get(field_name)
+                if source_field is not None:
+                    snapshot.add_relation(field_node, "DERIVES_FIELD_FROM", source_field, provenance="schema_fields")
+        field_nodes_by_layer[layer_name] = layer_field_nodes
+    return layer_nodes, field_nodes_by_layer
+
+
 def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     base_pipeline_path = root / "configs" / "base" / "pipeline.yaml"
     base_payload = _read_yaml(base_pipeline_path) if base_pipeline_path.is_file() else {}
@@ -3553,142 +3929,28 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
         quality_version = _optional_text(quality_payload.get("version"))
         contract_ref = f"{provider_name}.{entity_name}"
         quality_index = _field_quality_index(payload)
-        field_nodes_by_layer: dict[str, dict[str, NodeKey]] = {}
-
-        layer_nodes: dict[str, NodeKey] = {}
-        for layer_name in ("bronze", "silver", "gold"):
-            layer_config = _merge_storage_layer_config(base_sink, pipeline_sink, layer_name)
-            enabled = bool(layer_config.get("enabled", True))
-            if layer_name == "gold" and not enabled:
-                continue
-            storage_ref = f"{layer_name}/{provider_name}/{entity_name}"
-            surface = _add_storage_surface(
-                snapshot,
-                project,
-                storage_ref,
-                summary=f"{layer_name.title()} storage surface for `{pipeline_name}`.",
-                layer=layer_name,
-                today=today,
-                storage_kind="entity_layer_output",
-                scope=EntityScope(provider=provider_name, entity=entity_name, pipeline_name=pipeline_name),
-                format_name=str(layer_config.get("format")) if layer_config.get("format") is not None else None,
-                mode=str(layer_config.get("mode")) if layer_config.get("mode") is not None else None,
-                enabled=enabled,
-                retention_days=int(retention_days) if isinstance(retention_days, int | float) else None,
-                config_version=config_version,
-                quality_version=quality_version,
-                partition_by=_normalized_text_list(layer_config.get("partition_by")),
-                sort_by=_normalized_text_list(layer_config.get("sort_by")),
-                on_schema_mismatch=_optional_text(layer_config.get("on_schema_mismatch")),
-                versioning_mode=_optional_text(layer_config.get("mode")),
-                version_column=(
-                    _optional_text(layer_config.get("scd_config", {}).get("version_col"))
-                    if isinstance(layer_config.get("scd_config"), dict)
-                    else None
-                ),
-                current_flag_column=(
-                    _optional_text(layer_config.get("scd_config", {}).get("current_flag_col"))
-                    if isinstance(layer_config.get("scd_config"), dict)
-                    else None
-                ),
-                valid_from_column=(
-                    _optional_text(layer_config.get("scd_config", {}).get("valid_from_col"))
-                    if isinstance(layer_config.get("scd_config"), dict)
-                    else None
-                ),
-                valid_to_column=(
-                    _optional_text(layer_config.get("scd_config", {}).get("valid_to_col"))
-                    if isinstance(layer_config.get("scd_config"), dict)
-                    else None
-                ),
-                **_storage_schema_properties(payload, layer_name=layer_name),
-            )
-            layer_nodes[layer_name] = surface
-            if pipeline_key in snapshot.nodes:
-                snapshot.add_relation(pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
-            if entity_key in snapshot.nodes:
-                snapshot.add_relation(entity_key, "WRITES_TO", surface, provenance="storage_surfaces")
-            if config_artifact in snapshot.nodes:
-                snapshot.add_relation(surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
-
-            layer_field_nodes: dict[str, NodeKey] = {}
-            drift_classification = "staging_projection" if layer_name == "bronze" else None
-            for field_group, field_name in _filtered_group_fields(payload, layer_name=layer_name):
-                field_quality = quality_index.get(field_name, {})
-                field_node = _add_schema_field_surface(
-                    snapshot,
-                    project,
-                    surface,
-                    field_name=field_name,
-                    field_group=field_group,
-                    today=today,
-                    contract_ref=contract_ref,
-                    scope=EntityScope(provider=provider_name, entity=entity_name, pipeline_name=pipeline_name),
-                    required_in_quality=(
-                        bool(field_quality.get("required_in_quality"))
-                        if field_quality.get("required_in_quality") is not None
-                        else None
-                    ),
-                    validation_types=_normalized_text_list(field_quality.get("validation_types")),
-                    drift_classification=drift_classification,
-                )
-                layer_field_nodes[field_name] = field_node
-                if config_artifact in snapshot.nodes:
-                    snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
-            scd_config = layer_config.get("scd_config") if isinstance(layer_config.get("scd_config"), dict) else {}
-            for metadata_field in (
-                _optional_text(scd_config.get("version_col")),
-                _optional_text(scd_config.get("current_flag_col")),
-                _optional_text(scd_config.get("valid_from_col")),
-                _optional_text(scd_config.get("valid_to_col")),
-            ):
-                if metadata_field is None or metadata_field in layer_field_nodes:
-                    continue
-                field_node = _add_schema_field_surface(
-                    snapshot,
-                    project,
-                    surface,
-                    field_name=metadata_field,
-                    field_group="system",
-                    today=today,
-                    contract_ref=contract_ref,
-                    scope=EntityScope(provider=provider_name, entity=entity_name, pipeline_name=pipeline_name),
-                    drift_classification="runtime_metadata",
-                )
-                layer_field_nodes[metadata_field] = field_node
-                if config_artifact in snapshot.nodes:
-                    snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
-            field_nodes_by_layer[layer_name] = layer_field_nodes
-            schema_fields_by_storage[surface.name] = layer_field_nodes
-
-        if "bronze" in layer_nodes and "silver" in layer_nodes:
-            snapshot.add_relation(layer_nodes["bronze"], "PROMOTES_TO", layer_nodes["silver"], provenance="storage_surfaces")
-            for field_name, bronze_field in field_nodes_by_layer.get("bronze", {}).items():
-                silver_field = field_nodes_by_layer.get("silver", {}).get(field_name)
-                if silver_field is not None:
-                    snapshot.add_relation(bronze_field, "PROMOTES_FIELD_TO", silver_field, provenance="schema_fields")
-        if "silver" in layer_nodes and "gold" in layer_nodes:
-            snapshot.add_relation(layer_nodes["silver"], "PROMOTES_TO", layer_nodes["gold"], provenance="storage_surfaces")
-            gold_fields = field_nodes_by_layer.get("gold", {})
-            for field_name, silver_field in field_nodes_by_layer.get("silver", {}).items():
-                silver_node = snapshot.nodes.get(silver_field)
-                if silver_node is None:
-                    continue
-                gold_field = gold_fields.get(field_name)
-                if gold_field is not None:
-                    snapshot.add_relation(silver_field, "PROMOTES_FIELD_TO", gold_field, provenance="schema_fields")
-                    silver_node.properties["drift_classification"] = "projected_to_gold"
-                else:
-                    silver_node.properties["drift_classification"] = "silver_only"
-            for field_name, gold_field in gold_fields.items():
-                gold_node = snapshot.nodes.get(gold_field)
-                if gold_node is None:
-                    continue
-                gold_node.properties["drift_classification"] = (
-                    "promoted_from_silver"
-                    if field_name in field_nodes_by_layer.get("silver", {})
-                    else "gold_only"
-                )
+        layer_nodes, field_nodes_by_layer = _add_entity_storage_layers(
+            snapshot,
+            project,
+            payload=payload,
+            base_sink=base_sink,
+            pipeline_sink=pipeline_sink,
+            provider_name=provider_name,
+            entity_name=entity_name,
+            pipeline_name=pipeline_name,
+            pipeline_key=pipeline_key,
+            entity_key=entity_key,
+            config_artifact=config_artifact,
+            today=today,
+            retention_days=int(retention_days) if isinstance(retention_days, int | float) else None,
+            config_version=config_version,
+            quality_version=quality_version,
+            contract_ref=contract_ref,
+            quality_index=quality_index,
+        )
+        for layer_name, surface in layer_nodes.items():
+            schema_fields_by_storage[surface.name] = field_nodes_by_layer.get(layer_name, {})
+        _link_entity_storage_promotions(snapshot, layer_nodes, field_nodes_by_layer)
 
     composites_root = root / "configs" / "composites"
     for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
@@ -3697,133 +3959,50 @@ def _add_storage_data_surfaces(snapshot: GraphSnapshot, root: Path, project: Nod
         composite_name = str(composite_payload.get("name", composite_path.stem))
         pipeline_key = NodeKey("pipeline_surface", composite_name)
         config_artifact = NodeKey("config_artifact", _rel_path(root, composite_path))
-        field_nodes_by_layer: dict[str, dict[str, NodeKey]] = {}
-        source_storage_refs: list[str] = []
         dependencies = composite_payload.get("dependencies")
         has_dependency_pipelines = isinstance(dependencies, list) and any(
             isinstance(item, dict) for item in dependencies
         )
-
-        seed_payload = composite_payload.get("seed") if isinstance(composite_payload.get("seed"), dict) else {}
-        seed_table = seed_payload.get("silver_table")
-        if isinstance(seed_table, str) and seed_table.strip():
-            seed_storage_ref = seed_table.strip()
-            source_storage_refs.append(seed_storage_ref)
-            seed_surface = NodeKey("storage_surface", seed_storage_ref)
-            if has_dependency_pipelines or seed_surface not in snapshot.nodes:
-                seed_surface = _add_storage_surface(
-                    snapshot,
-                    project,
-                    seed_storage_ref,
-                    summary=f"Seed storage surface for composite pipeline `{composite_name}`.",
-                    layer="silver",
-                    today=today,
-                    storage_kind="composite_seed_input",
-                    scope=EntityScope(pipeline_name=composite_name),
-                )
-            if pipeline_key in snapshot.nodes:
-                snapshot.add_relation(pipeline_key, "DEPENDS_ON", seed_surface, provenance="storage_surfaces")
-            if config_artifact in snapshot.nodes:
-                snapshot.add_relation(seed_surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
-
-        if isinstance(dependencies, list):
-            for dependency in dependencies:
-                if not isinstance(dependency, dict):
-                    continue
-                silver_table = dependency.get("silver_table")
-                if not isinstance(silver_table, str) or not silver_table.strip():
-                    continue
-                source_storage_refs.append(silver_table.strip())
-                dependency_surface = _add_storage_surface(
-                    snapshot,
-                    project,
-                    silver_table.strip(),
-                    summary=f"Dependency storage surface for composite pipeline `{composite_name}`.",
-                    layer="silver",
-                    today=today,
-                    storage_kind="composite_dependency_input",
-                    scope=EntityScope(pipeline_name=composite_name),
-                )
-                if pipeline_key in snapshot.nodes:
-                    snapshot.add_relation(
-                        pipeline_key,
-                        "DEPENDS_ON",
-                        dependency_surface,
-                        provenance="storage_surfaces",
-                        required=bool(dependency.get("required", False)),
-                    )
-                if config_artifact in snapshot.nodes:
-                    snapshot.add_relation(dependency_surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
-
+        source_storage_refs = _add_composite_seed_surface(
+            snapshot,
+            project,
+            composite_name=composite_name,
+            pipeline_key=pipeline_key,
+            config_artifact=config_artifact,
+            composite_payload=composite_payload,
+            today=today,
+            has_dependency_pipelines=has_dependency_pipelines,
+        )
+        source_storage_refs.extend(
+            _add_composite_dependency_surfaces(
+                snapshot,
+                project,
+                composite_name=composite_name,
+                pipeline_key=pipeline_key,
+                config_artifact=config_artifact,
+                dependencies=dependencies,
+                today=today,
+            )
+        )
         merge_payload = composite_payload.get("merge") if isinstance(composite_payload.get("merge"), dict) else {}
         output_payload = merge_payload.get("output") if isinstance(merge_payload.get("output"), dict) else {}
         composite_version = _optional_text(composite_payload.get("version"))
-        group_fields: list[tuple[str, str]] = []
-        column_groups = merge_payload.get("column_groups")
-        if isinstance(column_groups, list):
-            for item in column_groups:
-                if not isinstance(item, dict):
-                    continue
-                group_name = _optional_text(item.get("name"))
-                if group_name is None:
-                    continue
-                for field_name in _normalized_text_list(item.get("fields")) or []:
-                    group_fields.append((group_name, field_name))
-        layer_nodes: dict[str, NodeKey] = {}
-        for layer_name in ("silver", "gold"):
-            output_path = output_payload.get(layer_name)
-            if not isinstance(output_path, str) or not output_path.strip():
-                continue
-            storage_ref = _storage_ref_from_output_path(output_path)
-            surface = _add_storage_surface(
-                snapshot,
-                project,
-                storage_ref,
-                summary=f"{layer_name.title()} output surface for composite pipeline `{composite_name}`.",
-                layer=layer_name,
-                today=today,
-                storage_kind="composite_layer_output",
-                scope=EntityScope(pipeline_name=composite_name),
-                config_version=composite_version,
-                merge_strategy=_optional_text(merge_payload.get("strategy")),
-                sort_by=_normalized_text_list(
-                    merge_payload.get("sort_by", {}).get(layer_name)
-                    if isinstance(merge_payload.get("sort_by"), dict)
-                    else None
-                ),
-            )
-            layer_nodes[layer_name] = surface
-            if pipeline_key in snapshot.nodes:
-                snapshot.add_relation(pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
-            if config_artifact in snapshot.nodes:
-                snapshot.add_relation(surface, "DEFINED_BY", config_artifact, provenance="storage_surfaces")
-            layer_field_nodes: dict[str, NodeKey] = {}
-            for field_group, field_name in group_fields:
-                candidate_sources = [ref for ref in source_storage_refs if field_name in schema_fields_by_storage.get(ref, {})]
-                field_node = _add_schema_field_surface(
-                    snapshot,
-                    project,
-                    surface,
-                    field_name=field_name,
-                    field_group=field_group,
-                    today=today,
-                    scope=EntityScope(
-                        provider="composite",
-                        entity=composite_name.removeprefix("composite_"),
-                        pipeline_name=composite_name,
-                    ),
-                    drift_classification="inherited_field" if candidate_sources else "composite_only",
-                    source_storage_refs=candidate_sources if candidate_sources else None,
-                )
-                layer_field_nodes[field_name] = field_node
-                if config_artifact in snapshot.nodes:
-                    snapshot.add_relation(field_node, "DEFINED_BY", config_artifact, provenance="schema_fields")
-                for source_ref in candidate_sources:
-                    source_field = schema_fields_by_storage.get(source_ref, {}).get(field_name)
-                    if source_field is not None:
-                        snapshot.add_relation(field_node, "DERIVES_FIELD_FROM", source_field, provenance="schema_fields")
-            field_nodes_by_layer[layer_name] = layer_field_nodes
-            schema_fields_by_storage[surface.name] = layer_field_nodes
+        layer_nodes, field_nodes_by_layer = _add_composite_output_layers(
+            snapshot,
+            project,
+            composite_name=composite_name,
+            pipeline_key=pipeline_key,
+            config_artifact=config_artifact,
+            today=today,
+            composite_version=composite_version,
+            merge_payload=merge_payload,
+            output_payload=output_payload,
+            group_fields=_composite_group_fields(merge_payload),
+            source_storage_refs=source_storage_refs,
+            schema_fields_by_storage=schema_fields_by_storage,
+        )
+        for layer_name, surface in layer_nodes.items():
+            schema_fields_by_storage[surface.name] = field_nodes_by_layer.get(layer_name, {})
         if "silver" in layer_nodes and "gold" in layer_nodes:
             snapshot.add_relation(layer_nodes["silver"], "PROMOTES_TO", layer_nodes["gold"], provenance="storage_surfaces")
             for field_name, silver_field in field_nodes_by_layer.get("silver", {}).items():
@@ -4528,6 +4707,375 @@ def _claim_modality(text: str) -> str:
     if "must" in lowered or "required" in lowered or "require" in lowered:
         return "required"
     return "guidance"
+
+
+def _job_step_counts(steps: object) -> tuple[int, int]:
+    if not isinstance(steps, list):
+        return 0, 0
+    inline_run_step_count = sum(1 for step in steps if isinstance(step, dict) and isinstance(step.get("run"), str))
+    uses_step_count = sum(1 for step in steps if isinstance(step, dict) and isinstance(step.get("uses"), str))
+    return inline_run_step_count, uses_step_count
+
+
+def _add_workflow_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    *,
+    workflow_name: str,
+    title: str,
+    relative_path: str,
+    today: str,
+) -> WorkflowContext:
+    workflow = snapshot.add_node(
+        "workflow_surface",
+        workflow_name,
+        summary=f"GitHub Actions workflow `{title}`.",
+        source_path=relative_path,
+        source_kind="github_actions_workflow",
+        workflow_title=title,
+        workflow_family=_workflow_family(workflow_name, title),
+        trigger_names=list(_workflow_trigger_names(_read_yaml(Path(relative_path)))) if False else None,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    return WorkflowContext(
+        workflow_name=workflow_name,
+        title=title,
+        relative_path=relative_path,
+        today=today,
+        workflow=workflow,
+    )
+
+
+def _attach_workflow_file_backing(snapshot: GraphSnapshot, workflow: NodeKey, relative_path: str) -> None:
+    parent_dir_relative = str(Path(relative_path).parent)
+    parent_dir_key = NodeKey("directory_surface", parent_dir_relative)
+    if parent_dir_key in snapshot.nodes:
+        snapshot.add_relation(parent_dir_key, "HOUSES", workflow, provenance="file_structure")
+    file_surface_key = NodeKey("file_surface", relative_path)
+    if file_surface_key in snapshot.nodes:
+        snapshot.add_relation(file_surface_key, "BACKS", workflow, provenance="workflow_graph")
+
+
+def _enrich_workflow_surface(
+    snapshot: GraphSnapshot,
+    context: WorkflowContext,
+    payload: dict[str, object],
+) -> None:
+    snapshot.add_node(
+        "workflow_surface",
+        context.workflow_name,
+        workflow_family=_workflow_family(context.workflow_name, context.title),
+        trigger_names=list(_workflow_trigger_names(payload)) or None,
+        concurrency_group=_workflow_concurrency_group(payload),
+    )
+
+
+def _add_workflow_call_entrypoint(
+    snapshot: GraphSnapshot,
+    context: WorkflowContext,
+    payload: dict[str, object],
+) -> NodeKey | None:
+    workflow_call_payload = _workflow_on_payload(payload)
+    if not isinstance(workflow_call_payload, dict):
+        return None
+    reusable_workflow_payload = workflow_call_payload.get("workflow_call")
+    if not isinstance(reusable_workflow_payload, dict):
+        return None
+    workflow_call_entrypoint = snapshot.add_node(
+        "workflow_call_surface",
+        f"{context.workflow_name}::workflow_call",
+        summary=f"Reusable workflow entrypoint for `{context.workflow_name}`.",
+        source_path=context.relative_path,
+        source_kind="workflow_call_surface",
+        workflow=context.workflow_name,
+        reusable_kind="workflow_call_trigger",
+        last_verified=context.today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(context.workflow, "CALLS_WORKFLOW", workflow_call_entrypoint, provenance="workflow_graph")
+    snapshot.add_relation(workflow_call_entrypoint, "DEPENDS_ON", context.workflow, provenance="workflow_graph")
+    for output_name, expression in _workflow_output_specs(
+        context.workflow_name,
+        context.workflow_name,
+        reusable_workflow_payload.get("outputs"),
+        scope="workflow_call_output",
+    ):
+        output = snapshot.add_node(
+            "workflow_output_surface",
+            output_name,
+            summary=f"Reusable workflow output `{output_name}`.",
+            source_path=context.relative_path,
+            source_kind="workflow_output_surface",
+            workflow=context.workflow_name,
+            output_scope="workflow_call",
+            output_expression=expression,
+            last_verified=context.today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(context.workflow, "EMITS_OUTPUT", output, provenance="workflow_graph")
+    return workflow_call_entrypoint
+
+
+def _add_secret_requirements(
+    snapshot: GraphSnapshot,
+    owner: NodeKey,
+    secret_names: tuple[str, ...],
+    *,
+    relative_path: str,
+    today: str,
+) -> None:
+    for secret_name in secret_names:
+        secret = snapshot.add_node(
+            "workflow_secret_surface",
+            secret_name,
+            summary=f"GitHub Actions secret usage hint `{secret_name}`.",
+            source_path=relative_path,
+            source_kind="github_actions_secret",
+            last_verified=today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(owner, "REQUIRES_SECRET", secret, provenance="workflow_graph")
+
+
+def _add_workflow_job_surface(
+    snapshot: GraphSnapshot,
+    context: WorkflowContext,
+    *,
+    job_id: str,
+    job_payload: dict[str, object],
+) -> tuple[WorkflowJobContext, tuple[dict[str, str], ...], tuple[str, ...]]:
+    steps = job_payload.get("steps")
+    inline_run_step_count, uses_step_count = _job_step_counts(steps)
+    secret_usage_hints = _workflow_secret_refs(job_payload)
+    matrix_axes = _workflow_matrix_axes(job_payload)
+    matrix_variants = _workflow_matrix_variants(job_payload)
+    environment_name = _workflow_environment_name(job_payload)
+    concurrency_group = _workflow_concurrency_group(job_payload)
+    job_name = f"{context.workflow_name}::{job_id}"
+    job = snapshot.add_node(
+        "workflow_job_surface",
+        job_name,
+        summary=f"GitHub Actions job `{job_id}` in workflow `{context.title}`.",
+        source_path=context.relative_path,
+        source_kind="github_actions_job",
+        workflow=context.workflow_name,
+        job_id=job_id,
+        runs_on=str(job_payload.get("runs-on")) if job_payload.get("runs-on") is not None else None,
+        inline_run_step_count=inline_run_step_count,
+        uses_step_count=uses_step_count,
+        matrix_axes=list(matrix_axes) if matrix_axes else None,
+        matrix_variant_count=len(matrix_variants) if matrix_variants else None,
+        environment_name=environment_name,
+        secret_usage_hints=list(secret_usage_hints) if secret_usage_hints else None,
+        concurrency_group=concurrency_group,
+        last_verified=context.today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(context.workflow, "CONTAINS", job, provenance="workflow_graph")
+    return (
+        WorkflowJobContext(
+            workflow_name=context.workflow_name,
+            job_id=job_id,
+            job_name=job_name,
+            relative_path=context.relative_path,
+            today=context.today,
+            job=job,
+        ),
+        matrix_variants,
+        secret_usage_hints,
+    )
+
+
+def _link_reusable_job_workflow(
+    snapshot: GraphSnapshot,
+    workflow_nodes: dict[str, NodeKey],
+    workflow_name_by_relative_path: dict[str, str],
+    context: WorkflowJobContext,
+    reusable_workflow_ref: str,
+) -> None:
+    action_key = _workflow_action_key(reusable_workflow_ref)
+    target_workflow_name, reusable_kind = _workflow_reusable_target(reusable_workflow_ref)
+    action = snapshot.add_node(
+        "workflow_action_surface",
+        action_key,
+        summary=f"Workflow action or reusable workflow `{action_key}`.",
+        source_path=context.relative_path,
+        source_kind="github_actions_uses",
+        uses_ref=reusable_workflow_ref,
+        last_verified=context.today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(context.job, "USES_ACTION", action, provenance="workflow_graph")
+    if target_workflow_name is None:
+        return
+    workflow_call = snapshot.add_node(
+        "workflow_call_surface",
+        f"{context.job_name}::{action_key}",
+        summary=f"Reusable workflow call `{action_key}` from job `{context.job_name}`.",
+        source_path=context.relative_path,
+        source_kind="workflow_call_surface",
+        workflow=context.workflow_name,
+        job_id=context.job_id,
+        uses_ref=reusable_workflow_ref,
+        reusable_kind=reusable_kind,
+        target_workflow=target_workflow_name,
+        last_verified=context.today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(context.job, "CALLS_WORKFLOW", workflow_call, provenance="workflow_graph")
+    local_relative_path = _workflow_action_key(reusable_workflow_ref).removeprefix("./")
+    target_key = workflow_nodes.get(target_workflow_name)
+    if target_key is None:
+        target_workflow = workflow_name_by_relative_path.get(local_relative_path)
+        if target_workflow is not None:
+            target_key = workflow_nodes.get(target_workflow)
+    if target_key is not None:
+        snapshot.add_relation(workflow_call, "DEPENDS_ON", target_key, provenance="workflow_graph")
+
+
+def _add_job_matrix_variants(
+    snapshot: GraphSnapshot,
+    context: WorkflowJobContext,
+    matrix_variants: tuple[dict[str, str], ...],
+) -> None:
+    for variant_payload in matrix_variants:
+        variant_name = ", ".join(f"{axis}={value}" for axis, value in sorted(variant_payload.items()))
+        matrix_variant = snapshot.add_node(
+            "workflow_matrix_variant_surface",
+            f"{context.job_name}[{variant_name}]",
+            summary=f"Expanded matrix variant `{variant_name}` for workflow job `{context.job_name}`.",
+            source_path=context.relative_path,
+            source_kind="workflow_matrix_variant_surface",
+            workflow=context.workflow_name,
+            job_id=context.job_id,
+            variant_axes=variant_payload,
+            last_verified=context.today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(context.job, "HAS_MATRIX_VARIANT", matrix_variant, provenance="workflow_graph")
+
+
+def _add_job_outputs(
+    snapshot: GraphSnapshot,
+    context: WorkflowJobContext,
+    output_payload: object,
+) -> None:
+    for output_name, expression in _workflow_output_specs(
+        context.workflow_name,
+        context.job_id,
+        output_payload,
+        scope="job_output",
+    ):
+        output = snapshot.add_node(
+            "workflow_output_surface",
+            output_name,
+            summary=f"Workflow output `{output_name}`.",
+            source_path=context.relative_path,
+            source_kind="workflow_output_surface",
+            workflow=context.workflow_name,
+            job_id=context.job_id,
+            output_scope="job",
+            output_expression=expression,
+            last_verified=context.today,
+            ingest_wave="repo_sync_v1",
+            confidence="high",
+        )
+        snapshot.add_relation(context.job, "EMITS_OUTPUT", output, provenance="workflow_graph")
+
+
+def _process_workflow_steps(
+    snapshot: GraphSnapshot,
+    context: WorkflowJobContext,
+    steps: object,
+) -> None:
+    if not isinstance(steps, list):
+        return
+    for step in steps:
+        if not isinstance(step, dict):
+            continue
+        uses_ref = step.get("uses")
+        if isinstance(uses_ref, str):
+            action_key = _workflow_action_key(uses_ref)
+            action = snapshot.add_node(
+                "workflow_action_surface",
+                action_key,
+                summary=f"Workflow action `{action_key}`.",
+                source_path=context.relative_path,
+                source_kind="github_actions_uses",
+                uses_ref=uses_ref,
+                last_verified=context.today,
+                ingest_wave="repo_sync_v1",
+                confidence="high",
+            )
+            snapshot.add_relation(context.job, "USES_ACTION", action, provenance="workflow_graph")
+            for artifact_name, artifact_relation, artifact_path in _workflow_artifact_specs(
+                context.workflow_name,
+                context.job_id,
+                step,
+            ):
+                artifact = snapshot.add_node(
+                    "workflow_artifact_surface",
+                    artifact_name,
+                    summary=f"Workflow artifact `{artifact_name}`.",
+                    source_path=context.relative_path,
+                    source_kind="github_actions_artifact",
+                    artifact_path=artifact_path,
+                    workflow=context.workflow_name,
+                    last_verified=context.today,
+                    ingest_wave="repo_sync_v1",
+                    confidence="high",
+                )
+                snapshot.add_relation(context.job, artifact_relation, artifact, provenance="workflow_graph")
+        run_text = step.get("run")
+        if not isinstance(run_text, str):
+            continue
+        for target in sorted(_workflow_script_targets(run_text), key=lambda item: (item.label, item.name)):
+            if target in snapshot.nodes:
+                snapshot.add_relation(context.job, "RUNS_VIA", target, provenance="workflow_graph")
+        for gate_name in _workflow_quality_gates(run_text):
+            gate_key = NodeKey("quality_gate", gate_name)
+            if gate_key in snapshot.nodes:
+                snapshot.add_relation(context.job, "EXECUTES_GATE", gate_key, provenance="workflow_graph")
+        _add_secret_requirements(
+            snapshot,
+            context.job,
+            _workflow_secret_refs(step),
+            relative_path=context.relative_path,
+            today=context.today,
+        )
+
+
+def _link_workflow_job_dependencies(
+    snapshot: GraphSnapshot,
+    workflow_name: str,
+    jobs: dict[str, object],
+    job_nodes: dict[tuple[str, str], NodeKey],
+) -> None:
+    for job_id, job_payload in jobs.items():
+        if not isinstance(job_payload, dict):
+            continue
+        job = job_nodes.get((workflow_name, str(job_id)))
+        if job is None:
+            continue
+        needs_payload = job_payload.get("needs")
+        dependency_ids: list[str] = []
+        if isinstance(needs_payload, str):
+            dependency_ids = [needs_payload]
+        elif isinstance(needs_payload, list):
+            dependency_ids = [str(item) for item in needs_payload if isinstance(item, str)]
+        for dependency_id in dependency_ids:
+            dependency_key = job_nodes.get((workflow_name, dependency_id))
+            if dependency_key is not None:
+                snapshot.add_relation(job, "DEPENDS_ON", dependency_key, provenance="workflow_graph")
 
 
 def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:

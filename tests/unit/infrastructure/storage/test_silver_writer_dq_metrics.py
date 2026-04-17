@@ -290,15 +290,15 @@ class TestSilverWriterDQMetrics:
         assert dq_summary.valid_records == 95
         assert dq_summary.error_records == 5
         assert dq_summary.warning_records == 2
-        assert dq_summary.error_rate == 0.05
+        assert dq_summary.error_rate == pytest.approx(0.05)
         assert dq_summary.validation_passed is False
 
         # Verify column metrics
         assert "entity_id" in dq_summary.column_metrics
         assert "value" in dq_summary.column_metrics
-        assert dq_summary.column_metrics["value"].null_rate == 0.05
-        assert dq_summary.column_metrics["value"].min == 1.0
-        assert dq_summary.column_metrics["value"].max == 100.0
+        assert dq_summary.column_metrics["value"].null_rate == pytest.approx(0.05)
+        assert dq_summary.column_metrics["value"].min == pytest.approx(1.0)
+        assert dq_summary.column_metrics["value"].max == pytest.approx(100.0)
 
         # Verify schema drift
         assert dq_summary.schema_drift is not None

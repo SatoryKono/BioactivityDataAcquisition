@@ -314,9 +314,9 @@ def test_build_runtime_duration_computes_seconds_or_zero() -> None:
     started = datetime(2026, 3, 17, 12, 0, 0, tzinfo=UTC)
     completed = datetime(2026, 3, 17, 12, 0, 2, 500000, tzinfo=UTC)
 
-    assert _build_runtime_duration(started, completed) == 2.5
-    assert _build_runtime_duration(None, completed) == 0.0
-    assert _build_runtime_duration(started, None) == 0.0
+    assert _build_runtime_duration(started, completed) == pytest.approx(2.5)
+    assert _build_runtime_duration(None, completed) == pytest.approx(0.0)
+    assert _build_runtime_duration(started, None) == pytest.approx(0.0)
 
 
 @pytest.mark.unit

@@ -183,11 +183,11 @@ class TestNoOpMemoryMonitor:
         """Test get_memory_stats returns 50% usage."""
         monitor = NoOpMemoryMonitor()
         stats = monitor.get_memory_stats()
-        assert stats.percent_used == 0.5
-        assert stats.used_mb == 4096.0
-        assert stats.available_mb == 4096.0
-        assert stats.total_mb == 8192.0
-        assert stats.process_mb == 256.0
+        assert stats.percent_used == pytest.approx(0.5)
+        assert stats.used_mb == pytest.approx(4096.0)
+        assert stats.available_mb == pytest.approx(4096.0)
+        assert stats.total_mb == pytest.approx(8192.0)
+        assert stats.process_mb == pytest.approx(256.0)
 
     def test_is_under_pressure_returns_false(self) -> None:
         """Test is_under_pressure returns False."""

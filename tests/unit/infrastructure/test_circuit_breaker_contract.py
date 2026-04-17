@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters._circuit_breaker_contract import (
     CircuitBreakerSnapshot,
@@ -29,7 +31,7 @@ class TestCircuitBreakerContract:
         assert decision.allow_request is False
         assert decision.next_state == CircuitBreakerState.OPEN
         assert decision.event == CircuitBreakerTransitionEvent.NONE
-        assert decision.retry_after == 5.0
+        assert decision.retry_after == pytest.approx(5.0)
 
     def test_open_state_allows_probe_after_recovery_timeout(self) -> None:
         snapshot = CircuitBreakerSnapshot(
@@ -44,7 +46,7 @@ class TestCircuitBreakerContract:
         assert decision.allow_request is True
         assert decision.next_state == CircuitBreakerState.HALF_OPEN
         assert decision.event == CircuitBreakerTransitionEvent.HALF_OPENED
-        assert decision.retry_after == 0.0
+        assert decision.retry_after == pytest.approx(0.0)
 
     def test_open_state_without_failure_timestamp_stays_blocked(self) -> None:
         snapshot = CircuitBreakerSnapshot(
@@ -57,7 +59,7 @@ class TestCircuitBreakerContract:
         decision = evaluate_attempt(snapshot, now=100.0)
 
         assert decision.allow_request is False
-        assert decision.retry_after == 60.0
+        assert decision.retry_after == pytest.approx(60.0)
 
     def test_success_from_half_open_closes_breaker(self) -> None:
         snapshot = CircuitBreakerSnapshot(
@@ -106,4 +108,4 @@ class TestCircuitBreakerContract:
             recovery_timeout=10.0,
         )
 
-        assert retry_after_seconds(snapshot, now=100.0) == 0.0
+        assert retry_after_seconds(snapshot, now=100.0) == pytest.approx(0.0)
