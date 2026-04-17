@@ -21,6 +21,8 @@ from bioetl.application.composite.column_orderer_semantic import (
 )
 from bioetl.application.composite.column_priority_orderer import (
     ColumnPriorityOrderer,
+    collect_priority_field_columns,
+    order_priority_columns,
 )
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 from bioetl.domain.composite.config import (
@@ -136,6 +138,84 @@ def collect_explicit_group_columns(
     return ordered, used
 
 
+class _ColumnPriorityOrderingAdapter:
+    """Internal non-deprecated adapter for explicit source-priority ordering."""
+
+    def __init__(self, logger: LoggerPort) -> None:
+        self._logger = logger
+
+    def collect_field_columns(
+        self,
+        field: str,
+        enrichers: Sequence[EnricherConfig],
+        available_columns: set[str],
+        seed_pipeline: str | None = None,
+    ) -> list[str]:
+        columns, used_parse_fallback = collect_priority_field_columns(
+            field=field,
+            enrichers=enrichers,
+            available_columns=available_columns,
+            seed_pipeline=seed_pipeline,
+        )
+        if used_parse_fallback and seed_pipeline:
+            self._logger.debug(
+                "Could not parse seed pipeline for field collection",
+                seed_pipeline=seed_pipeline,
+                field=field,
+            )
+        return columns
+
+    def order_columns_by_priority(
+        self,
+        field: str,
+        columns: list[str],
+        priorities: Sequence[str],
+        seed_pipeline: str | None = None,
+    ) -> list[str]:
+        ordered_cols, used_parse_fallback = order_priority_columns(
+            field=field,
+            columns=columns,
+            priorities=priorities,
+            seed_pipeline=seed_pipeline,
+        )
+        if used_parse_fallback and seed_pipeline:
+            self._logger.debug(
+                "Could not parse seed pipeline for priority ordering",
+                seed_pipeline=seed_pipeline,
+                field=field,
+            )
+        return ordered_cols
+
+    def filter_compatible_columns(
+        self,
+        df: pl.DataFrame,
+        field: str,
+        ordered_cols: list[str],
+        can_coalesce: Callable[[pl.DataFrame, str, str], bool],
+    ) -> tuple[list[str], list[str]]:
+        if not ordered_cols:
+            return [], []
+
+        base_col = ordered_cols[0]
+        compatible_cols = [base_col]
+        incompatible_cols: list[str] = []
+
+        for col in ordered_cols[1:]:
+            if can_coalesce(df, base_col, col):
+                compatible_cols.append(col)
+                continue
+            self._logger.debug(
+                "Skipping column with incompatible type in explicit rules",
+                field=field,
+                incompatible_col=col,
+                base_type=str(df[base_col].dtype),
+                col_type=str(df[col].dtype),
+            )
+            incompatible_cols.append(col)
+
+        return compatible_cols, incompatible_cols
+
+
 class ColumnOrderService:
     """Unified service for column ordering supporting semantic and priority strategies."""
 
@@ -144,13 +224,15 @@ class ColumnOrderService:
         logger: LoggerPort,
         config: ColumnOrderConfig | None = None,
         column_groups: Sequence[ColumnGroupConfig] | None = None,
-        priority_orderer: ColumnPriorityOrderer | None = None,
+        priority_orderer: ColumnPriorityOrderer | _ColumnPriorityOrderingAdapter | None = None,
     ) -> None:
         """Initialize unified column ordering service."""
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER
         self._column_groups = tuple(column_groups) if column_groups else None
-        self._priority_orderer = priority_orderer or ColumnPriorityOrderer(logger)
+        self._priority_orderer = priority_orderer or _ColumnPriorityOrderingAdapter(
+            logger
+        )
 
     # === Semantic Group Ordering (ColumnOrderer compatibility) ===
 

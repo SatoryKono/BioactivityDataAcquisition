@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.application.core.wiring.runtime import (
     BatchMetricsRecorderService,
@@ -82,7 +81,7 @@ def create_batch_processing_components(
         normalization_processor=normalization_processor,
     )
     column_orderer = (
-        ColumnOrderer(context.logger, column_groups=config.column_groups)
+        ColumnOrderService(context.logger, column_groups=config.column_groups)
         if config.column_groups
         else None
     )

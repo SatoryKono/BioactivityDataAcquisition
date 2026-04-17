@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T12:16:58.857234+00:00",
+  "generated_at": "2026-04-17T12:32:29.710689+00:00",
   "summary": {
-    "total_scripts": 392,
+    "total_scripts": 388,
     "status_counts": {
-      "active": 308,
+      "active": 307,
       "legacy": 9,
-      "orphan": 66,
+      "orphan": 63,
       "unknown": 9
     },
     "reference_group_coverage": {
-      "agents": 11,
+      "agents": 10,
       "build": 1,
       "ci": 49,
       "docs": 116,
       "scripts": 291,
-      "skills": 8,
-      "tests": 97
+      "skills": 7,
+      "tests": 99
     }
   },
   "scripts": [
@@ -29,7 +29,7 @@
       "references": [
         {
           "path": "scripts/README.md",
-          "line": 43,
+          "line": 41,
           "source_group": "scripts",
           "text": "python -m scripts.ai --help"
         },
@@ -3163,9 +3163,9 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 6206,
+          "line": 6340,
           "source_group": "scripts",
-          "text": "if \"scripts.docs\" in lowered or \"check-links\" in lowered or \"build_docs_site.sh\" in lowered:"
+          "text": "lambda text: _contains_any(text, (\"scripts.docs\", \"check-links\", \"build_docs_site.sh\")),"
         }
       ]
     },
@@ -6338,7 +6338,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -6357,6 +6357,12 @@
           "line": 47,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
+        },
+        {
+          "path": "tests/architecture/test_architecture_debt_agent_surface.py",
+          "line": 32,
+          "source_group": "tests",
+          "text": "assert (ROOT / \"scripts\" / \"qa\" / \"generate_architecture_debt_tasks.py\").exists()"
         }
       ]
     },
@@ -6673,7 +6679,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -6692,6 +6698,12 @@
           "line": 48,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
+        },
+        {
+          "path": "tests/architecture/test_architecture_debt_agent_surface.py",
+          "line": 33,
+          "source_group": "tests",
+          "text": "assert (ROOT / \"scripts\" / \"qa\" / \"reduce_architecture_debt.py\").exists()"
         }
       ]
     },
@@ -7222,16 +7234,16 @@
           "text": "\"check-catalog\": \"check_scripts_catalog.py\","
         },
         {
-          "path": "scripts/repo/check_scripts_catalog.py",
-          "line": 3,
-          "source_group": "scripts",
-          "text": "Canonical implementation lives in scripts/engineering/repo/check_scripts_catalog.py."
-        },
-        {
           "path": "tests/architecture/test_quality_governance_workflow.py",
           "line": 69,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/repo/check_scripts_catalog.py\" in workflow"
+        },
+        {
+          "path": "tests/architecture/test_scripts_catalog_governance.py",
+          "line": 23,
+          "source_group": "tests",
+          "text": "/ \"check_scripts_catalog.py\""
         }
       ]
     },
@@ -7707,13 +7719,13 @@
         },
         {
           "path": "scripts/README.md",
-          "line": 39,
+          "line": 37,
           "source_group": "scripts",
           "text": "python -m scripts.ops --help"
         },
         {
           "path": "scripts/README.md",
-          "line": 53,
+          "line": 51,
           "source_group": "scripts",
           "text": "python -m scripts.ops rerender-grafana"
         },
@@ -10730,89 +10742,6 @@
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         }
       ]
-    },
-    {
-      "path": "scripts/qa/__main__.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [
-        "py-architecture-debt-bot"
-      ],
-      "reference_count": 9,
-      "references": [
-        {
-          "path": ".codex/agents/py-architecture-debt-bot.md",
-          "line": 22,
-          "source_group": "agents",
-          "text": "- Runtime generator: `python -m scripts.qa generate-debt-tasks`"
-        },
-        {
-          "path": ".codex/agents/py-architecture-debt-bot.md",
-          "line": 23,
-          "source_group": "agents",
-          "text": "- Runtime planner: `python -m scripts.qa reduce-architecture-debt`"
-        },
-        {
-          "path": ".codex/agents/py-architecture-debt-bot.md",
-          "line": 24,
-          "source_group": "agents",
-          "text": "- Registry verification gate: `python -m scripts.qa check-exemptions --mode auto --growth-mode auto --trend-report off`"
-        },
-        {
-          "path": ".codex/agents/py-architecture-debt-bot.md",
-          "line": 55,
-          "source_group": "agents",
-          "text": "python -m scripts.qa generate-debt-tasks"
-        },
-        {
-          "path": ".codex/agents/py-architecture-debt-bot.md",
-          "line": 56,
-          "source_group": "agents",
-          "text": "python -m scripts.qa reduce-architecture-debt"
-        },
-        {
-          "path": ".codex/agents/py-architecture-debt-bot.md",
-          "line": 89,
-          "source_group": "agents",
-          "text": "3. Построй/обнови execution plan через `python -m scripts.qa reduce-architecture-debt`."
-        },
-        {
-          "path": ".codex/agents/py-architecture-debt-bot.md",
-          "line": 120,
-          "source_group": "agents",
-          "text": "python -m scripts.qa check-exemptions --mode auto --growth-mode auto --trend-report off"
-        },
-        {
-          "path": ".codex/skills/py-architecture-debt-bot/SKILL.md",
-          "line": 17,
-          "source_group": "skills",
-          "text": "- `python -m scripts.qa generate-debt-tasks`"
-        }
-      ]
-    },
-    {
-      "path": "scripts/qa/generate_architecture_debt_tasks.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/qa/reduce_architecture_debt.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/repo/check_scripts_catalog.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/run.py",
