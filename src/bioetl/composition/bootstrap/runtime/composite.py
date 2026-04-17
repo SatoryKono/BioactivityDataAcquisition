@@ -8,10 +8,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
+from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.application.composite.runtime_wiring_api import (
-    CompositePipelineRunnerService,
-)
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
@@ -261,7 +259,7 @@ def _create_composite_runner_from_plan(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     plan: _CompositeBootstrapPlan,
-) -> CompositePipelineRunnerService:
+) -> CompositePipelineRunner:
     """Create the final composite runner from the resolved bootstrap plan."""
     return _create_composite_runner_builder_impl(
         config=config,
@@ -283,8 +281,8 @@ def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str | None = None,
-) -> CompositePipelineRunnerService:
-    """Create a ``CompositePipelineRunnerService`` with all dependencies.
+) -> CompositePipelineRunner:
+    """Create a ``CompositePipelineRunner`` with all dependencies.
 
     Args:
         config: Parsed and validated CompositeConfig domain object describing
@@ -295,7 +293,7 @@ def bootstrap_composite_runner(
             generated when None.
 
     Returns:
-        Fully wired CompositePipelineRunnerService ready for execution.
+        Fully wired CompositePipelineRunner ready for execution.
     """
     plan = _build_composite_bootstrap_plan(
         config=config, runtime=runtime, run_id=run_id

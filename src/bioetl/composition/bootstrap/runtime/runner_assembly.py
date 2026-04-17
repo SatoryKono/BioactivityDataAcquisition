@@ -197,7 +197,7 @@ def _invoke_composite_runner_factory(
 def _create_composite_runner_service_from_inputs(
     inputs: _CompositeRunnerServiceInputs,
 ) -> CompositePipelineRunner:
-    """Construct CompositePipelineRunnerService from a pre-expanded payload."""
+    """Construct CompositePipelineRunner from a pre-expanded payload."""
     deps = _build_composite_runner_dependencies(inputs)
     return CompositePipelineRunner(
         config=inputs.config,
@@ -232,7 +232,7 @@ def create_composite_runner_service(
     observer: CompositeLifecycleObserverService | None = None,
     manifest_id: str | None = None,
     run_ledger_service: RunLedgerService | None = None,
-) -> CompositePipelineRunnerService:
+) -> CompositePipelineRunner:
     """Create a composite runner service from fully resolved dependencies."""
     if fsm_state_helper is None:
         raise AssertionError("Composite runner requires fsm_state_helper")
@@ -282,8 +282,8 @@ def create_composite_runner(
     enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     support_services: CompositeSupportServices,
     runner_factory: CompositeRunnerFactory = create_composite_runner_service,
-) -> CompositePipelineRunnerService:
-    """Create a fully wired ``CompositePipelineRunnerService``."""
+) -> CompositePipelineRunner:
+    """Create a fully wired ``CompositePipelineRunner``."""
     service_inputs = _build_composite_runner_service_inputs(
         config=config,
         runtime=runtime,
@@ -321,8 +321,8 @@ def bootstrap_composite_runner(
         ],
     ],
     build_support_services_fn: Callable[..., CompositeSupportServices],
-    create_composite_runner_fn: Callable[..., CompositePipelineRunnerService],
-) -> CompositePipelineRunnerService:
+    create_composite_runner_fn: Callable[..., CompositePipelineRunner],
+) -> CompositePipelineRunner:
     """Assemble and create a composite runner via injected dependency builders."""
     return bootstrap_composite_runner_via_wiring(
         config=config,

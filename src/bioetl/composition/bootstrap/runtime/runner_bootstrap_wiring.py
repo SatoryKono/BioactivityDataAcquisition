@@ -6,10 +6,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.application.composite.runtime_wiring_api import (
-    CompositePipelineRunnerService,
-)
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 
@@ -123,7 +121,7 @@ def _resolve_bootstrap_runner_factories(
 
 def _create_bootstrapped_composite_runner(
     *,
-    create_composite_runner_fn: Callable[..., CompositePipelineRunnerService],
+    create_composite_runner_fn: Callable[..., CompositePipelineRunner],
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str,
@@ -135,7 +133,7 @@ def _create_bootstrapped_composite_runner(
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     support_services: CompositeSupportServices,
-) -> CompositePipelineRunnerService:
+) -> CompositePipelineRunner:
     """Create the final runner from already-assembled bootstrap components."""
     return create_composite_runner_fn(
         config=config,
@@ -170,8 +168,8 @@ def bootstrap_composite_runner_via_wiring(
         ],
     ],
     build_support_services_fn: Callable[..., CompositeSupportServices],
-    create_composite_runner_fn: Callable[..., CompositePipelineRunnerService],
-) -> CompositePipelineRunnerService:
+    create_composite_runner_fn: Callable[..., CompositePipelineRunner],
+) -> CompositePipelineRunner:
     """Assemble and create composite runner with injected dependency builders."""
     runtime_basics = _resolve_bootstrap_runtime_basics(
         bootstrap_runtime_basics_fn=bootstrap_runtime_basics_fn,

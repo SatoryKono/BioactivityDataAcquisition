@@ -67,7 +67,7 @@ groups:
     purpose: Repository hygiene and inventory governance tooling
   ops:
     path: scripts/ops
-    purpose: Platform/ops automation and skills/tooling checks
+    purpose: Active platform/ops automation, launchers, runtime, and maintenance tooling
   diagnostics:
     path: scripts/engineering/diagnostics
     purpose: Manual diagnostics and investigation helpers
@@ -82,7 +82,7 @@ groups:
     purpose: One-time migration scripts with explicit sunset
   archive:
     path: scripts/ops/archive
-    purpose: Archived historical scripts retained for traceability only
+    purpose: Archived historical scripts retained for traceability only; non-canonical for new integrations
   diagrams:
     path: scripts/diagrams
     purpose: Diagram lint/render/quality pipeline

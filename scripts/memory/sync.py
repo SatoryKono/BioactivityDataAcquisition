@@ -2869,12 +2869,17 @@ def _alert_rule_overrides(
     alert_name: str,
     group_name: str,
 ) -> tuple[dict[str, object], dict[str, object]]:
-    alerts_config = memory_mapping.get("alerts")
-    groups = alerts_config.get("groups") if isinstance(alerts_config, dict) else {}
-    rules = alerts_config.get("rules") if isinstance(alerts_config, dict) else {}
+    alerts_config = _alerts_config_section(memory_mapping)
+    groups = alerts_config.get("groups")
+    rules = alerts_config.get("rules")
     group_rule = groups.get(group_name) if isinstance(groups, dict) and isinstance(groups.get(group_name), dict) else {}
     alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
     return group_rule, alert_rule
+
+
+def _alerts_config_section(memory_mapping: dict[str, object]) -> dict[str, object]:
+    alerts_config = memory_mapping.get("alerts")
+    return alerts_config if isinstance(alerts_config, dict) else {}
 
 
 def _pipeline_targets_for_alert(
@@ -3131,11 +3136,11 @@ def _alert_dashboard_config(
     *,
     alert_name: str,
 ) -> tuple[dict[str, object], dict[str, object], dict[str, object] | object]:
-    alerts_config = memory_mapping.get("alerts")
-    rules = alerts_config.get("rules") if isinstance(alerts_config, dict) else {}
+    alerts_config = _alerts_config_section(memory_mapping)
+    rules = alerts_config.get("rules")
     dashboard_fallbacks = (
         alerts_config.get("dashboard_fallbacks")
-        if isinstance(alerts_config, dict) and isinstance(alerts_config.get("dashboard_fallbacks"), dict)
+        if isinstance(alerts_config.get("dashboard_fallbacks"), dict)
         else {}
     )
     alert_rule = rules.get(alert_name) if isinstance(rules, dict) and isinstance(rules.get(alert_name), dict) else {}
@@ -11203,10 +11208,17 @@ def _entity_pipeline_test_index(
     snapshot: GraphSnapshot,
 ) -> dict[tuple[str, str], NodeKey]:
     return {
-        (str(node.properties.get("provider")), str(node.properties.get("entity"))): node.key
+        identity: node.key
         for node in snapshot.nodes.values()
-        if node.key.label == "pipeline_surface" and node.properties.get("pipeline_kind") == "entity"
+        for identity in [_entity_pipeline_node_identity(node)]
+        if identity is not None
     }
+
+
+def _entity_pipeline_node_identity(node: GraphNode) -> tuple[str, str] | None:
+    if node.key.label != "pipeline_surface" or node.properties.get("pipeline_kind") != "entity":
+        return None
+    return str(node.properties.get("provider")), str(node.properties.get("entity"))
 
 
 def _provider_pipeline_test_index(snapshot: GraphSnapshot) -> dict[str, list[NodeKey]]:
@@ -11284,12 +11296,12 @@ def _entity_pipeline_contract_tests(
     entity_pipeline_index: dict[tuple[str, str], NodeKey],
     ownership: dict[object, object],
 ) -> tuple[tuple[NodeKey, tuple[str, ...]], ...]:
-    targets: list[tuple[NodeKey, tuple[str, ...]]] = []
-    for contract_ref, raw_tests in ownership.items():
-        target = _entity_pipeline_contract_target(entity_pipeline_index, contract_ref, raw_tests)
-        if target is not None:
-            targets.append(target)
-    return tuple(targets)
+    return tuple(
+        target
+        for contract_ref, raw_tests in ownership.items()
+        for target in [_entity_pipeline_contract_target(entity_pipeline_index, contract_ref, raw_tests)]
+        if target is not None
+    )
 
 
 def _entity_pipeline_contract_target(
@@ -11354,12 +11366,12 @@ def _link_provider_suite_targets(
 def _provider_regression_suite_targets(
     suites: dict[object, object],
 ) -> tuple[tuple[str, tuple[tuple[str, str], ...]], ...]:
-    targets: list[tuple[str, tuple[tuple[str, str], ...]]] = []
-    for suite_name, suite_payload in suites.items():
-        suite_target = _provider_regression_suite_target(suite_name, suite_payload)
-        if suite_target is not None:
-            targets.append(suite_target)
-    return tuple(targets)
+    return tuple(
+        suite_target
+        for suite_name, suite_payload in suites.items()
+        for suite_target in [_provider_regression_suite_target(suite_name, suite_payload)]
+        if suite_target is not None
+    )
 
 
 def _provider_regression_suite_target(
@@ -12753,6 +12765,87 @@ def _execute_prune_stale_statements(
     client.execute([_prune_stale_nodes_statement(sync_run)])
 
 
+def _reset_managed_relations_if_requested(
+    client: Neo4jHttpClient,
+    snapshot: GraphSnapshot,
+    relation_groups: dict[str, list[dict[str, JsonValue]]],
+    options: SyncApplyOptions,
+) -> None:
+    if not options.prune_stale or not relation_groups:
+        return
+    relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
+    client.execute([_reset_managed_relations_statement(relation_types)])
+
+
+def _apply_snapshot_statement_groups(
+    client: Neo4jHttpClient,
+    snapshot: GraphSnapshot,
+    *,
+    options: SyncApplyOptions,
+    relation_groups: dict[str, list[dict[str, JsonValue]]],
+    core_node_groups: dict[str, list[dict[str, JsonValue]]],
+    analysis_node_groups: dict[str, list[dict[str, JsonValue]]],
+    core_relation_groups: dict[str, list[dict[str, JsonValue]]],
+    analysis_relation_groups: dict[str, list[dict[str, JsonValue]]],
+) -> None:
+    _execute_grouped_statements(client, core_node_groups, options.batch_size, "core node")
+    _execute_grouped_statements(
+        client,
+        analysis_node_groups,
+        _analysis_node_batch_size(analysis_node_groups, options.batch_size),
+        "analysis node",
+    )
+    _reset_managed_relations_if_requested(client, snapshot, relation_groups, options)
+    _execute_grouped_statements(client, core_relation_groups, options.batch_size, "core relation")
+    _execute_grouped_statements(
+        client,
+        analysis_relation_groups,
+        _analysis_relation_batch_size(analysis_relation_groups, options.batch_size),
+        "analysis relation",
+    )
+
+
+def _verify_sync_snapshot(
+    client: Neo4jHttpClient,
+    *,
+    targeted_mode: bool,
+    prune_stale: bool,
+    sync_run: str,
+    batch_size: int,
+    node_groups: dict[str, list[dict[str, JsonValue]]],
+    relation_groups: dict[str, list[dict[str, JsonValue]]],
+    analysis_node_groups: dict[str, list[dict[str, JsonValue]]],
+    analysis_relation_groups: dict[str, list[dict[str, JsonValue]]],
+) -> None:
+    verification_sync_run = _verification_sync_run(
+        targeted_mode,
+        prune_stale,
+        sync_run,
+    )
+    _retry_critical_analysis_groups(
+        client,
+        analysis_node_groups,
+        analysis_relation_groups,
+        batch_size,
+        sync_run=verification_sync_run,
+    )
+    _verify_expected_group_counts(
+        client,
+        analysis_node_groups if targeted_mode else {},
+        analysis_relation_groups if targeted_mode else {},
+        strict_analysis=not targeted_mode,
+        sync_run=verification_sync_run,
+    )
+    if targeted_mode:
+        _verify_expected_group_counts(
+            client,
+            node_groups,
+            relation_groups,
+            strict_analysis=False,
+            sync_run=verification_sync_run,
+        )
+
+
 def sync_snapshot(
     snapshot: GraphSnapshot,
     root: Path,
@@ -12788,53 +12881,27 @@ def sync_snapshot(
         sync_run,
     )
     _delete_managed_wave_if_requested(client, managed_labels, resolved_options)
-    _execute_grouped_statements(client, core_node_groups, resolved_options.batch_size, "core node")
-    analysis_node_batch_size = _analysis_node_batch_size(
-        analysis_node_groups,
-        resolved_options.batch_size,
-    )
-    _execute_grouped_statements(client, analysis_node_groups, analysis_node_batch_size, "analysis node")
-    if resolved_options.prune_stale and relation_groups:
-        relation_types = sorted({relation.relation_type for relation in snapshot.relations.values()})
-        client.execute([_reset_managed_relations_statement(relation_types)])
-    _execute_grouped_statements(client, core_relation_groups, resolved_options.batch_size, "core relation")
-    analysis_relation_batch_size = _analysis_relation_batch_size(
-        analysis_relation_groups,
-        resolved_options.batch_size,
-    )
-    _execute_grouped_statements(
+    _apply_snapshot_statement_groups(
         client,
-        analysis_relation_groups,
-        analysis_relation_batch_size,
-        "analysis relation",
+        snapshot,
+        options=resolved_options,
+        relation_groups=relation_groups,
+        core_node_groups=core_node_groups,
+        analysis_node_groups=analysis_node_groups,
+        core_relation_groups=core_relation_groups,
+        analysis_relation_groups=analysis_relation_groups,
     )
-    verification_sync_run = _verification_sync_run(
-        targeted_mode,
-        resolved_options.prune_stale,
-        sync_run,
-    )
-    _retry_critical_analysis_groups(
+    _verify_sync_snapshot(
         client,
-        analysis_node_groups,
-        analysis_relation_groups,
-        resolved_options.batch_size,
-        sync_run=verification_sync_run,
+        targeted_mode=targeted_mode,
+        prune_stale=resolved_options.prune_stale,
+        sync_run=sync_run,
+        batch_size=resolved_options.batch_size,
+        node_groups=node_groups,
+        relation_groups=relation_groups,
+        analysis_node_groups=analysis_node_groups,
+        analysis_relation_groups=analysis_relation_groups,
     )
-    _verify_expected_group_counts(
-        client,
-        analysis_node_groups if targeted_mode else {},
-        analysis_relation_groups if targeted_mode else {},
-        strict_analysis=not targeted_mode,
-        sync_run=verification_sync_run,
-    )
-    if targeted_mode:
-        _verify_expected_group_counts(
-            client,
-            node_groups,
-            relation_groups,
-            strict_analysis=False,
-            sync_run=verification_sync_run,
-        )
     _prune_managed_graph_if_requested(
         client,
         resolved_options,
@@ -13109,14 +13176,9 @@ def _ensure_targeted_apply_prerequisites(
         required_anchor_labels,
         context=f"{mode_description} prerequisite anchor check",
     )
-    missing_labels = [label for label in required_anchor_labels if live_anchor_counts.get(label, 0) == 0]
+    missing_labels = _missing_anchor_labels(required_anchor_labels, live_anchor_counts)
     if missing_labels:
-        missing_summary = ", ".join(f"`{label}`" for label in missing_labels)
-        raise RuntimeError(
-            f"{mode_description} requires pre-existing managed anchor labels in the live graph, "
-            f"but these labels are missing or empty: {missing_summary}. "
-            "Run a base sync first (for example `python -m scripts.memory sync --apply --prune-stale`)."
-        )
+        raise RuntimeError(_missing_anchor_labels_message(mode_description, missing_labels))
     external_anchor_keys = _targeted_apply_external_anchor_keys(snapshot)
     missing_anchor_keys = _missing_managed_anchor_keys(
         client,
@@ -13124,16 +13186,42 @@ def _ensure_targeted_apply_prerequisites(
         context=f"{mode_description} prerequisite anchor node check",
     )
     if missing_anchor_keys:
-        sample = ", ".join(
-            f"`{key.label}:{key.name}`" for key in missing_anchor_keys[:10]
-        )
-        remainder = len(missing_anchor_keys) - min(len(missing_anchor_keys), 10)
-        remainder_suffix = f" and {remainder} more" if remainder > 0 else ""
-        raise RuntimeError(
-            f"{mode_description} requires pre-existing managed anchor nodes in the live graph, "
-            f"but these nodes are missing: {sample}{remainder_suffix}. "
-            "Run a base sync first (for example `python -m scripts.memory sync --apply --prune-stale`)."
-        )
+        raise RuntimeError(_missing_anchor_keys_message(mode_description, missing_anchor_keys))
+
+
+def _missing_anchor_labels(
+    required_anchor_labels: tuple[str, ...],
+    live_anchor_counts: dict[str, int],
+) -> list[str]:
+    return [label for label in required_anchor_labels if live_anchor_counts.get(label, 0) == 0]
+
+
+def _missing_anchor_labels_message(
+    mode_description: str,
+    missing_labels: list[str],
+) -> str:
+    missing_summary = ", ".join(f"`{label}`" for label in missing_labels)
+    return (
+        f"{mode_description} requires pre-existing managed anchor labels in the live graph, "
+        f"but these labels are missing or empty: {missing_summary}. "
+        "Run a base sync first (for example `python -m scripts.memory sync --apply --prune-stale`)."
+    )
+
+
+def _missing_anchor_keys_message(
+    mode_description: str,
+    missing_anchor_keys: tuple[NodeKey, ...],
+) -> str:
+    sample = ", ".join(
+        f"`{key.label}:{key.name}`" for key in missing_anchor_keys[:10]
+    )
+    remainder = len(missing_anchor_keys) - min(len(missing_anchor_keys), 10)
+    remainder_suffix = f" and {remainder} more" if remainder > 0 else ""
+    return (
+        f"{mode_description} requires pre-existing managed anchor nodes in the live graph, "
+        f"but these nodes are missing: {sample}{remainder_suffix}. "
+        "Run a base sync first (for example `python -m scripts.memory sync --apply --prune-stale`)."
+    )
 
 
 def _active_group_names(

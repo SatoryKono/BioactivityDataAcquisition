@@ -110,7 +110,7 @@ class TestCreateBatchProcessingComponents:
     """Tests for create_batch_processing_components."""
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_processing_components_builder.ColumnOrderer"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.ColumnOrderService"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
@@ -130,7 +130,7 @@ class TestCreateBatchProcessingComponents:
         mock_batch_metrics: MagicMock,
         mock_batch_transformer: MagicMock,
         mock_batch_writer: MagicMock,
-        mock_column_orderer: MagicMock,
+        mock_column_order_service: MagicMock,
     ) -> None:
         """Returns BatchProcessingComponents with wired metrics, transformer, writer."""
         bm = MagicMock()
@@ -167,10 +167,10 @@ class TestCreateBatchProcessingComponents:
         assert result.batch_metrics is bm
         assert result.transformer is tf
         assert result.writer is wr
-        mock_column_orderer.assert_not_called()
+        mock_column_order_service.assert_not_called()
 
     @patch(
-        "bioetl.composition.factories.services.pipeline_processing_components_builder.ColumnOrderer"
+        "bioetl.composition.factories.services.pipeline_processing_components_builder.ColumnOrderService"
     )
     @patch(
         "bioetl.composition.factories.services.pipeline_processing_components_builder.BatchWriter"
@@ -190,14 +190,14 @@ class TestCreateBatchProcessingComponents:
         mock_batch_metrics: MagicMock,
         mock_batch_transformer: MagicMock,
         mock_batch_writer: MagicMock,
-        mock_column_orderer: MagicMock,
+        mock_column_order_service: MagicMock,
     ) -> None:
         mock_quarantine.return_value = MagicMock()
         mock_batch_metrics.return_value = MagicMock()
         mock_batch_transformer.return_value = MagicMock()
         mock_batch_writer.return_value = MagicMock()
         ordered = MagicMock(name="column_orderer")
-        mock_column_orderer.return_value = ordered
+        mock_column_order_service.return_value = ordered
 
         context = MagicMock()
         context.run_type.value = "incremental"
@@ -220,7 +220,7 @@ class TestCreateBatchProcessingComponents:
             gold_validator=MagicMock(),
         )
 
-        mock_column_orderer.assert_called_once_with(
+        mock_column_order_service.assert_called_once_with(
             context.logger,
             column_groups=config.column_groups,
         )

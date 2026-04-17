@@ -22,6 +22,15 @@ The `scripts/` root is intentionally compact.
 - `scripts/ops` — runtime, maintenance, observability, migration, and support tooling.
 - `scripts/schema` — schema generation and validation contracts.
 
+## Active vs Archive
+
+- Active operational commands live under `scripts/ops` and its canonical grouped
+  entry points such as `scripts.ops`, `scripts.ops.data`, and
+  `scripts.engineering.baselines`.
+- Historical material under `scripts/ops/archive` is retained for traceability
+  only. It is discoverable through `python scripts/run.py list` under the
+  `archive` group, but it is not the target surface for new integrations.
+
 ## Canonical Entry Points
 
 Use grouped module entrypoints where available:
@@ -63,4 +72,6 @@ If you add or relocate script domains, update the catalog and rerun the repo gov
 
 - Historical root-level wrappers have been consolidated into canonical domain packages.
 - New integrations should target grouped module commands or canonical package paths only.
+- Archive-only paths under `scripts/ops/archive/**` are historical context and
+  should not be used as canonical command targets.
 - Historical evidence under `docs/reports/evidence/**` may still mention removed paths; treat those references as archival, not canonical guidance.
