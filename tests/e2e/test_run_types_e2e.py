@@ -31,11 +31,10 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestIncrementalRunType:
     """Tests for INCREMENTAL run type behavior."""
 
-    async def test_incremental_uses_checkpoint(self, mock_logger: MagicMock):
+    def test_incremental_uses_checkpoint(self, mock_logger: MagicMock):
         """E2E: Incremental run should use checkpoints for resumption."""
         context = PipelineContext(
             run_id=uuid4(),
@@ -47,7 +46,7 @@ class TestIncrementalRunType:
         # Incremental should support resumption
         assert context.run_type.value == "incremental"
 
-    async def test_incremental_does_not_clear_data(self, mock_logger: MagicMock):
+    def test_incremental_does_not_clear_data(self, mock_logger: MagicMock):
         """E2E: Incremental run should not clear existing data."""
         from bioetl.domain.medallion import MedallionPolicy
 
@@ -61,7 +60,7 @@ class TestIncrementalRunType:
         should_clear_gold = policy.should_clear_gold
         assert should_clear_gold is False
 
-    async def test_incremental_appends_bronze(self, mock_logger: MagicMock):
+    def test_incremental_appends_bronze(self, mock_logger: MagicMock):
         """E2E: Incremental run should append to Bronze layer."""
         # Bronze is always append-only regardless of run type
         # This is a design constraint, not configurable
@@ -77,11 +76,10 @@ class TestIncrementalRunType:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestBackfillRunType:
     """Tests for BACKFILL run type behavior."""
 
-    async def test_backfill_clears_silver_and_gold(self, mock_logger: MagicMock):
+    def test_backfill_clears_silver_and_gold(self, mock_logger: MagicMock):
         """E2E: Backfill run should clear Silver and Gold layers."""
         from bioetl.domain.medallion import MedallionPolicy
 
@@ -95,7 +93,7 @@ class TestBackfillRunType:
         should_clear_gold = policy.should_clear_gold
         assert should_clear_gold is True
 
-    async def test_backfill_preserves_bronze(self, mock_logger: MagicMock):
+    def test_backfill_preserves_bronze(self, mock_logger: MagicMock):
         """E2E: Backfill should preserve Bronze layer (archive)."""
         # Bronze is append-only for audit/forensic purposes
         # Backfill creates new Bronze data but doesn't delete old
@@ -107,7 +105,7 @@ class TestBackfillRunType:
 
         assert context.run_type == RunType.BACKFILL
 
-    async def test_backfill_ignores_checkpoint(self, mock_logger: MagicMock):
+    def test_backfill_ignores_checkpoint(self, mock_logger: MagicMock):
         """E2E: Backfill should not use checkpoint (fresh start)."""
         context = PipelineContext(
             run_id=uuid4(),
@@ -120,11 +118,10 @@ class TestBackfillRunType:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestRebuildRunType:
     """Tests for REBUILD run type behavior."""
 
-    async def test_rebuild_clears_all_layers(self, mock_logger: MagicMock):
+    def test_rebuild_clears_all_layers(self, mock_logger: MagicMock):
         """E2E: Rebuild should clear Silver and Gold layers."""
         from bioetl.domain.medallion import MedallionPolicy
 
@@ -138,7 +135,7 @@ class TestRebuildRunType:
         should_clear_gold = policy.should_clear_gold
         assert should_clear_gold is True
 
-    async def test_rebuild_starts_fresh(self, mock_logger: MagicMock):
+    def test_rebuild_starts_fresh(self, mock_logger: MagicMock):
         """E2E: Rebuild should start from scratch."""
         context = PipelineContext(
             run_id=uuid4(),
@@ -149,7 +146,7 @@ class TestRebuildRunType:
         assert context.run_type == RunType.REBUILD
         assert context.run_type.value == "rebuild"
 
-    async def test_rebuild_reprocesses_bronze(self, mock_logger: MagicMock):
+    def test_rebuild_reprocesses_bronze(self, mock_logger: MagicMock):
         """E2E: Rebuild should reprocess existing Bronze data."""
         # Rebuild reads from Bronze and regenerates Silver/Gold
         context = PipelineContext(
@@ -162,11 +159,10 @@ class TestRebuildRunType:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestRunTypeTransitions:
     """Tests for transitions between run types."""
 
-    async def test_incremental_after_rebuild(self, mock_logger: MagicMock):
+    def test_incremental_after_rebuild(self, mock_logger: MagicMock):
         """E2E: Incremental run after rebuild should work normally."""
         from bioetl.domain.medallion import MedallionPolicy
 
@@ -176,7 +172,7 @@ class TestRunTypeTransitions:
         should_clear = policy.should_clear_silver
         assert should_clear is False
 
-    async def test_backfill_after_incremental(self, mock_logger: MagicMock):
+    def test_backfill_after_incremental(self, mock_logger: MagicMock):
         """E2E: Backfill after incremental should clear data."""
         from bioetl.domain.medallion import MedallionPolicy
 
@@ -188,11 +184,10 @@ class TestRunTypeTransitions:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestRunTypeMetrics:
     """Tests for run type metrics tracking."""
 
-    async def test_run_type_in_records(self, mock_logger: MagicMock):
+    def test_run_type_in_records(self, mock_logger: MagicMock):
         """E2E: Run type should be tracked in Silver records."""
         from bioetl.domain.types import RunType
 
@@ -211,7 +206,7 @@ class TestRunTypeMetrics:
 
         assert mock_record["_run_type"] == "incremental"
 
-    async def test_all_run_types_valid(self, mock_logger: MagicMock):
+    def test_all_run_types_valid(self, mock_logger: MagicMock):
         """E2E: All run types should be valid enum values."""
         valid_types = [RunType.INCREMENTAL, RunType.BACKFILL, RunType.REBUILD]
 
@@ -225,11 +220,10 @@ class TestRunTypeMetrics:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestMedallionPolicyIntegration:
     """Tests for MedallionPolicy integration with run types."""
 
-    async def test_policy_default_values(self):
+    def test_policy_default_values(self):
         """E2E: Policy should have sensible defaults."""
         from bioetl.domain.medallion import MedallionPolicy
 
@@ -238,7 +232,7 @@ class TestMedallionPolicyIntegration:
         # Default policy exists
         assert policy is not None
 
-    async def test_policy_respects_run_type(self):
+    def test_policy_respects_run_type(self):
         """E2E: Policy decisions should respect run type."""
         from bioetl.domain.medallion import MedallionPolicy
 
@@ -251,7 +245,7 @@ class TestMedallionPolicyIntegration:
         assert backfill_policy.should_clear_silver is True
         assert rebuild_policy.should_clear_silver is True
 
-    async def test_silver_write_mode_enum(self):
+    def test_silver_write_mode_enum(self):
         """E2E: SilverWriteMode enum should have expected values."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriteMode
 
@@ -259,7 +253,7 @@ class TestMedallionPolicyIntegration:
         assert hasattr(SilverWriteMode, "APPEND")
         assert hasattr(SilverWriteMode, "DELETE")
 
-    async def test_gold_write_mode_enum(self):
+    def test_gold_write_mode_enum(self):
         """E2E: GoldWriteMode enum should have expected values."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
 

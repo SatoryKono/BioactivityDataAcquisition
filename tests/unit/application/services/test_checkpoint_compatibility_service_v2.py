@@ -19,7 +19,7 @@ HASH_B = "b" * 64
 def test_service_creation():
     """Test that service can be created."""
     service = CheckpointCompatibilityServiceV2()
-    assert service is not None
+    assert isinstance(service, CheckpointCompatibilityServiceV2)
     assert service.config.mode == CheckpointCompatibilityMode.STRICT
     assert service.config.max_schema_version_delta == 1
 

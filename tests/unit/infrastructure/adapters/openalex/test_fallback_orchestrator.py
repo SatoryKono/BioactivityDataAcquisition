@@ -112,8 +112,8 @@ async def test_execute_attaches_openalex_phase1_summary_logger() -> None:
         request: FallbackFetchRequest,
     ) -> AsyncIterator[BronzeRecord]:
         captured_requests.append(request)
-        return
-        yield
+        if False:
+            yield {}
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
     service.execute = capture_execute
@@ -122,8 +122,8 @@ async def test_execute_attaches_openalex_phase1_summary_logger() -> None:
     async def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        return
-        yield
+        if False:
+            yield {}
 
     await _collect(
         orchestrator,
@@ -159,8 +159,8 @@ async def test_execute_skips_service_for_unsupported_filter_field() -> None:
     async def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        return
-        yield
+        if False:
+            yield {}
 
     results = await _collect(
         orchestrator,
@@ -190,8 +190,8 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
         request: FallbackFetchRequest,
     ) -> AsyncIterator[BronzeRecord]:
         captured_requests.append(request)
-        return
-        yield
+        if False:
+            yield {}
 
     service = MagicMock(spec=FallbackFetchOrchestratorService)
     service.execute = capture_execute
@@ -213,8 +213,8 @@ async def test_configure_policy_can_disable_fallback_handler() -> None:
     async def primary_fetcher(
         ids: list[str], limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
-        return
-        yield
+        if False:
+            yield {}
 
     await _collect(
         orchestrator,

@@ -120,6 +120,140 @@ def _collect_dashboard_links(dashboard: dict) -> list[dict]:
     return links
 
 
+def _unknown_metrics_for_query(query: str, valid_metrics: set[str]) -> list[str]:
+    """Return metric-like tokens that are not present in the known metric set."""
+    unknown_metrics: list[str] = []
+    for metric in re.findall(r"(bioetl_[a-z0-9_]+)", query):
+        if metric in valid_metrics:
+            continue
+        base = re.sub(r"(_total|_bucket|_sum|_count|_created)$", "", metric)
+        if base not in valid_metrics:
+            unknown_metrics.append(metric)
+    return unknown_metrics
+
+
+def _assert_standard_variable_contract(
+    dashboard_path: Path, variable_map: dict[str, dict[str, object]]
+) -> None:
+    """Assert the variable contract for standard dashboards."""
+    assert "run_id" not in variable_map, (
+        f"Dashboard {dashboard_path.name} must not define deprecated 'run_id' variable"
+    )
+
+    pipeline_var = variable_map.get("pipeline")
+    assert pipeline_var is not None, (
+        f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
+    )
+    pipeline_query = pipeline_var.get("query", {})
+    pipeline_query_text = (
+        pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
+    )
+    assert "bioetl_records_processed_total" in pipeline_query_text, (
+        f"Dashboard {dashboard_path.name} 'pipeline' query must use "
+        "bioetl_records_processed_total"
+    )
+
+    run_type_var = variable_map.get("run_type")
+    assert run_type_var is not None, (
+        f"Dashboard {dashboard_path.name} must define 'run_type' variable"
+    )
+    run_type_query = run_type_var.get("query", {})
+    run_type_query_text = (
+        run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
+    )
+    assert "bioetl_records_processed_total" in run_type_query_text, (
+        f"Dashboard {dashboard_path.name} 'run_type' query must use "
+        "bioetl_records_processed_total"
+    )
+    assert "run_type" in run_type_query_text, (
+        f"Dashboard {dashboard_path.name} 'run_type' query must select run_type label"
+    )
+
+
+def _assert_provider_health_variable_contract(
+    dashboard_path: Path, variable_map: dict[str, dict[str, object]]
+) -> None:
+    """Assert the variable contract for the provider health dashboard."""
+    assert "run_id" not in variable_map, (
+        f"Dashboard {dashboard_path.name} must not define deprecated 'run_id' variable"
+    )
+
+    provider_var = variable_map.get("provider")
+    assert provider_var is not None, (
+        f"Dashboard {dashboard_path.name} must define 'provider' variable"
+    )
+    provider_query = provider_var.get("query", {})
+    provider_query_text = (
+        provider_query.get("query", "") if isinstance(provider_query, dict) else ""
+    )
+    assert "bioetl_health_check_(success|degraded|failures)_total" in (
+        provider_query_text
+    ), (
+        f"Dashboard {dashboard_path.name} 'provider' query must use "
+        "the union of health-check outcome counters"
+    )
+    assert "pipeline" not in variable_map, (
+        f"Dashboard {dashboard_path.name} must not expose misleading 'pipeline' variable"
+    )
+
+
+def _assert_silver_reject_explorer_variable_contract(
+    dashboard_path: Path, variable_map: dict[str, dict[str, object]]
+) -> None:
+    """Assert the variable contract for the silver reject explorer dashboard."""
+
+    def _extract_query_url(variable: dict[str, object]) -> str:
+        query = variable.get("query", {})
+        if not isinstance(query, dict):
+            return ""
+        infinity_query = query.get("infinityQuery")
+        if isinstance(infinity_query, dict):
+            url = infinity_query.get("url", "")
+            if isinstance(url, str):
+                return url
+        legacy_url = query.get("query", "")
+        return legacy_url if isinstance(legacy_url, str) else ""
+
+    pipeline_var = variable_map.get("pipeline")
+    assert pipeline_var is not None, (
+        f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
+    )
+    assert pipeline_var.get("datasource") == "Prometheus", (
+        f"Dashboard {dashboard_path.name} 'pipeline' must use Prometheus datasource"
+    )
+    pipeline_query = pipeline_var.get("query", {})
+    pipeline_query_text = (
+        pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
+    )
+    assert "bioetl_records_processed_total" in pipeline_query_text, (
+        f"Dashboard {dashboard_path.name} 'pipeline' query must use "
+        "bioetl_records_processed_total"
+    )
+
+    for variable_name in ("run_type", "reason_code", "field", "run_id"):
+        variable = variable_map.get(variable_name)
+        assert variable is not None, (
+            f"Dashboard {dashboard_path.name} must define '{variable_name}' variable"
+        )
+        assert variable.get("datasource") == "Quarantine Explorer", (
+            f"Dashboard {dashboard_path.name} '{variable_name}' must use "
+            "Quarantine Explorer datasource"
+        )
+        query_url = _extract_query_url(variable)
+        assert "/ops/quarantine/filter-options" in query_url, (
+            f"Dashboard {dashboard_path.name} '{variable_name}' query must use "
+            "/ops/quarantine/filter-options endpoint"
+        )
+
+    payload_hash_var = variable_map.get("payload_hash")
+    assert payload_hash_var is not None, (
+        f"Dashboard {dashboard_path.name} must define 'payload_hash' variable"
+    )
+    assert payload_hash_var.get("type") == "textbox", (
+        f"Dashboard {dashboard_path.name} 'payload_hash' must be a textbox"
+    )
+
+
 def _emit_sample_structured_log(*, pipeline: str, provider: str) -> str:
     """Emit one JSON log line through the shipped structlog pipeline."""
     configure_logging, unified_logger_cls = _load_logging_helpers()
@@ -168,18 +302,10 @@ def test_dashboard_metrics_contract(dashboard_path):
             if not query:
                 continue
 
-            # Regex to find potential bioetl metric names
-            # Matches strings starting with bioetl_ and containing letters, numbers, underscores
-            found_metrics = re.findall(r"(bioetl_[a-z0-9_]+)", query)
-            for m in found_metrics:
-                # Basic check: is this exact name or base name valid?
-                if m not in valid_metrics:
-                    # Also check without common suffixes
-                    base = re.sub(r"(_total|_bucket|_sum|_count|_created)$", "", m)
-                    if base not in valid_metrics:
-                        errors.append(
-                            f"Panel '{panel.get('title')}' uses unknown metric: {m}"
-                        )
+            for metric in _unknown_metrics_for_query(query, valid_metrics):
+                errors.append(
+                    f"Panel '{panel.get('title')}' uses unknown metric: {metric}"
+                )
 
     assert not errors, f"Metric mismatch in {dashboard_path.name}:\n" + "\n".join(
         errors
@@ -247,111 +373,13 @@ def test_variable_query_sources(dashboard_path):
     }
 
     if dashboard_path.name == "bioetl-silver-reject-explorer.json":
-        def _extract_query_url(variable: dict[str, object]) -> str:
-            """Extract endpoint URL for Infinity query variables."""
-            query = variable.get("query", {})
-            if not isinstance(query, dict):
-                return ""
-            infinity_query = query.get("infinityQuery")
-            if isinstance(infinity_query, dict):
-                url = infinity_query.get("url", "")
-                if isinstance(url, str):
-                    return url
-            legacy_url = query.get("query", "")
-            return legacy_url if isinstance(legacy_url, str) else ""
-
-        pipeline_var = variable_map.get("pipeline")
-        assert pipeline_var is not None, (
-            f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
-        )
-        assert pipeline_var.get("datasource") == "Prometheus", (
-            f"Dashboard {dashboard_path.name} 'pipeline' must use Prometheus datasource"
-        )
-        pipeline_query = pipeline_var.get("query", {})
-        pipeline_query_text = (
-            pipeline_query.get("query", "")
-            if isinstance(pipeline_query, dict)
-            else ""
-        )
-        assert "bioetl_records_processed_total" in pipeline_query_text, (
-            f"Dashboard {dashboard_path.name} 'pipeline' query must use "
-            "bioetl_records_processed_total"
-        )
-
-        for variable_name in ("run_type", "reason_code", "field", "run_id"):
-            variable = variable_map.get(variable_name)
-            assert variable is not None, (
-                f"Dashboard {dashboard_path.name} must define '{variable_name}' variable"
-            )
-            assert variable.get("datasource") == "Quarantine Explorer", (
-                f"Dashboard {dashboard_path.name} '{variable_name}' must use "
-                "Quarantine Explorer datasource"
-            )
-            query_url = _extract_query_url(variable)
-            assert "/ops/quarantine/filter-options" in query_url, (
-                f"Dashboard {dashboard_path.name} '{variable_name}' query must use "
-                "/ops/quarantine/filter-options endpoint"
-            )
-
-        payload_hash_var = variable_map.get("payload_hash")
-        assert payload_hash_var is not None, (
-            f"Dashboard {dashboard_path.name} must define 'payload_hash' variable"
-        )
-        assert payload_hash_var.get("type") == "textbox", (
-            f"Dashboard {dashboard_path.name} 'payload_hash' must be a textbox"
-        )
+        _assert_silver_reject_explorer_variable_contract(dashboard_path, variable_map)
         return
 
-    assert "run_id" not in variable_map, (
-        f"Dashboard {dashboard_path.name} must not define deprecated 'run_id' variable"
-    )
-
     if dashboard_path.name == "bioetl-provider-health-v2.json":
-        provider_var = variable_map.get("provider")
-        assert provider_var is not None, (
-            f"Dashboard {dashboard_path.name} must define 'provider' variable"
-        )
-        provider_query = provider_var.get("query", {})
-        provider_query_text = (
-            provider_query.get("query", "") if isinstance(provider_query, dict) else ""
-        )
-        assert "bioetl_health_check_(success|degraded|failures)_total" in (
-            provider_query_text
-        ), (
-            f"Dashboard {dashboard_path.name} 'provider' query must use "
-            "the union of health-check outcome counters"
-        )
-        assert "pipeline" not in variable_map, (
-            f"Dashboard {dashboard_path.name} must not expose misleading 'pipeline' variable"
-        )
+        _assert_provider_health_variable_contract(dashboard_path, variable_map)
     else:
-        pipeline_var = variable_map.get("pipeline")
-        assert pipeline_var is not None, (
-            f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
-        )
-        pipeline_query = pipeline_var.get("query", {})
-        pipeline_query_text = (
-            pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
-        )
-        assert "bioetl_records_processed_total" in pipeline_query_text, (
-            f"Dashboard {dashboard_path.name} 'pipeline' query must use "
-            "bioetl_records_processed_total"
-        )
-        run_type_var = variable_map.get("run_type")
-        assert run_type_var is not None, (
-            f"Dashboard {dashboard_path.name} must define 'run_type' variable"
-        )
-        run_type_query = run_type_var.get("query", {})
-        run_type_query_text = (
-            run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
-        )
-        assert "bioetl_records_processed_total" in run_type_query_text, (
-            f"Dashboard {dashboard_path.name} 'run_type' query must use "
-            "bioetl_records_processed_total"
-        )
-        assert "run_type" in run_type_query_text, (
-            f"Dashboard {dashboard_path.name} 'run_type' query must select run_type label"
-        )
+        _assert_standard_variable_contract(dashboard_path, variable_map)
 
 
 def test_summary_queries_use_zero_fallbacks() -> None:

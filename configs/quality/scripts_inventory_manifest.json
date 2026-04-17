@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T05:57:16.338957+00:00",
+  "generated_at": "2026-04-17T06:06:43.124960+00:00",
   "summary": {
     "total_scripts": 352,
     "status_counts": {
@@ -88,7 +88,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
@@ -101,12 +101,6 @@
           "line": 100,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
-          "line": 30,
-          "source_group": "docs",
-          "text": "- **[check.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
@@ -187,7 +181,7 @@
           "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
           "line": 30,
           "source_group": "docs",
-          "text": "- **[check.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check"
+          "text": "- **[check_neo4j_memory.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check"
         }
       ]
     },
@@ -788,7 +782,7 @@
         },
         {
           "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
         },

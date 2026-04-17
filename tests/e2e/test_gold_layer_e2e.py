@@ -30,29 +30,28 @@ def mock_logger() -> MagicMock:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestGoldWriteModes:
     """Tests for Gold layer write modes."""
 
-    async def test_gold_write_mode_overwrite_enum(self):
+    def test_gold_write_mode_overwrite_enum(self):
         """E2E: GoldWriteMode.OVERWRITE is available."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
 
         assert GoldWriteMode.OVERWRITE.value == "overwrite"
 
-    async def test_gold_write_mode_append_enum(self):
+    def test_gold_write_mode_append_enum(self):
         """E2E: GoldWriteMode.APPEND is available."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
 
         assert GoldWriteMode.APPEND.value == "append"
 
-    async def test_gold_write_mode_scd2_enum(self):
+    def test_gold_write_mode_scd2_enum(self):
         """E2E: GoldWriteMode.SCD2 is available."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
 
         assert GoldWriteMode.SCD2.value == "scd2"
 
-    async def test_gold_write_mode_values(self):
+    def test_gold_write_mode_values(self):
         """E2E: All GoldWriteMode values are valid."""
         from bioetl.infrastructure.storage.gold_writer import GoldWriteMode
 
@@ -62,11 +61,10 @@ class TestGoldWriteModes:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestGoldSchemaValidation:
     """Tests for Gold layer schema validation."""
 
-    async def test_gold_schema_flat_structure(self):
+    def test_gold_schema_flat_structure(self):
         """E2E: Gold records should have flat structure (no nested JSON)."""
         flat_record = {
             "entity_id": "test_123",
@@ -81,7 +79,7 @@ class TestGoldSchemaValidation:
             assert not isinstance(value, dict), f"Field {key} should not be dict"
             assert not isinstance(value, list), f"Field {key} should not be list"
 
-    async def test_gold_excludes_json_fields(self):
+    def test_gold_excludes_json_fields(self):
         """E2E: Gold records exclude complex JSON fields."""
         silver_record = {
             "entity_id": "test_123",
@@ -100,7 +98,7 @@ class TestGoldSchemaValidation:
         assert "properties" not in gold_record
         assert "synonyms" not in gold_record
 
-    async def test_gold_preserves_scalar_types(self):
+    def test_gold_preserves_scalar_types(self):
         """E2E: Gold records preserve scalar type integrity."""
         record = {
             "id": "test",
@@ -117,11 +115,10 @@ class TestGoldSchemaValidation:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestGoldAuditFields:
     """Tests for Gold layer audit fields."""
 
-    async def test_gold_has_ingestion_timestamp(self):
+    def test_gold_has_ingestion_timestamp(self):
         """E2E: Gold records should have ingestion timestamp."""
         from datetime import datetime
 
@@ -132,7 +129,7 @@ class TestGoldAuditFields:
 
         assert "_ingestion_ts" in gold_record
 
-    async def test_gold_has_run_id(self):
+    def test_gold_has_run_id(self):
         """E2E: Gold records should have run ID for audit correlation."""
         gold_record = {
             "entity_id": "test_123",
@@ -141,7 +138,7 @@ class TestGoldAuditFields:
 
         assert "_run_id" in gold_record
 
-    async def test_audit_fields_format(self):
+    def test_audit_fields_format(self):
         """E2E: Audit fields should have correct format."""
         run_id = uuid4()
         gold_record = {
@@ -159,11 +156,10 @@ class TestGoldAuditFields:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestGoldSCD2Behavior:
     """Tests for Gold layer SCD Type 2 behavior."""
 
-    async def test_scd2_valid_from_field(self):
+    def test_scd2_valid_from_field(self):
         """E2E: SCD2 records have valid_from timestamp."""
         scd2_record = {
             "entity_id": "test_123",
@@ -176,7 +172,7 @@ class TestGoldSCD2Behavior:
         assert "valid_from" in scd2_record
         assert scd2_record["is_current"] is True
 
-    async def test_scd2_historical_record(self):
+    def test_scd2_historical_record(self):
         """E2E: SCD2 historical records have valid_to timestamp."""
         historical_record = {
             "entity_id": "test_123",
@@ -189,7 +185,7 @@ class TestGoldSCD2Behavior:
         assert historical_record["valid_to"] is not None
         assert historical_record["is_current"] is False
 
-    async def test_scd2_version_tracking(self):
+    def test_scd2_version_tracking(self):
         """E2E: SCD2 tracks version numbers."""
         records = [
             {"entity_id": "test_123", "version": 1, "is_current": False},
@@ -203,11 +199,10 @@ class TestGoldSCD2Behavior:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestSilverToGoldTransformation:
     """Tests for Silver to Gold transformation logic."""
 
-    async def test_json_field_exclusion_config(self):
+    def test_json_field_exclusion_config(self):
         """E2E: JSON field exclusion is configurable via YAML."""
         # Gold filters are configured in pipeline YAML
         # Example: gold_filters.exclude_fields = ["raw_json", "metadata"]
@@ -238,7 +233,7 @@ class TestSilverToGoldTransformation:
         assert "entity_id" in gold_record
         assert "name" in gold_record
 
-    async def test_silver_preserves_json_for_forensics(self):
+    def test_silver_preserves_json_for_forensics(self):
         """E2E: Silver layer preserves JSON for forensic analysis."""
         silver_record = {
             "entity_id": "test_123",
@@ -252,11 +247,10 @@ class TestSilverToGoldTransformation:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestGoldTableNaming:
     """Tests for Gold table naming conventions."""
 
-    async def test_gold_table_name_format(self):
+    def test_gold_table_name_format(self):
         """E2E: Gold table names follow provider.entity format."""
         table_names = [
             "chembl.activity",
@@ -272,7 +266,7 @@ class TestGoldTableNaming:
             assert len(parts[0]) > 0  # provider
             assert len(parts[1]) > 0  # entity
 
-    async def test_gold_table_path_derivation(self):
+    def test_gold_table_path_derivation(self):
         """E2E: Gold table paths are derived from names."""
         table_name = "chembl.activity"
         base_path = Path("/data/gold")
@@ -284,11 +278,10 @@ class TestGoldTableNaming:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestGoldPartitioning:
     """Tests for Gold layer partitioning."""
 
-    async def test_date_partitioning_support(self):
+    def test_date_partitioning_support(self):
         """E2E: Gold supports date-based partitioning."""
         record_with_date = {
             "entity_id": "test_123",
@@ -299,7 +292,7 @@ class TestGoldPartitioning:
         partition_key = record_with_date["_ingestion_date"]
         assert len(partition_key) == 10  # YYYY-MM-DD format
 
-    async def test_provider_partitioning_support(self):
+    def test_provider_partitioning_support(self):
         """E2E: Gold supports provider-based partitioning."""
         records = [
             {"entity_id": "1", "provider": "chembl"},
@@ -312,11 +305,10 @@ class TestGoldPartitioning:
 
 
 @pytest.mark.e2e
-@pytest.mark.asyncio
 class TestGoldDataQuality:
     """Tests for Gold layer data quality."""
 
-    async def test_gold_no_null_primary_keys(self):
+    def test_gold_no_null_primary_keys(self):
         """E2E: Gold records should not have null primary keys."""
         valid_records = [
             {"entity_id": "test_1", "name": "A"},
@@ -326,7 +318,7 @@ class TestGoldDataQuality:
         for record in valid_records:
             assert record["entity_id"] is not None
 
-    async def test_gold_unique_entity_ids(self):
+    def test_gold_unique_entity_ids(self):
         """E2E: Gold entity IDs should be unique within a batch."""
         records = [
             {"entity_id": "test_1", "version": 1},
@@ -337,7 +329,7 @@ class TestGoldDataQuality:
         entity_ids = [r["entity_id"] for r in records]
         assert len(entity_ids) == len(set(entity_ids))
 
-    async def test_gold_type_consistency(self):
+    def test_gold_type_consistency(self):
         """E2E: Gold field types should be consistent across records."""
         records = [
             {"entity_id": "1", "value": 1.0, "active": True},

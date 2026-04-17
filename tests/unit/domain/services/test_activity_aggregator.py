@@ -202,7 +202,6 @@ class TestActivityAggregatorWeighted:
         values = [100.0, 200.0, 300.0]
         weights = [3.0, 2.0, 1.0]  # Higher weight on lower values
         result = aggregator.weighted_aggregate(values, weights)
-        # (100*3 + 200*2 + 300*1) / (3+2+1) = (300 + 400 + 300) / 6 = 166.67
         assert result == pytest.approx(166.67, rel=0.01)
 
     def test_weighted_aggregate_length_mismatch_raises(

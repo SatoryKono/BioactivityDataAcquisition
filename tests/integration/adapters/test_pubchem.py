@@ -721,11 +721,12 @@ class TestPubChemErrorPaths:
         observe the failure.
         """
         with pytest.raises((OSError, RuntimeError, Exception)):
-            async for _ in pubchem_adapter.fetch(
-                entity_type="compound",
-                query="ibuprofen",
-            ):
-                pass  # pragma: no cover
+            await _consume_async_iter(
+                pubchem_adapter.fetch(
+                    entity_type="compound",
+                    query="ibuprofen",
+                )
+            )
 
     @pytest.mark.vcr
     async def test_fetch_by_smiles_http_503_is_handled(

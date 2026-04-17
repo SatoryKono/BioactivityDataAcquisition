@@ -28,6 +28,21 @@ def _get_function_def(tree: ast.AST, name: str) -> ast.FunctionDef:
     raise AssertionError(f"Function {name} not found")
 
 
+def _collect_called_names_and_attrs(function_node: ast.FunctionDef) -> tuple[set[str], set[str]]:
+    """Collect direct call names and attribute names from a function body."""
+    called_names: set[str] = set()
+    called_attrs: set[str] = set()
+    for inner in ast.walk(function_node):
+        if not isinstance(inner, ast.Call):
+            continue
+        func = inner.func
+        if isinstance(func, ast.Name):
+            called_names.add(func.id)
+        elif isinstance(func, ast.Attribute):
+            called_attrs.add(func.attr)
+    return called_names, called_attrs
+
+
 def test_runtime_metrics_bootstrap_uses_metrics_service_not_raw_infra_starter() -> None:
     """Runtime bootstrap must use the composition-owned metrics service path."""
     source = METRICS_BOOTSTRAP_PATH.read_text(encoding="utf-8")
@@ -52,11 +67,7 @@ def test_runtime_metrics_bootstrap_uses_metrics_service_not_raw_infra_starter() 
     )
 
     function_node = _get_function_def(tree, "maybe_start_metrics_server")
-    called_names = {
-        inner.func.id
-        for inner in ast.walk(function_node)
-        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name)
-    }
+    called_names, _ = _collect_called_names_and_attrs(function_node)
     assert "create_metrics_service" in called_names or "service_factory" in source, (
         "maybe_start_metrics_server must resolve a composition-owned metrics "
         "service and call its start() method."
@@ -69,16 +80,7 @@ def test_observability_api_start_metrics_server_delegates_via_metrics_service() 
     tree = ast.parse(source)
     function_node = _get_function_def(tree, "start_metrics_server")
 
-    called_names = {
-        inner.func.id
-        for inner in ast.walk(function_node)
-        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name)
-    }
-    called_attrs = {
-        inner.func.attr
-        for inner in ast.walk(function_node)
-        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Attribute)
-    }
+    called_names, called_attrs = _collect_called_names_and_attrs(function_node)
 
     assert "get_metrics_service" in called_names, (
         "composition.observability_api.start_metrics_server must obtain the "
@@ -96,16 +98,7 @@ def test_observability_api_push_metrics_delegates_via_metrics_service() -> None:
     tree = ast.parse(source)
     function_node = _get_function_def(tree, "push_metrics_to_gateway")
 
-    called_names = {
-        inner.func.id
-        for inner in ast.walk(function_node)
-        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name)
-    }
-    called_attrs = {
-        inner.func.attr
-        for inner in ast.walk(function_node)
-        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Attribute)
-    }
+    called_names, called_attrs = _collect_called_names_and_attrs(function_node)
 
     assert "get_metrics_service" in called_names, (
         "composition.observability_api.push_metrics_to_gateway must obtain the "

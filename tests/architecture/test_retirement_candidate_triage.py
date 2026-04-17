@@ -39,28 +39,33 @@ def _iter_src_python_files() -> list[Path]:
     return sorted(SRC_ROOT.rglob("*.py"))
 
 
+def _file_imports_module(path: Path, module_name: str) -> bool:
+    """Return True when the file imports the requested module."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(alias.name == module_name for alias in node.names):
+                return True
+            continue
+        if not isinstance(node, ast.ImportFrom) or node.level != 0:
+            continue
+        if node.module == module_name:
+            return True
+        if node.module is None:
+            continue
+        if any(
+            f"{node.module}.{alias.name}" == module_name
+            for alias in node.names
+            if alias.name != "*"
+        ):
+            return True
+    return False
+
+
 def _count_src_importers(module_name: str) -> int:
-    count = 0
-    for path in _iter_src_python_files():
-        source = path.read_text(encoding="utf-8")
-        tree = ast.parse(source)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                if any(alias.name == module_name for alias in node.names):
-                    count += 1
-                    break
-            if isinstance(node, ast.ImportFrom) and node.level == 0:
-                if node.module == module_name:
-                    count += 1
-                    break
-                if node.module is not None and any(
-                    f"{node.module}.{alias.name}" == module_name
-                    for alias in node.names
-                    if alias.name != "*"
-                ):
-                    count += 1
-                    break
-    return count
+    return sum(
+        1 for path in _iter_src_python_files() if _file_imports_module(path, module_name)
+    )
 
 
 def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
@@ -73,9 +78,7 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
 
     families = triage.get("families", [])
     assert isinstance(families, list) and families
-    entries = [
-        entry for entry in _iter_triage_entries(triage)
-    ]
+    entries = list(_iter_triage_entries(triage))
     assert entries, "Expected at least one retirement-triage entry"
 
     for entry in entries:

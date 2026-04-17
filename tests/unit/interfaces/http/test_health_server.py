@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -336,7 +337,7 @@ class TestHealthServerHTTP:
     """Tests for HTTP request handling via actual connections."""
 
     @pytest.fixture
-    async def running_server(self) -> HealthServer:
+    async def running_server(self) -> AsyncGenerator[HealthServer, None]:
         """Create and start a health server."""
         server = HealthServer(host="127.0.0.1", port=0)
         await server.start()
@@ -355,7 +356,7 @@ class TestHealthServerHTTP:
         self, port: int, method: str = "GET", path: str = "/health"
     ) -> tuple[int, str, str]:
         """Send HTTP request and return status code, status text, and body."""
-        reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        _reader, writer = await asyncio.open_connection("127.0.0.1", port)
         try:
             request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
             writer.write(request.encode())
@@ -520,7 +521,9 @@ class TestHealthServerQuarantineExplorer:
     """Tests for /ops/quarantine/* explorer endpoints."""
 
     @pytest.fixture
-    async def running_server_without_quarantine(self) -> HealthServer:
+    async def running_server_without_quarantine(
+        self,
+    ) -> AsyncGenerator[HealthServer, None]:
         """Start server without quarantine service."""
         server = HealthServer(host="127.0.0.1", port=0)
         await server.start()
@@ -530,7 +533,7 @@ class TestHealthServerQuarantineExplorer:
     @pytest.fixture
     async def running_server_with_quarantine(
         self,
-    ) -> tuple[HealthServer, MagicMock]:
+    ) -> AsyncGenerator[tuple[HealthServer, MagicMock], None]:
         """Start server with mocked quarantine service."""
         service = MagicMock()
         service.list_filtered_records = AsyncMock(
@@ -578,7 +581,7 @@ class TestHealthServerQuarantineExplorer:
         self, port: int, method: str, path: str
     ) -> tuple[int, str, str]:
         """Send request and return status code, status text, and body."""
-        reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        _reader, writer = await asyncio.open_connection("127.0.0.1", port)
         try:
             request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
             writer.write(request.encode())
@@ -881,7 +884,7 @@ class TestHealthServerErrorHandling:
         mock_writer.drain.return_value.set_result(None)
 
         # Test error handling without logger - should not raise
-        error = Exception("Test error")
+        error = RuntimeError("Test error")
         await server._handle_request_error(mock_writer, error)
 
     @pytest.mark.asyncio
@@ -899,7 +902,7 @@ class TestHealthServerErrorHandling:
             mock_writer.drain.return_value.set_result(None)
 
             # Test error handling
-            error = Exception("Test error")
+            error = RuntimeError("Test error")
             await server._handle_request_error(mock_writer, error)
 
             mock_logger.error.assert_called_with(

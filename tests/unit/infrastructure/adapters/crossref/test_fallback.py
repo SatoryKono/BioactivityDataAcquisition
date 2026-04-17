@@ -145,8 +145,8 @@ async def test_search_by_title_empty_results(mock_logger):
     """Test title search with no results."""
 
     async def mock_search(query, limit):
-        return
-        yield  # Make it a generator
+        if False:
+            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Nonexistent publication")
@@ -162,8 +162,8 @@ async def test_search_by_title_truncates_long_title(mock_logger):
 
     async def mock_search(query, limit):
         query_received.append(query)
-        return
-        yield
+        if False:
+            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     await handler.search_by_title(long_title)
@@ -179,7 +179,8 @@ async def test_search_by_title_handles_exception(mock_logger):
 
     async def mock_search(query, limit):
         raise RuntimeError("Search failed")
-        yield
+        if False:
+            yield {}
 
     handler = CrossRefTitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
     result = await handler.search_by_title("Test title")
