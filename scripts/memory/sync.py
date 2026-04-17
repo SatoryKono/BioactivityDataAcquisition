@@ -3720,36 +3720,12 @@ def _add_composite_config_surfaces(
 ) -> None:
     composites_root = root / "configs" / "composites"
     for composite_path in sorted(composites_root.glob(YAML_FILE_GLOB)):
-        payload = _read_yaml(composite_path)
-        composite_name, summary, composite_payload, seed_pipeline = _composite_config_identity(
+        _add_composite_config_surface(
+            snapshot,
+            root,
+            project,
+            today,
             composite_path,
-            payload,
-        )
-        composite_node = snapshot.add_node(
-            "composite_config",
-            composite_name,
-            summary=summary,
-            source_path=_rel_path(root, composite_path),
-            source_kind="composite_config",
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
-        )
-        snapshot.add_relation(project, "HAS_COMPOSITE", composite_node, provenance="composite_config")
-        _link_config_artifact(
-            snapshot,
-            composite_node,
-            path=_rel_path(root, composite_path),
-            summary=summary,
-            source_kind="composite_config",
-            today=today,
-            provenance="composite_config",
-        )
-        _link_composite_config_dependencies(
-            snapshot,
-            composite_node,
-            composite_payload,
-            seed_pipeline=seed_pipeline,
             entity_nodes=entity_nodes,
         )
 
@@ -3769,6 +3745,49 @@ def _composite_config_identity(
         if isinstance(seed, dict):
             seed_pipeline = seed.get("pipeline")
     return composite_name, summary, composite_payload, seed_pipeline
+
+
+def _add_composite_config_surface(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    composite_path: Path,
+    *,
+    entity_nodes: dict[str, NodeKey],
+) -> None:
+    payload = _read_yaml(composite_path)
+    composite_name, summary, composite_payload, seed_pipeline = _composite_config_identity(
+        composite_path,
+        payload,
+    )
+    composite_node = snapshot.add_node(
+        "composite_config",
+        composite_name,
+        summary=summary,
+        source_path=_rel_path(root, composite_path),
+        source_kind="composite_config",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_COMPOSITE", composite_node, provenance="composite_config")
+    _link_config_artifact(
+        snapshot,
+        composite_node,
+        path=_rel_path(root, composite_path),
+        summary=summary,
+        source_kind="composite_config",
+        today=today,
+        provenance="composite_config",
+    )
+    _link_composite_config_dependencies(
+        snapshot,
+        composite_node,
+        composite_payload,
+        seed_pipeline=seed_pipeline,
+        entity_nodes=entity_nodes,
+    )
 
 
 def _link_composite_config_dependencies(
@@ -7885,16 +7904,37 @@ def _add_port_surfaces(
 
     descriptors, _, _ = _build_port_surface_catalog(root)
     for descriptor in descriptors:
-        port = _add_protocol_port_surface(
+        _register_protocol_port_surface(
             snapshot,
             project,
             facade,
             family,
             descriptor,
             today,
+            port_nodes=port_nodes,
         )
-        port_nodes.add(port)
     return port_nodes
+
+
+def _register_protocol_port_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    facade: NodeKey,
+    family: NodeKey,
+    descriptor: PortSurfaceDescriptor,
+    today: str,
+    *,
+    port_nodes: set[NodeKey],
+) -> None:
+    port = _add_protocol_port_surface(
+        snapshot,
+        project,
+        facade,
+        family,
+        descriptor,
+        today,
+    )
+    port_nodes.add(port)
 
 
 def _add_port_facade_surface(
@@ -10885,7 +10925,7 @@ def _link_alert_observer_dashboards(
     dashboard_metrics: dict[NodeKey, frozenset[str]],
     memory_mapping: dict[str, object],
 ) -> None:
-    for dashboard in _select_alert_dashboards(
+    for dashboard in _selected_alert_dashboards(
         alert_name,
         group_name,
         expr,
@@ -10894,6 +10934,22 @@ def _link_alert_observer_dashboards(
     ):
         if dashboard in snapshot.nodes:
             snapshot.add_relation(alert, "OBSERVED_BY", dashboard, provenance="impact_alerts")
+
+
+def _selected_alert_dashboards(
+    alert_name: str,
+    group_name: str,
+    expr: str,
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    memory_mapping: dict[str, object],
+) -> list[NodeKey]:
+    return _select_alert_dashboards(
+        alert_name,
+        group_name,
+        expr,
+        dashboard_metrics,
+        memory_mapping,
+    )
 
 
 def _link_alert_runbook(
@@ -10943,29 +10999,34 @@ def _add_governance_edges(
     pipeline_nodes: dict[str, NodeKey],
     contract_nodes: dict[str, NodeKey],
 ) -> None:
-    for policy_name in ("hexagonal import matrix", "hexagonal package layout"):
-        _link_policy_governance_group(
-            snapshot,
-            NodeKey("policy_surface", policy_name),
-            sorted(port_nodes, key=lambda node: node.name),
-            sorted(adapter_nodes.values(), key=lambda node: node.name),
-        )
+    for policy, target_groups in _governance_policy_targets(
+        snapshot,
+        port_nodes=port_nodes,
+        adapter_nodes=adapter_nodes,
+        pipeline_nodes=pipeline_nodes,
+        contract_nodes=contract_nodes,
+    ):
+        _link_policy_governance_group(snapshot, policy, *target_groups)
 
-    _link_policy_governance_group(
-        snapshot,
-        NodeKey("policy_surface", "pipeline assembly model"),
-        sorted(pipeline_nodes.values(), key=lambda node: node.name),
-    )
-    _link_policy_governance_group(
-        snapshot,
-        NodeKey("policy_surface", "medallion storage contract"),
-        sorted(contract_nodes.values(), key=lambda node: node.name),
-        sorted(pipeline_nodes.values(), key=lambda node: node.name),
-    )
-    _link_policy_governance_group(
-        snapshot,
-        NodeKey("policy_surface", "observability surface model"),
-        _alert_surface_nodes(snapshot),
+
+def _governance_policy_targets(
+    snapshot: GraphSnapshot,
+    *,
+    port_nodes: set[NodeKey],
+    adapter_nodes: dict[str, NodeKey],
+    pipeline_nodes: dict[str, NodeKey],
+    contract_nodes: dict[str, NodeKey],
+) -> tuple[tuple[NodeKey, tuple[Sequence[NodeKey], ...]], ...]:
+    sorted_ports = sorted(port_nodes, key=lambda node: node.name)
+    sorted_adapters = sorted(adapter_nodes.values(), key=lambda node: node.name)
+    sorted_pipelines = sorted(pipeline_nodes.values(), key=lambda node: node.name)
+    sorted_contracts = sorted(contract_nodes.values(), key=lambda node: node.name)
+    return (
+        (NodeKey("policy_surface", "hexagonal import matrix"), (sorted_ports, sorted_adapters)),
+        (NodeKey("policy_surface", "hexagonal package layout"), (sorted_ports, sorted_adapters)),
+        (NodeKey("policy_surface", "pipeline assembly model"), (sorted_pipelines,)),
+        (NodeKey("policy_surface", "medallion storage contract"), (sorted_contracts, sorted_pipelines)),
+        (NodeKey("policy_surface", "observability surface model"), (_alert_surface_nodes(snapshot),)),
     )
 
 
