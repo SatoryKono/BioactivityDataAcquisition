@@ -219,7 +219,7 @@ fixture_governance:
   extensionless_allowlist: .github/vcr-noext-allowlist.txt
   root_vcr_policy_enforced: true
   cassette_metadata_backfill_workflow_present: false
-  cassette_metadata_backfill_script: scripts/migrations/active/backfill_vcr_metadata_sidecars.py
+  cassette_metadata_backfill_script: scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py
   cassette_metadata_seed_registry:
     scope: bounded_provider_seed_slice
     provider_coverage_mode: at_least_one_per_vcr_provider

@@ -10,6 +10,7 @@ These tests verify the order of operations in PipelineRunner.run() to ensure:
 
 from __future__ import annotations
 
+import asyncio
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -133,8 +134,8 @@ def mock_checkpoint_manager_with_recorder(call_recorder):
     manager = AsyncMock()
 
     async def load_checkpoint(*, current_metadata=None):
+        await asyncio.sleep(0)
         call_recorder.record("checkpoint.load")
-        return None
 
     async def delete_checkpoint():
         call_recorder.record("checkpoint.delete")
@@ -903,10 +904,13 @@ class TestPipelineRunnerLifecycle:
 
         # Properly set up async context manager
         async def services_dq_aenter(self):
+            del self
+            await asyncio.sleep(0)
             return services_with_dq
 
         async def services_dq_aexit(self, *args):
-            return None
+            del args
+            await asyncio.sleep(0)
 
         services_with_dq.__aenter__ = services_dq_aenter
         services_with_dq.__aexit__ = services_dq_aexit

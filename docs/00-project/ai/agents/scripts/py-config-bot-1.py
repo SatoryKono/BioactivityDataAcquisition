@@ -25,6 +25,7 @@ import yaml
 
 ENTITY_CONFIGS_DIR = Path("configs/entities")
 COMPOSITES_DIR = Path("configs/composites")
+COMPOSITE_SUFFIX = " (composite)"
 
 
 @dataclass
@@ -47,6 +48,111 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+def _validate_required_pipeline_fields(
+    pipeline_config: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
+    """Return critical/medium/low gaps for required standard fields."""
+    critical: list[str] = []
+    medium: list[str] = []
+    low: list[str] = []
+    for field_name in (
+        "pipeline_name",
+        "provider",
+        "entity_type",
+        "business_primary_keys",
+    ):
+        if field_name not in pipeline_config:
+            critical.append(f"Missing MUST field: pipeline.{field_name}")
+    business_keys = pipeline_config.get("business_primary_keys")
+    if not isinstance(business_keys, list) or not business_keys:
+        critical.append("pipeline.business_primary_keys must be a non-empty list")
+    return critical, medium, low
+
+
+def _validate_recommended_metadata(
+    pipeline_config: dict[str, Any],
+    top: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
+    """Return gaps for recommended metadata and version formatting."""
+    medium: list[str] = []
+    if "version" not in top:
+        medium.append("Missing SHOULD field: top-level version")
+    if "description" not in pipeline_config:
+        medium.append("Missing SHOULD field: pipeline.description")
+    version = top.get("version")
+    if version and not re.match(r"^\d+\.\d+\.\d+$", str(version)):
+        medium.append(f"Version '{version}' not semver format")
+    return [], medium, []
+
+
+def _validate_contract_alignment(
+    pipeline_config: dict[str, Any],
+    top: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
+    """Return gaps for contract primary key alignment."""
+    critical: list[str] = []
+    medium: list[str] = []
+    contracts = _as_dict(top.get("contracts"))
+    contract_pk = contracts.get("primary_key")
+    business_keys = pipeline_config.get("business_primary_keys")
+    if contract_pk is None:
+        critical.append("Missing MUST field: contracts.primary_key")
+    elif isinstance(business_keys, list) and isinstance(contract_pk, list):
+        if sorted(str(v) for v in business_keys) != sorted(str(v) for v in contract_pk):
+            medium.append(
+                "Mismatch between pipeline.business_primary_keys and contracts.primary_key"
+            )
+    return critical, medium, []
+
+
+def _validate_sink_path_suffixes(
+    pipeline_config: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
+    """Return low-severity sink path hierarchy gaps."""
+    provider = pipeline_config.get("provider", "")
+    entity = pipeline_config.get("entity_type", "")
+    sink = _as_dict(pipeline_config.get("sink"))
+    if not (provider and entity and sink):
+        return [], [], []
+    expected_suffix = f"{provider}/{entity}"
+    low: list[str] = []
+    for layer in ("bronze", "silver", "gold"):
+        layer_cfg = _as_dict(sink.get(layer))
+        path = layer_cfg.get("path", "")
+        if isinstance(path, str) and path and not path.endswith(expected_suffix):
+            low.append(
+                f"sink.{layer}.path should end with '{expected_suffix}' (got '{path}')"
+            )
+    return [], [], low
+
+
+def _validate_inline_dq_thresholds(
+    pipeline_config: dict[str, Any],
+    top: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
+    """Return deprecated inline DQ threshold findings."""
+    medium: list[str] = []
+    for dq_parent_name, dq_parent in (("top-level", top), ("pipeline", pipeline_config)):
+        dq = _as_dict(dq_parent.get("dq_overrides"))
+        if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
+            medium.append(
+                f"Inline dq_overrides thresholds in {dq_parent_name} (deprecated per ADR-027)"
+            )
+    return [], medium, []
+
+
+def _validate_gold_filters(top: dict[str, Any]) -> tuple[list[str], list[str], list[str]]:
+    """Return findings for missing gold filter declarations."""
+    low: list[str] = []
+    filters = _as_dict(top.get("filters"))
+    gold_filters = _as_dict(filters.get("gold_filters"))
+    if not gold_filters:
+        low.append("Missing filters.gold_filters section")
+    elif not gold_filters.get("required_fields"):
+        low.append("filters.gold_filters.required_fields empty or missing")
+    return [], [], low
+
+
 def analyze_standard_config(
     pipeline_config: dict[str, Any],
     gaps: ConfigGaps,
@@ -59,72 +165,77 @@ def analyze_standard_config(
     - pipeline.business_primary_keys
     - optional pipeline.sink.* sections
     """
-    # === ADR-025: Required pipeline fields (MUST) ===
-    for fld in ("pipeline_name", "provider", "entity_type", "business_primary_keys"):
-        if fld not in pipeline_config:
-            gaps.critical.append(f"Missing MUST field: pipeline.{fld}")
-
-    business_keys = pipeline_config.get("business_primary_keys")
-    if not isinstance(business_keys, list) or not business_keys:
-        gaps.critical.append("pipeline.business_primary_keys must be a non-empty list")
-
-    # === ADR-025: Recommended metadata fields (SHOULD) ===
     top = full_config or {}
-    if "version" not in top:
-        gaps.medium.append("Missing SHOULD field: top-level version")
-    if "description" not in pipeline_config:
-        gaps.medium.append("Missing SHOULD field: pipeline.description")
+    validators = (
+        _validate_required_pipeline_fields,
+        lambda cfg: _validate_recommended_metadata(cfg, top),
+        lambda cfg: _validate_contract_alignment(cfg, top),
+        _validate_sink_path_suffixes,
+        lambda cfg: _validate_inline_dq_thresholds(cfg, top),
+        lambda _cfg: _validate_gold_filters(top),
+    )
+    for validator in validators:
+        critical, medium, low = validator(pipeline_config)
+        gaps.critical.extend(critical)
+        gaps.medium.extend(medium)
+        gaps.low.extend(low)
 
-    # === ADR-025: Version format ===
-    version = top.get("version")
-    if version and not re.match(r"^\d+\.\d+\.\d+$", str(version)):
-        gaps.medium.append(f"Version '{version}' not semver format")
 
-    # === Unified key consistency checks ===
-    contracts = _as_dict(top.get("contracts"))
-    contract_pk = contracts.get("primary_key")
-    if contract_pk is None:
-        gaps.critical.append("Missing MUST field: contracts.primary_key")
-    elif isinstance(business_keys, list) and isinstance(contract_pk, list):
-        if sorted(str(v) for v in business_keys) != sorted(str(v) for v in contract_pk):
-            gaps.medium.append(
-                "Mismatch between pipeline.business_primary_keys and contracts.primary_key"
-            )
+def _validate_composite_seed(seed: dict[str, Any]) -> tuple[list[str], list[str], list[str]]:
+    """Return findings for composite seed configuration."""
+    medium: list[str] = []
+    if seed:
+        for field_name in ("pipeline", "output_keys", "silver_table"):
+            if field_name not in seed:
+                medium.append(f"Missing composite.seed.{field_name}")
+    return [], medium, []
 
-    # === Sink checks (keep aligned with current Pydantic schema) ===
-    sink = _as_dict(pipeline_config.get("sink"))
 
-    # === ADR-025: Hierarchical paths (SHOULD) ===
-    provider = pipeline_config.get("provider", "")
-    entity = pipeline_config.get("entity_type", "")
-    if provider and entity and sink:
-        expected_suffix = f"{provider}/{entity}"
-        for layer in ("bronze", "silver", "gold"):
-            layer_cfg = _as_dict(sink.get(layer))
-            path = layer_cfg.get("path", "")
-            if isinstance(path, str) and path and not path.endswith(expected_suffix):
-                gaps.low.append(
-                    f"sink.{layer}.path should end with '{expected_suffix}' (got '{path}')"
-                )
+def _validate_composite_enrichers(
+    enrichers: Any,
+) -> tuple[list[str], list[str], list[str]]:
+    """Return findings for composite enricher declarations."""
+    critical: list[str] = []
+    medium: list[str] = []
+    for index, enricher in enumerate(enrichers if isinstance(enrichers, list) else []):
+        if "pipeline" not in enricher:
+            critical.append(f"Missing pipeline in enricher[{index}]")
+        if "join_keys" not in enricher:
+            medium.append(f"Missing join_keys in enricher[{index}]")
+        if "silver_table" not in enricher:
+            medium.append(f"Missing silver_table in enricher[{index}]")
+    return critical, medium, []
 
-    # === ADR-027: DQ rules ===
-    for dq_parent_name, dq_parent in (
-        ("top-level", top),
-        ("pipeline", pipeline_config),
-    ):
-        dq = _as_dict(dq_parent.get("dq_overrides"))
-        if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
-            gaps.medium.append(
-                f"Inline dq_overrides thresholds in {dq_parent_name} (deprecated per ADR-027)"
-            )
 
-    # === ADR-025: gold_filters ===
-    filters = _as_dict(top.get("filters"))
-    gold_filters = _as_dict(filters.get("gold_filters"))
-    if not gold_filters:
-        gaps.low.append("Missing filters.gold_filters section")
-    elif not gold_filters.get("required_fields"):
-        gaps.low.append("filters.gold_filters.required_fields empty or missing")
+def _validate_composite_merge(
+    merge: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
+    """Return findings for composite merge configuration."""
+    medium: list[str] = []
+    low: list[str] = []
+    if merge:
+        if "strategy" not in merge:
+            medium.append("Missing composite.merge.strategy")
+        output = _as_dict(merge.get("output"))
+        if not output.get("silver"):
+            medium.append("Missing composite.merge.output.silver")
+        if not output.get("gold"):
+            low.append("Missing composite.merge.output.gold")
+    return [], medium, low
+
+
+def _validate_composite_dq_overrides(
+    config: dict[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
+    """Return findings for deprecated composite inline DQ thresholds."""
+    dq = config.get("dq_overrides")
+    if not isinstance(dq, dict):
+        return [], [], []
+    if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
+        return [], [
+            "Inline dq_overrides thresholds in composite (deprecated per ADR-027)"
+        ], []
+    return [], [], []
 
 
 def analyze_composite_config(config: dict[str, Any], gaps: ConfigGaps) -> None:
@@ -138,45 +249,20 @@ def analyze_composite_config(config: dict[str, Any], gaps: ConfigGaps) -> None:
         gaps.critical.append("Missing 'composite' section for composite pipeline")
         return
 
-    for fld in ["name", "version", "seed", "enrichers", "merge"]:
-        if fld not in composite:
-            gaps.critical.append(f"Missing composite.{fld}")
-
-    # === Seed validation ===
-    seed = _as_dict(composite.get("seed"))
-    if seed:
-        for fld in ["pipeline", "output_keys", "silver_table"]:
-            if fld not in seed:
-                gaps.medium.append(f"Missing composite.seed.{fld}")
-
-    # === Enrichers validation ===
-    enrichers = composite.get("enrichers", [])
-    for i, enricher in enumerate(enrichers):
-        if "pipeline" not in enricher:
-            gaps.critical.append(f"Missing pipeline in enricher[{i}]")
-        if "join_keys" not in enricher:
-            gaps.medium.append(f"Missing join_keys in enricher[{i}]")
-        if "silver_table" not in enricher:
-            gaps.medium.append(f"Missing silver_table in enricher[{i}]")
-
-    # === Merge validation ===
-    merge = _as_dict(composite.get("merge"))
-    if merge:
-        if "strategy" not in merge:
-            gaps.medium.append("Missing composite.merge.strategy")
-        output = _as_dict(merge.get("output"))
-        if not output.get("silver"):
-            gaps.medium.append("Missing composite.merge.output.silver")
-        if not output.get("gold"):
-            gaps.low.append("Missing composite.merge.output.gold")
-
-    # === ADR-027: DQ rules in composite ===
-    if "dq_overrides" in config:
-        dq = config["dq_overrides"]
-        if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
-            gaps.medium.append(
-                "Inline dq_overrides thresholds in composite (deprecated per ADR-027)"
-            )
+    for field_name in ("name", "version", "seed", "enrichers", "merge"):
+        if field_name not in composite:
+            gaps.critical.append(f"Missing composite.{field_name}")
+    validators = (
+        lambda: _validate_composite_seed(_as_dict(composite.get("seed"))),
+        lambda: _validate_composite_enrichers(composite.get("enrichers", [])),
+        lambda: _validate_composite_merge(_as_dict(composite.get("merge"))),
+        lambda: _validate_composite_dq_overrides(config),
+    )
+    for validator in validators:
+        critical, medium, low = validator()
+        gaps.critical.extend(critical)
+        gaps.medium.extend(medium)
+        gaps.low.extend(low)
 
     # Note: Composite pipelines don't have standard sink structure
     # sort_by would be defined in the individual pipelines that composite references
@@ -187,10 +273,9 @@ def analyze_config(config_path: Path) -> ConfigGaps:
     gaps = ConfigGaps(path=config_path)
 
     try:
-        with open(config_path, encoding="utf-8") as f:
-            config = yaml.safe_load(f)
-    except Exception as e:
-        gaps.critical.append(f"YAML parse error: {e}")
+        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        gaps.critical.append(f"YAML parse error: {exc}")
         return gaps
 
     if not config:
@@ -213,6 +298,45 @@ def analyze_config(config_path: Path) -> ConfigGaps:
         gaps.low.append("Legacy standalone pipeline format detected")
 
     return gaps
+
+
+def _relative_config_path(path: Path) -> Path:
+    """Return config path relative to entity/composite roots when possible."""
+    for root in (ENTITY_CONFIGS_DIR, COMPOSITES_DIR):
+        try:
+            return path.relative_to(root)
+        except ValueError:
+            continue
+    return path
+
+
+def _config_type_suffix(gaps: ConfigGaps) -> str:
+    """Return printable config type suffix."""
+    return COMPOSITE_SUFFIX if gaps.is_composite else ""
+
+
+def _append_gap_section(
+    lines: list[str],
+    *,
+    heading: str,
+    gaps_list: list[ConfigGaps],
+    attribute: str,
+    marker: str,
+    empty_message: str | None = None,
+) -> None:
+    """Append one severity section to the report."""
+    if not gaps_list and empty_message is None:
+        return
+    lines.extend([heading, ""])
+    if not gaps_list:
+        lines.extend([empty_message or "", ""])
+        return
+    for gaps in gaps_list:
+        rel = _relative_config_path(gaps.path)
+        lines.append(f"### `{rel}`{_config_type_suffix(gaps)}")
+        for issue in getattr(gaps, attribute):
+            lines.append(f"- {marker} {issue}")
+        lines.append("")
 
 
 def generate_report(all_gaps: list[ConfigGaps]) -> str:
@@ -248,53 +372,28 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
         "",
     ]
 
-    def _rel(path: Path) -> Path:
-        for root in (ENTITY_CONFIGS_DIR, COMPOSITES_DIR):
-            try:
-                return path.relative_to(root)
-            except ValueError:
-                continue
-        return path
-
-    # Critical
-    critical_gaps = [g for g in all_gaps if g.critical]
-    if critical_gaps:
-        lines.extend(["## Critical Issues (MUST fix)", ""])
-        for g in critical_gaps:
-            rel = _rel(g.path)
-            config_type = " (composite)" if g.is_composite else ""
-            lines.append(f"### `{rel}`{config_type}")
-            for issue in g.critical:
-                lines.append(f"- [CRIT] {issue}")
-            lines.append("")
-    else:
-        lines.extend(
-            ["## Critical Issues (MUST fix)", "", "No critical issues found.", ""]
-        )
-
-    # Medium
-    medium_gaps = [g for g in all_gaps if g.medium]
-    if medium_gaps:
-        lines.extend(["## Medium Issues (SHOULD fix)", ""])
-        for g in medium_gaps:
-            rel = _rel(g.path)
-            config_type = " (composite)" if g.is_composite else ""
-            lines.append(f"### `{rel}`{config_type}")
-            for issue in g.medium:
-                lines.append(f"- [WARN] {issue}")
-            lines.append("")
-
-    # Low
-    low_gaps = [g for g in all_gaps if g.low]
-    if low_gaps:
-        lines.extend(["## Low Issues (MAY fix)", ""])
-        for g in low_gaps:
-            rel = _rel(g.path)
-            config_type = " (composite)" if g.is_composite else ""
-            lines.append(f"### `{rel}`{config_type}")
-            for issue in g.low:
-                lines.append(f"- [INFO] {issue}")
-            lines.append("")
+    _append_gap_section(
+        lines,
+        heading="## Critical Issues (MUST fix)",
+        gaps_list=[g for g in all_gaps if g.critical],
+        attribute="critical",
+        marker="[CRIT]",
+        empty_message="No critical issues found.",
+    )
+    _append_gap_section(
+        lines,
+        heading="## Medium Issues (SHOULD fix)",
+        gaps_list=[g for g in all_gaps if g.medium],
+        attribute="medium",
+        marker="[WARN]",
+    )
+    _append_gap_section(
+        lines,
+        heading="## Low Issues (MAY fix)",
+        gaps_list=[g for g in all_gaps if g.low],
+        attribute="low",
+        marker="[INFO]",
+    )
 
     # Action items
     lines.extend(
@@ -330,6 +429,32 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
     return "\n".join(lines)
 
 
+def _status_for_gaps(gaps: ConfigGaps) -> str:
+    """Return printable status tag for one config report line."""
+    if gaps.critical:
+        return "[FAIL]"
+    if gaps.medium:
+        return "[WARN]"
+    if gaps.low:
+        return "[INFO]"
+    return "[OK]"
+
+
+def _print_verbose_config_status(cfg: Path, gaps: ConfigGaps) -> None:
+    """Print one verbose config status line."""
+    rel = _relative_config_path(cfg)
+    status = _status_for_gaps(gaps)
+    print(
+        f"{status} {rel}: {len(gaps.critical)} critical, "
+        f"{len(gaps.medium)} medium, {len(gaps.low)} low"
+    )
+
+
+def _iter_config_files() -> list[Path]:
+    """Return all config files participating in the audit."""
+    return sorted(ENTITY_CONFIGS_DIR.rglob("*.yaml")) + sorted(COMPOSITES_DIR.glob("*.yaml"))
+
+
 def main() -> int:
     import argparse
 
@@ -343,31 +468,14 @@ def main() -> int:
     args = parser.parse_args()
 
     all_gaps: list[ConfigGaps] = []
-    config_files = sorted(ENTITY_CONFIGS_DIR.rglob("*.yaml")) + sorted(
-        COMPOSITES_DIR.glob("*.yaml")
-    )
+    config_files = _iter_config_files()
     for cfg in config_files:
         if cfg.name.startswith("_"):
             continue
         gaps = analyze_config(cfg)
         all_gaps.append(gaps)
-
         if args.verbose:
-            rel = cfg
-            for root in (ENTITY_CONFIGS_DIR, COMPOSITES_DIR):
-                try:
-                    rel = cfg.relative_to(root)
-                    break
-                except ValueError:
-                    continue
-            status = (
-                "[FAIL]"
-                if gaps.critical
-                else ("[WARN]" if gaps.medium else ("[INFO]" if gaps.low else "[OK]"))
-            )
-            print(
-                f"{status} {rel}: {len(gaps.critical)} critical, {len(gaps.medium)} medium, {len(gaps.low)} low"
-            )
+            _print_verbose_config_status(cfg, gaps)
 
     report = generate_report(all_gaps)
 

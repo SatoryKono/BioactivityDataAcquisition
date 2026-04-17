@@ -9,7 +9,7 @@ if command -v readlink >/dev/null 2>&1; then
     fi
 fi
 SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 cd "$REPO_ROOT"
 
 RUNNER="$SCRIPT_DIR/run_pytest.sh"
@@ -33,80 +33,92 @@ STRICT_DOCS_PREFLIGHT="${BIOETL_PREFLIGHT_STRICT_DOCS:-0}"
 SELECTED_WAVE=""
 SELECTED_SHARDS=()
 EXTRA_PYTEST_ARGS=()
+PATH_TESTS_ARCHITECTURE="tests/architecture"
+SHARD_S1_DOMAIN_CORE="S1-domain-core"
+SHARD_S1_DOMAIN_SERVICES="S1-domain-services"
+SHARD_S2_COMP_IFACE="S2-comp-iface"
+SHARD_S4_APP_SERVICES="S4-app-services"
+SHARD_S7_ARCH_A="S7-crosscutting-architecture-a"
+SHARD_S7_ARCH_B="S7-crosscutting-architecture-b"
+SHARD_S7_ARCH_C="S7-crosscutting-architecture-c"
+SHARD_S7_ARCH_D="S7-crosscutting-architecture-d"
+SHARD_S7_GUARDRAILS="S7-crosscutting-architecture-guardrails"
+SHARD_S8_GOVERNANCE="S8-crosscutting-governance"
+SHARD_S9_FAILURES="S9-failures"
 
 SHARD_ORDER=(
-    "S1-domain-core"
-    "S1-domain-services"
-    "S2-comp-iface"
-    "S7-crosscutting-architecture-a"
+    "$SHARD_S1_DOMAIN_CORE"
+    "$SHARD_S1_DOMAIN_SERVICES"
+    "$SHARD_S2_COMP_IFACE"
+    "$SHARD_S7_ARCH_A"
     "S3-app-foundation"
-    "S4-app-services"
-    "S7-crosscutting-architecture-b"
+    "$SHARD_S4_APP_SERVICES"
+    "$SHARD_S7_ARCH_B"
     "S5-infra-adapters"
     "S6-crosscutting-unit"
-    "S7-crosscutting-architecture-c"
-    "S7-crosscutting-architecture-guardrails"
-    "S8-crosscutting-governance"
-    "S7-crosscutting-architecture-d"
-    "S9-failures"
+    "$SHARD_S7_ARCH_C"
+    "$SHARD_S7_GUARDRAILS"
+    "$SHARD_S8_GOVERNANCE"
+    "$SHARD_S7_ARCH_D"
+    "$SHARD_S9_FAILURES"
 )
 
 declare -A SHARD_WAVE=(
-    ["S1-domain-core"]="1"
-    ["S1-domain-services"]="1"
-    ["S2-comp-iface"]="1"
-    ["S7-crosscutting-architecture-a"]="1"
+    ["$SHARD_S1_DOMAIN_CORE"]="1"
+    ["$SHARD_S1_DOMAIN_SERVICES"]="1"
+    ["$SHARD_S2_COMP_IFACE"]="1"
+    ["$SHARD_S7_ARCH_A"]="1"
     ["S3-app-foundation"]="2"
-    ["S4-app-services"]="2"
-    ["S7-crosscutting-architecture-b"]="2"
+    ["$SHARD_S4_APP_SERVICES"]="2"
+    ["$SHARD_S7_ARCH_B"]="2"
     ["S5-infra-adapters"]="3"
     ["S6-crosscutting-unit"]="3"
-    ["S7-crosscutting-architecture-c"]="3"
-    ["S7-crosscutting-architecture-guardrails"]="2"
-    ["S8-crosscutting-governance"]="3"
-    ["S7-crosscutting-architecture-d"]="4"
-    ["S9-failures"]="4"
+    ["$SHARD_S7_ARCH_C"]="3"
+    ["$SHARD_S7_GUARDRAILS"]="2"
+    ["$SHARD_S8_GOVERNANCE"]="3"
+    ["$SHARD_S7_ARCH_D"]="4"
+    ["$SHARD_S9_FAILURES"]="4"
 )
 
 declare -A SHARD_PATHS=(
     ["S1-domain-core"]="tests/unit/domain/value_objects tests/unit/domain/schemas tests/unit/domain/entities tests/unit/domain/composite tests/unit/domain/filtering tests/unit/domain/types tests/unit/domain/ports tests/unit/domain/aggregates tests/unit/domain/validation tests/unit/domain/mapping tests/unit/domain/models tests/unit/domain/exceptions tests/unit/domain/transformations tests/unit/domain/lineage tests/unit/domain/hash_policy"
     ["S1-domain-services"]="tests/unit/domain/services tests/unit/domain/control_plane tests/unit/domain/config tests/unit/domain/configs tests/unit/domain/registry tests/unit/domain/test_*.py"
-    ["S2-comp-iface"]="tests/unit/composition tests/unit/interfaces"
+    ["$SHARD_S2_COMP_IFACE"]="tests/unit/composition tests/unit/interfaces"
     ["S3-app-foundation"]="tests/unit/application/composite tests/unit/application/core"
-    ["S4-app-services"]="tests/unit/application/services tests/unit/application/pipelines"
+    ["$SHARD_S4_APP_SERVICES"]="tests/unit/application/services tests/unit/application/pipelines"
     ["S5-infra-adapters"]="tests/unit/infrastructure/adapters tests/unit/infrastructure/storage tests/integration/adapters tests/integration/interfaces"
     ["S6-crosscutting-unit"]="tests/unit/infrastructure/config tests/unit/infrastructure/quality tests/unit/infrastructure/observability tests/unit/infrastructure/schemas"
-    ["S7-crosscutting-architecture-a"]="tests/architecture"
-    ["S7-crosscutting-architecture-b"]="tests/architecture"
-    ["S7-crosscutting-architecture-c"]="tests/architecture"
-    ["S7-crosscutting-architecture-d"]="tests/architecture"
-    ["S7-crosscutting-architecture-guardrails"]="tests/architecture/test_any_budget.py tests/architecture/test_scripts_catalog_governance.py tests/architecture/test_architecture_dependency_docs_drift.py tests/architecture/test_check_doc_links_guardrails.py tests/architecture/test_compatibility_facade_inventory.py tests/architecture/test_docs_version_sync.py tests/architecture/test_documentation_sync.py tests/architecture/test_code_metrics.py tests/architecture/test_legacy_schema_wrappers.py tests/architecture/test_diagram_regression_workflow.py tests/architecture/test_docs_governance_workflow.py tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_burndown_priorities.py"
-    ["S8-crosscutting-governance"]="tests/integration/pipelines tests/integration/chembl tests/contract tests/smoke"
-    ["S9-failures"]="tests/unit/interfaces/cli/test_registry_consistency.py::TestListPipelinesCommandSnapshot::test_list_pipelines_command_output tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow tests/architecture/test_docs_governance_workflow.py::test_docs_workflow_runs_lightweight_docs_governance_profile tests/architecture/test_diagram_regression_workflow.py::test_docs_workflow_runs_doc_integrity_guardrails tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
+    ["$SHARD_S7_ARCH_A"]="$PATH_TESTS_ARCHITECTURE"
+    ["$SHARD_S7_ARCH_B"]="$PATH_TESTS_ARCHITECTURE"
+    ["$SHARD_S7_ARCH_C"]="$PATH_TESTS_ARCHITECTURE"
+    ["$SHARD_S7_ARCH_D"]="$PATH_TESTS_ARCHITECTURE"
+    ["$SHARD_S7_GUARDRAILS"]="tests/architecture/test_any_budget.py tests/architecture/test_scripts_catalog_governance.py tests/architecture/test_architecture_dependency_docs_drift.py tests/architecture/test_check_doc_links_guardrails.py tests/architecture/test_compatibility_facade_inventory.py tests/architecture/test_docs_version_sync.py tests/architecture/test_documentation_sync.py tests/architecture/test_code_metrics.py tests/architecture/test_legacy_schema_wrappers.py tests/architecture/test_diagram_regression_workflow.py tests/architecture/test_docs_governance_workflow.py tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_quality_burndown_priorities.py"
+    ["$SHARD_S8_GOVERNANCE"]="tests/integration/pipelines tests/integration/chembl tests/contract tests/smoke"
+    ["$SHARD_S9_FAILURES"]="tests/unit/interfaces/cli/test_registry_consistency.py::TestListPipelinesCommandSnapshot::test_list_pipelines_command_output tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow tests/architecture/test_docs_governance_workflow.py::test_docs_workflow_runs_lightweight_docs_governance_profile tests/architecture/test_diagram_regression_workflow.py::test_docs_workflow_runs_doc_integrity_guardrails tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
 )
 
 declare -A SHARD_WORKERS_OVERRIDE=(
-    ["S1-domain-core"]="0"
-    ["S1-domain-services"]="0"
-    ["S4-app-services"]="0"
-    ["S7-crosscutting-architecture-a"]="0"
-    ["S7-crosscutting-architecture-b"]="0"
-    ["S7-crosscutting-architecture-c"]="0"
-    ["S7-crosscutting-architecture-d"]="0"
-    ["S7-crosscutting-architecture-guardrails"]="2"
-    ["S8-crosscutting-governance"]="0"
-    ["S9-failures"]="0"
+    ["$SHARD_S1_DOMAIN_CORE"]="0"
+    ["$SHARD_S1_DOMAIN_SERVICES"]="0"
+    ["$SHARD_S4_APP_SERVICES"]="0"
+    ["$SHARD_S7_ARCH_A"]="0"
+    ["$SHARD_S7_ARCH_B"]="0"
+    ["$SHARD_S7_ARCH_C"]="0"
+    ["$SHARD_S7_ARCH_D"]="0"
+    ["$SHARD_S7_GUARDRAILS"]="2"
+    ["$SHARD_S8_GOVERNANCE"]="0"
+    ["$SHARD_S9_FAILURES"]="0"
 )
 
 declare -A SHARD_EXTRA_PYTEST_ARGS=(
-    ["S2-comp-iface"]="--ignore=tests/unit/interfaces/cli/test_registry_consistency.py --deselect=tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode"
-    ["S7-crosscutting-architecture-a"]="--timeout=300 --ignore-glob=tests/architecture/test_[g-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-    ["S7-crosscutting-architecture-b"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-f]*.py --ignore-glob=tests/architecture/test_[m-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-    ["S7-crosscutting-architecture-c"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-l]*.py --ignore-glob=tests/architecture/test_[s-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-    ["S7-crosscutting-architecture-d"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-r]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
-    ["S7-crosscutting-architecture-guardrails"]="--timeout=300 --deselect=tests/architecture/test_docs_governance_workflow.py::test_docs_workflow_runs_lightweight_docs_governance_profile --deselect=tests/architecture/test_diagram_regression_workflow.py::test_docs_workflow_runs_doc_integrity_guardrails"
-    ["S8-crosscutting-governance"]="--timeout=300"
-    ["S9-failures"]="--timeout=300"
+    ["$SHARD_S2_COMP_IFACE"]="--ignore=tests/unit/interfaces/cli/test_registry_consistency.py --deselect=tests/unit/interfaces/cli/commands/test_quarantine_support.py::TestShowQuarantineStats::test_json_output_mode"
+    ["$SHARD_S7_ARCH_A"]="--timeout=300 --ignore-glob=tests/architecture/test_[g-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
+    ["$SHARD_S7_ARCH_B"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-f]*.py --ignore-glob=tests/architecture/test_[m-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
+    ["$SHARD_S7_ARCH_C"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-l]*.py --ignore-glob=tests/architecture/test_[s-z]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
+    ["$SHARD_S7_ARCH_D"]="--timeout=300 --ignore-glob=tests/architecture/test_[a-r]*.py --ignore=tests/architecture/test_any_budget.py --ignore=tests/architecture/test_scripts_catalog_governance.py --ignore=tests/architecture/test_architecture_dependency_docs_drift.py --ignore=tests/architecture/test_check_doc_links_guardrails.py --ignore=tests/architecture/test_compatibility_facade_inventory.py --ignore=tests/architecture/test_docs_version_sync.py --ignore=tests/architecture/test_documentation_sync.py --ignore=tests/architecture/test_code_metrics.py --ignore=tests/architecture/test_legacy_schema_wrappers.py --ignore=tests/architecture/test_diagram_regression_workflow.py --ignore=tests/architecture/test_docs_governance_workflow.py --ignore=tests/architecture/test_quality_debt_scorecard.py --ignore=tests/architecture/test_quality_burndown_priorities.py --deselect=tests/architecture/test_provider_registry_decomposition.py::test_provider_registry_facade_does_not_grow --deselect=tests/architecture/test_rf014_composition_bootstrap_closeout.py::test_rf014_composition_bootstrap_surfaces_stay_bounded_and_helper_backed[src/bioetl/composition/factories/pipeline/assembler.py-280-required_modules0]"
+    ["$SHARD_S7_GUARDRAILS"]="--timeout=300 --deselect=tests/architecture/test_docs_governance_workflow.py::test_docs_workflow_runs_lightweight_docs_governance_profile --deselect=tests/architecture/test_diagram_regression_workflow.py::test_docs_workflow_runs_doc_integrity_guardrails"
+    ["$SHARD_S8_GOVERNANCE"]="--timeout=300"
+    ["$SHARD_S9_FAILURES"]="--timeout=300"
 )
 
 usage() {
@@ -140,6 +152,7 @@ Examples:
   bash scripts/engineering/dev/run_pytest_sharded.sh --wave 2
   bash scripts/engineering/dev/run_pytest_sharded.sh --shard S3-app-foundation -- --lf
 EOF
+    return 0
 }
 
 is_valid_shard() {
@@ -173,11 +186,14 @@ expand_shard_alias() {
             printf '%s\n' "$shard"
             ;;
     esac
+    return 0
 }
 
 parse_args() {
     while (($# > 0)); do
-        case "$1" in
+        local current_arg="$1"
+        local current_value="${2:-}"
+        case "$current_arg" in
             --list)
                 LIST_ONLY=1
                 shift
@@ -187,7 +203,7 @@ parse_args() {
                     echo "[run_pytest_sharded][error] --wave requires a value" >&2
                     exit 2
                 }
-                SELECTED_WAVE="$2"
+                SELECTED_WAVE="$current_value"
                 shift 2
                 ;;
             --shard)
@@ -195,14 +211,14 @@ parse_args() {
                     echo "[run_pytest_sharded][error] --shard requires a value" >&2
                     exit 2
                 }
-                is_valid_shard "$2" || {
-                    echo "[run_pytest_sharded][error] Unknown shard: $2" >&2
+                is_valid_shard "$current_value" || {
+                    echo "[run_pytest_sharded][error] Unknown shard: $current_value" >&2
                     exit 2
                 }
                 local expanded_shard
                 while IFS= read -r expanded_shard; do
                     SELECTED_SHARDS+=("$expanded_shard")
-                done < <(expand_shard_alias "$2")
+                done < <(expand_shard_alias "$current_value")
                 shift 2
                 ;;
             --workers-per-shard)
@@ -210,7 +226,7 @@ parse_args() {
                     echo "[run_pytest_sharded][error] --workers-per-shard requires a value" >&2
                     exit 2
                 }
-                WORKERS_PER_SHARD="$2"
+                WORKERS_PER_SHARD="$current_value"
                 shift 2
                 ;;
             --dist)
@@ -218,7 +234,7 @@ parse_args() {
                     echo "[run_pytest_sharded][error] --dist requires a value" >&2
                     exit 2
                 }
-                DIST_MODE="$2"
+                DIST_MODE="$current_value"
                 shift 2
                 ;;
             --coverage-dir)
@@ -226,7 +242,7 @@ parse_args() {
                     echo "[run_pytest_sharded][error] --coverage-dir requires a value" >&2
                     exit 2
                 }
-                COVERAGE_DIR="$2"
+                COVERAGE_DIR="$current_value"
                 shift 2
                 ;;
             --stream)
@@ -259,12 +275,13 @@ parse_args() {
                 break
                 ;;
             *)
-                echo "[run_pytest_sharded][error] Unknown argument: $1" >&2
+                echo "[run_pytest_sharded][error] Unknown argument: $current_arg" >&2
                 usage >&2
                 exit 2
                 ;;
         esac
     done
+    return 0
 }
 
 print_plan() {
@@ -278,6 +295,7 @@ print_plan() {
             "${SHARD_WAVE[$shard]}" \
             "${SHARD_PATHS[$shard]}"
     done
+    return 0
 }
 
 build_selected_shards() {
@@ -301,6 +319,7 @@ build_selected_shards() {
     fi
 
     printf '%s\n' "${selected[@]}"
+    return 0
 }
 
 workers_for_shard() {
@@ -310,6 +329,7 @@ workers_for_shard() {
         return 0
     fi
     printf '%s\n' "$WORKERS_PER_SHARD"
+    return 0
 }
 
 selected_python() {
@@ -334,6 +354,7 @@ selected_python() {
 
 is_wsl_mounted_checkout() {
     [[ "$REPO_ROOT" == /mnt/* ]]
+    return $?
 }
 
 default_tmp_coverage_dir() {
@@ -343,6 +364,7 @@ default_tmp_coverage_dir() {
         "$repo_name" \
         "$(date +%Y%m%d-%H%M%S)" \
         "$$"
+    return 0
 }
 
 default_tmp_hypothesis_database_dir() {
@@ -352,6 +374,7 @@ default_tmp_hypothesis_database_dir() {
         "$repo_name" \
         "$(date +%Y%m%d-%H%M%S)" \
         "$$"
+    return 0
 }
 
 normalize_coverage_dir_for_environment() {
@@ -370,6 +393,7 @@ normalize_coverage_dir_for_environment() {
     echo \
         "[run_pytest_sharded][info] Disabling pytest-cov for mounted WSL checkout to avoid coverage instability under /mnt/* (including sqlite lock/malformed shard data)" \
         >&2
+    return 0
 }
 
 prepare_hypothesis_database_for_environment() {
@@ -385,6 +409,7 @@ prepare_hypothesis_database_for_environment() {
     mkdir -p "$HYPOTHESIS_DATABASE"
     export HYPOTHESIS_DATABASE
     echo "[run_pytest_sharded][info] Using temp Hypothesis database $HYPOTHESIS_DATABASE for mounted WSL checkout $REPO_ROOT" >&2
+    return 0
 }
 
 run_preflight_if_needed() {
@@ -412,6 +437,7 @@ run_preflight_if_needed() {
 
     BIOETL_PREFLIGHT_ACTIVE=1 "${preflight_cmd[@]}"
     export BIOETL_PREFLIGHT_DONE=1
+    return 0
 }
 
 cleanup_coverage_dir() {
@@ -444,6 +470,7 @@ start_log_tailer() {
     touch "$log_file"
     tail -n +1 -f "$log_file" 2>/dev/null | sed -u "s/^/[${shard}] /" &
     printf '%s\n' "$!"
+    return 0
 }
 
 stop_log_tailers() {
@@ -454,6 +481,7 @@ stop_log_tailers() {
             wait "$tail_pid" 2>/dev/null || true
         fi
     done
+    return 0
 }
 
 run_wave() {
@@ -477,8 +505,6 @@ run_wave() {
         local -a cmd=(bash "$RUNNER")
         local shard_extra_args_string="${SHARD_EXTRA_PYTEST_ARGS[$shard]:-}"
         local shard_workers
-        local path
-        local extra_arg
 
         # shellcheck disable=SC2206
         local -a paths=( $paths_string )
@@ -595,6 +621,7 @@ combine_coverage() {
     printf "\n[run_pytest_sharded] Combining coverage files from %s\n" "$COVERAGE_DIR"
     COVERAGE_FILE="$COVERAGE_DIR/.coverage" "$python_bin" -m coverage combine "$COVERAGE_DIR"
     COVERAGE_FILE="$COVERAGE_DIR/.coverage" "$python_bin" -m coverage report
+    return 0
 }
 
 main() {
@@ -644,6 +671,7 @@ main() {
     if [[ "$DRY_RUN" == "0" ]]; then
         printf "\n[run_pytest_sharded] Done. Logs and coverage files: %s\n" "$COVERAGE_DIR"
     fi
+    return 0
 }
 
 main "$@"

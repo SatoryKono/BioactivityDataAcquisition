@@ -147,7 +147,8 @@ async def test_process_missing_dois_passes_entity_type_to_search_fallback() -> N
     ) -> AsyncIterator[BronzeRecord]:
         del mapping, limit, fetched
         captured_entity.append(entity_type)
-        if False:
+        del ids
+        for _ in ():
             yield {}
 
     def resolve(ids: list[str], found: set[str], mapping: dict[str, str]) -> list[str]:
@@ -184,9 +185,10 @@ async def test_process_missing_dois_passes_limit_and_fetched_to_search() -> None
         limit: int | None,
         fetched: int,
     ) -> AsyncIterator[BronzeRecord]:
+        del entity_type, ids, mapping
         captured["limit"] = limit
         captured["fetched"] = fetched
-        if False:
+        for _ in ():
             yield {}
 
     def resolve(ids: list[str], found: set[str], mapping: dict[str, str]) -> list[str]:
@@ -336,9 +338,10 @@ async def test_process_title_only_entries_with_empty_entries_list() -> None:
         limit: int | None,
         fetched: int,
     ) -> AsyncIterator[BronzeRecord]:
+        del entity_type, ids, mapping, limit, fetched
         search_called.append(True)
-        return
-        yield
+        for _ in ():
+            yield {}
 
     handler = _make_handler(search_fallback=search_fallback)
 

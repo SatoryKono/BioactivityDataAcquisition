@@ -13,7 +13,7 @@ POLICY_PATH = ROOT / "configs" / "quality" / "integration_vcr_policy.yaml"
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 CONFTST_PATH = ROOT / "tests" / "conftest.py"
 TESTING_GUIDE_PATH = ROOT / "docs" / "03-guides" / "testing.md"
-DEV_README_PATH = ROOT / "scripts" / "dev" / "README.md"
+DEV_README_PATH = ROOT / "scripts" / "engineering" / "dev" / "README.md"
 DATA_README_PATH = ROOT / "scripts" / "data" / "README.md"
 CONTRIBUTING_PATH = ROOT / ".github" / "CONTRIBUTING.md"
 VCR_TASKS_PATH = ROOT / "docs" / "05-operations" / "verification" / "vcr-test-tasks.md"
@@ -247,8 +247,14 @@ class TestIntegrationVcrPolicy:
         assert policy["supported_scopes"]["e2e"]["ci_smoke_target"] in tests_workflow
         assert "VCR_RECORD_MODE=none uv run pytest" in tests_workflow
         assert "--vcr-record=none" in tests_workflow
-        assert "python scripts/data/check_root_vcr_cassettes.py" in tests_workflow
-        assert "python scripts/data/check_vcr_filename_policy.py" in tests_workflow
+        assert (
+            "python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
+            in tests_workflow
+        )
+        assert (
+            "python scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
+            in tests_workflow
+        )
         assert "tests/contract/ -v --tb=short --network" in contract_workflow
         assert (
             "github.repository == "

@@ -74,7 +74,6 @@ class TestValueObject:
         vo = ConcreteValueObject("test")
         assert vo != "TEST"
         assert vo != 123
-        assert vo is not None
 
     def test_hash_consistent_with_equality(self) -> None:
         """Test hash is consistent with equality."""

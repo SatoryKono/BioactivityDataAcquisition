@@ -5,9 +5,9 @@
 
 Canonical active migration entrypoints currently retained:
 
-- `scripts/migrations/active/backfill_vcr_metadata_sidecars.py`
+- `scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py`
 
 Canonical one-off migration entrypoints currently retained:
 
-- `scripts/migrations/oneoff/migrate_exemption_keys_to_paths.py`
-- `scripts/migrations/oneoff/migrate_vcr_extensionless.py`
+- `scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py`
+- `scripts/ops/migrations/oneoff/migrate_vcr_extensionless.py`

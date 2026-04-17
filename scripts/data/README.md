@@ -1,6 +1,12 @@
-# scripts/data — Data Integrity
+# scripts/data — Compatibility Data Facade
 
-Data integrity, VCR policy enforcement, checksum/Delta utilities, and DQ baseline management.
+Compatibility command router for data integrity, VCR policy enforcement,
+checksum/Delta utilities, and DQ baseline management.
+
+Canonical homes:
+- operational data checks: `scripts/ops/data/`
+- VCR governance checks: `scripts/engineering/qa/vcr/`
+- DQ baseline maintenance: `scripts/engineering/baselines/`
 
 Canonical replay/refresh policy for integration and E2E tests lives in
 `configs/quality/integration_vcr_policy.yaml` and is explained in
@@ -11,22 +17,24 @@ Canonical replay/refresh policy for integration and E2E tests lives in
 ```bash
 python -m scripts.data --help
 python -m scripts.data <command> [args...]
+python -m scripts.ops.data --help
+python -m scripts.engineering.qa.vcr --help
 ```
 
 ## Commands
 
 | Command               | Script                                                    | Description                                         |
 | --------------------- | --------------------------------------------------------- | --------------------------------------------------- |
-| `check-vcr-placement` | `scripts/data/check_root_vcr_cassettes.py`                | Block VCR cassette anti-patterns                    |
-| `check-vcr-naming`    | `scripts/data/check_vcr_filename_policy.py`               | Enforce VCR filename policy                         |
-| `check-vcr-secrets`   | `scripts/data/check_vcr_secrets.py`                       | Detect potential secret leaks in VCR cassettes      |
-| `check-delta`         | `scripts/data/check_delta_integrity.py`                   | Check Delta Lake integrity                          |
-| `check-data-dir`      | `scripts/data/validate_data_dir.py`                       | Validate data directory structure against allowlist |
-| `vacuum`              | `scripts/data/vacuum_delta.py`                            | Vacuum Delta Lake tables                            |
-| `checksums`           | `scripts/data/verify_checksums.py`                        | Generate/verify file checksums                      |
-| `dq-baseline`         | `scripts/data/dq_baseline_update.py`                      | Update DQ baseline metrics                          |
-| `report-null-fields`  | `scripts/data/extract_null_fields.py`                     | Extract null field statistics                       |
-| `report-content-hash` | `scripts/data/generate_content_hash_comparison_report.py` | Generate content hash comparison report             |
+| `check-vcr-placement` | `scripts/engineering/qa/vcr/check_root_vcr_cassettes.py`                | Block VCR cassette anti-patterns                    |
+| `check-vcr-naming`    | `scripts/engineering/qa/vcr/check_vcr_filename_policy.py`               | Enforce VCR filename policy                         |
+| `check-vcr-secrets`   | `scripts/engineering/qa/vcr/check_vcr_secrets.py`                       | Detect potential secret leaks in VCR cassettes      |
+| `check-delta`         | `scripts/ops/data/check_delta_integrity.py`                   | Check Delta Lake integrity                          |
+| `check-data-dir`      | `scripts/ops/data/validate_data_dir.py`                       | Validate data directory structure against allowlist |
+| `vacuum`              | `scripts/ops/data/vacuum_delta.py`                            | Vacuum Delta Lake tables                            |
+| `checksums`           | `scripts/ops/data/verify_checksums.py`                        | Generate/verify file checksums                      |
+| `dq-baseline`         | `scripts/engineering/baselines/dq_baseline_update.py`                      | Update DQ baseline metrics                          |
+| `report-null-fields`  | `scripts/ops/data/extract_null_fields.py`                     | Extract null field statistics                       |
+| `report-content-hash` | `scripts/ops/data/generate_content_hash_comparison_report.py` | Generate content hash comparison report             |
 
 ## When to Use
 

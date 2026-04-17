@@ -86,7 +86,7 @@ class TestNormalizeCrossPipelineCase:
 
     def test_none_and_empty(self) -> None:
         """Test None and empty string handling."""
-        none_value: str | None = None
+        none_value = cast(str, None)
         assert normalize_cross_pipeline_case(none_value, "uppercase") is None
         assert normalize_cross_pipeline_case("", "uppercase") is None
         assert normalize_cross_pipeline_case("   ", "uppercase") is None

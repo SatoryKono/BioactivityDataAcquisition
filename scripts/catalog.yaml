@@ -6,13 +6,13 @@ canonical_roots:
   - scripts/engineering/qa
   - scripts/docs
   - scripts/schema
-  - scripts/data
   - scripts/engineering/repo
   - scripts/ops
   - scripts/engineering/diagnostics
   - scripts/engineering/baselines
-  - scripts/migrations/active
-  - scripts/migrations/oneoff
+  - scripts/ops/migrations/active
+  - scripts/ops/migrations/oneoff
+  - scripts/ops/archive
   - scripts/diagrams
 
 policies:
@@ -60,7 +60,7 @@ groups:
     path: scripts/schema
     purpose: Schema generation and validation contracts
   data:
-    path: scripts/data
+    path: scripts/ops/data
     purpose: Data integrity and storage-level operational checks
   repo:
     path: scripts/engineering/repo
@@ -75,11 +75,14 @@ groups:
     path: scripts/engineering/baselines
     purpose: Baseline artifacts consumed by engineering quality gates
   migrations_active:
-    path: scripts/migrations/active
+    path: scripts/ops/migrations/active
     purpose: Active repeatable migration scripts
   migrations_oneoff:
-    path: scripts/migrations/oneoff
+    path: scripts/ops/migrations/oneoff
     purpose: One-time migration scripts with explicit sunset
+  archive:
+    path: scripts/ops/archive
+    purpose: Archived historical scripts retained for traceability only
   diagrams:
     path: scripts/diagrams
     purpose: Diagram lint/render/quality pipeline

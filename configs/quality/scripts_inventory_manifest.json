@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T08:08:44.522969+00:00",
+  "generated_at": "2026-04-17T09:45:57.080818+00:00",
   "summary": {
-    "total_scripts": 393,
+    "total_scripts": 394,
     "status_counts": {
-      "active": 308,
+      "active": 309,
       "legacy": 10,
       "orphan": 66,
       "unknown": 9
@@ -14,7 +14,7 @@
       "build": 1,
       "ci": 49,
       "docs": 118,
-      "scripts": 295,
+      "scripts": 296,
       "skills": 9,
       "tests": 100
     }
@@ -3152,300 +3152,6 @@
       ]
     },
     {
-      "path": "scripts/data/check_delta_integrity.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/data/README.md",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "| `check-delta`         | `scripts/data/check_delta_integrity.py`                   | Check Delta Lake integrity                          |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 31,
-          "source_group": "scripts",
-          "text": "\"check-delta\": \"check_delta_integrity.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/check_root_vcr_cassettes.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 5,
-      "references": [
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 61,
-          "source_group": "ci",
-          "text": "run: python scripts/data/check_root_vcr_cassettes.py"
-        },
-        {
-          "path": "scripts/data/README.md",
-          "line": 20,
-          "source_group": "scripts",
-          "text": "| `check-vcr-placement` | `scripts/data/check_root_vcr_cassettes.py`                | Block VCR cassette anti-patterns                    |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 28,
-          "source_group": "scripts",
-          "text": "\"check-vcr-placement\": \"check_root_vcr_cassettes.py\","
-        },
-        {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 250,
-          "source_group": "tests",
-          "text": "assert \"python scripts/data/check_root_vcr_cassettes.py\" in tests_workflow"
-        },
-        {
-          "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 292,
-          "source_group": "tests",
-          "text": "assert \"python scripts/data/check_root_vcr_cassettes.py\" in workflow"
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/check_vcr_filename_policy.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 5,
-      "references": [
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 64,
-          "source_group": "ci",
-          "text": "run: python scripts/data/check_vcr_filename_policy.py"
-        },
-        {
-          "path": "scripts/data/README.md",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "| `check-vcr-naming`    | `scripts/data/check_vcr_filename_policy.py`               | Enforce VCR filename policy                         |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 29,
-          "source_group": "scripts",
-          "text": "\"check-vcr-naming\": \"check_vcr_filename_policy.py\","
-        },
-        {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 251,
-          "source_group": "tests",
-          "text": "assert \"python scripts/data/check_vcr_filename_policy.py\" in tests_workflow"
-        },
-        {
-          "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 293,
-          "source_group": "tests",
-          "text": "assert \"python scripts/data/check_vcr_filename_policy.py\" in workflow"
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/check_vcr_secrets.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/data/README.md",
-          "line": 22,
-          "source_group": "scripts",
-          "text": "| `check-vcr-secrets`   | `scripts/data/check_vcr_secrets.py`                       | Detect potential secret leaks in VCR cassettes      |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 30,
-          "source_group": "scripts",
-          "text": "\"check-vcr-secrets\": \"check_vcr_secrets.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/dq_baseline_update.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 92,
-          "source_group": "docs",
-          "text": "| `dq_baseline_update.py`        | scripts/data/        | Нет     | `uv run python -m scripts.data dq-baseline`        | —            | Пересчёт DQ baseline                       |"
-        },
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 139,
-          "source_group": "docs",
-          "text": "| RULES.md §3.4.1                                             | `dq_baseline_update.py`                                        |"
-        },
-        {
-          "path": "scripts/data/README.md",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "| `dq-baseline`         | `scripts/data/dq_baseline_update.py`                      | Update DQ baseline metrics                          |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 35,
-          "source_group": "scripts",
-          "text": "\"dq-baseline\": \"dq_baseline_update.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/extract_null_fields.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/data/README.md",
-          "line": 28,
-          "source_group": "scripts",
-          "text": "| `report-null-fields`  | `scripts/data/extract_null_fields.py`                     | Extract null field statistics                       |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "\"report-null-fields\": \"extract_null_fields.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/generate_content_hash_comparison_report.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/data/README.md",
-          "line": 29,
-          "source_group": "scripts",
-          "text": "| `report-content-hash` | `scripts/data/generate_content_hash_comparison_report.py` | Generate content hash comparison report             |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 37,
-          "source_group": "scripts",
-          "text": "\"report-content-hash\": \"generate_content_hash_comparison_report.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/vacuum_delta.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 5,
-      "references": [
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 91,
-          "source_group": "docs",
-          "text": "| `vacuum_delta.py`              | scripts/data/        | Нет     | `uv run python -m scripts.data vacuum`             | —            | VACUUM Delta Lake таблиц                   |"
-        },
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 136,
-          "source_group": "docs",
-          "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |"
-        },
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 138,
-          "source_group": "docs",
-          "text": "| RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |"
-        },
-        {
-          "path": "scripts/data/README.md",
-          "line": 25,
-          "source_group": "scripts",
-          "text": "| `vacuum`              | `scripts/data/vacuum_delta.py`                            | Vacuum Delta Lake tables                            |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 33,
-          "source_group": "scripts",
-          "text": "\"vacuum\": \"vacuum_delta.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/validate_data_dir.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 192,
-          "source_group": "docs",
-          "text": "uv run python scripts/data/validate_data_dir.py"
-        },
-        {
-          "path": "scripts/data/README.md",
-          "line": 24,
-          "source_group": "scripts",
-          "text": "| `check-data-dir`      | `scripts/data/validate_data_dir.py`                       | Validate data directory structure against allowlist |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 32,
-          "source_group": "scripts",
-          "text": "\"check-data-dir\": \"validate_data_dir.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/data/verify_checksums.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 93,
-          "source_group": "docs",
-          "text": "| `verify_checksums.py`          | scripts/data/        | Нет     | `uv run python -m scripts.data checksums`          | —            | Верификация контрольных сумм               |"
-        },
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 136,
-          "source_group": "docs",
-          "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |"
-        },
-        {
-          "path": "scripts/data/README.md",
-          "line": 26,
-          "source_group": "scripts",
-          "text": "| `checksums`           | `scripts/data/verify_checksums.py`                        | Generate/verify file checksums                      |"
-        },
-        {
-          "path": "scripts/data/__main__.py",
-          "line": 34,
-          "source_group": "scripts",
-          "text": "\"checksums\": \"verify_checksums.py\","
-        }
-      ]
-    },
-    {
       "path": "scripts/diagrams/__main__.py",
       "type": "py",
       "status": "active",
@@ -3996,7 +3702,7 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 361,
+          "line": 377,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/enforce_diagram_quality_budget.py\""
         }
@@ -4035,13 +3741,13 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 308,
+          "line": 320,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 311,
+          "line": 323,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
         },
@@ -4799,7 +4505,7 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 186,
+          "line": 187,
           "source_group": "scripts",
           "text": "\"scripts/diagrams/svg2png.mjs\","
         },
@@ -4985,21 +4691,6 @@
       ]
     },
     {
-      "path": "scripts/docs/build/mkdocs_build.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/docs/README.md",
-          "line": 46,
-          "source_group": "scripts",
-          "text": "| `build-site`                          | `scripts/docs/build/mkdocs_build.py`                         | Build the MkDocs site through the packaged Python entrypoint                          |"
-        }
-      ]
-    },
-    {
       "path": "scripts/docs/build_docs_site.sh",
       "type": "sh",
       "status": "active",
@@ -5020,7 +4711,7 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 5055,
+          "line": 5160,
           "source_group": "scripts",
           "text": "if \"scripts.docs\" in lowered or \"check-links\" in lowered or \"build_docs_site.sh\" in lowered:"
         }
@@ -5714,9 +5405,42 @@
       "references": [
         {
           "path": "scripts/memory/sync.py",
-          "line": 719,
+          "line": 720,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/baselines/dq_baseline_update.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 92,
+          "source_group": "docs",
+          "text": "| `dq_baseline_update.py`        | scripts/data/        | Нет     | `uv run python -m scripts.data dq-baseline`        | —            | Пересчёт DQ baseline                       |"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 139,
+          "source_group": "docs",
+          "text": "| RULES.md §3.4.1                                             | `dq_baseline_update.py`                                        |"
+        },
+        {
+          "path": "scripts/data/README.md",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "| `dq-baseline`         | `scripts/engineering/baselines/dq_baseline_update.py`                      | Update DQ baseline metrics                          |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 39,
+          "source_group": "scripts",
+          "text": "\"dq-baseline\": \"scripts/engineering/baselines/dq_baseline_update.py\","
         }
       ]
     },
@@ -8738,7 +8462,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 330,
+          "line": 336,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         },
@@ -8783,6 +8507,144 @@
           "line": 334,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/validate_dq_consistency.py"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/vcr/__main__.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/data/README.md",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "python -m scripts.engineering.qa.vcr --help"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "python -m scripts.engineering.qa.vcr <command>"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/vcr/check_root_vcr_cassettes.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 61,
+          "source_group": "ci",
+          "text": "run: python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
+        },
+        {
+          "path": "scripts/data/README.md",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "| `check-vcr-placement` | `scripts/engineering/qa/vcr/check_root_vcr_cassettes.py`                | Block VCR cassette anti-patterns                    |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "\"check-vcr-placement\": \"scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\","
+        },
+        {
+          "path": "scripts/engineering/qa/vcr/__main__.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "\"check-placement\": \"check_root_vcr_cassettes.py\","
+        },
+        {
+          "path": "tests/architecture/test_integration_vcr_policy.py",
+          "line": 251,
+          "source_group": "tests",
+          "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\""
+        },
+        {
+          "path": "tests/architecture/test_test_matrix_coverage.py",
+          "line": 292,
+          "source_group": "tests",
+          "text": "assert \"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/vcr/check_vcr_filename_policy.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 64,
+          "source_group": "ci",
+          "text": "run: python scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
+        },
+        {
+          "path": "scripts/data/README.md",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "| `check-vcr-naming`    | `scripts/engineering/qa/vcr/check_vcr_filename_policy.py`               | Enforce VCR filename policy                         |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "\"check-vcr-naming\": \"scripts/engineering/qa/vcr/check_vcr_filename_policy.py\","
+        },
+        {
+          "path": "scripts/engineering/qa/vcr/__main__.py",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "\"check-naming\": \"check_vcr_filename_policy.py\","
+        },
+        {
+          "path": "tests/architecture/test_integration_vcr_policy.py",
+          "line": 255,
+          "source_group": "tests",
+          "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\""
+        },
+        {
+          "path": "tests/architecture/test_test_matrix_coverage.py",
+          "line": 293,
+          "source_group": "tests",
+          "text": "assert \"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/vcr/check_vcr_secrets.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/data/README.md",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "| `check-vcr-secrets`   | `scripts/engineering/qa/vcr/check_vcr_secrets.py`                       | Detect potential secret leaks in VCR cassettes      |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "\"check-vcr-secrets\": \"scripts/engineering/qa/vcr/check_vcr_secrets.py\","
+        },
+        {
+          "path": "scripts/engineering/qa/vcr/__main__.py",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "\"check-secrets\": \"check_vcr_secrets.py\","
         }
       ]
     },
@@ -9464,7 +9326,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 331,
+          "line": 337,
           "source_group": "tests",
           "text": "\"scripts/migrations/active/backfill_vcr_metadata_sidecars.py\","
         }
@@ -9987,6 +9849,225 @@
           "line": 215,
           "source_group": "docs",
           "text": "./scripts/ops/codex.sh \"create Pydantic models for bronze layer\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/data/__main__.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/data/README.md",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "python -m scripts.ops.data --help"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "python -m scripts.ops.data <command>"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/data/check_delta_integrity.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/data/README.md",
+          "line": 31,
+          "source_group": "scripts",
+          "text": "| `check-delta`         | `scripts/ops/data/check_delta_integrity.py`                   | Check Delta Lake integrity                          |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "\"check-delta\": \"scripts/ops/data/check_delta_integrity.py\","
+        },
+        {
+          "path": "scripts/ops/data/__main__.py",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "\"check-delta\": \"check_delta_integrity.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/data/extract_null_fields.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/data/README.md",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "| `report-null-fields`  | `scripts/ops/data/extract_null_fields.py`                     | Extract null field statistics                       |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "\"report-null-fields\": \"scripts/ops/data/extract_null_fields.py\","
+        },
+        {
+          "path": "scripts/ops/data/__main__.py",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "\"report-null-fields\": \"extract_null_fields.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/data/generate_content_hash_comparison_report.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/data/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "| `report-content-hash` | `scripts/ops/data/generate_content_hash_comparison_report.py` | Generate content hash comparison report             |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 41,
+          "source_group": "scripts",
+          "text": "\"report-content-hash\": \"scripts/ops/data/generate_content_hash_comparison_report.py\","
+        },
+        {
+          "path": "scripts/ops/data/__main__.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "\"report-content-hash\": \"generate_content_hash_comparison_report.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/data/vacuum_delta.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 91,
+          "source_group": "docs",
+          "text": "| `vacuum_delta.py`              | scripts/data/        | Нет     | `uv run python -m scripts.data vacuum`             | —            | VACUUM Delta Lake таблиц                   |"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 136,
+          "source_group": "docs",
+          "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 138,
+          "source_group": "docs",
+          "text": "| RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |"
+        },
+        {
+          "path": "scripts/data/README.md",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "| `vacuum`              | `scripts/ops/data/vacuum_delta.py`                            | Vacuum Delta Lake tables                            |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "\"vacuum\": \"scripts/ops/data/vacuum_delta.py\","
+        },
+        {
+          "path": "scripts/ops/data/__main__.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "\"vacuum\": \"vacuum_delta.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/data/validate_data_dir.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/00-project/governance/03-file-policy.md",
+          "line": 192,
+          "source_group": "docs",
+          "text": "uv run python scripts/data/validate_data_dir.py"
+        },
+        {
+          "path": "scripts/data/README.md",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "| `check-data-dir`      | `scripts/ops/data/validate_data_dir.py`                       | Validate data directory structure against allowlist |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "\"check-data-dir\": \"scripts/ops/data/validate_data_dir.py\","
+        },
+        {
+          "path": "scripts/ops/data/__main__.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "\"check-data-dir\": \"validate_data_dir.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/data/verify_checksums.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 93,
+          "source_group": "docs",
+          "text": "| `verify_checksums.py`          | scripts/data/        | Нет     | `uv run python -m scripts.data checksums`          | —            | Верификация контрольных сумм               |"
+        },
+        {
+          "path": "docs/00-project/TOOLS.md",
+          "line": 136,
+          "source_group": "docs",
+          "text": "| [cleanup-policy.md](../03-guides/cleanup-policy.md)         | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |"
+        },
+        {
+          "path": "scripts/data/README.md",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "| `checksums`           | `scripts/ops/data/verify_checksums.py`                        | Generate/verify file checksums                      |"
+        },
+        {
+          "path": "scripts/data/__main__.py",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "\"checksums\": \"scripts/ops/data/verify_checksums.py\","
+        },
+        {
+          "path": "scripts/ops/data/__main__.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "\"checksums\": \"verify_checksums.py\","
         }
       ]
     },

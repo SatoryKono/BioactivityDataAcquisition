@@ -87,7 +87,6 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
 
     with observer:
         observer.capture_execution_metrics({"records_gold": 42})
-        assert observer is not None
 
     # Verify metrics
     metrics_mock.observe_histogram.assert_called_once()
@@ -174,7 +173,7 @@ def test_observer_records_duration(metrics_mock, logger_mock, run_id):
     )
 
     with observer:
-        assert observer is not None
+        pass
 
     # Verify histogram was called with correct metric name
     metrics_mock.observe_histogram.assert_called_once()
@@ -240,7 +239,7 @@ def test_observer_graceful_shutdown(metrics_mock, logger_mock, tracer_mock, run_
     )
 
     with observer:
-        assert observer is not None
+        pass
 
     # Verify span was created and ended properly
     tracer_mock.get_tracer.assert_called_once_with("bioetl.pipeline")
@@ -288,7 +287,7 @@ def test_observer_handles_close_error(metrics_mock, logger_mock, tracer_mock, ru
 
     # Should not raise despite tracer error
     with observer:
-        assert observer is not None
+        pass
 
     # Pipeline should still record success metrics
     metrics_mock.observe_histogram.assert_called_once()
@@ -532,7 +531,7 @@ def test_emit_health_check_summary_uses_observer_contract(
     call_args = logger_mock.warning.call_args
     assert call_args.args[0] == "health_check_summary_recorded"
     assert call_args.kwargs["phase"] == "preflight"
-    assert call_args.kwargs["validated"] is False
+    assert not call_args.kwargs["validated"]
     assert call_args.kwargs["overall_status"] == "unhealthy"
     assert call_args.kwargs["components_checked"] == 2
 
@@ -596,13 +595,11 @@ class TestObserverEmitPhase:
 
         # Find the phase duration metric call
         histogram_calls = metrics_mock.observe_histogram.call_args_list
-        phase_call = None
-        for call in histogram_calls:
-            if call[0][0] == "bioetl_phase_duration_seconds":
-                phase_call = call
-                break
-
-        assert phase_call is not None
+        phase_call = next(
+            call
+            for call in histogram_calls
+            if call[0][0] == "bioetl_phase_duration_seconds"
+        )
         assert phase_call[1]["labels"]["phase"] == "execution"
         assert phase_call[1]["labels"]["status"] == "success"
 

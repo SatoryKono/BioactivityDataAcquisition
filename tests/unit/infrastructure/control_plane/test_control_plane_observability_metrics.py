@@ -18,7 +18,7 @@ from bioetl.infrastructure.control_plane.file_run_manifest_store import (
 
 
 def _make_manifest(pipeline: str = "chembl_activity") -> RunManifest:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     return RunManifest(
         manifest_id="manifest-obs",
         execution_fingerprint="fingerprint",
@@ -42,7 +42,7 @@ def _make_ledger_entry(manifest: RunManifest) -> RunLedgerEntry:
         manifest_id=manifest.manifest_id,
         run_id=manifest.run_id,
         event_type="manifest_created",
-        occurred_at=datetime.utcnow(),
+        occurred_at=datetime.now(timezone.utc),
         status="success",
         details={"_diagnostic": {"pipeline": manifest.pipeline_name}},
     )

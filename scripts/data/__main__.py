@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Unified entry point for scripts/data/ commands.
+"""Compatibility entry point for scripts/data commands.
 
 Usage:
     python -m scripts.data <command> [args...]
     python -m scripts.data --help
+
+Canonical command groups:
+    python -m scripts.ops.data <command>
+    python -m scripts.engineering.qa.vcr <command>
 
 Commands:
     check-vcr-placement    Block VCR cassette anti-patterns
@@ -25,23 +29,23 @@ import sys
 from pathlib import Path
 
 COMMANDS: dict[str, str] = {
-    "check-vcr-placement": "check_root_vcr_cassettes.py",
-    "check-vcr-naming": "check_vcr_filename_policy.py",
-    "check-vcr-secrets": "check_vcr_secrets.py",
-    "check-delta": "check_delta_integrity.py",
-    "check-data-dir": "validate_data_dir.py",
-    "vacuum": "vacuum_delta.py",
-    "checksums": "verify_checksums.py",
-    "dq-baseline": "dq_baseline_update.py",
-    "report-null-fields": "extract_null_fields.py",
-    "report-content-hash": "generate_content_hash_comparison_report.py",
+    "check-vcr-placement": "scripts/engineering/qa/vcr/check_root_vcr_cassettes.py",
+    "check-vcr-naming": "scripts/engineering/qa/vcr/check_vcr_filename_policy.py",
+    "check-vcr-secrets": "scripts/engineering/qa/vcr/check_vcr_secrets.py",
+    "check-delta": "scripts/ops/data/check_delta_integrity.py",
+    "check-data-dir": "scripts/ops/data/validate_data_dir.py",
+    "vacuum": "scripts/ops/data/vacuum_delta.py",
+    "checksums": "scripts/ops/data/verify_checksums.py",
+    "dq-baseline": "scripts/engineering/baselines/dq_baseline_update.py",
+    "report-null-fields": "scripts/ops/data/extract_null_fields.py",
+    "report-content-hash": "scripts/ops/data/generate_content_hash_comparison_report.py",
 }
 
-_DIR = Path(__file__).parent
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _run_script(name: str, argv: list[str]) -> int:
-    script = _DIR / name
+    script = _REPO_ROOT / name
     result = subprocess.run([sys.executable, str(script), *argv], check=False)
     return result.returncode
 

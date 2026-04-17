@@ -74,12 +74,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded local Neo4j/MCP bootstrap helper while the Neo4j memory tooling remains an operator-maintained troubleshooting surface; either promote it into a canonical supported workflow or remove it once those setup docs are retired."
     },
-    "scripts/memory/prompts/print_seed.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a ready-to-paste maintainer helper for seeding BioETL facts into Neo4j memory; do not extend it as a general-purpose automation entrypoint."
-    },
     "scripts/ops/start-neo4j-audit.ps1": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
@@ -104,12 +98,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/restart-docker.ps1 while historical docs and operator habits still reference the legacy root path."
     },
-    "scripts/memory/setup/wsl_startup.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a thin root-level compatibility wrapper to scripts/ops/setup-neo4j-wsl.sh while historical docs and operator habits still reference the legacy root path."
-    },
     "scripts/ops/neo4j-recovery-checklist.ps1": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -121,24 +109,6 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Windows-side Docker Desktop recovery helper for local Neo4j troubleshooting; prefer documented canonical setup flows for routine contributor work."
-    },
-    "scripts/ops/setup-neo4j-wsl.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL troubleshooting helper for reaching the Windows-hosted Docker Desktop Neo4j backend from mounted checkouts; either fold it into a canonical cross-platform setup flow or remove it once the mixed Windows-WSL path is stable."
-    },
-    "script-codex/helper/test-basic.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded local Codex environment smoke helper while the mixed Windows-WSL Codex setup remains operator-maintained; either promote it into a documented verification command or remove it once the bootstrap path is stable."
-    },
-    "scripts/archive/ops/run-codex": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
-      "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-codex/run-codex.sh as the canonical Unix entrypoint instead of the legacy hardcoded-key launcher."
     },
     "scripts/ops/codex-wsl.bat": {
       "owner": "@bioetl-platform",
@@ -152,23 +122,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a convenience Windows launcher for the mixed WSL Codex bootstrap flow while operators still use batch entrypoints; prefer documented canonical setup commands for normal contributor workflows."
     },
-    "scripts/ops/codex-headless.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin shell launcher to scripts/ai/codex/headless.sh while historical headless entrypoints still reference the scripts.ops path."
-    },
     "scripts/ops/codex-headless.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher to scripts/ai/codex/headless.ps1 while Windows-side headless entrypoints still reference the scripts.ops path."
-    },
-    "scripts/ops/diagnose-codex-wsl.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin shell launcher to scripts/ai/codex/diagnose_wsl.sh while historical diagnostic references still point to the scripts.ops path."
     },
     "scripts/ops/diagnose-codex-wsl.ps1": {
       "owner": "@bioetl-platform",
@@ -296,12 +254,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a local operator helper for starting the health server from Windows shells; do not expand it into a canonical contributor workflow without stronger call-site evidence."
     },
-    "scripts/ops/verify_neo4j.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a cmd.exe compatibility verification helper for the historical Neo4j memory setup path; remove it if Windows command-prompt support is no longer needed."
-    },
     "scripts/engineering/repo/finalize_docs_issues_2638_2643.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -416,12 +368,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded simple maintenance test helper; remove it once maintenance testing is handled by canonical test utilities."
     },
-    "scripts/engineering/dev/python/test_neo4j_memory.py": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded Neo4j memory test helper; remove it once Neo4j memory testing is handled by canonical test utilities."
-    },
     "scripts/engineering/dev/python/test_null_handling.py": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
@@ -446,65 +392,125 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded assay profile update helper; remove it once assay profile updates are handled by canonical migration utilities."
     },
-    "script-codex/archive/setup_codex.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_legacy_setup",
-      "review_by": "2026-07-15",
-      "next_step": "Archived after Codex setup consolidation; use script-codex/run-codex.{ps1,sh} or the active scripts/ops bootstrap entrypoints instead."
-    },
-    "scripts/agents/py-team-orchestration.py": {
+    "scripts/ops/archive/agents/py-team-orchestration.py": {
       "owner": "@bioetl-architecture",
-      "decision": "agent_workflow",
+      "decision": "archived_duplicate",
       "review_by": "2026-07-15",
-      "next_step": "Retain as canonical agent workflow script; document in agent workflow guides."
+      "next_step": "Retain only as an archived historical agent-orchestration snapshot; prefer the governed Codex skill workflow instead of reviving this standalone archive path."
     },
-    "scripts/archive/ops/mistral-exec.bat": {
+    "scripts/ops/archive/ai/TREE.sh": {
       "owner": "@bioetl-platform",
       "decision": "archived_duplicate",
       "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-mistrallvibe/run-vibe.ps1 --prompt ... as the supported Windows entrypoint."
+      "next_step": "Retain only as an archived AI workspace tree snapshot helper; do not revive this path while canonical inventory and docs tooling cover repository topology."
     },
-    "scripts/archive/ops/mistral-exec.sh": {
+    "scripts/ops/archive/gemini/SUMMARY.sh": {
       "owner": "@bioetl-platform",
       "decision": "archived_duplicate",
       "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-mistrallvibe/run-vibe.sh for Unix prompt and interactive execution."
+      "next_step": "Retain only as an archived Gemini-era summary helper for historical traceability; do not extend it as part of the current governed AI workflow."
     },
-    "scripts/archive/ops/mistral.bat": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
+    "scripts/docs/chembl_matrix_structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-mistrallvibe/run-vibe.ps1 as the supported Windows entrypoint."
+      "next_step": "Retain only as a historical one-off docs utility for ChEMBL matrix contract generation; remove it once any remaining archived workbook references are retired."
     },
-    "scripts/archive/ops/codex-login.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
+    "scripts/docs/enrich_chembl_matrix_normalization_details.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-codex/run-codex.sh login for Unix API-key login."
+      "next_step": "Retain only as a historical docs enrichment helper for ChEMBL matrix normalization notes; do not reuse it as a canonical docs pipeline."
     },
-    "scripts/archive/ops/codex-login.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
+    "scripts/docs/export_chembl_matrix_structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-codex/run-codex.ps1 login for Windows API-key login."
+      "next_step": "Retain only as a historical export helper for the ChEMBL matrix structural contract workbook; remove it after archived workbook workflows are fully retired."
     },
-    "scripts/archive/ops/codex-device-login.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
+    "scripts/docs/filter_chembl_matrix_rows.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-codex/run-codex.sh device-login for Unix device-auth login."
+      "next_step": "Retain only as a historical row-filtering helper for ChEMBL matrix workbook maintenance; do not treat it as supported docs automation."
     },
-    "scripts/archive/ops/codex-device-login.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
+    "scripts/docs/fix_doc_links_auto.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-codex/run-codex.ps1 device-login for Windows device-auth login."
+      "next_step": "Retain only as a historical automatic doc-link fixer used during earlier cleanup waves; prefer current governed docs link checks and sync flows."
     },
-    "scripts/archive/ops/setup_mistral_vibe.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "archived_duplicate",
+    "scripts/docs/fix_doc_links_explicit.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
-      "next_step": "Archived after consolidation; use script-mistrallvibe/helper/setup-env.sh for setup."
+      "next_step": "Retain only as a historical explicit doc-link fixer from earlier remediation waves; do not reuse it as canonical docs automation."
+    },
+    "scripts/docs/fix_link_warnings.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical warning-fix helper for docs cleanup waves; prefer current link validation and targeted remediation scripts."
+    },
+    "scripts/docs/generate_chembl_activity_field_matrix.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical ChEMBL activity matrix generator for archived workbook maintenance; do not extend it as part of the canonical docs toolchain."
+    },
+    "scripts/docs/generate_chembl_matrix_dictionaries.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical helper for generating ChEMBL matrix workbook dictionaries; remove it when archived workbook support is no longer required."
+    },
+    "scripts/docs/matrix/structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical matrix structural-contract helper used by archived workbook tooling; do not treat it as supported docs automation."
+    },
+    "scripts/docs/normalize_chembl_matrix_workbook.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical workbook-normalization helper for ChEMBL matrix maintenance; remove it once the workbook path is fully retired."
+    },
+    "scripts/docs/sentence_doc_audit.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical sentence-level docs audit helper from earlier cleanup waves; prefer current docs audit orchestration instead."
+    },
+    "scripts/docs/sync_chembl_matrix_structural_policy.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical sync helper for ChEMBL matrix structural-policy artifacts; do not use it as canonical policy automation."
+    },
+    "scripts/docs/sync_repo_identity.py": {
+      "owner": "@bioetl-docs",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical docs-side repo-identity sync helper while the canonical implementation lives under scripts.docs."
+    },
+    "scripts/engineering/qa/hotspot_family_metrics.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded hotspot-family metrics helper while the newer baseline/report flow stabilizes; either promote it through documented call-sites or remove it."
+    },
+    "scripts/memory/mcp_smoke.py": {
+      "owner": "@bioetl-platform",
+      "decision": "temporary_diagnostic",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded MCP smoke helper for local memory tooling diagnostics; do not expand it into a canonical contributor workflow without stronger call-site evidence."
+    },
+    "scripts/ops/support/load_repo_env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a low-level repo-environment loader for compatibility with older ops wrappers; do not document it as a primary user-facing entrypoint."
     }
   }
 }
