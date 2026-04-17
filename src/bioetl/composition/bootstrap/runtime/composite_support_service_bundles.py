@@ -66,7 +66,7 @@ class MergeDependenciesBundle:
     aggregator: EnricherAggregator
     renamer: ColumnRenamer
     orderer: ColumnOrderService | None
-    priority_orderer: ColumnPriorityOrderer
+    priority_orderer: ColumnPriorityOrderer | None
     order_service: ColumnOrderService
     coalesce_policy: CoalescePolicyService
     conflict_resolver: ConflictResolverService
