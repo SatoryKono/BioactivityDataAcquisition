@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Quick test that load_repo_env works correctly
+# Quick test that the MCP-local repo env loader resolves Neo4j settings correctly.
 
 set -euo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")"/../.. || exit 1
+cd "$(dirname "${BASH_SOURCE[0]}")"/../../.. || exit 1
 
-source scripts/ops/support/load_repo_env.sh
+source scripts/ai/mcp/support/load_repo_env.sh
 load_repo_env_if_present
 
 echo "=== Environment Variables Loaded ==="
 echo "NEO4J_URI=${NEO4J_URI:-NOT SET}"
-echo "NEO4J_USERNAME=${NEO4J_USERNAME:-NOT SET}"  
+echo "NEO4J_USERNAME=${NEO4J_USERNAME:-NOT SET}"
 echo "NEO4J_PASSWORD=${NEO4J_PASSWORD:-NOT SET}"
 echo "NEO4J_DATABASE=${NEO4J_DATABASE:-NOT SET}"
 echo "NEO4J_AUTH=${NEO4J_AUTH:-NOT SET}"

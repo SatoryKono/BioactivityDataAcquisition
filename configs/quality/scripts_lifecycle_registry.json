@@ -128,12 +128,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded WSL troubleshooting helper for reaching the Windows-hosted Docker Desktop Neo4j backend from mounted checkouts; either fold it into a canonical cross-platform setup flow or remove it once the mixed Windows-WSL path is stable."
     },
-    "scripts/ai/mcp/check_neo4j_memory.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded end-to-end local Neo4j MCP smoke helper while the graph-memory setup remains an operator troubleshooting workflow; either fold it into a canonical verification command or remove it once the setup path is stabilized."
-    },
     "script-codex/helper/test-basic.sh": {
       "owner": "@bioetl-platform",
       "decision": "temporary_diagnostic",
@@ -145,12 +139,6 @@
       "decision": "archived_duplicate",
       "review_by": "2026-07-15",
       "next_step": "Archived after consolidation; use script-codex/run-codex.sh as the canonical Unix entrypoint instead of the legacy hardcoded-key launcher."
-    },
-    "scripts/ops/test_env_loading.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded local smoke helper for validating repo .env loading in Neo4j/MCP setup flows; either fold this check into a canonical verification command or remove it once manual troubleshooting is no longer needed."
     },
     "scripts/ops/codex-wsl.bat": {
       "owner": "@bioetl-platform",
@@ -212,11 +200,11 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway mermaid server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ai/mcp/check_neo4j_memory.sh": {
+    "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1": {
       "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
+      "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a Windows-side smoke helper for the knowall Neo4j MCP path; do not treat it as a reusable automation surface for new operator flows."
+      "next_step": "Retain only as a thin PowerShell launcher for the specialized Neo4j memory MCP server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
     "scripts/dev/run_project_python.py": {
       "owner": "@bioetl-platform",

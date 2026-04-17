@@ -24,8 +24,7 @@ under `scripts/memory/`, while MCP operational scripts live under
 
 ## Internal-only zones
 
-- `support/load_repo_env.{sh,ps1}`
-- `support/docker_cli_resolver.sh`
+- `support/load_repo_env.sh`
 - `script-codex/helper/ensure-codex-cli.sh`
 
 ## Legacy maintenance zone

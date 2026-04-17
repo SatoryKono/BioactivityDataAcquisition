@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-16T19:49:29.014666+00:00",
+  "generated_at": "2026-04-17T05:52:40.320435+00:00",
   "summary": {
-    "total_scripts": 350,
+    "total_scripts": 349,
     "status_counts": {
-      "active": 275,
+      "active": 281,
       "legacy": 10,
-      "orphan": 54,
-      "unknown": 11
+      "orphan": 49,
+      "unknown": 9
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 1,
       "ci": 49,
-      "docs": 123,
-      "scripts": 265,
+      "docs": 121,
+      "scripts": 271,
       "skills": 9,
-      "tests": 98
+      "tests": 100
     }
   },
   "scripts": [
@@ -63,7 +63,1009 @@
       ]
     },
     {
-      "path": "scripts/agents/architecture-techdebt-automation.py",
+      "path": "scripts/ai/mcp/__main__.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/memory/README.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "- `python -m scripts.ai.mcp smoke-neo4j-memory`"
+        },
+        {
+          "path": "scripts/ops/README.md",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/__main__.py)."
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/check.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 93,
+          "source_group": "docs",
+          "text": "| **check.sh** | `scripts/memory/mcp/` | Full MCP + backend health check |"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 106,
+          "source_group": "docs",
+          "text": "bash scripts/ai/mcp/check.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": "- **[check.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
+          "line": 99,
+          "source_group": "docs",
+          "text": "bash scripts/ai/mcp/check.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
+          "line": 211,
+          "source_group": "docs",
+          "text": "3. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`"
+        },
+        {
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "\"check\": \"check.sh\","
+        },
+        {
+          "path": "scripts/dev/bash/WSL_COMMANDS.sh",
+          "line": 61,
+          "source_group": "scripts",
+          "text": "# bash scripts/ai/mcp/check.sh"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 27,
+      "references": [
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 173,
+          "source_group": "docs",
+          "text": "3. Run verification: `bash scripts/ai/mcp/check_neo4j_memory.sh`"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 193,
+          "source_group": "docs",
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 68,
+          "source_group": "docs",
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 100,
+          "source_group": "docs",
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 188,
+          "source_group": "docs",
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": "- **[check.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 82,
+          "source_group": "docs",
+          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/github-mcp-wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "wrapper_path = str((root / \"scripts\" / \"ai\" / \"mcp\" / \"github-mcp-wrapper.ps1\").resolve())"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 81,
+          "source_group": "tests",
+          "text": "assert \"github-mcp-wrapper.ps1\" in servers[\"github\"][\"args\"][-1]"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 181,
+          "source_group": "tests",
+          "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/github-mcp-wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "EXPECTED_GITHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/github-mcp-wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "wrapper_path = str((root / \"scripts\" / \"ai\" / \"mcp\" / \"github-mcp-wrapper.sh\").resolve())"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 107,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 178,
+          "source_group": "tests",
+          "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 100,
+          "source_group": "tests",
+          "text": "assert \"mcp_brave_search_wrapper.ps1\" in servers[\"brave-search\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "EXPECTED_BRAVE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 131,
+          "source_group": "scripts",
+          "text": "\"brave-search\": _wrapper_server(root, \"scripts/ai/mcp/mcp_brave_search_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 142,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 95,
+          "source_group": "tests",
+          "text": "assert \"mcp_context7_wrapper.ps1\" in servers[\"context7\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 126,
+          "source_group": "scripts",
+          "text": "\"context7\": _wrapper_server(root, \"scripts/ai/mcp/mcp_context7_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 127,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 94,
+          "source_group": "tests",
+          "text": "assert \"mcp_docker_docs_wrapper.ps1\" in servers[\"docker-docs\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "EXPECTED_DOCKER_DOCS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 125,
+          "source_group": "scripts",
+          "text": "\"docker-docs\": _wrapper_server(root, \"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 124,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 93,
+          "source_group": "tests",
+          "text": "assert \"mcp_docker_wrapper.ps1\" in servers[\"docker\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_docker_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 124,
+          "source_group": "scripts",
+          "text": "\"docker\": _wrapper_server(root, \"scripts/ai/mcp/mcp_docker_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 121,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 97,
+          "source_group": "tests",
+          "text": "assert \"mcp_dockerhub_wrapper.ps1\" in servers[\"dockerhub\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "EXPECTED_DOCKERHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 128,
+          "source_group": "scripts",
+          "text": "\"dockerhub\": _wrapper_server(root, \"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 133,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 99,
+          "source_group": "tests",
+          "text": "assert \"mcp_grafana_wrapper.ps1\" in servers[\"grafana\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_grafana_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "EXPECTED_GRAFANA_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 130,
+          "source_group": "scripts",
+          "text": "\"grafana\": _wrapper_server(root, \"scripts/ai/mcp/mcp_grafana_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 139,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 102,
+          "source_group": "tests",
+          "text": "assert \"mcp_neo4j_cypher_wrapper.ps1\" in servers[\"neo4j-cypher\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "EXPECTED_NEO4J_CYPHER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 133,
+          "source_group": "scripts",
+          "text": "\"neo4j-cypher\": _wrapper_server(root, \"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 148,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 23,
+      "references": [
+        {
+          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
+          "line": 74,
+          "source_group": "docs",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh\","
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 10,
+          "source_group": "docs",
+          "text": "- `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` (wrapper script)"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 63,
+          "source_group": "docs",
+          "text": "Command: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
+          "line": 172,
+          "source_group": "docs",
+          "text": "2. Check wrapper script exists: `ls -la scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
+          "line": 46,
+          "source_group": "docs",
+          "text": "| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` | MCP wrapper script | ✅ Ready |"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 14,
+          "source_group": "docs",
+          "text": "- **Wrapper Script**: `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` created"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 20,
+          "source_group": "docs",
+          "text": "# Expected: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
+          "line": 108,
+          "source_group": "docs",
+          "text": "│ scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh             │"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_paper_search_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 96,
+          "source_group": "tests",
+          "text": "assert \"mcp_paper_search_wrapper.ps1\" in servers[\"paper-search\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_paper_search_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "EXPECTED_PAPER_SEARCH_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 127,
+          "source_group": "scripts",
+          "text": "\"paper-search\": _wrapper_server(root, \"scripts/ai/mcp/mcp_paper_search_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 130,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 98,
+          "source_group": "tests",
+          "text": "assert \"mcp_prometheus_wrapper.ps1\" in servers[\"prometheus\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_prometheus_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "EXPECTED_PROMETHEUS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 129,
+          "source_group": "scripts",
+          "text": "\"prometheus\": _wrapper_server(root, \"scripts/ai/mcp/mcp_prometheus_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 136,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 101,
+          "source_group": "tests",
+          "text": "assert \"mcp_sonarqube_wrapper.ps1\" in servers[\"sonarqube\"][\"args\"][-1]"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "EXPECTED_SONARQUBE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
+          "line": 38,
+          "source_group": "scripts",
+          "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
+        },
+        {
+          "path": "scripts/dev/setup_copilot_codex_mcp.py",
+          "line": 132,
+          "source_group": "scripts",
+          "text": "\"sonarqube\": _wrapper_server(root, \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\"),"
+        },
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 145,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/neo4j_memory_mcp_adapter.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "exec \"${PYTHON_BIN}\" \"${REPO_ROOT}/scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" -- \\"
+        },
+        {
+          "path": "scripts/memory/README.md",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "- `scripts/ai/mcp/neo4j_memory_mcp_adapter.py` bridges Codex framed stdio to the upstream line-delimited server."
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
+          "line": 51,
+          "source_group": "tests",
+          "text": "adapter = Path(\"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\").resolve()"
+        },
+        {
+          "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
+          "line": 66,
+          "source_group": "tests",
+          "text": "assert \"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" in wrapper"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/neo4j_memory_mcp_smoke.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "\"smoke-neo4j-memory\": \"neo4j_memory_mcp_smoke.py\","
+        },
+        {
+          "path": "scripts/memory/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "- `scripts/ai/mcp/neo4j_memory_mcp_smoke.py` validates framed stdio behavior for the `neo4j-memory` MCP server."
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "\"smoke-sonarqube\": \"sonarqube_mcp_smoke.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/support/docker_cli_resolver.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "$dockerCliResolverPath = Join-Path -Path $scriptDir -ChildPath \"support\\docker_cli_resolver.ps1\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "$dockerCliResolverPath = Join-Path -Path $scriptDir -ChildPath \"support\\docker_cli_resolver.ps1\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "$dockerCliResolverPath = Join-Path -Path $scriptDir -ChildPath \"support\\docker_cli_resolver.ps1\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "$dockerCliResolverPath = Join-Path -Path $scriptDir -ChildPath \"support\\docker_cli_resolver.ps1\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/support/docker_cli_resolver.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 26,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
+          "line": 6,
+          "source_group": "scripts",
+          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/support/load_repo_env.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 10,
+      "references": [
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md",
+          "line": 10,
+          "source_group": "docs",
+          "text": "- `scripts/ai/mcp/support/load_repo_env.ps1` - PowerShell environment loader"
+        },
+        {
+          "path": "scripts/ai/mcp/github-mcp-wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        },
+        {
+          "path": "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
+          "line": 6,
+          "source_group": "scripts",
+          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/support/load_repo_env.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
+          "line": 76,
+          "source_group": "docs",
+          "text": "\"scripts/ai/mcp/support/load_repo_env.sh\","
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 104,
+          "source_group": "docs",
+          "text": "| `scripts/ai/mcp/support/load_repo_env.sh` | Env variable loader |"
+        },
+        {
+          "path": "scripts/ai/mcp/test_env_loading.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "source scripts/ai/mcp/support/load_repo_env.sh"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mcp/test_env_loading.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "\"test-env-loading\": \"test_env_loading.sh\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/agents/architecture-techdebt-automation.py",
       "type": "py",
       "status": "active",
       "agent_usage": [
@@ -92,7 +1094,7 @@
       ]
     },
     {
-      "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+      "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [
@@ -151,7 +1153,7 @@
       ]
     },
     {
-      "path": "scripts/agents/diagrams/py-doc-bot-2.py",
+      "path": "scripts/archive/agents/diagrams/py-doc-bot-2.py",
       "type": "py",
       "status": "active",
       "agent_usage": [
@@ -184,7 +1186,7 @@
           "text": "DOCX_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py\")"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-4.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-4.sh",
           "line": 169,
           "source_group": "scripts",
           "text": "DOCX_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py\")"
@@ -204,7 +1206,7 @@
       ]
     },
     {
-      "path": "scripts/agents/diagrams/py-doc-bot-3.py",
+      "path": "scripts/archive/agents/diagrams/py-doc-bot-3.py",
       "type": "py",
       "status": "active",
       "agent_usage": [
@@ -237,7 +1239,7 @@
           "text": "PDF_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py\")"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-4.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-4.sh",
           "line": 178,
           "source_group": "scripts",
           "text": "PDF_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py\")"
@@ -257,7 +1259,7 @@
       ]
     },
     {
-      "path": "scripts/agents/diagrams/py-doc-bot-4.sh",
+      "path": "scripts/archive/agents/diagrams/py-doc-bot-4.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [
@@ -316,7 +1318,7 @@
       ]
     },
     {
-      "path": "scripts/agents/py-config-bot-1.py",
+      "path": "scripts/archive/agents/py-config-bot-1.py",
       "type": "py",
       "status": "active",
       "agent_usage": [
@@ -377,7 +1379,7 @@
       ]
     },
     {
-      "path": "scripts/agents/py-config-bot-2.py",
+      "path": "scripts/archive/agents/py-config-bot-2.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -410,7 +1412,7 @@
       ]
     },
     {
-      "path": "scripts/agents/py-team-orchestration.py",
+      "path": "scripts/archive/agents/py-team-orchestration.py",
       "type": "py",
       "status": "unknown",
       "agent_usage": [],
@@ -425,7 +1427,7 @@
       ]
     },
     {
-      "path": "scripts/ai/TREE.sh",
+      "path": "scripts/archive/ai/TREE.sh",
       "type": "sh",
       "status": "orphan",
       "agent_usage": [],
@@ -433,56 +1435,56 @@
       "references": []
     },
     {
-      "path": "scripts/ai/gemini-interactive.sh",
+      "path": "scripts/archive/ai/gemini-interactive.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
       "reference_count": 49,
       "references": [
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 8,
           "source_group": "scripts",
           "text": "✓ gemini-interactive.sh (21.6 KB)"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 146,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini-interactive.sh"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 155,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini-interactive.sh"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 220,
           "source_group": "scripts",
           "text": "1. Launch: bash scripts/ai/gemini-interactive.sh"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 231,
           "source_group": "scripts",
           "text": "1. Launch: bash scripts/ai/gemini-interactive.sh"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 243,
           "source_group": "scripts",
           "text": "1. Launch: bash scripts/ai/gemini-interactive.sh"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 347,
           "source_group": "scripts",
           "text": "4. Launch: `bash scripts/ai/gemini-interactive.sh`"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 399,
           "source_group": "scripts",
           "text": "→ Or run: `wsl bash scripts/ai/gemini-interactive.sh`"
@@ -490,56 +1492,56 @@
       ]
     },
     {
-      "path": "scripts/ai/gemini.ps1",
+      "path": "scripts/archive/ai/gemini.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
       "reference_count": 34,
       "references": [
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 24,
           "source_group": "scripts",
           "text": "✓ gemini.ps1 (6.4 KB)"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 139,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini.ps1"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 451,
           "source_group": "scripts",
           "text": "- [x] PowerShell wrapper created (gemini.ps1)"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 488,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini.ps1"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 7,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini.ps1              # Interactive menu"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 8,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini.ps1 setup        # Initialize"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 9,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini.ps1 sync         # Sync profiles"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 10,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\gemini.ps1 status       # Check status"
@@ -547,56 +1549,56 @@
       ]
     },
     {
-      "path": "scripts/ai/launch-gemini.sh",
+      "path": "scripts/archive/ai/launch-gemini.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
       "reference_count": 15,
       "references": [
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 43,
           "source_group": "scripts",
           "text": "✓ launch-gemini.sh (2.2 KB)"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 175,
           "source_group": "scripts",
           "text": "├── launch-gemini.sh"
         },
         {
-          "path": "scripts/ai/GEMINI-WSL-SETUP.md",
+          "path": "scripts/archive/ai/GEMINI-WSL-SETUP.md",
           "line": 17,
           "source_group": "scripts",
           "text": "| `scripts/ai/launch-gemini.sh` | Launch Gemini with context | (new) |"
         },
         {
-          "path": "scripts/ai/GEMINI-WSL-SETUP.md",
+          "path": "scripts/archive/ai/GEMINI-WSL-SETUP.md",
           "line": 79,
           "source_group": "scripts",
           "text": "bash scripts/ai/launch-gemini.sh [profile] [mode]"
         },
         {
-          "path": "scripts/ai/GEMINI-WSL-SETUP.md",
+          "path": "scripts/archive/ai/GEMINI-WSL-SETUP.md",
           "line": 86,
           "source_group": "scripts",
           "text": "bash scripts/ai/launch-gemini.sh py-review-orchestrator"
         },
         {
-          "path": "scripts/ai/GEMINI-WSL-SETUP.md",
+          "path": "scripts/archive/ai/GEMINI-WSL-SETUP.md",
           "line": 89,
           "source_group": "scripts",
           "text": "bash scripts/ai/launch-gemini.sh py-audit-bot"
         },
         {
-          "path": "scripts/ai/GEMINI-WSL-SETUP.md",
+          "path": "scripts/archive/ai/GEMINI-WSL-SETUP.md",
           "line": 92,
           "source_group": "scripts",
           "text": "bash scripts/ai/launch-gemini.sh py-config-bot"
         },
         {
-          "path": "scripts/ai/GEMINI-WSL-SETUP.md",
+          "path": "scripts/archive/ai/GEMINI-WSL-SETUP.md",
           "line": 192,
           "source_group": "scripts",
           "text": "bash scripts/ai/launch-gemini.sh py-review-orchestrator"
@@ -604,56 +1606,56 @@
       ]
     },
     {
-      "path": "scripts/ai/quick-gemini.sh",
+      "path": "scripts/archive/ai/quick-gemini.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
       "reference_count": 20,
       "references": [
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 17,
           "source_group": "scripts",
           "text": "✓ quick-gemini.sh (3.7 KB)"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 172,
           "source_group": "scripts",
           "text": "├── quick-gemini.sh"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 194,
           "source_group": "scripts",
           "text": "bash scripts/ai/quick-gemini.sh status  (Bash)"
         },
         {
-          "path": "scripts/ai/INTERACTIVE-MODE.md",
+          "path": "scripts/archive/ai/INTERACTIVE-MODE.md",
           "line": 12,
           "source_group": "scripts",
           "text": "bash scripts/ai/quick-gemini.sh interactive"
         },
         {
-          "path": "scripts/ai/INTERACTIVE-MODE.md",
+          "path": "scripts/archive/ai/INTERACTIVE-MODE.md",
           "line": 184,
           "source_group": "scripts",
           "text": "bash scripts/ai/quick-gemini.sh status"
         },
         {
-          "path": "scripts/ai/INTERACTIVE-MODE.md",
+          "path": "scripts/archive/ai/INTERACTIVE-MODE.md",
           "line": 189,
           "source_group": "scripts",
           "text": "bash scripts/ai/quick-gemini.sh setup"
         },
         {
-          "path": "scripts/ai/INTERACTIVE-MODE.md",
+          "path": "scripts/archive/ai/INTERACTIVE-MODE.md",
           "line": 194,
           "source_group": "scripts",
           "text": "bash scripts/ai/quick-gemini.sh sync"
         },
         {
-          "path": "scripts/ai/INTERACTIVE-MODE.md",
+          "path": "scripts/archive/ai/INTERACTIVE-MODE.md",
           "line": 199,
           "source_group": "scripts",
           "text": "bash scripts/ai/quick-gemini.sh help"
@@ -661,56 +1663,56 @@
       ]
     },
     {
-      "path": "scripts/ai/setup-gemini-wsl.sh",
+      "path": "scripts/archive/ai/setup-gemini-wsl.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
       "reference_count": 52,
       "references": [
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 31,
           "source_group": "scripts",
           "text": "✓ setup-gemini-wsl.sh (3.4 KB)"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 345,
           "source_group": "scripts",
           "text": "2. Run: `bash scripts/ai/setup-gemini-wsl.sh`"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 392,
           "source_group": "scripts",
           "text": "→ Run: `bash scripts/ai/setup-gemini-wsl.sh`"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 406,
           "source_group": "scripts",
           "text": "→ Run: `bash scripts/ai/setup-gemini-wsl.sh`"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 414,
           "source_group": "scripts",
           "text": "bash scripts/ai/setup-gemini-wsl.sh"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 453,
           "source_group": "scripts",
           "text": "- [x] Setup script created (setup-gemini-wsl.sh)"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 16,
           "source_group": "scripts",
           "text": "bash scripts/ai/setup-gemini-wsl.sh      # Initialize"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 173,
           "source_group": "scripts",
           "text": "├── setup-gemini-wsl.sh"
@@ -718,59 +1720,742 @@
       ]
     },
     {
-      "path": "scripts/ai/sync-agents-codex-to-gemini.sh",
+      "path": "scripts/archive/ai/sync-agents-codex-to-gemini.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
       "reference_count": 39,
       "references": [
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 38,
           "source_group": "scripts",
           "text": "✓ sync-agents-codex-to-gemini.sh (1.2 KB)"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 129,
           "source_group": "scripts",
           "text": "**Note:** Agent profiles (py-*.md) synced separately via `sync-agents-codex-to-gemini.sh`"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 346,
           "source_group": "scripts",
           "text": "3. Run: `bash scripts/ai/sync-agents-codex-to-gemini.sh`"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 395,
           "source_group": "scripts",
           "text": "→ Run: `bash scripts/ai/sync-agents-codex-to-gemini.sh`"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 419,
           "source_group": "scripts",
           "text": "bash scripts/ai/sync-agents-codex-to-gemini.sh"
         },
         {
-          "path": "scripts/ai/00-START-HERE.md",
+          "path": "scripts/archive/ai/00-START-HERE.md",
           "line": 454,
           "source_group": "scripts",
           "text": "- [x] Sync script created (sync-agents-codex-to-gemini.sh)"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 17,
           "source_group": "scripts",
           "text": "bash scripts/ai/sync-agents-codex-to-gemini.sh  # Sync profiles"
         },
         {
-          "path": "scripts/ai/CHEAT-SHEET.md",
+          "path": "scripts/archive/ai/CHEAT-SHEET.md",
           "line": 174,
           "source_group": "scripts",
           "text": "├── sync-agents-codex-to-gemini.sh"
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/QUICK-START.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 31,
+          "source_group": "scripts",
+          "text": "└── QUICK-START.sh                  ← Quick reference"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 197,
+          "source_group": "scripts",
+          "text": "scripts/gemini/QUICK-START.sh    ← Quick reference"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 301,
+          "source_group": "scripts",
+          "text": "- `scripts/gemini/QUICK-START.sh` — Quick reference card"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 397,
+          "source_group": "scripts",
+          "text": "1. Read: `scripts/gemini/QUICK-START.sh`"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 417,
+          "source_group": "scripts",
+          "text": "- **Quick reference:** `scripts/gemini/QUICK-START.sh`"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "└── QUICK-START.sh (quick reference)"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 80,
+          "source_group": "scripts",
+          "text": "QUICK-START.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 151,
+          "source_group": "scripts",
+          "text": "echo \"Read more: bash scripts/gemini/QUICK-START.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/SUMMARY.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/archive/gemini/lib/chat.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "│   ├── chat.sh                     ← Chat mode"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 160,
+          "source_group": "scripts",
+          "text": "chat.sh      → Interactive chat with profile"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 77,
+          "source_group": "scripts",
+          "text": "│   ├── chat.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 53,
+          "source_group": "scripts",
+          "text": "│   ├── chat.sh              ← Chat mode"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 235,
+          "source_group": "scripts",
+          "text": "│   ├── chat.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 220,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/chat.sh\" \"$profile\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/interactive.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "│   ├── interactive.sh              ← Full interactive menu"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 161,
+          "source_group": "scripts",
+          "text": "interactive.sh → Full menu system (7 modes)"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 78,
+          "source_group": "scripts",
+          "text": "│   ├── interactive.sh             ← Full menu system"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "│   ├── interactive.sh       ← Interactive menu"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 236,
+          "source_group": "scripts",
+          "text": "│   ├── interactive.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 202,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/interactive.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/reset.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "│   ├── reset.sh                    ← Reset environment"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 159,
+          "source_group": "scripts",
+          "text": "reset.sh     → Clear memory + reinitialize"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 76,
+          "source_group": "scripts",
+          "text": "│   ├── reset.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 52,
+          "source_group": "scripts",
+          "text": "│   ├── reset.sh             ← Reset environment"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 234,
+          "source_group": "scripts",
+          "text": "│   ├── reset.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 280,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/reset.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/setup.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh                    ← Environment initialization"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 156,
+          "source_group": "scripts",
+          "text": "setup.sh     → Initialize .gemini/, memory, validate MCP"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 73,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh             ← Environment initialization"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 231,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 206,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/setup.sh\""
+        },
+        {
+          "path": "scripts/archive/gemini/lib/reset.sh",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "bash \"${SCRIPT_DIR}/setup.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/status.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "│   ├── status.sh                   ← Status reporting"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 158,
+          "source_group": "scripts",
+          "text": "status.sh    → Show environment status"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 75,
+          "source_group": "scripts",
+          "text": "│   ├── status.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 51,
+          "source_group": "scripts",
+          "text": "│   ├── status.sh            ← Status reporting"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 233,
+          "source_group": "scripts",
+          "text": "│   ├── status.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 276,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/status.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/sync.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 7,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "│   ├── sync.sh                     ← Profile synchronization"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 157,
+          "source_group": "scripts",
+          "text": "sync.sh      → Copy 9 profiles from Codex"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 74,
+          "source_group": "scripts",
+          "text": "│   ├── sync.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "│   ├── sync.sh              ← Profile sync"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 232,
+          "source_group": "scripts",
+          "text": "│   ├── sync.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/SUMMARY.sh",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 210,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/sync.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/tasks/architecture.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "│       ├── architecture.sh         ← Architecture analysis"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 170,
+          "source_group": "scripts",
+          "text": "architecture.sh  → Create architecture analysis task file"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 83,
+          "source_group": "scripts",
+          "text": "│       ├── architecture.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 59,
+          "source_group": "scripts",
+          "text": "│       ├── architecture.sh  ← Architecture analysis"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 241,
+          "source_group": "scripts",
+          "text": "│       ├── architecture.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 261,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/architecture.sh\" \"$focus\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/tasks/config.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 86,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "│       ├── config.sh               ← Config audit task"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 169,
+          "source_group": "scripts",
+          "text": "config.sh        → Create config audit task file"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 82,
+          "source_group": "scripts",
+          "text": "│       ├── config.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 58,
+          "source_group": "scripts",
+          "text": "│       ├── config.sh        ← Config audit task"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 240,
+          "source_group": "scripts",
+          "text": "│       ├── config.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 251,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/config.sh\" \"$scope\""
+        },
+        {
+          "path": "tests/unit/domain/composite/test_data_schema_config.py",
+          "line": 180,
+          "source_group": "tests",
+          "text": "assert config.should_include_group(\"silver\", \"system\") is True"
+        },
+        {
+          "path": "tests/unit/domain/composite/test_data_schema_config.py",
+          "line": 181,
+          "source_group": "tests",
+          "text": "assert config.should_include_group(\"silver\", \"anything\") is True"
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/tasks/debug.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "│       └── debug.sh                ← Debug/fix task"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 171,
+          "source_group": "scripts",
+          "text": "debug.sh         → Create debug/fix task file"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 84,
+          "source_group": "scripts",
+          "text": "│       └── debug.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 60,
+          "source_group": "scripts",
+          "text": "│       └── debug.sh         ← Debug/fix task"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 242,
+          "source_group": "scripts",
+          "text": "│       └── debug.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 272,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/debug.sh\" \"$issue\" \"$file\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/tasks/review.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "│       ├── review.sh               ← Code review task"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 167,
+          "source_group": "scripts",
+          "text": "review.sh        → Create code review task file"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 80,
+          "source_group": "scripts",
+          "text": "│       ├── review.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "│       ├── review.sh        ← Code review task"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 238,
+          "source_group": "scripts",
+          "text": "│       ├── review.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 267,
+          "source_group": "scripts",
+          "text": "3. `cmd_review()` calls `lib/tasks/review.sh staged`"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 268,
+          "source_group": "scripts",
+          "text": "4. `review.sh` sources `lib/utils.sh`"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 230,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/review.sh\" \"$scope\" \"${@:2}\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/tasks/test.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "│       ├── test.sh                 ← Test generation task"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 168,
+          "source_group": "scripts",
+          "text": "test.sh          → Create test generation task file"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 81,
+          "source_group": "scripts",
+          "text": "│       ├── test.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 57,
+          "source_group": "scripts",
+          "text": "│       ├── test.sh          ← Test generation task"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 239,
+          "source_group": "scripts",
+          "text": "│       ├── test.sh"
+        },
+        {
+          "path": "scripts/archive/gemini/gemini",
+          "line": 241,
+          "source_group": "scripts",
+          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/test.sh\" \"$coverage\" \"$scope\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/archive/gemini/lib/utils.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 27,
+      "references": [
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "│   ├── utils.sh                    ← Shared utilities (sourced by all)"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 115,
+          "source_group": "scripts",
+          "text": "Source lib/utils.sh (shared functions)"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 124,
+          "source_group": "scripts",
+          "text": "✓ **DRY** — Shared utilities in `lib/utils.sh`"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 142,
+          "source_group": "scripts",
+          "text": "### Shared Utilities (`lib/utils.sh`)"
+        },
+        {
+          "path": "scripts/archive/gemini/INSTALLATION.md",
+          "line": 408,
+          "source_group": "scripts",
+          "text": "1. Study: `lib/utils.sh` (shared functions)"
+        },
+        {
+          "path": "scripts/archive/gemini/QUICK-START.sh",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "│   ├── utils.sh                   ← Shared utilities (sourced by all)"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "│   ├── utils.sh             ← Shared utilities"
+        },
+        {
+          "path": "scripts/archive/gemini/README.md",
+          "line": 142,
+          "source_group": "scripts",
+          "text": "Executes with shared utils (lib/utils.sh)"
         }
       ]
     },
@@ -1922,7 +3607,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -2360,14 +4045,6 @@
       "references": []
     },
     {
-      "path": "scripts/dev/python/test_neo4j_memory.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/dev/python/test_null_handling.py",
       "type": "py",
       "status": "orphan",
@@ -2460,7 +4137,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 34,
+      "reference_count": 32,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -2519,7 +4196,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 35,
+      "reference_count": 33,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -2586,7 +4263,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 55,
+      "reference_count": 53,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -2645,7 +4322,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 68,
+      "reference_count": 66,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -2904,7 +4581,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 160,
+          "line": 169,
           "source_group": "tests",
           "text": "content = (root / \"scripts/dev/setup_copilot_codex_mcp.ps1\").read_text("
         }
@@ -2937,7 +4614,7 @@
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 199,
+          "line": 198,
           "source_group": "docs",
           "text": "- **Project MCP Config**: `scripts/dev/setup_copilot_codex_mcp.py`"
         },
@@ -2982,7 +4659,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 151,
+          "line": 160,
           "source_group": "tests",
           "text": "content = (root / \"scripts/dev/setup_copilot_codex_mcp.sh\").read_text("
         }
@@ -3515,13 +5192,13 @@
           "text": "| DIAG-T033 | Class method render integrity | Целостность сигнатур методов в classDiagram | `scripts/diagrams/check_class_method_render_integrity.py` | Auto | PR | Hard |"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 341,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py\" \\"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 353,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py\" \\"
@@ -3694,7 +5371,7 @@
           "text": "| DIAG-T013 | Visual smoke manifest pass | Базовая читаемость эталонного пула | `check_diagram_visual_smoke.py` | Auto | PR | Hard |"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 408,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/check_diagram_visual_smoke.py\" \\"
@@ -3721,7 +5398,7 @@
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-3.py",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-3.py",
           "line": 36,
           "source_group": "scripts",
           "text": "DEFAULT_BOUNDS_CHECKER = Path(\"scripts/diagrams/check_pdf_image_bounds.py\")"
@@ -3844,13 +5521,13 @@
           "text": "source \"$REPO_ROOT/scripts/diagrams/diagram_paths.sh\""
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 15,
           "source_group": "scripts",
           "text": "# shellcheck source=scripts/diagrams/diagram_paths.sh"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 16,
           "source_group": "scripts",
           "text": "source \"$REPO_ROOT/scripts/diagrams/diagram_paths.sh\""
@@ -3895,7 +5572,7 @@
           "text": "`scripts/diagrams/enforce_diagram_quality_budget.py`."
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 361,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/enforce_diagram_quality_budget.py\""
@@ -3934,13 +5611,13 @@
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 308,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 311,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
@@ -4539,13 +6216,13 @@
           "text": "- `run_diagram_nightly_suite.py` (DIAG-T024..T029);"
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 445,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py\""
         },
         {
-          "path": "scripts/agents/diagrams/py-doc-bot-1.sh",
+          "path": "scripts/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 508,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py\" \\"
@@ -4639,7 +6316,7 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 150,
+          "line": 186,
           "source_group": "scripts",
           "text": "\"scripts/diagrams/svg2png.mjs\","
         },
@@ -4772,7 +6449,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 89,
+      "reference_count": 87,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -5244,7 +6921,7 @@
         },
         {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
-          "line": 44,
+          "line": 46,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }
@@ -5421,692 +7098,9 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 519,
+          "line": 719,
           "source_group": "scripts",
           "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/QUICK-START.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 8,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 31,
-          "source_group": "scripts",
-          "text": "└── QUICK-START.sh                  ← Quick reference"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 197,
-          "source_group": "scripts",
-          "text": "scripts/gemini/QUICK-START.sh    ← Quick reference"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 301,
-          "source_group": "scripts",
-          "text": "- `scripts/gemini/QUICK-START.sh` — Quick reference card"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 397,
-          "source_group": "scripts",
-          "text": "1. Read: `scripts/gemini/QUICK-START.sh`"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 417,
-          "source_group": "scripts",
-          "text": "- **Quick reference:** `scripts/gemini/QUICK-START.sh`"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 28,
-          "source_group": "scripts",
-          "text": "└── QUICK-START.sh (quick reference)"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 80,
-          "source_group": "scripts",
-          "text": "QUICK-START.sh"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 151,
-          "source_group": "scripts",
-          "text": "echo \"Read more: bash scripts/gemini/QUICK-START.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/SUMMARY.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/gemini/lib/chat.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 20,
-          "source_group": "scripts",
-          "text": "│   ├── chat.sh                     ← Chat mode"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 160,
-          "source_group": "scripts",
-          "text": "chat.sh      → Interactive chat with profile"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 77,
-          "source_group": "scripts",
-          "text": "│   ├── chat.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 53,
-          "source_group": "scripts",
-          "text": "│   ├── chat.sh              ← Chat mode"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 235,
-          "source_group": "scripts",
-          "text": "│   ├── chat.sh"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 220,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/chat.sh\" \"$profile\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/interactive.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "│   ├── interactive.sh              ← Full interactive menu"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 161,
-          "source_group": "scripts",
-          "text": "interactive.sh → Full menu system (7 modes)"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 78,
-          "source_group": "scripts",
-          "text": "│   ├── interactive.sh             ← Full menu system"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 54,
-          "source_group": "scripts",
-          "text": "│   ├── interactive.sh       ← Interactive menu"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 236,
-          "source_group": "scripts",
-          "text": "│   ├── interactive.sh"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 202,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/interactive.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/reset.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "│   ├── reset.sh                    ← Reset environment"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 159,
-          "source_group": "scripts",
-          "text": "reset.sh     → Clear memory + reinitialize"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 76,
-          "source_group": "scripts",
-          "text": "│   ├── reset.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 52,
-          "source_group": "scripts",
-          "text": "│   ├── reset.sh             ← Reset environment"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 234,
-          "source_group": "scripts",
-          "text": "│   ├── reset.sh"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 280,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/reset.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/setup.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 8,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh                    ← Environment initialization"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 156,
-          "source_group": "scripts",
-          "text": "setup.sh     → Initialize .gemini/, memory, validate MCP"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 73,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 49,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh             ← Environment initialization"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 231,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 206,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/setup.sh\""
-        },
-        {
-          "path": "scripts/gemini/lib/reset.sh",
-          "line": 37,
-          "source_group": "scripts",
-          "text": "bash \"${SCRIPT_DIR}/setup.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/status.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "│   ├── status.sh                   ← Status reporting"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 158,
-          "source_group": "scripts",
-          "text": "status.sh    → Show environment status"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 75,
-          "source_group": "scripts",
-          "text": "│   ├── status.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 51,
-          "source_group": "scripts",
-          "text": "│   ├── status.sh            ← Status reporting"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 233,
-          "source_group": "scripts",
-          "text": "│   ├── status.sh"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 276,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/status.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/sync.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "│   ├── sync.sh                     ← Profile synchronization"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 157,
-          "source_group": "scripts",
-          "text": "sync.sh      → Copy 9 profiles from Codex"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 74,
-          "source_group": "scripts",
-          "text": "│   ├── sync.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 50,
-          "source_group": "scripts",
-          "text": "│   ├── sync.sh              ← Profile sync"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 232,
-          "source_group": "scripts",
-          "text": "│   ├── sync.sh"
-        },
-        {
-          "path": "scripts/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 210,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/sync.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/tasks/architecture.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 26,
-          "source_group": "scripts",
-          "text": "│       ├── architecture.sh         ← Architecture analysis"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 170,
-          "source_group": "scripts",
-          "text": "architecture.sh  → Create architecture analysis task file"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 83,
-          "source_group": "scripts",
-          "text": "│       ├── architecture.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 59,
-          "source_group": "scripts",
-          "text": "│       ├── architecture.sh  ← Architecture analysis"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 241,
-          "source_group": "scripts",
-          "text": "│       ├── architecture.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 261,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/architecture.sh\" \"$focus\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/tasks/config.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 86,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 25,
-          "source_group": "scripts",
-          "text": "│       ├── config.sh               ← Config audit task"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 169,
-          "source_group": "scripts",
-          "text": "config.sh        → Create config audit task file"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "│       ├── config.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 58,
-          "source_group": "scripts",
-          "text": "│       ├── config.sh        ← Config audit task"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 240,
-          "source_group": "scripts",
-          "text": "│       ├── config.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 251,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/config.sh\" \"$scope\""
-        },
-        {
-          "path": "tests/unit/domain/composite/test_data_schema_config.py",
-          "line": 180,
-          "source_group": "tests",
-          "text": "assert config.should_include_group(\"silver\", \"system\") is True"
-        },
-        {
-          "path": "tests/unit/domain/composite/test_data_schema_config.py",
-          "line": 181,
-          "source_group": "tests",
-          "text": "assert config.should_include_group(\"silver\", \"anything\") is True"
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/tasks/debug.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "│       └── debug.sh                ← Debug/fix task"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 171,
-          "source_group": "scripts",
-          "text": "debug.sh         → Create debug/fix task file"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 84,
-          "source_group": "scripts",
-          "text": "│       └── debug.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 60,
-          "source_group": "scripts",
-          "text": "│       └── debug.sh         ← Debug/fix task"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 242,
-          "source_group": "scripts",
-          "text": "│       └── debug.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 272,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/debug.sh\" \"$issue\" \"$file\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/tasks/review.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 8,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│       ├── review.sh               ← Code review task"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 167,
-          "source_group": "scripts",
-          "text": "review.sh        → Create code review task file"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 80,
-          "source_group": "scripts",
-          "text": "│       ├── review.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 56,
-          "source_group": "scripts",
-          "text": "│       ├── review.sh        ← Code review task"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 238,
-          "source_group": "scripts",
-          "text": "│       ├── review.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 267,
-          "source_group": "scripts",
-          "text": "3. `cmd_review()` calls `lib/tasks/review.sh staged`"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 268,
-          "source_group": "scripts",
-          "text": "4. `review.sh` sources `lib/utils.sh`"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 230,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/review.sh\" \"$scope\" \"${@:2}\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/tasks/test.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 24,
-          "source_group": "scripts",
-          "text": "│       ├── test.sh                 ← Test generation task"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 168,
-          "source_group": "scripts",
-          "text": "test.sh          → Create test generation task file"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 81,
-          "source_group": "scripts",
-          "text": "│       ├── test.sh"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 57,
-          "source_group": "scripts",
-          "text": "│       ├── test.sh          ← Test generation task"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 239,
-          "source_group": "scripts",
-          "text": "│       ├── test.sh"
-        },
-        {
-          "path": "scripts/gemini/gemini",
-          "line": 241,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/test.sh\" \"$coverage\" \"$scope\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/gemini/lib/utils.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 27,
-      "references": [
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "│   ├── utils.sh                    ← Shared utilities (sourced by all)"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 115,
-          "source_group": "scripts",
-          "text": "Source lib/utils.sh (shared functions)"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 124,
-          "source_group": "scripts",
-          "text": "✓ **DRY** — Shared utilities in `lib/utils.sh`"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "### Shared Utilities (`lib/utils.sh`)"
-        },
-        {
-          "path": "scripts/gemini/INSTALLATION.md",
-          "line": 408,
-          "source_group": "scripts",
-          "text": "1. Study: `lib/utils.sh` (shared functions)"
-        },
-        {
-          "path": "scripts/gemini/QUICK-START.sh",
-          "line": 72,
-          "source_group": "scripts",
-          "text": "│   ├── utils.sh                   ← Shared utilities (sourced by all)"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 48,
-          "source_group": "scripts",
-          "text": "│   ├── utils.sh             ← Shared utilities"
-        },
-        {
-          "path": "scripts/gemini/README.md",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "Executes with shared utils (lib/utils.sh)"
         }
       ]
     },
@@ -6140,6 +7134,195 @@
           "line": 50,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/generate_architecture_dependency_map.py\").read_text("
+        }
+      ]
+    },
+    {
+      "path": "scripts/memory/__main__.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 135,
+      "references": [
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 27,
+          "source_group": "docs",
+          "text": "`python -m scripts.memory sync`"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 68,
+          "source_group": "docs",
+          "text": "Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 72,
+          "source_group": "docs",
+          "text": "`python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer`,"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 73,
+          "source_group": "docs",
+          "text": "`python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 74,
+          "source_group": "docs",
+          "text": "`python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph`,"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 75,
+          "source_group": "docs",
+          "text": "`python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift`."
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 76,
+          "source_group": "docs",
+          "text": "Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
+        },
+        {
+          "path": "docs/00-project/ai/memory/README.md",
+          "line": 80,
+          "source_group": "docs",
+          "text": "`python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json`:"
+        }
+      ]
+    },
+    {
+      "path": "scripts/memory/prompts/print_seed.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/memory/README.md",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "- `bash scripts/memory/prompts/print_seed.sh`"
+        }
+      ]
+    },
+    {
+      "path": "scripts/memory/query.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
+          "line": 205,
+          "source_group": "docs",
+          "text": "- `scripts/memory/query.py`"
+        },
+        {
+          "path": "docs/reports/evidence/project-package-topology-recursive/infrastructure/02-evidence/infrastructure-recursive-package-topology/EV-infrastructure-recursive-package-topology-adapters-crossref-is-a-client-and-fetch-pipeline-package.yaml",
+          "line": 8,
+          "source_group": "docs",
+          "text": "quote: \"client.py, query.py, fetch.py, response.py, batch.py, fallback.py, exceptions.py\""
+        },
+        {
+          "path": "scripts/memory/README.md",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "- `query.py` exposes operator-facing query shortcuts."
+        },
+        {
+          "path": "scripts/memory/__main__.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "\"query\": \"query.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/memory/setup/wsl_startup.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 13,
+      "references": [
+        {
+          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
+          "line": 75,
+          "source_group": "docs",
+          "text": "\"scripts/memory/setup/wsl_startup.sh\","
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 13,
+          "source_group": "docs",
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 100,
+          "source_group": "docs",
+          "text": "| `scripts/memory/setup/wsl_startup.sh` | ⭐ Start Neo4j (run first) |"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 120,
+          "source_group": "docs",
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 158,
+          "source_group": "docs",
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 248,
+          "source_group": "docs",
+          "text": "# Edit wsl_startup.sh and modify:"
+        },
+        {
+          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
+          "line": 303,
+          "source_group": "docs",
+          "text": "**Ready to start?** Run: `bash scripts/memory/setup/wsl_startup.sh`"
+        },
+        {
+          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
+          "line": 85,
+          "source_group": "docs",
+          "text": "bash scripts/memory/setup/wsl_startup.sh"
+        }
+      ]
+    },
+    {
+      "path": "scripts/memory/sync.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
+          "line": 206,
+          "source_group": "docs",
+          "text": "- `scripts/memory/sync.py`"
+        },
+        {
+          "path": "scripts/memory/README.md",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "- `sync.py` builds and optionally applies the deterministic repo graph."
+        },
+        {
+          "path": "scripts/memory/__main__.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "\"sync\": \"sync.py\","
         }
       ]
     },
@@ -6227,55 +7410,31 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 136,
+      "reference_count": 4,
       "references": [
         {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 27,
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 151,
           "source_group": "docs",
-          "text": "`python -m scripts.memory sync`"
+          "text": "| `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |"
         },
         {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 68,
-          "source_group": "docs",
-          "text": "Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:"
+          "path": "scripts/ops/INDEX.md",
+          "line": 7,
+          "source_group": "scripts",
+          "text": "- `python -m scripts.ops --help` lists the supported facade commands."
         },
         {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 72,
-          "source_group": "docs",
-          "text": "`python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer`,"
+          "path": "scripts/ops/README.md",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "- supported non-memory Python commands exposed through `python -m scripts.ops`"
         },
         {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 73,
-          "source_group": "docs",
-          "text": "`python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
-        },
-        {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 74,
-          "source_group": "docs",
-          "text": "`python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph`,"
-        },
-        {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 75,
-          "source_group": "docs",
-          "text": "`python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift`."
-        },
-        {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 76,
-          "source_group": "docs",
-          "text": "Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
-        },
-        {
-          "path": "docs/00-project/ai/memory/README.md",
-          "line": 80,
-          "source_group": "docs",
-          "text": "`python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json`:"
+          "path": "scripts/ops/README.md",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/__main__.py)."
         }
       ]
     },
@@ -6312,117 +7471,9 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 56,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"check-skills\": \"check_ai_skills_layout.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/check.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 95,
-          "source_group": "docs",
-          "text": "| **check_mcp.sh** | `scripts/ops/` | General MCP validation (all servers) |"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 106,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
-          "line": 99,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
-          "line": 211,
-          "source_group": "docs",
-          "text": "3. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`"
-        },
-        {
-          "path": "scripts/dev/bash/WSL_COMMANDS.sh",
-          "line": 61,
-          "source_group": "scripts",
-          "text": "# bash scripts/ai/mcp/check.sh"
-        },
-        {
-          "path": "scripts/ops/README.md",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "- checks and wrappers such as `check_mcp.sh`, `check.sh`,"
-        },
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 58,
-          "source_group": "scripts",
-          "text": "\"check-mcp\": \"check_mcp.sh\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 19,
-      "references": [
-        {
-          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
-          "line": 70,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
-          "line": 173,
-          "source_group": "docs",
-          "text": "3. Run verification: `bash scripts/ai/mcp/check_neo4j_memory.sh`"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
-          "line": 193,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 68,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 93,
-          "source_group": "docs",
-          "text": "| **check.sh** | `scripts/ops/` | Full MCP + backend health check |"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 100,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 189,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
-          "line": 30,
-          "source_group": "docs",
-          "text": "- **[check.sh](../../../scripts/ai/mcp/check_neo4j_memory.sh)** - Comprehensive MCP + backend health check"
         }
       ]
     },
@@ -6543,19 +7594,19 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 75,
+          "line": 74,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\codex-exec.bat \"refactor code\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 132,
+          "line": 131,
           "source_group": "docs",
           "text": "| `codex-exec.bat` | Original auto-exec launcher | Legacy (still works) |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 245,
+          "line": 244,
           "source_group": "docs",
           "text": "├─ codex-exec.bat (legacy) ────────────│"
         },
@@ -6582,37 +7633,37 @@
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 26,
+          "line": 25,
           "source_group": "docs",
           "text": "├── codex-exec.sh              ⭐ NEW - WSL auto-exec launcher"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 84,
+          "line": 83,
           "source_group": "docs",
           "text": "| **Auto-Apply Changes** | `./codex-exec.sh \"refactor\"` | WSL |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 122,
+          "line": 121,
           "source_group": "docs",
           "text": "| `codex-exec.sh` | Auto-execute changes (full-auto mode) | Simple |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 234,
+          "line": 233,
           "source_group": "docs",
           "text": "./scripts/ops/codex-exec.sh \"add type hints to all modules\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 235,
+          "line": 234,
           "source_group": "docs",
           "text": "./scripts/ops/codex-exec.sh \"fix all TODO comments\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 250,
+          "line": 249,
           "source_group": "docs",
           "text": "├─ codex-exec.sh ──────├─ npm/Node.js"
         },
@@ -6662,37 +7713,37 @@
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 29,
+          "line": 28,
           "source_group": "docs",
           "text": "└── codex-wsl.bat              ⭐ NEW - Modern Windows wrapper"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 54,
+          "line": 53,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\codex-wsl.bat \"analyze the pipeline\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 85,
+          "line": 84,
           "source_group": "docs",
           "text": "| **Windows Interactive** | `.\\codex-wsl.bat` | PowerShell |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 86,
+          "line": 85,
           "source_group": "docs",
           "text": "| **Windows One-Shot** | `.\\codex-wsl.bat \"analyze\"` | PowerShell |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 130,
+          "line": 129,
           "source_group": "docs",
           "text": "| `codex-wsl.bat` | Modern wrapper for WSL scripts | Recommended |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 243,
+          "line": 242,
           "source_group": "docs",
           "text": "├─ codex-wsl.bat ──────────────────────┐"
         },
@@ -6743,25 +7794,25 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 74,
+          "line": 73,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\codex.bat"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 87,
+          "line": 86,
           "source_group": "docs",
           "text": "| **Original Windows** | `.\\codex.bat` | PowerShell |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 131,
+          "line": 130,
           "source_group": "docs",
           "text": "| `codex.bat` | Original Windows launcher | Legacy (still works) |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 244,
+          "line": 243,
           "source_group": "docs",
           "text": "├─ codex.bat (legacy) ─────────────────│ All routes to WSL2"
         }
@@ -6776,49 +7827,49 @@
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 25,
+          "line": 24,
           "source_group": "docs",
           "text": "├── codex.sh                    ⭐ NEW - WSL bash launcher"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 67,
+          "line": 66,
           "source_group": "docs",
           "text": "./scripts/ops/codex.sh \"analyze the pipeline\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 82,
+          "line": 81,
           "source_group": "docs",
           "text": "| **Interactive Analysis** | `./codex.sh` | WSL |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 83,
+          "line": 82,
           "source_group": "docs",
           "text": "| **One-Shot Analysis** | `./codex.sh \"analyze code\"` | WSL |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 121,
+          "line": 120,
           "source_group": "docs",
           "text": "| `codex.sh` | Launch Codex interactively or with prompt | Simple |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 210,
+          "line": 209,
           "source_group": "docs",
           "text": "./scripts/ops/codex.sh \"explain the ChemBL data extraction pipeline\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 211,
+          "line": 210,
           "source_group": "docs",
           "text": "./scripts/ops/codex.sh \"identify performance bottlenecks in ETL\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 216,
+          "line": 215,
           "source_group": "docs",
           "text": "./scripts/ops/codex.sh \"create Pydantic models for bronze layer\""
         }
@@ -6833,7 +7884,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 60,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"delete-branches\": \"delete-stale-branches.sh\","
         }
@@ -6884,7 +7935,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 59,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"deploy\": \"deploy-bioetl.sh\","
         }
@@ -6948,7 +7999,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 40,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"fix-grafana\": \"fix_grafana_dashboards.py\","
         }
@@ -6993,7 +8044,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 51,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"close-ge-spike\": \"maintenance/close_great_expectations_spike_issue.sh\","
         },
@@ -7029,7 +8080,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 52,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"close-schema-drift\": \"maintenance/close_pandera_schema_drift_issue.sh\","
         },
@@ -7103,7 +8154,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 50,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"triage-issues\": \"maintenance/triage_cleanup_issue_wave.sh\","
         }
@@ -7118,7 +8169,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 49,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"update-issue\": \"maintenance/update_github_issue.sh\","
         },
@@ -7164,639 +8215,12 @@
       ]
     },
     {
-      "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 98,
-          "source_group": "tests",
-          "text": "assert \"mcp_brave_search_wrapper.ps1\" in servers[\"brave-search\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 130,
-          "source_group": "scripts",
-          "text": "\"brave-search\": _wrapper_server(root, \"mcp_brave_search_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "EXPECTED_BRAVE_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 136,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 93,
-          "source_group": "tests",
-          "text": "assert \"mcp_context7_wrapper.ps1\" in servers[\"context7\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 125,
-          "source_group": "scripts",
-          "text": "\"context7\": _wrapper_server(root, \"mcp_context7_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 10,
-          "source_group": "scripts",
-          "text": "EXPECTED_CONTEXT7_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 121,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 92,
-          "source_group": "tests",
-          "text": "assert \"mcp_docker_docs_wrapper.ps1\" in servers[\"docker-docs\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 124,
-          "source_group": "scripts",
-          "text": "\"docker-docs\": _wrapper_server(root, \"mcp_docker_docs_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "EXPECTED_DOCKER_DOCS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 118,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 91,
-          "source_group": "tests",
-          "text": "assert \"mcp_docker_wrapper.ps1\" in servers[\"docker\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_docker_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 123,
-          "source_group": "scripts",
-          "text": "\"docker\": _wrapper_server(root, \"mcp_docker_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "EXPECTED_DOCKER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 115,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 95,
-          "source_group": "tests",
-          "text": "assert \"mcp_dockerhub_wrapper.ps1\" in servers[\"dockerhub\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 127,
-          "source_group": "scripts",
-          "text": "\"dockerhub\": _wrapper_server(root, \"mcp_dockerhub_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 12,
-          "source_group": "scripts",
-          "text": "EXPECTED_DOCKERHUB_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 127,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 97,
-          "source_group": "tests",
-          "text": "assert \"mcp_grafana_wrapper.ps1\" in servers[\"grafana\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_grafana_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 129,
-          "source_group": "scripts",
-          "text": "\"grafana\": _wrapper_server(root, \"mcp_grafana_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 14,
-          "source_group": "scripts",
-          "text": "EXPECTED_GRAFANA_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 133,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 99,
-          "source_group": "tests",
-          "text": "assert \"mcp_neo4j_cypher_wrapper.ps1\" in servers[\"neo4j-cypher\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 132,
-          "source_group": "scripts",
-          "text": "\"neo4j-cypher\": _wrapper_server(root, \"mcp_neo4j_cypher_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "EXPECTED_NEO4J_CYPHER_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 139,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 100,
-          "source_group": "tests",
-          "text": "assert \"wrapper.ps1\" in servers[\"neo4j-memory\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 31,
-      "references": [
-        {
-          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
-          "line": 74,
-          "source_group": "docs",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh\","
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
-          "line": 10,
-          "source_group": "docs",
-          "text": "- `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` (wrapper script)"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
-          "line": 63,
-          "source_group": "docs",
-          "text": "Command: scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
-          "line": 126,
-          "source_group": "docs",
-          "text": "The wrapper script (`wrapper.sh`) will:"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
-          "line": 172,
-          "source_group": "docs",
-          "text": "2. Check wrapper script exists: `ls -la scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 46,
-          "source_group": "docs",
-          "text": "| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` | MCP wrapper script | ✅ Ready |"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
-          "line": 113,
-          "source_group": "docs",
-          "text": "Used by `wrapper.sh`:"
-        },
-        {
-          "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
-          "line": 14,
-          "source_group": "docs",
-          "text": "- **Wrapper Script**: `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh` created"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_paper_search_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 94,
-          "source_group": "tests",
-          "text": "assert \"mcp_paper_search_wrapper.ps1\" in servers[\"paper-search\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_paper_search_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 126,
-          "source_group": "scripts",
-          "text": "\"paper-search\": _wrapper_server(root, \"mcp_paper_search_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 11,
-          "source_group": "scripts",
-          "text": "EXPECTED_PAPER_SEARCH_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 124,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 96,
-          "source_group": "tests",
-          "text": "assert \"mcp_prometheus_wrapper.ps1\" in servers[\"prometheus\"][\"args\"][-1]"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_prometheus_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 128,
-          "source_group": "scripts",
-          "text": "\"prometheus\": _wrapper_server(root, \"mcp_prometheus_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 13,
-          "source_group": "scripts",
-          "text": "EXPECTED_PROMETHEUS_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
-        {
-          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 130,
-          "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_pubchem_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_pubmed_wrapper.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/dev/setup_copilot_codex_mcp.py",
-          "line": 131,
-          "source_group": "scripts",
-          "text": "\"sonarqube\": _wrapper_server(root, \"mcp_sonarqube_wrapper.sh\"),"
-        },
-        {
-          "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
-          "line": 39,
-          "source_group": "scripts",
-          "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
-        }
-      ]
-    },
-    {
       "path": "scripts/ops/neo4j-recovery-checklist.ps1",
       "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/neo4j_memory_mcp_adapter.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
-          "line": 54,
-          "source_group": "scripts",
-          "text": "exec \"${PYTHON_BIN}\" \"${SCRIPT_DIR}/neo4j_memory_mcp_adapter.py\" -- \\"
-        },
-        {
-          "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
-          "line": 51,
-          "source_group": "tests",
-          "text": "adapter = Path(\"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\").resolve()"
-        },
-        {
-          "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
-          "line": 64,
-          "source_group": "tests",
-          "text": "assert \"neo4j_memory_mcp_adapter.py\" in wrapper"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/neo4j_memory_mcp_smoke.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 43,
-          "source_group": "scripts",
-          "text": "\"smoke-mcp\": \"mcp_smoke.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/memory/query.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
-          "line": 205,
-          "source_group": "docs",
-          "text": "- `scripts/memory/query.py`"
-        },
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 42,
-          "source_group": "scripts",
-          "text": "\"query\": \"query.py\","
-        }
-      ]
-    },
-    {
-      "path": "scripts/memory/sync.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
-          "line": 206,
-          "source_group": "docs",
-          "text": "- `scripts/memory/sync.py`"
-        },
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 41,
-          "source_group": "scripts",
-          "text": "\"sync\": \"sync.py\","
-        }
-      ]
     },
     {
       "path": "scripts/ops/neo4j_quick_start.sh",
@@ -7842,14 +8266,6 @@
           "text": "| **Quick Start** | `bash scripts/ops/neo4j_quick_start.sh` |"
         }
       ]
-    },
-    {
-      "path": "scripts/memory/prompts/print_seed.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ops/rerender_grafana_screenshots.py",
@@ -7901,19 +8317,11 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 39,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"salt_rotate.py\","
         }
       ]
-    },
-    {
-      "path": "scripts/ops/setup-neo4j-wsl.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ops/setup_agents.sh",
@@ -7930,7 +8338,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 53,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"setup-agents\": \"setup_agents.sh\","
         },
@@ -7993,7 +8401,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 54,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"setup-plugins\": \"setup_plugins.sh\","
         },
@@ -8020,7 +8428,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 55,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"setup-skills\": \"setup_skills.sh\","
         },
@@ -8029,107 +8437,6 @@
           "line": 43,
           "source_group": "tests",
           "text": "[\"bash\", \"scripts/ops/setup_skills.sh\", \"--dry-run\"],"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
-      "type": "sh",
-      "status": "unknown",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/SMOKE_TEST_README.md",
-          "line": 48,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/mcp/check_neo4j_memory.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 8,
-      "references": [
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 30,
-          "source_group": "docs",
-          "text": "1. Run smoke test: bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 36,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 101,
-          "source_group": "docs",
-          "text": "| `scripts/ai/mcp/check_neo4j_memory.sh` | ⭐ Verify setup (run second) |"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 128,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 161,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "docs/05-operations/verification/neo4j-memory-windows-verification.md",
-          "line": 63,
-          "source_group": "docs",
-          "text": "You ran `bash scripts/ai/mcp/check_neo4j_memory.sh` from PowerShell."
-        },
-        {
-          "path": "scripts/dev/bash/WSL_COMMANDS.sh",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/mcp/check_neo4j_memory.sh"
-        },
-        {
-          "path": "scripts/memory/setup/wsl_startup.sh",
-          "line": 328,
-          "source_group": "scripts",
-          "text": "printf \"   ${BLUE}bash scripts/ai/mcp/check_neo4j_memory.sh${NC}\\n\\n\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 44,
-          "source_group": "scripts",
-          "text": "\"smoke-sonarqube-mcp\": \"sonarqube_mcp_smoke.py\","
         }
       ]
     },
@@ -8328,178 +8635,7 @@
       "references": []
     },
     {
-      "path": "scripts/ops/support/docker_cli_resolver.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 28,
-      "references": [
-        {
-          "path": "scripts/ops/INDEX.md",
-          "line": 12,
-          "source_group": "scripts",
-          "text": "- `support/docker_cli_resolver.sh`"
-        },
-        {
-          "path": "scripts/ops/README.md",
-          "line": 28,
-          "source_group": "scripts",
-          "text": "- `support/docker_cli_resolver.sh`"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
-          "line": 6,
-          "source_group": "scripts",
-          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
-          "line": 6,
-          "source_group": "scripts",
-          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/docker_cli_resolver.sh"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_context7_wrapper.sh",
-          "line": 6,
-          "source_group": "scripts",
-          "text": "source \"${script_dir}/support/docker_cli_resolver.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/support/load_repo_env.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 11,
-      "references": [
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 14,
-          "source_group": "docs",
-          "text": "├── load_repo_env.ps1   ← PowerShell loader"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md",
-          "line": 10,
-          "source_group": "docs",
-          "text": "- `scripts/ops/load_repo_env.ps1` - PowerShell environment loader"
-        },
-        {
-          "path": "scripts/ops/INDEX.md",
-          "line": 14,
-          "source_group": "scripts",
-          "text": "- `support/load_repo_env.ps1`"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
-          "line": 6,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
-          "line": 6,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
-          "line": 6,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
-          "line": 6,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
-        },
-        {
-          "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
-          "line": 6,
-          "source_group": "scripts",
-          "text": ". (Join-Path $PSScriptRoot \"support/load_repo_env.ps1\")"
-        }
-      ]
-    },
-    {
       "path": "scripts/ops/support/load_repo_env.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 26,
-      "references": [
-        {
-          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
-          "line": 76,
-          "source_group": "docs",
-          "text": "\"scripts/ops/support/load_repo_env.sh\","
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 104,
-          "source_group": "docs",
-          "text": "| `scripts/ops/support/load_repo_env.sh` | Env variable loader |"
-        },
-        {
-          "path": "scripts/ops/INDEX.md",
-          "line": 13,
-          "source_group": "scripts",
-          "text": "- `support/load_repo_env.sh`"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/load_repo_env.sh"
-        },
-        {
-          "path": "scripts/ai/mcp/check.sh",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "source \"${SCRIPT_DIR}/support/load_repo_env.sh\""
-        },
-        {
-          "path": "scripts/ai/mcp/check_neo4j_memory.sh",
-          "line": 37,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/load_repo_env.sh"
-        },
-        {
-          "path": "scripts/ai/mcp/check_neo4j_memory.sh",
-          "line": 38,
-          "source_group": "scripts",
-          "text": "source \"${SCRIPT_DIR}/support/load_repo_env.sh\""
-        },
-        {
-          "path": "scripts/ops/delete-stale-branches.sh",
-          "line": 6,
-          "source_group": "scripts",
-          "text": "# shellcheck source=./support/load_repo_env.sh"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/test_env_loading.sh",
       "type": "sh",
       "status": "orphan",
       "agent_usage": [],
@@ -8526,71 +8662,6 @@
           "line": 15,
           "source_group": "scripts",
           "text": "echo   .\\scripts\\ops\\verify-setup.ps1"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/verify_neo4j.bat",
-      "type": "bat",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/memory/setup/wsl_startup.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 13,
-      "references": [
-        {
-          "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
-          "line": 75,
-          "source_group": "docs",
-          "text": "\"scripts/memory/setup/wsl_startup.sh\","
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 13,
-          "source_group": "docs",
-          "text": "bash scripts/memory/setup/wsl_startup.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 100,
-          "source_group": "docs",
-          "text": "| `scripts/memory/setup/wsl_startup.sh` | ⭐ Start Neo4j (run first) |"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 120,
-          "source_group": "docs",
-          "text": "bash scripts/memory/setup/wsl_startup.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 158,
-          "source_group": "docs",
-          "text": "bash scripts/memory/setup/wsl_startup.sh"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 248,
-          "source_group": "docs",
-          "text": "# Edit wsl_startup.sh and modify:"
-        },
-        {
-          "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
-          "line": 303,
-          "source_group": "docs",
-          "text": "**Ready to start?** Run: `bash scripts/memory/setup/wsl_startup.sh`"
-        },
-        {
-          "path": "scripts/dev/bash/WSL_COMMANDS.sh",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "bash scripts/memory/setup/wsl_startup.sh"
         }
       ]
     },
@@ -10712,39 +10783,6 @@
           "line": 41,
           "source_group": "tests",
           "text": "assert \"validate_unified_configs.py\" in content"
-        }
-      ]
-    },
-    {
-      "path": "scripts/memory/setup/wsl_startup.sh",
-      "type": "sh",
-      "status": "unknown",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 85,
-          "source_group": "docs",
-          "text": "bash scripts/memory/setup/wsl_startup.sh"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 112,
-          "source_group": "docs",
-          "text": "| `scripts/memory/setup/wsl_startup.sh` | WSL-aware setup and validation path |"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 144,
-          "source_group": "docs",
-          "text": "bash scripts/memory/setup/wsl_startup.sh"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 163,
-          "source_group": "docs",
-          "text": "- `bash scripts/memory/setup/wsl_startup.sh` succeeds"
         }
       ]
     },

@@ -9,9 +9,7 @@
 ## Support helpers
 
 - `script-codex/helper/ensure-codex-cli.sh`
-- `support/docker_cli_resolver.sh`
 - `support/load_repo_env.sh`
-- `support/load_repo_env.ps1`
 
 These helper assets are intentionally internal and should be referenced by
 wrappers rather than documented as primary user commands.
