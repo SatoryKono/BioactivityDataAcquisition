@@ -74,7 +74,7 @@ class TestProviderConfig:
         )
 
         assert config.http_config is not None
-        assert config.http_config.rate == 10.0
+        assert config.http_config.rate == pytest.approx(10.0)
         assert config.http_config.capacity == 20
 
     def test_config_is_frozen(self):
@@ -92,7 +92,7 @@ class TestHttpConfig:
         """Verify HttpConfig default values."""
         config = HttpConfig()
 
-        assert config.rate == 5.0
+        assert config.rate == pytest.approx(5.0)
         assert config.capacity == 10
         assert config.rate_overrides == {}
 
@@ -104,7 +104,7 @@ class TestHttpConfig:
             rate_overrides={"api_key": 150.0},
         )
 
-        assert config.rate == 100.0
+        assert config.rate == pytest.approx(100.0)
         assert config.capacity == 200
         assert config.rate_overrides == {"api_key": 150.0}
 
@@ -157,7 +157,7 @@ class TestProviderRegistry:
         result = ProviderRegistry.get("duplicate_test")
         assert result is config2
         assert result.http_config is not None
-        assert result.http_config.rate == 99.0
+        assert result.http_config.rate == pytest.approx(99.0)
 
     def test_get_unknown_provider_raises(self):
         """Verify getting unknown provider raises KeyError."""
@@ -197,7 +197,7 @@ class TestProviderRegistry:
         result = ProviderRegistry.get_http_config("http_test")
 
         assert result is not None
-        assert result.rate == 15.0
+        assert result.rate == pytest.approx(15.0)
         assert result.capacity == 30
 
     def test_get_http_config_returns_none(self):
@@ -536,7 +536,7 @@ class TestRegisterProviderDecorator:
 
         config = ProviderRegistry.get("http_decorator_test")
         assert config.http_config is not None
-        assert config.http_config.rate == 25.0
+        assert config.http_config.rate == pytest.approx(25.0)
         assert config.http_config.capacity == 50
 
     def test_decorator_without_http_client(self):
@@ -802,7 +802,7 @@ class TestRealProviderRegistration:
         # Rate should match configs/sources/crossref.yaml (50 req/sec for polite pool)
         source_config = load_source_config("crossref")
         assert config.http_config.rate == source_config.rate_limit.requests_per_second
-        assert config.http_config.rate == 50.0
+        assert config.http_config.rate == pytest.approx(50.0)
 
     def test_all_providers_listed(self):
         """Verify all expected providers are listed."""

@@ -1394,6 +1394,203 @@ class ComplexityAnalysisConfig:
     blocker_anchor_limit: int
 
 
+@dataclass(frozen=True)
+class SurfaceRelationIndexes:
+    incoming: dict[NodeKey, list[GraphRelation]]
+    outgoing: dict[NodeKey, list[GraphRelation]]
+    declared_children: dict[NodeKey, list[NodeKey]]
+
+
+@dataclass(frozen=True)
+class AnalysisAnchors:
+    runtime: tuple[NodeKey, ...]
+    config: tuple[NodeKey, ...]
+    docs: tuple[NodeKey, ...]
+    tests: tuple[NodeKey, ...]
+
+
+@dataclass(frozen=True)
+class ComplexityMetrics:
+    branch_count: int
+    nesting_depth: int
+    call_count: int
+    helper_call_count: int
+    abstraction_fanout: int
+    api_surface_to_logic_ratio: float
+
+
+def _build_surface_relation_indexes(snapshot: GraphSnapshot) -> SurfaceRelationIndexes:
+    incoming: dict[NodeKey, list[GraphRelation]] = {}
+    outgoing: dict[NodeKey, list[GraphRelation]] = {}
+    declared_children: dict[NodeKey, list[NodeKey]] = {}
+    for relation in snapshot.relations.values():
+        incoming.setdefault(relation.target, []).append(relation)
+        outgoing.setdefault(relation.source, []).append(relation)
+        if relation.relation_type == "DECLARES":
+            declared_children.setdefault(relation.source, []).append(relation.target)
+    return SurfaceRelationIndexes(
+        incoming=incoming,
+        outgoing=outgoing,
+        declared_children=declared_children,
+    )
+
+
+def _analysis_read_source_text(root: Path, relative_path: str, text_cache: dict[str, str]) -> str:
+    if relative_path not in text_cache:
+        path = root / relative_path
+        try:
+            text_cache[relative_path] = _read_text(path).casefold()
+        except OSError:
+            text_cache[relative_path] = ""
+    return text_cache[relative_path]
+
+
+def _analysis_family_for_source_path(
+    relative_path: str,
+    duplication_config: dict[str, object],
+    family_cache: dict[str, DuplicateFamilyConfig | None],
+) -> DuplicateFamilyConfig | None:
+    if relative_path not in family_cache:
+        family_cache[relative_path] = _family_for_path(relative_path, duplication_config)
+    return family_cache[relative_path]
+
+
+def _collect_analysis_anchor_nodes(
+    snapshot: GraphSnapshot,
+    indexes: SurfaceRelationIndexes,
+    surface_key: NodeKey,
+    module_key: NodeKey,
+    *,
+    ignored_relation_types: set[str],
+    runtime_labels: set[str],
+    config_labels: set[str],
+    doc_labels: set[str],
+    test_labels: set[str],
+) -> AnalysisAnchors:
+    buckets: dict[str, set[NodeKey]] = {
+        "runtime": set(),
+        "config": set(),
+        "docs": set(),
+        "tests": set(),
+    }
+    package_name: str | None = None
+    module_node = snapshot.nodes.get(module_key)
+    if module_node is not None:
+        package_raw = module_node.properties.get("family_name")
+        if isinstance(package_raw, str) and package_raw:
+            package_name = package_raw
+
+    keys_to_scan = {surface_key, module_key}
+    if package_name is not None:
+        keys_to_scan.add(NodeKey("package_family", package_name))
+
+    for key in keys_to_scan:
+        for relation in [*indexes.incoming.get(key, ()), *indexes.outgoing.get(key, ())]:
+            if relation.relation_type in ignored_relation_types:
+                continue
+            other = relation.source if relation.target == key else relation.target
+            if other.label in runtime_labels:
+                buckets["runtime"].add(other)
+            elif other.label in config_labels:
+                buckets["config"].add(other)
+            elif other.label in doc_labels:
+                buckets["docs"].add(other)
+            elif other.label in test_labels:
+                buckets["tests"].add(other)
+    return AnalysisAnchors(
+        runtime=tuple(sorted(buckets["runtime"], key=lambda item: (item.label, item.name))),
+        config=tuple(sorted(buckets["config"], key=lambda item: (item.label, item.name))),
+        docs=tuple(sorted(buckets["docs"], key=lambda item: (item.label, item.name))),
+        tests=tuple(sorted(buckets["tests"], key=lambda item: (item.label, item.name))),
+    )
+
+
+def _int_node_property(snapshot: GraphSnapshot, node_key: NodeKey, property_name: str) -> int:
+    node = snapshot.nodes.get(node_key)
+    if node is None:
+        return 0
+    raw_value = node.properties.get(property_name)
+    return int(raw_value) if isinstance(raw_value, int | float) else 0
+
+
+def _aggregate_callable_metrics(snapshot: GraphSnapshot, node_key: NodeKey) -> tuple[int, int, int, int]:
+    return (
+        _int_node_property(snapshot, node_key, "branch_count"),
+        _int_node_property(snapshot, node_key, "nesting_depth"),
+        _int_node_property(snapshot, node_key, "call_count"),
+        _int_node_property(snapshot, node_key, "helper_call_count"),
+    )
+
+
+def _aggregate_surface_complexity_metrics(
+    snapshot: GraphSnapshot,
+    indexes: SurfaceRelationIndexes,
+    surface_key: NodeKey,
+) -> ComplexityMetrics:
+    if surface_key.label in {"function_surface", "method_surface"}:
+        branch_count, nesting_depth, call_count, helper_call_count = _aggregate_callable_metrics(snapshot, surface_key)
+        abstraction_fanout = max(1, call_count)
+        return ComplexityMetrics(
+            branch_count=branch_count,
+            nesting_depth=nesting_depth,
+            call_count=call_count,
+            helper_call_count=helper_call_count,
+            abstraction_fanout=abstraction_fanout,
+            api_surface_to_logic_ratio=round(call_count / max(1, branch_count + nesting_depth), 2),
+        )
+
+    if surface_key.label == "class_surface":
+        methods = [child for child in indexes.declared_children.get(surface_key, ()) if child.label == "method_surface"]
+        method_metrics = [_aggregate_callable_metrics(snapshot, method_key) for method_key in methods]
+        return ComplexityMetrics(
+            branch_count=sum(metric[0] for metric in method_metrics),
+            nesting_depth=max((metric[1] for metric in method_metrics), default=0),
+            call_count=sum(metric[2] for metric in method_metrics),
+            helper_call_count=sum(metric[3] for metric in method_metrics),
+            abstraction_fanout=len(methods),
+            api_surface_to_logic_ratio=round(len(methods) / max(1, sum(metric[0] for metric in method_metrics) + 1), 2),
+        )
+
+    if surface_key.label == "module_surface":
+        children = indexes.declared_children.get(surface_key, ())
+        functions = [child for child in children if child.label == "function_surface"]
+        classes = [child for child in children if child.label == "class_surface"]
+        methods = [
+            method_key
+            for class_key in classes
+            for method_key in indexes.declared_children.get(class_key, ())
+            if method_key.label == "method_surface"
+        ]
+        callable_metrics = [
+            *[_aggregate_callable_metrics(snapshot, function_key) for function_key in functions],
+            *[_aggregate_callable_metrics(snapshot, method_key) for method_key in methods],
+        ]
+        abstraction_fanout = len(functions) + len(classes)
+        return ComplexityMetrics(
+            branch_count=sum(metric[0] for metric in callable_metrics),
+            nesting_depth=max((metric[1] for metric in callable_metrics), default=0),
+            call_count=sum(metric[2] for metric in callable_metrics),
+            helper_call_count=sum(metric[3] for metric in callable_metrics),
+            abstraction_fanout=abstraction_fanout,
+            api_surface_to_logic_ratio=round(abstraction_fanout / max(1, sum(metric[0] for metric in callable_metrics) + 1), 2),
+        )
+
+    return ComplexityMetrics(0, 0, 0, 0, 0, 0.0)
+
+
+def _complexity_marker_buckets(
+    config: ComplexityAnalysisConfig,
+    relative_path: str,
+    symbol_name: str,
+    source_text: str,
+) -> tuple[list[str], list[str], list[str]]:
+    normalized = f"{relative_path} {symbol_name}".casefold()
+    indirection = sorted({marker for marker in config.indirection_markers if marker in normalized or marker in source_text})
+    stateful = sorted({marker for marker in config.stateful_markers if marker in normalized or marker in source_text})
+    deprecation = sorted({marker for marker in config.deprecation_markers if marker in normalized or marker in source_text})
+    return indirection, stateful, deprecation
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Build and optionally sync a deterministic BioETL graph into Neo4j.",
@@ -6313,248 +6510,33 @@ def _extract_code_duplication_surfaces(
 
     min_cluster_size = int(config.get("min_cluster_size", 2))
     min_ast_nodes = int(config.get("min_ast_nodes", 12))
-
-    class_descriptors: dict[NodeKey, ClassDescriptor] = {}
-    callable_descriptors: dict[NodeKey, CallableDescriptor] = {}
-    class_name_index: dict[str, list[NodeKey]] = {}
-
+    extraction = DuplicationExtractionContext(
+        snapshot=snapshot,
+        root=root,
+        today=today,
+        config=config,
+    )
     for module in tuple(snapshot.nodes.values()):
         if module.key.label != "module_surface":
             continue
-        relative_path = module.key.name
-        family = _family_for_path(relative_path, config)
-        if family is None:
-            continue
+        _collect_duplication_descriptors_for_module(extraction, module)
 
-        module_path = root / relative_path
-        tree = _parse_python_ast(module_path)
-        if tree is None:
-            continue
-        dotted_path = str(module.properties.get("dotted_path") or _module_dotted_name(relative_path))
-
-        for node in tree.body:
-            if isinstance(node, ast.ClassDef):
-                class_key = snapshot.add_node(
-                    "class_surface",
-                    f"{dotted_path}.{node.name}",
-                    summary=f"Class surface `{node.name}` from `{dotted_path}`.",
-                    source_path=relative_path,
-                    source_kind="python_class_surface",
-                    family_name=family.name,
-                    package_family=family.package_family,
-                    class_name=node.name,
-                    base_names=sorted(filter(None, (_base_name(base) for base in node.bases))),
-                    method_count=sum(
-                        1 for child in node.body if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
-                    ),
-                    is_mixin=node.name.endswith("Mixin"),
-                    semantic_tags=list(_semantic_tags(relative_path, node.name)),
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="medium",
-                )
-                snapshot.add_relation(module.key, "DECLARES", class_key, provenance="code_duplication")
-                class_descriptor = ClassDescriptor(
-                    node_key=class_key,
-                    family_name=family.name,
-                    package_family=family.package_family,
-                    source_path=relative_path,
-                    class_name=node.name,
-                    base_names=tuple(sorted(filter(None, (_base_name(base) for base in node.bases)))),
-                    method_names=tuple(
-                        child.name
-                        for child in node.body
-                        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
-                    ),
-                )
-                class_descriptors[class_key] = class_descriptor
-                class_name_index.setdefault(node.name, []).append(class_key)
-
-                for child in node.body:
-                    if not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        continue
-                    method_key = snapshot.add_node(
-                        "method_surface",
-                        f"{dotted_path}.{node.name}.{child.name}",
-                        summary=f"Method surface `{node.name}.{child.name}` from `{dotted_path}`.",
-                        source_path=relative_path,
-                        source_kind="python_method_surface",
-                        family_name=family.name,
-                        package_family=family.package_family,
-                        callable_name=child.name,
-                        parent_class=node.name,
-                        signature_hash=_signature_hash(child),
-                        ast_shape_hash=_normalized_callable_hash(child),
-                        ast_node_count=_callable_ast_node_count(child),
-                        branch_count=_callable_branch_count(child),
-                        nesting_depth=_callable_max_nesting_depth(child),
-                        call_count=_callable_call_count(child),
-                        helper_call_count=_callable_helper_call_count(child),
-                        semantic_tags=list(_semantic_tags(relative_path, child.name)),
-                        last_verified=today,
-                        ingest_wave="repo_sync_v1",
-                        confidence="medium",
-                    )
-                    snapshot.add_relation(class_key, "DECLARES", method_key, provenance="code_duplication")
-                    callable_descriptors[method_key] = CallableDescriptor(
-                        node_key=method_key,
-                        family_name=family.name,
-                        package_family=family.package_family,
-                        source_path=relative_path,
-                        callable_name=child.name,
-                        parent_class=node.name,
-                        surface_kind="method_surface",
-                        ast_shape_hash=str(snapshot.nodes[method_key].properties["ast_shape_hash"]),
-                        signature_hash=str(snapshot.nodes[method_key].properties["signature_hash"]),
-                        ast_node_count=int(snapshot.nodes[method_key].properties["ast_node_count"]),
-                        semantic_tags=tuple(_semantic_tags(relative_path, child.name)),
-                    )
-            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                function_key = snapshot.add_node(
-                    "function_surface",
-                    f"{dotted_path}.{node.name}",
-                    summary=f"Function surface `{node.name}` from `{dotted_path}`.",
-                    source_path=relative_path,
-                    source_kind="python_function_surface",
-                    family_name=family.name,
-                    package_family=family.package_family,
-                    callable_name=node.name,
-                    signature_hash=_signature_hash(node),
-                    ast_shape_hash=_normalized_callable_hash(node),
-                    ast_node_count=_callable_ast_node_count(node),
-                    branch_count=_callable_branch_count(node),
-                    nesting_depth=_callable_max_nesting_depth(node),
-                    call_count=_callable_call_count(node),
-                    helper_call_count=_callable_helper_call_count(node),
-                    semantic_tags=list(_semantic_tags(relative_path, node.name)),
-                    last_verified=today,
-                    ingest_wave="repo_sync_v1",
-                    confidence="medium",
-                )
-                snapshot.add_relation(module.key, "DECLARES", function_key, provenance="code_duplication")
-                callable_descriptors[function_key] = CallableDescriptor(
-                    node_key=function_key,
-                    family_name=family.name,
-                    package_family=family.package_family,
-                    source_path=relative_path,
-                    callable_name=node.name,
-                    parent_class=None,
-                    surface_kind="function_surface",
-                    ast_shape_hash=str(snapshot.nodes[function_key].properties["ast_shape_hash"]),
-                    signature_hash=str(snapshot.nodes[function_key].properties["signature_hash"]),
-                    ast_node_count=int(snapshot.nodes[function_key].properties["ast_node_count"]),
-                    semantic_tags=tuple(_semantic_tags(relative_path, node.name)),
-                )
-
-    class_method_index: dict[tuple[NodeKey, str], NodeKey] = {}
-    for callable_descriptor in callable_descriptors.values():
-        if callable_descriptor.surface_kind != "method_surface" or callable_descriptor.parent_class is None:
-            continue
-        owner_name = callable_descriptor.node_key.name.rsplit(".", 1)[0]
-        owner_key = NodeKey("class_surface", owner_name)
-        class_method_index[(owner_key, callable_descriptor.callable_name)] = callable_descriptor.node_key
-
-    for class_descriptor in class_descriptors.values():
-        class_node = snapshot.nodes[class_descriptor.node_key]
-        base_names = class_node.properties.get("base_names")
-        if not isinstance(base_names, list):
-            continue
-        for base_name in base_names:
-            if not isinstance(base_name, str) or not base_name:
-                continue
-            base_candidates = class_name_index.get(base_name, [])
-            if len(base_candidates) != 1:
-                continue
-            base_class = base_candidates[0]
-            snapshot.add_relation(class_descriptor.node_key, "DEPENDS_ON", base_class, provenance="code_duplication")
-            for method_name in class_descriptor.method_names:
-                base_method = class_method_index.get((base_class, method_name))
-                current_method = class_method_index.get((class_descriptor.node_key, method_name))
-                if base_method is not None and current_method is not None:
-                    snapshot.add_relation(current_method, "OVERRIDES", base_method, provenance="code_duplication")
-
-    grouped: dict[tuple[str, str, str], list[CallableDescriptor]] = {}
-    for descriptor in callable_descriptors.values():
-        if descriptor.ast_node_count < min_ast_nodes:
-            continue
-        grouped.setdefault(
-            (descriptor.family_name, descriptor.surface_kind, descriptor.ast_shape_hash),
-            [],
-        ).append(descriptor)
-
-    for (family_name, surface_kind, shape_hash), members in sorted(grouped.items()):
-        if len(members) < min_cluster_size:
-            continue
-        unique_members = sorted(members, key=lambda item: item.node_key.name)
-        cluster = snapshot.add_node(
-            "duplication_cluster",
-            f"{family_name}:{surface_kind}:{shape_hash[:12]}",
-            summary=f"Potential duplicate logic cluster for `{family_name}` {surface_kind}.",
-            source_kind="semantic_duplication_cluster",
-            family_name=family_name,
-            surface_kind=surface_kind,
-            duplicate_count=len(unique_members),
-            ast_shape_hash=shape_hash,
-            semantic_tags=sorted({tag for member in unique_members for tag in member.semantic_tags}),
-            promotion_score=round(min(0.99, 0.35 + (0.1 * len(unique_members))), 2),
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="medium",
-        )
-        snapshot.add_relation(project, "CONTAINS", cluster, provenance="code_duplication")
-        for member in unique_members:
-            snapshot.add_relation(cluster, "CONTAINS", member.node_key, provenance="code_duplication")
-        for index, left in enumerate(unique_members):
-            for right in unique_members[index + 1 :]:
-                snapshot.add_relation(left.node_key, "SAME_SHAPE_AS", right.node_key, provenance="code_duplication")
-                snapshot.add_relation(right.node_key, "SAME_SHAPE_AS", left.node_key, provenance="code_duplication")
-
-        family = next(
-            (
-                item
-                for item in config.get("families", ())
-                if isinstance(item, DuplicateFamilyConfig) and item.name == family_name
-            ),
-            None,
-        )
-        promotion_target: NodeKey | None = None
-        if surface_kind == "method_surface":
-            common_base_candidates: set[NodeKey] | None = None
-            method_name = unique_members[0].callable_name
-            if all(member.callable_name == method_name and member.parent_class for member in unique_members):
-                for member in unique_members:
-                    member_class = NodeKey("class_surface", member.node_key.name.rsplit(".", 1)[0])
-                    candidate_set = {
-                        relation.target
-                        for relation in snapshot.relations.values()
-                        if relation.source == member.node_key
-                        and relation.relation_type == "OVERRIDES"
-                        and relation.target.label == "method_surface"
-                    }
-                    class_targets = {
-                        NodeKey("class_surface", target.name.rsplit(".", 1)[0]) for target in candidate_set
-                    }
-                    common_base_candidates = (
-                        class_targets
-                        if common_base_candidates is None
-                        else common_base_candidates & class_targets
-                    )
-                if common_base_candidates:
-                    promotion_target = sorted(common_base_candidates, key=lambda item: item.name)[0]
-
-        if promotion_target is None and isinstance(family, DuplicateFamilyConfig):
-            for candidate in family.promotion_targets:
-                if candidate in snapshot.nodes:
-                    promotion_target = candidate
-                    break
-        if promotion_target is not None:
-            snapshot.add_relation(cluster, "CAN_PROMOTE_TO", promotion_target, provenance="code_duplication")
-
-        package_family = NodeKey("package_family", unique_members[0].package_family)
-        for relation in tuple(snapshot.relations.values()):
-            if relation.relation_type != "TESTS_PACKAGE_FAMILY" or relation.target != package_family:
-                continue
-            snapshot.add_relation(cluster, "COVERED_BY_TEST", relation.source, provenance="code_duplication")
+    class_method_index = _duplication_class_method_index(extraction.callable_descriptors)
+    _link_duplication_override_relations(
+        snapshot,
+        extraction.class_descriptors,
+        extraction.class_name_index,
+        class_method_index,
+    )
+    _emit_duplication_clusters(
+        snapshot,
+        project,
+        today=today,
+        config=config,
+        callable_descriptors=extraction.callable_descriptors,
+        min_cluster_size=min_cluster_size,
+        min_ast_nodes=min_ast_nodes,
+    )
 
 
 def _add_retirement_analysis_surfaces(

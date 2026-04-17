@@ -49,16 +49,16 @@ class NoOpAudit:
         """No-op implementation of aclose — no resources to release."""
         return None
 
-    async def log_event(
+    def log_event(
         self,
-        event_name: str,  # noqa: ARG002
-        event_data: dict | None = None,  # noqa: ARG002
+        _event_name: str,
+        _event_data: dict | None = None,
     ) -> None:
         """No-op implementation of log_event — discards the event.
 
         Args:
-            event_name: Name of the event to log (ignored).
-            event_data: Event data dictionary (ignored).
+            _event_name: Name of the event to log (ignored).
+            _event_data: Event data dictionary (ignored).
         """
         return None
 

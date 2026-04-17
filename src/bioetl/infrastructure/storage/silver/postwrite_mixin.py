@@ -109,10 +109,6 @@ class SilverWriterPostwriteMixin:
         """Run post-write stages: CSV export, audit, and result finalization."""
         # Use maintenance operations if available, otherwise fall back to mixin method
         if hasattr(self, '_maintenance') and self._maintenance is not None:
-            csv_append = ctx.mode != "delete"
-            csv_primary_keys = (
-                ctx.primary_keys if payload.validated_mode == SilverWriteMode.MERGE else None
-            )
             await self._maintenance.maybe_export_csv(
                 table_name=ctx.table_name,
                 arrow_data=payload.arrow_data,

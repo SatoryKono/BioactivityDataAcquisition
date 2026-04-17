@@ -63,7 +63,7 @@ class TestRecordRequest:
         assert request.base_url == "https://api.example.com"
         assert request.http_method == "GET"
         assert request.response_size_bytes == 1024
-        assert request.request_duration_ms == 150.5
+        assert request.request_duration_ms == pytest.approx(150.5)
         assert request.status_code == 200
 
     def test_record_request_with_params(self) -> None:
@@ -145,7 +145,7 @@ class TestRecordRequest:
         assert request.rate_limit.remaining == 95
         assert request.rate_limit.limit == 100
         assert request.rate_limit.reset_at == reset_time
-        assert request.rate_limit.retry_after_seconds == 5.0
+        assert request.rate_limit.retry_after_seconds == pytest.approx(5.0)
 
     def test_record_request_timestamp_default(self) -> None:
         """Request recording uses current UTC time if not provided."""
@@ -247,7 +247,7 @@ class TestRecordFromResponse:
         assert request.endpoint == "/data"
         assert request.status_code == 200
         assert request.response_size_bytes == 1024
-        assert request.request_duration_ms == 150.0
+        assert request.request_duration_ms == pytest.approx(150.0)
         assert request.http_method == "GET"
 
     def test_record_from_response_with_rate_limit_headers(self) -> None:
@@ -275,7 +275,7 @@ class TestRecordFromResponse:
         assert request.rate_limit.remaining == 95
         assert request.rate_limit.limit == 100
         assert request.rate_limit.reset_at is not None
-        assert request.rate_limit.retry_after_seconds == 5.5
+        assert request.rate_limit.retry_after_seconds == pytest.approx(5.5)
 
     def test_record_from_response_missing_headers(self) -> None:
         """Recording handles missing rate limit headers gracefully."""
@@ -310,7 +310,7 @@ class TestToSourceMetadata:
         assert metadata.api_requests == []
         assert metadata.total_requests == 0
         assert metadata.total_response_bytes == 0
-        assert metadata.avg_request_duration_ms == 0.0
+        assert metadata.avg_request_duration_ms == pytest.approx(0.0)
 
     def test_aggregates_multiple_requests(self) -> None:
         """Aggregates are computed correctly from multiple requests."""
@@ -336,7 +336,7 @@ class TestToSourceMetadata:
 
         assert metadata.total_requests == 3
         assert metadata.total_response_bytes == 6000
-        assert metadata.avg_request_duration_ms == 200.0  # (100 + 200 + 300) / 3
+        assert metadata.avg_request_duration_ms == pytest.approx(200.0)  # (100 + 200 + 300) / 3
 
     def test_to_source_metadata_with_url(self) -> None:
         """Source metadata includes base URL when provided."""
@@ -390,7 +390,7 @@ class TestToSourceMetadata:
         metadata = collector.to_source_metadata()
 
         # (100.333333 + 200.666666) / 2 = 150.499999... → 150.5
-        assert metadata.avg_request_duration_ms == 150.5
+        assert metadata.avg_request_duration_ms == pytest.approx(150.5)
 
 
 class TestThreadSafety:

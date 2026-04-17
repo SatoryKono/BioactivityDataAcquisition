@@ -18,10 +18,10 @@ class TestRetryConfig:
         config = RetryConfig()
         assert config.max_attempts == 3
         assert config.retry_budget_per_request is None
-        assert config.base_delay == 1.0
-        assert config.max_delay == 60.0
+        assert config.base_delay == pytest.approx(1.0)
+        assert config.max_delay == pytest.approx(60.0)
         assert config.max_retry_after_seconds is None
-        assert config.multiplier == 2.0
+        assert config.multiplier == pytest.approx(2.0)
         assert config.jitter_range == (0.1, 0.5)
         assert config.retryable_statuses == frozenset({429, 500, 502, 503, 504})
         assert ConnectionError in config.retryable_exceptions
@@ -31,19 +31,19 @@ class TestRetryConfig:
         """Test delay calculation for first attempt (no jitter)."""
         config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
         delay = config.calculate_delay(0)
-        assert delay == 1.0
+        assert delay == pytest.approx(1.0)
 
     def test_calculate_delay_second_attempt(self) -> None:
         """Test delay calculation for second attempt (no jitter)."""
         config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
         delay = config.calculate_delay(1)
-        assert delay == 2.0
+        assert delay == pytest.approx(2.0)
 
     def test_calculate_delay_third_attempt(self) -> None:
         """Test delay calculation for third attempt (no jitter)."""
         config = RetryConfig(base_delay=1.0, multiplier=2.0, jitter_range=(0.0, 0.0))
         delay = config.calculate_delay(2)
-        assert delay == 4.0
+        assert delay == pytest.approx(4.0)
 
     def test_calculate_delay_respects_max_delay(self) -> None:
         """Test that delay is capped at max_delay."""
@@ -51,7 +51,7 @@ class TestRetryConfig:
             base_delay=10.0, multiplier=2.0, max_delay=15.0, jitter_range=(0.0, 0.0)
         )
         delay = config.calculate_delay(5)
-        assert delay == 15.0
+        assert delay == pytest.approx(15.0)
 
     def test_is_retryable_status(self) -> None:
         """Test is_retryable_status method."""
@@ -134,12 +134,12 @@ class TestRetryConfig:
 
         actual_delay = config.calculate_delay(attempt=0, url=url)
 
-        assert actual_delay == expected_delay, (
+        assert actual_delay == pytest.approx(expected_delay), (
             f"Jitter calculation mismatch. Expected {expected_delay}, got {actual_delay}. "
             "This may indicate the implementation uses Python's hash() instead of MD5."
         )
-        assert config.calculate_delay(attempt=0, url=url) == expected_delay
-        assert config.calculate_delay(attempt=0, url=url) == expected_delay
+        assert config.calculate_delay(attempt=0, url=url) == pytest.approx(expected_delay)
+        assert config.calculate_delay(attempt=0, url=url) == pytest.approx(expected_delay)
 
     def test_is_last_attempt(self) -> None:
         """Test is_last_attempt method."""
@@ -163,7 +163,7 @@ class TestRetryConfig:
     def test_clamp_retry_after(self) -> None:
         """Test Retry-After clamping behavior."""
         config = RetryConfig(max_delay=30.0)
-        assert config.clamp_retry_after(120.0) == 30.0
+        assert config.clamp_retry_after(120.0) == pytest.approx(30.0)
 
         custom_cap = RetryConfig(max_delay=60.0, max_retry_after_seconds=10.0)
-        assert custom_cap.clamp_retry_after(25.0) == 10.0
+        assert custom_cap.clamp_retry_after(25.0) == pytest.approx(10.0)
