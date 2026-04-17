@@ -60,7 +60,11 @@ _PUBLIC_EXPORTS: dict[str, str] = {
 }
 
 
-def __getattr__(name: str) -> Any:  # Any: lazy runtime re-export preserves the original symbol type at lookup time.
+def __getattr__(
+    name: str,
+) -> (
+    Any  # Any: lazy runtime re-export preserves the original symbol type at lookup time.
+):  # Any: lazy runtime re-export preserves the original symbol type at lookup time.
     """Resolve runtime re-exports lazily to keep package import light-weight."""
     module_name = _PUBLIC_EXPORTS.get(name)
     if module_name is None:

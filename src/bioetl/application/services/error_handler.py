@@ -47,7 +47,11 @@ class ErrorHandler:
     def handle_error(
         self,
         exception: Exception,
-        context: Dict[str, Any] | None = None,  # Any: Generic context data from various sources
+        context: Dict[
+            str,
+            Any,  # Any: Generic context data from various sources
+        ]
+        | None = None,
         reraise: bool = True,
     ) -> None:
         """Handle an exception with logging and metrics.
@@ -74,7 +78,11 @@ class ErrorHandler:
         self,
         exception: Exception,
         transform_func: Callable[[Exception], Exception],
-        context: Dict[str, Any] | None = None,  # Any: Generic context data from various sources
+        context: Dict[
+            str,
+            Any,  # Any: Generic context data from various sources
+        ]
+        | None = None,
         reraise: bool = True,
     ) -> None:
         """Handle an exception and transform it to a domain exception.
@@ -157,7 +165,10 @@ class ErrorHandler:
     def _log_error(
         self,
         exception: Exception,
-        context: Dict[str, Any] = None,  # Any: Logging context carries heterogeneous scalar payloads from callers.
+        context: Dict[
+            str,
+            Any,  # Any: Logging context carries heterogeneous scalar payloads from callers.
+        ] = None,
     ) -> None:
         """Log an error with full context."""
         log_context = self._prepare_log_context(exception, context)
@@ -201,8 +212,15 @@ class ErrorHandler:
     def _prepare_log_context(
         self,
         exception: Exception,
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for logging
-    ) -> Dict[str, Any]:  # Any: Prepared log context remains a heterogeneous structured payload.
+        context: Dict[
+            str,
+            Any,  # Any: Generic context data for logging
+        ]
+        | None = None,
+    ) -> Dict[
+        str,
+        Any,  # Any: Prepared log context remains a heterogeneous structured payload.
+    ]:
         """Prepare context dictionary for logging."""
         log_context = context or {}
 
@@ -238,7 +256,11 @@ class ErrorHandler:
         message: str,
         field_name: str,
         invalid_value: Any,  # Any: Generic invalid value from various sources
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for validation errors
+        context: Dict[
+            str,
+            Any,  # Any: Generic context data for validation errors
+        ]
+        | None = None,
     ) -> None:
         """Create and handle a validation error."""
         from bioetl.domain.exceptions.base_exceptions import BioETLValidationError
@@ -255,7 +277,11 @@ class ErrorHandler:
         self,
         message: str,
         config_key: str,
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for configuration errors
+        context: Dict[
+            str,
+            Any,  # Any: Generic context data for configuration errors
+        ]
+        | None = None,
     ) -> None:
         """Create and handle a configuration error."""
         from bioetl.domain.exceptions.base_exceptions import BioETLConfigurationError
@@ -272,7 +298,11 @@ class ErrorHandler:
         message: str,
         record_id: str | None = None,
         severity: str = "warning",
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for data quality errors
+        context: Dict[
+            str,
+            Any,  # Any: Generic context data for data quality errors
+        ]
+        | None = None,
     ) -> None:
         """Create and handle a data quality error."""
         from bioetl.domain.exceptions.base_exceptions import BioETLDataQualityError
@@ -291,7 +321,11 @@ class ErrorHandler:
         service_name: str,
         operation: str,
         is_retryable: bool = True,
-        context: Dict[str, Any] | None = None,  # Any: Generic context data for integration errors
+        context: Dict[
+            str,
+            Any,  # Any: Generic context data for integration errors
+        ]
+        | None = None,
     ) -> None:
         """Create and handle an integration error."""
         error = BioETLIntegrationError(

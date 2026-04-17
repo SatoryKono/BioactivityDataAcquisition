@@ -29,7 +29,11 @@ def track_deprecated_class(
     def decorator(cls: Type[T]) -> Type[T]:
         original_init = cls.__init__
 
-        def new_init(self: T, *args: Any, **kwargs: Any) -> None:  # Any: Decorator must preserve arbitrary constructor signatures.
+        def new_init(
+            self: T,
+            *args: Any,  # Any: Decorator must preserve arbitrary constructor signatures.
+            **kwargs: Any,  # Any: Decorator must preserve arbitrary constructor signatures.
+        ) -> None:
             # Log the usage
             _deprecation_logger.warning(
                 f"Deprecated class used: {old_class_name}. "

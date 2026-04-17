@@ -21,8 +21,10 @@ class LoggerPort(Protocol):
     """
 
     def error(
-        self, message: str, **kwargs: Any
-    ) -> None:  # Any: Generic context data for structured logging
+        self,
+        message: str,
+        **kwargs: Any,  # Any: Generic context data for structured logging
+    ) -> None:
         """Log an error message with context.
 
         Args:
@@ -32,8 +34,10 @@ class LoggerPort(Protocol):
         ...
 
     def warning(
-        self, message: str, **kwargs: Any
-    ) -> None:  # Any: Generic context data for structured logging
+        self,
+        message: str,
+        **kwargs: Any,  # Any: Generic context data for structured logging
+    ) -> None:
         """Log a warning message with context.
 
         Args:
@@ -43,8 +47,10 @@ class LoggerPort(Protocol):
         ...
 
     def info(
-        self, message: str, **kwargs: Any
-    ) -> None:  # Any: Generic context data for structured logging
+        self,
+        message: str,
+        **kwargs: Any,  # Any: Generic context data for structured logging
+    ) -> None:
         """Log an informational message with context.
 
         Args:
@@ -54,8 +60,10 @@ class LoggerPort(Protocol):
         ...
 
     def debug(
-        self, message: str, **kwargs: Any
-    ) -> None:  # Any: Generic context data for structured logging
+        self,
+        message: str,
+        **kwargs: Any,  # Any: Generic context data for structured logging
+    ) -> None:
         """Log a debug message with context.
 
         Args:

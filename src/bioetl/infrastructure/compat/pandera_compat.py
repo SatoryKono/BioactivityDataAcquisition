@@ -32,14 +32,17 @@ def _patch_typing_inspect_get_origin(
 
 def _find_fn_by_subclass_or_union(
     registry: dict[
-        typing.Any, typing.Any  # Any: multipledispatch requires erased types
+        typing.Any,  # Any: multipledispatch requires erased types
+        typing.Any,  # Any: multipledispatch requires erased types
     ],  # Any: multipledispatch requires erased types
     input_data_type: type,
     typing_inspect_module: typing.Any,  # Any: imported module is runtime-defined
 ) -> typing.Any:  # Any: multipledispatch requires erased types
     """Search a dispatcher registry via subclass or union members."""
     for registered_type, registered_fn in registry.items():
-        if registered_type is typing.Any:  # Any: dispatcher registry may explicitly register a catch-all Any fallback.
+        if (
+            registered_type is typing.Any
+        ):  # Any: dispatcher registry may explicitly register a catch-all Any fallback.
             continue
         if isinstance(registered_type, type) and issubclass(
             input_data_type, registered_type
@@ -56,12 +59,17 @@ def _find_fn_by_subclass_or_union(
 
 def _find_any_fallback(
     registry: dict[
-        typing.Any, typing.Any  # Any: multipledispatch requires erased types
+        typing.Any,  # Any: multipledispatch requires erased types
+        typing.Any,  # Any: multipledispatch requires erased types
     ],
 ) -> typing.Any:  # Any: multipledispatch requires erased types
     """Return the Any-registered dispatcher function when present."""
-    if typing.Any in registry:  # Any: multipledispatch stores the catch-all fallback under typing.Any.
-        return registry[typing.Any]  # Any: compat lookup must preserve the catch-all dispatcher fallback.
+    if (
+        typing.Any in registry
+    ):  # Any: multipledispatch stores the catch-all fallback under typing.Any.
+        return registry[
+            typing.Any
+        ]  # Any: compat lookup must preserve the catch-all dispatcher fallback.
     return None
 
 
