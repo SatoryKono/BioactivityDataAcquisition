@@ -12,6 +12,7 @@ Per RULES.md 4.4 Graceful Shutdown:
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from uuid import uuid4
@@ -26,6 +27,7 @@ class TestCheckpointSaving:
 
     async def test_checkpoint_file_created(self, e2e_data_dir: Path):
         """E2E: Checkpoint file is created during pipeline run."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -44,6 +46,7 @@ class TestCheckpointSaving:
 
     async def test_checkpoint_contains_offset(self, e2e_data_dir: Path):
         """E2E: Checkpoint contains offset information."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -61,6 +64,7 @@ class TestCheckpointSaving:
 
     async def test_checkpoint_contains_run_id(self, e2e_data_dir: Path):
         """E2E: Checkpoint contains run ID for correlation."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -79,6 +83,7 @@ class TestCheckpointSaving:
 
     async def test_checkpoint_overwrite(self, e2e_data_dir: Path):
         """E2E: New checkpoint overwrites old checkpoint."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -101,6 +106,7 @@ class TestCheckpointLoading:
 
     async def test_load_existing_checkpoint(self, e2e_data_dir: Path):
         """E2E: Can load an existing checkpoint."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -119,6 +125,7 @@ class TestCheckpointLoading:
 
     async def test_missing_checkpoint_returns_none(self, e2e_data_dir: Path):
         """E2E: Missing checkpoint file returns None/default."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -134,6 +141,7 @@ class TestCheckpointLoading:
 
     async def test_corrupted_checkpoint_handling(self, e2e_data_dir: Path):
         """E2E: Corrupted checkpoint is handled gracefully."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -157,6 +165,7 @@ class TestCheckpointResume:
 
     async def test_resume_continues_from_offset(self, e2e_data_dir: Path):
         """E2E: Resume starts from checkpoint offset."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -172,6 +181,7 @@ class TestCheckpointResume:
 
     async def test_resume_without_checkpoint_starts_fresh(self, e2e_data_dir: Path):
         """E2E: Resume without checkpoint starts from beginning."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -188,6 +198,7 @@ class TestCheckpointResume:
 
     async def test_resume_preserves_run_context(self, e2e_data_dir: Path):
         """E2E: Resume preserves run context from checkpoint."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -214,6 +225,7 @@ class TestCheckpointCleanup:
 
     async def test_checkpoint_deleted_on_completion(self, e2e_data_dir: Path):
         """E2E: Checkpoint can be deleted after successful completion."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -229,6 +241,7 @@ class TestCheckpointCleanup:
 
     async def test_checkpoint_retained_on_failure(self, e2e_data_dir: Path):
         """E2E: Checkpoint is retained on pipeline failure."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 
@@ -248,6 +261,7 @@ class TestCheckpointConcurrency:
 
     async def test_checkpoint_atomic_write(self, e2e_data_dir: Path):
         """E2E: Checkpoint write should be atomic."""
+        await asyncio.sleep(0)
         checkpoint_dir = e2e_data_dir / "checkpoints"
         checkpoint_dir.mkdir(exist_ok=True)
 

@@ -585,6 +585,7 @@ class TestSilverWriterPreparePayloadExecutor:
             )
 
         async def schema_stage(*_: object) -> None:
+            await asyncio.sleep(0)
             call_order.append("schema")
 
         writer._check_schema_drift = AsyncMock(side_effect=schema_stage)  # type: ignore[method-assign]
@@ -673,7 +674,7 @@ class TestSilverWriterPreparePayloadExecutor:
                 key_nullability_rules=None,
             )
 
-        assert captured_request is not None
+        assert isinstance(captured_request, _SilverWritePreparationRequest)
         assert captured_request.table_name == "test.table"
         assert captured_request.records == records
         assert captured_request.primary_keys == ["entity_id"]

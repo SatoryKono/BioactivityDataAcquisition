@@ -365,6 +365,9 @@ class TestRunManifestCommands:
     ) -> None:
         import importlib
 
+        def _fail_registry_build() -> None:
+            raise AssertionError("registry should stay lazy")
+
         registry_helpers = importlib.import_module(
             "bioetl.interfaces.cli.registry_helpers"
         )
@@ -372,7 +375,7 @@ class TestRunManifestCommands:
         monkeypatch.setattr(
             registry_helpers,
             "build_cli_registry",
-            lambda: (_ for _ in ()).throw(AssertionError("registry should stay lazy")),
+            _fail_registry_build,
         )
 
         result = cli_runner.invoke(cli, ["run-manifest", "--help"])

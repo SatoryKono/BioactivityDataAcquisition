@@ -18,6 +18,9 @@ if TYPE_CHECKING:
     from bioetl.composition._services import get_pipeline_runner_service
     from bioetl.composition.bootstrap import maybe_start_metrics_server
 
+_PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
+_APPLICATION_SERVICES_MODULE = "bioetl.application.services"
+
 __all__ = [
     "ArchiveOptions",
     "PipelineRunResult",
@@ -34,17 +37,17 @@ __all__ = [
 ]
 
 _PUBLIC_EXPORTS: dict[str, str] = {
-    "ArchiveOptions": "bioetl.composition._pipeline_execution",
-    "PipelineRunResult": "bioetl.application.services",
-    "RunOptions": "bioetl.application.services",
-    "RunResult": "bioetl.application.services",
-    "VacuumOptions": "bioetl.composition._pipeline_execution",
-    "build_pipeline_context": "bioetl.composition._pipeline_execution",
-    "create_pipeline_runner": "bioetl.composition._pipeline_execution",
-    "ensure_metrics_server_started": "bioetl.composition._pipeline_execution",
+    "ArchiveOptions": _PIPELINE_EXECUTION_MODULE,
+    "PipelineRunResult": _APPLICATION_SERVICES_MODULE,
+    "RunOptions": _APPLICATION_SERVICES_MODULE,
+    "RunResult": _APPLICATION_SERVICES_MODULE,
+    "VacuumOptions": _PIPELINE_EXECUTION_MODULE,
+    "build_pipeline_context": _PIPELINE_EXECUTION_MODULE,
+    "create_pipeline_runner": _PIPELINE_EXECUTION_MODULE,
+    "ensure_metrics_server_started": _PIPELINE_EXECUTION_MODULE,
     "get_pipeline_runner_service": "bioetl.composition._services",
     "maybe_start_metrics_server": "bioetl.composition.bootstrap",
-    "run_pipeline": "bioetl.composition._pipeline_execution",
+    "run_pipeline": _PIPELINE_EXECUTION_MODULE,
 }
 
 

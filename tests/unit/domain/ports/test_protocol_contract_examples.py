@@ -6,6 +6,7 @@ signal beyond generic runtime-checkable and stub coverage.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 from typing import Any, Literal
 
@@ -16,6 +17,11 @@ from bioetl.domain.ports import (
     StoragePort,
 )
 from bioetl.domain.types import BatchID, RunID
+
+
+async def _yield_once() -> None:
+    """Exercise async paths in protocol examples."""
+    await asyncio.sleep(0)
 
 
 @pytest.mark.unit
@@ -84,7 +90,7 @@ class TestStoragePortProtocol:
                 run_id: RunID | None = None,
                 silver_refs: list[Any] | None = None,
             ) -> None:
-                pass
+                await _yield_once()
 
             def get_table_path(
                 self,
@@ -113,7 +119,7 @@ class TestStoragePortProtocol:
                 sources_used: list[str] | None = None,
                 preserve_column_order: bool = False,
             ) -> None:
-                pass
+                await _yield_once()
 
             async def write_gold_merged(
                 self,
@@ -126,11 +132,11 @@ class TestStoragePortProtocol:
                 sources_used: list[str] | None = None,
                 preserve_column_order: bool = False,
             ) -> None:
+                await _yield_once()
                 del completed_at
-                pass
 
             async def aclose(self) -> None:
-                pass
+                await _yield_once()
 
             async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
                 return 0
@@ -178,7 +184,7 @@ class TestStoragePortProtocol:
                 retention_hours: int = 168,
                 dry_run: bool = False,
             ) -> None:
-                pass
+                await _yield_once()
 
             def is_table_initialized(
                 self,
@@ -214,14 +220,17 @@ class TestStoragePortProtocol:
         # not signatures. Test missing methods instead.
         class InvalidStorage:
             async def write_bronze(self, *args, **kwargs):
-                pass
+                await _yield_once()
+                return None
 
             # Missing write_silver method entirely
             async def write_gold(self, *args, **kwargs):
-                pass
+                await _yield_once()
+                return None
 
             async def aclose(self):
-                pass
+                await _yield_once()
+                return None
 
         assert not isinstance(InvalidStorage(), StoragePort)
 
@@ -248,10 +257,10 @@ class TestQuarantinePortProtocol:
                 *,
                 ingestion_ts: datetime,
             ) -> None:
-                pass
+                await _yield_once()
 
             async def write_many(self, records: list[dict[str, Any]]) -> None:
-                pass
+                await _yield_once()
 
             async def inspect(
                 self,
@@ -359,7 +368,7 @@ class TestQuarantinePortProtocol:
                 return True
 
             async def aclose(self) -> None:
-                pass
+                await _yield_once()
 
         assert isinstance(ValidQuarantine(), QuarantinePort)
 
@@ -411,6 +420,6 @@ class TestQuarantinePortProtocol:
                 return True
 
             async def aclose(self) -> None:
-                pass
+                await _yield_once()
 
         assert not isinstance(InvalidQuarantine(), QuarantinePort)

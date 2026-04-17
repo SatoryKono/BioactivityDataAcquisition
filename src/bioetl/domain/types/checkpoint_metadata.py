@@ -20,6 +20,9 @@ from bioetl.domain.types.checkpoint_compatibility_result import (
     CheckpointCompatibilityResult,
 )
 
+_OPTIONAL_STR = str | None
+_OPTIONAL_BOOL = bool | None
+
 
 @dataclass(frozen=True, slots=True)
 class CheckpointMetadata:
@@ -48,22 +51,22 @@ class CheckpointMetadata:
     """
 
     records_processed: int
-    dq_contract_compatibility_hash: str | None = None
-    dq_policy_hash: str | None = None
-    dq_rule_bundle_version: str | None = None
-    pipeline_name: str | None = None
-    run_type: str | None = None
-    pipeline_version: str | None = None
-    effective_config_hash: str | None = None
-    effective_config_artifact_id: str | None = None
-    execution_fingerprint: str | None = None
-    composite_run_identity: str | None = None
-    manifest_id: str | None = None
-    contract_ref: str | None = None
-    contract_version: str | None = None
-    exact_replay: bool | None = None
+    dq_contract_compatibility_hash: _OPTIONAL_STR = None
+    dq_policy_hash: _OPTIONAL_STR = None
+    dq_rule_bundle_version: _OPTIONAL_STR = None
+    pipeline_name: _OPTIONAL_STR = None
+    run_type: _OPTIONAL_STR = None
+    pipeline_version: _OPTIONAL_STR = None
+    effective_config_hash: _OPTIONAL_STR = None
+    effective_config_artifact_id: _OPTIONAL_STR = None
+    execution_fingerprint: _OPTIONAL_STR = None
+    composite_run_identity: _OPTIONAL_STR = None
+    manifest_id: _OPTIONAL_STR = None
+    contract_ref: _OPTIONAL_STR = None
+    contract_version: _OPTIONAL_STR = None
+    exact_replay: _OPTIONAL_BOOL = None
     input_snapshot_ids: tuple[str, ...] = ()
-    input_snapshot_fingerprint: str | None = None
+    input_snapshot_fingerprint: _OPTIONAL_STR = None
     run_context: JsonDict | None = None  # Any: run context has heterogeneous values
 
     @staticmethod
@@ -83,8 +86,8 @@ class CheckpointMetadata:
             ),
             dq_policy_hash=legacy_metadata.get("dq_policy_hash"),
             dq_rule_bundle_version=legacy_metadata.get("dq_rule_bundle_version"),
-            pipeline_name=cast("str | None", legacy_metadata.get("pipeline_name")),
-            run_type=cast("str | None", legacy_metadata.get("run_type")),
+            pipeline_name=cast(_OPTIONAL_STR, legacy_metadata.get("pipeline_name")),
+            run_type=cast(_OPTIONAL_STR, legacy_metadata.get("run_type")),
             pipeline_version=legacy_metadata.get("pipeline_version"),
             effective_config_hash=legacy_metadata.get("effective_config_hash"),
             effective_config_artifact_id=legacy_metadata.get(
@@ -92,7 +95,7 @@ class CheckpointMetadata:
             ),
             execution_fingerprint=legacy_metadata.get("execution_fingerprint"),
             composite_run_identity=cast(
-                "str | None",
+                _OPTIONAL_STR,
                 legacy_metadata.get("composite_run_identity")
                 or extract_run_context_anchor(
                     legacy_metadata,
@@ -100,21 +103,21 @@ class CheckpointMetadata:
                 ),
             ),
             manifest_id=cast(
-                "str | None",
+                _OPTIONAL_STR,
                 legacy_metadata.get("manifest_id")
                 or extract_run_context_anchor(legacy_metadata, "manifest_id"),
             ),
-            contract_ref=cast("str | None", legacy_metadata.get("contract_ref")),
+            contract_ref=cast(_OPTIONAL_STR, legacy_metadata.get("contract_ref")),
             contract_version=cast(
-                "str | None",
+                _OPTIONAL_STR,
                 legacy_metadata.get("contract_version"),
             ),
-            exact_replay=cast("bool | None", legacy_metadata.get("exact_replay")),
+            exact_replay=cast(_OPTIONAL_BOOL, legacy_metadata.get("exact_replay")),
             input_snapshot_ids=coerce_snapshot_ids(
                 legacy_metadata.get("input_snapshot_ids")
             ),
             input_snapshot_fingerprint=cast(
-                "str | None", legacy_metadata.get("input_snapshot_fingerprint")
+                _OPTIONAL_STR, legacy_metadata.get("input_snapshot_fingerprint")
             ),
             run_context=legacy_metadata.get("run_context"),
         )
@@ -166,27 +169,27 @@ class CheckpointMetadata:
             dq_contract_compatibility_hash=data.get("dq_contract_compatibility_hash"),
             dq_policy_hash=data.get("dq_policy_hash"),
             dq_rule_bundle_version=data.get("dq_rule_bundle_version"),
-            pipeline_name=cast("str | None", data.get("pipeline_name")),
-            run_type=cast("str | None", data.get("run_type")),
+            pipeline_name=cast(_OPTIONAL_STR, data.get("pipeline_name")),
+            run_type=cast(_OPTIONAL_STR, data.get("run_type")),
             pipeline_version=data.get("pipeline_version"),
             effective_config_hash=data.get("effective_config_hash"),
             effective_config_artifact_id=data.get("effective_config_artifact_id"),
             execution_fingerprint=data.get("execution_fingerprint"),
             composite_run_identity=cast(
-                "str | None",
+                _OPTIONAL_STR,
                 data.get("composite_run_identity")
                 or extract_run_context_anchor(data, "composite_run_identity"),
             ),
             manifest_id=cast(
-                "str | None",
+                _OPTIONAL_STR,
                 data.get("manifest_id") or extract_run_context_anchor(data, "manifest_id"),
             ),
-            contract_ref=cast("str | None", data.get("contract_ref")),
-            contract_version=cast("str | None", data.get("contract_version")),
-            exact_replay=cast("bool | None", data.get("exact_replay")),
+            contract_ref=cast(_OPTIONAL_STR, data.get("contract_ref")),
+            contract_version=cast(_OPTIONAL_STR, data.get("contract_version")),
+            exact_replay=cast(_OPTIONAL_BOOL, data.get("exact_replay")),
             input_snapshot_ids=coerce_snapshot_ids(data.get("input_snapshot_ids")),
             input_snapshot_fingerprint=cast(
-                "str | None", data.get("input_snapshot_fingerprint")
+                _OPTIONAL_STR, data.get("input_snapshot_fingerprint")
             ),
             run_context=data.get("run_context"),
         )

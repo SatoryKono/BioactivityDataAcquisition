@@ -509,11 +509,6 @@ class TestSilverWriterDQMetrics:
                 table_name="test.table",
                 records=valid_records,
                 table_path="/tmp/silver/test/table",
-                primary_keys=["entity_id"],
-                validated_mode=SilverWriteMode.MERGE,
-                bronze_refs=None,
-                partition_cols=None,
-                source_batch_id="batch-456",
                 started_at=started_at,
                 start_perf=4.0,
             )

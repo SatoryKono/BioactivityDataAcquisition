@@ -23,8 +23,8 @@ class TestDeterministicJitter:
 
     def test_zero_max_returns_zero(self) -> None:
         """Line 41: max_jitter_seconds <= 0 returns 0.0."""
-        assert _deterministic_jitter_seconds(0, 0.0) == 0.0
-        assert _deterministic_jitter_seconds(1, -1.0) == 0.0
+        assert _deterministic_jitter_seconds(0, 0.0) == pytest.approx(0.0)
+        assert _deterministic_jitter_seconds(1, -1.0) == pytest.approx(0.0)
 
     def test_positive_max_returns_bounded_value(self) -> None:
         """Returns value in (0, max_jitter_seconds]."""
@@ -44,7 +44,7 @@ class TestDeterministicJitter:
         """max(0, retry_count) clamps negative values."""
         # retry_count=-1 => phase=(0%4)+1=1 => 1/4 * max
         result = _deterministic_jitter_seconds(-1, 1.0)
-        assert result == 0.25
+        assert result == pytest.approx(0.25)
 
 
 @pytest.mark.unit
@@ -59,8 +59,8 @@ class TestAdaptiveRetryPolicyCalculateDelay:
             base_delay_seconds=0.0,
             max_delay_seconds=1.0,
         )
-        assert policy.calculate_delay(0) == 0.0
-        assert policy.calculate_delay(2) == 0.0
+        assert policy.calculate_delay(0) == pytest.approx(0.0)
+        assert policy.calculate_delay(2) == pytest.approx(0.0)
 
     def test_zero_max_delay_returns_zero(self) -> None:
         """Line 77: max_delay_seconds <= 0 returns 0.0."""
@@ -70,7 +70,7 @@ class TestAdaptiveRetryPolicyCalculateDelay:
             base_delay_seconds=0.1,
             max_delay_seconds=0.0,
         )
-        assert policy.calculate_delay(0) == 0.0
+        assert policy.calculate_delay(0) == pytest.approx(0.0)
 
     def test_non_adaptive_linear_delay(self) -> None:
         """Line 83: adaptive=False uses linear delay formula."""
@@ -193,7 +193,7 @@ class TestBuildDefaultAtomicReplaceRetryPolicy:
         )
         policy = build_default_atomic_replace_retry_policy()
         assert policy.max_retries == 20
-        assert policy.base_delay_seconds == 0.01
+        assert policy.base_delay_seconds == pytest.approx(0.01)
 
     def test_non_windows_returns_non_windows_policy(
         self, monkeypatch: pytest.MonkeyPatch
@@ -204,7 +204,7 @@ class TestBuildDefaultAtomicReplaceRetryPolicy:
         )
         policy = build_default_atomic_replace_retry_policy()
         assert policy.max_retries == 3
-        assert policy.base_delay_seconds == 0.002
+        assert policy.base_delay_seconds == pytest.approx(0.002)
 
 
 @pytest.mark.unit
@@ -230,7 +230,7 @@ class TestSilverMergeResiliencePolicy:
             commit_retry=commit_retry,
             timeout_retry=timeout_retry,
         )
-        assert policy.execution_timeout_seconds == 30.0
+        assert policy.execution_timeout_seconds == pytest.approx(30.0)
         assert policy.commit_retry is commit_retry
         assert policy.timeout_retry is timeout_retry
 

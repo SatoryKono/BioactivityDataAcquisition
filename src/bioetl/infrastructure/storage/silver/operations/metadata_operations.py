@@ -35,6 +35,30 @@ class _PreparedSilverWriteFinalizationContext:
 
 
 @dataclass(frozen=True, slots=True)
+class _SilverMetadataBuildRequest:
+    """Input bundle for constructing one SilverMetadata payload."""
+
+    table_name: str
+    table_path: str
+    records: list[BronzeRecord]
+    dq_metrics: BatchDQMetrics | None
+    mode: str
+    runtime_started_at: datetime
+    runtime_completed_at: datetime
+    run_id: RunID | str | None
+    run_type: RunType | object | None
+    source_batch_id: BatchID | None
+    transform_version: str | None
+    transform_steps: tuple[str, ...] | None
+    bronze_refs: list[BronzeWriteResult] | None
+    primary_keys: list[str] | None = None
+    version_after: int | None = None
+    hostname: str = "localhost"
+    bioetl_version: str = "test"
+    python_version: str = "test"
+
+
+@dataclass(frozen=True, slots=True)
 class SilverMetadataOperations:
     """Metadata operations for Silver layer storage.
     
@@ -156,11 +180,7 @@ class SilverMetadataOperations:
 
         arrow_data = pl.DataFrame(records).to_arrow()
         return await self.compute_dq_metrics(
-            table_name=table_name,
             arrow_data=arrow_data,
-            primary_keys=primary_keys,
-            mode="merge",
-            validated_mode=validated_mode,
         )
 
     async def _resolve_version_after(self, table_path: str) -> int | None:
@@ -171,25 +191,7 @@ class SilverMetadataOperations:
 
     def _build_silver_metadata(
         self,
-        *,
-        table_name: str,
-        table_path: str,
-        records: list[BronzeRecord],
-        dq_metrics: BatchDQMetrics | None,
-        mode: str,
-        runtime_started_at: datetime,
-        runtime_completed_at: datetime,
-        run_id: RunID | str | None,
-        run_type: RunType | object | None,
-        source_batch_id: BatchID | None,
-        transform_version: str | None,
-        transform_steps: tuple[str, ...] | None,
-        bronze_refs: list[BronzeWriteResult] | None,
-        primary_keys: list[str] | None = None,
-        version_after: int | None = None,
-        hostname: str = "localhost",
-        bioetl_version: str = "test",
-        python_version: str = "test",
+        request: _SilverMetadataBuildRequest,
     ) -> SilverMetadata:
         """Build a complete SilverMetadata payload from write/finalization inputs."""
         from bioetl.domain.models._metadata_common import (
@@ -205,7 +207,7 @@ class SilverMetadataOperations:
             SilverOutputExt,
         )
 
-        provider_name, entity_name = self._split_table_name(table_name)
+        provider_name, entity_name = self._split_table_name(request.table_name)
         (
             total_records,
             valid_records,
@@ -213,16 +215,23 @@ class SilverMetadataOperations:
             warning_records,
             error_rate,
             validation_passed,
-        ) = self._resolve_dq_summary_values(dq_metrics, records_count=len(records))
+        ) = self._resolve_dq_summary_values(
+            request.dq_metrics,
+            records_count=len(request.records),
+        )
 
         runtime_metadata = RuntimeMetadata(
-            run_id=str(run_id or "unknown"),
-            run_type=run_type or "incremental",
-            started_at_utc=runtime_started_at,
-            completed_at_utc=runtime_completed_at,
+            run_id=str(request.run_id or "unknown"),
+            run_type=request.run_type or "incremental",
+            started_at_utc=request.runtime_started_at,
+            completed_at_utc=request.runtime_completed_at,
             duration_seconds=max(
                 0,
-                int((runtime_completed_at - runtime_started_at).total_seconds()),
+                int(
+                    (
+                        request.runtime_completed_at - request.runtime_started_at
+                    ).total_seconds()
+                ),
             ),
         )
         pipeline_metadata = PipelineMetadata(
@@ -232,21 +241,23 @@ class SilverMetadataOperations:
             version="1.0",
         )
         lineage_metadata = LineageMetadata(
-            source_batch_ids=[source_batch_id] if source_batch_id else [],
-            bronze_paths=[ref.relative_path for ref in bronze_refs] if bronze_refs else [],
-            transform_version=transform_version,
-            transform_steps=list(transform_steps) if transform_steps else [],
+            source_batch_ids=[request.source_batch_id] if request.source_batch_id else [],
+            bronze_paths=[
+                ref.relative_path for ref in request.bronze_refs
+            ] if request.bronze_refs else [],
+            transform_version=request.transform_version,
+            transform_steps=list(request.transform_steps) if request.transform_steps else [],
         )
         delta_metadata = DeltaMetrics(
-            table_path=table_path,
-            operation=str(mode),
-            primary_key=primary_keys or [],
+            table_path=request.table_path,
+            operation=str(request.mode),
+            primary_key=request.primary_keys or [],
             partition_by=[],
             version_before=None,
-            version_after=version_after,
+            version_after=request.version_after,
             files_added=1,
             files_removed=0,
-            rows_inserted=len(records),
+            rows_inserted=len(request.records),
             rows_updated=0,
             rows_deleted=0,
         )
@@ -256,59 +267,43 @@ class SilverMetadataOperations:
             error_records=error_records,
             warning_records=warning_records,
             error_rate=error_rate,
-            column_metrics=self._build_column_metrics_dict(dq_metrics),
-            schema_drift=self._build_schema_drift_object(dq_metrics),
+            column_metrics=self._build_column_metrics_dict(request.dq_metrics),
+            schema_drift=self._build_schema_drift_object(request.dq_metrics),
             validation_passed=validation_passed,
         )
         return SilverMetadata(
-            table_name=table_name,
+            table_name=request.table_name,
             runtime=runtime_metadata,
             pipeline=pipeline_metadata,
             lineage=lineage_metadata,
             delta=delta_metadata,
             dq_summary=dq_summary,
             output=BaseOutputMetadata(
-                artifact_id=f"{table_name}-{run_id or 'unknown'}",
-                record_count=len(records),
+                artifact_id=f"{request.table_name}-{request.run_id or 'unknown'}",
+                record_count=len(request.records),
                 total_bytes=0,
                 content_hash="placeholder-hash",
             ),
             output_ext=SilverOutputExt(
                 delta_version_before=None,
-                delta_version_after=version_after,
+                delta_version_after=request.version_after,
             ),
             environment=EnvironmentMetadata(
-                hostname=hostname,
-                bioetl_version=bioetl_version,
-                python_version=python_version,
+                hostname=request.hostname,
+                bioetl_version=request.bioetl_version,
+                python_version=request.python_version,
             ),
         )
     
     async def compute_dq_metrics(
         self,
-        table_name: str,
         arrow_data: pa.Table,
-        primary_keys: list[str],
-        mode: str,
-        validated_mode: SilverWriteMode,
-        run_id: RunID | None = None,
-        run_type: RunType | None = None,
-        source_batch_id: BatchID | None = None,
-        ingestion_ts: datetime | None = None,
     ) -> BatchDQMetrics:
         """Compute data quality metrics for Silver write.
         
         Args:
-            table_name: Name of the table
             arrow_data: PyArrow table with data
-            primary_keys: List of primary key columns
-            mode: Write mode (append, merge, delete)
-            validated_mode: Validated write mode
-            run_id: Optional run ID
-            run_type: Optional run type
-            source_batch_id: Optional source batch ID
-            ingestion_ts: Optional ingestion timestamp
-        
+
         Returns:
             Computed DQ metrics
         """
@@ -371,19 +366,21 @@ class SilverMetadataOperations:
         runtime_completed_at = datetime.now(UTC)
         table_path_placeholder = self._placeholder_table_path(table_name)
         metadata = self._build_silver_metadata(
-            table_name=table_name,
-            table_path=table_path_placeholder,
-            records=records,
-            dq_metrics=dq_metrics,
-            mode=mode,
-            runtime_started_at=runtime_started_at,
-            runtime_completed_at=runtime_completed_at,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            transform_version=transform_version,
-            transform_steps=transform_steps,
-            bronze_refs=bronze_refs,
+            _SilverMetadataBuildRequest(
+                table_name=table_name,
+                table_path=table_path_placeholder,
+                records=records,
+                dq_metrics=dq_metrics,
+                mode=mode,
+                runtime_started_at=runtime_started_at,
+                runtime_completed_at=runtime_completed_at,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                transform_version=transform_version,
+                transform_steps=transform_steps,
+                bronze_refs=bronze_refs,
+            )
         )
         result = await self._persist_silver_metadata(
             metadata=metadata,
@@ -511,9 +508,6 @@ class SilverMetadataOperations:
         table_path: str,
         primary_keys: list[str],
         validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
         started_at: datetime,
         start_perf: float,
     ) -> "_PreparedSilverWriteFinalizationContext":
@@ -573,30 +567,29 @@ class SilverMetadataOperations:
             table_path=table_path,
             primary_keys=primary_keys,
             validated_mode=validated_mode,
-            bronze_refs=bronze_refs,
-            partition_cols=partition_cols,
-            source_batch_id=source_batch_id,
             started_at=started_at,
             start_perf=start_perf,
         )
         run_id = str(records[0]["_run_id"]) if records and "_run_id" in records[0] else "test_run_id"
         metadata = self._build_silver_metadata(
-            table_name=table_name,
-            table_path=table_path,
-            records=records,
-            dq_metrics=context.dq_metrics,
-            mode="merge",
-            runtime_started_at=started_at,
-            runtime_completed_at=context.completed_at,
-            run_id=run_id,
-            run_type=RunTypeEnum.INCREMENTAL,
-            source_batch_id=source_batch_id,
-            transform_version=None,
-            transform_steps=None,
-            bronze_refs=bronze_refs,
-            primary_keys=primary_keys,
-            version_after=context.version_after,
-            hostname="test-host",
+            _SilverMetadataBuildRequest(
+                table_name=table_name,
+                table_path=table_path,
+                records=records,
+                dq_metrics=context.dq_metrics,
+                mode="merge",
+                runtime_started_at=started_at,
+                runtime_completed_at=context.completed_at,
+                run_id=run_id,
+                run_type=RunTypeEnum.INCREMENTAL,
+                source_batch_id=source_batch_id,
+                transform_version=None,
+                transform_steps=None,
+                bronze_refs=bronze_refs,
+                primary_keys=primary_keys,
+                version_after=context.version_after,
+                hostname="test-host",
+            )
         )
         await self._persist_silver_metadata(
             metadata=metadata,

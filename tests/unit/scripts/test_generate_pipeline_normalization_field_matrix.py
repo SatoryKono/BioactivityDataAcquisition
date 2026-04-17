@@ -201,7 +201,7 @@ def test_build_entity_profile_coverage_kpi_summarizes_entity_rows() -> None:
     assert kpi["name"] == "explicit_profile_coverage_pct"
     assert kpi["numerator"] == 2
     assert kpi["denominator"] == 3
-    assert kpi["value_pct"] == 66.67
+    assert kpi["value_pct"] == pytest.approx(66.67)
 
 
 def test_build_composite_join_key_policy_coverage_kpi_reports_configured_keys() -> None:
@@ -219,7 +219,7 @@ def test_build_control_plane_normalization_coverage_kpi_reports_governed_seams()
     assert kpi["surface"] == "control_plane_reproducibility"
     assert kpi["name"] == CONTROL_PLANE_NORMALIZATION_COVERAGE_KPI
     assert int(cast(int, kpi["denominator"])) == 6
-    assert float(cast(float, kpi["value_pct"])) == 100.0
+    assert float(cast(float, kpi["value_pct"])) == pytest.approx(100.0)
 
 
 def test_build_surface_coverage_kpis_lists_entity_composite_and_control_plane() -> None:

@@ -35,6 +35,9 @@ if TYPE_CHECKING:
     )
     from bioetl.composition.observability_api import start_metrics_server
 
+_COMPOSITION_EXECUTION_API_MODULE = "bioetl.composition.execution_api"
+_COMPOSITION_COMPOSITE_API_MODULE = "bioetl.composition.composite_api"
+
 __all__ = [
     "ArchiveOptions",
     "PipelineRunResult",
@@ -54,20 +57,20 @@ __all__ = [
 ]
 
 _PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
-    "ArchiveOptions": "bioetl.composition.execution_api",
-    "PipelineRunResult": "bioetl.composition.execution_api",
-    "RunOptions": "bioetl.composition.execution_api",
-    "RunResult": "bioetl.composition.execution_api",
-    "VacuumOptions": "bioetl.composition.execution_api",
-    "bootstrap_composite_runner": "bioetl.composition.composite_api",
-    "build_pipeline_context": "bioetl.composition.execution_api",
-    "create_pipeline_runner": "bioetl.composition.execution_api",
-    "ensure_metrics_server_started": "bioetl.composition.execution_api",
-    "load_composite_config": "bioetl.composition.composite_api",
-    "load_pipeline_config": "bioetl.composition.composite_api",
-    "maybe_start_metrics_server": "bioetl.composition.execution_api",
-    "push_metrics_to_gateway": "bioetl.composition.execution_api",
-    "run_pipeline": "bioetl.composition.execution_api",
+    "ArchiveOptions": _COMPOSITION_EXECUTION_API_MODULE,
+    "PipelineRunResult": _COMPOSITION_EXECUTION_API_MODULE,
+    "RunOptions": _COMPOSITION_EXECUTION_API_MODULE,
+    "RunResult": _COMPOSITION_EXECUTION_API_MODULE,
+    "VacuumOptions": _COMPOSITION_EXECUTION_API_MODULE,
+    "bootstrap_composite_runner": _COMPOSITION_COMPOSITE_API_MODULE,
+    "build_pipeline_context": _COMPOSITION_EXECUTION_API_MODULE,
+    "create_pipeline_runner": _COMPOSITION_EXECUTION_API_MODULE,
+    "ensure_metrics_server_started": _COMPOSITION_EXECUTION_API_MODULE,
+    "load_composite_config": _COMPOSITION_COMPOSITE_API_MODULE,
+    "load_pipeline_config": _COMPOSITION_COMPOSITE_API_MODULE,
+    "maybe_start_metrics_server": _COMPOSITION_EXECUTION_API_MODULE,
+    "push_metrics_to_gateway": _COMPOSITION_EXECUTION_API_MODULE,
+    "run_pipeline": _COMPOSITION_EXECUTION_API_MODULE,
     "start_metrics_server": "bioetl.composition.observability_api",
 }
 

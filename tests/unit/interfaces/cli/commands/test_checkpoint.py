@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -35,6 +36,7 @@ class _FakeWorkflowService:
         *,
         limit: int = 100,
     ) -> _FakeInspectionResult:
+        await asyncio.sleep(0)
         self.audit_run_calls.append((run_id, limit))
         return _FakeInspectionResult(
             {
@@ -104,6 +106,7 @@ class _FakeWorkflowService:
         run_id: str | None = None,
         audit_limit: int = 100,
     ) -> _FakeInspectionResult:
+        await asyncio.sleep(0)
         self.checkpoint_calls.append((pipeline_name, run_id, audit_limit))
         return _FakeInspectionResult(
             {

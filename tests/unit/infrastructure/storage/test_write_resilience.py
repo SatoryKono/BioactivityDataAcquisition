@@ -15,16 +15,16 @@ def test_build_default_silver_merge_policy_matches_pipeline_defaults() -> None:
     """Default storage merge policy must stay aligned with PipelineSettings defaults."""
     policy = build_default_silver_merge_policy()
 
-    assert policy.execution_timeout_seconds == 45.0
+    assert policy.execution_timeout_seconds == pytest.approx(45.0)
     assert policy.commit_retry.enabled is True
     assert policy.commit_retry.max_retries == 3
-    assert policy.commit_retry.base_delay_seconds == 0.250
-    assert policy.commit_retry.max_delay_seconds == 2.0
-    assert policy.commit_retry.jitter_seconds == 0.050
+    assert policy.commit_retry.base_delay_seconds == pytest.approx(0.250)
+    assert policy.commit_retry.max_delay_seconds == pytest.approx(2.0)
+    assert policy.commit_retry.jitter_seconds == pytest.approx(0.050)
     assert policy.commit_retry.adaptive is True
     assert policy.timeout_retry.enabled is True
     assert policy.timeout_retry.max_retries == 1
-    assert policy.timeout_retry.base_delay_seconds == 0.200
-    assert policy.timeout_retry.max_delay_seconds == 2.0
-    assert policy.timeout_retry.jitter_seconds == 0.050
+    assert policy.timeout_retry.base_delay_seconds == pytest.approx(0.200)
+    assert policy.timeout_retry.max_delay_seconds == pytest.approx(2.0)
+    assert policy.timeout_retry.jitter_seconds == pytest.approx(0.050)
     assert policy.timeout_retry.adaptive is True

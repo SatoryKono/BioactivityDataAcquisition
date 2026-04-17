@@ -446,17 +446,17 @@ class TestHealthCheckAsyncExecution:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check when adapter has check_health method."""
-        MockHealthResult = mock_health_service._MockHealthResult
-        MockHealthSummary = mock_health_service._MockHealthSummary
+        mock_health_result_cls = mock_health_service._MockHealthResult
+        mock_health_summary_cls = mock_health_service._MockHealthSummary
 
-        result_obj = MockHealthResult(
+        result_obj = mock_health_result_cls(
             provider="test_provider",
             status="healthy",
             latency_ms=25.5,
             endpoint="/api/status",
         )
         mock_health_service.check_providers = AsyncMock(
-            return_value=MockHealthSummary(
+            return_value=mock_health_summary_cls(
                 results={"test_provider": result_obj}, all_healthy=True
             )
         )
@@ -478,10 +478,10 @@ class TestHealthCheckAsyncExecution:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check when check_health result has error."""
-        MockHealthResult = mock_health_service._MockHealthResult
-        MockHealthSummary = mock_health_service._MockHealthSummary
+        mock_health_result_cls = mock_health_service._MockHealthResult
+        mock_health_summary_cls = mock_health_service._MockHealthSummary
 
-        result_obj = MockHealthResult(
+        result_obj = mock_health_result_cls(
             provider="test_provider",
             status="unhealthy",
             latency_ms=100.0,
@@ -489,7 +489,7 @@ class TestHealthCheckAsyncExecution:
             error="Connection timeout",
         )
         mock_health_service.check_providers = AsyncMock(
-            return_value=MockHealthSummary(
+            return_value=mock_health_summary_cls(
                 results={"test_provider": result_obj}, all_healthy=False
             )
         )
@@ -509,15 +509,15 @@ class TestHealthCheckAsyncExecution:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check when adapter has health_check method (via service)."""
-        MockHealthResult = mock_health_service._MockHealthResult
-        MockHealthSummary = mock_health_service._MockHealthSummary
+        mock_health_result_cls = mock_health_service._MockHealthResult
+        mock_health_summary_cls = mock_health_service._MockHealthSummary
 
-        result_obj = MockHealthResult(
+        result_obj = mock_health_result_cls(
             provider="legacy_provider",
             status="healthy",
         )
         mock_health_service.check_providers = AsyncMock(
-            return_value=MockHealthSummary(
+            return_value=mock_health_summary_cls(
                 results={"legacy_provider": result_obj}, all_healthy=True
             )
         )
@@ -538,16 +538,16 @@ class TestHealthCheckAsyncExecution:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check when adapter has no health check methods."""
-        MockHealthResult = mock_health_service._MockHealthResult
-        MockHealthSummary = mock_health_service._MockHealthSummary
+        mock_health_result_cls = mock_health_service._MockHealthResult
+        mock_health_summary_cls = mock_health_service._MockHealthSummary
 
-        result_obj = MockHealthResult(
+        result_obj = mock_health_result_cls(
             provider="no_health_provider",
             status="unknown",
             error="Adapter does not implement HealthCheckPort",
         )
         mock_health_service.check_providers = AsyncMock(
-            return_value=MockHealthSummary(
+            return_value=mock_health_summary_cls(
                 results={"no_health_provider": result_obj}, all_healthy=False
             )
         )
@@ -567,16 +567,16 @@ class TestHealthCheckAsyncExecution:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check when adapter raises exception during check."""
-        MockHealthResult = mock_health_service._MockHealthResult
-        MockHealthSummary = mock_health_service._MockHealthSummary
+        mock_health_result_cls = mock_health_service._MockHealthResult
+        mock_health_summary_cls = mock_health_service._MockHealthSummary
 
-        result_obj = MockHealthResult(
+        result_obj = mock_health_result_cls(
             provider="failing_provider",
             status="unhealthy",
             error="Network unreachable",
         )
         mock_health_service.check_providers = AsyncMock(
-            return_value=MockHealthSummary(
+            return_value=mock_health_summary_cls(
                 results={"failing_provider": result_obj}, all_healthy=False
             )
         )
@@ -597,17 +597,17 @@ class TestHealthCheckAsyncExecution:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check filters to specific providers."""
-        MockHealthResult = mock_health_service._MockHealthResult
-        MockHealthSummary = mock_health_service._MockHealthSummary
+        mock_health_result_cls = mock_health_service._MockHealthResult
+        mock_health_summary_cls = mock_health_service._MockHealthSummary
 
-        result_obj = MockHealthResult(
+        result_obj = mock_health_result_cls(
             provider="chembl",
             status="healthy",
             latency_ms=10.0,
             endpoint="/api",
         )
         mock_health_service.check_providers = AsyncMock(
-            return_value=MockHealthSummary(
+            return_value=mock_health_summary_cls(
                 results={"chembl": result_obj}, all_healthy=True
             )
         )

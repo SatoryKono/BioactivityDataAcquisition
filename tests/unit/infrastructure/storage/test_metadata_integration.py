@@ -6,6 +6,7 @@ when configured to write metadata sidecar files.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -134,6 +135,7 @@ class MockMetadataWriter:
         entity: str | None = None,
     ) -> str:
         """Mock Bronze metadata write."""
+        await asyncio.sleep(0)
         return ""
 
     async def write_silver_metadata(
@@ -147,6 +149,7 @@ class MockMetadataWriter:
         entity: str | None = None,
     ) -> str:
         """Record Silver metadata write."""
+        await asyncio.sleep(0)
         self.silver_calls.append((base_path, metadata))
         return str(Path(base_path) / "_metadata.yaml")
 
@@ -161,6 +164,7 @@ class MockMetadataWriter:
         entity: str | None = None,
     ) -> str:
         """Record Gold metadata write."""
+        await asyncio.sleep(0)
         self.gold_calls.append((base_path, metadata))
         return str(Path(base_path) / "_metadata.yaml")
 
@@ -177,6 +181,7 @@ class MockMetadataWriter:
         delta_version_after: int | None = None,
     ) -> str | None:
         """Record Silver metadata finalization as a no-op compatible seam."""
+        await asyncio.sleep(0)
         _ = (
             table_name,
             flat_structure,
@@ -200,6 +205,7 @@ class MockMetadataWriter:
         completed_at: datetime | None = None,
     ) -> str | None:
         """Record Gold metadata finalization as a no-op compatible seam."""
+        await asyncio.sleep(0)
         _ = (
             table_name,
             flat_structure,
@@ -212,7 +218,7 @@ class MockMetadataWriter:
 
     async def aclose(self) -> None:
         """No-op close."""
-        pass
+        await asyncio.sleep(0)
 
 
 @pytest.fixture
