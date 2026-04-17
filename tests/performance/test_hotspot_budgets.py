@@ -72,6 +72,7 @@ class _FakeHttp:
         self._response = response
 
     async def get(self, *args: Any, **kwargs: Any) -> _FakeResponse:
+        await asyncio.sleep(0)
         del args, kwargs
         return self._response
 
@@ -427,6 +428,7 @@ def test_crossref_batch_adapter_budget(pytestconfig: pytest.Config) -> None:
     )
 
     async def op() -> float:
+        await asyncio.sleep(0)
         started = time.perf_counter()
         records = [item async for item in processor.fetch_batch(dois)]
         elapsed = time.perf_counter() - started

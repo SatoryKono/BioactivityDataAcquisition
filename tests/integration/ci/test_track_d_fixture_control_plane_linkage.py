@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from uuid import uuid4
@@ -258,6 +259,7 @@ async def test_exact_replay_without_materialized_cached_bronze_batches_fails_clo
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Exact replay must fail closed and avoid publishing a manifest without snapshots."""
+    await asyncio.sleep(0)
     cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
     (cached_root / "2026-03-25").mkdir(parents=True, exist_ok=True)
 

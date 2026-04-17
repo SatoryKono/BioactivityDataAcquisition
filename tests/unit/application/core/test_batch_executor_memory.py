@@ -318,6 +318,7 @@ class TestBatchExecutorMemory:
 
         # Mock fetch to yield records
         async def mock_fetch(**kwargs):
+            await asyncio.sleep(0)
             for i in range(10):
                 yield {"id": i}
 
@@ -361,6 +362,7 @@ class TestBatchExecutorMemory:
         )
 
         async def mock_fetch(**kwargs):
+            await asyncio.sleep(0)
             for i in range(20):
                 yield {"id": i}
 
@@ -383,6 +385,7 @@ class TestBatchExecutorMemory:
         memory_config,
     ):
         """Test estimation from config without monitor."""
+        await asyncio.sleep(0)
         executor = _create_batch_executor(
             services=mock_services,
             context=mock_context,
@@ -423,6 +426,7 @@ class TestBatchExecutorMemory:
         )
 
         async def mock_fetch(**kwargs):
+            await asyncio.sleep(0)
             yield {"id": 1, "value": 10}
 
         mock_services.data_source.fetch = mock_fetch

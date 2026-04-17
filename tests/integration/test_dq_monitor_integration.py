@@ -6,6 +6,7 @@ baseline updates, and threshold violations.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
@@ -327,6 +328,7 @@ class TestDataQualityServiceMetricsEmission:
         When error_rate exceeds soft threshold (5%) but below hard (20%),
         the service MUST emit the bioetl_dq_soft_threshold_exceeded counter.
         """
+        await asyncio.sleep(0)
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
@@ -367,6 +369,7 @@ class TestDataQualityServiceMetricsEmission:
         When DQ monitor is present and runs anomaly detection,
         the service MUST emit check duration histogram.
         """
+        await asyncio.sleep(0)
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
@@ -408,6 +411,7 @@ class TestDataQualityServiceMetricsEmission:
         recording_logger: RecordingLogger,
     ) -> None:
         """DQ service should emit score and the matching record-count gauge."""
+        await asyncio.sleep(0)
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
 
@@ -472,6 +476,7 @@ class TestDataQualityServiceMetricsEmission:
         2. Histogram for check duration is emitted
         3. Baseline is updated
         """
+        await asyncio.sleep(0)
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
@@ -517,6 +522,7 @@ class TestDataQualityServiceMetricsEmission:
         recording_logger: RecordingLogger,
     ) -> None:
         """Freshness anchor should drive anomaly timestamps and detection."""
+        await asyncio.sleep(0)
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.domain.value_objects.dq_anomaly import DQAnomalyType
@@ -565,6 +571,7 @@ class TestDataQualityServiceMetricsEmission:
         When baseline is updated after successful DQ check,
         the service MUST emit baseline update counter for each metric.
         """
+        await asyncio.sleep(0)
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (
@@ -620,6 +627,7 @@ class TestDataQualityServiceMetricsEmission:
         When error_rate is below soft threshold (5%),
         the service MUST NOT emit bioetl_dq_soft_threshold_exceeded counter.
         """
+        await asyncio.sleep(0)
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
@@ -658,6 +666,7 @@ class TestDataQualityServiceMetricsEmission:
         2. Check duration histogram (via DQ monitor)
         3. Baseline update counters (via DQ monitor)
         """
+        await asyncio.sleep(0)
         from bioetl.application.services.data_quality_service import DataQualityService
         from bioetl.domain.config import DQConfig
         from bioetl.infrastructure.observability.anomaly import (

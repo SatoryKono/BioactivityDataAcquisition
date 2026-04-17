@@ -113,6 +113,7 @@ async def test_semanticscholar_publication_full_cycle(
     2. Bronze files are created
     3. Silver table contains expected records
     """
+    await asyncio.sleep(0)
     bronze_files = semanticscholar_publication_run["bronze_files"]
     assert len(bronze_files) >= 1
 
@@ -135,6 +136,7 @@ async def test_semanticscholar_publication_metadata_fields(
 
     Semantic Scholar provides title, authors, year, citation counts, etc.
     """
+    await asyncio.sleep(0)
     records = semanticscholar_publication_run["records"]
     assert len(records) >= 1, "Should have at least one S2 record"
 
@@ -152,6 +154,7 @@ async def test_semanticscholar_publication_citation_fields(
     semanticscholar_publication_run: dict[str, Any],
 ) -> None:
     """E2E: Verify citation fields from Semantic Scholar."""
+    await asyncio.sleep(0)
     records = semanticscholar_publication_run["records"]
     for record in records:
         citations = record.get("citations_received")

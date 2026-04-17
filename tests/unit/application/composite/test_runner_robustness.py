@@ -8,6 +8,7 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from uuid import UUID, uuid4
@@ -67,18 +68,23 @@ class InMemoryCheckpointManager:
         )
 
     async def load(self) -> CompositeCheckpointState:
+        await asyncio.sleep(0)
         return self._state
 
     async def save(self, state: CompositeCheckpointState) -> None:
+        await asyncio.sleep(0)
         self._state = state
 
     async def delete(self) -> None:
+        await asyncio.sleep(0)
         return None
 
     async def delete_orphaned(self) -> int:
+        await asyncio.sleep(0)
         return 0
 
     async def list_all(self) -> list[str]:
+        await asyncio.sleep(0)
         return []
 
 

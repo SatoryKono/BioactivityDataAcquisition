@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T10:39:06.193427+00:00",
+  "generated_at": "2026-04-17T12:12:39.081815+00:00",
   "summary": {
-    "total_scripts": 395,
+    "total_scripts": 392,
     "status_counts": {
-      "active": 309,
-      "legacy": 10,
-      "orphan": 67,
+      "active": 308,
+      "legacy": 9,
+      "orphan": 66,
       "unknown": 9
     },
     "reference_group_coverage": {
       "agents": 11,
       "build": 1,
       "ci": 49,
-      "docs": 117,
-      "scripts": 293,
+      "docs": 116,
+      "scripts": 291,
       "skills": 8,
-      "tests": 100
+      "tests": 97
     }
   },
   "scripts": [
@@ -25,19 +25,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
-          "path": "scripts/VIBE.md",
-          "line": 20,
+          "path": "scripts/README.md",
+          "line": 43,
           "source_group": "scripts",
-          "text": "python -m scripts.ai vibe --help"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai vibe --help"
+          "text": "python -m scripts.ai --help"
         },
         {
           "path": "scripts/ai/vibe/README.md",
@@ -1521,37 +1515,13 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/VIBE.md",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "- `scripts/ai/vibe/launch.ps1` — Canonical PowerShell launcher (Windows via WSL)"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 26,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\vibe\\launch.ps1"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 27,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\vibe\\launch.ps1 \"explain this code\""
-        },
         {
           "path": "scripts/ai/vibe/README.md",
           "line": 16,
           "source_group": "scripts",
           "text": "pwsh -File scripts/ai/vibe/launch.ps1 --help"
-        },
-        {
-          "path": "scripts/vibe.ps1",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "$Target = Join-Path $PSScriptRoot \"ai\\vibe\\launch.ps1\""
         }
       ]
     },
@@ -1560,55 +1530,19 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/VIBE.md",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "- `scripts/ai/vibe/launch.sh` — Canonical Bash launcher (Linux/WSL)"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/vibe/launch.sh"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/vibe/launch.sh \"explain this code\""
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 60,
-          "source_group": "scripts",
-          "text": "chmod +x scripts/ai/vibe/launch.sh"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 67,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/vibe/launch.sh"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 72,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/vibe/launch.sh \"refactor this function for better performance\""
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 77,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/vibe/launch.sh \"analyze security issues in this code\""
-        },
         {
           "path": "scripts/ai/vibe/README.md",
           "line": 15,
           "source_group": "scripts",
           "text": "bash scripts/ai/vibe/launch.sh --help"
+        },
+        {
+          "path": "scripts/ai/vibe/__main__.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "[\"bash\", str(_DIR / \"launch.sh\"), *args],"
         }
       ]
     },
@@ -1674,7 +1608,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 44,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -3029,7 +2963,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 42,
+          "line": 38,
           "source_group": "tests",
           "text": "svg2png_path = \"/\".join([\"scripts\", \"diagrams\", \"svg2png.mjs\"])"
         }
@@ -3156,7 +3090,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 100,
+      "reference_count": 103,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -3229,7 +3163,7 @@
         },
         {
           "path": "scripts/memory/sync.py",
-          "line": 5360,
+          "line": 6121,
           "source_group": "scripts",
           "text": "if \"scripts.docs\" in lowered or \"check-links\" in lowered or \"build_docs_site.sh\" in lowered:"
         }
@@ -3688,7 +3622,7 @@
         },
         {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
-          "line": 46,
+          "line": 48,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }
@@ -4046,9 +3980,9 @@
         },
         {
           "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 54,
+          "line": 50,
           "source_group": "tests",
-          "text": "/ \"_compatibility_registry.py\","
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         },
         {
           "path": "tests/architecture/test_compatibility_telemetry_reporting.py",
@@ -4612,7 +4546,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -4833,7 +4767,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "\"install-deps\": \"install_deps.py\","
         }
@@ -4854,7 +4788,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 33,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"mock-metrics\": \"metrics_mock_server.py\","
         }
@@ -4916,7 +4850,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"pretest-guardrails\": \"pretest_guardrails.sh\","
         },
@@ -4945,19 +4879,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
         {
-          "path": "scripts/migrate_deprecated_names.py",
-          "line": 5,
+          "path": "scripts/engineering/dev/__main__.py",
+          "line": 32,
           "source_group": "scripts",
-          "text": "- scripts/engineering/dev/python/migrate_deprecated_names.py"
-        },
-        {
-          "path": "scripts/migrate_deprecated_names.py",
-          "line": 14,
-          "source_group": "scripts",
-          "text": "[sys.executable, \"scripts/engineering/dev/python/migrate_deprecated_names.py\"] + sys.argv[1:],"
+          "text": "\"migrate-deprecated-names\": \"python/migrate_deprecated_names.py\","
         }
       ]
     },
@@ -5102,7 +5030,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 31,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"probe-quality\": \"quality_gate_probe.py\","
         }
@@ -5129,7 +5057,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 34,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"mock-quarantine\": \"quarantine_explorer_mock_server.py\","
         }
@@ -5327,7 +5255,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 66,
+      "reference_count": 67,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -5426,7 +5354,7 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"pytest-sharded\": \"run_pytest_sharded.sh\","
         },
@@ -5481,9 +5409,9 @@
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 38,
+          "line": 40,
           "source_group": "tests",
-          "text": "content = (root / \"scripts/engineering/dev/run_tests.ps1\").read_text(encoding=\"utf-8\")"
+          "text": "content = (root / \"scripts/engineering/dev/run_tests.ps1\").read_text("
         }
       ]
     },
@@ -5508,13 +5436,13 @@
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 32,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_tests.py\","
         },
         {
           "path": "scripts/engineering/dev/__main__.py",
-          "line": 76,
+          "line": 78,
           "source_group": "scripts",
           "text": "return _run_script(\"run_tests.py\", [\"changed\", *rest])"
         },
@@ -5567,7 +5495,7 @@
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
           "line": 31,
           "source_group": "tests",
-          "text": "content = (root / \"scripts/engineering/dev/run_tests.sh\").read_text(encoding=\"utf-8\")"
+          "text": "content = (root / \"scripts/engineering/dev/run_tests.sh\").read_text("
         }
       ]
     },
@@ -5793,9 +5721,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 45,
+          "line": 49,
           "source_group": "tests",
-          "text": "content = (root / \"scripts/engineering/dev/test_changed.sh\").read_text(encoding=\"utf-8\")"
+          "text": "content = (root / \"scripts/engineering/dev/test_changed.sh\").read_text("
         }
       ]
     },
@@ -6044,7 +5972,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 74,
+      "reference_count": 76,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -6159,7 +6087,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 468,
+          "line": 466,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_application_deps.py\","
         },
@@ -6204,7 +6132,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 467,
+          "line": 465,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_architecture.py\","
         },
@@ -6282,7 +6210,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 469,
+          "line": 467,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_constructor_args.py\","
         },
@@ -6354,15 +6282,15 @@
         },
         {
           "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 14,
+          "line": 15,
           "source_group": "tests",
-          "text": "assert script.exists(), \"scripts/engineering/qa/check_naming_package_consistency.py must exist\""
+          "text": "\"scripts/engineering/qa/check_naming_package_consistency.py must exist\""
         },
         {
           "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 33,
+          "line": 36,
           "source_group": "tests",
-          "text": "assert \"scripts/engineering/qa/check_naming_package_consistency.py --check\" in workflow"
+          "text": "\"scripts/engineering/qa/check_naming_package_consistency.py --check\" in workflow"
         }
       ]
     },
@@ -6410,7 +6338,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -6429,12 +6357,6 @@
           "line": 47,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"generate_architecture_debt_tasks.py\","
-        },
-        {
-          "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 32,
-          "source_group": "tests",
-          "text": "assert (ROOT / \"scripts\" / \"qa\" / \"generate_architecture_debt_tasks.py\").exists()"
         }
       ]
     },
@@ -6443,7 +6365,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 42,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -6751,7 +6673,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -6770,12 +6692,6 @@
           "line": 48,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"reduce_architecture_debt.py\","
-        },
-        {
-          "path": "tests/architecture/test_architecture_debt_agent_surface.py",
-          "line": 33,
-          "source_group": "tests",
-          "text": "assert (ROOT / \"scripts\" / \"qa\" / \"reduce_architecture_debt.py\").exists()"
         }
       ]
     },
@@ -7088,9 +7004,9 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 292,
+          "line": 293,
           "source_group": "tests",
-          "text": "assert \"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
+          "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
         }
       ]
     },
@@ -7133,9 +7049,9 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 293,
+          "line": 296,
           "source_group": "tests",
-          "text": "assert \"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
+          "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
         }
       ]
     },
@@ -7171,7 +7087,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -7580,44 +7496,11 @@
       ]
     },
     {
-      "path": "scripts/generate_architecture_dependency_map.py",
-      "type": "py",
-      "status": "legacy",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 35,
-          "source_group": "docs",
-          "text": "[`scripts/generate_architecture_dependency_map.py`](scripts/generate_architecture_dependency_map.py),"
-        },
-        {
-          "path": "scripts/engineering/qa/README.md",
-          "line": 88,
-          "source_group": "scripts",
-          "text": "`scripts/generate_architecture_dependency_map.py` remains a compatibility wrapper only."
-        },
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 434,
-          "source_group": "scripts",
-          "text": "\"scripts/generate_architecture_dependency_map.py\","
-        },
-        {
-          "path": "tests/architecture/test_architecture_dependency_docs_drift.py",
-          "line": 50,
-          "source_group": "tests",
-          "text": "wrapper = Path(\"scripts/generate_architecture_dependency_map.py\").read_text("
-        }
-      ]
-    },
-    {
       "path": "scripts/memory/__main__.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 135,
+      "reference_count": 138,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -7810,33 +7693,29 @@
       ]
     },
     {
-      "path": "scripts/migrate_deprecated_names.py",
-      "type": "py",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/neo4j-recovery-checklist.ps1",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ops/__main__.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
           "line": 151,
           "source_group": "docs",
           "text": "| `scripts.ops`         | `uv run python -m scripts.ops`         | Ops: salt rotation, Grafana, deploy        |"
+        },
+        {
+          "path": "scripts/README.md",
+          "line": 39,
+          "source_group": "scripts",
+          "text": "python -m scripts.ops --help"
+        },
+        {
+          "path": "scripts/README.md",
+          "line": 53,
+          "source_group": "scripts",
+          "text": "python -m scripts.ops rerender-grafana"
         },
         {
           "path": "scripts/ops/INDEX.md",
@@ -9690,7 +9569,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"codex-headless\": \"launchers/codex/codex-headless.sh\","
         }
@@ -9892,7 +9771,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"diagnose-codex-wsl\": \"launchers/codex/diagnose-codex-wsl.sh\","
         }
@@ -9958,15 +9837,15 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"setup-plugins\": \"launchers/codex/setup_plugins.sh\","
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 62,
+          "line": 61,
           "source_group": "tests",
-          "text": "root / \"scripts/ops/launchers/codex/setup_plugins.sh\""
+          "text": "content = (root / \"scripts/ops/launchers/codex/setup_plugins.sh\").read_text("
         }
       ]
     },
@@ -10037,7 +9916,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"delete-branches\": \"maintenance/git/delete-stale-branches.sh\","
         }
@@ -10052,7 +9931,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 439,
+          "line": 437,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh\","
         }
@@ -10067,7 +9946,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 440,
+          "line": 438,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh\","
         }
@@ -10082,13 +9961,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 447,
+          "line": 445,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh\","
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 46,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"close-ge-spike\": \"maintenance/github/close_great_expectations_spike_issue.sh\","
         }
@@ -10103,7 +9982,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 444,
+          "line": 442,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_issue_2597.sh\","
         }
@@ -10118,13 +9997,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 448,
+          "line": 446,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh\","
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 47,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"close-schema-drift\": \"maintenance/github/close_pandera_schema_drift_issue.sh\","
         }
@@ -10139,7 +10018,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 438,
+          "line": 436,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_superseded_prs.sh\","
         }
@@ -10162,7 +10041,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 443,
+          "line": 441,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_2597_progress.sh\","
         }
@@ -10177,7 +10056,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 445,
+          "line": 443,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_rescope_comments.sh\","
         }
@@ -10192,7 +10071,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"triage-issues\": \"maintenance/github/triage_cleanup_issue_wave.sh\","
         }
@@ -10207,7 +10086,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"update-issue\": \"maintenance/github/update_github_issue.sh\","
         },
@@ -10246,7 +10125,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 446,
+          "line": 444,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/update_issue_rescope_bodies.sh\","
         }
@@ -10273,7 +10152,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"salt-rotate\": \"maintenance/security/salt_rotate.py\","
         }
@@ -10351,7 +10230,7 @@
       "references": [
         {
           "path": "scripts/ops/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"fix-grafana\": \"observability/grafana/fix_grafana_dashboards.py\","
         }
@@ -10371,10 +10250,10 @@
           "text": "[`scripts/rerender_grafana_screenshots.py`](scripts/rerender_grafana_screenshots.py)"
         },
         {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 435,
+          "path": "scripts/ops/__main__.py",
+          "line": 41,
           "source_group": "scripts",
-          "text": "\"scripts/rerender_grafana_screenshots.py\","
+          "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
         }
       ]
     },
@@ -10423,7 +10302,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 57,
+          "line": 59,
           "source_group": "scripts",
           "text": "\"deploy\": \"runtime/deploy/deploy-bioetl.sh\","
         }
@@ -10432,10 +10311,23 @@
     {
       "path": "scripts/ops/runtime/docker/restart-docker.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1"
+        },
+        {
+          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
+          "line": 148,
+          "source_group": "docs",
+          "text": "| `scripts/ops/runtime/docker/restart-docker.ps1` | Docker Desktop restart helper |"
+        }
+      ]
     },
     {
       "path": "scripts/ops/runtime/health/start_health_server.ps1",
@@ -10806,7 +10698,7 @@
         },
         {
           "path": "scripts/ops/__main__.py",
-          "line": 55,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"check-skills\": \"support/skills/check_ai_skills_layout.sh\","
         }
@@ -10899,6 +10791,22 @@
       ]
     },
     {
+      "path": "scripts/qa/generate_architecture_debt_tasks.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/qa/reduce_architecture_debt.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/repo/check_scripts_catalog.py",
       "type": "py",
       "status": "orphan",
@@ -10907,32 +10815,11 @@
       "references": []
     },
     {
-      "path": "scripts/restart-docker.ps1",
-      "type": "ps1",
-      "status": "unknown",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": ".\\scripts\\restart-docker.ps1"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-complete-recovery-guide.md",
-          "line": 148,
-          "source_group": "docs",
-          "text": "| `scripts/restart-docker.ps1` | Docker Desktop restart helper |"
-        }
-      ]
-    },
-    {
       "path": "scripts/run.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 38,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -10989,7 +10876,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 52,
+      "reference_count": 54,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -11233,7 +11120,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 461,
+          "line": 459,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
@@ -11512,7 +11399,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 463,
+          "line": 461,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/validate_unified_configs.py\","
         },
@@ -11557,27 +11444,6 @@
           "line": 41,
           "source_group": "tests",
           "text": "assert \"validate_unified_configs.py\" in content"
-        }
-      ]
-    },
-    {
-      "path": "scripts/vibe.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/VIBE.md",
-          "line": 11,
-          "source_group": "scripts",
-          "text": "- `scripts/vibe.ps1` — Compatibility PowerShell wrapper"
-        },
-        {
-          "path": "scripts/VIBE.md",
-          "line": 28,
-          "source_group": "scripts",
-          "text": ".\\scripts\\vibe.ps1 --help"
         }
       ]
     },

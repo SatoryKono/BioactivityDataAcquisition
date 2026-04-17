@@ -503,9 +503,11 @@ class TestDependencyExecution:
 
         class _ImmediateTimeout:
             async def __aenter__(self) -> None:
+                await asyncio.sleep(0)
                 raise TimeoutError
 
             async def __aexit__(self, *_args: object) -> bool:
+                await asyncio.sleep(0)
                 return False
 
         monkeypatch.setattr(

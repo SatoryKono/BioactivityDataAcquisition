@@ -6,6 +6,7 @@ Tests real API behavior with recorded cassettes.
 
 from __future__ import annotations
 
+import asyncio
 import os
 from pathlib import Path
 
@@ -63,6 +64,7 @@ async def http_client():
 @pytest_asyncio.fixture
 async def adapter(http_client: UnifiedHTTPClient):
     """Create OpenAlex adapter for integration tests."""
+    await asyncio.sleep(0)
     logger = NoOpLogger()
     metrics = NoOpMetrics()
     return OpenAlexAdapter(

@@ -6,6 +6,7 @@ during execution and properly stops it on completion or failure.
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -225,12 +226,14 @@ class TestCompositeRunnerHeartbeat:
     @pytest.mark.asyncio
     async def test_heartbeat_interval_defaults_to_30(self) -> None:
         """Default composite heartbeat interval is 30s via CompositeRuntimeConfig."""
+        await asyncio.sleep(0)
         runtime = CompositeRuntimeConfig()
         assert runtime.heartbeat_interval_seconds == 30
 
     @pytest.mark.asyncio
     async def test_lock_ttl_defaults_to_3600(self) -> None:
         """Default lock TTL is 3600s (1 hour) via CompositeRuntimeConfig."""
+        await asyncio.sleep(0)
         runtime = CompositeRuntimeConfig()
         assert runtime.lock_ttl_seconds == 3600
 

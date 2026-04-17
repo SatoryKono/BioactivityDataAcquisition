@@ -3657,14 +3657,12 @@ def _add_curated_script_clusters(snapshot: GraphSnapshot, project: NodeKey, toda
         entrypoint = _add_curated_cluster_entrypoint(snapshot, cluster, today)
 
         for execution_payload in cluster["execution_paths"]:
-            execution = _add_execution_path_node(snapshot, today, execution_payload)
-            snapshot.add_relation(entrypoint, "PROVIDES", execution, provenance="curated_script_clusters")
-            snapshot.add_relation(readme, "DESCRIBES", execution, provenance="curated_script_clusters")
-            _link_execution_gate(
+            _add_curated_cluster_execution(
                 snapshot,
-                execution,
+                today,
+                entrypoint,
+                readme,
                 execution_payload,
-                provenance="curated_script_clusters",
             )
 
 
@@ -3704,11 +3702,30 @@ def _add_curated_cluster_entrypoint(
     )
 
 
+def _add_curated_cluster_execution(
+    snapshot: GraphSnapshot,
+    today: str,
+    entrypoint: NodeKey,
+    readme: NodeKey,
+    execution_payload: dict[str, object],
+) -> None:
+    execution = _add_execution_path_node(snapshot, today, execution_payload)
+    snapshot.add_relation(entrypoint, "PROVIDES", execution, provenance="curated_script_clusters")
+    snapshot.add_relation(readme, "DESCRIBES", execution, provenance="curated_script_clusters")
+    _link_execution_gate(
+        snapshot,
+        execution,
+        execution_payload,
+        provenance="curated_script_clusters",
+    )
+
+
 def _add_quality_and_scripts(snapshot: GraphSnapshot, _root: Path, project: NodeKey, today: str) -> None:
     _add_curated_quality_gates(snapshot, project, today)
     dev_readme = _developer_workflow_readme(snapshot, project, today)
     _add_curated_execution_paths(snapshot, project, today, dev_readme)
     _add_curated_script_clusters(snapshot, project, today)
+
 
 def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     execution_to_gates, execution_to_scripts = _cli_execution_indexes(snapshot)
@@ -3721,25 +3738,22 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
         backing_scripts = execution_to_scripts.get(execution.key, [])
         source_path = _cli_command_source_path(root, command_name, backing_scripts)
         command_options = _extract_cli_options(execution.key.name)
-        command = snapshot.add_node(
-            "cli_command_surface",
-            command_name,
-            summary=f"CLI command surface `{command_name}`.",
+        command = _add_cli_command_surface(
+            snapshot,
+            execution,
+            command_name=command_name,
             source_path=source_path,
-            source_kind="cli_command_surface",
-            platform=str(execution.properties.get("platform") or ""),
-            side_effect_class=_cli_side_effect_class(command_name),
-            command_options=list(command_options) if command_options else None,
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="high",
+            command_options=command_options,
+            today=today,
         )
         snapshot.add_relation(project, "HAS_CLI_COMMAND", command, provenance="cli_command_graph")
-        snapshot.add_relation(command, "RUNS_VIA", execution.key, provenance="cli_command_graph")
-        for gate in execution_to_gates.get(execution.key, []):
-            snapshot.add_relation(command, "EXECUTES_GATE", gate, provenance="cli_command_graph")
-        for script in backing_scripts:
-            snapshot.add_relation(command, "DEPENDS_ON", script, provenance="cli_command_graph")
+        _link_cli_command_execution(
+            snapshot,
+            command,
+            execution.key,
+            execution_to_gates.get(execution.key, []),
+            backing_scripts,
+        )
         _add_cli_option_surfaces(
             snapshot,
             command,
@@ -3749,6 +3763,44 @@ def _add_cli_command_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey
             today=today,
         )
         _link_cli_command_side_effects(snapshot, command, command_name)
+
+
+def _add_cli_command_surface(
+    snapshot: GraphSnapshot,
+    execution: GraphNode,
+    *,
+    command_name: str,
+    source_path: str,
+    command_options: tuple[str, ...],
+    today: str,
+) -> NodeKey:
+    return snapshot.add_node(
+        "cli_command_surface",
+        command_name,
+        summary=f"CLI command surface `{command_name}`.",
+        source_path=source_path,
+        source_kind="cli_command_surface",
+        platform=str(execution.properties.get("platform") or ""),
+        side_effect_class=_cli_side_effect_class(command_name),
+        command_options=list(command_options) if command_options else None,
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+
+
+def _link_cli_command_execution(
+    snapshot: GraphSnapshot,
+    command: NodeKey,
+    execution_key: NodeKey,
+    gates: list[NodeKey],
+    scripts: list[NodeKey],
+) -> None:
+    snapshot.add_relation(command, "RUNS_VIA", execution_key, provenance="cli_command_graph")
+    for gate in gates:
+        snapshot.add_relation(command, "EXECUTES_GATE", gate, provenance="cli_command_graph")
+    for script in scripts:
+        snapshot.add_relation(command, "DEPENDS_ON", script, provenance="cli_command_graph")
 
 
 def _cli_execution_indexes(
@@ -4921,6 +4973,15 @@ def _classify_projected_storage_fields(
     silver_fields: dict[str, NodeKey],
     gold_fields: dict[str, NodeKey],
 ) -> None:
+    _classify_silver_storage_fields(snapshot, silver_fields, gold_fields)
+    _classify_gold_storage_fields(snapshot, silver_fields, gold_fields)
+
+
+def _classify_silver_storage_fields(
+    snapshot: GraphSnapshot,
+    silver_fields: dict[str, NodeKey],
+    gold_fields: dict[str, NodeKey],
+) -> None:
     for field_name, silver_field in silver_fields.items():
         silver_node = snapshot.nodes.get(silver_field)
         if silver_node is None:
@@ -4931,6 +4992,13 @@ def _classify_projected_storage_fields(
             silver_node.properties["drift_classification"] = "projected_to_gold"
             continue
         silver_node.properties["drift_classification"] = "silver_only"
+
+
+def _classify_gold_storage_fields(
+    snapshot: GraphSnapshot,
+    silver_fields: dict[str, NodeKey],
+    gold_fields: dict[str, NodeKey],
+) -> None:
     for field_name, gold_field in gold_fields.items():
         gold_node = snapshot.nodes.get(gold_field)
         if gold_node is None:
@@ -4946,14 +5014,17 @@ def _composite_group_fields(merge_payload: dict[str, object]) -> list[tuple[str,
     if not isinstance(column_groups, list):
         return group_fields
     for item in column_groups:
-        if not isinstance(item, dict):
-            continue
-        group_name = _optional_text(item.get("name"))
-        if group_name is None:
-            continue
-        for field_name in _normalized_text_list(item.get("fields")) or []:
-            group_fields.append((group_name, field_name))
+        group_fields.extend(_composite_group_field_entries(item))
     return group_fields
+
+
+def _composite_group_field_entries(item: object) -> list[tuple[str, str]]:
+    if not isinstance(item, dict):
+        return []
+    group_name = _optional_text(item.get("name"))
+    if group_name is None:
+        return []
+    return [(group_name, field_name) for field_name in (_normalized_text_list(item.get("fields")) or [])]
 
 
 def _add_composite_seed_surface(
@@ -4963,11 +5034,9 @@ def _add_composite_seed_surface(
     composite_payload: dict[str, object],
     has_dependency_pipelines: bool,
 ) -> list[str]:
-    seed_payload = composite_payload.get("seed") if isinstance(composite_payload.get("seed"), dict) else {}
-    seed_table = seed_payload.get("silver_table")
-    if not isinstance(seed_table, str) or not seed_table.strip():
+    seed_storage_ref = _composite_seed_storage_ref(composite_payload)
+    if seed_storage_ref is None:
         return []
-    seed_storage_ref = seed_table.strip()
     seed_surface = NodeKey("storage_surface", seed_storage_ref)
     if has_dependency_pipelines or seed_surface not in snapshot.nodes:
         seed_surface = _add_storage_surface(
@@ -4982,11 +5051,27 @@ def _add_composite_seed_surface(
                 scope=EntityScope(pipeline_name=context.composite_name),
             ),
         )
+    _link_composite_seed_surface(snapshot, context, seed_surface)
+    return [seed_storage_ref]
+
+
+def _composite_seed_storage_ref(composite_payload: dict[str, object]) -> str | None:
+    seed_payload = composite_payload.get("seed") if isinstance(composite_payload.get("seed"), dict) else {}
+    seed_table = seed_payload.get("silver_table")
+    if not isinstance(seed_table, str) or not seed_table.strip():
+        return None
+    return seed_table.strip()
+
+
+def _link_composite_seed_surface(
+    snapshot: GraphSnapshot,
+    context: CompositePipelineContext,
+    seed_surface: NodeKey,
+) -> None:
     if context.pipeline_key in snapshot.nodes:
         snapshot.add_relation(context.pipeline_key, "DEPENDS_ON", seed_surface, provenance="storage_surfaces")
     if context.config_artifact in snapshot.nodes:
         snapshot.add_relation(seed_surface, "DEFINED_BY", context.config_artifact, provenance="storage_surfaces")
-    return [seed_storage_ref]
 
 
 def _add_composite_dependency_surfaces(
@@ -5003,7 +5088,7 @@ def _add_composite_dependency_surfaces(
         if storage_ref is None:
             continue
         source_storage_refs.append(storage_ref)
-        dependency_surface = _add_composite_dependency_surface(snapshot, project, context, dependency, storage_ref)
+        dependency_surface = _add_composite_dependency_surface(snapshot, project, context, storage_ref)
         _link_composite_dependency_surface(snapshot, context, dependency_surface, dependency)
     return source_storage_refs
 
@@ -5021,7 +5106,6 @@ def _add_composite_dependency_surface(
     snapshot: GraphSnapshot,
     project: NodeKey,
     context: CompositePipelineContext,
-    dependency: object,
     storage_ref: str,
 ) -> NodeKey:
     return _add_storage_surface(
@@ -5076,66 +5160,110 @@ def _add_composite_output_layers(
         pipeline_name=context.composite_name,
     )
     for layer_name in ("silver", "gold"):
-        output_path = output_config.output_payload.get(layer_name)
-        if not isinstance(output_path, str) or not output_path.strip():
-            continue
-        storage_ref = _storage_ref_from_output_path(output_path)
-        surface = _add_storage_surface(
+        surface = _add_composite_output_surface(
             snapshot,
             project,
-            StorageSurfaceSpec(
-                ref=storage_ref,
-                summary=f"{layer_name.title()} output surface for composite pipeline `{context.composite_name}`.",
-                layer=layer_name,
-                today=context.today,
-                storage_kind="composite_layer_output",
-                scope=EntityScope(pipeline_name=context.composite_name),
-                config_version=context.composite_version,
-                semantic_properties={
-                    "merge_strategy": _optional_text(output_config.merge_payload.get("strategy")),
-                    "sort_by": _normalized_text_list(
-                        output_config.merge_payload.get("sort_by", {}).get(layer_name)
-                        if isinstance(output_config.merge_payload.get("sort_by"), dict)
-                        else None
-                    ),
-                },
+            context,
+            output_config,
+            layer_name=layer_name,
+        )
+        if surface is None:
+            continue
+        layer_nodes[layer_name] = surface
+        field_nodes_by_layer[layer_name] = _add_composite_output_field_nodes(
+            snapshot,
+            project,
+            context,
+            output_config,
+            composite_scope=composite_scope,
+            surface=surface,
+        )
+    return layer_nodes, field_nodes_by_layer
+
+
+def _composite_output_storage_ref(output_payload: dict[str, object], layer_name: str) -> str | None:
+    output_path = output_payload.get(layer_name)
+    if not isinstance(output_path, str) or not output_path.strip():
+        return None
+    return _storage_ref_from_output_path(output_path)
+
+
+def _add_composite_output_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    context: CompositePipelineContext,
+    output_config: CompositeOutputConfig,
+    *,
+    layer_name: str,
+) -> NodeKey | None:
+    storage_ref = _composite_output_storage_ref(output_config.output_payload, layer_name)
+    if storage_ref is None:
+        return None
+    surface = _add_storage_surface(
+        snapshot,
+        project,
+        StorageSurfaceSpec(
+            ref=storage_ref,
+            summary=f"{layer_name.title()} output surface for composite pipeline `{context.composite_name}`.",
+            layer=layer_name,
+            today=context.today,
+            storage_kind="composite_layer_output",
+            scope=EntityScope(pipeline_name=context.composite_name),
+            config_version=context.composite_version,
+            semantic_properties={
+                "merge_strategy": _optional_text(output_config.merge_payload.get("strategy")),
+                "sort_by": _normalized_text_list(
+                    output_config.merge_payload.get("sort_by", {}).get(layer_name)
+                    if isinstance(output_config.merge_payload.get("sort_by"), dict)
+                    else None
+                ),
+            },
+        ),
+    )
+    if context.pipeline_key in snapshot.nodes:
+        snapshot.add_relation(context.pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
+    if context.config_artifact in snapshot.nodes:
+        snapshot.add_relation(surface, "DEFINED_BY", context.config_artifact, provenance="storage_surfaces")
+    return surface
+
+
+def _add_composite_output_field_nodes(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    context: CompositePipelineContext,
+    output_config: CompositeOutputConfig,
+    *,
+    composite_scope: EntityScope,
+    surface: NodeKey,
+) -> dict[str, NodeKey]:
+    layer_field_nodes: dict[str, NodeKey] = {}
+    for field_group, field_name in output_config.group_fields:
+        candidate_sources = [
+            ref
+            for ref in output_config.source_storage_refs
+            if field_name in output_config.schema_fields_by_storage.get(ref, {})
+        ]
+        field_node = _add_schema_field_surface(
+            snapshot,
+            project,
+            surface,
+            field_name=field_name,
+            field_group=field_group,
+            today=context.today,
+            spec=SchemaFieldSpec(
+                scope=composite_scope,
+                drift_classification="inherited_field" if candidate_sources else "composite_only",
+                source_storage_refs=candidate_sources if candidate_sources else None,
             ),
         )
-        layer_nodes[layer_name] = surface
-        if context.pipeline_key in snapshot.nodes:
-            snapshot.add_relation(context.pipeline_key, "WRITES_TO", surface, provenance="storage_surfaces")
+        layer_field_nodes[field_name] = field_node
         if context.config_artifact in snapshot.nodes:
-            snapshot.add_relation(surface, "DEFINED_BY", context.config_artifact, provenance="storage_surfaces")
-
-        layer_field_nodes: dict[str, NodeKey] = {}
-        for field_group, field_name in output_config.group_fields:
-            candidate_sources = [
-                ref
-                for ref in output_config.source_storage_refs
-                if field_name in output_config.schema_fields_by_storage.get(ref, {})
-            ]
-            field_node = _add_schema_field_surface(
-                snapshot,
-                project,
-                surface,
-                field_name=field_name,
-                field_group=field_group,
-                today=context.today,
-                spec=SchemaFieldSpec(
-                    scope=composite_scope,
-                    drift_classification="inherited_field" if candidate_sources else "composite_only",
-                    source_storage_refs=candidate_sources if candidate_sources else None,
-                ),
-            )
-            layer_field_nodes[field_name] = field_node
-            if context.config_artifact in snapshot.nodes:
-                snapshot.add_relation(field_node, "DEFINED_BY", context.config_artifact, provenance="schema_fields")
-            for source_ref in candidate_sources:
-                source_field = output_config.schema_fields_by_storage.get(source_ref, {}).get(field_name)
-                if source_field is not None:
-                    snapshot.add_relation(field_node, "DERIVES_FIELD_FROM", source_field, provenance="schema_fields")
-        field_nodes_by_layer[layer_name] = layer_field_nodes
-    return layer_nodes, field_nodes_by_layer
+            snapshot.add_relation(field_node, "DEFINED_BY", context.config_artifact, provenance="schema_fields")
+        for source_ref in candidate_sources:
+            source_field = output_config.schema_fields_by_storage.get(source_ref, {}).get(field_name)
+            if source_field is not None:
+                snapshot.add_relation(field_node, "DERIVES_FIELD_FROM", source_field, provenance="schema_fields")
+    return layer_field_nodes
 
 
 def _base_pipeline_storage_config(root: Path) -> tuple[dict[str, object], dict[str, object]]:
@@ -5725,14 +5853,7 @@ def _link_run_instance_documents(
     surface: NodeKey,
     spec: dict[str, object],
 ) -> None:
-    source_path = _optional_text(spec.get("source_path"))
-    if source_path is not None:
-        test_key = NodeKey("test_artifact", source_path)
-        if test_key in snapshot.nodes:
-            snapshot.add_relation(surface, "DESCRIBED_IN", test_key, provenance="runtime_evidence")
-
-    for doc_path in spec.get("doc_paths", ()):
-        doc_key = NodeKey("doc_artifact", str(doc_path))
+    for doc_key in _run_instance_doc_targets(spec):
         if doc_key in snapshot.nodes:
             snapshot.add_relation(surface, "DESCRIBED_IN", doc_key, provenance="runtime_evidence")
 
@@ -5742,10 +5863,25 @@ def _link_run_instance_artifacts(
     surface: NodeKey,
     spec: dict[str, object],
 ) -> None:
-    for artifact_name in spec.get("artifact_refs", ()):
-        artifact_key = NodeKey("control_plane_artifact_surface", str(artifact_name))
+    for artifact_key in _run_instance_artifact_targets(spec):
         if artifact_key in snapshot.nodes:
             snapshot.add_relation(surface, "REFERENCES_ARTIFACT", artifact_key, provenance="runtime_evidence")
+
+
+def _run_instance_doc_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
+    targets: list[NodeKey] = []
+    source_path = _optional_text(spec.get("source_path"))
+    if source_path is not None:
+        targets.append(NodeKey("test_artifact", source_path))
+    targets.extend(NodeKey("doc_artifact", str(doc_path)) for doc_path in spec.get("doc_paths", ()))
+    return tuple(targets)
+
+
+def _run_instance_artifact_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
+    return tuple(
+        NodeKey("control_plane_artifact_surface", str(artifact_name))
+        for artifact_name in spec.get("artifact_refs", ())
+    )
 
 
 def _runtime_state_specs() -> tuple[dict[str, object], ...]:
@@ -5892,14 +6028,23 @@ def _link_runtime_state_evidence_materials(
     state: NodeKey,
     spec: dict[str, object],
 ) -> None:
-    for artifact_name in spec.get("artifact_refs", ()):
-        artifact_key = NodeKey("control_plane_artifact_surface", str(artifact_name))
+    for artifact_key in _runtime_state_artifact_targets(spec):
         if artifact_key in snapshot.nodes:
             snapshot.add_relation(state, "REFERENCES_ARTIFACT", artifact_key, provenance="runtime_state")
-    for doc_path in spec.get("doc_paths", ()):
-        doc_key = NodeKey("doc_artifact", str(doc_path))
+    for doc_key in _runtime_state_doc_targets(spec):
         if doc_key in snapshot.nodes:
             snapshot.add_relation(state, "DESCRIBED_IN", doc_key, provenance="runtime_state")
+
+
+def _runtime_state_artifact_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
+    return tuple(
+        NodeKey("control_plane_artifact_surface", str(artifact_name))
+        for artifact_name in spec.get("artifact_refs", ())
+    )
+
+
+def _runtime_state_doc_targets(spec: dict[str, object]) -> tuple[NodeKey, ...]:
+    return tuple(NodeKey("doc_artifact", str(doc_path)) for doc_path in spec.get("doc_paths", ()))
 
 
 def _add_control_plane_run_instance_surfaces(
@@ -5938,18 +6083,32 @@ def _add_runtime_state_spec_surfaces(
 
 def _workflow_script_targets(run_text: str) -> set[NodeKey]:
     targets: set[NodeKey] = set()
-    module_pattern = re.compile(r"(?:uv\s+run\s+)?python(?:3)?\s+-m\s+scripts\.([\w.]+)")
-    for match in module_pattern.finditer(run_text):
-        script_path = f"scripts/{match.group(1).replace('.', '/')}/{MAIN_PY}"
-        targets.add(NodeKey("script_surface", script_path))
+    targets.update(_workflow_module_script_targets(run_text))
+    targets.update(_workflow_repo_path_targets(run_text))
+    return targets
 
+
+def _workflow_module_script_targets(run_text: str) -> tuple[NodeKey, ...]:
+    module_pattern = re.compile(r"(?:uv\s+run\s+)?python(?:3)?\s+-m\s+scripts\.([\w.]+)")
+    return tuple(
+        NodeKey("script_surface", f"scripts/{match.group(1).replace('.', '/')}/{MAIN_PY}")
+        for match in module_pattern.finditer(run_text)
+    )
+
+
+def _workflow_repo_path_targets(run_text: str) -> tuple[NodeKey, ...]:
     path_pattern = re.compile(r"(?<![\w./-])((?:scripts|tests|configs|src|docs|grafana|\.github)/[\w./-]+)")
+    targets: list[NodeKey] = []
     for match in path_pattern.finditer(run_text):
         candidate = match.group(1).rstrip(".,:)")
-        targets.add(NodeKey("script_surface", candidate))
-        targets.add(NodeKey("file_surface", candidate))
-        targets.add(NodeKey("directory_surface", candidate))
-    return targets
+        targets.extend(
+            (
+                NodeKey("script_surface", candidate),
+                NodeKey("file_surface", candidate),
+                NodeKey("directory_surface", candidate),
+            )
+        )
+    return tuple(targets)
 
 
 def _workflow_quality_gates(run_text: str) -> tuple[str, ...]:
@@ -6629,16 +6788,19 @@ def _link_workflow_job_dependencies(
         job = job_nodes.get((workflow_name, str(job_id)))
         if job is None:
             continue
-        needs_payload = job_payload.get("needs")
-        dependency_ids: list[str] = []
-        if isinstance(needs_payload, str):
-            dependency_ids = [needs_payload]
-        elif isinstance(needs_payload, list):
-            dependency_ids = [str(item) for item in needs_payload if isinstance(item, str)]
-        for dependency_id in dependency_ids:
+        for dependency_id in _workflow_job_dependency_ids(job_payload):
             dependency_key = job_nodes.get((workflow_name, dependency_id))
             if dependency_key is not None:
                 snapshot.add_relation(job, "DEPENDS_ON", dependency_key, provenance="workflow_graph")
+
+
+def _workflow_job_dependency_ids(job_payload: dict[str, object]) -> tuple[str, ...]:
+    needs_payload = job_payload.get("needs")
+    if isinstance(needs_payload, str):
+        return (needs_payload,)
+    if isinstance(needs_payload, list):
+        return tuple(str(item) for item in needs_payload if isinstance(item, str))
+    return ()
 
 
 def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
@@ -7639,12 +7801,7 @@ def _link_contract_dependency_modules(
     entry_context: ContractEntryContext,
     mapping_config: ContractMappingConfig,
 ) -> None:
-    for module_paths, provenance in (
-        (mapping_config.control_plane_modules, "impact_contracts_control_plane"),
-        (mapping_config.control_plane_runtime_modules, "impact_contracts_runtime"),
-        (mapping_config.lineage_modules, "impact_contracts_lineage"),
-        (mapping_config.lineage_runtime_modules, "impact_contracts_lineage_runtime"),
-    ):
+    for module_paths, provenance in _contract_dependency_module_specs(mapping_config):
         _link_contract_module_dependencies(
             snapshot,
             entry_context,
@@ -7658,33 +7815,48 @@ def _link_contract_dependency_docs(
     entry_context: ContractEntryContext,
     mapping_config: ContractMappingConfig,
 ) -> None:
-    for doc_paths, anchor_fields, summary, provenance in (
-        (
-            mapping_config.control_plane_docs,
-            mapping_config.control_plane_anchor_fields,
-            "Control-plane contract reference for `{contract_ref}`.",
-            "impact_contracts_control_plane",
-        ),
-        (
-            mapping_config.lineage_docs,
-            mapping_config.lineage_anchor_fields,
-            "Lineage/traceability contract reference for `{contract_ref}`.",
-            "impact_contracts_lineage",
-        ),
-    ):
+    for doc_paths, anchor_fields, summary, source_kind, provenance in _contract_dependency_doc_specs(mapping_config):
         _link_contract_doc_dependencies(
             snapshot,
             entry_context,
             doc_paths,
             anchor_fields,
             summary=summary,
-            source_kind=(
-                "control_plane_contract_doc"
-                if provenance == "impact_contracts_control_plane"
-                else "lineage_contract_doc"
-            ),
+            source_kind=source_kind,
             provenance=provenance,
         )
+
+
+def _contract_dependency_module_specs(
+    mapping_config: ContractMappingConfig,
+) -> tuple[tuple[list[str], str], ...]:
+    return (
+        (mapping_config.control_plane_modules, "impact_contracts_control_plane"),
+        (mapping_config.control_plane_runtime_modules, "impact_contracts_runtime"),
+        (mapping_config.lineage_modules, "impact_contracts_lineage"),
+        (mapping_config.lineage_runtime_modules, "impact_contracts_lineage_runtime"),
+    )
+
+
+def _contract_dependency_doc_specs(
+    mapping_config: ContractMappingConfig,
+) -> tuple[tuple[list[str], list[str], str, str, str], ...]:
+    return (
+        (
+            mapping_config.control_plane_docs,
+            mapping_config.control_plane_anchor_fields,
+            "Control-plane contract reference for `{contract_ref}`.",
+            "control_plane_contract_doc",
+            "impact_contracts_control_plane",
+        ),
+        (
+            mapping_config.lineage_docs,
+            mapping_config.lineage_anchor_fields,
+            "Lineage/traceability contract reference for `{contract_ref}`.",
+            "lineage_contract_doc",
+            "impact_contracts_lineage",
+        ),
+    )
 
 
 def _add_contract_surfaces(
@@ -9088,12 +9260,7 @@ def _normalization_statement_params(
 def _normalization_batch_pipeline_span(
     batch: list[dict[str, JsonValue]],
 ) -> tuple[str | None, str | None]:
-    pipeline_names = [
-        str(pipeline_name)
-        for statement in batch
-        for pipeline_name in [statement.get("parameters", {}).get("pipeline_name")]
-        if isinstance(pipeline_name, str) and pipeline_name
-    ]
+    pipeline_names = _batch_pipeline_names(batch)
     if not pipeline_names:
         return None, None
     return pipeline_names[0], pipeline_names[-1]
@@ -9109,6 +9276,38 @@ def _emit_normalization_apply_progress(
     pipeline_end: str | None,
     elapsed_seconds: float | None = None,
 ) -> None:
+    payload = _normalization_progress_payload(
+        event=event,
+        batch_index=batch_index,
+        batch_count=batch_count,
+        statement_count=statement_count,
+        pipeline_start=pipeline_start,
+        pipeline_end=pipeline_end,
+        elapsed_seconds=elapsed_seconds,
+    )
+    sys.stderr.write(json.dumps(payload) + "\n")
+    sys.stderr.flush()
+
+
+def _batch_pipeline_names(batch: list[dict[str, JsonValue]]) -> list[str]:
+    return [
+        str(pipeline_name)
+        for statement in batch
+        for pipeline_name in [statement.get("parameters", {}).get("pipeline_name")]
+        if isinstance(pipeline_name, str) and pipeline_name
+    ]
+
+
+def _normalization_progress_payload(
+    *,
+    event: str,
+    batch_index: int,
+    batch_count: int,
+    statement_count: int,
+    pipeline_start: str | None,
+    pipeline_end: str | None,
+    elapsed_seconds: float | None,
+) -> dict[str, JsonValue]:
     payload: dict[str, JsonValue] = {
         "event": event,
         "sync_scope": "normalization_evidence_only",
@@ -9121,8 +9320,7 @@ def _emit_normalization_apply_progress(
     }
     if elapsed_seconds is not None:
         payload["elapsed_seconds"] = round(elapsed_seconds, 3)
-    sys.stderr.write(json.dumps(payload) + "\n")
-    sys.stderr.flush()
+    return payload
 
 
 def apply_normalization_evidence_only(
@@ -9309,17 +9507,27 @@ def _link_entity_pipeline_tests(
     entity_pipeline_index: dict[tuple[str, str], NodeKey],
     ownership: dict[object, object],
 ) -> None:
+    for pipeline_key, test_paths in _entity_pipeline_contract_tests(entity_pipeline_index, ownership):
+        for test_path in test_paths:
+            link_test_target(pipeline_key, test_path, "impact_pipeline_tests")
+
+
+def _entity_pipeline_contract_tests(
+    entity_pipeline_index: dict[tuple[str, str], NodeKey],
+    ownership: dict[object, object],
+) -> tuple[tuple[NodeKey, tuple[str, ...]], ...]:
+    targets: list[tuple[NodeKey, tuple[str, ...]]] = []
     for contract_ref, raw_tests in ownership.items():
-        if not isinstance(contract_ref, str):
-            continue
-        if "." not in contract_ref:
+        if not isinstance(contract_ref, str) or "." not in contract_ref:
             continue
         provider_name, entity_name = contract_ref.split(".", 1)
         pipeline_key = entity_pipeline_index.get((provider_name, entity_name))
         if pipeline_key is None:
             continue
-        for test_path in _as_string_list(raw_tests):
-            link_test_target(pipeline_key, test_path, "impact_pipeline_tests")
+        test_paths = tuple(_as_string_list(raw_tests))
+        if test_paths:
+            targets.append((pipeline_key, test_paths))
+    return tuple(targets)
 
 
 def _link_provider_regression_suite_tests(
@@ -9525,20 +9733,6 @@ def _add_alert_surface_node(
     snapshot.add_relation(project, "HAS_ALERT", alert, provenance="impact_alerts")
     snapshot.add_relation(alert, "BACKED_BY", artifact, provenance="impact_alerts")
     return alert
-        if not isinstance(group, dict):
-            continue
-        _add_alert_rule_group_surfaces(
-            snapshot,
-            root,
-            project,
-            today,
-            rules_path,
-            artifact,
-            group,
-            dashboard_metrics=dashboard_metrics,
-            target_context=target_context,
-            memory_mapping=memory_mapping,
-        )
 
 
 def _add_alert_rule_group_surfaces(
@@ -9555,12 +9749,7 @@ def _add_alert_rule_group_surfaces(
     memory_mapping: dict[str, object],
 ) -> None:
     group_name = str(group.get("name", rules_path.stem))
-    rules = group.get("rules")
-    if not isinstance(rules, list):
-        return
-    for rule in rules:
-        if not isinstance(rule, dict):
-            continue
+    for rule in _alert_group_rules(group):
         _add_single_alert_surface(
             snapshot,
             root,
@@ -9574,6 +9763,13 @@ def _add_alert_rule_group_surfaces(
             target_context=target_context,
             memory_mapping=memory_mapping,
         )
+
+
+def _alert_group_rules(group: dict[str, object]) -> tuple[dict[str, object], ...]:
+    rules = group.get("rules")
+    if not isinstance(rules, list):
+        return ()
+    return tuple(rule for rule in rules if isinstance(rule, dict))
 
 
 def _add_single_alert_surface(
@@ -9641,12 +9837,42 @@ def _link_alert_targets(
         expr,
         dimensions,
     )
+    _link_alert_target_nodes(snapshot, alert, selected_pipelines, selected_providers, selected_contracts)
+    _link_alert_observer_dashboards(
+        snapshot,
+        alert,
+        alert_name,
+        group_name,
+        expr,
+        dashboard_metrics,
+        memory_mapping,
+    )
+
+
+def _link_alert_target_nodes(
+    snapshot: GraphSnapshot,
+    alert: NodeKey,
+    selected_pipelines: tuple[NodeKey, ...],
+    selected_providers: tuple[NodeKey, ...],
+    selected_contracts: tuple[NodeKey, ...],
+) -> None:
     for pipeline in selected_pipelines:
         snapshot.add_relation(alert, "DEPENDS_ON", pipeline, provenance="impact_alerts")
     for provider in selected_providers:
         snapshot.add_relation(alert, "DEPENDS_ON", provider, provenance="impact_alerts")
     for contract in selected_contracts:
         snapshot.add_relation(alert, "DEPENDS_ON", contract, provenance="impact_alerts")
+
+
+def _link_alert_observer_dashboards(
+    snapshot: GraphSnapshot,
+    alert: NodeKey,
+    alert_name: str,
+    group_name: str,
+    expr: str,
+    dashboard_metrics: dict[NodeKey, frozenset[str]],
+    memory_mapping: dict[str, object],
+) -> None:
     for dashboard in _select_alert_dashboards(
         alert_name,
         group_name,

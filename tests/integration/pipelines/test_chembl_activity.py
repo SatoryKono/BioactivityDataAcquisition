@@ -5,6 +5,7 @@ Cassettes location: tests/fixtures/vcr/chembl/
 
 from __future__ import annotations
 
+import asyncio
 import os
 from pathlib import Path
 from typing import Any
@@ -162,8 +163,9 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         from bioetl.domain.exceptions import ApiError
 
         async def mock_async_gen(*args, **kwargs):
-            if False:
-                yield  # make it a generator
+            await asyncio.sleep(0)
+            if args or kwargs:
+                pass
             raise ApiError("Simulated API Failure")
 
         # Patch the instance method on the adapter object
