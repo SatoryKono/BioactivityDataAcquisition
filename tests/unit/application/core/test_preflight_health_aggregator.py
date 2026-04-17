@@ -307,8 +307,8 @@ class TestHealthAggregatorPublicationBoundary:
         mock_services: MagicMock,
     ) -> None:
         """Observer-owned metrics must not be emitted by the helper."""
-        await health_aggregator.check_all(mock_services)
-        assert True
+        report = await health_aggregator.check_all(mock_services)
+        assert isinstance(report, HealthReport)
 
     @pytest.mark.asyncio
     async def test_check_all_does_not_emit_direct_logs(
@@ -353,7 +353,7 @@ class TestHealthAggregatorPublicationBoundary:
         )
         assert data_source_result.status == HealthStatus.DEGRADED
         assert data_source_result.provider == "stub_provider"
-        assert data_source_result.latency_ms == 42.0
+        assert data_source_result.latency_ms == pytest.approx(42.0)
         assert data_source_result.probe_fallback_reason == "status_downgrade"
 
     @pytest.mark.asyncio

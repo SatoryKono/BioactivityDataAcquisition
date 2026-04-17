@@ -32,10 +32,6 @@ class TestJsonHashStability:
 
     def test_hash_stability_with_different_key_orders(self) -> None:
         """Test that different JSON key orders produce same normalized result."""
-        json1 = '{"year": 2023, "assay_type": "B", "confidence": 9}'
-        json2 = '{"confidence": 9, "assay_type": "B", "year": 2023}'
-        json3 = '{"assay_type": "B", "year": 2023, "confidence": 9}'
-        
         # All should normalize to the same result
         norm1 = serialize_json_canonical({"year": 2023, "assay_type": "B", "confidence": 9})
         norm2 = serialize_json_canonical({"confidence": 9, "assay_type": "B", "year": 2023})

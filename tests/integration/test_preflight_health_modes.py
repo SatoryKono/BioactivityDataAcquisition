@@ -165,7 +165,7 @@ async def test_probe_mode_downgrades_unhealthy_status_with_deterministic_reason(
         "probe_mode_fallback: stub provider unhealthy"
     )
     assert data_source_result.provider == "stub_provider"
-    assert data_source_result.latency_ms == 42.0
+    assert data_source_result.latency_ms == pytest.approx(42.0)
     assert data_source_result.probe_fallback_reason == "status_downgrade"
     metrics.increment_counter.assert_not_called()
     metrics.set_gauge.assert_not_called()

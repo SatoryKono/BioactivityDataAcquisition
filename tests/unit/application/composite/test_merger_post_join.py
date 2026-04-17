@@ -185,4 +185,4 @@ class TestPersistAndBuildResult:
             )
 
         call_kwargs = host._build_merge_result.call_args[1]
-        assert call_kwargs["duration_seconds"] == 3.5
+        assert call_kwargs["duration_seconds"] == pytest.approx(3.5)

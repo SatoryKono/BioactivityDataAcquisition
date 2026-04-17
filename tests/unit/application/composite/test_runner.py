@@ -275,7 +275,7 @@ class TestFSMSeedStateTransitions:
             runner._start_run_lifecycle()
 
         assert runner._started_at == started_at
-        assert runner._start_time == 42.0
+        assert runner._start_time == pytest.approx(42.0)
         runner._observer.emit_run_started.assert_called_once_with(
             composite_name="test_composite",
             run_id=runner.run_id,

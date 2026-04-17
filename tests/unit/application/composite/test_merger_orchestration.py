@@ -130,7 +130,7 @@ class TestMergeExecutionRequestHelpers:
         assert execution_context.request is request
         assert execution_context.loaded_inputs.records_from_seed == 1
         assert execution_context.started_at == started_at
-        assert execution_context.started_monotonic == 10.0
+        assert execution_context.started_monotonic == pytest.approx(10.0)
         host._prepare_seed_dataframe.assert_awaited_once_with(
             "silver/chembl",
             "chembl_compound",

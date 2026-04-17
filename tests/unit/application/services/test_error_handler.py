@@ -126,7 +126,7 @@ class TestErrorHandlerBasicFunctionality:
         
         # Verify context is included in logs
         assert len(logger.logs) == 1
-        log_message, log_context = logger.logs[0][1], logger.logs[0][2]
+        _, log_context = logger.logs[0][1], logger.logs[0][2]
         assert log_context["user_id"] == "123"
         assert log_context["operation"] == "update"
 

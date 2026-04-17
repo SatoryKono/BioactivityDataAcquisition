@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import cast
 
+import pytest
+
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
     CSV_NAME,
     COMPOSITE_JOIN_KEY_COVERAGE_KPI,
@@ -208,7 +210,7 @@ def test_build_composite_join_key_policy_coverage_kpi_reports_configured_keys() 
     assert kpi["surface"] == "composite_join_key"
     assert kpi["name"] == COMPOSITE_JOIN_KEY_COVERAGE_KPI
     assert int(cast(int, kpi["denominator"])) > 0
-    assert float(cast(float, kpi["value_pct"])) == 100.0
+    assert float(cast(float, kpi["value_pct"])) == pytest.approx(100.0)
 
 
 def test_build_control_plane_normalization_coverage_kpi_reports_governed_seams() -> None:
@@ -243,7 +245,10 @@ def test_build_profile_semantic_invariants_report_reviewed_semantics() -> None:
         PROFILE_SET_LIKE_JSON_STRING_KPI,
         PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
     ]
-    assert all(float(cast(float, kpi["value_pct"])) == 100.0 for kpi in kpis)
+    assert all(
+        float(cast(float, kpi["value_pct"])) == pytest.approx(100.0)
+        for kpi in kpis
+    )
     assert all(kpi["surface"] == "profile_semantics" for kpi in kpis)
     assert all(list(kpi["regressions"]) == [] for kpi in kpis)
 

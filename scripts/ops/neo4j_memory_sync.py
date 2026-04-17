@@ -42,8 +42,10 @@ DEFAULT_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 INIT_PY = "__init__.py"
 MAIN_PY = "__main__.py"
 GITHUB_DIR = ".github"
+GITHUB_PATH_PREFIX = f"{GITHUB_DIR}/"
 GITHUB_WORKFLOWS_PREFIX = f"{GITHUB_DIR}/workflows/"
 PORTS_MODULE_PREFIX = "bioetl.domain.ports"
+PORTS_FACADE_SOURCE_PATH = f"src/bioetl/domain/ports/{INIT_PY}"
 RULES_DOC_PATH = "docs/00-project/RULES.md"
 TESTING_GUIDE_PATH = "docs/03-guides/testing.md"
 DOCS_VERIFICATION_GUIDE_PATH = "docs/03-guides/docs-verification.md"
@@ -346,7 +348,7 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
     },
     {
         "name": "RULES.md",
-        "path": "docs/00-project/RULES.md",
+        "path": RULES_DOC_PATH,
         "summary": "Canonical governance and requirements surface for the project.",
     },
     {
@@ -356,7 +358,7 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
     },
     {
         "name": "testing guide",
-        "path": "docs/03-guides/testing.md",
+        "path": TESTING_GUIDE_PATH,
         "summary": "Published testing strategy guide.",
     },
     {
@@ -406,7 +408,7 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
     },
     {
         "name": "docs verification guide",
-        "path": "docs/03-guides/docs-verification.md",
+        "path": DOCS_VERIFICATION_GUIDE_PATH,
         "summary": "Published workflow for docs verification and drift control.",
     },
     {
@@ -420,7 +422,7 @@ CURATED_DOC_SOURCES: tuple[dict[str, str], ...] = (
         "summary": "Accepted governance decisions and risks.",
     },
     {
-        "name": "grafana dashboards json",
+        "name": DOC_GRAFANA_DASHBOARDS_JSON,
         "path": "grafana/dashboards",
         "summary": "Factual source of truth for shipped dashboard behavior.",
     },
@@ -431,19 +433,19 @@ CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
         "summary": "Primary test runner for local and CI feedback.",
     },
     {
-        "name": "mypy --strict",
+        "name": GATE_MYPY_STRICT,
         "summary": "Static typing gate for public surfaces and repo strictness.",
     },
     {
-        "name": "docs verification",
+        "name": GATE_DOCS_VERIFICATION,
         "summary": "Published docs verification chain via scripts.docs verify and strict MkDocs build.",
     },
     {
-        "name": "config validation",
+        "name": GATE_CONFIG_VALIDATION,
         "summary": "Schema/config validation path for supported configs and invariants.",
     },
     {
-        "name": "pretest guardrails",
+        "name": GATE_PRETEST_GUARDRAILS,
         "summary": "Broad preflight for cleanup, docs, inventory, and architecture drift.",
     },
     {
@@ -451,7 +453,7 @@ CURATED_QUALITY_GATES: tuple[dict[str, object], ...] = (
         "summary": "Repo-backed ontology validation for deterministic Neo4j memory graph structure and invariants.",
     },
     {
-        "name": "diagram quality gates",
+        "name": GATE_DIAGRAM_QUALITY,
         "summary": "Diagram lint, syntax validation, artifact checks, visual smoke, and nightly regression gates for Mermaid publication surfaces.",
     },
 )
@@ -463,7 +465,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "infrastructure imports domain plus itself, composition can wire all layers except interfaces, "
             "and interfaces can depend on all layers."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": RULES_DOC_PATH,
         "artifact_label": "doc_artifact",
         "governs_layers": KNOWN_LAYERS,
     },
@@ -473,7 +475,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "BioETL follows Bronze to Silver to Gold medallion flow. Silver must use Delta Lake rather than raw "
             "Parquet, and Pandera remains the schema validation standard across dataframe boundaries."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": RULES_DOC_PATH,
         "artifact_label": "doc_artifact",
     },
     {
@@ -482,7 +484,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "Primary provider set includes ChEMBL, PubChem, PubMed, Semantic Scholar, CrossRef, OpenAlex, "
             "and UniProt for bioactivity acquisition and enrichment workflows."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": RULES_DOC_PATH,
         "artifact_label": "doc_artifact",
     },
     {
@@ -492,7 +494,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "Domain stays pure, composition owns wiring, interfaces expose CLI entrypoints, and architecture tests "
             "enforce cross-layer boundaries."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": RULES_DOC_PATH,
         "artifact_label": "doc_artifact",
         "governs_layers": KNOWN_LAYERS,
     },
@@ -503,7 +505,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "through composition-layer factories and config-driven pipeline definitions rather than hard-coded "
             "business wiring inside domain or application layers."
         ),
-        "source_path": "docs/00-project/RULES.md",
+        "source_path": RULES_DOC_PATH,
         "artifact_label": "doc_artifact",
         "governs_layers": ("composition", "application"),
     },
@@ -516,7 +518,7 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
         ),
         "source_path": "docs/03-guides/dashboards/dashboard-extension-llm.md",
         "artifact_label": "doc_artifact",
-        "governs_docs": ("grafana dashboards json",),
+        "governs_docs": (DOC_GRAFANA_DASHBOARDS_JSON,),
     },
     {
         "name": "testing strategy matrix",
@@ -527,17 +529,17 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
         ),
         "source_path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
         "artifact_label": "doc_artifact",
-        "governs_test_surfaces": ("unit tests", "integration tests", "e2e tests", "architecture tests", "contract tests"),
+        "governs_test_surfaces": ("unit tests", TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E, TEST_SURFACE_ARCHITECTURE, "contract tests"),
     },
     {
         "name": "quality gate stack",
         "summary": (
-            "The main repository gate stack combines pytest, mypy --strict, VCR execution policy, docs verification, "
-            "config validation, and pretest guardrails."
+            f"The main repository gate stack combines pytest, {GATE_MYPY_STRICT}, VCR execution policy, "
+            f"{GATE_DOCS_VERIFICATION}, {GATE_CONFIG_VALIDATION}, and {GATE_PRETEST_GUARDRAILS}."
         ),
-        "source_path": "docs/03-guides/testing.md",
+        "source_path": TESTING_GUIDE_PATH,
         "artifact_label": "doc_artifact",
-        "governs_quality_gates": ("pytest", "mypy --strict", "docs verification", "config validation", "pretest guardrails"),
+        "governs_quality_gates": ("pytest", GATE_MYPY_STRICT, GATE_DOCS_VERIFICATION, GATE_CONFIG_VALIDATION, GATE_PRETEST_GUARDRAILS),
     },
     {
         "name": "VCR replay discipline",
@@ -545,9 +547,9 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "Integration and e2e work is replay-first. VCR cassettes are refreshed in a targeted way rather than "
             "broad uncontrolled rewrites, and machine-readable policy keeps the replay contract synchronized with the test matrix."
         ),
-        "source_path": "docs/03-guides/testing.md",
+        "source_path": TESTING_GUIDE_PATH,
         "artifact_label": "doc_artifact",
-        "governs_test_surfaces": ("integration tests", "e2e tests"),
+        "governs_test_surfaces": (TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E),
     },
     {
         "name": "target enrichment bridge",
@@ -565,23 +567,23 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
             "while PubMed, CrossRef, OpenAlex, and Semantic Scholar enrich publication metadata through PMID, DOI, title, "
             "and citation-oriented resolution paths."
         ),
-        "source_path": "configs/quality/test_matrix.yaml",
+        "source_path": TEST_MATRIX_CONFIG_PATH,
         "artifact_label": "config_artifact",
     },
     {
         "name": "integration and VCR execution policy",
         "summary": "Tracked machine-readable policy for integration and VCR execution scope, replay modes, and suite inventory.",
-        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "source_path": INTEGRATION_VCR_POLICY_PATH,
         "artifact_label": "config_artifact",
-        "governs_test_surfaces": ("integration tests", "e2e tests"),
+        "governs_test_surfaces": (TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E),
         "governs_quality_gates": ("pytest",),
     },
     {
         "name": "docs verification guide",
         "summary": "Published workflow defining the verification path for docs surface and repo-only supporting material boundaries.",
-        "source_path": "docs/03-guides/docs-verification.md",
+        "source_path": DOCS_VERIFICATION_GUIDE_PATH,
         "artifact_label": "doc_artifact",
-        "governs_quality_gates": ("docs verification",),
+        "governs_quality_gates": (GATE_DOCS_VERIFICATION,),
     },
     {
         "name": "diagram governance policy",
@@ -591,15 +593,15 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
         ),
         "source_path": "docs/02-architecture/diagrams/governance/policy.md",
         "artifact_label": "doc_artifact",
-        "governs_quality_gates": ("diagram quality gates",),
-        "governs_test_surfaces": ("architecture tests",),
+        "governs_quality_gates": (GATE_DIAGRAM_QUALITY,),
+        "governs_test_surfaces": (TEST_SURFACE_ARCHITECTURE,),
         "governs_docs": (
-            "architecture diagrams hub",
+            DOC_ARCHITECTURE_DIAGRAMS_HUB,
             "diagram governance ADR",
             "diagram governance workflow",
             "diagram measured inventory",
             "diagram views inventory",
-            "diagram tooling readme",
+            DOC_DIAGRAM_TOOLING_README,
         ),
     },
     {
@@ -610,27 +612,27 @@ CURATED_POLICY_SURFACES: tuple[dict[str, object], ...] = (
         ),
         "source_path": "docs/02-architecture/diagrams/README.md",
         "artifact_label": "doc_artifact",
-        "governs_docs": ("architecture diagrams hub", "diagram tooling readme"),
+        "governs_docs": (DOC_ARCHITECTURE_DIAGRAMS_HUB, DOC_DIAGRAM_TOOLING_README),
     },
     {
         "name": "published docs boundary",
         "summary": "Published docs in docs/00-05 and README define active supported behavior; repo-only material must not override them.",
-        "source_path": "docs/03-guides/docs-verification.md",
+        "source_path": DOCS_VERIFICATION_GUIDE_PATH,
         "artifact_label": "doc_artifact",
     },
     {
         "name": "default VCR record mode",
         "summary": "CI defaults to none; local defaults to once unless explicitly overridden.",
-        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "source_path": INTEGRATION_VCR_POLICY_PATH,
         "artifact_label": "config_artifact",
-        "governs_test_surfaces": ("integration tests", "e2e tests"),
+        "governs_test_surfaces": (TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E),
     },
     {
         "name": "targeted cassette refresh",
         "summary": "Targeted VCR refresh uses new_episodes; broad rewrites are not the supported default path.",
-        "source_path": "configs/quality/integration_vcr_policy.yaml",
+        "source_path": INTEGRATION_VCR_POLICY_PATH,
         "artifact_label": "config_artifact",
-        "governs_test_surfaces": ("integration tests", "e2e tests"),
+        "governs_test_surfaces": (TEST_SURFACE_INTEGRATION, TEST_SURFACE_E2E),
     },
 )
 CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
@@ -673,41 +675,41 @@ CURATED_EXECUTION_PATHS: tuple[dict[str, object], ...] = (
         "name": "uv run python -m mypy --strict src/bioetl/",
         "platform": "ci_uv",
         "summary": "Canonical CI and single-OS strict typing path.",
-        "gate": "mypy --strict",
+        "gate": GATE_MYPY_STRICT,
     },
     {
         "name": "bash scripts/dev/run_mypy.sh",
         "platform": "wsl",
         "summary": "WSL/Linux mypy wrapper for the stable WSL virtualenv.",
-        "gate": "mypy --strict",
+        "gate": GATE_MYPY_STRICT,
         "script_path": "scripts/dev/run_mypy.sh",
     },
     {
         "name": ".\\scripts\\dev\\run_mypy.ps1",
         "platform": "windows",
         "summary": "PowerShell mypy wrapper for .venv-win.",
-        "gate": "mypy --strict",
+        "gate": GATE_MYPY_STRICT,
         "script_path": "scripts/dev/run_mypy.ps1",
     },
     {
         "name": "uv run python -m scripts.docs verify",
         "platform": "ci_uv",
         "summary": "Canonical end-to-end published docs verification path.",
-        "gate": "docs verification",
+        "gate": GATE_DOCS_VERIFICATION,
         "script_path": "scripts/docs/verify_docs.py",
     },
     {
         "name": "uv run python -m scripts.schema validate-configs",
         "platform": "ci_uv",
         "summary": "Canonical config validation path for supported configs.",
-        "gate": "config validation",
+        "gate": GATE_CONFIG_VALIDATION,
         "script_path": "scripts/schema/validate_configs.py",
     },
     {
         "name": "bash scripts/dev/pretest_guardrails.sh",
         "platform": "wsl",
         "summary": "WSL pretest guardrail runner before broad pytest waves.",
-        "gate": "pretest guardrails",
+        "gate": GATE_PRETEST_GUARDRAILS,
         "script_path": "scripts/dev/pretest_guardrails.sh",
     },
 )
@@ -727,13 +729,13 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
                 "name": "uv run python -m scripts.diagrams lint",
                 "platform": "ci_uv",
                 "summary": "Canonical diagram lint path for Mermaid source validation.",
-                "gate": "diagram quality gates",
+                "gate": GATE_DIAGRAM_QUALITY,
             },
             {
                 "name": "uv run python -m scripts.diagrams check-quality-gates",
                 "platform": "ci_uv",
                 "summary": "Canonical diagram regression gate for tracked Mermaid and publication invariants.",
-                "gate": "diagram quality gates",
+                "gate": GATE_DIAGRAM_QUALITY,
             },
         ),
     },
@@ -752,13 +754,13 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
                 "name": "uv run python -m scripts.docs verify",
                 "platform": "ci_uv",
                 "summary": "Canonical end-to-end docs verification chain.",
-                "gate": "docs verification",
+                "gate": GATE_DOCS_VERIFICATION,
             },
             {
                 "name": "uv run python -m scripts.docs check-links --links --specs --configs",
                 "platform": "ci_uv",
                 "summary": "Canonical docs link/spec/config verification path.",
-                "gate": "docs verification",
+                "gate": GATE_DOCS_VERIFICATION,
             },
             {
                 "name": "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check",
@@ -800,13 +802,13 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
                 "name": "uv run python -m scripts.schema validate-configs",
                 "platform": "ci_uv",
                 "summary": "Maintained JSON Schema validation path for unified pipeline configs.",
-                "gate": "config validation",
+                "gate": GATE_CONFIG_VALIDATION,
             },
             {
                 "name": "uv run python -m scripts.schema check-invariants",
                 "platform": "ci_uv",
                 "summary": "Canonical config invariant check for naming, auth, keys, and config CI policy.",
-                "gate": "config validation",
+                "gate": GATE_CONFIG_VALIDATION,
             },
         ),
     },
@@ -942,6 +944,117 @@ class GraphSnapshot:
         }
 
 
+def _selected_shard_filters(
+    *,
+    only_storage_layer: bool,
+    only_runtime_evidence_layer: bool,
+    only_workflow_graph: bool,
+    only_docs_drift: bool,
+) -> tuple[ShardFilterSpec, ...]:
+    selected: list[ShardFilterSpec] = []
+    if only_storage_layer:
+        selected.append(STORAGE_LAYER_FILTER)
+    if only_runtime_evidence_layer:
+        selected.append(RUNTIME_EVIDENCE_LAYER_FILTER)
+    if only_workflow_graph:
+        selected.append(WORKFLOW_GRAPH_FILTER)
+    if only_docs_drift:
+        selected.append(DOCS_DRIFT_FILTER)
+    return tuple(selected)
+
+
+def _allowed_analysis_relation_types(
+    *,
+    only_analysis_layer: bool,
+    only_retirement_layer: bool,
+    only_complexity_layer: bool,
+) -> set[str]:
+    allowed = set()
+    if only_analysis_layer:
+        allowed.update(ANALYSIS_RELATION_TYPES)
+    if only_retirement_layer:
+        allowed.update(RETIREMENT_RELATION_TYPES)
+    if only_complexity_layer:
+        allowed.update(COMPLEXITY_RELATION_TYPES)
+    return allowed or set(ANALYSIS_RELATION_TYPES)
+
+
+def _build_allowed_labels(
+    only_labels: tuple[str, ...],
+    shard_filters: tuple[ShardFilterSpec, ...],
+    *,
+    only_analysis_layer: bool,
+    only_retirement_layer: bool,
+    only_complexity_layer: bool,
+) -> set[str]:
+    allowed_labels = set(only_labels)
+    for shard_labels, _ in shard_filters:
+        allowed_labels.update(shard_labels)
+    if only_analysis_layer:
+        allowed_labels.update(ANALYSIS_NODE_LABELS)
+    if only_retirement_layer:
+        allowed_labels.update(RETIREMENT_NODE_LABELS)
+    if only_complexity_layer:
+        allowed_labels.update(COMPLEXITY_NODE_LABELS)
+    return allowed_labels
+
+
+def _relation_matches_shard_filters(relation: GraphRelation, shard_filters: tuple[ShardFilterSpec, ...]) -> bool:
+    for _, relation_specs in shard_filters:
+        for relation_type, source_labels, target_labels in relation_specs:
+            if (
+                relation.relation_type == relation_type
+                and relation.source.label in source_labels
+                and relation.target.label in target_labels
+            ):
+                return True
+    return False
+
+
+def _include_analysis_relation(
+    filtered: GraphSnapshot,
+    rel_key: tuple[NodeKey, str, NodeKey],
+    relation: GraphRelation,
+    *,
+    allowed_labels: set[str],
+    allowed_analysis_relation_types: set[str],
+    label_scoped_only: bool,
+    only_analysis_layer: bool,
+) -> bool:
+    if relation.relation_type not in ANALYSIS_RELATION_TYPES:
+        return False
+    if relation.relation_type not in allowed_analysis_relation_types:
+        return True
+    if label_scoped_only:
+        if relation.source.label in allowed_labels and relation.target.label in allowed_labels:
+            filtered.relations[rel_key] = relation
+        return True
+    if only_analysis_layer or relation.source.label in allowed_labels or relation.target.label in allowed_labels:
+        filtered.relations[rel_key] = relation
+    return True
+
+
+def _seed_filtered_nodes(
+    filtered: GraphSnapshot,
+    snapshot: GraphSnapshot,
+    allowed_labels: set[str],
+    *,
+    has_shard_filters: bool,
+) -> None:
+    if has_shard_filters:
+        return
+    for key, node in snapshot.nodes.items():
+        if key.label in allowed_labels:
+            filtered.nodes[key] = node
+
+
+def _include_shard_relation_nodes(filtered: GraphSnapshot, snapshot: GraphSnapshot, relation: GraphRelation) -> None:
+    if relation.source in snapshot.nodes:
+        filtered.nodes.setdefault(relation.source, snapshot.nodes[relation.source])
+    if relation.target in snapshot.nodes:
+        filtered.nodes.setdefault(relation.target, snapshot.nodes[relation.target])
+
+
 def _filtered_snapshot(
     snapshot: GraphSnapshot,
     only_labels: tuple[str, ...] = (),
@@ -953,248 +1066,22 @@ def _filtered_snapshot(
     only_workflow_graph: bool = False,
     only_docs_drift: bool = False,
 ) -> GraphSnapshot:
-    shard_label_sets: list[set[str]] = []
-    shard_relation_specs: list[tuple[str, frozenset[str], frozenset[str]]] = []
-    if only_storage_layer:
-        shard_label_sets.append(
-            {
-                "project",
-                "pipeline_surface",
-                "entity_config",
-                "composite_config",
-                "config_artifact",
-                "storage_surface",
-                "runtime_evidence_surface",
-                "control_plane_artifact_surface",
-                "run_instance_surface",
-                "runtime_state_surface",
-                "schema_field_surface",
-            }
-        )
-        shard_relation_specs.extend(
-            (
-                ("HAS_STORAGE_SURFACE", frozenset({"project"}), frozenset({"storage_surface"})),
-                ("HAS_RUNTIME_EVIDENCE", frozenset({"project"}), frozenset({"runtime_evidence_surface"})),
-                (
-                    "HAS_CONTROL_PLANE_ARTIFACT",
-                    frozenset({"project"}),
-                    frozenset({"control_plane_artifact_surface"}),
-                ),
-                ("HAS_RUN_INSTANCE", frozenset({"project"}), frozenset({"run_instance_surface"})),
-                (
-                    "WRITES_TO",
-                    frozenset({"pipeline_surface", "entity_config", "composite_config", "runtime_evidence_surface"}),
-                    frozenset({"storage_surface"}),
-                ),
-                (
-                    "DEFINED_BY",
-                    frozenset({"pipeline_surface", "entity_config", "composite_config"}),
-                    frozenset({"config_artifact"}),
-                ),
-                ("PROMOTES_TO", frozenset({"storage_surface"}), frozenset({"storage_surface"})),
-                (
-                    "EMITS_ARTIFACT",
-                    frozenset({"runtime_evidence_surface"}),
-                    frozenset({"control_plane_artifact_surface"}),
-                ),
-                (
-                    "MATERIALIZED_AS",
-                    frozenset({"control_plane_artifact_surface"}),
-                    frozenset({"storage_surface"}),
-                ),
-                (
-                    "REFERENCES_ARTIFACT",
-                    frozenset({"run_instance_surface"}),
-                    frozenset({"control_plane_artifact_surface"}),
-                ),
-                ("HAS_SCHEMA_FIELD", frozenset({"project", "storage_surface", "contract_surface"}), frozenset({"schema_field_surface"})),
-                ("PROMOTES_FIELD_TO", frozenset({"schema_field_surface"}), frozenset({"schema_field_surface"})),
-                ("DERIVES_FIELD_FROM", frozenset({"schema_field_surface"}), frozenset({"schema_field_surface"})),
-                ("HAS_RUNTIME_STATE", frozenset({"project", "run_instance_surface"}), frozenset({"runtime_state_surface"})),
-                ("REFERENCES_ARTIFACT", frozenset({"runtime_state_surface"}), frozenset({"control_plane_artifact_surface"})),
-            )
-        )
-    if only_runtime_evidence_layer:
-        shard_label_sets.append(
-            {
-                "project",
-                "runtime_evidence_surface",
-                "control_plane_artifact_surface",
-                "run_instance_surface",
-                "runtime_state_surface",
-                "storage_surface",
-                "module_surface",
-                "doc_artifact",
-                "test_artifact",
-                "pipeline_surface",
-                "contract_surface",
-                "workflow_surface",
-            }
-        )
-        shard_relation_specs.extend(
-            (
-                ("HAS_RUNTIME_EVIDENCE", frozenset({"project"}), frozenset({"runtime_evidence_surface"})),
-                (
-                    "HAS_CONTROL_PLANE_ARTIFACT",
-                    frozenset({"project"}),
-                    frozenset({"control_plane_artifact_surface"}),
-                ),
-                ("HAS_RUN_INSTANCE", frozenset({"project"}), frozenset({"run_instance_surface"})),
-                ("BACKED_BY", frozenset({"runtime_evidence_surface"}), frozenset({"module_surface"})),
-                ("DESCRIBED_IN", frozenset({"runtime_evidence_surface"}), frozenset({"doc_artifact"})),
-                (
-                    "DESCRIBED_IN",
-                    frozenset({"run_instance_surface"}),
-                    frozenset({"doc_artifact", "test_artifact"}),
-                ),
-                (
-                    "DEPENDS_ON",
-                    frozenset({"run_instance_surface"}),
-                    frozenset({"pipeline_surface", "contract_surface"}),
-                ),
-                ("WRITES_TO", frozenset({"runtime_evidence_surface"}), frozenset({"storage_surface"})),
-                (
-                    "EMITS_ARTIFACT",
-                    frozenset({"runtime_evidence_surface"}),
-                    frozenset({"control_plane_artifact_surface"}),
-                ),
-                (
-                    "MATERIALIZED_AS",
-                    frozenset({"control_plane_artifact_surface"}),
-                    frozenset({"storage_surface"}),
-                ),
-                (
-                    "REFERENCES_ARTIFACT",
-                    frozenset({"run_instance_surface"}),
-                    frozenset({"control_plane_artifact_surface"}),
-                ),
-                ("HAS_RUNTIME_STATE", frozenset({"project", "run_instance_surface"}), frozenset({"runtime_state_surface"})),
-                (
-                    "DEPENDS_ON",
-                    frozenset({"runtime_state_surface"}),
-                    frozenset({"pipeline_surface", "workflow_surface", "runtime_evidence_surface", "contract_surface"}),
-                ),
-                (
-                    "REFERENCES_ARTIFACT",
-                    frozenset({"runtime_state_surface"}),
-                    frozenset({"control_plane_artifact_surface"}),
-                ),
-                ("DESCRIBED_IN", frozenset({"runtime_state_surface"}), frozenset({"doc_artifact"})),
-            )
-        )
-    if only_workflow_graph:
-        shard_label_sets.append(
-            {
-                "project",
-                "workflow_surface",
-                "workflow_job_surface",
-                "workflow_call_surface",
-                "workflow_matrix_variant_surface",
-                "workflow_output_surface",
-                "workflow_action_surface",
-                "workflow_artifact_surface",
-                "workflow_secret_surface",
-                "script_surface",
-                "file_surface",
-                "directory_surface",
-                "quality_gate",
-            }
-        )
-        shard_relation_specs.extend(
-            (
-                ("HAS_WORKFLOW", frozenset({"project"}), frozenset({"workflow_surface"})),
-                ("CONTAINS", frozenset({"workflow_surface"}), frozenset({"workflow_job_surface"})),
-                ("CALLS_WORKFLOW", frozenset({"workflow_surface", "workflow_job_surface"}), frozenset({"workflow_call_surface"})),
-                ("HAS_MATRIX_VARIANT", frozenset({"workflow_job_surface"}), frozenset({"workflow_matrix_variant_surface"})),
-                ("EMITS_OUTPUT", frozenset({"workflow_surface", "workflow_job_surface"}), frozenset({"workflow_output_surface"})),
-                (
-                    "RUNS_VIA",
-                    frozenset({"workflow_job_surface"}),
-                    frozenset({"script_surface", "file_surface", "directory_surface"}),
-                ),
-                (
-                    "EXECUTES_GATE",
-                    frozenset({"workflow_job_surface"}),
-                    frozenset({"quality_gate"}),
-                ),
-                (
-                    "DEPENDS_ON",
-                    frozenset({"workflow_job_surface", "workflow_call_surface"}),
-                    frozenset({"workflow_job_surface", "workflow_artifact_surface", "workflow_surface"}),
-                ),
-                (
-                    "USES_ACTION",
-                    frozenset({"workflow_job_surface"}),
-                    frozenset({"workflow_action_surface"}),
-                ),
-                (
-                    "PUBLISHES_ARTIFACT",
-                    frozenset({"workflow_job_surface"}),
-                    frozenset({"workflow_artifact_surface"}),
-                ),
-                (
-                    "REQUIRES_SECRET",
-                    frozenset({"workflow_job_surface"}),
-                    frozenset({"workflow_secret_surface"}),
-                ),
-            )
-        )
-    if only_docs_drift:
-        shard_label_sets.append(
-            {
-                "doc_source_surface",
-                "doc_artifact",
-                "policy_surface",
-                "doc_claim_surface",
-                "module_surface",
-                "script_surface",
-                "config_artifact",
-                "workflow_surface",
-                "cli_command_surface",
-                "file_surface",
-                "directory_surface",
-                "execution_path",
-            }
-        )
-        shard_relation_specs.extend(
-            (
-                (
-                    "DESCRIBES",
-                    frozenset({"doc_source_surface", "doc_artifact", "policy_surface"}),
-                    frozenset(
-                        {
-                            "module_surface",
-                            "script_surface",
-                            "config_artifact",
-                            "workflow_surface",
-                            "cli_command_surface",
-                            "file_surface",
-                            "directory_surface",
-                            "execution_path",
-                        }
-                    ),
-                ),
-                ("ASSERTS", frozenset({"doc_source_surface", "doc_artifact", "policy_surface"}), frozenset({"doc_claim_surface"})),
-                (
-                    "ASSERTS_ABOUT",
-                    frozenset({"doc_claim_surface"}),
-                    frozenset(
-                        {
-                            "module_surface",
-                            "script_surface",
-                            "config_artifact",
-                            "workflow_surface",
-                            "cli_command_surface",
-                            "file_surface",
-                            "directory_surface",
-                            "execution_path",
-                        }
-                    ),
-                ),
-            )
-        )
+    shard_filters = _selected_shard_filters(
+        only_storage_layer=only_storage_layer,
+        only_runtime_evidence_layer=only_runtime_evidence_layer,
+        only_workflow_graph=only_workflow_graph,
+        only_docs_drift=only_docs_drift,
+    )
+    allowed_labels = _build_allowed_labels(
+        only_labels,
+        shard_filters,
+        only_analysis_layer=only_analysis_layer,
+        only_retirement_layer=only_retirement_layer,
+        only_complexity_layer=only_complexity_layer,
+    )
+    if not allowed_labels:
+        return snapshot
 
-    allowed_labels = set(only_labels)
     label_scoped_only = bool(only_labels) and not any(
         (
             only_analysis_layer,
@@ -1206,59 +1093,28 @@ def _filtered_snapshot(
             only_docs_drift,
         )
     )
-    for label_set in shard_label_sets:
-        allowed_labels |= label_set
-    if only_analysis_layer:
-        allowed_labels |= set(ANALYSIS_NODE_LABELS)
-    if only_retirement_layer:
-        allowed_labels |= set(RETIREMENT_NODE_LABELS)
-    if only_complexity_layer:
-        allowed_labels |= set(COMPLEXITY_NODE_LABELS)
-    if not allowed_labels:
-        return snapshot
-
     filtered = GraphSnapshot()
-    allowed_analysis_relation_types = set()
-    if only_analysis_layer:
-        allowed_analysis_relation_types |= set(ANALYSIS_RELATION_TYPES)
-    if only_retirement_layer:
-        allowed_analysis_relation_types |= set(RETIREMENT_RELATION_TYPES)
-    if only_complexity_layer:
-        allowed_analysis_relation_types |= set(COMPLEXITY_RELATION_TYPES)
-    if not allowed_analysis_relation_types:
-        allowed_analysis_relation_types = set(ANALYSIS_RELATION_TYPES)
-    has_shard_filters = bool(shard_relation_specs)
-    if not has_shard_filters:
-        for key, node in snapshot.nodes.items():
-            if key.label in allowed_labels:
-                filtered.nodes[key] = node
-
-    def _matches_shard_relation(relation: GraphRelation) -> bool:
-        for relation_type, source_labels, target_labels in shard_relation_specs:
-            if (
-                relation.relation_type == relation_type
-                and relation.source.label in source_labels
-                and relation.target.label in target_labels
-            ):
-                return True
-        return False
+    allowed_analysis_relation_types = _allowed_analysis_relation_types(
+        only_analysis_layer=only_analysis_layer,
+        only_retirement_layer=only_retirement_layer,
+        only_complexity_layer=only_complexity_layer,
+    )
+    has_shard_filters = bool(shard_filters)
+    _seed_filtered_nodes(filtered, snapshot, allowed_labels, has_shard_filters=has_shard_filters)
 
     for rel_key, relation in snapshot.relations.items():
-        if relation.relation_type in ANALYSIS_RELATION_TYPES:
-            if relation.relation_type not in allowed_analysis_relation_types:
-                continue
-            if label_scoped_only:
-                if relation.source.label in allowed_labels and relation.target.label in allowed_labels:
-                    filtered.relations[rel_key] = relation
-                continue
-            if only_analysis_layer or relation.source.label in allowed_labels or relation.target.label in allowed_labels:
-                filtered.relations[rel_key] = relation
+        if _include_analysis_relation(
+            filtered,
+            rel_key,
+            relation,
+            allowed_labels=allowed_labels,
+            allowed_analysis_relation_types=allowed_analysis_relation_types,
+            label_scoped_only=label_scoped_only,
+            only_analysis_layer=only_analysis_layer,
+        ):
             continue
-        if has_shard_filters and _matches_shard_relation(relation):
-            if relation.source in snapshot.nodes:
-                filtered.nodes.setdefault(relation.source, snapshot.nodes[relation.source])
-            if relation.target in snapshot.nodes:
-                filtered.nodes.setdefault(relation.target, snapshot.nodes[relation.target])
+        if has_shard_filters and _relation_matches_shard_filters(relation, shard_filters):
+            _include_shard_relation_nodes(filtered, snapshot, relation)
             filtered.relations[rel_key] = relation
             continue
         if not has_shard_filters and relation.source.label in allowed_labels and relation.target.label in allowed_labels:
@@ -1685,8 +1541,9 @@ def _module_dotted_name(relative_path: str) -> str:
 
 
 def _python_surface_name(relative_path: str) -> str:
-    if relative_path.endswith("/__init__.py"):
-        dotted = relative_path.removesuffix("/__init__.py").replace("/", ".")
+    init_suffix = f"/{INIT_PY}"
+    if relative_path.endswith(init_suffix):
+        dotted = relative_path.removesuffix(init_suffix).replace("/", ".")
     else:
         dotted = _module_dotted_name(relative_path)
     return dotted.removeprefix("src.")
@@ -2119,7 +1976,8 @@ def _build_port_surface_catalog(
             continue
         relative_path = _rel_path(root, port_path)
         module_name = _python_surface_name(relative_path)
-        init_paths.append((module_name, port_path)) if port_path.name == "__init__.py" else None
+        if port_path.name == INIT_PY:
+            init_paths.append((module_name, port_path))
         for class_name in _protocol_class_names(port_path):
             surface_name = f"{module_name}.{class_name}"
             descriptors.append(
@@ -2140,7 +1998,7 @@ def _build_port_surface_catalog(
             exported_surfaces = module_surfaces.setdefault(module_name, set())
             exported_symbols = symbol_index.setdefault(module_name, {})
             for imported_module, imported_name, alias_name in _imported_symbols(init_path):
-                if not imported_module.startswith("bioetl.domain.ports"):
+                if not imported_module.startswith(PORTS_MODULE_PREFIX):
                     continue
                 target = symbol_index.get(imported_module, {}).get(imported_name)
                 if target is None:
@@ -2168,10 +2026,10 @@ def _imported_port_surfaces(
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if alias.name.startswith("bioetl.domain.ports"):
+                if alias.name.startswith(PORTS_MODULE_PREFIX):
                     imported.update(port_module_surfaces.get(alias.name, set()))
         elif isinstance(node, ast.ImportFrom) and node.module is not None:
-            if node.module.startswith("bioetl.domain.ports"):
+            if node.module.startswith(PORTS_MODULE_PREFIX):
                 if any(alias.name == "*" for alias in node.names):
                     imported.update(port_module_surfaces.get(node.module, set()))
                     continue
@@ -2187,7 +2045,7 @@ def _resolve_python_module_surface(root: Path, module_name: str) -> NodeKey | No
     file_candidate = root / relative_py.with_suffix(".py")
     if file_candidate.is_file():
         return NodeKey("module_surface", _rel_path(root, file_candidate))
-    init_candidate = root / relative_py / "__init__.py"
+    init_candidate = root / relative_py / INIT_PY
     if init_candidate.is_file():
         return NodeKey("module_surface", _rel_path(root, init_candidate))
     return None
@@ -2415,7 +2273,6 @@ def resolve_neo4j_connection(root: Path, explicit_http_uri: str | None) -> tuple
     default_host = _default_neo4j_host(env)
 
     if audit_mode:
-        bolt_uri = env.get("NEO4J_AUDIT_URI") or f"bolt://{default_host}:7688"
         username = env.get("NEO4J_AUDIT_USERNAME")
         password = env.get("NEO4J_AUDIT_PASSWORD")
         database = env.get("NEO4J_AUDIT_DATABASE") or env.get("NEO4J_DATABASE") or "neo4j"
@@ -2632,7 +2489,7 @@ def _add_layer_topology(snapshot: GraphSnapshot, root: Path, project: NodeKey, t
             )
             snapshot.add_relation(layer, "CONTAINS", family, provenance="source_tree")
         for module_path in sorted(layer_path.rglob("*.py")):
-            if module_path.name in {"__init__.py", "__main__.py"}:
+            if module_path.name in {INIT_PY, MAIN_PY}:
                 continue
             if _is_ignored_repo_path(module_path):
                 continue
@@ -2803,7 +2660,7 @@ def _add_provider_and_config_graph(
 
 def _add_dashboard_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
     dashboards_root = root / "grafana" / "dashboards"
-    source_surface = NodeKey("doc_source_surface", "grafana dashboards json")
+    source_surface = NodeKey("doc_source_surface", DOC_GRAFANA_DASHBOARDS_JSON)
     snapshot.add_relation(project, "HAS_DOC_SOURCE_SURFACE", source_surface, provenance="dashboard_graph")
     for dashboard_path in sorted(dashboards_root.glob("*.json")):
         name = dashboard_path.stem
@@ -3188,7 +3045,7 @@ def _add_file_structure_surfaces(snapshot: GraphSnapshot, root: Path, project: N
                     is_doc_artifact = file_extension in {".md", ".yml", ".yaml"} and (
                         relative_file in {"README.md", "mkdocs.yml"}
                         or relative_file.startswith("docs/")
-                        or relative_file.startswith(".github/")
+                        or relative_file.startswith(GITHUB_PATH_PREFIX)
                     )
                     if is_doc_artifact:
                         doc_artifact = snapshot.add_node(
@@ -3947,10 +3804,10 @@ def _add_control_plane_runtime_evidence(
         {
             "name": "run_manifest",
             "summary": "Control-plane runtime evidence for immutable run manifests.",
-            "source_path": "docs/04-reference/contracts/run-manifest-ledger.md",
+            "source_path": RUN_MANIFEST_LEDGER_DOC_PATH,
             "docs": (
-                "docs/04-reference/contracts/run-manifest-ledger.md",
-                "docs/05-operations/runbooks/run-manifest-inspection.md",
+                RUN_MANIFEST_LEDGER_DOC_PATH,
+                RUN_MANIFEST_INSPECTION_DOC_PATH,
                 "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
             ),
             "modules": (
@@ -3970,10 +3827,10 @@ def _add_control_plane_runtime_evidence(
         {
             "name": "run_ledger",
             "summary": "Control-plane runtime evidence for append-only run ledgers.",
-            "source_path": "docs/04-reference/contracts/run-manifest-ledger.md",
+            "source_path": RUN_MANIFEST_LEDGER_DOC_PATH,
             "docs": (
-                "docs/04-reference/contracts/run-manifest-ledger.md",
-                "docs/05-operations/runbooks/run-manifest-inspection.md",
+                RUN_MANIFEST_LEDGER_DOC_PATH,
+                RUN_MANIFEST_INSPECTION_DOC_PATH,
                 "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
             ),
             "modules": (
@@ -3991,7 +3848,7 @@ def _add_control_plane_runtime_evidence(
             "source_path": "docs/04-reference/components/config-runtime-artifacts.md",
             "docs": (
                 "docs/04-reference/components/config-runtime-artifacts.md",
-                "docs/05-operations/runbooks/run-manifest-inspection.md",
+                RUN_MANIFEST_INSPECTION_DOC_PATH,
             ),
             "modules": (
                 "src/bioetl/domain/control_plane/effective_config_artifact.py",
@@ -4006,10 +3863,10 @@ def _add_control_plane_runtime_evidence(
         {
             "name": "lineage",
             "summary": "Runtime evidence for artifact lineage and inspection surfaces.",
-            "source_path": "docs/05-operations/runbooks/traceability-signal-ownership.md",
+            "source_path": TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
             "docs": (
-                "docs/05-operations/runbooks/traceability-signal-ownership.md",
-                "docs/04-reference/contracts/run-manifest-ledger.md",
+                TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
+                RUN_MANIFEST_LEDGER_DOC_PATH,
             ),
             "modules": (
                 "src/bioetl/application/services/lineage_inspection_service.py",
@@ -4094,7 +3951,7 @@ def _add_control_plane_run_instance_surfaces(
             "run_type": "incremental",
             "execution_fingerprint": "fp-stable",
             "created_at": "2025-01-01T00:00:00+00:00",
-            "contract_ref": "chembl.activity",
+            "contract_ref": CHEMBL_ACTIVITY_CONTRACT_REF,
             "contract_version": "1.0.0",
             "effective_config_artifact_id": "eca-123",
             "config_hash": "deadbeef",
@@ -4102,8 +3959,8 @@ def _add_control_plane_run_instance_surfaces(
             "surface_kind": "reproducibility_fixture",
             "lifecycle_status": "fixture_manifest_only",
             "source_path": "tests/integration/ci/test_reproducibility_contract_suite.py",
-            "doc_paths": ("docs/04-reference/contracts/run-manifest-ledger.md",),
-            "artifact_refs": ("run_manifest::json", "effective_config_artifact::json"),
+            "doc_paths": (RUN_MANIFEST_LEDGER_DOC_PATH,),
+            "artifact_refs": (RUN_MANIFEST_ARTIFACT_REF, EFFECTIVE_CONFIG_ARTIFACT_REF),
         },
         {
             "manifest_id": "manifest-chain-smoke",
@@ -4112,7 +3969,7 @@ def _add_control_plane_run_instance_surfaces(
             "provider": "chembl",
             "entity": "activity",
             "run_type": "incremental",
-            "contract_ref": "chembl.activity",
+            "contract_ref": CHEMBL_ACTIVITY_CONTRACT_REF,
             "contract_version": "1.0.0",
             "effective_config_artifact_id": "eca-smoke-1",
             "config_hash": "hash-smoke",
@@ -4122,13 +3979,13 @@ def _add_control_plane_run_instance_surfaces(
             "lineage_fragment_id": "silver:fragment-smoke-1",
             "source_path": "tests/unit/application/services/test_run_manifest_inspection_service.py",
             "doc_paths": (
-                "docs/04-reference/contracts/run-manifest-ledger.md",
-                "docs/05-operations/runbooks/run-manifest-inspection.md",
+                RUN_MANIFEST_LEDGER_DOC_PATH,
+                RUN_MANIFEST_INSPECTION_DOC_PATH,
             ),
             "artifact_refs": (
-                "run_manifest::json",
-                "run_ledger::jsonl",
-                "effective_config_artifact::json",
+                RUN_MANIFEST_ARTIFACT_REF,
+                RUN_LEDGER_ARTIFACT_REF,
+                EFFECTIVE_CONFIG_ARTIFACT_REF,
                 "lineage::run_index",
             ),
         },
@@ -4139,7 +3996,7 @@ def _add_control_plane_run_instance_surfaces(
             "provider": "chembl",
             "entity": "activity",
             "run_type": "incremental",
-            "contract_ref": "chembl.activity",
+            "contract_ref": CHEMBL_ACTIVITY_CONTRACT_REF,
             "contract_version": "1.0.0",
             "effective_config_artifact_id": "eca-chain-2",
             "surface_kind": "dq_failure_fixture",
@@ -4149,13 +4006,13 @@ def _add_control_plane_run_instance_surfaces(
             "dq_report_path": "data/output/gold/chembl/activity/_dq.json",
             "source_path": "tests/unit/application/services/test_run_manifest_inspection_service.py",
             "doc_paths": (
-                "docs/04-reference/contracts/run-manifest-ledger.md",
-                "docs/05-operations/runbooks/traceability-signal-ownership.md",
+                RUN_MANIFEST_LEDGER_DOC_PATH,
+                TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
             ),
             "artifact_refs": (
-                "run_manifest::json",
-                "run_ledger::jsonl",
-                "effective_config_artifact::json",
+                RUN_MANIFEST_ARTIFACT_REF,
+                RUN_LEDGER_ARTIFACT_REF,
+                EFFECTIVE_CONFIG_ARTIFACT_REF,
             ),
         },
         {
@@ -4167,7 +4024,7 @@ def _add_control_plane_run_instance_surfaces(
             "run_type": "incremental",
             "execution_fingerprint": "fp-stable",
             "created_at": "2025-01-01T00:00:00+00:00",
-            "contract_ref": "chembl.activity",
+            "contract_ref": CHEMBL_ACTIVITY_CONTRACT_REF,
             "contract_version": "1.0.0",
             "effective_config_artifact_id": "eca-123",
             "config_hash": "deadbeef",
@@ -4178,13 +4035,13 @@ def _add_control_plane_run_instance_surfaces(
             "diagnostic_scope": "composite_cross_validation_quarantine",
             "source_path": "tests/integration/ci/test_reproducibility_contract_suite.py",
             "doc_paths": (
-                "docs/04-reference/contracts/run-manifest-ledger.md",
-                "docs/05-operations/runbooks/traceability-signal-ownership.md",
+                RUN_MANIFEST_LEDGER_DOC_PATH,
+                TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
             ),
             "artifact_refs": (
-                "run_manifest::json",
-                "run_ledger::jsonl",
-                "effective_config_artifact::json",
+                RUN_MANIFEST_ARTIFACT_REF,
+                RUN_LEDGER_ARTIFACT_REF,
+                EFFECTIVE_CONFIG_ARTIFACT_REF,
             ),
         },
     )
@@ -4265,9 +4122,9 @@ def _add_runtime_state_surfaces(snapshot: GraphSnapshot, project: NodeKey, today
             "lock_scope": "pipeline_execution",
             "owner_hint": "run_manifest_service",
             "workflow_name": "tests",
-            "artifact_refs": ("run_manifest::json", "effective_config_artifact::json"),
+            "artifact_refs": (RUN_MANIFEST_ARTIFACT_REF, EFFECTIVE_CONFIG_ARTIFACT_REF),
             "runtime_evidence_refs": ("run_manifest", "effective_config_artifact"),
-            "doc_paths": ("docs/05-operations/runbooks/run-manifest-inspection.md",),
+            "doc_paths": (RUN_MANIFEST_INSPECTION_DOC_PATH,),
         },
         {
             "name": "manifest-chain-2::retry-window",
@@ -4277,9 +4134,9 @@ def _add_runtime_state_surfaces(snapshot: GraphSnapshot, project: NodeKey, today
             "retry_count": 1,
             "retry_strategy": "resume_failed_only",
             "workflow_name": "tests",
-            "artifact_refs": ("run_ledger::jsonl", "effective_config_artifact::json"),
+            "artifact_refs": (RUN_LEDGER_ARTIFACT_REF, EFFECTIVE_CONFIG_ARTIFACT_REF),
             "runtime_evidence_refs": ("run_ledger", "effective_config_artifact"),
-            "doc_paths": ("docs/04-reference/contracts/run-manifest-ledger.md",),
+            "doc_paths": (RUN_MANIFEST_LEDGER_DOC_PATH,),
         },
         {
             "name": "chembl_activity::composite-lock",
@@ -4291,9 +4148,9 @@ def _add_runtime_state_surfaces(snapshot: GraphSnapshot, project: NodeKey, today
             "lock_scope": "cross_validation_quarantine",
             "owner_hint": "workflow_lock_service",
             "workflow_name": "tests",
-            "artifact_refs": ("run_ledger::jsonl",),
+            "artifact_refs": (RUN_LEDGER_ARTIFACT_REF,),
             "runtime_evidence_refs": ("run_ledger",),
-            "doc_paths": ("docs/05-operations/runbooks/traceability-signal-ownership.md",),
+            "doc_paths": (TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,),
         },
     )
 
@@ -4348,12 +4205,12 @@ def _add_runtime_state_surfaces(snapshot: GraphSnapshot, project: NodeKey, today
 
 def _workflow_script_targets(run_text: str) -> set[NodeKey]:
     targets: set[NodeKey] = set()
-    module_pattern = re.compile(r"(?:uv\s+run\s+)?python(?:3)?\s+-m\s+scripts\.([a-zA-Z0-9_]+)")
+    module_pattern = re.compile(r"(?:uv\s+run\s+)?python(?:3)?\s+-m\s+scripts\.(\w+)")
     for match in module_pattern.finditer(run_text):
-        script_path = f"scripts/{match.group(1)}/__main__.py"
+        script_path = f"scripts/{match.group(1)}/{MAIN_PY}"
         targets.add(NodeKey("script_surface", script_path))
 
-    path_pattern = re.compile(r"(?<![A-Za-z0-9_./-])((?:scripts|tests|configs|src|docs|grafana|\\.github)/[A-Za-z0-9_./-]+)")
+    path_pattern = re.compile(r"(?<![\w./-])((?:scripts|tests|configs|src|docs|grafana|\.github)/[\w./-]+)")
     for match in path_pattern.finditer(run_text):
         candidate = match.group(1).rstrip(".,:)")
         targets.add(NodeKey("script_surface", candidate))
@@ -4368,11 +4225,11 @@ def _workflow_quality_gates(run_text: str) -> tuple[str, ...]:
     if "pytest" in lowered:
         gates.append("pytest")
     if "mypy" in lowered:
-        gates.append("mypy --strict")
+        gates.append(GATE_MYPY_STRICT)
     if "scripts.docs" in lowered or "check-links" in lowered or "build_docs_site.sh" in lowered:
-        gates.append("docs verification")
+        gates.append(GATE_DOCS_VERIFICATION)
     if "validate_pipeline_configs" in lowered or "scripts.schema" in lowered or "check_config_invariants" in lowered:
-        gates.append("config validation")
+        gates.append(GATE_CONFIG_VALIDATION)
     if "neo4j-memory" in lowered:
         gates.append("deterministic neo4j memory ontology invariants")
     return tuple(dict.fromkeys(gates))
@@ -4490,7 +4347,7 @@ def _workflow_matrix_variants(job_payload: dict[str, object]) -> tuple[dict[str,
 
 
 def _workflow_secret_refs(payload: object) -> tuple[str, ...]:
-    secret_pattern = re.compile(r"secrets\.([A-Za-z0-9_]+)")
+    secret_pattern = re.compile(r"secrets\.(\w+)")
     found: set[str] = set()
 
     def _visit(value: object) -> None:
@@ -4516,10 +4373,10 @@ def _workflow_action_key(uses_ref: str) -> str:
 
 def _workflow_reusable_target(uses_ref: str) -> tuple[str | None, str]:
     normalized = _workflow_action_key(uses_ref)
-    if normalized.startswith("./.github/workflows/"):
+    if normalized.startswith(f"./{GITHUB_WORKFLOWS_PREFIX}"):
         return Path(normalized).stem, "local_reusable_workflow"
-    if ".github/workflows/" in normalized:
-        workflow_name = Path(normalized.split(".github/workflows/", 1)[1]).stem
+    if GITHUB_WORKFLOWS_PREFIX in normalized:
+        workflow_name = Path(normalized.split(GITHUB_WORKFLOWS_PREFIX, 1)[1]).stem
         return workflow_name, "remote_reusable_workflow"
     return None, "github_action"
 
@@ -4595,25 +4452,25 @@ def _workflow_artifact_specs(
 def _normalize_cli_command_name(raw_command: str) -> str | None:
     lowered = raw_command.lower()
     if " -m bioetl " in lowered:
-        match = re.search(r"-m\s+bioetl\s+([A-Za-z0-9_-]+)", raw_command)
+        match = re.search(r"-m\s+bioetl\s+([\w-]+)", raw_command)
         if match:
             return f"bioetl {match.group(1)}"
         return "bioetl"
-    script_module_match = re.search(r"-m\s+scripts\.([A-Za-z0-9_]+)(?:\s+([A-Za-z0-9_.-]+))?", raw_command)
+    script_module_match = re.search(r"-m\s+scripts\.(\w+)(?:\s+([\w.-]+))?", raw_command)
     if script_module_match:
         module_name = script_module_match.group(1)
         subcommand = script_module_match.group(2)
         if subcommand and not subcommand.startswith("-"):
             return f"scripts.{module_name} {subcommand}"
         return f"scripts.{module_name}"
-    script_path_match = re.search(r"scripts/([A-Za-z0-9_]+)/([A-Za-z0-9_.-]+)", raw_command)
+    script_path_match = re.search(r"scripts/(\w+)/([\w.-]+)", raw_command)
     if script_path_match:
         return f"scripts.{script_path_match.group(1)} {script_path_match.group(2)}"
     return None
 
 
 def _extract_cli_options(raw_command: str) -> tuple[str, ...]:
-    options = re.findall(r"(?<![A-Za-z0-9_-])(--[A-Za-z0-9][A-Za-z0-9-]*)", raw_command)
+    options = re.findall(r"(?<![\w-])(--[\w][\w-]*)", raw_command)
     return tuple(sorted(dict.fromkeys(options)))
 
 
@@ -4636,7 +4493,7 @@ def _claim_modality(text: str) -> str:
 
 
 def _add_ci_workflow_graph(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
-    workflows_root = root / ".github" / "workflows"
+    workflows_root = root / GITHUB_DIR / "workflows"
     if not workflows_root.is_dir():
         return
 
@@ -4954,7 +4811,7 @@ def _normalize_docs_repo_reference(raw_ref: str) -> str | None:
     elif candidate.endswith("/*"):
         candidate = candidate[: -len("/*")]
     candidate = candidate.rstrip("/")
-    allowed_prefixes = ("src/", "configs/", "scripts/", "tests/", "docs/", "grafana/", ".github/")
+    allowed_prefixes = ("src/", "configs/", "scripts/", "tests/", "docs/", "grafana/", GITHUB_PATH_PREFIX)
     if candidate in {"README.md", "mkdocs.yml"}:
         return candidate
     if any(candidate.startswith(prefix) for prefix in allowed_prefixes):
@@ -4988,7 +4845,7 @@ def _resolve_docs_reference_target(
         NodeKey("script_surface", ref),
         NodeKey("test_artifact", ref),
         NodeKey("config_artifact", ref),
-        NodeKey("workflow_surface", Path(ref).stem if ref.startswith(".github/workflows/") else ref),
+        NodeKey("workflow_surface", Path(ref).stem if ref.startswith(GITHUB_WORKFLOWS_PREFIX) else ref),
         NodeKey("cli_command_surface", _normalize_cli_command_name(ref) or ref),
         NodeKey("file_surface", ref),
         NodeKey("directory_surface", ref),
@@ -5007,17 +4864,17 @@ def _resolve_docs_reference_target(
 def _resolve_claim_targets(snapshot: GraphSnapshot, claim_text: str) -> tuple[tuple[NodeKey, str, str], ...]:
     tokens: set[str] = set()
     tokens.update(match.group(1) for match in re.finditer(r"`([^`]+)`", claim_text))
-    tokens.update(match.group(0) for match in re.finditer(r"\bbioetl\s+[A-Za-z0-9_-]+\b", claim_text))
+    tokens.update(match.group(0) for match in re.finditer(r"\bbioetl\s+[\w-]+\b", claim_text))
     tokens.update(
         match.group(0)
-        for match in re.finditer(r"\bscripts\.[A-Za-z0-9_]+(?:\s+[A-Za-z0-9_.-]+)?\b", claim_text)
+        for match in re.finditer(r"\bscripts\.\w+(?:\s+[\w.-]+)?\b", claim_text)
     )
-    tokens.update(match.group(0) for match in re.finditer(r"\b(?:bioetl|domain)\.[A-Za-z0-9_.]+\b", claim_text))
+    tokens.update(match.group(0) for match in re.finditer(r"\b(?:bioetl|domain)\.[\w.]+\b", claim_text))
 
     resolved: list[tuple[NodeKey, str, str]] = []
     seen: set[NodeKey] = set()
     for token in sorted(tokens):
-        normalized_token = "bioetl.domain.ports" if token == "domain.ports" else token
+        normalized_token = PORTS_MODULE_PREFIX if token == "domain.ports" else token
         exact_candidates = (
             NodeKey("port_surface", normalized_token),
             NodeKey("cli_command_surface", normalized_token),
@@ -5036,15 +4893,15 @@ def _resolve_claim_targets(snapshot: GraphSnapshot, claim_text: str) -> tuple[tu
 
 def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
     path_pattern = re.compile(
-        r"(?<![A-Za-z0-9_./-])("
-        r"README\.md|mkdocs\.yml|\.github/[A-Za-z0-9_./*-]+|"
-        r"(?:src|configs|scripts|tests|docs|grafana)/[A-Za-z0-9_./*-]+"
+        r"(?<![\w./-])("
+        r"README\.md|mkdocs\.yml|\.github/[\w./*-]+|"
+        r"(?:src|configs|scripts|tests|docs|grafana)/[\w./*-]+"
         r")"
     )
     command_pattern = re.compile(
-        r"(?:python3?\s+-m\s+(?:bioetl|scripts\.[A-Za-z0-9_]+)(?:\s+[A-Za-z0-9_.-]+)?(?:\s+--?[A-Za-z0-9][A-Za-z0-9-]*(?:[ =][^\s`]+)?)*|"
-        r"uv\s+run\s+python3?\s+-m\s+(?:bioetl|scripts\.[A-Za-z0-9_]+)(?:\s+[A-Za-z0-9_.-]+)?(?:\s+--?[A-Za-z0-9][A-Za-z0-9-]*(?:[ =][^\s`]+)?)*|"
-        r"uv\s+run\s+python\s+-m\s+(?:bioetl|scripts\.[A-Za-z0-9_]+)(?:\s+[A-Za-z0-9_.-]+)?(?:\s+--?[A-Za-z0-9][A-Za-z0-9-]*(?:[ =][^\s`]+)?)*"
+        r"(?:python3?\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*|"
+        r"uv\s+run\s+python3?\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*|"
+        r"uv\s+run\s+python\s+-m\s+(?:bioetl|scripts\.\w+)(?:\s+[\w.-]+)?(?:\s+--?[\w][\w-]*(?:[ =][^\s`]+)?)*"
         r")"
     )
     doc_like_labels = {"doc_source_surface", "doc_artifact", "policy_surface"}
@@ -5200,9 +5057,9 @@ def _add_port_surfaces(
     port_nodes: set[NodeKey] = set()
     facade = snapshot.add_node(
         "port_surface",
-        "bioetl.domain.ports",
+        PORTS_MODULE_PREFIX,
         summary="Canonical facade exporting stable domain port protocols.",
-        source_path="src/bioetl/domain/ports/__init__.py",
+        source_path=f"src/bioetl/domain/ports/{INIT_PY}",
         source_kind="domain_port_facade",
         granularity="facade",
         last_verified=today,
@@ -5213,7 +5070,7 @@ def _add_port_surfaces(
     snapshot.add_relation(project, "HAS_PORT", facade, provenance="impact_ports")
     if family in snapshot.nodes:
         snapshot.add_relation(family, "CONTAINS", facade, provenance="impact_ports")
-    facade_module = NodeKey("module_surface", "src/bioetl/domain/ports/__init__.py")
+    facade_module = NodeKey("module_surface", PORTS_FACADE_SOURCE_PATH)
     if facade_module in snapshot.nodes:
         snapshot.add_relation(facade, "BACKED_BY", facade_module, provenance="impact_ports")
 
@@ -5293,7 +5150,7 @@ def _add_adapter_surfaces(
             for module_path in sorted(child.rglob("*.py")):
                 if _is_ignored_repo_path(module_path):
                     continue
-                if fine_grained_enabled and module_path.name != "__init__.py":
+                if fine_grained_enabled and module_path.name != INIT_PY:
                     impl_relative_path = _rel_path(root, module_path)
                     impl_surface_name = _python_surface_name(impl_relative_path)
                     impl_node = snapshot.add_node(
@@ -5335,7 +5192,7 @@ def _add_adapter_surfaces(
                     )
             continue
 
-        if child.suffix != ".py" or child.name == "__init__.py":
+        if child.suffix != ".py" or child.name == INIT_PY:
             continue
         relative_path = _rel_path(root, child)
         surface_name = _python_surface_name(relative_path)
@@ -6824,9 +6681,9 @@ def _add_pipeline_test_edges(
     tests_mapping = memory_mapping.get("pipeline_tests")
     relation_type = str(tests_mapping.get("relation_type", "TESTED_BY")) if isinstance(tests_mapping, dict) else "TESTED_BY"
     ownership_config = (
-        str(tests_mapping.get("ownership_config", "configs/quality/test_matrix.yaml"))
+        str(tests_mapping.get("ownership_config", TEST_MATRIX_CONFIG_PATH))
         if isinstance(tests_mapping, dict)
-        else "configs/quality/test_matrix.yaml"
+        else TEST_MATRIX_CONFIG_PATH
     )
     ownership_path = root / ownership_config
     if not ownership_path.is_file():
@@ -7070,7 +6927,7 @@ def _add_pipeline_operational_edges(
         )
     ] or [
         NodeKey("quality_gate", "pytest"),
-        NodeKey("quality_gate", "config validation"),
+        NodeKey("quality_gate", GATE_CONFIG_VALIDATION),
     ]
     dashboards_cfg = pipeline_ops.get("dashboards") if isinstance(pipeline_ops, dict) else {}
     common_dashboards = [
@@ -8108,8 +7965,8 @@ def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
         if int(stats["relation_types"].get(relation_type, 0)) <= 0:
             issues.append(f"missing required relation population: {relation_type}")
 
-    if NodeKey("port_surface", "bioetl.domain.ports") not in snapshot.nodes:
-        issues.append("missing bioetl.domain.ports facade port surface")
+    if NodeKey("port_surface", PORTS_MODULE_PREFIX) not in snapshot.nodes:
+        issues.append(f"missing {PORTS_MODULE_PREFIX} facade port surface")
 
     protocol_ports = [
         node

@@ -165,7 +165,7 @@ def gold_filter_callback():
     """Create mock gold filter callback."""
 
     def filter_gold(ctx, record):
-        return True
+        return record.get("value", 0) > 5
 
     return filter_gold
 

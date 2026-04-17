@@ -129,7 +129,7 @@ class TestPreflightRules:
     def test_validate_field_priority_missing_field(self) -> None:
         validator = _make_validator()
         source_fields: dict[str, SchemaFields] = {"chembl": {}}
-        issues, resolved = validator._validate_field_priority(
+        issues, _ = validator._validate_field_priority(
             "nonexistent",
             ("chembl",),
             frozenset({"seed", "chembl"}),
@@ -146,7 +146,7 @@ class TestPreflightRules:
                 )
             },
         }
-        issues, resolved = validator._validate_field_priority(
+        _, resolved = validator._validate_field_priority(
             "doi",
             ("chembl",),
             frozenset({"seed", "chembl"}),

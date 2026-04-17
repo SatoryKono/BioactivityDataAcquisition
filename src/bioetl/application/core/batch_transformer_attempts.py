@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import FilteredOutError
@@ -116,7 +117,12 @@ async def transform_record_attempt(
     )
 
     try:
-        transformed = await transform(record_context, raw_record, index)
+        transformed_result = transform(record_context, raw_record, index)
+        transformed = (
+            await transformed_result
+            if isawaitable(transformed_result)
+            else transformed_result
+        )
         finalized_record = _finalize_transformed_record(
             transformed=transformed,
             normalization_processor=normalization_processor,
