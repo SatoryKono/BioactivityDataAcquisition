@@ -100,6 +100,7 @@ class OpenAlexAdapterFilterFetchMixin:
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Multi-field filtering is not supported by OpenAlex."""
+        del entity_type, filters, limit
         raise NotImplementedError(
             "OpenAlex adapter does not support multi-field filtering. "
             "Use fetch_filtered() with filter_field='doi' instead."
@@ -150,6 +151,7 @@ class OpenAlexAdapterFilterFetchMixin:
         offset: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch OpenAlex works by filters or free-text query."""
+        del offset
         request = create_fetch_request(
             entity_type=entity_type,
             limit=limit,

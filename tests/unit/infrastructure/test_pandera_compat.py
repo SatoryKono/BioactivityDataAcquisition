@@ -6,10 +6,31 @@ import typing
 from types import ModuleType
 
 
+def _get_origin_stub(_tp) -> None:
+    return None
+
+
+def _get_args_stub(tp: object) -> tuple[object, ...]:
+    return getattr(tp, "__union_args__", ())
+
+
+def _compat_disabled() -> bool:
+    return False
+
+
+def _compat_enabled() -> bool:
+    return True
+
+
+def _record_and_return_false(calls: list[str]) -> bool:
+    calls.append("applied")
+    return False
+
+
 def _install_fake_pandera_modules(monkeypatch) -> tuple[ModuleType, type]:
     typing_inspect_module = ModuleType("typing_inspect")
-    typing_inspect_module.get_origin = lambda _tp: None
-    typing_inspect_module.get_args = lambda tp: getattr(tp, "__union_args__", ())
+    typing_inspect_module.get_origin = _get_origin_stub
+    typing_inspect_module.get_args = _get_args_stub
 
     pandera_module = ModuleType("pandera")
     pandera_backends = ModuleType("pandera.backends")
@@ -52,7 +73,7 @@ def test_apply_pandera_typing_compat_is_noop_when_not_required(
     module = importlib.reload(
         importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
     )
-    monkeypatch.setattr(module, "_requires_pandera_typing_compat", lambda: False)
+    monkeypatch.setattr(module, "_requires_pandera_typing_compat", _compat_disabled)
     monkeypatch.setattr(module, "_PATCH_APPLIED", False)
 
     assert module.apply_pandera_typing_compat_if_needed() is False
@@ -64,7 +85,7 @@ def test_apply_pandera_typing_compat_patches_dispatcher_when_forced(
     module = importlib.reload(
         importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
     )
-    monkeypatch.setattr(module, "_requires_pandera_typing_compat", lambda: True)
+    monkeypatch.setattr(module, "_requires_pandera_typing_compat", _compat_enabled)
     monkeypatch.setattr(module, "_PATCH_APPLIED", False)
 
     typing_inspect_module, fake_dispatcher_cls = _install_fake_pandera_modules(
@@ -84,7 +105,7 @@ def test_apply_pandera_typing_compat_patches_dispatcher_when_forced(
 
     dispatcher = fake_dispatcher_cls()
     dispatcher._function_registry = {
-        FakeUnionType: lambda value: f"union:{value}",
+        FakeUnionType: _format_union_value,
     }
     assert dispatcher(1) == "union:1"
 
@@ -112,11 +133,19 @@ def test_bootstrap_lazy_exports_apply_compat_before_import(monkeypatch) -> None:
     )
 
     calls: list[str] = []
+
+    def apply_compat_and_record() -> bool:
+        return _record_and_return_false(calls)
+
     monkeypatch.setattr(
         compat_module,
         "apply_pandera_typing_compat_if_needed",
-        lambda: calls.append("applied") or False,
+        apply_compat_and_record,
     )
 
     assert bootstrap_module.load_pipeline_config
     assert calls == ["applied"]
+
+
+def _format_union_value(value: object) -> str:
+    return f"union:{value}"

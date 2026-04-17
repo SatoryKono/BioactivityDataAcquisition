@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import JsonDict
@@ -35,6 +36,7 @@ class UnifiedQuarantineFilteredMixin:
         sort: str = "ingestion_ts_desc",
     ) -> JsonDict:
         """List paginated Silver-filter quarantine rows for record-level exploration."""
+        await asyncio.sleep(0)
         return list_filtered_records(
             self.base_path,
             None,
@@ -58,6 +60,7 @@ class UnifiedQuarantineFilteredMixin:
         pipeline: str | None = None,
     ) -> JsonDict | None:
         """Return one filtered Silver record with full payload details."""
+        await asyncio.sleep(0)
         return get_filtered_record(
             self.base_path,
             None,
@@ -78,6 +81,7 @@ class UnifiedQuarantineFilteredMixin:
         to_ts: str | None = None,
     ) -> JsonDict:
         """Return aggregate Silver-filter explorer stats for current scope."""
+        await asyncio.sleep(0)
         return get_filtered_stats(
             self.base_path,
             None,
@@ -103,6 +107,7 @@ class UnifiedQuarantineFilteredMixin:
         to_ts: str | None = None,
     ) -> JsonDict:
         """Return dynamic filter options for record-level quarantine exploration."""
+        await asyncio.sleep(0)
         return get_filtered_filter_options(
             self.base_path,
             None,

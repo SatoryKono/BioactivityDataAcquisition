@@ -17,6 +17,16 @@ from bioetl.infrastructure.storage.delta.resilience import (
 )
 
 
+def _fixed_jitter(_lo: float, _hi: float) -> float:
+    """Return a deterministic jitter value for test coverage."""
+    return 0.1
+
+
+def _negative_jitter(_lo: float, _hi: float) -> float:
+    """Return a negative jitter value to exercise clamping."""
+    return -99.0
+
+
 @pytest.mark.unit
 class TestDeterministicJitter:
     """Tests for _deterministic_jitter_seconds (line 41)."""
@@ -125,9 +135,7 @@ class TestAdaptiveRetryPolicyCalculateDelay:
             jitter_seconds=0.5,
             adaptive=True,
         )
-        # Custom jitter_fn returns fixed 0.1
-        custom_jitter_fn = lambda lo, hi: 0.1  # noqa: E731
-        delay = policy.calculate_delay(0, jitter_fn=custom_jitter_fn)
+        delay = policy.calculate_delay(0, jitter_fn=_fixed_jitter)
         assert delay == pytest.approx(0.2)  # 0.1 (base) + 0.1 (jitter)
 
     def test_jitter_without_custom_fn_uses_deterministic(self) -> None:
@@ -154,8 +162,7 @@ class TestAdaptiveRetryPolicyCalculateDelay:
             jitter_seconds=0.5,
             adaptive=True,
         )
-        negative_jitter_fn = lambda lo, hi: -99.0  # noqa: E731
-        delay = policy.calculate_delay(0, jitter_fn=negative_jitter_fn)
+        delay = policy.calculate_delay(0, jitter_fn=_negative_jitter)
         assert delay >= 0.0
 
     def test_should_retry_disabled_policy(self) -> None:

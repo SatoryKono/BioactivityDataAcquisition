@@ -30,35 +30,34 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from pathlib import Path
 
 COMMANDS: dict[str, str] = {
-    "verify": "checks/verify.py",
-    "check-links": "checks/check_links.py",
-    "check-drift": "checks/check_drift.py",
-    "check-docstrings": "checks/check_docstrings.py",
-    "check-kpi": "checks/report_docs_kpi.py",
-    "export-matrix-structural-contract": "matrix/export_structural_contract.py",
-    "generate-field-matrix": "matrix/generate_field_matrix.py",
-    "generate-pipeline-normalization-matrix": "matrix/generate_pipeline_normalization_matrix.py",
-    "build-matrix-dicts": "matrix/build_matrix_dicts.py",
-    "enrich-matrix-normalization-details": "matrix/enrich_normalization_details.py",
-    "filter-matrix-rows": "matrix/filter_rows.py",
-    "normalize-matrix-values": "matrix/normalize_values.py",
-    "sync-matrix-structural-policy": "matrix/sync_structural_policy.py",
-    "fix-links-auto": "fixers/fix_links_auto.py",
-    "fix-links-explicit": "fixers/fix_links_explicit.py",
-    "fix-link-warnings": "fixers/link_warnings.py",
-    "audit-sentence": "fixers/sentence_audit.py",
-    "sync-repo-identity": "fixers/repo_identity.py",
+    "verify": "scripts.docs.checks.verify",
+    "check-links": "scripts.docs.checks.check_links",
+    "check-drift": "scripts.docs.checks.check_drift",
+    "check-docstrings": "scripts.docs.checks.check_docstrings",
+    "check-kpi": "scripts.docs.checks.report_docs_kpi",
+    "export-matrix-structural-contract": "scripts.docs.matrix.export_structural_contract",
+    "generate-field-matrix": "scripts.docs.matrix.generate_field_matrix",
+    "generate-pipeline-normalization-matrix": "scripts.docs.matrix.generate_pipeline_normalization_matrix",
+    "build-matrix-dicts": "scripts.docs.matrix.build_matrix_dicts",
+    "enrich-matrix-normalization-details": "scripts.docs.matrix.enrich_normalization_details",
+    "filter-matrix-rows": "scripts.docs.matrix.filter_rows",
+    "normalize-matrix-values": "scripts.docs.matrix.normalize_values",
+    "sync-matrix-structural-policy": "scripts.docs.matrix.sync_structural_policy",
+    "fix-links-auto": "scripts.docs.fixers.fix_links_auto",
+    "fix-links-explicit": "scripts.docs.fixers.fix_links_explicit",
+    "fix-link-warnings": "scripts.docs.fixers.link_warnings",
+    "audit-sentence": "scripts.docs.fixers.sentence_audit",
+    "sync-repo-identity": "scripts.docs.fixers.repo_identity",
 }
 
-_DIR = Path(__file__).parent
 
-
-def _run_script(name: str, argv: list[str]) -> int:
-    script = _DIR / name
-    result = subprocess.run([sys.executable, str(script), *argv], check=False)
+def _run_module(module_name: str, argv: list[str]) -> int:
+    result = subprocess.run(
+        [sys.executable, "-m", module_name, *argv],
+        check=False,
+    )
     return result.returncode
 
 
@@ -80,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Available: {', '.join(COMMANDS)}", file=sys.stderr)
         return 2
 
-    return _run_script(COMMANDS[cmd], rest)
+    return _run_module(COMMANDS[cmd], rest)
 
 
 if __name__ == "__main__":

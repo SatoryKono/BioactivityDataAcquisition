@@ -437,7 +437,7 @@ class TestPolarsPerformance:
         df = pl.DataFrame(records_for_df)
 
         def filter_df():
-            return df.filter(pl.col("active") == True)  # noqa: E712
+            return df.filter(pl.col("active"))
 
         result = benchmark(filter_df)
         assert len(result) == 2500
