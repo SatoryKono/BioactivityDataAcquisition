@@ -41,7 +41,7 @@ is consolidated incrementally.
 | `build-matrix-dicts`                  | `scripts/docs/matrix/build_matrix_dicts.py`                  | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook     |
 | `enrich-matrix-normalization-details` | `scripts/docs/matrix/enrich_normalization_details.py`        | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook  |
 | `filter-matrix-rows`                  | `scripts/docs/matrix/filter_rows.py`                         | Remove rows from the canonical ChEMBL matrix workbook by column value                 |
-| `normalize-matrix-values`             | `scripts/docs/normalize_chembl_matrix_workbook.py`           | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |
+| `normalize-matrix-values`             | `scripts/docs/matrix/normalize_values.py`                    | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |
 | `sync-matrix-structural-policy`       | `scripts/docs/sync_chembl_matrix_structural_policy.py`       | Reconcile workbook policy columns with the current structural Silver policy semantics |
 | `fix-links-auto`                      | `scripts/docs/fix_doc_links_auto.py`                         | Auto-fix broken documentation links                                                   |
 | `fix-links-explicit`                  | `scripts/docs/fix_doc_links_explicit.py`                     | Fix documentation links with explicit rules                                           |

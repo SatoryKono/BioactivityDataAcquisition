@@ -55,7 +55,9 @@ SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "src/tools",
 )
 SKIP_DIR_NAMES: Final[set[str]] = {
+    ".cache",
     ".git",
+    ".idea",
     ".venv",
     ".mypy_cache",
     ".pytest_cache",
@@ -150,14 +152,18 @@ def _iter_scripts(root: Path) -> list[Path]:
         base = root / rel_root
         if not base.exists():
             continue
-        for file_path in base.rglob("*"):
-            if not file_path.is_file():
-                continue
-            if file_path.suffix not in SCRIPT_EXTENSIONS:
-                continue
-            if file_path.name == "__init__.py":
-                continue
-            scripts.append(file_path)
+        for dirpath, dirnames, filenames in os.walk(base):
+            dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_NAMES]
+            current_path = Path(dirpath)
+            for filename in filenames:
+                file_path = current_path / filename
+                if not file_path.is_file():
+                    continue
+                if file_path.suffix not in SCRIPT_EXTENSIONS:
+                    continue
+                if file_path.name == "__init__.py":
+                    continue
+                scripts.append(file_path)
     return sorted(set(scripts))
 
 
