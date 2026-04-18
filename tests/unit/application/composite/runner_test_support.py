@@ -281,14 +281,11 @@ def create_mock_merger(
         result
         if result is not None
         else MergeResult(
+            records_merged=100,
             records_from_seed=100,
-            records_merged=95,
-            records_enriched=80,
-            records_fully_enriched=70,
-            sources_used=("crossref", "pubmed"),
-            output_silver_path="silver/composite/test",
-            output_gold_path="gold/test_enriched",
-            duration_seconds=5.0,
+            records_enriched=0,
+            records_fully_enriched=0,
+            duration_seconds=1.0,
         )
     )
     merge_call = AsyncMock(return_value=merge_result)
