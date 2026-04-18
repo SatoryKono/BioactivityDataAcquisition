@@ -843,13 +843,24 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             EnvironmentMetadata,
             PipelineMetadata,
             RuntimeMetadata,
+            RunTypeEnum,
         )
         from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
         completed_at = datetime.now(UTC)
+        first_record = records[0] if records else {}
+        run_id = str(first_record.get("_run_id") or getattr(self, "run_id", "") or "")
+        manifest_id = str(
+            first_record.get("_manifest_id")
+            or getattr(self, "manifest_id", None)
+            or run_id
+        ).strip() or None
         metadata = SilverMetadata(
             table_name=table_name,
             runtime=RuntimeMetadata(
+                run_id=run_id or "legacy-direct-metadata-writer",
+                manifest_id=manifest_id,
+                run_type=RunTypeEnum.INCREMENTAL,
                 started_at=started_at,
                 completed_at=completed_at,
                 duration_seconds=int((completed_at - started_at).total_seconds()),

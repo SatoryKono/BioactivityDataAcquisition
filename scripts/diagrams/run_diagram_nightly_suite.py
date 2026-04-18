@@ -502,7 +502,7 @@ def write_temp_source(tmpdir: Path, stem: str, lines: list[str]) -> Path:
     path = tmpdir / f"{stem}.mmd"
     safe_path = _ensure_path_within_root(path, tmpdir)
     safe_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return path
+    return safe_path
 
 
 def check_diag_t027(
