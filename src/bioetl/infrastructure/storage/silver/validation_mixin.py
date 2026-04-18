@@ -32,6 +32,9 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _validate_write_mode_impl,
     _ValidatedSilverWriteContext,
 )
+from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+    _prepare_silver_write_payload_impl,
+)
 
 
 class SilverWriterValidationMixin:
@@ -131,28 +134,18 @@ class SilverWriterValidationMixin:
         key_nullability_rules: list[KeyNullabilityRule] | None,
     ) -> _PreparedSilverWritePayload:
         """Run full validation chain and prepare Arrow data for write."""
-        request = _SilverWritePreparationRequest(
+        return await _prepare_silver_write_payload_impl(
+            self,
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
             schema=schema,
             mode=mode,
+            on_schema_mismatch=on_schema_mismatch,
             column_order=column_order,
             partition_cols=partition_cols,
             key_nullability_rules=key_nullability_rules,
         )
-        validated = await asyncio.to_thread(
-            self._sync_validate_and_build_arrow,
-            request,
-        )
-        schema_request = _SilverSchemaPolicyRequest(
-            table_name=table_name,
-            records=validated.records,
-            on_schema_mismatch=on_schema_mismatch,
-            validated_mode=validated.validated_mode,
-            arrow_data=validated.arrow_data,
-        )
-        return await self._finalize_silver_write_payload(schema_request)
 
 
 SilverWriterValidationMixin._validate_write_mode = staticmethod(

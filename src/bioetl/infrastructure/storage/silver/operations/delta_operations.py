@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -45,6 +44,16 @@ class _SilverDeltaHostProtocol(Protocol):
     def _load_silver_writer_module(self) -> Any: ...
 
     async def _write_append(
+        self,
+        request: _DeltaWriteRequest,
+    ) -> None: ...
+
+    async def _write_delete(
+        self,
+        request: _DeltaWriteRequest,
+    ) -> None: ...
+
+    async def _write_merge(
         self,
         request: _DeltaWriteRequest,
     ) -> None: ...

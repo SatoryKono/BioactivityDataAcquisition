@@ -46,9 +46,8 @@ from bioetl.infrastructure.storage.silver.operations.postwrite_operations import
 # SilverWriterValidationMixin removed from inheritance (composition pattern)
 # Validation operations now handled by SilverValidationOperations service
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-    _build_prepared_silver_write_payload,
     _PreparedSilverWritePayload,
-    _SilverSchemaPolicyRequest,
+    _prepare_silver_write_payload_impl,
     _SilverWritePreparationRequest,
 )
 
@@ -484,35 +483,17 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         writer keeps this orchestration surface even though the implementation is
         split into operation services.
         """
-        request = _SilverWritePreparationRequest(
+        return await _prepare_silver_write_payload_impl(
+            self,
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
             schema=schema,
             mode=mode,
+            on_schema_mismatch=on_schema_mismatch,
             column_order=column_order,
             partition_cols=partition_cols,
             key_nullability_rules=key_nullability_rules,
-        )
-        validated = await asyncio.to_thread(
-            self._sync_validate_and_build_arrow,
-            request,
-        )
-        schema_request = _SilverSchemaPolicyRequest(
-            table_name=table_name,
-            records=validated.records,
-            on_schema_mismatch=on_schema_mismatch,
-            validated_mode=validated.validated_mode,
-            arrow_data=validated.arrow_data,
-        )
-        await self._check_schema_drift(
-            schema_request.table_name,
-            schema_request.records,
-            schema_request.on_schema_mismatch,
-        )
-        return _build_prepared_silver_write_payload(
-            table_path=self._resolve_table_path(schema_request.table_name),
-            schema_request=schema_request,
         )
 
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:

@@ -2,14 +2,24 @@
 
 from __future__ import annotations
 
-import time
 from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
+)
+from bioetl.application.core.postrun._phase_runtime import (
+    describe_compaction_phase,
+    describe_dq_phase,
+    describe_dq_report_phase,
+    describe_final_metadata_phase,
+    describe_vacuum_phase,
+    emit_postrun_phase_observability,
+    record_run_span_attributes,
+    run_async_postrun_phase,
+    run_sync_postrun_phase,
 )
 from bioetl.application.core.postrun._service_collaborators import (
     resolve_postrun_collaborators,
@@ -151,7 +161,7 @@ class PostrunService:
                 executor=executor,
                 dq_context=dq_context,
             )
-            self._record_run_span_attributes(span, result)
+            record_run_span_attributes(span, result)
             return result
 
     async def _run_postrun_flow(
@@ -173,224 +183,63 @@ class PostrunService:
             compaction=compaction,
         )
 
-    def _emit_postrun_phase_observability(
-        self,
-        *,
-        phase: Literal[
-            "compaction",
-            "dq_evaluation",
-            "dq_reports",
-            "vacuum",
-            "final_metadata",
-        ],
-        status: str,
-        duration_seconds: float,
-        level: Literal["info", "warning", "error"] | None = None,
-        **extra: object,
-    ) -> None:
+    def _emit_postrun_phase_observability(self, **kwargs: object) -> None:
         """Emit bounded metrics and structured logs for one postrun subphase."""
-        labels = {
-            "pipeline": self._config.pipeline_name,
-            "phase": phase,
-            "status": status,
-        }
-        self._metrics.increment_counter(
-            self.METRIC_POSTRUN_PHASE_EVENTS_TOTAL,
-            1,
-            labels=labels,
-        )
-        self._metrics.observe_histogram(
-            self.METRIC_POSTRUN_PHASE_DURATION_SECONDS,
-            duration_seconds,
-            labels=labels,
-        )
-
-        resolved_level = level or self._resolve_postrun_phase_log_level(status)
-        log_payload: dict[str, object] = {
-            "phase": phase,
-            "status": status,
-            "duration_seconds": round(duration_seconds, 4),
-            **extra,
-        }
-        if resolved_level == "error":
-            self._logger.error("postrun_phase_completed", **log_payload)
-        elif resolved_level == "warning":
-            self._logger.warning("postrun_phase_completed", **log_payload)
-        else:
-            self._logger.info("postrun_phase_completed", **log_payload)
-
-    @staticmethod
-    def _resolve_postrun_phase_log_level(
-        status: str,
-    ) -> Literal["info", "warning", "error"]:
-        """Map bounded postrun status values to structured log levels."""
-        if status == "failed":
-            return "error"
-        if status == "warning":
-            return "warning"
-        return "info"
-
-    def _record_run_span_attributes(self, span: Span, result: PostrunResult) -> None:
-        """Attach postrun outcome attributes to the active tracing span."""
-        span.set_attribute("bioetl.dq_status", result.dq.status.value)
-        span.set_attribute("bioetl.dq_anomalies_count", result.dq.anomalies_count)
-        span.set_attribute("bioetl.dq_has_critical", result.dq.has_critical)
-        span.set_attribute("bioetl.dq_check_duration_ms", result.dq.check_duration_ms)
-        span.set_attribute(
-            "bioetl.dq_reports_generated",
-            bool(result.dq_reports and result.dq_reports.any_generated),
-        )
-        span.set_attribute(
-            "bioetl.dq_reports_count",
-            0 if result.dq_reports is None else result.dq_reports.reports_count,
-        )
-        span.set_attribute("bioetl.compaction_status", result.compaction.status)
-        span.set_attribute(
-            "bioetl.compaction_duplicates_removed",
-            result.compaction.duplicates_removed,
-        )
-        span.set_attribute("bioetl.vacuum_skipped", result.vacuum.skipped)
-        span.set_attribute(
-            "bioetl.vacuum_silver_files_removed",
-            result.vacuum.silver_files_removed,
-        )
-        span.set_attribute(
-            "bioetl.vacuum_gold_files_removed",
-            result.vacuum.gold_files_removed,
+        emit_postrun_phase_observability(
+            metrics=self._metrics,
+            logger=self._logger,
+            pipeline_name=self._config.pipeline_name,
+            phase_events_metric=self.METRIC_POSTRUN_PHASE_EVENTS_TOTAL,
+            phase_duration_metric=self.METRIC_POSTRUN_PHASE_DURATION_SECONDS,
+            **kwargs,
         )
 
     def _run_dq_phase(self, executor: ExecutorMetricsPort) -> DQResult:
         """Execute data-quality evaluation for the completed run."""
-        start_time = time.perf_counter()
-        with self._postrun_span("postrun.dq_evaluation") as span:
-            try:
-                result = self.run_dq_checks(executor)
-            except self.OPERATION_ERRORS as exc:
-                self._emit_postrun_phase_observability(
-                    phase="dq_evaluation",
-                    status="failed",
-                    duration_seconds=time.perf_counter() - start_time,
-                    level="error",
-                    error_type=type(exc).__name__,
-                )
-                raise
-            span.set_attribute("bioetl.dq_status", result.status.value)
-            span.set_attribute("bioetl.dq_anomalies_count", result.anomalies_count)
-            span.set_attribute("bioetl.dq_has_critical", result.has_critical)
-            span.set_attribute(
-                "bioetl.dq_check_duration_ms",
-                result.check_duration_ms,
-            )
-            self._emit_postrun_phase_observability(
-                phase="dq_evaluation",
-                status=result.status.value,
-                duration_seconds=time.perf_counter() - start_time,
-                anomalies_count=result.anomalies_count,
-                has_critical=result.has_critical,
-                check_duration_ms=result.check_duration_ms,
-            )
-            return result
+        return run_sync_postrun_phase(
+            span_factory=self._postrun_span,
+            phase="dq_evaluation",
+            operation=lambda: self.run_dq_checks(executor),
+            operation_errors=self.OPERATION_ERRORS,
+            emit_phase_observability=self._emit_postrun_phase_observability,
+            on_success=describe_dq_phase,
+        )
 
     async def _run_compaction_phase(self) -> CompactionResult:
         """Execute the compaction phase for Silver when the policy allows it."""
-        start_time = time.perf_counter()
-        with self._postrun_span("postrun.compaction") as span:
-            try:
-                result = await self.run_silver_compact_if_needed()
-            except self.OPERATION_ERRORS as exc:
-                self._emit_postrun_phase_observability(
-                    phase="compaction",
-                    status="failed",
-                    duration_seconds=time.perf_counter() - start_time,
-                    level="error",
-                    error_type=type(exc).__name__,
-                )
-                raise
-            span.set_attribute("bioetl.compaction_status", result.status)
-            span.set_attribute(
-                "bioetl.compaction_duplicates_removed",
-                result.duplicates_removed,
-            )
-            if result.error is not None:
-                span.set_attribute("bioetl.compaction_error", result.error)
-            self._emit_postrun_phase_observability(
-                phase="compaction",
-                status=result.status,
-                duration_seconds=time.perf_counter() - start_time,
-                level="warning" if result.status == "failed" else None,
-                duplicates_removed=result.duplicates_removed,
-                has_error=result.error is not None,
-            )
-            return result
+        return await run_async_postrun_phase(
+            span_factory=self._postrun_span,
+            phase="compaction",
+            operation=self.run_silver_compact_if_needed,
+            operation_errors=self.OPERATION_ERRORS,
+            emit_phase_observability=self._emit_postrun_phase_observability,
+            on_success=describe_compaction_phase,
+        )
 
     async def _run_dq_report_phase(
         self,
         dq_context: DQReportContext | None,
     ) -> DQReportResult | None:
         """Generate postrun DQ reports for the current run."""
-        start_time = time.perf_counter()
-        with self._postrun_span("postrun.dq_reports") as span:
-            try:
-                result = await self._generate_dq_reports(dq_context)
-            except self.OPERATION_ERRORS as exc:
-                self._emit_postrun_phase_observability(
-                    phase="dq_reports",
-                    status="failed",
-                    duration_seconds=time.perf_counter() - start_time,
-                    level="error",
-                    error_type=type(exc).__name__,
-                )
-                raise
-            span.set_attribute(
-                "bioetl.dq_reports_generated",
-                bool(result and result.any_generated),
-            )
-            span.set_attribute(
-                "bioetl.dq_reports_count",
-                0 if result is None else result.reports_count,
-            )
-            self._emit_postrun_phase_observability(
-                phase="dq_reports",
-                status="generated" if result and result.any_generated else "skipped",
-                duration_seconds=time.perf_counter() - start_time,
-                reports_generated=bool(result and result.any_generated),
-                reports_count=0 if result is None else result.reports_count,
-            )
-            return result
+        return await run_async_postrun_phase(
+            span_factory=self._postrun_span,
+            phase="dq_reports",
+            operation=lambda: self._generate_dq_reports(dq_context),
+            operation_errors=self.OPERATION_ERRORS,
+            emit_phase_observability=self._emit_postrun_phase_observability,
+            on_success=describe_dq_report_phase,
+        )
 
     async def _run_vacuum_phase(self) -> VacuumResult:
         """Execute VACUUM finalization for the current run."""
-        start_time = time.perf_counter()
-        with self._postrun_span("postrun.vacuum") as span:
-            try:
-                result = await self.run_vacuum_if_enabled()
-            except self.OPERATION_ERRORS as exc:
-                self._emit_postrun_phase_observability(
-                    phase="vacuum",
-                    status="failed",
-                    duration_seconds=time.perf_counter() - start_time,
-                    level="error",
-                    error_type=type(exc).__name__,
-                )
-                raise
-            span.set_attribute("bioetl.vacuum_skipped", result.skipped)
-            span.set_attribute(
-                "bioetl.vacuum_silver_files_removed",
-                result.silver_files_removed,
-            )
-            span.set_attribute(
-                "bioetl.vacuum_gold_files_removed",
-                result.gold_files_removed,
-            )
-            self._emit_postrun_phase_observability(
-                phase="vacuum",
-                status="skipped" if result.skipped else "success",
-                duration_seconds=time.perf_counter() - start_time,
-                silver_files_removed=result.silver_files_removed,
-                gold_files_removed=result.gold_files_removed,
-                skipped=result.skipped,
-            )
-            return result
+        return await run_async_postrun_phase(
+            span_factory=self._postrun_span,
+            phase="vacuum",
+            operation=self.run_vacuum_if_enabled,
+            operation_errors=self.OPERATION_ERRORS,
+            emit_phase_observability=self._emit_postrun_phase_observability,
+            on_success=describe_vacuum_phase,
+        )
 
     async def _run_final_metadata_phase(
         self,
@@ -398,34 +247,20 @@ class PostrunService:
         dq_reports: DQReportResult | None,
     ) -> None:
         """Persist final metadata when metadata collaborators are configured."""
-        start_time = time.perf_counter()
-        with self._postrun_span("postrun.final_metadata") as span:
-            try:
-                wrote_metadata = await self._metadata_write_orchestrator.write_final_metadata_if_available(
-                    executor,
-                    dq_reports,
-                )
-            except self.OPERATION_ERRORS as exc:
-                self._emit_postrun_phase_observability(
-                    phase="final_metadata",
-                    status="failed",
-                    duration_seconds=time.perf_counter() - start_time,
-                    level="error",
-                    error_type=type(exc).__name__,
-                )
-                raise
-            span.set_attribute("bioetl.final_metadata_phase_completed", True)
-            span.set_attribute(
-                "bioetl.dq_reports_available",
-                dq_reports is not None,
-            )
-            self._emit_postrun_phase_observability(
-                phase="final_metadata",
-                status="success" if wrote_metadata else "skipped",
-                duration_seconds=time.perf_counter() - start_time,
-                dq_reports_available=dq_reports is not None,
-                metadata_written=wrote_metadata,
-            )
+        await run_async_postrun_phase(
+            span_factory=self._postrun_span,
+            phase="final_metadata",
+            operation=lambda: self._metadata_write_orchestrator.write_final_metadata_if_available(
+                executor,
+                dq_reports,
+            ),
+            operation_errors=self.OPERATION_ERRORS,
+            emit_phase_observability=self._emit_postrun_phase_observability,
+            on_success=lambda wrote_metadata: describe_final_metadata_phase(
+                wrote_metadata=wrote_metadata,
+                dq_reports=dq_reports,
+            ),
+        )
 
     def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.
