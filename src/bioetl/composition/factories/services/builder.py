@@ -18,6 +18,9 @@ from bioetl.application.core.wiring.runtime import (
     ShutdownSignal,
     TransformCallback,
 )
+from bioetl.composition.factories.services._builder_record_processor_support import (
+    create_record_processor_impl,
+)
 from bioetl.composition.factories.services.callbacks import (
     create_data_normalization_service,
     extract_pipeline_callbacks,
@@ -30,7 +33,6 @@ from bioetl.composition.factories.services.pipeline_builder import (
 )
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
-from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
@@ -162,58 +164,38 @@ class ServicesBuilder:
         gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None = None,
     ) -> RecordProcessor:
         """Create configured ``RecordProcessor`` for pipeline execution."""
-        effective_tracer = tracer or services.tracing
-        active_gold_schema = (
-            gold_schema_policy_by_version.active_schema
-            if gold_schema_policy_by_version is not None
-            else gold_schema
-        )
-        processor_config = RecordProcessorConfig(
+        return create_record_processor_impl(
+            services_builder=ServicesBuilder,
+            services=services,
+            context=context,
             pipeline_name=pipeline_name,
             provider=provider,
             entity_type=entity_type,
             silver_schema=silver_schema,
             gold_schema=gold_schema,
             dq_config=dq_config,
-            table_config=TableConfig(
-                primary_keys=tuple(primary_keys),
-                silver_table=silver_table,
-                gold_table=gold_table,
-                silver_write_mode=silver_write_mode,
-                gold_write_mode=gold_write_mode,
-                on_schema_mismatch=on_schema_mismatch,
-            ),
+            primary_keys=primary_keys,
+            silver_table=silver_table,
+            gold_table=gold_table,
+            silver_write_mode=silver_write_mode,
+            gold_write_mode=gold_write_mode,
+            on_schema_mismatch=on_schema_mismatch,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+            tracer=tracer,
+            strict_gold_validation=strict_gold_validation,
+            lock_validator=lock_validator,
             column_groups=column_groups,
             scd_config=scd_config,
             content_hash_include_fields=content_hash_include_fields,
             content_hash_exclude_fields=content_hash_exclude_fields,
             content_hash_policy_by_version=content_hash_policy_by_version,
             gold_schema_policy_by_version=gold_schema_policy_by_version,
-        )
-
-        components = ServicesBuilder.create_batch_processing_components(
-            services=services,
-            context=context,
-            config=processor_config,
-            error_classifier=ErrorClassifier(),
-            transform_callback=transform_callback,
-            gold_filter_callback=gold_filter_callback,
-            gold_transform_callback=gold_transform_callback,
-            gold_validator=PanderaGoldValidator(
-                cast("pdr.DataFrameSchema | None", active_gold_schema),
-                strict=strict_gold_validation,
-            ),
-            tracer=effective_tracer,
-            lock_validator=lock_validator,
-        )
-
-        return RecordProcessor(
-            context=context,
-            batch_metrics=components.batch_metrics,
-            transformer=components.transformer,
-            writer=components.writer,
-            config=processor_config,
-            tracer=effective_tracer,
+            record_processor_config_cls=RecordProcessorConfig,
+            table_config_cls=TableConfig,
+            gold_validator_factory=PanderaGoldValidator,
+            record_processor_cls=RecordProcessor,
         )
 
     @staticmethod

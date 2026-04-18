@@ -2104,46 +2104,55 @@ def _file_structure_config(memory_mapping: dict[str, object]) -> dict[str, objec
 
 def _duplication_analysis_config(memory_mapping: dict[str, object]) -> dict[str, object]:
     payload = _mapping_section(memory_mapping, "duplication_analysis")
-
-    raw_families = payload.get("families", {})
-    families: list[DuplicateFamilyConfig] = []
-    if isinstance(raw_families, dict):
-        for family_name, family_payload in raw_families.items():
-            if not isinstance(family_payload, dict):
-                continue
-            roots = tuple(_as_string_list(family_payload.get("roots")))
-            package_family = str(family_payload.get("package_family", "")).strip()
-            if not roots or not package_family:
-                continue
-            excluded_paths = tuple(
-                sorted(set(_as_string_list(family_payload.get("excluded_paths"))))
-            )
-            promotion_targets: list[NodeKey] = []
-            raw_targets = family_payload.get("promotion_targets", [])
-            if isinstance(raw_targets, list):
-                for raw_target in raw_targets:
-                    if not isinstance(raw_target, dict):
-                        continue
-                    label = str(raw_target.get("label", "")).strip()
-                    name = str(raw_target.get("name", "")).strip()
-                    if label and name:
-                        promotion_targets.append(NodeKey(label, name))
-            families.append(
-                DuplicateFamilyConfig(
-                    name=str(family_name),
-                    roots=roots,
-                    package_family=package_family,
-                    promotion_targets=tuple(promotion_targets),
-                    excluded_paths=excluded_paths,
-                )
-            )
-
+    families = _configured_duplication_families(payload.get("families", {}))
     return {
         "enabled": bool(payload.get("enabled", True)),
         "min_cluster_size": int(payload.get("min_cluster_size", 2) or 2),
         "min_ast_nodes": int(payload.get("min_ast_nodes", 12) or 12),
         "families": tuple(families),
     }
+
+
+def _promotion_targets_from_payload(raw_targets: object) -> tuple[NodeKey, ...]:
+    if not isinstance(raw_targets, list):
+        return ()
+    promotion_targets: list[NodeKey] = []
+    for raw_target in raw_targets:
+        if not isinstance(raw_target, dict):
+            continue
+        label = str(raw_target.get("label", "")).strip()
+        name = str(raw_target.get("name", "")).strip()
+        if label and name:
+            promotion_targets.append(NodeKey(label, name))
+    return tuple(promotion_targets)
+
+
+def _duplicate_family_config(name: object, payload: object) -> DuplicateFamilyConfig | None:
+    if not isinstance(payload, dict):
+        return None
+    roots = tuple(_as_string_list(payload.get("roots")))
+    package_family = str(payload.get("package_family", "")).strip()
+    if not roots or not package_family:
+        return None
+    excluded_paths = tuple(sorted(set(_as_string_list(payload.get("excluded_paths")))))
+    return DuplicateFamilyConfig(
+        name=str(name),
+        roots=roots,
+        package_family=package_family,
+        promotion_targets=_promotion_targets_from_payload(payload.get("promotion_targets", [])),
+        excluded_paths=excluded_paths,
+    )
+
+
+def _configured_duplication_families(raw_families: object) -> list[DuplicateFamilyConfig]:
+    if not isinstance(raw_families, dict):
+        return []
+    families: list[DuplicateFamilyConfig] = []
+    for family_name, family_payload in raw_families.items():
+        family = _duplicate_family_config(family_name, family_payload)
+        if family is not None:
+            families.append(family)
+    return families
 
 
 def _retirement_analysis_config(
@@ -2310,53 +2319,82 @@ def _git_last_commit_age_days_bulk(
         return {}
 
     git_executable = _resolve_git_executable()
-    resolved: dict[str, int | None] = {}
-    for path in unique_paths:
-        if path in cache:
-            resolved[path] = cache[path]
-
+    resolved = _git_cached_commit_ages(unique_paths, cache)
     pending_paths = [path for path in unique_paths if path not in resolved]
     for start_index in range(0, len(pending_paths), chunk_size):
         chunk = pending_paths[start_index : start_index + chunk_size]
         if not chunk:
             continue
-        result = subprocess.run(
-            [
-                git_executable,
-                "-C",
-                str(root),
-                "log",
-                "--format=__TS__%ct",
-                "--name-only",
-                "--",
-                *chunk,
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
+        chunk_results = _git_chunk_commit_ages(
+            git_executable=git_executable,
+            root=root,
+            chunk=chunk,
+            today=today,
         )
-        chunk_results = {path: None for path in chunk}
-        if result.returncode == 0:
-            current_timestamp: int | None = None
-            unresolved = set(chunk)
-            for raw_line in result.stdout.splitlines():
-                line = raw_line.strip()
-                if not line:
-                    continue
-                if line.startswith("__TS__"):
-                    timestamp = line.removeprefix("__TS__")
-                    current_timestamp = int(timestamp) if timestamp.isdigit() else None
-                    continue
-                if current_timestamp is None or line not in unresolved:
-                    continue
-                committed_at = datetime.fromtimestamp(current_timestamp, tz=UTC).date()
-                chunk_results[line] = max(0, (today - committed_at).days)
-                unresolved.remove(line)
-                if not unresolved:
-                    break
         cache.update(chunk_results)
         resolved.update(chunk_results)
     return {path: resolved.get(path) for path in unique_paths}
+
+
+def _git_cached_commit_ages(
+    unique_paths: list[str],
+    cache: dict[str, int | None],
+) -> dict[str, int | None]:
+    return {path: cache[path] for path in unique_paths if path in cache}
+
+
+def _git_chunk_commit_ages(
+    *,
+    git_executable: str,
+    root: Path,
+    chunk: list[str],
+    today: date,
+) -> dict[str, int | None]:
+    result = subprocess.run(
+        [
+            git_executable,
+            "-C",
+            str(root),
+            "log",
+            "--format=__TS__%ct",
+            "--name-only",
+            "--",
+            *chunk,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    chunk_results = {path: None for path in chunk}
+    if result.returncode != 0:
+        return chunk_results
+    return _parse_git_chunk_age_output(result.stdout, chunk, today)
+
+
+def _parse_git_chunk_age_output(
+    output: str,
+    chunk: list[str],
+    today: date,
+) -> dict[str, int | None]:
+    chunk_results = {path: None for path in chunk}
+    current_timestamp: int | None = None
+    unresolved = set(chunk)
+    for raw_line in output.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if line.startswith("__TS__"):
+            timestamp = line.removeprefix("__TS__")
+            current_timestamp = int(timestamp) if timestamp.isdigit() else None
+            continue
+        if current_timestamp is None or line not in unresolved:
+            continue
+        committed_at = datetime.fromtimestamp(current_timestamp, tz=UTC).date()
+        chunk_results[line] = max(0, (today - committed_at).days)
+        unresolved.remove(line)
+        if not unresolved:
+            break
+    return chunk_results
 
 
 def _resolve_git_executable() -> str:
@@ -2808,21 +2846,60 @@ def _imported_port_surfaces(
 
     imported: set[str] = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                if alias.name.startswith(PORTS_MODULE_PREFIX):
-                    imported.update(port_module_surfaces.get(alias.name, set()))
-        elif isinstance(node, ast.ImportFrom) and node.module is not None:
-            if not node.module.startswith(PORTS_MODULE_PREFIX):
-                continue
-            if any(alias.name == "*" for alias in node.names):
-                imported.update(port_module_surfaces.get(node.module, set()))
-                continue
-            symbol_targets = port_symbol_index.get(node.module, {})
-            for alias in node.names:
-                target = symbol_targets.get(alias.name)
-                if target is not None:
-                    imported.add(target)
+        imported.update(
+            _imported_port_surfaces_for_node(
+                node,
+                port_module_surfaces=port_module_surfaces,
+                port_symbol_index=port_symbol_index,
+            )
+        )
+    return imported
+
+
+def _imported_port_surfaces_for_node(
+    node: ast.AST,
+    *,
+    port_module_surfaces: dict[str, set[str]],
+    port_symbol_index: dict[str, dict[str, str]],
+) -> set[str]:
+    if isinstance(node, ast.Import):
+        return _imported_port_surfaces_from_import(node, port_module_surfaces)
+    if isinstance(node, ast.ImportFrom) and node.module is not None:
+        return _imported_port_surfaces_from_import_from(
+            node,
+            port_module_surfaces=port_module_surfaces,
+            port_symbol_index=port_symbol_index,
+        )
+    return set()
+
+
+def _imported_port_surfaces_from_import(
+    node: ast.Import,
+    port_module_surfaces: dict[str, set[str]],
+) -> set[str]:
+    imported: set[str] = set()
+    for alias in node.names:
+        if alias.name.startswith(PORTS_MODULE_PREFIX):
+            imported.update(port_module_surfaces.get(alias.name, set()))
+    return imported
+
+
+def _imported_port_surfaces_from_import_from(
+    node: ast.ImportFrom,
+    *,
+    port_module_surfaces: dict[str, set[str]],
+    port_symbol_index: dict[str, dict[str, str]],
+) -> set[str]:
+    if node.module is None or not node.module.startswith(PORTS_MODULE_PREFIX):
+        return set()
+    if any(alias.name == "*" for alias in node.names):
+        return set(port_module_surfaces.get(node.module, set()))
+    imported: set[str] = set()
+    symbol_targets = port_symbol_index.get(node.module, {})
+    for alias in node.names:
+        target = symbol_targets.get(alias.name)
+        if target is not None:
+            imported.add(target)
     return imported
 
 
@@ -9746,23 +9823,47 @@ def _link_duplication_override_relations(
     class_method_index: dict[tuple[NodeKey, str], NodeKey],
 ) -> None:
     for class_descriptor in class_descriptors.values():
-        class_node = snapshot.nodes[class_descriptor.node_key]
-        base_names = class_node.properties.get("base_names")
-        if not isinstance(base_names, list):
-            continue
-        for base_name in base_names:
-            if not isinstance(base_name, str) or not base_name:
-                continue
-            base_candidates = class_name_index.get(base_name, [])
-            if len(base_candidates) != 1:
-                continue
-            base_class = base_candidates[0]
+        for base_class in _resolved_base_classes(snapshot, class_descriptor, class_name_index):
             snapshot.add_relation(class_descriptor.node_key, "DEPENDS_ON", base_class, provenance="code_duplication")
-            for method_name in class_descriptor.method_names:
-                base_method = class_method_index.get((base_class, method_name))
-                current_method = class_method_index.get((class_descriptor.node_key, method_name))
-                if base_method is not None and current_method is not None:
-                    snapshot.add_relation(current_method, "OVERRIDES", base_method, provenance="code_duplication")
+            _link_duplication_override_methods(
+                snapshot,
+                class_descriptor=class_descriptor,
+                base_class=base_class,
+                class_method_index=class_method_index,
+            )
+
+
+def _resolved_base_classes(
+    snapshot: GraphSnapshot,
+    class_descriptor: ClassDescriptor,
+    class_name_index: dict[str, list[NodeKey]],
+) -> tuple[NodeKey, ...]:
+    class_node = snapshot.nodes[class_descriptor.node_key]
+    base_names = class_node.properties.get("base_names")
+    if not isinstance(base_names, list):
+        return ()
+    resolved: list[NodeKey] = []
+    for base_name in base_names:
+        if not isinstance(base_name, str) or not base_name:
+            continue
+        base_candidates = class_name_index.get(base_name, [])
+        if len(base_candidates) == 1:
+            resolved.append(base_candidates[0])
+    return tuple(resolved)
+
+
+def _link_duplication_override_methods(
+    snapshot: GraphSnapshot,
+    *,
+    class_descriptor: ClassDescriptor,
+    base_class: NodeKey,
+    class_method_index: dict[tuple[NodeKey, str], NodeKey],
+) -> None:
+    for method_name in class_descriptor.method_names:
+        base_method = class_method_index.get((base_class, method_name))
+        current_method = class_method_index.get((class_descriptor.node_key, method_name))
+        if base_method is not None and current_method is not None:
+            snapshot.add_relation(current_method, "OVERRIDES", base_method, provenance="code_duplication")
 
 
 def _duplication_promotion_target(
@@ -9772,28 +9873,58 @@ def _duplication_promotion_target(
     surface_kind: str,
     unique_members: list[CallableDescriptor],
 ) -> NodeKey | None:
-    promotion_target: NodeKey | None = None
-    if surface_kind == "method_surface":
-        common_base_candidates: set[NodeKey] | None = None
-        method_name = unique_members[0].callable_name
-        if all(member.callable_name == method_name and member.parent_class for member in unique_members):
-            for member in unique_members:
-                candidate_set = {
-                    relation.target
-                    for relation in snapshot.relations.values()
-                    if relation.source == member.node_key
-                    and relation.relation_type == "OVERRIDES"
-                    and relation.target.label == "method_surface"
-                }
-                class_targets = {NodeKey("class_surface", target.name.rsplit(".", 1)[0]) for target in candidate_set}
-                common_base_candidates = (
-                    class_targets if common_base_candidates is None else common_base_candidates & class_targets
-                )
-            if common_base_candidates:
-                promotion_target = sorted(common_base_candidates, key=lambda item: item.name)[0]
+    promotion_target = _method_surface_promotion_target(snapshot, surface_kind, unique_members)
     if promotion_target is not None:
         return promotion_target
-    family = next(
+    family = _duplication_family_by_name(config, family_name)
+    if not isinstance(family, DuplicateFamilyConfig):
+        return None
+    for candidate in family.promotion_targets:
+        if candidate in snapshot.nodes:
+            return candidate
+    return None
+
+
+def _method_surface_promotion_target(
+    snapshot: GraphSnapshot,
+    surface_kind: str,
+    unique_members: list[CallableDescriptor],
+) -> NodeKey | None:
+    if surface_kind != "method_surface" or not unique_members:
+        return None
+    method_name = unique_members[0].callable_name
+    if not all(member.callable_name == method_name and member.parent_class for member in unique_members):
+        return None
+    common_base_candidates: set[NodeKey] | None = None
+    for member in unique_members:
+        class_targets = _override_target_classes(snapshot, member)
+        common_base_candidates = (
+            class_targets if common_base_candidates is None else common_base_candidates & class_targets
+        )
+    if not common_base_candidates:
+        return None
+    return sorted(common_base_candidates, key=lambda item: item.name)[0]
+
+
+def _override_target_classes(
+    snapshot: GraphSnapshot,
+    member: CallableDescriptor,
+) -> set[NodeKey]:
+    candidate_set = {
+        relation.target
+        for relation in snapshot.relations.values()
+        if relation.source == member.node_key
+        and relation.relation_type == "OVERRIDES"
+        and relation.target.label == "method_surface"
+    }
+    return {NodeKey("class_surface", target.name.rsplit(".", 1)[0]) for target in candidate_set}
+
+
+def _duplication_family_by_name(
+    config: dict[str, object],
+    family_name: str,
+) -> DuplicateFamilyConfig | None:
+    return next(
         (
             item
             for item in config.get("families", ())
@@ -9801,12 +9932,6 @@ def _duplication_promotion_target(
         ),
         None,
     )
-    if not isinstance(family, DuplicateFamilyConfig):
-        return None
-    for candidate in family.promotion_targets:
-        if candidate in snapshot.nodes:
-            return candidate
-    return None
 
 
 def _emit_duplication_clusters(
