@@ -1,0 +1,1 @@
+{"timestamp": "2026-02-26T12:00:00Z", "agent_id": "L2-infrastructure-unit-integ", "level": "L2", "test_nodeid": "tests/unit/infrastructure/test_fake.py::test_fake", "test_type": "unit", "layer": "infrastructure", "module": "infrastructure.fake", "outcome": "pass", "duration_ms": 10, "retry_index": 0, "is_flaky_suspected": false, "run_id": "run-1"}

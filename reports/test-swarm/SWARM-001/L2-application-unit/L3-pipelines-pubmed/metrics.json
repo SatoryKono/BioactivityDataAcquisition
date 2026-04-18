@@ -1,0 +1,1 @@
+{"agent_id": "L3-pipelines-pubmed", "level": "L3", "scope": "tests/unit/application/pipelines-pubmed/", "status": "completed", "overall_status": "GREEN", "metrics_after": {"total_tests": 1000, "passed": 1000, "failed": 0, "skipped": 0, "coverage_pct": 88.0, "median_duration_ms": 2, "p95_duration_ms": 10}}

@@ -1,0 +1,1 @@
+{"agent_id": "L3-adapters-chembl", "level": "L3", "scope": "tests/unit/infrastructure/adapters-chembl/", "status": "completed", "overall_status": "GREEN", "metrics_after": {"total_tests": 1000, "passed": 1000, "failed": 0, "skipped": 0, "coverage_pct": 86.0, "median_duration_ms": 10, "p95_duration_ms": 50}}
