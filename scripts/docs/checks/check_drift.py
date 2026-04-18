@@ -455,78 +455,153 @@ def check_glossary(report: DriftReport) -> None:
 def check_runtime_mirrors(report: DriftReport) -> None:
     """Verify critical published runtime mirrors stay aligned with canonical docs."""
     for rule in RUNTIME_MIRROR_RULES:
-        canonical_path = PROJECT_ROOT / rule.canonical
-        mirror_path = PROJECT_ROOT / rule.mirror
+        _check_runtime_mirror_rule(report, rule)
 
-        canonical_text = _read_doc(canonical_path)
-        mirror_text = _read_doc(mirror_path)
 
-        if not canonical_text:
-            report.add(
-                "runtime-mirrors",
-                "ERROR",
-                _rel(canonical_path),
-                "Canonical runtime doc missing",
-            )
-            continue
-        if not mirror_text:
-            report.add(
-                "runtime-mirrors",
-                "ERROR",
-                _rel(mirror_path),
-                "Published runtime mirror missing",
-            )
-            continue
+def _check_runtime_mirror_rule(report: DriftReport, rule: RuntimeMirrorRule) -> None:
+    canonical_path = PROJECT_ROOT / rule.canonical
+    mirror_path = PROJECT_ROOT / rule.mirror
+    canonical_text = _read_doc(canonical_path)
+    mirror_text = _read_doc(mirror_path)
 
-        if rule.compare_version:
-            canonical_version = _extract_runtime_version(canonical_text)
-            mirror_version = _extract_runtime_version(mirror_text)
-            if canonical_version is None or mirror_version is None:
-                report.add(
-                    "runtime-mirrors",
-                    "ERROR",
-                    _rel(mirror_path),
-                    f"{rule.name}: could not extract version marker from canonical or mirror",
-                )
-            elif canonical_version != mirror_version:
-                report.add(
-                    "runtime-mirrors",
-                    "ERROR",
-                    _rel(mirror_path),
-                    f"{rule.name}: version marker drifted "
-                    f"(canonical v{canonical_version}, mirror v{mirror_version})",
-                )
+    if not _validate_runtime_mirror_inputs(
+        report,
+        canonical_path=canonical_path,
+        mirror_path=mirror_path,
+        canonical_text=canonical_text,
+        mirror_text=mirror_text,
+    ):
+        return
 
-        for heading in rule.sections:
-            canonical_section = _extract_section(canonical_text, heading)
-            mirror_section = _extract_section(mirror_text, heading)
+    assert canonical_text is not None
+    assert mirror_text is not None
+    _check_runtime_mirror_versions(report, rule, mirror_path, canonical_text, mirror_text)
+    _check_runtime_mirror_sections(
+        report,
+        rule,
+        canonical_path=canonical_path,
+        mirror_path=mirror_path,
+        canonical_text=canonical_text,
+        mirror_text=mirror_text,
+    )
 
-            if canonical_section is None:
-                report.add(
-                    "runtime-mirrors",
-                    "ERROR",
-                    _rel(canonical_path),
-                    f"{rule.name}: canonical doc missing required section {heading!r}",
-                )
-                continue
-            if mirror_section is None:
-                report.add(
-                    "runtime-mirrors",
-                    "ERROR",
-                    _rel(mirror_path),
-                    f"{rule.name}: mirror doc missing required section {heading!r}",
-                )
-                continue
 
-            if _normalize_markdown_block(
-                canonical_section
-            ) != _normalize_markdown_block(mirror_section):
-                report.add(
-                    "runtime-mirrors",
-                    "ERROR",
-                    _rel(mirror_path),
-                    f"{rule.name}: section {heading!r} drifted from canonical runtime doc",
-                )
+def _validate_runtime_mirror_inputs(
+    report: DriftReport,
+    *,
+    canonical_path: Path,
+    mirror_path: Path,
+    canonical_text: str | None,
+    mirror_text: str | None,
+) -> bool:
+    if not canonical_text:
+        report.add(
+            "runtime-mirrors",
+            "ERROR",
+            _rel(canonical_path),
+            "Canonical runtime doc missing",
+        )
+        return False
+    if not mirror_text:
+        report.add(
+            "runtime-mirrors",
+            "ERROR",
+            _rel(mirror_path),
+            "Published runtime mirror missing",
+        )
+        return False
+    return True
+
+
+def _check_runtime_mirror_versions(
+    report: DriftReport,
+    rule: RuntimeMirrorRule,
+    mirror_path: Path,
+    canonical_text: str,
+    mirror_text: str,
+) -> None:
+    if not rule.compare_version:
+        return
+    canonical_version = _extract_runtime_version(canonical_text)
+    mirror_version = _extract_runtime_version(mirror_text)
+    if canonical_version is None or mirror_version is None:
+        report.add(
+            "runtime-mirrors",
+            "ERROR",
+            _rel(mirror_path),
+            f"{rule.name}: could not extract version marker from canonical or mirror",
+        )
+        return
+    if canonical_version != mirror_version:
+        report.add(
+            "runtime-mirrors",
+            "ERROR",
+            _rel(mirror_path),
+            f"{rule.name}: version marker drifted "
+            f"(canonical v{canonical_version}, mirror v{mirror_version})",
+        )
+
+
+def _check_runtime_mirror_sections(
+    report: DriftReport,
+    rule: RuntimeMirrorRule,
+    *,
+    canonical_path: Path,
+    mirror_path: Path,
+    canonical_text: str,
+    mirror_text: str,
+) -> None:
+    for heading in rule.sections:
+        _check_runtime_mirror_section(
+            report,
+            rule,
+            heading,
+            canonical_path=canonical_path,
+            mirror_path=mirror_path,
+            canonical_text=canonical_text,
+            mirror_text=mirror_text,
+        )
+
+
+def _check_runtime_mirror_section(
+    report: DriftReport,
+    rule: RuntimeMirrorRule,
+    heading: str,
+    *,
+    canonical_path: Path,
+    mirror_path: Path,
+    canonical_text: str,
+    mirror_text: str,
+) -> None:
+    canonical_section = _extract_section(canonical_text, heading)
+    mirror_section = _extract_section(mirror_text, heading)
+
+    if canonical_section is None:
+        report.add(
+            "runtime-mirrors",
+            "ERROR",
+            _rel(canonical_path),
+            f"{rule.name}: canonical doc missing required section {heading!r}",
+        )
+        return
+    if mirror_section is None:
+        report.add(
+            "runtime-mirrors",
+            "ERROR",
+            _rel(mirror_path),
+            f"{rule.name}: mirror doc missing required section {heading!r}",
+        )
+        return
+
+    if _normalize_markdown_block(canonical_section) != _normalize_markdown_block(
+        mirror_section
+    ):
+        report.add(
+            "runtime-mirrors",
+            "ERROR",
+            _rel(mirror_path),
+            f"{rule.name}: section {heading!r} drifted from canonical runtime doc",
+        )
 
 
 def check_freshness(report: DriftReport) -> None:
