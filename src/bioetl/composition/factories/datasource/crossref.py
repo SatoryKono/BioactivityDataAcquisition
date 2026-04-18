@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from bioetl.composition.factories.datasource._crossref_support import (
-    build_crossref_components,
+from bioetl.composition.factories.datasource._crossref_inputs import (
     require_dependencies,
     resolve_mailto,
+)
+from bioetl.composition.factories.datasource._crossref_support import (
+    build_crossref_components,
 )
 from bioetl.infrastructure.adapters.crossref import CrossRefAdapter
 

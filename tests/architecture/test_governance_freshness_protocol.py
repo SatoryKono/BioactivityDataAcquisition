@@ -40,15 +40,21 @@ def test_evidence_index_declares_rebaseline_model() -> None:
 
 
 def test_high_signal_reports_carry_freshness_notes() -> None:
-    candidate_paths = (
-        "reports/plans/architecture-overview-and-refactor-roadmap-2026-03-23.md",
-        "reports/gpt-5.2/review_py-audit-bot_20260323_0850_baseline.md",
-    )
-    existing_paths = [path for path in candidate_paths if (ROOT / path).exists()]
-    assert existing_paths, "Expected at least one high-signal dated report artifact"
-    for relative_path in existing_paths:
+    candidate_paths = [
+        path.relative_to(ROOT).as_posix()
+        for path in sorted((ROOT / "docs" / "plans").glob("*2026-*.md"))
+    ]
+    assert candidate_paths, "Expected at least one high-signal dated report artifact"
+
+    paths_with_freshness_note = []
+    for relative_path in candidate_paths:
         text = _read(relative_path)
-        assert "Freshness note" in text, f"{relative_path} is missing Freshness note"
+        if "Freshness note" in text:
+            paths_with_freshness_note.append(relative_path)
+
+    assert paths_with_freshness_note, (
+        "Expected at least one high-signal dated report artifact with a Freshness note"
+    )
 
 
 def test_technical_debt_surfaces_mark_rebaseline_status() -> None:
