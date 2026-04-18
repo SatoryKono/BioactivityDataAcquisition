@@ -123,33 +123,6 @@ def _reorder_records(records: list[dict], variant: int) -> list[dict]:
         return records[1:] + records[:1]
     return records[2:] + records[:2]
 
-    async def test_json_serialization_with_sort_keys(
-        self, tmp_path: Path, mock_logger: MagicMock
-    ):
-        """Test that JSON serialization uses sort_keys=True."""
-        records = [
-            {"id": "A", "data": {"z_key": 1, "a_key": 2, "m_key": 3}},
-        ]
-        table = pa.Table.from_pylist(records)
-
-        exporter = CsvExporter(
-            base_path=str(tmp_path),
-            logger=mock_logger,
-            sort_by=["id"],
-        )
-
-        csv_path = await exporter.export("json_test", table, append=False)
-
-        content = await asyncio.to_thread(Path(csv_path).read_text, encoding="utf-8")
-
-        # JSON should have keys in alphabetical order
-        assert '"a_key"' in content
-        # Check that a_key comes before z_key in the serialized JSON
-        a_pos = content.find('"a_key"')
-        z_pos = content.find('"z_key"')
-        assert a_pos < z_pos, "JSON keys should be sorted alphabetically"
-
-
 class TestDeterministicBronzeWrite:
     """Tests for deterministic Bronze layer write."""
 
