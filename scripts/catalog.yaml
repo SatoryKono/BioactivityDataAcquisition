@@ -1,6 +1,10 @@
 schema_version: "1.0"
 canonical_roots:
   - scripts/ai
+  - scripts/ai/codex
+  - scripts/ai/gemini
+  - scripts/ai/mistrall
+  - scripts/ai/mistrallvibe
   - scripts/engineering/ci
   - scripts/engineering/dev
   - scripts/engineering/qa

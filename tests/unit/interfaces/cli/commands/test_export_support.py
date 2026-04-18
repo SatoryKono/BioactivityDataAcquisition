@@ -167,22 +167,19 @@ class TestBuildExportOptions:
 class TestListTablesOrExit:
     """Tests for _list_tables_or_exit helper."""
 
-    def test_returns_true_when_tables_empty(self) -> None:
-        """Test that empty table list returns True (continue)."""
+    def test_empty_table_list_returns_without_error(self) -> None:
+        """Test that empty table list exits normally after printing info."""
         service = _make_service(tables=[])
 
-        result = _list_tables_or_exit(service, layer="silver")
+        _list_tables_or_exit(service, layer="silver")
+        service.list_tables.assert_called_once()
 
-        assert result is True
-
-    def test_returns_true_and_prints_tables(self) -> None:
-        """Test that non-empty table list is printed and True is returned."""
+    def test_non_empty_table_list_prints_tables(self) -> None:
+        """Test that non-empty table list is printed without error."""
         table = _make_table_info()
         service = _make_service(tables=[table])
 
-        result = _list_tables_or_exit(service, layer="silver")
-
-        assert result is True
+        _list_tables_or_exit(service, layer="silver")
         service.list_tables.assert_called_once()
 
     def test_handles_domain_error_exits_with_fail(self) -> None:

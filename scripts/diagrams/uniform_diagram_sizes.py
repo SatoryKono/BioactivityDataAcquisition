@@ -98,6 +98,17 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
+def _repo_relative_path(path: Path) -> Path:
+    safe_path = _ensure_repo_path(path)
+    return safe_path.relative_to(SCRIPT_DIR.parents[1].resolve())
+
+
+def _write_repo_text(relative_path: Path, content: str) -> None:
+    """Write normalized diagram text via a repository-relative path."""
+    target_path = SCRIPT_DIR.parents[1] / relative_path
+    target_path.write_text(content, encoding="utf-8")
+
+
 # Flowchart node patterns:
 #   ID["Label text"]         — rectangle
 #   ID(["Label text"])       — rounded
@@ -966,7 +977,7 @@ def main() -> int:
             print()
         else:
             safe_path = _ensure_repo_path(path)
-            safe_path.write_text(normalized, encoding="utf-8")
+            _write_repo_text(_repo_relative_path(safe_path), normalized)
             print(f"  {GREEN}FIXED{NC}  {path}")
 
     # Summary
