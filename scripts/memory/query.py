@@ -1503,32 +1503,67 @@ def _format_promotion_candidates_rows(title: str, name: str, rows: list[dict[str
     return "\n".join(lines)
 
 
+def _marker_suffix(row: dict[str, JsonValue], field_name: str, suffix_name: str) -> str:
+    marker_str = _join_string_list(row.get(field_name))
+    return f" | {suffix_name}={marker_str}" if marker_str else ""
+
+
+def _target_identity_parts(row: dict[str, JsonValue]) -> list[str]:
+    return [
+        f"target={row.get('target_name') or ''!s}",
+        f"label={row.get('target_label') or ''!s}",
+        f"family={row.get('family_name') or ''!s}",
+    ]
+
+
+def _anchor_count_parts(row: dict[str, JsonValue]) -> list[str]:
+    return [
+        f"runtime={row.get('runtime_anchor_count') or ''!s}",
+        f"config={row.get('config_anchor_count') or ''!s}",
+        f"docs={row.get('doc_anchor_count') or ''!s}",
+        f"tests={row.get('test_anchor_count') or ''!s}",
+    ]
+
+
+def _target_row_line(row: dict[str, JsonValue], extra_parts: list[str], suffix: str = "") -> str:
+    return "- " + " | ".join([*_target_identity_parts(row), *extra_parts]) + suffix
+
+
+def _blocker_detail_lines(blockers: JsonValue) -> list[str]:
+    if not isinstance(blockers, list):
+        return []
+    normalized: set[str] = set()
+    for blocker in blockers:
+        if not isinstance(blocker, dict):
+            continue
+        blocker_name = str(blocker.get("name") or "")
+        if not blocker_name:
+            continue
+        relation_name = str(blocker.get("relation") or "")
+        normalized.add(f"  blocker={blocker_name} | relation={relation_name}{_label_suffix(blocker.get('labels'))}")
+    return sorted(normalized)
+
+
 def _format_dead_code_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        target_name = str(row.get("target_name") or "")
-        if not target_name:
+        if not row.get("target_name"):
             continue
-        family_name = str(row.get("family_name") or "")
-        target_label = str(row.get("target_label") or "")
-        deletion_score = str(row.get("deletion_score") or "")
-        deletion_confidence = str(row.get("deletion_confidence") or "")
-        recent_age_days = str(row.get("recent_age_days") or "")
-        only_test_referenced = str(row.get("only_test_referenced") or "")
-        runtime_anchor_count = str(row.get("runtime_anchor_count") or "")
-        config_anchor_count = str(row.get("config_anchor_count") or "")
-        doc_anchor_count = str(row.get("doc_anchor_count") or "")
-        test_anchor_count = str(row.get("test_anchor_count") or "")
-        blocked_by_cycle = str(row.get("blocked_by_cycle") or "")
-        deprecation_markers = row.get("deprecation_markers")
-        marker_str = ",".join(str(marker) for marker in deprecation_markers) if isinstance(deprecation_markers, list) else ""
-        blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
-        marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
+        suffix = _marker_suffix(row, "deprecation_markers", "deprecation_markers")
+        if row.get("blocked_by_cycle"):
+            suffix += f" | blocked_by={row.get('blocked_by_cycle') or ''!s}"
         lines.append(
-            f"- target={target_name} | label={target_label} | family={family_name} | deletion_score={deletion_score} "
-            f"| confidence={deletion_confidence} | recent_age_days={recent_age_days} | only_test_referenced={only_test_referenced} "
-            f"| runtime={runtime_anchor_count} | config={config_anchor_count} | docs={doc_anchor_count} | tests={test_anchor_count}"
-            f"{marker_suffix}{blocked_suffix}"
+            _target_row_line(
+                row,
+                [
+                    f"deletion_score={row.get('deletion_score') or ''!s}",
+                    f"confidence={row.get('deletion_confidence') or ''!s}",
+                    f"recent_age_days={row.get('recent_age_days') or ''!s}",
+                    f"only_test_referenced={row.get('only_test_referenced') or ''!s}",
+                    *_anchor_count_parts(row),
+                ],
+                suffix,
+            )
         )
     if len(lines) == 1:
         lines.append("- no dead code candidates found")
@@ -1538,25 +1573,19 @@ def _format_dead_code_candidates_rows(title: str, name: str, rows: list[dict[str
 def _format_current_cycle_code_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        target_name = str(row.get("target_name") or "")
-        if not target_name:
+        if not row.get("target_name"):
             continue
-        family_name = str(row.get("family_name") or "")
-        target_label = str(row.get("target_label") or "")
-        cycle_status = str(row.get("cycle_status") or "")
-        cycle_score = str(row.get("cycle_score") or "")
-        recent_age_days = str(row.get("recent_age_days") or "")
-        runtime_anchor_count = str(row.get("runtime_anchor_count") or "")
-        config_anchor_count = str(row.get("config_anchor_count") or "")
-        doc_anchor_count = str(row.get("doc_anchor_count") or "")
-        test_anchor_count = str(row.get("test_anchor_count") or "")
-        wip_markers = row.get("wip_markers")
-        marker_str = ",".join(str(marker) for marker in wip_markers) if isinstance(wip_markers, list) else ""
-        marker_suffix = f" | wip_markers={marker_str}" if marker_str else ""
         lines.append(
-            f"- target={target_name} | label={target_label} | family={family_name} | cycle_status={cycle_status} "
-            f"| cycle_score={cycle_score} | recent_age_days={recent_age_days} | runtime={runtime_anchor_count} "
-            f"| config={config_anchor_count} | docs={doc_anchor_count} | tests={test_anchor_count}{marker_suffix}"
+            _target_row_line(
+                row,
+                [
+                    f"cycle_status={row.get('cycle_status') or ''!s}",
+                    f"cycle_score={row.get('cycle_score') or ''!s}",
+                    f"recent_age_days={row.get('recent_age_days') or ''!s}",
+                    *_anchor_count_parts(row),
+                ],
+                _marker_suffix(row, "wip_markers", "wip_markers"),
+            )
         )
     if len(lines) == 1:
         lines.append("- no current-cycle code surfaces found")
@@ -1566,26 +1595,28 @@ def _format_current_cycle_code_rows(title: str, name: str, rows: list[dict[str, 
 def _format_overengineered_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        target_name = str(row.get("target_name") or "")
-        if not target_name:
+        if not row.get("target_name"):
             continue
-        blocked_by_cycle = str(row.get("blocked_by_cycle") or "")
-        indirection_markers = row.get("indirection_markers")
-        stateful_markers = row.get("stateful_markers")
-        indirection_str = ",".join(str(marker) for marker in indirection_markers) if isinstance(indirection_markers, list) else ""
-        stateful_str = ",".join(str(marker) for marker in stateful_markers) if isinstance(stateful_markers, list) else ""
-        blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
+        blocked_suffix = f" | blocked_by={row.get('blocked_by_cycle') or ''!s}" if row.get("blocked_by_cycle") else ""
         lines.append(
-            f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
-            f"| classification={row.get('classification') or ''!s} | complexity_score={row.get('complexity_score') or ''!s} "
-            f"| simplification_score={row.get('simplification_score') or ''!s} | removable_score={row.get('removable_score') or ''!s} "
-            f"| branches={row.get('branch_count') or ''!s} | nesting={row.get('nesting_depth') or ''!s} "
-            f"| helper_calls={row.get('helper_call_count') or ''!s}{blocked_suffix}"
+            _target_row_line(
+                row,
+                [
+                    f"classification={row.get('classification') or ''!s}",
+                    f"complexity_score={row.get('complexity_score') or ''!s}",
+                    f"simplification_score={row.get('simplification_score') or ''!s}",
+                    f"removable_score={row.get('removable_score') or ''!s}",
+                    f"branches={row.get('branch_count') or ''!s}",
+                    f"nesting={row.get('nesting_depth') or ''!s}",
+                    f"helper_calls={row.get('helper_call_count') or ''!s}",
+                ],
+                blocked_suffix,
+            )
         )
-        if indirection_str:
-            lines.append(f"  indirection_markers={indirection_str}")
-        if stateful_str:
-            lines.append(f"  stateful_markers={stateful_str}")
+        if _join_string_list(row.get("indirection_markers")):
+            lines.append(f"  indirection_markers={_join_string_list(row.get('indirection_markers'))}")
+        if _join_string_list(row.get("stateful_markers")):
+            lines.append(f"  stateful_markers={_join_string_list(row.get('stateful_markers'))}")
     if len(lines) == 1:
         lines.append("- no overengineered candidates found")
     return "\n".join(lines)
@@ -1614,28 +1645,19 @@ def _format_removable_complexity_rows(title: str, name: str, rows: list[dict[str
 def _format_simplification_blockers_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        target_name = str(row.get("target_name") or "")
-        if not target_name:
+        if not row.get("target_name"):
             continue
         lines.append(
-            f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
-            f"| classification={row.get('classification') or ''!s} | runtime={row.get('runtime_anchor_count') or ''!s} "
-            f"| config={row.get('config_anchor_count') or ''!s} | docs={row.get('doc_anchor_count') or ''!s} "
-            f"| tests={row.get('test_anchor_count') or ''!s}"
+            _target_row_line(
+                row,
+                [
+                    f"classification={row.get('classification') or ''!s}",
+                    *_anchor_count_parts(row),
+                ],
+            )
         )
         lines.extend(_sorted_prefixed_values(row.get("cycle_blockers"), "cycle_blocker"))
-        blockers = row.get("blockers")
-        if isinstance(blockers, list):
-            normalized: set[str] = set()
-            for blocker in blockers:
-                if not isinstance(blocker, dict):
-                    continue
-                blocker_name = str(blocker.get("name") or "")
-                if not blocker_name:
-                    continue
-                relation_name = str(blocker.get("relation") or "")
-                normalized.add(f"  blocker={blocker_name} | relation={relation_name}{_label_suffix(blocker.get('labels'))}")
-            lines.extend(sorted(normalized))
+        lines.extend(_blocker_detail_lines(row.get("blockers")))
     if len(lines) == 1:
         lines.append("- no simplification blockers found")
     return "\n".join(lines)

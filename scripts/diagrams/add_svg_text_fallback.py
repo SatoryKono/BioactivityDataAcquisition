@@ -381,18 +381,32 @@ def add_fallbacks(
     tree = ET.parse(safe_path)
     root = tree.getroot()
 
-    inserted = 0
-    removed_empty_edge_labels = 0
+    parent_map = {child: parent for parent in root.iter() for child in parent}
+    removed_empty_edge_labels = _remove_empty_edge_label_groups(root)
+    inserted = _insert_fallback_text_nodes(root, parent_map)
+
+    if write and (inserted > 0 or removed_empty_edge_labels > 0):
+        tree.write(safe_path, encoding="utf-8", xml_declaration=False)
+
+    return inserted + removed_empty_edge_labels
+
+
+def _remove_empty_edge_label_groups(root: ET.Element) -> int:
+    removed = 0
     for parent in root.iter():
-        children = list(parent)
-        for child in children:
+        for child in list(parent):
             if not _is_empty_edge_label_group(child):
                 continue
             parent.remove(child)
-            removed_empty_edge_labels += 1
+            removed += 1
+    return removed
 
-    parent_map = {child: parent for parent in root.iter() for child in parent}
 
+def _insert_fallback_text_nodes(
+    root: ET.Element,
+    parent_map: dict[ET.Element, ET.Element],
+) -> int:
+    inserted = 0
     for parent in root.iter():
         children = list(parent)
         for idx, child in enumerate(children):
@@ -411,11 +425,7 @@ def add_fallbacks(
             child_index = live_children.index(child)
             parent.insert(child_index, fallback)
             inserted += 1
-
-    if write and (inserted > 0 or removed_empty_edge_labels > 0):
-        tree.write(safe_path, encoding="utf-8", xml_declaration=False)
-
-    return inserted + removed_empty_edge_labels
+    return inserted
 
 
 def collect_svg_files(files: list[Path] | None, dirs: list[Path] | None) -> list[Path]:

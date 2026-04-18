@@ -34,6 +34,8 @@ DEFAULT_INPUTS = [
 ]
 DEFAULT_CSS = (DIAGRAM_THEME_DIR / "with-descriptions-print.css").relative_to(REPO_ROOT)
 DEFAULT_BOUNDS_CHECKER = Path("scripts/diagrams/check_pdf_image_bounds.py")
+PNG_SEGMENT = "/png/"
+SVG_SEGMENT = "/svg/"
 
 
 def parse_args() -> argparse.Namespace:
@@ -110,10 +112,10 @@ def rewrite_image_links(markdown_text: str, *, base_dir: Path, prefer_svg: bool)
         alt = match.group(1)
         target = match.group(2)
         updated = target
-        if prefer_svg and "/png/" in updated and updated.endswith(".png"):
-            updated = updated.replace("/png/", "/svg/")[:-4] + ".svg"
-        elif not prefer_svg and "/svg/" in updated and updated.endswith(".svg"):
-            updated = updated.replace("/svg/", "/png/")[:-4] + ".png"
+        if prefer_svg and PNG_SEGMENT in updated and updated.endswith(".png"):
+            updated = updated.replace(PNG_SEGMENT, SVG_SEGMENT)[:-4] + ".svg"
+        elif not prefer_svg and SVG_SEGMENT in updated and updated.endswith(".svg"):
+            updated = updated.replace(SVG_SEGMENT, PNG_SEGMENT)[:-4] + ".png"
 
         if "://" in updated or updated.startswith("data:"):
             return f"![{alt}]({updated})"

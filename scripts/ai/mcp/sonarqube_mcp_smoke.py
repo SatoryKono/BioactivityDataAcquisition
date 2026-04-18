@@ -88,24 +88,12 @@ def _drain_stdout_frames(
         header_end = data.find(b"\r\n\r\n")
         if header_end == -1:
             return
-        header_blob = data[:header_end].decode("ascii", errors="strict")
-        headers: dict[str, str] = {}
-        for line in header_blob.split("\r\n"):
-            name, _, value = line.partition(":")
-            if not _:
-                raise ValueError(f"Malformed MCP header line: {line!r}")
-            headers[name.strip().lower()] = value.strip()
-        content_length_raw = headers.get("content-length")
-        if content_length_raw is None:
-            raise ValueError("MCP frame is missing Content-Length header.")
-        content_length = int(content_length_raw)
+        content_length = _parse_content_length_header(data[:header_end])
         body_start = header_end + 4
         body_end = body_start + content_length
         if len(data) < body_end:
             return
-        message = json.loads(data[body_start:body_end].decode("utf-8"))
-        if isinstance(message.get("id"), int):
-            responses[message["id"]] = message
+        _store_response_message(data[body_start:body_end], responses)
         del stdout_buffer[:body_end]
 
 
@@ -121,9 +109,7 @@ def _drain_stdout_lines(
         del stdout_buffer[: newline_index + 1]
         if not raw_line:
             continue
-        message = json.loads(raw_line.decode("utf-8"))
-        if isinstance(message.get("id"), int):
-            responses[message["id"]] = message
+        _store_response_message(raw_line, responses)
 
 
 def _drain_stdout_messages(
@@ -144,6 +130,30 @@ def _find_response(messages: Sequence[dict[str, Any]], request_id: int) -> dict[
         if message.get("id") == request_id:
             return message
     return None
+
+
+def _parse_content_length_header(header_bytes: bytes) -> int:
+    header_blob = header_bytes.decode("ascii", errors="strict")
+    headers: dict[str, str] = {}
+    for line in header_blob.split("\r\n"):
+        name, separator, value = line.partition(":")
+        if not separator:
+            raise ValueError(f"Malformed MCP header line: {line!r}")
+        headers[name.strip().lower()] = value.strip()
+
+    content_length_raw = headers.get("content-length")
+    if content_length_raw is None:
+        raise ValueError("MCP frame is missing Content-Length header.")
+    return int(content_length_raw)
+
+
+def _store_response_message(
+    payload: bytes,
+    responses: dict[int, dict[str, Any]],
+) -> None:
+    message = json.loads(payload.decode("utf-8"))
+    if isinstance(message.get("id"), int):
+        responses[message["id"]] = message
 
 
 def _pipe_reader(
@@ -216,18 +226,22 @@ def run_smoke_command(
     try:
         while True:
             now = time.monotonic()
-            if not ready_seen and now >= ready_deadline:
+            if _deadlines_expired(
+                now,
+                ready_seen=ready_seen,
+                ready_deadline=ready_deadline,
+                handshake_deadline=handshake_deadline,
+            ):
                 break
-            if ready_seen and handshake_deadline is not None and now >= handshake_deadline:
-                break
-            if ready_seen and _INITIALIZE_REQUEST_ID in responses and _TOOLS_LIST_REQUEST_ID in responses:
+            if _handshake_complete(ready_seen, responses):
                 break
 
-            timeout = 1.0
-            if not ready_seen:
-                timeout = min(timeout, max(0.0, ready_deadline - now))
-            elif handshake_deadline is not None:
-                timeout = min(timeout, max(0.0, handshake_deadline - now))
+            timeout = _next_chunk_timeout(
+                now,
+                ready_seen=ready_seen,
+                ready_deadline=ready_deadline,
+                handshake_deadline=handshake_deadline,
+            )
 
             try:
                 channel, chunk = chunks.get(timeout=timeout)
@@ -240,18 +254,18 @@ def run_smoke_command(
                     break
                 continue
 
-            if channel == "stderr":
-                stderr_buffer.extend(chunk)
-                stderr_text = stderr_buffer.decode("utf-8", errors="replace")
-                if not ready_seen and _READY_MARKER in stderr_text:
-                    ready_seen = True
-                    process.stdin.write(_build_handshake_lines())
-                    process.stdin.flush()
-                    handshake_sent = True
-                    handshake_deadline = time.monotonic() + handshake_timeout_seconds
-            else:
-                stdout_buffer.extend(chunk)
-                _drain_stdout_messages(stdout_buffer, responses)
+            ready_seen, handshake_sent, handshake_deadline = _handle_stream_chunk(
+                channel,
+                chunk,
+                stdout_buffer=stdout_buffer,
+                stderr_buffer=stderr_buffer,
+                responses=responses,
+                process_stdin=process.stdin,
+                ready_seen=ready_seen,
+                handshake_sent=handshake_sent,
+                handshake_timeout_seconds=handshake_timeout_seconds,
+                handshake_deadline=handshake_deadline,
+            )
     except ValueError as exc:
         return SmokeResult(
             ok=False,
@@ -375,6 +389,70 @@ def build_arg_parser() -> argparse.ArgumentParser:
         ),
     )
     return parser
+
+
+def _deadlines_expired(
+    now: float,
+    *,
+    ready_seen: bool,
+    ready_deadline: float,
+    handshake_deadline: float | None,
+) -> bool:
+    if not ready_seen:
+        return now >= ready_deadline
+    return handshake_deadline is not None and now >= handshake_deadline
+
+
+def _handshake_complete(
+    ready_seen: bool,
+    responses: dict[int, dict[str, Any]],
+) -> bool:
+    return (
+        ready_seen
+        and _INITIALIZE_REQUEST_ID in responses
+        and _TOOLS_LIST_REQUEST_ID in responses
+    )
+
+
+def _next_chunk_timeout(
+    now: float,
+    *,
+    ready_seen: bool,
+    ready_deadline: float,
+    handshake_deadline: float | None,
+) -> float:
+    timeout = 1.0
+    if not ready_seen:
+        return min(timeout, max(0.0, ready_deadline - now))
+    if handshake_deadline is None:
+        return timeout
+    return min(timeout, max(0.0, handshake_deadline - now))
+
+
+def _handle_stream_chunk(
+    channel: str,
+    chunk: bytes,
+    *,
+    stdout_buffer: bytearray,
+    stderr_buffer: bytearray,
+    responses: dict[int, dict[str, Any]],
+    process_stdin: Any,
+    ready_seen: bool,
+    handshake_sent: bool,
+    handshake_timeout_seconds: float,
+    handshake_deadline: float | None,
+) -> tuple[bool, bool, float | None]:
+    if channel == "stderr":
+        stderr_buffer.extend(chunk)
+        if not ready_seen and _READY_MARKER in stderr_buffer.decode("utf-8", errors="replace"):
+            process_stdin.write(_build_handshake_lines())
+            process_stdin.flush()
+            return True, True, time.monotonic() + handshake_timeout_seconds
+        return ready_seen, handshake_sent, handshake_deadline
+
+    stdout_buffer.extend(chunk)
+    _drain_stdout_messages(stdout_buffer, responses)
+    return ready_seen, handshake_sent, handshake_deadline
 
 
 def main(argv: list[str] | None = None) -> int:

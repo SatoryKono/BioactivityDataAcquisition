@@ -76,9 +76,8 @@ def _read_repo_text(relative_path: Path) -> str:
 
 
 def _write_repo_text(relative_path: Path, content: str) -> None:
-    (_repo_root() / relative_path).write_text(
-        content, encoding="utf-8", newline="\n"
-    )
+    safe_path = _ensure_repo_path(_repo_root() / relative_path)
+    safe_path.write_text(content, encoding="utf-8", newline="\n")
 
 
 def _display_path(path: Path) -> str:

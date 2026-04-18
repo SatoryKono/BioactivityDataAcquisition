@@ -45,41 +45,34 @@ Examples:
   scripts/diagrams/run_diagram_docs_agent.sh --diagram <repo-relative-diagram-path>
   scripts/diagrams/run_diagram_docs_agent.sh --input-md <repo-relative-bundle-path>
 EOF
+  return 0
 }
 
 log() { printf '[INFO] %s\n' "$*"; }
 
 resolve_python() {
+  local python_bin=""
   if [[ -n "${PYTHON_BIN:-}" ]]; then
-    printf '%s\n' "$PYTHON_BIN"
-    return
+    python_bin="$PYTHON_BIN"
+  elif [[ -x "$REPO_ROOT/.venv-win/Scripts/python.exe" ]]; then
+    python_bin="$REPO_ROOT/.venv-win/Scripts/python.exe"
+  elif [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
+    python_bin="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
+  elif [[ -x "$REPO_ROOT/.venv/Scripts/python.exe" ]]; then
+    python_bin="$REPO_ROOT/.venv/Scripts/python.exe"
+  elif [[ -x "$REPO_ROOT/.venv/bin/python" ]]; then
+    python_bin="$REPO_ROOT/.venv/bin/python"
+  elif command -v python3 >/dev/null 2>&1; then
+    python_bin="$(command -v python3)"
+  elif command -v python >/dev/null 2>&1; then
+    python_bin="$(command -v python)"
   fi
-  if [[ -x "$REPO_ROOT/.venv-win/Scripts/python.exe" ]]; then
-    printf '%s\n' "$REPO_ROOT/.venv-win/Scripts/python.exe"
-    return
+  if [[ -z "$python_bin" ]]; then
+    echo "Python interpreter not found. Set PYTHON_BIN." >&2
+    return 2
   fi
-  if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
-    printf '%s\n' "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
-    return
-  fi
-  if [[ -x "$REPO_ROOT/.venv/Scripts/python.exe" ]]; then
-    printf '%s\n' "$REPO_ROOT/.venv/Scripts/python.exe"
-    return
-  fi
-  if [[ -x "$REPO_ROOT/.venv/bin/python" ]]; then
-    printf '%s\n' "$REPO_ROOT/.venv/bin/python"
-    return
-  fi
-  if command -v python3 >/dev/null 2>&1; then
-    command -v python3
-    return
-  fi
-  if command -v python >/dev/null 2>&1; then
-    command -v python
-    return
-  fi
-  echo "Python interpreter not found. Set PYTHON_BIN." >&2
-  exit 2
+  printf '%s\n' "$python_bin"
+  return 0
 }
 
 while [[ $# -gt 0 ]]; do
