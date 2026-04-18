@@ -28,7 +28,7 @@ def _load_registry_payload() -> dict[str, object]:
 
 
 def _load_naming_audit_module() -> ModuleType:
-    script = REPO_ROOT / "scripts" / "qa" / "naming_audit.py"
+    script = REPO_ROOT / "scripts" / "engineering" / "qa" / "naming_audit.py"
     spec = importlib.util.spec_from_file_location("naming_audit_runtime", str(script))
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)

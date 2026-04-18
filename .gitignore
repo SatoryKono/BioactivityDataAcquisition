@@ -257,3 +257,7 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 /scripts/gemini
 /.gemini
 .gemini/agents/GEMINI-RUNTIME.md
+/script-codex
+/script-gemini
+/script-mistrall
+/script-mistrallvibe

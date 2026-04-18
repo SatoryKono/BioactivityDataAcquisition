@@ -65,6 +65,20 @@ def _line_span(node: ast.AST) -> tuple[int, int, int]:
     return start_line, end_line, end_line - start_line + 1
 
 
+def _iter_ast_items(
+    source_ast_cache: dict,
+    node_types: tuple[type[ast.AST], ...],
+) -> list[tuple[Path, ast.AST]]:
+    items: list[tuple[Path, ast.AST]] = []
+    for py_file, tree in source_ast_cache.items():
+        if py_file.name.startswith("__"):
+            continue
+        for node in ast.walk(tree):
+            if isinstance(node, node_types):
+                items.append((py_file, node))
+    return items
+
+
 class TestFileSizeLimits:
     """Enforce maximum file size limits by layer."""
 
@@ -257,37 +271,42 @@ class TestFunctionLength:
     # Any new violation should fail immediately instead of being absorbed by a stale debt budget.
     MAX_VIOLATIONS = 0
 
+    def _function_length_violation(
+        self,
+        src_dir: Path,
+        py_file: Path,
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
+    ) -> str | None:
+        start_line, _, func_lines = _line_span(node)
+        max_lines = _module_registry_value(
+            self.EXEMPTIONS,
+            src_dir,
+            py_file,
+            symbol_name=node.name,
+        )
+        if max_lines is None:
+            max_lines = self.MAX_LINES
+        if func_lines <= max_lines:
+            return None
+        return (
+            f"{py_file.relative_to(src_dir)}:{start_line} - {node.name}() "
+            f"is {func_lines} lines (max={max_lines})"
+        )
+
     def test_functions_under_100_lines(
         self,
         src_dir: Path,
         source_ast_cache: dict,
     ) -> None:
         """All functions must be under 100 lines (with exemptions)."""
-        violations = []
-
-        for py_file, tree in source_ast_cache.items():
-            if py_file.name.startswith("__"):
-                continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    start_line = node.lineno
-                    end_line = node.end_lineno or start_line
-                    func_lines = end_line - start_line + 1
-
-                    max_lines = resolve_registry_value(
-                        self.EXEMPTIONS,
-                        module_path=build_module_path_key(py_file, src_root=src_dir),
-                        symbol_name=node.name,
-                    )
-                    if max_lines is None:
-                        max_lines = self.MAX_LINES
-
-                    if func_lines > max_lines:
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{start_line} - {node.name}() "
-                            f"is {func_lines} lines (max={max_lines})"
-                        )
+        violations = [
+            violation
+            for py_file, node in _iter_ast_items(
+                source_ast_cache, (ast.FunctionDef, ast.AsyncFunctionDef)
+            )
+            for violation in [self._function_length_violation(src_dir, py_file, node)]
+            if violation is not None
+        ]
 
         if len(violations) > self.MAX_VIOLATIONS:
             pytest.fail(
@@ -306,37 +325,71 @@ class TestClassSize:
 
     EXEMPTIONS = get_registry_values("class_size")
 
+    def _public_method_count(self, node: ast.ClassDef) -> int:
+        return sum(
+            1
+            for item in node.body
+            if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and not item.name.startswith("_")
+        )
+
+    def _class_size_violation(
+        self,
+        src_dir: Path,
+        py_file: Path,
+        node: ast.ClassDef,
+    ) -> str | None:
+        start_line, _, class_lines = _line_span(node)
+        max_lines = _module_registry_value(
+            self.EXEMPTIONS,
+            src_dir,
+            py_file,
+            symbol_name=node.name,
+        )
+        if max_lines is None:
+            max_lines = self.MAX_CLASS_LINES
+        if class_lines <= max_lines:
+            return None
+        return (
+            f"{py_file.relative_to(src_dir)}:{start_line} - {node.name} "
+            f"is {class_lines} lines (max={max_lines})"
+        )
+
+    def _class_method_violation(
+        self,
+        src_dir: Path,
+        py_file: Path,
+        node: ast.ClassDef,
+    ) -> str | None:
+        public_method_count = self._public_method_count(node)
+        max_methods = _module_registry_value(
+            self.METHOD_EXEMPTIONS,
+            src_dir,
+            py_file,
+            symbol_name=node.name,
+        )
+        if max_methods is None:
+            max_methods = self.MAX_METHODS_PER_CLASS
+        if public_method_count <= max_methods:
+            return None
+        return (
+            f"{py_file.relative_to(src_dir)} - {node.name} has "
+            f"{public_method_count} public methods "
+            f"(max={max_methods})"
+        )
+
     def test_classes_under_300_lines(
         self,
         src_dir: Path,
         source_ast_cache: dict,
     ) -> None:
         """All classes must be under 300 lines (with exemptions)."""
-        violations = []
-
-        for py_file, tree in source_ast_cache.items():
-            if py_file.name.startswith("__"):
-                continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    start_line = node.lineno
-                    end_line = node.end_lineno or start_line
-                    class_lines = end_line - start_line + 1
-
-                    max_lines = resolve_registry_value(
-                        self.EXEMPTIONS,
-                        module_path=build_module_path_key(py_file, src_root=src_dir),
-                        symbol_name=node.name,
-                    )
-                    if max_lines is None:
-                        max_lines = self.MAX_CLASS_LINES
-
-                    if class_lines > max_lines:
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{start_line} - {node.name} "
-                            f"is {class_lines} lines (max={max_lines})"
-                        )
+        violations = [
+            violation
+            for py_file, node in _iter_ast_items(source_ast_cache, (ast.ClassDef,))
+            for violation in [self._class_size_violation(src_dir, py_file, node)]
+            if violation is not None
+        ]
 
         if violations:
             pytest.fail(
@@ -350,35 +403,12 @@ class TestClassSize:
         source_ast_cache: dict,
     ) -> None:
         """Classes should not have more than 20 public methods."""
-        violations = []
-
-        for py_file, tree in source_ast_cache.items():
-            if py_file.name.startswith("__"):
-                continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    public_methods = [
-                        n
-                        for n in node.body
-                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                        and not n.name.startswith("_")
-                    ]
-
-                    max_methods = resolve_registry_value(
-                        self.METHOD_EXEMPTIONS,
-                        module_path=build_module_path_key(py_file, src_root=src_dir),
-                        symbol_name=node.name,
-                    )
-                    if max_methods is None:
-                        max_methods = self.MAX_METHODS_PER_CLASS
-
-                    if len(public_methods) > max_methods:
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)} - {node.name} has "
-                            f"{len(public_methods)} public methods "
-                            f"(max={max_methods})"
-                        )
+        violations = [
+            violation
+            for py_file, node in _iter_ast_items(source_ast_cache, (ast.ClassDef,))
+            for violation in [self._class_method_violation(src_dir, py_file, node)]
+            if violation is not None
+        ]
 
         if violations:
             pytest.fail(

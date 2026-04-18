@@ -351,40 +351,52 @@ FORBIDDEN_ADAPTER_CLASSES = frozenset(
 _FORBIDDEN_LAYERS = ("domain", "application", "interfaces")
 
 
+def _file_in_forbidden_layer(src_dir: Path, py_file: Path) -> bool:
+    bioetl = src_dir / "bioetl"
+    return any((bioetl / layer) in py_file.parents for layer in _FORBIDDEN_LAYERS)
+
+
+def _call_name(node: ast.Call) -> str | None:
+    if isinstance(node.func, ast.Name):
+        return node.func.id
+    if isinstance(node.func, ast.Attribute):
+        return node.func.attr
+    return None
+
+
+def _adapter_instantiations_in_tree(
+    src_dir: Path,
+    py_file: Path,
+    tree: ast.AST,
+) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _call_name(node)
+        if name in FORBIDDEN_ADAPTER_CLASSES:
+            rel = py_file.relative_to(src_dir)
+            violations.append(f"{rel}:{node.lineno}: {name}()")
+    return violations
+
+
 def _find_adapter_instantiations(
     src_dir: Path,
     source_ast_cache: dict[Path, ast.Module] | None = None,
 ) -> list[str]:
     """Find direct adapter class instantiations outside composition/."""
     violations: list[str] = []
-    bioetl = src_dir / "bioetl"
 
     if source_ast_cache is not None:
         for py_file, tree in source_ast_cache.items():
             if py_file.name.startswith("__"):
                 continue
-            # Check if file is in one of the forbidden layers
-            layer_match = False
-            for layer in _FORBIDDEN_LAYERS:
-                if (bioetl / layer) in py_file.parents:
-                    layer_match = True
-                    break
-            if not layer_match:
+            if not _file_in_forbidden_layer(src_dir, py_file):
                 continue
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.Call):
-                    continue
-                name = None
-                if isinstance(node.func, ast.Name):
-                    name = node.func.id
-                elif isinstance(node.func, ast.Attribute):
-                    name = node.func.attr
-                if name in FORBIDDEN_ADAPTER_CLASSES:
-                    rel = py_file.relative_to(src_dir)
-                    violations.append(f"{rel}:{node.lineno}: {name}()")
+            violations.extend(_adapter_instantiations_in_tree(src_dir, py_file, tree))
     else:
         for layer in _FORBIDDEN_LAYERS:
-            layer_path = bioetl / layer
+            layer_path = src_dir / "bioetl" / layer
             if not layer_path.exists():
                 continue
             for py_file in sorted(layer_path.rglob("*.py")):
@@ -395,17 +407,7 @@ def _find_adapter_instantiations(
                     tree = ast.parse(source)
                 except SyntaxError:
                     continue
-                for node in ast.walk(tree):
-                    if not isinstance(node, ast.Call):
-                        continue
-                    name = None
-                    if isinstance(node.func, ast.Name):
-                        name = node.func.id
-                    elif isinstance(node.func, ast.Attribute):
-                        name = node.func.attr
-                    if name in FORBIDDEN_ADAPTER_CLASSES:
-                        rel = py_file.relative_to(src_dir)
-                        violations.append(f"{rel}:{node.lineno}: {name}()")
+                violations.extend(_adapter_instantiations_in_tree(src_dir, py_file, tree))
     return violations
 
 

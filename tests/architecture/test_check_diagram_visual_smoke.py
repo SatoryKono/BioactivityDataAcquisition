@@ -24,7 +24,8 @@ def _load_module() -> ModuleType:
 def test_load_manifest_rejects_absolute_entries(tmp_path: Path) -> None:
     module = _load_module()
     manifest = tmp_path / "visual.manifest"
-    manifest.write_text("/tmp/outside.svg\n", encoding="utf-8")
+    absolute_entry = (tmp_path / "outside.svg").resolve().as_posix()
+    manifest.write_text(f"{absolute_entry}\n", encoding="utf-8")
 
     try:
         module.load_manifest(manifest)

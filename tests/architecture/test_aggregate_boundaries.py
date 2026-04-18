@@ -20,6 +20,10 @@ from pathlib import Path
 import pytest
 
 
+FORBIDDEN_AGGREGATE_TYPES = {"Batch", "PipelineRun", "QuarantineEntry"}
+ALLOWED_AGGREGATE_ID_TYPES = {"BatchID", "RunID", "EntityID", "ContentHash"}
+
+
 def _read_aggregate_content(aggregates_dir: Path, filename: str) -> str:
     """Read aggregate content including sub-module facades.
 
@@ -44,6 +48,117 @@ def _read_aggregate_content(aggregates_dir: Path, filename: str) -> str:
                 if sub_content not in content:
                     content += "\n" + sub_content
     return content
+
+
+def _iter_aggregate_files(aggregates_dir: Path) -> list[Path]:
+    return [
+        py_file
+        for py_file in aggregates_dir.glob("*.py")
+        if py_file.name not in ("__init__.py", "events.py")
+        and not py_file.name.startswith("_")
+    ]
+
+
+def _aggregate_tree(aggregates_dir: Path, py_file: Path) -> ast.AST | None:
+    full_content = _read_aggregate_content(aggregates_dir, py_file.name)
+    try:
+        return ast.parse(full_content, filename=str(py_file))
+    except SyntaxError:
+        return None
+
+
+def _current_aggregate_class(py_file: Path) -> str | None:
+    if py_file.name == "batch.py":
+        return "Batch"
+    if py_file.name == "pipeline_run.py":
+        return "PipelineRun"
+    if py_file.name == "quarantine_entry.py":
+        return "QuarantineEntry"
+    return None
+
+
+def _annotation_mentions_forbidden_type(annotation: str, forbidden: str) -> bool:
+    import re
+
+    if not re.search(rf"\b{forbidden}\b", annotation):
+        return False
+    for allowed in ALLOWED_AGGREGATE_ID_TYPES:
+        if allowed in annotation and re.search(rf"{forbidden}ID\b", annotation):
+            return False
+    return True
+
+
+def _aggregate_reference_violations(
+    aggregates_dir: Path,
+) -> list[str]:
+    violations: list[str] = []
+    for py_file in _iter_aggregate_files(aggregates_dir):
+        tree = _aggregate_tree(aggregates_dir, py_file)
+        if tree is None:
+            continue
+        current_file_class = _current_aggregate_class(py_file)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            for item in node.body:
+                if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+                    for arg in item.args.args:
+                        if not arg.annotation:
+                            continue
+                        ann_str = ast.unparse(arg.annotation)
+                        for forbidden in FORBIDDEN_AGGREGATE_TYPES:
+                            if (
+                                _annotation_mentions_forbidden_type(ann_str, forbidden)
+                                and forbidden != current_file_class
+                            ):
+                                violations.append(
+                                    f"{py_file.name}:{item.lineno} - "
+                                    f"Parameter '{arg.arg}' has type "
+                                    f"'{ann_str}' (should use ID type)"
+                                )
+                if isinstance(item, ast.AnnAssign) and item.target:
+                    ann_str = ast.unparse(item.annotation)
+                    target_name = getattr(item.target, "id", "unknown")
+                    for forbidden in FORBIDDEN_AGGREGATE_TYPES:
+                        if (
+                            _annotation_mentions_forbidden_type(ann_str, forbidden)
+                            and forbidden != current_file_class
+                        ):
+                            violations.append(
+                                f"{py_file.name}:{item.lineno} - "
+                                f"Attribute '{target_name}' has type "
+                                f"'{ann_str}' (should use ID type)"
+                            )
+    return violations
+
+
+def _immutable_property_violations(aggregates_dir: Path) -> list[str]:
+    violations: list[str] = []
+    for py_file in _iter_aggregate_files(aggregates_dir):
+        tree = _aggregate_tree(aggregates_dir, py_file)
+        if tree is None:
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            for item in node.body:
+                if not isinstance(item, ast.FunctionDef):
+                    continue
+                if not any(
+                    isinstance(decorator, ast.Name) and decorator.id == "property"
+                    for decorator in item.decorator_list
+                ):
+                    continue
+                if not item.returns:
+                    continue
+                ret_str = ast.unparse(item.returns)
+                if "list[" in ret_str.lower() and "tuple(" not in ast.unparse(item):
+                    violations.append(
+                        f"{py_file.name}:{item.lineno} - "
+                        f"Property {item.name} returns "
+                        f"{ret_str}, should return tuple"
+                    )
+    return violations
 
 
 class TestAggregateBoundaryIsolation:
@@ -121,94 +236,9 @@ class TestAggregateBoundaryIsolation:
         REQ-ARCH-021: Cross-aggregate references must be by ID only,
         not by full aggregate objects.
         """
-        import re
-
         if not aggregates_dir.exists():
             pytest.skip("Aggregates directory not found")
-
-        # These aggregate type names should NOT appear in type hints
-        forbidden_types = {"Batch", "PipelineRun", "QuarantineEntry"}
-
-        # ID types that are allowed (they reference aggregates by ID)
-        allowed_id_types = {"BatchID", "RunID", "EntityID", "ContentHash"}
-
-        violations = []
-
-        for py_file in aggregates_dir.glob("*.py"):
-            if py_file.name in ("__init__.py", "events.py"):
-                continue
-            # Skip private sub-modules (part of their parent aggregate)
-            if py_file.name.startswith("_"):
-                continue
-
-            # Read full content including sub-modules for AST parsing
-            full_content = _read_aggregate_content(aggregates_dir, py_file.name)
-            try:
-                tree = ast.parse(full_content, filename=str(py_file))
-            except SyntaxError:
-                continue
-
-            current_file_class = None
-            if py_file.name == "batch.py":
-                current_file_class = "Batch"
-            elif py_file.name == "pipeline_run.py":
-                current_file_class = "PipelineRun"
-            elif py_file.name == "quarantine_entry.py":
-                current_file_class = "QuarantineEntry"
-
-            def is_forbidden_type(ann_str: str, forbidden: str) -> bool:
-                """Check if annotation contains forbidden type (not ID type)."""
-                # Check for exact match or as generic type parameter
-                # Use word boundary to avoid matching substrings like "BatchID"
-                pattern = rf"\b{forbidden}\b"
-                if not re.search(pattern, ann_str):
-                    return False
-                # Skip if it's actually an ID type (e.g., BatchID, RunID)
-                for allowed in allowed_id_types:
-                    if allowed in ann_str:
-                        # Check if the forbidden word is part of an ID type
-                        id_pattern = rf"{forbidden}ID\b"
-                        if re.search(id_pattern, ann_str):
-                            return False
-                return True
-
-            # Check each class in the file
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    for item in node.body:
-                        # Check __init__ parameters
-                        if (
-                            isinstance(item, ast.FunctionDef)
-                            and item.name == "__init__"
-                        ):
-                            for arg in item.args.args:
-                                if arg.annotation:
-                                    ann_str = ast.unparse(arg.annotation)
-                                    for forbidden in forbidden_types:
-                                        if (
-                                            is_forbidden_type(ann_str, forbidden)
-                                            and forbidden != current_file_class
-                                        ):
-                                            violations.append(
-                                                f"{py_file.name}:{item.lineno} - "
-                                                f"Parameter '{arg.arg}' has type "
-                                                f"'{ann_str}' (should use ID type)"
-                                            )
-
-                        # Check class attributes (AnnAssign)
-                        if isinstance(item, ast.AnnAssign) and item.target:
-                            ann_str = ast.unparse(item.annotation)
-                            target_name = getattr(item.target, "id", "unknown")
-                            for forbidden in forbidden_types:
-                                if (
-                                    is_forbidden_type(ann_str, forbidden)
-                                    and forbidden != current_file_class
-                                ):
-                                    violations.append(
-                                        f"{py_file.name}:{item.lineno} - "
-                                        f"Attribute '{target_name}' has type "
-                                        f"'{ann_str}' (should use ID type)"
-                                    )
+        violations = _aggregate_reference_violations(aggregates_dir)
 
         assert not violations, (
             "Aggregates should reference other aggregates by ID only, "
@@ -259,45 +289,7 @@ class TestAggregateInvariantProtection:
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         if not aggregates_dir.exists():
             pytest.skip("Aggregates directory not found")
-
-        violations = []
-
-        for py_file in aggregates_dir.glob("*.py"):
-            if py_file.name in ("__init__.py", "events.py"):
-                continue
-            # Skip private sub-modules (part of their parent aggregate)
-            if py_file.name.startswith("_"):
-                continue
-
-            full_content = _read_aggregate_content(aggregates_dir, py_file.name)
-            try:
-                tree = ast.parse(full_content, filename=str(py_file))
-            except SyntaxError:
-                continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    for item in node.body:
-                        # Find properties that return collections
-                        if isinstance(item, ast.FunctionDef):
-                            for decorator in item.decorator_list:
-                                if (
-                                    isinstance(decorator, ast.Name)
-                                    and decorator.id == "property"
-                                ):
-                                    # Check return annotation
-                                    if item.returns:
-                                        ret_str = ast.unparse(item.returns)
-                                        # If returns list, should return tuple
-                                        if "list[" in ret_str.lower():
-                                            # Check function body for tuple() call
-                                            body_str = ast.unparse(item)
-                                            if "tuple(" not in body_str:
-                                                violations.append(
-                                                    f"{py_file.name}:{item.lineno} - "
-                                                    f"Property {item.name} returns "
-                                                    f"{ret_str}, should return tuple"
-                                                )
+        violations = _immutable_property_violations(aggregates_dir)
 
         # Note: This is a soft check - existing code returns tuples correctly
         if violations:

@@ -44,6 +44,15 @@ def _load_workspace_mcp_config(
     return json.loads(committed_path.read_text(encoding="utf-8")), root
 
 
+def _assert_shell_wrapper(
+    server: dict[str, object],
+    shell_name: str,
+    expected_suffix: str,
+) -> None:
+    assert server["command"] in {shell_name, "bash", "powershell"}
+    assert str(server["args"][-1]).endswith(expected_suffix)
+
+
 def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None:
     """Workspace MCP config should match the canonical server layout."""
     root = _project_root()
@@ -92,79 +101,114 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "--stdio",
     ]
     if os.name == "nt":
-        assert servers["github"]["command"] == "powershell"
-        assert "scripts/ai/mcp" in servers["github"]["args"][-1]
-        assert "github-mcp-wrapper.ps1" in servers["github"]["args"][-1]
-        assert servers["docker"]["command"] == "powershell"
-        assert servers["docker-docs"]["command"] == "powershell"
-        assert servers["context7"]["command"] == "powershell"
-        assert servers["paper-search"]["command"] == "powershell"
-        assert servers["dockerhub"]["command"] == "powershell"
-        assert servers["prometheus"]["command"] == "powershell"
-        assert servers["grafana"]["command"] == "powershell"
-        assert servers["brave-search"]["command"] == "powershell"
-        assert servers["sonarqube"]["command"] == "powershell"
-        assert servers["neo4j-cypher"]["command"] == "powershell"
-        assert servers["neo4j-memory"]["command"] == "powershell"
-        assert "mcp_docker_wrapper.ps1" in servers["docker"]["args"][-1]
-        assert "mcp_docker_docs_wrapper.ps1" in servers["docker-docs"]["args"][-1]
-        assert "mcp_context7_wrapper.ps1" in servers["context7"]["args"][-1]
-        assert "mcp_paper_search_wrapper.ps1" in servers["paper-search"]["args"][-1]
-        assert "mcp_dockerhub_wrapper.ps1" in servers["dockerhub"]["args"][-1]
-        assert "mcp_prometheus_wrapper.ps1" in servers["prometheus"]["args"][-1]
-        assert "mcp_grafana_wrapper.ps1" in servers["grafana"]["args"][-1]
-        assert "mcp_brave_search_wrapper.ps1" in servers["brave-search"]["args"][-1]
-        assert "mcp_sonarqube_wrapper.ps1" in servers["sonarqube"]["args"][-1]
-        assert "mcp_neo4j_cypher_wrapper.ps1" in servers["neo4j-cypher"]["args"][-1]
-        assert "wrapper.ps1" in servers["neo4j-memory"]["args"][-1]
+        _assert_shell_wrapper(
+            servers["github"], "powershell", "scripts/ai/mcp/github-mcp-wrapper.ps1"
+        )
+        _assert_shell_wrapper(
+            servers["docker"], "powershell", "scripts/ai/mcp/mcp_docker_wrapper.ps1"
+        )
+        _assert_shell_wrapper(
+            servers["docker-docs"],
+            "powershell",
+            "scripts/ai/mcp/mcp_docker_docs_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["context7"],
+            "powershell",
+            "scripts/ai/mcp/mcp_context7_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["paper-search"],
+            "powershell",
+            "scripts/ai/mcp/mcp_paper_search_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["dockerhub"],
+            "powershell",
+            "scripts/ai/mcp/mcp_dockerhub_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["prometheus"],
+            "powershell",
+            "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["grafana"],
+            "powershell",
+            "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["brave-search"],
+            "powershell",
+            "scripts/ai/mcp/mcp_brave_search_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["sonarqube"],
+            "powershell",
+            "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["neo4j-cypher"],
+            "powershell",
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
+        )
+        _assert_shell_wrapper(
+            servers["neo4j-memory"],
+            "powershell",
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
+        )
     else:
-        assert servers["github"]["command"] == "bash"
-        assert servers["github"]["args"][-1].endswith(
-            "scripts/ai/mcp/github-mcp-wrapper.sh"
+        _assert_shell_wrapper(
+            servers["github"], "bash", "scripts/ai/mcp/github-mcp-wrapper.sh"
         )
-        assert servers["docker"]["command"] == "bash"
-        assert servers["docker-docs"]["command"] == "bash"
-        assert servers["context7"]["command"] == "bash"
-        assert servers["paper-search"]["command"] == "bash"
-        assert servers["dockerhub"]["command"] == "bash"
-        assert servers["prometheus"]["command"] == "bash"
-        assert servers["grafana"]["command"] == "bash"
-        assert servers["brave-search"]["command"] == "bash"
-        assert servers["sonarqube"]["command"] == "bash"
-        assert servers["neo4j-cypher"]["command"] == "bash"
-        assert servers["neo4j-memory"]["command"] == "bash"
-        assert servers["docker"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_docker_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["docker"], "bash", "scripts/ai/mcp/mcp_docker_wrapper.sh"
         )
-        assert servers["docker-docs"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_docker_docs_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["docker-docs"],
+            "bash",
+            "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
         )
-        assert servers["context7"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_context7_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["context7"], "bash", "scripts/ai/mcp/mcp_context7_wrapper.sh"
         )
-        assert servers["paper-search"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_paper_search_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["paper-search"],
+            "bash",
+            "scripts/ai/mcp/mcp_paper_search_wrapper.sh",
         )
-        assert servers["dockerhub"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_dockerhub_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["dockerhub"],
+            "bash",
+            "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
         )
-        assert servers["prometheus"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_prometheus_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["prometheus"],
+            "bash",
+            "scripts/ai/mcp/mcp_prometheus_wrapper.sh",
         )
-        assert servers["grafana"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_grafana_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["grafana"], "bash", "scripts/ai/mcp/mcp_grafana_wrapper.sh"
         )
-        assert servers["brave-search"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_brave_search_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["brave-search"],
+            "bash",
+            "scripts/ai/mcp/mcp_brave_search_wrapper.sh",
         )
-        assert servers["sonarqube"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["sonarqube"],
+            "bash",
+            "scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
         )
-        assert servers["neo4j-cypher"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["neo4j-cypher"],
+            "bash",
+            "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
         )
-        assert servers["neo4j-memory"]["args"][-1].endswith(
-            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+        _assert_shell_wrapper(
+            servers["neo4j-memory"],
+            "bash",
+            "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
         )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"

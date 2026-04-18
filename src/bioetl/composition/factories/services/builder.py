@@ -1,5 +1,3 @@
-"""Builder for pipeline infrastructure components."""
-
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Sequence
@@ -62,17 +60,9 @@ if TYPE_CHECKING:
         ScdConfig,
     )
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-
-__all__ = [
-    "ServicesBuilder",
-    "create_data_normalization_service",
-    "extract_pipeline_callbacks",
-]
-
+__all__ = ["ServicesBuilder", "create_data_normalization_service", "extract_pipeline_callbacks"]
 
 class ServicesBuilder:
-    """Builder for pipeline infrastructure components."""
-
     @staticmethod
     def create_batch_processing_components(
         *,
@@ -88,7 +78,6 @@ class ServicesBuilder:
         domain_event_emitter: DomainEventEmitterPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> BatchProcessingComponents:
-        """Create batch metrics/transformer/writer stack via composition DI."""
         return create_batch_processing_components(
             services=services,
             context=context,
@@ -115,11 +104,8 @@ class ServicesBuilder:
         metrics: MetricsPort | None = None,
         checkpoint_compatibility_service: object | None = None,
         current_metadata: CheckpointMetadata | None = None,
-        compatibility_policy: Literal[
-            "observe", "soft_fail", "hard_fail"
-        ] = "soft_fail",
+        compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
     ) -> CheckpointManagerService:
-        """Create a configured checkpoint manager for one pipeline run."""
         return create_checkpoint_manager(
             checkpoint_port=checkpoint_port,
             logger=logger,
@@ -163,7 +149,6 @@ class ServicesBuilder:
         content_hash_policy_by_version: ContentHashPolicyByVersion | None = None,
         gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None = None,
     ) -> RecordProcessor:
-        """Create configured ``RecordProcessor`` for pipeline execution."""
         return create_record_processor_impl(
             services_builder=ServicesBuilder,
             services=services,
@@ -207,7 +192,6 @@ class ServicesBuilder:
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
-        """Create a ``RecordProcessor`` from an already configured pipeline."""
         callbacks = extract_pipeline_callbacks(pipeline)
         return create_record_processor_from_pipeline(
             pipeline=pipeline,
@@ -240,7 +224,6 @@ class ServicesBuilder:
         batch_id_factory: BatchIdGeneratorPort | None = None,
         domain_event_emitter: DomainEventEmitterPort | None = None,
     ) -> BatchExecutor:
-        """Create a ``BatchExecutor`` from an already configured pipeline."""
         callbacks = extract_pipeline_callbacks(pipeline)
         return create_batch_executor_from_pipeline(
             pipeline=pipeline,

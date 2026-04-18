@@ -80,6 +80,8 @@ def _write_repo_text(relative_path: Path, content: str) -> None:
     if safe_path.is_dir():
         raise ValueError(f"refusing to write to directory path: {safe_path}")
     safe_path.write_text(content, encoding="utf-8", newline="\n")
+        raise ValueError(f"refusing to write to directory path: {safe_path}")
+    safe_path.write_text(content, encoding="utf-8", newline="\n")
 
 def _write_repo_text(relative_path: Path, content: str) -> None:
     safe_path = _ensure_repo_path(_repo_path(relative_path))

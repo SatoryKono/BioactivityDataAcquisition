@@ -65,9 +65,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import GoldSchemaType
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-__all__ = [
-    "assemble_runner_impl",
-]
+__all__ = ["assemble_runner_impl"]
 
 
 def _build_checkpoint_manager(
@@ -75,7 +73,6 @@ def _build_checkpoint_manager(
     pipeline: BasePipeline,
     logger_port: LoggerPort,
 ) -> CheckpointManagerService:
-    """Backward-compatible seam for direct unit tests around policy selection."""
     current_metadata = _build_current_checkpoint_metadata(pipeline)
     compatibility_service = CheckpointCompatibilityService(
         logger=logger_port,
@@ -101,7 +98,6 @@ def _build_checkpoint_manager(
 
 
 def _build_current_checkpoint_metadata(pipeline: BasePipeline) -> CheckpointMetadata:
-    """Backward-compatible seam for unit tests that patch metadata assembly."""
     return build_current_checkpoint_metadata(pipeline)
 
 
@@ -163,7 +159,6 @@ def _build_postrun_service_for_pipeline(
 def _create_pipeline_runner(
     payload: RunnerConstructorPayload,
 ) -> PipelineRunner:
-    """Backward-compatible seam for unit tests that patch runner creation."""
     return create_pipeline_runner_from_payload(payload)
 
 

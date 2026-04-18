@@ -247,6 +247,10 @@
       <excludeFolder url="file://$MODULE_DIR$/scripts/.gemini" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/gemini" />
       <excludeFolder url="file://$MODULE_DIR$/.codex/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/script-codex" />
+      <excludeFolder url="file://$MODULE_DIR$/script-gemini" />
+      <excludeFolder url="file://$MODULE_DIR$/script-mistrall" />
+      <excludeFolder url="file://$MODULE_DIR$/script-mistrallvibe" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/archive/.gemini" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/archive/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/scripts/docs/build" />
