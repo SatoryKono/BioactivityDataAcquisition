@@ -16,13 +16,28 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-MEMORY_FILE_PATH = REPO_ROOT / "docs/00-project/ai/memory/mcp-memory.json"
 NPM_CACHE_DIR = "/tmp/npm-cache"
 FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 
 
+def _config_root_hint() -> Path:
+    committed_config = REPO_ROOT / ".mcp.json"
+    if committed_config.exists():
+        try:
+            payload = json.loads(committed_config.read_text(encoding="utf-8"))
+            filesystem_root = payload["mcpServers"]["filesystem"]["args"][-1]
+            return Path(str(filesystem_root))
+        except (KeyError, IndexError, TypeError, json.JSONDecodeError):
+            pass
+    return REPO_ROOT
+
+
+CONFIG_ROOT = _config_root_hint()
+MEMORY_FILE_PATH = CONFIG_ROOT / "docs/00-project/ai/memory/mcp-memory.json"
+
+
 def _wrapper_command(script_name: str) -> dict[str, Any]:
-    wrapper = REPO_ROOT / "scripts/ai/mcp" / script_name
+    wrapper = CONFIG_ROOT / "scripts/ai/mcp" / script_name
     if os.name == "nt":
         return {
             "command": "powershell",
@@ -52,7 +67,7 @@ def _canonical_servers() -> dict[str, dict[str, Any]]:
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-filesystem@2026.1.14",
-                str(REPO_ROOT),
+                str(CONFIG_ROOT),
             ],
             "env": {"NPM_CONFIG_CACHE": NPM_CACHE_DIR},
         },
@@ -115,7 +130,7 @@ def _run_codex_validation() -> None:
         return
     result = subprocess.run(
         [codex_bin, "mcp", "list"],
-        cwd=REPO_ROOT,
+        cwd=CONFIG_ROOT,
         capture_output=True,
         text=True,
         check=False,
@@ -131,7 +146,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--root",
         type=Path,
-        default=REPO_ROOT,
+        default=CONFIG_ROOT,
         help="Directory where .mcp.json and .vscode/mcp.json should be written.",
     )
     parser.add_argument(
