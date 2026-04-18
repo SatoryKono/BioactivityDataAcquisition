@@ -31,8 +31,7 @@ def test_consistency_gate_script_runs_clean_in_check_mode() -> None:
         return
 
     expected_violation = (
-        "[suffix-policy]"
-        in result.stdout
+        "[suffix-policy]" in result.stdout
         and "scripts/qa/naming_audit.py" in result.stdout
         and "scripts/engineering/qa/naming_audit.py not found" in result.stdout
     )

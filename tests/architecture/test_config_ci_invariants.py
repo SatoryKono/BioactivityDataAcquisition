@@ -209,7 +209,9 @@ def _load_bronze_fixture_manifest() -> dict[str, dict[str, Any]]:
     return result
 
 
-def _pipeline_fixture_context(config_path: Path) -> tuple[str, str, str, list[Path], int]:
+def _pipeline_fixture_context(
+    config_path: Path,
+) -> tuple[str, str, str, list[Path], int]:
     data = _load_yaml(config_path)
     provider = str(data.get("provider", config_path.parent.name))
     entity = str(data.get("entity", config_path.stem))
@@ -233,7 +235,7 @@ def _validate_manifest_entry(
 
     invalid_entries: list[str] = []
     has_manifest_fixture = False
-    
+
     _validate_fixture_kind(key, manifest_entry, allowed_fixture_kinds, invalid_entries)
     has_manifest_fixture = _validate_fixture_path(
         key, manifest_entry, min_tracked_sample_records, invalid_entries
@@ -272,39 +274,37 @@ def _validate_fixture_path(
     if not isinstance(fixture_path_raw, str) or not fixture_path_raw.strip():
         invalid_entries.append(f"{key}: fixture_path is required in manifest")
         return has_manifest_fixture
-    
+
     fixture_path = PROJECT_ROOT / fixture_path_raw
     if not fixture_path.exists() or not fixture_path.is_file():
         invalid_entries.append(
             f"{key}: fixture_path does not exist: {fixture_path_raw}"
         )
         return has_manifest_fixture
-    
+
     if fixture_path.suffix != ".jsonl":
         invalid_entries.append(
-            f"{key}: fixture_path must point to .jsonl file, "
-            f"found {fixture_path_raw}"
+            f"{key}: fixture_path must point to .jsonl file, found {fixture_path_raw}"
         )
         return has_manifest_fixture
-    
+
     manifest_lines = _count_jsonl_lines([fixture_path])
     records = manifest_entry.get("records")
     if not isinstance(records, int) or records <= 0:
         invalid_entries.append(f"{key}: records must be positive int in manifest")
         return has_manifest_fixture
-    
+
     if records != manifest_lines:
         invalid_entries.append(
             f"{key}: records={records} does not match fixture "
             f"line count={manifest_lines}"
         )
         return has_manifest_fixture
-    
+
     if fixture_kind == "tracked_ci_sample":
         if not fixture_path_raw.startswith("tests/fixtures/bronze/"):
             invalid_entries.append(
-                f"{key}: tracked_ci_sample must live under "
-                "tests/fixtures/bronze/"
+                f"{key}: tracked_ci_sample must live under tests/fixtures/bronze/"
             )
         if records < min_tracked_sample_records:
             invalid_entries.append(
@@ -312,7 +312,7 @@ def _validate_fixture_path(
                 f"{min_tracked_sample_records} records"
             )
         has_manifest_fixture = True
-    
+
     return has_manifest_fixture
 
 
@@ -353,7 +353,7 @@ def _validate_gap_entry(
 
     gap = gaps[key]
     invalid_entries: list[str] = []
-    
+
     _validate_gap_reason(key, gap, invalid_entries)
     _validate_gap_owner(key, gap, invalid_entries)
     _validate_gap_status(key, gap, allowed_gap_statuses, invalid_entries)

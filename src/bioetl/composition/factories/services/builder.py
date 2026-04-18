@@ -60,7 +60,12 @@ if TYPE_CHECKING:
         ScdConfig,
     )
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-__all__ = ["ServicesBuilder", "create_data_normalization_service", "extract_pipeline_callbacks"]
+__all__ = [
+    "ServicesBuilder",
+    "create_data_normalization_service",
+    "extract_pipeline_callbacks",
+]
+
 
 class ServicesBuilder:
     @staticmethod
@@ -104,7 +109,9 @@ class ServicesBuilder:
         metrics: MetricsPort | None = None,
         checkpoint_compatibility_service: object | None = None,
         current_metadata: CheckpointMetadata | None = None,
-        compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
+        compatibility_policy: Literal[
+            "observe", "soft_fail", "hard_fail"
+        ] = "soft_fail",
     ) -> CheckpointManagerService:
         return create_checkpoint_manager(
             checkpoint_port=checkpoint_port,

@@ -164,6 +164,7 @@ def _check_ann_assign(
 
 
 def _immutable_property_violations(aggregates_dir: Path) -> list[str]:
+    """Check for violations of immutable properties."""
     violations: list[str] = []
     for py_file in _iter_aggregate_files(aggregates_dir):
         tree = _aggregate_tree(aggregates_dir, py_file)
@@ -172,24 +173,47 @@ def _immutable_property_violations(aggregates_dir: Path) -> list[str]:
         for node in ast.walk(tree):
             if not isinstance(node, ast.ClassDef):
                 continue
-            for item in node.body:
-                if not isinstance(item, ast.FunctionDef):
-                    continue
-                if not any(
-                    isinstance(decorator, ast.Name) and decorator.id == "property"
-                    for decorator in item.decorator_list
-                ):
-                    continue
-                if not item.returns:
-                    continue
-                ret_str = ast.unparse(item.returns)
-                if "list[" in ret_str.lower() and "tuple(" not in ast.unparse(item):
-                    violations.append(
-                        f"{py_file.name}:{item.lineno} - "
-                        f"Property {item.name} returns "
-                        f"{ret_str}, should return tuple"
-                    )
+            _check_class_properties(node, py_file, violations)
     return violations
+
+
+def _check_class_properties(
+    node: ast.ClassDef,
+    py_file: Path,
+    violations: list[str],
+) -> None:
+    """Check the properties of a class for violations."""
+    for item in node.body:
+        if not isinstance(item, ast.FunctionDef):
+            continue
+        if not _is_property(item):
+            continue
+        if not item.returns:
+            continue
+        _check_property_return_type(item, py_file, violations)
+
+
+def _is_property(item: ast.FunctionDef) -> bool:
+    """Check if the function is a property."""
+    return any(
+        isinstance(decorator, ast.Name) and decorator.id == "property"
+        for decorator in item.decorator_list
+    )
+
+
+def _check_property_return_type(
+    item: ast.FunctionDef,
+    py_file: Path,
+    violations: list[str],
+) -> None:
+    """Check the return type of a property for violations."""
+    ret_str = ast.unparse(item.returns)
+    if "list[" in ret_str.lower() and "tuple(" not in ast.unparse(item):
+        violations.append(
+            f"{py_file.name}:{item.lineno} - "
+            f"Property {item.name} returns "
+            f"{ret_str}, should return tuple"
+        )
 
 
 class TestAggregateBoundaryIsolation:

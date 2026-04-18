@@ -424,42 +424,18 @@ class GitHubAPI:
 
 
 def apply_ci01(api: GitHubAPI) -> None:
+    """Apply CI-01: Replace checkout@v6 → @v4."""
     print("\n=== CI-01: Replace checkout@v6 → @v4 ===")
     branch = BRANCHES["ci-01"]
     sha = api.get_sha()
-
-    if api.branch_exists(branch):
-        print(f"  Branch {branch} already exists — skipping branch creation")
-    else:
-        api.create_branch(branch, sha)
-
+    
+    _create_branch_if_not_exists(api, branch, sha)
+    
     files = api.list_workflow_files()
-    updated = []
-    # In dry-run the branch isn't created, so read from BASE_BRANCH for scanning.
-    read_branch = BASE_BRANCH if api.dry_run else branch
-
-    for f in files:
-        if not f["name"].endswith(".yml") and not f["name"].endswith(".yaml"):
-            continue
-        path = f["path"]
-        content, file_sha = api.get_file(path, read_branch)
-        if CHECKOUT_V6 not in content:
-            continue
-        new_content = content.replace(CHECKOUT_V6, CHECKOUT_V4)
-        count = content.count(CHECKOUT_V6)
-        print(f"  Patching {path} ({count} occurrence{'s' if count > 1 else ''})")
-        api.update_file(
-            path=path,
-            content=new_content,
-            sha=file_sha,
-            message=f"fix(ci): replace checkout@v6 with @v4 in {f['name']}\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
-            branch=branch,
-        )
-        updated.append(f["name"])
-        time.sleep(0.3)  # avoid secondary rate limit
-
+    updated = _apply_ci01_fixes(api, files, branch)
+    
     print(f"\n  Updated {len(updated)} files: {', '.join(updated)}")
-
+    
     if not api.dry_run:
         pr_url = api.create_pr(
             title="fix(ci): replace non-existent actions/checkout@v6 with @v4 across all workflows",
@@ -467,6 +443,64 @@ def apply_ci01(api: GitHubAPI) -> None:
             body=PR_BODIES["ci-01"],
         )
         print(f"  PR created: {pr_url}")
+
+
+def _create_branch_if_not_exists(api: GitHubAPI, branch: str, sha: str) -> None:
+    """Create a branch if it does not exist."""
+    if api.branch_exists(branch):
+        print(f"  Branch {branch} already exists — skipping branch creation")
+    else:
+        api.create_branch(branch, sha)
+
+
+def _apply_ci01_fixes(
+    api: GitHubAPI,
+    files: list[dict],
+    branch: str,
+) -> list[str]:
+    """Apply CI-01 fixes to workflow files."""
+    updated = []
+    read_branch = BASE_BRANCH if api.dry_run else branch
+    
+    for f in files:
+        if not _is_workflow_file(f):
+            continue
+        path = f["path"]
+        content, file_sha = api.get_file(path, read_branch)
+        if CHECKOUT_V6 not in content:
+            continue
+        _patch_file(api, path, content, file_sha, branch, f["name"], updated)
+    
+    return updated
+
+
+def _is_workflow_file(f: dict) -> bool:
+    """Check if the file is a workflow file."""
+    return f["name"].endswith(".yml") or f["name"].endswith(".yaml")
+
+
+def _patch_file(
+    api: GitHubAPI,
+    path: str,
+    content: str,
+    file_sha: str,
+    branch: str,
+    filename: str,
+    updated: list[str],
+) -> None:
+    """Patch a file with the given content."""
+    new_content = content.replace(CHECKOUT_V6, CHECKOUT_V4)
+    count = content.count(CHECKOUT_V6)
+    print(f"  Patching {path} ({count} occurrence{'s' if count > 1 else ''})")
+    api.update_file(
+        path=path,
+        content=new_content,
+        sha=file_sha,
+        message=f"fix(ci): replace checkout@v6 with @v4 in {filename}\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+        branch=branch,
+    )
+    updated.append(filename)
+    time.sleep(0.3)  # avoid secondary rate limit
 
 
 # ── CI-02 ────────────────────────────────────────────────────────────────────
