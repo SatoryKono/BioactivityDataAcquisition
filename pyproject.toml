@@ -438,4 +438,5 @@ skips = ["*/domain/*"]
 [dependency-groups]
 dev = [
     "bioetl[dev]",
+    "pytest==9.0.3",
 ]
