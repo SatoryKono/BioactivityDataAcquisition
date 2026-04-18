@@ -57,7 +57,13 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-__all__ = ["BaseServicesFactory", "DQServicesFactory", "ServicesBuilder", "create_data_normalization_service", "extract_pipeline_callbacks"]
+__all__ = [
+    "BaseServicesFactory",
+    "DQServicesFactory",
+    "ServicesBuilder",
+    "create_data_normalization_service",
+    "extract_pipeline_callbacks",
+]
 
 
 class BaseServicesFactory:

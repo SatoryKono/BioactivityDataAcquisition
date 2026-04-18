@@ -177,7 +177,7 @@ def _sanitize_bioetl_env_vars() -> None:
     import re
 
     inline_comment_re = re.compile(r"\s+#\s.*$")
-    for key in list(os.environ):
+    for key in tuple(os.environ):
         if key.startswith("BIOETL_"):
             val = os.environ[key]
             cleaned = inline_comment_re.sub("", val)

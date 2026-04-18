@@ -73,26 +73,16 @@ COLLECTION_PHRASES = {
 VIEW_SUFFIX_ORDER = ("-full", "-overview", "-dataflow", "-domain", "-infra")
 
 
-def parse_mermaid(path: Path) -> dict[str, object]:
-    """Parse a mermaid file and extract rich metadata."""
-    text = path.read_text(encoding="utf-8")
-    lines = text.splitlines()
-
-    meta: dict[str, object] = {
-        "stem": path.stem,
-        "filename": path.name,
-    }
-
-    # ── Extract comment metadata ──
+def _extract_comment_metadata(lines: list[str], meta: dict[str, object]) -> None:
+    """Populate metadata from Mermaid comment headers."""
     for line in lines:
-        s = line.strip()
-        if not s.startswith("%%"):
-            if s and not s.startswith("%%"):
-                # Stop at first non-comment, non-blank line (except init blocks)
-                if not s.startswith("%%{"):
-                    break
+        stripped_line = line.strip()
+        if not stripped_line.startswith("%%"):
+            if stripped_line and not stripped_line.startswith("%%{"):
+                break
             continue
-        stripped = s.lstrip("% ").strip()
+
+        stripped = stripped_line.lstrip("% ").strip()
 
         if m := re.match(r"Title:\s*(.+)", stripped):
             meta["title"] = m.group(1).strip()
@@ -121,90 +111,125 @@ def parse_mermaid(path: Path) -> dict[str, object]:
         elif m := re.match(r"Shows\s+(.+)", stripped):
             if "covers" not in meta:
                 meta["covers"] = m.group(1).strip()
-        # First non-@, non-keyword line as fallback title / covers
-        if not stripped.startswith("@"):
-            if "title" not in meta:
-                # "BioETL — Something" pattern
-                if "—" in stripped:
-                    meta["title"] = stripped.split("—", 1)[1].strip()
-            elif "covers" not in meta and len(stripped) > 10:
-                # Second comment line as fallback covers (e.g. class-diagrams)
-                meta["covers"] = stripped
 
-    # ── Detect diagram type from content ──
-    if "type" not in meta:
-        for line in lines[:30]:
-            ls = line.strip().lower()
-            for prefix in (
-                "flowchart",
-                "sequencediagram",
-                "classdiagram",
-                "statediagram-v2",
-                "statediagram",
-                "erdiagram",
-                "mindmap",
-                "graph",
-            ):
-                if ls.startswith(prefix):
-                    meta["type"] = prefix
-                    break
-            if "type" in meta:
-                break
+        if stripped.startswith("@"):
+            continue
+        if "title" not in meta and "—" in stripped:
+            meta["title"] = stripped.split("—", 1)[1].strip()
+        elif "covers" not in meta and len(stripped) > 10:
+            meta["covers"] = stripped
 
-    # ── Count nodes (named elements) ──
-    node_names: list[str] = []
-    is_class_diagram = str(meta.get("type", "")).lower() == "classdiagram"
 
-    if is_class_diagram:
-        # classDiagram: class ClassName { ... }
-        class_pattern = re.compile(r"^\s+class\s+(\w+)\s*[\{:]?")
-        for line in lines:
-            m = class_pattern.match(line)
-            if m:
-                name = m.group(1)
-                if name and len(name) < 80:
-                    node_names.append(name)
-    else:
-        # flowchart / graph / other: N1["Label"] or N1[Label]
-        node_pattern = re.compile(
-            r'^\s+(\w+)\["([^"]+)"\]'  # N1["Label"]
-            r'|^\s+(\w+)\["([^"]+)"'  # N1["Label"
-            r"|^\s+(\w+)\[([^\]]+)\]"  # N1[Label]
+def _detect_diagram_type(lines: list[str], meta: dict[str, object]) -> None:
+    """Infer Mermaid diagram type from content when metadata is absent."""
+    if "type" in meta:
+        return
+
+    prefixes = (
+        "flowchart",
+        "sequencediagram",
+        "classdiagram",
+        "statediagram-v2",
+        "statediagram",
+        "erdiagram",
+        "mindmap",
+        "graph",
+    )
+    for line in lines[:30]:
+        lowered = line.strip().lower()
+        matched_prefix = next(
+            (prefix for prefix in prefixes if lowered.startswith(prefix)),
+            None,
         )
-        for line in lines:
-            m = node_pattern.match(line)
-            if m:
-                label = m.group(2) or m.group(4) or m.group(6) or ""
-                label = re.sub(r"<br\s*/?>", " ", label)
-                label = re.sub(r"<[^>]+>", "", label).strip()
-                if label and len(label) < 80:
-                    node_names.append(label)
+        if matched_prefix:
+            meta["type"] = matched_prefix
+            return
 
-    # ── Count edges ──
+
+def _collect_class_node_names(lines: list[str]) -> list[str]:
+    """Extract class names from class diagrams."""
+    class_pattern = re.compile(r"^\s+class\s+(\w+)\s*[\{:]?")
+    node_names: list[str] = []
+    for line in lines:
+        match = class_pattern.match(line)
+        if not match:
+            continue
+        name = match.group(1)
+        if name and len(name) < 80:
+            node_names.append(name)
+    return node_names
+
+
+def _collect_flow_node_names(lines: list[str]) -> list[str]:
+    """Extract readable node labels from flowchart-like diagrams."""
+    node_pattern = re.compile(
+        r'^\s+(\w+)\["([^"]+)"\]'  # N1["Label"]
+        r'|^\s+(\w+)\["([^"]+)"'  # N1["Label"
+        r"|^\s+(\w+)\[([^\]]+)\]"  # N1[Label]
+    )
+    node_names: list[str] = []
+    for line in lines:
+        match = node_pattern.match(line)
+        if not match:
+            continue
+        label = match.group(2) or match.group(4) or match.group(6) or ""
+        label = re.sub(r"<br\s*/?>", " ", label)
+        label = re.sub(r"<[^>]+>", "", label).strip()
+        if label and len(label) < 80:
+            node_names.append(label)
+    return node_names
+
+
+def _count_edges(lines: list[str], is_class_diagram: bool) -> int:
+    """Count Mermaid relationships for class and flow diagrams."""
     if is_class_diagram:
-        # classDiagram edges: <|--, *--, o--, -->, ..|>, ..>
         class_edge_pattern = re.compile(
             r"<\|--|--\*|--o|-->|<--|\.\.>|\.\.\|>|\*--(?!>)|o--(?!>)"
         )
-        edge_count = sum(len(class_edge_pattern.findall(line)) for line in lines)
-    else:
-        edge_pattern = re.compile(r"(?:==>|-.->|--(?:>|o)|<--|~~~)")
-        edge_count = sum(len(edge_pattern.findall(line)) for line in lines)
+        return sum(len(class_edge_pattern.findall(line)) for line in lines)
 
-    # ── Extract subgraph / namespace names ──
+    edge_pattern = re.compile(r"(?:==>|-.->|--[>o]|<--|~~~)")
+    return sum(len(edge_pattern.findall(line)) for line in lines)
+
+
+def _collect_subgraph_names(lines: list[str]) -> list[str]:
+    """Extract Mermaid subgraph and namespace labels."""
     subgraph_names: list[str] = []
     subgraph_pattern = re.compile(r'subgraph\s+(?:(\w+)\["([^"]+)"\]|(\w+))\s*$')
     namespace_pattern = re.compile(r"^\s+namespace\s+(\w+)\s*\{?\s*$")
     for line in lines:
-        m = subgraph_pattern.search(line)
-        if m:
-            name = m.group(2) or m.group(3) or ""
+        subgraph_match = subgraph_pattern.search(line)
+        if subgraph_match:
+            name = subgraph_match.group(2) or subgraph_match.group(3) or ""
             if name and name != "direction":
                 subgraph_names.append(name)
-        m2 = namespace_pattern.match(line)
-        if m2:
-            name = m2.group(1).replace("_", " ")
-            subgraph_names.append(name)
+        namespace_match = namespace_pattern.match(line)
+        if namespace_match:
+            subgraph_names.append(namespace_match.group(1).replace("_", " "))
+    return subgraph_names
+
+
+def parse_mermaid(path: Path) -> dict[str, object]:
+    """Parse a mermaid file and extract rich metadata."""
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+
+    meta: dict[str, object] = {
+        "stem": path.stem,
+        "filename": path.name,
+    }
+
+    _extract_comment_metadata(lines, meta)
+    _detect_diagram_type(lines, meta)
+
+    is_class_diagram = str(meta.get("type", "")).lower() == "classdiagram"
+    node_names = (
+        _collect_class_node_names(lines)
+        if is_class_diagram
+        else _collect_flow_node_names(lines)
+    )
+    edge_count = _count_edges(lines, is_class_diagram)
+    subgraph_names = _collect_subgraph_names(lines)
 
     meta["node_count"] = len(node_names)
     meta["node_names"] = node_names
@@ -230,7 +255,6 @@ def format_title(meta: dict[str, object]) -> str:
 def build_description(meta: dict[str, object], collection: str) -> str:
     """Build a rich description matching class-diagrams quality."""
     title = format_title(meta)
-    stem = str(meta["stem"])
     diagram_type = str(meta.get("type", "flowchart"))
     type_label = TYPE_LABELS.get(diagram_type.lower(), diagram_type)
     level = str(meta.get("level", ""))
@@ -411,6 +435,66 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _bundle_header_lines(bundle_title: str, diagram_count: int) -> list[str]:
+    return [
+        f"# {bundle_title}\n",
+        f"- Generated: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}",
+        f"- Diagram count: {diagram_count}\n",
+    ]
+
+
+def _append_page_break(lines: list[str]) -> None:
+    lines.append("\\newpage")
+    lines.append("")
+    lines.append('<div style="page-break-before: always;"></div>')
+    lines.append("")
+
+
+def _build_metadata_block(meta: dict[str, object]) -> list[str]:
+    meta_items: list[str] = []
+    if "type" in meta:
+        meta_items.append(f"- Тип: `{meta['type']}`")
+    if "level" in meta:
+        meta_items.append(f"- Уровень: `{meta['level']}`")
+    if "date" in meta:
+        meta_items.append(f"- Дата: `{meta['date']}`")
+    if "view_type" in meta:
+        meta_items.append(f"- Представление: `{meta['view_type']}`")
+    nodes_meta = meta.get("nodes_meta", "")
+    if nodes_meta:
+        meta_items.append(f"- Узлы (metadata): `{nodes_meta}`")
+    if meta.get("adr"):
+        meta_items.append(f"- ADR: `{meta['adr']}`")
+    if not meta_items:
+        return []
+    return ["### Метаданные", *meta_items, ""]
+
+
+def _build_diagram_entry_lines(
+    diagram_path: Path,
+    meta: dict[str, object],
+    collection_dir: Path,
+    output_md: Path,
+    collection_key: str,
+    *,
+    include_page_break: bool,
+) -> list[str]:
+    stem = diagram_path.stem
+    title = format_title(meta)
+    lines: list[str] = []
+    if include_page_break:
+        _append_page_break(lines)
+
+    lines.append(f"## {stem}\n")
+    lines.append(f"**{title}**\n")
+    lines.append(resolve_bundle_image_markdown(collection_dir, stem, output_md))
+    lines.append("### Описание")
+    lines.append(build_description(meta, collection_key))
+    lines.append("")
+    lines.extend(_build_metadata_block(meta))
+    return lines
+
+
 def generate_bundle(
     collection_dir: Path,
     file_ext: str,
@@ -429,61 +513,23 @@ def generate_bundle(
         (diagram_path, parse_mermaid(diagram_path)) for diagram_path in diagram_files
     ]
 
-    lines: list[str] = []
-    lines.append(f"# {bundle_title}\n")
-    lines.append(f"- Generated: {datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}")
-    lines.append(f"- Diagram count: {len(diagram_files)}\n")
-
-    # ── Table of Contents ──
+    lines = _bundle_header_lines(bundle_title, len(diagram_files))
     lines.extend(build_toc_lines(parsed_diagrams, collection_key))
+    _append_page_break(lines)
 
-    # ── Page break after TOC ──
-    lines.append("\\newpage")
-    lines.append("")
-    lines.append('<div style="page-break-before: always;"></div>')
-    lines.append("")
-
-    # ── Diagram entries ──
     first = True
-    for df, meta in parsed_diagrams:
-        stem = df.stem
-        title = format_title(meta)
-        # Page break between diagrams
-        if not first:
-            lines.append("\\newpage")
-            lines.append("")
-            lines.append('<div style="page-break-before: always;"></div>')
-            lines.append("")
+    for diagram_path, meta in parsed_diagrams:
+        lines.extend(
+            _build_diagram_entry_lines(
+                diagram_path,
+                meta,
+                collection_dir,
+                output_md,
+                collection_key,
+                include_page_break=not first,
+            )
+        )
         first = False
-
-        # Use Markdown heading IDs so MkDocs can validate self-links in bundle TOCs.
-        lines.append(f"## {stem}\n")
-        lines.append(f"**{title}**\n")
-        lines.append(resolve_bundle_image_markdown(collection_dir, stem, output_md))
-
-        lines.append("### Описание")
-        lines.append(build_description(meta, collection_key))
-        lines.append("")
-
-        # ── Metadata block ──
-        meta_items: list[str] = []
-        if "type" in meta:
-            meta_items.append(f"- Тип: `{meta['type']}`")
-        if "level" in meta:
-            meta_items.append(f"- Уровень: `{meta['level']}`")
-        if "date" in meta:
-            meta_items.append(f"- Дата: `{meta['date']}`")
-        if "view_type" in meta:
-            meta_items.append(f"- Представление: `{meta['view_type']}`")
-        nodes_meta = meta.get("nodes_meta", "")
-        if nodes_meta:
-            meta_items.append(f"- Узлы (metadata): `{nodes_meta}`")
-        if meta.get("adr"):
-            meta_items.append(f"- ADR: `{meta['adr']}`")
-        if meta_items:
-            lines.append("### Метаданные")
-            lines.extend(meta_items)
-            lines.append("")
 
     output_md.write_text("\n".join(lines), encoding="utf-8")
     print(f"[OK] {output_name}.md: {len(diagram_files)} diagrams")
