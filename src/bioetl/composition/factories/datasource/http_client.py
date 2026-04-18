@@ -1,18 +1,4 @@
-"""Factory for creating HTTP clients with standard configurations.
-
-Ensures consistent rate limiting and circuit breaker settings across providers.
-Uses source configuration from YAML files (configs/providers/*.yaml) for settings.
-
-Configuration Priority:
-1. Provider YAML config (configs/providers/{provider}.yaml) - PRIMARY
-2. Settings API key overrides (for rate limit boost with API keys)
-3. ProviderRegistry defaults (fallback only)
-
-SRP Compliance:
-- Creates UnifiedHTTPClient with injected RateLimiterPort and CircuitBreakerPort
-- RetryConfig is configured via domain value object
-- Observability components (tracer, metrics, logger) are injected for correlation
-"""
+"""Factory for provider-specific HTTP clients."""
 
 from __future__ import annotations
 
@@ -44,12 +30,7 @@ __all__ = [
 
 @dataclass(frozen=True)
 class ResolvedHttpConfig:
-    """Pure config resolution result — no infrastructure objects.
-
-    Extracted from ``HttpClientFactory._create_from_registry`` so that config
-    resolution logic can be tested in isolation without constructing real
-    TokenBucketRateLimiter / CircuitBreakerGuard / UnifiedHTTPClient instances.
-    """
+    """Resolved HTTP scalar config."""
 
     rate: float
     capacity: int
@@ -65,11 +46,7 @@ class ResolvedHttpConfig:
 
 
 class HttpClientFactory:
-    """Factory for creating HTTP clients.
-
-    Uses ProviderRegistry for configuration lookup.
-    Injects observability components for distributed tracing and metrics.
-    """
+    """Create HTTP clients from source config plus registry fallbacks."""
 
     @classmethod
     def create_for_provider(
@@ -83,29 +60,8 @@ class HttpClientFactory:
         logger: LoggerPort | None = None,
         provider_registry: ProviderRegistry | None = None,
     ) -> UnifiedHTTPClient:
-        """Create a configured HTTP client for the given provider.
-
-        Uses ProviderRegistry for configuration lookup.
-
-        Args:
-            provider: Provider name (e.g., 'chembl', 'pubmed')
-            settings: Optional settings to override defaults (e.g., API keys)
-            run_id: Optional run ID for correlation headers
-            tracer: Optional TracingPort for distributed tracing
-            metrics: Optional MetricsPort for metrics collection
-            logger: Optional LoggerPort for structured logging
-
-        Returns:
-            UnifiedHTTPClient configured for the provider with observability
-
-        Raises:
-            ValueError: If the provider is unknown.
-        """
-        # Keep provider bootstrap behind the registry facade to avoid
-        # spreading loader knowledge across internal composition helpers.
+        """Create a configured client for ``provider``."""
         registry = _resolve_provider_registry(provider_registry)
-
-        # Validate provider is registered
         if not registry.is_registered(provider):
             available = ", ".join(registry.list_providers())
             raise ValueError(f"Unknown provider: {provider}. Available: {available}")
@@ -128,21 +84,8 @@ class HttpClientFactory:
         *,
         provider_registry: ProviderRegistry | None = None,
     ) -> ResolvedHttpConfig:
-        """Pure config resolution — no infrastructure objects created.
-
-        Priority: source YAML > ProviderRegistry > safe defaults.
-        API-key rate overrides applied last.
-
-        Args:
-            provider: Provider name
-            settings: Application settings (used for API-key rate overrides)
-
-        Returns:
-            ResolvedHttpConfig with all scalar values resolved.
-        """
+        """Resolve scalar config from source YAML, registry, and overrides."""
         registry = _resolve_provider_registry(provider_registry)
-
-        # Load source config from provider YAML (primary source) if exists.
         try:
             source_config = load_source_config(provider)
         except ValueError:
@@ -161,7 +104,6 @@ class HttpClientFactory:
             max_keepalive = source_config.max_keepalive_connections
             trust_env = source_config.trust_env
         else:
-            # Fallback defaults when no source YAML config is available
             _FALLBACK_TIMEOUT = 30.0
             _FALLBACK_MAX_RETRIES = 3
             _FALLBACK_CB_THRESHOLD = 5
@@ -185,7 +127,6 @@ class HttpClientFactory:
             max_connections, max_keepalive = 50, 10
             trust_env = True
 
-        # Apply rate overrides based on settings (API key boosts)
         http_config = registry.get_http_config(provider)
         if settings and http_config and http_config.rate_overrides:
             for setting_name, override_rate in http_config.rate_overrides.items():
@@ -220,19 +161,7 @@ class HttpClientFactory:
         logger: LoggerPort | None = None,
         provider_registry: ProviderRegistry | None = None,
     ) -> UnifiedHTTPClient:
-        """Thin assembler: resolves config, then constructs infrastructure objects.
-
-        Args:
-            provider: Provider name used as label in HTTP client configuration.
-            settings: Optional application settings for API-key rate overrides.
-            run_id: Optional run ID for correlation headers; defaults to None.
-            tracer: Optional TracingPort for distributed tracing; defaults to None.
-            metrics: Optional MetricsPort for circuit breaker metrics; defaults to None.
-            logger: Optional LoggerPort for HTTP client logging; defaults to None.
-
-        Returns:
-            Configured UnifiedHTTPClient with rate limiter and circuit breaker.
-        """
+        """Resolve config and assemble a ``UnifiedHTTPClient``."""
         cfg = cls._resolve_config(
             provider,
             settings,
@@ -267,14 +196,6 @@ class HttpClientFactory:
 
     @classmethod
     def _check_setting(cls, settings: Settings, setting_name: str) -> bool:
-        """Check if a setting is present and truthy.
-
-        Args:
-            settings: Application settings
-            setting_name: Name of the setting to check
-
-        Returns:
-            True if setting exists and is truthy
-        """
+        """Return ``True`` when the setting exists and is truthy."""
         value = getattr(settings, setting_name, None)
         return value is not None and bool(value)

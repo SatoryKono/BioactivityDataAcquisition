@@ -1204,60 +1204,70 @@ def _format_workflow_execution_rows(title: str, name: str, rows: list[dict[str, 
     return "\n".join(lines)
 
 
+def _join_string_list(values: JsonValue) -> str:
+    return ",".join(str(item) for item in values) if isinstance(values, list) else ""
+
+
+def _label_suffix(labels: JsonValue) -> str:
+    label_str = _join_string_list(labels)
+    return f" | labels={label_str}" if label_str else ""
+
+
+def _sorted_prefixed_values(values: JsonValue, prefix: str) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    return [f"  {prefix}={value}" for value in sorted({str(item) for item in values if item})]
+
+
+def _storage_summary_line(row: dict[str, JsonValue], storage_name: str) -> str:
+    roles_str = _join_string_list(row.get("storage_roles"))
+    return (
+        f"- storage={storage_name} | layer={row.get('layer') or ''!s} | storage_kind={row.get('storage_kind') or ''!s} "
+        f"| format={row.get('storage_format') or ''!s} | roles={roles_str or ''} | schema_present={row.get('schema_present') or False!s}"
+    )
+
+
+def _storage_detail_line(row: dict[str, JsonValue]) -> str | None:
+    detail_parts = [
+        f"config_version={row.get('config_version') or ''!s}" if row.get("config_version") else "",
+        f"quality_version={row.get('quality_version') or ''!s}" if row.get("quality_version") else "",
+        f"partition_by={_join_string_list(row.get('partition_by'))}" if _join_string_list(row.get("partition_by")) else "",
+        f"sort_by={_join_string_list(row.get('sort_by'))}" if _join_string_list(row.get("sort_by")) else "",
+        f"versioning_mode={row.get('versioning_mode') or ''!s}" if row.get("versioning_mode") else "",
+        f"version_column={row.get('version_column') or ''!s}" if row.get("version_column") else "",
+    ]
+    detail_line = " | ".join(part for part in detail_parts if part)
+    return f"  {detail_line}" if detail_line else None
+
+
+def _storage_producer_lines(producers: JsonValue) -> list[str]:
+    if not isinstance(producers, list):
+        return []
+    normalized: set[str] = set()
+    for producer in producers:
+        if not isinstance(producer, dict):
+            continue
+        producer_name = str(producer.get("name") or "")
+        if not producer_name:
+            continue
+        normalized.add(f"  producer={producer_name}{_label_suffix(producer.get('labels'))}")
+    return sorted(normalized)
+
+
 def _format_storage_lineage_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         storage_name = str(row.get("storage_name") or "")
         if not storage_name:
             continue
-        storage_roles = row.get("storage_roles")
-        roles_str = ",".join(str(item) for item in storage_roles) if isinstance(storage_roles, list) else ""
-        partition_by = row.get("partition_by")
-        partition_str = ",".join(str(item) for item in partition_by) if isinstance(partition_by, list) else ""
-        sort_by = row.get("sort_by")
-        sort_str = ",".join(str(item) for item in sort_by) if isinstance(sort_by, list) else ""
-        lines.append(
-            f"- storage={storage_name} | layer={row.get('layer') or ''!s} | storage_kind={row.get('storage_kind') or ''!s} "
-            f"| format={row.get('storage_format') or ''!s} | roles={roles_str or ''} | schema_present={row.get('schema_present') or False!s}"
-        )
-        versioning_mode = str(row.get("versioning_mode") or "")
-        version_column = str(row.get("version_column") or "")
-        config_version = str(row.get("config_version") or "")
-        quality_version = str(row.get("quality_version") or "")
-        detail_parts = [
-            f"config_version={config_version}" if config_version else "",
-            f"quality_version={quality_version}" if quality_version else "",
-            f"partition_by={partition_str}" if partition_str else "",
-            f"sort_by={sort_str}" if sort_str else "",
-            f"versioning_mode={versioning_mode}" if versioning_mode else "",
-            f"version_column={version_column}" if version_column else "",
-        ]
-        detail_line = " | ".join(part for part in detail_parts if part)
+        lines.append(_storage_summary_line(row, storage_name))
+        detail_line = _storage_detail_line(row)
         if detail_line:
-            lines.append(f"  {detail_line}")
-        producers = row.get("producers")
-        if isinstance(producers, list):
-            normalized_producers: set[str] = set()
-            for producer in producers:
-                if not isinstance(producer, dict):
-                    continue
-                producer_name = str(producer.get("name") or "")
-                if not producer_name:
-                    continue
-                labels = producer.get("labels")
-                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                label_suffix = f" | labels={label_str}" if label_str else ""
-                normalized_producers.add(f"  producer={producer_name}{label_suffix}")
-            lines.extend(sorted(normalized_producers))
-        for field_name, prefix in (
-            ("upstream_surfaces", "upstream"),
-            ("downstream_surfaces", "downstream"),
-            ("defining_configs", "defined_by"),
-        ):
-            values = row.get(field_name)
-            if isinstance(values, list):
-                for value in sorted({str(item) for item in values if item}):
-                    lines.append(f"  {prefix}={value}")
+            lines.append(detail_line)
+        lines.extend(_storage_producer_lines(row.get("producers")))
+        lines.extend(_sorted_prefixed_values(row.get("upstream_surfaces"), "upstream"))
+        lines.extend(_sorted_prefixed_values(row.get("downstream_surfaces"), "downstream"))
+        lines.extend(_sorted_prefixed_values(row.get("defining_configs"), "defined_by"))
     if len(lines) == 1:
         lines.append("- no storage lineage found")
     return "\n".join(lines)
@@ -1465,9 +1475,7 @@ def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str,
         f"- family={family_name} | surface_kind={surface_kind} | duplicates={duplicate_count} | promotion_score={promotion_score}"
     )
     if promotion_target:
-        label_str = ",".join(str(label) for label in target_labels) if isinstance(target_labels, list) else ""
-        label_suffix = f" | labels={label_str}" if label_str else ""
-        lines.append(f"- promotion_target={promotion_target}{label_suffix}")
+        lines.append(f"- promotion_target={promotion_target}{_label_suffix(target_labels)}")
     if isinstance(members, list):
         normalized_members = []
         for member in members:
@@ -1476,10 +1484,7 @@ def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str,
             member_name = str(member.get("name") or "")
             if not member_name:
                 continue
-            labels = member.get("labels")
-            label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-            label_suffix = f" | labels={label_str}" if label_str else ""
-            normalized_members.append(f"- member={member_name}{label_suffix}")
+            normalized_members.append(f"- member={member_name}{_label_suffix(member.get('labels'))}")
         lines.extend(sorted(normalized_members))
     if isinstance(tests, list):
         normalized_tests = sorted(
@@ -1672,10 +1677,7 @@ def _format_simplification_blockers_rows(title: str, name: str, rows: list[dict[
             f"| config={row.get('config_anchor_count') or ''!s} | docs={row.get('doc_anchor_count') or ''!s} "
             f"| tests={row.get('test_anchor_count') or ''!s}"
         )
-        cycle_blockers = row.get("cycle_blockers")
-        if isinstance(cycle_blockers, list):
-            for blocker in sorted({str(item) for item in cycle_blockers if item}):
-                lines.append(f"  cycle_blocker={blocker}")
+        lines.extend(_sorted_prefixed_values(row.get("cycle_blockers"), "cycle_blocker"))
         blockers = row.get("blockers")
         if isinstance(blockers, list):
             normalized: set[str] = set()
@@ -1686,11 +1688,7 @@ def _format_simplification_blockers_rows(title: str, name: str, rows: list[dict[
                 if not blocker_name:
                     continue
                 relation_name = str(blocker.get("relation") or "")
-                labels = blocker.get("labels")
-                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                normalized.add(
-                    f"  blocker={blocker_name} | relation={relation_name}" + (f" | labels={label_str}" if label_str else "")
-                )
+                normalized.add(f"  blocker={blocker_name} | relation={relation_name}{_label_suffix(blocker.get('labels'))}")
             lines.extend(sorted(normalized))
     if len(lines) == 1:
         lines.append("- no simplification blockers found")
