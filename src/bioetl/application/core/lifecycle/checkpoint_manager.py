@@ -93,10 +93,7 @@ class CheckpointManagerService:
             self._emit_checkpoint_load_status("failed")
             raise
 
-    def _resolve_checkpoint_metadata(
-        self,
-        checkpoint_data: tuple[RunID, JsonDict],
-    ) -> CheckpointMetadata:
+    def _resolve_checkpoint_metadata(self, checkpoint_data: tuple[RunID, JsonDict]) -> CheckpointMetadata:
         """Convert persisted legacy checkpoint payload into typed metadata."""
         _, legacy_metadata = checkpoint_data
         return CheckpointMetadata.from_legacy_metadata(legacy_metadata)
@@ -231,11 +228,7 @@ class CheckpointManagerService:
         """Save checkpoint metadata, accepting the legacy integer shorthand."""
         if isinstance(metadata, int):
             metadata = CheckpointMetadata(records_processed=metadata)
-        metadata = enrich_metadata_with_execution_identity(
-            metadata,
-            identity=self._current_metadata,
-        )
-
+        metadata = enrich_metadata_with_execution_identity(metadata, identity=self._current_metadata)
         await self._checkpoint.save(
             pipeline=self._pipeline_name,
             run_id=self._run_id,
@@ -248,7 +241,6 @@ class CheckpointManagerService:
 
     async def list_all(self) -> list[str]:
         """List all pipelines that currently have checkpoints."""
-        checkpoint_names: list[str] = await self._checkpoint.list_all()
-        return checkpoint_names
+        return await self._checkpoint.list_all()
 
 __all__ = ["CheckpointManager", "CheckpointManagerService"]

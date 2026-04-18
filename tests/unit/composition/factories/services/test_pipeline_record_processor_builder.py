@@ -7,6 +7,7 @@ from typing import cast
 from unittest.mock import MagicMock
 
 from bioetl.application.core.wiring.runtime import BasePipeline
+from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services.pipeline_record_processor_builder import (
     build_record_processor_config_and_validator,
     create_record_processor_from_pipeline,
@@ -67,7 +68,7 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
         pipeline=pipeline,
         silver_schema=None,
         gold_schema=active_schema,
-        callbacks=callbacks,
+        callbacks=cast(PipelineCallbacksContext, callbacks),
         create_record_processor_fn=create_fn,
         lock_validator=MagicMock(name="lock_validator"),
         tracer=MagicMock(name="tracer"),

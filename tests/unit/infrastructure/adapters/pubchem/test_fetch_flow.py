@@ -138,6 +138,7 @@ class TestFetchFlowExecute:
             call_order.append("acquire")
 
         async def track_cb_call(*args: object, **kwargs: object) -> list[object]:
+            await asyncio.sleep(0)
             call_order.append("cb_call")
             return []
 

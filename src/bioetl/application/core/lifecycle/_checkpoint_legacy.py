@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import warnings
 
+
 class CheckpointManager:
     """Deprecated compatibility alias retained for legacy constructor calls."""
 

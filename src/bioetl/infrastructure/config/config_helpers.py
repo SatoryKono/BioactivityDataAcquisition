@@ -1,11 +1,7 @@
-"""
-Config helpers module for common configuration operations.
-"""
-
-from typing import Any, Dict
+"""Config helpers module for common configuration operations."""
 
 
-def load_config(config_path: str) -> Dict[str, Any]:
+def load_config(config_path: str) -> dict[str, object]:
     """Load configuration from a file.
     
     Args:
@@ -18,7 +14,7 @@ def load_config(config_path: str) -> Dict[str, Any]:
     return {}
 
 
-def load_and_validate_config(config_path: str) -> Dict[str, Any]:
+def load_and_validate_config(config_path: str) -> dict[str, object]:
     """Load and validate configuration.
     
     Args:
