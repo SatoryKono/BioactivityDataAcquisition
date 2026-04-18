@@ -1,5 +1,3 @@
-"""Private collaborator assembly for the CrossRef datasource factory."""
-
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
@@ -42,7 +40,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
-
 @dataclass(frozen=True)
 class CrossRefAdapterComponents:
     metrics: MetricsPort | None
@@ -81,10 +78,7 @@ def require_dependencies(
     return http_client, logger
 
 
-def _create_helper_services(
-    logger: LoggerPort,
-    metrics: MetricsPort | None,
-) -> AdapterHelperServices:
+def _create_helper_services(logger: LoggerPort, metrics: MetricsPort | None) -> AdapterHelperServices:
     return AdapterHelpersFactory.create_http_helpers(
         provider="crossref",
         logger=logger,
@@ -139,10 +133,7 @@ def _create_query_builder(
 
 
 def _create_response_mapper(kwargs: dict[str, object]) -> CrossRefResponseMapper:
-    response_mapper = cast(
-        "CrossRefResponseMapper | None",
-        kwargs.get("response_mapper"),
-    )
+    response_mapper = cast("CrossRefResponseMapper | None", kwargs.get("response_mapper"))
     if response_mapper is None:
         response_mapper = _create_default_crossref_response_mapper()
     return response_mapper
@@ -202,10 +193,7 @@ def _create_title_fallback_handler(
     logger: LoggerPort,
     search_fn: Callable[[str, int], AsyncIterator[JsonDict]],
 ) -> CrossRefTitleFallbackHandler:
-    title_fallback_handler = cast(
-        "CrossRefTitleFallbackHandler | None",
-        kwargs.get("title_fallback_handler"),
-    )
+    title_fallback_handler = cast("CrossRefTitleFallbackHandler | None", kwargs.get("title_fallback_handler"))
     if title_fallback_handler is None:
         title_fallback_handler = _create_default_crossref_title_fallback_handler(
             logger=logger,
@@ -224,12 +212,9 @@ def build_crossref_components(
     mailto = resolve_mailto(kwargs, settings)
     metrics = cast("MetricsPort | None", kwargs.get("metrics"))
     helper_services = _create_helper_services(logger, metrics)
-    (
-        error_handler,
-        adapter_metrics,
-        request_collector,
-        fallback_fetch_service,
-    ) = _resolve_optional_components(kwargs, helper_services)
+    error_handler, adapter_metrics, request_collector, fallback_fetch_service = (
+        _resolve_optional_components(kwargs, helper_services)
+    )
     query_builder = _create_query_builder(kwargs, mailto)
     headers_fn = query_builder.build_headers
     response_mapper = _create_response_mapper(kwargs)
