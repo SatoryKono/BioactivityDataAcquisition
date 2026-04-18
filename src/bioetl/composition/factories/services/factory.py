@@ -1,8 +1,4 @@
-"""Services Factory.
-
-Contains BaseServicesFactory for creating PipelineService with all dependencies.
-ServicesBuilder and helpers have been extracted to services_builder.py.
-"""
+"""Services factory façade for pipeline service wiring."""
 
 from __future__ import annotations
 
@@ -61,13 +57,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-__all__ = [
-    "BaseServicesFactory",
-    "DQServicesFactory",
-    "ServicesBuilder",
-    "create_data_normalization_service",
-    "extract_pipeline_callbacks",
-]
+__all__ = ["BaseServicesFactory", "DQServicesFactory", "ServicesBuilder", "create_data_normalization_service", "extract_pipeline_callbacks"]
 
 
 class BaseServicesFactory:
@@ -92,22 +82,7 @@ class BaseServicesFactory:
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
     ) -> PipelineService:
-        """Create a fully wired `PipelineService` bundle for one pipeline run.
-
-        Args:
-            settings: Application settings for storage paths, environment, and feature flags.
-            logger: LoggerPort for structured logging across all services.
-            data_source: DataSourcePort providing raw records for the pipeline.
-            pipeline_config: Pipeline YAML configuration with table names and source settings.
-            metrics: Optional MetricsPort; creates PrometheusMetrics from settings if None.
-            tracer: Optional TracingPort; uses NoOpTracing if None.
-            dq_monitor: Optional DQMonitorPort for anomaly detection.
-            metadata_coordinator: Optional coordinator for pipeline metadata writes.
-            silver_validator: Optional Silver layer validator; required in production.
-
-        Returns:
-            PipelineService with storage, checkpoint, observability, and DQ wired.
-        """
+        """Create a fully wired `PipelineService` bundle for one pipeline run."""
         cls._ensure_prod_silver_validator(settings, pipeline_config, silver_validator)
         common_ports = build_common_service_ports(
             CommonServicePortsRequest(
@@ -141,13 +116,7 @@ class BaseServicesFactory:
         pipeline_config: PipelineYamlConfig,
         silver_validator: SilverValidatorPort | None,
     ) -> None:
-        """Enforce validator requirement in production mode.
-
-        Args:
-            settings: Application settings used to detect production environment.
-            pipeline_config: Pipeline config providing the pipeline name for error messages.
-            silver_validator: Silver validator instance; raises if None in production.
-        """
+        """Enforce validator requirement in production mode."""
         if (
             settings.env == "prod"
             and not settings.test_mode
@@ -160,14 +129,7 @@ class BaseServicesFactory:
 
     @staticmethod
     def _resolve_tracer(tracer: TracingPort | None) -> TracingPort:
-        """Return tracer or fallback to NoOpTracing.
-
-        Args:
-            tracer: Optional TracingPort; if None, a NoOpTracing instance is returned.
-
-        Returns:
-            A non-None TracingPort (either the provided tracer or a NoOp fallback).
-        """
+        """Return tracer or fallback to NoOpTracing."""
         return resolve_tracer(tracer)
 
     @staticmethod
@@ -185,24 +147,7 @@ class BaseServicesFactory:
         metadata_coordinator: MetadataCoordinator | None,
         dq_services: JsonDict,  # Any: heterogeneous DQ service instances
     ) -> PipelineService:
-        """Assemble PipelineService from pre-built dependencies.
-
-        Args:
-            data_source: Configured data source adapter for the provider.
-            storage_ctx: Storage context containing adapter and derived paths.
-            lock: In-memory lock for concurrency control.
-            checkpoint: Checkpoint adapter for resume support.
-            quarantine: Quarantine store for failed records.
-            metrics_port: Metrics port for Prometheus counters and histograms.
-            tracer: Tracing port for distributed span propagation.
-            logger: LoggerPort for structured logging.
-            dq_monitor: Optional DQ monitor port; no DQ alerting if None.
-            metadata_coordinator: Optional coordinator for metadata persistence.
-            dq_services: Dict of optional DQ analyzers, writer, and report service.
-
-        Returns:
-            Fully assembled PipelineService instance.
-        """
+        """Assemble PipelineService from pre-built dependencies."""
         return assemble_pipeline_service(
             data_source=data_source,
             logger=logger,
@@ -224,15 +169,7 @@ class BaseServicesFactory:
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
     ) -> Path:
-        """Derive output root from pipeline config or fall back to settings.
-
-        Args:
-            settings: Application settings providing the default output root.
-            pipeline_config: Pipeline YAML config that may override the output root.
-
-        Returns:
-            Resolved output root Path for the pipeline.
-        """
+        """Derive output root from pipeline config or fall back to settings."""
         return _get_output_root_impl(settings, pipeline_config)
 
     @classmethod

@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-18T09:40:59.558978+00:00",
+  "generated_at": "2026-04-18T11:01:25.160078+00:00",
   "summary": {
-    "total_scripts": 383,
+    "total_scripts": 384,
     "status_counts": {
       "active": 281,
       "legacy": 15,
-      "orphan": 77,
+      "orphan": 78,
       "unknown": 10
     },
     "reference_group_coverage": {
@@ -2263,6 +2263,14 @@
           "text": "- `scripts/ci/_compatibility_telemetry.py` tracks modules when the first docstring line starts with a compatibility prefix."
         }
       ]
+    },
+    {
+      "path": "scripts/common/repo_paths.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/data/__main__.py",
@@ -4592,7 +4600,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"dq-baseline\": \"scripts/engineering/baselines/dq_baseline_update.py\","
         },
@@ -7598,7 +7606,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 33,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"check-vcr-placement\": \"scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\","
         },
@@ -7643,7 +7651,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 34,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"check-vcr-naming\": \"scripts/engineering/qa/vcr/check_vcr_filename_policy.py\","
         },
@@ -7682,7 +7690,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 35,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"check-vcr-secrets\": \"scripts/engineering/qa/vcr/check_vcr_secrets.py\","
         },
@@ -8421,7 +8429,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 36,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"check-delta\": \"scripts/ops/data/check_delta_integrity.py\","
         },
@@ -8448,7 +8456,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"report-null-fields\": \"scripts/ops/data/extract_null_fields.py\","
         },
@@ -8475,7 +8483,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"report-content-hash\": \"scripts/ops/data/generate_content_hash_comparison_report.py\","
         },
@@ -8520,7 +8528,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 38,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"vacuum\": \"scripts/ops/data/vacuum_delta.py\","
         },
@@ -8547,7 +8555,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 37,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"check-data-dir\": \"scripts/ops/data/validate_data_dir.py\","
         },
@@ -8586,7 +8594,7 @@
         },
         {
           "path": "scripts/data/__main__.py",
-          "line": 39,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"checksums\": \"scripts/ops/data/verify_checksums.py\","
         },
