@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -243,6 +244,7 @@ class TestSilverWriterDQMetrics:
             provider=None,
             entity=None,
         ):
+            await asyncio.sleep(0)
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
@@ -327,6 +329,7 @@ class TestSilverWriterDQMetrics:
             provider=None,
             entity=None,
         ):
+            await asyncio.sleep(0)
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
@@ -392,6 +395,7 @@ class TestSilverWriterDQMetrics:
             provider=None,
             entity=None,
         ):
+            await asyncio.sleep(0)
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write

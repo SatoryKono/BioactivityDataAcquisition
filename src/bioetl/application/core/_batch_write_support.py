@@ -15,10 +15,10 @@ from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.types import BatchID, ErrorType, RunID
 
 if TYPE_CHECKING:
+    from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterPort,
     )
-    from bioetl.application.core.batch_writer import BatchWriter
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 

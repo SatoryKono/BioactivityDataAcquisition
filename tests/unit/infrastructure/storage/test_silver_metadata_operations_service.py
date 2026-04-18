@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
@@ -23,6 +24,7 @@ async def test_write_silver_metadata_uses_record_ingestion_anchor_when_explicit_
     captured: dict[str, object] = {}
 
     async def capture_write(**kwargs):
+        await asyncio.sleep(0)
         captured.update(kwargs)
         return None
 

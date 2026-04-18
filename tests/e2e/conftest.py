@@ -381,7 +381,7 @@ def _create_retry_run_context(
 
     if attempt == 0:
         return context
-    return replace(context, run_id=RunID(uuid4()))
+    return cast(PipelineRunContext, replace(context, run_id=RunID(uuid4())))
 
 
 def _get_transient_reason_code(exc: Exception | None) -> str:

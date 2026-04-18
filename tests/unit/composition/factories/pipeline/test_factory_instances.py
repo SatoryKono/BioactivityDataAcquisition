@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
@@ -70,7 +71,7 @@ class TestChemblActivityFactory:
     """Concrete registry instances should behave like GenericPipelineFactory."""
 
     @pytest.fixture(autouse=True)
-    def _restore_factory_state(self) -> None:
+    def _restore_factory_state(self) -> Generator[None, None, None]:
         from bioetl.composition.factories.pipeline.registry import (
             chembl_activity_factory,
         )

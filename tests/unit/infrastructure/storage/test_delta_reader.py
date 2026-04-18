@@ -6,6 +6,7 @@ row limiting, schema retrieval, and existence checks.
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -207,6 +208,7 @@ class TestReadTable:
             columns: list[str] | None = None,
             limit: int | None = None,
         ) -> pa.Table:
+            await asyncio.sleep(0)
             captured["table_path"] = table_path
             captured["columns"] = columns
             captured["limit"] = limit
@@ -237,6 +239,7 @@ class TestReadTable:
             columns: list[str] | None = None,
             limit: int | None = None,
         ) -> pa.Table:
+            await asyncio.sleep(0)
             del columns, limit
             if table_path == "chembl.activity__v2_0_0":
                 raise FileNotFoundError("missing v2")

@@ -179,14 +179,6 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Continue extracting DQ analysis/reporting helpers until the service drops below the default limit."
-    src/bioetl/application/services/error_handler.py::ErrorHandler:
-      value: 316
-      owner: "@bioetl-platform"
-      reason: "Error handling remains a broad coordination surface while exception routing and telemetry branches are still centralized."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Split exception routing and telemetry concerns into dedicated helpers until the class returns under the default limit."
     src/bioetl/application/services/metrics_service.py::MetricsService:
       value: 357
       owner: "@bioetl-platform"

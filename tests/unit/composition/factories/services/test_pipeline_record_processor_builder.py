@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock
 
+from bioetl.application.core.wiring.runtime import BasePipeline
 from bioetl.composition.factories.services.pipeline_record_processor_builder import (
     build_record_processor_config_and_validator,
     create_record_processor_from_pipeline,
 )
 
 
-def _make_pipeline() -> MagicMock:
+def _make_pipeline() -> BasePipeline:
     pipeline = MagicMock()
     pipeline.services = MagicMock(name="services")
     pipeline.context = MagicMock(name="context")
@@ -43,7 +45,7 @@ def _make_pipeline() -> MagicMock:
     pipeline.config.table.on_schema_mismatch = "error"
     pipeline.config.column_groups = ["system", "business"]
     pipeline.config.scd_config = {"type": 2}
-    return pipeline
+    return cast(BasePipeline, pipeline)
 
 
 def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> None:

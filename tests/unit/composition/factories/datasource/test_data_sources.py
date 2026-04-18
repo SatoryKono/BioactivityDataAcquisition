@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from unittest.mock import Mock
 
@@ -72,15 +73,18 @@ def test_create_uses_explicit_provider_registry(mock_http_client, mock_logger):
             return self
 
         async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+            await asyncio.sleep(0)
             return None
 
         async def fetch(self, *args, **kwargs):
             yield {}
 
         async def health_check(self) -> HealthStatus:
+            await asyncio.sleep(0)
             return HealthStatus.HEALTHY
 
         async def aclose(self) -> None:
+            await asyncio.sleep(0)
             return None
 
     isolated.register(

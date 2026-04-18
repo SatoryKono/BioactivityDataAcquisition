@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterator
 from datetime import datetime, timedelta, timezone, UTC
+from typing import cast
 from unittest.mock import MagicMock
 
 import pytest
@@ -61,8 +63,12 @@ class TestBronzeWriterValidationMixin:
     def test_validate_records_iterator_none(self) -> None:
         """None records should raise TypeError."""
         host = _Host()
+        validate_records = cast(
+            Callable[[Iterator[bytes] | None], None],
+            host._validate_records_iterator,
+        )
         with pytest.raises(TypeError, match="records cannot be None"):
-            host._validate_records_iterator(None)  # type: ignore[arg-type]
+            validate_records(None)
 
     def test_validate_records_iterator_valid(self) -> None:
         """A valid iterator should pass without error."""

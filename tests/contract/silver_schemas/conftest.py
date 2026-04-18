@@ -164,7 +164,17 @@ def _normalize_dtype_name(field_name: str, dtype_name: str) -> str:
     normalized = dtype_name.strip()
 
     # Historical snapshots store this field as int64 while newer Pandera may expose Int64.
-    if field_name == "dosed_ingredient" and normalized == "Int64":
+    legacy_int64_fields = {
+        "black_box_warning",
+        "chirality",
+        "dosed_ingredient",
+        "first_in_class",
+        "inorganic_flag",
+        "natural_product",
+        "polymer_flag",
+        "prodrug",
+    }
+    if field_name in legacy_int64_fields and normalized == "Int64":
         return "int64"
 
     if normalized == "boolean":

@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import cast
 from uuid import uuid4
 
 import pytest
 
 from bioetl.domain.aggregates.events import (
     BatchWritten,
+    DomainEvent,
     PipelineCompleted,
     QuarantineEntryResolved,
 )
@@ -78,4 +80,4 @@ def test_unknown_domain_event_type_raises_type_error() -> None:
         occurred_at = datetime(2026, 4, 10, tzinfo=UTC)
 
     with pytest.raises(TypeError, match="Unsupported DomainEvent"):
-        map_domain_event_to_observability_event(UnknownEvent())  # type: ignore[arg-type]
+        map_domain_event_to_observability_event(cast(DomainEvent, UnknownEvent()))

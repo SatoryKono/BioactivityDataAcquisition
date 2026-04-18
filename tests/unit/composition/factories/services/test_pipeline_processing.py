@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock, patch
 
+from bioetl.application.core.wiring.runtime import RecordProcessorConfig
 
 from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
@@ -40,10 +42,13 @@ class TestBuildComponentsAndProcessingService:
                 run_type=MagicMock(value="incremental"),
             ),
         )
-        processor_config = SimpleNamespace(
-            pipeline_name="test_pipeline",
-            provider="test_provider",
-            entity_type="test_entity",
+        processor_config = cast(
+            RecordProcessorConfig,
+            SimpleNamespace(
+                pipeline_name="test_pipeline",
+                provider="test_provider",
+                entity_type="test_entity",
+            ),
         )
         callbacks = SimpleNamespace(
             transform=MagicMock(name="transform"),

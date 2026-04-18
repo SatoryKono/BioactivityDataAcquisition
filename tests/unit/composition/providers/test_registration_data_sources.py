@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,6 +21,7 @@ from bioetl.composition.providers.registration_bio import (
     _create_pubchem_adapter,
     _create_uniprot_idmapping_data_source,
 )
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 # Common mock target for the generic biblio helper
 _BIBLIO_HTTP_DS = (
@@ -492,7 +494,7 @@ class TestUniProtIdMappingCreatorBranches:
             to_db="UniProtKB-Swiss-Prot",
         )
         source = SimpleNamespace(api=source_api, input_path="data/input/custom.csv")
-        pipeline_config = SimpleNamespace(source=source)
+        pipeline_config = cast(PipelineYamlConfig, SimpleNamespace(source=source))
         filter_config = SimpleNamespace(direct_filter_ids=["CHEMBL1", "CHEMBL2"])
         logger = MagicMock()
 
@@ -536,7 +538,7 @@ class TestUniProtIdMappingCreatorBranches:
         mock_idmapping_data_source.return_value = mock_ds
 
         source = SimpleNamespace(api=None, input_path=None)
-        pipeline_config = SimpleNamespace(source=source)
+        pipeline_config = cast(PipelineYamlConfig, SimpleNamespace(source=source))
         logger = MagicMock()
 
         _create_uniprot_idmapping_data_source(

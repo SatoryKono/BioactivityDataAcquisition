@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from types import TracebackType
 from unittest.mock import AsyncMock, MagicMock
 
@@ -33,6 +34,7 @@ class _HTTPClientStub:
         params: dict[str, object] | None = None,
         headers: dict[str, str] | None = None,
     ) -> _ResponseStub:
+        await asyncio.sleep(0)
         del url, params, headers
         return _ResponseStub()
 
