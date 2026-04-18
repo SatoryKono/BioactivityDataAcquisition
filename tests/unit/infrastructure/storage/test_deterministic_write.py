@@ -123,6 +123,7 @@ def _reorder_records(records: list[dict], variant: int) -> list[dict]:
         return records[1:] + records[:1]
     return records[2:] + records[:2]
 
+
 class TestDeterministicBronzeWrite:
     """Tests for deterministic Bronze layer write."""
 

@@ -58,10 +58,14 @@ def build_launch_context_snapshot(
 ) -> dict[str, object]:
     """Build a snapshot of the launch context."""
     snapshot = _build_base_snapshot(ctx, run_type_value, execution_context_value)
-    snapshot.update({
-        "required_persistence_profile": required_persistence_profile,
-        "exact_replay_support_boundary": _determine_replay_support_boundary(execution_context_value),
-    })
+    snapshot.update(
+        {
+            "required_persistence_profile": required_persistence_profile,
+            "exact_replay_support_boundary": _determine_replay_support_boundary(
+                execution_context_value
+            ),
+        }
+    )
     _add_optional_fields(snapshot, ctx)
     return snapshot
 
@@ -100,8 +104,12 @@ def _determine_replay_support_boundary(execution_context_value: str) -> str:
 def _add_optional_fields(snapshot: dict[str, object], ctx: PipelineRunContext) -> None:
     """Add optional fields to the snapshot."""
     snapshot["vacuum"] = to_serializable_mapping(getattr(ctx, "vacuum", None))
-    snapshot["input_filter"] = to_serializable_mapping(getattr(ctx, "input_filter", None))
-    snapshot["cached_bronze"] = to_serializable_mapping(getattr(ctx, "cached_bronze", None))
+    snapshot["input_filter"] = to_serializable_mapping(
+        getattr(ctx, "input_filter", None)
+    )
+    snapshot["cached_bronze"] = to_serializable_mapping(
+        getattr(ctx, "cached_bronze", None)
+    )
 
 
 def resolve_replay_parentage(
@@ -111,8 +119,12 @@ def resolve_replay_parentage(
 ) -> tuple[str | None, str | None]:
     """Resolve the replay parentage."""
     runtime_config_mapping = _as_runtime_config_mapping(runtime_config)
-    replay_of_run_id = _resolve_replay_id(ctx, "replay_of_run_id", runtime_config_mapping)
-    replay_of_manifest_id = _resolve_replay_id(ctx, "replay_of_manifest_id", runtime_config_mapping)
+    replay_of_run_id = _resolve_replay_id(
+        ctx, "replay_of_run_id", runtime_config_mapping
+    )
+    replay_of_manifest_id = _resolve_replay_id(
+        ctx, "replay_of_manifest_id", runtime_config_mapping
+    )
     return replay_of_run_id, replay_of_manifest_id
 
 
@@ -125,7 +137,7 @@ def _resolve_replay_id(
     ctx_value = _coerce_optional_text(getattr(ctx, attr_name, None))
     if ctx_value is not None:
         return ctx_value
-    
+
     keys = (attr_name, f"exact_replay_parent_{attr_name}")
     return _resolve_replay_parentage_mapping_value(runtime_config_mapping, *keys)
 

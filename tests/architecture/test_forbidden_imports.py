@@ -59,13 +59,17 @@ def _module_import_violations(
     exact_modules = exact_modules or set()
     violations: list[str] = []
     tree = _parse_file(py_file)
-    
+
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
-            _check_import_from(node, py_file, src_dir, exact_modules, startswith_modules, violations)
+            _check_import_from(
+                node, py_file, src_dir, exact_modules, startswith_modules, violations
+            )
         elif isinstance(node, ast.Import):
-            _check_import(node, py_file, src_dir, exact_modules, startswith_modules, violations)
-    
+            _check_import(
+                node, py_file, src_dir, exact_modules, startswith_modules, violations
+            )
+
     return violations
 
 
@@ -109,13 +113,17 @@ def _composition_module_violations(
     """Check for violations of composition module imports."""
     violations: list[str] = []
     tree = _parse_file(py_file)
-    
+
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
-            _check_composition_import_from(node, py_file, src_dir, allowed_modules, violations)
+            _check_composition_import_from(
+                node, py_file, src_dir, allowed_modules, violations
+            )
         elif isinstance(node, ast.Import):
-            _check_composition_import(node, py_file, src_dir, allowed_modules, violations)
-    
+            _check_composition_import(
+                node, py_file, src_dir, allowed_modules, violations
+            )
+
     return violations
 
 

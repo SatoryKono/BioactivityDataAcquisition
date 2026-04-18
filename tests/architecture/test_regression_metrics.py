@@ -436,7 +436,9 @@ def _find_adapter_instantiations(
                     tree = ast.parse(source)
                 except SyntaxError:
                     continue
-                violations.extend(_adapter_instantiations_in_tree(src_dir, py_file, tree))
+                violations.extend(
+                    _adapter_instantiations_in_tree(src_dir, py_file, tree)
+                )
     return violations
 
 
@@ -760,8 +762,7 @@ def _assert_makefile_architecture_target(content: str) -> None:
         "Makefile must keep the qa-arch-fast target for architecture CI"
     )
     assert (
-        'tests/architecture/ -m "not slow and not serial and not memory"'
-        in content
+        'tests/architecture/ -m "not slow and not serial and not memory"' in content
     ), (
         "qa-arch-fast must exclude @pytest.mark.slow, @pytest.mark.serial, and memory tests"
     )
@@ -798,7 +799,9 @@ def _load_exemptions_registries() -> dict[str, Any]:
     return registries
 
 
-def _scorecard_baseline_section(scorecard: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def _scorecard_baseline_section(
+    scorecard: dict[str, Any],
+) -> tuple[str, dict[str, Any]]:
     governance = scorecard.get("governance", {})
     section_name = "baseline"
     if isinstance(governance, dict):
