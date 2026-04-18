@@ -251,6 +251,72 @@ def get_primary_keys(config_path: str) -> list[str]:
     return primary_keys
 
 
+def _append_baseline_differences(
+    *,
+    pair_name: str,
+    missing_in_gold: list[str],
+    missing_in_silver: list[str],
+    known_silver_only: set[str],
+    known_gold_only: set[str],
+    warnings: list[str],
+    blocking: list[str],
+) -> None:
+    """Split gaps into baselined informational warnings and new blocking ones."""
+    new_missing_in_gold = [field for field in missing_in_gold if field not in known_silver_only]
+    new_missing_in_silver = [field for field in missing_in_silver if field not in known_gold_only]
+    baselined_in_gold = [field for field in missing_in_gold if field in known_silver_only]
+    baselined_in_silver = [field for field in missing_in_silver if field in known_gold_only]
+
+    if baselined_in_gold:
+        warnings.append(f"{pair_name}: baselined Silver->Gold gaps: {baselined_in_gold}")
+    if baselined_in_silver:
+        warnings.append(f"{pair_name}: baselined Gold->Silver gaps: {baselined_in_silver}")
+    if new_missing_in_gold:
+        blocking.append(
+            f"{pair_name}: NEW fields in Silver but missing in Gold: {new_missing_in_gold}"
+        )
+    if new_missing_in_silver:
+        blocking.append(
+            f"{pair_name}: NEW fields in Gold but missing in Silver: {new_missing_in_silver}"
+        )
+
+
+def _validate_primary_key(
+    *,
+    pair: SchemaPair,
+    primary_key: str,
+    silver_fields: dict[str, object],
+    gold_columns: dict[str, object],
+    warnings: list[str],
+    blocking: list[str],
+) -> None:
+    """Validate PK presence and nullability across Silver and Gold layers."""
+    if primary_key not in silver_fields:
+        blocking.append(
+            f"{pair.name}: PK '{primary_key}' missing in Silver schema ({pair.config_path})"
+        )
+        return
+
+    if primary_key not in gold_columns:
+        blocking.append(
+            f"{pair.name}: PK '{primary_key}' missing in Gold schema ({pair.config_path})"
+        )
+        return
+
+    silver_nullable = silver_fields[primary_key].nullable
+    gold_nullable = gold_columns[primary_key].nullable
+
+    if silver_nullable:
+        warnings.append(f"{pair.name}: PK '{primary_key}' is nullable in Silver schema")
+    if gold_nullable:
+        warnings.append(f"{pair.name}: PK '{primary_key}' is nullable in Gold schema")
+    if silver_nullable != gold_nullable:
+        blocking.append(
+            f"{pair.name}: PK '{primary_key}' nullable mismatch "
+            f"(Silver={silver_nullable}, Gold={gold_nullable})"
+        )
+
+
 def check_schema_pair(
     pair: SchemaPair,
     baseline: dict[str, dict[str, list[str]]],
@@ -269,32 +335,15 @@ def check_schema_pair(
     known = baseline.get(pair.name, {})
     known_silver_only = set(known.get("silver_only", []))
     known_gold_only = set(known.get("gold_only", []))
-
-    new_missing_in_gold = [f for f in missing_in_gold if f not in known_silver_only]
-    new_missing_in_silver = [f for f in missing_in_silver if f not in known_gold_only]
-
-    # Report known differences as informational
-    baselined_in_gold = [f for f in missing_in_gold if f in known_silver_only]
-    baselined_in_silver = [f for f in missing_in_silver if f in known_gold_only]
-
-    if baselined_in_gold:
-        warnings.append(
-            f"{pair.name}: baselined Silver->Gold gaps: {baselined_in_gold}"
-        )
-    if baselined_in_silver:
-        warnings.append(
-            f"{pair.name}: baselined Gold->Silver gaps: {baselined_in_silver}"
-        )
-
-    # Only NEW mismatches are blocking
-    if new_missing_in_gold:
-        blocking.append(
-            f"{pair.name}: NEW fields in Silver but missing in Gold: {new_missing_in_gold}"
-        )
-    if new_missing_in_silver:
-        blocking.append(
-            f"{pair.name}: NEW fields in Gold but missing in Silver: {new_missing_in_silver}"
-        )
+    _append_baseline_differences(
+        pair_name=pair.name,
+        missing_in_gold=missing_in_gold,
+        missing_in_silver=missing_in_silver,
+        known_silver_only=known_silver_only,
+        known_gold_only=known_gold_only,
+        warnings=warnings,
+        blocking=blocking,
+    )
 
     primary_keys = get_primary_keys(pair.config_path)
     if not primary_keys:
@@ -303,34 +352,14 @@ def check_schema_pair(
         )
 
     for primary_key in primary_keys:
-        if primary_key not in silver_fields:
-            blocking.append(
-                f"{pair.name}: PK '{primary_key}' missing in Silver schema ({pair.config_path})"
-            )
-            continue
-
-        if primary_key not in gold_columns:
-            blocking.append(
-                f"{pair.name}: PK '{primary_key}' missing in Gold schema ({pair.config_path})"
-            )
-            continue
-
-        if silver_fields[primary_key].nullable:
-            warnings.append(
-                f"{pair.name}: PK '{primary_key}' is nullable in Silver schema"
-            )
-
-        if gold_columns[primary_key].nullable:
-            warnings.append(
-                f"{pair.name}: PK '{primary_key}' is nullable in Gold schema"
-            )
-
-        if silver_fields[primary_key].nullable != gold_columns[primary_key].nullable:
-            blocking.append(
-                f"{pair.name}: PK '{primary_key}' nullable mismatch "
-                f"(Silver={silver_fields[primary_key].nullable}, "
-                f"Gold={gold_columns[primary_key].nullable})"
-            )
+        _validate_primary_key(
+            pair=pair,
+            primary_key=primary_key,
+            silver_fields=silver_fields,
+            gold_columns=gold_columns,
+            warnings=warnings,
+            blocking=blocking,
+        )
 
     return blocking, warnings
 
