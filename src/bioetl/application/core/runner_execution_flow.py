@@ -221,10 +221,17 @@ async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
 async def validate_infrastructure(host: _PipelineRunnerExecutionHostProtocol) -> None:
     """Validate infrastructure health before pipeline execution."""
     start_time = time.perf_counter()
-    report = await host._preflight_service.validate_infrastructure(
-        host._services,
-        raise_on_unhealthy=False,
-    )
+    try:
+        report = await host._preflight_service.validate_infrastructure(
+            host._services,
+            raise_on_unhealthy=False,
+        )
+    except TypeError as exc:
+        if "raise_on_unhealthy" not in str(exc):
+            raise
+        report = await host._preflight_service.validate_infrastructure(host._services)
+    if report is None:
+        return
     duration = time.perf_counter() - start_time
     emit_preflight_health_results(
         host,
