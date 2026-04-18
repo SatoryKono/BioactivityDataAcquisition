@@ -1,49 +1,45 @@
-schema_version: "1.0"
+schema_version: '1.0'
 canonical_roots:
-  - scripts/ai
-  - scripts/ai/codex
-  - scripts/ai/gemini
-  - scripts/ai/mistrall
-  - scripts/ai/mistrallvibe
-  - scripts/engineering/ci
-  - scripts/engineering/dev
-  - scripts/engineering/qa
-  - scripts/docs
-  - scripts/schema
-  - scripts/engineering/repo
-  - scripts/ops
-  - scripts/engineering/diagnostics
-  - scripts/engineering/baselines
-  - scripts/ops/migrations/active
-  - scripts/ops/migrations/oneoff
-  - scripts/ops/archive
-  - scripts/diagrams
-
+- scripts/ai
+- scripts/ai/codex
+- scripts/ai/gemini
+- scripts/ai/mistrall
+- scripts/ai/mistrallvibe
+- scripts/engineering/ci
+- scripts/engineering/dev
+- scripts/engineering/qa
+- scripts/docs
+- scripts/schema
+- scripts/engineering/repo
+- scripts/ops
+- scripts/engineering/diagnostics
+- scripts/engineering/baselines
+- scripts/ops/migrations/active
+- scripts/ops/migrations/oneoff
+- scripts/diagrams
 policies:
   root_allowlist:
-    - run.py
+  - run.py
   canonical_invocation_required_for_new_integrations: true
   no_scripts_in_root: true
-
 lifecycle:
   manifest_path: configs/quality/scripts_inventory_manifest.json
   registry_path: configs/quality/scripts_lifecycle_registry.json
   non_active_statuses:
-    - unknown
-    - orphan
-    - legacy
+  - unknown
+  - orphan
+  - legacy
   required_registry_fields:
-    - owner
-    - decision
-    - next_step
-    - review_by
+  - owner
+  - decision
+  - next_step
+  - review_by
   deprecated_decisions:
-    - deprecate
+  - deprecate
   deprecated_required_fields:
-    - replacement
-    - sunset_date
+  - replacement
+  - sunset_date
   enforce_known_registry_paths: true
-
 groups:
   ai:
     path: scripts/ai
@@ -84,9 +80,6 @@ groups:
   migrations_oneoff:
     path: scripts/ops/migrations/oneoff
     purpose: One-time migration scripts with explicit sunset
-  archive:
-    path: scripts/ops/archive
-    purpose: Archived historical scripts retained for traceability only; non-canonical for new integrations
   diagrams:
     path: scripts/diagrams
     purpose: Diagram lint/render/quality pipeline

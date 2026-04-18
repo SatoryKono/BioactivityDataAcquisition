@@ -264,6 +264,25 @@ def test_profile_backed_processor_can_enable_bounded_compatibility_fallback() ->
 
 
 @pytest.mark.unit
+def test_profile_backed_processor_accepts_chembl_publication_oa_status() -> None:
+    processor = RecordNormalizationProcessor(
+        provider="chembl",
+        entity_type="publication",
+    )
+
+    normalized = processor.normalize_business_data(
+        {
+            "publication_id": "CHEMBL25",
+            "title": "Example",
+            "publication_type": "journal-article",
+            "oa_status": None,
+        }
+    )
+
+    assert normalized["oa_status"] is None
+
+
+@pytest.mark.unit
 def test_processor_without_profile_keeps_legacy_fallback_behavior() -> None:
     processor = RecordNormalizationProcessor(
         provider="crossref",

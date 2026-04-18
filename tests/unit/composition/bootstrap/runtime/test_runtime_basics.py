@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock
 from uuid import UUID
 
 import pytest
 
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.runtime_basics import (
     bootstrap_runtime_basics,
     build_support_services,
@@ -15,9 +17,18 @@ from bioetl.composition.bootstrap.runtime.runtime_basics import (
 from bioetl.composition.bootstrap.runtime.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
+from bioetl.domain.composite.config import CompositeConfig
 
 
 _FIXED_UUID = UUID("12345678-1234-5678-1234-567812345678")
+
+
+def _make_config(name: str = "test_pipeline") -> CompositeConfig:
+    return cast(CompositeConfig, SimpleNamespace(name=name))
+
+
+def _make_runtime() -> CompositeRuntimeConfig:
+    return CompositeRuntimeConfig()
 
 
 @pytest.mark.unit
@@ -26,7 +37,7 @@ class TestBootstrapRuntimeBasics:
 
     def test_returns_seven_element_tuple(self) -> None:
         """bootstrap_runtime_basics returns run_id/settings/logger/metrics/tracer/storage/lock."""
-        config = SimpleNamespace(name="test_pipeline")
+        config = _make_config()
         settings = SimpleNamespace(metrics_enabled=False)
         logger = MagicMock()
         tracer = MagicMock()
@@ -56,7 +67,7 @@ class TestBootstrapRuntimeBasics:
 
     def test_uses_provided_run_id(self) -> None:
         """When run_id is provided, it is used instead of generating a new one."""
-        config = SimpleNamespace(name="test_pipeline")
+        config = _make_config()
         provided_run_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 
         result = bootstrap_runtime_basics(
@@ -79,7 +90,7 @@ class TestBootstrapRuntimeBasics:
         uuid_factory = MagicMock(return_value=_FIXED_UUID)
 
         result = bootstrap_runtime_basics(
-            config=SimpleNamespace(name="p"),
+            config=_make_config("p"),
             run_id=None,
             settings_provider=MagicMock(
                 return_value=SimpleNamespace(metrics_enabled=False)
@@ -99,7 +110,7 @@ class TestBootstrapRuntimeBasics:
         storage_bootstrapper = MagicMock(return_value=MagicMock())
 
         bootstrap_runtime_basics(
-            config=SimpleNamespace(name="p"),
+            config=_make_config("p"),
             run_id=str(_FIXED_UUID),
             settings_provider=MagicMock(
                 return_value=SimpleNamespace(metrics_enabled=False)
@@ -122,7 +133,7 @@ class TestBootstrapRuntimeBasics:
             return MagicMock()
 
         bootstrap_runtime_basics(
-            config=SimpleNamespace(name="my_composite"),
+            config=_make_config("my_composite"),
             run_id=str(_FIXED_UUID),
             settings_provider=MagicMock(
                 return_value=SimpleNamespace(metrics_enabled=False)
@@ -158,8 +169,8 @@ class TestBuildSupportServices:
         )
 
         result = build_support_services(
-            config=SimpleNamespace(),
-            runtime=SimpleNamespace(),
+            config=_make_config(),
+            runtime=_make_runtime(),
             infra_context=infra_context,
             support_services_factory_cls=mock_cls,
             resolve_gold_schema_fn=MagicMock(),
@@ -175,7 +186,7 @@ class TestBuildSupportServices:
         mock_instance = MagicMock()
         mock_instance.build.return_value = SimpleNamespace()
         mock_cls = MagicMock(return_value=mock_instance)
-        config = SimpleNamespace(name="test")
+        config = _make_config("test")
         infra_context = CompositeInfrastructureContext(
             run_id="rid",
             settings=SimpleNamespace(metrics_enabled=False),
@@ -188,7 +199,7 @@ class TestBuildSupportServices:
 
         build_support_services(
             config=config,
-            runtime=SimpleNamespace(),
+            runtime=_make_runtime(),
             infra_context=infra_context,
             support_services_factory_cls=mock_cls,
             resolve_gold_schema_fn=MagicMock(),

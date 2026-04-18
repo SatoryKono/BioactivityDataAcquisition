@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -19,6 +20,28 @@ from bioetl.composition.factories.services.factory import (
 from bioetl.composition.factories.services.port_factories import (
     create_metrics,
 )
+from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+def _make_settings(**overrides: object) -> Settings:
+    defaults = {
+        "env": "dev",
+        "test_mode": True,
+        "metrics_enabled": False,
+        "data_dir": MagicMock(),
+    }
+    defaults.update(overrides)
+    return cast(Settings, SimpleNamespace(**defaults))
+
+
+def _make_pipeline_config(**overrides: object) -> PipelineYamlConfig:
+    defaults = {
+        "pipeline_name": "chembl_activity",
+        "sink": {},
+    }
+    defaults.update(overrides)
+    return cast(PipelineYamlConfig, SimpleNamespace(**defaults))
 
 
 @pytest.mark.unit
@@ -80,8 +103,8 @@ def test_extract_pipeline_callbacks_legacy_requires_transform_method() -> None:
 
 @pytest.mark.unit
 def test_create_common_services_requires_silver_validator_in_prod() -> None:
-    settings = SimpleNamespace(env="prod", test_mode=False, metrics_enabled=False)
-    pipeline_config = SimpleNamespace(pipeline_name="chembl_activity")
+    settings = _make_settings(env="prod", test_mode=False)
+    pipeline_config = _make_pipeline_config()
 
     with pytest.raises(ValueError, match="Silver validator is required"):
         BaseServicesFactory.create_common_services(
@@ -107,10 +130,10 @@ def test_create_common_services_uses_noop_tracing_when_not_provided(
     mock_create_lock: MagicMock,
     mock_storage_create: MagicMock,
 ) -> None:
-    settings = SimpleNamespace(env="dev", test_mode=True, metrics_enabled=False)
+    settings = _make_settings()
     data_source = MagicMock()
     logger = MagicMock()
-    pipeline_config = SimpleNamespace(pipeline_name="chembl_activity")
+    pipeline_config = _make_pipeline_config()
 
     storage_ctx = SimpleNamespace(
         adapter=MagicMock(), checkpoints_path="/tmp/checkpoints"
@@ -160,8 +183,8 @@ def test_create_metrics_returns_prometheus_when_enabled(
 
 @pytest.mark.unit
 def test_get_output_root_uses_bronze_path_when_available() -> None:
-    settings = SimpleNamespace(test_mode=False, data_dir=MagicMock())
-    pipeline_config = SimpleNamespace(
+    settings = _make_settings(test_mode=False, data_dir=MagicMock())
+    pipeline_config = _make_pipeline_config(
         sink={
             "bronze": SimpleNamespace(path="data/output/bronze/chembl/activity"),
         }
@@ -174,8 +197,13 @@ def test_get_output_root_uses_bronze_path_when_available() -> None:
 
 @pytest.mark.unit
 def test_get_output_root_falls_back_to_settings_data_dir() -> None:
-    settings = SimpleNamespace(test_mode=True, data_dir=SimpleNamespace(name="data"))
-    pipeline_config = SimpleNamespace(sink={"bronze": SimpleNamespace(path="x/y/z")})
+    settings = _make_settings(
+        test_mode=True,
+        data_dir=SimpleNamespace(name="data"),
+    )
+    pipeline_config = _make_pipeline_config(
+        sink={"bronze": SimpleNamespace(path="x/y/z")}
+    )
 
     output_root = BaseServicesFactory._get_output_root(settings, pipeline_config)
 
@@ -184,8 +212,8 @@ def test_get_output_root_falls_back_to_settings_data_dir() -> None:
 
 @pytest.mark.unit
 def test_create_dq_services_returns_empty_when_disabled() -> None:
-    settings = SimpleNamespace()
-    pipeline_config = SimpleNamespace(
+    settings = _make_settings()
+    pipeline_config = _make_pipeline_config(
         sink={"bronze": None, "silver": None, "gold": None}
     )
 
@@ -200,7 +228,7 @@ def test_create_dq_services_returns_empty_when_disabled() -> None:
 
 @pytest.mark.unit
 def test_is_dq_report_enabled_false_when_all_disabled() -> None:
-    pipeline_config = SimpleNamespace(
+    pipeline_config = _make_pipeline_config(
         sink={
             "bronze": SimpleNamespace(dq_report=SimpleNamespace(enabled=False)),
             "silver": None,
@@ -213,14 +241,14 @@ def test_is_dq_report_enabled_false_when_all_disabled() -> None:
 
 @pytest.mark.unit
 def test_get_flat_structure_false_when_not_configured() -> None:
-    pipeline_config = SimpleNamespace(sink={"silver": None, "gold": None})
+    pipeline_config = _make_pipeline_config(sink={"silver": None, "gold": None})
 
     assert BaseServicesFactory._get_flat_structure(pipeline_config) is False
 
 
 @pytest.mark.unit
 def test_is_dq_report_enabled_true_when_any_layer_enabled() -> None:
-    pipeline_config = SimpleNamespace(
+    pipeline_config = _make_pipeline_config(
         sink={
             "bronze": None,
             "silver": SimpleNamespace(dq_report=SimpleNamespace(enabled=True)),
@@ -233,7 +261,7 @@ def test_is_dq_report_enabled_true_when_any_layer_enabled() -> None:
 
 @pytest.mark.unit
 def test_get_flat_structure_true_when_gold_enabled() -> None:
-    pipeline_config = SimpleNamespace(
+    pipeline_config = _make_pipeline_config(
         sink={
             "silver": SimpleNamespace(flat_structure=False),
             "gold": SimpleNamespace(flat_structure=True),
@@ -276,8 +304,8 @@ def test_create_dq_services_builds_enabled_stack(
     mock_report_writer: MagicMock,
     mock_report_service: MagicMock,
 ) -> None:
-    settings = SimpleNamespace()
-    pipeline_config = SimpleNamespace(sink={})
+    settings = _make_settings()
+    pipeline_config = _make_pipeline_config(sink={})
     logger = MagicMock()
 
     mock_bronze_analyzer.return_value = "bronze"

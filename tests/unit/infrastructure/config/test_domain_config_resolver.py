@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -12,6 +11,16 @@ from bioetl.infrastructure.config.domain_config_resolver import (
     load_domain_pipeline_config,
     resolve_domain_pipeline_config,
 )
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+def _make_yaml_config() -> PipelineYamlConfig:
+    return PipelineYamlConfig(
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity_type="activity",
+        business_primary_keys=["chembl_id"],
+    )
 
 
 class _DummyLoader:
@@ -21,13 +30,13 @@ class _DummyLoader:
         self.configs_root = configs_root
         self.relaxed_dq = relaxed_dq
 
-    def resolve_dq_config(self, _yaml_config: object) -> str:
+    def resolve_dq_config(self, _yaml_config: PipelineYamlConfig) -> str:
         return "resolved-dq"
 
 
 @pytest.mark.unit
 def test_domain_config_resolver_uses_loader_and_mapper() -> None:
-    yaml_config = SimpleNamespace()
+    yaml_config = _make_yaml_config()
     captured: dict[str, object] = {}
 
     def _mapper(config: object, resolved_dq_config: object = None) -> str:
@@ -50,10 +59,10 @@ def test_domain_config_resolver_uses_loader_and_mapper() -> None:
 
 @pytest.mark.unit
 def test_load_domain_pipeline_config_uses_canonical_function_flow() -> None:
-    yaml_config = SimpleNamespace()
+    yaml_config = _make_yaml_config()
     captured: dict[str, object] = {}
 
-    def _yaml_loader(pipeline_name: str) -> object:
+    def _yaml_loader(pipeline_name: str) -> PipelineYamlConfig:
         captured["pipeline_name"] = pipeline_name
         return yaml_config
 
@@ -79,7 +88,7 @@ def test_load_domain_pipeline_config_uses_canonical_function_flow() -> None:
 
 @pytest.mark.unit
 def test_resolve_domain_pipeline_config_uses_resolver_builder_and_mapper() -> None:
-    yaml_config = SimpleNamespace()
+    yaml_config = _make_yaml_config()
     captured: dict[str, object] = {}
 
     def _mapper(config: object, resolved_dq_config: object = None) -> str:

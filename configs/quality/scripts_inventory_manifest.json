@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-18T08:06:11.637266+00:00",
+  "generated_at": "2026-04-18T08:48:07.659831+00:00",
   "summary": {
-    "total_scripts": 353,
+    "total_scripts": 381,
     "status_counts": {
-      "active": 267,
-      "legacy": 9,
-      "orphan": 67,
+      "active": 279,
+      "legacy": 15,
+      "orphan": 77,
       "unknown": 10
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 49,
-      "docs": 111,
-      "scripts": 251,
-      "skills": 7,
-      "tests": 96
+      "docs": 118,
+      "scripts": 271,
+      "skills": 8,
+      "tests": 102
     }
   },
   "scripts": [
@@ -48,163 +48,176 @@
       ]
     },
     {
-      "path": "scripts/ai/codex/__main__.py",
-      "type": "py",
+      "path": "scripts/ai/codex/helper/check-env.ps1",
+      "type": "ps1",
       "status": "orphan",
       "agent_usage": [],
       "reference_count": 0,
       "references": []
     },
     {
-      "path": "scripts/ai/codex/check_skills_layout.sh",
+      "path": "scripts/ai/codex/helper/check-env.sh",
       "type": "sh",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/support/skills/check_ai_skills_layout.sh",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "exec bash \"$REPO_ROOT/scripts/ai/codex/check_skills_layout.sh\" \"$@\""
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
-      "path": "scripts/ai/codex/check_skills_mirror.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/support/skills/check_skills_mirror.sh",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "exec bash \"$REPO_ROOT/scripts/ai/codex/check_skills_mirror.sh\" \"$@\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/codex/diagnose_wsl.bat",
-      "type": "bat",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/launchers/codex/diagnose-codex-wsl.bat",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "call \"%~dp0..\\..\\..\\ai\\codex\\diagnose_wsl.bat\" %*"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/codex/diagnose_wsl.ps1",
+      "path": "scripts/ai/codex/helper/diagnose-hang.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 5,
       "references": [
         {
-          "path": "scripts/ops/launchers/codex/diagnose-codex-wsl.ps1",
-          "line": 7,
+          "path": "scripts/ai/codex/README.md",
+          "line": 17,
           "source_group": "scripts",
-          "text": "$Target = Join-Path $PSScriptRoot \"..\\..\\..\\ai\\codex\\diagnose_wsl.ps1\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/codex/diagnose_wsl.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/launchers/codex/diagnose-codex-wsl.sh",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "exec bash \"${REPO_ROOT}/scripts/ai/codex/diagnose_wsl.sh\" \"$@\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/codex/exec.bat",
-      "type": "bat",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/codex/exec.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ai/codex/headless.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/launchers/codex/codex-headless.ps1",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "$Target = Join-Path $PSScriptRoot \"..\\..\\..\\ai\\codex\\headless.ps1\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/codex/headless.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/launchers/codex/codex-headless.sh",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "exec bash \"${REPO_ROOT}/scripts/ai/codex/headless.sh\" \"$@\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/codex/launch.bat",
-      "type": "bat",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "scripts/ops/launchers/codex/codex-wsl.bat",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "call \"%~dp0..\\..\\..\\ai\\codex\\launch.bat\" %*"
+          "text": "│   ├── diagnose-hang.ps1      # 🔧 Debug setup hangs"
         },
         {
-          "path": "scripts/ops/launchers/codex/start-codex.bat",
+          "path": "scripts/ai/codex/README.md",
+          "line": 129,
+          "source_group": "scripts",
+          "text": ".\\helper\\diagnose-hang.ps1"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 186,
+          "source_group": "scripts",
+          "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
+        },
+        {
+          "path": "scripts/ai/codex/md/SETUP_HANG_FIX.md",
+          "line": 42,
+          "source_group": "scripts",
+          "text": ".\\script-codex\\helper\\diagnose-hang.ps1"
+        },
+        {
+          "path": "scripts/ai/codex/md/SETUP_HANG_FIX.md",
+          "line": 131,
+          "source_group": "scripts",
+          "text": ".\\script-codex\\helper\\diagnose-hang.ps1"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/helper/ensure-codex-cli.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 10,
+      "references": [
+        {
+          "path": "scripts/ai/codex/helper/setup-wsl-complete.sh",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure-codex-cli.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/helper/setup-wsl.sh",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${SCRIPT_DIR}/ensure-codex-cli.sh\""
+        },
+        {
+          "path": "scripts/ai/codex/helper/verify-setup.sh",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)/ensure-codex-cli.sh\""
+        },
+        {
+          "path": "scripts/ops/INDEX.md",
           "line": 11,
           "source_group": "scripts",
-          "text": "echo [compat] Delegating to scripts\\ai\\codex\\launch.bat"
+          "text": "- `script-codex/helper/ensure-codex-cli.sh`"
         },
         {
-          "path": "scripts/ops/launchers/codex/start-codex.bat",
-          "line": 14,
+          "path": "scripts/ops/launchers/codex/codex-exec.sh",
+          "line": 8,
           "source_group": "scripts",
-          "text": "call \"%~dp0..\\..\\..\\ai\\codex\\launch.bat\" %*"
+          "text": "ENSURE_SCRIPT=\"${REPO_ROOT}/script-codex/helper/ensure-codex-cli.sh\""
+        },
+        {
+          "path": "scripts/ops/launchers/codex/codex.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "ENSURE_SCRIPT=\"${REPO_ROOT}/script-codex/helper/ensure-codex-cli.sh\""
+        },
+        {
+          "path": "tests/architecture/test_codex_launcher_bootstrap.py",
+          "line": 22,
+          "source_group": "tests",
+          "text": "assert \"ensure-codex-cli.sh\" in codex_sh"
+        },
+        {
+          "path": "tests/architecture/test_codex_launcher_bootstrap.py",
+          "line": 26,
+          "source_group": "tests",
+          "text": "assert \"ensure-codex-cli.sh\" in codex_exec_sh"
         }
       ]
     },
     {
-      "path": "scripts/ai/codex/launch.sh",
+      "path": "scripts/ai/codex/helper/run-codex-impl.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 18,
+      "references": [
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "│   └── run-codex-impl.sh      # Codex launcher implementation"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 187,
+          "source_group": "scripts",
+          "text": "- `run-codex-impl.sh` - Launch Codex with environment"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "│   └── run-codex-impl.sh        Codex implementation"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 47,
+          "source_group": "scripts",
+          "text": "- `helper/run-codex-impl.sh` - Launch Codex"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 78,
+          "source_group": "scripts",
+          "text": "4. **Launch** - helper/run-codex-impl.sh starts Codex"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 115,
+          "source_group": "scripts",
+          "text": "Launch helper/run-codex-impl.sh"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 136,
+          "source_group": "scripts",
+          "text": "### run-codex-impl.sh"
+        },
+        {
+          "path": "scripts/ai/codex/md/SETUP_COMPLETE.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "│   └── run-codex-impl.sh      # Codex launcher"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/helper/setup-env.sh",
       "type": "sh",
       "status": "orphan",
       "agent_usage": [],
@@ -212,17 +225,305 @@
       "references": []
     },
     {
-      "path": "scripts/ai/codex/setup_agents.sh",
+      "path": "scripts/ai/codex/helper/setup-wsl-complete.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
-          "path": "scripts/ops/launchers/codex/setup_agents.sh",
-          "line": 8,
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 209,
           "source_group": "scripts",
-          "text": "exec bash \"$REPO_ROOT/scripts/ai/codex/setup_agents.sh\" \"$@\""
+          "text": "bash ./script-codex/helper/setup-wsl-complete.sh"
+        },
+        {
+          "path": "scripts/ai/codex/setup-codex-wsl.bat",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/script-codex/helper/setup-wsl-complete.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/helper/setup-wsl.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 38,
+      "references": [
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 26,
+          "source_group": "docs",
+          "text": "├── ../script-codex/helper/setup-wsl.sh          ⭐ NEW - Installation & setup"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 47,
+          "source_group": "docs",
+          "text": "wsl -- bash ./script-codex/helper/setup-wsl.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 60,
+          "source_group": "docs",
+          "text": "bash ./script-codex/helper/setup-wsl.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 122,
+          "source_group": "docs",
+          "text": "| `script-codex/helper/setup-wsl.sh` | Install all dependencies & configure | Medium |"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 146,
+          "source_group": "docs",
+          "text": "bash ./script-codex/helper/setup-wsl.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 250,
+          "source_group": "docs",
+          "text": "└─ script-codex/helper/setup-wsl.sh ─│"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 304,
+          "source_group": "docs",
+          "text": "bash ./script-codex/helper/setup-wsl.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 330,
+          "source_group": "docs",
+          "text": "| **Installation Required** | ✅ Yes (`script-codex/helper/setup-wsl.sh`) |"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/helper/test-basic.sh",
+      "type": "sh",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md",
+          "line": 89,
+          "source_group": "docs",
+          "text": "- `script-codex/helper/test-basic.sh` - Basic functionality test"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md",
+          "line": 187,
+          "source_group": "docs",
+          "text": "- **Testing**: `bash ./script-codex/helper/test-basic.sh`"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/helper/verify-setup.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 21,
+      "references": [
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 27,
+          "source_group": "docs",
+          "text": "├── ../script-codex/helper/verify-setup.sh       ⭐ NEW - Verification script"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 50,
+          "source_group": "docs",
+          "text": "wsl -- bash ./script-codex/helper/verify-setup.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 63,
+          "source_group": "docs",
+          "text": "bash ./script-codex/helper/verify-setup.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 100,
+          "source_group": "docs",
+          "text": "→ Run: script-codex/helper/verify-setup.sh (automated checker)"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 123,
+          "source_group": "docs",
+          "text": "| `script-codex/helper/verify-setup.sh` | Check installation & connectivity | Medium |"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 151,
+          "source_group": "docs",
+          "text": "bash ./script-codex/helper/verify-setup.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 185,
+          "source_group": "docs",
+          "text": "$ bash ./script-codex/helper/verify-setup.sh"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
+          "line": 276,
+          "source_group": "docs",
+          "text": "bash ./script-codex/helper/verify-setup.sh"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/run-codex.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 84,
+      "references": [
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "├── run-codex.ps1              ⭐ Main entry point (PowerShell) - Non-blocking!"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 32,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 33,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 \"analyze the code\""
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 36,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 check"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 setup"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 56,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 help              # Show help"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 57,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1                   # Interactive mode"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 58,
+          "source_group": "scripts",
+          "text": ".\\run-codex.ps1 \"prompt\"          # With prompt"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/run-codex.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 23,
+      "references": [
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "├── run-codex.sh               ⭐ Main entry point (WSL/Bash)"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 47,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh check"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 48,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh setup"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh \"analyze the code\""
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 68,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh help            # Show help"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 69,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh                 # Interactive mode"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 70,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh \"prompt\"        # With prompt"
+        },
+        {
+          "path": "scripts/ai/codex/README.md",
+          "line": 71,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh exec \"prompt\"   # Auto-exec mode"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/setup-codex-wsl.bat",
+      "type": "bat",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": ".\\script-codex\\setup-codex-wsl.bat"
+        },
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 76,
+          "source_group": "scripts",
+          "text": ".\\script-codex\\setup-codex-wsl.bat"
+        },
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 133,
+          "source_group": "scripts",
+          "text": ".\\script-codex\\setup-codex-wsl.bat"
+        },
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 221,
+          "source_group": "scripts",
+          "text": "3. `.\\script-codex\\setup-codex-wsl.bat`"
         }
       ]
     },
@@ -248,47 +549,197 @@
       ]
     },
     {
-      "path": "scripts/ai/codex/setup_skills.sh",
+      "path": "scripts/ai/gemini/helper/check-env.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/gemini/helper/check-env.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/gemini/helper/run-gemini-impl.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 9,
       "references": [
         {
-          "path": "scripts/ops/launchers/codex/setup_skills.sh",
-          "line": 8,
+          "path": "scripts/ai/gemini/README.md",
+          "line": 16,
           "source_group": "scripts",
-          "text": "exec bash \"$REPO_ROOT/scripts/ai/codex/setup_skills.sh\" \"$@\""
+          "text": "│   └── run-gemini-impl.sh     # Gemini launcher implementation"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 127,
+          "source_group": "scripts",
+          "text": "- `run-gemini-impl.sh` - Launch Gemini with environment"
+        },
+        {
+          "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "│   └── run-gemini-impl.sh     Gemini launcher"
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.ps1",
+          "line": 108,
+          "source_group": "scripts",
+          "text": "wsl -d Ubuntu -e bash -- \"$HelperWSL/run-gemini-impl.sh\" -- $PromptStr"
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.ps1",
+          "line": 110,
+          "source_group": "scripts",
+          "text": "wsl -d Ubuntu -e bash -- \"$HelperWSL/run-gemini-impl.sh\""
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.ps1",
+          "line": 153,
+          "source_group": "scripts",
+          "text": "wsl -d Ubuntu -e bash -- \"$HelperWSL/run-gemini-impl.sh\" -- ($FullPrompt -join ' ')"
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.sh",
+          "line": 115,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\" -- \"$PROMPT\""
+        },
+        {
+          "path": "scripts/ai/gemini/run-gemini.sh",
+          "line": 117,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-gemini-impl.sh\""
         }
       ]
     },
     {
-      "path": "scripts/ai/codex/verify_setup.bat",
-      "type": "bat",
-      "status": "active",
+      "path": "scripts/ai/gemini/helper/setup-env.sh",
+      "type": "sh",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/launchers/codex/verify-setup.bat",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "call \"%~dp0..\\..\\..\\ai\\codex\\verify_setup.bat\" %*"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
-      "path": "scripts/ai/codex/verify_setup.ps1",
+      "path": "scripts/ai/gemini/run-gemini.ps1",
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 35,
       "references": [
         {
-          "path": "scripts/ops/launchers/codex/verify-setup.ps1",
-          "line": 8,
+          "path": "scripts/ai/gemini/README.md",
+          "line": 9,
           "source_group": "scripts",
-          "text": "$Target = Join-Path $PSScriptRoot \"..\\..\\..\\ai\\codex\\verify_setup.ps1\""
+          "text": "├── run-gemini.ps1             ⭐ Main entry point (PowerShell)"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 29,
+          "source_group": "scripts",
+          "text": ".\\run-gemini.ps1 check"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 30,
+          "source_group": "scripts",
+          "text": ".\\run-gemini.ps1 setup"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 36,
+          "source_group": "scripts",
+          "text": ".\\run-gemini.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": ".\\run-gemini.ps1 \"what is AI?\""
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 61,
+          "source_group": "scripts",
+          "text": ".\\run-gemini.ps1 help              # Show help"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 62,
+          "source_group": "scripts",
+          "text": ".\\run-gemini.ps1                   # Interactive mode"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 63,
+          "source_group": "scripts",
+          "text": ".\\run-gemini.ps1 \"prompt\"          # With prompt"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/gemini/run-gemini.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 18,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "├── run-gemini.sh              ⭐ Main entry point (WSL/Bash)"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 46,
+          "source_group": "scripts",
+          "text": "bash run-gemini.sh check"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 47,
+          "source_group": "scripts",
+          "text": "bash run-gemini.sh setup"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 53,
+          "source_group": "scripts",
+          "text": "bash run-gemini.sh"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "bash run-gemini.sh \"what is AI?\""
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 70,
+          "source_group": "scripts",
+          "text": "bash run-gemini.sh help            # Show help"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 71,
+          "source_group": "scripts",
+          "text": "bash run-gemini.sh                 # Interactive mode"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "bash run-gemini.sh \"prompt\"        # With prompt"
         }
       ]
     },
@@ -1217,6 +1668,464 @@
       ]
     },
     {
+      "path": "scripts/ai/mistrall/helper/check-env.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrall/helper/check-env.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrall/helper/download-image.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrall/helper/load-image.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/mistrall/PREPULL_GUIDE.md",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "./load-image.sh"
+        },
+        {
+          "path": "scripts/ai/mistrall/helper/save-image.sh",
+          "line": 65,
+          "source_group": "scripts",
+          "text": "log_info \"Transfer this file to target machine and run: ./load-image.sh\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mistrall/helper/run-mistrall-impl.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 61,
+          "source_group": "scripts",
+          "text": "└── run-mistrall-impl.ps1     # Implementation (PowerShell)"
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.ps1",
+          "line": 95,
+          "source_group": "scripts",
+          "text": "& \"$HelperDir\\run-mistrall-impl.ps1\" start @Args"
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.ps1",
+          "line": 101,
+          "source_group": "scripts",
+          "text": "& \"$HelperDir\\run-mistrall-impl.ps1\" daemon @Args"
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.ps1",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "& \"$HelperDir\\run-mistrall-impl.ps1\" stop @Args"
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.ps1",
+          "line": 111,
+          "source_group": "scripts",
+          "text": "& \"$HelperDir\\run-mistrall-impl.ps1\" status @Args"
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.ps1",
+          "line": 116,
+          "source_group": "scripts",
+          "text": "& \"$HelperDir\\run-mistrall-impl.ps1\" logs @Args"
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.ps1",
+          "line": 122,
+          "source_group": "scripts",
+          "text": "& \"$HelperDir\\run-mistrall-impl.ps1\" shell @Args"
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.ps1",
+          "line": 128,
+          "source_group": "scripts",
+          "text": "& \"$HelperDir\\run-mistrall-impl.ps1\" pull @Args"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mistrall/helper/run-mistrall-impl.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 60,
+          "source_group": "scripts",
+          "text": "├── run-mistrall-impl.sh      # Implementation (bash)"
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.sh",
+          "line": 108,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" start \"$@\""
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.sh",
+          "line": 112,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" daemon \"$@\""
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.sh",
+          "line": 116,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" stop \"$@\""
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.sh",
+          "line": 120,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" status \"$@\""
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.sh",
+          "line": 124,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" logs \"$@\""
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.sh",
+          "line": 128,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" shell \"$@\""
+        },
+        {
+          "path": "scripts/ai/mistrall/run-mistrall.sh",
+          "line": 132,
+          "source_group": "scripts",
+          "text": "bash \"${HELPER_DIR}/run-mistrall-impl.sh\" pull \"$@\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mistrall/helper/save-image.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/mistrall/PREPULL_GUIDE.md",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "./save-image.sh"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mistrall/helper/setup-env.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrall/run-mistrall.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 12,
+      "references": [
+        {
+          "path": "scripts/ai/mistrall/PREPULL_GUIDE.md",
+          "line": 93,
+          "source_group": "scripts",
+          "text": "# Then: .\\run-mistrall.ps1 daemon"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": ".\\run-mistrall.ps1 daemon"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 19,
+          "source_group": "scripts",
+          "text": ".\\run-mistrall.ps1 pull"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 20,
+          "source_group": "scripts",
+          "text": ".\\run-mistrall.ps1 status"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 21,
+          "source_group": "scripts",
+          "text": ".\\run-mistrall.ps1 logs"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 53,
+          "source_group": "scripts",
+          "text": "├── run-mistrall.ps1             # Main entry point (Windows)"
+        },
+        {
+          "path": "scripts/ai/mistrall/helper/check-env.ps1",
+          "line": 3,
+          "source_group": "scripts",
+          "text": "# Called by: run-mistrall.ps1"
+        },
+        {
+          "path": "scripts/ai/mistrall/helper/download-image.ps1",
+          "line": 3,
+          "source_group": "scripts",
+          "text": "# Called by: run-mistrall.ps1 setup"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mistrall/run-mistrall.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 13,
+      "references": [
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "./run-mistrall.sh daemon  # Start in background"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "./run-mistrall.sh pull    # Pull Mistral model"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "./run-mistrall.sh status  # Check if running"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "./run-mistrall.sh logs    # View logs"
+        },
+        {
+          "path": "scripts/ai/mistrall/README.md",
+          "line": 52,
+          "source_group": "scripts",
+          "text": "├── run-mistrall.sh              # Main entry point (Linux/WSL)"
+        },
+        {
+          "path": "scripts/ai/mistrall/helper/check-env.sh",
+          "line": 3,
+          "source_group": "scripts",
+          "text": "# Called by: run-mistrall.sh"
+        },
+        {
+          "path": "scripts/ai/mistrall/helper/run-mistrall-impl.sh",
+          "line": 3,
+          "source_group": "scripts",
+          "text": "# Called by: run-mistrall.sh"
+        },
+        {
+          "path": "scripts/ai/mistrall/helper/run-mistrall-impl.sh",
+          "line": 80,
+          "source_group": "scripts",
+          "text": "log_info \"View logs: ./run-mistrall.sh logs\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mistrallvibe/helper/check-env.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrallvibe/helper/check-env.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrallvibe/helper/run-mistrallvibe-impl.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrallvibe/helper/setup-env.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrallvibe/helper/setup-env.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/mistrallvibe/run-vibe.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 25,
+          "source_group": "docs",
+          "text": "- Canonical Windows PowerShell launcher: `script-mistrallvibe/run-vibe.ps1`"
+        },
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 89,
+          "source_group": "docs",
+          "text": ".\\script-mistrallvibe\\run-vibe.ps1"
+        },
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 90,
+          "source_group": "docs",
+          "text": ".\\script-mistrallvibe\\run-vibe.ps1 \"inspect the failing architecture tests\""
+        },
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 96,
+          "source_group": "docs",
+          "text": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\script-mistrallvibe\\run-vibe.ps1"
+        },
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 97,
+          "source_group": "docs",
+          "text": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\script-mistrallvibe\\run-vibe.ps1 \"inspect the failing architecture tests\""
+        },
+        {
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 11,
+          "source_group": "scripts",
+          "text": ".\\run-vibe.ps1"
+        },
+        {
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "├── run-vibe.ps1          ⭐ Launcher (Windows)"
+        },
+        {
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 80,
+          "source_group": "scripts",
+          "text": ".\\run-vibe.ps1"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/mistrallvibe/run-vibe.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 9,
+      "references": [
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 24,
+          "source_group": "docs",
+          "text": "- Canonical WSL launcher: `script-mistrallvibe/run-vibe.sh`"
+        },
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 81,
+          "source_group": "docs",
+          "text": "bash script-mistrallvibe/run-vibe.sh"
+        },
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 82,
+          "source_group": "docs",
+          "text": "bash script-mistrallvibe/run-vibe.sh \"inspect the failing architecture tests\""
+        },
+        {
+          "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
+          "line": 83,
+          "source_group": "docs",
+          "text": "bash script-mistrallvibe/run-vibe.sh --prompt \"fix the failing architecture test\" --max-turns 5"
+        },
+        {
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "./run-vibe.sh"
+        },
+        {
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "./run-vibe.sh                      # Interactive mode"
+        },
+        {
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "./run-vibe.sh \"explain this code\"  # Send prompt"
+        },
+        {
+          "path": "scripts/ai/mistrallvibe/README.md",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "./run-vibe.sh --help              # Help"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/vibe/__main__.py",
       "type": "py",
       "status": "orphan",
@@ -1662,7 +2571,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -4324,9 +5233,9 @@
     {
       "path": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
       "type": "sh",
-      "status": "unknown",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 27,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -5786,7 +6695,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -5799,30 +6708,6 @@
           "line": 42,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"check_application_deps.py\","
-        },
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 466,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/check_application_deps.py\","
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 26,
-          "source_group": "tests",
-          "text": "wrapper_path = repo_root / \"src\" / \"tools\" / \"scripts\" / \"check_application_deps.py\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 29,
-          "source_group": "tests",
-          "text": "\"src/tools/scripts/check_application_deps.py must exist\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 35,
-          "source_group": "tests",
-          "text": "assert \"check_application_deps.py\" in content"
         }
       ]
     },
@@ -5831,7 +6716,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -5844,30 +6729,6 @@
           "line": 41,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"check_architecture.py\","
-        },
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 465,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/check_architecture.py\","
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 14,
-          "source_group": "tests",
-          "text": "wrapper_path = repo_root / \"src\" / \"tools\" / \"scripts\" / \"check_architecture.py\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 16,
-          "source_group": "tests",
-          "text": "assert wrapper_path.exists(), \"src/tools/scripts/check_architecture.py must exist\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 21,
-          "source_group": "tests",
-          "text": "assert \"check_architecture.py\" in content"
         }
       ]
     },
@@ -5909,7 +6770,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -5922,30 +6783,6 @@
           "line": 43,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"check_constructor_args.py\","
-        },
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 467,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/check_constructor_args.py\","
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 40,
-          "source_group": "tests",
-          "text": "wrapper_path = repo_root / \"src\" / \"tools\" / \"scripts\" / \"check_constructor_args.py\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 43,
-          "source_group": "tests",
-          "text": "\"src/tools/scripts/check_constructor_args.py must exist\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
-          "line": 49,
-          "source_group": "tests",
-          "text": "assert \"check_constructor_args.py\" in content"
         }
       ]
     },
@@ -6272,38 +7109,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 5,
       "references": [
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 101,
-          "source_group": "docs",
-          "text": "| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`    | —            | Линтер терминологии                     "
-        },
-        {
-          "path": "docs/00-project/TOOLS.md",
-          "line": 146,
-          "source_group": "docs",
-          "text": "| [glossary.md](glossary.md)                                  | `lint_terminology.py`                                          |"
-        },
-        {
-          "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
-          "line": 5,
-          "source_group": "docs",
-          "text": "- src/tools/scripts/engineering/qa/lint_terminology.py"
-        },
-        {
-          "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
-          "line": 21,
-          "source_group": "docs",
-          "text": "if (parent / \"src\" / \"tools\" / \"scripts\" / \"lint_terminology.py\").exists()"
-        },
-        {
-          "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
-          "line": 25,
-          "source_group": "docs",
-          "text": "return repo_root / \"src\" / \"tools\" / \"scripts\" / \"lint_terminology.py\""
-        },
         {
           "path": "docs/00-project/glossary.md",
           "line": 502,
@@ -6317,10 +7124,22 @@
           "text": "python scripts/engineering/qa/lint_terminology.py src/bioetl/"
         },
         {
-          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": "- `src/tools/scripts/lint_terminology.py`"
+          "path": "scripts/engineering/qa/README.md",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "| `check-terminology`           | `lint_terminology.py`                     | Terminology linting against glossary                                                              |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "\"check-terminology\": \"lint_terminology.py\","
+        },
+        {
+          "path": "tests/architecture/test_lint_terminology_script.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "assert script_path.exists(), \"scripts/engineering/qa/lint_terminology.py must exist\""
         }
       ]
     },
@@ -7754,7 +8573,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 29,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -7811,7 +8630,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 31,
+      "reference_count": 36,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -7948,7 +8767,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 63,
+      "reference_count": 77,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -8005,7 +8824,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 98,
+      "reference_count": 107,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -8068,18 +8887,31 @@
     {
       "path": "scripts/ops/launchers/codex/diagnose-codex-wsl.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 66,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ops\\diagnose-codex-wsl.ps1"
+        }
+      ]
     },
     {
       "path": "scripts/ops/launchers/codex/diagnose-codex-wsl.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 210,
+          "source_group": "scripts",
+          "text": "bash ./scripts/ops/diagnose-codex-wsl.sh"
+        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 53,
@@ -8093,8 +8925,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "\"setup-agents\": \"launchers/codex/setup_agents.sh\","
+        },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
           "line": 20,
@@ -8165,8 +9003,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ops/__main__.py",
+          "line": 56,
+          "source_group": "scripts",
+          "text": "\"setup-skills\": \"launchers/codex/setup_skills.sh\","
+        },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
           "line": 43,
@@ -8205,18 +9049,50 @@
     {
       "path": "scripts/ops/launchers/codex/verify-setup.bat",
       "type": "bat",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 69,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ops\\verify-setup.bat"
+        }
+      ]
     },
     {
       "path": "scripts/ops/launchers/codex/verify-setup.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 10,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ops\\verify-setup.ps1"
+        },
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 63,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ops\\verify-setup.ps1"
+        },
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 180,
+          "source_group": "scripts",
+          "text": "1. **Use `verify-setup.ps1` not the batch version** — better output and colors"
+        },
+        {
+          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
+          "line": 220,
+          "source_group": "scripts",
+          "text": "2. `.\\scripts\\ops\\verify-setup.ps1`"
+        }
+      ]
     },
     {
       "path": "scripts/ops/maintenance/git/delete-stale-branches.sh",
@@ -8808,7 +9684,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 21,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -8865,7 +9741,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 13,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -9002,8 +9878,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 9,
       "references": [
+        {
+          "path": ".codex/skills/SKILLS-CATALOG.md",
+          "line": 13,
+          "source_group": "skills",
+          "text": "bash scripts/ops/check_skills_mirror.sh --check"
+        },
+        {
+          "path": ".codex/skills/SKILLS-CATALOG.md",
+          "line": 14,
+          "source_group": "skills",
+          "text": "bash scripts/ops/check_skills_mirror.sh --sync"
+        },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 19,
@@ -9021,8 +9909,34 @@
           "line": 44,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
+        },
+        {
+          "path": "docs/00-project/ai/skills/_references/README.md",
+          "line": 22,
+          "source_group": "docs",
+          "text": "| `scripts/ops/check_skills_mirror.sh`    | Overlays reference bundles from `_references/local` onto skill mirrors |"
+        },
+        {
+          "path": "docs/00-project/ai/skills/local/SKILLS-CATALOG.md",
+          "line": 13,
+          "source_group": "docs",
+          "text": "bash scripts/check_skills_mirror.sh --check"
+        },
+        {
+          "path": "docs/00-project/ai/skills/local/SKILLS-CATALOG.md",
+          "line": 14,
+          "source_group": "docs",
+          "text": "bash scripts/check_skills_mirror.sh --sync"
         }
       ]
+    },
+    {
+      "path": "scripts/qa/lint_terminology.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/run.py",
@@ -9269,7 +10183,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/schema/README.md",
@@ -9282,6 +10196,12 @@
           "line": 41,
           "source_group": "scripts",
           "text": "\"generate-config-matrix\": \"generate_config_matrix.py\","
+        },
+        {
+          "path": "src/tools/scripts/config_matrix_generator.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "/ \"generate_config_matrix.py\""
         },
         {
           "path": "tests/architecture/test_legacy_schema_wrappers.py",
@@ -9605,14 +10525,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 461,
-          "source_group": "scripts",
-          "text": "\"src/tools/scripts/validate_unified_configs.py\","
-        },
         {
           "path": "scripts/schema/README.md",
           "line": 36,
@@ -9624,36 +10538,6 @@
           "line": 46,
           "source_group": "scripts",
           "text": "\"validate-unified-configs\": \"validate_unified_configs.py\","
-        },
-        {
-          "path": "src/tools/README.md",
-          "line": 279,
-          "source_group": "scripts",
-          "text": "### scripts/validate_unified_configs.py"
-        },
-        {
-          "path": "src/tools/README.md",
-          "line": 283,
-          "source_group": "scripts",
-          "text": "**Location:** `src/tools/scripts/validate_unified_configs.py`"
-        },
-        {
-          "path": "tests/architecture/test_legacy_schema_wrappers.py",
-          "line": 31,
-          "source_group": "tests",
-          "text": "repo_root / \"src\" / \"tools\" / \"scripts\" / \"validate_unified_configs.py\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_schema_wrappers.py",
-          "line": 35,
-          "source_group": "tests",
-          "text": "\"src/tools/scripts/validate_unified_configs.py must exist\""
-        },
-        {
-          "path": "tests/architecture/test_legacy_schema_wrappers.py",
-          "line": 41,
-          "source_group": "tests",
-          "text": "assert \"validate_unified_configs.py\" in content"
         }
       ]
     },
@@ -9966,6 +10850,162 @@
           "line": 207,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
+        }
+      ]
+    },
+    {
+      "path": "src/tools/scripts/check_application_deps.py",
+      "type": "py",
+      "status": "legacy",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 466,
+          "source_group": "scripts",
+          "text": "\"src/tools/scripts/check_application_deps.py\","
+        },
+        {
+          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
+          "line": 29,
+          "source_group": "tests",
+          "text": "\"src/tools/scripts/check_application_deps.py must exist\""
+        }
+      ]
+    },
+    {
+      "path": "src/tools/scripts/check_architecture.py",
+      "type": "py",
+      "status": "legacy",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 465,
+          "source_group": "scripts",
+          "text": "\"src/tools/scripts/check_architecture.py\","
+        },
+        {
+          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "assert wrapper_path.exists(), \"src/tools/scripts/check_architecture.py must exist\""
+        }
+      ]
+    },
+    {
+      "path": "src/tools/scripts/check_constructor_args.py",
+      "type": "py",
+      "status": "legacy",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 467,
+          "source_group": "scripts",
+          "text": "\"src/tools/scripts/check_constructor_args.py\","
+        },
+        {
+          "path": "tests/architecture/test_legacy_qa_check_wrappers.py",
+          "line": 43,
+          "source_group": "tests",
+          "text": "\"src/tools/scripts/check_constructor_args.py must exist\""
+        }
+      ]
+    },
+    {
+      "path": "src/tools/scripts/config_matrix_generator.py",
+      "type": "py",
+      "status": "legacy",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 458,
+          "source_group": "scripts",
+          "text": "\"src/tools/scripts/config_matrix_generator.py\","
+        },
+        {
+          "path": "src/tools/README.md",
+          "line": 263,
+          "source_group": "scripts",
+          "text": "### scripts/config_matrix_generator.py"
+        },
+        {
+          "path": "src/tools/README.md",
+          "line": 267,
+          "source_group": "scripts",
+          "text": "**Location:** `src/tools/scripts/config_matrix_generator.py`"
+        },
+        {
+          "path": "tests/architecture/test_legacy_schema_wrappers.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "repo_root / \"src\" / \"tools\" / \"scripts\" / \"config_matrix_generator.py\""
+        },
+        {
+          "path": "tests/architecture/test_legacy_schema_wrappers.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "\"src/tools/scripts/config_matrix_generator.py must exist\""
+        }
+      ]
+    },
+    {
+      "path": "src/tools/scripts/lint_terminology.py",
+      "type": "py",
+      "status": "legacy",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "docs/reports/evidence/scripts-layer-governance/SUMMARY.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": "- `src/tools/scripts/lint_terminology.py`"
+        },
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 460,
+          "source_group": "scripts",
+          "text": "\"src/tools/scripts/lint_terminology.py\","
+        },
+        {
+          "path": "tests/architecture/test_lint_terminology_script.py",
+          "line": 37,
+          "source_group": "tests",
+          "text": "assert wrapper_path.exists(), \"src/tools/scripts/lint_terminology.py must exist\""
+        }
+      ]
+    },
+    {
+      "path": "src/tools/scripts/validate_unified_configs.py",
+      "type": "py",
+      "status": "legacy",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/check_scripts_inventory.py",
+          "line": 461,
+          "source_group": "scripts",
+          "text": "\"src/tools/scripts/validate_unified_configs.py\","
+        },
+        {
+          "path": "src/tools/README.md",
+          "line": 283,
+          "source_group": "scripts",
+          "text": "**Location:** `src/tools/scripts/validate_unified_configs.py`"
+        },
+        {
+          "path": "tests/architecture/test_legacy_schema_wrappers.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "\"src/tools/scripts/validate_unified_configs.py must exist\""
         }
       ]
     },
