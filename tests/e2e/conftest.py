@@ -23,7 +23,7 @@ from contextlib import contextmanager
 from dataclasses import replace
 from functools import cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from uuid import uuid4
 
 import pytest

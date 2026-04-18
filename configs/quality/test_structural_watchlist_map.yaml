@@ -32,7 +32,7 @@ watchlist_families:
     path_prefixes:
       - src/bioetl/infrastructure/storage/
     representative_modules:
-      - src/bioetl/infrastructure/storage/metadata_builder.py
+      - src/bioetl/infrastructure/storage/metadata/builder_base.py
       - src/bioetl/infrastructure/storage/silver/runtime_helpers.py
       - src/bioetl/infrastructure/storage/bronze/pipeline_helpers.py
     rationale: >-

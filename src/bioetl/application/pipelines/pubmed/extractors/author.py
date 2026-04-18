@@ -88,37 +88,43 @@ class AuthorExtractor(BaseFieldExtractor):
         if author_list is None:
             return None
 
-        raw_authors: list[RawAuthor] = []
-        for author in author_list.findall("Author"):
-            # Extract simple affiliations (legacy format)
-            affiliations: list[str] = []
-            # Extract structured affiliations with identifiers
-            structured_affiliations: list[StructuredAffiliation] = []
-
-            for info in author.findall("AffiliationInfo"):
-                aff_text = get_text(info.find("Affiliation"))
-                if aff_text:
-                    affiliations.append(aff_text)
-
-                    # Build structured affiliation
-                    structured_aff = self._extract_structured_affiliation(info)
-                    if structured_aff:
-                        structured_affiliations.append(structured_aff)
-
-            raw_authors.append(
-                RawAuthor(
-                    last_name=get_text(author.find("LastName")),
-                    initials=get_text(author.find("Initials")),
-                    fore_name=get_text(author.find("ForeName")),
-                    collective_name=get_text(author.find("CollectiveName")),
-                    affiliations=affiliations if affiliations else None,
-                    structured_affiliations=(
-                        structured_affiliations if structured_affiliations else None
-                    ),
-                )
-            )
+        raw_authors = [
+            self._build_raw_author(author)
+            for author in author_list.findall("Author")
+        ]
 
         return raw_authors if raw_authors else None
+
+    def _build_raw_author(self, author: Element) -> RawAuthor:
+        """Build one raw author payload from an Author XML element."""
+        affiliations, structured_affiliations = self._extract_affiliations(author)
+        return RawAuthor(
+            last_name=get_text(author.find("LastName")),
+            initials=get_text(author.find("Initials")),
+            fore_name=get_text(author.find("ForeName")),
+            collective_name=get_text(author.find("CollectiveName")),
+            affiliations=affiliations if affiliations else None,
+            structured_affiliations=(
+                structured_affiliations if structured_affiliations else None
+            ),
+        )
+
+    def _extract_affiliations(
+        self,
+        author: Element,
+    ) -> tuple[list[str], list[StructuredAffiliation]]:
+        """Extract legacy and structured affiliations from one author node."""
+        affiliations: list[str] = []
+        structured_affiliations: list[StructuredAffiliation] = []
+        for info in author.findall("AffiliationInfo"):
+            aff_text = get_text(info.find("Affiliation"))
+            if not aff_text:
+                continue
+            affiliations.append(aff_text)
+            structured_aff = self._extract_structured_affiliation(info)
+            if structured_aff:
+                structured_affiliations.append(structured_aff)
+        return affiliations, structured_affiliations
 
     def _find_identifier(self, aff_info: Element) -> tuple[str | None, str | None]:
         """Find the best identifier from AffiliationInfo, preferring ROR > GRID > ISNI > RINGGOLD.

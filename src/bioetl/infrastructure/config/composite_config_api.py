@@ -99,5 +99,5 @@ def load_composite_config(
     try:
         schema = validate_payload(mutable_payload)
         return schema.to_domain()
-    except ValidationError as error:
+    except (ValidationError, TypeError, ValueError) as error:
         raise ValueError(f"Invalid composite config '{name}': {error}") from error

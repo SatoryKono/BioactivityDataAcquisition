@@ -162,7 +162,7 @@ class EnrichmentCoordinatorResultMixin:
 
         if enricher.required:
             self._logger.error("Required enricher failed", **log_kwargs)
-            raise  # re-raise from caller's except block
+            raise error
 
         self._logger.warning("Optional enricher failed", **log_kwargs)
         return EnrichmentResult.failed(

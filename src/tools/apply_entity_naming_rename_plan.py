@@ -146,18 +146,71 @@ def list_waves(rows: list[RenameRow]) -> int:
     return 0
 
 
+def _group_executable_rows(
+    rows: list[RenameRow],
+) -> tuple[dict[Path, list[RenameRow]], list[RenameRow]]:
+    file_to_rows: dict[Path, list[RenameRow]] = {}
+    skipped_rows: list[RenameRow] = []
+    for row in rows:
+        if row.executable:
+            file_to_rows.setdefault(row.file_path, []).append(row)
+        else:
+            skipped_rows.append(row)
+    return file_to_rows, skipped_rows
+
+
+def _apply_rows_to_file(
+    *,
+    file_path: Path,
+    rows: list[RenameRow],
+    patterns: dict[str, re.Pattern[str]],
+    apply: bool,
+) -> int:
+    if not file_path.exists():
+        print(f"[missing] {file_path}")
+        return 0
+
+    updated_text = file_path.read_text(encoding="utf-8")
+    file_matches = 0
+    for row in rows:
+        pattern = patterns[row.old_name]
+        updated_text, count = pattern.subn(row.new_name, updated_text)
+        file_matches += count
+        if count:
+            print(f"[match] {file_path} :: {row.old_name} -> {row.new_name} :: {count}")
+
+    if file_matches == 0:
+        print(f"[noop] {file_path}")
+        return 0
+
+    if apply:
+        file_path.write_text(updated_text, encoding="utf-8")
+        print(f"[write] {file_path}")
+    else:
+        print(f"[dry-run] {file_path}")
+    return file_matches
+
+
+def _print_skipped_rows(skipped_rows: list[RenameRow]) -> None:
+    if not skipped_rows:
+        return
+    print("\nSkipped non-auto-safe rows:")
+    for row in skipped_rows:
+        print(
+            f"- {row.wave} :: {row.action} :: {row.old_name} -> {row.new_name} :: {row.file_path}"
+        )
+
+
 def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
-    executable_rows = [row for row in rows if row.executable]
-    skipped_rows = [row for row in rows if not row.executable]
+    file_to_rows, skipped_rows = _group_executable_rows(rows)
+    executable_rows = [row for grouped_rows in file_to_rows.values() for row in grouped_rows]
 
     print(f"Mode: {'apply' if apply else 'dry-run'}")
     print(f"Executable rows: {len(executable_rows)}")
     print(f"Skipped rows: {len(skipped_rows)}")
 
-    file_to_rows: dict[Path, list[RenameRow]] = {}
     unique_old_names: set[str] = set()
     for row in executable_rows:
-        file_to_rows.setdefault(row.file_path, []).append(row)
         unique_old_names.add(row.old_name)
 
     # Pre-compile patterns to avoid re-compilation in the nested loop
@@ -170,42 +223,17 @@ def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
     modified_files = 0
 
     for file_path in sorted(file_to_rows):
-        if not file_path.exists():
-            print(f"[missing] {file_path}")
-            continue
-
-        original_text = file_path.read_text(encoding="utf-8")
-        updated_text = original_text
-        file_matches = 0
-
-        for row in file_to_rows[file_path]:
-            pattern = patterns[row.old_name]
-            updated_text, count = pattern.subn(row.new_name, updated_text)
-            file_matches += count
-            if count:
-                print(
-                    f"[match] {file_path} :: {row.old_name} -> {row.new_name} :: {count}"
-                )
-
+        file_matches = _apply_rows_to_file(
+            file_path=file_path,
+            rows=file_to_rows[file_path],
+            patterns=patterns,
+            apply=apply,
+        )
         if file_matches == 0:
-            print(f"[noop] {file_path}")
             continue
-
         total_matches += file_matches
         modified_files += 1
-
-        if apply:
-            file_path.write_text(updated_text, encoding="utf-8")
-            print(f"[write] {file_path}")
-        else:
-            print(f"[dry-run] {file_path}")
-
-    if skipped_rows:
-        print("\nSkipped non-auto-safe rows:")
-        for row in skipped_rows:
-            print(
-                f"- {row.wave} :: {row.action} :: {row.old_name} -> {row.new_name} :: {row.file_path}"
-            )
+    _print_skipped_rows(skipped_rows)
 
     mode = "apply" if apply else "dry-run"
     print(

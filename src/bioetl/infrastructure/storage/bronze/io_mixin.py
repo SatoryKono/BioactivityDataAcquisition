@@ -230,18 +230,36 @@ class BronzeWriterIOMixin:
         files, bytes_total, dirs = 0, 0, 0
 
         for date_dir in self._find_old_date_dirs(cutoff_str, provider, entity):
-            for file_path in date_dir.glob("*"):
-                if file_path.is_file():
-                    bytes_total += file_path.stat().st_size
-                    files += 1
-                    if not dry_run:
-                        file_path.unlink()
+            removed_files, removed_bytes = self._remove_old_dir_files(
+                date_dir=date_dir,
+                dry_run=dry_run,
+            )
+            files += removed_files
+            bytes_total += removed_bytes
             if dry_run or not any(date_dir.iterdir()):
                 dirs += 1
                 if not dry_run:
                     date_dir.rmdir()
 
         return files, bytes_total, dirs
+
+    def _remove_old_dir_files(
+        self,
+        *,
+        date_dir: Path,
+        dry_run: bool,
+    ) -> tuple[int, int]:
+        """Remove all files from one old Bronze date directory."""
+        files_removed = 0
+        bytes_removed = 0
+        for file_path in date_dir.glob("*"):
+            if not file_path.is_file():
+                continue
+            bytes_removed += file_path.stat().st_size
+            files_removed += 1
+            if not dry_run:
+                file_path.unlink()
+        return files_removed, bytes_removed
 
     async def cleanup_old_files(
         self,

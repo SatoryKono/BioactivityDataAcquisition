@@ -29,6 +29,8 @@ from bioetl.domain.value_objects import SMILES, InChIKey
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
+OptionalJsonDict = JsonDict | None
+
 
 # Field mappings for molecule nested structures
 _HIERARCHY_FIELDS: JsonDict = {  # Any: converter callables or None
@@ -190,7 +192,7 @@ class MoleculeTransformer(BaseChemblTransformer):
         # Extract structure fields
         structure_data = flatten_nested_dict(
             cast(
-                "JsonDict | None",  # Any: untyped ChEMBL API JSON
+                OptionalJsonDict,
                 rec.get("molecule_structures"),
             ),
             "",  # No prefix - unified naming with PubChem
@@ -213,7 +215,7 @@ class MoleculeTransformer(BaseChemblTransformer):
 
         properties = flatten_nested_dict(
             cast(
-                "JsonDict | None",  # Any: untyped ChEMBL API JSON
+                OptionalJsonDict,
                 rec.get("molecule_properties"),
             ),
             "property_",
@@ -236,7 +238,7 @@ class MoleculeTransformer(BaseChemblTransformer):
             # Nested dict extraction with renames
             **flatten_nested_dict(
                 cast(
-                    "JsonDict | None",  # Any: untyped ChEMBL API JSON
+                    OptionalJsonDict,
                     rec.get("molecule_hierarchy"),
                 ),
                 "hierarchy_",

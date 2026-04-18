@@ -22,6 +22,8 @@ from bioetl.domain.value_objects.dq_report import (
     ValueDistributionResult,
 )
 
+OptionalNumeric = int | float | None
+
 
 def detect_type_changes(
     current: dict[str, str], previous: dict[str, str]
@@ -318,11 +320,11 @@ def profile_numeric_column(
         stats = df[col].drop_nulls()
         if len(stats) == 0:
             return None
-        min_num = cast("int | float | None", stats.min())
-        max_num = cast("int | float | None", stats.max())
-        mean_num = cast("int | float | None", stats.mean())
-        std_num = cast("int | float | None", stats.std())
-        median_num = cast("int | float | None", stats.median())
+        min_num = cast(OptionalNumeric, stats.min())
+        max_num = cast(OptionalNumeric, stats.max())
+        mean_num = cast(OptionalNumeric, stats.mean())
+        std_num = cast(OptionalNumeric, stats.std())
+        median_num = cast(OptionalNumeric, stats.median())
         return NumericDistribution(
             min=float(min_num) if min_num is not None else None,
             max=float(max_num) if max_num is not None else None,

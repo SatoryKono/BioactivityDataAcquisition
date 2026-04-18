@@ -86,6 +86,41 @@ async def _maybe_pre_evolve_on_duplicate_field_error(
     return evolved_request, True
 
 
+async def _handle_merge_execution_error(
+    *,
+    exc: Exception,
+    active_request: _DeltaWriteRequest,
+    schema_pre_evolved: bool,
+    timeout_retry_count: int,
+    policy: SilverMergeResiliencePolicy,
+    load_module: Callable[[], Any],
+    emit_final: Callable[..., None],
+    emit_retry: Callable[..., None],
+) -> tuple[_DeltaWriteRequest, bool, int]:
+    """Handle timeout retries and duplicate-field schema recovery."""
+    if isinstance(exc, _MergeExecutionTimeoutError):
+        next_timeout_retry_count = await _handle_timeout_retry(
+            table_path=active_request.table_path,
+            policy=policy,
+            retry_count=timeout_retry_count,
+            cause=exc,
+            emit_final=emit_final,
+            emit_retry=emit_retry,
+        )
+        return active_request, schema_pre_evolved, next_timeout_retry_count
+
+    evolved = await _maybe_pre_evolve_on_duplicate_field_error(
+        exc=exc,
+        request=active_request,
+        schema_pre_evolved=schema_pre_evolved,
+        load_module=load_module,
+    )
+    if evolved is None:
+        raise exc
+    next_request, next_schema_pre_evolved = evolved
+    return next_request, next_schema_pre_evolved, timeout_retry_count
+
+
 async def _execute_merge_write_request(
     *,
     request: _DeltaWriteRequest,
@@ -140,28 +175,21 @@ async def _execute_merge_write_request(
             if next_commit_retry_count is None:
                 raise
             commit_retry_count = next_commit_retry_count
-        except BaseException as exc:
-            if not isinstance(exc, Exception):
-                raise
-            if isinstance(exc, _MergeExecutionTimeoutError):
-                timeout_retry_count = await _handle_timeout_retry(
-                    table_path=active_request.table_path,
-                    policy=policy,
-                    retry_count=timeout_retry_count,
-                    cause=exc,
-                    emit_final=emit_final,
-                    emit_retry=emit_retry,
-                )
-                continue
-            evolved = await _maybe_pre_evolve_on_duplicate_field_error(
+        except Exception as exc:
+            (
+                active_request,
+                schema_pre_evolved,
+                timeout_retry_count,
+            ) = await _handle_merge_execution_error(
                 exc=exc,
-                request=active_request,
+                active_request=active_request,
                 schema_pre_evolved=schema_pre_evolved,
+                timeout_retry_count=timeout_retry_count,
+                policy=policy,
                 load_module=load_module,
+                emit_final=emit_final,
+                emit_retry=emit_retry,
             )
-            if evolved is None:
-                raise
-            active_request, schema_pre_evolved = evolved
 
 
 async def _handle_commit_retry(

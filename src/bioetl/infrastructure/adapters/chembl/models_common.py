@@ -22,6 +22,8 @@ __all__ = [
     "ChemblTargetResponse",
 ]
 
+_PAGINATION_METADATA_DESCRIPTION = "Pagination metadata"
+
 
 class ChemblPageMeta(BaseModel):
     """Pagination metadata from ChEMBL API."""
@@ -92,7 +94,7 @@ class ChemblAssayResponse(BaseModel):
         default_factory=list, description="List of assay records"
     )
     page_meta: ChemblPageMeta | None = Field(
-        default=None, description="Pagination metadata"
+        default=None, description=_PAGINATION_METADATA_DESCRIPTION
     )
 
 
@@ -128,7 +130,7 @@ class ChemblTargetResponse(BaseModel):
         default_factory=list, description="List of target records"
     )
     page_meta: ChemblPageMeta | None = Field(
-        default=None, description="Pagination metadata"
+        default=None, description=_PAGINATION_METADATA_DESCRIPTION
     )
 
 

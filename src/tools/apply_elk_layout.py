@@ -215,6 +215,66 @@ def enforce_edge_routing(
     return new_lines, changed, found
 
 
+def _ensure_elk_init(
+    *,
+    lines: list[str],
+    nodes: int | None,
+    threshold: int,
+    edge_routing: str | None,
+) -> tuple[list[str], list[str], str | None]:
+    """Ensure ELK init exists or return a skip reason."""
+    changes: list[str] = []
+    if has_elk_init(lines):
+        if edge_routing is None:
+            return lines, changes, None
+        updated_lines, changed, found = enforce_edge_routing(
+            lines,
+            edge_routing=edge_routing,
+        )
+        if changed:
+            changes.append(f"edgeRouting->{edge_routing}")
+        elif not found:
+            return lines, changes, "ELK init present but edgeRouting field not found"
+        return updated_lines, changes, None
+
+    if nodes is None:
+        return lines, changes, "no @nodes metadata"
+    if nodes <= threshold:
+        return lines, changes, f"@nodes={nodes} <= threshold {threshold}"
+
+    graph_idx = find_graph_line_index(lines)
+    if graph_idx is None:
+        return lines, changes, "graph declaration not found"
+
+    selected_routing = edge_routing or DEFAULT_EDGE_ROUTING
+    updated_lines = lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
+    changes.append("elk_init")
+    return updated_lines, changes, None
+
+
+def _maybe_force_lr_direction(
+    *,
+    lines: list[str],
+    file_stem: str,
+    auto_direction: bool,
+) -> tuple[list[str], bool]:
+    """Rewrite graph declaration to LR when the filename matches LR heuristics."""
+    if not auto_direction or not should_use_lr(file_stem):
+        return lines, False
+    graph_idx = find_graph_line_index(lines)
+    if graph_idx is None:
+        return lines, False
+    current_decl = lines[graph_idx]
+    stripped_decl = current_decl.lstrip()
+    indent = current_decl[: len(current_decl) - len(stripped_decl)]
+    updated_decl = _GRAPH_LINE_RE.sub(lambda match: f"{match.group(1)} LR", stripped_decl)
+    updated_decl = indent + updated_decl
+    if updated_decl == current_decl:
+        return lines, False
+    lines[graph_idx] = updated_decl
+    return lines, True
+
+
 def apply_elk(
     fpath: Path,
     threshold: int,
@@ -229,46 +289,22 @@ def apply_elk(
     lines = content.splitlines()
     if not is_flowchart(lines):
         return False, "not a flowchart/graph diagram"
-    changes: list[str] = []
     nodes = parse_nodes(lines)
-    if has_elk_init(lines):
-        if edge_routing is not None:
-            lines, changed, found = enforce_edge_routing(
-                lines, edge_routing=edge_routing
-            )
-            if changed:
-                changes.append(f"edgeRouting->{edge_routing}")
-            elif not found:
-                return False, "ELK init present but edgeRouting field not found"
-    else:
-        if nodes is None:
-            return False, "no @nodes metadata"
-        if nodes <= threshold:
-            return False, f"@nodes={nodes} <= threshold {threshold}"
-        graph_idx = find_graph_line_index(lines)
-        if graph_idx is None:
-            return False, "graph declaration not found"
-        # ── Insert ELK init directive before graph declaration ────────────────────
-        selected_routing = edge_routing or DEFAULT_EDGE_ROUTING
-        lines = (
-            lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
-        )
-        changes.append("elk_init")
-    # ── Optionally override direction ─────────────────────────────────────────
-    if auto_direction and should_use_lr(fpath.stem):
-        graph_idx = find_graph_line_index(lines)
-        if graph_idx is not None:
-            current_decl = lines[graph_idx]
-            stripped_decl = current_decl.lstrip()
-            indent = current_decl[: len(current_decl) - len(stripped_decl)]
-            updated_decl = _GRAPH_LINE_RE.sub(
-                lambda m: f"{m.group(1)} LR",
-                stripped_decl,
-            )
-            updated_decl = indent + updated_decl
-            if updated_decl != current_decl:
-                lines[graph_idx] = updated_decl
-                changes.append("direction->LR")
+    lines, changes, reason = _ensure_elk_init(
+        lines=lines,
+        nodes=nodes,
+        threshold=threshold,
+        edge_routing=edge_routing,
+    )
+    if reason is not None:
+        return False, reason
+    lines, direction_changed = _maybe_force_lr_direction(
+        lines=lines,
+        file_stem=fpath.stem,
+        auto_direction=auto_direction,
+    )
+    if direction_changed:
+        changes.append("direction->LR")
     if not changes:
         return False, "ELK init already present"
     new_content = "\n".join(lines).rstrip("\n") + "\n"

@@ -114,7 +114,12 @@ class DoiBatchProcessor:
 
     def _normalize_dois(self, dois: list[str]) -> list[str]:
         """Normalize and filter DOI list, removing invalid entries."""
-        return [normalize_doi(doi) or "" for doi in dois if normalize_doi(doi)]
+        normalized: list[str] = []
+        for doi in dois:
+            value = normalize_doi(doi)
+            if value:
+                normalized.append(value)
+        return normalized
 
     async def _execute_batch_request(
         self, normalized_dois: list[str]
@@ -145,14 +150,6 @@ class DoiBatchProcessor:
 
         return response
 
-    @staticmethod
-    def _parse_batch_items(response: Response) -> list[BronzeRecord]:
-        """Extract publication items from a CrossRef batch response."""
-        data = response.json()
-        message = data.get("message", {})
-        items = message.get("items", []) if isinstance(message, dict) else []
-        return [cast(BronzeRecord, item) for item in items if isinstance(item, dict)]
-
     async def fetch_batch(self, dois: list[str]) -> AsyncIterator[BronzeRecord]:
         """Fetch multiple publications by DOI batch."""
         if not dois:
@@ -168,8 +165,9 @@ class DoiBatchProcessor:
             if response is None:
                 raise CrossRefApiError("CrossRef batch request returned no response")
 
+            logger = self._logger
             if response.status_code != 200:
-                self._logger.warning(
+                logger.warning(
                     "crossref_batch_fetch_failed",
                     status_code=response.status_code,
                     doi_count=len(dois),
@@ -178,8 +176,12 @@ class DoiBatchProcessor:
                     yield publication
                 return
 
-            for item in self._parse_batch_items(response):
-                yield item
+            data = response.json()
+            message = data.get("message", {})
+            items = message.get("items", []) if isinstance(message, dict) else []
+            for item in items:
+                if isinstance(item, dict):
+                    yield cast(BronzeRecord, item)
 
         except CROSSREF_RUNTIME_ERRORS as error:
             self._logger.warning(

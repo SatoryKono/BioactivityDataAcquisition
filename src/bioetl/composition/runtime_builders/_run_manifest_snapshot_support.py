@@ -183,29 +183,29 @@ def _as_runtime_config_mapping(runtime_config: object) -> Mapping[str, object]:
     return {}
 
 
+def _resolve_mapping_text(mapping: object, key: str) -> str | None:
+    """Read one optional text value from a mapping-like object."""
+    if not isinstance(mapping, Mapping):
+        return None
+    return _coerce_optional_text(mapping.get(key))
+
+
 def _resolve_replay_parentage_mapping_value(
     runtime_config: Mapping[str, object],
     *keys: str,
 ) -> str | None:
+    """Resolve replay parentage from direct and nested runtime config mappings."""
+    candidate_mappings: tuple[object, ...] = (
+        runtime_config,
+        runtime_config.get("control_plane"),
+        runtime_config.get("pipeline"),
+        _as_runtime_config_mapping(runtime_config.get("pipeline")).get("control_plane"),
+    )
     for key in keys:
-        direct_value = _coerce_optional_text(runtime_config.get(key))
-        if direct_value is not None:
-            return direct_value
-        control_plane = runtime_config.get("control_plane")
-        if isinstance(control_plane, Mapping):
-            nested_value = _coerce_optional_text(control_plane.get(key))
-            if nested_value is not None:
-                return nested_value
-        pipeline = runtime_config.get("pipeline")
-        if isinstance(pipeline, Mapping):
-            nested_direct = _coerce_optional_text(pipeline.get(key))
-            if nested_direct is not None:
-                return nested_direct
-            nested_control_plane = pipeline.get("control_plane")
-            if isinstance(nested_control_plane, Mapping):
-                nested_value = _coerce_optional_text(nested_control_plane.get(key))
-                if nested_value is not None:
-                    return nested_value
+        for mapping in candidate_mappings:
+            resolved = _resolve_mapping_text(mapping, key)
+            if resolved is not None:
+                return resolved
     return None
 
 

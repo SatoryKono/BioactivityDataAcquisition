@@ -14,10 +14,8 @@ from bioetl.domain.ports import (
     MetricsPort,
     QuarantinePort,
 )
-from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.observability import PrometheusMetrics
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
 __all__ = [
@@ -58,14 +56,7 @@ def create_quarantine(settings: object) -> QuarantinePort:
 
 def create_metrics(settings: object) -> MetricsPort:
     """Create metrics port based on settings."""
-    if not _metrics_enabled(settings):
-        return NoOpMetrics(warn_on_use=False)
-
-    observability = getattr(settings, "observability", None)
-    if observability is None:
-        metrics: object = PrometheusMetrics()
-    else:
-        metrics = resolve_metrics_port(metrics=None, settings=settings)
+    metrics: object = resolve_metrics_port(metrics=None, settings=settings)
 
     if isinstance(metrics, MetricsPort):
         assert isinstance(metrics, MetricsPort), (

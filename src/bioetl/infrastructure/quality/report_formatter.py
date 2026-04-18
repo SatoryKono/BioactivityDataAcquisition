@@ -66,20 +66,25 @@ def _collect_allowances(
             continue
 
         allowance_total += int(allowances.get("total_exemptions", 0))
-
-        reg_allowances = allowances.get("registry_budgets", {})
-        if isinstance(reg_allowances, dict):
-            for registry_name, value in reg_allowances.items():
-                if isinstance(value, int):
-                    allowance_by_registry[registry_name] += value
-
-        group_allowances = allowances.get("group_budgets", {})
-        if isinstance(group_allowances, dict):
-            for group_name, value in group_allowances.items():
-                if isinstance(value, int):
-                    allowance_by_group[group_name] += value
+        _accumulate_allowances(
+            allowances.get("registry_budgets", {}),
+            allowance_by_registry,
+        )
+        _accumulate_allowances(
+            allowances.get("group_budgets", {}),
+            allowance_by_group,
+        )
 
     return allowance_total, allowance_by_registry, allowance_by_group
+
+
+def _accumulate_allowances(source: object, destination: Counter[str]) -> None:
+    """Accumulate integer budget entries from one allowance mapping."""
+    if not isinstance(source, dict):
+        return
+    for name, value in source.items():
+        if isinstance(value, int):
+            destination[name] += value
 
 
 def _extract_growth_violation_section(violation: str) -> str:

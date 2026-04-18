@@ -116,6 +116,22 @@ def echo_vacuum_all_summary(result: VacuumAllResult) -> None:
         click.echo(f"Failed tables: {', '.join(result.failed_tables)}", err=True)
 
 
+def _echo_error_detail_fields(error_details: dict[str, object]) -> None:
+    """Print structured quarantine error detail fields when present."""
+    for label, key in (
+        ("Reason Code", "reason_code"),
+        ("Rule Type", "rule_type"),
+        ("Field", "field"),
+        ("Operator", "operator"),
+        ("Expected", "expected"),
+        ("Actual", "actual"),
+    ):
+        value = error_details.get(key)
+        if value is None or value == "":
+            continue
+        click.echo(f"{label}: {value}")
+
+
 def echo_quarantine_record(
     record: JsonDict,  # Any: CLI/HTTP response values are heterogeneous
 ) -> None:  # Any: quarantine record has heterogeneous values
@@ -141,18 +157,7 @@ def echo_quarantine_record(
     if isinstance(error_details, dict) and error_details:
         if error_details.get("message"):
             click.echo(f"Reason: {error_details['message']}")
-        for label, key in (
-            ("Reason Code", "reason_code"),
-            ("Rule Type", "rule_type"),
-            ("Field", "field"),
-            ("Operator", "operator"),
-            ("Expected", "expected"),
-            ("Actual", "actual"),
-        ):
-            value = error_details.get(key)
-            if value is None or value == "":
-                continue
-            click.echo(f"{label}: {value}")
+        _echo_error_detail_fields(error_details)
 
     click.echo(f"Payload: {payload_display}")
     click.echo("")

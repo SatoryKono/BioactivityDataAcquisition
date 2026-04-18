@@ -37,6 +37,8 @@ if TYPE_CHECKING:
 
 _COMPOSITION_EXECUTION_API_MODULE = "bioetl.composition.execution_api"
 _COMPOSITION_COMPOSITE_API_MODULE = "bioetl.composition.composite_api"
+_COMPOSITION_SERVICES_API_MODULE = "bioetl.composition.services_api"
+_COMPOSITION_RESOURCES_API_MODULE = "bioetl.composition.resources_api"
 
 __all__ = [
     "ArchiveOptions",
@@ -76,29 +78,29 @@ _PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
 
 _LEGACY_SYMBOL_TARGETS: dict[str, str] = {
     # services_api
-    "cleanup_bronze": "bioetl.composition.services_api",
-    "get_adr_service": "bioetl.composition.services_api",
-    "get_bronze_cleanup_service": "bioetl.composition.services_api",
-    "get_checkpoint_service": "bioetl.composition.services_api",
-    "get_config_service": "bioetl.composition.services_api",
-    "get_export_service": "bioetl.composition.services_api",
-    "get_health_server_dependencies": "bioetl.composition.services_api",
-    "get_health_service": "bioetl.composition.services_api",
-    "get_lock_service": "bioetl.composition.services_api",
-    "get_metrics_service": "bioetl.composition.services_api",
-    "get_pipeline_runner_service": "bioetl.composition.services_api",
-    "get_quarantine_port": "bioetl.composition.services_api",
-    "get_quarantine_service": "bioetl.composition.services_api",
-    "get_vacuum_service": "bioetl.composition.services_api",
+    "cleanup_bronze": _COMPOSITION_SERVICES_API_MODULE,
+    "get_adr_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_bronze_cleanup_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_checkpoint_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_config_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_export_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_health_server_dependencies": _COMPOSITION_SERVICES_API_MODULE,
+    "get_health_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_lock_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_metrics_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_pipeline_runner_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_quarantine_port": _COMPOSITION_SERVICES_API_MODULE,
+    "get_quarantine_service": _COMPOSITION_SERVICES_API_MODULE,
+    "get_vacuum_service": _COMPOSITION_SERVICES_API_MODULE,
     # resources_api
-    "archive_table": "bioetl.composition.resources_api",
-    "get_checkpoint_manager": "bioetl.composition.resources_api",
-    "get_lifecycle_service": "bioetl.composition.resources_api",
-    "get_quarantine_manager": "bioetl.composition.resources_api",
-    "inspect_quarantine": "bioetl.composition.resources_api",
-    "list_checkpoints": "bioetl.composition.resources_api",
-    "preview_cleanup": "bioetl.composition.resources_api",
-    "vacuum_table": "bioetl.composition.resources_api",
+    "archive_table": _COMPOSITION_RESOURCES_API_MODULE,
+    "get_checkpoint_manager": _COMPOSITION_RESOURCES_API_MODULE,
+    "get_lifecycle_service": _COMPOSITION_RESOURCES_API_MODULE,
+    "get_quarantine_manager": _COMPOSITION_RESOURCES_API_MODULE,
+    "inspect_quarantine": _COMPOSITION_RESOURCES_API_MODULE,
+    "list_checkpoints": _COMPOSITION_RESOURCES_API_MODULE,
+    "preview_cleanup": _COMPOSITION_RESOURCES_API_MODULE,
+    "vacuum_table": _COMPOSITION_RESOURCES_API_MODULE,
 }
 
 

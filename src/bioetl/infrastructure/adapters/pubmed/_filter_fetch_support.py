@@ -13,10 +13,13 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
 
 
+_PUBLICATION_ONLY_ERROR = "PubMedAdapter only supports 'publication'"
+
+
 async def empty_async_iterator() -> AsyncIterator[BronzeRecord]:
     """Return an empty async iterator matching BronzeRecord stream contract."""
-    if False:  # pragma: no cover
-        yield {}
+    for record in ():
+        yield record
 
 
 class PubMedAdapterFilterFetchHost(Protocol):
@@ -102,7 +105,7 @@ async def fetch_filtered_records(
 ) -> AsyncIterator[BronzeRecord]:
     """Fetch PubMed records by ID list via FilterableDataSourcePort contract."""
     if entity_type != "publication":
-        raise ValueError("PubMedAdapter only supports 'publication'")
+        raise ValueError(_PUBLICATION_ONLY_ERROR)
 
     if filter_field != "pmid":
         host._logger.warning(
@@ -125,7 +128,7 @@ async def fetch_filtered_with_fallback_records(
 ) -> AsyncIterator[BronzeRecord]:
     """Fetch with fallback to title search when primary lookup fails."""
     if entity_type != "publication":
-        raise ValueError("PubMedAdapter only supports 'publication'")
+        raise ValueError(_PUBLICATION_ONLY_ERROR)
 
     def _primary_records(
         primary_ids: list[str],
@@ -208,7 +211,7 @@ async def fetch_from_filter_ids(
 def validate_publication_entity(entity_type: str) -> None:
     """Validate supported PubMed entity type."""
     if entity_type != "publication":
-        raise ValueError("PubMedAdapter only supports 'publication'")
+        raise ValueError(_PUBLICATION_ONLY_ERROR)
 
 
 def resolve_resume_offset(

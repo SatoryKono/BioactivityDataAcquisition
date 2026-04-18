@@ -172,7 +172,9 @@ class SilverPostwriteOperations:
     ) -> None:
         """Run the postwrite export branch for composition-backed writers."""
         if hasattr(self._host, "_maintenance") and self._host._maintenance is not None:
-            export_path = str(Path(self._host.base_path) / f"{ctx.table_name}.csv")
+            export_path = (
+                Path(self._host.base_path) / f"{ctx.table_name}.csv"
+            ).as_posix()
             await self._host._maintenance.maybe_export_csv(
                 table_name=ctx.table_name,
                 arrow_data=payload.arrow_data,
