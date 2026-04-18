@@ -87,7 +87,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import (
-        CompositePipelineRunnerService,
+        CompositePipelineRunner,
         PipelineRunner,
     )
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
@@ -111,9 +111,9 @@ def create_composite_runner(
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
     support_services: CompositeSupportServices,
-    runner_factory: Callable[..., CompositePipelineRunnerService],
-) -> CompositePipelineRunnerService:
-    """Create fully wired CompositePipelineRunner service.
+    runner_factory: Callable[..., CompositePipelineRunner],
+) -> CompositePipelineRunner:
+    """Create fully wired CompositePipelineRunner.
 
     Args:
         config: CompositeConfig for this composite run.
@@ -128,10 +128,10 @@ def create_composite_runner(
             PipelineRunner given a pipeline name and keys DataFrame.
         support_services: Bundle of support services (checkpoint, merger, etc.).
         runner_factory: Factory callable used to instantiate
-            CompositePipelineRunnerService with all wired dependencies.
+            CompositePipelineRunner with all wired dependencies.
 
     Returns:
-        Fully wired CompositePipelineRunnerService ready for execution.
+        Fully wired CompositePipelineRunner ready for execution.
     """
     return _create_composite_runner_impl(
         config=config,

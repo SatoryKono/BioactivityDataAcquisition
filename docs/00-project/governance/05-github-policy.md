@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md v6.1 | Last updated: 2026-03-13*
+*Synced with RULES.md v6.1.2 | Last updated: 2026-04-09*
 
 ----------------------------------------------------------------------
 

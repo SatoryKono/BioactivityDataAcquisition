@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Architecture Overview
 
-*Synced with RULES.md v6.1 (2026-03-13)*
+*Synced with RULES.md v6.1.2 (2026-04-09)*
 
 ## Quick Navigation
 

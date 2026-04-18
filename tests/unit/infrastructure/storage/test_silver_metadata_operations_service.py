@@ -15,7 +15,9 @@ from bioetl.infrastructure.storage.silver.operations.metadata_operations import 
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_write_silver_metadata_uses_record_ingestion_anchor_when_explicit_time_missing() -> None:
+async def test_write_silver_metadata_uses_record_ingestion_anchor_when_explicit_time_missing() -> (
+    None
+):
     """Metadata runtime timestamps should reuse deterministic record anchors."""
     expected = datetime(2025, 1, 15, 12, 0, tzinfo=UTC)
     captured: dict[str, object] = {}

@@ -39,4 +39,6 @@ def __getattr__(name: str) -> ModuleType:
 
 def __dir__() -> list[str]:
     """Return stable interface exports for shell/help introspection."""
-    return sorted(set(globals()) | set(__all__))
+    # Use set-unpacking to avoid redundant intermediate set(...) calls flagged by static
+    # analysis while keeping the behaviour: union of current globals and declared exports.
+    return sorted({*globals(), *__all__})

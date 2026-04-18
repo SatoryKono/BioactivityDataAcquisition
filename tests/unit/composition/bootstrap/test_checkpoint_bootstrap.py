@@ -332,6 +332,7 @@ class TestBootstrapQuarantineService:
     def test_bootstrap_quarantine_service_resolves_metrics_port(self):
         """CLI quarantine service should resolve metrics through composition."""
         resolved_metrics = MagicMock()
+        resolved_tracer = MagicMock(spec=TracingPort)
         with (
             patch(
                 "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
@@ -340,13 +341,23 @@ class TestBootstrapQuarantineService:
                 "bioetl.composition.bootstrap.cli.checkpoint.resolve_metrics_port",
                 return_value=resolved_metrics,
             ) as mock_resolve_metrics,
+            patch(
+                "bioetl.composition.bootstrap.cli.checkpoint.resolve_tracing_port",
+                return_value=resolved_tracer,
+            ) as mock_resolve_tracing,
         ):
             settings = MagicMock(quarantine_path=Path("/tmp/quarantine"))
             mock_settings.return_value = settings
             result = bootstrap_quarantine_service()
 
         assert result.metrics is resolved_metrics
+        assert result.tracer is resolved_tracer
         mock_resolve_metrics.assert_called_once_with(metrics=None, settings=settings)
+        mock_resolve_tracing.assert_called_once_with(
+            tracer=None,
+            settings=settings,
+            service_name="bioetl.quarantine_admin",
+        )
 
     def test_bootstrap_quarantine_service_wires_tracing_port(self):
         """CLI quarantine service should inject an explicit tracing port."""

@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v6.1 | Last updated: 2026-04-01*
+*Synced with RULES.md v6.1.2 | Last updated: 2026-04-09*
 
 > **Documentation Update:** 2026-03-24
 >
@@ -73,7 +73,7 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v6.1)
+│   ├── RULES.md                 # Canonical rules document (v6.1.2)
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Active tools hub & unified entry points
 │   ├── rules-summary.md         # TL;DR of RULES.md
