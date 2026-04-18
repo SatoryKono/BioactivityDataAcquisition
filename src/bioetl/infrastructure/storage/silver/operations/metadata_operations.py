@@ -193,17 +193,15 @@ class SilverMetadataOperations:
         request: _SilverMetadataBuildRequest,
     ) -> SilverMetadata:
         """Build a complete SilverMetadata payload from write/finalization inputs."""
-        from bioetl.domain.models._metadata_common import (
+        from bioetl.domain.models.metadata import (
             BaseOutputMetadata,
-            EnvironmentMetadata,
-            PipelineMetadata,
-            RuntimeMetadata,
-        )
-        from bioetl.domain.models._metadata_silver import (
             DeltaMetrics,
             DQSummary,
+            EnvironmentMetadata,
             LineageMetadata,
+            PipelineMetadata,
             SilverOutputExt,
+            RuntimeMetadata,
         )
 
         provider_name, entity_name = self._split_table_name(request.table_name)
@@ -572,7 +570,7 @@ class SilverMetadataOperations:
         """
         del partition_cols
 
-        from bioetl.domain.models._metadata_common import RunTypeEnum
+        from bioetl.domain.models.metadata import RunTypeEnum
 
         context = await self._prepare_silver_write_finalization_context(
             table_name=table_name,
