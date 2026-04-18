@@ -274,6 +274,65 @@ def _architecture_skip_cache_key(project_root: Path) -> str:
     return f"bioetl/architecture_skip_count/{digest.hexdigest()}"
 
 
+def _architecture_session_items(request: pytest.FixtureRequest) -> list[pytest.Item]:
+    return [
+        item
+        for item in request.session.items
+        if item.nodeid.replace("\\", "/").startswith("tests/architecture/")
+    ]
+
+
+def _cached_architecture_skip_count(
+    request: pytest.FixtureRequest,
+    cache_key: str,
+) -> int | None:
+    cached_skipped = request.config.cache.get(cache_key, None)
+    return cached_skipped if isinstance(cached_skipped, int) else None
+
+
+def _collect_architecture_skip_count() -> int:
+    counter = _SkipMarkerCounter()
+    exit_code = pytest.main(
+        [
+            "tests/architecture/",
+            "--collect-only",
+            "-q",
+            "--ignore=tests/architecture/test_regression_metrics.py",
+            "-p",
+            "no:timeout",
+            "-p",
+            "no:xdist",
+            "--no-header",
+            "--override-ini=addopts=",
+        ],
+        plugins=[counter],
+    )
+    if counter.total == 0 and exit_code not in (
+        pytest.ExitCode.OK,
+        pytest.ExitCode.NO_TESTS_COLLECTED,
+    ):
+        pytest.fail(
+            "Nested architecture collection failed while counting skip markers: "
+            f"exit_code={exit_code}"
+        )
+    return counter.skipped
+
+
+def _architecture_skip_count(request: pytest.FixtureRequest) -> int:
+    architecture_items = _architecture_session_items(request)
+    if len(architecture_items) >= 200:
+        return _count_skip_markers(architecture_items)
+
+    cache_key = _architecture_skip_cache_key(Path.cwd())
+    cached_skipped = _cached_architecture_skip_count(request, cache_key)
+    if cached_skipped is not None:
+        return cached_skipped
+
+    skipped = _collect_architecture_skip_count()
+    request.config.cache.set(cache_key, skipped)
+    return skipped
+
+
 @pytest.mark.timeout(120)
 def test_architecture_skip_count(request: pytest.FixtureRequest) -> None:
     """Architecture test skip count must not exceed the ratchet budget.
@@ -283,45 +342,7 @@ def test_architecture_skip_count(request: pytest.FixtureRequest) -> None:
     architecture items (for narrow targeted invocations).
     """
     max_architecture_skips = _resolve_coarse_budget("architecture_skip_count")
-    architecture_items = [
-        item
-        for item in request.session.items
-        if item.nodeid.replace("\\", "/").startswith("tests/architecture/")
-    ]
-    if len(architecture_items) >= 200:
-        skipped = _count_skip_markers(architecture_items)
-    else:
-        cache_key = _architecture_skip_cache_key(Path.cwd())
-        cached_skipped = request.config.cache.get(cache_key, None)
-        if isinstance(cached_skipped, int):
-            skipped = cached_skipped
-        else:
-            counter = _SkipMarkerCounter()
-            exit_code = pytest.main(
-                [
-                    "tests/architecture/",
-                    "--collect-only",
-                    "-q",
-                    "--ignore=tests/architecture/test_regression_metrics.py",
-                    "-p",
-                    "no:timeout",
-                    "-p",
-                    "no:xdist",
-                    "--no-header",
-                    "--override-ini=addopts=",
-                ],
-                plugins=[counter],
-            )
-            if counter.total == 0 and exit_code not in (
-                pytest.ExitCode.OK,
-                pytest.ExitCode.NO_TESTS_COLLECTED,
-            ):
-                pytest.fail(
-                    "Nested architecture collection failed while counting skip markers: "
-                    f"exit_code={exit_code}"
-                )
-            skipped = counter.skipped
-            request.config.cache.set(cache_key, skipped)
+    skipped = _architecture_skip_count(request)
 
     assert skipped <= max_architecture_skips, (
         f"architecture_skip_count={skipped} exceeds budget {max_architecture_skips}"
@@ -746,28 +767,20 @@ def test_architecture_test_p95_duration_tracked() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_scorecard_baseline_matches_registry() -> None:
-    """Scorecard baseline must match actual exemption registry counts."""
+def _load_exemptions_registries() -> dict[str, Any]:
     if not EXEMPTIONS_YAML.exists():
         pytest.skip("Exemptions YAML not found")
-    if not DEBT_SCORECARD_YAML.exists():
-        pytest.skip("Debt scorecard YAML not found")
-
     with open(EXEMPTIONS_YAML, encoding="utf-8") as f:
-        exemptions = yaml.safe_load(f)
-    with open(DEBT_SCORECARD_YAML, encoding="utf-8") as f:
-        scorecard = yaml.safe_load(f)
-
+        exemptions = yaml.safe_load(f) or {}
     registries = exemptions.get("registries", {})
-    actual_by_registry: dict[str, int] = {}
-    actual_total = 0
-    for reg_name, entries in registries.items():
-        count = len(entries) if isinstance(entries, dict) else 0
-        actual_by_registry[reg_name] = count
-        actual_total += count
+    if not isinstance(registries, dict):
+        pytest.fail("exemptions.registries must be a mapping")
+    return registries
 
+
+def _scorecard_baseline_section(scorecard: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     governance = scorecard.get("governance", {})
-    baseline_section_name = "baseline"
+    section_name = "baseline"
     if isinstance(governance, dict):
         baseline_policy = governance.get("baseline_policy", {})
         if isinstance(baseline_policy, dict):
@@ -777,12 +790,30 @@ def test_scorecard_baseline_matches_registry() -> None:
                 "section, not to historical_baseline"
             )
             if isinstance(sync_source, str) and sync_source.strip():
-                baseline_section_name = sync_source
+                section_name = sync_source
 
-    baseline = scorecard.get(baseline_section_name, {})
-    expected_total = baseline.get("total_exemptions", 0)
-    expected_by_registry = baseline.get("by_registry", {})
+    baseline = scorecard.get(section_name, {})
+    if not isinstance(baseline, dict):
+        pytest.fail(f"scorecard.{section_name} must be a mapping")
+    return section_name, baseline
 
+
+def _registry_counts(registries: dict[str, Any]) -> tuple[dict[str, int], int]:
+    actual_by_registry: dict[str, int] = {}
+    actual_total = 0
+    for reg_name, entries in registries.items():
+        count = len(entries) if isinstance(entries, dict) else 0
+        actual_by_registry[reg_name] = count
+        actual_total += count
+    return actual_by_registry, actual_total
+
+
+def _scorecard_registry_mismatches(
+    actual_by_registry: dict[str, int],
+    actual_total: int,
+    expected_by_registry: dict[str, Any],
+    expected_total: int,
+) -> list[str]:
     mismatches: list[str] = []
     if actual_total != expected_total:
         mismatches.append(
@@ -794,6 +825,23 @@ def test_scorecard_baseline_matches_registry() -> None:
             mismatches.append(
                 f"{reg_name}: scorecard={expected_count}, actual={actual_count}"
             )
+    return mismatches
+
+
+def test_scorecard_baseline_matches_registry() -> None:
+    """Scorecard baseline must match actual exemption registry counts."""
+    scorecard = _load_debt_scorecard()
+    registries = _load_exemptions_registries()
+    actual_by_registry, actual_total = _registry_counts(registries)
+    baseline_section_name, baseline = _scorecard_baseline_section(scorecard)
+    expected_total = baseline.get("total_exemptions", 0)
+    expected_by_registry = baseline.get("by_registry", {})
+    mismatches = _scorecard_registry_mismatches(
+        actual_by_registry=actual_by_registry,
+        actual_total=actual_total,
+        expected_by_registry=expected_by_registry,
+        expected_total=expected_total,
+    )
 
     assert not mismatches, (
         "Scorecard baseline drifted from actual exemption registry:\n"
