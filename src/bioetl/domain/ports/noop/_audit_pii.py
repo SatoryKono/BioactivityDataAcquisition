@@ -1,12 +1,18 @@
 """No-op audit and PII hasher implementations."""
 
 from __future__ import annotations
+import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.ports.audit import AuditEntry, AuditLayer
     from bioetl.domain.types import RunID
+
+
+async def _yield_control() -> None:
+    """Yield once to keep no-op async methods honest without side effects."""
+    await asyncio.sleep(0)
 
 
 class NoOpAudit:
@@ -18,6 +24,7 @@ class NoOpAudit:
         Args:
             _entry: Audit entry to log; intentionally ignored by this no-op.
         """
+        await _yield_control()
         return None
 
     async def get_entries(
@@ -42,11 +49,13 @@ class NoOpAudit:
         Returns:
             Empty list.
         """
+        await _yield_control()
         del run_id, layer, table_name, start_time, end_time, limit
         return []
 
     async def aclose(self) -> None:
         """No-op implementation of aclose — no resources to release."""
+        await _yield_control()
         return None
 
     def log_event(

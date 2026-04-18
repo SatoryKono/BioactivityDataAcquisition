@@ -242,9 +242,6 @@ class ErrorHandlerService:
 
         return log_context
 
-
-ErrorHandler = ErrorHandlerService
-
     def _get_error_type(self, exception: Exception) -> str:
         """Get the error type for classification."""
         if isinstance(exception, BioETLIntegrationError):
@@ -339,3 +336,6 @@ ErrorHandler = ErrorHandlerService
             context=context,
         )
         self.handle_error(error, context, reraise=True)
+
+
+ErrorHandler = ErrorHandlerService
