@@ -8286,7 +8286,7 @@ def _markdown_heading_context(text: str, offset: int) -> tuple[str | None, str |
 
 
 def _markdown_heading_matches(text: str) -> Iterator[re.Match[str]]:
-    heading_pattern = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+    heading_pattern = re.compile(r"^(#{1,6})\s+([^\n]*\S)\s*$", re.MULTILINE)
     return heading_pattern.finditer(text)
 
 

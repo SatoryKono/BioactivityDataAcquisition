@@ -121,7 +121,7 @@ class TestAdapterHealthCheck:
 
             # Only scan files that define adapter-like classes.
             adapter_like_class = re.search(
-                r"class\s+\w*(Adapter|Client|Fetcher)\w*\s*\(",
+                r"class\s+\w{0,128}(?:Adapter|Client|Fetcher)\w{0,128}\s*\(",
                 content,
                 re.MULTILINE,
             )

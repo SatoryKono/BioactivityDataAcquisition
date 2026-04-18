@@ -128,9 +128,11 @@ def _extract_edge_endpoints(line: str) -> list[tuple[str, str]]:
 def fix_link002(lines: list[str]) -> list[str]:
     entries: list[tuple[int, int, str, str]] = []
     for i, ln in enumerate(lines):
-        m = LINKSTYLE_SINGLE_RE.match(ln)
-        if m:
-            entries.append((i, int(m.group(2)), m.group(3).strip(), m.group(1)))
+        parsed = _parse_linkstyle_single(ln)
+        if parsed is None:
+            continue
+        indent, index, style = parsed
+        entries.append((i, int(index), style, indent))
 
     if len(entries) < 12:
         return lines

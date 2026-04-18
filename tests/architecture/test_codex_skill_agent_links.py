@@ -34,7 +34,7 @@ def test_codex_skills_claude_agent_links_must_exist() -> None:
     """Every `.claude/agents/*.md` path mentioned in skills must resolve."""
     root = _project_root()
     missing: list[str] = []
-    pattern = re.compile(r"`([^`]*\.claude/agents/[^`]*\.md)`")
+    pattern = re.compile(r"`([^`\n]{1,512}\.claude/agents/[^`\n]{1,512}\.md)`")
 
     for skill_path in _skill_files(root):
         content = skill_path.read_text(encoding="utf-8")

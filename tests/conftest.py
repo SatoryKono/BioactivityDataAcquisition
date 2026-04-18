@@ -174,15 +174,21 @@ def _sanitize_bioetl_env_vars() -> None:
     string values. This fixture strips everything after ``#`` for
     all BIOETL_ variables so Settings() can parse them correctly.
     """
-    import re
-
-    inline_comment_re = re.compile(r"\s+#\s.*$")
     for key in tuple(os.environ):
         if key.startswith("BIOETL_"):
             val = os.environ[key]
-            cleaned = inline_comment_re.sub("", val)
+            cleaned = _strip_inline_env_comment(val)
             if cleaned != val:
                 os.environ[key] = cleaned
+
+
+def _strip_inline_env_comment(value: str) -> str:
+    hash_index = value.find("#")
+    if hash_index == -1:
+        return value
+    prefix = value[:hash_index]
+    stripped = prefix.rstrip()
+    return stripped if stripped != value else value
 
 
 @pytest.fixture(scope="session", autouse=True)

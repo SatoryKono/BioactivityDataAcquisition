@@ -18,6 +18,53 @@ from bioetl.infrastructure.quality import (
 )
 
 
+def _layer_path(src_dir: Path, layer: str) -> Path:
+    return src_dir / "bioetl" / layer
+
+
+def _iter_layer_python_items(
+    src_dir: Path,
+    layer: str,
+    source_content_cache: dict | None = None,
+) -> list[tuple[Path, str]]:
+    layer_path = _layer_path(src_dir, layer)
+    if not layer_path.exists():
+        pytest.skip(f"{layer} layer not found")
+    if source_content_cache is not None:
+        return [
+            (p, c)
+            for p, c in source_content_cache.items()
+            if layer_path in p.parents and not p.name.startswith("__")
+        ]
+    return [
+        (p, p.read_text(encoding="utf-8"))
+        for p in layer_path.rglob("*.py")
+        if not p.name.startswith("__")
+    ]
+
+
+def _module_registry_value(
+    registry: dict,
+    src_dir: Path,
+    py_file: Path,
+    *,
+    symbol_name: str | None = None,
+    legacy_name: str | None = None,
+) -> int | None:
+    return resolve_registry_value(
+        registry,
+        module_path=build_module_path_key(py_file, src_root=src_dir),
+        symbol_name=symbol_name,
+        legacy_name=legacy_name,
+    )
+
+
+def _line_span(node: ast.AST) -> tuple[int, int, int]:
+    start_line = getattr(node, "lineno")
+    end_line = getattr(node, "end_lineno", None) or start_line
+    return start_line, end_line, end_line - start_line + 1
+
+
 class TestFileSizeLimits:
     """Enforce maximum file size limits by layer."""
 
@@ -90,29 +137,14 @@ class TestFileSizeLimits:
         source_content_cache: dict | None = None,
     ) -> None:
         """Check all files in a layer against the limit."""
-        layer_path = src_dir / "bioetl" / layer
-        if not layer_path.exists():
-            pytest.skip(f"{layer} layer not found")
-
         violations = []
-        if source_content_cache is not None:
-            items = (
-                (p, c)
-                for p, c in source_content_cache.items()
-                if layer_path in p.parents and not p.name.startswith("__")
-            )
-        else:
-            items = (
-                (p, p.read_text(encoding="utf-8"))
-                for p in layer_path.rglob("*.py")
-                if not p.name.startswith("__")
-            )
-
-        for py_file, content in items:
-            # Check for exemptions
-            file_limit = resolve_registry_value(
+        for py_file, content in _iter_layer_python_items(
+            src_dir, layer, source_content_cache
+        ):
+            file_limit = _module_registry_value(
                 self.EXEMPTIONS,
-                module_path=build_module_path_key(py_file, src_root=src_dir),
+                src_dir,
+                py_file,
                 legacy_name=py_file.name,
             )
             if file_limit is None:
@@ -185,32 +217,17 @@ class TestFunctionComplexity:
         except ImportError:
             pytest.skip("radon not installed")
 
-        layer_path = src_dir / "bioetl" / layer
-        if not layer_path.exists():
-            pytest.skip(f"{layer} layer not found")
-
         violations = []
-        if source_content_cache is not None:
-            items = (
-                (p, c)
-                for p, c in source_content_cache.items()
-                if layer_path in p.parents and not p.name.startswith("__")
-            )
-        else:
-            items = (
-                (p, p.read_text(encoding="utf-8"))
-                for p in layer_path.rglob("*.py")
-                if not p.name.startswith("__")
-            )
-
-        for py_file, content in items:
+        for py_file, content in _iter_layer_python_items(
+            src_dir, layer, source_content_cache
+        ):
             try:
                 results = cc_visit(content)
                 for item in results:
-                    # Check for exemptions
-                    func_max_cc = resolve_registry_value(
+                    func_max_cc = _module_registry_value(
                         self.EXEMPTIONS,
-                        module_path=build_module_path_key(py_file, src_root=src_dir),
+                        src_dir,
+                        py_file,
                         symbol_name=item.name,
                     )
                     if func_max_cc is None:
@@ -390,7 +407,9 @@ class TestGodObjectDetection:
         end_line = class_node.end_lineno or start_line
         return end_line - start_line + 1
 
-    def _is_exempt_class(self, src_dir: Path, py_file: Path, class_node: ast.ClassDef) -> bool:
+    def _is_exempt_class(
+        self, src_dir: Path, py_file: Path, class_node: ast.ClassDef
+    ) -> bool:
         return (
             resolve_registry_value(
                 self.EXEMPTIONS,

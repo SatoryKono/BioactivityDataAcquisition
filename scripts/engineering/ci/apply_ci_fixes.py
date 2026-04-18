@@ -1239,12 +1239,19 @@ def apply_hf_lxml(api: GitHubAPI) -> None:
 
     new_content = content.replace(old_cmd, new_cmd, 1)
     if new_content == content:
-        # Try a more flexible replacement in case of whitespace differences
-        new_content = _re.sub(
-            r"(uv run mypy[^\n]*)\s*\n(\s*)--txt-report reports/mypy_report\s*\\\n(\s*)(2>&1)",
-            r"\1 \\\n\3\4",
-            content,
-        )
+        # Try a line-based replacement in case of whitespace differences.
+        lines = content.splitlines(keepends=True)
+        for idx in range(len(lines) - 2):
+            if "uv run mypy" not in lines[idx]:
+                continue
+            if "--txt-report reports/mypy_report" not in lines[idx + 1]:
+                continue
+            if "2>&1" not in lines[idx + 2]:
+                continue
+            lines[idx] = lines[idx].rstrip("\n") + " \\\n"
+            del lines[idx + 1]
+            new_content = "".join(lines)
+            break
 
     if new_content == content:
         print(

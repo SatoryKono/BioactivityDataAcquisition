@@ -232,14 +232,14 @@ def test_adr_status_is_from_allowed_set() -> None:
     violations: list[str] = []
 
     status_patterns = (
-        re.compile(r"^\*\*Status:\*\*\s*(.+)$", flags=re.MULTILINE),
-        re.compile(r"^\*\s+\*\*Status\*\*:\s*(.+)$", flags=re.MULTILINE),
+        re.compile(r"^\*\*Status:\*\*\s*([^\n]+)$", flags=re.MULTILINE),
+        re.compile(r"^\*\s+\*\*Status\*\*:\s*([^\n]+)$", flags=re.MULTILINE),
         re.compile(
-            r"^\|\s*\*\*Статус\*\*\s*\|\s*(.+?)\s*\|$",
+            r"^\|\s*\*\*Статус\*\*\s*\|\s*([^|\n]+)\s*\|$",
             flags=re.MULTILINE,
         ),
         re.compile(
-            r"^\|\s*\*\*Status\*\*\s*\|\s*(.+?)\s*\|$",
+            r"^\|\s*\*\*Status\*\*\s*\|\s*([^|\n]+)\s*\|$",
             flags=re.MULTILINE,
         ),
     )

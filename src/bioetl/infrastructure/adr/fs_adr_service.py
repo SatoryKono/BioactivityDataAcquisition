@@ -22,22 +22,22 @@ from bioetl.domain.ports import (
 
 ADR_FILENAME_RE = re.compile(r"^ADR-(\d+)-(.+)\.md$", re.IGNORECASE)
 STATUS_PATTERNS = (
-    re.compile(r"^\*\*Status:\*\*\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^\*\*Статус:\*\*\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^Status:\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^Статус:\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^\*\*Status:\*\*\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^\*\*Статус:\*\*\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^Status:\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^Статус:\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
     re.compile(
-        r"^\|\s*\*\*(?:Status|Статус)\*\*\s*\|\s*([^|]+?)\s*\|",
+        r"^\|\s*\*\*(?:Status|Статус)\*\*\s*\|\s*([^|\n]+)\s*\|",
         flags=re.IGNORECASE | re.MULTILINE,
     ),
 )
 DATE_PATTERNS = (
-    re.compile(r"^\*\*Date:\*\*\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^\*\*Дата:\*\*\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^Date:\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^Дата:\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^\*\*Date:\*\*\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^\*\*Дата:\*\*\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^Date:\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^Дата:\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
     re.compile(
-        r"^\|\s*\*\*(?:Date|Дата)\*\*\s*\|\s*([^|]+?)\s*\|",
+        r"^\|\s*\*\*(?:Date|Дата)\*\*\s*\|\s*([^|\n]+)\s*\|",
         flags=re.IGNORECASE | re.MULTILINE,
     ),
 )
