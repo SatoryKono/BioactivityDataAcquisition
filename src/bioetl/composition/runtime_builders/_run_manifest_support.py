@@ -1,19 +1,20 @@
-"""Private support helpers for control-plane manifest creation."""
-
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import asdict, is_dataclass
-from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
-from uuid import UUID
 
 from bioetl.composition.runtime_builders._cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders._run_manifest_contract_identity import (
     resolve_contract_identity,
+)
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+    build_launch_context_snapshot,
+    normalize_snapshot,
+    resolve_provider_entity,
+    resolve_replay_parentage,
+    to_serializable_mapping,
 )
 from bioetl.composition.runtime_builders._run_manifest_refs import (
     ManifestControlPlaneRefs,
@@ -29,8 +30,6 @@ from bioetl.domain.control_plane import (
 )
 
 if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
-
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config import Settings
 
@@ -51,173 +50,6 @@ __all__ = [
 ]
 
 
-def normalize_snapshot(value: object) -> object:
-    """Normalize dataclass/Pydantic values into JSON-safe primitives."""
-    if not isinstance(value, type) and is_dataclass(value):
-        return normalize_snapshot(asdict(cast("DataclassInstance", value)))
-    if hasattr(value, "__dict__") and not isinstance(value, type):
-        return normalize_snapshot(
-            {key: item for key, item in vars(value).items() if not key.startswith("_")}
-        )
-    if isinstance(value, dict):
-        return {str(key): normalize_snapshot(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, set, frozenset)):
-        return [normalize_snapshot(item) for item in value]
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, UUID):
-        return str(value)
-    return value
-
-
-def to_serializable_mapping(value: object) -> dict[str, object]:
-    """Convert dataclass or model objects into plain mappings."""
-    if hasattr(value, "model_dump"):
-        payload = value.model_dump(mode="json", exclude_none=True)
-    elif hasattr(value, "dict"):
-        payload = value.dict(exclude_none=True)
-    elif hasattr(value, "__dict__"):
-        payload = {
-            key: item for key, item in vars(value).items() if not key.startswith("_")
-        }
-    else:
-        payload = normalize_snapshot(value)
-    if not isinstance(payload, dict):
-        return {"value": normalize_snapshot(payload)}
-    normalized = normalize_snapshot(payload)
-    if not isinstance(normalized, dict):
-        raise TypeError("Manifest snapshot normalization must return a mapping")
-    return normalized
-
-
-def build_launch_context_snapshot(
-    ctx: PipelineRunContext,
-    *,
-    run_type_value: str,
-    execution_context_value: str,
-    required_persistence_profile: str,
-) -> dict[str, object]:
-    """Capture launch-time options that materially affect execution semantics."""
-    return {
-        "pipeline_name": str(ctx.pipeline_name),
-        "run_type": run_type_value,
-        "resume": getattr(ctx, "resume", False),
-        "dry_run": getattr(ctx, "dry_run", False),
-        "limit": getattr(ctx, "limit", None),
-        "query": getattr(ctx, "query", None),
-        "start_offset": getattr(ctx, "start_offset", None),
-        "log_level": getattr(ctx, "log_level", "INFO"),
-        "ignore_yaml_filter": getattr(ctx, "ignore_yaml_filter", False),
-        "skip_gold": getattr(ctx, "skip_gold", False),
-        "exact_replay": getattr(ctx, "exact_replay", False),
-        "execution_context": execution_context_value,
-        "required_persistence_profile": required_persistence_profile,
-        "exact_replay_support_boundary": (
-            "snapshot_backed_source_runs_only"
-            if execution_context_value != "composite"
-            else "composite_execution_unsupported"
-        ),
-        "vacuum": to_serializable_mapping(getattr(ctx, "vacuum", None)),
-        "input_filter": to_serializable_mapping(getattr(ctx, "input_filter", None)),
-        "cached_bronze": to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
-    }
-
-
-def resolve_replay_parentage(
-    *,
-    ctx: PipelineRunContext,
-    runtime_config: object,
-) -> tuple[str | None, str | None]:
-    """Resolve explicit replay ancestry from context or runtime configuration."""
-    runtime_config_mapping = _as_runtime_config_mapping(runtime_config)
-    replay_of_run_id = _coerce_optional_text(getattr(ctx, "replay_of_run_id", None))
-    replay_of_manifest_id = _coerce_optional_text(
-        getattr(ctx, "replay_of_manifest_id", None)
-    )
-    if replay_of_run_id is None:
-        replay_of_run_id = _resolve_replay_parentage_mapping_value(
-            runtime_config_mapping,
-            "replay_of_run_id",
-            "exact_replay_parent_run_id",
-        )
-    if replay_of_manifest_id is None:
-        replay_of_manifest_id = _resolve_replay_parentage_mapping_value(
-            runtime_config_mapping,
-            "replay_of_manifest_id",
-            "exact_replay_parent_manifest_id",
-        )
-    return replay_of_run_id, replay_of_manifest_id
-
-
-def _as_runtime_config_mapping(runtime_config: object) -> Mapping[str, object]:
-    """Return a mapping view for runtime-config lookups or an empty mapping."""
-    if isinstance(runtime_config, Mapping):
-        return runtime_config
-    return {}
-
-
-def _resolve_replay_parentage_mapping_value(
-    runtime_config: Mapping[str, object],
-    *keys: str,
-) -> str | None:
-    """Resolve one replay parentage field from known runtime-config locations."""
-    for key in keys:
-        direct_value = _coerce_optional_text(runtime_config.get(key))
-        if direct_value is not None:
-            return direct_value
-        control_plane = runtime_config.get("control_plane")
-        if isinstance(control_plane, Mapping):
-            nested_value = _coerce_optional_text(control_plane.get(key))
-            if nested_value is not None:
-                return nested_value
-        pipeline = runtime_config.get("pipeline")
-        if isinstance(pipeline, Mapping):
-            nested_direct = _coerce_optional_text(pipeline.get(key))
-            if nested_direct is not None:
-                return nested_direct
-            nested_control_plane = pipeline.get("control_plane")
-            if isinstance(nested_control_plane, Mapping):
-                nested_value = _coerce_optional_text(nested_control_plane.get(key))
-                if nested_value is not None:
-                    return nested_value
-    return None
-
-
-def resolve_provider_entity(
-    *,
-    pipeline_name: str,
-    yaml_config: object,
-) -> tuple[str, str]:
-    """Resolve provider/entity from YAML when available, otherwise fallback."""
-    if "_" in pipeline_name:
-        fallback_provider, fallback_entity = pipeline_name.split("_", 1)
-    else:
-        fallback_provider = pipeline_name
-        fallback_entity = pipeline_name
-    provider = _resolve_name_component(
-        getattr(yaml_config, "provider", None),
-        fallback=fallback_provider,
-    )
-    entity = _resolve_name_component(
-        getattr(yaml_config, "entity_type", None),
-        fallback=fallback_entity,
-    )
-    return provider, entity
-
-
-def _resolve_name_component(value: object, *, fallback: str) -> str:
-    """Return a canonical provider/entity component or fall back safely.
-
-    ``MagicMock`` and other object doubles frequently expose arbitrary attributes
-    in tests; they must not leak into manifest ``contract_ref`` values.
-    """
-    if isinstance(value, str):
-        normalized = value.strip()
-        if normalized:
-            return normalized
-    return fallback
-
-
 def build_run_source_refs(
     *,
     ctx: PipelineRunContext,
@@ -226,7 +58,6 @@ def build_run_source_refs(
     provider: str,
     entity: str,
 ) -> tuple[RunSourceRef, ...]:
-    """Build manifest source refs, including cached-Bronze snapshot provenance."""
     input_snapshots = _build_cached_bronze_snapshot_refs(
         cached_bronze=cached_bronze,
         settings=settings,
@@ -254,7 +85,6 @@ def resolve_replay_capability(
     source_refs: tuple[RunSourceRef, ...],
     resume_requested: bool,
 ) -> ReplayCapability:
-    """Classify control-plane replay capability for one manifested run."""
     has_input_snapshots = any(ref.input_snapshots for ref in source_refs)
     if has_input_snapshots:
         return ReplayCapability.EXACT_REPLAY_SUPPORTED
@@ -291,11 +121,3 @@ def _build_cached_bronze_snapshot_refs(
             "Cached Bronze execution requires at least one persisted batch file for snapshot provenance"
         )
     return snapshot_refs
-
-
-def _coerce_optional_text(value: object) -> str | None:
-    """Return normalized non-empty text when available."""
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
