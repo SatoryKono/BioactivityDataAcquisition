@@ -106,25 +106,50 @@ def _composition_module_violations(
     *,
     allowed_modules: set[str],
 ) -> list[str]:
+    """Check for violations of composition module imports."""
     violations: list[str] = []
     tree = _parse_file(py_file)
+    
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
-            module = node.module
-            if module is not None and module.startswith("bioetl.composition."):
-                if module not in allowed_modules:
-                    violations.append(
-                        f"{_relative(src_dir, py_file)}:{node.lineno} -> {module}"
-                    )
+            _check_composition_import_from(node, py_file, src_dir, allowed_modules, violations)
         elif isinstance(node, ast.Import):
-            for alias in node.names:
-                module = alias.name
-                if module.startswith("bioetl.composition."):
-                    if module not in allowed_modules:
-                        violations.append(
-                            f"{_relative(src_dir, py_file)}:{node.lineno} -> {module}"
-                        )
+            _check_composition_import(node, py_file, src_dir, allowed_modules, violations)
+    
     return violations
+
+
+def _check_composition_import_from(
+    node: ast.ImportFrom,
+    py_file: Path,
+    src_dir: Path,
+    allowed_modules: set[str],
+    violations: list[str],
+) -> None:
+    """Check ImportFrom node for composition violations."""
+    module = node.module
+    if module is not None and module.startswith("bioetl.composition."):
+        if module not in allowed_modules:
+            violations.append(
+                f"{_relative(src_dir, py_file)}:{node.lineno} -> {module}"
+            )
+
+
+def _check_composition_import(
+    node: ast.Import,
+    py_file: Path,
+    src_dir: Path,
+    allowed_modules: set[str],
+    violations: list[str],
+) -> None:
+    """Check Import node for composition violations."""
+    for alias in node.names:
+        module = alias.name
+        if module.startswith("bioetl.composition."):
+            if module not in allowed_modules:
+                violations.append(
+                    f"{_relative(src_dir, py_file)}:{node.lineno} -> {module}"
+                )
 
 
 def _is_forbidden_port_import_target(module_name: str) -> bool:
