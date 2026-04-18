@@ -251,14 +251,9 @@ def create_pipeline_factory(
     provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     return GenericPipelineFactory(
-        pipeline_name,
-        pipeline_class,
-        provider,
-        silver_schema,
-        gold_schema,
-        pandera_silver_schema,
-        None,
-        transformer_class,
+        pipeline_name, pipeline_class, provider,
+        silver_schema, gold_schema, pandera_silver_schema,
+        None, transformer_class,
         provider_registry,
     )
 
