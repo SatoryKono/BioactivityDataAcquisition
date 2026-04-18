@@ -95,19 +95,13 @@ def _ensure_repo_path(path: Path) -> Path:
     return _ensure_path_within_root(path, REPO_ROOT)
 
 
-def _relative_to_root(path: Path, *, root: Path) -> Path:
-    safe_path = _ensure_path_within_root(path, root)
-    return safe_path.relative_to(root.resolve())
-
-
-def _write_text_within_root(relative_path: Path, content: str, *, root: Path) -> None:
-    target_path = root / relative_path
-    target_path.write_text(content, encoding="utf-8")
-
-
-def _write_repo_text(relative_path: Path, content: str) -> None:
-    """Write generated assets via a repository-relative path."""
-    _write_text_within_root(relative_path, content, root=REPO_ROOT)
+def _git_pathspec(path: Path) -> str:
+    """Return a sanitized repo-relative Git pathspec."""
+    safe_path = _ensure_repo_path(REPO_ROOT / path)
+    relative = safe_path.relative_to(REPO_ROOT.resolve()).as_posix()
+    if relative.startswith("-"):
+        raise ValueError(f"Git pathspec must not start with '-': {relative}")
+    return relative
 
 
 def _parse_manifest_path_entry(line: str, allowed_suffixes: tuple[str, ...]) -> Path:
@@ -460,8 +454,30 @@ def check_diag_t025(render_paths: list[Path]) -> list[Issue]:
 
 
 def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
-    cmd = ["git", "diff", "--name-only", "--", *[str(path) for path in render_paths]]
-    code, details = run_command(cmd)
+    try:
+        pathspecs = [_git_pathspec(path) for path in render_paths]
+    except ValueError as exc:
+        return [
+            Issue("DIAG-T026", "WARNING", "<git-diff>", f"invalid render path: {exc}")
+        ]
+
+    try:
+        completed = subprocess.run(
+            ["git", "diff", "--name-only", "--", *pathspecs],
+            check=False,
+            capture_output=True,
+            text=True,
+            cwd=REPO_ROOT,
+        )
+    except FileNotFoundError as exc:
+        return [
+            Issue("DIAG-T026", "WARNING", "<git-diff>", f"git diff failed: {exc}")
+        ]
+
+    stderr = completed.stderr.strip()
+    stdout = completed.stdout.strip()
+    details = stderr or stdout
+    code = completed.returncode
     if code != 0:
         return [
             Issue("DIAG-T026", "WARNING", "<git-diff>", f"git diff failed: {details}")

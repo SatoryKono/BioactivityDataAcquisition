@@ -470,7 +470,7 @@ def _print_json_payload(
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
-def run(argv: list[str] | None = None) -> None:
+def run(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     templates = _build_child_issue_templates(args.parent_issue)
 
@@ -493,7 +493,7 @@ def run(argv: list[str] | None = None) -> None:
             )
         else:
             _print_dry_run(templates=templates, comment_body=comment_body)
-        return
+        return 0
 
     token = _require_token(args.token_env)
     existing_issues = _list_repo_issues(args.owner, args.repo, token)
@@ -541,7 +541,7 @@ def run(argv: list[str] | None = None) -> None:
             print(f"\nPosted follow-up comment to #{args.parent_issue}.")
         else:
             print(f"\nParent comment preview:\n\n{comment_body}")
-    return
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int | None:
