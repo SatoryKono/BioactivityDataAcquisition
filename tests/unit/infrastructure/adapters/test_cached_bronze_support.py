@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -11,13 +12,14 @@ import pytest
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters._cached_bronze_support import (
+    BronzeBatchReader,
     log_unsupported_fetch_params,
     raise_if_empty_batches,
     resolve_bronze_path,
 )
 
 
-class _ReaderStub:
+class _ReaderStub(BronzeBatchReader):
     """Minimal reader stub for cached-Bronze helper tests."""
 
     def __init__(self, *, base_path: Path, flat_structure: bool) -> None:
@@ -28,22 +30,27 @@ class _ReaderStub:
         self,
         provider: str,
         entity: str,
-        date: object = None,
+        date: datetime | None = None,
     ) -> list[str]:
         raise AssertionError(
             f"list_batches should not be called in this test: {provider=} {entity=} {date=}"
         )
 
-    async def read_bronze(self, path: str) -> AsyncIterator[JsonDict]:
-        if False:
-            yield {}
-        raise AssertionError(f"read_bronze should not be called in this test: {path=}")
+    def read_bronze(self, path: str) -> AsyncIterator[JsonDict]:
+        async def _unreachable() -> AsyncIterator[JsonDict]:
+            raise AssertionError(
+                f"read_bronze should not be called in this test: {path=}"
+            )
+            if False:
+                yield {}
+
+        return _unreachable()
 
 
 @pytest.mark.unit
 def test_resolve_bronze_path_uses_base_path_for_flat_structure() -> None:
     """Flat layout should keep empty-cache errors anchored at base_path."""
-    reader = _ReaderStub(
+    reader: BronzeBatchReader = _ReaderStub(
         base_path=Path("/tmp/bronze/chembl/activity"),
         flat_structure=True,
     )
@@ -60,7 +67,7 @@ def test_resolve_bronze_path_uses_base_path_for_flat_structure() -> None:
 @pytest.mark.unit
 def test_resolve_bronze_path_appends_provider_and_entity_for_nested_layout() -> None:
     """Nested layout should point empty-cache errors at provider/entity path."""
-    reader = _ReaderStub(
+    reader: BronzeBatchReader = _ReaderStub(
         base_path=Path("/tmp/bronze"),
         flat_structure=False,
     )
@@ -77,7 +84,7 @@ def test_resolve_bronze_path_appends_provider_and_entity_for_nested_layout() -> 
 @pytest.mark.unit
 def test_raise_if_empty_batches_raises_cached_bronze_empty_error() -> None:
     """Empty batch lists should raise the canonical cached-Bronze error."""
-    reader = _ReaderStub(
+    reader: BronzeBatchReader = _ReaderStub(
         base_path=Path("/tmp/bronze"),
         flat_structure=False,
     )
@@ -101,7 +108,7 @@ def test_raise_if_empty_batches_raises_cached_bronze_empty_error() -> None:
 @pytest.mark.unit
 def test_raise_if_empty_batches_is_noop_when_batches_exist() -> None:
     """Non-empty batch lists should not raise."""
-    reader = _ReaderStub(
+    reader: BronzeBatchReader = _ReaderStub(
         base_path=Path("/tmp/bronze"),
         flat_structure=False,
     )
