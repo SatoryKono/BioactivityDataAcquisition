@@ -86,7 +86,14 @@ def load_manifest(manifest_path: Path) -> list[str]:
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        paths.append(line)
+        path = Path(line)
+        if path.is_absolute():
+            raise ValueError(f"Manifest paths must be relative: {line}")
+        if any(part == ".." for part in path.parts):
+            raise ValueError(f"Manifest paths must not escape the repository root: {line}")
+        if line.startswith("-"):
+            raise ValueError(f"Manifest paths must not start with '-': {line}")
+        paths.append(path.as_posix())
 
     if not paths:
         raise ValueError(f"Manifest is empty: {manifest_path}")

@@ -533,7 +533,7 @@ def fix_file(path: Path) -> tuple[bool, set[str]]:
             return False, set()
         new_lines = fix_sequence_lines(lines, orphans, decl_lines)
 
-    path.write_text("".join(new_lines), encoding="utf-8")
+    _write_repo_text(path, "".join(new_lines))
     return True, orphans
 
 

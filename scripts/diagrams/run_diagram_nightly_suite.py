@@ -105,6 +105,20 @@ def _write_repo_text(path: Path, content: str) -> None:
     _write_text_within_root(path, content, root=REPO_ROOT)
 
 
+def _parse_manifest_path_entry(line: str, allowed_suffixes: tuple[str, ...]) -> Path:
+    path = Path(line)
+    if path.is_absolute():
+        raise ValueError(f"Manifest paths must be relative: {line}")
+    if any(part == ".." for part in path.parts):
+        raise ValueError(f"Manifest paths must not escape the repository root: {line}")
+    if line.startswith("-"):
+        raise ValueError(f"Manifest paths must not start with '-': {line}")
+    if path.suffix.lower() not in allowed_suffixes:
+        allowed = ", ".join(allowed_suffixes)
+        raise ValueError(f"Unsupported suffix in manifest ({allowed} expected): {line}")
+    return path
+
+
 def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> list[Path]:
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
@@ -113,13 +127,7 @@ def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> lis
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        path = Path(line)
-        if path.suffix.lower() not in allowed_suffixes:
-            allowed = ", ".join(allowed_suffixes)
-            raise ValueError(
-                f"Unsupported suffix in manifest ({allowed} expected): {line}"
-            )
-        paths.append(path)
+        paths.append(_parse_manifest_path_entry(line, allowed_suffixes))
     if not paths:
         raise ValueError(f"Manifest is empty: {manifest_path}")
     return paths
@@ -898,9 +906,11 @@ def main() -> int:
         json_out = (
             args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
         )
-        json_out.parent.mkdir(parents=True, exist_ok=True)
-        json_out.write_text(
-            json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8"
+        safe_json_out = _ensure_repo_path(json_out)
+        safe_json_out.parent.mkdir(parents=True, exist_ok=True)
+        _write_repo_text(
+            safe_json_out,
+            json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
         )
 
     if args.markdown_out is not None:
@@ -909,8 +919,9 @@ def main() -> int:
             if args.markdown_out.is_absolute()
             else REPO_ROOT / args.markdown_out
         )
-        md_out.parent.mkdir(parents=True, exist_ok=True)
-        md_out.write_text(render_markdown(report), encoding="utf-8")
+        safe_md_out = _ensure_repo_path(md_out)
+        safe_md_out.parent.mkdir(parents=True, exist_ok=True)
+        _write_repo_text(safe_md_out, render_markdown(report))
 
     if args.json:
         _out(json.dumps(payload, ensure_ascii=True, indent=2))

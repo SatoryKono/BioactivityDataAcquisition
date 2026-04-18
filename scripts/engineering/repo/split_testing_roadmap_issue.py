@@ -544,16 +544,16 @@ def run(argv: list[str] | None = None) -> None:
     return
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int | None:
     try:
         run(argv)
-        return 0
     except ValueError as exc:
         print(f"[FAIL] {exc}", file=sys.stderr)
         return 2
     except RuntimeError as exc:
         print(f"[FAIL] {exc}", file=sys.stderr)
         return 1
+    return None
 
 
 if __name__ == "__main__":

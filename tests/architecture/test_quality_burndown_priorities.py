@@ -109,11 +109,12 @@ def test_function_length_registry_has_no_stale_entries() -> None:
     max_lengths = _collect_max_function_lengths()
 
     violations: list[str] = []
-    for symbol_name in sorted(function_length):
+    for function_key in sorted(function_length):
+        symbol_name = _extract_symbol_name(function_key)
         max_len = max_lengths.get(symbol_name, 0)
         if max_len <= _DEFAULT_FUNCTION_LENGTH_LIMIT:
             violations.append(
-                f"{symbol_name}: max_len={max_len} <= {_DEFAULT_FUNCTION_LENGTH_LIMIT}"
+                f"{function_key}: max_len={max_len} <= {_DEFAULT_FUNCTION_LENGTH_LIMIT}"
             )
 
     assert not violations, (
