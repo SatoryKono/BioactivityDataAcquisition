@@ -1,9 +1,6 @@
 # Note: Previously had a duplicate in project-automation.yml (removed)
 name: Tests
 
-permissions:
-    contents: read
-
 on:
     push:
         branches: [ main, master, develop ]
@@ -47,6 +44,8 @@ jobs:
     smoke-check:
         runs-on: ubuntu-latest
         timeout-minutes: 5
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -92,6 +91,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 15
         needs: smoke-check
+        permissions:
+            contents: read
         env:
             BIOETL_TEST_MODE: "true"
             BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
@@ -126,6 +127,8 @@ jobs:
     governance-preflight:
         runs-on: ubuntu-latest
         timeout-minutes: 10
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -196,6 +199,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 20
         needs: governance-preflight
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -230,6 +235,8 @@ jobs:
     config-schema-preflight:
         runs-on: ubuntu-latest
         timeout-minutes: 10
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -283,6 +290,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 15
         needs: smoke-check
+        permissions:
+            contents: read
         env:
             BIOETL_TEST_MODE: "true"
             BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
@@ -320,6 +329,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 10
         needs: governance-preflight
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -337,6 +348,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 20
         needs: governance-preflight
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -365,6 +378,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 10
         needs: smoke-check  # Only minimal dependency smoke should gate fast tests
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -415,6 +430,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 15
         needs: smoke-check  # Allow matrix to start after minimal dependency smoke only
+        permissions:
+            contents: read
         strategy:
             fail-fast: false
             matrix:
@@ -492,6 +509,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 15
         needs: smoke-check
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -525,6 +544,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 20
         needs: smoke-check
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code
@@ -604,6 +625,8 @@ jobs:
             - test-fast
             - test-matrix
         timeout-minutes: 20
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout code

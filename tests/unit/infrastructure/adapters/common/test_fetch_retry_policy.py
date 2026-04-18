@@ -9,6 +9,8 @@ from hypothesis import given
 from hypothesis import settings
 from hypothesis import strategies as st
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.infrastructure.adapters.common.fetch_retry_policy import (
     TITLE_ONLY_MARKER_PREFIX,
@@ -198,9 +200,8 @@ def test_run_fetch_with_fallback_policy_prefix_property(
         expected_ids = expected_ids[:limit]
 
     async def _collect_ids() -> list[str]:
-        rows = [
-            record
-            async for record in run_fetch_with_fallback_policy(
+        rows = await collect_async_iterator(
+            run_fetch_with_fallback_policy(
                 primary_records=primary_records(),
                 primary_ids=primary_ids,
                 title_only_entries=title_only_entries,
@@ -211,7 +212,7 @@ def test_run_fetch_with_fallback_policy_prefix_property(
                 limit=limit,
                 primary_lookup_method="doi",
             )
-        ]
+        )
         return [str(row["id"]) for row in rows]
 
     assert asyncio.run(_collect_ids()) == expected_ids
@@ -258,9 +259,8 @@ async def test_run_fetch_with_fallback_policy_orchestrates_three_phases() -> Non
 
     fallback = _FallbackStub()
     seen_summary: list[tuple[int, int]] = []
-    results = [
-        record
-        async for record in run_fetch_with_fallback_policy(
+    results = await collect_async_iterator(
+        run_fetch_with_fallback_policy(
             primary_records=primary_records(),
             primary_ids=["10.1/a", "10.2/b"],
             title_only_entries=["__title_only_0__"],
@@ -274,7 +274,7 @@ async def test_run_fetch_with_fallback_policy_orchestrates_three_phases() -> Non
             primary_lookup_method="doi",
             phase1_summary_logger=_phase1_summary_logger(seen_summary),
         )
-    ]
+    )
 
     assert [str(item["id"]) for item in results] == [
         "phase1-a",
@@ -295,9 +295,8 @@ async def test_run_fetch_with_fallback_policy_respects_limit() -> None:
         yield {"id": "p2", "doi": "10.2/b"}
 
     fallback = _FallbackStub()
-    results = [
-        record
-        async for record in run_fetch_with_fallback_policy(
+    results = await collect_async_iterator(
+        run_fetch_with_fallback_policy(
             primary_records=primary_records(),
             primary_ids=["10.1/a", "10.2/b"],
             title_only_entries=["__title_only_0__"],
@@ -311,7 +310,7 @@ async def test_run_fetch_with_fallback_policy_respects_limit() -> None:
             primary_lookup_method="doi",
             limit=1,
         )
-    ]
+    )
 
     assert [str(item["id"]) for item in results] == ["p1"]
     assert fallback.calls == []

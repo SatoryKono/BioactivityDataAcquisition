@@ -18,6 +18,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.domain.exceptions import (
     CircuitBreakerOpenError,
     NetworkError,
@@ -197,7 +199,7 @@ class TestRetryingDataSourceDecoratorFetch:
         )
 
         async with decorator:
-            records = [r async for r in decorator.fetch("activity")]
+            records = await collect_async_iterator(decorator.fetch("activity"))
 
         assert len(records) == 2
         assert mock_data_source._fetch_call_count == 1
@@ -219,7 +221,7 @@ class TestRetryingDataSourceDecoratorFetch:
         )
 
         async with decorator:
-            records = [r async for r in decorator.fetch("activity")]
+            records = await collect_async_iterator(decorator.fetch("activity"))
 
         assert len(records) == 2
         assert mock_data_source._fetch_call_count == 2  # Retried once
@@ -242,7 +244,7 @@ class TestRetryingDataSourceDecoratorFetch:
 
         async with decorator:
             with pytest.raises(RetryExhaustedError) as exc_info:
-                _ = [r async for r in decorator.fetch("activity")]
+                _ = await collect_async_iterator(decorator.fetch("activity"))
 
         assert mock_data_source._fetch_call_count == 3
         assert exc_info.value.attempts == 3
@@ -265,7 +267,7 @@ class TestRetryingDataSourceDecoratorFetch:
 
         async with decorator:
             with pytest.raises(CircuitBreakerOpenError):
-                _ = [r async for r in decorator.fetch("activity")]
+                _ = await collect_async_iterator(decorator.fetch("activity"))
 
         # Should not retry CB errors
         assert mock_data_source._fetch_call_count == 1
@@ -287,7 +289,7 @@ class TestRetryingDataSourceDecoratorFetch:
 
         async with decorator:
             with pytest.raises(ValueError, match="Invalid argument"):
-                _ = [r async for r in decorator.fetch("activity")]
+                _ = await collect_async_iterator(decorator.fetch("activity"))
 
         assert mock_data_source._fetch_call_count == 1
 
@@ -374,7 +376,7 @@ class TestRetryingDataSourceDecoratorLogging:
         )
 
         async with decorator:
-            _ = [r async for r in decorator.fetch("activity")]
+            _ = await collect_async_iterator(decorator.fetch("activity"))
 
         # Verify warning was logged
         mock_logger.warning.assert_called()
@@ -407,7 +409,7 @@ class TestRetryingDataSourceDecoratorMetrics:
         )
 
         async with decorator:
-            _ = [r async for r in decorator.fetch("activity")]
+            _ = await collect_async_iterator(decorator.fetch("activity"))
 
         # Verify metrics were recorded
         mock_metrics.increment_counter.assert_called()
@@ -439,7 +441,7 @@ class TestRetryingDataSourceDecoratorMetrics:
 
         async with decorator:
             with pytest.raises(RetryExhaustedError):
-                _ = [r async for r in decorator.fetch("activity")]
+                _ = await collect_async_iterator(decorator.fetch("activity"))
 
         # Verify exhaustion metric was recorded
         calls = mock_metrics.increment_counter.call_args_list
