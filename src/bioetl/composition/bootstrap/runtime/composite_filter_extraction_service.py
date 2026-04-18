@@ -1,9 +1,4 @@
-"""Filter extraction service for composite runtime runner factories.
-
-Encapsulates extraction logic for:
-- enricher single-field filter IDs and fallback mapping
-- dependency single/multi-field filter IDs
-"""
+"""Filter extraction service for composite runtime runner factories."""
 
 from __future__ import annotations
 
@@ -61,16 +56,7 @@ class CompositeFilterExtractionService:
         filter_key: str,
         join_keys: tuple[str, ...],
     ) -> dict[str, str] | None:
-        """Build ID -> title mapping when title is present in join keys.
-
-        Args:
-            keys: DataFrame containing filter key and title columns.
-            filter_key: Column name used as the mapping key.
-            join_keys: Tuple of join key names; title must be present for mapping.
-
-        Returns:
-            Dict mapping filter key values to titles, or None if title is not a join key.
-        """
+        """Build ID-to-title mapping when title is part of the join keys."""
         if "title" not in join_keys or "title" not in keys.columns:
             return None
         pairs = keys.select([filter_key, "title"]).drop_nulls().iter_rows()
@@ -84,15 +70,7 @@ class CompositeFilterExtractionService:
         join_keys: tuple[str, ...],
         columns: list[str],
     ) -> str | None:
-        """Find first usable join key, skipping title if alternatives exist.
-
-        Args:
-            join_keys: Ordered tuple of candidate join key names.
-            columns: Column names present in the keys DataFrame.
-
-        Returns:
-            First join key present in columns, or None if none found.
-        """
+        """Find the first usable join key, preferring non-title keys."""
         for key in join_keys:
             if key == "title" and len(join_keys) > 1:
                 continue
@@ -105,15 +83,7 @@ class CompositeFilterExtractionService:
         enricher_cfg: EnricherConfig,
         keys: pl.DataFrame | None,
     ) -> tuple[tuple[str, ...] | None, str | None, dict[str, str] | None]:
-        """Extract single-field filters and fallback mapping for enricher.
-
-        Args:
-            enricher_cfg: Enricher configuration providing join keys and pipeline name.
-            keys: DataFrame of available keys from the seed pipeline; None if unavailable.
-
-        Returns:
-            Tuple of (filter_ids, filter_field, fallback_mapping) for the enricher.
-        """
+        """Extract single-field filters and fallback mapping for an enricher."""
         if keys is None or len(keys) == 0:
             self._debug(
                 "No keys available for enricher", pipeline=enricher_cfg.pipeline
@@ -147,15 +117,7 @@ class CompositeFilterExtractionService:
         keys: pl.DataFrame,
         field: str,
     ) -> tuple[str, ...] | None:
-        """Extract unique non-null values for field from keys DataFrame.
-
-        Args:
-            keys: DataFrame containing the target field column.
-            field: Column name to extract unique values from.
-
-        Returns:
-            Tuple of unique string values, or None if field is absent or empty.
-        """
+        """Extract unique non-null values for a field from the keys frame."""
         if field not in keys.columns:
             return None
         values = keys.select(field).drop_nulls().to_series().to_list()
@@ -168,15 +130,7 @@ class CompositeFilterExtractionService:
         dep_cfg: DependencyConfig,
         keys: pl.DataFrame | None,
     ) -> dict[str, tuple[str, ...]] | None:
-        """Extract multi-field filter IDs for dependency pipeline.
-
-        Args:
-            dep_cfg: Dependency configuration with effective_filter_fields.
-            keys: DataFrame of available keys from the seed pipeline; None if unavailable.
-
-        Returns:
-            Dict mapping field names to tuples of IDs, or None if extraction fails.
-        """
+        """Extract multi-field filter IDs for a dependency pipeline."""
         if keys is None or len(keys) == 0:
             return None
 
@@ -206,15 +160,7 @@ class CompositeFilterExtractionService:
         dep_cfg: DependencyConfig | None,
         keys: pl.DataFrame | None,
     ) -> tuple[tuple[str, ...] | None, str | None, dict[str, tuple[str, ...]] | None]:
-        """Resolve single-field or multi-field dependency filter inputs.
-
-        Args:
-            dep_cfg: Dependency configuration; returns empty tuple if None.
-            keys: DataFrame of available keys from the seed pipeline; None if unavailable.
-
-        Returns:
-            Tuple of (filter_ids, filter_field, multi_filter_ids) for the dependency.
-        """
+        """Resolve single-field or multi-field dependency filter inputs."""
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
         multi_filter_ids: dict[str, tuple[str, ...]] | None = None

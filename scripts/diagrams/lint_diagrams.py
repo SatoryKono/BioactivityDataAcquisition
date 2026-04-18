@@ -55,7 +55,6 @@ PLACEHOLDER_MARKERS = ["placeholder", "TODO", "FIXME", "stub"]
 # ── Layout rules (ADR-040 adaptive layout) ────────────────────────────────────
 _NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
 _GRAPH_LINE_RE = re.compile(r"^(graph|flowchart)\b", re.IGNORECASE)
-_ELK_RE = re.compile(r"%%\{init.*layout.*elk", re.IGNORECASE)
 _EDGE_ROUTING_VALUE_RE = re.compile(
     r"(?:['\"])?edgeRouting(?:['\"])?\s*:\s*['\"]([A-Za-z_]+)['\"]",
     re.IGNORECASE,
@@ -69,13 +68,12 @@ _UNESCAPED_DUNDER_METHOD_RE = re.compile(
     r"^\s*[+\-#~][^\n]*?(?<!\\)__[A-Za-z0-9_]+__(?=\s*\()"
 )
 _CLASS_METHOD_SIGNATURE_RE = re.compile(
-    r"^\s*[+\-#~]\s*([A-Za-z_\\][A-Za-z0-9_\\]*)\s*\((.*?)\)\s*(.*)$"
+    r"^\s*[+\-#~]\s*([A-Za-z_\\][A-Za-z0-9_\\]*)\s*\(([^)]*)\)\s*(.*)$"
 )
 _STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
 _HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
 _LINK_STYLE_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)")
-_LINK_STYLE_FULL_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)\s+(.+)$")
 _BR_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)
 _QUOTED_LABEL_RE = re.compile(r'"([^"]+)"')
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
@@ -561,7 +559,7 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
         return issues
 
     # Check ELK presence
-    has_elk = any(_ELK_RE.search(ln) for ln in lines)
+    has_elk = any(_has_elk_layout_init(ln) for ln in lines)
     edge_routing: str | None = None
     for ln in lines:
         match = _EDGE_ROUTING_VALUE_RE.search(ln)
@@ -640,12 +638,13 @@ def check_link_semantics(path: Path, lines: list[str]) -> list[Issue]:
         # via differentiated linkStyle groups. Treat that as semantically valid.
         linkstyle_styles: set[str] = set()
         for ln in lines:
-            m = _LINK_STYLE_FULL_RE.match(ln)
-            if not m:
+            parsed = _parse_link_style_line(ln)
+            if parsed is None:
                 continue
-            if m.group(1) == "default":
+            target, style_payload = parsed
+            if target == "default":
                 continue
-            linkstyle_styles.add(" ".join(m.group(2).split()))
+            linkstyle_styles.add(style_payload)
         if len(linkstyle_styles) >= 2:
             return issues
 
@@ -677,11 +676,10 @@ def check_linkstyle_index_fragility(path: Path, lines: list[str]) -> list[Issue]
     groups: list[int] = []
     styles: list[str] = []
     for ln in lines:
-        m = _LINK_STYLE_FULL_RE.match(ln)
-        if not m:
+        parsed = _parse_link_style_line(ln)
+        if parsed is None:
             continue
-        target = m.group(1)
-        style_payload = " ".join(m.group(2).split())
+        target, style_payload = parsed
         if target == "default":
             continue
         if re.fullmatch(r"\d+(,\d+)*", target):
@@ -936,6 +934,24 @@ def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue
         )
 
     return issues
+
+
+def _has_elk_layout_init(line: str) -> bool:
+    lowered = line.lower()
+    return "%%{init" in lowered and "layout" in lowered and "elk" in lowered
+
+
+def _parse_link_style_line(line: str) -> tuple[str, str] | None:
+    stripped = line.strip()
+    if not stripped.startswith("linkStyle "):
+        return None
+    payload = stripped[len("linkStyle ") :].strip()
+    if not payload:
+        return None
+    parts = payload.split(maxsplit=1)
+    if len(parts) != 2:
+        return None
+    return parts[0], " ".join(parts[1].split())
 
 
 def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:

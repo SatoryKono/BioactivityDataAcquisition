@@ -108,9 +108,6 @@ _ARROW_RE = re.compile(
 # Flowchart: subgraph open — capture the subgraph ID
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\s+(\w+)")
 
-# Flowchart: class directive — `class NodeId[,NodeId...] className`
-_CLASS_DIRECTIVE_RE = re.compile(r"^\s*class\s+([\w,\s]+)\s+\w+\s*$")
-
 # Flowchart: style directive — `style NodeId key:val`
 _STYLE_DIRECTIVE_RE = re.compile(r"^\s*style\s+(\w+)\b")
 
@@ -129,21 +126,10 @@ _NODE_SHAPE_RE = re.compile(
 # keep-orphan annotation
 _KEEP_ORPHAN_RE = re.compile(r"%%\s*keep-orphan\s*:\s*(.*)")
 
-# Sequence: participant/actor declaration
-_SEQ_PARTICIPANT_RE = re.compile(
-    r"^\s*(?:participant|actor)\s+(\w+)(?:\s+as\s+.+)?$",
-    re.IGNORECASE,
-)
-
 # Sequence: message line  A ->> B: msg  or  A --> B
 _SEQ_MESSAGE_RE = re.compile(
     r"^\s*(\w+)\s*(?:->>|-->>|->|-->|-x|--x|-\)|--\)|->>\+|-->>\+|<<-|<<--)"
     r"\s*(?:\+|-)?\s*(\w+)\s*:",
-)
-
-# Sequence: Note over A / Note over A,B / Note left of A / Note right of A
-_SEQ_NOTE_RE = re.compile(
-    r"^\s*[Nn]ote\s+(?:over|left\s+of|right\s+of)\s+([\w,\s]+)\s*:",
 )
 
 # Sequence: activate/deactivate
@@ -151,6 +137,51 @@ _SEQ_ACTIVATE_RE = re.compile(r"^\s*(?:activate|deactivate)\s+(\w+)", re.IGNOREC
 
 # Sequence: box … end  (do NOT treat box names as participants)
 _SEQ_BOX_RE = re.compile(r"^\s*box\b", re.IGNORECASE)
+
+
+def _parse_class_directive(line: str) -> tuple[str, str] | None:
+    stripped = line.strip()
+    if not stripped.startswith("class "):
+        return None
+    payload = stripped[len("class ") :].strip()
+    if not payload:
+        return None
+    parts = payload.rsplit(maxsplit=1)
+    if len(parts) != 2:
+        return None
+    node_ids, class_name = parts
+    if not class_name.isidentifier():
+        return None
+    return node_ids, class_name
+
+
+def _parse_sequence_participant(line: str) -> str | None:
+    stripped = line.strip()
+    lowered = stripped.lower()
+    if lowered.startswith("participant "):
+        payload = stripped[len("participant ") :].strip()
+    elif lowered.startswith("actor "):
+        payload = stripped[len("actor ") :].strip()
+    else:
+        return None
+    if not payload:
+        return None
+    alias_part = payload.partition(" as ")[0].strip()
+    return alias_part if alias_part.isidentifier() else None
+
+
+def _parse_sequence_note_targets(line: str) -> str | None:
+    stripped = line.strip()
+    lowered = stripped.lower()
+    for prefix in ("note over ", "note left of ", "note right of "):
+        if not lowered.startswith(prefix):
+            continue
+        payload = stripped[len(prefix) :]
+        targets, separator, _ = payload.partition(":")
+        if not separator:
+            return None
+        return targets.strip()
+    return None
 
 
 # ── Data classes ──────────────────────────────────────────────────────────────
@@ -289,7 +320,7 @@ def parse_flowchart_orphans(
             continue
 
         # ── class directive: `class NodeId className` ────────────────────────
-        if _CLASS_DIRECTIVE_RE.match(s):
+        if _parse_class_directive(s) is not None:
             continue
 
         # ── style directive: `style NodeId ...` ─────────────────────────────
@@ -378,9 +409,9 @@ def parse_sequence_orphans(
             continue
 
         # participant / actor declaration
-        m = _SEQ_PARTICIPANT_RE.match(s)
-        if m:
-            nid = m.group(1)
+        participant_id = _parse_sequence_participant(s)
+        if participant_id is not None:
+            nid = participant_id
             all_declared.add(nid)
             declaration_lines.setdefault(nid, []).append(i)
             continue
@@ -393,9 +424,9 @@ def parse_sequence_orphans(
             continue
 
         # Note over A,B
-        m = _SEQ_NOTE_RE.match(s)
-        if m:
-            for nid in re.split(r"[\s,]+", m.group(1).strip()):
+        note_targets = _parse_sequence_note_targets(s)
+        if note_targets is not None:
+            for nid in re.split(r"[\s,]+", note_targets):
                 if nid and re.match(rf"^{_NID}$", nid):
                     messaged.add(nid)
             continue
@@ -437,23 +468,21 @@ def fix_flowchart_lines(
         if i in remove_indices:
             continue
 
-        m = _CLASS_DIRECTIVE_RE.match(ln.strip())
-        if m:
-            raw_ids = [nid.strip() for nid in re.split(r"[\s,]+", m.group(1).strip())]
+        class_directive = _parse_class_directive(ln.strip())
+        if class_directive is not None:
+            raw_ids, class_name = class_directive
+            raw_ids = [nid.strip() for nid in re.split(r"[\s,]+", raw_ids)]
             surviving = [nid for nid in raw_ids if nid and nid not in orphan_ids]
             if not surviving:
                 # Remove entire line
                 continue
             elif len(surviving) < len(raw_ids):
                 # Rebuild line with surviving IDs
-                # Extract className (last token after all IDs)
-                class_name_m = re.search(r"\s+(\w+)\s*$", ln)
-                if class_name_m:
-                    indent = re.match(r"^(\s*)", ln).group(1)
-                    new_lines.append(
-                        f"{indent}class {','.join(surviving)} {class_name_m.group(1)}\n"
-                    )
-                    continue
+                indent = len(ln) - len(ln.lstrip())
+                new_lines.append(
+                    f"{' ' * indent}class {','.join(surviving)} {class_name}\n"
+                )
+                continue
 
         new_lines.append(ln)
 

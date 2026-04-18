@@ -186,7 +186,7 @@ def _sanitize_label_line(line: str, label_kind: str) -> str:
             return "--------"
 
     # Normalize slash separators for more readable fallback labels.
-    stripped = re.sub(r"\s*/\s*", " / ", stripped)
+    stripped = _normalize_slash_spacing(stripped)
 
     # Keep UML method signatures intact in methods-group:
     # "+fetch(entity_type)" must not become "+fetch (entity_type)".
@@ -201,6 +201,11 @@ def _sanitize_label_line(line: str, label_kind: str) -> str:
     # humanized = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", humanized)
     humanized = stripped
     return humanized
+
+
+def _normalize_slash_spacing(text: str) -> str:
+    parts = [part.strip() for part in text.split("/")]
+    return " / ".join(parts)
 
 
 def _estimate_wrap_chars(width: float, font_size: float) -> int:

@@ -150,8 +150,6 @@ CONTROL_PLANE_COMPATIBILITY_FACADE_PATHS = (
 )
 SECTION_SEPARATOR = "=" * 60
 DELIMITED_FRONTMATTER_RE = re.compile(r"_{10,}")
-FRONTMATTER_NESTED_RE = re.compile(r"^[ \t]+([^:]+):\s*(.*)$")
-FRONTMATTER_KEY_VALUE_RE = re.compile(r"^([^:]+):\s*(.*)$")
 LEGACY_DELTA_LOG_TOKEN_RE = re.compile(r"(?<!\w)(?:-delta-log|delta-log)(?!\w)")
 
 
@@ -327,15 +325,16 @@ def _update_delimited_frontmatter(
     if not stripped:
         return current_key
 
-    nested_match = FRONTMATTER_NESTED_RE.match(raw_line)
-    if nested_match:
-        frontmatter[nested_match.group(1).strip()] = nested_match.group(2).strip()
+    nested_entry = _parse_frontmatter_line(raw_line, require_indent=True)
+    if nested_entry is not None:
+        key, value = nested_entry
+        frontmatter[key] = value
         return current_key
 
-    key_value_match = FRONTMATTER_KEY_VALUE_RE.match(raw_line)
-    if key_value_match:
-        current_key = key_value_match.group(1).strip()
-        frontmatter[current_key] = key_value_match.group(2).strip()
+    key_value_entry = _parse_frontmatter_line(raw_line, require_indent=False)
+    if key_value_entry is not None:
+        current_key, value = key_value_entry
+        frontmatter[current_key] = value
         return current_key
 
     if current_key == "Reviewers" and stripped.startswith("- "):
@@ -344,6 +343,29 @@ def _update_delimited_frontmatter(
             reviewers.append(stripped[2:].strip())
 
     return current_key
+
+
+def _parse_frontmatter_line(
+    raw_line: str,
+    *,
+    require_indent: bool,
+) -> tuple[str, str] | None:
+    if require_indent:
+        if not raw_line or raw_line[0] not in {" ", "\t"}:
+            return None
+        candidate = raw_line.lstrip(" \t")
+    else:
+        if raw_line and raw_line[0] in {" ", "\t"}:
+            return None
+        candidate = raw_line
+
+    key, separator, value = candidate.partition(":")
+    if not separator:
+        return None
+    key = key.strip()
+    if not key:
+        return None
+    return key, value.strip()
 
 
 def _extract_frontmatter(md_file: Path) -> dict[str, object]:

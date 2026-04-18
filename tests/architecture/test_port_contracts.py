@@ -17,6 +17,98 @@ import pytest
 from bioetl.domain import ports
 from bioetl.domain.value_objects.dq_anomaly import DQAnomaly
 
+
+def _ports_dir(src_dir: Path) -> Path:
+    return src_dir / "bioetl" / "domain" / "ports"
+
+
+def _iter_port_files(ports_dir: Path) -> list[Path]:
+    return [path for path in ports_dir.glob("*.py") if path.name != "__init__.py"]
+
+
+def _parse_ast(path: Path) -> ast.AST:
+    return ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+
+
+def _iter_port_classes(tree: ast.AST) -> list[ast.ClassDef]:
+    return [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef) and node.name.endswith("Port")
+    ]
+
+
+def _is_port_method(node: ast.stmt) -> bool:
+    return isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+
+
+def _is_public_port_method(method: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    return not method.name.startswith("_") or method.name in {"__aenter__", "__aexit__"}
+
+
+def _iter_public_port_methods(
+    port_class: ast.ClassDef,
+) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
+    return [
+        method
+        for method in port_class.body
+        if _is_port_method(method) and _is_public_port_method(method)
+    ]
+
+
+def _method_has_docstring(method: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    return bool(
+        method.body
+        and isinstance(method.body[0], ast.Expr)
+        and isinstance(method.body[0].value, ast.Constant)
+        and isinstance(method.body[0].value.value, str)
+    )
+
+
+def _is_ellipsis_expr(node: ast.expr) -> bool:
+    if isinstance(node, ast.Constant) and node.value is ...:
+        return True
+    return bool(
+        hasattr(ast, "Ellipsis")
+        and isinstance(node, ast.Ellipsis)  # type: ignore[attr-defined]
+    )
+
+
+def _method_body_is_port_contract_only(
+    method: ast.FunctionDef | ast.AsyncFunctionDef,
+) -> bool:
+    body = method.body
+    if len(body) == 1 and isinstance(body[0], ast.Expr):
+        if _method_has_docstring(method):
+            return True
+        return _is_ellipsis_expr(body[0].value)
+    if len(body) != 2 or not _method_has_docstring(method):
+        return False
+    return isinstance(body[1], ast.Expr) and _is_ellipsis_expr(body[1].value)
+
+
+def _missing_port_docstrings(ports_dir: Path) -> list[str]:
+    missing_docstrings: list[str] = []
+    for ports_file in _iter_port_files(ports_dir):
+        tree = _parse_ast(ports_file)
+        for port_class in _iter_port_classes(tree):
+            for method in _iter_public_port_methods(port_class):
+                if not _method_has_docstring(method):
+                    missing_docstrings.append(f"{port_class.name}.{method.name}")
+    return missing_docstrings
+
+
+def _port_implementations(ports_dir: Path) -> list[str]:
+    implementations_found: list[str] = []
+    for ports_file in _iter_port_files(ports_dir):
+        tree = _parse_ast(ports_file)
+        for port_class in _iter_port_classes(tree):
+            for method in _iter_public_port_methods(port_class):
+                if not _method_body_is_port_contract_only(method):
+                    implementations_found.append(f"{port_class.name}.{method.name}")
+    return implementations_found
+
+
 # ============================================================================
 # Port Lifecycle Contract Tests
 # ============================================================================
@@ -408,43 +500,10 @@ class TestPortDefinitionQuality:
 
     def test_all_port_methods_have_docstrings(self, src_dir: Path) -> None:
         """All port methods SHOULD have docstrings."""
-        ports_dir = src_dir / "bioetl" / "domain" / "ports"
+        ports_dir = _ports_dir(src_dir)
         if not ports_dir.exists():
             pytest.skip("ports/ package not found")
-
-        missing_docstrings = []
-
-        for ports_file in ports_dir.glob("*.py"):
-            if ports_file.name == "__init__.py":
-                continue
-
-            with ports_file.open(encoding="utf-8") as f:
-                tree = ast.parse(f.read(), filename=str(ports_file))
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Check if it's a Port class
-                    if not node.name.endswith("Port"):
-                        continue
-
-                    for item in node.body:
-                        if isinstance(item, ast.FunctionDef | ast.AsyncFunctionDef):
-                            # Skip __init__ and private methods
-                            if (
-                                item.name.startswith("_")
-                                and item.name != "__aenter__"
-                                and item.name != "__aexit__"
-                            ):
-                                continue
-
-                            # Check for docstring
-                            if not (
-                                item.body
-                                and isinstance(item.body[0], ast.Expr)
-                                and isinstance(item.body[0].value, ast.Constant)
-                                and isinstance(item.body[0].value.value, str)
-                            ):
-                                missing_docstrings.append(f"{node.name}.{item.name}")
+        missing_docstrings = _missing_port_docstrings(ports_dir)
 
         # Allow some missing (ellipsis-only methods in Protocols are ok without detailed docs)
         # But warn if there are many
@@ -456,65 +515,10 @@ class TestPortDefinitionQuality:
 
     def test_no_implementation_in_ports(self, src_dir: Path) -> None:
         """Port methods MUST only have ellipsis (...) as body, no implementation."""
-        ports_dir = src_dir / "bioetl" / "domain" / "ports"
+        ports_dir = _ports_dir(src_dir)
         if not ports_dir.exists():
             pytest.skip("ports/ package not found")
-
-        implementations_found = []
-
-        for ports_file in ports_dir.glob("*.py"):
-            if ports_file.name == "__init__.py":
-                continue
-
-            with ports_file.open(encoding="utf-8") as f:
-                tree = ast.parse(f.read(), filename=str(ports_file))
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef) and node.name.endswith("Port"):
-                    for item in node.body:
-                        if isinstance(item, ast.FunctionDef | ast.AsyncFunctionDef):
-                            # Check method body
-                            body = item.body
-
-                            # Allow: docstring + Ellipsis, or just Ellipsis
-                            # Note: ast.Ellipsis was removed in Python 3.12,
-                            # now ellipsis is ast.Constant with value=...
-                            def _is_ellipsis(node: ast.expr) -> bool:
-                                """Check if AST node is ellipsis (compatible with Python 3.8-3.12+)."""
-                                if isinstance(node, ast.Constant) and node.value is ...:
-                                    return True
-                                # For Python < 3.12 compatibility
-                                if hasattr(ast, "Ellipsis") and isinstance(
-                                    node,
-                                    ast.Ellipsis,  # type: ignore[attr-defined]
-                                ):
-                                    return True
-                                return False
-
-                            if len(body) == 1:
-                                if isinstance(body[0], ast.Expr):
-                                    # Just docstring or ellipsis
-                                    if isinstance(body[0].value, ast.Constant):
-                                        if isinstance(body[0].value.value, str):
-                                            continue  # docstring only
-                                        if body[0].value.value is ...:
-                                            continue  # ellipsis only
-                                    if _is_ellipsis(body[0].value):
-                                        continue  # ellipsis only
-                            elif len(body) == 2:
-                                # docstring + ellipsis
-                                if (
-                                    isinstance(body[0], ast.Expr)
-                                    and isinstance(body[0].value, ast.Constant)
-                                    and isinstance(body[0].value.value, str)
-                                ):
-                                    if isinstance(body[1], ast.Expr) and _is_ellipsis(
-                                        body[1].value
-                                    ):
-                                        continue
-
-                            # If we get here, there's actual implementation
-                            implementations_found.append(f"{node.name}.{item.name}")
+        implementations_found = _port_implementations(ports_dir)
 
         assert not implementations_found, (
             "Ports should not contain implementations (use ... only):\n"

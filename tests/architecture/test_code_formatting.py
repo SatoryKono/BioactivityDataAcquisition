@@ -8,6 +8,7 @@ Note: ruff replaces black+isort as the unified formatter and linter.
 
 from __future__ import annotations
 
+import os
 import platform
 import subprocess
 import sys
@@ -25,10 +26,10 @@ def _resolve_ruff_cmd() -> list[str] | None:
     Prefer project-local .venv binaries to avoid formatter-version drift when
     tests are run with a different system Python interpreter.
     """
-    local_candidates = [
-        _REPO_ROOT / ".venv" / "Scripts" / "ruff.exe",  # Windows venv
-        _REPO_ROOT / ".venv" / "bin" / "ruff",  # POSIX venv
-    ]
+    if os.name == "nt":
+        local_candidates = [_REPO_ROOT / ".venv" / "Scripts" / "ruff.exe"]
+    else:
+        local_candidates = [_REPO_ROOT / ".venv" / "bin" / "ruff"]
     for candidate in local_candidates:
         if candidate.exists():
             return [str(candidate)]
