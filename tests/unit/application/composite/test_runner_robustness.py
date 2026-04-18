@@ -8,10 +8,8 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-import asyncio
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import polars as pl
 import pytest
@@ -31,84 +29,14 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import RunnerAlreadyExecutedError
-from bioetl.domain.locking import FencingToken
+from tests.unit.application.composite import runner_test_support as support
 
-_MOCK_TOKEN = FencingToken(
-    sequence=1,
-    key="lock:mock",
-    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
-    issued_at=0.0,
-)
-
-
-class InMemoryCheckpointManager:
-    """Minimal checkpoint manager fake for CompositePipelineRunner unit tests."""
-
-    expected_effective_config_hash = ""
-    expected_contract_ref = ""
-    expected_contract_version = ""
-    expected_manifest_id = ""
-
-    def __init__(
-        self,
-        *,
-        composite_name: str,
-        run_id: str,
-        logger: MagicMock,
-        resume: bool = False,
-    ) -> None:
-        self._composite_name = composite_name
-        self._run_id = run_id
-        self._logger = logger
-        self._resume = resume
-        self._state = CompositeCheckpointState(
-            composite_name=composite_name,
-            run_id=run_id,
-            created_at=datetime.now(tz=UTC),
-        )
-
-    async def load(self) -> CompositeCheckpointState:
-        await asyncio.sleep(0)
-        return self._state
-
-    async def save(self, state: CompositeCheckpointState) -> None:
-        await asyncio.sleep(0)
-        self._state = state
-
-    async def delete(self) -> None:
-        await asyncio.sleep(0)
-        return None
-
-    async def delete_orphaned(self) -> int:
-        await asyncio.sleep(0)
-        return 0
-
-    async def list_all(self) -> list[str]:
-        await asyncio.sleep(0)
-        return []
-
-
-def create_checkpoint_manager(
-    *,
-    composite_name: str,
-    run_id: str,
-    logger: MagicMock,
-    resume: bool = False,
-) -> InMemoryCheckpointManager:
-    """Create a lightweight checkpoint manager without filesystem I/O."""
-    return InMemoryCheckpointManager(
-        composite_name=composite_name,
-        run_id=run_id,
-        logger=logger,
-        resume=resume,
-    )
+InMemoryCheckpointManager = support.InMemoryCheckpointManager
+create_checkpoint_manager = support.create_in_memory_checkpoint_manager
 
 
 def _seed_runner_factory(seed_runner: AsyncMock):
-    def _factory() -> AsyncMock:
-        return seed_runner
-
-    return _factory
+    return support.seed_runner_factory(seed_runner)
 
 
 def _new_enricher_runner_factory():
@@ -132,24 +60,20 @@ def test_run_id() -> str:
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock logger."""
-    return MagicMock()
+    return support.create_mock_logger()
 
 
 @pytest.fixture
 def mock_lock() -> AsyncMock:
     """Create a mock lock."""
-    lock = AsyncMock()
-    lock.acquire.return_value = _MOCK_TOKEN
-    lock.release.return_value = True
-    return lock
+    return support.create_mock_lock()
 
 
 @pytest.fixture
 def mock_merger() -> AsyncMock:
     """Create a mock merger service."""
-    merger = AsyncMock()
-    merge_call = AsyncMock(
-        return_value=MergeResult(
+    return support.create_mock_merger(
+        MergeResult(
             records_from_seed=100,
             records_merged=95,
             records_enriched=80,
@@ -160,64 +84,40 @@ def mock_merger() -> AsyncMock:
             duration_seconds=5.0,
         )
     )
-    merger.merge = merge_call
-    merger.execute_request = merge_call
-    return merger
 
 
 @pytest.fixture
 def mock_coordinator() -> AsyncMock:
     """Create a mock enrichment coordinator."""
-    coordinator = AsyncMock()
-    coordinator.run_enrichers.return_value = {
-        "crossref": EnrichmentResult.success(
-            enricher_name="crossref",
-            records_input=100,
-            records_enriched=95,
-            records_not_found=5,
-            duration_seconds=10.0,
-        ),
-    }
-    return coordinator
+    return support.create_mock_coordinator(
+        {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=95,
+                records_not_found=5,
+                duration_seconds=10.0,
+            ),
+        }
+    )
 
 
 @pytest.fixture
 def mock_key_extractor() -> AsyncMock:
     """Create a mock key extractor service."""
-    extractor = AsyncMock()
-    extractor.extract.return_value = pl.DataFrame({"doi": ["10.1234/test"]})
-    return extractor
+    return support.create_mock_key_extractor(pl.DataFrame({"doi": ["10.1234/test"]}))
 
 
 @pytest.fixture
 def mock_seed_runner() -> AsyncMock:
     """Create a mock seed runner."""
-    runner = AsyncMock()
-    runner.run.return_value = None
-    runner._executor = MagicMock(records_fetched=100, records_silver=95)
-    runner.execution_metrics = {
-        "records_fetched": 100,
-        "records_silver": 95,
-    }
-    return runner
+    return support.create_async_seed_runner()
 
 
 @pytest.fixture
 def mock_config() -> MagicMock:
     """Create a mock composite config."""
-    config = MagicMock()
-    config.name = "test_composite"
-    config.lock_key = "composite:test_composite"
-    config.seed.pipeline = "chembl_activity"
-    config.seed.silver_table = "silver/chembl/activity"
-    config.seed.output_keys = ("doi",)
-    config.enrichers = []
-    config.required_enrichers = []
-    config.merge.output_silver_path = "silver/composite/test"
-    config.merge.output_gold_path = "gold/test_enriched"
-    config.dq.soft_fail_threshold = 0.05
-    config.dq.hard_fail_threshold = 0.20
-    return config
+    return support.create_magic_composite_config(output_keys=("doi",))
 
 
 def create_runner(
