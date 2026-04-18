@@ -40,6 +40,17 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
+def _repo_relative_path(path: Path) -> Path:
+    safe_path = _ensure_repo_path(path)
+    return safe_path.relative_to(ROOT.resolve())
+
+
+def _write_repo_text(relative_path: Path, content: str) -> None:
+    """Write generated snapshot content via a repository-relative path."""
+    target_path = ROOT / relative_path
+    target_path.write_text(content, encoding="utf-8")
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate/check the compatibility facade snapshot companion file."
@@ -281,7 +292,7 @@ def main() -> int:
     output_path = _ensure_repo_path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     rendered_with_frontmatter = f"{frontmatter}{rendered}" if frontmatter else rendered
-    output_path.write_text(rendered_with_frontmatter, encoding="utf-8")
+    _write_repo_text(_repo_relative_path(output_path), rendered_with_frontmatter)
     print(f"[updated] wrote {output_path.as_posix()}")
     if unexpected or missing or measured_only_import_violations or ratchet_violations:
         if unexpected:

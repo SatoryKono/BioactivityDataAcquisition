@@ -69,7 +69,7 @@ class QuarantineManagerService:
         pipeline_name: str,
         metrics: MetricsPort | None = None,
         pipeline_metrics: PipelineMetricsRecorder | None = None,
-        domain_event_emitter: DomainEventEmitter | None = None,
+        domain_event_emitter: DomainEventEmitterPort | None = None,
     ) -> None:
         """Initialize QuarantineManagerService with explicit dependencies.
 
@@ -427,5 +427,9 @@ class QuarantineManagerService:
 __all__ = [
     "DQQuarantineEntry",
     "FilteredQuarantineEntry",
+    "QuarantineManager",
     "QuarantineManagerService",
 ]
+
+# Backward-compatible public alias for historical call sites and tests.
+QuarantineManager = QuarantineManagerService

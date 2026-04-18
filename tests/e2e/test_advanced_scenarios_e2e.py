@@ -212,7 +212,7 @@ async def test_quarantine_records_are_persisted(e2e_data_dir: Path):
         base_path=str(quarantine_path),
     )
 
-    manager = QuarantineManager(
+    manager = QuarantineManagerService(
         quarantine_port=quarantine, pipeline_name="test_pipeline"
     )
 
