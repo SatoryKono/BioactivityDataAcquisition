@@ -14,6 +14,9 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
+ACTION_TYPE_DESCRIPTION = "Compound that inhibits target activity"
+ACTION_TYPE_PARENT_TYPE = "NEGATIVE MODULATOR"
+
 
 @pytest.fixture
 def transformer() -> ActivityTransformer:
@@ -290,8 +293,8 @@ class SharedActivityTransformerTransformTests:
             "molecule_id": "CHEMBL25",
             "action_type": {
                 "action_type": "INHIBITOR",
-                "description": "Compound that inhibits target activity",
-                "parent_type": "NEGATIVE MODULATOR",
+                "description": ACTION_TYPE_DESCRIPTION,
+                "parent_type": ACTION_TYPE_PARENT_TYPE,
             },
         }
 
@@ -299,11 +302,8 @@ class SharedActivityTransformerTransformTests:
 
         assert result is not None
         assert result["action_type"] == "INHIBITOR"
-        assert (
-            result["action_type_description"]
-            == "Compound that inhibits target activity"
-        )
-        assert result["action_type_parent_type"] == "NEGATIVE MODULATOR"
+        assert result["action_type_description"] == ACTION_TYPE_DESCRIPTION
+        assert result["action_type_parent_type"] == ACTION_TYPE_PARENT_TYPE
 
     @pytest.mark.asyncio
     async def test_transform_with_action_type_null(self, transformer, mock_context):
@@ -358,18 +358,15 @@ class SharedActivityTransformerActionTypeExtractionTests:
         """Test extraction with valid action type dictionary."""
         action_data = {
             "action_type": "INHIBITOR",
-            "description": "Compound that inhibits target activity",
-            "parent_type": "NEGATIVE MODULATOR",
+            "description": ACTION_TYPE_DESCRIPTION,
+            "parent_type": ACTION_TYPE_PARENT_TYPE,
         }
 
         result = transformer._extract_action_type(action_data)
 
         assert result["action_type"] == "INHIBITOR"
-        assert (
-            result["action_type_description"]
-            == "Compound that inhibits target activity"
-        )
-        assert result["action_type_parent_type"] == "NEGATIVE MODULATOR"
+        assert result["action_type_description"] == ACTION_TYPE_DESCRIPTION
+        assert result["action_type_parent_type"] == ACTION_TYPE_PARENT_TYPE
 
     def test_extract_action_type_none(self, transformer):
         """Test extraction with None input."""
