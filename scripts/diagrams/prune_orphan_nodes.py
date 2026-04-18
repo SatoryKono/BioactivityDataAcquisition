@@ -67,11 +67,6 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
-def _write_repo_text(path: Path, content: str) -> None:
-    """Write Mermaid content only after repository-root validation."""
-    safe_path = _ensure_repo_path(path)
-    safe_path.write_text(content, encoding="utf-8")
-
 # ── Regex constants ───────────────────────────────────────────────────────────
 
 # Node ID: letters/digits/underscore, must start with letter or underscore
@@ -533,7 +528,8 @@ def fix_file(path: Path) -> tuple[bool, set[str]]:
             return False, set()
         new_lines = fix_sequence_lines(lines, orphans, decl_lines)
 
-    _write_repo_text(path, "".join(new_lines))
+    safe_path = _ensure_repo_path(path)
+    safe_path.write_text("".join(new_lines), encoding="utf-8")
     return True, orphans
 
 
@@ -668,7 +664,7 @@ def grandfather_file(path: Path) -> tuple[bool, set[str]]:
     else:
         new_lines = lines[:insert_idx] + [annotation] + lines[insert_idx:]
 
-    _write_repo_text(safe_path, "".join(new_lines))
+    safe_path.write_text("".join(new_lines), encoding="utf-8")
     return True, orphans
 
 

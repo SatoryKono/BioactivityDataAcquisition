@@ -95,16 +95,6 @@ def _ensure_repo_path(path: Path) -> Path:
     return _ensure_path_within_root(path, REPO_ROOT)
 
 
-def _write_text_within_root(path: Path, content: str, *, root: Path) -> None:
-    safe_path = _ensure_path_within_root(path, root)
-    safe_path.write_text(content, encoding="utf-8")
-
-
-def _write_repo_text(path: Path, content: str) -> None:
-    """Write generated assets only after repository-root validation."""
-    _write_text_within_root(path, content, root=REPO_ROOT)
-
-
 def _parse_manifest_path_entry(line: str, allowed_suffixes: tuple[str, ...]) -> Path:
     path = Path(line)
     if path.is_absolute():
@@ -479,7 +469,8 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
 
 def write_temp_source(tmpdir: Path, stem: str, lines: list[str]) -> Path:
     path = tmpdir / f"{stem}.mmd"
-    _write_text_within_root(path, "\n".join(lines) + "\n", root=tmpdir)
+    safe_path = _ensure_path_within_root(path, tmpdir)
+    safe_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
 
 
@@ -658,11 +649,12 @@ def check_diag_t028(
 
 def build_alt_css(original_css: Path, target_css: Path, *, temp_root: Path) -> None:
     safe_original = _ensure_repo_path(original_css)
+    safe_target = _ensure_path_within_root(target_css, temp_root)
     content = safe_original.read_text(encoding="utf-8")
     content = content.replace("#f5f3ff", "#ede9fe")
     content = content.replace("#fff1f2", "#ffe4e6")
     content = content.replace("#111827", "#0f172a")
-    _write_text_within_root(target_css, content, root=temp_root)
+    safe_target.write_text(content, encoding="utf-8")
 
 
 def check_diag_t029(
@@ -908,9 +900,9 @@ def main() -> int:
         )
         safe_json_out = _ensure_repo_path(json_out)
         safe_json_out.parent.mkdir(parents=True, exist_ok=True)
-        _write_repo_text(
-            safe_json_out,
+        safe_json_out.write_text(
             json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
+            encoding="utf-8",
         )
 
     if args.markdown_out is not None:
@@ -921,7 +913,7 @@ def main() -> int:
         )
         safe_md_out = _ensure_repo_path(md_out)
         safe_md_out.parent.mkdir(parents=True, exist_ok=True)
-        _write_repo_text(safe_md_out, render_markdown(report))
+        safe_md_out.write_text(render_markdown(report), encoding="utf-8")
 
     if args.json:
         _out(json.dumps(payload, ensure_ascii=True, indent=2))
