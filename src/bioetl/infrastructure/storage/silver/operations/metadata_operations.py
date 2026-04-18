@@ -450,28 +450,15 @@ class SilverMetadataOperations:
         if not self._audit:
             return
 
-        audit_entry = {
-            "table": table_name,
-            "records": len(records),
-            "mode": mode,
-            "validated_mode": validated_mode.value
-            if hasattr(validated_mode, "value")
-            else str(validated_mode),
-            "success": success,
-        }
-
-        if run_id:
-            audit_entry["run_id"] = str(run_id)
-        if run_type:
-            audit_entry["run_type"] = run_type
-        if source_batch_id:
-            audit_entry["source_batch_id"] = str(source_batch_id)
-        if ingestion_ts:
-            audit_entry["ingestion_ts"] = ingestion_ts.isoformat()
-        if error:
-            audit_entry["error"] = error
-
-        await asyncio.to_thread(self._audit.log_event, "SilverWrite", audit_entry)
+        await self._log_silver_audit(
+            table_name=table_name,
+            records=records,
+            mode=validated_mode,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
+        )
 
     async def _log_silver_audit(
         self,

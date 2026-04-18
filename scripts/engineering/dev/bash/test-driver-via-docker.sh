@@ -45,7 +45,7 @@ docker run --rm -i node:18-alpine bash -c '
   fi
 '
 
-if [ $? -eq 0 ]; then
+if [[ $? -eq 0 ]]; then
   echo ""
   echo "Backend integration complete!"
 else

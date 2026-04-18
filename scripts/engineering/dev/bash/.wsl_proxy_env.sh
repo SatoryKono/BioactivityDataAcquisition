@@ -3,7 +3,7 @@
 # Routes WSL2 traffic through Windows host proxy (port 3128)
 
 _WIN_HOST_IP=$(/sbin/ip route show default 2>/dev/null | awk '{print $3}')
-if [ -n "$_WIN_HOST_IP" ]; then
+if [[ -n "$_WIN_HOST_IP" ]]; then
   export http_proxy="http://${_WIN_HOST_IP}:3128"
   export https_proxy="http://${_WIN_HOST_IP}:3128"
   export HTTP_PROXY="$http_proxy"

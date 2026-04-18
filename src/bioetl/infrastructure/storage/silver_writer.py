@@ -1240,6 +1240,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         primary_keys: list[str],
         completed_at: str | datetime | None = None,
         run_id: str | None = None,
+        sources_used: list[str] | None = None,
     ) -> None:
         """Write merged Silver metadata for a completed table write.
 
@@ -1262,6 +1263,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             primary_keys=primary_keys,
             completed_at=normalized_completed_at,
             run_id=run_id,
+            sources_used=sources_used,
         )
 
     async def _compute_dq_metrics(
