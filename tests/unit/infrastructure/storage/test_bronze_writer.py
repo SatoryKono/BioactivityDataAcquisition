@@ -595,8 +595,9 @@ class TestBronzeWriterWriteLocal:
         assert meta_path.exists()
 
         # Verify metadata content
-        with open(meta_path) as f:
-            metadata = json.load(f)
+        metadata = json.loads(
+            await asyncio.to_thread(meta_path.read_text, encoding="utf-8")
+        )
         assert metadata["run_id"] == str(run_id)
         assert metadata["run_type"] == run_type.value
         assert metadata["provider"] == "chembl"
@@ -604,8 +605,7 @@ class TestBronzeWriterWriteLocal:
         assert metadata["batch_id"] == str(batch_id)
 
         # Verify content (use streaming decompression for robustness)
-        with open(full_path, "rb") as f:
-            compressed_data = f.read()
+        compressed_data = await asyncio.to_thread(full_path.read_bytes)
 
         decompressor = zstd.ZstdDecompressor()
         with decompressor.stream_reader(compressed_data) as reader:
@@ -702,8 +702,7 @@ class TestBronzeWriterWriteLocal:
         assert len(json_files) == 1
 
         # Verify JSON content
-        with open(json_files[0], "rb") as f:
-            content = f.read()
+        content = await asyncio.to_thread(json_files[0].read_bytes)
         expected = b"".join(sample_records)
         assert content == expected
 
@@ -1272,10 +1271,8 @@ class TestBronzeWriterMetadataDeterminism:
         meta_path_1 = (tmp_path / result_1.relative_path).with_suffix(".zst.meta.json")
         meta_path_2 = (tmp_path / result_2.relative_path).with_suffix(".zst.meta.json")
 
-        with open(meta_path_1, "rb") as f:
-            meta_bytes_1 = f.read()
-        with open(meta_path_2, "rb") as f:
-            meta_bytes_2 = f.read()
+        meta_bytes_1 = await asyncio.to_thread(meta_path_1.read_bytes)
+        meta_bytes_2 = await asyncio.to_thread(meta_path_2.read_bytes)
 
         # Parse to compare structure (batch_id will differ)
         meta_1 = json.loads(meta_bytes_1)
