@@ -7,8 +7,11 @@ from dataclasses import dataclass
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 
 __all__ = [
+    "CliRunOptionsSpec",
     "CliRunOptionsInput",
+    "CliRunPreparationSpec",
     "CliRunPreparationInput",
+    "RunExecutionContext",
     "RunExecutionRequest",
     "RunPreparationResult",
     "StartOffsetValidationResult",
@@ -24,7 +27,7 @@ class StartOffsetValidationResult:
 
 
 @dataclass(frozen=True, slots=True)
-class CliRunOptionsInput:
+class CliRunOptionsSpec:
     """Normalized raw CLI option values used to build RunOptions."""
 
     run_type: str
@@ -48,17 +51,17 @@ class CliRunOptionsInput:
 
 
 @dataclass(frozen=True, slots=True)
-class CliRunPreparationInput:
+class CliRunPreparationSpec:
     """Validated-or-not raw CLI inputs needed to prepare one execution request."""
 
     pipeline: str
-    options: CliRunOptionsInput
+    options: CliRunOptionsSpec
     health_server: bool
     health_port: int
 
 
 @dataclass(frozen=True, slots=True)
-class RunExecutionRequest:
+class RunExecutionContext:
     """Prepared run request passed across CLI orchestration boundaries."""
 
     pipeline: str
@@ -71,10 +74,15 @@ class RunExecutionRequest:
 class RunPreparationResult:
     """Result of translating raw CLI inputs into a prepared run request."""
 
-    request: RunExecutionRequest | None = None
+    request: RunExecutionContext | None = None
     error_message: str | None = None
 
     @property
     def is_valid(self) -> bool:
         """Whether CLI inputs were valid enough to build a run request."""
         return self.request is not None
+
+
+CliRunOptionsInput = CliRunOptionsSpec
+CliRunPreparationInput = CliRunPreparationSpec
+RunExecutionRequest = RunExecutionContext

@@ -36,9 +36,10 @@ def track_deprecated_class(
         ) -> None:
             # Log the usage
             _deprecation_logger.warning(
-                f"Deprecated class used: {old_class_name}. "
-                f"Please migrate to {new_class_name}. "
-                f"This will be removed in v2.0."
+                "Deprecated class used: %s. Please migrate to %s. "
+                "This will be removed in v2.0.",
+                old_class_name,
+                new_class_name,
             )
 
             # Call original init

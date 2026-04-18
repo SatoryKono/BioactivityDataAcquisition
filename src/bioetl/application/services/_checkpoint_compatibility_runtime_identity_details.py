@@ -15,7 +15,7 @@ from bioetl.domain.types.execution_phase import ExecutionPhase
 
 
 @dataclass(frozen=True, slots=True)
-class IdentityDetailsRequest:
+class IdentityDetailsSpec:
     """Inputs required to build one structured identity-details payload."""
 
     effective_config_hash: str
@@ -124,7 +124,7 @@ def _degraded_runtime_anchor_detail(
     )
 
 
-def build_identity_details(request: IdentityDetailsRequest) -> JsonDict:
+def build_identity_details(request: IdentityDetailsSpec) -> JsonDict:
     """Build canonical identity details payload."""
     canonical_fallback_payload = _canonical_execution_identity_payload(
         pipeline_name=request.pipeline_name,
@@ -172,6 +172,9 @@ def build_identity_details(request: IdentityDetailsRequest) -> JsonDict:
             effective_config_artifact_id=request.effective_config_artifact_id,
         ),
     }
+
+
+IdentityDetailsRequest = IdentityDetailsSpec
 
 
 def generate_details(

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 from bioetl.application.core.batch_transformer_state import TransformResult
 
 
-class ThresholdBreach(Enum):
+class ThresholdBreachReason(Enum):
     """Classification of DQ threshold breaches."""
 
     NONE = "none"
@@ -34,7 +34,7 @@ class ThresholdBreach(Enum):
 class DQThresholdCheckResult:
     """Result of DQ threshold validation."""
 
-    breach: ThresholdBreach
+    breach: ThresholdBreachReason
     error_rate: float
     soft_threshold: float | None
     hard_threshold: float | None
@@ -84,7 +84,7 @@ async def finalize_batch_transform_result(
         hard_threshold=hard_threshold,
     )
 
-    if threshold_result.breach == ThresholdBreach.HARD:
+    if threshold_result.breach == ThresholdBreachReason.HARD:
         context.logger.error(
             "DQ hard threshold exceeded",
             error_rate=threshold_result.error_rate,
@@ -102,7 +102,7 @@ async def finalize_batch_transform_result(
             threshold=float(threshold_result.hard_threshold),
         )
 
-    if threshold_result.breach == ThresholdBreach.SOFT:
+    if threshold_result.breach == ThresholdBreachReason.SOFT:
         context.logger.warning(
             "DQ threshold breach detected",
             breach=threshold_result.breach.value,
@@ -168,7 +168,7 @@ def check_dq_thresholds(
     """
     if record_count == 0:
         return DQThresholdCheckResult(
-            breach=ThresholdBreach.NONE,
+            breach=ThresholdBreachReason.NONE,
             error_rate=0.0,
             soft_threshold=soft_threshold,
             hard_threshold=hard_threshold,
@@ -178,7 +178,7 @@ def check_dq_thresholds(
 
     if hard_threshold is not None and error_rate >= float(hard_threshold):
         return DQThresholdCheckResult(
-            breach=ThresholdBreach.HARD,
+            breach=ThresholdBreachReason.HARD,
             error_rate=error_rate,
             soft_threshold=soft_threshold,
             hard_threshold=hard_threshold,
@@ -186,14 +186,14 @@ def check_dq_thresholds(
 
     if soft_threshold is not None and error_rate >= float(soft_threshold):
         return DQThresholdCheckResult(
-            breach=ThresholdBreach.SOFT,
+            breach=ThresholdBreachReason.SOFT,
             error_rate=error_rate,
             soft_threshold=soft_threshold,
             hard_threshold=hard_threshold,
         )
 
     return DQThresholdCheckResult(
-        breach=ThresholdBreach.NONE,
+        breach=ThresholdBreachReason.NONE,
         error_rate=error_rate,
         soft_threshold=soft_threshold,
         hard_threshold=hard_threshold,
@@ -204,7 +204,7 @@ def classify_dq_threshold_breach(
     error_rate: float,
     soft_threshold: float | None,
     hard_threshold: float | None,
-) -> ThresholdBreach:
+) -> ThresholdBreachReason:
     """Classify threshold breach based on error rate.
 
     Args:
@@ -216,12 +216,15 @@ def classify_dq_threshold_breach(
         Threshold breach classification
     """
     if hard_threshold is not None and error_rate >= hard_threshold:
-        return ThresholdBreach.HARD
+        return ThresholdBreachReason.HARD
 
     if soft_threshold is not None and error_rate >= soft_threshold:
-        return ThresholdBreach.SOFT
+        return ThresholdBreachReason.SOFT
 
-    return ThresholdBreach.NONE
+    return ThresholdBreachReason.NONE
+
+
+ThresholdBreach = ThresholdBreachReason
 
 
 def compute_error_rate(error_count: int, record_count: int) -> float:
