@@ -31,11 +31,11 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
     _BuildFactoryServicesRequest,
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
-    build_create_pipeline_with_services_request,
-    build_pipeline_factory_context,
-    create_factory_data_source,
-    extract_entity_type,
-    resolve_data_source_creator,
+    build_create_pipeline_with_services_request as _build_create_pipeline_with_services_request,
+    build_pipeline_factory_context as _build_pipeline_factory_context,
+    create_factory_data_source as _create_factory_data_source,
+    extract_entity_type as _extract_entity_type_helper,
+    resolve_data_source_creator as _resolve_data_source_creator,
 )
 from bioetl.composition.factories.pipeline.transformer_dependencies import (
     build_transformer_dependencies,
@@ -55,9 +55,6 @@ from bioetl.domain.filtering import (
 from bioetl.domain.ports import (
     ContractPolicyPort,
     DataNormalizationPort,
-    DataSourcePort,
-    DQMonitorPort,
-    LoggerPort,
     MetricsPort,
     PiiHasherPort,
     TracingPort,
@@ -69,6 +66,11 @@ from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_confi
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
+build_create_pipeline_with_services_request = _build_create_pipeline_with_services_request
+build_pipeline_factory_context = _build_pipeline_factory_context
+create_factory_data_source = _create_factory_data_source
+extract_entity_type = _extract_entity_type_helper
+resolve_data_source_creator = _resolve_data_source_creator
 
 
 def create_transformer_instance(

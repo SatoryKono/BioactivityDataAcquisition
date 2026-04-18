@@ -38,6 +38,7 @@ DEFAULT_SOURCE_MANIFEST = QUALITY_GATE_MANIFEST
 DEFAULT_RENDER_MANIFEST = VISUAL_SMOKE_MANIFEST
 DEFAULT_CONFIG = DIAGRAM_THEME_DIR / "mermaid-config.json"
 DEFAULT_CSS = DIAGRAM_THEME_DIR / "custom.css"
+GIT_DIFF_SCOPE = "<git-diff>"
 
 SVG_NS = "http://www.w3.org/2000/svg"
 NS = {"svg": SVG_NS}
@@ -458,7 +459,7 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
         pathspecs = [_git_pathspec(path) for path in render_paths]
     except ValueError as exc:
         return [
-            Issue("DIAG-T026", "WARNING", "<git-diff>", f"invalid render path: {exc}")
+            Issue("DIAG-T026", "WARNING", GIT_DIFF_SCOPE, f"invalid render path: {exc}")
         ]
 
     try:
@@ -471,7 +472,7 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
         )
     except FileNotFoundError as exc:
         return [
-            Issue("DIAG-T026", "WARNING", "<git-diff>", f"git diff failed: {exc}")
+            Issue("DIAG-T026", "WARNING", GIT_DIFF_SCOPE, f"git diff failed: {exc}")
         ]
 
     stderr = completed.stderr.strip()
@@ -480,7 +481,7 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
     code = completed.returncode
     if code != 0:
         return [
-            Issue("DIAG-T026", "WARNING", "<git-diff>", f"git diff failed: {details}")
+            Issue("DIAG-T026", "WARNING", GIT_DIFF_SCOPE, f"git diff failed: {details}")
         ]
 
     changed = [line.strip() for line in details.splitlines() if line.strip()]
