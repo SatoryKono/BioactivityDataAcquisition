@@ -1,8 +1,5 @@
 name: Lint and Architecture Gates
 
-permissions:
-    contents: read
-
 on:
     push:
         branches:
@@ -30,6 +27,8 @@ concurrency:
 jobs:
     lint:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout
@@ -119,6 +118,8 @@ jobs:
     c901-governance:
         name: C901 Governance (blocking)
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout
@@ -143,6 +144,8 @@ jobs:
 
     arch-tests:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
 
         steps:
             -   name: Checkout

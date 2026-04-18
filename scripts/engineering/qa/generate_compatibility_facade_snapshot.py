@@ -284,6 +284,7 @@ def main() -> int:
             return 1
         print("[ok] compatibility facade snapshot is up to date")
         return 0
+    output_path = _ensure_repo_path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     rendered_with_frontmatter = f"{frontmatter}{rendered}" if frontmatter else rendered
     _write_repo_text(output_path, rendered_with_frontmatter)

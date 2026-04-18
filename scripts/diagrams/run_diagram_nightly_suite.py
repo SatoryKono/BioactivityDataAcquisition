@@ -83,18 +83,26 @@ def _err(message: str) -> None:
     sys.stderr.write(f"{message}\n")
 
 
-def _ensure_repo_path(path: Path) -> Path:
-    resolved_root = REPO_ROOT.resolve()
+def _ensure_path_within_root(path: Path, root: Path) -> Path:
+    resolved_root = root.resolve()
     resolved_path = path.resolve()
     if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
         raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
     return resolved_path
 
 
+def _ensure_repo_path(path: Path) -> Path:
+    return _ensure_path_within_root(path, REPO_ROOT)
+
+
+def _write_text_within_root(path: Path, content: str, *, root: Path) -> None:
+    safe_path = _ensure_path_within_root(path, root)
+    safe_path.write_text(content, encoding="utf-8")
+
+
 def _write_repo_text(path: Path, content: str) -> None:
     """Write generated assets only after repository-root validation."""
-    safe_path = _ensure_repo_path(path)
-    safe_path.write_text(content, encoding="utf-8")
+    _write_text_within_root(path, content, root=REPO_ROOT)
 
 
 def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> list[Path]:
@@ -463,7 +471,7 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
 
 def write_temp_source(tmpdir: Path, stem: str, lines: list[str]) -> Path:
     path = tmpdir / f"{stem}.mmd"
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_text_within_root(path, "\n".join(lines) + "\n", root=tmpdir)
     return path
 
 
@@ -640,13 +648,13 @@ def check_diag_t028(
     return issues
 
 
-def build_alt_css(original_css: Path, target_css: Path) -> None:
+def build_alt_css(original_css: Path, target_css: Path, *, temp_root: Path) -> None:
     safe_original = _ensure_repo_path(original_css)
     content = safe_original.read_text(encoding="utf-8")
     content = content.replace("#f5f3ff", "#ede9fe")
     content = content.replace("#fff1f2", "#ffe4e6")
     content = content.replace("#111827", "#0f172a")
-    _write_repo_text(target_css, content)
+    _write_text_within_root(target_css, content, root=temp_root)
 
 
 def check_diag_t029(
@@ -660,7 +668,7 @@ def check_diag_t029(
 ) -> list[Issue]:
     issues: list[Issue] = []
     alt_css = tmpdir / "alt-theme.css"
-    build_alt_css(css, alt_css)
+    build_alt_css(css, alt_css, temp_root=tmpdir)
 
     for rel in source_paths:
         path = REPO_ROOT / rel

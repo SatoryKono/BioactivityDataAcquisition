@@ -19,6 +19,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState, HealthStatus
 from bioetl.infrastructure.adapters.decorators.circuit_breaker import (
@@ -215,7 +217,7 @@ class TestCircuitBreakerDecoratorFetch:
         )
 
         async with decorator:
-            records = [r async for r in decorator.fetch("activity")]
+            records = await collect_async_iterator(decorator.fetch("activity"))
 
         assert len(records) == 2
         assert mock_data_source._fetch_call_count == 1
@@ -236,7 +238,7 @@ class TestCircuitBreakerDecoratorFetch:
 
         async with decorator:
             with pytest.raises(CircuitBreakerOpenError) as exc_info:
-                _ = [r async for r in decorator.fetch("activity")]
+                _ = await collect_async_iterator(decorator.fetch("activity"))
 
         # Data source should NOT be called when circuit is open
         assert mock_data_source._fetch_call_count == 0
@@ -257,7 +259,7 @@ class TestCircuitBreakerDecoratorFetch:
         )
 
         async with decorator:
-            records = [r async for r in decorator.fetch("activity")]
+            records = await collect_async_iterator(decorator.fetch("activity"))
 
         # Should succeed - half-open allows probe requests
         assert len(records) == 2
@@ -410,7 +412,7 @@ class TestCircuitBreakerDecoratorLogging:
 
         async with decorator:
             with pytest.raises(CircuitBreakerOpenError):
-                _ = [r async for r in decorator.fetch("activity")]
+                _ = await collect_async_iterator(decorator.fetch("activity"))
 
         # Verify warning was logged
         mock_logger.warning.assert_called()
@@ -437,7 +439,7 @@ class TestCircuitBreakerDecoratorRecoveryTimeout:
 
         async with decorator:
             with pytest.raises(CircuitBreakerOpenError) as exc_info:
-                _ = [r async for r in decorator.fetch("activity")]
+                _ = await collect_async_iterator(decorator.fetch("activity"))
 
         assert exc_info.value.retry_after == pytest.approx(120.0)
 
@@ -459,7 +461,7 @@ class TestCircuitBreakerDecoratorRecoveryTimeout:
 
         async with decorator:
             with pytest.raises(CircuitBreakerOpenError) as exc_info:
-                _ = [r async for r in decorator.fetch("activity")]
+                _ = await collect_async_iterator(decorator.fetch("activity"))
 
         assert exc_info.value.retry_after == pytest.approx(60.0)
 
@@ -480,7 +482,7 @@ class TestCircuitBreakerDecoratorRecoveryTimeout:
         )
 
         async with decorator:
-            records = [r async for r in decorator.fetch("activity")]
+            records = await collect_async_iterator(decorator.fetch("activity"))
 
         assert len(records) == 2
         assert mock_data_source._fetch_call_count == 1

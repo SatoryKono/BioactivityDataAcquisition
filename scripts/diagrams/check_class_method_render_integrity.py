@@ -17,9 +17,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 try:
-    from .diagram_paths import source_dir
+    from .diagram_paths import source_dir as diagram_source_dir
 except ImportError:  # pragma: no cover - direct script execution
-    from diagram_paths import source_dir
+    from diagram_paths import source_dir as diagram_source_dir
 
 SVG_NS = "http://www.w3.org/2000/svg"
 NS = {"svg": SVG_NS}
@@ -217,7 +217,7 @@ def main() -> int:
     parser.add_argument(
         "--source-dir",
         type=Path,
-        default=source_dir("class-diagrams"),
+        default=diagram_source_dir("class-diagrams"),
         help="Directory containing class-diagram .mmd sources.",
     )
     parser.add_argument(
@@ -240,20 +240,20 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    source_dir = (
+    source_root = (
         args.source_dir
         if args.source_dir.is_absolute()
         else Path.cwd() / args.source_dir
     )
-    svg_dir_input = args.svg_dir if args.svg_dir is not None else source_dir / "svg"
+    svg_dir_input = args.svg_dir if args.svg_dir is not None else source_root / "svg"
     svg_dir = (
         svg_dir_input if svg_dir_input.is_absolute() else Path.cwd() / svg_dir_input
     )
 
     explicit_files = [Path(raw) for raw in args.file]
-    sources = resolve_sources(source_dir, explicit_files)
+    sources = resolve_sources(source_root, explicit_files)
     if not sources:
-        sys.stderr.write(f"No class-diagram sources found in {source_dir}\n")
+        sys.stderr.write(f"No class-diagram sources found in {source_root}\n")
         return 2
 
     all_issues: list[IntegrityIssue] = []
