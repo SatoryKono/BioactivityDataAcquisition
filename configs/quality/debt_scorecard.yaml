@@ -1,8 +1,8 @@
 schema_version: 1
 baseline:
-  total_exemptions: 30
+  total_exemptions: 28
   by_registry:
-    file_size_limits: 4
+    file_size_limits: 2
     function_complexity: 0
     function_length: 10
     class_size: 13
@@ -20,93 +20,95 @@ historical_baseline:
     god_object: 3
     domain_complexity: 6
   snapshot_date: '2025-12-31'
-  source_report: 'reports/architecture/2025-Q4-final.json'
+  source_report: reports/architecture/2025-Q4-final.json
 governance:
   baseline_policy:
     enforceable_section: baseline
     historical_section: historical_baseline
     registry_sync_source: baseline
-    rationale: "Stabilizing architecture metrics through baseline ratcheting."
+    rationale: Stabilizing architecture metrics through baseline ratcheting.
   coarse_budgets:
     ruff_error_count:
       max_count: 0
-      owner: "@bioetl-architecture"
-      linked_rf: "RF-ARCH-009"
-      rationale: "Ruff backlog for src/bioetl has been retired; CI now enforces zero source-level lint debt."
-      ratchet_policy: "ratchet only downward from zero"
+      owner: '@bioetl-architecture'
+      linked_rf: RF-ARCH-009
+      rationale: Ruff backlog for src/bioetl has been retired; CI now enforces zero
+        source-level lint debt.
+      ratchet_policy: ratchet only downward from zero
     mypy_error_count:
       max_count: 0
-      owner: "@bioetl-architecture"
-      linked_rf: "RF-ARCH-015"
-      rationale: "Strict typing is already stabilized repo-wide and stays zero-budget."
-      ratchet_policy: "ratchet only downward from zero"
+      owner: '@bioetl-architecture'
+      linked_rf: RF-ARCH-015
+      rationale: Strict typing is already stabilized repo-wide and stays zero-budget.
+      ratchet_policy: ratchet only downward from zero
     architecture_skip_count:
       max_count: 7
-      owner: "@bioetl-architecture"
-      linked_rf: "RF-ARCH-015"
-      rationale: "Marker-skip budget remains explicit until historical skip debt is fully retired."
-      ratchet_policy: "ratchet only after skip inventory shrinks"
+      owner: '@bioetl-architecture'
+      linked_rf: RF-ARCH-015
+      rationale: Marker-skip budget remains explicit until historical skip debt is
+        fully retired.
+      ratchet_policy: ratchet only after skip inventory shrinks
   review_policy:
     new_exemption_requires:
-      - value
-      - owner
-      - reason
-      - classification
-      - linked_rf
-      - expires_on
-      - removal_step
+    - value
+    - owner
+    - reason
+    - classification
+    - linked_rf
+    - expires_on
+    - removal_step
     reviewer_checks:
-      - "classification is technical_debt or intentional_exception"
-      - "linked_rf points to active"
-      - "placeholder exemptions require concrete technical follow-up"
-      - "2026-06-30"
+    - classification is technical_debt or intentional_exception
+    - linked_rf points to active
+    - placeholder exemptions require concrete technical follow-up
+    - '2026-06-30'
   owner_diversification:
     starts_quarter: 2026-Q2
     min_distinct_owners: 3
   owner_registry_q2_subsystems:
     architecture:
-      owner: "@bioetl-architecture"
+      owner: '@bioetl-architecture'
     platform:
-      owner: "@bioetl-platform"
+      owner: '@bioetl-platform'
     data_model:
-      owner: "@bioetl-data-model"
+      owner: '@bioetl-data-model'
   temporary_exemptions:
-    window_policy: "budget-only"
+    window_policy: budget-only
     max_window_days: 30
   growth_section_gate_rollout:
     default_mode: block
     warn_until_by_section:
-      "registry:file_size_limits": "2026-06-30"
+      registry:file_size_limits: '2026-06-30'
   burn_down_priorities:
     registries:
-      - file_size_limits
-      - class_size
-      - god_object
+    - file_size_limits
+    - class_size
+    - god_object
   allow_grace_windows_only_for_rf: true
   review_cycle: 90
   quarterly_burndown_target: 2
   allowed_classifications:
-    - architectural_debt
-    - interface_debt
-    - domain_complexity
-    - technical_debt
-    - transitional_compat
-    - legacy_artifact
-    - intentional_exception
+  - architectural_debt
+  - interface_debt
+  - domain_complexity
+  - technical_debt
+  - transitional_compat
+  - legacy_artifact
+  - intentional_exception
 registry_groups:
   size_metrics:
     registries:
-      - file_size_limits
-      - function_length
-      - class_size
+    - file_size_limits
+    - function_length
+    - class_size
   complexity_metrics:
     registries:
-      - function_complexity
-      - domain_complexity
+    - function_complexity
+    - domain_complexity
   structural_debt:
     registries:
-      - god_object
-      - class_method_count
+    - god_object
+    - class_method_count
 registries:
   file_size_limits:
     target_count: 10
@@ -118,222 +120,238 @@ registries:
   god_object:
     max_count: 2
 hotspot_budgets:
-  - name: "core_orchestration"
-    rationale: "Critical orchestration logic hotspot."
-    path_prefixes:
-      - "src/bioetl/application/core/"
-    registry_budgets:
-      file_size_limits: 1
-      class_size: 3
-      god_object: 1
-  - name: "composite_orchestration"
-    rationale: "Composite runtime orchestration hotspot spanning join, checkpoint, and runner support seams."
-    path_prefixes:
-      - "src/bioetl/application/composite/"
-    registry_budgets:
-      file_size_limits: 1
-      class_size: 1
-      god_object: 1
+- name: core_orchestration
+  rationale: Critical orchestration logic hotspot.
+  path_prefixes:
+  - src/bioetl/application/core/
+  registry_budgets:
+    file_size_limits: 1
+    class_size: 3
+    god_object: 1
+- name: composite_orchestration
+  rationale: Composite runtime orchestration hotspot spanning join, checkpoint, and
+    runner support seams.
+  path_prefixes:
+  - src/bioetl/application/composite/
+  registry_budgets:
+    file_size_limits: 1
+    class_size: 1
+    god_object: 1
 report_only_hotspot_families:
   snapshot_date: '2026-03-24'
   mode: report-only
   artifact_policy:
-    duplication_command: "make qa-hotspot-report"
-    baseline_artifact: "reports/quality/hotspot-duplication-baseline.json"
-    history_artifact: "reports/quality/hotspot-duplication-history.jsonl"
-    latest_reviewed_snapshot: "2026-03-24"
+    duplication_command: make qa-hotspot-report
+    baseline_artifact: reports/quality/hotspot-duplication-baseline.json
+    history_artifact: reports/quality/hotspot-duplication-history.jsonl
+    latest_reviewed_snapshot: '2026-03-24'
     confirming_clean_snapshots_required: 2
-    expected_direction: "downward"
-    ratchet_policy: "Keep the hotspot layer report-only at the repo level; once a zero-duplication family has two confirming clean snapshots, activate bounded family-level duplication, file-growth, and fan-in ratchets from reviewed scorecard baselines."
+    expected_direction: downward
+    ratchet_policy: Keep the hotspot layer report-only at the repo level; once a zero-duplication
+      family has two confirming clean snapshots, activate bounded family-level duplication,
+      file-growth, and fan-in ratchets from reviewed scorecard baselines.
   families:
-    - name: "application_core"
-      owner: "@bioetl-architecture"
-      linked_rf: "RF-023"
-      ratchet_stage: "active"
-      ratchet_scope: "duplication-only"
-      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both file-growth and fan-in at the reviewed baseline during core orchestration changes."
-      path_prefixes:
-        - "src/bioetl/application/core/"
-      bounded_growth_budgets:
-        files_ge_250_loc: 18
-        max_internal_fan_in: 22
-      metrics:
-        duplication_clusters: 0
-        files: 81
-        total_loc: 12259
-        files_ge_250_loc: 18
-        helper_function_ratio: 0.46
-        max_internal_fan_in: 22
-        max_internal_fan_in_module: "bioetl.application.core.base_transformer"
-      trend:
-        status: "down_vs_2026-03-23"
-        next_action: "2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in caps at the reviewed baseline for application/core while keeping the family duplication ratchet active."
-    - name: "composition_bootstrap_runtime"
-      owner: "@bioetl-platform"
-      linked_rf: "RF-023"
-      ratchet_stage: "active"
-      ratchet_scope: "duplication-only"
-      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both file-growth and fan-in at the reviewed baseline during runtime/bootstrap changes."
-      path_prefixes:
-        - "src/bioetl/composition/bootstrap/runtime/"
-      bounded_growth_budgets:
-        files_ge_250_loc: 6
-        max_internal_fan_in: 6
-      metrics:
-        duplication_clusters: 0
-        files: 27
-        total_loc: 3163
-        files_ge_250_loc: 6
-        helper_function_ratio: 0.333
-        max_internal_fan_in: 5
-        max_internal_fan_in_module: "bioetl.composition.bootstrap.runtime.observability"
-      trend:
-        status: "down_vs_2026-03-23"
-        next_action: "2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in caps at the current reviewed baseline for composition/bootstrap/runtime."
-    - name: "composition_factories_pipeline"
-      owner: "@bioetl-platform"
-      linked_rf: "RF-023"
-      ratchet_stage: "active"
-      ratchet_scope: "duplication-only"
-      expected_action: "Hold duplication at zero via an active family-level ratchet and cap both file-growth and fan-in at the reviewed baseline during pipeline-factory changes."
-      path_prefixes:
-        - "src/bioetl/composition/factories/pipeline/"
-      bounded_growth_budgets:
-        files_ge_250_loc: 4
-        max_internal_fan_in: 6
-      metrics:
-        duplication_clusters: 0
-        files: 22
-        total_loc: 2589
-        files_ge_250_loc: 4
-        helper_function_ratio: 0.469
-        max_internal_fan_in: 6
-        max_internal_fan_in_module: "bioetl.composition.factories.pipeline.registry"
-      trend:
-        status: "down_vs_2026-03-23"
-        next_action: "2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in caps at the current reviewed baseline for composition/factories/pipeline."
+  - name: application_core
+    owner: '@bioetl-architecture'
+    linked_rf: RF-023
+    ratchet_stage: active
+    ratchet_scope: duplication-only
+    expected_action: Hold duplication at zero via an active family-level ratchet and
+      cap both file-growth and fan-in at the reviewed baseline during core orchestration
+      changes.
+    path_prefixes:
+    - src/bioetl/application/core/
+    bounded_growth_budgets:
+      files_ge_250_loc: 18
+      max_internal_fan_in: 22
+    metrics:
+      duplication_clusters: 0
+      files: 81
+      total_loc: 12259
+      files_ge_250_loc: 18
+      helper_function_ratio: 0.46
+      max_internal_fan_in: 22
+      max_internal_fan_in_module: bioetl.application.core.base_transformer
+    trend:
+      status: down_vs_2026-03-23
+      next_action: 2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in
+        caps at the reviewed baseline for application/core while keeping the family
+        duplication ratchet active.
+  - name: composition_bootstrap_runtime
+    owner: '@bioetl-platform'
+    linked_rf: RF-023
+    ratchet_stage: active
+    ratchet_scope: duplication-only
+    expected_action: Hold duplication at zero via an active family-level ratchet and
+      cap both file-growth and fan-in at the reviewed baseline during runtime/bootstrap
+      changes.
+    path_prefixes:
+    - src/bioetl/composition/bootstrap/runtime/
+    bounded_growth_budgets:
+      files_ge_250_loc: 6
+      max_internal_fan_in: 6
+    metrics:
+      duplication_clusters: 0
+      files: 27
+      total_loc: 3163
+      files_ge_250_loc: 6
+      helper_function_ratio: 0.333
+      max_internal_fan_in: 5
+      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
+    trend:
+      status: down_vs_2026-03-23
+      next_action: 2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in
+        caps at the current reviewed baseline for composition/bootstrap/runtime.
+  - name: composition_factories_pipeline
+    owner: '@bioetl-platform'
+    linked_rf: RF-023
+    ratchet_stage: active
+    ratchet_scope: duplication-only
+    expected_action: Hold duplication at zero via an active family-level ratchet and
+      cap both file-growth and fan-in at the reviewed baseline during pipeline-factory
+      changes.
+    path_prefixes:
+    - src/bioetl/composition/factories/pipeline/
+    bounded_growth_budgets:
+      files_ge_250_loc: 4
+      max_internal_fan_in: 6
+    metrics:
+      duplication_clusters: 0
+      files: 22
+      total_loc: 2589
+      files_ge_250_loc: 4
+      helper_function_ratio: 0.469
+      max_internal_fan_in: 6
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry
+    trend:
+      status: down_vs_2026-03-23
+      next_action: 2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in
+        caps at the current reviewed baseline for composition/factories/pipeline.
 removable_complexity_family_ratchets:
-  snapshot_date: "2026-04-13"
-  update_policy: "Only raise budgets after an intentional reviewed baseline refresh tied to a closed cleanup issue."
+  snapshot_date: '2026-04-13'
+  update_policy: Only raise budgets after an intentional reviewed baseline refresh
+    tied to a closed cleanup issue.
   families:
-    - name: "adapter_layer"
-      owner: "@bioetl-platform"
-      linked_issue: "2910"
-      path_prefixes:
-        - "src/bioetl/infrastructure/adapters/"
-      family_budgets:
-        files_ge_250_loc: 19
-        max_internal_fan_in: 31
-      tracked_seams:
-        - path: "src/bioetl/infrastructure/adapters/http/_health_monitor_support.py"
-          max_lines: 40
-          required_modules:
-            - "bioetl.infrastructure.adapters.http._health_monitor_observability"
-            - "bioetl.infrastructure.adapters.http._health_monitor_transitions"
-    - name: "composite_layer"
-      owner: "@bioetl-architecture"
-      linked_issue: "2910"
-      path_prefixes:
-        - "src/bioetl/application/composite/"
-      family_budgets:
-        files_ge_250_loc: 19
-        max_internal_fan_in: 25
-      tracked_seams:
-        - path: "src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py"
-          max_lines: 130
-          required_symbols:
-            - "EnrichmentSummary"
-            - "_summarize_enrichment_results"
-        - path: "src/bioetl/application/composite/fsm_helper.py"
-          max_lines: 260
-          required_symbols:
-            - "ResumePhaseInfo"
-            - "_resolve_resume_phase"
+  - name: adapter_layer
+    owner: '@bioetl-platform'
+    linked_issue: '2910'
+    path_prefixes:
+    - src/bioetl/infrastructure/adapters/
+    family_budgets:
+      files_ge_250_loc: 19
+      max_internal_fan_in: 31
+    tracked_seams:
+    - path: src/bioetl/infrastructure/adapters/http/_health_monitor_support.py
+      max_lines: 40
+      required_modules:
+      - bioetl.infrastructure.adapters.http._health_monitor_observability
+      - bioetl.infrastructure.adapters.http._health_monitor_transitions
+  - name: composite_layer
+    owner: '@bioetl-architecture'
+    linked_issue: '2910'
+    path_prefixes:
+    - src/bioetl/application/composite/
+    family_budgets:
+      files_ge_250_loc: 19
+      max_internal_fan_in: 25
+    tracked_seams:
+    - path: src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py
+      max_lines: 130
+      required_symbols:
+      - EnrichmentSummary
+      - _summarize_enrichment_results
+    - path: src/bioetl/application/composite/fsm_helper.py
+      max_lines: 260
+      required_symbols:
+      - ResumePhaseInfo
+      - _resolve_resume_phase
 neo4j_memory_calibration:
-  snapshot_date: "2026-04-13"
-  update_policy: "When Neo4j memory refresh flags zero-anchor retirement or complexity hotspots, record the reviewed expectation here and keep retirement_candidate_triage.yaml aligned."
+  snapshot_date: '2026-04-13'
+  update_policy: When Neo4j memory refresh flags zero-anchor retirement or complexity
+    hotspots, record the reviewed expectation here and keep retirement_candidate_triage.yaml
+    aligned.
   families:
-    - name: "adapter_layer"
-      linked_issue: "2943"
-      candidates:
-        - module_path: "src/bioetl/infrastructure/adapters/_cached_bronze_support.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/infrastructure/adapters/_error_handling_support.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/infrastructure/adapters/_health_check_observability.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/infrastructure/adapters/_health_check_policy.py"
-          expected_disposition: "retain_active"
-    - name: "composite_layer"
-      linked_issue: "2943"
-      candidates:
-        - module_path: "src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py"
-          expected_disposition: "removed"
-        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_flow.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_mixin.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_policy.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_runtime.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/application/composite/runner_pkg/runner_support_types.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/application/composite/runtime_models.py"
-          expected_disposition: "retain_active"
-        - module_path: "src/bioetl/application/composite/runtime_wiring_api.py"
-          expected_disposition: "retain_active"
+  - name: adapter_layer
+    linked_issue: '2943'
+    candidates:
+    - module_path: src/bioetl/infrastructure/adapters/_cached_bronze_support.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/infrastructure/adapters/_circuit_breaker_contract.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/infrastructure/adapters/_error_handling_support.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/infrastructure/adapters/_health_check_observability.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/infrastructure/adapters/_health_check_policy.py
+      expected_disposition: retain_active
+  - name: composite_layer
+    linked_issue: '2943'
+    candidates:
+    - module_path: src/bioetl/application/composite/runner_pkg/runner_merge_stage_flow.py
+      expected_disposition: removed
+    - module_path: src/bioetl/application/composite/runner_pkg/runner_support_flow.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/application/composite/runner_pkg/runner_support_mixin.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/application/composite/runner_pkg/runner_support_policy.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/application/composite/runner_pkg/runner_support_runtime.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/application/composite/runner_pkg/runner_support_types.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/application/composite/runtime_models.py
+      expected_disposition: retain_active
+    - module_path: src/bioetl/application/composite/runtime_wiring_api.py
+      expected_disposition: retain_active
 quarterly_targets:
-  - quarter: "2026-Q1"
-    max_total_exemptions: 29
-    min_integral_score: 65
-    group_budgets:
-      size_metrics: 26
-      complexity_metrics: 1
-      structural_debt: 4
-    registry_budgets:
-      file_size_limits: 4
-      function_complexity: 1
-      function_length: 11
-      class_size: 14
-      class_method_count: 0
-      god_object: 4
-      domain_complexity: 6
-  - quarter: "2026-Q2"
-    max_total_exemptions: 28
-    min_integral_score: 70
-    group_budgets:
-      size_metrics: 25
-      complexity_metrics: 0
-      structural_debt: 3
-    registry_budgets:
-      file_size_limits: 3
-      function_complexity: 0
-      function_length: 10
-      class_size: 13
-      class_method_count: 0
-      god_object: 3
-      domain_complexity: 0
+- quarter: 2026-Q1
+  max_total_exemptions: 29
+  min_integral_score: 65
+  group_budgets:
+    size_metrics: 26
+    complexity_metrics: 1
+    structural_debt: 4
+  registry_budgets:
+    file_size_limits: 4
+    function_complexity: 1
+    function_length: 11
+    class_size: 14
+    class_method_count: 0
+    god_object: 4
+    domain_complexity: 6
+- quarter: 2026-Q2
+  max_total_exemptions: 28
+  min_integral_score: 70
+  group_budgets:
+    size_metrics: 25
+    complexity_metrics: 0
+    structural_debt: 3
+  registry_budgets:
+    file_size_limits: 3
+    function_complexity: 0
+    function_length: 10
+    class_size: 13
+    class_method_count: 0
+    god_object: 3
+    domain_complexity: 0
 owner_decomposition_targets:
-  - quarter: "2026-Q1"
-    allocations:
-      "@bioetl-architecture": 3
-      "@bioetl-platform": 17
-      "@bioetl-data-model": 9
-  - quarter: "2026-Q2"
-    allocations:
-      "@bioetl-architecture": 2
-      "@bioetl-platform": 17
-      "@bioetl-data-model": 9
+- quarter: 2026-Q1
+  allocations:
+    '@bioetl-architecture': 3
+    '@bioetl-platform': 17
+    '@bioetl-data-model': 9
+- quarter: 2026-Q2
+  allocations:
+    '@bioetl-architecture': 2
+    '@bioetl-platform': 17
+    '@bioetl-data-model': 9
 expiry_decomposition_targets:
-  - quarter: "2026-Q1"
-    max_entries_expiring_in_quarter: 29
-  - quarter: "2026-Q2"
-    max_entries_expiring_in_quarter: 28
+- quarter: 2026-Q1
+  max_entries_expiring_in_quarter: 29
+- quarter: 2026-Q2
+  max_entries_expiring_in_quarter: 28
 program_done_criteria:
-  deadline_quarter: "2027-Q1"
+  deadline_quarter: 2027-Q1
   max_total_exemptions: 0
   min_integral_score: 100
   max_expired_entries: 0

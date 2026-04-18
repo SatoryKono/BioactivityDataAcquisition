@@ -21,6 +21,7 @@ _CHEMBL_PUBLICATION_COMPAT_IDENTIFIER_FIELDS = tuple(
         "publication_doi",
         "publication_pmid",
         "publication_pmc_id",
+        "oa_status",
         "_source",
     )
     if field not in _CHEMBL_PUBLICATION_BASE_FIELDS
