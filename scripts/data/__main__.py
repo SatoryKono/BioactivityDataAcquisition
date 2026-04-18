@@ -46,7 +46,7 @@ COMMANDS: dict[str, str] = {
 
 
 def _run_script(name: str, argv: list[str]) -> int:
-    script = _REPO_ROOT / name
+    script = REPO_ROOT / name
     result = subprocess.run([sys.executable, str(script), *argv], check=False)
     return result.returncode
 
