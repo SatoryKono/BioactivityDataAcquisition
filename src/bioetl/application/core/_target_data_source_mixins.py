@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 from bioetl.application.core._target_data_source_fetch_support import (
     ensure_filterable_data_source,
-    yield_plain_wrapped_fetch_records as _yield_plain_wrapped_fetch_records,
     yield_target_or_delegate_records,
     yield_target_records_from_fallback_fetch,
     yield_wrapped_fetch_records,
@@ -14,7 +13,7 @@ from bioetl.application.core._target_data_source_fetch_support import (
 from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Callable
+    from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import DataSourcePort
 
