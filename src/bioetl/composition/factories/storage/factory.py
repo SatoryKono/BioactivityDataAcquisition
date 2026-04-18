@@ -84,7 +84,11 @@ class StorageFactory:
             settings=settings,
             config=config,
             logger=logger,
-            pipeline_name=pipeline_name or config.pipeline_name,
+            pipeline_name=(
+                pipeline_name
+                or getattr(config, "pipeline_name", None)
+                or f"{config.provider}_{config.entity_type}"
+            ),
         )
         logger.info(
             "Using local storage",

@@ -71,6 +71,10 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServicesRequest,
     build_silver_writer_runtime_services,
 )
+from bioetl.infrastructure.storage.silver.merged_operations import (
+    _MergedSilverWriteRequest,
+    _PreparedMergedSilverWrite,
+)
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_write_targets,
 )
@@ -1124,6 +1128,107 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             run_type=run_type,
             source_batch_id=source_batch_id,
             ingestion_ts=ingestion_ts,
+        )
+
+    async def write_silver_merged(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        primary_keys: list[str] | None = None,
+        *,
+        completed_at: datetime | None = None,
+        run_id: str | None = None,
+        sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
+    ) -> None:
+        """Write merged Silver records through the merged-write service surface."""
+        if self._merged is not None:
+            await self._merged.write_silver_merged(
+                table_name=table_name,
+                records=records,
+                primary_keys=primary_keys,
+                completed_at=completed_at,
+                run_id=run_id,
+                sources_used=sources_used,
+                preserve_column_order=preserve_column_order,
+            )
+            return
+
+        from bioetl.infrastructure.storage.silver.merged_mixin import (
+            SilverWriterMergedMixin,
+        )
+
+        await SilverWriterMergedMixin.write_silver_merged(
+            self,
+            table_name=table_name,
+            records=records,
+            primary_keys=primary_keys,
+            completed_at=completed_at,
+            run_id=run_id,
+            sources_used=sources_used,
+            preserve_column_order=preserve_column_order,
+        )
+
+    def _prepare_merged_silver_write(
+        self,
+        request: _MergedSilverWriteRequest,
+    ) -> _PreparedMergedSilverWrite:
+        """Compatibility seam for merged payload preparation."""
+        if self._merged is not None:
+            return self._merged._prepare_merged_silver_write(request)
+
+        from bioetl.infrastructure.storage.silver.merged_mixin import (
+            SilverWriterMergedMixin,
+        )
+
+        return SilverWriterMergedMixin._prepare_merged_silver_write(self, request)
+
+    async def _write_silver_merged_delta(
+        self,
+        *,
+        table_path: str,
+        arrow_table: pa.Table,
+    ) -> None:
+        """Compatibility seam for merged Delta overwrite execution."""
+        if self._merged is not None:
+            await self._merged._write_silver_merged_delta(
+                table_path=table_path,
+                arrow_table=arrow_table,
+            )
+            return
+
+        from bioetl.infrastructure.storage.silver.merged_mixin import (
+            SilverWriterMergedMixin,
+        )
+
+        await SilverWriterMergedMixin._write_silver_merged_delta(
+            self,
+            table_path=table_path,
+            arrow_table=arrow_table,
+        )
+
+    async def _export_silver_merged_csv(
+        self,
+        *,
+        table_name: str,
+        arrow_table: pa.Table,
+    ) -> None:
+        """Compatibility seam for merged CSV export."""
+        if self._merged is not None:
+            await self._merged._export_silver_merged_csv(
+                table_name=table_name,
+                arrow_table=arrow_table,
+            )
+            return
+
+        from bioetl.infrastructure.storage.silver.merged_mixin import (
+            SilverWriterMergedMixin,
+        )
+
+        await SilverWriterMergedMixin._export_silver_merged_csv(
+            self,
+            table_name=table_name,
+            arrow_table=arrow_table,
         )
 
     async def _write_silver_merged_metadata(

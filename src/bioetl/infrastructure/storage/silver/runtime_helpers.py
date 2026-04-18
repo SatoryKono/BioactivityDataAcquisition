@@ -227,7 +227,7 @@ def build_silver_writer_runtime_services(
 
     # Create merged operations if needed components are available
     merged_ops = None
-    if request.csv_exporter is not None and request.base_path is not None:
+    if request.base_path is not None:
         # Import here to avoid circular imports
         from bioetl.infrastructure.storage.delta.arrow_converter import (
             ArrowDataConverter,
