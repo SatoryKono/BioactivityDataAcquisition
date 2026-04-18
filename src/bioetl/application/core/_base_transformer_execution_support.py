@@ -59,7 +59,7 @@ def handle_transformation_error(
     owner: TransformerExecutionOwner,
     error: TransformationError,
     context: PipelineContext,
-    span: Any,
+    span: object,  # Any: OpenTelemetry span type is dynamic
 ) -> str:
     """Log and annotate span for transformation errors."""
     error_type = "transformation_error"
