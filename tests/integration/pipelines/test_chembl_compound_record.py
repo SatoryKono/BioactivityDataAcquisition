@@ -127,13 +127,16 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
             run_id=run_id,
         )
 
+        async def _raise_api_error() -> None:
+            raise ApiError("Simulated API Failure")
+
         class _FailingAsyncIterator:
             def __aiter__(self):
                 return self
 
             async def __anext__(self):
                 await asyncio.sleep(0)
-                raise ApiError("Simulated API Failure")
+                return await _raise_api_error()
 
         def mock_async_gen(*args, **kwargs):
             if args or kwargs:

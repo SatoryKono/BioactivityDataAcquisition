@@ -162,13 +162,16 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         # Or check if there is a generic API error or create a mock exception
         from bioetl.domain.exceptions import ApiError
 
+        async def _raise_api_error() -> None:
+            raise ApiError("Simulated API Failure")
+
         class _FailingAsyncIterator:
             def __aiter__(self):
                 return self
 
             async def __anext__(self):
                 await asyncio.sleep(0)
-                raise ApiError("Simulated API Failure")
+                return await _raise_api_error()
 
         def mock_async_gen(*args, **kwargs):
             if args or kwargs:
