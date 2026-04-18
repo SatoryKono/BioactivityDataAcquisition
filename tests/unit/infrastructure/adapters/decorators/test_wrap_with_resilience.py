@@ -10,7 +10,7 @@ Tests cover:
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable
 from typing import Any
 
 import pytest
@@ -59,10 +59,10 @@ class MockDataSource:
         del entity_type, limit, query, filter_ids, filter_field, offset
         yield {"id": 1}
 
-    def health_check(self) -> asyncio.Future[HealthStatus]:
+    def health_check(self) -> Awaitable[HealthStatus]:
         return asyncio.sleep(0, result=HealthStatus.HEALTHY)
 
-    def aclose(self) -> asyncio.Future[None]:
+    def aclose(self) -> Awaitable[None]:
         return asyncio.sleep(0)
 
 

@@ -145,9 +145,10 @@ def e2e_environment():
     os.environ.setdefault("BIOETL_ENV", "dev")
     os.environ.setdefault("BIOETL_TEST_MODE", "true")
     os.environ.setdefault("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
-    os.environ.setdefault(
-        "BIOETL_TEST_RELAXED_DQ", "1"
-    )  # Relax DQ thresholds for VCR cassettes
+    # Keep the legacy flag for test callers, but populate the canonical nested
+    # setting that ``Settings.pipeline.relaxed_dq`` actually reads.
+    os.environ.setdefault("BIOETL_TEST_RELAXED_DQ", "1")
+    os.environ.setdefault("BIOETL_PIPELINE__RELAXED_DQ", "1")
     os.environ.setdefault("BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PROFILE", "e2e")
     # Prevent shutil.get_terminal_size hangs in CI/Test environments
     os.environ["COLUMNS"] = "80"

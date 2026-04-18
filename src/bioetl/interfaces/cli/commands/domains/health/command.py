@@ -187,10 +187,6 @@ async def _run_health_server(host: str, port: int) -> None:
         await server.start()
         while True:
             await asyncio.sleep(1)
-    except asyncio.CancelledError:
-        # Treat task cancellation as the normal shutdown signal for the
-        # long-running CLI health server command; cleanup still runs in finally.
-        pass
     finally:
         await server.stop()
         if quarantine_service is not None:

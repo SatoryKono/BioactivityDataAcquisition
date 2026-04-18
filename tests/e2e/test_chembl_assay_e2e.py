@@ -16,6 +16,7 @@ import pytest
 
 from .conftest import (
     assert_bronze_files_exist,
+    assert_run_manifest_exists,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
@@ -70,9 +71,9 @@ async def test_chembl_assay_full_cycle(e2e_data_dir: Path):
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
-        assert "_run_id" in record
-        assert "_run_type" in record
-        assert "_ingestion_ts" in record
+
+    manifest_payload = assert_run_manifest_exists(e2e_data_dir, ctx.run_id)
+    assert manifest_payload["pipeline_name"] == "chembl_assay"
 
 
 @pytest.mark.e2e

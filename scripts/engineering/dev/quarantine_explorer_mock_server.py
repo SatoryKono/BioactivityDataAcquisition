@@ -426,8 +426,6 @@ async def _run_server(host: str, port: int) -> None:
     try:
         while True:
             await asyncio.sleep(1)
-    except asyncio.CancelledError:
-        pass
     finally:
         await server.stop()
 
