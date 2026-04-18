@@ -16,12 +16,15 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.core._runner_observability import (
+    emit_postrun_observability,
+    emit_preflight_health_results,
+)
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
 from bioetl.application.observability.observer import LifecyclePhase
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
-from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -90,65 +93,6 @@ class _ExecutionCycleContext:
 def _phase_for_stage_name(stage_name: str) -> LifecyclePhase:
     """Resolve observer phase name for one canonical runner stage."""
     return _PHASE_BY_STAGE_NAME[stage_name]
-
-
-def _emit_preflight_health_results(
-    host: _PipelineRunnerExecutionHostProtocol,
-    report: HealthReport | None,
-) -> None:
-    """Emit component-level preflight health results through PipelineObserver."""
-    if report is None:
-        return
-    health_check_mode = getattr(host._runtime, "health_check_mode", "strict")
-    for result in report.results:
-        host._observer.emit_health_check_result(
-            component=result.component,
-            healthy=result.status != HealthStatus.UNHEALTHY,
-            duration_ms=result.duration_seconds * 1000.0,
-            provider=result.provider,
-            latency_ms=result.latency_ms,
-            health_check_mode=health_check_mode,
-            fallback_reason=result.probe_fallback_reason,
-            health_status=result.status.value,
-            runner_stage=_PREFLIGHT_STAGE_NAME,
-        )
-
-
-def _emit_postrun_observability(
-    host: _PipelineRunnerExecutionHostProtocol,
-    result: PostrunResult,
-) -> None:
-    """Emit DQ anomaly and VACUUM events from one postrun result."""
-    for anomaly in result.dq.anomalies:
-        host._observer.emit_dq_anomaly(
-            metric_name=anomaly.metric_name,
-            severity=anomaly.severity.value,
-            anomaly_type=anomaly.anomaly_type.value,
-            current_value=anomaly.current_value,
-            baseline_mean=anomaly.baseline_mean,
-            baseline_stddev=anomaly.baseline_stddev,
-            z_score=anomaly.z_score,
-            message=anomaly.message,
-            runner_stage=_POSTRUN_STAGE_NAME,
-        )
-
-    if result.vacuum.skipped:
-        return
-
-    host._observer.emit_vacuum_result(
-        layer="silver",
-        table=host._config.effective_silver_table,
-        files_removed=result.vacuum.silver_files_removed,
-        runner_stage=_POSTRUN_STAGE_NAME,
-    )
-
-    if not getattr(host._runtime, "skip_gold", False):
-        host._observer.emit_vacuum_result(
-            layer="gold",
-            table=host._config.effective_gold_table,
-            files_removed=result.vacuum.gold_files_removed,
-            runner_stage=_POSTRUN_STAGE_NAME,
-        )
 
 
 async def _run_tracked_stage(
@@ -278,7 +222,7 @@ async def run_postrun_phase(host: _PipelineRunnerExecutionHostProtocol) -> None:
         executor=host._executor,
         dq_context=dq_context,
     )
-    _emit_postrun_observability(host, result)
+    emit_postrun_observability(host, result, runner_stage=_POSTRUN_STAGE_NAME)
 
 
 async def validate_infrastructure(host: _PipelineRunnerExecutionHostProtocol) -> None:
@@ -289,7 +233,11 @@ async def validate_infrastructure(host: _PipelineRunnerExecutionHostProtocol) ->
         raise_on_unhealthy=False,
     )
     duration = time.perf_counter() - start_time
-    _emit_preflight_health_results(host, report)
+    emit_preflight_health_results(
+        host,
+        report,
+        runner_stage=_PREFLIGHT_STAGE_NAME,
+    )
     host._observer.emit_health_check_summary(
         validated=report.is_healthy,
         duration_seconds=duration,
