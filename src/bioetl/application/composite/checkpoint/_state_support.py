@@ -106,6 +106,6 @@ def _replace_checkpoint_state(
     # `dataclasses.replace` accepts field-aligned keyword overrides, but mypy
     # cannot infer them from this helper's dynamic kwargs surface.
     return cast(
-        CompositeCheckpointState,
+        "CompositeCheckpointState",
         replace(checkpoint_state, updated_at=datetime.now(tz=UTC), **changes),
     )
