@@ -354,7 +354,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     python_bin, interpreter_kind = _preferred_python()
     probes = _build_probes(python_bin)
@@ -381,13 +381,14 @@ def main(argv: list[str] | None = None) -> None:
         }
         json.dump(payload, sys.stdout, indent=2)
         print()
-        return
+        return 0
 
     _print_markdown(
         interpreter=python_bin,
         interpreter_kind=interpreter_kind,
         results=results,
     )
+    return 0
 
 
 if __name__ == "__main__":

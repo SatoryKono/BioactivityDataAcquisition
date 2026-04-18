@@ -93,6 +93,23 @@ def _ensure_path_within_root(path: Path, root: Path) -> Path:
 
 def _ensure_repo_path(path: Path) -> Path:
     return _ensure_path_within_root(path, REPO_ROOT)
+
+
+def _relative_to_root(path: Path, *, root: Path) -> Path:
+    safe_path = _ensure_path_within_root(path, root)
+    return safe_path.relative_to(root.resolve())
+
+
+def _write_text_within_root(relative_path: Path, content: str, *, root: Path) -> None:
+    target_path = root / relative_path
+    target_path.write_text(content, encoding="utf-8")
+
+
+def _write_repo_text(relative_path: Path, content: str) -> None:
+    """Write generated assets via a repository-relative path."""
+    _write_text_within_root(relative_path, content, root=REPO_ROOT)
+
+
 def _parse_manifest_path_entry(line: str, allowed_suffixes: tuple[str, ...]) -> Path:
     path = Path(line)
     if path.is_absolute():
@@ -468,11 +485,7 @@ def check_diag_t026(render_paths: list[Path]) -> list[Issue]:
 def write_temp_source(tmpdir: Path, stem: str, lines: list[str]) -> Path:
     path = tmpdir / f"{stem}.mmd"
     safe_path = _ensure_path_within_root(path, tmpdir)
-    _write_text_within_root(
-        _relative_to_root(safe_path, root=tmpdir),
-        "\n".join(lines) + "\n",
-        root=tmpdir,
-    )
+    safe_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
 
 
@@ -656,11 +669,7 @@ def build_alt_css(original_css: Path, target_css: Path, *, temp_root: Path) -> N
     content = content.replace("#f5f3ff", "#ede9fe")
     content = content.replace("#fff1f2", "#ffe4e6")
     content = content.replace("#111827", "#0f172a")
-    _write_text_within_root(
-        _relative_to_root(safe_target, root=temp_root),
-        content,
-        root=temp_root,
-    )
+    safe_target.write_text(content, encoding="utf-8")
 
 
 def check_diag_t029(

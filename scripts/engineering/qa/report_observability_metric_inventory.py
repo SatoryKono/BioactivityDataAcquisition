@@ -511,15 +511,16 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
     return "\n".join(lines)
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     report = collect_metric_inventory(args.repo_root)
     if args.json:
         json.dump(report, sys.stdout, indent=2, sort_keys=True)
         sys.stdout.write("\n")
-        return
+        return 0
     print(_render_text(report))
+    return 0
 
 
 if __name__ == "__main__":

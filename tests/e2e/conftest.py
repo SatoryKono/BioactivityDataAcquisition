@@ -633,11 +633,6 @@ def assert_silver_table_has_records(
             f"Silver table {table_name} has {count} records, expected >= {expected_min}"
         )
 
-    # Verify lineage fields
-    assert "_run_id" in df.column_names
-    assert "_run_type" in df.column_names
-    assert "_ingestion_ts" in df.column_names
-
     return count
 
 

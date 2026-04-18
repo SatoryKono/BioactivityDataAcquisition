@@ -17,35 +17,30 @@ class TestNoOpLogger:
         logger = NoOpLogger()
         assert isinstance(logger, LoggerPort)
 
-    def test_info_returns_none(self) -> None:
-        """info() should silently return None."""
+    def test_info_accepts_context_without_error(self) -> None:
+        """info() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        result = logger.info("test message", key="value")
-        assert result is None
+        logger.info("test message", key="value")
 
-    def test_warning_returns_none(self) -> None:
-        """warning() should silently return None."""
+    def test_warning_accepts_context_without_error(self) -> None:
+        """warning() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        result = logger.warning("test warning", key="value")
-        assert result is None
+        logger.warning("test warning", key="value")
 
-    def test_error_returns_none(self) -> None:
-        """error() should silently return None."""
+    def test_error_accepts_context_without_error(self) -> None:
+        """error() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        result = logger.error("test error", key="value")
-        assert result is None
+        logger.error("test error", key="value")
 
-    def test_debug_returns_none(self) -> None:
-        """debug() should silently return None."""
+    def test_debug_accepts_context_without_error(self) -> None:
+        """debug() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        result = logger.debug("test debug", key="value")
-        assert result is None
+        logger.debug("test debug", key="value")
 
-    def test_exception_returns_none(self) -> None:
-        """exception() should silently return None."""
+    def test_exception_accepts_context_without_error(self) -> None:
+        """exception() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        result = logger.exception("test exception", key="value")
-        assert result is None
+        logger.exception("test exception", key="value")
 
     def test_bind_returns_self(self) -> None:
         """bind() should return self (no new instance)."""

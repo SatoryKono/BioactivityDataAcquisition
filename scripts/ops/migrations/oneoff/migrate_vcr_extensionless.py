@@ -62,7 +62,7 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
+def main() -> int:
     args = _parse_args()
     extensionless = _collect_extensionless()
     pairs: list[tuple[Path, Path]] = []
@@ -92,7 +92,7 @@ def main() -> None:
             sys.stdout.write(
                 "Allowlist synchronized (dry-run mode for file renames).\n"
             )
-        return
+        return 0
 
     migrated = 0
     dropped_paired = 0
@@ -117,7 +117,7 @@ def main() -> None:
         sys.stdout.write(
             "NOTE: paired files were preserved (manual review required before deletion).\n"
         )
-    return
+    return 0
 
 
 if __name__ == "__main__":

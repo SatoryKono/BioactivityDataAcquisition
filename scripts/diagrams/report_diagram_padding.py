@@ -66,7 +66,7 @@ def analyze_file(path: Path) -> FilePaddingStat:
     )
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Report top Mermaid files by &nbsp; usage."
     )
@@ -87,7 +87,7 @@ def main() -> None:
     files = collect_files(roots)
     if not files:
         print("No Mermaid files found.")
-        return
+        return 0
 
     stats = [analyze_file(path) for path in files]
     stats.sort(key=lambda item: item.nbsp_count, reverse=True)
@@ -113,7 +113,7 @@ def main() -> None:
             f"{item.path.as_posix()}"
         )
 
-    return
+    return 0
 
 
 if __name__ == "__main__":
