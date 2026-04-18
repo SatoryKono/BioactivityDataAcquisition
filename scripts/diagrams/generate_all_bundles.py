@@ -206,18 +206,32 @@ def _count_edges(lines: list[str], is_class_diagram: bool) -> int:
 def _collect_subgraph_names(lines: list[str]) -> list[str]:
     """Extract Mermaid subgraph and namespace labels."""
     subgraph_names: list[str] = []
-    subgraph_pattern = re.compile(r'subgraph\s+(?:(\w+)\["([^"]+)"\]|(\w+))\s*$')
     namespace_pattern = re.compile(r"^\s+namespace\s+(\w+)\s*\{?\s*$")
     for line in lines:
-        subgraph_match = subgraph_pattern.search(line)
-        if subgraph_match:
-            name = subgraph_match.group(2) or subgraph_match.group(3) or ""
-            if name and name != "direction":
-                subgraph_names.append(name)
+        name = _extract_subgraph_name(line)
+        if name and name != "direction":
+            subgraph_names.append(name)
         namespace_match = namespace_pattern.match(line)
         if namespace_match:
             subgraph_names.append(namespace_match.group(1).replace("_", " "))
     return subgraph_names
+
+
+def _extract_subgraph_name(line: str) -> str | None:
+    stripped = line.strip()
+    if not stripped.startswith("subgraph "):
+        return None
+
+    payload = stripped[len("subgraph ") :].strip()
+    if not payload:
+        return None
+
+    if payload.endswith('"]') and '["' in payload:
+        _, _, label = payload.partition('["')
+        return label[:-2].strip() or None
+
+    name = payload.split(maxsplit=1)[0]
+    return name or None
 
 
 def parse_mermaid(path: Path) -> dict[str, object]:

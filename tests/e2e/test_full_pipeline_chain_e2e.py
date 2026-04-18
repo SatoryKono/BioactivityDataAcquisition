@@ -160,7 +160,7 @@ async def test_parallel_independent_pipelines(e2e_data_dir: Path):
     PubMed and UniProt pipelines are independent and should not interfere.
     """
     # Run UniProt pipeline
-    uniprot_ctx = create_test_context("uniprot_protein", limit=3)
+    uniprot_ctx = create_test_context("uniprot_protein", limit=5)
     uniprot_runner = bootstrap_pipeline_runner(uniprot_ctx)
     await uniprot_runner.run()
 

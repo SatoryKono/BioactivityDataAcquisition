@@ -14,6 +14,7 @@ Forbidden import tests moved to test_forbidden_imports.py.
 
 from __future__ import annotations
 
+import ast
 import os
 import re
 import subprocess
@@ -76,6 +77,132 @@ def _check_imports_in_content(
             errors.append(f"Disallowed import 'from {lib}' in {file_path}")
 
     return errors
+
+
+BASE_EXCEPTION_CLASSES = {
+    "BioETLError",
+    "CriticalError",
+    "RecoverableError",
+    "DataQualityError",
+}
+
+BIOETL_EXCEPTION_BASES = {
+    "BioETLError",
+    "CriticalError",
+    "RecoverableError",
+    "DataQualityError",
+    "StorageError",
+    "ApiError",
+}
+
+PORT_METHOD_PATTERNS = (
+    "clear_",
+    "write_",
+    "read_",
+    "load_",
+    "save_",
+    "delete_",
+    "health_",
+    "acquire",
+    "release",
+)
+
+ALLOWED_HASATTR_CHECKS: set[str] = set()
+
+
+def _exception_files(src_dir: Path) -> list[Path]:
+    exceptions_dir = src_dir / "bioetl" / "domain" / "exceptions"
+    exceptions_file = src_dir / "bioetl" / "domain" / "exceptions.py"
+    if exceptions_dir.is_dir():
+        return [f for f in exceptions_dir.glob("*.py") if f.name != "__init__.py"]
+    if exceptions_file.exists():
+        return [exceptions_file]
+    pytest.fail("Domain exceptions not found")
+
+
+def _exception_class_bases(node: ast.ClassDef) -> list[str]:
+    bases: list[str] = []
+    for base in node.bases:
+        if isinstance(base, ast.Name):
+            bases.append(base.id)
+        elif isinstance(base, ast.Attribute):
+            bases.append(base.attr)
+    return bases
+
+
+def _has_error_type_assignment(node: ast.ClassDef) -> bool:
+    for stmt in node.body:
+        if isinstance(stmt, ast.Assign):
+            if any(
+                isinstance(target, ast.Name) and target.id == "error_type"
+                for target in stmt.targets
+            ):
+                return True
+        if isinstance(stmt, ast.AnnAssign):
+            if isinstance(stmt.target, ast.Name) and stmt.target.id == "error_type":
+                return True
+    return False
+
+
+def _missing_exception_error_types(src_dir: Path) -> list[str]:
+    missing_error_type: list[str] = []
+    for path in _exception_files(src_dir):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            if node.name in BASE_EXCEPTION_CLASSES:
+                continue
+            if not any(base in BIOETL_EXCEPTION_BASES for base in _exception_class_bases(node)):
+                continue
+            if not _has_error_type_assignment(node):
+                missing_error_type.append(node.name)
+    return missing_error_type
+
+
+def _hasattr_attr_name(node: ast.Call) -> str | None:
+    if not (
+        isinstance(node.func, ast.Name)
+        and node.func.id == "hasattr"
+        and len(node.args) >= 2
+    ):
+        return None
+    attr_arg = node.args[1]
+    if isinstance(attr_arg, ast.Constant) and isinstance(attr_arg.value, str):
+        return attr_arg.value
+    return None
+
+
+def _is_suspicious_hasattr(attr_name: str) -> bool:
+    if attr_name.startswith("_"):
+        return False
+    if attr_name in ALLOWED_HASATTR_CHECKS:
+        return False
+    return any(attr_name.startswith(pattern) for pattern in PORT_METHOD_PATTERNS)
+
+
+def _application_hasattr_violations(
+    application_path: Path,
+    source_content_cache: dict[Path, str],
+) -> list[str]:
+    violations: list[str] = []
+    for py_file, content in _iter_python_content_under(
+        application_path, source_content_cache
+    ):
+        try:
+            tree = ast.parse(content, filename=str(py_file))
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            attr_name = _hasattr_attr_name(node)
+            if attr_name and _is_suspicious_hasattr(attr_name):
+                violations.append(
+                    f"{py_file.name}:{node.lineno} - "
+                    f"hasattr check for '{attr_name}' suggests missing port contract"
+                )
+    return violations
 
 
 def test_domain_layer_no_infrastructure_imports(
@@ -662,71 +789,9 @@ def test_no_hasattr_duck_typing_in_application(
     - Checking for private attributes (_internal)
     - fetch_filtered: Extension method for filterable adapters (ChEMBL-specific)
     """
-    import ast
-
     application_path = src_dir / "bioetl" / "application"
     assert application_path.exists(), "Application layer not found"
-
-    # Methods that indicate duck-typing on ports (suspicious patterns)
-    PORT_METHOD_PATTERNS = (
-        "clear_",
-        "write_",
-        # "fetch_" excluded: fetch_filtered is a documented extension pattern
-        "read_",
-        "load_",
-        "save_",
-        "delete_",
-        "health_",
-        "acquire",
-        "release",
-    )
-
-    # Explicitly allowed hasattr checks (documented extensions)
-    # Note: fetch_filtered is now formalized via FilterableDataSourcePort Protocol
-    ALLOWED_HASATTR_CHECKS: set[str] = set()
-
-    violations = []
-
-    for py_file, content in _iter_python_content_under(
-        application_path, source_content_cache
-    ):
-        try:
-            tree = ast.parse(content, filename=str(py_file))
-        except SyntaxError:
-            continue
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Call):
-                # Check for hasattr(obj, "method_name") calls
-                if (
-                    isinstance(node.func, ast.Name)
-                    and node.func.id == "hasattr"
-                    and len(node.args) >= 2
-                ):
-                    # Get the attribute name being checked
-                    attr_arg = node.args[1]
-                    if isinstance(attr_arg, ast.Constant) and isinstance(
-                        attr_arg.value, str
-                    ):
-                        attr_name = attr_arg.value
-
-                        # Skip dunder methods and private attributes
-                        if attr_name.startswith("_"):
-                            continue
-
-                        # Skip explicitly allowed extensions
-                        if attr_name in ALLOWED_HASATTR_CHECKS:
-                            continue
-
-                        # Check if it matches port method patterns
-                        if any(
-                            attr_name.startswith(pattern)
-                            for pattern in PORT_METHOD_PATTERNS
-                        ):
-                            violations.append(
-                                f"{py_file.name}:{node.lineno} - "
-                                f"hasattr check for '{attr_name}' suggests missing port contract"
-                            )
+    violations = _application_hasattr_violations(application_path, source_content_cache)
 
     assert not violations, (
         "Found hasattr duck-typing in application layer. "
@@ -747,97 +812,7 @@ def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
     This ensures ErrorClassifier uses the error_type attribute instead of
     keyword matching for domain exceptions.
     """
-    import ast
-
-    # Support both single file and package structure
-    exceptions_dir = src_dir / "bioetl" / "domain" / "exceptions"
-    exceptions_file = src_dir / "bioetl" / "domain" / "exceptions.py"
-
-    exception_files: list[Path] = []
-    if exceptions_dir.is_dir():
-        # New package structure: scan all .py files except __init__.py
-        exception_files = [
-            f for f in exceptions_dir.glob("*.py") if f.name != "__init__.py"
-        ]
-    elif exceptions_file.exists():
-        # Legacy single file structure
-        exception_files = [exceptions_file]
-    else:
-        pytest.fail("Domain exceptions not found")
-
-    # Parse all exception files and collect AST trees
-    trees: list[ast.AST] = []
-    for f in exception_files:
-        with f.open(encoding="utf-8") as fp:
-            content = fp.read()
-            trees.append(ast.parse(content))
-
-    # Base classes that don't need error_type (they provide defaults)
-    base_classes = {
-        "BioETLError",
-        "CriticalError",
-        "RecoverableError",
-        "DataQualityError",
-    }
-
-    # Classes that inherit from BioETL exception hierarchy
-    exception_bases = {
-        "BioETLError",
-        "CriticalError",
-        "RecoverableError",
-        "DataQualityError",
-        "StorageError",
-        "ApiError",
-    }
-
-    missing_error_type = []
-
-    for tree in trees:
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                # Skip base classes
-                if node.name in base_classes:
-                    continue
-
-                # Check if inherits from exception hierarchy
-                bases = []
-                for base in node.bases:
-                    if isinstance(base, ast.Name):
-                        bases.append(base.id)
-                    elif isinstance(base, ast.Attribute):
-                        bases.append(base.attr)
-
-                if not any(b in exception_bases for b in bases):
-                    continue
-
-                # Check for error_type class attribute
-                has_error_type = False
-                for stmt in node.body:
-                    # Check for error_type assignment
-                    if isinstance(stmt, ast.Assign):
-                        for target in stmt.targets:
-                            if (
-                                isinstance(target, ast.Name)
-                                and target.id == "error_type"
-                            ):
-                                has_error_type = True
-                                break
-                    # Check for annotated assignment
-                    if isinstance(stmt, ast.AnnAssign):
-                        if (
-                            isinstance(stmt.target, ast.Name)
-                            and stmt.target.id == "error_type"
-                        ):
-                            has_error_type = True
-                    # Check for Import statement (class-level import for error_type)
-                    if isinstance(stmt, ast.ImportFrom):
-                        for alias in stmt.names:
-                            if alias.name == "ErrorType":
-                                # Next statement should be error_type assignment
-                                pass
-
-                if not has_error_type:
-                    missing_error_type.append(node.name)
+    missing_error_type = _missing_exception_error_types(src_dir)
 
     assert not missing_error_type, (
         "BioETLError subclasses must have explicit error_type attribute.\n"

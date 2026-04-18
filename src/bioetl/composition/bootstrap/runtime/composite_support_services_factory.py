@@ -101,33 +101,7 @@ class CompositeSupportServicesFactory:
             CompositeCheckpointService
         ] = CompositeCheckpointService,
     ) -> None:
-        """Initialise the factory with composite run context and injectable callables.
-
-        Stores all dependencies as private attributes so that ``build()`` can
-        construct the full ``CompositeSupportServices`` bundle without requiring
-        additional arguments. Injectable callables (``resolve_gold_schema``,
-        ``load_field_group_registry``, ``create_dq_report_service``) allow the
-        factory to remain testable without importing concrete infrastructure types
-        at class level. Part of the composition layer for ADR-026.
-
-        Args:
-            config: Parsed domain ``CompositeConfig`` containing merge, enricher,
-                dependency, DQ, and cross-validation settings.
-            runtime: Immutable composite runtime options (resume flag,
-                concurrency settings).
-            infra_context: Bundle of infrastructure primitives (run_id, settings, logger, storage).
-            resolve_gold_schema: Callable that accepts a composite pipeline name and
-                returns the corresponding Pandera ``DataFrameModel`` class or ``None``.
-            load_field_group_registry: Callable that accepts a composite pipeline name
-                and a ``LoggerPort`` and returns a configured ``FieldGroupRegistry``
-                or ``None``.
-            create_dq_report_service: Callable that accepts a ``LoggerPort``,
-                ``Settings``, and ``MetricsPort`` and returns a ``DQReportService``
-                instance.
-            checkpoint_manager_cls: ``CompositeCheckpointService`` class (or
-                compatible subclass) used to create the checkpoint manager; allows
-                injection of a test double.
-        """
+        """Store composite runtime dependencies and validate normalization policies."""
         validate_join_key_normalization_policies(
             config,
             self._JOIN_KEY_NORMALIZATION_POLICIES,
@@ -141,11 +115,7 @@ class CompositeSupportServicesFactory:
         self._checkpoint_manager_cls = checkpoint_manager_cls
 
     def build(self) -> CompositeSupportServices:
-        """Build and return support service bundle.
-
-        Returns:
-            CompositeSupportServices bundle with all services required by CompositePipelineRunner.
-        """
+        """Build and return the support-service bundle."""
         control_plane_bundle = build_composite_control_plane_bundle(
             config=self._config,
             runtime=self._runtime,
