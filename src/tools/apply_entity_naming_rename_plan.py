@@ -203,7 +203,9 @@ def _print_skipped_rows(skipped_rows: list[RenameRow]) -> None:
 
 def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
     file_to_rows, skipped_rows = _group_executable_rows(rows)
-    executable_rows = [row for grouped_rows in file_to_rows.values() for row in grouped_rows]
+    executable_rows = [
+        row for grouped_rows in file_to_rows.values() for row in grouped_rows
+    ]
 
     print(f"Mode: {'apply' if apply else 'dry-run'}")
     print(f"Executable rows: {len(executable_rows)}")

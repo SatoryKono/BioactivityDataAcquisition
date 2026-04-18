@@ -163,8 +163,12 @@ async def test_runtime_rollout_dual_write_populates_versioned_silver_tables(
     assert v1_rows, "Legacy Silver version should be written by runtime rollout"
     assert v2_rows, "Shadow Silver version should be written by runtime rollout"
     assert len(v1_rows) == len(v2_rows)
-    assert all(row.get("_run_id") for row in v1_rows)
-    assert all(row.get("_run_id") for row in v2_rows)
+    assert all("_run_id" not in row for row in v1_rows)
+    assert all("_run_id" not in row for row in v2_rows)
+    assert all("_run_type" not in row for row in v1_rows)
+    assert all("_run_type" not in row for row in v2_rows)
+    assert all("_ingestion_ts" not in row for row in v1_rows)
+    assert all("_ingestion_ts" not in row for row in v2_rows)
 
 
 @pytest.mark.e2e

@@ -25,26 +25,31 @@ class FakeMetrics:
     """Minimal fake metrics for benchmarks."""
 
     def observe_histogram(self, *args: Any, **kwargs: Any) -> None:
+        # Intentionally left blank: metrics are not collected in benchmarks.
         pass
 
     def increment_counter(self, *args: Any, **kwargs: Any) -> None:
-        pass
+        # Intentionally left blank: metrics are not collected in benchmarks.
+        return None
+
+    def increment_counter(self, *args: Any, **kwargs: Any) -> None:
+        return None
 
 
 class FakeLogger:
     """Minimal fake logger for benchmarks."""
 
     def info(self, _msg: str, **_kwargs: Any) -> None:
-        pass
+        return None
 
     def debug(self, _msg: str, **_kwargs: Any) -> None:
-        pass
+        return None
 
     def warning(self, _msg: str, **_kwargs: Any) -> None:
-        pass
+        return None
 
     def error(self, _msg: str, **_kwargs: Any) -> None:
-        pass
+        return None
 
     def bind(self, **_kwargs: Any) -> "FakeLogger":
         return self

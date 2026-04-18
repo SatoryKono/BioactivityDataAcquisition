@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Validation helpers module for common validation operations."""
 
 

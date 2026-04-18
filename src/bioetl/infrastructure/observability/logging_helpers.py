@@ -1,6 +1,6 @@
-"""
-Logging helpers module for common logging operations.
-"""
+from __future__ import annotations
+
+"""Logging helpers module for common logging operations."""
 
 from logging import Logger
 
@@ -12,7 +12,7 @@ def log_error(logger: Logger, error: str) -> None:
         logger: Logger instance.
         error: Error message to log.
     """
-    logger.error(f"Error occurred: {error}")
+    logger.error("Error occurred: %s", error)
 
 
 def log_debug(logger: Logger, details: str) -> None:
@@ -22,4 +22,4 @@ def log_debug(logger: Logger, details: str) -> None:
         logger: Logger instance.
         details: Debug details to log.
     """
-    logger.debug(f"Debug info: {details}")
+    logger.debug("Debug info: %s", details)

@@ -244,6 +244,9 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
     script_set = set(rel_scripts)
     basename_map = _build_basename_map(rel_scripts)
     refs: dict[str, list[RefEvidence]] = {item: [] for item in rel_scripts}
+    for script_rel in rel_scripts:
+        for alias in SCRIPT_PATH_ALIASES.get(script_rel, ()):
+            refs.setdefault(alias, [])
     search_files = _iter_search_files(root)
 
     for file_path in search_files:
@@ -257,6 +260,8 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
             continue
         for script_rel, evidence in discovered:
             refs[script_rel].append(evidence)
+            for alias in SCRIPT_PATH_ALIASES.get(script_rel, ()):
+                refs.setdefault(alias, []).append(evidence)
     return refs
 
 

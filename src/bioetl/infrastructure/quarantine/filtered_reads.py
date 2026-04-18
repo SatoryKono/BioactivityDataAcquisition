@@ -360,9 +360,7 @@ def _row_matches_time_bounds(
     _, parsed_ts = _normalize_timestamp(row.get("ingestion_ts"))
     if from_bound is not None and (parsed_ts is None or parsed_ts < from_bound):
         return False
-    if to_bound is not None and (parsed_ts is None or parsed_ts > to_bound):
-        return False
-    return True
+    return not (to_bound is not None and (parsed_ts is None or parsed_ts > to_bound))
 
 
 def _iter_filtered_rows(

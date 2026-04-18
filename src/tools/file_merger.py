@@ -204,6 +204,30 @@ def sort_files(files: list[Path], sort_method: str) -> list[Path]:
         return files
 
 
+def _tree_child_prefix(prefix: str, is_last: bool) -> str:
+    return prefix + ("    " if is_last else "│   ")
+
+
+def _format_tree_node(
+    prefix: str, name: str, *, is_dir: bool = False, is_last: bool = True
+) -> str:
+    suffix = "/" if is_dir else ""
+    if prefix == "":
+        return f"{name}{suffix}"
+    connector = "└── " if is_last else "├── "
+    return f"{prefix}{connector}{name}{suffix}"
+
+
+def _iter_tree_items(directory: Path, exclude_dirs: set[str]) -> list[Path] | None:
+    try:
+        items = sorted(
+            directory.iterdir(), key=lambda path: (not path.is_dir(), path.name)
+        )
+    except (PermissionError, OSError):
+        return None
+    return [item for item in items if not (item.is_dir() and item.name in exclude_dirs)]
+
+
 def merge_files(
     files: list[Path], output_file: Path, input_dir: Path, encoding: str
 ) -> tuple[int, int, dict[str, int]]:
@@ -493,47 +517,29 @@ def generate_tree_structure(
     """
     lines: list[str] = []
 
-    # Get directory name
     dir_name = directory.name if directory.name else str(directory)
+    lines.append(_format_tree_node(prefix, dir_name, is_dir=True, is_last=is_last))
 
-    # Add current directory
-    if prefix == "":  # Root level
-        lines.append(f"{dir_name}/")
-    else:
-        connector = "└── " if is_last else "├── "
-        lines.append(f"{prefix}{connector}{dir_name}/")
-
-    # Get all items in directory
-    try:
-        items = sorted(directory.iterdir(), key=lambda p: (not p.is_dir(), p.name))
-    except (PermissionError, OSError):
+    items = _iter_tree_items(directory, exclude_dirs)
+    if items is None:
         return lines
-
-    # Filter out excluded directories
-    items = [
-        item for item in items if not (item.is_dir() and item.name in exclude_dirs)
-    ]
 
     # Process items
     for idx, item in enumerate(items):
         is_last_item = idx == len(items) - 1
+        child_prefix = _tree_child_prefix(prefix, is_last)
 
         if item.is_symlink():
-            connector = "└── " if is_last_item else "├── "
-            extension = prefix + ("    " if is_last else "│   ")
-            lines.append(f"{extension}{connector}{item.name}@")
-        elif item.is_dir():
-            # Recursively process subdirectories
-            new_prefix = prefix + ("    " if is_last else "│   ")
-            sub_lines = generate_tree_structure(
-                item, exclude_dirs, new_prefix, is_last_item
+            lines.append(
+                _format_tree_node(child_prefix, f"{item.name}@", is_last=is_last_item)
             )
-            lines.extend(sub_lines)
-        else:
-            # Add file
-            connector = "└── " if is_last_item else "├── "
-            extension = prefix + ("    " if is_last else "│   ")
-            lines.append(f"{extension}{connector}{item.name}")
+            continue
+        if item.is_dir():
+            lines.extend(
+                generate_tree_structure(item, exclude_dirs, child_prefix, is_last_item)
+            )
+            continue
+        lines.append(_format_tree_node(child_prefix, item.name, is_last=is_last_item))
 
     return lines
 
@@ -679,6 +685,68 @@ def merge_configs(
     return 0
 
 
+def _resolve_mode_output(
+    current_output: Path,
+    default_output: Path,
+    fallback_output: str,
+) -> Path:
+    """Use a mode-specific output path when the CLI kept the generic default."""
+    if current_output == default_output:
+        return Path(fallback_output)
+    return current_output
+
+
+def _run_special_modes(
+    args: argparse.Namespace, exclude_dirs: set[str]
+) -> tuple[bool, int]:
+    """Execute selected special modes and return (executed_any, exit_code)."""
+    default_output = Path("reports/merged_output.txt")
+    exit_code = 0
+    executed_any = False
+
+    if args.merge_project_code:
+        executed_any = True
+        result = merge_project_code_layers(args.encoding, exclude_dirs, args.sort)
+        if result != 0:
+            exit_code = result
+
+    mode_specs = (
+        (
+            args.merge_documentation,
+            "reports/documentation_merged.md",
+            lambda output: merge_documentation(
+                output, args.encoding, exclude_dirs, args.sort
+            ),
+        ),
+        (
+            args.merge_configs,
+            "reports/configs_merged.md",
+            lambda output: merge_configs(
+                output, args.encoding, exclude_dirs, args.sort
+            ),
+        ),
+        (
+            args.project_structure,
+            "reports/project_structure.md",
+            lambda output: create_project_structure(
+                output, args.encoding, exclude_dirs
+            ),
+        ),
+    )
+
+    for enabled, fallback_output, runner in mode_specs:
+        if not enabled:
+            continue
+        executed_any = True
+        output_file = _resolve_mode_output(args.output, default_output, fallback_output)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        result = runner(output_file)
+        if result != 0:
+            exit_code = result
+
+    return executed_any, exit_code
+
+
 def main() -> int:
     """Main entry point.
 
@@ -697,56 +765,7 @@ def main() -> int:
         args.merge_configs = True
         args.project_structure = True
 
-    # Default output path for checking if user specified custom output
-    default_output = Path("reports/merged_output.txt")
-
-    exit_code = 0
-    executed_any = False
-
-    # Check if project code merge mode is enabled
-    if args.merge_project_code:
-        executed_any = True
-        result = merge_project_code_layers(args.encoding, exclude_dirs, args.sort)
-        if result != 0:
-            exit_code = result
-
-    # Check if documentation merge mode is enabled
-    if args.merge_documentation:
-        executed_any = True
-        # Set default output file if not specified
-        output_file = args.output
-        if output_file == default_output:  # User didn't specify output
-            output_file = Path("reports/documentation_merged.md")
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        result = merge_documentation(
-            output_file, args.encoding, exclude_dirs, args.sort
-        )
-        if result != 0:
-            exit_code = result
-
-    # Check if configs merge mode is enabled
-    if args.merge_configs:
-        executed_any = True
-        # Set default output file if not specified
-        output_file = args.output
-        if output_file == default_output:  # User didn't specify output
-            output_file = Path("reports/configs_merged.md")
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        result = merge_configs(output_file, args.encoding, exclude_dirs, args.sort)
-        if result != 0:
-            exit_code = result
-
-    # Check if project structure mode is enabled
-    if args.project_structure:
-        executed_any = True
-        # Set default output file if not specified
-        output_file = args.output
-        if output_file == default_output:  # User didn't specify output
-            output_file = Path("reports/project_structure.md")
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        result = create_project_structure(output_file, args.encoding, exclude_dirs)
-        if result != 0:
-            exit_code = result
+    executed_any, exit_code = _run_special_modes(args, exclude_dirs)
 
     if executed_any:
         return exit_code

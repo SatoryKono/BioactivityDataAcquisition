@@ -9,7 +9,19 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.docs.checks.check_drift import main
+from scripts.docs.checks.check_drift import (
+    DriftReport,
+    check_freshness,
+    check_runtime_mirrors,
+    main,
+)
+
+__all__ = [
+    "DriftReport",
+    "check_freshness",
+    "check_runtime_mirrors",
+    "main",
+]
 
 if __name__ == "__main__":
     raise SystemExit(main())

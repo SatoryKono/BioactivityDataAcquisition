@@ -75,16 +75,21 @@ def _repo_path(relative_path: Path) -> Path:
     return _repo_root() / relative_path
 
 
-def _write_repo_text(relative_path: Path, content: str) -> None:
-    safe_path = _ensure_repo_path(_repo_root() / relative_path)
-    if safe_path.is_dir():
-        raise ValueError(f"refusing to write to directory path: {safe_path}")
-    safe_path.write_text(content, encoding="utf-8", newline="\n")
-        raise ValueError(f"refusing to write to directory path: {safe_path}")
-    safe_path.write_text(content, encoding="utf-8", newline="\n")
+def _resolve_repo_file_path(path: Path) -> Path:
+    if path.is_absolute():
+        return _ensure_repo_path(path)
+    return _ensure_repo_path(_repo_path(path))
+
+
+def _read_repo_text(path: Path) -> str:
+    safe_path = _resolve_repo_file_path(path)
+    return safe_path.read_text(encoding="utf-8")
+
 
 def _write_repo_text(relative_path: Path, content: str) -> None:
-    safe_path = _ensure_repo_path(_repo_path(relative_path))
+    safe_path = _resolve_repo_file_path(relative_path)
+    if safe_path.is_dir():
+        raise ValueError(f"refusing to write to directory path: {safe_path}")
     safe_path.write_text(content, encoding="utf-8", newline="\n")
 
 
@@ -155,7 +160,7 @@ def _collect_issues(lines: list[str]) -> list[OperatorIssue]:
 
 def check_file(path: Path) -> FileCheckResult:
     """Validate one Mermaid file for unsupported operators in target types."""
-    safe_path = _repo_path(path)
+    safe_path = _resolve_repo_file_path(path)
     lines = safe_path.read_text(encoding="utf-8").splitlines()
     diagram_type = detect_diagram_type(lines)
     if diagram_type not in TARGET_DIAGRAM_TYPES:

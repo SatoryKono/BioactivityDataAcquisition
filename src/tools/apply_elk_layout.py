@@ -247,7 +247,9 @@ def _ensure_elk_init(
         return lines, changes, "graph declaration not found"
 
     selected_routing = edge_routing or DEFAULT_EDGE_ROUTING
-    updated_lines = lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
+    updated_lines = (
+        lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
+    )
     changes.append("elk_init")
     return updated_lines, changes, None
 
@@ -267,7 +269,9 @@ def _maybe_force_lr_direction(
     current_decl = lines[graph_idx]
     stripped_decl = current_decl.lstrip()
     indent = current_decl[: len(current_decl) - len(stripped_decl)]
-    updated_decl = _GRAPH_LINE_RE.sub(lambda match: f"{match.group(1)} LR", stripped_decl)
+    updated_decl = _GRAPH_LINE_RE.sub(
+        lambda match: f"{match.group(1)} LR", stripped_decl
+    )
     updated_decl = indent + updated_decl
     if updated_decl == current_decl:
         return lines, False

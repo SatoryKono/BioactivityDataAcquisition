@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Config helpers module for common configuration operations."""
 
 
