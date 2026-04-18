@@ -188,19 +188,17 @@ def parse_mermaid(path: Path) -> dict[str, object]:
         )
         edge_count = sum(len(class_edge_pattern.findall(line)) for line in lines)
     else:
-        edge_pattern = re.compile(r"(?:-->|==>|-.->|--(?:>|o)|<--|~~~)")
+        edge_pattern = re.compile(r"(?:==>|-.->|--(?:>|o)|<--|~~~)")
         edge_count = sum(len(edge_pattern.findall(line)) for line in lines)
 
     # ── Extract subgraph / namespace names ──
     subgraph_names: list[str] = []
-    subgraph_pattern = re.compile(
-        r'(?:subgraph\s+\w+\["([^"]+)"\]|subgraph\s+(\w+)\s*$)'
-    )
+    subgraph_pattern = re.compile(r'subgraph\s+(?:(\w+)\["([^"]+)"\]|(\w+))\s*$')
     namespace_pattern = re.compile(r"^\s+namespace\s+(\w+)\s*\{?\s*$")
     for line in lines:
         m = subgraph_pattern.search(line)
         if m:
-            name = m.group(1) or m.group(2) or ""
+            name = m.group(2) or m.group(3) or ""
             if name and name != "direction":
                 subgraph_names.append(name)
         m2 = namespace_pattern.match(line)

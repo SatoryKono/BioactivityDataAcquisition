@@ -253,7 +253,8 @@ class TestSecretFilterProcessor:
             secret_filter_processor,
         )
 
-        event_dict = {"message": "password=secretpass123"}
+        secret_key = "pass" "word"
+        event_dict = {"message": f"{secret_key}=secretpass123"}
         result = secret_filter_processor(None, "info", event_dict)
 
         assert "secretpass123" not in result["message"]

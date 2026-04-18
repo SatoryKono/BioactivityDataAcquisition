@@ -50,6 +50,17 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
+def _resolve_repo_relative_path(raw: Path | str) -> Path:
+    candidate = Path(raw)
+    if candidate.is_absolute():
+        raise ValueError(f"absolute paths are not allowed: {candidate}")
+    if any(part == ".." for part in candidate.parts):
+        raise ValueError(f"path traversal is not allowed: {candidate}")
+    if candidate.parts and candidate.parts[0].startswith("-"):
+        raise ValueError(f"option-like path is not allowed: {candidate}")
+    return _ensure_repo_path(REPO_ROOT / candidate)
+
+
 @dataclass(frozen=True)
 class Violation:
     file: str
@@ -92,8 +103,7 @@ def load_manifest(manifest_path: Path) -> list[Path]:
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        candidate = line if line.startswith("/") else (REPO_ROOT / line)
-        path = _ensure_repo_path(Path(candidate))
+        path = _resolve_repo_relative_path(line)
         if path.suffix not in SUPPORTED_SUFFIXES:
             raise ValueError(f"Manifest entry must be .mmd/.mermaid: {line}")
         files.append(path)
@@ -107,7 +117,7 @@ def discover_files(targets: list[Path]) -> list[Path]:
     files: list[Path] = []
 
     for target in targets:
-        resolved = _ensure_repo_path(target if target.is_absolute() else (REPO_ROOT / target))
+        resolved = _ensure_repo_path(target)
         if resolved.is_file():
             if resolved.suffix in SUPPORTED_SUFFIXES and resolved not in seen:
                 seen.add(resolved)
@@ -516,14 +526,16 @@ def main() -> int:
     try:
         if not args.no_manifest:
             manifest = (
-                args.manifest
-                if args.manifest.is_absolute()
-                else (REPO_ROOT / args.manifest)
+                DEFAULT_MANIFEST
+                if args.manifest == DEFAULT_MANIFEST
+                else _resolve_repo_relative_path(args.manifest)
             )
             files = load_manifest(manifest)
         else:
             targets = (
-                [Path(path) for path in args.paths] if args.paths else [DEFAULT_TARGET]
+                [_resolve_repo_relative_path(path) for path in args.paths]
+                if args.paths
+                else [DEFAULT_TARGET]
             )
             files = discover_files(targets)
     except (FileNotFoundError, ValueError) as exc:

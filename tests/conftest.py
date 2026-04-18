@@ -455,6 +455,7 @@ def _create_minimal_df(columns, provider, entity_id, pk_field, pk_value):
     pd = _load_pandas()
     if pd is None:
         pytest.skip("pandas not installed")
+    assert pd is not None
     all_cols = list(set(SYSTEM_COLUMNS + BASE_PUBLICATION_COLUMNS + columns))
     data = dict.fromkeys(all_cols)
 

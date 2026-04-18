@@ -457,4 +457,4 @@ class TestBackwardCompatibility:
 
         # Resolved config should have validations from hierarchy
         # (inline dq_overrides in pipeline configs typically don't have validations)
-        assert len(resolved_dq.field_validations) >= 0
+        assert len(resolved_dq.field_validations) > 0

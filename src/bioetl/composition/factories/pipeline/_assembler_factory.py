@@ -17,10 +17,6 @@ from bioetl.application.core.wiring.transformer import (
 )
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
-    get_data_source_creator,
-)
-from bioetl.composition.factories.dq.context_resolver import (
-    extract_dq_configs as _extract_dq_configs,
 )
 from bioetl.composition.factories.pipeline.assembler_helpers import (
     build_factory_context,
@@ -29,19 +25,12 @@ from bioetl.composition.factories.pipeline.assembler_helpers import (
 )
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
-    build_factory_services,
     create_factory_data_source,
-    create_pipeline_instance_with_services,
     create_transformer_instance,
+    resolve_data_source_creator,
 )
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as _extract_entity_type,
-)
-from bioetl.composition.factories.pipeline.factory_method_helpers import (
-    resolve_data_source_creator,
-)
-from bioetl.composition.factories.pipeline.runner_assembly import (
-    assemble_runner_impl as _assemble_runner_impl,
 )
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
@@ -68,6 +57,12 @@ from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
+
+
+def _public_assembler_seam(name: str) -> object:
+    from bioetl.composition.factories.pipeline import assembler as public_assembler
+
+    return getattr(public_assembler, name)
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
@@ -108,7 +103,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             provider=provider,
             provider_registry=provider_registry,
             data_source_creator=data_source_creator,
-            get_data_source_creator_fn=get_data_source_creator,
+            get_data_source_creator_fn=_public_assembler_seam("get_data_source_creator"),
         )
 
     def create_transformer(
@@ -164,7 +159,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
-        return build_factory_services(
+        return _public_assembler_seam("build_factory_services")(
             factory_context=build_factory_context(self),
             request=_BuildFactoryServicesRequest(
                 settings,
@@ -209,7 +204,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             dq_monitor,
             metrics,
             cached_bronze,
-            create_pipeline_instance_with_services_fn=create_pipeline_instance_with_services,
+            create_pipeline_instance_with_services_fn=_public_assembler_seam(
+                "create_pipeline_instance_with_services"
+            ),
         )
 
     def create_runner(
@@ -241,7 +238,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             filter_config=filter_config,
             config=config,
             cached_bronze=cached_bronze,
-            assemble_runner_fn=assemble_runner,
+            assemble_runner_fn=_public_assembler_seam("assemble_runner"),
         )
 
 
@@ -276,14 +273,14 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    return _assemble_runner_impl(
+    return _public_assembler_seam("_assemble_runner_impl")(
         pipeline=pipeline,
         observability=observability,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
         strict_gold_validation=strict_gold_validation,
         yaml_config=yaml_config,
-        dq_configs_extractor=_extract_dq_configs,
+        dq_configs_extractor=_public_assembler_seam("_extract_dq_configs"),
     )
 
 

@@ -43,17 +43,16 @@ class TestCrossValidationValidator:
     def test_validate_valid_config(
         self,
         validator: CrossValidationValidator,
-        valid_config: CrossValidationConfig,
         source_names: list[str],
     ) -> None:
         """Test validation of a completely valid configuration."""
         # Disable strict mode to avoid coverage warning for this test
-        valid_config = CrossValidationConfig(
+        config = CrossValidationConfig(
             pairs=[{"source1": "source2"}],
             rules={"rule1": "strict"},
             strict_mode=False,  # Disable strict mode
         )
-        result = validator.validate_cross_validation_config(valid_config, source_names)
+        result = validator.validate_cross_validation_config(config, source_names)
 
         assert result.issues == []
         assert result.validation_layer == ValidationLayer.DEEP_PREFLIGHT

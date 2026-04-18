@@ -19,11 +19,6 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Re-export for backwards compatibility
 __all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "PublicationEnrichedSchema"]
 
-_CROSSREF_ISSN_MULTI_PATTERN = (
-    r'^(?:\d{4}-\d{3}[\dX]|\["?\d{4}-\d{3}[\dX]"?(?:,\s*"?\d{4}-\d{3}[\dX]"?)*\]|'
-    r'\d{4}-\d{3}[\dX](?:,\s*\d{4}-\d{3}[\dX])*)$'
-)
-
 
 class PublicationEnrichedSchema(PublicationBaseSchema):
     """CrossRef-enriched Publication validation schema for Silver layer.
@@ -74,10 +69,10 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
         nullable=True,
-        str_matches=_CROSSREF_ISSN_MULTI_PATTERN,
         description=(
-            "Primary ISSN or serialized CrossRef ISSN payload "
-            "(single ISSN, CSV list, or JSON-like list)"
+            "Primary ISSN or provider-native serialized ISSN payload. "
+            "CrossRef can surface multi-value ISSN strings here; canonical "
+            "typed variants remain in issn_print / issn_electronic / issn_list."
         ),
     )
     issn_list: Series[str] = pa.Field(
