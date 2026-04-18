@@ -63,6 +63,48 @@ def _get_base_path(relative_path: Path) -> Path:
     return Path(__file__).parent.parent.parent / relative_path
 
 
+def _parse_python_file(py_file: Path) -> tuple[str, ast.AST] | None:
+    content = py_file.read_text(encoding="utf-8")
+    try:
+        return content, ast.parse(content)
+    except SyntaxError:
+        return None
+
+
+def _relative_to_application(py_file: Path) -> Path:
+    return py_file.relative_to(_get_base_path(APPLICATION_DIR))
+
+
+def _relative_to_src(src_dir: Path, py_file: Path) -> Path:
+    return py_file.relative_to(src_dir)
+
+
+def _files_for_layers(src_dir: Path, layers: list[str]) -> list[Path]:
+    files: list[Path] = []
+    for layer in layers:
+        layer_path = src_dir / "bioetl" / layer
+        if not layer_path.exists():
+            continue
+        files.extend(layer_path.rglob("*.py"))
+    return files
+
+
+def _type_checking_line_numbers(lines: list[str]) -> set[int]:
+    active_numbers: set[int] = set()
+    in_type_checking = False
+    for index, line in enumerate(lines, 1):
+        stripped = line.strip()
+        if "if TYPE_CHECKING:" in line:
+            in_type_checking = True
+            active_numbers.add(index)
+            continue
+        if in_type_checking and stripped and not line.startswith((" ", "\t")):
+            in_type_checking = False
+        if in_type_checking:
+            active_numbers.add(index)
+    return active_numbers
+
+
 class InstantiationFinder(ast.NodeVisitor):
     """AST visitor to find forbidden instantiation calls."""
 
@@ -133,15 +175,11 @@ class TestDICompliance:
         See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
         """
         violations = []
-
         for py_file in application_python_files:
-            content = py_file.read_text(encoding="utf-8")
-
-            try:
-                tree = ast.parse(content)
-            except SyntaxError:
+            parsed = _parse_python_file(py_file)
+            if parsed is None:
                 continue
-
+            _content, tree = parsed
             finder = InstantiationFinder(
                 FORBIDDEN_INSTANTIATION_CLASSES,
                 FORBIDDEN_ATTRIBUTE_INSTANTIATIONS,
@@ -149,8 +187,9 @@ class TestDICompliance:
             finder.visit(tree)
 
             for lineno, class_name in finder.violations:
-                relative = py_file.relative_to(_get_base_path(APPLICATION_DIR))
-                violations.append(f"{relative}:{lineno}: {class_name}()")
+                violations.append(
+                    f"{_relative_to_application(py_file)}:{lineno}: {class_name}()"
+                )
 
         assert not violations, (
             "DI violations: Application layer must not instantiate "
@@ -168,31 +207,18 @@ class TestDICompliance:
         This ensures a single composition root for dependency assembly.
         """
         violations = []
-
-        # Layers that should NOT contain factories
         forbidden_layers = ["application", "infrastructure", "domain", "interfaces"]
-
-        for layer in forbidden_layers:
-            layer_path = src_dir / "bioetl" / layer
-            if not layer_path.exists():
+        for py_file in _files_for_layers(src_dir, forbidden_layers):
+            parsed = _parse_python_file(py_file)
+            if parsed is None:
                 continue
-
-            for py_file in layer_path.rglob("*.py"):
-                content = py_file.read_text(encoding="utf-8")
-
-                try:
-                    tree = ast.parse(content)
-                except SyntaxError:
-                    continue
-
-                for node in ast.walk(tree):
-                    if isinstance(node, ast.ClassDef):
-                        # Check for Factory suffix
-                        if node.name.endswith("Factory"):
-                            relative = py_file.relative_to(src_dir)
-                            violations.append(
-                                f"{relative}:{node.lineno} - class {node.name}"
-                            )
+            _content, tree = parsed
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef) and node.name.endswith("Factory"):
+                    violations.append(
+                        f"{_relative_to_src(src_dir, py_file)}:{node.lineno} - "
+                        f"class {node.name}"
+                    )
 
         assert not violations, (
             "Factory classes must be in composition layer only.\n"
@@ -210,52 +236,36 @@ class TestDICompliance:
         Anti-pattern: self._client = SomeClient() inside __init__.
         """
         violations = []
-
-        # Patterns for internal instantiation (suspicious but not always wrong)
-        # NOTE: We match specific infrastructure class patterns, not general ones.
-        # Application-layer coordinators like BatchWriter, BatchTransformer are allowed
-        # since they're not infrastructure - they depend on injected ports.
         internal_creation_patterns = [
-            # Creating adapters inside __init__ (infrastructure)
             (r"self\._\w+\s*=\s*(?!Batch)\w+Adapter\(", "Adapter creation in __init__"),
             (r"self\._\w+\s*=\s*(?!Unified)\w+Client\(", "Client creation in __init__"),
-            # Storage layer writers (infrastructure), but NOT BatchWriter (application)
             (
                 r"self\._\w+\s*=\s*(Bronze|Silver|Gold|Delta)Writer\(",
                 "Storage writer creation in __init__",
             ),
-            # Creating HTTP clients inside methods
             (r"httpx\.(Async)?Client\(\)", "httpx client creation"),
         ]
 
         for py_file in application_python_files:
-            content = py_file.read_text(encoding="utf-8")
-
-            try:
-                tree = ast.parse(content)
-            except SyntaxError:
+            parsed = _parse_python_file(py_file)
+            if parsed is None:
                 continue
-
-            # Find __init__ methods and check for internal instantiation
+            content, tree = parsed
             for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    for item in node.body:
-                        if (
-                            isinstance(item, ast.FunctionDef)
-                            and item.name == "__init__"
-                        ):
-                            # Get the source lines for __init__
-                            init_lines = ast.get_source_segment(content, item)
-                            if init_lines:
-                                for pattern, desc in internal_creation_patterns:
-                                    if re.search(pattern, init_lines):
-                                        relative = py_file.relative_to(
-                                            _get_base_path(APPLICATION_DIR)
-                                        )
-                                        violations.append(
-                                            f"{relative}:{item.lineno} - "
-                                            f"{node.name}.__init__: {desc}"
-                                        )
+                if not isinstance(node, ast.ClassDef):
+                    continue
+                for item in node.body:
+                    if not isinstance(item, ast.FunctionDef) or item.name != "__init__":
+                        continue
+                    init_lines = ast.get_source_segment(content, item)
+                    if not init_lines:
+                        continue
+                    for pattern, desc in internal_creation_patterns:
+                        if re.search(pattern, init_lines):
+                            violations.append(
+                                f"{_relative_to_application(py_file)}:{item.lineno} - "
+                                f"{node.name}.__init__: {desc}"
+                            )
 
         assert not violations, (
             "Dependencies should be injected, not created internally.\n"
@@ -273,31 +283,18 @@ class TestDICompliance:
         Application should use DataSourcePort, not httpx.
         """
         violations = []
-
         for py_file in application_python_files:
-            content = py_file.read_text(encoding="utf-8")
-            lines = content.splitlines()
-
-            in_type_checking = False
-
+            lines = py_file.read_text(encoding="utf-8").splitlines()
+            type_checking_lines = _type_checking_line_numbers(lines)
             for i, line in enumerate(lines, 1):
                 stripped = line.strip()
-
-                # Track TYPE_CHECKING blocks (imports for hints are OK)
-                if "if TYPE_CHECKING:" in line:
-                    in_type_checking = True
-                elif in_type_checking and stripped and not line.startswith((" ", "\t")):
-                    in_type_checking = False
-
-                if in_type_checking:
+                if i in type_checking_lines:
                     continue
-
-                # Check for direct httpx imports
                 if "import httpx" in stripped or "from httpx" in stripped:
-                    # Skip if in docstring (rough check)
                     if not stripped.startswith('"""') and not stripped.startswith("#"):
-                        relative = py_file.relative_to(_get_base_path(APPLICATION_DIR))
-                        violations.append(f"{relative}:{i}: {stripped}")
+                        violations.append(
+                            f"{_relative_to_application(py_file)}:{i}: {stripped}"
+                        )
 
         assert not violations, (
             "Application layer must not import httpx directly.\n"

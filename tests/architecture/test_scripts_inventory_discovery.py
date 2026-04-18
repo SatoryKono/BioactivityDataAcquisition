@@ -45,20 +45,30 @@ def test_iter_scripts_includes_non_python_entrypoints_in_current_scope() -> None
     assert not any(path.endswith(".sql") for path in rel_paths)
 
 
-def test_discover_refs_normalizes_windows_path_separators() -> None:
-    """Docs references written as scripts\\foo.bat must be discovered."""
+def test_discover_refs_normalizes_windows_path_separators(tmp_path: Path) -> None:
+    """Windows-style script refs should resolve through path aliases."""
     module = _load_inventory_module()
     root = _project_root()
     targets = [
-        root / "scripts" / "codex-exec.bat",
-        root / "scripts" / "codex.bat",
-        root / "scripts" / "start-wsl-proxy.bat",
-        root / "scripts" / "ops" / "codex-exec.bat",
-        root / "scripts" / "ops" / "codex.bat",
-        root / "scripts" / "ops" / "start-wsl-proxy.bat",
+        root / "scripts" / "ops" / "launchers" / "codex" / "codex-exec.bat",
+        root / "scripts" / "ops" / "launchers" / "codex" / "codex.bat",
+        root / "scripts" / "ops" / "runtime" / "wsl" / "start-wsl-proxy.bat",
     ]
     original_iter_search_files = module._iter_search_files
-    docs_file = root / "docs" / "03-guides" / "development" / "codex-wsl2-setup.md"
+    docs_dir = tmp_path / "docs" / "03-guides" / "development"
+    docs_dir.mkdir(parents=True)
+    docs_file = docs_dir / "codex-paths.md"
+    docs_file.write_text(
+        "\n".join(
+            (
+                r"scripts\codex-exec.bat",
+                r"scripts\codex.bat",
+                r"scripts\start-wsl-proxy.bat",
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
     def _iter_only_codex_setup_docs(_: Path) -> list[Path]:
         return [docs_file]
@@ -74,15 +84,15 @@ def test_discover_refs_normalizes_windows_path_separators() -> None:
     proxy_key = "/".join(["scripts", "start-wsl-proxy.bat"])
 
     assert any(
-        item.path == "docs/03-guides/development/codex-wsl2-setup.md"
+        item.path == "docs/03-guides/development/codex-paths.md"
         for item in refs[codex_exec_key]
     )
     assert any(
-        item.path == "docs/03-guides/development/codex-wsl2-setup.md"
+        item.path == "docs/03-guides/development/codex-paths.md"
         for item in refs[codex_key]
     )
     assert any(
-        item.path == "docs/03-guides/development/codex-wsl2-setup.md"
+        item.path == "docs/03-guides/development/codex-paths.md"
         for item in refs[proxy_key]
     )
 
