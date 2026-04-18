@@ -16,8 +16,8 @@ WIDTH = 1600
 HEIGHT = 2200
 
 
-def _auth_header(username: str = "admin", password: str = "admin") -> str:
-    token = base64.b64encode(f"{username}:{password}".encode()).decode("ascii")
+def _auth_header(username: str = "admin", secret_value: str = "admin") -> str:
+    token = base64.b64encode(f"{username}:{secret_value}".encode()).decode("ascii")
     return f"Basic {token}"
 
 
