@@ -53,7 +53,7 @@ _OPERATION_ERRORS = _RF005_OPERATION_ERRORS
 
 
 class BatchProcessingSupportService:
-    """Encapsulates per-batch transform/write tracing choreography."""
+    """Encapsulate per-batch transform/write tracing choreography."""
 
     def __init__(
         self,
@@ -68,7 +68,7 @@ class BatchProcessingSupportService:
         run_id: RunID | None = None,
         domain_event_emitter: DomainEventEmitterPort | None = None,
     ) -> None:
-        """Store shared collaborators for one batch-processing family slice."""
+        """Store shared collaborators for one batch-processing slice."""
         self._services = services
         self._logger = logger
         self._batch_metrics = batch_metrics
@@ -83,7 +83,7 @@ class BatchProcessingSupportService:
         self,
         query_string: str | None,
     ) -> SourceMetadata | None:
-        """Get source metadata and enrich it with query string when available."""
+        """Get source metadata and enrich it with the active query string."""
         return get_source_metadata(
             data_source=self._services.data_source,
             logger=self._logger,
@@ -98,7 +98,7 @@ class BatchProcessingSupportService:
         ingestion_ts: datetime,
         source_metadata: SourceMetadata | None,
     ) -> object:
-        """Write records to Bronze layer and track batch metrics."""
+        """Write records to Bronze and track the corresponding metrics."""
         result = await self._execute_with_span(
             "write_bronze",
             self._writer.write_bronze(
@@ -132,7 +132,7 @@ class BatchProcessingSupportService:
         batch_id: BatchID,
         start_index: int,
     ) -> TransformResult:
-        """Execute transform stage and track per-layer record counts."""
+        """Execute the transform stage and track per-layer record counts."""
         transform_result = await self._execute_transform_with_span(
             records=records,
             batch_id=batch_id,
@@ -156,7 +156,7 @@ class BatchProcessingSupportService:
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None,
     ) -> None:
-        """Fire Silver and Gold writes concurrently to independent Delta tables."""
+        """Write Silver and Gold outputs concurrently to independent tables."""
         write_coros: list[Awaitable[object]] = []
 
         if transform_result.silver_records:
@@ -205,7 +205,7 @@ class BatchProcessingSupportService:
         records: list[BronzeRecord],
         transform_result: TransformResult,
     ) -> None:
-        """Set batch result on tracing span and close it."""
+        """Set batch result attributes on the tracing span and close it."""
         self._tracing.set_batch_result(
             span,
             bronze_count=len(records),
@@ -236,7 +236,7 @@ class BatchProcessingSupportService:
         count: int,
         on_error: Callable[[Exception], None] | None = None,
     ) -> object:
-        """Execute a coroutine wrapped with a per-layer tracing span."""
+        """Execute one coroutine wrapped with a per-layer tracing span."""
         return await execute_with_layer_span(
             tracing=self._tracing,
             name=name,
@@ -253,7 +253,7 @@ class BatchProcessingSupportService:
         batch_id: BatchID,
         start_index: int,
     ) -> TransformResult:
-        """Execute transform stage and attach output metrics to the span."""
+        """Execute the transform stage and attach output metrics to the span."""
         return await execute_transform_with_span(
             tracing=self._tracing,
             transformer=self._transformer,

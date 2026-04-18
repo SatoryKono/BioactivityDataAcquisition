@@ -10,14 +10,16 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
 )
-from bioetl.application.core.postrun._phase_runtime import (
+from bioetl.application.core.postrun._phase_descriptions import (
     describe_compaction_phase,
     describe_dq_phase,
     describe_dq_report_phase,
     describe_final_metadata_phase,
     describe_vacuum_phase,
-    emit_postrun_phase_observability,
     record_run_span_attributes,
+)
+from bioetl.application.core.postrun._phase_runtime import (
+    emit_postrun_phase_observability,
     run_async_postrun_phase,
     run_sync_postrun_phase,
 )
