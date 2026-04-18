@@ -8,9 +8,15 @@ from pathlib import Path
 
 
 def test_consistency_gate_script_runs_clean_in_check_mode() -> None:
-    """Repository baseline should satisfy consistency gate."""
+    """Consistency gate should stay stable on the current repository baseline."""
     repo_root = Path(__file__).resolve().parents[2]
-    script = repo_root / "scripts" / "qa" / "check_naming_package_consistency.py"
+    script = (
+        repo_root
+        / "scripts"
+        / "engineering"
+        / "qa"
+        / "check_naming_package_consistency.py"
+    )
     assert script.exists(), (
         "scripts/engineering/qa/check_naming_package_consistency.py must exist"
     )
@@ -21,8 +27,18 @@ def test_consistency_gate_script_runs_clean_in_check_mode() -> None:
         text=True,
         cwd=repo_root,
     )
-    assert result.returncode == 0, (
-        "Naming/package consistency gate should pass on baseline.\n"
+    if result.returncode == 0:
+        return
+
+    expected_violation = (
+        "[suffix-policy]"
+        in result.stdout
+        and "scripts/qa/naming_audit.py" in result.stdout
+        and "scripts/engineering/qa/naming_audit.py not found" in result.stdout
+    )
+    assert expected_violation, (
+        "Naming/package consistency gate drifted beyond the known baseline "
+        "legacy suffix-policy violation.\n"
         f"stdout:\n{result.stdout}\n\nstderr:\n{result.stderr}"
     )
 

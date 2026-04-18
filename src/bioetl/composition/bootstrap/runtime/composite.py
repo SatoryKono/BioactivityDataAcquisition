@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from pydantic import ValidationError as _ValidationError
+
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     CompositeBootstrapPlan as _CompositeBootstrapPlan,
@@ -25,7 +27,7 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     create_composite_runner_from_plan_impl as _create_composite_runner_from_plan_impl,
 )
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
-    load_composite_config_impl as _load_composite_config_runtime_impl,
+    load_composite_config_impl as _load_runtime_composite_config_impl,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
     _create_dq_report_service,
@@ -64,7 +66,13 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.ports import LoggerPort
 
-__all__ = ["CompositeRuntimeConfig", "bootstrap_composite_runner", "load_composite_config"]
+__all__ = [
+    "CompositeRuntimeConfig",
+    "bootstrap_composite_runner",
+    "load_composite_config",
+]
+
+ValidationError = _ValidationError
 
 
 def _resolve_composite_gold_schema(composite_name: str) -> type | None:
@@ -85,7 +93,7 @@ def _resolve_composite_config_path(name: str) -> Path:
 
 def load_composite_config(name: str) -> CompositeConfig:
     """Load and validate composite pipeline configuration from YAML."""
-    return _load_composite_config_runtime_impl(
+    return _load_runtime_composite_config_impl(
         name,
         resolve_config_path_fn=_resolve_composite_config_path,
         validate_payload=validate_composite_config_payload,

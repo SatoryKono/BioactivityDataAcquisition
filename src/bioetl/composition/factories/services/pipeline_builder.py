@@ -1,5 +1,3 @@
-"""Pipeline-bound facade helpers for ServicesBuilder."""
-
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
@@ -52,8 +50,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types import GoldSchemaType, RunID
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-
-
 def create_batch_processing_components(
     *,
     services: PipelineService,
@@ -68,7 +64,6 @@ def create_batch_processing_components(
     domain_event_emitter: DomainEventEmitterPort | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
-    """Create batch metrics/transformer/writer stack via composition DI."""
     return build_batch_processing_components(
         services=services,
         context=context,
@@ -97,7 +92,6 @@ def create_checkpoint_manager(
     current_metadata: CheckpointMetadata | None = None,
     compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
 ) -> CheckpointManagerService:
-    """Create configured CheckpointManagerService."""
     return CheckpointManagerService(
         checkpoint_port=checkpoint_port,
         logger=logger,
@@ -123,7 +117,6 @@ def create_record_processor_from_pipeline(
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
     tracer: TracingPort | None = None,
 ) -> RecordProcessor:
-    """Create RecordProcessor from pipeline using delegated builder."""
     return build_record_processor_from_pipeline(
         pipeline=pipeline,
         silver_schema=silver_schema,
@@ -157,7 +150,6 @@ def create_batch_executor_from_pipeline(
     batch_id_factory: BatchIdGeneratorPort | None = None,
     domain_event_emitter: DomainEventEmitterPort | None = None,
 ) -> BatchExecutor:
-    """Create BatchExecutor from pipeline using delegated component factories."""
     return build_batch_executor_from_pipeline(
         pipeline=pipeline,
         callbacks=callbacks,
@@ -178,8 +170,6 @@ def create_batch_executor_from_pipeline(
         batch_id_factory=batch_id_factory,
         domain_event_emitter=domain_event_emitter,
     )
-
-
 __all__ = [
     "BatchProcessingComponents",
     "create_batch_executor_from_pipeline",

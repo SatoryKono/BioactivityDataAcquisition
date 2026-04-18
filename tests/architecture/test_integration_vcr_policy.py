@@ -379,8 +379,8 @@ class TestIntegrationVcrPolicy:
         assert "--vcr-record=new_episodes" in dev_readme
 
         assert "configs/quality/integration_vcr_policy.yaml" in data_readme
-        assert "python -m scripts.data check-vcr-placement" in data_readme
-        assert "python -m scripts.data check-vcr-secrets" in data_readme
+        assert "python -m scripts.engineering.qa.vcr check-placement" in data_readme
+        assert "python -m scripts.engineering.qa.vcr check-secrets" in data_readme
         assert (
             "python -m scripts.engineering.qa report-vcr-metadata --check"
             in data_readme

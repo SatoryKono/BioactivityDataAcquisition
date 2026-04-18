@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.application.composite.runtime_wiring_api import (
-    CompositeLifecycleObserverService,
     CompositeCheckpointService,
+    CompositeLifecycleObserverService,
 )
 from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
     CompositeRunnerFactory,
@@ -41,9 +41,13 @@ if TYPE_CHECKING:
         DependencyCoordinatorService,
         EnrichmentCoordinatorService,
         FSMStateHelperService,
-        KeyExtractorService as _KeyExtractorService,
-        MergeService as _MergeService,
         PipelineRunner,
+    )
+    from bioetl.application.composite.runtime_wiring_api import (
+        KeyExtractorService as _KeyExtractorService,
+    )
+    from bioetl.application.composite.runtime_wiring_api import (
+        MergeService as _MergeService,
     )
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
