@@ -15,12 +15,16 @@ __all__ = [
 
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
+from bioetl.application.core._target_data_source_fetch_support import (
+    yield_plain_wrapped_fetch_records as _yield_plain_wrapped_fetch_records,
+)
+from bioetl.application.core._target_data_source_fetch_support import (
+    yield_wrapped_fetch_records as _yield_wrapped_fetch_records,
+)
 from bioetl.application.core._target_data_source_mixins import (
     _FallbackFilterableTargetFetchMixin,
     _FilterableTargetDelegationMixin,
     _TargetEntityFetchDelegationMixin,
-    _yield_plain_wrapped_fetch_records,
-    _yield_wrapped_fetch_records,
 )
 
 if TYPE_CHECKING:

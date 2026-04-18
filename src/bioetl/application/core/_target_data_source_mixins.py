@@ -2,13 +2,26 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "_FallbackFilterableTargetFetchMixin",
+    "_FilterableTargetDelegationMixin",
+    "_TargetEntityFetchDelegationMixin",
+    "_yield_plain_wrapped_fetch_records",
+    "_yield_wrapped_fetch_records",
+]
+
 from typing import TYPE_CHECKING, Protocol, TypeVar, cast
 
 from bioetl.application.core._target_data_source_fetch_support import (
     ensure_filterable_data_source,
     yield_target_or_delegate_records,
     yield_target_records_from_fallback_fetch,
-    yield_wrapped_fetch_records,
+)
+from bioetl.application.core._target_data_source_fetch_support import (
+    yield_plain_wrapped_fetch_records as _yield_plain_wrapped_fetch_records,
+)
+from bioetl.application.core._target_data_source_fetch_support import (
+    yield_wrapped_fetch_records as _yield_wrapped_fetch_records,
 )
 from bioetl.domain.ports import FilterableDataSourcePort
 
@@ -55,7 +68,7 @@ class _TargetEntityFetchDelegationMixin:
                 offset,
             )
 
-        return yield_wrapped_fetch_records(
+        return _yield_wrapped_fetch_records(
             self._data_source,
             entity_type=entity_type,
             limit=limit,
