@@ -255,22 +255,24 @@ def handle_destructive_confirmation(
     exit_func: Callable[[int | str | None], NoReturn] = sys.exit,
 ) -> bool:
     """Handle confirmation flow for destructive run-all operations."""
+    should_continue = True
     if not should_prompt_for_destructive_run(
         run_type=run_type,
         dry_run=dry_run,
         yes=yes,
     ):
-        return True
+        return should_continue
 
     emit_destructive_confirmation_preview(
         run_type=run_type,
         pipelines=pipelines,
     )
 
-    if not confirm_fn("\nDo you want to continue?"):
+    should_continue = confirm_fn("\nDo you want to continue?")
+    if not should_continue:
         info_printer("Operation cancelled.")
         exit_func(ExitCode.OK)
-    return True
+    return should_continue
 
 
 def emit_run_all_preview(

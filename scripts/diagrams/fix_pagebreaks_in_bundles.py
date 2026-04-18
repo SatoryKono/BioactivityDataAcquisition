@@ -32,6 +32,12 @@ def _safe_bundle_path(path: Path) -> Path:
     return resolved_path
 
 
+def _write_bundle_text(path: Path, content: str) -> None:
+    """Write bundle content only after confirming the path remains inside DIAGRAM_ROOT."""
+    safe_path = _safe_bundle_path(path)
+    safe_path.write_text(content, encoding="utf-8")
+
+
 def fix_bundle(md_path: Path) -> int:
     safe_path = _safe_bundle_path(md_path)
     text = safe_path.read_text(encoding="utf-8")
@@ -102,7 +108,7 @@ def fix_bundle(md_path: Path) -> int:
 
     if changes > 0:
         result = "\n".join(out) + "\n"
-        safe_path.write_text(result, encoding="utf-8")
+        _write_bundle_text(safe_path, result)
         print(f"[OK] Fixed {changes} items in {safe_path.name}")
     else:
         print(f"[SKIP] No changes needed: {safe_path.name}")

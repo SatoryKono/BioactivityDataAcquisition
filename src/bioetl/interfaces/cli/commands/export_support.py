@@ -263,7 +263,7 @@ def _list_tables_or_exit(
     service: _ExportCommandService,
     *,
     layer: str,
-) -> bool:
+) -> None:
     """Handle table listing mode."""
     tables = _run_export_sync(
         lambda: service.list_tables(layer=_resolve_list_layer(layer)),
@@ -273,9 +273,8 @@ def _list_tables_or_exit(
         unexpected_error_title="Unexpected error during export table listing",
     )
     if tables is None:
-        return True
+        return
     if not tables:
         echo_info("No Delta tables found.")
-        return True
+        return
     echo_table_list(tables)
-    return True

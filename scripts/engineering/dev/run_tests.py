@@ -31,10 +31,16 @@ COMMANDS: dict[str, CommandSpec] = {
     "contract": CommandSpec("Contract Tests", ["tests/contract/", "-v"]),
     "smoke": CommandSpec("Smoke Tests", ["tests/smoke/", "-v"]),
     "security": CommandSpec("Security Tests", ["tests/security/", "-v"]),
+    "memory": CommandSpec(
+        "Neo4j Memory Tests",
+        ["tests/unit/scripts/ops/", "-m", "memory", "-q"],
+    ),
     "cov": CommandSpec(
         "Tests + Coverage",
         [
             "tests/",
+            "-m",
+            "not memory",
             "--cov=src/bioetl",
             "--cov-report=html",
             "--cov-report=term-missing",
@@ -78,7 +84,8 @@ Commands:
   contract-live Contract tests with live APIs + network enabled
   smoke         Smoke tests (tests/smoke/)
   security      Security tests (tests/security/)
-  cov           All tests with coverage report (fail-under=85%)
+  memory        Dedicated Neo4j project-memory and MCP tests
+  cov           All non-memory tests with coverage report (fail-under=85%)
   quick         Unit + smoke (fast feedback loop)
   parallel      All tests via pytest-xdist (-n auto)
   changed       Run tests related to files changed vs a base branch (default: main)

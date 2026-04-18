@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import pytest
 from datetime import date
 from urllib import error
 
@@ -53,6 +54,8 @@ from scripts.memory.sync import (
     _targeted_apply_external_anchor_keys,
     _targeted_apply_required_anchor_labels,
 )
+
+pytestmark = pytest.mark.memory
 
 
 def _snapshot() -> tuple[Path, object]:

@@ -3,11 +3,15 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 from scripts.memory.mcp_smoke import (
     _encode_frame,
     _parse_frames,
     run_smoke_command,
 )
+
+pytestmark = pytest.mark.memory
 
 
 def test_parse_frames_round_trips_multiple_messages() -> None:

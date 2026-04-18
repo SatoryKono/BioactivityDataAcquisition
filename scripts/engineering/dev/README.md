@@ -163,7 +163,7 @@ python -m scripts.engineering.dev <command> [args...]
 | `setup --ci`     | Legacy compatibility entrypoint only; CI should use the maintained repo commands                                    | CI migration/legacy compatibility only                 |
 | `install-deps`   | Specialized helper for one auxiliary package; not for normal repo setup                                             | Manual, rare maintenance task                          |
 | `pretest-guardrails` | Before broad bash pytest runs when you want drift/governance issues caught up front                            | Manual, or auto-triggered by bash pytest runners       |
-| `run-tests`      | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `cov`  | Manual, during development                             |
+| `run-tests`      | Local test execution; supports modes: `all`, `unit`, `arch`, `integration`, `contract`, `smoke`, `security`, `memory`, `cov`  | Manual, during development                             |
 | `pytest-sharded` | Faster local feedback for the large pytest suite by running stable path-based shards through the maintained wrapper | Manual, during development                             |
 | `mock-metrics`   | When developing or testing Grafana dashboards locally; starts Prometheus mock server with sample data               | Manual, during dashboard development                   |
 | `mock-quarantine`| When validating `5. Silver Reject Explorer` against `/ops/quarantine/*` without real Delta data                     | Manual, during dashboard/API smoke checks              |

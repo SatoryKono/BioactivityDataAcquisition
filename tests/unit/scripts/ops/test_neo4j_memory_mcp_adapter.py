@@ -3,7 +3,11 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 from scripts.ai.mcp.neo4j_memory_mcp_smoke import run_smoke_command
+
+pytestmark = pytest.mark.memory
 
 
 def test_adapter_bridges_framed_client_to_line_delimited_server(tmp_path: Path) -> None:

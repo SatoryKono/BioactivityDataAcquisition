@@ -4,6 +4,8 @@ from collections.abc import AsyncIterator
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.infrastructure.adapters.common.retry_reduction_policy import (
     run_retry_exhausted_recovery_policy,
 )
@@ -30,16 +32,15 @@ async def test_run_retry_exhausted_recovery_policy_splits_multi_batch() -> None:
         single_calls.append(single_id)
         yield {"id": single_id}
 
-    records = [
-        record
-        async for record in run_retry_exhausted_recovery_policy(
+    records = await collect_async_iterator(
+        run_retry_exhausted_recovery_policy(
             id_batch=["A", "B", "C", "D"],
             retry_error=RuntimeError("retry exhausted"),
             on_split=_on_split,
             fetch_reduced_batch=_fetch_reduced_batch,
             fetch_single_fallback=_fetch_single_fallback,
         )
-    ]
+    )
 
     assert records == [{"id": "A,B"}, {"id": "C,D"}]
     assert reduced_calls == [["A", "B"], ["C", "D"]]
@@ -64,16 +65,15 @@ async def test_run_retry_exhausted_recovery_policy_uses_single_fallback() -> Non
         single_calls.append((single_id, str(error)))
         yield {"id": f"single:{single_id}"}
 
-    records = [
-        record
-        async for record in run_retry_exhausted_recovery_policy(
+    records = await collect_async_iterator(
+        run_retry_exhausted_recovery_policy(
             id_batch=["CHEMBL123"],
             retry_error=ValueError("fail"),
             on_split=None,
             fetch_reduced_batch=_fetch_reduced_batch,
             fetch_single_fallback=_fetch_single_fallback,
         )
-    ]
+    )
 
     assert records == [{"id": "single:CHEMBL123"}]
     assert reduced_calls == []
@@ -99,16 +99,15 @@ async def test_run_retry_exhausted_recovery_policy_empty_batch_noop() -> None:
         if False:  # pragma: no cover
             yield {"id": "unused"}
 
-    records = [
-        record
-        async for record in run_retry_exhausted_recovery_policy(
+    records = await collect_async_iterator(
+        run_retry_exhausted_recovery_policy(
             id_batch=[],
             retry_error=RuntimeError("irrelevant"),
             on_split=None,
             fetch_reduced_batch=_fetch_reduced_batch,
             fetch_single_fallback=_fetch_single_fallback,
         )
-    ]
+    )
 
     assert records == []
     assert reduced_calls == []

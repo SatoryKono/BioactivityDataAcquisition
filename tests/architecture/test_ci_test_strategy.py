@@ -19,8 +19,8 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
     assert "pattern: coverage-data-*" in workflow, (
         "coverage-verify job must download all coverage shard artifacts"
     )
-    assert ' -m "serial and not e2e and not benchmark" \\' in workflow or (
-        '-m "serial and not e2e and not benchmark"' in workflow
+    assert (
+        '--parallel-marker "serial and not e2e and not benchmark and not memory"' in workflow
     ), "coverage-verify job must run only serial-marker tests directly"
     assert "coverage combine reports/coverage" in workflow, (
         "coverage-verify job must combine shard coverage instead of rerunning the full suite"
@@ -33,11 +33,11 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
 def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     """Parallel CI jobs should not execute serial-only tests."""
     workflow = _read_workflow(".github/workflows/tests.yml")
-    assert '-m "not slow and not serial"' in workflow, (
-        "test-fast job must exclude serial marker in parallel mode"
+    assert '-m "not slow and not serial and not memory"' in workflow, (
+        "test-fast job must exclude serial and memory markers in parallel mode"
     )
-    assert '-m "not serial"' in workflow, (
-        "test-matrix job must exclude serial marker in parallel mode"
+    assert '-m "not serial and not memory"' in workflow, (
+        "test-matrix job must exclude serial and memory markers in parallel mode"
     )
     assert "--max-worker-restart=0" in workflow, (
         "parallel CI jobs must fail fast on worker restart loops"
@@ -75,4 +75,18 @@ def test_tests_workflow_publishes_duration_telemetry_artifact() -> None:
     )
     assert "slowest-tests.md" in workflow and "slowest-tests.json" in workflow, (
         "duration telemetry output should include both markdown and JSON summaries"
+    )
+
+
+def test_tests_workflow_has_dedicated_memory_lane_outside_coverage() -> None:
+    """Neo4j memory tests should run in their own non-coverage lane."""
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    assert "memory-tests:" in workflow, (
+        "tests workflow should define a dedicated memory-tests job"
+    )
+    assert '--junitxml=reports/test-telemetry/junit-memory.xml' in workflow, (
+        "memory-tests job should emit its own telemetry artifact"
+    )
+    assert ' -m "memory" \\' in workflow or '-m "memory"' in workflow, (
+        "memory-tests job must run only the dedicated memory-marked suite"
     )

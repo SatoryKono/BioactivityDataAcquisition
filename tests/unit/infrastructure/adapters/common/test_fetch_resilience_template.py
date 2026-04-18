@@ -7,6 +7,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
     fetch_batch_with_reduction,
@@ -83,9 +85,8 @@ async def test_fetch_batch_with_reduction_yields_records_without_recovery() -> N
         deduplicated_records=[{"id": "A"}, {"id": "B"}],
     )
 
-    records = [
-        record
-        async for record in fetch_batch_with_reduction(
+    records = await collect_async_iterator(
+        fetch_batch_with_reduction(
             host,
             "target",
             ["A", "B"],
@@ -94,7 +95,7 @@ async def test_fetch_batch_with_reduction_yields_records_without_recovery() -> N
             set(),
             "target_id",
         )
-    ]
+    )
 
     assert records == [{"id": "A"}, {"id": "B"}]
     assert host.reduced_calls == []
@@ -109,9 +110,8 @@ async def test_fetch_batch_with_reduction_uses_single_id_fallback_on_retry_exhau
     host = _FakeRecoveryHost(deduplicated_error=retry_error)
     host.retry_exhausted_errors.add(retry_error)
 
-    records = [
-        record
-        async for record in fetch_batch_with_reduction(
+    records = await collect_async_iterator(
+        fetch_batch_with_reduction(
             host,
             "target",
             ["CHEMBL1"],
@@ -120,7 +120,7 @@ async def test_fetch_batch_with_reduction_uses_single_id_fallback_on_retry_exhau
             set(),
             "target_id",
         )
-    ]
+    )
 
     assert records == [{"id": "fallback:CHEMBL1"}]
     assert host.reduced_calls == []
@@ -153,9 +153,8 @@ async def test_retry_with_split_batches_logs_and_fetches_reduced_batches() -> No
     host = _FakeRecoveryHost()
     retry_error = RetryExhaustedError("chembl://target", attempts=3)
 
-    records = [
-        record
-        async for record in retry_with_split_batches(
+    records = await collect_async_iterator(
+        retry_with_split_batches(
             host,
             "target",
             ["1", "2", "3", "4"],
@@ -165,7 +164,7 @@ async def test_retry_with_split_batches_logs_and_fetches_reduced_batches() -> No
             "target_id",
             retry_error,
         )
-    ]
+    )
 
     assert records == [{"id": "1,2"}, {"id": "3,4"}]
     assert host.reduced_calls == [["1", "2"], ["3", "4"]]

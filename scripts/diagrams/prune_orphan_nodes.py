@@ -66,6 +66,12 @@ def _ensure_repo_path(path: Path) -> Path:
         raise ValueError(f"refusing to process path outside {resolved_root}: {resolved_path}")
     return resolved_path
 
+
+def _write_repo_text(path: Path, content: str) -> None:
+    """Write Mermaid content only after repository-root validation."""
+    safe_path = _ensure_repo_path(path)
+    safe_path.write_text(content, encoding="utf-8")
+
 # ── Regex constants ───────────────────────────────────────────────────────────
 
 # Node ID: letters/digits/underscore, must start with letter or underscore
@@ -662,7 +668,7 @@ def grandfather_file(path: Path) -> tuple[bool, set[str]]:
     else:
         new_lines = lines[:insert_idx] + [annotation] + lines[insert_idx:]
 
-    safe_path.write_text("".join(new_lines), encoding="utf-8")
+    _write_repo_text(safe_path, "".join(new_lines))
     return True, orphans
 
 

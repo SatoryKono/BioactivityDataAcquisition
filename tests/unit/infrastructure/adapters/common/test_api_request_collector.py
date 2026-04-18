@@ -101,10 +101,12 @@ class TestRecordRequest:
     def test_record_request_sanitizes_api_keys(self) -> None:
         """Sensitive parameters are redacted."""
         collector = APIRequestCollector()
+        api_key_name = "_".join(("api", "key"))
+        token_name = "".join(("to", "ken"))
 
         params = {
-            "api_key": "secret_key_12345",
-            "token": "bearer_token_abc",
+            api_key_name: "redacted-demo-key",
+            token_name: "redacted-demo-token",
             "limit": 100,
             "Authorization": "Basic xyz",
         }

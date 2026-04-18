@@ -6,6 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 import bioetl.infrastructure.adapters.common.fallback_fetch_service as fallback_service
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     FallbackFetchOrchestratorService,
@@ -82,7 +84,7 @@ async def test_execute_splits_and_trims_primary_ids(
         trim_primary_ids_to_limit=True,
     )
 
-    results = [record async for record in orchestrator.execute(request)]
+    results = await collect_async_iterator(orchestrator.execute(request))
 
     assert [str(item["id"]) for item in results] == ["primary:10.1/a", "from-policy"]
     assert primary_call == {"primary_ids": ["10.1/a"], "limit": 1}
@@ -154,7 +156,7 @@ async def test_execute_without_trim_keeps_all_primary_ids(
         trim_primary_ids_to_limit=False,
     )
 
-    results = [record async for record in orchestrator.execute(request)]
+    results = await collect_async_iterator(orchestrator.execute(request))
 
     assert [str(item["id"]) for item in results] == ["A", "B"]
     assert seen_primary_ids == ["A", "B"]
@@ -214,7 +216,7 @@ async def test_execute_records_unified_fallback_metrics(
         primary_lookup_method="doi",
     )
 
-    _ = [record async for record in orchestrator.execute(request)]
+    _ = await collect_async_iterator(orchestrator.execute(request))
 
     mock_adapter_metrics.record_fallback_outcome.assert_called_once_with(
         "fetch_filtered_with_fallback",

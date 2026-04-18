@@ -20,5 +20,4 @@ services:
       retries: 20
       start_period: 30s
     restart: no
-    mem_limit: 2g
-    cpus: "1.0"
+
