@@ -43,6 +43,10 @@ class GenericPipelineFactory(_GenericPipelineFactory[TPipeline]):
     def create_transformer(self, *args: object, **kwargs: object) -> object:
         return super().create_transformer(*args, **kwargs)
 
+    def create_with_services(self, *args: object, **kwargs: object) -> object:
+        # transformer_class=self.transformer_class stays delegated via helper owners.
+        return super().create_with_services(*args, **kwargs)
+
 
 def create_pipeline_factory(*args: object, **kwargs: object) -> GenericPipelineFactory[object]:
     return GenericPipelineFactory(*args, **kwargs)
