@@ -1,16 +1,10 @@
 """Execution lifecycle helpers for :mod:`bioetl.application.core.runner`."""
-
 from __future__ import annotations
 
 __all__ = [
-    "execute_pipeline",
-    "prepare_medallion_layers",
-    "run_execution_cycle",
-    "run_managed_pipeline",
-    "run_postrun_phase",
-    "validate_infrastructure",
+    "execute_pipeline", "prepare_medallion_layers", "run_execution_cycle",
+    "run_managed_pipeline", "run_postrun_phase", "validate_infrastructure",
 ]
-
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -32,14 +26,13 @@ if TYPE_CHECKING:
         CheckpointManagerService,
     )
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.core.postrun.service import PostrunResult, PostrunService
+    from bioetl.application.core.postrun.service import PostrunService
     from bioetl.application.core.preflight.service import PreflightService
     from bioetl.application.observability.observer import PipelineObserver
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
-    from bioetl.domain.types import HealthReport
 
 
 _PREFLIGHT_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[0]

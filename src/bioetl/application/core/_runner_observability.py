@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
+    from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.application.core.runner_execution_flow import (
         _PipelineRunnerExecutionHostProtocol,
     )
-    from bioetl.application.core.postrun.service import PostrunResult
     from bioetl.domain.types import HealthReport
 
 
