@@ -15381,7 +15381,6 @@ def main(argv: list[str] | None = None) -> None:
         args.report,
         args.report_fast,
     )
-    return
 
 
 if __name__ == "__main__":

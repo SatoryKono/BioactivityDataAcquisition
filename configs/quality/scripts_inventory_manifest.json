@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-17T13:24:30.770567+00:00",
+  "generated_at": "2026-04-18T08:06:11.637266+00:00",
   "summary": {
-    "total_scripts": 389,
+    "total_scripts": 353,
     "status_counts": {
-      "active": 308,
+      "active": 267,
       "legacy": 9,
-      "orphan": 63,
-      "unknown": 9
+      "orphan": 67,
+      "unknown": 10
     },
     "reference_group_coverage": {
-      "agents": 10,
+      "agents": 4,
       "build": 1,
       "ci": 49,
-      "docs": 118,
-      "scripts": 292,
+      "docs": 111,
+      "scripts": 251,
       "skills": 7,
-      "tests": 99
+      "tests": 96
     }
   },
   "scripts": [
@@ -29,7 +29,7 @@
       "references": [
         {
           "path": "scripts/README.md",
-          "line": 42,
+          "line": 51,
           "source_group": "scripts",
           "text": "python -m scripts.ai --help"
         },
@@ -50,73 +50,18 @@
     {
       "path": "scripts/ai/codex/__main__.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 10,
-      "references": [
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai.codex --help"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai.codex setup-mcp"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai.codex setup-agents"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 20,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai.codex setup-skills"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai.codex check-skills"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 22,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai.codex check-mirror"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai.codex launch --help"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 24,
-          "source_group": "scripts",
-          "text": "python -m scripts.ai.codex exec --help"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/codex/check_skills_layout.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 33,
-          "source_group": "scripts",
-          "text": "\"check-skills\": \"check_skills_layout.sh\","
-        },
         {
           "path": "scripts/ops/support/skills/check_ai_skills_layout.sh",
           "line": 8,
@@ -130,14 +75,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 34,
-          "source_group": "scripts",
-          "text": "\"check-mirror\": \"check_skills_mirror.sh\","
-        },
         {
           "path": "scripts/ops/support/skills/check_skills_mirror.sh",
           "line": 8,
@@ -181,38 +120,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 38,
-          "source_group": "scripts",
-          "text": "\"diagnose-wsl\": \"diagnose_wsl.sh\","
-        },
-        {
-          "path": "scripts/ai/codex/diagnose_wsl.bat",
-          "line": 33,
-          "source_group": "scripts",
-          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ai/codex/diagnose_wsl.sh\""
-        },
-        {
-          "path": "scripts/ai/codex/diagnose_wsl.ps1",
-          "line": 44,
-          "source_group": "scripts",
-          "text": "$diagnosticScript = \"$repoWSL/scripts/ai/codex/diagnose_wsl.sh\""
-        },
-        {
-          "path": "scripts/ai/codex/verify_setup.bat",
-          "line": 53,
-          "source_group": "scripts",
-          "text": "wsl -d %WSL_DISTRO% -- bash \"!REPO_WSL!/scripts/ai/codex/diagnose_wsl.sh\" 2>&1"
-        },
-        {
-          "path": "scripts/ai/codex/verify_setup.ps1",
-          "line": 59,
-          "source_group": "scripts",
-          "text": "wsl bash \"$repoWSL/scripts/ai/codex/diagnose_wsl.sh\" 2>&1"
-        },
         {
           "path": "scripts/ops/launchers/codex/diagnose-codex-wsl.sh",
           "line": 9,
@@ -224,56 +133,18 @@
     {
       "path": "scripts/ai/codex/exec.bat",
       "type": "bat",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/ai/codex/launch.bat",
-          "line": 56,
-          "source_group": "scripts",
-          "text": "echo   exec.bat \"your prompt\""
-        },
-        {
-          "path": "scripts/ops/launchers/codex/codex-exec.bat",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "call \"%~dp0..\\..\\..\\ai\\codex\\exec.bat\" %*"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/codex/exec.sh",
       "type": "sh",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "\"exec\": \"exec.sh\","
-        },
-        {
-          "path": "scripts/ai/codex/diagnose_wsl.sh",
-          "line": 161,
-          "source_group": "scripts",
-          "text": "\"${SCRIPT_DIR}/exec.sh\" \\"
-        },
-        {
-          "path": "scripts/ai/codex/exec.bat",
-          "line": 31,
-          "source_group": "scripts",
-          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ai/codex/exec.sh\" %*"
-        },
-        {
-          "path": "scripts/ops/launchers/codex/codex-exec.sh",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "exec bash \"${REPO_ROOT}/scripts/ai/codex/exec.sh\" \"$@\""
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/codex/headless.ps1",
@@ -295,20 +166,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 37,
-          "source_group": "scripts",
-          "text": "\"headless\": \"headless.sh\","
-        },
-        {
-          "path": "scripts/ai/codex/headless.ps1",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "wsl -e bash \"$RepoWSL/scripts/ai/codex/headless.sh\" @Args 2>&1"
-        },
         {
           "path": "scripts/ops/launchers/codex/codex-headless.sh",
           "line": 9,
@@ -322,22 +181,10 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
-          "path": "scripts/ai/codex/exec.bat",
-          "line": 50,
-          "source_group": "scripts",
-          "text": "echo   launch.bat \"your prompt\""
-        },
-        {
           "path": "scripts/ops/launchers/codex/codex-wsl.bat",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "call \"%~dp0..\\..\\..\\ai\\codex\\launch.bat\" %*"
-        },
-        {
-          "path": "scripts/ops/launchers/codex/codex.bat",
           "line": 5,
           "source_group": "scripts",
           "text": "call \"%~dp0..\\..\\..\\ai\\codex\\launch.bat\" %*"
@@ -359,61 +206,18 @@
     {
       "path": "scripts/ai/codex/launch.sh",
       "type": "sh",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 5,
-      "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 35,
-          "source_group": "scripts",
-          "text": "\"launch\": \"launch.sh\","
-        },
-        {
-          "path": "scripts/ai/codex/diagnose_wsl.sh",
-          "line": 160,
-          "source_group": "scripts",
-          "text": "\"${SCRIPT_DIR}/launch.sh\" \\"
-        },
-        {
-          "path": "scripts/ai/codex/launch.bat",
-          "line": 32,
-          "source_group": "scripts",
-          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ai/codex/launch.sh\""
-        },
-        {
-          "path": "scripts/ai/codex/launch.bat",
-          "line": 35,
-          "source_group": "scripts",
-          "text": "wsl -d %WSL_DISTRO% -- bash \"%REPO_WSL%/scripts/ai/codex/launch.sh\" !ARGS!"
-        },
-        {
-          "path": "scripts/ops/launchers/codex/codex.sh",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "exec bash \"${REPO_ROOT}/scripts/ai/codex/launch.sh\" \"$@\""
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/codex/setup_agents.sh",
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 31,
-          "source_group": "scripts",
-          "text": "\"setup-agents\": \"setup_agents.sh\","
-        },
-        {
-          "path": "scripts/ai/codex/setup_skills.sh",
-          "line": 90,
-          "source_group": "scripts",
-          "text": "AGENT_SETUP_SCRIPT=\"$SCRIPT_DIR/setup_agents.sh\""
-        },
         {
           "path": "scripts/ops/launchers/codex/setup_agents.sh",
           "line": 8,
@@ -427,14 +231,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "\"setup-mcp\": \"setup_mcp.py\","
-        },
         {
           "path": "scripts/engineering/dev/setup_copilot_codex_mcp.ps1",
           "line": 5,
@@ -454,14 +252,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/codex/__main__.py",
-          "line": 32,
-          "source_group": "scripts",
-          "text": "\"setup-skills\": \"setup_skills.sh\","
-        },
         {
           "path": "scripts/ops/launchers/codex/setup_skills.sh",
           "line": 8,
@@ -490,14 +282,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/codex/verify_setup.bat",
-          "line": 13,
-          "source_group": "scripts",
-          "text": "echo   .\\scripts\\ai\\codex\\verify_setup.ps1"
-        },
         {
           "path": "scripts/ops/launchers/codex/verify-setup.ps1",
           "line": 8,
@@ -634,14 +420,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 38,
-          "source_group": "scripts",
-          "text": "(root / \"scripts\" / \"ai\" / \"mcp\" / \"github-mcp-wrapper.ps1\").resolve()"
-        },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
           "line": 81,
@@ -661,14 +441,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 29,
-          "source_group": "scripts",
-          "text": "(root / \"scripts\" / \"ai\" / \"mcp\" / \"github-mcp-wrapper.sh\").resolve()"
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 8,
@@ -709,14 +483,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 141,
-          "source_group": "scripts",
-          "text": "root, \"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 16,
@@ -767,14 +535,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 131,
-          "source_group": "scripts",
-          "text": "\"context7\": _wrapper_server(root, \"scripts/ai/mcp/mcp_context7_wrapper.sh\"),"
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 11,
@@ -809,14 +571,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 129,
-          "source_group": "scripts",
-          "text": "root, \"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 10,
@@ -851,14 +607,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 127,
-          "source_group": "scripts",
-          "text": "\"docker\": _wrapper_server(root, \"scripts/ai/mcp/mcp_docker_wrapper.sh\"),"
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 9,
@@ -893,14 +643,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 135,
-          "source_group": "scripts",
-          "text": "\"dockerhub\": _wrapper_server(root, \"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\"),"
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 13,
@@ -935,14 +679,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 139,
-          "source_group": "scripts",
-          "text": "\"grafana\": _wrapper_server(root, \"scripts/ai/mcp/mcp_grafana_wrapper.sh\"),"
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 15,
@@ -993,14 +731,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 147,
-          "source_group": "scripts",
-          "text": "root, \"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 18,
@@ -1028,7 +760,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -1100,14 +832,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 133,
-          "source_group": "scripts",
-          "text": "root, \"scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 12,
@@ -1142,14 +868,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 137,
-          "source_group": "scripts",
-          "text": "root, \"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 14,
@@ -1216,14 +936,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "scripts/ai/codex/setup_mcp.py",
-          "line": 144,
-          "source_group": "scripts",
-          "text": "root, \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 17,
@@ -1265,13 +979,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
-          "line": 51,
+          "line": 55,
           "source_group": "tests",
           "text": "adapter = Path(\"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\").resolve()"
         },
         {
           "path": "tests/unit/scripts/ops/test_neo4j_memory_mcp_adapter.py",
-          "line": 66,
+          "line": 70,
           "source_group": "tests",
           "text": "assert \"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" in wrapper"
         }
@@ -1547,6 +1261,71 @@
       ]
     },
     {
+      "path": "scripts/ci/_compatibility_registry.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ci/_compatibility_telemetry.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 13,
+      "references": [
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-reporting-test-replays-inventory-counts.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"tests/architecture/test_compatibility_telemetry_reporting.py; docs/02-architecture/07-compatibility-facade-inventory.md; scripts/ci/_compatibility_telemetry.py\""
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-script-hardcodes-tracked-docstring-prefixes.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"scripts/ci/_compatibility_telemetry.py; docs/02-architecture/07-compatibility-facade-inventory.md\""
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
+          "line": 15,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py`"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
+          "line": 23,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes `measured_paths = inventory_paths | _iter_docstring_tracked_modules(...)`, so telemetry uses its own trac"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/03-synthesis/SYN-compatibility-registry-curated-ssot-drift.md",
+          "line": 36,
+          "source_group": "docs",
+          "text": "`scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes snapshot counts by combining inventory rows with an AST scan. The telemetry reporting test then re-parses t"
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/02-evidence/compatibility-registry-policy-history-mixing/EV-compatibility-registry-policy-history-mixing-telemetry-prefix-gating.yaml",
+          "line": 5,
+          "source_group": "docs",
+          "text": "ref: \"scripts/ci/_compatibility_telemetry.py:9-18,73-118\""
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/RAW-compatibility-registry-policy-history-mixing-2026-03-21.md",
+          "line": 14,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py` defines the measured compatibility snapshot logic."
+        },
+        {
+          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/RAW-compatibility-registry-policy-history-mixing-2026-03-21.md",
+          "line": 28,
+          "source_group": "docs",
+          "text": "- `scripts/ci/_compatibility_telemetry.py` tracks modules when the first docstring line starts with a compatibility prefix."
+        }
+      ]
+    },
+    {
       "path": "scripts/data/__main__.py",
       "type": "py",
       "status": "active",
@@ -1596,7 +1375,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 44,
+      "reference_count": 40,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -1710,7 +1489,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/00-diagramming-policy.md",
@@ -1767,7 +1546,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 18,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1824,7 +1603,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -1883,7 +1662,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 10,
+      "reference_count": 9,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -1940,7 +1719,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
@@ -1965,12 +1744,6 @@
           "line": 36,
           "source_group": "scripts",
           "text": "DEFAULT_BOUNDS_CHECKER = Path(\"scripts/diagrams/check_pdf_image_bounds.py\")"
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-3.py",
-          "line": 36,
-          "source_group": "scripts",
-          "text": "DEFAULT_BOUNDS_CHECKER = Path(\"scripts/diagrams/check_pdf_image_bounds.py\")"
         }
       ]
     },
@@ -1979,7 +1752,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -2063,7 +1836,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
@@ -2088,18 +1861,6 @@
           "line": 5,
           "source_group": "scripts",
           "text": "source \"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)/diagram_paths.sh\""
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-1.sh",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "# shellcheck source=scripts/diagrams/diagram_paths.sh"
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-1.sh",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "source \"$REPO_ROOT/scripts/diagrams/diagram_paths.sh\""
         }
       ]
     },
@@ -2108,7 +1869,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -2139,12 +1900,6 @@
           "line": 377,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/enforce_diagram_quality_budget.py\""
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-1.sh",
-          "line": 376,
-          "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/enforce_diagram_quality_budget.py\""
         }
       ]
     },
@@ -2153,7 +1908,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/diagrams/README.md",
@@ -2175,18 +1930,6 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 323,
-          "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-1.sh",
-          "line": 320,
-          "source_group": "scripts",
-          "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-1.sh",
           "line": 323,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py\" \\"
@@ -2569,7 +2312,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 45,
+      "reference_count": 41,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -2806,7 +2549,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -2935,19 +2678,13 @@
       "type": "mjs",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/diagrams/README.md",
           "line": 107,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/svg2png.mjs` | Node.js SVG-to-PNG converter |"
-        },
-        {
-          "path": "scripts/memory/sync.py",
-          "line": 187,
-          "source_group": "scripts",
-          "text": "\"scripts/diagrams/svg2png.mjs\","
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
@@ -3021,7 +2758,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 20,
+      "reference_count": 19,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -3078,7 +2815,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 103,
+      "reference_count": 97,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -3088,13 +2825,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 256,
+          "line": 263,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 265,
+          "line": 272,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -3135,7 +2872,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
@@ -3148,12 +2885,6 @@
           "line": 148,
           "source_group": "scripts",
           "text": "| `scripts/docs/build_docs_site.sh` | Shell wrapper around the packaged MkDocs build entrypoint; kept for docs, CI, and local habits   |"
-        },
-        {
-          "path": "scripts/memory/sync.py",
-          "line": 6864,
-          "source_group": "scripts",
-          "text": "lambda text: _contains_any(text, (\"scripts.docs\", \"check-links\", \"build_docs_site.sh\")),"
         }
       ]
     },
@@ -3839,17 +3570,10 @@
     {
       "path": "scripts/docs/verify_docs.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/memory/sync.py",
-          "line": 720,
-          "source_group": "scripts",
-          "text": "\"script_path\": \"scripts/docs/verify_docs.py\","
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/baselines/__main__.py",
@@ -3878,13 +3602,13 @@
         },
         {
           "path": "scripts/README.md",
-          "line": 37,
+          "line": 46,
           "source_group": "scripts",
           "text": "python -m scripts.engineering.baselines --help"
         },
         {
           "path": "scripts/README.md",
-          "line": 52,
+          "line": 61,
           "source_group": "scripts",
           "text": "python -m scripts.engineering.baselines dq-baseline --dry-run"
         },
@@ -3950,13 +3674,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 163,
+          "line": 166,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 224,
+          "line": 229,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -4003,7 +3727,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
           "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/SUMMARY.md",
@@ -4022,18 +3746,6 @@
           "line": 45,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_registry.py` | Shared compatibility registry loader used by telemetry/reporting helpers |"
-        },
-        {
-          "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 50,
-          "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
-        },
-        {
-          "path": "tests/architecture/test_compatibility_telemetry_reporting.py",
-          "line": 35,
-          "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"ci\" / \"_compatibility_registry.py\","
         }
       ]
     },
@@ -4042,55 +3754,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 1,
       "references": [
         {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-reporting-test-replays-inventory-counts.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"tests/architecture/test_compatibility_telemetry_reporting.py; docs/02-architecture/07-compatibility-facade-inventory.md; scripts/ci/_compatibility_telemetry.py\""
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/EV-compatibility-registry-curated-ssot-drift-telemetry-script-hardcodes-tracked-docstring-prefixes.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/ci/_compatibility_telemetry.py; docs/02-architecture/07-compatibility-facade-inventory.md\""
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
-          "line": 15,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py`"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/02-evidence/compatibility-registry-curated-ssot-drift/RAW-compatibility-registry-curated-ssot-drift-2026-03-21.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes `measured_paths = inventory_paths | _iter_docstring_tracked_modules(...)`, so telemetry uses its own trac"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-curated-ssot-drift/03-synthesis/SYN-compatibility-registry-curated-ssot-drift.md",
-          "line": 36,
-          "source_group": "docs",
-          "text": "`scripts/ci/_compatibility_telemetry.py` hardcodes `TRACKED_DOCSTRING_PREFIXES` and computes snapshot counts by combining inventory rows with an AST scan. The telemetry reporting test then re-parses t"
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/02-evidence/compatibility-registry-policy-history-mixing/EV-compatibility-registry-policy-history-mixing-telemetry-prefix-gating.yaml",
-          "line": 5,
-          "source_group": "docs",
-          "text": "ref: \"scripts/ci/_compatibility_telemetry.py:9-18,73-118\""
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/RAW-compatibility-registry-policy-history-mixing-2026-03-21.md",
-          "line": 14,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` defines the measured compatibility snapshot logic."
-        },
-        {
-          "path": "docs/reports/evidence/compatibility-registry-policy-history-mixing/RAW-compatibility-registry-policy-history-mixing-2026-03-21.md",
-          "line": 28,
-          "source_group": "docs",
-          "text": "- `scripts/ci/_compatibility_telemetry.py` tracks modules when the first docstring line starts with a compatibility prefix."
+          "path": "scripts/engineering/ci/README.md",
+          "line": 46,
+          "source_group": "scripts",
+          "text": "| `scripts/engineering/ci/_compatibility_telemetry.py` | Compatibility inventory telemetry helper used by architecture reporting flows |"
         }
       ]
     },
@@ -4376,7 +4046,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 598,
+          "line": 654,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -4654,9 +4324,9 @@
     {
       "path": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
       "type": "sh",
-      "status": "active",
+      "status": "unknown",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 17,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -4867,7 +4537,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 10,
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
@@ -5115,7 +4785,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 32,
+      "reference_count": 30,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -5174,7 +4844,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 33,
+      "reference_count": 31,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -5241,7 +4911,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 53,
+      "reference_count": 51,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -5300,7 +4970,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 67,
+      "reference_count": 65,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6017,7 +5687,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 76,
+      "reference_count": 73,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -6045,7 +5715,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 166,
+          "line": 169,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa report-family-baseline --active-only --check"
         },
@@ -6210,7 +5880,7 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 139,
+          "line": 140,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/check_c901_baseline.py \\"
         },
@@ -6288,7 +5958,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 274,
+          "line": 281,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/check_docs_drift.py"
         }
@@ -6303,7 +5973,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 169,
+          "line": 172,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/check_naming_package_consistency.py --check"
         },
@@ -6348,7 +6018,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 141,
+          "line": 144,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/check_quality_exemptions.py \\"
         },
@@ -6438,7 +6108,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 271,
+          "line": 278,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -6540,7 +6210,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 520,
+          "line": 574,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -6602,7 +6272,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -6989,13 +6659,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 172,
+          "line": 175,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/validate_dq_consistency.py"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 334,
+          "line": 345,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/validate_dq_consistency.py"
         }
@@ -7067,7 +6737,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 61,
+          "line": 60,
           "source_group": "ci",
           "text": "run: python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
         },
@@ -7112,7 +6782,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 64,
+          "line": 63,
           "source_group": "ci",
           "text": "run: python scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
         },
@@ -7298,7 +6968,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 160,
+          "line": 163,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/repo/check_scripts_catalog.py --catalog scripts/catalog.yaml"
         },
@@ -7337,7 +7007,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 152,
+          "line": 155,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/repo/check_scripts_inventory.py \\"
         },
@@ -7406,7 +7076,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 67,
+          "line": 66,
           "source_group": "ci",
           "text": "run: python scripts/engineering/repo/check_version_consistency.py"
         },
@@ -7593,7 +7263,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 138,
+      "reference_count": 127,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -7800,13 +7470,13 @@
         },
         {
           "path": "scripts/README.md",
-          "line": 38,
+          "line": 47,
           "source_group": "scripts",
           "text": "python -m scripts.ops --help"
         },
         {
           "path": "scripts/README.md",
-          "line": 53,
+          "line": 62,
           "source_group": "scripts",
           "text": "python -m scripts.ops rerender-grafana"
         },
@@ -7827,1488 +7497,6 @@
           "line": 42,
           "source_group": "scripts",
           "text": "For MCP operational tooling, see [scripts/ai/mcp/__main__.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/__main__.py)."
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/agents/architecture-techdebt-automation.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [
-        "architecture-techdebt-automation"
-      ],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": ".codex/agents/architecture-techdebt-automation.md",
-          "line": 152,
-          "source_group": "agents",
-          "text": "- `python docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py --mode auto --growth-mode auto --trend-report off`"
-        },
-        {
-          "path": "scripts/engineering/qa/check_quality_exemptions.py",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "- docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py"
-        },
-        {
-          "path": "scripts/engineering/qa/check_quality_exemptions.py",
-          "line": 24,
-          "source_group": "scripts",
-          "text": "/ \"architecture-techdebt-automation.py\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-1.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [
-        "py-doc-bot"
-      ],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": ".codex/agents/py-doc-bot.md",
-          "line": 155,
-          "source_group": "agents",
-          "text": "| Unified checks | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr` |"
-        },
-        {
-          "path": ".codex/agents/py-doc-bot.md",
-          "line": 171,
-          "source_group": "agents",
-          "text": "1. `py-doc-bot-1.sh` завершён без ошибок"
-        },
-        {
-          "path": "docs/00-project/ai/agents/agents/py-doc-bot.md",
-          "line": 159,
-          "source_group": "docs",
-          "text": "| Unified checks | `bash scripts/agents/diagrams/py-doc-bot-1.sh --profile pr` |"
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md",
-          "line": 16,
-          "source_group": "docs",
-          "text": "1. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh` — единый quality gate (lint/syntax/render/smoke/quality)."
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md",
-          "line": 39,
-          "source_group": "docs",
-          "text": "| `CHECK` | Только `py-doc-bot-1.sh` |"
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-4.sh",
-          "line": 148,
-          "source_group": "scripts",
-          "text": "CHECK_CMD=(\"bash\" \"$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh\" \"--profile\" \"$PROFILE\" \"--text-layer\" \"$TEXT_LAYER\")"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-2.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [
-        "py-doc-bot"
-      ],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": ".codex/agents/py-doc-bot.md",
-          "line": 158,
-          "source_group": "agents",
-          "text": "| DOCX bundles | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py` |"
-        },
-        {
-          "path": "docs/00-project/ai/agents/agents/py-doc-bot.md",
-          "line": 162,
-          "source_group": "docs",
-          "text": "| DOCX bundles | `python scripts/agents/diagrams/py-doc-bot-2.py` |"
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md",
-          "line": 17,
-          "source_group": "docs",
-          "text": "2. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py` — генерация DOCX из `*-with-descriptions.md`."
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-4.sh",
-          "line": 169,
-          "source_group": "scripts",
-          "text": "DOCX_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py\")"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-3.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [
-        "py-doc-bot"
-      ],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": ".codex/agents/py-doc-bot.md",
-          "line": 157,
-          "source_group": "agents",
-          "text": "| PDF bundles | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py` |"
-        },
-        {
-          "path": "docs/00-project/ai/agents/agents/py-doc-bot.md",
-          "line": 161,
-          "source_group": "docs",
-          "text": "| PDF bundles | `python scripts/agents/diagrams/py-doc-bot-3.py` |"
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md",
-          "line": 18,
-          "source_group": "docs",
-          "text": "3. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py` — генерация PDF из `*-with-descriptions.md`."
-        },
-        {
-          "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-4.sh",
-          "line": 178,
-          "source_group": "scripts",
-          "text": "PDF_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py\")"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/agents/diagrams/py-doc-bot-4.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [
-        "py-doc-bot"
-      ],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": ".codex/agents/py-doc-bot.md",
-          "line": 159,
-          "source_group": "agents",
-          "text": "| Full pipeline | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh` |"
-        },
-        {
-          "path": "docs/00-project/ai/agents/agents/py-doc-bot.md",
-          "line": 163,
-          "source_group": "docs",
-          "text": "| Full pipeline | `bash scripts/agents/diagrams/py-doc-bot-4.sh` |"
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md",
-          "line": 19,
-          "source_group": "docs",
-          "text": "4. `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh` — единый orchestrator для полного цикла."
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md",
-          "line": 25,
-          "source_group": "docs",
-          "text": "bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh"
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md",
-          "line": 28,
-          "source_group": "docs",
-          "text": "bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh \\"
-        },
-        {
-          "path": "docs/00-project/ai/agents/runtime/py-diagram-docs-orchestrator.md",
-          "line": 32,
-          "source_group": "docs",
-          "text": "bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh --skip-checks"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/agents/py-config-bot-1.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [
-        "ORCHESTRATION",
-        "py-audit-bot",
-        "py-config-bot"
-      ],
-      "reference_count": 27,
-      "references": [
-        {
-          "path": ".codex/agents/ORCHESTRATION.md",
-          "line": 302,
-          "source_group": "agents",
-          "text": "6. **Config compliance gate**: `py-config-bot-1.py` MUST иметь 0 critical findings после `py-config-bot`."
-        },
-        {
-          "path": ".codex/agents/ORCHESTRATION.md",
-          "line": 370,
-          "source_group": "agents",
-          "text": "| `docs/00-project/ai/agents/scripts/py-config-bot-1.py` | Автоматическая проверка конфигов |"
-        },
-        {
-          "path": ".codex/agents/py-audit-bot.md",
-          "line": 209,
-          "source_group": "agents",
-          "text": "python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v"
-        },
-        {
-          "path": ".codex/agents/py-config-bot.md",
-          "line": 47,
-          "source_group": "agents",
-          "text": "- **Gap remediation**: исправление findings из `py-config-bot-1.py`."
-        },
-        {
-          "path": ".codex/agents/py-config-bot.md",
-          "line": 75,
-          "source_group": "agents",
-          "text": "1. Все конфигурации MUST проходить `uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v` без critical findings."
-        },
-        {
-          "path": ".codex/agents/py-config-bot.md",
-          "line": 236,
-          "source_group": "agents",
-          "text": "uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v"
-        },
-        {
-          "path": ".codex/agents/py-config-bot.md",
-          "line": 249,
-          "source_group": "agents",
-          "text": "uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v"
-        },
-        {
-          "path": ".codex/agents/py-config-bot.md",
-          "line": 296,
-          "source_group": "agents",
-          "text": "uv run python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/agents/py-config-bot-2.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/00-project/ai/agents/runtime/orchestration/py-team-orchestration.md",
-          "line": 53,
-          "source_group": "docs",
-          "text": "- **Конфиги**: `python docs/00-project/ai/agents/scripts/py-config-bot-2.py`, `python docs/00-project/ai/agents/scripts/py-config-bot-1.py`."
-        },
-        {
-          "path": "scripts/schema/README.md",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "- `scripts/schema/validate_pipeline_configs.py` is an officially supported compatibility wrapper around the canonical validator in `docs/00-project/ai/agents/scripts/py-config-bot-2.py`."
-        },
-        {
-          "path": "scripts/schema/validate_pipeline_configs.py",
-          "line": 5,
-          "source_group": "scripts",
-          "text": "- docs/00-project/ai/agents/scripts/py-config-bot-2.py"
-        },
-        {
-          "path": "scripts/schema/validate_pipeline_configs.py",
-          "line": 24,
-          "source_group": "scripts",
-          "text": "/ \"py-config-bot-2.py\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/agents/py-team-orchestration.py",
-      "type": "py",
-      "status": "unknown",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "docs/00-project/ai/agents/runtime/orchestration/py-team-orchestration.md",
-          "line": 54,
-          "source_group": "docs",
-          "text": "- **Терминология**: `python docs/00-project/ai/agents/scripts/py-team-orchestration.py`."
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ai/TREE.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ops/archive/ai/gemini-interactive.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 49,
-      "references": [
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 8,
-          "source_group": "scripts",
-          "text": "✓ gemini-interactive.sh (21.6 KB)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 146,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/gemini-interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 155,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/gemini-interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 220,
-          "source_group": "scripts",
-          "text": "1. Launch: bash scripts/ai/gemini-interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 231,
-          "source_group": "scripts",
-          "text": "1. Launch: bash scripts/ai/gemini-interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 243,
-          "source_group": "scripts",
-          "text": "1. Launch: bash scripts/ai/gemini-interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 347,
-          "source_group": "scripts",
-          "text": "4. Launch: `bash scripts/ai/gemini-interactive.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 399,
-          "source_group": "scripts",
-          "text": "→ Or run: `wsl bash scripts/ai/gemini-interactive.sh`"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ai/gemini.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 34,
-      "references": [
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 24,
-          "source_group": "scripts",
-          "text": "✓ gemini.ps1 (6.4 KB)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 139,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini.ps1"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 451,
-          "source_group": "scripts",
-          "text": "- [x] PowerShell wrapper created (gemini.ps1)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 488,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini.ps1"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 7,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini.ps1              # Interactive menu"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 8,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini.ps1 setup        # Initialize"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 9,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini.ps1 sync         # Sync profiles"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 10,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\gemini.ps1 status       # Check status"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ai/launch-gemini.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 15,
-      "references": [
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 43,
-          "source_group": "scripts",
-          "text": "✓ launch-gemini.sh (2.2 KB)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 175,
-          "source_group": "scripts",
-          "text": "├── launch-gemini.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/GEMINI-WSL-SETUP.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "| `scripts/ai/launch-gemini.sh` | Launch Gemini with context | (new) |"
-        },
-        {
-          "path": "scripts/ops/archive/ai/GEMINI-WSL-SETUP.md",
-          "line": 79,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/launch-gemini.sh [profile] [mode]"
-        },
-        {
-          "path": "scripts/ops/archive/ai/GEMINI-WSL-SETUP.md",
-          "line": 86,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/launch-gemini.sh py-review-orchestrator"
-        },
-        {
-          "path": "scripts/ops/archive/ai/GEMINI-WSL-SETUP.md",
-          "line": 89,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/launch-gemini.sh py-audit-bot"
-        },
-        {
-          "path": "scripts/ops/archive/ai/GEMINI-WSL-SETUP.md",
-          "line": 92,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/launch-gemini.sh py-config-bot"
-        },
-        {
-          "path": "scripts/ops/archive/ai/GEMINI-WSL-SETUP.md",
-          "line": 192,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/launch-gemini.sh py-review-orchestrator"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ai/quick-gemini.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 20,
-      "references": [
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "✓ quick-gemini.sh (3.7 KB)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 172,
-          "source_group": "scripts",
-          "text": "├── quick-gemini.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 194,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/quick-gemini.sh status  (Bash)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/INTERACTIVE-MODE.md",
-          "line": 12,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/quick-gemini.sh interactive"
-        },
-        {
-          "path": "scripts/ops/archive/ai/INTERACTIVE-MODE.md",
-          "line": 184,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/quick-gemini.sh status"
-        },
-        {
-          "path": "scripts/ops/archive/ai/INTERACTIVE-MODE.md",
-          "line": 189,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/quick-gemini.sh setup"
-        },
-        {
-          "path": "scripts/ops/archive/ai/INTERACTIVE-MODE.md",
-          "line": 194,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/quick-gemini.sh sync"
-        },
-        {
-          "path": "scripts/ops/archive/ai/INTERACTIVE-MODE.md",
-          "line": 199,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/quick-gemini.sh help"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ai/setup-gemini-wsl.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 52,
-      "references": [
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 31,
-          "source_group": "scripts",
-          "text": "✓ setup-gemini-wsl.sh (3.4 KB)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 345,
-          "source_group": "scripts",
-          "text": "2. Run: `bash scripts/ai/setup-gemini-wsl.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 392,
-          "source_group": "scripts",
-          "text": "→ Run: `bash scripts/ai/setup-gemini-wsl.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 406,
-          "source_group": "scripts",
-          "text": "→ Run: `bash scripts/ai/setup-gemini-wsl.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 414,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/setup-gemini-wsl.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 453,
-          "source_group": "scripts",
-          "text": "- [x] Setup script created (setup-gemini-wsl.sh)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/setup-gemini-wsl.sh      # Initialize"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 173,
-          "source_group": "scripts",
-          "text": "├── setup-gemini-wsl.sh"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ai/sync-agents-codex-to-gemini.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 39,
-      "references": [
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 38,
-          "source_group": "scripts",
-          "text": "✓ sync-agents-codex-to-gemini.sh (1.2 KB)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 129,
-          "source_group": "scripts",
-          "text": "**Note:** Agent profiles (py-*.md) synced separately via `sync-agents-codex-to-gemini.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 346,
-          "source_group": "scripts",
-          "text": "3. Run: `bash scripts/ai/sync-agents-codex-to-gemini.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 395,
-          "source_group": "scripts",
-          "text": "→ Run: `bash scripts/ai/sync-agents-codex-to-gemini.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 419,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/sync-agents-codex-to-gemini.sh"
-        },
-        {
-          "path": "scripts/ops/archive/ai/00-START-HERE.md",
-          "line": 454,
-          "source_group": "scripts",
-          "text": "- [x] Sync script created (sync-agents-codex-to-gemini.sh)"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "bash scripts/ai/sync-agents-codex-to-gemini.sh  # Sync profiles"
-        },
-        {
-          "path": "scripts/ops/archive/ai/CHEAT-SHEET.md",
-          "line": 174,
-          "source_group": "scripts",
-          "text": "├── sync-agents-codex-to-gemini.sh"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 8,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 31,
-          "source_group": "scripts",
-          "text": "└── QUICK-START.sh                  ← Quick reference"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 197,
-          "source_group": "scripts",
-          "text": "scripts/gemini/QUICK-START.sh    ← Quick reference"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 301,
-          "source_group": "scripts",
-          "text": "- `scripts/gemini/QUICK-START.sh` — Quick reference card"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 397,
-          "source_group": "scripts",
-          "text": "1. Read: `scripts/gemini/QUICK-START.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 417,
-          "source_group": "scripts",
-          "text": "- **Quick reference:** `scripts/gemini/QUICK-START.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 28,
-          "source_group": "scripts",
-          "text": "└── QUICK-START.sh (quick reference)"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 80,
-          "source_group": "scripts",
-          "text": "QUICK-START.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 151,
-          "source_group": "scripts",
-          "text": "echo \"Read more: bash scripts/gemini/QUICK-START.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/chat.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 20,
-          "source_group": "scripts",
-          "text": "│   ├── chat.sh                     ← Chat mode"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 160,
-          "source_group": "scripts",
-          "text": "chat.sh      → Interactive chat with profile"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 77,
-          "source_group": "scripts",
-          "text": "│   ├── chat.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 53,
-          "source_group": "scripts",
-          "text": "│   ├── chat.sh              ← Chat mode"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 235,
-          "source_group": "scripts",
-          "text": "│   ├── chat.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 220,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/chat.sh\" \"$profile\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/interactive.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "│   ├── interactive.sh              ← Full interactive menu"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 161,
-          "source_group": "scripts",
-          "text": "interactive.sh → Full menu system (7 modes)"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 78,
-          "source_group": "scripts",
-          "text": "│   ├── interactive.sh             ← Full menu system"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 54,
-          "source_group": "scripts",
-          "text": "│   ├── interactive.sh       ← Interactive menu"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 236,
-          "source_group": "scripts",
-          "text": "│   ├── interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 202,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/interactive.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/reset.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "│   ├── reset.sh                    ← Reset environment"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 159,
-          "source_group": "scripts",
-          "text": "reset.sh     → Clear memory + reinitialize"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 76,
-          "source_group": "scripts",
-          "text": "│   ├── reset.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 52,
-          "source_group": "scripts",
-          "text": "│   ├── reset.sh             ← Reset environment"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 234,
-          "source_group": "scripts",
-          "text": "│   ├── reset.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 280,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/reset.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/setup.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 8,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh                    ← Environment initialization"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 156,
-          "source_group": "scripts",
-          "text": "setup.sh     → Initialize .gemini/, memory, validate MCP"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 73,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 49,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh             ← Environment initialization"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 231,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 206,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/setup.sh\""
-        },
-        {
-          "path": "scripts/ops/archive/gemini/lib/reset.sh",
-          "line": 37,
-          "source_group": "scripts",
-          "text": "bash \"${SCRIPT_DIR}/setup.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/status.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "│   ├── status.sh                   ← Status reporting"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 158,
-          "source_group": "scripts",
-          "text": "status.sh    → Show environment status"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 75,
-          "source_group": "scripts",
-          "text": "│   ├── status.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 51,
-          "source_group": "scripts",
-          "text": "│   ├── status.sh            ← Status reporting"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 233,
-          "source_group": "scripts",
-          "text": "│   ├── status.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 276,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/status.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/sync.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "│   ├── sync.sh                     ← Profile synchronization"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 157,
-          "source_group": "scripts",
-          "text": "sync.sh      → Copy 9 profiles from Codex"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 74,
-          "source_group": "scripts",
-          "text": "│   ├── sync.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 50,
-          "source_group": "scripts",
-          "text": "│   ├── sync.sh              ← Profile sync"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 232,
-          "source_group": "scripts",
-          "text": "│   ├── sync.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/SUMMARY.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│   ├── setup.sh, sync.sh, status.sh, reset.sh, chat.sh, interactive.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 210,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/sync.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/tasks/architecture.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 26,
-          "source_group": "scripts",
-          "text": "│       ├── architecture.sh         ← Architecture analysis"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 170,
-          "source_group": "scripts",
-          "text": "architecture.sh  → Create architecture analysis task file"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 83,
-          "source_group": "scripts",
-          "text": "│       ├── architecture.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 59,
-          "source_group": "scripts",
-          "text": "│       ├── architecture.sh  ← Architecture analysis"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 241,
-          "source_group": "scripts",
-          "text": "│       ├── architecture.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 261,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/architecture.sh\" \"$focus\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/tasks/config.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 86,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 25,
-          "source_group": "scripts",
-          "text": "│       ├── config.sh               ← Config audit task"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 169,
-          "source_group": "scripts",
-          "text": "config.sh        → Create config audit task file"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "│       ├── config.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 58,
-          "source_group": "scripts",
-          "text": "│       ├── config.sh        ← Config audit task"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 240,
-          "source_group": "scripts",
-          "text": "│       ├── config.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 251,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/config.sh\" \"$scope\""
-        },
-        {
-          "path": "tests/unit/domain/composite/test_data_schema_config.py",
-          "line": 180,
-          "source_group": "tests",
-          "text": "assert config.should_include_group(\"silver\", \"system\") is True"
-        },
-        {
-          "path": "tests/unit/domain/composite/test_data_schema_config.py",
-          "line": 181,
-          "source_group": "tests",
-          "text": "assert config.should_include_group(\"silver\", \"anything\") is True"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/tasks/debug.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "│       └── debug.sh                ← Debug/fix task"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 171,
-          "source_group": "scripts",
-          "text": "debug.sh         → Create debug/fix task file"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 84,
-          "source_group": "scripts",
-          "text": "│       └── debug.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 60,
-          "source_group": "scripts",
-          "text": "│       └── debug.sh         ← Debug/fix task"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 242,
-          "source_group": "scripts",
-          "text": "│       └── debug.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 272,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/debug.sh\" \"$issue\" \"$file\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/tasks/review.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 8,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "│       ├── review.sh               ← Code review task"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 167,
-          "source_group": "scripts",
-          "text": "review.sh        → Create code review task file"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 80,
-          "source_group": "scripts",
-          "text": "│       ├── review.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 56,
-          "source_group": "scripts",
-          "text": "│       ├── review.sh        ← Code review task"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 238,
-          "source_group": "scripts",
-          "text": "│       ├── review.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 267,
-          "source_group": "scripts",
-          "text": "3. `cmd_review()` calls `lib/tasks/review.sh staged`"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 268,
-          "source_group": "scripts",
-          "text": "4. `review.sh` sources `lib/utils.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 230,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/review.sh\" \"$scope\" \"${@:2}\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/tasks/test.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 24,
-          "source_group": "scripts",
-          "text": "│       ├── test.sh                 ← Test generation task"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 168,
-          "source_group": "scripts",
-          "text": "test.sh          → Create test generation task file"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 81,
-          "source_group": "scripts",
-          "text": "│       ├── test.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 57,
-          "source_group": "scripts",
-          "text": "│       ├── test.sh          ← Test generation task"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 239,
-          "source_group": "scripts",
-          "text": "│       ├── test.sh"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/gemini",
-          "line": 241,
-          "source_group": "scripts",
-          "text": "PROJECT_ROOT=\"$PROJECT_ROOT\" bash \"${SCRIPT_DIR}/lib/tasks/test.sh\" \"$coverage\" \"$scope\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/gemini/lib/utils.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 27,
-      "references": [
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "│   ├── utils.sh                    ← Shared utilities (sourced by all)"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 115,
-          "source_group": "scripts",
-          "text": "Source lib/utils.sh (shared functions)"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 124,
-          "source_group": "scripts",
-          "text": "✓ **DRY** — Shared utilities in `lib/utils.sh`"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "### Shared Utilities (`lib/utils.sh`)"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/INSTALLATION.md",
-          "line": 408,
-          "source_group": "scripts",
-          "text": "1. Study: `lib/utils.sh` (shared functions)"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/QUICK-START.sh",
-          "line": 72,
-          "source_group": "scripts",
-          "text": "│   ├── utils.sh                   ← Shared utilities (sourced by all)"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 48,
-          "source_group": "scripts",
-          "text": "│   ├── utils.sh             ← Shared utilities"
-        },
-        {
-          "path": "scripts/ops/archive/gemini/README.md",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "Executes with shared utils (lib/utils.sh)"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/codex-device-login.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 12,
-          "source_group": "scripts",
-          "text": "- `ops/codex-device-login.ps1` → replaced by `script-codex/run-codex.ps1 device-login`"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/codex-device-login.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 11,
-          "source_group": "scripts",
-          "text": "- `ops/codex-device-login.sh` → replaced by `script-codex/run-codex.sh device-login`"
-        },
-        {
-          "path": "scripts/ops/archive/ops/codex-device-login.ps1",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "wsl -d Ubuntu -e bash \"$repoWSL/scripts/ops/codex-device-login.sh\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/codex-login.ps1",
-      "type": "ps1",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 10,
-          "source_group": "scripts",
-          "text": "- `ops/codex-login.ps1` → replaced by `script-codex/run-codex.ps1 login`"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/codex-login.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "- `ops/codex-login.sh` → replaced by `script-codex/run-codex.sh login`"
-        },
-        {
-          "path": "scripts/ops/archive/ops/codex-login.ps1",
-          "line": 66,
-          "source_group": "scripts",
-          "text": "wsl bash \"$repoWSL/scripts/ops/codex-login.sh\" 2>&1"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/mistral-exec.bat",
-      "type": "bat",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 14,
-          "source_group": "scripts",
-          "text": "- `ops/mistral-exec.bat` → replaced by `script-mistrallvibe/run-vibe.ps1 --prompt ...`"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/mistral-exec.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "- `ops/mistral-exec.sh` → replaced by `script-mistrallvibe/run-vibe.sh --prompt ...`"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/mistral.bat",
-      "type": "bat",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 13,
-          "source_group": "scripts",
-          "text": "- `ops/mistral.bat` → replaced by `script-mistrallvibe/run-vibe.ps1`"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/mistral.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 15,
-          "source_group": "scripts",
-          "text": "- `ops/mistral.sh` → replaced by `script-mistrallvibe/run-vibe.sh`"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/archive/ops/setup_mistral_vibe.sh",
-      "type": "sh",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ops/archive/README.md",
-          "line": 17,
-          "source_group": "scripts",
-          "text": "- `ops/setup_mistral_vibe.sh` → replaced by `script-mistrallvibe/helper/setup-env.sh`"
         }
       ]
     },
@@ -9623,7 +7811,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 31,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -9760,7 +7948,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 67,
+      "reference_count": 63,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -9817,7 +8005,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 97,
+      "reference_count": 98,
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -10775,7 +8963,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -10800,24 +8988,6 @@
           "line": 23,
           "source_group": "docs",
           "text": "| `scripts/ops/check_ai_skills_layout.sh` | Validates `_references` exists as a required subdirectory              |"
-        },
-        {
-          "path": "scripts/ai/codex/check_skills_layout.sh",
-          "line": 86,
-          "source_group": "scripts",
-          "text": "--glob '!scripts/check_ai_skills_layout.sh' \\"
-        },
-        {
-          "path": "scripts/ai/codex/check_skills_layout.sh",
-          "line": 87,
-          "source_group": "scripts",
-          "text": "--glob '!scripts/ops/support/skills/check_ai_skills_layout.sh' \\"
-        },
-        {
-          "path": "scripts/ai/codex/check_skills_layout.sh",
-          "line": 116,
-          "source_group": "scripts",
-          "text": "--exclude=check_ai_skills_layout.sh \\"
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -10859,7 +9029,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 38,
+      "reference_count": 39,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -10916,17 +9086,17 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 54,
+      "reference_count": 49,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 250,
+          "line": 257,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 253,
+          "line": 260,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         },
@@ -10998,7 +9168,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 247,
+          "line": 254,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/check_config_invariants.py"
         },
@@ -11229,7 +9399,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 268,
+          "line": 275,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/generate_pipeline_schema.py --check"
         },
@@ -11301,7 +9471,7 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 77,
+          "line": 76,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/generate_schema_artifacts.py --check"
         },
@@ -11382,7 +9552,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 244,
+          "line": 251,
           "source_group": "ci",
           "text": "run: uv run python scripts/schema/validate_pipeline_configs.py"
         },
@@ -11778,7 +9948,7 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 128,
+          "line": 131,
           "source_group": "ci",
           "text": "run: uv run python src/tools/generate_json_field_typing_inventory.py"
         }
@@ -11820,7 +9990,7 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 125,
+          "line": 128,
           "source_group": "ci",
           "text": "run: uv run python src/tools/verify_schema_parity.py --mode blocking"
         },

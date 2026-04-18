@@ -69,7 +69,7 @@ def test_add_fallbacks_replaces_old_single_line_text(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    changed = module.add_fallbacks(svg_path)
+    changed = module.add_fallbacks(svg_path, require_repo=False)
     assert changed >= 1
 
     root = ET.parse(svg_path).getroot()
@@ -146,7 +146,7 @@ def test_add_fallbacks_methods_group_keeps_method_format_and_supports_escaped_ne
         encoding="utf-8",
     )
 
-    changed = module.add_fallbacks(svg_path)
+    changed = module.add_fallbacks(svg_path, require_repo=False)
     assert changed >= 1
 
     root = ET.parse(svg_path).getroot()

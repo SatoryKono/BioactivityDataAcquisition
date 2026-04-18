@@ -71,3 +71,29 @@ def test_parse_long_label_count_detects_long_and_dense_labels() -> None:
     count = module.parse_long_label_count(lines, max_len=25, max_br=3)
 
     assert count >= 2
+
+
+def test_load_manifest_rejects_parent_traversal_entries(tmp_path: Path) -> None:
+    module = _load_module()
+    manifest = tmp_path / "nightly.manifest"
+    manifest.write_text("../escape.mmd\n", encoding="utf-8")
+
+    try:
+        module.load_manifest(manifest, (".mmd", ".mermaid"))
+    except ValueError as exc:
+        assert "must not escape the repository root" in str(exc)
+    else:
+        raise AssertionError("Expected manifest traversal validation to fail")
+
+
+def test_load_manifest_rejects_option_like_entries(tmp_path: Path) -> None:
+    module = _load_module()
+    manifest = tmp_path / "nightly.manifest"
+    manifest.write_text("-unsafe.mmd\n", encoding="utf-8")
+
+    try:
+        module.load_manifest(manifest, (".mmd", ".mermaid"))
+    except ValueError as exc:
+        assert "must not start with '-'" in str(exc)
+    else:
+        raise AssertionError("Expected option-like manifest validation to fail")
