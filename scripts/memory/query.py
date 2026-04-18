@@ -1032,73 +1032,59 @@ def _format_neighbors_rows(title: str, name: str, rows: list[dict[str, JsonValue
     return "\n".join(lines)
 
 
+def _docs_drift_row_line(row: dict[str, JsonValue]) -> str | None:
+    doc_name = str(row.get("doc_name") or "")
+    target_name = str(row.get("target_name") or "")
+    if not doc_name or not target_name:
+        return None
+    detail_parts = [
+        f"doc={doc_name}",
+        f"doc_labels={_join_string_list(row.get('doc_labels'))}",
+        f"target={target_name}",
+        f"target_labels={_join_string_list(row.get('target_labels'))}",
+        f"doc_path={row.get('doc_source_path') or ''!s}" if row.get("doc_source_path") else "",
+        f"target_path={row.get('target_source_path') or ''!s}" if row.get("target_source_path") else "",
+        f"ref={row.get('doc_reference') or ''!s}" if row.get("doc_reference") else "",
+        f"evidence_kind={row.get('evidence_kind') or ''!s}" if row.get("evidence_kind") else "",
+        f"confidence={row.get('confidence') or ''!s}" if row.get("confidence") else "",
+        f"section={row.get('section_title') or ''!s}" if row.get("section_title") else "",
+        f"anchor={row.get('section_anchor') or ''!s}" if row.get("section_anchor") else "",
+        f"line={int(row.get('line_number') or 0)}" if int(row.get("line_number") or 0) else "",
+    ]
+    return "- " + " | ".join(part for part in detail_parts if part)
+
+
 def _format_docs_drift_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
-    seen: set[tuple[str, str]] = set()
+    seen: set[str] = set()
     for row in rows:
-        doc_name = str(row.get("doc_name") or "")
-        target_name = str(row.get("target_name") or "")
-        if not doc_name or not target_name:
+        rendered = _docs_drift_row_line(row)
+        if not rendered or rendered in seen:
             continue
-        key = (doc_name, target_name)
-        if key in seen:
-            continue
-        seen.add(key)
-        doc_labels = row.get("doc_labels")
-        target_labels = row.get("target_labels")
-        doc_label_str = ",".join(str(label) for label in doc_labels) if isinstance(doc_labels, list) else ""
-        target_label_str = ",".join(str(label) for label in target_labels) if isinstance(target_labels, list) else ""
-        doc_path = str(row.get("doc_source_path") or "")
-        target_path = str(row.get("target_source_path") or "")
-        doc_reference = str(row.get("doc_reference") or "")
-        evidence_kind = str(row.get("evidence_kind") or "")
-        confidence = str(row.get("confidence") or "")
-        section_title = str(row.get("section_title") or "")
-        section_anchor = str(row.get("section_anchor") or "")
-        line_number = int(row.get("line_number") or 0)
-        path_suffix = f" | doc_path={doc_path}" if doc_path else ""
-        target_path_suffix = f" | target_path={target_path}" if target_path else ""
-        evidence_suffix = f" | ref={doc_reference}" if doc_reference else ""
-        evidence_suffix += f" | evidence_kind={evidence_kind}" if evidence_kind else ""
-        evidence_suffix += f" | confidence={confidence}" if confidence else ""
-        evidence_suffix += f" | section={section_title}" if section_title else ""
-        evidence_suffix += f" | anchor={section_anchor}" if section_anchor else ""
-        evidence_suffix += f" | line={line_number}" if line_number else ""
-        lines.append(
-            f"- doc={doc_name} | doc_labels={doc_label_str} | target={target_name} | "
-            f"target_labels={target_label_str}{path_suffix}{target_path_suffix}{evidence_suffix}"
-        )
+        seen.add(rendered)
+        lines.append(rendered)
     if len(lines) == 1:
         lines.append("- no docs-to-code drift edges found")
     return "\n".join(lines)
 
 
+def _workflow_job_header(row: dict[str, JsonValue]) -> str | None:
+    workflow_name = str(row.get("workflow_name") or "")
+    job_name = str(row.get("job_name") or "")
+    if not workflow_name or not job_name:
+        return None
+    return f"- workflow={workflow_name} | job={job_name}"
+
+
 def _format_workflow_gates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        workflow_name = str(row.get("workflow_name") or "")
-        job_name = str(row.get("job_name") or "")
-        if not workflow_name or not job_name:
+        header = _workflow_job_header(row)
+        if not header:
             continue
-        lines.append(f"- workflow={workflow_name} | job={job_name}")
-        gates = row.get("gates")
-        if isinstance(gates, list):
-            for gate_name in sorted({str(item) for item in gates if item}):
-                lines.append(f"  gate={gate_name}")
-        run_targets = row.get("run_targets")
-        if isinstance(run_targets, list):
-            normalized_targets: set[str] = set()
-            for target in run_targets:
-                if not isinstance(target, dict):
-                    continue
-                target_name = str(target.get("name") or "")
-                if not target_name:
-                    continue
-                labels = target.get("labels")
-                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                label_suffix = f" | labels={label_str}" if label_str else ""
-                normalized_targets.add(f"  runs_via={target_name}{label_suffix}")
-            lines.extend(sorted(normalized_targets))
+        lines.append(header)
+        lines.extend(_sorted_prefixed_values(row.get("gates"), "gate"))
+        lines.extend(_format_surface_dict_list(row.get("run_targets"), "runs_via"))
     if len(lines) == 1:
         lines.append("- no workflow gate coverage found")
     return "\n".join(lines)
@@ -1107,15 +1093,11 @@ def _format_workflow_gates_rows(title: str, name: str, rows: list[dict[str, Json
 def _format_workflow_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        workflow_name = str(row.get("workflow_name") or "")
-        job_name = str(row.get("job_name") or "")
-        if not workflow_name or not job_name:
+        header = _workflow_job_header(row)
+        if not header:
             continue
-        lines.append(f"- workflow={workflow_name} | job={job_name}")
-        actions = row.get("actions")
-        if isinstance(actions, list):
-            for action_name in sorted({str(item) for item in actions if item}):
-                lines.append(f"  action={action_name}")
+        lines.append(header)
+        lines.extend(_sorted_prefixed_values(row.get("actions"), "action"))
         artifacts = row.get("artifacts")
         if isinstance(artifacts, list):
             normalized_artifacts: set[str] = set()
@@ -1129,10 +1111,7 @@ def _format_workflow_artifacts_rows(title: str, name: str, rows: list[dict[str, 
                 relation_suffix = f" | relation={relation_name}" if relation_name else ""
                 normalized_artifacts.add(f"  artifact={artifact_name}{relation_suffix}")
             lines.extend(sorted(normalized_artifacts))
-        secrets = row.get("secrets")
-        if isinstance(secrets, list):
-            for secret_name in sorted({str(item) for item in secrets if item}):
-                lines.append(f"  secret={secret_name}")
+        lines.extend(_sorted_prefixed_values(row.get("secrets"), "secret"))
     if len(lines) == 1:
         lines.append("- no workflow action or artifact coverage found")
     return "\n".join(lines)
@@ -1167,21 +1146,28 @@ def _format_workflow_execution_value(field_name: str, prefix: str, value: dict[s
     return f"  {prefix}={item_name}{suffix}"
 
 
+def _workflow_execution_header(row: dict[str, JsonValue]) -> str | None:
+    workflow_name = str(row.get("workflow_name") or "")
+    if not workflow_name:
+        return None
+    job_name = str(row.get("job_name") or "")
+    workflow_concurrency = str(row.get("workflow_concurrency_group") or "")
+    job_concurrency = str(row.get("job_concurrency_group") or "")
+    return (
+        f"- workflow={workflow_name}"
+        + (f" | job={job_name}" if job_name else "")
+        + (f" | workflow_concurrency={workflow_concurrency}" if workflow_concurrency else "")
+        + (f" | job_concurrency={job_concurrency}" if job_concurrency else "")
+    )
+
+
 def _format_workflow_execution_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        workflow_name = str(row.get("workflow_name") or "")
-        if not workflow_name:
+        header = _workflow_execution_header(row)
+        if not header:
             continue
-        job_name = str(row.get("job_name") or "")
-        workflow_concurrency = str(row.get("workflow_concurrency_group") or "")
-        job_concurrency = str(row.get("job_concurrency_group") or "")
-        lines.append(
-            f"- workflow={workflow_name}"
-            + (f" | job={job_name}" if job_name else "")
-            + (f" | workflow_concurrency={workflow_concurrency}" if workflow_concurrency else "")
-            + (f" | job_concurrency={job_concurrency}" if job_concurrency else "")
-        )
+        lines.append(header)
         for field_name, prefix in (
             ("reusable_calls", "call"),
             ("matrix_variants", "matrix"),
@@ -1407,20 +1393,7 @@ def _format_claim_trace_rows(title: str, name: str, rows: list[dict[str, JsonVal
         claim_text = str(row.get("claim_text") or "")
         if claim_text:
             lines.append(f"  text={claim_text}")
-        targets = row.get("targets")
-        if isinstance(targets, list):
-            normalized_targets: set[str] = set()
-            for target in targets:
-                if not isinstance(target, dict):
-                    continue
-                target_name = str(target.get("name") or "")
-                if not target_name:
-                    continue
-                labels = target.get("labels")
-                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                label_suffix = f" | labels={label_str}" if label_str else ""
-                normalized_targets.add(f"  target={target_name}{label_suffix}")
-            lines.extend(sorted(normalized_targets))
+        lines.extend(_format_surface_dict_list(row.get("targets"), "target"))
     if len(lines) == 1:
         lines.append("- no claim-level traceability found")
     return "\n".join(lines)
@@ -1433,28 +1406,9 @@ def _format_cli_semantics_rows(title: str, name: str, rows: list[dict[str, JsonV
         if not command_name:
             continue
         lines.append(f"- command={command_name} | side_effect_class={row.get('side_effect_class') or ''!s}")
-        options = row.get("options")
-        if isinstance(options, list):
-            for option_name in sorted({str(item) for item in options if item}):
-                lines.append(f"  option={option_name}")
-        gates = row.get("gates")
-        if isinstance(gates, list):
-            for gate_name in sorted({str(item) for item in gates if item}):
-                lines.append(f"  gate={gate_name}")
-        targets = row.get("side_effect_targets")
-        if isinstance(targets, list):
-            normalized_targets: set[str] = set()
-            for target in targets:
-                if not isinstance(target, dict):
-                    continue
-                target_name = str(target.get("name") or "")
-                if not target_name:
-                    continue
-                labels = target.get("labels")
-                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                label_suffix = f" | labels={label_str}" if label_str else ""
-                normalized_targets.add(f"  side_effect_target={target_name}{label_suffix}")
-            lines.extend(sorted(normalized_targets))
+        lines.extend(_sorted_prefixed_values(row.get("options"), "option"))
+        lines.extend(_sorted_prefixed_values(row.get("gates"), "gate"))
+        lines.extend(_format_surface_dict_list(row.get("side_effect_targets"), "side_effect_target"))
     if len(lines) == 1:
         lines.append("- no CLI semantic coverage found")
     return "\n".join(lines)
@@ -1477,15 +1431,7 @@ def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str,
     if promotion_target:
         lines.append(f"- promotion_target={promotion_target}{_label_suffix(target_labels)}")
     if isinstance(members, list):
-        normalized_members = []
-        for member in members:
-            if not isinstance(member, dict):
-                continue
-            member_name = str(member.get("name") or "")
-            if not member_name:
-                continue
-            normalized_members.append(f"- member={member_name}{_label_suffix(member.get('labels'))}")
-        lines.extend(sorted(normalized_members))
+        lines.extend(line.replace("  member=", "- member=", 1) for line in _format_surface_dict_list(members, "member"))
     if isinstance(tests, list):
         normalized_tests = sorted(
             {f"- covered_by_test={test_name!s}" for test_name in tests if test_name is not None and str(test_name)}
