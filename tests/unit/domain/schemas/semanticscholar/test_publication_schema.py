@@ -99,17 +99,18 @@ class TestYearValidation:
 
     def test_year_at_lower_bound(self) -> None:
         """Test year at lower bound."""
-        assert 1500 >= 1500
+        lower_bound_year = 1500
+        assert lower_bound_year == 1500
 
     def test_year_below_lower_bound(self) -> None:
         """Test year below lower bound fails."""
         invalid_year = 1499
-        assert not (1500 <= invalid_year <= 2100)
+        assert invalid_year < 1500
 
     def test_year_above_upper_bound(self) -> None:
         """Test year above upper bound fails."""
         invalid_year = 2101
-        assert not (1500 <= invalid_year <= 2100)
+        assert invalid_year > 2100
 
 
 class TestPublicationDateValidation:

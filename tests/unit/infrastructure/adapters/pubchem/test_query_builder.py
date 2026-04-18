@@ -80,7 +80,7 @@ class TestBuildCidBatchEndpoint:
 
     def test_single_cid(self) -> None:
         result = build_cid_batch_endpoint([42])
-        assert "cid/42" in result
+        assert result == "/compound/cid/42/JSON"
 
     def test_large_batch_truncated_to_preview(self) -> None:
         """Only first 3 CIDs appear in endpoint preview."""

@@ -150,7 +150,7 @@ class TestListBatches:
 
         result = await mixin.list_batches("", "", date=date)
         # flat_structure + date: searches tmp_path / "2025-01-15"
-        assert len(result) >= 0  # Just verify no error
+        assert len(result) == 1
 
     @pytest.mark.asyncio
     async def test_list_batches_sorted_result(self, tmp_path: Path) -> None:

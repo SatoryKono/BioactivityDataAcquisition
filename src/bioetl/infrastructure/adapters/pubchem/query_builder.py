@@ -42,4 +42,6 @@ def build_cid_batch_endpoint(batch: list[int]) -> str:
     if not batch:
         raise ValueError("CID batch must contain at least one CID")
     preview = ",".join(map(str, batch[:3]))
-    return f"/compound/cid/{preview},.../JSON"
+    if len(batch) > 3:
+        preview = f"{preview},..."
+    return f"/compound/cid/{preview}/JSON"

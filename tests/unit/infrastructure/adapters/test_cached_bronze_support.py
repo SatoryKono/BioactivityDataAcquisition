@@ -37,14 +37,16 @@ class _ReaderStub(BronzeBatchReader):
         )
 
     def read_bronze(self, path: str) -> AsyncIterator[JsonDict]:
-        async def _unreachable() -> AsyncIterator[JsonDict]:
-            raise AssertionError(
-                f"read_bronze should not be called in this test: {path=}"
-            )
-            if False:
-                yield {}
+        class _FailingAsyncIterator:
+            def __aiter__(self) -> _FailingAsyncIterator:
+                return self
 
-        return _unreachable()
+            async def __anext__(self) -> JsonDict:
+                raise AssertionError(
+                    f"read_bronze should not be called in this test: {path=}"
+                )
+
+        return _FailingAsyncIterator()
 
 
 @pytest.mark.unit
