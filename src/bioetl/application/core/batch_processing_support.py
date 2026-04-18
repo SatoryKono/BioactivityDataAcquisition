@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-__all__ = ["BatchProcessingSupportService"]
-
 import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import datetime
@@ -32,6 +30,8 @@ from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
+
+__all__ = ["BatchProcessingSupportService"]
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -68,7 +68,6 @@ class BatchProcessingSupportService:
         run_id: RunID | None = None,
         domain_event_emitter: DomainEventEmitterPort | None = None,
     ) -> None:
-        """Store shared collaborators for one batch-processing slice."""
         self._services = services
         self._logger = logger
         self._batch_metrics = batch_metrics
@@ -79,11 +78,7 @@ class BatchProcessingSupportService:
         self._run_id = run_id
         self._domain_event_emitter = domain_event_emitter
 
-    def get_source_metadata(
-        self,
-        query_string: str | None,
-    ) -> SourceMetadata | None:
-        """Get source metadata and enrich it with the active query string."""
+    def get_source_metadata(self, query_string: str | None) -> SourceMetadata | None:
         return get_source_metadata(
             data_source=self._services.data_source,
             logger=self._logger,
@@ -98,7 +93,6 @@ class BatchProcessingSupportService:
         ingestion_ts: datetime,
         source_metadata: SourceMetadata | None,
     ) -> object:
-        """Write records to Bronze and track the corresponding metrics."""
         result = await self._execute_with_span(
             "write_bronze",
             self._writer.write_bronze(
@@ -132,20 +126,13 @@ class BatchProcessingSupportService:
         batch_id: BatchID,
         start_index: int,
     ) -> TransformResult:
-        """Execute the transform stage and track per-layer record counts."""
         transform_result = await self._execute_transform_with_span(
             records=records,
             batch_id=batch_id,
             start_index=start_index,
         )
-        self._batch_metrics.track_processed_records(
-            "silver",
-            len(transform_result.silver_records),
-        )
-        self._batch_metrics.track_processed_records(
-            "gold",
-            len(transform_result.gold_records),
-        )
+        self._batch_metrics.track_processed_records("silver", len(transform_result.silver_records))
+        self._batch_metrics.track_processed_records("gold", len(transform_result.gold_records))
         return transform_result
 
     async def write_silver_gold_concurrent(
@@ -156,9 +143,7 @@ class BatchProcessingSupportService:
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None,
     ) -> None:
-        """Write Silver and Gold outputs concurrently to independent tables."""
         write_coros: list[Awaitable[object]] = []
-
         if transform_result.silver_records:
             write_coros.append(
                 safe_write_layer(
@@ -176,7 +161,6 @@ class BatchProcessingSupportService:
                     operation_errors=_OPERATION_ERRORS,
                 )
             )
-
         if transform_result.gold_records:
             write_coros.append(
                 safe_write_layer(
@@ -194,7 +178,6 @@ class BatchProcessingSupportService:
                     operation_errors=_OPERATION_ERRORS,
                 )
             )
-
         if write_coros:
             await asyncio.gather(*write_coros)
 
@@ -205,7 +188,6 @@ class BatchProcessingSupportService:
         records: list[BronzeRecord],
         transform_result: TransformResult,
     ) -> None:
-        """Set batch result attributes on the tracing span and close it."""
         self._tracing.set_batch_result(
             span,
             bronze_count=len(records),
@@ -221,7 +203,6 @@ class BatchProcessingSupportService:
         span: Span | None,
         work_coro: Awaitable[_ResultT],
     ) -> _ResultT:
-        """Finish the batch span consistently across runtime failure cases."""
         return await execute_with_pipeline_failure_policy(
             tracing=self._tracing,
             span=span,
@@ -236,7 +217,6 @@ class BatchProcessingSupportService:
         count: int,
         on_error: Callable[[Exception], None] | None = None,
     ) -> object:
-        """Execute one coroutine wrapped with a per-layer tracing span."""
         return await execute_with_layer_span(
             tracing=self._tracing,
             name=name,
@@ -253,7 +233,6 @@ class BatchProcessingSupportService:
         batch_id: BatchID,
         start_index: int,
     ) -> TransformResult:
-        """Execute the transform stage and attach output metrics to the span."""
         return await execute_transform_with_span(
             tracing=self._tracing,
             transformer=self._transformer,
@@ -263,12 +242,8 @@ class BatchProcessingSupportService:
         )
 
     @staticmethod
-    def build_bronze_refs(
-        bronze_result: object,
-    ) -> list[BronzeWriteResult] | None:
-        """Normalize Bronze write output into writer-compatible references."""
+    def build_bronze_refs(bronze_result: object) -> list[BronzeWriteResult] | None:
         return build_bronze_refs(bronze_result)
 
     def emit_domain_event(self, event: DomainEvent) -> None:
-        """Best-effort publish of one typed domain event."""
         emit_domain_event(self._domain_event_emitter, event)

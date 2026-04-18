@@ -1,11 +1,7 @@
-"""
-Validation helpers module for common validation operations.
-"""
-
-from typing import Any
+"""Validation helpers module for common validation operations."""
 
 
-def validate_data(data: Any) -> None:
+def validate_data(data: object) -> None:
     """Validate that data is not empty.
     
     Args:

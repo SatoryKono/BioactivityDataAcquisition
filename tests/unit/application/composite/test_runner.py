@@ -6,16 +6,13 @@ Tests for FSM state management during seed pipeline execution phase.
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from unittest.mock import patch
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointState
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRunnerDependencies,
@@ -34,188 +31,20 @@ from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.control_plane.run_ledger import COMPOSITE_RUN_LEDGER_STAGE_NAMES
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.exceptions.pipeline_shutdown import PipelineShutdownError
-from bioetl.domain.locking import FencingToken
-
-_MOCK_TOKEN = FencingToken(
-    sequence=1,
-    key="lock:mock",
-    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
-    issued_at=0.0,
+from tests.unit.application.composite.runner_test_support import (
+    MockCompositeConfig,
+    MockPipelineRunner,
+    create_mock_checkpoint_manager,
+    create_mock_coordinator,
+    create_mock_fsm_state_helper,
+    create_mock_key_extractor,
+    create_mock_lock,
+    create_mock_logger,
+    create_mock_merger,
+    new_enricher_runner_factory,
+    new_seed_runner_factory,
+    seed_runner_factory,
 )
-
-
-@dataclass
-class MockCompositeConfig:
-    """Mock composite configuration for testing."""
-
-    name: str = "test_composite"
-    lock_key: str = "lock:test_composite"
-
-    @dataclass
-    class SeedConfig:
-        pipeline: str = "chembl_activity"
-        silver_table: str = "chembl_activity"
-        output_keys: tuple[str, ...] = ("chembl_id",)
-
-    @dataclass
-    class MergeConfig:
-        output_silver_path: str = "silver/composite"
-        output_gold_path: str = "gold/composite"
-
-    @dataclass
-    class DQConfig:
-        soft_fail_threshold: float = 0.05
-        hard_fail_threshold: float = 0.20
-
-    seed: SeedConfig = None  # type: ignore[assignment]
-    merge: MergeConfig = None  # type: ignore[assignment]
-    dq: DQConfig = None  # type: ignore[assignment]
-    enrichers: tuple = ()
-    required_enrichers: frozenset = frozenset()
-    dependencies: tuple = ()
-
-    @property
-    def required_dependencies(self) -> tuple[str, ...]:
-        return tuple(
-            d.pipeline for d in self.dependencies if getattr(d, "required", False)
-        )
-
-    def __post_init__(self):
-        if self.seed is None:
-            self.seed = self.SeedConfig()
-        if self.merge is None:
-            self.merge = self.MergeConfig()
-        if self.dq is None:
-            self.dq = self.DQConfig()
-
-
-class MockPipelineRunner:
-    """Mock PipelineRunner for testing."""
-
-    def __init__(self, should_fail: bool = False, error_message: str = "Seed failed"):
-        self._should_fail = should_fail
-        self._error_message = error_message
-        self.run_called = False
-        self._executor = MagicMock()
-        self._executor.records_fetched = 100
-        self._executor.records_silver = 95
-
-    @property
-    def execution_metrics(self) -> dict[str, int]:
-        return {
-            "records_fetched": self._executor.records_fetched,
-            "records_silver": self._executor.records_silver,
-        }
-
-    async def run(self):
-        await asyncio.sleep(0)
-        self.run_called = True
-        if self._should_fail:
-            raise RuntimeError(self._error_message)
-
-
-def create_mock_logger() -> MagicMock:
-    """Create a mock logger."""
-    logger = MagicMock()
-    logger.info = MagicMock()
-    logger.error = MagicMock()
-    logger.warning = MagicMock()
-    logger.debug = MagicMock()
-    return logger
-
-
-def create_mock_lock() -> AsyncMock:
-    """Create a mock lock."""
-    lock = AsyncMock()
-    lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
-    lock.release = AsyncMock(return_value=True)
-    return lock
-
-
-def create_mock_checkpoint_manager(
-    initial_state: CompositeCheckpointState | None = None,
-) -> AsyncMock:
-    """Create a mock checkpoint manager."""
-    manager = AsyncMock()
-    if initial_state is None:
-        initial_state = CompositeCheckpointState(
-            composite_name="test_composite",
-            run_id=str(uuid4()),
-            created_at=datetime.now(tz=UTC),
-        )
-    manager.load = AsyncMock(return_value=initial_state)
-    manager.save = AsyncMock()
-    manager.delete = AsyncMock()
-    return manager
-
-
-def create_mock_key_extractor() -> AsyncMock:
-    """Create a mock key extractor."""
-    import polars as pl
-
-    extractor = AsyncMock()
-    extractor.extract = AsyncMock(
-        return_value=pl.DataFrame({"chembl_id": ["CHEMBL123"]})
-    )
-    return extractor
-
-
-def create_mock_coordinator() -> AsyncMock:
-    """Create a mock enrichment coordinator."""
-    coordinator = AsyncMock()
-    coordinator.run_enrichers = AsyncMock(return_value={})
-    return coordinator
-
-
-def create_mock_merger() -> AsyncMock:
-    """Create a mock merger."""
-    from bioetl.domain.composite.result import MergeResult
-
-    merger = AsyncMock()
-    merge_result = MergeResult(
-        records_merged=100,
-        records_from_seed=100,
-        records_enriched=0,
-        records_fully_enriched=0,
-        duration_seconds=1.0,
-    )
-    merger.merge = AsyncMock(return_value=merge_result)
-    merger.execute_request = AsyncMock(return_value=merge_result)
-    return merger
-
-
-def _seed_runner_factory(seed_runner: MockPipelineRunner):
-    def _factory() -> MockPipelineRunner:
-        return seed_runner
-
-    return _factory
-
-
-def _new_seed_runner_factory():
-    def _factory() -> MockPipelineRunner:
-        return MockPipelineRunner()
-
-    return _factory
-
-
-def _new_enricher_runner_factory():
-    def _factory(name: str, df: object) -> MockPipelineRunner:
-        return MockPipelineRunner()
-
-    return _factory
-
-
-def create_mock_fsm_state_helper(
-    logger: MagicMock,
-    config: MockCompositeConfig | None = None,
-    run_id: str | None = None,
-) -> FSMStateHelperService:
-    """Create a real FSM helper service for runner tests."""
-    return FSMStateHelperService(
-        config=config or MockCompositeConfig(),
-        logger=logger,
-        run_id=run_id or str(uuid4()),
-    )
 
 
 def create_runner(
@@ -237,8 +66,8 @@ def create_runner(
     run_id = str(uuid4())
 
     deps = CompositeRunnerDependencies(
-        seed_runner_factory=_seed_runner_factory(seed_runner),
-        enricher_runner_factory=_new_enricher_runner_factory(),
+        seed_runner_factory=seed_runner_factory(seed_runner),
+        enricher_runner_factory=new_enricher_runner_factory(),
         key_extractor=create_mock_key_extractor(),
         coordinator=create_mock_coordinator(),
         merger=create_mock_merger(),
@@ -518,8 +347,8 @@ class TestFSMSeedFailure:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_seed_runner_factory(seed_runner),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=seed_runner_factory(seed_runner),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -663,8 +492,8 @@ class TestFSMSeedResume:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_new_seed_runner_factory(),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=new_seed_runner_factory(),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -694,8 +523,8 @@ class TestFSMSeedResume:
         """Seed resume helper should normalize old checkpoint state and emit seed_resume transition."""
         logger = create_mock_logger()
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_new_seed_runner_factory(),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=new_seed_runner_factory(),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -758,8 +587,8 @@ class TestFSMSeedResume:
         logger = create_mock_logger()
         run_id = str(uuid4())
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_new_seed_runner_factory(),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=new_seed_runner_factory(),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -852,8 +681,8 @@ class TestFSMTransitionLogging:
         """Transition to SEED_RUNNING should be logged."""
         logger = create_mock_logger()
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_new_seed_runner_factory(),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=new_seed_runner_factory(),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -881,8 +710,8 @@ class TestFSMTransitionLogging:
         """Transition to SEED_COMPLETED should be logged."""
         logger = create_mock_logger()
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_new_seed_runner_factory(),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=new_seed_runner_factory(),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -911,8 +740,8 @@ class TestFSMTransitionLogging:
         logger = create_mock_logger()
         seed_runner = MockPipelineRunner(should_fail=True)
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_seed_runner_factory(seed_runner),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=seed_runner_factory(seed_runner),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -951,8 +780,8 @@ class TestCheckpointSaveErrorHandling:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_new_seed_runner_factory(),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=new_seed_runner_factory(),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),
@@ -990,8 +819,8 @@ class TestCheckpointSaveErrorHandling:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-            seed_runner_factory=_new_seed_runner_factory(),
-            enricher_runner_factory=_new_enricher_runner_factory(),
+            seed_runner_factory=new_seed_runner_factory(),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),

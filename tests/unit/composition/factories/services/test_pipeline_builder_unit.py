@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from bioetl.application.core.wiring.runtime import BasePipeline
+from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services.pipeline_builder import (
     BatchProcessingComponents,
     create_batch_processing_components,
@@ -313,10 +315,10 @@ class TestCreateRecordProcessorFromPipeline:
         )
 
         result = create_record_processor_from_pipeline(
-            pipeline=cast("BasePipeline", pipeline),
+            pipeline=cast(BasePipeline, pipeline),
             silver_schema=None,
             gold_schema=MagicMock(),
-            callbacks=callbacks,
+            callbacks=cast(PipelineCallbacksContext, callbacks),
             create_record_processor_fn=create_fn,
         )
 
@@ -351,10 +353,10 @@ class TestCreateRecordProcessorFromPipeline:
         )
 
         create_record_processor_from_pipeline(
-            pipeline=cast("BasePipeline", pipeline),
+            pipeline=cast(BasePipeline, pipeline),
             silver_schema=None,
             gold_schema=MagicMock(),
-            callbacks=callbacks,
+            callbacks=cast(PipelineCallbacksContext, callbacks),
             create_record_processor_fn=create_fn,
             lock_validator=lock_validator,
             tracer=tracer,

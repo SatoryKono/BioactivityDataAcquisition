@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 
 from bioetl.application.core.wiring.runtime import RecordProcessorConfig
 
+from bioetl.application.core.wiring.runtime import BasePipeline
+from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
 )
@@ -73,10 +75,10 @@ class TestBuildComponentsAndProcessingService:
 
         # Act
         res_components, res_service = build_components_and_processing_service(
-            pipeline=pipeline,
+            pipeline=cast(BasePipeline, pipeline),
             processor_config=processor_config,
             error_classifier=error_classifier,
-            callbacks=callbacks,
+            callbacks=cast(PipelineCallbacksContext, callbacks),
             gold_filter=gold_filter,
             gold_validator=gold_validator,
             tracing_manager=tracing_manager,

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
 from bioetl.domain.exceptions import StorageError
+from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters._cached_bronze_support import (
     log_unsupported_fetch_params,
     raise_if_empty_batches,
@@ -21,6 +23,21 @@ class _ReaderStub:
     def __init__(self, *, base_path: Path, flat_structure: bool) -> None:
         self.base_path = base_path
         self._flat_structure = flat_structure
+
+    async def list_batches(
+        self,
+        provider: str,
+        entity: str,
+        date: object = None,
+    ) -> list[str]:
+        raise AssertionError(
+            f"list_batches should not be called in this test: {provider=} {entity=} {date=}"
+        )
+
+    async def read_bronze(self, path: str) -> AsyncIterator[JsonDict]:
+        if False:
+            yield {}
+        raise AssertionError(f"read_bronze should not be called in this test: {path=}")
 
 
 @pytest.mark.unit
