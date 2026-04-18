@@ -5,6 +5,7 @@ Verifies provider registration, configuration lookup, and adapter creation.
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from typing import Any
 from unittest.mock import MagicMock
@@ -48,6 +49,7 @@ class MockAdapter:
 
     async def health_check(self) -> HealthStatus:
         """Mock health check."""
+        await asyncio.sleep(0)
         return HealthStatus.HEALTHY
 
 

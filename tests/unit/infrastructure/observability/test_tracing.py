@@ -5,6 +5,7 @@ These tests verify the OpenTelemetry tracing implementation.
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -70,7 +71,7 @@ class TestOpenTelemetryTracerWithOTEL:
     """Tests for OpenTelemetryTracer when OpenTelemetry is available."""
 
     @pytest.fixture
-    def mock_otel(self) -> None:
+    def mock_otel(self) -> Generator[dict[str, MagicMock], None, None]:
         """Mock OpenTelemetry modules."""
         mock_trace = MagicMock()
         mock_provider = MagicMock()

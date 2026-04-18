@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -282,9 +284,13 @@ class TestBronzeWriterTracing:
             logger=noop_logger,
             metrics=NoOpMetrics(),
         )
+        validate_records = cast(
+            Callable[[Iterator[bytes] | None], None],
+            writer._validate_records_iterator,
+        )
 
         with pytest.raises(TypeError, match="records cannot be None"):
-            writer._validate_records_iterator(None)  # type: ignore[arg-type]
+            validate_records(None)
 
     def test_validate_records_iterator_not_iterator_raises(
         self, tmp_path: Path, noop_logger: NoOpLogger
@@ -295,18 +301,19 @@ class TestBronzeWriterTracing:
             logger=noop_logger,
             metrics=NoOpMetrics(),
         )
+        validate_records = cast(Callable[[object], None], writer._validate_records_iterator)
 
         # List is an iterable (valid now)
-        writer._validate_records_iterator([b"test"])  # type: ignore[arg-type]
+        validate_records([b"test"])
 
         # String is iterable but we should check if logic handles it (it iterates chars)
         # It technically passes "hasattr __iter__" but likely fails later if bytes expected.
         # But this test checks only _validate_records_iterator
-        writer._validate_records_iterator("test")  # type: ignore[arg-type]
+        validate_records("test")
 
         # Int is NOT iterable
         with pytest.raises(TypeError, match="records must be an Iterator"):
-            writer._validate_records_iterator(123)  # type: ignore[arg-type]
+            validate_records(123)
 
     @pytest.mark.asyncio
     async def test_write_bronze_invalid_records_type_raises(
@@ -325,11 +332,12 @@ class TestBronzeWriterTracing:
             metrics=NoOpMetrics(),
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
+        write_bronze = cast(Callable[..., object], writer.write_bronze)
 
         # Int is not iterable
         with pytest.raises(TypeError, match="records must be an Iterator"):
-            await writer.write_bronze(
-                records=123,  # type: ignore[arg-type]
+            await write_bronze(
+                records=123,
                 provider="chembl",
                 entity="activity",
                 date=date,

@@ -18,6 +18,7 @@ from bioetl.interfaces.cli.registry_helpers import (
 )
 
 __all__ = [
+    "build_cli_registry",
     "cli",
     "main",
 ]
@@ -164,6 +165,11 @@ def _build_main_registry() -> object:
         create_registry_fn=create_registry,
         register_all_pipelines_fn=register_all_pipelines,
     )
+
+
+def build_cli_registry() -> object:
+    """Compatibility seam retaining the historical main-level registry builder."""
+    return _build_main_registry()
 
 
 @click.group(cls=_LazyCliGroup)  # type: ignore[untyped-decorator]

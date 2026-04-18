@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -735,6 +736,7 @@ class TestStorageAdapterVacuum:
 
         # Mock the silver.vacuum as async
         async def mock_vacuum(**kwargs):
+            await asyncio.sleep(0)
             return ["file1", "file2"]
 
         silver.vacuum = mock_vacuum
