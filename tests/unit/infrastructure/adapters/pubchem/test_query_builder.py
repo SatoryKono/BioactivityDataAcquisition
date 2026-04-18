@@ -88,3 +88,7 @@ class TestBuildCidBatchEndpoint:
         result = build_cid_batch_endpoint(cids)
         assert "cid/1,2,3,..." in result
         assert "100" not in result
+
+    def test_empty_batch_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="at least one CID"):
+            build_cid_batch_endpoint([])

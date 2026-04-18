@@ -342,8 +342,8 @@ class TestExponentialBackoff:
         # All delays after a point should be capped
         assert all(d <= max_delay for d in delays)
         # Later delays should all be at max
-        assert delays[-1] == max_delay
-        assert delays[-2] == max_delay
+        assert delays[-1] == pytest.approx(max_delay)
+        assert delays[-2] == pytest.approx(max_delay)
 
 
 @pytest.mark.e2e
@@ -391,6 +391,7 @@ class TestConnectionPoolExhaustion:
         async def waiting_request():
             try:
                 async with asyncio.timeout(0.01):
+                    await _yield_control()
                     async with semaphore:
                         return "acquired"
             except TimeoutError:
@@ -407,7 +408,5 @@ class TestConnectionPoolExhaustion:
         assert "Pool acquisition timeout" in str(exc_info.value)
 
         blocking_task.cancel()
-        try:
+        with pytest.raises(asyncio.CancelledError):
             await blocking_task
-        except asyncio.CancelledError:
-            pass

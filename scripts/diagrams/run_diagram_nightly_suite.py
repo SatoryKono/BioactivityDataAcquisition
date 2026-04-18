@@ -697,8 +697,15 @@ def check_diag_t029(
     tmpdir: Path,
 ) -> list[Issue]:
     issues: list[Issue] = []
-    alt_css = _ensure_path_within_root(tmpdir / "alt-theme.css", tmpdir)
-    alt_css.write_text(build_alt_css(css), encoding="utf-8")
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        suffix=".css",
+        dir=tmpdir,
+        delete=False,
+    ) as handle:
+        alt_css = _ensure_path_within_root(Path(handle.name), tmpdir)
+        handle.write(build_alt_css(css))
 
     for rel in source_paths:
         path = REPO_ROOT / rel

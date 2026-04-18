@@ -988,12 +988,9 @@ class TestRunHealthServer:
             await asyncio.sleep(0)
         task.cancel()
 
-        # The task catches CancelledError and performs cleanup,
-        # so it may complete normally or raise CancelledError
-        try:
+        # run_health_server re-raises cancellation after cleanup.
+        with pytest.raises(asyncio.CancelledError):
             await task
-        except asyncio.CancelledError:
-            pass
 
         # Verify server was started and stopped
         assert mock_logger.info.call_count >= 1
@@ -1022,11 +1019,9 @@ class TestRunHealthServer:
             await asyncio.sleep(0)
         task.cancel()
 
-        # The task catches CancelledError and performs cleanup
-        try:
+        # run_health_server re-raises cancellation after cleanup.
+        with pytest.raises(asyncio.CancelledError):
             await task
-        except asyncio.CancelledError:
-            pass
 
         # Verify server was started
         assert mock_logger.info.call_count >= 1

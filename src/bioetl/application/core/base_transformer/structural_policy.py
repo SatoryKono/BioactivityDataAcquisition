@@ -1,10 +1,4 @@
-"""Schema-aware structural policy for transformed Silver records.
-
-This stage runs after transformer-specific mapping and before semantic
-Silver filters. It enforces generic presence/type expectations inferred from
-the Silver schema and pipeline config without relying on hard-coded field
-lists in application code.
-"""
+"""Schema-aware structural policy for transformed Silver records."""
 
 from __future__ import annotations
 
@@ -15,8 +9,13 @@ from bioetl.application.core.base_transformer._structural_policy_coercion import
 )
 from bioetl.application.core.base_transformer._structural_policy_contracts import (
     is_missing_value,
-    resolve_field_contracts,
-    resolve_pandera_schema,
+)
+from bioetl.application.core.base_transformer._structural_policy_support import (
+    NoOpStructuralPolicy,
+    build_optional_nonnullable_events,
+    build_quarantine_outcome,
+    build_structural_details,
+    build_structural_policy,
 )
 from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralFieldSpec,
@@ -24,20 +23,7 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
     StructuralPolicyProtocol,
     StructuralPolicySignal,
 )
-from bioetl.application.core.base_transformer.field_policy import FieldPolicyResolver
-from bioetl.domain.types import JsonDict, SilverRecord
-
-_SENSITIVE_FIELD_NAME_TOKENS = frozenset(
-    {"api_key", "authorization", "password", "secret", "token"}
-)
-
-
-class NoOpStructuralPolicy:
-    """Fallback policy used when no schema-aware enforcement is configured."""
-
-    def apply(self, record: SilverRecord) -> StructuralPolicyOutcome:
-        """Return the record unchanged."""
-        return StructuralPolicyOutcome(record=record)
+from bioetl.domain.types import SilverRecord
 
 
 class SchemaAwareStructuralPolicy:
@@ -121,13 +107,13 @@ class SchemaAwareStructuralPolicy:
             empty_as_missing=contract.empty_as_missing,
         ):
             return None
-        details = _build_structural_details(
+        details = build_structural_details(
             reason_code="required_field_missing",
             contract=contract,
             actual_value=value,
             action_taken="quarantine_original_record",
         )
-        return self._build_quarantine_outcome(
+        return build_quarantine_outcome(
             working_record=working_record,
             events=events,
             quarantine_reason=f"Required field '{contract.field_name}' is missing",
@@ -146,7 +132,7 @@ class SchemaAwareStructuralPolicy:
             return None
         if not contract.optional:
             return None
-        details = _build_structural_details(
+        details = build_structural_details(
             reason_code="optional_nonnullable_field_type_mismatch",
             contract=contract,
             actual_value=None,
@@ -155,8 +141,8 @@ class SchemaAwareStructuralPolicy:
             dq_warn=True,
             dq_error=True,
         )
-        events.extend(_build_optional_nonnullable_events(details))
-        return self._build_quarantine_outcome(
+        events.extend(build_optional_nonnullable_events(details))
+        return build_quarantine_outcome(
             working_record=working_record,
             events=events,
             quarantine_reason=f"Optional field '{contract.field_name}' cannot be null",
@@ -181,7 +167,7 @@ class SchemaAwareStructuralPolicy:
             )
             return None
 
-        details = _build_structural_details(
+        details = build_structural_details(
             reason_code=(
                 "optional_nonnullable_field_type_mismatch"
                 if contract.optional
@@ -199,13 +185,13 @@ class SchemaAwareStructuralPolicy:
             dq_error=contract.optional,
         )
         if contract.optional:
-            events.extend(_build_optional_nonnullable_events(details))
+            events.extend(build_optional_nonnullable_events(details))
             reason = (
                 f"Optional non-nullable field '{contract.field_name}' has invalid type"
             )
         else:
             reason = f"Required field '{contract.field_name}' has invalid type"
-        return self._build_quarantine_outcome(
+        return build_quarantine_outcome(
             working_record=working_record,
             events=events,
             quarantine_reason=reason,
@@ -223,7 +209,7 @@ class SchemaAwareStructuralPolicy:
         """Normalize invalid nullable values to null and emit a warning."""
         working_record[contract.field_name] = None
         working_record["_dq_warn"] = True
-        details = _build_structural_details(
+        details = build_structural_details(
             reason_code="nullable_field_type_coerced_to_null",
             contract=contract,
             actual_value=value,
@@ -239,123 +225,9 @@ class SchemaAwareStructuralPolicy:
             )
         )
 
-    @staticmethod
-    def _build_quarantine_outcome(
-        *,
-        working_record: dict[str, object],
-        events: list[StructuralPolicySignal],
-        quarantine_reason: str,
-        details: JsonDict,
-    ) -> StructuralPolicyOutcome:
-        """Build a quarantine outcome with the current record snapshot."""
-        return StructuralPolicyOutcome(
-            record=cast("SilverRecord", working_record),
-            quarantine_reason=quarantine_reason,
-            details=details,
-            events=tuple(events),
-        )
-
-
-def build_structural_policy(
-    *,
-    domain_config: object,
-    pandera_silver_schema: object | None,
-) -> StructuralPolicyProtocol:
-    """Build structural policy from pipeline domain config and Pandera schema."""
-    schema = resolve_pandera_schema(pandera_silver_schema)
-    if schema is None:
-        return NoOpStructuralPolicy()
-
-    field_policy_resolver = FieldPolicyResolver.from_domain_config(domain_config)
-    contracts = tuple(
-        resolve_field_contracts(
-            schema=schema,
-            field_policy_resolver=field_policy_resolver,
-        )
-    )
-    if not contracts:
-        return NoOpStructuralPolicy()
-    return SchemaAwareStructuralPolicy(contracts=contracts)
-
-
-def _build_structural_details(
-    *,
-    reason_code: str,
-    contract: StructuralFieldSpec,
-    actual_value: object,
-    action_taken: str,
-    proposed_normalized_outcome: object | None = None,
-    dq_warn: bool = False,
-    dq_error: bool = False,
-) -> JsonDict:
-    """Build structured structural-policy details for logs/quarantine."""
-    details: JsonDict = {
-        "reason_code": reason_code,
-        "field": contract.field_name,
-        "expected_logical_type": contract.logical_type,
-        "expected_physical_type": contract.physical_type,
-        "nullable": contract.nullable,
-        "optional": contract.optional,
-        "optional_sources": list(contract.optional_sources),
-        "empty_as_missing": contract.empty_as_missing,
-        "coercion_policy": contract.coercion_policy,
-        "action_taken": action_taken,
-        "actual_python_type": type(actual_value).__name__,
-        "actual_value_preview": _preview_value(
-            actual_value,
-            field_name=contract.field_name,
-        ),
-    }
-    if contract.boolean_true_values:
-        details["boolean_true_values"] = list(contract.boolean_true_values)
-    if contract.boolean_false_values:
-        details["boolean_false_values"] = list(contract.boolean_false_values)
-    if proposed_normalized_outcome is not None or dq_warn or dq_error:
-        details["proposed_normalized_outcome"] = proposed_normalized_outcome
-    if dq_warn:
-        details["dq_warn"] = True
-    if dq_error:
-        details["dq_error"] = True
-    return details
-
-
-def _build_optional_nonnullable_events(
-    details: JsonDict,
-) -> tuple[StructuralPolicySignal, StructuralPolicySignal]:
-    """Build warning + error log events for optional/non-nullable mismatch."""
-    return (
-        StructuralPolicySignal(
-            level="warning",
-            event="silver_structural_type_mismatch_warn",
-            details=details,
-        ),
-        StructuralPolicySignal(
-            level="error",
-            event="silver_structural_type_mismatch_error",
-            details=details,
-        ),
-    )
-
-
 # Backward-compatible aliases retained for existing imports/tests.
 StructuralFieldContract = StructuralFieldSpec
 StructuralPolicyEvent = StructuralPolicySignal
-
-
-def _preview_value(
-    value: object,
-    *,
-    field_name: str,
-    max_length: int = 120,
-) -> str:
-    """Create a bounded preview suitable for logs/quarantine metadata."""
-    normalized_field_name = field_name.strip().lower()
-    if any(token in normalized_field_name for token in _SENSITIVE_FIELD_NAME_TOKENS):
-        return "<redacted>"
-    preview = repr(value)
-    if len(preview) <= max_length:
-        return preview
-    return f"{preview[: max_length - 3]}..."
 
 
 __all__ = [
