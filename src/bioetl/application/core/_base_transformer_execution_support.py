@@ -5,9 +5,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any, Protocol
 
-from bioetl.application.core.base_transformer.errors import TransformationError
-
 if TYPE_CHECKING:
+    from bioetl.application.core.base_transformer.errors import TransformationError
     from bioetl.application.core.base_transformer.structural_policy import (
         StructuralPolicyProtocol,
     )

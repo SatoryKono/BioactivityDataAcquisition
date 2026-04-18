@@ -139,9 +139,16 @@ def check_file(path: Path) -> FileCheckResult:
     )
 
 
-def fix_file(path: Path, *, dry_run: bool) -> int:
+def fix_file(path: Path, *, dry_run: bool, allow_non_repo_path: bool = False) -> int:
     """Rewrite a Mermaid file in-place and return replacement count."""
-    safe_path = _ensure_repo_path(path.resolve())
+    resolved_path = path.resolve()
+    if allow_non_repo_path:
+        try:
+            safe_path = _ensure_repo_path(resolved_path)
+        except ValueError:
+            safe_path = resolved_path
+    else:
+        safe_path = _ensure_repo_path(resolved_path)
     lines = safe_path.read_text(encoding="utf-8").splitlines()
     if detect_diagram_type(lines) not in TARGET_DIAGRAM_TYPES:
         return 0

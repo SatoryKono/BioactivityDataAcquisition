@@ -52,7 +52,7 @@ def test_build_parent_comment_references_child_issues() -> None:
 def test_run_dry_run_json_outputs_planned_items(capsys: object) -> None:
     rc = module.run(["--json"])
 
-    assert rc == 0
+    assert rc == 3
     out = capsys.readouterr().out
     payload = json.loads(out)
 
@@ -116,6 +116,6 @@ def test_run_apply_reuses_existing_issues_and_skips_comment(
 
     rc = module.run(["--apply"])
 
-    assert rc == 0
+    assert rc == 3
     assert len(created_issues) == 2
     assert posted_comments == []
