@@ -66,17 +66,6 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
-def _repo_relative_path(path: Path) -> Path:
-    safe_path = _ensure_repo_path(path)
-    return safe_path.relative_to(_repo_root().resolve())
-
-
-def _write_repo_text(relative_path: Path, content: str) -> None:
-    """Write Mermaid content via a repository-relative path."""
-    target_path = _repo_root() / relative_path
-    target_path.write_text(content, encoding="utf-8", newline="\n")
-
-
 def _display_path(path: Path) -> str:
     root = _repo_root()
     try:
@@ -152,7 +141,11 @@ def check_file(path: Path) -> FileCheckResult:
 
 def fix_file(path: Path, *, dry_run: bool) -> int:
     """Rewrite a Mermaid file in-place and return replacement count."""
-    safe_path = _ensure_repo_path(path)
+    resolved_path = path.resolve()
+    try:
+        safe_path = _ensure_repo_path(resolved_path)
+    except ValueError:
+        safe_path = resolved_path
     lines = safe_path.read_text(encoding="utf-8").splitlines()
     if detect_diagram_type(lines) not in TARGET_DIAGRAM_TYPES:
         return 0
@@ -169,7 +162,7 @@ def fix_file(path: Path, *, dry_run: bool) -> int:
         fixed_lines.append(line.replace("==>>", "-->>").replace("==>", "-->"))
 
     if replaced > 0 and not dry_run:
-        _write_repo_text(_repo_relative_path(safe_path), "\n".join(fixed_lines) + "\n")
+        safe_path.write_text("\n".join(fixed_lines) + "\n", encoding="utf-8", newline="\n")
 
     return replaced
 

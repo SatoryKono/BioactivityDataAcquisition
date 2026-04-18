@@ -29,6 +29,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts.common.repo_paths import REPO_ROOT
+
 COMMANDS: dict[str, str] = {
     "check-vcr-placement": "scripts/engineering/qa/vcr/check_root_vcr_cassettes.py",
     "check-vcr-naming": "scripts/engineering/qa/vcr/check_vcr_filename_policy.py",
@@ -41,8 +43,6 @@ COMMANDS: dict[str, str] = {
     "report-null-fields": "scripts/ops/data/extract_null_fields.py",
     "report-content-hash": "scripts/ops/data/generate_content_hash_comparison_report.py",
 }
-
-_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _run_script(name: str, argv: list[str]) -> int:

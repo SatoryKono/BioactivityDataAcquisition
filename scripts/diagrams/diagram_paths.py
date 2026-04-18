@@ -14,16 +14,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
-def resolve_repo_root() -> Path:
-    current = Path(__file__).resolve()
-    for parent in current.parents:
-        if (parent / "pyproject.toml").exists() and (parent / "scripts").exists():
-            return parent
-    return current.parents[0]
-
-
-REPO_ROOT = resolve_repo_root()
+from scripts.common.repo_paths import REPO_ROOT, resolve_repo_root
 ARCHITECTURE_DOCS_ROOT = REPO_ROOT / "docs" / "02-architecture"
 
 

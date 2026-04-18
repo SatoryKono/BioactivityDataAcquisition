@@ -1,21 +1,4 @@
-"""Declarative field mapping specifications.
-
-Provides a DSL for declaring field transformations, replacing repetitive
-_map_* methods with config-driven approach.
-
-Example usage:
-    >>> from bioetl.application.core.field_specs import (
-    ...     FieldSpec, FieldGroup, map_fields, INT, FLOAT
-    ... )
-    >>> specs = (
-    ...     FieldSpec("activity_id", converter=str),
-    ...     FieldSpec("value", converter=FLOAT),
-    ...     FieldSpec("type"),  # No conversion
-    ... )
-    >>> record = {"activity_id": 123, "value": "5.5", "type": "IC50"}
-    >>> map_fields(record, specs)
-    {'activity_id': '123', 'value': 5.5, 'type': 'IC50'}
-"""
+"""Declarative field-mapping helpers for transformer implementations."""
 
 from __future__ import annotations
 
@@ -43,31 +26,7 @@ STR: Callable[[object], str] = str  # object: raw field value from Bronze record
 def normalize_pmid(
     value: object,
 ) -> str | None:  # object: raw PMID value (int, str, or None)
-    """Normalize PubMed ID to string format.
-
-    Delegates to PubMedId.from_raw() Value Object for validation
-    and normalization (strip leading zeros, int→str, upper-bound < 10^10).
-
-    Args:
-        value: Raw PMID value (int, str, or None).
-
-    Returns:
-        Normalized PMID string (digits only), or None if invalid.
-
-    Examples:
-        >>> normalize_pmid(12345678)
-        '12345678'
-        >>> normalize_pmid("12345678")
-        '12345678'
-        >>> normalize_pmid("  12345678  ")
-        '12345678'
-        >>> normalize_pmid("0012345")
-        '12345'
-        >>> normalize_pmid(None)
-        None
-        >>> normalize_pmid("abc")
-        None
-    """
+    """Normalize one PubMed identifier via the publication value object."""
     from bioetl.domain.value_objects.publications import PubMedId
 
     normalized_input: str | int | None = None
@@ -86,20 +45,7 @@ PMID: Callable[[object], str | None] = (
 
 @dataclass(frozen=True, slots=True)
 class FieldSpec:
-    """Specification for a single field mapping.
-
-    Attributes:
-        source: Source field name in the record.
-        target: Target field name in output. Defaults to source if None.
-        converter: Optional type converter function. Applied if value is not None.
-        required: If True, raise ValueError when field is missing or None.
-        default: Default value when field is missing (only used if not required).
-
-    Example:
-        >>> spec = FieldSpec("molecule_id", target="molecule_chembl_id", converter=str)
-        >>> spec = FieldSpec("value", converter=FLOAT, required=True)
-        >>> spec = FieldSpec("description", default="Unknown")
-    """
+    """Specification for one field mapping."""
 
     source: str
     target: str | None = None
@@ -114,24 +60,7 @@ class FieldSpec:
 
 @dataclass(frozen=True, slots=True)
 class FieldGroup:
-    """Group of related field specifications.
-
-    Useful for organizing fields by category (identifiers, values, metadata).
-
-    Attributes:
-        name: Descriptive name for the group.
-        fields: Tuple of field specifications.
-        prefix: Optional prefix added to all target field names.
-
-    Example:
-        >>> group = FieldGroup(
-        ...     name="activity_values",
-        ...     fields=(
-        ...         FieldSpec("value", converter=FLOAT),
-        ...         FieldSpec("units"),
-        ...     ),
-        ... )
-    """
+    """Group of related field specifications with an optional target prefix."""
 
     name: str
     fields: tuple[FieldSpec, ...]
@@ -142,18 +71,7 @@ def map_field(
     record: BronzeRecord,
     spec: FieldSpec,
 ) -> tuple[str, object]:  # object: field value type varies (str | int | float | None)
-    """Map a single field from record according to specification.
-
-    Args:
-        record: Source record dictionary.
-        spec: Field specification.
-
-    Returns:
-        Tuple of (target_field_name, value).
-
-    Raises:
-        ValueError: If field is required but missing or None.
-    """
+    """Map one source field according to a field specification."""
     value = record.get(spec.source)
     target = spec.target or spec.source
 
@@ -174,27 +92,7 @@ def map_fields(
     record: BronzeRecord,
     specs: Sequence[FieldSpec],
 ) -> JsonDict:  # Any: heterogeneous record values
-    """Map multiple fields from record according to specifications.
-
-    Args:
-        record: Source record dictionary.
-        specs: Sequence of field specifications.
-
-    Returns:
-        Dictionary with mapped fields.
-
-    Raises:
-        ValueError: If any required field is missing.
-
-    Example:
-        >>> specs = (
-        ...     FieldSpec("activity_id", converter=str, required=True),
-        ...     FieldSpec("value", converter=FLOAT),
-        ...     FieldSpec("type"),
-        ... )
-        >>> map_fields({"activity_id": 123, "value": "5.5", "type": "IC50"}, specs)
-        {'activity_id': '123', 'value': 5.5, 'type': 'IC50'}
-    """
+    """Map multiple fields from one source record."""
     result: JsonDict = {}  # Any: heterogeneous record values
 
     for spec in specs:
@@ -208,27 +106,7 @@ def map_field_group(
     record: BronzeRecord,
     group: FieldGroup,
 ) -> JsonDict:  # Any: heterogeneous record values
-    """Map a group of fields with optional prefix.
-
-    Args:
-        record: Source record dictionary.
-        group: Field group specification.
-
-    Returns:
-        Dictionary with mapped fields, optionally prefixed.
-
-    Example:
-        >>> group = FieldGroup(
-        ...     name="ligand_efficiency",
-        ...     prefix="le_",
-        ...     fields=(
-        ...         FieldSpec("bei", converter=FLOAT),
-        ...         FieldSpec("le", converter=FLOAT),
-        ...     ),
-        ... )
-        >>> map_field_group({"bei": "1.5", "le": "0.3"}, group)
-        {'le_bei': 1.5, 'le_le': 0.3}
-    """
+    """Map one field group and apply its optional target prefix."""
     mapped = map_fields(record, group.fields)
 
     if group.prefix:
@@ -240,15 +118,7 @@ def map_field_groups(
     record: BronzeRecord,
     groups: Sequence[FieldGroup],
 ) -> JsonDict:  # Any: heterogeneous record values
-    """Map multiple field groups, merging results.
-
-    Args:
-        record: Source record dictionary.
-        groups: Sequence of field groups.
-
-    Returns:
-        Merged dictionary with all mapped fields.
-    """
+    """Map multiple field groups and merge the results."""
     result: JsonDict = {}  # Any: heterogeneous record values
 
     for group in groups:
@@ -263,64 +133,22 @@ def map_field_groups(
 
 
 def simple_fields(*field_names: str) -> tuple[FieldSpec, ...]:
-    """Create simple field specs (no conversion) from field names.
-
-    Args:
-        *field_names: Variable number of field names.
-
-    Returns:
-        Tuple of FieldSpec objects with no converters.
-
-    Example:
-        >>> specs = simple_fields("type", "units", "relation")
-        >>> len(specs)
-        3
-    """
+    """Create pass-through field specs from raw field names."""
     return tuple(FieldSpec(name) for name in field_names)
 
 
 def int_fields(*field_names: str) -> tuple[FieldSpec, ...]:
-    """Create field specs with safe_int converter.
-
-    Args:
-        *field_names: Variable number of field names.
-
-    Returns:
-        Tuple of FieldSpec objects with INT converter.
-
-    Example:
-        >>> specs = int_fields("record_id", "src_id", "max_phase")
-    """
+    """Create field specs that normalize values with `INT`."""
     return tuple(FieldSpec(name, converter=INT) for name in field_names)
 
 
 def float_fields(*field_names: str) -> tuple[FieldSpec, ...]:
-    """Create field specs with safe_float converter.
-
-    Args:
-        *field_names: Variable number of field names.
-
-    Returns:
-        Tuple of FieldSpec objects with FLOAT converter.
-
-    Example:
-        >>> specs = float_fields("value", "standard_value", "pchembl_value")
-    """
+    """Create field specs that normalize values with `FLOAT`."""
     return tuple(FieldSpec(name, converter=FLOAT) for name in field_names)
 
 
 def pmid_fields(*field_names: str) -> tuple[FieldSpec, ...]:
-    """Create field specs with PMID converter.
-
-    Args:
-        *field_names: Variable number of PMID field names.
-
-    Returns:
-        Tuple of FieldSpec objects with PMID converter.
-
-    Example:
-        >>> specs = pmid_fields("pubmed_id", "pmid")
-    """
+    """Create field specs that normalize values with `PMID`."""
     return tuple(FieldSpec(name, converter=PMID) for name in field_names)
 
 

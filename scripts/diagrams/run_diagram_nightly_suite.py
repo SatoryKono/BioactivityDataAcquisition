@@ -678,14 +678,13 @@ def check_diag_t028(
     return issues
 
 
-def build_alt_css(original_css: Path, target_css: Path, *, temp_root: Path) -> None:
+def build_alt_css(original_css: Path) -> str:
     safe_original = _ensure_repo_path(original_css)
-    safe_target = _ensure_path_within_root(target_css, temp_root)
     content = safe_original.read_text(encoding="utf-8")
     content = content.replace("#f5f3ff", "#ede9fe")
     content = content.replace("#fff1f2", "#ffe4e6")
     content = content.replace("#111827", "#0f172a")
-    safe_target.write_text(content, encoding="utf-8")
+    return content
 
 
 def check_diag_t029(
@@ -698,8 +697,8 @@ def check_diag_t029(
     tmpdir: Path,
 ) -> list[Issue]:
     issues: list[Issue] = []
-    alt_css = tmpdir / "alt-theme.css"
-    build_alt_css(css, alt_css, temp_root=tmpdir)
+    alt_css = _ensure_path_within_root(tmpdir / "alt-theme.css", tmpdir)
+    alt_css.write_text(build_alt_css(css), encoding="utf-8")
 
     for rel in source_paths:
         path = REPO_ROOT / rel
