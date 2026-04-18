@@ -49,6 +49,7 @@ def sort_columns_by_provider(
     provider_order: tuple[str, ...],
 ) -> list[str]:
     """Sort columns by provider prefix order."""
+    provider_idx = {p: i for i, p in enumerate(provider_order)}
 
     def sort_key(col: str) -> tuple[int, str]:
         """Return ``(provider_index, name)`` placing seed columns first."""
@@ -57,11 +58,10 @@ def sort_columns_by_provider(
             return (0, col.lower())
 
         provider = parts[0].lower()
-        try:
-            idx = provider_order.index(provider)
+        idx = provider_idx.get(provider)
+        if idx is not None:
             return (idx + 1, col.lower())
-        except ValueError:
-            return (len(provider_order) + 1, col.lower())
+        return (len(provider_order) + 1, col.lower())
 
     return sorted(columns, key=sort_key)
 

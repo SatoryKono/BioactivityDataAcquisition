@@ -40,6 +40,7 @@ class FieldGroupRegistry:
                 self._field_to_mapping[fm.base_name.lower()] = fm
                 for col in fm.provider_columns:
                     self._column_to_group[col.lower()] = fm.group
+        self._provider_order_idx = {p: i for i, p in enumerate(self._provider_order)}
 
     @property
     def groups(self) -> tuple[FieldGroupDefinition, ...]:
@@ -160,14 +161,12 @@ class FieldGroupRegistry:
         """
         system_cols = [c for c in columns if c.startswith("_")]
         data_cols = [c for c in columns if not c.startswith("_")]
-        group_order = list(FieldGroupId)
+        group_order_idx = {g: i for i, g in enumerate(list(FieldGroupId))}
+        group_len = len(group_order_idx)
 
         def sort_key(column: str) -> tuple[int, int, str]:
             group = self.get_group(column)
-            try:
-                group_idx = group_order.index(group)
-            except ValueError:
-                group_idx = len(group_order)
+            group_idx = group_order_idx.get(group, group_len)
             provider_rank = self._get_provider_rank(column)
             field_name = self._extract_field(column)
             return (group_idx, provider_rank, field_name)
@@ -206,10 +205,10 @@ class FieldGroupRegistry:
         parts = column.split(".")
         if len(parts) == 3:
             provider = parts[0].lower()
-            try:
-                return self._provider_order.index(provider)
-            except ValueError:
-                return 999
+            idx = self._provider_order_idx.get(provider)
+            if idx is not None:
+                return idx
+            return 999
         return -1
 
     @staticmethod

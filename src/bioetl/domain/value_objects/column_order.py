@@ -151,6 +151,14 @@ class ColumnOrderConfig:
         "openalex",
         "semantic_scholar",
     )
+    _provider_priority_idx: dict[str, int] = field(init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "_provider_priority_idx",
+            {p: i for i, p in enumerate(self.provider_priority)},
+        )
 
     def get_group(self, column: str) -> SemanticGroup:
         """Get semantic group for a column.
@@ -188,10 +196,10 @@ class ColumnOrderConfig:
         parts = column.split(".")
         if len(parts) == 3:
             provider = parts[0].lower()
-            try:
-                return self.provider_priority.index(provider)
-            except ValueError:
-                return 999
+            idx = getattr(self, "_provider_priority_idx", {}).get(provider)
+            if idx is not None:
+                return idx
+            return 999
 
         # Unqualified columns get highest priority (seed)
         return -1

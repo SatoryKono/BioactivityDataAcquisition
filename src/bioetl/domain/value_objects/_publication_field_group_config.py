@@ -31,6 +31,14 @@ class FieldGroupConfig:
         "semanticscholar",
     )
     default_group: PublicationFieldGroup = PublicationFieldGroup.TRASH
+    _provider_priority_idx: dict[str, int] = field(init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "_provider_priority_idx",
+            {p: i for i, p in enumerate(self.provider_priority)},
+        )
 
     def get_group(self, column: str) -> PublicationFieldGroup:
         """Get semantic group for qualified or unqualified column name.
@@ -122,10 +130,11 @@ class FieldGroupConfig:
         if len(parts) != 3:
             return -1
         provider = parts[0].lower()
-        try:
-            return self.provider_priority.index(provider)
-        except ValueError:
-            return 999
+        # Note: _provider_priority_idx is set in __post_init__
+        idx = getattr(self, "_provider_priority_idx", {}).get(provider)
+        if idx is not None:
+            return idx
+        return 999
 
     def sort_columns(self, columns: list[str]) -> list[str]:
         """Sort by semantic group, provider priority, then field name.
@@ -136,12 +145,13 @@ class FieldGroupConfig:
         Returns:
             Sorted list of column names by group, provider priority, and field name.
         """
+        group_idx_map = {g: i for i, g in enumerate(list(PublicationFieldGroup))}
 
         def sort_key(column: str) -> tuple[int, int, str]:
             group = self.get_group(column)
             provider_rank = self.get_provider_rank(column)
             field_name = self._extract_field(column)
-            return (list(PublicationFieldGroup).index(group), provider_rank, field_name)
+            return (group_idx_map.get(group, len(group_idx_map)), provider_rank, field_name)
 
         return sorted(columns, key=sort_key)
 
