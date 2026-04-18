@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 from uuid import uuid4
 
 import pytest
@@ -15,22 +16,41 @@ from bioetl.composition.factories.pipeline.run_context_factory import (
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.config.domain_config_resolver import (
     DomainConfigResolver,
 )
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
+    defaults = {
+        "content_hash": SimpleNamespace(include=[], exclude=[]),
+        "transform": SimpleNamespace(version="2.4.0", steps=["normalize", "validate", "hash"]),
+        "silver_filters": None,
+        "gold_filters": None,
+    }
+    defaults.update(overrides)
+    return cast(PipelineYamlConfig, SimpleNamespace(**defaults))
+
+
+def _make_runtime(**overrides: object) -> RuntimeConfig:
+    defaults = {"run_type": RunType.INCREMENTAL}
+    defaults.update(overrides)
+    return cast(RuntimeConfig, SimpleNamespace(**defaults))
+
+
+def _make_domain_config(**overrides: object) -> PipelineConfig:
+    defaults = {"silver_filters": None, "gold_filters": None}
+    defaults.update(overrides)
+    return cast(PipelineConfig, SimpleNamespace(**defaults))
 
 
 @pytest.mark.unit
 def test_run_context_factory_creates_expected_context() -> None:
-    yaml_config = SimpleNamespace(
-        content_hash=SimpleNamespace(include=[], exclude=[]),
-        transform=SimpleNamespace(
-            version="2.4.0",
-            steps=["normalize", "validate", "hash"],
-        ),
-    )
-    runtime = SimpleNamespace(run_type=RunType.INCREMENTAL)
+    yaml_config = _make_yaml_config()
+    runtime = _make_runtime(run_type=RunType.INCREMENTAL)
     factory = RunContextFactory(
         pipeline_name="chembl_activity",
         provider="chembl",
@@ -73,17 +93,17 @@ class _DummyLoader:
         self.configs_root = configs_root
         self.relaxed_dq = relaxed_dq
 
-    def resolve_dq_config(self, _yaml_config: object) -> str:
+    def resolve_dq_config(self, _yaml_config: PipelineYamlConfig) -> str:
         return "resolved-dq"
 
 
 @pytest.mark.unit
 def test_domain_config_resolver_uses_loader_and_mapper() -> None:
-    yaml_config = SimpleNamespace()
+    yaml_config = _make_yaml_config()
     captured: dict[str, object] = {}
 
     def _mapper(
-        config: object,
+        config: PipelineYamlConfig,
         resolved_dq_config: object = None,
     ) -> str:
         captured["config"] = config
@@ -111,10 +131,8 @@ def test_transformer_builder_returns_none_without_class() -> None:
     )
     result = builder.build(
         transformer_class=None,
-        yaml_config=SimpleNamespace(
-            content_hash=SimpleNamespace(include=[], exclude=[])
-        ),
-        domain_config=SimpleNamespace(silver_filters=None, gold_filters=None),
+        yaml_config=_make_yaml_config(),
+        domain_config=_make_domain_config(),
         pandera_silver_schema=None,
         tracer=None,
         metrics=None,
@@ -142,10 +160,10 @@ def test_transformer_builder_builds_transformer_with_policy_fallback() -> None:
 
     transformer = builder.build(
         transformer_class=_Transformer,
-        yaml_config=SimpleNamespace(
+        yaml_config=_make_yaml_config(
             content_hash=SimpleNamespace(include=["a"], exclude=["b"])
         ),
-        domain_config=SimpleNamespace(
+        domain_config=_make_domain_config(
             silver_filters="silver-filter",
             gold_filters="gold-filter",
         ),

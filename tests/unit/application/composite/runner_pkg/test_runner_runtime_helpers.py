@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -18,8 +19,28 @@ from bioetl.application.composite.runner_pkg.runner_runtime_helpers import (
     run_with_managed_lock,
     validate_runner_can_start,
 )
+from bioetl.application.composite.runtime_models import (
+    CompositeRunnerDependencies,
+    CompositeRuntimeConfig,
+)
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import LockAcquisitionError, RunnerAlreadyExecutedError
+
+
+def _make_runtime(**overrides: object) -> CompositeRuntimeConfig:
+    defaults = {"resume": False}
+    defaults.update(overrides)
+    return cast(CompositeRuntimeConfig, SimpleNamespace(**defaults))
+
+
+def _make_checkpoint_state(**overrides: object) -> object:
+    defaults = {
+        "is_resumable": True,
+        "run_id": "original-run",
+        "state": CompositePipelineState.FAILED,
+    }
+    defaults.update(overrides)
+    return SimpleNamespace(**defaults)
 
 
 @pytest.mark.unit
@@ -28,26 +49,29 @@ def test_bind_runner_dependencies_builds_metrics_aware_observer_fallback() -> No
     logger = MagicMock()
     metrics = MagicMock()
     tracer = MagicMock()
-    deps = SimpleNamespace(
-        seed_runner_factory=MagicMock(),
-        enricher_runner_factory=MagicMock(),
-        dependencies_runner_factory=MagicMock(),
-        key_extractor=MagicMock(),
-        dependency_coordinator=MagicMock(),
-        coordinator=MagicMock(),
-        merger=MagicMock(),
-        checkpoint_manager=MagicMock(),
-        logger=logger,
-        lock=MagicMock(),
-        dq_report_service=MagicMock(),
-        preflight_validator=MagicMock(),
-        quarantine_port=MagicMock(),
-        metrics=metrics,
-        tracer=tracer,
-        observer=None,
-        fsm_state_helper=MagicMock(),
-        manifest_id="manifest-123",
-        run_ledger_service=MagicMock(),
+    deps = cast(
+        CompositeRunnerDependencies,
+        SimpleNamespace(
+            seed_runner_factory=MagicMock(),
+            enricher_runner_factory=MagicMock(),
+            dependencies_runner_factory=MagicMock(),
+            key_extractor=MagicMock(),
+            dependency_coordinator=MagicMock(),
+            coordinator=MagicMock(),
+            merger=MagicMock(),
+            checkpoint_manager=MagicMock(),
+            logger=logger,
+            lock=MagicMock(),
+            dq_report_service=MagicMock(),
+            preflight_validator=MagicMock(),
+            quarantine_port=MagicMock(),
+            metrics=metrics,
+            tracer=tracer,
+            observer=None,
+            fsm_state_helper=MagicMock(),
+            manifest_id="manifest-123",
+            run_ledger_service=MagicMock(),
+        ),
     )
 
     bind_runner_dependencies(host, deps)
@@ -70,8 +94,8 @@ def test_validate_runner_can_start_raises_for_finished_runner() -> None:
 
 @pytest.mark.unit
 def test_resolve_original_run_id_for_resume_returns_checkpoint_run_id() -> None:
-    runtime = SimpleNamespace(resume=True)
-    state = SimpleNamespace(is_resumable=True, run_id="original-run")
+    runtime = _make_runtime(resume=True)
+    state = _make_checkpoint_state(is_resumable=True, run_id="original-run")
 
     result = resolve_original_run_id(
         runtime=runtime,
@@ -135,11 +159,11 @@ async def test_run_with_managed_lock_raises_when_lock_not_acquired() -> None:
 @pytest.mark.unit
 @pytest.mark.asyncio
 async def test_prepare_run_state_normalizes_failed_resume_before_logging() -> None:
-    failed_state = SimpleNamespace(
+    failed_state = _make_checkpoint_state(
         state=CompositePipelineState.FAILED,
         is_resumable=True,
     )
-    resumed_state = SimpleNamespace(
+    resumed_state = _make_checkpoint_state(
         state=CompositePipelineState.ENRICHMENT_COMPLETED,
         is_resumable=True,
     )
@@ -151,7 +175,7 @@ async def test_prepare_run_state_normalizes_failed_resume_before_logging() -> No
 
     result = await prepare_run_state(
         checkpoint_manager=checkpoint_manager,
-        runtime=SimpleNamespace(resume=True),
+        runtime=_make_runtime(resume=True),
         fsm=fsm,
     )
 
