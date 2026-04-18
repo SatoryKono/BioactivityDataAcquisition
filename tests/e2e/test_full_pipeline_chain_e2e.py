@@ -28,11 +28,14 @@ from .conftest import (
 CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
 
 
-@pytest.fixture(scope="module")
-def vcr_config() -> dict[str, Any]:
+@pytest.fixture
+def vcr_config(request: pytest.FixtureRequest) -> dict[str, Any]:
     """Configure VCR for ChEMBL multi-pipeline E2E tests."""
+    cassette_dir = CASSETTE_DIR
+    if request.node.name == "test_parallel_independent_pipelines":
+        cassette_dir = Path(__file__).parent.parent / "fixtures" / "vcr" / "uniprot"
     return {
-        "cassette_library_dir": str(CASSETTE_DIR),
+        "cassette_library_dir": str(cassette_dir),
         "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "decode_compressed_response": True,
