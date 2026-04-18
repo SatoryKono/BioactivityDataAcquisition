@@ -82,9 +82,24 @@ python3 sonar_issue_processor_demo.py
 
 To run with real SonarQube and GitHub data:
 
+### Option 1: Using .env file (recommended)
+
+1. Create/edit `.env` file in your project root:
+```bash
+# SonarCloud Configuration
+SONARQUBE_TOKEN="your-sonarcloud-token"
+GITHUB_TOKEN="your-github-token"
+```
+
+2. Run the processor:
+```bash
+python3 sonar_issue_processor.py
+```
+
+### Option 2: Using environment variables
+
 ```bash
 # Set required environment variables
-export SONARQUBE_ORG="your-sonarcloud-org"
 export SONARQUBE_TOKEN="your-sonarcloud-token"
 export GITHUB_TOKEN="your-github-token"
 

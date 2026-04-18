@@ -4,8 +4,13 @@ Demo version of SonarQube issue processor - simulates the workflow without real 
 """
 
 import json
+import os
 from datetime import datetime
 from typing import Any, Dict, List
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Simulated data
 SIMULATED_SONAR_ISSUES = [
@@ -161,11 +166,11 @@ def main():
         print(f"  • {layer}: {url}")
 
     print("\n✅ Demo completed successfully!")
-    print("\n💡 To run with real data, set these environment variables:")
-    print("   export SONARQUBE_ORG='your-sonarcloud-org'")
-    print("   export SONARQUBE_TOKEN='your-sonarcloud-token'")
-    print("   export GITHUB_TOKEN='your-github-token'")
-    print("   python3 sonar_issue_processor.py")
+    print("\n💡 To run with real data:")
+    print("   1. Create .env file with your tokens:")
+    print("      SONARQUBE_TOKEN='your-sonarcloud-token'")
+    print("      GITHUB_TOKEN='your-github-token'")
+    print("   2. Run: python3 sonar_issue_processor.py")
 
 
 if __name__ == "__main__":
