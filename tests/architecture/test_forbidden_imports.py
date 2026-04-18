@@ -55,22 +55,49 @@ def _module_import_violations(
     exact_modules: set[str] | None = None,
     startswith_modules: tuple[str, ...] = (),
 ) -> list[str]:
+    """Check for violations of module imports."""
     exact_modules = exact_modules or set()
     violations: list[str] = []
     tree = _parse_file(py_file)
+    
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
-            module = node.module
-            if module is None:
-                continue
-            if module in exact_modules or module.startswith(startswith_modules):
-                violations.append(f"{_relative(src_dir, py_file)}:{node.lineno}")
+            _check_import_from(node, py_file, src_dir, exact_modules, startswith_modules, violations)
         elif isinstance(node, ast.Import):
-            for alias in node.names:
-                module = alias.name
-                if module in exact_modules or module.startswith(startswith_modules):
-                    violations.append(f"{_relative(src_dir, py_file)}:{node.lineno}")
+            _check_import(node, py_file, src_dir, exact_modules, startswith_modules, violations)
+    
     return violations
+
+
+def _check_import_from(
+    node: ast.ImportFrom,
+    py_file: Path,
+    src_dir: Path,
+    exact_modules: set[str],
+    startswith_modules: tuple[str, ...],
+    violations: list[str],
+) -> None:
+    """Check ImportFrom node for violations."""
+    module = node.module
+    if module is None:
+        return
+    if module in exact_modules or module.startswith(startswith_modules):
+        violations.append(f"{_relative(src_dir, py_file)}:{node.lineno}")
+
+
+def _check_import(
+    node: ast.Import,
+    py_file: Path,
+    src_dir: Path,
+    exact_modules: set[str],
+    startswith_modules: tuple[str, ...],
+    violations: list[str],
+) -> None:
+    """Check Import node for violations."""
+    for alias in node.names:
+        module = alias.name
+        if module in exact_modules or module.startswith(startswith_modules):
+            violations.append(f"{_relative(src_dir, py_file)}:{node.lineno}")
 
 
 def _composition_module_violations(
