@@ -170,8 +170,10 @@ class TestCompositeConfigColumnGroups:
             "_resolve_composite_config_path",
             lambda _name: config_path,
         )
+        # Mock pydantic.ValidationError instead of composite_runtime.ValidationError
+        import pydantic
         monkeypatch.setattr(
-            composite_runtime,
+            pydantic,
             "ValidationError",
             _DummyValidationError,
         )

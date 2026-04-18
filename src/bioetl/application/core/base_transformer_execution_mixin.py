@@ -35,7 +35,7 @@ class _BaseTransformerExecutionMixin:
         self,
         context: PipelineContext,
         index: int,
-    ) -> Any:
+    ) -> object:  # Any: OpenTelemetry span type is dynamic
         """Create and enter an OpenTelemetry span for record transformation."""
         return start_transform_span(
             cast("TransformerExecutionOwner", self), context, index
@@ -93,7 +93,7 @@ class _BaseTransformerExecutionMixin:
         self,
         error: TransformationError,
         context: PipelineContext,
-        span: Any,
+        span: object,  # Any: OpenTelemetry span type is dynamic
     ) -> str:
         """Log and annotate span for transformation errors."""
         return handle_transformation_error(
@@ -107,7 +107,7 @@ class _BaseTransformerExecutionMixin:
         self,
         error: ValueError,
         context: PipelineContext,
-        span: Any,
+        span: object,  # Any: OpenTelemetry span type is dynamic
     ) -> str:
         """Log and annotate span for validation errors."""
         return handle_validation_error(
@@ -121,7 +121,7 @@ class _BaseTransformerExecutionMixin:
         self,
         start_time: float,
         error_type: str | None,
-        span: Any,
+        span: object,  # Any: OpenTelemetry span type is dynamic
     ) -> None:
         """Record transform duration/error metrics and close the OTEL span."""
         record_metrics_and_close_span(
