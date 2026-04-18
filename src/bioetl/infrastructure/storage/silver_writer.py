@@ -634,16 +634,45 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         validated_mode: SilverWriteMode,
         primary_keys: list[str],
     ) -> None:
-        """Fallback CSV export method for backward compatibility.
+        """Compatibility seam for CSV export across composition and mixin paths."""
+        if self._maintenance is not None:
+            export_path = str(Path(self.base_path) / f"{table_name}.csv")
+            await self._maintenance.maybe_export_csv(
+                table_name=table_name,
+                arrow_data=arrow_data,
+                export_path=export_path,
+                mode=mode,
+                validated_mode=validated_mode,
+                primary_keys=primary_keys,
+            )
+            return
 
-        This method provides a no-op fallback when the maintenance service
-        is not available. It's called by postwrite operations as a fallback
-        when self._maintenance is None.
-        """
-        del table_name, arrow_data, mode, validated_mode, primary_keys
-        # No-op implementation - CSV export requires maintenance service
-        # This maintains backward compatibility with tests that don't provide
-        # full runtime_services but still trigger postwrite operations
+    async def _maybe_log_silver_audit(
+        self,
+        *,
+        table_name: str,
+        records: list[BronzeRecord],
+        mode: SilverWriteMode,
+        run_id: RunID | None,
+        run_type: RunType | None,
+        source_batch_id: BatchID | None,
+        ingestion_ts: datetime | None,
+    ) -> None:
+        """Compatibility seam for conditional Silver audit logging."""
+        from bioetl.infrastructure.storage.silver.metadata_mixin import (
+            SilverWriterMetadataMixin,
+        )
+
+        await SilverWriterMetadataMixin._maybe_log_silver_audit(
+            self,
+            table_name=table_name,
+            records=records,
+            mode=mode,
+            run_id=run_id,
+            run_type=run_type,
+            source_batch_id=source_batch_id,
+            ingestion_ts=ingestion_ts,
+        )
 
     async def _prepare_silver_write_finalization_context(
         self,
