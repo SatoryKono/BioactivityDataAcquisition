@@ -79,7 +79,9 @@ class TestBuildCidBatchEndpoint:
         assert result.endswith("/JSON")
 
     def test_single_cid(self) -> None:
-        result = build_cid_batch_endpoint([42])
+        cids = [42]
+        assert cids
+        result = build_cid_batch_endpoint(cids)
         assert result == "/compound/cid/42/JSON"
 
     def test_large_batch_truncated_to_preview(self) -> None:

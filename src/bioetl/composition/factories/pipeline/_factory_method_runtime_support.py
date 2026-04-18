@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.runner import PipelineRunner
-    from bioetl.composition.factories.pipeline.factory_method_helpers import (
+    from bioetl.composition.factories.pipeline._factory_method_types import (
         _CreatePipelineWithServicesRequest,
         _PipelineFactoryContext,
     )
