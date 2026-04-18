@@ -261,3 +261,4 @@ docs/reports/evidence/documentation-internal-surface-governance/02-evidence/inte
 /script-gemini
 /script-mistrall
 /script-mistrallvibe
+.env.local
