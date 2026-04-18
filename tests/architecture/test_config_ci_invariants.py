@@ -209,6 +209,150 @@ def _load_bronze_fixture_manifest() -> dict[str, dict[str, Any]]:
     return result
 
 
+def _pipeline_fixture_context(config_path: Path) -> tuple[str, str, str, list[Path], int]:
+    data = _load_yaml(config_path)
+    provider = str(data.get("provider", config_path.parent.name))
+    entity = str(data.get("entity", config_path.stem))
+    key = f"{provider}/{entity}"
+    runtime_fixture_files = _collect_input_jsonl_files(provider, entity)
+    runtime_fixture_lines = _count_jsonl_lines(runtime_fixture_files)
+    return key, provider, entity, runtime_fixture_files, runtime_fixture_lines
+
+
+def _validate_manifest_entry(
+    key: str,
+    manifest_entry: dict[str, Any] | None,
+    *,
+    allowed_fixture_kinds: set[str],
+    allowed_validation_statuses: set[str],
+    min_tracked_sample_records: int,
+) -> tuple[list[str], bool]:
+    if manifest_entry is None:
+        return [], False
+
+    invalid_entries: list[str] = []
+    has_manifest_fixture = False
+    fixture_kind = manifest_entry.get("fixture_kind")
+    if fixture_kind not in allowed_fixture_kinds:
+        invalid_entries.append(
+            f"{key}: fixture_kind must be one of {sorted(allowed_fixture_kinds)}"
+        )
+
+    fixture_path_raw = manifest_entry.get("fixture_path")
+    if not isinstance(fixture_path_raw, str) or not fixture_path_raw.strip():
+        invalid_entries.append(f"{key}: fixture_path is required in manifest")
+    else:
+        fixture_path = PROJECT_ROOT / fixture_path_raw
+        if not fixture_path.exists() or not fixture_path.is_file():
+            invalid_entries.append(
+                f"{key}: fixture_path does not exist: {fixture_path_raw}"
+            )
+        elif fixture_path.suffix != ".jsonl":
+            invalid_entries.append(
+                f"{key}: fixture_path must point to .jsonl file, "
+                f"found {fixture_path_raw}"
+            )
+        else:
+            manifest_lines = _count_jsonl_lines([fixture_path])
+            records = manifest_entry.get("records")
+            if not isinstance(records, int) or records <= 0:
+                invalid_entries.append(f"{key}: records must be positive int in manifest")
+            elif records != manifest_lines:
+                invalid_entries.append(
+                    f"{key}: records={records} does not match fixture "
+                    f"line count={manifest_lines}"
+                )
+            elif fixture_kind == "tracked_ci_sample":
+                if not fixture_path_raw.startswith("tests/fixtures/bronze/"):
+                    invalid_entries.append(
+                        f"{key}: tracked_ci_sample must live under "
+                        "tests/fixtures/bronze/"
+                    )
+                if records < min_tracked_sample_records:
+                    invalid_entries.append(
+                        f"{key}: tracked_ci_sample requires at least "
+                        f"{min_tracked_sample_records} records"
+                    )
+                has_manifest_fixture = True
+
+    for field in ("provenance", "owner", "last_refresh"):
+        value = manifest_entry.get(field)
+        if not isinstance(value, str) or not value.strip():
+            invalid_entries.append(f"{key}: manifest.{field} is required")
+
+    validation_status = manifest_entry.get("validation_status")
+    if validation_status not in allowed_validation_statuses:
+        invalid_entries.append(
+            f"{key}: validation_status must be one of "
+            f"{sorted(allowed_validation_statuses)}"
+        )
+
+    return invalid_entries, has_manifest_fixture
+
+
+def _validate_gap_entry(
+    key: str,
+    gaps: dict[str, dict[str, Any]],
+    *,
+    allowed_gap_statuses: set[str],
+) -> list[str]:
+    if key not in gaps:
+        return []
+
+    gap = gaps[key]
+    invalid_entries: list[str] = []
+    if not isinstance(gap.get("reason"), str) or not gap.get("reason"):
+        invalid_entries.append(f"{key}: gap.reason is required")
+    if not isinstance(gap.get("owner"), str) or not gap.get("owner"):
+        invalid_entries.append(f"{key}: gap.owner is required")
+    status = gap.get("status")
+    if status not in allowed_gap_statuses:
+        invalid_entries.append(
+            f"{key}: gap.status must be one of {sorted(allowed_gap_statuses)}"
+        )
+    if not isinstance(gap.get("resolution_plan"), str) or not gap.get(
+        "resolution_plan"
+    ):
+        invalid_entries.append(f"{key}: gap.resolution_plan is required")
+    return invalid_entries
+
+
+def _fixture_coverage_findings(
+    key: str,
+    *,
+    runtime_fixture_files: list[Path],
+    runtime_fixture_lines: int,
+    has_gap: bool,
+    has_manifest_fixture: bool,
+    min_recommended_records: int,
+) -> tuple[list[str], list[str], list[str]]:
+    missing_fixture: list[str] = []
+    insufficient_fixture: list[str] = []
+    stale_gap_entries: list[str] = []
+
+    if not runtime_fixture_files and not has_manifest_fixture:
+        if not has_gap:
+            missing_fixture.append(
+                f"{key}: no runtime fixture, no tracked fixture, and no GAP entry"
+            )
+    elif (
+        runtime_fixture_files
+        and runtime_fixture_lines < min_recommended_records
+        and not (has_gap or has_manifest_fixture)
+    ):
+        insufficient_fixture.append(
+            f"{key}: runtime fixture has < {min_recommended_records} records "
+            f"(declare GAP or add records)"
+        )
+
+    if has_manifest_fixture and has_gap:
+        stale_gap_entries.append(
+            f"{key}: remove GAP entry (covered by tracked_ci_sample manifest)"
+        )
+
+    return missing_fixture, insufficient_fixture, stale_gap_entries
+
+
 # ---------------------------------------------------------------------------
 # INV-CFG-001: No legacy naming
 # ---------------------------------------------------------------------------
@@ -763,128 +907,42 @@ class TestBronzeFixtureCoverage:
         stale_gap_entries: list[str] = []
 
         for config_path in _collect_pipeline_configs():
-            data = _load_yaml(config_path)
-            provider = str(data.get("provider", config_path.parent.name))
-            entity = str(data.get("entity", config_path.stem))
-            key = f"{provider}/{entity}"
+            (
+                key,
+                _provider,
+                _entity,
+                runtime_fixture_files,
+                runtime_fixture_lines,
+            ) = _pipeline_fixture_context(config_path)
             pipeline_keys.add(key)
-
-            runtime_fixture_files = _collect_input_jsonl_files(provider, entity)
-            runtime_fixture_lines = _count_jsonl_lines(
-                runtime_fixture_files, stop_after=self._MIN_RECOMMENDED_RECORDS
-            )
             has_gap = key in gaps
             manifest_entry = manifest.get(key)
-            has_manifest_fixture = False
-
-            if manifest_entry is not None:
-                fixture_kind = manifest_entry.get("fixture_kind")
-                if fixture_kind not in self._ALLOWED_FIXTURE_KINDS:
-                    invalid_manifest_entries.append(
-                        f"{key}: fixture_kind must be one of "
-                        f"{sorted(self._ALLOWED_FIXTURE_KINDS)}"
-                    )
-
-                fixture_path_raw = manifest_entry.get("fixture_path")
-                if (
-                    not isinstance(fixture_path_raw, str)
-                    or not fixture_path_raw.strip()
-                ):
-                    invalid_manifest_entries.append(
-                        f"{key}: fixture_path is required in manifest"
-                    )
-                else:
-                    fixture_path = PROJECT_ROOT / fixture_path_raw
-                    if not fixture_path.exists() or not fixture_path.is_file():
-                        invalid_manifest_entries.append(
-                            f"{key}: fixture_path does not exist: {fixture_path_raw}"
-                        )
-                    elif fixture_path.suffix != ".jsonl":
-                        invalid_manifest_entries.append(
-                            f"{key}: fixture_path must point to .jsonl file, "
-                            f"found {fixture_path_raw}"
-                        )
-                    else:
-                        manifest_lines = _count_jsonl_lines([fixture_path])
-                        records = manifest_entry.get("records")
-                        if not isinstance(records, int) or records <= 0:
-                            invalid_manifest_entries.append(
-                                f"{key}: records must be positive int in manifest"
-                            )
-                        elif records != manifest_lines:
-                            invalid_manifest_entries.append(
-                                f"{key}: records={records} does not match fixture "
-                                f"line count={manifest_lines}"
-                            )
-                        elif fixture_kind == "tracked_ci_sample":
-                            if not fixture_path_raw.startswith(
-                                "tests/fixtures/bronze/"
-                            ):
-                                invalid_manifest_entries.append(
-                                    f"{key}: tracked_ci_sample must live under "
-                                    "tests/fixtures/bronze/"
-                                )
-                            if records < self._MIN_TRACKED_SAMPLE_RECORDS:
-                                invalid_manifest_entries.append(
-                                    f"{key}: tracked_ci_sample requires at least "
-                                    f"{self._MIN_TRACKED_SAMPLE_RECORDS} records"
-                                )
-                            has_manifest_fixture = True
-
-                for field in ("provenance", "owner", "last_refresh"):
-                    value = manifest_entry.get(field)
-                    if not isinstance(value, str) or not value.strip():
-                        invalid_manifest_entries.append(
-                            f"{key}: manifest.{field} is required"
-                        )
-
-                validation_status = manifest_entry.get("validation_status")
-                if validation_status not in self._ALLOWED_VALIDATION_STATUSES:
-                    invalid_manifest_entries.append(
-                        f"{key}: validation_status must be one of "
-                        f"{sorted(self._ALLOWED_VALIDATION_STATUSES)}"
-                    )
-
-            if not runtime_fixture_files and not has_manifest_fixture:
-                if not has_gap:
-                    missing_fixture.append(
-                        f"{key}: no runtime fixture, no tracked fixture, and no GAP entry"
-                    )
-            else:
-                if (
-                    runtime_fixture_files
-                    and runtime_fixture_lines < self._MIN_RECOMMENDED_RECORDS
-                    and not (has_gap or has_manifest_fixture)
-                ):
-                    insufficient_fixture.append(
-                        f"{key}: runtime fixture has < {self._MIN_RECOMMENDED_RECORDS} "
-                        f"records "
-                        f"(declare GAP or add records)"
-                    )
-
-            if has_manifest_fixture and has_gap:
-                stale_gap_entries.append(
-                    f"{key}: remove GAP entry (covered by tracked_ci_sample manifest)"
+            manifest_errors, has_manifest_fixture = _validate_manifest_entry(
+                key,
+                manifest_entry,
+                allowed_fixture_kinds=self._ALLOWED_FIXTURE_KINDS,
+                allowed_validation_statuses=self._ALLOWED_VALIDATION_STATUSES,
+                min_tracked_sample_records=self._MIN_TRACKED_SAMPLE_RECORDS,
+            )
+            invalid_manifest_entries.extend(manifest_errors)
+            invalid_gap_entries.extend(
+                _validate_gap_entry(
+                    key,
+                    gaps,
+                    allowed_gap_statuses=self._ALLOWED_GAP_STATUS,
                 )
-
-            if has_gap:
-                gap = gaps[key]
-                if not isinstance(gap.get("reason"), str) or not gap.get("reason"):
-                    invalid_gap_entries.append(f"{key}: gap.reason is required")
-                if not isinstance(gap.get("owner"), str) or not gap.get("owner"):
-                    invalid_gap_entries.append(f"{key}: gap.owner is required")
-                status = gap.get("status")
-                if status not in self._ALLOWED_GAP_STATUS:
-                    invalid_gap_entries.append(
-                        f"{key}: gap.status must be one of "
-                        f"{sorted(self._ALLOWED_GAP_STATUS)}"
-                    )
-                if not isinstance(gap.get("resolution_plan"), str) or not gap.get(
-                    "resolution_plan"
-                ):
-                    invalid_gap_entries.append(
-                        f"{key}: gap.resolution_plan is required"
-                    )
+            )
+            missing, insufficient, stale = _fixture_coverage_findings(
+                key,
+                runtime_fixture_files=runtime_fixture_files,
+                runtime_fixture_lines=runtime_fixture_lines,
+                has_gap=has_gap,
+                has_manifest_fixture=has_manifest_fixture,
+                min_recommended_records=self._MIN_RECOMMENDED_RECORDS,
+            )
+            missing_fixture.extend(missing)
+            insufficient_fixture.extend(insufficient)
+            stale_gap_entries.extend(stale)
 
         unknown_gap_keys = sorted(set(gaps) - pipeline_keys)
         unknown_manifest_keys = sorted(set(manifest) - pipeline_keys)
