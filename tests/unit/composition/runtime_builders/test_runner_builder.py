@@ -67,6 +67,133 @@ def _runtime_config_stub() -> dict[str, object]:
     return {"runtime_profile": "stub"}
 
 
+def _build_factory_registry() -> tuple[_FakeFactory, _FakeRegistry]:
+    fake_factory = _FakeFactory()
+    return fake_factory, _FakeRegistry(factory=fake_factory)
+
+
+def _build_context(**overrides: object) -> SimpleNamespace:
+    values: dict[str, object] = {
+        "pipeline_name": "chembl_activity",
+        "run_id": uuid4(),
+        "log_level": "INFO",
+        "vacuum": None,
+        "run_type": "incremental",
+        "resume": False,
+        "limit": None,
+        "query": None,
+        "dry_run": False,
+        "skip_gold": False,
+        "start_offset": None,
+        "input_filter": SimpleNamespace(enabled=False),
+    }
+    values.update(overrides)
+    return SimpleNamespace(**values)
+
+
+def _build_settings(
+    *,
+    data_dir: str | None = None,
+    heartbeat_interval: int = 30,
+    health_check_mode: str | None = None,
+    control_plane: object | None = None,
+    test_mode: bool = False,
+) -> SimpleNamespace:
+    pipeline_values: dict[str, object] = {
+        "heartbeat_interval": heartbeat_interval,
+    }
+    if health_check_mode is not None:
+        pipeline_values["health_check_mode"] = health_check_mode
+    if control_plane is not None:
+        pipeline_values["control_plane"] = control_plane
+
+    settings_values: dict[str, object] = {
+        "pipeline": SimpleNamespace(**pipeline_values),
+        "test_mode": test_mode,
+    }
+    if data_dir is not None:
+        settings_values["data_dir"] = data_dir
+    return SimpleNamespace(**settings_values)
+
+
+def _build_pipeline_config(**overrides: object) -> SimpleNamespace:
+    values: dict[str, object] = {
+        "provider": "chembl",
+        "entity_type": "activity",
+        "version": "2.0.0",
+        "maintenance": None,
+        "input_filter": SimpleNamespace(),
+        "business_primary_keys": ["activity_id"],
+        "technical_primary_key": "entity_id",
+    }
+    values.update(overrides)
+    return SimpleNamespace(**values)
+
+
+def _default_build_observability_bundle_fn(**_: object) -> SimpleNamespace:
+    return _namespace_observability(SimpleNamespace(info=lambda *_, **__: None))
+
+
+def _default_cached_bronze_context(_: object) -> SimpleNamespace:
+    return SimpleNamespace(enabled=False)
+
+
+def _call_build_pipeline_runner(
+    context: SimpleNamespace | None = None,
+    *,
+    registry: _FakeRegistry | None = None,
+    create_registry_fn: object | None = None,
+    ensure_providers_loaded_fn: object | None = None,
+    register_all_pipelines_fn: object | None = None,
+    settings: object | None = None,
+    pipeline_config: object | None = None,
+    build_observability_bundle_fn: object | None = None,
+    assemble_vacuum_settings_fn: object | None = None,
+    assemble_runtime_config_fn: object | None = None,
+    assemble_filter_config_fn: object | None = None,
+    assemble_cached_bronze_context_fn: object | None = None,
+) -> object:
+    kwargs: dict[str, object] = {
+        "ensure_providers_loaded_fn": ensure_providers_loaded_fn
+        if ensure_providers_loaded_fn is not None
+        else (lambda: None),
+        "register_all_pipelines_fn": register_all_pipelines_fn
+        if register_all_pipelines_fn is not None
+        else (lambda registry=None: None),
+        "get_settings_fn": lambda: (
+            settings if settings is not None else _build_settings()
+        ),
+        "load_pipeline_config_fn": lambda _: (
+            pipeline_config
+            if pipeline_config is not None
+            else _build_pipeline_config()
+        ),
+        "build_observability_bundle_fn": build_observability_bundle_fn
+        if build_observability_bundle_fn is not None
+        else _default_build_observability_bundle_fn,
+        "assemble_vacuum_settings_fn": assemble_vacuum_settings_fn
+        if assemble_vacuum_settings_fn is not None
+        else (lambda **_: None),
+        "assemble_runtime_config_fn": assemble_runtime_config_fn
+        if assemble_runtime_config_fn is not None
+        else (lambda **_: _runtime_config_stub()),
+        "assemble_filter_config_fn": assemble_filter_config_fn
+        if assemble_filter_config_fn is not None
+        else (lambda **_: None),
+        "assemble_cached_bronze_context_fn": assemble_cached_bronze_context_fn
+        if assemble_cached_bronze_context_fn is not None
+        else _default_cached_bronze_context,
+    }
+    if registry is not None:
+        kwargs["registry"] = registry
+    if create_registry_fn is not None:
+        kwargs["create_registry_fn"] = create_registry_fn
+    return runner_builder.build_pipeline_runner(
+        context if context is not None else _build_context(),
+        **kwargs,
+    )
+
+
 def test_build_pipeline_runner_defaults_to_provider_registry_bootstrap() -> None:
     """Default provider bootstrap should come from the named loader helper."""
     default_fn = runner_builder.build_pipeline_runner.__kwdefaults__[
@@ -198,53 +325,16 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
 
 def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
     """Builder should create a fresh registry when no explicit registry is provided."""
-    fake_factory = _FakeFactory()
-    created_registry = _FakeRegistry(factory=fake_factory)
+    fake_factory, created_registry = _build_factory_registry()
 
-    def get_settings_fn() -> SimpleNamespace:
-        return SimpleNamespace(
-            pipeline=SimpleNamespace(heartbeat_interval=15),
-            test_mode=True,
-        )
-
-    def load_pipeline_config_fn(_: str) -> SimpleNamespace:
-        return SimpleNamespace(
+    result = _call_build_pipeline_runner(
+        _build_context(),
+        create_registry_fn=lambda: created_registry,
+        settings=_build_settings(heartbeat_interval=15, test_mode=True),
+        pipeline_config=_build_pipeline_config(
             maintenance=None,
             input_filter=None,
-            business_primary_keys=["activity_id"],
-            technical_primary_key="entity_id",
-        )
-
-    def build_observability_bundle_fn(**_: object) -> SimpleNamespace:
-        return _namespace_observability(SimpleNamespace(info=lambda *_, **__: None))
-
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=uuid4(),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=False,
-        limit=None,
-        query=None,
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
-    )
-
-    result = runner_builder.build_pipeline_runner(
-        context,
-        create_registry_fn=lambda: created_registry,
-        ensure_providers_loaded_fn=lambda: None,
-        register_all_pipelines_fn=lambda registry=None: None,
-        get_settings_fn=get_settings_fn,
-        load_pipeline_config_fn=load_pipeline_config_fn,
-        build_observability_bundle_fn=build_observability_bundle_fn,
-        assemble_vacuum_settings_fn=lambda **_: None,
-        assemble_runtime_config_fn=lambda **_: _runtime_config_stub(),
-        assemble_filter_config_fn=lambda **_: None,
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
+        ),
     )
 
     assert result == "runner-instance"
@@ -254,49 +344,21 @@ def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
 
 def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> None:
     """Builder should register pipelines against the created runtime registry."""
-    fake_factory = _FakeFactory()
-    created_registry = _FakeRegistry(factory=fake_factory)
+    fake_factory, created_registry = _build_factory_registry()
     calls: dict[str, object] = {}
 
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=uuid4(),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=False,
-        limit=None,
-        query=None,
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
-    )
-
-    result = runner_builder.build_pipeline_runner(
-        context,
+    result = _call_build_pipeline_runner(
+        _build_context(),
         create_registry_fn=lambda: created_registry,
         ensure_providers_loaded_fn=lambda: calls.setdefault("providers", True),
         register_all_pipelines_fn=lambda registry=None: calls.setdefault(
             "pipelines_registry", registry
         ),
-        get_settings_fn=lambda: SimpleNamespace(
-            pipeline=SimpleNamespace(heartbeat_interval=15),
-            test_mode=True,
-        ),
-        load_pipeline_config_fn=lambda _: SimpleNamespace(
+        settings=_build_settings(heartbeat_interval=15, test_mode=True),
+        pipeline_config=_build_pipeline_config(
             maintenance=None,
             input_filter=None,
-            business_primary_keys=["activity_id"],
-            technical_primary_key="entity_id",
         ),
-        build_observability_bundle_fn=lambda **_: _namespace_observability(
-            SimpleNamespace(info=lambda *_, **__: None),
-        ),
-        assemble_vacuum_settings_fn=lambda **_: None,
-        assemble_runtime_config_fn=lambda **_: _runtime_config_stub(),
-        assemble_filter_config_fn=lambda **_: None,
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
     )
 
     assert result == "runner-instance"
@@ -363,53 +425,21 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     tmp_path: Path,
 ) -> None:
     """Builder should persist a manifest and pass manifest_id to the factory."""
-    fake_factory = _FakeFactory()
-    fake_registry = _FakeRegistry(factory=fake_factory)
+    fake_factory, fake_registry = _build_factory_registry()
+    context = _build_context(limit=25, query="assay_type=B")
 
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=uuid4(),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=False,
-        limit=25,
-        query="assay_type=B",
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
-    )
-
-    result = runner_builder.build_pipeline_runner(
+    result = _call_build_pipeline_runner(
         context,
         registry=fake_registry,
-        ensure_providers_loaded_fn=lambda: None,
-        register_all_pipelines_fn=lambda registry=None: None,
-        get_settings_fn=lambda: SimpleNamespace(
-            data_dir=str(tmp_path),
-            pipeline=SimpleNamespace(heartbeat_interval=30),
-            test_mode=False,
-        ),
-        load_pipeline_config_fn=lambda _: SimpleNamespace(
-            provider="chembl",
-            entity_type="activity",
-            version="2.0.0",
+        settings=_build_settings(data_dir=str(tmp_path)),
+        pipeline_config=_build_pipeline_config(
             maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
-            input_filter=SimpleNamespace(),
-            business_primary_keys=["activity_id"],
-            technical_primary_key="entity_id",
-        ),
-        build_observability_bundle_fn=lambda **_: _namespace_observability(
-            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: "vacuum",
         assemble_runtime_config_fn=lambda **_: SimpleNamespace(
             run_type="incremental",
             limit=25,
         ),
-        assemble_filter_config_fn=lambda **_: None,
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
     )
 
     assert result == "runner-instance"
@@ -642,53 +672,21 @@ def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enable
     tmp_path: Path,
 ) -> None:
     """Resume requests should still persist manifest + ledger control-plane state."""
-    fake_factory = _FakeFactory()
-    fake_registry = _FakeRegistry(factory=fake_factory)
+    fake_factory, fake_registry = _build_factory_registry()
+    context = _build_context(resume=True, limit=25, query="status=active")
 
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=uuid4(),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=True,
-        limit=25,
-        query="status=active",
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
-    )
-
-    result = runner_builder.build_pipeline_runner(
+    result = _call_build_pipeline_runner(
         context,
         registry=fake_registry,
-        ensure_providers_loaded_fn=lambda: None,
-        register_all_pipelines_fn=lambda registry=None: None,
-        get_settings_fn=lambda: SimpleNamespace(
-            data_dir=str(tmp_path),
-            pipeline=SimpleNamespace(heartbeat_interval=30),
-            test_mode=False,
-        ),
-        load_pipeline_config_fn=lambda _: SimpleNamespace(
-            provider="chembl",
-            entity_type="activity",
-            version="2.0.0",
+        settings=_build_settings(data_dir=str(tmp_path)),
+        pipeline_config=_build_pipeline_config(
             maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
-            input_filter=SimpleNamespace(),
-            business_primary_keys=["activity_id"],
-            technical_primary_key="entity_id",
-        ),
-        build_observability_bundle_fn=lambda **_: _namespace_observability(
-            SimpleNamespace(info=lambda *_, **__: None),
         ),
         assemble_vacuum_settings_fn=lambda **_: "vacuum",
         assemble_runtime_config_fn=lambda **_: SimpleNamespace(
             run_type="incremental",
             limit=25,
         ),
-        assemble_filter_config_fn=lambda **_: None,
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
     )
 
     assert result == "runner-instance"
@@ -720,22 +718,8 @@ def test_build_pipeline_runner_persists_resume_launch_context_when_resume_enable
 def test_build_pipeline_runner_aborts_before_factory_create_when_manifest_persistence_fails(
     tmp_path: Path,
 ) -> None:
-    fake_factory = _FakeFactory()
-    fake_registry = _FakeRegistry(factory=fake_factory)
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=uuid4(),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=False,
-        limit=25,
-        query=None,
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
-    )
+    fake_factory, fake_registry = _build_factory_registry()
+    context = _build_context(limit=25)
 
     with (
         patch(
@@ -744,38 +728,21 @@ def test_build_pipeline_runner_aborts_before_factory_create_when_manifest_persis
         ),
         pytest.raises(OSError, match="manifest write failed"),
     ):
-        runner_builder.build_pipeline_runner(
+        _call_build_pipeline_runner(
             context,
             registry=fake_registry,
-            ensure_providers_loaded_fn=lambda: None,
-            register_all_pipelines_fn=lambda registry=None: None,
-            get_settings_fn=lambda: SimpleNamespace(
-                data_dir=str(tmp_path),
-                pipeline=SimpleNamespace(heartbeat_interval=30),
-                test_mode=False,
-            ),
-            load_pipeline_config_fn=lambda _: SimpleNamespace(
-                provider="chembl",
-                entity_type="activity",
-                version="2.0.0",
+            settings=_build_settings(data_dir=str(tmp_path)),
+            pipeline_config=_build_pipeline_config(
                 maintenance=SimpleNamespace(
                     auto_vacuum=False,
                     vacuum_retention_days=7,
                 ),
-                input_filter=SimpleNamespace(),
-                business_primary_keys=["activity_id"],
-                technical_primary_key="entity_id",
-            ),
-            build_observability_bundle_fn=lambda **_: _namespace_observability(
-                SimpleNamespace(info=lambda *_, **__: None),
             ),
             assemble_vacuum_settings_fn=lambda **_: "vacuum",
             assemble_runtime_config_fn=lambda **_: SimpleNamespace(
                 run_type="incremental",
                 limit=25,
             ),
-            assemble_filter_config_fn=lambda **_: None,
-            assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
         )
 
     assert fake_factory.kwargs is None
@@ -786,8 +753,7 @@ def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
     tmp_path: Path,
 ) -> None:
     """Builder should enrich bundle logger context once manifest_id exists."""
-    fake_factory = _FakeFactory()
-    fake_registry = _FakeRegistry(factory=fake_factory)
+    fake_factory, fake_registry = _build_factory_registry()
     base_logger = MagicMock()
     bound_logger = MagicMock()
     base_logger.bind.return_value = bound_logger
@@ -797,45 +763,15 @@ def test_build_pipeline_runner_binds_manifest_id_into_observability_bundle(
         tracer=NoOpTracing(),
     )
 
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=uuid4(),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=False,
-        limit=25,
-        query=None,
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
-    )
+    context = _build_context(limit=25)
 
-    runner_builder.build_pipeline_runner(
+    _call_build_pipeline_runner(
         context,
         registry=fake_registry,
-        ensure_providers_loaded_fn=lambda: None,
-        register_all_pipelines_fn=lambda registry=None: None,
-        get_settings_fn=lambda: SimpleNamespace(
-            data_dir=str(tmp_path),
-            pipeline=SimpleNamespace(heartbeat_interval=30),
-            test_mode=False,
-        ),
-        load_pipeline_config_fn=lambda _: SimpleNamespace(
-            provider="chembl",
-            entity_type="activity",
-            version="2.0.0",
-            maintenance=None,
-            input_filter=SimpleNamespace(),
-            business_primary_keys=["activity_id"],
-            technical_primary_key="entity_id",
-        ),
+        settings=_build_settings(data_dir=str(tmp_path)),
+        pipeline_config=_build_pipeline_config(),
         build_observability_bundle_fn=lambda **_: bundle,
-        assemble_vacuum_settings_fn=lambda **_: None,
         assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
-        assemble_filter_config_fn=lambda **_: None,
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
     )
 
     assert isinstance(fake_factory.kwargs, dict)
@@ -849,52 +785,21 @@ def test_build_pipeline_runner_binds_manifest_id_into_namespace_logger(
     tmp_path: Path,
 ) -> None:
     """Builder should support lightweight namespace observability doubles."""
-    fake_factory = _FakeFactory()
-    fake_registry = _FakeRegistry(factory=fake_factory)
+    fake_factory, fake_registry = _build_factory_registry()
     base_logger = MagicMock()
     bound_logger = MagicMock()
     base_logger.bind.return_value = bound_logger
     observability = _namespace_observability(base_logger)
 
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=uuid4(),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=False,
-        limit=25,
-        query=None,
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
-    )
+    context = _build_context(limit=25)
 
-    runner_builder.build_pipeline_runner(
+    _call_build_pipeline_runner(
         context,
         registry=fake_registry,
-        ensure_providers_loaded_fn=lambda: None,
-        register_all_pipelines_fn=lambda registry=None: None,
-        get_settings_fn=lambda: SimpleNamespace(
-            data_dir=str(tmp_path),
-            pipeline=SimpleNamespace(heartbeat_interval=30),
-            test_mode=False,
-        ),
-        load_pipeline_config_fn=lambda _: SimpleNamespace(
-            provider="chembl",
-            entity_type="activity",
-            version="2.0.0",
-            maintenance=None,
-            input_filter=SimpleNamespace(),
-            business_primary_keys=["activity_id"],
-            technical_primary_key="entity_id",
-        ),
+        settings=_build_settings(data_dir=str(tmp_path)),
+        pipeline_config=_build_pipeline_config(),
         build_observability_bundle_fn=lambda **_: observability,
-        assemble_vacuum_settings_fn=lambda **_: None,
         assemble_runtime_config_fn=lambda **_: SimpleNamespace(run_type="incremental"),
-        assemble_filter_config_fn=lambda **_: None,
-        assemble_cached_bronze_context_fn=lambda _: SimpleNamespace(enabled=False),
     )
 
     assert isinstance(fake_factory.kwargs, dict)
