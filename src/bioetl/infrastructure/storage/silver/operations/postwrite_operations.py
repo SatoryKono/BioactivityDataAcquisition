@@ -102,6 +102,52 @@ class _SilverPostwriteHostProtocol(Protocol):
     ) -> SilverWriteResult | None: ...
 
 
+class _SilverPostwriteExecutorProtocol(Protocol):
+    """Shared postwrite executor contract for mixin and operations implementations."""
+
+    async def _run_postwrite_export(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> None: ...
+
+    async def _run_postwrite_audit(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> None: ...
+
+    async def _finalize_postwrite_result(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> SilverWriteResult | None: ...
+
+
+async def _complete_silver_write_pipeline_impl(
+    executor: _SilverPostwriteExecutorProtocol,
+    *,
+    ctx: _SilverWritePostwriteContext,
+    payload: _PreparedSilverWritePayload,
+) -> SilverWriteResult | None:
+    """Run the shared postwrite sequence."""
+    await executor._run_postwrite_export(
+        ctx=ctx,
+        payload=payload,
+    )
+    await executor._run_postwrite_audit(
+        ctx=ctx,
+        payload=payload,
+    )
+    return await executor._finalize_postwrite_result(
+        ctx=ctx,
+        payload=payload,
+    )
+
+
 class SilverPostwriteOperations:
     """Postwrite operations service for Silver layer writes.
 
@@ -118,19 +164,14 @@ class SilverPostwriteOperations:
         """
         self._host = host
 
-    async def _complete_silver_write_pipeline(
+    async def _run_postwrite_export(
         self,
         *,
         ctx: _SilverWritePostwriteContext,
         payload: _PreparedSilverWritePayload,
-    ) -> SilverWriteResult | None:
-        """Run post-write stages: CSV export, audit, and result finalization.
-
-        Uses maintenance operations if available, otherwise falls back to host methods.
-        """
-        # Use maintenance operations if available, otherwise fall back to host method
+    ) -> None:
+        """Run the postwrite export branch for composition-backed writers."""
         if hasattr(self._host, "_maintenance") and self._host._maintenance is not None:
-            # Construct export path from base_path and table_name
             export_path = str(Path(self._host.base_path) / f"{ctx.table_name}.csv")
             await self._host._maintenance.maybe_export_csv(
                 table_name=ctx.table_name,
@@ -138,15 +179,23 @@ class SilverPostwriteOperations:
                 export_path=export_path,
                 primary_keys=ctx.primary_keys,
             )
-        else:
-            await self._host._maybe_export_csv(
-                table_name=ctx.table_name,
-                arrow_data=payload.arrow_data,
-                mode=ctx.mode,
-                validated_mode=payload.validated_mode,
-                primary_keys=ctx.primary_keys,
-            )
+            return
 
+        await self._host._maybe_export_csv(
+            table_name=ctx.table_name,
+            arrow_data=payload.arrow_data,
+            mode=ctx.mode,
+            validated_mode=payload.validated_mode,
+            primary_keys=ctx.primary_keys,
+        )
+
+    async def _run_postwrite_audit(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> None:
+        """Run the postwrite audit branch for composition-backed writers."""
         if hasattr(self._host, "_metadata") and self._host._metadata is not None:
             await self._host._metadata.log_silver_audit(
                 table_name=ctx.table_name,
@@ -159,6 +208,13 @@ class SilverPostwriteOperations:
                 ingestion_ts=ctx.ingestion_ts,
             )
 
+    async def _finalize_postwrite_result(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> SilverWriteResult | None:
+        """Finalize the postwrite flow after export/audit orchestration."""
         return await self._host._finalize_silver_write_result(
             table_name=ctx.table_name,
             records=payload.records,
@@ -170,4 +226,20 @@ class SilverPostwriteOperations:
             source_batch_id=ctx.source_batch_id,
             started_at=ctx.started_at,
             start_perf=ctx.start_perf,
+        )
+
+    async def _complete_silver_write_pipeline(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> SilverWriteResult | None:
+        """Run post-write stages: CSV export, audit, and result finalization.
+
+        Uses maintenance operations if available, otherwise falls back to host methods.
+        """
+        return await _complete_silver_write_pipeline_impl(
+            self,
+            ctx=ctx,
+            payload=payload,
         )

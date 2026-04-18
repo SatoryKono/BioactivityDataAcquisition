@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Awaitable
 from dataclasses import dataclass, field
-from types import SimpleNamespace
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.core.batch_executor_loop_flow import (
@@ -76,6 +75,16 @@ class BatchExtractionIterationContext:
     progress_service: _BatchProgressReporterPort
     progress_state: _BatchProgressSnapshot
     checkpoint_interval: int
+
+
+@dataclass(slots=True)
+class _BatchFlushContext:
+    """Concrete flush context passed into flow helpers."""
+
+    process_batch: _BatchStateUpdater
+    memory_manager: BatchMemoryManagerService
+    progress_service: _BatchProgressReporterPort
+    progress_state: _BatchProgressSnapshot
 
 
 class _BatchStateUpdater(Protocol):
@@ -151,7 +160,7 @@ async def flush_batch_if_needed(
     await flush_batch_if_needed_from_flow(
         loop_state=loop_state,
         records_fetched=records_fetched,
-        flush_context=SimpleNamespace(
+        flush_context=_BatchFlushContext(
             process_batch=process_batch,
             memory_manager=memory_manager,
             progress_service=progress_service,

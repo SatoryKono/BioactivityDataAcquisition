@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
+from typing import cast
 
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
@@ -90,13 +91,16 @@ def merge_expected_anchors(
     merged = normalize_runtime_anchor_payload(
         _build_merged_anchor_payload(state=state, anchors=anchors)
     )
-    return replace(
-        state,
-        effective_config_hash=merged["effective_config_hash"] or "",
-        contract_ref=merged["contract_ref"] or "",
-        contract_version=merged["contract_version"] or "",
-        manifest_id=merged["manifest_id"] or "",
-        composite_run_identity=merged["composite_run_identity"] or "",
+    return cast(
+        CompositeCheckpointState,
+        replace(
+            state,
+            effective_config_hash=merged["effective_config_hash"] or "",
+            contract_ref=merged["contract_ref"] or "",
+            contract_version=merged["contract_version"] or "",
+            manifest_id=merged["manifest_id"] or "",
+            composite_run_identity=merged["composite_run_identity"] or "",
+        ),
     )
 
 
