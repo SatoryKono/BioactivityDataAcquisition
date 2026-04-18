@@ -10,9 +10,10 @@ REQ-OBS-004: Metrics should include tags for filtering
 
 from __future__ import annotations
 
-from typing import Any, Dict, Protocol
+from typing import Any, Dict, Protocol, runtime_checkable
 
 
+@runtime_checkable
 class MetricsPort(Protocol):
     """Metrics port protocol for collecting application metrics.
 
