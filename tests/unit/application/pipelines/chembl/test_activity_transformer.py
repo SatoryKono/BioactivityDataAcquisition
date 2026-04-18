@@ -28,7 +28,8 @@ from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_ACTIVITY_SCH
 from bioetl.infrastructure.validation.pandera_validator import PanderaSilverValidator
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 from tests.unit.application.pipelines.activity_transformer_shared import (
-    SharedActivityTransformerExtractionTests,
+    SharedActivityTransformerActionTypeExtractionTests,
+    SharedActivityTransformerLigandExtractionTests,
     SharedActivityTransformerTransformTests,
     mock_context,
     transformer,
@@ -163,13 +164,15 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
 
 @pytest.mark.unit
 class TestActivityTransformerLigandEfficiency(
-    SharedActivityTransformerExtractionTests
+    SharedActivityTransformerLigandExtractionTests
 ):
     """Tests for ligand efficiency extraction."""
 
 
 @pytest.mark.unit
-class TestActivityTransformerActionType(SharedActivityTransformerExtractionTests):
+class TestActivityTransformerActionType(
+    SharedActivityTransformerActionTypeExtractionTests
+):
     """Tests for action type extraction."""
 
 
