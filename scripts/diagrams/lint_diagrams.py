@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from dataclasses import dataclass, field
@@ -698,7 +699,7 @@ def check_linkstyle_index_fragility(path: Path, lines: list[str]) -> list[Issue]
     # - many singleton linkStyle lines (index-by-index mapping), or
     # - many style lines with very low style diversity (typically repetitive copy-paste).
     if (len(groups) >= 20 and singleton_ratio >= 0.85 and unique_styles <= 3) or (
-        len(groups) >= 12 and singleton_ratio == 1.0 and unique_styles == 1
+        len(groups) >= 12 and math.isclose(singleton_ratio, 1.0) and unique_styles == 1
     ):
         issues.append(
             Issue(

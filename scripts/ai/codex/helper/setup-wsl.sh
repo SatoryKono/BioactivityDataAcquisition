@@ -25,7 +25,7 @@ for i in {1..5}; do
     if sudo apt-get update -qq 2>/dev/null; then
         echo "✓ Package manager updated"
         break
-    elif [ $i -lt 5 ]; then
+    elif [[ $i -lt 5 ]]; then
         echo "  → Retrying (attempt $((i+1))/5)..."
         sleep 5
     else

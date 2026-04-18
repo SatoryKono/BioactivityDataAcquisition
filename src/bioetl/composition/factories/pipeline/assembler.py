@@ -33,8 +33,10 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_factory_data_source,
     create_pipeline_instance_with_services,
     create_transformer_instance,
-    extract_entity_type as _extract_entity_type,
     resolve_data_source_creator,
+)
+from bioetl.composition.factories.pipeline.factory_method_helpers import (
+    extract_entity_type as _extract_entity_type,
 )
 from bioetl.composition.factories.pipeline.runner_assembly import (
     assemble_runner_impl as _assemble_runner_impl,
@@ -64,7 +66,6 @@ from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-
 class GenericPipelineFactory(Generic[TPipeline]):
     """Composition-layer factory for assembling pipelines and runners."""
 
@@ -251,10 +252,8 @@ def create_pipeline_factory(
     provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     return GenericPipelineFactory(
-        pipeline_name, pipeline_class, provider,
-        silver_schema, gold_schema, pandera_silver_schema,
-        None, transformer_class,
-        provider_registry,
+        pipeline_name, pipeline_class, provider, silver_schema, gold_schema, pandera_silver_schema,
+        None, transformer_class, provider_registry,
     )
 
 
@@ -271,8 +270,7 @@ def assemble_runner(
         observability=observability,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
-        strict_gold_validation=strict_gold_validation,
-        yaml_config=yaml_config,
+        strict_gold_validation=strict_gold_validation, yaml_config=yaml_config,
         dq_configs_extractor=_extract_dq_configs,
     )
 

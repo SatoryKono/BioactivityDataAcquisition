@@ -123,7 +123,7 @@ logs() {
   echo "📝 Logs for $COMPONENT in $NAMESPACE"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-  if [ "$COMPONENT" = "all" ]; then
+  if [[ "$COMPONENT" = "all" ]]; then
     kubectl logs -n "$NAMESPACE" -l app=bioetl -f --max-log-requests=10
   else
     kubectl logs -n "$NAMESPACE" -l app="$COMPONENT" -f
