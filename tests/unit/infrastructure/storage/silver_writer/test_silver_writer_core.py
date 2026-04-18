@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -213,6 +214,7 @@ class TestSilverWriterValidation:
             invocation: _SilverWriteInvocation,
             ctx: _SilverWriteExecutionContext,
         ) -> object:
+            await asyncio.sleep(0)
             assert ctx.table_name == "test.table"
             assert ctx.primary_keys == ["entity_id"]
             assert ctx.schema == schema
@@ -304,6 +306,7 @@ class TestSilverWriterValidation:
             invocation: _SilverWriteInvocation,
             ctx: _SilverWriteExecutionContext,
         ) -> None:
+            await asyncio.sleep(0)
             assert ctx.table_name == "chembl.activity"
 
         await execute_silver_write_with_tracing(
@@ -375,6 +378,7 @@ class TestSilverWriterValidation:
             invocation: _SilverWriteInvocation,
             ctx: _SilverWriteExecutionContext,
         ) -> None:
+            await asyncio.sleep(0)
             assert ctx.table_name == "singletable"
 
         await execute_silver_write_with_tracing(
@@ -760,6 +764,7 @@ class TestSilverWriterValidation:
         captured: dict[str, object] = {}
 
         async def fake_execute_silver_write_with_tracing(**kwargs):
+            await asyncio.sleep(0)
             captured.update(kwargs)
             return expected_result
 
