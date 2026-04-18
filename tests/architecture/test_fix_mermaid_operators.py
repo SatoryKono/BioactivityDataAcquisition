@@ -71,8 +71,11 @@ def test_check_file_flags_only_class_and_sequence_diagrams(tmp_path: Path) -> No
     assert flow_result.issues == []
 
 
-def test_fix_file_rewrites_invalid_arrows_in_place(tmp_path: Path) -> None:
+def test_fix_file_rewrites_invalid_arrows_in_place(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     module = _load_module()
+    monkeypatch.setattr(module, "_repo_root", lambda: tmp_path)
 
     diagram = tmp_path / "sequence-demo.mmd"
     diagram.write_text(
@@ -97,8 +100,11 @@ def test_fix_file_rewrites_invalid_arrows_in_place(tmp_path: Path) -> None:
     assert "B -->> A: response" in content
 
 
-def test_fix_file_dry_run_does_not_modify_file(tmp_path: Path) -> None:
+def test_fix_file_dry_run_does_not_modify_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     module = _load_module()
+    monkeypatch.setattr(module, "_repo_root", lambda: tmp_path)
 
     diagram = tmp_path / "class-demo.mmd"
     original = "\n".join(["classDiagram", "A ==> B"]) + "\n"
@@ -109,6 +115,15 @@ def test_fix_file_dry_run_does_not_modify_file(tmp_path: Path) -> None:
 
     assert replacements == 1
     assert content_after == original
+
+
+def test_fix_file_rejects_paths_outside_repo(tmp_path: Path) -> None:
+    module = _load_module()
+    diagram = tmp_path / "outside-repo.mmd"
+    diagram.write_text("sequenceDiagram\nA ==> B\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="outside"):
+        module.fix_file(diagram, dry_run=False)
 
 
 @pytest.mark.slow
