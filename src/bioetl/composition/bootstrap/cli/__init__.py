@@ -23,6 +23,7 @@ Components:
 
 from __future__ import annotations
 
+from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -73,7 +74,7 @@ def __getattr__(name: str) -> object:
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-    module = __import__(module_name, fromlist=[name])
+    module = import_module(module_name)
     return getattr(module, name)
 
 
