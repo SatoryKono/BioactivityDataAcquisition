@@ -6,6 +6,7 @@ Uses mocking for external API calls.
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import MagicMock
 
 import pytest
@@ -224,6 +225,7 @@ class TestPubChemAdapter:
         fetch_strategies,
     ):
         """Test compound conversion to dictionary."""
+        await asyncio.sleep(0)
         adapter = PubChemAdapter(
             logger=mock_logger,
             rate_limiter=rate_limiter,

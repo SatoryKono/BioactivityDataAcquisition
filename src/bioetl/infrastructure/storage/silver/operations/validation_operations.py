@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, Protocol
 
 import pyarrow as pa
 
@@ -38,6 +38,91 @@ if TYPE_CHECKING:
         LineageStorePort,
         MetadataCoordinatorPort,
         MetadataWriterPort,
+    )
+
+
+class _SilverPayloadPreparationHostProtocol(Protocol):
+    """Shared host contract for Silver payload preparation orchestration."""
+
+    _host: object | None
+    _resolve_table_path: Callable[[str], str]
+
+    def _sync_validate_and_build_arrow(
+        self,
+        request: _SilverWritePreparationRequest,
+    ) -> _ValidatedSilverWriteContext: ...
+
+
+class _SilverPayloadPreparationRuntimeProtocol(Protocol):
+    """Runtime host contract used after synchronous validation completes."""
+
+    _resolve_table_path: Callable[[str], str]
+
+    async def _check_schema_drift(
+        self,
+        table_name: str,
+        records: list[BronzeRecord],
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
+    ) -> None: ...
+
+
+def _resolve_payload_runtime_host(
+    host: _SilverPayloadPreparationHostProtocol,
+) -> _SilverPayloadPreparationRuntimeProtocol:
+    """Return the runtime host that owns schema-drift hooks and path resolution."""
+    runtime_host = getattr(host, "_host", None)
+    if runtime_host is not None:
+        return runtime_host  # type: ignore[return-value]
+    return host  # type: ignore[return-value]
+
+
+async def _prepare_silver_write_payload_impl(
+    host: _SilverPayloadPreparationHostProtocol,
+    *,
+    table_name: str,
+    records: list[BronzeRecord],
+    primary_keys: list[str],
+    schema: pa.Schema,
+    mode: str,
+    on_schema_mismatch: Literal["error", "evolve", "ignore"],
+    column_order: list[str] | None,
+    partition_cols: list[str] | None,
+    key_nullability_rules: list[KeyNullabilityRule] | None,
+) -> _PreparedSilverWritePayload:
+    """Run the shared Silver payload preparation flow."""
+    request = _SilverWritePreparationRequest(
+        table_name=table_name,
+        records=records,
+        primary_keys=primary_keys,
+        schema=schema,
+        mode=mode,
+        column_order=column_order,
+        partition_cols=partition_cols,
+        key_nullability_rules=key_nullability_rules,
+    )
+
+    from bioetl.infrastructure.storage.silver import validation_mixin
+
+    validated = await validation_mixin.asyncio.to_thread(
+        host._sync_validate_and_build_arrow,
+        request,
+    )
+    schema_request = _SilverSchemaPolicyRequest(
+        table_name=table_name,
+        records=validated.records,
+        on_schema_mismatch=on_schema_mismatch,
+        validated_mode=validated.validated_mode,
+        arrow_data=validated.arrow_data,
+    )
+    runtime_host = _resolve_payload_runtime_host(host)
+    await runtime_host._check_schema_drift(
+        schema_request.table_name,
+        schema_request.records,
+        schema_request.on_schema_mismatch,
+    )
+    return _build_prepared_silver_write_payload(
+        table_path=runtime_host._resolve_table_path(schema_request.table_name),
+        schema_request=schema_request,
     )
 
 
@@ -144,36 +229,15 @@ class SilverValidationOperations:
         key_nullability_rules: list[KeyNullabilityRule] | None,
     ) -> _PreparedSilverWritePayload:
         """Run full validation chain and prepare Arrow data for write."""
-        request = _SilverWritePreparationRequest(
+        return await _prepare_silver_write_payload_impl(
+            self,
             table_name=table_name,
             records=records,
             primary_keys=primary_keys,
             schema=schema,
             mode=mode,
+            on_schema_mismatch=on_schema_mismatch,
             column_order=column_order,
             partition_cols=partition_cols,
             key_nullability_rules=key_nullability_rules,
-        )
-        from bioetl.infrastructure.storage.silver import validation_mixin
-
-        validated = await validation_mixin.asyncio.to_thread(
-            self._sync_validate_and_build_arrow,
-            request,
-        )
-        host = self._host if self._host is not None else self
-        schema_request = _SilverSchemaPolicyRequest(
-            table_name=table_name,
-            records=validated.records,
-            on_schema_mismatch=on_schema_mismatch,
-            validated_mode=validated.validated_mode,
-            arrow_data=validated.arrow_data,
-        )
-        await host._check_schema_drift(  # type: ignore[attr-defined]
-            schema_request.table_name,
-            schema_request.records,
-            schema_request.on_schema_mismatch,
-        )
-        return _build_prepared_silver_write_payload(
-            table_path=host._resolve_table_path(schema_request.table_name),  # type: ignore[attr-defined]
-            schema_request=schema_request,
         )

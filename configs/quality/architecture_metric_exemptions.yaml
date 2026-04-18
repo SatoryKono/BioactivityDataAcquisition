@@ -123,14 +123,6 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Continue extracting lifecycle emission branches into smaller tracing helpers until the mixin drops below the default limit."
-    src/bioetl/application/core/postrun/service.py::PostrunService:
-      value: 412
-      owner: "@bioetl-platform"
-      reason: "Postrun orchestration remains a broad coordination surface while cleanup, reporting, and compaction flows are still converging."
-      classification: "technical_debt"
-      linked_rf: "RF-023"
-      expires_on: "2026-06-30"
-      removal_step: "Continue peeling postrun subflows into dedicated orchestrators until the class drops below the default limit."
     src/bioetl/application/core/quarantine_manager.py::QuarantineManagerService:
       value: 366
       owner: "@bioetl-platform"

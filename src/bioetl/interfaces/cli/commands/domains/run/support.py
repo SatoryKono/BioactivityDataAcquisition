@@ -7,6 +7,7 @@ These are CLI-layer responsibilities separated for maintainability.
 from __future__ import annotations
 
 import asyncio
+import io
 import sys
 from functools import cache
 from typing import TYPE_CHECKING
@@ -72,11 +73,10 @@ def resolve_context_registry(
     """Return the explicit registry carried by Click context, if any."""
     if click_context is None:
         click_context = click.get_current_context(silent=True)
+    if click_context is None or click_context.obj is None:
+        return None
     pipeline_registry_type = _load_pipeline_registry_type()
-    if click_context is None or not isinstance(
-        click_context.obj,
-        pipeline_registry_type,
-    ):
+    if not isinstance(click_context.obj, pipeline_registry_type):
         return None
     return click_context.obj
 
@@ -191,6 +191,13 @@ def handle_destructive_run_confirmation(
 
     if not yes:
         echo_warning(f"{run_type} will clear existing data for {pipeline}.")
+        stdin = click.get_text_stream("stdin")
+        try:
+            interactive_stdin = stdin.isatty()
+        except (AttributeError, OSError, ValueError, io.UnsupportedOperation):
+            interactive_stdin = False
+        if not interactive_stdin:
+            raise click.Abort()
         if not click.confirm("Do you want to continue?", default=None):
             echo_info("Operation cancelled.")
             sys.exit(ExitCode.OK)
