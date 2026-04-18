@@ -13,6 +13,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
+from bioetl.domain.error_types import ErrorType
+
 
 class BioETLError(Exception):
     """Base exception for all BioETL errors.
@@ -38,6 +40,8 @@ class BioETLDomainError(BioETLError):
         context: Additional context data (must be JSON-serializable)
         original_exception: Original exception that caused this error (if any)
     """
+
+    error_type = ErrorType.INVALID_DATA
 
     message: str
     context: Dict[

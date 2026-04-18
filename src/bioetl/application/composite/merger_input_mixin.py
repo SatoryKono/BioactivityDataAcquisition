@@ -56,7 +56,7 @@ class _MergeInputLoaderMixin:
                 else "unexpected_error"
             )
             self._logger.warning(
-                f"Skipping {role} input due to read error",
+                "Skipping merge input due to read error",
                 pipeline=pipeline,
                 table=table,
                 role=role,

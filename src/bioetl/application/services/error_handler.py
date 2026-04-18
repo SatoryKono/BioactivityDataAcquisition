@@ -20,7 +20,7 @@ from bioetl.domain.exceptions.base_exceptions import (
 from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
-class ErrorHandler:
+class ErrorHandlerService:
     """Centralized error handling service.
 
     This service provides consistent error handling, logging, and metrics
@@ -241,6 +241,9 @@ class ErrorHandler:
                 log_context.update(domain_context["context"])
 
         return log_context
+
+
+ErrorHandler = ErrorHandlerService
 
     def _get_error_type(self, exception: Exception) -> str:
         """Get the error type for classification."""
