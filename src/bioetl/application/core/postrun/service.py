@@ -24,6 +24,7 @@ from bioetl.application.core.span_helpers import (
     start_current_span,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
+from bioetl.application.services.medallion_types import VacuumResult
 from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -44,11 +45,13 @@ if TYPE_CHECKING:
     from bioetl.application.core.postrun.metadata_write_service import (
         PostrunMetadataWriteService,
     )
-    from bioetl.application.services.dq_report_service import DQReportContext, DQReportResult
+    from bioetl.application.services.dq_report_service import (
+        DQReportContext,
+        DQReportResult,
+    )
     from bioetl.application.services.medallion_lifecycle import (
         MedallionLifecycleService,
     )
-    from bioetl.application.services.medallion_types import VacuumResult
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
