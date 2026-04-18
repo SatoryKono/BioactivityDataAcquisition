@@ -163,19 +163,14 @@ class TestCompositeConfigColumnGroups:
             pass
 
         def _raise_validation(_payload: dict[str, Any]) -> None:
-            raise _DummyValidationError("bad payload")
+            # Raise pydantic.ValidationError to match the expected exception type
+            from pydantic import ValidationError
+            raise ValidationError([{"loc": ("composite",), "msg": "bad payload", "type": "value_error"}])
 
         monkeypatch.setattr(
             composite_runtime,
             "_resolve_composite_config_path",
             lambda _name: config_path,
-        )
-        # Mock pydantic.ValidationError instead of composite_runtime.ValidationError
-        import pydantic
-        monkeypatch.setattr(
-            pydantic,
-            "ValidationError",
-            _DummyValidationError,
         )
         monkeypatch.setattr(
             composite_runtime,
