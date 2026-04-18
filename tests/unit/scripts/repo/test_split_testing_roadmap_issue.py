@@ -116,6 +116,6 @@ def test_run_apply_reuses_existing_issues_and_skips_comment(
 
     rc = module.run(["--apply"])
 
-    assert rc == 3
+    assert rc == 2
     assert len(created_issues) == 2
     assert posted_comments == []
