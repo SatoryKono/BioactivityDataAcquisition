@@ -15,7 +15,7 @@ from __future__ import annotations
 from uuid import uuid4
 
 from bioetl.application.core.lifecycle.checkpoint_manager import (
-    CheckpointManagerService as CheckpointManager,
+    CheckpointManagerService,
 )
 from bioetl.application.services.admin_runtime_api import QuarantineManagerService
 from bioetl.application.services.audit_inspection_service import AuditInspectionService
@@ -74,10 +74,10 @@ def bootstrap_quarantine_manager(pipeline_name: str) -> QuarantineManagerService
     )
 
 
-def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
-    """Bootstrap CheckpointManager for CLI inspection operations.
+def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManagerService:
+    """Bootstrap CheckpointManagerService for CLI inspection operations.
 
-    Creates a minimal CheckpointManager for checkpoint listing and inspection.
+    Creates a minimal CheckpointManagerService for checkpoint listing and inspection.
     Uses NoOpLogger and dummy run_id since CLI operations don't need full
     pipeline execution context.
 
@@ -86,14 +86,14 @@ def bootstrap_checkpoint_manager(pipeline_name: str) -> CheckpointManager:
             for operations like list_all).
 
     Returns:
-        CheckpointManager configured for CLI inspection.
+        CheckpointManagerService configured for CLI inspection.
     """
     checkpoint_port = bootstrap_checkpoint_port(pipeline_name)
     noop_logger = create_noop_logger()
 
     compatibility_service = bootstrap_checkpoint_compatibility_service(noop_logger)
 
-    return CheckpointManager(
+    return CheckpointManagerService(
         checkpoint_port=checkpoint_port,
         logger=noop_logger,
         pipeline_name=pipeline_name,

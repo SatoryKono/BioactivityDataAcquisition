@@ -21,6 +21,8 @@ import argparse
 import re
 import sys
 from pathlib import Path
+import tempfile
+import os
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -62,7 +64,7 @@ _NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
 _GRAPH_LINE_RE = re.compile(r"^(graph|flowchart)\s+(TB|LR|BT|RL|TD)?", re.IGNORECASE)
 _ELK_ALREADY_RE = re.compile(r"%%\{init:.*layout.*elk", re.IGNORECASE | re.DOTALL)
 _EDGE_ROUTING_RE = re.compile(
-    r"((?:['\"])?edgeRouting(?:['\"])?\s*:\s*['\"])([A-Za-z_]+)(['\"])",
+    r"(['\"]?edgeRouting['\"]?\s*:\s*['\"])([A-Za-z_]+)(['\"])",
     re.IGNORECASE,
 )
 _DIAGRAM_TYPE_RE = re.compile(
@@ -123,6 +125,60 @@ def _ensure_path_within_root(path: Path, root: Path) -> Path:
     return resolved_path
 
 
+def _safe_read_text(path: Path, max_bytes: int = 2_000_000, encoding: str = "utf-8") -> str:
+    """Read text from a path with basic safety checks to satisfy static analysis.
+
+    Checks performed:
+    - path exists and is a file
+    - size is reasonable (<= max_bytes)
+    - content is valid UTF-8 (errors='strict')
+    - content does not contain embedded NUL bytes
+    """
+    if not path.exists() or not path.is_file():
+        raise FileNotFoundError(f"file not found: {path}")
+    size = path.stat().st_size
+    if size > max_bytes:
+        raise ValueError(f"file too large ({size} bytes) to read safely: {path}")
+    # Use strict decoding to avoid silently accepting malformed input
+    text = path.read_text(encoding=encoding)
+    if "\x00" in text:
+        raise ValueError(f"file contains NUL byte which is not allowed: {path}")
+    return text
+
+
+def _safe_write_text(path: Path, content: str, encoding: str = "utf-8") -> None:
+    """Atomically write text to a file with basic validation.
+
+    - Validate content is a string and does not contain NUL bytes
+    - Write to a temporary file in the same directory then replace the target
+    to avoid partial writes and to make the write operation explicit for
+    static analysis.
+    """
+    if not isinstance(content, str):
+        raise TypeError("content must be a str")
+    if "\x00" in content:
+        raise ValueError("content contains NUL byte which is not allowed")
+
+    target_dir = path.parent
+    # Create a secure temporary file in the same directory to allow atomic replace
+    fd, tmp_path = tempfile.mkstemp(prefix=".tmp", dir=str(target_dir))
+    try:
+        with os.fdopen(fd, "w", encoding=encoding) as fh:
+            fh.write(content)
+            fh.flush()
+            os.fsync(fh.fileno())
+        # Atomic replace
+        tmp = Path(tmp_path)
+        tmp.replace(path)
+    finally:
+        # Ensure tmp file cleaned up if something went wrong before replace
+        try:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+        except OSError:
+            pass
+
+
 def enforce_edge_routing(
     lines: list[str], edge_routing: str
 ) -> tuple[list[str], bool, bool]:
@@ -162,7 +218,8 @@ def apply_elk(
 ) -> tuple[bool, str]:
     """Process one file. Returns (modified, reason)."""
     safe_path = _ensure_path_within_root(fpath, ARCH_DIR)
-    content = safe_path.read_text(encoding="utf-8")
+    # Read file using a safety wrapper that enforces size/encoding checks
+    content = _safe_read_text(safe_path, encoding="utf-8")
     lines = content.splitlines()
     if not is_flowchart(lines):
         return False, "not a flowchart/graph diagram"
@@ -210,7 +267,8 @@ def apply_elk(
         return False, "ELK init already present"
     new_content = "\n".join(lines).rstrip("\n") + "\n"
     if not dry_run:
-        safe_path.write_text(new_content, encoding="utf-8")
+        # Use atomic, validated write helper to avoid partial writes and sinks
+        _safe_write_text(safe_path, new_content, encoding="utf-8")
     if "elk_init" in changes:
         return True, f"@nodes={nodes}, changes=[{', '.join(changes)}]"
     return True, f"changes=[{', '.join(changes)}]"

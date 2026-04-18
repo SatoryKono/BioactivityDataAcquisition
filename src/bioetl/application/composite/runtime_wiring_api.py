@@ -57,9 +57,13 @@ from bioetl.application.composite.lifecycle_observer_service import (
 )
 from bioetl.application.composite.merger import MergeCollaboratorGroup, MergeService
 from bioetl.application.composite.preflight_validator import (
+    CompositePreflightValidationService,
     CompositePreflightValidator,
 )
-from bioetl.application.composite.runner_pkg import CompositePipelineRunnerService
+from bioetl.application.composite.runner_pkg import (
+    CompositePipelineRunner,
+    CompositePipelineRunnerService,
+)
 from bioetl.application.composite.runtime_models import CompositeRunnerDependencies
 from bioetl.application.core.runner import PipelineRunner
 
@@ -71,7 +75,9 @@ __all__ = [
     "ColumnRenamer",
     "CompositeCheckpointService",
     "CompositeLifecycleObserverService",
+    "CompositePipelineRunner",
     "CompositePipelineRunnerService",
+    "CompositePreflightValidationService",
     "CompositePreflightValidator",
     "CompositeRunnerDependencies",
     "ConflictResolverService",

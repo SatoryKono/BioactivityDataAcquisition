@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_wiring_api import (
-        CompositePreflightValidator,
+        CompositePreflightValidationService,
         FSMStateHelperService,
         PipelineRunner,
     )
@@ -74,7 +74,7 @@ class _CompositeRunnerServiceInputs:
     checkpoint_manager: CompositeCheckpointService
     fsm_state_helper: FSMStateHelperService
     dq_report_service: DQReportService | None
-    preflight_validator: CompositePreflightValidator | None
+    preflight_validator: CompositePreflightValidationService | None
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner] | None
     dependency_coordinator: DependencyCoordinatorService | None
     quarantine_port: QuarantinePort | None
@@ -222,7 +222,7 @@ def create_composite_runner_service(
     fsm_state_helper: FSMStateHelperService,
     run_id: str | None = None,
     dq_report_service: DQReportService | None = None,
-    preflight_validator: CompositePreflightValidator | None = None,
+    preflight_validator: CompositePreflightValidationService | None = None,
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
     | None = None,
     dependency_coordinator: DependencyCoordinatorService | None = None,

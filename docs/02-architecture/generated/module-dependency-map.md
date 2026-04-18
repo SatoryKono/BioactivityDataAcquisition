@@ -22,14 +22,14 @@ flowchart LR
     composition[composition]
     interfaces[interfaces]
     application -->|994 OK| application
-    application -->|921 OK| domain
+    application -->|920 OK| domain
     composition -->|173 OK| application
     composition -->|433 OK| composition
     composition -->|317 OK| domain
     composition -->|265 OK| infrastructure
     domain -->|982 OK| domain
     infrastructure -->|693 OK| domain
-    infrastructure -->|871 OK| infrastructure
+    infrastructure -->|872 OK| infrastructure
     interfaces -->|64 OK| application
     interfaces -->|60 OK| composition
     interfaces -->|40 OK| domain
@@ -42,14 +42,14 @@ flowchart LR
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
 | `application`    | `application`    |     994 | allowed |
-| `application`    | `domain`         |     921 | allowed |
+| `application`    | `domain`         |     920 | allowed |
 | `composition`    | `application`    |     173 | allowed |
 | `composition`    | `composition`    |     433 | allowed |
 | `composition`    | `domain`         |     317 | allowed |
 | `composition`    | `infrastructure` |     265 | allowed |
 | `domain`         | `domain`         |     982 | allowed |
 | `infrastructure` | `domain`         |     693 | allowed |
-| `infrastructure` | `infrastructure` |     871 | allowed |
+| `infrastructure` | `infrastructure` |     872 | allowed |
 | `interfaces`     | `application`    |      64 | allowed |
 | `interfaces`     | `composition`    |      60 | allowed |
 | `interfaces`     | `domain`         |      40 | allowed |
@@ -65,7 +65,7 @@ flowchart LR
 | `application.core`         | `domain.types`                  |      87 |
 | `infrastructure.adapters`  | `domain.ports`                  |      86 |
 | `application.pipelines`    | `domain.types`                  |      78 |
-| `application.composite`    | `domain.ports`                  |      64 |
+| `application.composite`    | `domain.ports`                  |      63 |
 | `application.core`         | `domain.ports`                  |      60 |
 | `infrastructure.storage`   | `domain.ports`                  |      59 |
 | `infrastructure.storage`   | `domain.types`                  |      57 |

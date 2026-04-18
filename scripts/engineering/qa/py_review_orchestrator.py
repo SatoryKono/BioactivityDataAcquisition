@@ -13,6 +13,40 @@ from typing import Any
 # Constants
 FILE_THRESHOLD = 40
 LOC_THRESHOLD = 3000
+SCORE_DEDUCTIONS = {"CRITICAL": -2.0, "HIGH": -1.0, "MEDIUM": -0.5, "LOW": -0.25}
+SECTOR_WEIGHTS = {
+    "S1": 0.20,
+    "S2": 0.20,
+    "S3": 0.20,
+    "S4": 0.10,
+    "S5": 0.10,
+    "S6": 0.08,
+    "S7": 0.05,
+    "S8": 0.07,
+}
+SCORE_WEIGHTS = {
+    "Architecture": 0.30,
+    "Anti-Patterns": 0.25,
+    "DI Violations": 0.20,
+    "Naming": 0.10,
+    "Types": 0.10,
+    "Testing": 0.05,
+    "Configs": 0.05,
+    "Documentation": 0.05,
+}
+IGNORED_REVIEW_DIRS = {
+    ".venv",
+    ".git",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".mypy_cache",
+    "__pycache__",
+    ".claude",
+    ".codex",
+    "playwright",
+    "reports",
+    "grafana",
+}
 STATIC_SUBSECTOR_DEFS: dict[str, list[dict[str, Any]]] = {
     "S2": [
         {
@@ -170,6 +204,178 @@ STATIC_SUBSECTOR_DEFS: dict[str, list[dict[str, Any]]] = {
             ],
         },
     ],
+}
+DOMAIN_COVERED_PATH_GROUPS = (
+    ("src/bioetl/domain/ports", "src/bioetl/domain/contracts"),
+    ("src/bioetl/domain/entities", "src/bioetl/domain/value_objects"),
+    ("src/bioetl/domain/schemas",),
+    (
+        "src/bioetl/domain/services",
+        "src/bioetl/domain/filtering",
+        "src/bioetl/domain/mapping",
+    ),
+    (
+        "src/bioetl/domain/config",
+        "src/bioetl/domain/composite",
+        "src/bioetl/domain/aggregates",
+        "src/bioetl/domain/registry",
+        "src/bioetl/domain/models",
+        "src/bioetl/domain/exceptions",
+    ),
+)
+DOMAIN_SUBSECTOR_DEFS = (
+    ("S1.1", "Ports+Contracts", ("src/bioetl/domain/ports", "src/bioetl/domain/contracts")),
+    ("S1.2", "Entities+VOs", ("src/bioetl/domain/entities", "src/bioetl/domain/value_objects")),
+    ("S1.3", "Schemas", ("src/bioetl/domain/schemas",)),
+    (
+        "S1.4",
+        "Services+Filters+Map",
+        (
+            "src/bioetl/domain/services",
+            "src/bioetl/domain/filtering",
+            "src/bioetl/domain/mapping",
+        ),
+    ),
+)
+DOMAIN_OTHER_PATHS = (
+    "src/bioetl/domain/config",
+    "src/bioetl/domain/composite",
+    "src/bioetl/domain/aggregates",
+    "src/bioetl/domain/registry",
+    "src/bioetl/domain/models",
+    "src/bioetl/domain/exceptions",
+)
+CONFIG_COVERED_PATH_GROUPS = (
+    ("configs/entities",),
+    ("configs/composites", "configs/contracts", "configs/providers"),
+    ("configs/base", "configs/quality", "configs/_schema", "configs/enums"),
+)
+CONFIG_SUBSECTOR_DEFS = (
+    ("S7.1", "Entities", ("configs/entities",)),
+    ("S7.2", "Composites+Contracts+Providers", ("configs/composites", "configs/contracts", "configs/providers")),
+)
+CONFIG_OTHER_PATHS = (
+    "configs/base",
+    "configs/quality",
+    "configs/_schema",
+    "configs/enums",
+)
+DOC_COVERED_PATH_GROUPS = (
+    ("docs/00-project", "docs/01-requirements"),
+    ("docs/02-architecture",),
+    ("docs/04-reference",),
+    ("docs/03-guides", "docs/05-operations"),
+)
+DOC_SUBSECTOR_DEFS = (
+    ("S8.1", "Project+Reqs", ("docs/00-project", "docs/01-requirements")),
+    ("S8.2", "Architecture", ("docs/02-architecture",)),
+    ("S8.3", "Reference", ("docs/04-reference",)),
+)
+DOC_OTHER_PATHS = ("docs/03-guides", "docs/05-operations")
+ALLOWED_CONSTRUCTORS = {
+    "Path",
+    "dict",
+    "list",
+    "set",
+    "tuple",
+    "frozenset",
+    "str",
+    "int",
+    "float",
+    "bool",
+    "bytes",
+    "bytearray",
+    "complex",
+    "range",
+    "memoryview",
+    "type",
+    "object",
+    "Exception",
+    "ValueError",
+    "TypeError",
+    "KeyError",
+    "IndexError",
+    "AttributeError",
+    "RuntimeError",
+    "NotImplementedError",
+    "NameError",
+    "SyntaxError",
+    "SystemError",
+    "EnvironmentError",
+    "IOError",
+    "OSError",
+    "ConnectionError",
+    "TimeoutError",
+    "PermissionError",
+    "IsADirectoryError",
+    "NotADirectoryError",
+    "FileExistsError",
+    "FileNotFoundError",
+    "ProcessLookupError",
+    "InterruptedError",
+    "ChildProcessError",
+    "MagicMock",
+    "Mock",
+    "PropertyMock",
+    "AsyncMock",
+    "NonCallableMock",
+    "ANY",
+    "SimpleNamespace",
+    "Counter",
+    "deque",
+    "defaultdict",
+    "namedtuple",
+    "OrderedDict",
+    "ChainMap",
+    "UserDict",
+    "UserList",
+    "UserString",
+    "timedelta",
+    "date",
+    "datetime",
+    "time",
+    "tzinfo",
+    "timezone",
+    "Decimal",
+    "Fraction",
+    "Pattern",
+    "Match",
+    "UUID",
+    "Enum",
+    "IntEnum",
+    "Flag",
+    "IntFlag",
+    "auto",
+    "Lock",
+    "RLock",
+    "Semaphore",
+    "BoundedSemaphore",
+    "Event",
+    "Condition",
+    "Barrier",
+    "Thread",
+    "Timer",
+    "Process",
+    "Pool",
+    "Queue",
+    "Pipe",
+    "Manager",
+    "Value",
+    "Array",
+    "ctypes",
+    "Struct",
+    "Union",
+    "BytesIO",
+    "StringIO",
+    "TextIOWrapper",
+    "FileIO",
+    "BufferedReader",
+    "BufferedWriter",
+    "BufferedRandom",
+    "BufferedRWPair",
+    "ConfigParser",
+    "RawConfigParser",
+    "SafeConfigParser",
 }
 
 
@@ -361,146 +567,77 @@ class ReviewOrchestrator:
     def _static_subsectors(self, sector_id: str) -> list[dict[str, Any]]:
         return [dict(item) for item in STATIC_SUBSECTOR_DEFS.get(sector_id, [])]
 
-    def _domain_subsectors(self) -> list[dict[str, Any]]:
-        covered_domain_paths = set(
-            self._existing_paths(
-                "src/bioetl/domain/ports",
-                "src/bioetl/domain/contracts",
-                "src/bioetl/domain/entities",
-                "src/bioetl/domain/value_objects",
-                "src/bioetl/domain/schemas",
-                "src/bioetl/domain/services",
-                "src/bioetl/domain/filtering",
-                "src/bioetl/domain/mapping",
-                "src/bioetl/domain/config",
-                "src/bioetl/domain/composite",
-                "src/bioetl/domain/aggregates",
-                "src/bioetl/domain/registry",
-                "src/bioetl/domain/models",
-                "src/bioetl/domain/exceptions",
-            )
-        )
+    def _covered_paths(self, path_groups: tuple[tuple[str, ...], ...]) -> set[str]:
+        return set(self._existing_paths(*(path for group in path_groups for path in group)))
+
+    def _configured_subsectors(
+        self,
+        definitions: tuple[tuple[str, str, tuple[str, ...]], ...],
+    ) -> list[dict[str, Any]]:
         return [
             {
-                "id": "S1.1",
-                "name": "Ports+Contracts",
-                "paths": self._existing_paths(
-                    "src/bioetl/domain/ports", "src/bioetl/domain/contracts"
-                ),
-            },
-            {
-                "id": "S1.2",
-                "name": "Entities+VOs",
-                "paths": self._existing_paths(
-                    "src/bioetl/domain/entities",
-                    "src/bioetl/domain/value_objects",
-                ),
-            },
-            {
-                "id": "S1.3",
-                "name": "Schemas",
-                "paths": self._existing_paths("src/bioetl/domain/schemas"),
-            },
-            {
-                "id": "S1.4",
-                "name": "Services+Filters+Map",
-                "paths": self._existing_paths(
-                    "src/bioetl/domain/services",
-                    "src/bioetl/domain/filtering",
-                    "src/bioetl/domain/mapping",
-                ),
-            },
-            {
-                "id": "S1.5",
-                "name": "Other",
-                "paths": self._dedupe_paths(
-                    self._existing_paths(
-                        "src/bioetl/domain/config",
-                        "src/bioetl/domain/composite",
-                        "src/bioetl/domain/aggregates",
-                        "src/bioetl/domain/registry",
-                        "src/bioetl/domain/models",
-                        "src/bioetl/domain/exceptions",
-                    )
-                    + self._remaining_subdirs("src/bioetl/domain", covered_domain_paths)
-                ),
-            },
+                "id": subsector_id,
+                "name": name,
+                "paths": self._existing_paths(*paths),
+            }
+            for subsector_id, name, paths in definitions
+        ]
+
+    def _other_subsector(
+        self,
+        *,
+        subsector_id: str,
+        name: str,
+        explicit_paths: tuple[str, ...],
+        root: str,
+        covered_paths: set[str],
+    ) -> dict[str, Any]:
+        return {
+            "id": subsector_id,
+            "name": name,
+            "paths": self._dedupe_paths(
+                self._existing_paths(*explicit_paths)
+                + self._remaining_subdirs(root, covered_paths)
+            ),
+        }
+
+    def _domain_subsectors(self) -> list[dict[str, Any]]:
+        covered_domain_paths = self._covered_paths(DOMAIN_COVERED_PATH_GROUPS)
+        return [
+            *self._configured_subsectors(DOMAIN_SUBSECTOR_DEFS),
+            self._other_subsector(
+                subsector_id="S1.5",
+                name="Other",
+                explicit_paths=DOMAIN_OTHER_PATHS,
+                root="src/bioetl/domain",
+                covered_paths=covered_domain_paths,
+            ),
         ]
 
     def _config_subsectors(self) -> list[dict[str, Any]]:
-        covered_config_paths = set(
-            self._existing_paths(
-                "configs/entities",
-                "configs/composites",
-                "configs/contracts",
-                "configs/providers",
-                "configs/base",
-                "configs/quality",
-                "configs/_schema",
-                "configs/enums",
-            )
-        )
+        covered_config_paths = self._covered_paths(CONFIG_COVERED_PATH_GROUPS)
         return [
-            {"id": "S7.1", "name": "Entities", "paths": ["configs/entities"]},
-            {
-                "id": "S7.2",
-                "name": "Composites+Contracts+Providers",
-                "paths": self._existing_paths(
-                    "configs/composites",
-                    "configs/contracts",
-                    "configs/providers",
-                ),
-            },
-            {
-                "id": "S7.3",
-                "name": "Other Configs",
-                "paths": self._dedupe_paths(
-                    self._existing_paths(
-                        "configs/base",
-                        "configs/quality",
-                        "configs/_schema",
-                        "configs/enums",
-                    )
-                    + self._remaining_subdirs("configs", covered_config_paths)
-                ),
-            },
+            *self._configured_subsectors(CONFIG_SUBSECTOR_DEFS),
+            self._other_subsector(
+                subsector_id="S7.3",
+                name="Other Configs",
+                explicit_paths=CONFIG_OTHER_PATHS,
+                root="configs",
+                covered_paths=covered_config_paths,
+            ),
         ]
 
     def _docs_subsectors(self) -> list[dict[str, Any]]:
-        covered_doc_paths = set(
-            self._existing_paths(
-                "docs/00-project",
-                "docs/01-requirements",
-                "docs/02-architecture",
-                "docs/04-reference",
-            )
-        )
+        covered_doc_paths = self._covered_paths(DOC_COVERED_PATH_GROUPS)
         return [
-            {
-                "id": "S8.1",
-                "name": "Project+Reqs",
-                "paths": self._existing_paths(
-                    "docs/00-project", "docs/01-requirements"
-                ),
-            },
-            {
-                "id": "S8.2",
-                "name": "Architecture",
-                "paths": self._existing_paths("docs/02-architecture"),
-            },
-            {
-                "id": "S8.3",
-                "name": "Reference",
-                "paths": self._existing_paths("docs/04-reference"),
-            },
-            {
-                "id": "S8.4",
-                "name": "Guides+Other Docs",
-                "paths": self._dedupe_paths(
-                    self._existing_paths("docs/03-guides", "docs/05-operations")
-                    + self._remaining_subdirs("docs", covered_doc_paths)
-                ),
-            },
+            *self._configured_subsectors(DOC_SUBSECTOR_DEFS),
+            self._other_subsector(
+                subsector_id="S8.4",
+                name="Guides+Other Docs",
+                explicit_paths=DOC_OTHER_PATHS,
+                root="docs",
+                covered_paths=covered_doc_paths,
+            ),
         ]
 
     def count_files_and_loc(
@@ -508,49 +645,57 @@ class ReviewOrchestrator:
     ) -> tuple[int, int, list[Path]]:
         total_files = 0
         total_loc = 0
-        file_paths = []
-        ignore_dirs = {
-            ".venv",
-            ".git",
-            ".pytest_cache",
-            ".ruff_cache",
-            ".mypy_cache",
-            "__pycache__",
-            ".claude",
-            ".codex",
-            "playwright",
-            "reports",
-            "grafana",
-        }
+        file_paths: list[Path] = []
 
         for p in paths:
             base_path = self._resolve_path(p)
             if not base_path.exists():
                 continue
             if base_path.is_file():
-                if base_path.suffix in file_exts:
-                    file_paths.append(base_path)
-                    try:
-                        loc = sum(1 for _ in open(base_path, "r", encoding="utf-8"))
-                        total_loc += loc
-                        total_files += 1
-                    except OSError:
-                        continue
+                total_files, total_loc = self._accumulate_review_file(
+                    base_path,
+                    file_exts,
+                    file_paths,
+                    total_files,
+                    total_loc,
+                )
                 continue
 
             for root, dirs, files in os.walk(base_path):
-                dirs[:] = [d for d in dirs if d not in ignore_dirs]
+                dirs[:] = [d for d in dirs if d not in IGNORED_REVIEW_DIRS]
                 for file in files:
                     file_path = Path(root) / file
-                    if file_path.suffix in file_exts:
-                        file_paths.append(file_path)
-                        try:
-                            loc = sum(1 for _ in open(file_path, encoding="utf-8"))
-                            total_loc += loc
-                            total_files += 1
-                        except OSError:
-                            continue
+                    total_files, total_loc = self._accumulate_review_file(
+                        file_path,
+                        file_exts,
+                        file_paths,
+                        total_files,
+                        total_loc,
+                    )
         return total_files, total_loc, file_paths
+
+    def _accumulate_review_file(
+        self,
+        file_path: Path,
+        file_exts: set[str],
+        file_paths: list[Path],
+        total_files: int,
+        total_loc: int,
+    ) -> tuple[int, int]:
+        if file_path.suffix not in file_exts:
+            return total_files, total_loc
+        file_paths.append(file_path)
+        loc = self._safe_loc(file_path)
+        if loc is None:
+            return total_files, total_loc
+        return total_files + 1, total_loc + loc
+
+    def _safe_loc(self, file_path: Path) -> int | None:
+        try:
+            with file_path.open(encoding="utf-8") as handle:
+                return sum(1 for _ in handle)
+        except OSError:
+            return None
 
     def determine_subsectors(
         self, sector_id: str, _paths: list[str]
@@ -653,432 +798,394 @@ class ReviewOrchestrator:
             return issues
         parent_map = self._build_parent_map(tree)
 
-        # Check EXC-005 (Large Files with Delegation) - crude heuristic
-        is_large_file_ok = False
-        if len(content.splitlines()) > 500:
-            delegations = len(set(re.findall(r"self\._[a-z_]*\.", content)))
-            if delegations > 5:
-                is_large_file_ok = True
-
-        allowed_constructors = {
-            "Path",
-            "dict",
-            "list",
-            "set",
-            "tuple",
-            "frozenset",
-            "str",
-            "int",
-            "float",
-            "bool",
-            "bytes",
-            "bytearray",
-            "complex",
-            "range",
-            "memoryview",
-            "type",
-            "object",
-            "Exception",
-            "ValueError",
-            "TypeError",
-            "KeyError",
-            "IndexError",
-            "AttributeError",
-            "RuntimeError",
-            "NotImplementedError",
-            "NameError",
-            "SyntaxError",
-            "SystemError",
-            "EnvironmentError",
-            "IOError",
-            "OSError",
-            "ConnectionError",
-            "TimeoutError",
-            "PermissionError",
-            "IsADirectoryError",
-            "NotADirectoryError",
-            "FileExistsError",
-            "FileNotFoundError",
-            "ProcessLookupError",
-            "InterruptedError",
-            "ChildProcessError",
-            "MagicMock",
-            "Mock",
-            "PropertyMock",
-            "AsyncMock",
-            "NonCallableMock",
-            "ANY",
-            "SimpleNamespace",
-            "Counter",
-            "deque",
-            "defaultdict",
-            "namedtuple",
-            "OrderedDict",
-            "ChainMap",
-            "UserDict",
-            "UserList",
-            "UserString",
-            "timedelta",
-            "date",
-            "datetime",
-            "time",
-            "tzinfo",
-            "timezone",
-            "Decimal",
-            "Fraction",
-            "Pattern",
-            "Match",
-            "UUID",
-            "Enum",
-            "IntEnum",
-            "Flag",
-            "IntFlag",
-            "auto",
-            "Lock",
-            "RLock",
-            "Semaphore",
-            "BoundedSemaphore",
-            "Event",
-            "Condition",
-            "Barrier",
-            "Thread",
-            "Timer",
-            "Process",
-            "Pool",
-            "Queue",
-            "Pipe",
-            "Manager",
-            "Value",
-            "Array",
-            "ctypes",
-            "Struct",
-            "Union",
-            "BytesIO",
-            "StringIO",
-            "TextIOWrapper",
-            "FileIO",
-            "BufferedReader",
-            "BufferedWriter",
-            "BufferedRandom",
-            "BufferedRWPair",
-            "ConfigParser",
-            "RawConfigParser",
-            "SafeConfigParser",
-        }
-
         for node in ast.walk(tree):
-            # AP-001 / DI-001: Hard-coded Constructor
-            if isinstance(node, ast.FunctionDef) and node.name == "__init__":
-                for stmt in node.body:
-                    if isinstance(stmt, ast.Assign):
-                        for target in stmt.targets:
-                            if (
-                                isinstance(target, ast.Attribute)
-                                and isinstance(target.value, ast.Name)
-                                and target.value.id == "self"
-                            ):
-                                if isinstance(stmt.value, ast.Call) and isinstance(
-                                    stmt.value.func, ast.Name
-                                ):
-                                    func_name = stmt.value.func.id
-                                    if (
-                                        func_name[0].isupper()
-                                        and func_name not in allowed_constructors
-                                    ):
-                                        issues.append(
-                                            Issue(
-                                                rule_id="AP-001",
-                                                rule_name="DI Violation - Hard-coded Constructor",
-                                                severity="CRITICAL",
-                                                file_path=relative_path,
-                                                line=stmt.lineno,
-                                                description=f"Hard-coded dependency instantiation: {func_name}()",
-                                                code_snippet=ast.unparse(stmt),
-                                                suggested_fix="Inject dependency via constructor.",
-                                                verification="Check DI configuration.",
-                                                category="Anti-Patterns",
-                                            )
-                                        )
+            self._collect_python_ast_issues(
+                issues,
+                node,
+                relative_path,
+                file_path,
+                content,
+                parent_map,
+            )
 
-            # AP-002: Direct structlog import
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name == "structlog":
-                        # allow in infrastructure/observability and tests (EXC-014)
-                        if (
-                            "infrastructure/observability" not in str(relative_path)
-                            and "tests/" not in relative_path
-                        ):
-                            issues.append(
-                                Issue(
-                                    rule_id="AP-002",
-                                    rule_name="Direct structlog Import",
-                                    severity="HIGH",
-                                    file_path=relative_path,
-                                    line=node.lineno,
-                                    description="Direct import of structlog outside infrastructure.",
-                                    code_snippet=ast.unparse(node),
-                                    suggested_fix="Use LoggerPort.",
-                                    verification="Check imports.",
-                                    category="Anti-Patterns",
-                                )
-                            )
-            elif isinstance(node, ast.ImportFrom):
-                if node.module == "structlog":
-                    if (
-                        "infrastructure/observability" not in str(relative_path)
-                        and "tests/" not in relative_path
-                    ):
-                        issues.append(
-                            Issue(
-                                rule_id="AP-002",
-                                rule_name="Direct structlog Import",
-                                severity="HIGH",
-                                file_path=relative_path,
-                                line=node.lineno,
-                                description="Direct import of structlog outside infrastructure.",
-                                code_snippet=ast.unparse(node),
-                                suggested_fix="Use LoggerPort.",
-                                verification="Check imports.",
-                                category="Anti-Patterns",
-                            )
-                        )
-
-            # ARCH-001: Import Boundary Violation
-            if isinstance(node, (ast.Import, ast.ImportFrom)):
-                for module in self._iter_import_modules(node):
-                    if self._is_type_checking_guarded(node, parent_map):
-                        continue
-                    if relative_path.startswith(
-                        "src/bioetl/domain/"
-                    ) and module.startswith("bioetl.infrastructure"):
-                        issues.append(
-                            Issue(
-                                rule_id="ARCH-001",
-                                rule_name="Import Boundary Violation",
-                                severity="CRITICAL",
-                                file_path=relative_path,
-                                line=node.lineno,
-                                description="Domain layer importing from Infrastructure layer.",
-                                code_snippet=ast.unparse(node),
-                                suggested_fix="Remove dependency.",
-                                verification="importlinter",
-                                category="Architecture",
-                            )
-                        )
-                    if relative_path.startswith(
-                        "src/bioetl/application/"
-                    ) and module.startswith("bioetl.infrastructure"):
-                        issues.append(
-                            Issue(
-                                rule_id="ARCH-001",
-                                rule_name="Import Boundary Violation",
-                                severity="CRITICAL",
-                                file_path=relative_path,
-                                line=node.lineno,
-                                description="Application layer importing from Infrastructure layer.",
-                                code_snippet=ast.unparse(node),
-                                suggested_fix="Use Ports.",
-                                verification="importlinter",
-                                category="Architecture",
-                            )
-                        )
-
-            # ARCH-003: Port Protocol Naming
-            if isinstance(node, ast.ClassDef):
-                if "Protocol" in [getattr(b, "id", "") for b in node.bases]:
-                    if "domain/ports" in str(file_path):
-                        if not node.name.endswith("Port"):
-                            issues.append(
-                                Issue(
-                                    rule_id="ARCH-003",
-                                    rule_name="Port Protocol Naming",
-                                    severity="HIGH",
-                                    file_path=relative_path,
-                                    line=node.lineno,
-                                    description=f"Protocol {node.name} in domain/ports must end with 'Port'.",
-                                    code_snippet=f"class {node.name}(Protocol):",
-                                    suggested_fix=f"Rename to {node.name}Port.",
-                                    verification="pytest tests/architecture/",
-                                    category="Architecture",
-                                )
-                            )
-
-            # ARCH-008: Single Source of Imports
-            if isinstance(node, ast.ImportFrom):
-                if (
-                    node.module
-                    and node.module.startswith("bioetl.domain.ports.")
-                    and not node.module == "bioetl.domain.ports"
-                ):
-                    issues.append(
-                        Issue(
-                            rule_id="ARCH-008",
-                            rule_name="Single Source of Imports",
-                            severity="MEDIUM",
-                            file_path=relative_path,
-                            line=node.lineno,
-                            description="Ports must be imported from bioetl.domain.ports facade.",
-                            code_snippet=ast.unparse(node),
-                            suggested_fix="from bioetl.domain.ports import ...",
-                            verification="pytest tests/architecture/",
-                            category="Architecture",
-                        )
-                    )
-
-            # AP-006: Print Statements
-            if (
-                isinstance(node, ast.Call)
-                and isinstance(node.func, ast.Name)
-                and node.func.id == "print"
-            ):
-                if "interfaces/cli" not in str(file_path):
-                    issues.append(
-                        Issue(
-                            rule_id="AP-006",
-                            rule_name="Print Statements",
-                            severity="MEDIUM",
-                            file_path=relative_path,
-                            line=node.lineno,
-                            description="Use of print() outside CLI.",
-                            code_snippet=ast.unparse(node),
-                            suggested_fix="Use structured logging.",
-                            verification="grep -rn print src/bioetl/",
-                            category="Anti-Patterns",
-                        )
-                    )
-
-            # DI-003: Service Locator
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-                if (
-                    isinstance(node.func.value, ast.Name)
-                    and node.func.value.id == "ServiceLocator"
-                    and node.func.attr == "get"
-                ) or (
-                    isinstance(node.func.value, ast.Name)
-                    and node.func.value.id == "Container"
-                    and node.func.attr in ("resolve", "get")
-                ):
-                    issues.append(
-                        Issue(
-                            rule_id="DI-003",
-                            rule_name="Service Locator",
-                            severity="CRITICAL",
-                            file_path=relative_path,
-                            line=node.lineno,
-                            description="Use of Service Locator pattern.",
-                            code_snippet=ast.unparse(node),
-                            suggested_fix="Use Constructor Injection.",
-                            verification="grep -rn ServiceLocator",
-                            category="DI Violations",
-                        )
-                    )
-
-            # TYPE-001: Public Function Annotations
-            if (
-                isinstance(node, ast.FunctionDef)
-                and not node.name.startswith("_")
-                and node.name not in ("__init__", "__main__")
-            ):
-                if getattr(node, "returns", None) is None:
-                    issues.append(
-                        Issue(
-                            rule_id="TYPE-001",
-                            rule_name="Public Function Annotations",
-                            severity="HIGH",
-                            file_path=relative_path,
-                            line=node.lineno,
-                            description=f"Public function '{node.name}' lacks return type annotation.",
-                            code_snippet=f"def {node.name}(...):",
-                            suggested_fix="Add -> Type:",
-                            verification="mypy --strict",
-                            category="Types",
-                        )
-                    )
-
-            # TYPE-002: Any Usage
-            if isinstance(node, ast.Name) and node.id == "Any":
-                # Check if there is a comment explaining it (Crude check by line)
-                line_str = content.splitlines()[node.lineno - 1]
-                if "#" not in line_str or "Any" not in line_str.split("#")[1]:
-                    issues.append(
-                        Issue(
-                            rule_id="TYPE-002",
-                            rule_name="Any Usage",
-                            severity="HIGH",
-                            file_path=relative_path,
-                            line=node.lineno,
-                            description="Usage of Any without comment justification.",
-                            code_snippet=line_str.strip(),
-                            suggested_fix="Add comment like # Any: reason",
-                            verification="mypy --strict",
-                            category="Types",
-                        )
-                    )
-
-        # Check hardcoded secrets (AP-005)
-        for i, line in enumerate(content.splitlines()):
-            if re.search(
-                r"(password|api_key|secret)\s*=\s*[\"\']", line, re.IGNORECASE
-            ):
-                if "tests/" not in str(file_path):
-                    issues.append(
-                        Issue(
-                            rule_id="AP-005",
-                            rule_name="Hardcoded Secrets",
-                            severity="CRITICAL",
-                            file_path=relative_path,
-                            line=i + 1,
-                            description="Potential hardcoded secret found.",
-                            code_snippet=line.strip(),
-                            suggested_fix="Use os.environ.",
-                            verification="make security",
-                            category="Anti-Patterns",
-                        )
-                    )
+        self._collect_hardcoded_secret_issues(issues, content, relative_path, file_path)
 
         return issues
 
-    def calculate_score(self, issues: list[Issue]) -> tuple[float, dict[str, float]]:
-        deductions = {"CRITICAL": -2.0, "HIGH": -1.0, "MEDIUM": -0.5, "LOW": -0.25}
-        weights = {
-            "Architecture": 0.30,
-            "Anti-Patterns": 0.25,
-            "DI Violations": 0.20,
-            "Naming": 0.10,
-            "Types": 0.10,
-            "Testing": 0.05,
-            "Configs": 0.05,
-            "Documentation": 0.05,
-        }
+    def _collect_python_ast_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+        file_path: Path,
+        content: str,
+        parent_map: dict[ast.AST, ast.AST],
+    ) -> None:
+        self._collect_constructor_issues(issues, node, relative_path)
+        self._collect_structlog_import_issues(issues, node, relative_path)
+        self._collect_import_boundary_issues(issues, node, relative_path, parent_map)
+        self._collect_protocol_naming_issues(issues, node, relative_path, file_path)
+        self._collect_port_facade_import_issues(issues, node, relative_path)
+        self._collect_print_issues(issues, node, relative_path, file_path)
+        self._collect_service_locator_issues(issues, node, relative_path)
+        self._collect_public_annotation_issues(issues, node, relative_path)
+        self._collect_any_usage_issues(issues, node, relative_path, content)
 
-        category_issues: dict[str, list[Issue]] = {}
-        for issue in issues:
-            cat = issue.category
-            if cat not in category_issues:
-                category_issues[cat] = []
-            category_issues[cat].append(issue)
+    def _collect_constructor_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+    ) -> None:
+        if not isinstance(node, ast.FunctionDef) or node.name != "__init__":
+            return
+        for stmt in node.body:
+            issue = self._constructor_issue(stmt, relative_path)
+            if issue is not None:
+                issues.append(issue)
+
+    def _constructor_issue(self, stmt: ast.stmt, relative_path: str) -> Issue | None:
+        if not isinstance(stmt, ast.Assign):
+            return None
+        for target in stmt.targets:
+            if not (
+                isinstance(target, ast.Attribute)
+                and isinstance(target.value, ast.Name)
+                and target.value.id == "self"
+            ):
+                continue
+            if not (isinstance(stmt.value, ast.Call) and isinstance(stmt.value.func, ast.Name)):
+                continue
+            func_name = stmt.value.func.id
+            if not (func_name[0].isupper() and func_name not in ALLOWED_CONSTRUCTORS):
+                continue
+            return Issue(
+                rule_id="AP-001",
+                rule_name="DI Violation - Hard-coded Constructor",
+                severity="CRITICAL",
+                file_path=relative_path,
+                line=stmt.lineno,
+                description=f"Hard-coded dependency instantiation: {func_name}()",
+                code_snippet=ast.unparse(stmt),
+                suggested_fix="Inject dependency via constructor.",
+                verification="Check DI configuration.",
+                category="Anti-Patterns",
+            )
+        return None
+
+    def _collect_structlog_import_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+    ) -> None:
+        if "infrastructure/observability" in relative_path or "tests/" in relative_path:
+            return
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == "structlog":
+                    issues.append(self._direct_structlog_issue(node, relative_path))
+        elif isinstance(node, ast.ImportFrom) and node.module == "structlog":
+            issues.append(self._direct_structlog_issue(node, relative_path))
+
+    def _direct_structlog_issue(self, node: ast.AST, relative_path: str) -> Issue:
+        return Issue(
+            rule_id="AP-002",
+            rule_name="Direct structlog Import",
+            severity="HIGH",
+            file_path=relative_path,
+            line=node.lineno,
+            description="Direct import of structlog outside infrastructure.",
+            code_snippet=ast.unparse(node),
+            suggested_fix="Use LoggerPort.",
+            verification="Check imports.",
+            category="Anti-Patterns",
+        )
+
+    def _collect_import_boundary_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+        parent_map: dict[ast.AST, ast.AST],
+    ) -> None:
+        if not isinstance(node, (ast.Import, ast.ImportFrom)):
+            return
+        for module in self._iter_import_modules(node):
+            if self._is_type_checking_guarded(node, parent_map):
+                continue
+            issue = self._import_boundary_issue(node, relative_path, module)
+            if issue is not None:
+                issues.append(issue)
+
+    def _import_boundary_issue(
+        self,
+        node: ast.AST,
+        relative_path: str,
+        module: str,
+    ) -> Issue | None:
+        if relative_path.startswith("src/bioetl/domain/") and module.startswith("bioetl.infrastructure"):
+            return Issue(
+                rule_id="ARCH-001",
+                rule_name="Import Boundary Violation",
+                severity="CRITICAL",
+                file_path=relative_path,
+                line=node.lineno,
+                description="Domain layer importing from Infrastructure layer.",
+                code_snippet=ast.unparse(node),
+                suggested_fix="Remove dependency.",
+                verification="importlinter",
+                category="Architecture",
+            )
+        if relative_path.startswith("src/bioetl/application/") and module.startswith("bioetl.infrastructure"):
+            return Issue(
+                rule_id="ARCH-001",
+                rule_name="Import Boundary Violation",
+                severity="CRITICAL",
+                file_path=relative_path,
+                line=node.lineno,
+                description="Application layer importing from Infrastructure layer.",
+                code_snippet=ast.unparse(node),
+                suggested_fix="Use Ports.",
+                verification="importlinter",
+                category="Architecture",
+            )
+        return None
+
+    def _collect_protocol_naming_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+        file_path: Path,
+    ) -> None:
+        if not isinstance(node, ast.ClassDef):
+            return
+        if "domain/ports" not in str(file_path):
+            return
+        if "Protocol" not in [getattr(b, "id", "") for b in node.bases]:
+            return
+        if node.name.endswith("Port"):
+            return
+        issues.append(
+            Issue(
+                rule_id="ARCH-003",
+                rule_name="Port Protocol Naming",
+                severity="HIGH",
+                file_path=relative_path,
+                line=node.lineno,
+                description=f"Protocol {node.name} in domain/ports must end with 'Port'.",
+                code_snippet=f"class {node.name}(Protocol):",
+                suggested_fix=f"Rename to {node.name}Port.",
+                verification="pytest tests/architecture/",
+                category="Architecture",
+            )
+        )
+
+    def _collect_port_facade_import_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+    ) -> None:
+        if not isinstance(node, ast.ImportFrom):
+            return
+        if not (
+            node.module
+            and node.module.startswith("bioetl.domain.ports.")
+            and node.module != "bioetl.domain.ports"
+        ):
+            return
+        issues.append(
+            Issue(
+                rule_id="ARCH-008",
+                rule_name="Single Source of Imports",
+                severity="MEDIUM",
+                file_path=relative_path,
+                line=node.lineno,
+                description="Ports must be imported from bioetl.domain.ports facade.",
+                code_snippet=ast.unparse(node),
+                suggested_fix="from bioetl.domain.ports import ...",
+                verification="pytest tests/architecture/",
+                category="Architecture",
+            )
+        )
+
+    def _collect_print_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+        file_path: Path,
+    ) -> None:
+        if "interfaces/cli" in str(file_path):
+            return
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "print"
+        ):
+            return
+        issues.append(
+            Issue(
+                rule_id="AP-006",
+                rule_name="Print Statements",
+                severity="MEDIUM",
+                file_path=relative_path,
+                line=node.lineno,
+                description="Use of print() outside CLI.",
+                code_snippet=ast.unparse(node),
+                suggested_fix="Use structured logging.",
+                verification="grep -rn print src/bioetl/",
+                category="Anti-Patterns",
+            )
+        )
+
+    def _collect_service_locator_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+    ) -> None:
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)):
+            return
+        if not (
+            (
+                isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "ServiceLocator"
+                and node.func.attr == "get"
+            )
+            or (
+                isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "Container"
+                and node.func.attr in ("resolve", "get")
+            )
+        ):
+            return
+        issues.append(
+            Issue(
+                rule_id="DI-003",
+                rule_name="Service Locator",
+                severity="CRITICAL",
+                file_path=relative_path,
+                line=node.lineno,
+                description="Use of Service Locator pattern.",
+                code_snippet=ast.unparse(node),
+                suggested_fix="Use Constructor Injection.",
+                verification="grep -rn ServiceLocator",
+                category="DI Violations",
+            )
+        )
+
+    def _collect_public_annotation_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+    ) -> None:
+        if not (
+            isinstance(node, ast.FunctionDef)
+            and not node.name.startswith("_")
+            and node.name not in ("__init__", "__main__")
+            and getattr(node, "returns", None) is None
+        ):
+            return
+        issues.append(
+            Issue(
+                rule_id="TYPE-001",
+                rule_name="Public Function Annotations",
+                severity="HIGH",
+                file_path=relative_path,
+                line=node.lineno,
+                description=f"Public function '{node.name}' lacks return type annotation.",
+                code_snippet=f"def {node.name}(...):",
+                suggested_fix="Add -> Type:",
+                verification="mypy --strict",
+                category="Types",
+            )
+        )
+
+    def _collect_any_usage_issues(
+        self,
+        issues: list[Issue],
+        node: ast.AST,
+        relative_path: str,
+        content: str,
+    ) -> None:
+        if not (isinstance(node, ast.Name) and node.id == "Any"):
+            return
+        line_str = content.splitlines()[node.lineno - 1]
+        if "#" in line_str and "Any" in line_str.split("#")[1]:
+            return
+        issues.append(
+            Issue(
+                rule_id="TYPE-002",
+                rule_name="Any Usage",
+                severity="HIGH",
+                file_path=relative_path,
+                line=node.lineno,
+                description="Usage of Any without comment justification.",
+                code_snippet=line_str.strip(),
+                suggested_fix="Add comment like # Any: reason",
+                verification="mypy --strict",
+                category="Types",
+            )
+        )
+
+    def _collect_hardcoded_secret_issues(
+        self,
+        issues: list[Issue],
+        content: str,
+        relative_path: str,
+        file_path: Path,
+    ) -> None:
+        if "tests/" in str(file_path):
+            return
+        for i, line in enumerate(content.splitlines(), start=1):
+            if re.search(r"(password|api_key|secret)\s*=\s*[\"\']", line, re.IGNORECASE):
+                issues.append(
+                    Issue(
+                        rule_id="AP-005",
+                        rule_name="Hardcoded Secrets",
+                        severity="CRITICAL",
+                        file_path=relative_path,
+                        line=i,
+                        description="Potential hardcoded secret found.",
+                        code_snippet=line.strip(),
+                        suggested_fix="Use os.environ.",
+                        verification="make security",
+                        category="Anti-Patterns",
+                    )
+                )
+
+    def calculate_score(self, issues: list[Issue]) -> tuple[float, dict[str, float]]:
+        category_issues = self._issues_by_category(issues)
 
         final_score = 0.0
         cat_scores: dict[str, float] = {}
 
-        for cat, weight in weights.items():
+        for cat, weight in SCORE_WEIGHTS.items():
             if cat not in category_issues:
                 cat_scores[cat] = 10.0
                 final_score += 10.0 * weight
                 continue
 
             deduction_sum = sum(
-                (deductions.get(i.severity, 0.0) for i in category_issues[cat]),
+                (SCORE_DEDUCTIONS.get(i.severity, 0.0) for i in category_issues[cat]),
                 0.0,
             )
             cat_score = max(0.0, 10.0 + deduction_sum)
             cat_scores[cat] = cat_score
             final_score += cat_score * weight
 
-        # Ensure max 10.0
         final_score = min(10.0, max(0.0, final_score))
         return final_score, cat_scores
+
+    def _issues_by_category(self, issues: list[Issue]) -> dict[str, list[Issue]]:
+        category_issues: dict[str, list[Issue]] = {}
+        for issue in issues:
+            category_issues.setdefault(issue.category, []).append(issue)
+        return category_issues
 
     def get_status(self, score: float) -> str:
         if score >= 8.0:
@@ -1104,27 +1211,43 @@ class ReviewOrchestrator:
 
         cat_stats, cat_scores = self._category_stats(result.issues)
 
-        for cat in cat_stats:
-            stats = cat_stats[cat]
-            report += (
+        report += "".join(self._worker_category_rows(cat_stats, cat_scores))
+
+        report += "\n## Critical Issues (MUST fix before merge)\n"
+        report += "".join(
+            self._worker_critical_issue_block(issue)
+            for issue in result.issues
+            if issue.severity == "CRITICAL"
+        )
+
+        self._sector_report_path(result).write_text(report, encoding="utf-8")
+
+    def _worker_category_rows(
+        self,
+        cat_stats: dict[str, dict[str, int]],
+        cat_scores: dict[str, float],
+    ) -> list[str]:
+        rows: list[str] = []
+        for cat, stats in cat_stats.items():
+            rows.append(
                 f"| {cat} | {stats['total']} | {stats['CRITICAL']} | "
                 f"{stats['HIGH']} | {stats['MEDIUM']} | {stats['LOW']} | "
                 f"{cat_scores.get(cat, 10.0):.1f} |\n"
             )
+        return rows
 
-        report += "\n## Critical Issues (MUST fix before merge)\n"
-        for issue in [i for i in result.issues if i.severity == "CRITICAL"]:
-            report += f"### {issue.rule_id}: {issue.rule_name}\n"
-            report += f"- **Rule**: {issue.rule_id} ({issue.rule_name})\n"
-            report += f"- **Severity**: {issue.severity}\n"
-            report += f"- **File**: `{issue.file_path}:{issue.line}`\n"
-            report += f"- **Description**: {issue.description}\n"
-            report += "- **Code**:\n  ```python\n"
-            report += f"  {issue.code_snippet}\n  ```\n"
-            report += f"- **Fix**: {issue.suggested_fix}\n"
-            report += f"- **Verification**: `{issue.verification}`\n\n"
-
-        self._sector_report_path(result).write_text(report, encoding="utf-8")
+    def _worker_critical_issue_block(self, issue: Issue) -> str:
+        return (
+            f"### {issue.rule_id}: {issue.rule_name}\n"
+            f"- **Rule**: {issue.rule_id} ({issue.rule_name})\n"
+            f"- **Severity**: {issue.severity}\n"
+            f"- **File**: `{issue.file_path}:{issue.line}`\n"
+            f"- **Description**: {issue.description}\n"
+            "- **Code**:\n  ```python\n"
+            f"  {issue.code_snippet}\n  ```\n"
+            f"- **Fix**: {issue.suggested_fix}\n"
+            f"- **Verification**: `{issue.verification}`\n\n"
+        )
 
     def write_orchestrator_report(self, result: SectorResult) -> None:
         if not result.sub_results:
@@ -1138,21 +1261,13 @@ class ReviewOrchestrator:
         all_high: list[Issue] = []
 
         for sub in result.sub_results:
-            score, _ = self.calculate_score(sub.issues)
-            status = self.get_status(score)
-            weight = sub.files_reviewed / max(1, total_files)
-            weighted_score_sum += weight * score
-
-            crit_c = sum(1 for i in sub.issues if i.severity == "CRITICAL")
-            high_c = sum(1 for i in sub.issues if i.severity == "HIGH")
-
-            sub_reports_lines.append(
-                f"| {sub.sector_id} — {sub.sector_name} | {sub.files_reviewed} | "
-                f"{score:.1f} | {status} | {crit_c} | {high_c} |"
+            weighted_score_sum += self._orchestrator_subreport(
+                sub,
+                total_files,
+                sub_reports_lines,
+                all_crit,
+                all_high,
             )
-
-            all_crit.extend([i for i in sub.issues if i.severity == "CRITICAL"])
-            all_high.extend([i for i in sub.issues if i.severity == "HIGH"])
 
         overall_status = self.get_status(weighted_score_sum)
 
@@ -1167,52 +1282,50 @@ class ReviewOrchestrator:
         report += "\n".join(sub_reports_lines) + "\n\n"
 
         report += "## Aggregated Issues\n### Critical (MUST fix)\n"
-        for i, issue in enumerate(all_crit[:20]):  # Limit to 20 for brevity
-            report += f"{i + 1}. **{issue.rule_id}** in `{issue.file_path}:{issue.line}` - {issue.description}\n"
+        report += "".join(self._aggregated_issue_lines(all_crit[:20]))
 
         self._sector_report_path(result).write_text(report, encoding="utf-8")
+
+    def _orchestrator_subreport(
+        self,
+        sub: SectorResult,
+        total_files: int,
+        sub_reports_lines: list[str],
+        all_crit: list[Issue],
+        all_high: list[Issue],
+    ) -> float:
+        score, _ = self.calculate_score(sub.issues)
+        status = self.get_status(score)
+        crit_c = sum(1 for i in sub.issues if i.severity == "CRITICAL")
+        high_c = sum(1 for i in sub.issues if i.severity == "HIGH")
+        sub_reports_lines.append(
+            f"| {sub.sector_id} — {sub.sector_name} | {sub.files_reviewed} | "
+            f"{score:.1f} | {status} | {crit_c} | {high_c} |"
+        )
+        all_crit.extend(i for i in sub.issues if i.severity == "CRITICAL")
+        all_high.extend(i for i in sub.issues if i.severity == "HIGH")
+        return (sub.files_reviewed / max(1, total_files)) * score
+
+    def _aggregated_issue_lines(self, issues: list[Issue]) -> list[str]:
+        return [
+            f"{index}. **{issue.rule_id}** in `{issue.file_path}:{issue.line}` - {issue.description}\n"
+            for index, issue in enumerate(issues, start=1)
+        ]
 
     def write_final_report(self, results: list[SectorResult]) -> None:
         total_files = sum(r.files_reviewed for r in results)
         total_loc = sum(r.total_loc for r in results)
-
-        sector_weights = {
-            "S1": 0.20,
-            "S2": 0.20,
-            "S3": 0.20,
-            "S4": 0.10,
-            "S5": 0.10,
-            "S6": 0.08,
-            "S7": 0.05,
-            "S8": 0.07,
-        }
 
         final_score = 0.0
         all_issues: list[Issue] = []
         sector_lines: list[str] = []
 
         for r in results:
-            if r.is_orchestrator:
-                total_f = sum(s.files_reviewed for s in r.sub_results)
-                score = sum(
-                    (s.files_reviewed / max(1, total_f))
-                    * self.calculate_score(s.issues)[0]
-                    for s in r.sub_results
-                )
-                all_issues.extend(r.all_issues)
-            else:
-                score, _ = self.calculate_score(r.issues)
-                all_issues.extend(r.issues)
-
+            score = self._sector_score(r)
+            all_issues.extend(r.all_issues if r.is_orchestrator else r.issues)
             status = self.get_status(score)
-            weight = sector_weights.get(r.sector_id, 0.0)
-            final_score += score * weight
-
-            paths_str = ", ".join(r.scope_paths)
-            sector_lines.append(
-                f"| {r.sector_id} {r.sector_name} | {paths_str} | "
-                f"{r.files_reviewed} | {r.total_loc} | {score:.1f} | {status} |"
-            )
+            final_score += score * SECTOR_WEIGHTS.get(r.sector_id, 0.0)
+            sector_lines.append(self._final_sector_row(r, score, status))
 
         overall_status = self.get_status(final_score)
 
@@ -1231,12 +1344,17 @@ class ReviewOrchestrator:
         report += f"**Overall Score**: {final_score:.1f}/10.0\n\n"
         report += "### Key Metrics\n"
         report += "| Metric | Value |\n|--------|-------|\n"
-        report += f"| Total issues found | {len(all_issues)} |\n"
-        report += f"| Critical issues | {len(crit_issues)} |\n"
-        report += f"| High issues | {len(high_issues)} |\n"
-        report += f"| Medium issues | {len(med_issues)} |\n"
-        report += f"| Low issues | {len(low_issues)} |\n"
-        report += f"| Sectors reviewed | {len(results)} |\n\n"
+        report += "".join(
+            self._final_metric_rows(
+                all_issues=all_issues,
+                crit_issues=crit_issues,
+                high_issues=high_issues,
+                med_issues=med_issues,
+                low_issues=low_issues,
+                results=results,
+            )
+        )
+        report += "\n"
 
         report += "---\n\n## Sector Scores\n"
         report += "| Sector | Scope | Files | LOC | Score | Status |\n"
@@ -1244,11 +1362,48 @@ class ReviewOrchestrator:
         report += "\n".join(sector_lines) + "\n\n"
 
         report += "---\n\n## Critical Issues (блокируют merge/release)\n"
-        for i, issue in enumerate(crit_issues[:50]):
-            report += f"- **{issue.rule_id}**: {issue.file_path}:{issue.line} - {issue.description}\n"
+        report += "".join(
+            f"- **{issue.rule_id}**: {issue.file_path}:{issue.line} - {issue.description}\n"
+            for issue in crit_issues[:50]
+        )
 
         report_path = self.reports_dir / "FINAL-REVIEW.md"
         report_path.write_text(report, encoding="utf-8")
+
+    def _final_metric_rows(
+        self,
+        *,
+        all_issues: list[Issue],
+        crit_issues: list[Issue],
+        high_issues: list[Issue],
+        med_issues: list[Issue],
+        low_issues: list[Issue],
+        results: list[SectorResult],
+    ) -> list[str]:
+        return [
+            f"| Total issues found | {len(all_issues)} |\n",
+            f"| Critical issues | {len(crit_issues)} |\n",
+            f"| High issues | {len(high_issues)} |\n",
+            f"| Medium issues | {len(med_issues)} |\n",
+            f"| Low issues | {len(low_issues)} |\n",
+            f"| Sectors reviewed | {len(results)} |\n",
+        ]
+
+    def _sector_score(self, result: SectorResult) -> float:
+        if not result.is_orchestrator:
+            return self.calculate_score(result.issues)[0]
+        total_f = sum(s.files_reviewed for s in result.sub_results)
+        return sum(
+            (s.files_reviewed / max(1, total_f)) * self.calculate_score(s.issues)[0]
+            for s in result.sub_results
+        )
+
+    def _final_sector_row(self, result: SectorResult, score: float, status: str) -> str:
+        paths_str = ", ".join(result.scope_paths)
+        return (
+            f"| {result.sector_id} {result.sector_name} | {paths_str} | "
+            f"{result.files_reviewed} | {result.total_loc} | {score:.1f} | {status} |"
+        )
 
     def review_sector(
         self, sector: dict[str, Any], is_l3: bool = False
@@ -1257,23 +1412,15 @@ class ReviewOrchestrator:
         sector_name = sector["name"]
         paths = sector["paths"]
 
-        file_exts = {".py"}
-        if sector_id.startswith("S7"):
-            file_exts = {".yaml", ".yml"}
-        elif sector_id.startswith("S8"):
-            file_exts = {".md"}
+        file_exts = self._sector_file_extensions(sector_id)
 
         total_files, total_loc, file_paths = self.count_files_and_loc(paths, file_exts)
 
-        # Scaling threshold check
-        threshold_files = 40
-        if sector_id.startswith("S7"):
-            threshold_files = 20
-        elif sector_id.startswith("S8"):
-            threshold_files = 30
-
-        needs_delegation = not is_l3 and (
-            total_files > threshold_files or total_loc > LOC_THRESHOLD
+        needs_delegation = self._needs_sector_delegation(
+            sector_id,
+            total_files,
+            total_loc,
+            is_l3=is_l3,
         )
 
         result = SectorResult(
@@ -1285,27 +1432,50 @@ class ReviewOrchestrator:
         )
 
         if needs_delegation:
-            # L2 Orchestrator mode
             subsectors = self.determine_subsectors(sector_id, paths)
             for sub in subsectors:
                 sub_result = self.review_sector(sub, is_l3=True)
                 result.sub_results.append(sub_result)
             self.write_orchestrator_report(result)
         else:
-            # Worker mode
             for filepath in file_paths:
-                if filepath.suffix == ".py":
-                    issues = self.analyze_python_file(filepath, sector_id)
-                    result.issues.extend(issues)
-                elif filepath.suffix in (".yaml", ".yml"):
-                    issues = self.analyze_yaml_file(filepath, sector_id)
-                    result.issues.extend(issues)
-                elif filepath.suffix == ".md":
-                    issues = self.analyze_markdown_file(filepath, sector_id)
-                    result.issues.extend(issues)
+                result.issues.extend(self._analyze_sector_file(filepath, sector_id))
             self.write_worker_report(result)
 
         return result
+
+    def _sector_file_extensions(self, sector_id: str) -> set[str]:
+        if sector_id.startswith("S7"):
+            return {".yaml", ".yml"}
+        if sector_id.startswith("S8"):
+            return {".md"}
+        return {".py"}
+
+    def _needs_sector_delegation(
+        self,
+        sector_id: str,
+        total_files: int,
+        total_loc: int,
+        *,
+        is_l3: bool,
+    ) -> bool:
+        if is_l3:
+            return False
+        threshold_files = 40
+        if sector_id.startswith("S7"):
+            threshold_files = 20
+        elif sector_id.startswith("S8"):
+            threshold_files = 30
+        return total_files > threshold_files or total_loc > LOC_THRESHOLD
+
+    def _analyze_sector_file(self, filepath: Path, sector_id: str) -> list[Issue]:
+        if filepath.suffix == ".py":
+            return self.analyze_python_file(filepath, sector_id)
+        if filepath.suffix in (".yaml", ".yml"):
+            return self.analyze_yaml_file(filepath, sector_id)
+        if filepath.suffix == ".md":
+            return self.analyze_markdown_file(filepath, sector_id)
+        return []
 
     def run(self) -> None:
         print("Starting hierarchical code review...")

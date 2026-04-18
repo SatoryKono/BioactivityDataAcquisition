@@ -17,7 +17,7 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 921,
+      "imports": 920,
       "allowed": true
     },
     {
@@ -59,7 +59,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 871,
+      "imports": 872,
       "allowed": true
     },
     {
@@ -122,7 +122,7 @@
     {
       "source": "application.composite",
       "target": "domain.ports",
-      "imports": 64
+      "imports": 63
     },
     {
       "source": "application.core",

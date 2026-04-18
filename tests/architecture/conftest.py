@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import pickle
 import subprocess
+import tempfile
 
 import pytest
 import yaml
@@ -47,8 +48,32 @@ def _cache_dir(project_root: Path) -> Path:
         # Isolate per-worker cache writes under xdist to avoid file lock contention
         # on Windows when multiple workers update the same pickle files.
         cache_dir = cache_dir / worker_id
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    return cache_dir
+    if _ensure_cache_dir_writable(cache_dir):
+        return cache_dir
+
+    project_key = hashlib.blake2b(
+        str(project_root).encode("utf-8"),
+        digest_size=8,
+    ).hexdigest()
+    fallback_dir = (
+        Path(tempfile.gettempdir()) / "bioetl_architecture_cache" / project_key
+    )
+    if worker_id:
+        fallback_dir = fallback_dir / worker_id
+    fallback_dir.mkdir(parents=True, exist_ok=True)
+    return fallback_dir
+
+
+def _ensure_cache_dir_writable(path: Path) -> bool:
+    """Return True when the cache directory exists and accepts a tiny probe write."""
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        probe = path / ".write_probe"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink()
+        return True
+    except OSError:
+        return False
 
 
 def _cache_key(path: Path) -> str:

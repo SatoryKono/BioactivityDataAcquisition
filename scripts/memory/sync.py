@@ -20,7 +20,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timezone
 from pathlib import Path
-from typing import Callable, TypeAlias, TypeVar
+from typing import Callable, TypeAlias, TypeVar, cast
 from urllib import error, parse, request
 
 import yaml
@@ -1070,17 +1070,7 @@ def _filtered_snapshot(
     selection: SnapshotSelection | None = None,
     **legacy_selection: object,
 ) -> GraphSnapshot:
-    if selection is None:
-        selection = SnapshotSelection(
-            only_labels=tuple(legacy_selection.get("only_labels", ())),
-            only_analysis_layer=bool(legacy_selection.get("only_analysis_layer", False)),
-            only_retirement_layer=bool(legacy_selection.get("only_retirement_layer", False)),
-            only_complexity_layer=bool(legacy_selection.get("only_complexity_layer", False)),
-            only_storage_layer=bool(legacy_selection.get("only_storage_layer", False)),
-            only_runtime_evidence_layer=bool(legacy_selection.get("only_runtime_evidence_layer", False)),
-            only_workflow_graph=bool(legacy_selection.get("only_workflow_graph", False)),
-            only_docs_drift=bool(legacy_selection.get("only_docs_drift", False)),
-        )
+    selection = _resolved_snapshot_selection(selection, legacy_selection)
     shard_filters = _selected_shard_filters(selection)
     allowed_labels = _build_allowed_labels(
         selection,
@@ -1096,23 +1086,79 @@ def _filtered_snapshot(
     _seed_filtered_nodes(filtered, snapshot, allowed_labels, has_shard_filters=has_shard_filters)
 
     for rel_key, relation in snapshot.relations.items():
-        if _include_analysis_relation(
+        _include_filtered_relation(
             filtered,
+            snapshot,
             rel_key,
             relation,
             allowed_labels=allowed_labels,
             allowed_analysis_relation_types=allowed_analysis_relation_types,
             label_scoped_only=label_scoped_only,
             selection=selection,
-        ):
-            continue
-        if has_shard_filters and _relation_matches_shard_filters(relation, shard_filters):
-            _include_shard_relation_nodes(filtered, snapshot, relation)
-            filtered.relations[rel_key] = relation
-            continue
-        if not has_shard_filters and relation.source.label in allowed_labels and relation.target.label in allowed_labels:
-            filtered.relations[rel_key] = relation
+            has_shard_filters=has_shard_filters,
+            shard_filters=shard_filters,
+        )
     return filtered
+
+
+def _resolved_snapshot_selection(
+    selection: SnapshotSelection | None,
+    legacy_selection: dict[str, object],
+) -> SnapshotSelection:
+    if selection is not None:
+        return selection
+    return SnapshotSelection(
+        only_labels=tuple(legacy_selection.get("only_labels", ())),
+        only_analysis_layer=bool(legacy_selection.get("only_analysis_layer", False)),
+        only_retirement_layer=bool(legacy_selection.get("only_retirement_layer", False)),
+        only_complexity_layer=bool(legacy_selection.get("only_complexity_layer", False)),
+        only_storage_layer=bool(legacy_selection.get("only_storage_layer", False)),
+        only_runtime_evidence_layer=bool(legacy_selection.get("only_runtime_evidence_layer", False)),
+        only_workflow_graph=bool(legacy_selection.get("only_workflow_graph", False)),
+        only_docs_drift=bool(legacy_selection.get("only_docs_drift", False)),
+    )
+
+
+def _include_filtered_relation(
+    filtered: GraphSnapshot,
+    snapshot: GraphSnapshot,
+    rel_key: RelationKey,
+    relation: GraphRelation,
+    *,
+    allowed_labels: set[str],
+    allowed_analysis_relation_types: set[str],
+    label_scoped_only: bool,
+    selection: SnapshotSelection,
+    has_shard_filters: bool,
+    shard_filters: tuple[ShardFilter, ...],
+) -> None:
+    if _include_analysis_relation(
+        filtered,
+        rel_key,
+        relation,
+        allowed_labels=allowed_labels,
+        allowed_analysis_relation_types=allowed_analysis_relation_types,
+        label_scoped_only=label_scoped_only,
+        selection=selection,
+    ):
+        return
+    if has_shard_filters:
+        _include_shard_filtered_relation(filtered, snapshot, rel_key, relation, shard_filters)
+        return
+    if relation.source.label in allowed_labels and relation.target.label in allowed_labels:
+        filtered.relations[rel_key] = relation
+
+
+def _include_shard_filtered_relation(
+    filtered: GraphSnapshot,
+    snapshot: GraphSnapshot,
+    rel_key: RelationKey,
+    relation: GraphRelation,
+    shard_filters: tuple[ShardFilter, ...],
+) -> None:
+    if _relation_matches_shard_filters(relation, shard_filters):
+        _include_shard_relation_nodes(filtered, snapshot, relation)
+        filtered.relations[rel_key] = relation
 
 
 @dataclass(frozen=True)
@@ -3465,6 +3511,16 @@ def _add_summary_table_identifiers(
 
 
 def _add_decisions_and_risks(snapshot: GraphSnapshot, root: Path, project: NodeKey, today: str) -> None:
+    _add_package_topology_decisions_and_risks(snapshot, root, project, today)
+    _add_governance_decisions_and_risks(snapshot, root, project, today)
+
+
+def _add_package_topology_decisions_and_risks(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+) -> None:
     package_summary, package_doc = _evidence_summary_doc(
         snapshot,
         root,
@@ -3472,29 +3528,34 @@ def _add_decisions_and_risks(snapshot: GraphSnapshot, root: Path, project: NodeK
         path="docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md",
         summary="Accepted package topology decisions and risks.",
     )
-    _add_summary_identifiers(
-        snapshot,
-        project,
-        today,
-        doc=package_doc,
-        provenance="package_topology_summary",
-        identifier_kind="decision",
-        matches=_summary_identifier_matches(package_summary, r"DEC-[a-z0-9-]+"),
-        summary="Accepted package-topology decision.",
-        source_path=_rel_path(root, package_summary),
-    )
-    _add_summary_identifiers(
-        snapshot,
-        project,
-        today,
-        doc=package_doc,
-        provenance="package_topology_summary",
-        identifier_kind="risk",
-        matches=_summary_identifier_matches(package_summary, r"RISK-[a-z0-9-]+"),
-        summary="Package-topology risk captured in evidence decisions.",
-        source_path=_rel_path(root, package_summary),
+    source_path = _rel_path(root, package_summary)
+    for identifier_kind, pattern, summary in _package_topology_summary_specs():
+        _add_summary_identifiers(
+            snapshot,
+            project,
+            today,
+            doc=package_doc,
+            provenance="package_topology_summary",
+            identifier_kind=identifier_kind,
+            matches=_summary_identifier_matches(package_summary, pattern),
+            summary=summary,
+            source_path=source_path,
+        )
+
+
+def _package_topology_summary_specs() -> tuple[tuple[str, str, str], ...]:
+    return (
+        ("decision", r"DEC-[a-z0-9-]+", "Accepted package-topology decision."),
+        ("risk", r"RISK-[a-z0-9-]+", "Package-topology risk captured in evidence decisions."),
     )
 
+
+def _add_governance_decisions_and_risks(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+) -> None:
     governance_summary, governance_doc = _evidence_summary_doc(
         snapshot,
         root,
@@ -3503,25 +3564,24 @@ def _add_decisions_and_risks(snapshot: GraphSnapshot, root: Path, project: NodeK
         summary="Accepted governance decisions and associated risks.",
     )
     governance_text = _read_text(governance_summary)
-    _add_summary_table_identifiers(
-        snapshot,
-        project,
-        today,
-        doc=governance_doc,
-        provenance="governance_summary",
-        identifier_kind="decision",
-        rows=_summary_table_rows(governance_text, "DEC"),
-        source_path=_rel_path(root, governance_summary),
-    )
-    _add_summary_table_identifiers(
-        snapshot,
-        project,
-        today,
-        doc=governance_doc,
-        provenance="governance_summary",
-        identifier_kind="risk",
-        rows=_summary_table_rows(governance_text, "RISK"),
-        source_path=_rel_path(root, governance_summary),
+    source_path = _rel_path(root, governance_summary)
+    for identifier_kind, prefix in _governance_summary_table_specs():
+        _add_summary_table_identifiers(
+            snapshot,
+            project,
+            today,
+            doc=governance_doc,
+            provenance="governance_summary",
+            identifier_kind=identifier_kind,
+            rows=_summary_table_rows(governance_text, prefix),
+            source_path=source_path,
+        )
+
+
+def _governance_summary_table_specs() -> tuple[tuple[str, str], ...]:
+    return (
+        ("decision", "DEC"),
+        ("risk", "RISK"),
     )
 
 
@@ -5631,35 +5691,16 @@ def _add_entity_storage_layer(
     field_nodes_by_layer: dict[str, dict[str, NodeKey]],
 ) -> None:
     layer_config = _merge_storage_layer_config(base_sink, pipeline_sink, layer_name)
-    enabled = bool(layer_config.get("enabled", True))
-    if layer_name == "gold" and not enabled:
+    if _skip_entity_storage_layer(layer_name, layer_config):
         return
-    storage_ref = f"{layer_name}/{context.provider_name}/{context.entity_name}"
-    surface = _add_storage_surface(
+    surface = _create_entity_storage_layer_surface(
         snapshot,
         project,
-        StorageSurfaceSpec(
-            ref=storage_ref,
-            summary=f"{layer_name.title()} storage surface for `{context.pipeline_name}`.",
-            layer=layer_name,
-            today=context.today,
-            storage_kind="entity_layer_output",
-            scope=scope,
-            format_name=str(layer_config.get("format")) if layer_config.get("format") is not None else None,
-            mode=str(layer_config.get("mode")) if layer_config.get("mode") is not None else None,
-            enabled=enabled,
-            retention_days=context.retention_days,
-            config_version=context.config_version,
-            quality_version=context.quality_version,
-            partition_by=_normalized_text_list(layer_config.get("partition_by")),
-            sort_by=_normalized_text_list(layer_config.get("sort_by")),
-            on_schema_mismatch=_optional_text(layer_config.get("on_schema_mismatch")),
-            versioning_mode=_optional_text(layer_config.get("mode")),
-            semantic_properties={
-                **_scd_config_columns(layer_config),
-                **_storage_schema_properties(payload, layer_name=layer_name),
-            },
-        ),
+        context,
+        payload,
+        scope=scope,
+        layer_name=layer_name,
+        layer_config=layer_config,
     )
     layer_nodes[layer_name] = surface
     _link_entity_storage_layer_backing(snapshot, context, surface)
@@ -5673,6 +5714,49 @@ def _add_entity_storage_layer(
             layer_name=layer_name,
             quality_index=quality_index,
             layer_config=layer_config,
+        ),
+    )
+
+
+def _skip_entity_storage_layer(layer_name: str, layer_config: dict[str, object]) -> bool:
+    return layer_name == "gold" and not bool(layer_config.get("enabled", True))
+
+
+def _create_entity_storage_layer_surface(
+    snapshot: GraphSnapshot,
+    project: NodeKey,
+    context: EntityPipelineContext,
+    payload: dict[str, object],
+    *,
+    scope: EntityScope,
+    layer_name: str,
+    layer_config: dict[str, object],
+) -> NodeKey:
+    storage_ref = f"{layer_name}/{context.provider_name}/{context.entity_name}"
+    return _add_storage_surface(
+        snapshot,
+        project,
+        StorageSurfaceSpec(
+            ref=storage_ref,
+            summary=f"{layer_name.title()} storage surface for `{context.pipeline_name}`.",
+            layer=layer_name,
+            today=context.today,
+            storage_kind="entity_layer_output",
+            scope=scope,
+            format_name=str(layer_config.get("format")) if layer_config.get("format") is not None else None,
+            mode=str(layer_config.get("mode")) if layer_config.get("mode") is not None else None,
+            enabled=bool(layer_config.get("enabled", True)),
+            retention_days=context.retention_days,
+            config_version=context.config_version,
+            quality_version=context.quality_version,
+            partition_by=_normalized_text_list(layer_config.get("partition_by")),
+            sort_by=_normalized_text_list(layer_config.get("sort_by")),
+            on_schema_mismatch=_optional_text(layer_config.get("on_schema_mismatch")),
+            versioning_mode=_optional_text(layer_config.get("mode")),
+            semantic_properties={
+                **_scd_config_columns(layer_config),
+                **_storage_schema_properties(payload, layer_name=layer_name),
+            },
         ),
     )
 
@@ -6219,87 +6303,139 @@ def _composite_storage_context(
     return context, composite_payload, composite_payload.get("dependencies")
 
 
+CONTROL_PLANE_LEDGER_DOCS = (
+    RUN_MANIFEST_LEDGER_DOC_PATH,
+    RUN_MANIFEST_INSPECTION_DOC_PATH,
+    "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
+)
+
+RUN_MANIFEST_RUNTIME_MODULES = (
+    "src/bioetl/domain/control_plane/run_manifest.py",
+    "src/bioetl/application/services/run_manifest_service.py",
+    "src/bioetl/application/services/run_manifest_diagnostics.py",
+    "src/bioetl/application/services/run_manifest_inspection_service.py",
+    "src/bioetl/interfaces/cli/commands/run_manifest.py",
+    "src/bioetl/composition/bootstrap/cli/run_manifest.py",
+    "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
+)
+
+RUN_LEDGER_RUNTIME_MODULES = (
+    "src/bioetl/domain/control_plane/run_ledger.py",
+    "src/bioetl/application/services/run_ledger_service.py",
+)
+
+EFFECTIVE_CONFIG_RUNTIME_MODULES = (
+    "src/bioetl/domain/control_plane/effective_config_artifact.py",
+    "src/bioetl/composition/services/effective_config_serializer.py",
+    "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
+)
+
+LINEAGE_RUNTIME_MODULES = (
+    "src/bioetl/application/services/lineage_inspection_service.py",
+    "src/bioetl/composition/bootstrap/cli/lineage.py",
+    "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+)
+
+RUNTIME_EVIDENCE_DEFINITIONS = (
+    (
+        "run_manifest",
+        "Control-plane runtime evidence for immutable run manifests.",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
+        CONTROL_PLANE_LEDGER_DOCS,
+        RUN_MANIFEST_RUNTIME_MODULES,
+        (
+            (f"control/run_manifest/{MANIFEST_ID_TEMPLATE}.json", "json", MANIFEST_ID_TEMPLATE),
+            (f"control/run_manifest/_by_run_id/{RUN_ID_TEMPLATE}.txt", "run_index", RUN_ID_TEMPLATE),
+        ),
+    ),
+    (
+        "run_ledger",
+        "Control-plane runtime evidence for append-only run ledgers.",
+        RUN_MANIFEST_LEDGER_DOC_PATH,
+        CONTROL_PLANE_LEDGER_DOCS,
+        RUN_LEDGER_RUNTIME_MODULES,
+        (
+            (f"control/run_ledger/{MANIFEST_ID_TEMPLATE}.jsonl", "jsonl", MANIFEST_ID_TEMPLATE),
+            (f"control/run_ledger/_by_run_id/{RUN_ID_TEMPLATE}.txt", "run_index", RUN_ID_TEMPLATE),
+        ),
+    ),
+    (
+        "effective_config_artifact",
+        "Runtime evidence for effective configuration artifacts and hashes.",
+        "docs/04-reference/components/config-runtime-artifacts.md",
+        (
+            "docs/04-reference/components/config-runtime-artifacts.md",
+            RUN_MANIFEST_INSPECTION_DOC_PATH,
+        ),
+        EFFECTIVE_CONFIG_RUNTIME_MODULES,
+        (
+            ("control/effective_config/{artifact_id}.json", "json", "{artifact_id}"),
+            (f"control/effective_config/_by_run_id/{RUN_ID_TEMPLATE}.txt", "run_index", RUN_ID_TEMPLATE),
+        ),
+    ),
+    (
+        "lineage",
+        "Runtime evidence for artifact lineage and inspection surfaces.",
+        TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
+        (
+            TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
+            RUN_MANIFEST_LEDGER_DOC_PATH,
+        ),
+        LINEAGE_RUNTIME_MODULES,
+        (
+            ("control/lineage/fragments/{fragment_hash}.json", "fragment", "{fragment_id}"),
+            ("control/lineage/_by_run_id/{run_id_hash}.jsonl", "run_index", RUN_ID_TEMPLATE),
+            ("control/lineage/_by_manifest_id/{manifest_id_hash}.jsonl", "manifest_index", MANIFEST_ID_TEMPLATE),
+            ("control/lineage/_by_node_id/{node_id_hash}.jsonl", "node_index", "{node_id}"),
+        ),
+    ),
+)
+
+
+def _runtime_evidence_spec(
+    *,
+    name: str,
+    summary: str,
+    source_path: str,
+    docs: tuple[str, ...],
+    modules: tuple[str, ...],
+    storage_refs: tuple[tuple[str, str, str], ...],
+) -> dict[str, object]:
+    return {
+        "name": name,
+        "summary": summary,
+        "source_path": source_path,
+        "docs": docs,
+        "modules": modules,
+        "storage_refs": storage_refs,
+    }
+
+
+def _runtime_evidence_definition_spec(
+    definition: tuple[
+        str,
+        str,
+        str,
+        tuple[str, ...],
+        tuple[str, ...],
+        tuple[tuple[str, str, str], ...],
+    ],
+) -> dict[str, object]:
+    name, summary, source_path, docs, modules, storage_refs = definition
+    return _runtime_evidence_spec(
+        name=name,
+        summary=summary,
+        source_path=source_path,
+        docs=docs,
+        modules=modules,
+        storage_refs=storage_refs,
+    )
+
+
 def _control_plane_runtime_evidence_specs() -> tuple[dict[str, object], ...]:
-    return (
-        {
-            "name": "run_manifest",
-            "summary": "Control-plane runtime evidence for immutable run manifests.",
-            "source_path": RUN_MANIFEST_LEDGER_DOC_PATH,
-            "docs": (
-                RUN_MANIFEST_LEDGER_DOC_PATH,
-                RUN_MANIFEST_INSPECTION_DOC_PATH,
-                "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
-            ),
-            "modules": (
-                "src/bioetl/domain/control_plane/run_manifest.py",
-                "src/bioetl/application/services/run_manifest_service.py",
-                "src/bioetl/application/services/run_manifest_diagnostics.py",
-                "src/bioetl/application/services/run_manifest_inspection_service.py",
-                "src/bioetl/interfaces/cli/commands/run_manifest.py",
-                "src/bioetl/composition/bootstrap/cli/run_manifest.py",
-                "src/bioetl/composition/runtime_builders/run_manifest_builder.py",
-            ),
-            "storage_refs": (
-                (f"control/run_manifest/{MANIFEST_ID_TEMPLATE}.json", "json", MANIFEST_ID_TEMPLATE),
-                (f"control/run_manifest/_by_run_id/{RUN_ID_TEMPLATE}.txt", "run_index", RUN_ID_TEMPLATE),
-            ),
-        },
-        {
-            "name": "run_ledger",
-            "summary": "Control-plane runtime evidence for append-only run ledgers.",
-            "source_path": RUN_MANIFEST_LEDGER_DOC_PATH,
-            "docs": (
-                RUN_MANIFEST_LEDGER_DOC_PATH,
-                RUN_MANIFEST_INSPECTION_DOC_PATH,
-                "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
-            ),
-            "modules": (
-                "src/bioetl/domain/control_plane/run_ledger.py",
-                "src/bioetl/application/services/run_ledger_service.py",
-            ),
-            "storage_refs": (
-                (f"control/run_ledger/{MANIFEST_ID_TEMPLATE}.jsonl", "jsonl", MANIFEST_ID_TEMPLATE),
-                (f"control/run_ledger/_by_run_id/{RUN_ID_TEMPLATE}.txt", "run_index", RUN_ID_TEMPLATE),
-            ),
-        },
-        {
-            "name": "effective_config_artifact",
-            "summary": "Runtime evidence for effective configuration artifacts and hashes.",
-            "source_path": "docs/04-reference/components/config-runtime-artifacts.md",
-            "docs": (
-                "docs/04-reference/components/config-runtime-artifacts.md",
-                RUN_MANIFEST_INSPECTION_DOC_PATH,
-            ),
-            "modules": (
-                "src/bioetl/domain/control_plane/effective_config_artifact.py",
-                "src/bioetl/composition/services/effective_config_serializer.py",
-                "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
-            ),
-            "storage_refs": (
-                ("control/effective_config/{artifact_id}.json", "json", "{artifact_id}"),
-                (f"control/effective_config/_by_run_id/{RUN_ID_TEMPLATE}.txt", "run_index", RUN_ID_TEMPLATE),
-            ),
-        },
-        {
-            "name": "lineage",
-            "summary": "Runtime evidence for artifact lineage and inspection surfaces.",
-            "source_path": TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
-            "docs": (
-                TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
-                RUN_MANIFEST_LEDGER_DOC_PATH,
-            ),
-            "modules": (
-                "src/bioetl/application/services/lineage_inspection_service.py",
-                "src/bioetl/composition/bootstrap/cli/lineage.py",
-                "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
-            ),
-            "storage_refs": (
-                ("control/lineage/fragments/{fragment_hash}.json", "fragment", "{fragment_id}"),
-                ("control/lineage/_by_run_id/{run_id_hash}.jsonl", "run_index", RUN_ID_TEMPLATE),
-                ("control/lineage/_by_manifest_id/{manifest_id_hash}.jsonl", "manifest_index", MANIFEST_ID_TEMPLATE),
-                ("control/lineage/_by_node_id/{node_id_hash}.jsonl", "node_index", "{node_id}"),
-            ),
-        },
+    return tuple(
+        _runtime_evidence_definition_spec(definition)
+        for definition in RUNTIME_EVIDENCE_DEFINITIONS
     )
 
 
@@ -6446,92 +6582,103 @@ def _storage_surface_format(snapshot: GraphSnapshot, storage: NodeKey) -> str | 
     return str(format_value) if format_value is not None else None
 
 
-def _control_plane_run_instance_specs() -> tuple[dict[str, object], ...]:
-    return (
+def _run_instance_fixture_spec(
+    *,
+    manifest_id: str,
+    run_id: str,
+    source_path: str,
+    doc_paths: tuple[str, ...],
+    artifact_refs: tuple[str, ...],
+    **extra: object,
+) -> dict[str, object]:
+    spec = {
+        "manifest_id": manifest_id,
+        "run_id": run_id,
+        "source_path": source_path,
+        "doc_paths": doc_paths,
+        "artifact_refs": artifact_refs,
+    }
+    spec.update(extra)
+    return spec
+
+
+RUN_INSTANCE_PRIMARY_DOCS = (RUN_MANIFEST_LEDGER_DOC_PATH,)
+RUN_INSTANCE_CHAIN_DOCS = (
+    RUN_MANIFEST_LEDGER_DOC_PATH,
+    RUN_MANIFEST_INSPECTION_DOC_PATH,
+)
+RUN_INSTANCE_TRACEABILITY_DOCS = (
+    RUN_MANIFEST_LEDGER_DOC_PATH,
+    TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
+)
+RUN_INSTANCE_PRIMARY_ARTIFACT_REFS = (
+    RUN_MANIFEST_ARTIFACT_REF,
+    EFFECTIVE_CONFIG_ARTIFACT_REF,
+)
+RUN_INSTANCE_CHAIN_ARTIFACT_REFS = (
+    RUN_MANIFEST_ARTIFACT_REF,
+    RUN_LEDGER_ARTIFACT_REF,
+    EFFECTIVE_CONFIG_ARTIFACT_REF,
+)
+RUN_INSTANCE_SPECS = (
+    (
+        "manifest-left",
+        "00000000-0000-0000-0000-000000000301",
+        "tests/integration/ci/test_reproducibility_contract_suite.py",
+        RUN_INSTANCE_PRIMARY_DOCS,
+        RUN_INSTANCE_PRIMARY_ARTIFACT_REFS,
         {
-            "manifest_id": "manifest-left",
-            "run_id": "00000000-0000-0000-0000-000000000301",
-            "pipeline_name": "chembl_activity",
-            "provider": "chembl",
-            "entity": "activity",
-            "run_type": "incremental",
             "execution_fingerprint": "fp-stable",
             "created_at": "2025-01-01T00:00:00+00:00",
-            "contract_ref": CHEMBL_ACTIVITY_CONTRACT_REF,
-            "contract_version": "1.0.0",
             "effective_config_artifact_id": "eca-123",
             "config_hash": "deadbeef",
             "replay_capability": "rebuild_only",
             "surface_kind": "reproducibility_fixture",
             "lifecycle_status": "fixture_manifest_only",
-            "source_path": "tests/integration/ci/test_reproducibility_contract_suite.py",
-            "doc_paths": (RUN_MANIFEST_LEDGER_DOC_PATH,),
-            "artifact_refs": (RUN_MANIFEST_ARTIFACT_REF, EFFECTIVE_CONFIG_ARTIFACT_REF),
         },
+    ),
+    (
+        "manifest-chain-smoke",
+        "00000000-0000-0000-0000-000000000103",
+        "tests/unit/application/services/test_run_manifest_inspection_service.py",
+        RUN_INSTANCE_CHAIN_DOCS,
+        (
+            *RUN_INSTANCE_CHAIN_ARTIFACT_REFS,
+            "lineage::run_index",
+        ),
         {
-            "manifest_id": "manifest-chain-smoke",
-            "run_id": "00000000-0000-0000-0000-000000000103",
-            "pipeline_name": "chembl_activity",
-            "provider": "chembl",
-            "entity": "activity",
-            "run_type": "incremental",
-            "contract_ref": CHEMBL_ACTIVITY_CONTRACT_REF,
-            "contract_version": "1.0.0",
             "effective_config_artifact_id": "eca-smoke-1",
             "config_hash": "hash-smoke",
             "surface_kind": "lifecycle_smoke_fixture",
             "lifecycle_status": "success",
             "published_dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-smoke-1",
-            "source_path": "tests/unit/application/services/test_run_manifest_inspection_service.py",
-            "doc_paths": (
-                RUN_MANIFEST_LEDGER_DOC_PATH,
-                RUN_MANIFEST_INSPECTION_DOC_PATH,
-            ),
-            "artifact_refs": (
-                RUN_MANIFEST_ARTIFACT_REF,
-                RUN_LEDGER_ARTIFACT_REF,
-                EFFECTIVE_CONFIG_ARTIFACT_REF,
-                "lineage::run_index",
-            ),
         },
+    ),
+    (
+        "manifest-chain-2",
+        "00000000-0000-0000-0000-000000000102",
+        "tests/unit/application/services/test_run_manifest_inspection_service.py",
+        RUN_INSTANCE_TRACEABILITY_DOCS,
+        RUN_INSTANCE_CHAIN_ARTIFACT_REFS,
         {
-            "manifest_id": "manifest-chain-2",
-            "run_id": "00000000-0000-0000-0000-000000000102",
-            "pipeline_name": "chembl_activity",
-            "provider": "chembl",
-            "entity": "activity",
-            "run_type": "incremental",
-            "contract_ref": CHEMBL_ACTIVITY_CONTRACT_REF,
-            "contract_version": "1.0.0",
             "effective_config_artifact_id": "eca-chain-2",
             "surface_kind": "dq_failure_fixture",
             "lifecycle_status": "failed",
             "dq_disposition": "fail",
             "dq_rule_id": "gold.not_null.id",
             "dq_report_path": "data/output/gold/chembl/activity/_dq.json",
-            "source_path": "tests/unit/application/services/test_run_manifest_inspection_service.py",
-            "doc_paths": (
-                RUN_MANIFEST_LEDGER_DOC_PATH,
-                TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
-            ),
-            "artifact_refs": (
-                RUN_MANIFEST_ARTIFACT_REF,
-                RUN_LEDGER_ARTIFACT_REF,
-                EFFECTIVE_CONFIG_ARTIFACT_REF,
-            ),
         },
+    ),
+    (
+        "manifest-composite-quarantine",
+        "00000000-0000-0000-0000-000000000402",
+        "tests/integration/ci/test_reproducibility_contract_suite.py",
+        RUN_INSTANCE_TRACEABILITY_DOCS,
+        RUN_INSTANCE_CHAIN_ARTIFACT_REFS,
         {
-            "manifest_id": "manifest-composite-quarantine",
-            "run_id": "00000000-0000-0000-0000-000000000402",
-            "pipeline_name": "chembl_activity",
-            "provider": "chembl",
-            "entity": "activity",
-            "run_type": "incremental",
             "execution_fingerprint": "fp-stable",
             "created_at": "2025-01-01T00:00:00+00:00",
-            "contract_ref": CHEMBL_ACTIVITY_CONTRACT_REF,
-            "contract_version": "1.0.0",
             "effective_config_artifact_id": "eca-123",
             "config_hash": "deadbeef",
             "surface_kind": "cross_validation_quarantine_fixture",
@@ -6539,18 +6686,52 @@ def _control_plane_run_instance_specs() -> tuple[dict[str, object], ...]:
             "last_event_at": "2025-02-03T00:00:00+00:00",
             "replay_contract": "excluded_from_exact_replay",
             "diagnostic_scope": "composite_cross_validation_quarantine",
-            "source_path": "tests/integration/ci/test_reproducibility_contract_suite.py",
-            "doc_paths": (
-                RUN_MANIFEST_LEDGER_DOC_PATH,
-                TRACEABILITY_SIGNAL_OWNERSHIP_DOC_PATH,
-            ),
-            "artifact_refs": (
-                RUN_MANIFEST_ARTIFACT_REF,
-                RUN_LEDGER_ARTIFACT_REF,
-                EFFECTIVE_CONFIG_ARTIFACT_REF,
-            ),
         },
+    ),
+)
+
+
+def _chembl_activity_run_instance_fixture(
+    *,
+    manifest_id: str,
+    run_id: str,
+    source_path: str,
+    doc_paths: tuple[str, ...],
+    artifact_refs: tuple[str, ...],
+    **extra: object,
+) -> dict[str, object]:
+    return _run_instance_fixture_spec(
+        manifest_id=manifest_id,
+        run_id=run_id,
+        source_path=source_path,
+        doc_paths=doc_paths,
+        artifact_refs=artifact_refs,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        run_type="incremental",
+        contract_ref=CHEMBL_ACTIVITY_CONTRACT_REF,
+        contract_version="1.0.0",
+        **extra,
     )
+
+
+def _run_instance_definition_spec(
+    definition: tuple[str, str, str, tuple[str, ...], tuple[str, ...], dict[str, object]],
+) -> dict[str, object]:
+    manifest_id, run_id, source_path, doc_paths, artifact_refs, extra = definition
+    return _chembl_activity_run_instance_fixture(
+        manifest_id=manifest_id,
+        run_id=run_id,
+        source_path=source_path,
+        doc_paths=doc_paths,
+        artifact_refs=artifact_refs,
+        **extra,
+    )
+
+
+def _control_plane_run_instance_specs() -> tuple[dict[str, object], ...]:
+    return tuple(_run_instance_definition_spec(definition) for definition in RUN_INSTANCE_SPECS)
 
 
 def _add_run_instance_surface(
@@ -7487,7 +7668,51 @@ def _add_workflow_job_surface(
         secret_usage_hints,
     ) = _workflow_job_surface_metadata(job_payload)
     job_name = f"{context.workflow_name}::{job_id}"
-    job = snapshot.add_node(
+    job = _create_workflow_job_surface(
+        snapshot,
+        context,
+        job_name=job_name,
+        job_id=job_id,
+        job_payload=job_payload,
+        inline_run_step_count=inline_run_step_count,
+        uses_step_count=uses_step_count,
+        matrix_axes=matrix_axes,
+        matrix_variants=matrix_variants,
+        environment_name=environment_name,
+        secret_usage_hints=secret_usage_hints,
+        concurrency_group=concurrency_group,
+    )
+    snapshot.add_relation(context.workflow, "CONTAINS", job, provenance="workflow_graph")
+    return (
+        WorkflowJobContext(
+            workflow_name=context.workflow_name,
+            job_id=job_id,
+            job_name=job_name,
+            relative_path=context.relative_path,
+            today=context.today,
+            job=job,
+        ),
+        matrix_variants,
+        secret_usage_hints,
+    )
+
+
+def _create_workflow_job_surface(
+    snapshot: GraphSnapshot,
+    context: WorkflowContext,
+    *,
+    job_name: str,
+    job_id: str,
+    job_payload: dict[str, object],
+    inline_run_step_count: int,
+    uses_step_count: int,
+    matrix_axes: tuple[str, ...],
+    matrix_variants: tuple[dict[str, str], ...],
+    environment_name: str | None,
+    secret_usage_hints: tuple[str, ...],
+    concurrency_group: str | None,
+) -> NodeKey:
+    return snapshot.add_node(
         "workflow_job_surface",
         job_name,
         summary=f"GitHub Actions job `{job_id}` in workflow `{context.title}`.",
@@ -7506,19 +7731,6 @@ def _add_workflow_job_surface(
         last_verified=context.today,
         ingest_wave="repo_sync_v1",
         confidence="high",
-    )
-    snapshot.add_relation(context.workflow, "CONTAINS", job, provenance="workflow_graph")
-    return (
-        WorkflowJobContext(
-            workflow_name=context.workflow_name,
-            job_id=job_id,
-            job_name=job_name,
-            relative_path=context.relative_path,
-            today=context.today,
-            job=job,
-        ),
-        matrix_variants,
-        secret_usage_hints,
     )
 
 
@@ -8211,19 +8423,18 @@ def _add_doc_claim_edges(
     path_pattern: re.Pattern[str],
 ) -> None:
     for line_number, raw_line in enumerate(text.splitlines(), start=1):
-        stripped = raw_line.strip()
-        if not _is_claim_candidate(stripped):
+        claim_line = _claim_line_context(raw_line)
+        if claim_line is None:
             continue
         section_title, section_anchor = _claim_section_context(text, raw_line)
-        clean_text = stripped.lstrip("-*0123456789. ").strip()
         claim = snapshot.add_node(
             "doc_claim_surface",
             f"{source_path}#L{line_number}",
             summary=f"Claim extracted from `{source_path}`.",
             source_path=source_path,
             source_kind="doc_claim_surface",
-            claim_text=clean_text,
-            modality=_claim_modality(clean_text),
+            claim_text=claim_line.clean_text,
+            modality=_claim_modality(claim_line.clean_text),
             section_title=section_title,
             section_anchor=section_anchor,
             line_number=line_number,
@@ -8236,7 +8447,7 @@ def _add_doc_claim_edges(
             snapshot,
             claim,
             source_node,
-            stripped,
+            claim_line.stripped,
             section_title=section_title,
             section_anchor=section_anchor,
             line_number=line_number,
@@ -8245,7 +8456,7 @@ def _add_doc_claim_edges(
         claim_has_target = _add_claim_token_targets(
             snapshot,
             claim,
-            clean_text,
+            claim_line.clean_text,
             section_title=section_title,
             section_anchor=section_anchor,
             line_number=line_number,
@@ -8259,6 +8470,22 @@ def _add_doc_claim_edges(
                 section_anchor=section_anchor,
                 line_number=line_number,
             )
+
+
+@dataclass(frozen=True)
+class ClaimLineContext:
+    stripped: str
+    clean_text: str
+
+
+def _claim_line_context(raw_line: str) -> ClaimLineContext | None:
+    stripped = raw_line.strip()
+    if not _is_claim_candidate(stripped):
+        return None
+    return ClaimLineContext(
+        stripped=stripped,
+        clean_text=stripped.lstrip("-*0123456789. ").strip(),
+    )
 
 
 def _claim_section_context(text: str, raw_line: str) -> tuple[str | None, str | None]:
@@ -9592,37 +9819,24 @@ def _emit_duplication_clusters(
     min_cluster_size: int,
     min_ast_nodes: int,
 ) -> None:
-    grouped: dict[tuple[str, str, str], list[CallableDescriptor]] = {}
-    for descriptor in callable_descriptors.values():
-        if descriptor.ast_node_count < min_ast_nodes:
-            continue
-        grouped.setdefault((descriptor.family_name, descriptor.surface_kind, descriptor.ast_shape_hash), []).append(descriptor)
-    for (family_name, surface_kind, shape_hash), members in sorted(grouped.items()):
+    for (family_name, surface_kind, shape_hash), members in _duplication_cluster_groups(
+        callable_descriptors,
+        min_ast_nodes=min_ast_nodes,
+    ):
         if len(members) < min_cluster_size:
             continue
         unique_members = sorted(members, key=lambda item: item.node_key.name)
-        cluster = snapshot.add_node(
-            "duplication_cluster",
-            f"{family_name}:{surface_kind}:{shape_hash[:12]}",
-            summary=f"Potential duplicate logic cluster for `{family_name}` {surface_kind}.",
-            source_kind="semantic_duplication_cluster",
+        cluster = _add_duplication_cluster_node(
+            snapshot,
+            today=today,
             family_name=family_name,
             surface_kind=surface_kind,
-            duplicate_count=len(unique_members),
-            ast_shape_hash=shape_hash,
-            semantic_tags=sorted({tag for member in unique_members for tag in member.semantic_tags}),
-            promotion_score=round(min(0.99, 0.35 + (0.1 * len(unique_members))), 2),
-            last_verified=today,
-            ingest_wave="repo_sync_v1",
-            confidence="medium",
+            shape_hash=shape_hash,
+            unique_members=unique_members,
         )
         snapshot.add_relation(project, "CONTAINS", cluster, provenance="code_duplication")
-        for member in unique_members:
-            snapshot.add_relation(cluster, "CONTAINS", member.node_key, provenance="code_duplication")
-        for index, left in enumerate(unique_members):
-            for right in unique_members[index + 1 :]:
-                snapshot.add_relation(left.node_key, "SAME_SHAPE_AS", right.node_key, provenance="code_duplication")
-                snapshot.add_relation(right.node_key, "SAME_SHAPE_AS", left.node_key, provenance="code_duplication")
+        _link_duplication_cluster_members(snapshot, cluster, unique_members)
+        _link_same_shape_members(snapshot, unique_members)
         promotion_target = _duplication_promotion_target(snapshot, config, family_name, surface_kind, unique_members)
         if promotion_target is not None:
             snapshot.add_relation(cluster, "CAN_PROMOTE_TO", promotion_target, provenance="code_duplication")
@@ -9630,6 +9844,64 @@ def _emit_duplication_clusters(
         for relation in tuple(snapshot.relations.values()):
             if relation.relation_type == "TESTS_PACKAGE_FAMILY" and relation.target == package_family:
                 snapshot.add_relation(cluster, "COVERED_BY_TEST", relation.source, provenance="code_duplication")
+
+
+def _duplication_cluster_groups(
+    callable_descriptors: dict[NodeKey, CallableDescriptor],
+    *,
+    min_ast_nodes: int,
+) -> tuple[tuple[tuple[str, str, str], list[CallableDescriptor]], ...]:
+    grouped: dict[tuple[str, str, str], list[CallableDescriptor]] = {}
+    for descriptor in callable_descriptors.values():
+        if descriptor.ast_node_count < min_ast_nodes:
+            continue
+        grouped.setdefault((descriptor.family_name, descriptor.surface_kind, descriptor.ast_shape_hash), []).append(descriptor)
+    return tuple(sorted(grouped.items()))
+
+
+def _add_duplication_cluster_node(
+    snapshot: GraphSnapshot,
+    *,
+    today: str,
+    family_name: str,
+    surface_kind: str,
+    shape_hash: str,
+    unique_members: list[CallableDescriptor],
+) -> NodeKey:
+    return snapshot.add_node(
+        "duplication_cluster",
+        f"{family_name}:{surface_kind}:{shape_hash[:12]}",
+        summary=f"Potential duplicate logic cluster for `{family_name}` {surface_kind}.",
+        source_kind="semantic_duplication_cluster",
+        family_name=family_name,
+        surface_kind=surface_kind,
+        duplicate_count=len(unique_members),
+        ast_shape_hash=shape_hash,
+        semantic_tags=sorted({tag for member in unique_members for tag in member.semantic_tags}),
+        promotion_score=round(min(0.99, 0.35 + (0.1 * len(unique_members))), 2),
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="medium",
+    )
+
+
+def _link_duplication_cluster_members(
+    snapshot: GraphSnapshot,
+    cluster: NodeKey,
+    unique_members: list[CallableDescriptor],
+) -> None:
+    for member in unique_members:
+        snapshot.add_relation(cluster, "CONTAINS", member.node_key, provenance="code_duplication")
+
+
+def _link_same_shape_members(
+    snapshot: GraphSnapshot,
+    unique_members: list[CallableDescriptor],
+) -> None:
+    for index, left in enumerate(unique_members):
+        for right in unique_members[index + 1 :]:
+            snapshot.add_relation(left.node_key, "SAME_SHAPE_AS", right.node_key, provenance="code_duplication")
+            snapshot.add_relation(right.node_key, "SAME_SHAPE_AS", left.node_key, provenance="code_duplication")
 
 
 def _extract_code_duplication_surfaces(
@@ -9688,21 +9960,57 @@ def _add_retirement_analysis_surfaces(
     config = _retirement_analysis_config(memory_mapping, duplication_config)
     if not config.enabled or not config.family_names:
         return
-
-    label_sets = _retirement_analysis_label_sets()
-    indexes = _build_surface_relation_indexes(snapshot)
-    today_date = date.fromisoformat(today)
-    text_cache: dict[str, str] = {}
-    age_cache: dict[str, int | None] = {}
-    family_cache: dict[str, DuplicateFamilyConfig | None] = {}
+    context = _retirement_analysis_context(snapshot, config, today)
 
     candidate_nodes = _retirement_candidate_nodes(
         snapshot,
         duplication_config=duplication_config,
-        family_names=set(config.family_names),
-        family_cache=family_cache,
+        family_names=context["family_names"],
+        family_cache=context["family_cache"],
     )
+    _prime_retirement_age_cache(root, context["today_date"], context["age_cache"], candidate_nodes)
 
+    for node, source_path, family, module_key in candidate_nodes:
+        candidate_payload = _retirement_candidate_payload(
+            snapshot,
+            root,
+            node,
+            source_path,
+            module_key,
+            indexes=context["indexes"],
+            label_sets=context["label_sets"],
+            text_cache=context["text_cache"],
+            age_cache=context["age_cache"],
+            family_name=family.name,
+            config=config,
+        )
+        if candidate_payload is None:
+            continue
+        _emit_retirement_candidate(snapshot, project, today, config, node, candidate_payload)
+
+
+def _retirement_analysis_context(
+    snapshot: GraphSnapshot,
+    config: RetirementAnalysisConfig,
+    today: str,
+) -> dict[str, object]:
+    return {
+        "label_sets": _retirement_analysis_label_sets(),
+        "indexes": _build_surface_relation_indexes(snapshot),
+        "today_date": date.fromisoformat(today),
+        "text_cache": {},
+        "age_cache": {},
+        "family_cache": {},
+        "family_names": set(config.family_names),
+    }
+
+
+def _prime_retirement_age_cache(
+    root: Path,
+    today_date: date,
+    age_cache: dict[str, int | None],
+    candidate_nodes: list[tuple[GraphNode, str, DuplicateFamilyConfig, NodeKey]],
+) -> None:
     _git_last_commit_age_days_bulk(
         root,
         [source_path for _, source_path, _, _ in candidate_nodes],
@@ -9710,23 +10018,34 @@ def _add_retirement_analysis_surfaces(
         age_cache,
     )
 
-    for node, source_path, family, module_key in candidate_nodes:
-        candidate_payload = _evaluate_retirement_surface(
-            snapshot,
-            root,
-            node,
-            source_path,
-            module_key,
-            indexes=indexes,
-            label_sets=label_sets,
-            text_cache=text_cache,
-            age_cache=age_cache,
-            family_name=family.name,
-            config=config,
-        )
-        if candidate_payload is None:
-            continue
-        _emit_retirement_candidate(snapshot, project, today, config, node, candidate_payload)
+
+def _retirement_candidate_payload(
+    snapshot: GraphSnapshot,
+    root: Path,
+    node: GraphNode,
+    source_path: str,
+    module_key: NodeKey,
+    *,
+    indexes: SurfaceRelationIndexes,
+    label_sets: AnalysisLabelSets,
+    text_cache: dict[str, str],
+    age_cache: dict[str, int | None],
+    family_name: str,
+    config: RetirementAnalysisConfig,
+) -> dict[str, object] | None:
+    return _evaluate_retirement_surface(
+        snapshot,
+        root,
+        node,
+        source_path,
+        module_key,
+        indexes=indexes,
+        label_sets=label_sets,
+        text_cache=text_cache,
+        age_cache=age_cache,
+        family_name=family_name,
+        config=config,
+    )
 
 
 def _retirement_analysis_label_sets() -> AnalysisLabelSets:
@@ -9793,33 +10112,85 @@ def _evaluate_retirement_surface(
         module_key,
         label_sets,
     )
-    runtime_count = len(anchors.runtime)
-    config_count = len(anchors.config)
-    doc_count = len(anchors.docs)
-    test_count = len(anchors.tests)
+    anchor_counts = _analysis_anchor_counts(anchors)
     source_text = _analysis_read_source_text(root, source_path, text_cache)
-    wip_markers = sorted({marker for marker in config.wip_markers if marker in source_text})
-    deprecation_markers = sorted({marker for marker in config.deprecation_markers if marker in source_text})
+    wip_markers, deprecation_markers = _retirement_marker_sets(config, source_text)
     recent_age_days = age_cache.get(source_path)
     cycle_score, deletion_score, only_test_referenced = _retirement_scores(
         config,
-        RetirementScoreInputs(
-            runtime_count=runtime_count,
-            config_count=config_count,
-            doc_count=doc_count,
-            test_count=test_count,
+        _retirement_score_inputs(
+            anchor_counts,
             recent_age_days=recent_age_days,
             wip_markers=wip_markers,
             deprecation_markers=deprecation_markers,
         ),
     )
+    return _retirement_surface_payload(
+        family_name=family_name,
+        anchors=anchors,
+        anchor_counts=anchor_counts,
+        wip_markers=wip_markers,
+        deprecation_markers=deprecation_markers,
+        recent_age_days=recent_age_days,
+        cycle_score=cycle_score,
+        deletion_score=deletion_score,
+        only_test_referenced=only_test_referenced,
+    )
+
+
+def _retirement_marker_sets(
+    config: RetirementAnalysisConfig,
+    source_text: str,
+) -> tuple[list[str], list[str]]:
+    return (
+        sorted({marker for marker in config.wip_markers if marker in source_text}),
+        sorted({marker for marker in config.deprecation_markers if marker in source_text}),
+    )
+
+
+def _retirement_score_inputs(
+    anchor_counts: dict[str, int],
+    *,
+    recent_age_days: int | None,
+    wip_markers: list[str],
+    deprecation_markers: list[str],
+) -> RetirementScoreInputs:
+    return RetirementScoreInputs(
+        runtime_count=anchor_counts["runtime_count"],
+        config_count=anchor_counts["config_count"],
+        doc_count=anchor_counts["doc_count"],
+        test_count=anchor_counts["test_count"],
+        recent_age_days=recent_age_days,
+        wip_markers=wip_markers,
+        deprecation_markers=deprecation_markers,
+    )
+
+
+def _analysis_anchor_counts(anchors: SurfaceAnchorSets) -> dict[str, int]:
+    return {
+        "runtime_count": len(anchors.runtime),
+        "config_count": len(anchors.config),
+        "doc_count": len(anchors.docs),
+        "test_count": len(anchors.tests),
+    }
+
+
+def _retirement_surface_payload(
+    *,
+    family_name: str,
+    anchors: SurfaceAnchorSets,
+    anchor_counts: dict[str, int],
+    wip_markers: list[str],
+    deprecation_markers: list[str],
+    recent_age_days: int | None,
+    cycle_score: int,
+    deletion_score: int,
+    only_test_referenced: bool,
+) -> dict[str, object]:
     return {
         "family_name": family_name,
         "anchors": anchors,
-        "runtime_count": runtime_count,
-        "config_count": config_count,
-        "doc_count": doc_count,
-        "test_count": test_count,
+        **anchor_counts,
         "wip_markers": wip_markers,
         "deprecation_markers": deprecation_markers,
         "recent_age_days": recent_age_days,
@@ -9839,10 +10210,6 @@ def _emit_retirement_candidate(
 ) -> None:
     metrics = _retirement_candidate_metrics(payload)
     cycle_score = metrics["cycle_score"]
-    runtime_count = metrics["runtime_count"]
-    config_count = metrics["config_count"]
-    doc_count = metrics["doc_count"]
-    test_count = metrics["test_count"]
     recent_age_days = payload["recent_age_days"]
     wip_markers = payload["wip_markers"]
     deletion_score = metrics["deletion_score"]
@@ -9853,10 +10220,10 @@ def _emit_retirement_candidate(
             cycle_score=cycle_score,
             recent_age_days=recent_age_days,
             wip_markers=wip_markers,
-            runtime_count=runtime_count,
-            config_count=config_count,
-            doc_count=doc_count,
-            test_count=test_count,
+            runtime_count=metrics["runtime_count"],
+            config_count=metrics["config_count"],
+            doc_count=metrics["doc_count"],
+            test_count=metrics["test_count"],
         )
     if deletion_score < config.dead_score_threshold:
         return
@@ -9873,10 +10240,10 @@ def _emit_retirement_candidate(
         cycle_score=cycle_score,
         deletion_score=deletion_score,
         recent_age_days=recent_age_days,
-        runtime_count=runtime_count,
-        config_count=config_count,
-        doc_count=doc_count,
-        test_count=test_count,
+        runtime_count=metrics["runtime_count"],
+        config_count=metrics["config_count"],
+        doc_count=metrics["doc_count"],
+        test_count=metrics["test_count"],
         wip_markers=wip_markers,
     )
     _link_retirement_candidate(snapshot, project, candidate, node.key)
@@ -10109,18 +10476,13 @@ def _complexity_surface_measurements(
     )
     metrics = _aggregate_surface_complexity_metrics(snapshot, indexes, node.key)
     blocked_by_current_cycle = bool(node.properties.get("current_cycle_status"))
-    complexity_score, simplification_score, removable_score = _complexity_scores(
+    complexity_score, simplification_score, removable_score = _complexity_surface_scores(
         metrics,
-        ComplexityScoreInputs(
-            indirection_markers=indirection_markers,
-            stateful_markers=stateful_markers,
-            deprecation_markers=deprecation_markers,
-            runtime_count=len(anchors.runtime),
-            config_count=len(anchors.config),
-            doc_count=len(anchors.docs),
-            test_count=len(anchors.tests),
-            blocked_by_current_cycle=blocked_by_current_cycle,
-        ),
+        anchors,
+        blocked_by_current_cycle=blocked_by_current_cycle,
+        indirection_markers=indirection_markers,
+        stateful_markers=stateful_markers,
+        deprecation_markers=deprecation_markers,
     )
     return (
         anchors,
@@ -10132,6 +10494,70 @@ def _complexity_surface_measurements(
         complexity_score,
         simplification_score,
         removable_score,
+    )
+
+
+def _complexity_surface_scores(
+    metrics: SurfaceComplexityMetrics,
+    anchors: SurfaceAnchorSets,
+    *,
+    blocked_by_current_cycle: bool,
+    indirection_markers: tuple[str, ...],
+    stateful_markers: tuple[str, ...],
+    deprecation_markers: tuple[str, ...],
+) -> tuple[float, float, float]:
+    return _complexity_scores(
+        metrics,
+        _complexity_score_inputs(
+            anchors,
+            blocked_by_current_cycle=blocked_by_current_cycle,
+            indirection_markers=indirection_markers,
+            stateful_markers=stateful_markers,
+            deprecation_markers=deprecation_markers,
+        ),
+    )
+
+
+def _complexity_score_inputs(
+    anchors: SurfaceAnchorSets,
+    *,
+    blocked_by_current_cycle: bool,
+    indirection_markers: tuple[str, ...],
+    stateful_markers: tuple[str, ...],
+    deprecation_markers: tuple[str, ...],
+) -> ComplexityScoreInputs:
+    return ComplexityScoreInputs(
+        indirection_markers=indirection_markers,
+        stateful_markers=stateful_markers,
+        deprecation_markers=deprecation_markers,
+        runtime_count=len(anchors.runtime),
+        config_count=len(anchors.config),
+        doc_count=len(anchors.docs),
+        test_count=len(anchors.tests),
+        blocked_by_current_cycle=blocked_by_current_cycle,
+    )
+
+
+def _complexity_candidate_context(
+    payload: dict[str, object],
+    *,
+    config: ComplexityAnalysisConfig,
+) -> ComplexityCandidateContext:
+    anchors = cast("SurfaceAnchorSets", payload["anchors"])
+    runtime_anchors, config_anchors, doc_anchors, test_anchors = _complexity_candidate_anchor_slices(
+        anchors,
+        blocker_anchor_limit=config.blocker_anchor_limit,
+    )
+    return ComplexityCandidateContext(
+        anchors=anchors,
+        metrics=cast("SurfaceComplexityMetrics", payload["metrics"]),
+        runtime_anchors=runtime_anchors,
+        config_anchors=config_anchors,
+        doc_anchors=doc_anchors,
+        test_anchors=test_anchors,
+        blocked_by_current_cycle=bool(payload["blocked_by_current_cycle"]),
+        simplification_score=float(payload["simplification_score"]),
+        classification=str(payload["classification"]),
     )
 
 
@@ -10180,22 +10606,84 @@ def _evaluate_complexity_surface(
         indexes=indexes,
         config=config,
     )
-    runtime_count = len(anchors.runtime)
-    config_count = len(anchors.config)
-    doc_count = len(anchors.docs)
-    if complexity_score < config.complexity_score_threshold and removable_score < config.removable_score_threshold:
+    anchor_counts = _analysis_anchor_counts(anchors)
+    if not _should_emit_complexity_candidate(
+        config,
+        complexity_score=complexity_score,
+        removable_score=removable_score,
+    ):
         return None
-    classification, removal_confidence = _classify_complexity_candidate(
+    classification, removal_confidence = _complexity_candidate_classification(
         config,
         removable_score=removable_score,
-        runtime_count=runtime_count,
-        config_count=config_count,
-        doc_count=doc_count,
+        anchor_counts=anchor_counts,
         blocked_by_current_cycle=blocked_by_current_cycle,
     )
+    return _complexity_surface_payload(
+        source_path=source_path,
+        family_name=family.name,
+        anchors=anchors,
+        metrics=metrics,
+        indirection_markers=indirection_markers,
+        stateful_markers=stateful_markers,
+        deprecation_markers=deprecation_markers,
+        blocked_by_current_cycle=blocked_by_current_cycle,
+        classification=classification,
+        complexity_score=complexity_score,
+        simplification_score=simplification_score,
+        removable_score=removable_score,
+        removal_confidence=removal_confidence,
+    )
+
+
+def _should_emit_complexity_candidate(
+    config: ComplexityAnalysisConfig,
+    *,
+    complexity_score: float,
+    removable_score: float,
+) -> bool:
+    return (
+        complexity_score >= config.complexity_score_threshold
+        or removable_score >= config.removable_score_threshold
+    )
+
+
+def _complexity_candidate_classification(
+    config: ComplexityAnalysisConfig,
+    *,
+    removable_score: float,
+    anchor_counts: dict[str, int],
+    blocked_by_current_cycle: bool,
+) -> tuple[str, str]:
+    return _classify_complexity_candidate(
+        config,
+        removable_score=removable_score,
+        runtime_count=anchor_counts["runtime_count"],
+        config_count=anchor_counts["config_count"],
+        doc_count=anchor_counts["doc_count"],
+        blocked_by_current_cycle=blocked_by_current_cycle,
+    )
+
+
+def _complexity_surface_payload(
+    *,
+    source_path: str,
+    family_name: str,
+    anchors: SurfaceAnchorSets,
+    metrics: SurfaceComplexityMetrics,
+    indirection_markers: tuple[str, ...],
+    stateful_markers: tuple[str, ...],
+    deprecation_markers: tuple[str, ...],
+    blocked_by_current_cycle: bool,
+    classification: str,
+    complexity_score: float,
+    simplification_score: float,
+    removable_score: float,
+    removal_confidence: str,
+) -> dict[str, object]:
     return {
         "source_path": source_path,
-        "family_name": family.name,
+        "family_name": family_name,
         "anchors": anchors,
         "metrics": metrics,
         "indirection_markers": indirection_markers,
@@ -10218,40 +10706,21 @@ def _emit_complexity_candidate(
     node: GraphNode,
     payload: dict[str, object],
 ) -> None:
-    anchors = payload["anchors"]
-    metrics = payload["metrics"]
-    runtime_anchors, config_anchors, doc_anchors, test_anchors = _complexity_candidate_anchor_slices(
-        anchors,
-        blocker_anchor_limit=config.blocker_anchor_limit,
-    )
-    blocked_by_current_cycle = bool(payload["blocked_by_current_cycle"])
-    simplification_score = float(payload["simplification_score"])
-    classification = str(payload["classification"])
+    context = _complexity_candidate_context(payload, config=config)
     candidate = _add_complexity_candidate_node(
         snapshot,
         today,
         config,
         node,
         payload,
-        anchors=anchors,
-        metrics=metrics,
-        runtime_anchors=runtime_anchors,
-        config_anchors=config_anchors,
-        doc_anchors=doc_anchors,
-        test_anchors=test_anchors,
-        blocked_by_current_cycle=blocked_by_current_cycle,
-        simplification_score=simplification_score,
-        classification=classification,
+        context=context,
     )
     _link_complexity_candidate(
         snapshot,
         project,
         candidate,
         node.key,
-        classification=classification,
-        runtime_anchors=tuple(runtime_anchors),
-        config_anchors=tuple(config_anchors),
-        doc_anchors=tuple(doc_anchors),
+        context=context,
     )
 
 
@@ -10279,19 +10748,16 @@ def _link_complexity_candidate(
     candidate: NodeKey,
     target: NodeKey,
     *,
-    classification: str,
-    runtime_anchors: tuple[NodeKey, ...],
-    config_anchors: tuple[NodeKey, ...],
-    doc_anchors: tuple[NodeKey, ...],
+    context: ComplexityCandidateContext,
 ) -> None:
     snapshot.add_relation(project, "CONTAINS", candidate, provenance="complexity_analysis")
     snapshot.add_relation(target, "HAS_COMPLEXITY_SIGNAL", candidate, provenance="complexity_analysis")
     snapshot.add_relation(candidate, "CANDIDATE_FOR_SIMPLIFICATION", target, provenance="complexity_analysis")
-    if classification == "removable_complexity":
+    if context.classification == "removable_complexity":
         snapshot.add_relation(candidate, "CANDIDATE_FOR_REMOVAL", target, provenance="complexity_analysis")
-    for anchor in runtime_anchors:
+    for anchor in context.runtime_anchors:
         snapshot.add_relation(candidate, "JUSTIFIED_BY_RUNTIME", anchor, provenance="complexity_analysis")
-    for anchor in [*config_anchors, *doc_anchors]:
+    for anchor in [*context.config_anchors, *context.doc_anchors]:
         snapshot.add_relation(candidate, "BLOCKED_BY_VARIANCE", anchor, provenance="complexity_analysis")
 
 
@@ -10302,16 +10768,12 @@ def _add_complexity_candidate_node(
     node: GraphNode,
     payload: dict[str, object],
     *,
-    anchors: SurfaceAnchorSets,
-    metrics: SurfaceComplexityMetrics,
-    runtime_anchors: tuple[NodeKey, ...] | list[NodeKey],
-    config_anchors: tuple[NodeKey, ...] | list[NodeKey],
-    doc_anchors: tuple[NodeKey, ...] | list[NodeKey],
-    test_anchors: tuple[NodeKey, ...] | list[NodeKey],
-    blocked_by_current_cycle: bool,
-    simplification_score: float,
-    classification: str,
+    context: ComplexityCandidateContext,
 ) -> NodeKey:
+    blocker_context = _complexity_blocker_context(
+        node,
+        blocked_by_current_cycle=context.blocked_by_current_cycle,
+    )
     return snapshot.add_node(
         "complexity_candidate",
         f"{node.key.label}:{node.key.name}",
@@ -10321,37 +10783,53 @@ def _add_complexity_candidate_node(
         family_name=str(payload["family_name"]),
         target_label=node.key.label,
         target_name=node.key.name,
-        classification=classification,
+        classification=context.classification,
         complexity_score=payload["complexity_score"],
         simplification_score=payload["simplification_score"],
         removable_score=payload["removable_score"],
-        simplification_confidence="high" if simplification_score >= config.complexity_score_threshold + 2 else "medium",
+        simplification_confidence="high"
+        if context.simplification_score >= config.complexity_score_threshold + 2
+        else "medium",
         removal_confidence=payload["removal_confidence"],
-        branch_count=metrics.branch_count,
-        nesting_depth=metrics.nesting_depth,
-        call_count=metrics.call_count,
-        helper_call_count=metrics.helper_call_count,
-        abstraction_fanout=metrics.abstraction_fanout,
-        api_surface_to_logic_ratio=metrics.api_surface_to_logic_ratio,
-        runtime_anchor_count=len(anchors.runtime),
-        config_anchor_count=len(anchors.config),
-        doc_anchor_count=len(anchors.docs),
-        test_anchor_count=len(anchors.tests),
+        branch_count=context.metrics.branch_count,
+        nesting_depth=context.metrics.nesting_depth,
+        call_count=context.metrics.call_count,
+        helper_call_count=context.metrics.helper_call_count,
+        abstraction_fanout=context.metrics.abstraction_fanout,
+        api_surface_to_logic_ratio=context.metrics.api_surface_to_logic_ratio,
+        runtime_anchor_count=len(context.anchors.runtime),
+        config_anchor_count=len(context.anchors.config),
+        doc_anchor_count=len(context.anchors.docs),
+        test_anchor_count=len(context.anchors.tests),
         indirection_markers=payload["indirection_markers"],
         stateful_markers=payload["stateful_markers"],
         deprecation_markers=payload["deprecation_markers"],
-        blocked_by_current_cycle=blocked_by_current_cycle,
-        blocked_by_current_cycle_target_name=node.key.name if blocked_by_current_cycle else None,
-        blocked_by_current_cycle_score=node.properties.get("current_cycle_score") if blocked_by_current_cycle else None,
-        blocked_by_current_cycle_wip_markers=node.properties.get("current_cycle_wip_markers") if blocked_by_current_cycle else None,
-        runtime_anchors=[anchor.name for anchor in runtime_anchors],
-        config_anchors=[anchor.name for anchor in config_anchors],
-        doc_anchors=[anchor.name for anchor in doc_anchors],
-        test_anchors=[anchor.name for anchor in test_anchors],
+        blocked_by_current_cycle=context.blocked_by_current_cycle,
+        blocked_by_current_cycle_target_name=blocker_context["target_name"],
+        blocked_by_current_cycle_score=blocker_context["score"],
+        blocked_by_current_cycle_wip_markers=blocker_context["wip_markers"],
+        runtime_anchors=[anchor.name for anchor in context.runtime_anchors],
+        config_anchors=[anchor.name for anchor in context.config_anchors],
+        doc_anchors=[anchor.name for anchor in context.doc_anchors],
+        test_anchors=[anchor.name for anchor in context.test_anchors],
         last_verified=today,
         ingest_wave="repo_sync_v1",
         confidence="medium",
     )
+
+
+def _complexity_blocker_context(
+    node: GraphNode,
+    *,
+    blocked_by_current_cycle: bool,
+) -> dict[str, object]:
+    if not blocked_by_current_cycle:
+        return {"target_name": None, "score": None, "wip_markers": None}
+    return {
+        "target_name": node.key.name,
+        "score": node.properties.get("current_cycle_score"),
+        "wip_markers": node.properties.get("current_cycle_wip_markers"),
+    }
 
 
 def _add_pipeline_surfaces(
@@ -11879,6 +12357,19 @@ class AlertTargetSelection:
     selected_pipelines: tuple[NodeKey, ...]
     selected_providers: tuple[NodeKey, ...]
     selected_contracts: tuple[NodeKey, ...]
+
+
+@dataclass(frozen=True)
+class ComplexityCandidateContext:
+    anchors: SurfaceAnchorSets
+    metrics: SurfaceComplexityMetrics
+    runtime_anchors: tuple[NodeKey, ...]
+    config_anchors: tuple[NodeKey, ...]
+    doc_anchors: tuple[NodeKey, ...]
+    test_anchors: tuple[NodeKey, ...]
+    blocked_by_current_cycle: bool
+    simplification_score: float
+    classification: str
 
 
 def _alert_target_inputs(rule: dict[str, object]) -> tuple[str, set[str]]:
@@ -13472,45 +13963,21 @@ def _retry_critical_analysis_groups(
         active_relation_types=active_relation_types,
         sync_run=sync_run,
     )
-
-    missing_node_labels = _missing_group_names(
-        active_node_labels,
-        node_groups,
-        live_node_counts,
-    )
-    _retry_missing_groups(
-        client,
-        node_groups,
-        missing_node_labels,
-        retry_batch_size,
-        kind="critical node retry",
-    )
-    live_node_counts = _refresh_node_counts_if_retried(
+    live_node_counts = _retry_critical_node_groups(
         client,
         active_node_labels,
-        missing_node_labels,
-        sync_run=sync_run,
+        node_groups,
         live_node_counts=live_node_counts,
-    )
-
-    missing_relation_types = _missing_group_names(
-        active_relation_types,
-        relation_groups,
-        live_relation_counts,
-    )
-    _retry_missing_groups(
-        client,
-        relation_groups,
-        missing_relation_types,
-        retry_batch_size,
-        kind="critical relation retry",
-    )
-    live_relation_counts = _refresh_relation_counts_if_retried(
-        client,
-        active_relation_types,
-        missing_relation_types,
+        retry_batch_size=retry_batch_size,
         sync_run=sync_run,
+    )
+    live_relation_counts = _retry_critical_relation_groups(
+        client,
+        active_relation_types,
+        relation_groups,
         live_relation_counts=live_relation_counts,
+        retry_batch_size=retry_batch_size,
+        sync_run=sync_run,
     )
 
     missing_after_retry = _critical_analysis_mismatch_messages(
@@ -13524,6 +13991,66 @@ def _retry_critical_analysis_groups(
     _raise_analysis_group_mismatches(
         missing_after_retry,
         prefix="Post-apply verification failed for critical analysis groups: ",
+    )
+
+
+def _retry_critical_node_groups(
+    client: Neo4jHttpClient,
+    active_node_labels: list[str],
+    node_groups: dict[str, list[dict[str, JsonValue]]],
+    *,
+    live_node_counts: dict[str, int],
+    retry_batch_size: int,
+    sync_run: str | None,
+) -> dict[str, int]:
+    missing_node_labels = _missing_group_names(
+        active_node_labels,
+        node_groups,
+        live_node_counts,
+    )
+    _retry_missing_groups(
+        client,
+        node_groups,
+        missing_node_labels,
+        retry_batch_size,
+        kind="critical node retry",
+    )
+    return _refresh_node_counts_if_retried(
+        client,
+        active_node_labels,
+        missing_node_labels,
+        sync_run=sync_run,
+        live_node_counts=live_node_counts,
+    )
+
+
+def _retry_critical_relation_groups(
+    client: Neo4jHttpClient,
+    active_relation_types: list[str],
+    relation_groups: dict[str, list[dict[str, JsonValue]]],
+    *,
+    live_relation_counts: dict[str, int],
+    retry_batch_size: int,
+    sync_run: str | None,
+) -> dict[str, int]:
+    missing_relation_types = _missing_group_names(
+        active_relation_types,
+        relation_groups,
+        live_relation_counts,
+    )
+    _retry_missing_groups(
+        client,
+        relation_groups,
+        missing_relation_types,
+        retry_batch_size,
+        kind="critical relation retry",
+    )
+    return _refresh_relation_counts_if_retried(
+        client,
+        active_relation_types,
+        missing_relation_types,
+        sync_run=sync_run,
+        live_relation_counts=live_relation_counts,
     )
 
 
@@ -14165,27 +14692,36 @@ def _missing_required_population(
     ]
 
 
+def _nodes_with_label(snapshot: GraphSnapshot, label: str) -> list[GraphNode]:
+    return [node for node in snapshot.nodes.values() if node.key.label == label]
+
+
+def _protocol_class_ports(snapshot: GraphSnapshot) -> list[GraphNode]:
+    return [
+        node
+        for node in _nodes_with_label(snapshot, "port_surface")
+        if node.properties.get("granularity") == "protocol_class"
+    ]
+
+
+def _rich_contract_surfaces(snapshot: GraphSnapshot) -> list[GraphNode]:
+    return [
+        node
+        for node in _nodes_with_label(snapshot, "contract_surface")
+        if node.properties.get("dq_policy_ref")
+        and node.properties.get("schema_classes")
+    ]
+
+
 def _port_and_contract_metadata_issues(snapshot: GraphSnapshot) -> list[str]:
     issues: list[str] = []
     if NodeKey("port_surface", PORTS_MODULE_PREFIX) not in snapshot.nodes:
         issues.append(f"missing {PORTS_MODULE_PREFIX} facade port surface")
 
-    protocol_ports = [
-        node
-        for node in snapshot.nodes.values()
-        if node.key.label == "port_surface" and node.properties.get("granularity") == "protocol_class"
-    ]
-    if not protocol_ports:
+    if not _protocol_class_ports(snapshot):
         issues.append("missing protocol-class port surfaces")
 
-    rich_contracts = [
-        node
-        for node in snapshot.nodes.values()
-        if node.key.label == "contract_surface"
-        and node.properties.get("dq_policy_ref")
-        and node.properties.get("schema_classes")
-    ]
-    if not rich_contracts:
+    if not _rich_contract_surfaces(snapshot):
         issues.append("missing rich contract metadata on contract surfaces")
 
     return issues
@@ -14229,29 +14765,47 @@ def _excluded_file_structure_paths(snapshot: GraphSnapshot) -> list[str]:
     ]
 
 
+def _sampled_sorted_unique(values: list[str], limit: int) -> list[str]:
+    return sorted(set(values))[:limit]
+
+
+def _append_path_issue(
+    issues: list[str],
+    prefix: str,
+    paths: list[str],
+    *,
+    limit: int,
+) -> None:
+    if paths:
+        issues.append(f"{prefix}: {_sampled_sorted_unique(paths, limit)}")
+
+
 def _path_leak_issues(snapshot: GraphSnapshot) -> list[str]:
     issues: list[str] = []
-    ignored_paths = _ignored_runtime_paths(snapshot)
-    if ignored_paths:
-        issues.append(f"ignored runtime paths leaked into snapshot: {sorted(set(ignored_paths))[:5]}")
-
+    _append_path_issue(
+        issues,
+        "ignored runtime paths leaked into snapshot",
+        _ignored_runtime_paths(snapshot),
+        limit=5,
+    )
     excluded_paths = _excluded_file_structure_paths(snapshot)
     if excluded_paths:
         issues.append(
             "excluded file-structure paths leaked into snapshot: "
-            + ", ".join(sorted(set(excluded_paths))[:10])
+            + ", ".join(_sampled_sorted_unique(excluded_paths, 10))
         )
     return issues
+
+
+def _format_orphan_nodes(orphan_nodes: list[NodeKey], limit: int) -> str:
+    return ", ".join(f"{node.label}:{node.name}" for node in orphan_nodes[:limit])
 
 
 def _orphan_node_issues(snapshot: GraphSnapshot) -> list[str]:
     orphan_nodes = snapshot_orphans(snapshot)
     if not orphan_nodes:
         return []
-    return [
-        "snapshot contains orphan nodes: "
-        + ", ".join(f"{node.label}:{node.name}" for node in orphan_nodes[:10])
-    ]
+    return ["snapshot contains orphan nodes: " + _format_orphan_nodes(orphan_nodes, 10)]
 
 
 def snapshot_invariant_issues(snapshot: GraphSnapshot) -> list[str]:
@@ -14578,49 +15132,23 @@ def build_fast_analysis_audit_report(
     base_uri, username, password, database = resolve_neo4j_connection(root, http_uri)
     client = Neo4jHttpClient(base_uri, username, password, database)
     snapshot_stats = snapshot.stats()
-
-    active_labels = tuple(
-        label for label in CRITICAL_ANALYSIS_NODE_LABELS if int(snapshot_stats["labels"].get(label, 0)) > 0
-    )
-    active_relation_types = tuple(
-        relation_type
-        for relation_type in CRITICAL_ANALYSIS_RELATION_TYPES
-        if int(snapshot_stats["relation_types"].get(relation_type, 0)) > 0
-    )
-    snapshot_label_counts = _snapshot_subset_count_map(snapshot_stats, "labels", active_labels)
-    snapshot_relation_counts = _snapshot_subset_count_map(
+    active_labels, active_relation_types = _fast_analysis_scope(snapshot_stats)
+    snapshot_label_counts, snapshot_relation_counts = _fast_analysis_snapshot_counts(
         snapshot_stats,
-        "relation_types",
+        active_labels,
         active_relation_types,
     )
-    live_managed_label_counts = _live_managed_node_counts(
+    live_managed_label_counts, live_managed_relation_counts = _fast_analysis_live_counts(
         client,
         active_labels,
-        context="fast audit label summary",
-    )
-    live_managed_relation_counts = _live_managed_relation_counts(
-        client,
         active_relation_types,
-        context="fast audit relation summary",
     )
-    live_summary = _audit_live_summary(
-        managed_node_total=sum(live_managed_label_counts.values()),
-        managed_relation_total=sum(live_managed_relation_counts.values()),
-        unmanaged_repo_node_total=0,
-        label_summary=_managed_label_summary_from_counts(live_managed_label_counts),
-        managed_relation_summary=_managed_relation_summary_from_counts(
-            live_managed_relation_counts
-        ),
-        orphan_summary=[],
-        unmanaged_summary=[],
+    live_summary = _fast_analysis_live_summary(
+        live_managed_label_counts,
+        live_managed_relation_counts,
     )
     return _audit_report_payload(
-        snapshot_payload={
-            "node_count": sum(snapshot_label_counts.values()),
-            "relation_count": sum(snapshot_relation_counts.values()),
-            "labels": snapshot_label_counts,
-            "relation_types": snapshot_relation_counts,
-        },
+        snapshot_payload=_fast_audit_snapshot_payload(snapshot_label_counts, snapshot_relation_counts),
         managed_labels=list(active_labels),
         live_summary=live_summary,
         snapshot_label_counts=snapshot_label_counts,
@@ -14628,6 +15156,83 @@ def build_fast_analysis_audit_report(
         snapshot_relation_counts=snapshot_relation_counts,
         live_managed_relation_counts=live_managed_relation_counts,
     )
+
+
+def _fast_analysis_scope(
+    snapshot_stats: dict[str, JsonValue],
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    return (
+        _active_critical_names(snapshot_stats, "labels", CRITICAL_ANALYSIS_NODE_LABELS),
+        _active_critical_names(snapshot_stats, "relation_types", CRITICAL_ANALYSIS_RELATION_TYPES),
+    )
+
+
+def _fast_analysis_snapshot_counts(
+    snapshot_stats: dict[str, JsonValue],
+    active_labels: tuple[str, ...],
+    active_relation_types: tuple[str, ...],
+) -> tuple[dict[str, int], dict[str, int]]:
+    return (
+        _snapshot_subset_count_map(snapshot_stats, "labels", active_labels),
+        _snapshot_subset_count_map(snapshot_stats, "relation_types", active_relation_types),
+    )
+
+
+def _fast_analysis_live_counts(
+    client: Neo4jHttpClient,
+    active_labels: tuple[str, ...],
+    active_relation_types: tuple[str, ...],
+) -> tuple[dict[str, int], dict[str, int]]:
+    return (
+        _live_managed_node_counts(
+            client,
+            active_labels,
+            context="fast audit label summary",
+        ),
+        _live_managed_relation_counts(
+            client,
+            active_relation_types,
+            context="fast audit relation summary",
+        ),
+    )
+
+
+def _fast_analysis_live_summary(
+    live_managed_label_counts: dict[str, int],
+    live_managed_relation_counts: dict[str, int],
+) -> dict[str, JsonValue]:
+    return _audit_live_summary(
+        managed_node_total=sum(live_managed_label_counts.values()),
+        managed_relation_total=sum(live_managed_relation_counts.values()),
+        unmanaged_repo_node_total=0,
+        label_summary=_managed_label_summary_from_counts(live_managed_label_counts),
+        managed_relation_summary=_managed_relation_summary_from_counts(live_managed_relation_counts),
+        orphan_summary=[],
+        unmanaged_summary=[],
+    )
+
+
+def _active_critical_names(
+    snapshot_stats: dict[str, JsonValue],
+    key: str,
+    critical_names: set[str],
+) -> tuple[str, ...]:
+    raw_counts = snapshot_stats.get(key)
+    if not isinstance(raw_counts, dict):
+        return ()
+    return tuple(name for name in critical_names if int(raw_counts.get(name, 0)) > 0)
+
+
+def _fast_audit_snapshot_payload(
+    snapshot_label_counts: dict[str, int],
+    snapshot_relation_counts: dict[str, int],
+) -> dict[str, JsonValue]:
+    return {
+        "node_count": sum(snapshot_label_counts.values()),
+        "relation_count": sum(snapshot_relation_counts.values()),
+        "labels": snapshot_label_counts,
+        "relation_types": snapshot_relation_counts,
+    }
 
 
 def _critical_analysis_audit_issues(report: dict[str, JsonValue]) -> list[str]:

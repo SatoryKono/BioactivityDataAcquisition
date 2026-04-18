@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # Historical Diagramming Policy
 
-*Synced with RULES.md v6.1 (2026-03-13)*
+*Synced with RULES.md v6.1.2 (2026-04-09)*
 
 > **Canonical policy:** [`docs/02-architecture/diagrams/governance/policy.md`](policy.md) (POL-LLM-DIAGRAMS-001).
 > **Canonical diagrams:** [`docs/02-architecture/diagrams/`](../README.md).

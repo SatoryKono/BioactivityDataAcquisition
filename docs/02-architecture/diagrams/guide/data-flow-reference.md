@@ -10,7 +10,7 @@ Last verified: '2026-03-29'
 
 # Data Flow
 
-*Aligned with RULES.md v6.1 (Local-Only Deployment)*
+*Aligned with RULES.md v6.1.2 (Local-Only Deployment)*
 
 ## Overview
 
