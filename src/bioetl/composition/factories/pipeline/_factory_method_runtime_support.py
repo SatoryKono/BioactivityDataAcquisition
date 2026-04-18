@@ -62,8 +62,8 @@ def create_pipeline_instance_from_request(
     )
     return cast(
         "BasePipeline",
-        cast("Any", create_pipeline_with_services_fn)(
-            **cast("dict[str, Any]", create_pipeline_kwargs)
+        cast("Any", create_pipeline_with_services_fn)(  # Any: Dynamic factory function
+            **cast("dict[str, Any]", create_pipeline_kwargs)  # Any: Dynamic kwargs dict
         ),
     )
 
@@ -110,9 +110,9 @@ def create_factory_runner_from_request(
         effective_config_artifact_id=effective_config_artifact_id,
     )
     pipeline = cast(
-        "Any",
+        "Any",  # Any: Dynamic factory function
         create_with_services_fn,
-    )(**cast("dict[str, Any]", create_with_services_kwargs))
+    )(**cast("dict[str, Any]", create_with_services_kwargs))  # Any: Dynamic kwargs dict
     return assemble_runner_fn(
         pipeline=pipeline,
         observability=observability,

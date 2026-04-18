@@ -56,9 +56,23 @@ Provide a summary report showing:
 
 The script `sonar_issue_processor.py` automates this entire workflow:
 
+### Using .env file (recommended):
+
+1. Create `.env` file:
+```bash
+SONARQUBE_TOKEN="your-sonarcloud-token"
+GITHUB_TOKEN="your-github-token"
+```
+
+2. Run the processor:
+```bash
+python3 sonar_issue_processor.py
+```
+
+### Using environment variables:
+
 ```bash
 # Set required environment variables
-export SONARQUBE_ORG="your-sonarcloud-org"
 export SONARQUBE_TOKEN="your-sonarcloud-token"
 export GITHUB_TOKEN="your-github-token"
 

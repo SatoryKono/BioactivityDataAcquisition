@@ -14,10 +14,13 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import requests
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configuration
 SONARQUBE_URL = os.getenv("SONARQUBE_URL", "https://sonarcloud.io")
-SONARQUBE_ORG = os.getenv("SONARQUBE_ORG")
 SONARQUBE_TOKEN = os.getenv("SONARQUBE_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO", "bioactivitydataacquisition2")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -135,8 +138,8 @@ def create_github_issue(layer: str, issues: list[dict[str, Any]]) -> bool:
 
 def main():
     """Main execution function."""
-    if not SONARQUBE_ORG or not SONARQUBE_TOKEN:
-        print("❌ SonarQube configuration missing. Please set SONARQUBE_ORG and SONARQUBE_TOKEN.")
+    if not SONARQUBE_TOKEN:
+        print("❌ SonarQube configuration missing. Please set SONARQUBE_TOKEN.")
         return
 
     if not GITHUB_TOKEN:
@@ -144,7 +147,7 @@ def main():
         return
 
     # Get project key (could be passed as argument or configured)
-    project_key = f"{SONARQUBE_ORG}_bioactivitydataacquisition2"  # Adjust as needed
+    project_key = "bioactivitydataacquisition2"  # Adjust as needed
 
     print(f"🔍 Fetching SonarQube issues for project: {project_key}")
     issues = get_sonar_issues(project_key)
