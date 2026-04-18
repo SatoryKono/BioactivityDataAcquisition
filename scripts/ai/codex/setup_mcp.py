@@ -14,7 +14,6 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 NPM_CACHE_DIR = "/tmp/npm-cache"
 FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]

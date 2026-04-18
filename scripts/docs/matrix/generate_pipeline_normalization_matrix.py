@@ -19,14 +19,14 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root))
     sys.path.insert(0, str(repo_root / "src"))
 
-from bioetl.application.composite.join_key_normalization import (
-    JOIN_KEY_NORMALIZATION_POLICIES,
-)
 from bioetl.application.composite.checkpoint import (
     create_expected_checkpoint_context,
     merge_expected_anchors,
 )
 from bioetl.application.composite.checkpoint.state import CompositeCheckpointState
+from bioetl.application.composite.join_key_normalization import (
+    JOIN_KEY_NORMALIZATION_POLICIES,
+)
 from bioetl.application.core.normalization_fallbacks import (
     is_date_field,
     is_doi_field,

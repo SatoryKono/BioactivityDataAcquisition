@@ -59,12 +59,12 @@ SET_LIKE_FIELDS = frozenset({"activity_properties"})
 
 # Export enum constants for use in normalization
 __all__ = [
+    "ACTIVITY_STANDARD_TYPES",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
-    "INT_FIELDS",
+    "DATA_VALIDITY_COMMENTS",
     "FLOAT_FIELDS",
+    "INT_FIELDS",
     "META_FIELDS",
     "SET_LIKE_FIELDS",
     "STANDARD_RELATIONS",
-    "ACTIVITY_STANDARD_TYPES",
-    "DATA_VALIDITY_COMMENTS",
 ]

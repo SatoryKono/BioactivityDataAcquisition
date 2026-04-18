@@ -16,8 +16,8 @@ if __package__ in {None, ""}:
         find_first_party_imports_of_measured_only_modules,
         load_compatibility_registry,
         scan_docstring_tracked_modules,
-        validate_measured_only_ratchet,
         validate_measured_docstring_surface,
+        validate_measured_only_ratchet,
     )
 else:
     raise SystemExit(

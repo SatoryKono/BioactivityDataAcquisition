@@ -21,7 +21,6 @@ from bioetl.infrastructure.config.domain_config_resolver import (
     resolve_domain_pipeline_config,
 )
 from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
-from bioetl.domain.context import PipelineContext
 from bioetl.domain.filtering import SilverFilterConfig
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
 from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_ACTIVITY_SCHEMA
@@ -31,8 +30,6 @@ from tests.unit.application.pipelines.activity_transformer_shared import (
     SharedActivityTransformerActionTypeExtractionTests,
     SharedActivityTransformerLigandExtractionTests,
     SharedActivityTransformerTransformTests,
-    mock_context,
-    transformer,
 )
 
 

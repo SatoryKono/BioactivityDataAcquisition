@@ -11,7 +11,7 @@ from bioetl.application.services.control_plane.run_manifest_service import (
 RunManifestCreateRequest = RunManifestCreateSpec
 
 __all__ = [
+    "RunManifestCreateRequest",
     "RunManifestCreateSpec",
     "RunManifestService",
-    "RunManifestCreateRequest",
 ]

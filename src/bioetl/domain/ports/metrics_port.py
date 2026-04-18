@@ -10,7 +10,7 @@ REQ-OBS-004: Metrics should include tags for filtering
 
 from __future__ import annotations
 
-from typing import Any, Dict, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -25,7 +25,7 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float = 1.0,
-        tags: Dict[
+        tags: dict[
             str,
             Any,  # Any: Generic tag values for metric filtering
         ]
@@ -44,7 +44,7 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[
+        tags: dict[
             str,
             Any,  # Any: Generic tag values for metric filtering
         ]
@@ -63,7 +63,7 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[
+        tags: dict[
             str,
             Any,  # Any: Generic tag values for metric filtering
         ]
@@ -82,7 +82,7 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: Dict[
+        tags: dict[
             str,
             Any,  # Any: Generic tag values for metric filtering
         ]

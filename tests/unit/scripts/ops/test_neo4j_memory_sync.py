@@ -11,7 +11,6 @@ from pathlib import Path
 
 from scripts.memory.sync import (
     _add_complexity_analysis_surfaces,
-    _build_normalization_pipeline_evidence,
     _build_diff_entries,
     _critical_analysis_audit_issues,
     _duplication_analysis_config,

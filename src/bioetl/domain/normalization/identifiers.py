@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 __all__ = [
+    "ONTOLOGY_PREFIXES",
     "PMID_MAX_EXCLUSIVE",
+    "get_ontology_prefix",
+    "is_valid_ontology_id",
     "normalize_doi",
+    "normalize_ontology_id",
+    "normalize_ontology_id_strict",
     "normalize_pmc_id",
     "normalize_pmid",
     "strip_doi_prefix",
-    "normalize_ontology_id",
-    "normalize_ontology_id_strict",
-    "get_ontology_prefix",
-    "is_valid_ontology_id",
-    "ONTOLOGY_PREFIXES",
 ]
 
 _DOI_URL_PREFIXES = (

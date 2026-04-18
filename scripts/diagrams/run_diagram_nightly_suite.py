@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 import argparse
-import json
 import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -274,7 +274,7 @@ def reorder_edge_lines(lines: list[str], seed: int = 13) -> list[str]:
 
 def _stable_shuffle(items: list[str], seed: int) -> list[str]:
     def _sort_key(value: str) -> bytes:
-        return hashlib.sha256(f"{seed}:{value}".encode("utf-8")).digest()
+        return hashlib.sha256(f"{seed}:{value}".encode()).digest()
 
     return sorted(items, key=_sort_key)
 

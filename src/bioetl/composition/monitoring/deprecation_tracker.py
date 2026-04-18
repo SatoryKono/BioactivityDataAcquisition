@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import Any, Callable, Type, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -23,10 +24,10 @@ if not _deprecation_logger.handlers:
 
 def track_deprecated_class(
     old_class_name: str, new_class_name: str
-) -> Callable[[Type[T]], Type[T]]:
+) -> Callable[[type[T]], type[T]]:
     """Decorator to track usage of deprecated classes."""
 
-    def decorator(cls: Type[T]) -> Type[T]:
+    def decorator(cls: type[T]) -> type[T]:
         original_init = cls.__init__
 
         def new_init(

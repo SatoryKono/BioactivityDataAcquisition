@@ -285,9 +285,9 @@ def _dead_code_findings(src_dir: Path) -> list[object]:
 
 def _format_dead_code_messages(unused: list[object]) -> list[str]:
     messages = [
-        f"{getattr(item, 'filename')}:{getattr(item, 'first_lineno')} - "
-        f"unused {getattr(item, 'typ')} '{getattr(item, 'name')}' "
-        f"(confidence: {getattr(item, 'confidence')}%)"
+        f"{item.filename}:{item.first_lineno} - "
+        f"unused {item.typ} '{item.name}' "
+        f"(confidence: {item.confidence}%)"
         for item in unused[:20]
     ]
     if len(unused) > 20:

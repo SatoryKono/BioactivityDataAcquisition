@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol
+from typing import Protocol
 
 __all__ = [
     "EnumLoaderPort",
-    "load_chembl_enums",
-    "get_enum_config",
     "get_chembl_enum",
     "get_chembl_enum_set",
+    "get_enum_config",
+    "load_chembl_enums",
 ]
 
 

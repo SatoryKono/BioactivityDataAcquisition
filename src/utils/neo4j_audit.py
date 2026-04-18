@@ -10,7 +10,6 @@ Usage:
 """
 
 import os
-from typing import Tuple
 
 
 def get_neo4j_uri() -> str:
@@ -29,7 +28,7 @@ def get_neo4j_uri() -> str:
         return "bolt://localhost:7687"
 
 
-def get_neo4j_auth() -> Tuple[str, str]:
+def get_neo4j_auth() -> tuple[str, str]:
     """
     Get Neo4j credentials based on execution context.
 

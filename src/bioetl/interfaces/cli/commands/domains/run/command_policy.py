@@ -30,7 +30,6 @@ from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
     from bioetl.application.services.execution.cli_run_orchestration_models import (
-        CliRunPreparationInput,
         RunExecutionRequest,
     )
     from bioetl.application.services.execution.cli_run_orchestration_service import (

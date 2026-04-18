@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import pytest
 
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
 from bioetl.domain.schemas.constants import (
     ASSAY_TYPES,
     ASSAY_TEST_TYPES,
-    ASSAY_CATEGORIES,
     RELATIONSHIP_TYPES,
 )
 

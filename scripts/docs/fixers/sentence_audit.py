@@ -296,14 +296,14 @@ def find_evidence(
     backticks = _extract_backticks(sentence)
     probe_tokens = _get_probe_tokens(sentence, freq)
     candidate_ids = _find_candidate_ids(probe_tokens, inverted)
-    
+
     evidence = _check_backticks(backticks, first_line_idx_by_path, lines)
     if evidence is not None:
         return evidence
-    
+
     if not candidate_ids:
         return None
-    
+
     return _find_best_evidence(candidate_ids, lines, probe_tokens)
 
 
@@ -327,7 +327,7 @@ def _find_candidate_ids(
         inverted.get(token, set()) for token in probe_tokens if token in inverted
     ]
     postings = sorted(postings, key=len)
-    
+
     if len(postings) >= 2:
         candidate_ids = postings[0] & postings[1]
         if not candidate_ids:
@@ -336,7 +336,7 @@ def _find_candidate_ids(
         candidate_ids = postings[0]
     else:
         candidate_ids = set()
-    
+
     return candidate_ids
 
 
@@ -406,10 +406,10 @@ def _update_best_evidence(
     """Update the best evidence based on score and weight."""
     if best is None:
         return candidate
-    
+
     best_tuple = (best.score, _path_weight(best.path), str(best.path), best.line_no)
     current_tuple = (candidate.score, weight, str(candidate.path), candidate.line_no)
-    
+
     if current_tuple > best_tuple:
         return candidate
     return best
@@ -463,7 +463,7 @@ def generate() -> None:
     doc_files = iter_doc_files()
     inverted, lines, freq = build_index()
     first_line_idx_by_path = _build_first_line_index(lines)
-    
+
     rows = _process_documents(doc_files, inverted, lines, freq, first_line_idx_by_path)
     _write_csv_report(rows)
     _write_summary_report(rows, doc_files)
@@ -498,7 +498,7 @@ def _process_documents(
     rows: list[dict[str, str]] = []
     prompt_map: dict[str, list[dict[str, str]]] = defaultdict(list)
     prompt_map_high: dict[str, list[dict[str, str]]] = defaultdict(list)
-    
+
     for doc in doc_files:
         text = read_text_robust(doc)
         sentences = extract_sentences(text)
@@ -529,7 +529,7 @@ def _process_documents(
                 prompt_map[rel(doc)].append(row)
                 if risk == "high":
                     prompt_map_high[rel(doc)].append(row)
-    
+
     rows.sort(key=lambda row: (row[DOC_FIELD], int(row[SENTENCE_NUMBER_FIELD])))
     return rows
 
@@ -598,14 +598,14 @@ def _write_prompt_reports(rows: list[dict[str, str]]) -> None:
     """Write the prompt reports."""
     prompt_map: dict[str, list[dict[str, str]]] = defaultdict(list)
     prompt_map_high: dict[str, list[dict[str, str]]] = defaultdict(list)
-    
+
     for row in rows:
         if row[STATUS_FIELD] == "нет":
             doc_name = row[DOC_FIELD]
             prompt_map[doc_name].append(row)
             if row["risk"] == "high":
                 prompt_map_high[doc_name].append(row)
-    
+
     _write_prompts_report(prompt_map)
     _write_prompts_high_report(prompt_map_high)
 

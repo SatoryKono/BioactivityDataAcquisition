@@ -19,15 +19,15 @@ from bioetl.domain.schemas.constants import (
 )
 
 __all__ = [
-    "ASSAY_TYPES",
-    "RELATIONSHIP_TYPES",
     "ASSAY_CATEGORIES",
-    "ASSAY_TEST_TYPES",
     "ASSAY_GROUPS",
-    "SUBCELLULAR_FRACTIONS",
-    "CONFIDENCE_DESCRIPTIONS",
+    "ASSAY_TEST_TYPES",
+    "ASSAY_TYPES",
     "CHEMBL_ASSAY_PROFILE",
     "CHEMBL_ASSAY_SCHEMA_FIELDS",
+    "CONFIDENCE_DESCRIPTIONS",
+    "RELATIONSHIP_TYPES",
+    "SUBCELLULAR_FRACTIONS",
     "create_case_normalizer",
 ]
 

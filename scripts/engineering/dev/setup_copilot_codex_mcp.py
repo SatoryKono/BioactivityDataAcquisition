@@ -12,6 +12,5 @@ if str(REPO_ROOT) not in sys.path:
 
 from scripts.ai.codex.setup_mcp import main
 
-
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))

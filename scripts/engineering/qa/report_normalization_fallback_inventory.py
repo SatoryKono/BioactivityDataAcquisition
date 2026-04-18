@@ -16,12 +16,12 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(repo_root / "src"))
 
 from scripts.docs.generate_pipeline_normalization_field_matrix import (
-    build_profile_semantic_invariants,
-    build_entity_profile_coverage_kpi,
-    build_surface_coverage_kpis,
     FALLBACK_BUSINESS,
     FALLBACK_TECHNICAL_PASSTHROUGH,
+    build_entity_profile_coverage_kpi,
     build_field_matrix_rows,
+    build_profile_semantic_invariants,
+    build_surface_coverage_kpis,
 )
 
 FALLBACK_SOURCES = {

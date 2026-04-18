@@ -9,7 +9,6 @@ from bioetl.application.core._base_transformer_execution_support import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.core.base_transformer.errors import FilteredOutError
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import FilterDecision
     from bioetl.domain.types import GoldRecord, SilverRecord

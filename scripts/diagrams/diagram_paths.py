@@ -15,6 +15,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from scripts.common.repo_paths import REPO_ROOT, resolve_repo_root
+
 ARCHITECTURE_DOCS_ROOT = REPO_ROOT / "docs" / "02-architecture"
 
 

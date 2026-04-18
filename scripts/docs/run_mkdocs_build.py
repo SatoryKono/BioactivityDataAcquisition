@@ -11,6 +11,5 @@ if __package__ in {None, ""}:
 
 from scripts.docs.build.mkdocs_build import main
 
-
 if __name__ == "__main__":
     raise SystemExit(main())

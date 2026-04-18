@@ -428,14 +428,14 @@ def apply_ci01(api: GitHubAPI) -> None:
     print("\n=== CI-01: Replace checkout@v6 → @v4 ===")
     branch = BRANCHES["ci-01"]
     sha = api.get_sha()
-    
+
     _create_branch_if_not_exists(api, branch, sha)
-    
+
     files = api.list_workflow_files()
     updated = _apply_ci01_fixes(api, files, branch)
-    
+
     print(f"\n  Updated {len(updated)} files: {', '.join(updated)}")
-    
+
     if not api.dry_run:
         pr_url = api.create_pr(
             title="fix(ci): replace non-existent actions/checkout@v6 with @v4 across all workflows",
@@ -461,7 +461,7 @@ def _apply_ci01_fixes(
     """Apply CI-01 fixes to workflow files."""
     updated = []
     read_branch = BASE_BRANCH if api.dry_run else branch
-    
+
     for f in files:
         if not _is_workflow_file(f):
             continue
@@ -470,7 +470,7 @@ def _apply_ci01_fixes(
         if CHECKOUT_V6 not in content:
             continue
         _patch_file(api, path, content, file_sha, branch, f["name"], updated)
-    
+
     return updated
 
 
@@ -511,22 +511,22 @@ def apply_ci02(api: GitHubAPI) -> None:
     print("\n=== CI-02: Add Python 3.13 to test-matrix ===")
     branch = BRANCHES["ci-02"]
     sha = api.get_sha()
-    
+
     _create_branch_if_not_exists(api, branch, sha)
-    
+
     path = ".github/workflows/tests.yml"
     read_branch = BASE_BRANCH if api.dry_run else branch
     content, file_sha = api.get_file(path, read_branch)
-    
+
     old_matrix = 'python-version: [ "3.11", "3.12" ]'
     new_matrix = 'python-version: [ "3.11", "3.12", "3.13" ]'
-    
+
     if old_matrix not in content:
         print(f"  WARNING: expected pattern not found in {path}. Already updated?")
         return
-    
+
     _apply_ci02_fix(api, path, content, file_sha, branch)
-    
+
     if not api.dry_run:
         pr_url = api.create_pr(
             title="feat(ci): add Python 3.13 to test-matrix",
@@ -548,7 +548,7 @@ def _apply_ci02_fix(
     new_matrix = 'python-version: [ "3.11", "3.12", "3.13" ]'
     new_content = content.replace(old_matrix, new_matrix, 1)
     print(f"  Patching {path}: adding 3.13 to test matrix")
-    
+
     api.update_file(
         path=path,
         content=new_content,

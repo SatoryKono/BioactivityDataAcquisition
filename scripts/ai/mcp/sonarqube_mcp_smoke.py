@@ -10,9 +10,10 @@ import subprocess
 import sys
 import threading
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 _INITIALIZE_REQUEST_ID = 1
 _TOOLS_LIST_REQUEST_ID = 2
@@ -159,7 +160,7 @@ def _store_response_message(
 def _pipe_reader(
     stream: Any,
     channel: str,
-    chunks: "queue.Queue[tuple[str, bytes | None]]",
+    chunks: queue.Queue[tuple[str, bytes | None]],
 ) -> None:
     try:
         while True:

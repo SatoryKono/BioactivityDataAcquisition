@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
 from bioetl.domain.normalization.json import (

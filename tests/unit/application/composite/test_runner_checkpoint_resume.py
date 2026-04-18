@@ -5,12 +5,10 @@ Tests for resuming from FAILED state and checkpoint resume context logging.
 
 from __future__ import annotations
 
-import asyncio
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 from uuid import uuid4
 
-import polars as pl
 import pytest
 
 from bioetl.application.composite.checkpoint import (
@@ -20,7 +18,6 @@ from bioetl.application.composite.checkpoint import (
 from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,
 )
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRunnerDependencies,
@@ -28,7 +25,6 @@ from bioetl.application.composite.runner_pkg import (
 )
 from bioetl.domain.composite.result import (
     EnrichmentResult,
-    MergeResult,
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState

@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio as _asyncio
 import time
 from collections.abc import Callable, Mapping
-from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -586,7 +585,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self,
         *,
         table_path: str,
-        metadata: "SilverMetadata",
+        metadata: SilverMetadata,
         table_name: str,
         provider_name: str,
         entity_name: str,
@@ -609,7 +608,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self,
         *,
         table_name: str,
-        request: "_DeltaWriteRequest",
+        request: _DeltaWriteRequest,
     ) -> None:
         """Delegate Delta write dispatch through the compatibility surface."""
         if self._delta:
@@ -686,7 +685,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         table_path: str,
         started_at: datetime,
         start_perf: float,
-    ) -> "_PreparedSilverWriteFinalizationContext":
+    ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare finalization context for silver write.
 
         This method provides backward compatibility for tests that expect
@@ -732,7 +731,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None:
-        from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
         """Fallback method to finalize silver write result for backward compatibility.
         
@@ -1034,13 +1032,12 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         self,
         table_name: str,
         records: list[BronzeRecord],
-    ) -> "SchemaDriftInfo | None":
+    ) -> SchemaDriftInfo | None:
         """Backward compatibility method for schema drift detection.
 
         This method provides the old interface for tests that call _detect_schema_drift
         directly. It uses the writer's own _get_table_schema method for test compatibility.
         """
-        from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
         from bioetl.infrastructure.storage.silver.schema_drift_operations import (
             _build_schema_drift_info,
             _build_silver_schema_drift_diff,
@@ -1271,7 +1268,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
     async def _compute_dq_metrics(
         self, table_name: str, records: pl.DataFrame | list[dict]
-    ) -> "BatchDQMetrics":
+    ) -> BatchDQMetrics:
         """Compute data quality metrics for a batch of records.
 
         Args:
@@ -1395,7 +1392,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
     async def _complete_silver_write_pipeline(
         self,
         *,
-        ctx: "_SilverWriteExecutionContext",
+        ctx: _SilverWriteExecutionContext,
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
         """Compatibility seam for postwrite orchestration."""

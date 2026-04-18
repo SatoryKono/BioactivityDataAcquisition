@@ -9,16 +9,16 @@ from bioetl.domain.config import RuntimeConfig
 if TYPE_CHECKING:
     from bioetl.composition.builders import FilterConfigBuilder
     from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
+    from bioetl.domain.context import VacuumSettings as CliVacuumSettings
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
-        MaintenanceConfig,
-        PipelineYamlConfig,
+        InputFilterYamlConfig as YamlInputFilter,
     )
     from bioetl.infrastructure.schemas.pipeline_config import (
-        InputFilterYamlConfig as YamlInputFilter,
+        MaintenanceConfig,
+        PipelineYamlConfig,
     )
 
 

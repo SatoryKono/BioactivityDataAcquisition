@@ -60,7 +60,7 @@ def _module_registry_value(
 
 
 def _line_span(node: ast.AST) -> tuple[int, int, int]:
-    start_line = getattr(node, "lineno")
+    start_line = node.lineno
     end_line = getattr(node, "end_lineno", None) or start_line
     return start_line, end_line, end_line - start_line + 1
 

@@ -7,11 +7,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.composite.column_service import (
     ColumnOrderService,
-    collect_explicit_group_columns,
-    collect_pattern_columns,
-    extract_field_from_qualified_name,
-    resolve_publication_field_aliases,
-    sort_columns_by_provider,
 )
 from bioetl.domain.value_objects.column_order import ColumnOrderConfig
 
