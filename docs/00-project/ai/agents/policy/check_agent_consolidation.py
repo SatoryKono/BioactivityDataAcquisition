@@ -23,11 +23,19 @@ class Finding:
 
 
 def parse_frontmatter(text: str) -> dict[str, str] | None:
-    match = re.match(r"^---\s*\n(.*?)\n---\s*\n", text, flags=re.S)
-    if not match:
+    if not text.startswith("---"):
+        return None
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return None
+    try:
+        end_index = next(
+            idx for idx, line in enumerate(lines[1:], start=1) if line.strip() == "---"
+        )
+    except StopIteration:
         return None
     frontmatter: dict[str, str] = {}
-    for line in match.group(1).splitlines():
+    for line in lines[1:end_index]:
         if ":" not in line:
             continue
         key, value = line.split(":", 1)

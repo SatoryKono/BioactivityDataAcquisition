@@ -54,8 +54,16 @@ CMD ["bioetl", "--help"]
 # ============ Development Stage ============
 FROM base AS development
 
-# Copy application source
-COPY . /app/
+# Copy development workspace explicitly to avoid recursive context import.
+COPY pyproject.toml uv.lock README.md mkdocs.yml pytest.ini /app/
+COPY src/ /app/src/
+COPY scripts/ /app/scripts/
+COPY docs/ /app/docs/
+COPY tests/ /app/tests/
+COPY configs/ /app/configs/
+COPY grafana/ /app/grafana/
+COPY package.json package-lock.json /app/
+COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /app/
 
 # Install development dependencies
 RUN pip install uv && \

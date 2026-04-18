@@ -27,7 +27,9 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 def _make_yaml_config(**overrides: object) -> PipelineYamlConfig:
     defaults = {
         "content_hash": SimpleNamespace(include=[], exclude=[]),
-        "transform": SimpleNamespace(version="2.4.0", steps=["normalize", "validate", "hash"]),
+        "transform": SimpleNamespace(
+            version="2.4.0", steps=["normalize", "validate", "hash"]
+        ),
         "silver_filters": None,
         "gold_filters": None,
     }

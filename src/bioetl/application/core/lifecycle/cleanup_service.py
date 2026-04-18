@@ -156,7 +156,9 @@ class CleanupService:
             silver_table=silver_table,
             gold_table=gold_table,
         )
-        silver_parts, gold_parts, total_files = parse_cleanup_preview_parts(preview_dict)
+        silver_parts, gold_parts, total_files = parse_cleanup_preview_parts(
+            preview_dict
+        )
         preview = CleanupPreview(
             silver=LayerInfo(*silver_parts),
             gold=LayerInfo(*gold_parts) if gold_parts is not None else None,

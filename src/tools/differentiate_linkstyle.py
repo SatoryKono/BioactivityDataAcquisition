@@ -45,7 +45,6 @@ _SKIP_LINE = re.compile(
     r"^\s*(?:%%|style\b|classDef\b|class\b|linkStyle\b|direction\b|subgraph\b|end\b)"
 )
 # Connection with optional label: SRC ARROW |label| TGT  or  SRC ARROW TGT
-_CONN_RE = re.compile(r"^\s*(\w+)\s*(-->|-.->|==>)\s*(?:\|([^|]*)\|)?\s*(\w+)")
 
 # ── Core functions ────────────────────────────────────────────────────────────
 
@@ -107,10 +106,33 @@ def parse_connections(lines: list[str]) -> list[tuple[str, str, str, str]]:
     """Return list of (src, arrow, label, tgt) for every connection line."""
     conns: list[tuple[str, str, str, str]] = []
     for ln in lines:
-        m = _CONN_RE.match(ln)
-        if m:
-            conns.append((m.group(1), m.group(2), m.group(3) or "", m.group(4)))
+        parsed = _parse_connection_line(ln)
+        if parsed is not None:
+            conns.append(parsed)
     return conns
+
+
+def _parse_connection_line(line: str) -> tuple[str, str, str, str] | None:
+    stripped = line.strip()
+    for arrow in ("-.->", "-->", "==>"):
+        if arrow not in stripped:
+            continue
+        left, _, right = stripped.partition(arrow)
+        src = left.strip()
+        if not src.isidentifier():
+            continue
+        label = ""
+        rhs = right.strip()
+        if rhs.startswith("|"):
+            _, separator, remainder = rhs[1:].partition("|")
+            if not separator:
+                return None
+            label = _.strip()
+            rhs = remainder.strip()
+        target = rhs.split(maxsplit=1)[0]
+        if target.isidentifier():
+            return src, arrow, label, target
+    return None
 
 
 def classify(

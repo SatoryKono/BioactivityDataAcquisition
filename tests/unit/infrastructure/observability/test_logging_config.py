@@ -253,7 +253,7 @@ class TestSecretFilterProcessor:
             secret_filter_processor,
         )
 
-        secret_key = "pass" "word"
+        secret_key = "password"
         event_dict = {"message": f"{secret_key}=secretpass123"}
         result = secret_filter_processor(None, "info", event_dict)
 

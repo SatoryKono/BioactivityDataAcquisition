@@ -1,6 +1,7 @@
 """No-op memory monitor and metadata writer implementations."""
 
 from __future__ import annotations
+
 import asyncio
 from collections.abc import Callable
 from datetime import datetime

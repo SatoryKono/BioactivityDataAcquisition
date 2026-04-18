@@ -3,10 +3,10 @@
 
 def load_config(config_path: str) -> dict[str, object]:
     """Load configuration from a file.
-    
+
     Args:
         config_path: Path to the configuration file.
-        
+
     Returns:
         Loaded configuration dictionary.
     """
@@ -16,13 +16,13 @@ def load_config(config_path: str) -> dict[str, object]:
 
 def load_and_validate_config(config_path: str) -> dict[str, object]:
     """Load and validate configuration.
-    
+
     Args:
         config_path: Path to the configuration file.
-        
+
     Returns:
         Validated configuration dictionary.
-        
+
     Raises:
         ValueError: If configuration is not found or invalid.
     """

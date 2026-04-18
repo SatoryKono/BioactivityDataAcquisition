@@ -3,10 +3,10 @@
 
 def validate_data(data: object) -> None:
     """Validate that data is not empty.
-    
+
     Args:
         data: Data to validate.
-        
+
     Raises:
         ValueError: If data is empty.
     """

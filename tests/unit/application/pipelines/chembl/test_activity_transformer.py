@@ -162,6 +162,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result is not None
         assert result[field_name] is None
 
+
 @pytest.mark.unit
 class TestActivityTransformerLigandEfficiency(
     SharedActivityTransformerLigandExtractionTests

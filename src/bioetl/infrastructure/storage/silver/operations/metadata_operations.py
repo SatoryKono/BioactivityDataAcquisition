@@ -222,8 +222,8 @@ class SilverMetadataOperations:
             EnvironmentMetadata,
             LineageMetadata,
             PipelineMetadata,
-            SilverOutputExt,
             RuntimeMetadata,
+            SilverOutputExt,
         )
 
         provider_name, entity_name = self._split_table_name(request.table_name)

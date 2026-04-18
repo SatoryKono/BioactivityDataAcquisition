@@ -91,9 +91,11 @@ class PostrunServiceSupportMixin:
         await run_async_postrun_phase(
             span_factory=self._postrun_span,
             phase="final_metadata",
-            operation=lambda: self._metadata_write_orchestrator.write_final_metadata_if_available(
-                executor,
-                dq_reports,
+            operation=lambda: (
+                self._metadata_write_orchestrator.write_final_metadata_if_available(
+                    executor,
+                    dq_reports,
+                )
             ),
             operation_errors=self.OPERATION_ERRORS,
             emit_phase_observability=self._emit_postrun_phase_observability,

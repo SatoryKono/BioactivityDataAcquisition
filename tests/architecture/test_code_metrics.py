@@ -385,6 +385,53 @@ class TestGodObjectDetection:
 
     EXEMPTIONS = get_registry_values("god_object")
 
+    def _class_line_count(self, class_node: ast.ClassDef) -> int:
+        start_line = class_node.lineno
+        end_line = class_node.end_lineno or start_line
+        return end_line - start_line + 1
+
+    def _is_exempt_class(self, src_dir: Path, py_file: Path, class_node: ast.ClassDef) -> bool:
+        return (
+            resolve_registry_value(
+                self.EXEMPTIONS,
+                module_path=build_module_path_key(py_file, src_root=src_dir),
+                symbol_name=class_node.name,
+            )
+            is not None
+        )
+
+    def _iter_candidate_classes(
+        self,
+        src_dir: Path,
+        source_ast_cache: dict,
+    ) -> list[tuple[Path, ast.ClassDef, int]]:
+        candidates: list[tuple[Path, ast.ClassDef, int]] = []
+        for py_file, tree in source_ast_cache.items():
+            if py_file.name.startswith("__"):
+                continue
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.ClassDef):
+                    continue
+                if self._is_exempt_class(src_dir, py_file, node):
+                    continue
+                class_lines = self._class_line_count(node)
+                if class_lines >= self.MIN_CLASS_LINES_FOR_CHECK:
+                    candidates.append((py_file, node, class_lines))
+        return candidates
+
+    def _delegation_violation(
+        self,
+        py_file: Path,
+        class_node: ast.ClassDef,
+        class_lines: int,
+        delegation_count: int,
+    ) -> str:
+        return (
+            f"{py_file.name}:{class_node.lineno} - {class_node.name} "
+            f"({class_lines} lines, {delegation_count} delegations) "
+            f"- large class with low delegation (potential god object)"
+        )
+
     def test_large_classes_have_delegation(
         self,
         src_dir: Path,
@@ -400,39 +447,19 @@ class TestGodObjectDetection:
         Exemptions are allowed for specific patterns (see EXEMPTIONS dict).
         """
         violations = []
-
-        for py_file, tree in source_ast_cache.items():
-            if py_file.name.startswith("__"):
-                continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Skip exempted classes
-                    god_object_exemption = resolve_registry_value(
-                        self.EXEMPTIONS,
-                        module_path=build_module_path_key(py_file, src_root=src_dir),
-                        symbol_name=node.name,
+        for py_file, node, class_lines in self._iter_candidate_classes(
+            src_dir, source_ast_cache
+        ):
+            delegation_count = self._count_delegation_calls(node)
+            if delegation_count < self.MIN_DELEGATION_CALLS:
+                violations.append(
+                    self._delegation_violation(
+                        py_file,
+                        node,
+                        class_lines,
+                        delegation_count,
                     )
-                    if god_object_exemption is not None:
-                        continue
-
-                    start_line = node.lineno
-                    end_line = node.end_lineno or start_line
-                    class_lines = end_line - start_line + 1
-
-                    # Only check large classes
-                    if class_lines < self.MIN_CLASS_LINES_FOR_CHECK:
-                        continue
-
-                    # Count delegation patterns in class body
-                    delegation_count = self._count_delegation_calls(node)
-
-                    if delegation_count < self.MIN_DELEGATION_CALLS:
-                        violations.append(
-                            f"{py_file.name}:{start_line} - {node.name} "
-                            f"({class_lines} lines, {delegation_count} delegations) "
-                            f"- large class with low delegation (potential god object)"
-                        )
+                )
 
         if violations:
             pytest.fail(

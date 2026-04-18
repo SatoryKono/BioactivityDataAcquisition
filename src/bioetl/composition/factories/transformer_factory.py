@@ -43,6 +43,7 @@ class TransformerRegistrationSpec:
     module_path: str
     class_name: str
 
+
 _BUILTIN_TRANSFORMER_SPECS: Final[tuple[TransformerRegistrationSpec, ...]] = tuple(
     TransformerRegistrationSpec(*spec) for spec in BUILTIN_TRANSFORMER_SPEC_ROWS
 )

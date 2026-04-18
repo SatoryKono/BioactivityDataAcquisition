@@ -37,7 +37,9 @@ class _BaseTransformerExecutionMixin:
         index: int,
     ) -> Any:
         """Create and enter an OpenTelemetry span for record transformation."""
-        return start_transform_span(cast("TransformerExecutionOwner", self), context, index)
+        return start_transform_span(
+            cast("TransformerExecutionOwner", self), context, index
+        )
 
     def _apply_silver_filter(
         self,
@@ -46,7 +48,9 @@ class _BaseTransformerExecutionMixin:
         index: int,
     ) -> None:
         """Check silver filter and raise FilteredOutError if excluded."""
-        apply_silver_filter(cast("TransformerExecutionOwner", self), context, result, index)
+        apply_silver_filter(
+            cast("TransformerExecutionOwner", self), context, result, index
+        )
 
     def _evaluate_semantic_shadow_decision(
         self,

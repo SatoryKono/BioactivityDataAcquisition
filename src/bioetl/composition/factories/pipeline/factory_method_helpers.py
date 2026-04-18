@@ -73,7 +73,9 @@ from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_confi
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-build_create_pipeline_with_services_request = _build_create_pipeline_with_services_request
+build_create_pipeline_with_services_request = (
+    _build_create_pipeline_with_services_request
+)
 build_pipeline_factory_context = _build_pipeline_factory_context
 create_factory_data_source = _create_factory_data_source
 extract_entity_type = _extract_entity_type_helper

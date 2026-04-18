@@ -731,7 +731,10 @@ def test_architecture_test_p95_duration_tracked() -> None:
     assert "qa-arch-fast:" in makefile_content, (
         "Makefile must keep the qa-arch-fast target for architecture CI"
     )
-    assert 'tests/architecture/ -m "not slow and not serial and not memory"' in makefile_content, (
+    assert (
+        'tests/architecture/ -m "not slow and not serial and not memory"'
+        in makefile_content
+    ), (
         "qa-arch-fast must exclude @pytest.mark.slow, @pytest.mark.serial, and memory tests"
     )
 

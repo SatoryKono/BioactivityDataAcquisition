@@ -397,7 +397,9 @@ class TestCsvFilterReaderLoadFilterWithFallback:
             ],
         )
 
-        result, mapping = await csv_reader.load_filter_with_fallback(path, "doi", "title")
+        result, mapping = await csv_reader.load_filter_with_fallback(
+            path, "doi", "title"
+        )
 
         assert "" not in result.ids
         assert "__title_only_0__" in result.ids
@@ -423,7 +425,9 @@ class TestCsvFilterReaderLoadFilterWithFallback:
             ],
         )
 
-        result, mapping = await csv_reader.load_filter_with_fallback(path, "doi", "title")
+        result, mapping = await csv_reader.load_filter_with_fallback(
+            path, "doi", "title"
+        )
 
         assert "__title_only_0__" in result.ids
         assert "__title_only_1__" in result.ids

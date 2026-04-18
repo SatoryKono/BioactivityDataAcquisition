@@ -178,6 +178,7 @@ class PostrunService(PostrunServiceSupportMixin):
             compaction=compaction,
         )
 
+
 __all__ = [
     "DQEvaluationStatus",
     "DQResult",

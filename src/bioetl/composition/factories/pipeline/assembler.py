@@ -29,9 +29,7 @@ from bioetl.composition.factories.pipeline.runner_assembly import (
 
 get_data_source_creator = _rf014_get_data_source_creator
 build_factory_services = _rf014_build_factory_services
-create_pipeline_instance_with_services = (
-    _rf014_create_pipeline_instance_with_services
-)
+create_pipeline_instance_with_services = _rf014_create_pipeline_instance_with_services
 _extract_entity_type = _rf014_extract_entity_type
 _extract_dq_configs = _rf014_extract_dq_configs
 _assemble_runner_impl = _rf014_assemble_runner_impl
@@ -47,7 +45,9 @@ class GenericPipelineFactory(_GenericPipelineFactory[TPipeline]):
         return super().create_with_services(*args, **kwargs)
 
 
-def create_pipeline_factory(*args: object, **kwargs: object) -> GenericPipelineFactory[object]:
+def create_pipeline_factory(
+    *args: object, **kwargs: object
+) -> GenericPipelineFactory[object]:
     return GenericPipelineFactory(*args, **kwargs)
 
 

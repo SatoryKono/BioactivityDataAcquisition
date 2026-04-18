@@ -72,14 +72,11 @@ class TestDeterministicCsvExport:
         self, tmp_path: Path, sample_records: list[dict], mock_logger: MagicMock
     ):
         """Test that multiple exports produce identical output."""
-        import random
-
         outputs = []
 
         for i in range(3):
-            # Shuffle records to simulate different input order
-            shuffled = sample_records.copy()
-            random.shuffle(shuffled)
+            # Rotate/reverse records to simulate different input orders deterministically.
+            shuffled = _reorder_records(sample_records, i)
 
             exporter = CsvExporter(
                 base_path=str(tmp_path / f"run_{i}"),
@@ -117,6 +114,14 @@ class TestDeterministicCsvExport:
         # First data row should be Alice (sorted by id)
         lines = content.strip().split("\n")
         assert "A" in lines[1], "First record should be Alice (id=A)"
+
+
+def _reorder_records(records: list[dict], variant: int) -> list[dict]:
+    if variant % 3 == 0:
+        return list(reversed(records))
+    if variant % 3 == 1:
+        return records[1:] + records[:1]
+    return records[2:] + records[:2]
 
     async def test_json_serialization_with_sort_keys(
         self, tmp_path: Path, mock_logger: MagicMock

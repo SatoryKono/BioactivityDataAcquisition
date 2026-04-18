@@ -109,6 +109,47 @@ PORT_METHOD_PATTERNS = (
 
 ALLOWED_HASATTR_CHECKS: set[str] = set()
 
+VULTURE_IGNORED_NAMES = {
+    "__init__",
+    "__str__",
+    "__repr__",
+    "__hash__",
+    "__eq__",
+    "__lt__",
+    "__le__",
+    "__gt__",
+    "__ge__",
+    "__aenter__",
+    "__aexit__",
+    "__enter__",
+    "__exit__",
+    "exc_type",
+    "exc_val",
+    "exc_tb",
+    "kind",
+    "attributes",
+    "links",
+    "set_status_on_exception",
+    "end_on_exit",
+    "fetch",
+    "write_bronze",
+    "write_silver",
+    "write_gold",
+    "acquire",
+    "release",
+    "save_checkpoint",
+    "load_checkpoint",
+    "delete_checkpoint",
+    "quarantine_record",
+    "model_config",
+    "main",
+    "param",
+    "execute",
+    "awaitable",
+}
+
+RESERVED_API_PARAMS = {"overrides", "config_path", "watermark"}
+
 
 def _exception_files(src_dir: Path) -> list[Path]:
     exceptions_dir = src_dir / "bioetl" / "domain" / "exceptions"
@@ -153,7 +194,9 @@ def _missing_exception_error_types(src_dir: Path) -> list[str]:
                 continue
             if node.name in BASE_EXCEPTION_CLASSES:
                 continue
-            if not any(base in BIOETL_EXCEPTION_BASES for base in _exception_class_bases(node)):
+            if not any(
+                base in BIOETL_EXCEPTION_BASES for base in _exception_class_bases(node)
+            ):
                 continue
             if not _has_error_type_assignment(node):
                 missing_error_type.append(node.name)
@@ -203,6 +246,53 @@ def _application_hasattr_violations(
                     f"hasattr check for '{attr_name}' suggests missing port contract"
                 )
     return violations
+
+
+def _is_reportable_vulture_item(item: object) -> bool:
+    name = getattr(item, "name", "")
+    filename = str(getattr(item, "filename", ""))
+    item_type = getattr(item, "typ", "")
+    confidence = int(getattr(item, "confidence", 0))
+    if name in VULTURE_IGNORED_NAMES or name in RESERVED_API_PARAMS:
+        return False
+    if str(name).startswith("_"):
+        return False
+    if "test" in filename.lower():
+        return False
+    if item_type == "import" and confidence < 100:
+        return False
+    return item_type != "unreachable_code"
+
+
+def _dead_code_findings(src_dir: Path) -> list[object]:
+    try:
+        from vulture import Vulture
+    except ImportError:
+        pytest.skip("vulture not installed - run: pip install vulture")
+
+    bioetl_path = src_dir / "bioetl"
+    if not bioetl_path.exists():
+        pytest.skip("bioetl source not found")
+
+    vulture = Vulture()
+    vulture.scavenge([str(bioetl_path)])
+    return [
+        item
+        for item in vulture.get_unused_code(min_confidence=80)
+        if _is_reportable_vulture_item(item)
+    ]
+
+
+def _format_dead_code_messages(unused: list[object]) -> list[str]:
+    messages = [
+        f"{getattr(item, 'filename')}:{getattr(item, 'first_lineno')} - "
+        f"unused {getattr(item, 'typ')} '{getattr(item, 'name')}' "
+        f"(confidence: {getattr(item, 'confidence')}%)"
+        for item in unused[:20]
+    ]
+    if len(unused) > 20:
+        messages.append(f"... and {len(unused) - 20} more")
+    return messages
 
 
 def test_domain_layer_no_infrastructure_imports(
@@ -529,96 +619,12 @@ def test_dead_code_vulture(src_dir: Path) -> None:
 
     REQ-ARCH-013: No unused code should exist in the codebase.
     """
-    try:
-        from vulture import Vulture
-    except ImportError:
-        pytest.skip("vulture not installed - run: pip install vulture")
-
-    bioetl_path = src_dir / "bioetl"
-    if not bioetl_path.exists():
-        pytest.skip("bioetl source not found")
-
-    v = Vulture()
-    v.scavenge([str(bioetl_path)])
-
-    # Filter results - ignore certain patterns
-    ignored_names = {
-        # Common false positives
-        "__init__",
-        "__str__",
-        "__repr__",
-        "__hash__",
-        "__eq__",
-        "__lt__",
-        "__le__",
-        "__gt__",
-        "__ge__",
-        "__aenter__",
-        "__aexit__",
-        "__enter__",
-        "__exit__",
-        # Context manager parameters (required by signature)
-        "exc_type",
-        "exc_val",
-        "exc_tb",
-        # NoOpTracer parameters (required by OpenTelemetry interface)
-        "kind",
-        "attributes",
-        "links",
-        "set_status_on_exception",
-        "end_on_exit",
-        # Protocol methods (interfaces implemented elsewhere)
-        "fetch",
-        "write_bronze",
-        "write_silver",
-        "write_gold",
-        "acquire",
-        "release",
-        "save_checkpoint",
-        "load_checkpoint",
-        "delete_checkpoint",
-        "quarantine_record",
-        # Pydantic/dataclass fields
-        "model_config",
-        # Click CLI
-        "main",
-        "param",  # Click callback signature requires param argument
-        # Prefect task decorators
-        "execute",
-        # Protocol callable parameter names
-        "awaitable",
-    }
-
-    # Get unused code with confidence threshold
-    # Note: TYPE_CHECKING imports often have 90% confidence but are not dead code
-    # API parameters reserved for future use (e.g., overrides in PipelineRunnerService)
-    reserved_api_params = {"overrides", "config_path", "watermark"}
-    unused = [
-        item
-        for item in v.get_unused_code(min_confidence=80)
-        if item.name not in ignored_names
-        and item.name not in reserved_api_params
-        and not item.name.startswith("_")  # Ignore private
-        and "test" not in str(item.filename).lower()  # Ignore test files
-        # Imports at 90% confidence in TYPE_CHECKING blocks are often false positives
-        and not (item.typ == "import" and item.confidence < 100)
-        # Unreachable code used for AsyncIterator type signature (NotImplementedError pattern)
-        # Example: `if False: yield {}; raise NotImplementedError(...)`
-        and item.typ != "unreachable_code"
-    ]
+    unused = _dead_code_findings(src_dir)
 
     if unused:
-        messages = [
-            f"{item.filename}:{item.first_lineno} - unused {item.typ} '{item.name}' "
-            f"(confidence: {item.confidence}%)"
-            for item in unused[:20]  # Limit output
-        ]
-        if len(unused) > 20:
-            messages.append(f"... and {len(unused) - 20} more")
-
         pytest.fail(
             f"Found {len(unused)} potentially dead code item(s):\n"
-            + "\n".join(messages)
+            + "\n".join(_format_dead_code_messages(unused))
         )
 
 

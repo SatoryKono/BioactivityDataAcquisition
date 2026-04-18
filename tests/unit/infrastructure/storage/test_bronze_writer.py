@@ -301,7 +301,9 @@ class TestBronzeWriterTracing:
             logger=noop_logger,
             metrics=NoOpMetrics(),
         )
-        validate_records = cast(Callable[[object], None], writer._validate_records_iterator)
+        validate_records = cast(
+            Callable[[object], None], writer._validate_records_iterator
+        )
 
         # List is an iterable (valid now)
         validate_records([b"test"])

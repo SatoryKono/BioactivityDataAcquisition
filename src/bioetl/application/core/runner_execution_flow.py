@@ -1,9 +1,14 @@
 """Execution lifecycle helpers for :mod:`bioetl.application.core.runner`."""
+
 from __future__ import annotations
 
 __all__ = [
-    "execute_pipeline", "prepare_medallion_layers", "run_execution_cycle",
-    "run_managed_pipeline", "run_postrun_phase", "validate_infrastructure",
+    "execute_pipeline",
+    "prepare_medallion_layers",
+    "run_execution_cycle",
+    "run_managed_pipeline",
+    "run_postrun_phase",
+    "validate_infrastructure",
 ]
 import time
 from collections.abc import Awaitable, Callable

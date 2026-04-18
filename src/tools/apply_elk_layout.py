@@ -18,11 +18,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
-from pathlib import Path
 import tempfile
-import os
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -62,7 +62,6 @@ _LR_RE = re.compile("|".join(LR_PATTERNS), re.IGNORECASE)
 
 _NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
 _GRAPH_LINE_RE = re.compile(r"^(graph|flowchart)\s+(TB|LR|BT|RL|TD)?", re.IGNORECASE)
-_ELK_ALREADY_RE = re.compile(r"%%\{init:.*layout.*elk", re.IGNORECASE | re.DOTALL)
 _EDGE_ROUTING_RE = re.compile(
     r"(['\"]?edgeRouting['\"]?\s*:\s*['\"])([A-Za-z_]+)(['\"])",
     re.IGNORECASE,
@@ -97,7 +96,12 @@ def is_flowchart(lines: list[str]) -> bool:
 
 
 def has_elk_init(lines: list[str]) -> bool:
-    return bool(_ELK_ALREADY_RE.search("\n".join(lines)))
+    return any(_line_has_elk_init(line) for line in lines)
+
+
+def _line_has_elk_init(line: str) -> bool:
+    lowered = line.lower()
+    return "%%{init:" in lowered and "layout" in lowered and "elk" in lowered
 
 
 def find_graph_line_index(lines: list[str]) -> int | None:
@@ -125,7 +129,9 @@ def _ensure_path_within_root(path: Path, root: Path) -> Path:
     return resolved_path
 
 
-def _safe_read_text(path: Path, max_bytes: int = 2_000_000, encoding: str = "utf-8") -> str:
+def _safe_read_text(
+    path: Path, max_bytes: int = 2_000_000, encoding: str = "utf-8"
+) -> str:
     """Read text from a path with basic safety checks to satisfy static analysis.
 
     Checks performed:

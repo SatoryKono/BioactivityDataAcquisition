@@ -698,7 +698,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
 
     dt = _load_delta_table()(str(table_path))
     records = dt.to_pyarrow_table().to_pylist()
-    
+
     # Validate that records are dictionaries
     for i, record in enumerate(records):
         if not isinstance(record, dict):
@@ -706,7 +706,7 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
                 f"Expected record at index {i} to be a dict, got {type(record).__name__}. "
                 f"Table: {table_name}, Record: {record}"
             )
-    
+
     return records
 
 
@@ -734,7 +734,7 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
 
     dt = _load_delta_table()(str(table_path))
     records = dt.to_pyarrow_table().to_pylist()
-    
+
     # Validate that records are dictionaries
     for i, record in enumerate(records):
         if not isinstance(record, dict):
@@ -742,5 +742,5 @@ def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
                 f"Expected record at index {i} to be a dict, got {type(record).__name__}. "
                 f"Gold table: {table_name}, Record: {record}"
             )
-    
+
     return records

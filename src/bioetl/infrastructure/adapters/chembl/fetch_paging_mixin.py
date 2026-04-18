@@ -46,6 +46,8 @@ CHEMBL_ADAPTER_ERRORS = (
     AttributeError,
     Exception,
 )
+
+
 class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
     """Provides ChEMBL pagination and filtered-page iteration helpers."""
 

@@ -7,14 +7,14 @@ from typing import Any, Dict
 
 def build_and_validate_metadata(key: str, value: str) -> Dict[str, str]:
     """Build and validate metadata dictionary.
-    
+
     Args:
         key: Metadata key.
         value: Metadata value.
-        
+
     Returns:
         Validated metadata dictionary.
-        
+
     Raises:
         ValueError: If metadata is empty.
     """

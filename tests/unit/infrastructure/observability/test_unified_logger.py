@@ -222,7 +222,7 @@ class TestSecretFiltering:
 
     def test_mask_password(self) -> None:
         """Test that passwords are masked."""
-        secret_key = "pass" "word"
+        secret_key = "password"
         text = f"{secret_key}=mysecretpassword"
         result = _mask_secrets(text)
 
@@ -269,7 +269,7 @@ class TestSecretFiltering:
 
     def test_secret_filter_processor_handles_nested_dicts(self) -> None:
         """Test that nested dicts are processed."""
-        secret_key = "pass" "word"
+        secret_key = "password"
         event_dict = {
             "config": {
                 secret_key: "secret123",
