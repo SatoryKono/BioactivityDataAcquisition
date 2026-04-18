@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Protocol, cast
+from typing import cast
 
 from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
+)
+from bioetl.application.core.lifecycle._checkpoint_legacy import CheckpointManager
+from bioetl.application.core.lifecycle._checkpoint_types import (
+    CheckpointCompatibilityService,
 )
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     CheckpointCompatibilityPolicy,
@@ -26,23 +30,8 @@ from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 _OPERATION_ERRORS = _RF005_OPERATION_ERRORS
 
 
-class _CheckpointCompatibilityService(Protocol):
-    """Duck-typed contract for checkpoint compatibility validation."""
-
-    def validate_checkpoint_compatibility(
-        self,
-        current_metadata: CheckpointMetadata,
-        checkpoint_metadata: CheckpointMetadata,
-    ) -> CheckpointCompatibilityResult: ...
-
-
 class CheckpointManagerService:
-    """Framework-agnostic checkpoint management.
-
-    Handles checkpoint persistence for pipeline run tracking with support
-    for loading_strategy (ADR-031) which disables checkpoint-based resume
-    for entities with unreliable offset pagination.
-    """
+    """Framework-agnostic checkpoint persistence and resume management."""
 
     def __init__(
         self,
@@ -54,26 +43,11 @@ class CheckpointManagerService:
         *,
         loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
-        checkpoint_compatibility_service: _CheckpointCompatibilityService | None = None,
+        checkpoint_compatibility_service: CheckpointCompatibilityService | None = None,
         current_metadata: CheckpointMetadata | None = None,
         compatibility_policy: CheckpointCompatibilityPolicy = "soft_fail",
     ) -> None:
-        """Initialize checkpoint manager.
-
-        Args:
-            checkpoint_port: Port for checkpoint operations.
-            logger: Logger instance.
-            pipeline_name: Name of the pipeline.
-            run_id: Unique identifier for the pipeline run.
-            resume: Whether to resume from previous checkpoint.
-            loading_strategy: Loading strategy (ADR-031).
-                FULL_SCAN_ONLY disables checkpoint resume.
-            checkpoint_compatibility_service: Optional service for DQ compatibility validation.
-            current_metadata: Optional current execution identity metadata.
-            compatibility_policy: Incompatible checkpoint handling mode
-                (`observe`, `soft_fail`, `hard_fail`).
-
-        """
+        """Initialize checkpoint management with explicit collaborators."""
         self._checkpoint = checkpoint_port
         self._logger = logger
         self._pipeline_name = pipeline_name
@@ -86,7 +60,7 @@ class CheckpointManagerService:
         self._compatibility_policy = validate_compatibility_policy(compatibility_policy)
 
     def _emit_checkpoint_load_status(self, status: str) -> None:
-        """Emit bounded checkpoint load outcome for runtime resume decisions."""
+        """Emit bounded checkpoint load outcomes for runtime resume decisions."""
         if self._metrics is None:
             return
         self._metrics.increment_counter(
@@ -100,7 +74,7 @@ class CheckpointManagerService:
 
     @property
     def current_metadata(self) -> CheckpointMetadata | None:
-        """Return current execution identity metadata used for compatibility checks."""
+        """Return execution identity metadata used for compatibility checks."""
         return self._current_metadata
 
     def _resume_blocked_by_loading_strategy(self) -> bool:
@@ -133,7 +107,7 @@ class CheckpointManagerService:
         *,
         current_metadata: CheckpointMetadata | None,
     ) -> tuple[CheckpointMetadata | None, bool]:
-        """Validate compatibility for a loaded checkpoint when runtime identity exists."""
+        """Validate a loaded checkpoint against runtime execution identity."""
         effective_current_metadata = resolve_current_metadata(
             current_metadata,
             default_metadata=self._current_metadata,
@@ -141,7 +115,7 @@ class CheckpointManagerService:
         if effective_current_metadata is None or self._compatibility_service is None:
             return checkpoint_metadata, False
         compatibility_result = cast(
-            _CheckpointCompatibilityService,
+            CheckpointCompatibilityService,
             self._compatibility_service,
         ).validate_checkpoint_compatibility(
             effective_current_metadata,
@@ -214,21 +188,7 @@ class CheckpointManagerService:
         self,
         current_metadata: CheckpointMetadata | None = None,
     ) -> CheckpointMetadata | None:
-        """Load checkpoint if resuming.
-
-        When loading_strategy is FULL_SCAN_ONLY (ADR-030, ADR-031), checkpoint loading
-        is blocked and a warning is logged. This ensures each run performs a full scan
-        of the data source, with deduplication handled on Silver layer via content_hash.
-
-        Args:
-            current_metadata: Optional current run metadata for compatibility validation.
-
-        Returns:
-            CheckpointMetadata if resume is enabled, compatible, and checkpoint exists,
-            None if resume is disabled, loading_strategy forbids resume, incompatible, or no checkpoint.
-
-        """
-        # Block resume for FULL_SCAN_ONLY loading strategy (ADR-030, ADR-031)
+        """Load a checkpoint when resume is enabled and policy allows it."""
         if self._resume_blocked_by_loading_strategy():
             self._emit_checkpoint_load_status("blocked")
             self._logger.warning(
@@ -268,14 +228,8 @@ class CheckpointManagerService:
         return compatible_checkpoint
 
     async def save_checkpoint(self, metadata: CheckpointMetadata | int) -> None:
-        """Save checkpoint with extended metadata.
-
-        Args:
-            metadata: Checkpoint metadata (CheckpointMetadata) or legacy records_processed (int)
-
-        """
+        """Save checkpoint metadata, accepting the legacy integer shorthand."""
         if isinstance(metadata, int):
-            # Legacy API compatibility - convert int to CheckpointMetadata
             metadata = CheckpointMetadata(records_processed=metadata)
         metadata = enrich_metadata_with_execution_identity(
             metadata,
@@ -293,31 +247,8 @@ class CheckpointManagerService:
         await self._checkpoint.delete(self._pipeline_name)
 
     async def list_all(self) -> list[str]:
-        """List all pipelines that have checkpoints.
-
-        Delegates to CheckpointPort.list_all() for CLI inspection.
-
-        Returns:
-            List of pipeline names with existing checkpoints.
-
-        """
+        """List all pipelines that currently have checkpoints."""
         checkpoint_names: list[str] = await self._checkpoint.list_all()
         return checkpoint_names
-
-
-# Compatibility alias retained for legacy imports; new code should use
-# CheckpointManagerService directly.
-import warnings
-
-
-class CheckpointManager(CheckpointManagerService):
-    def __init__(self, *args, **kwargs):
-        message = (
-            "CheckpointManager is deprecated and will be removed in v2.0. "
-            "Use CheckpointManagerService instead."
-        )
-        warnings.warn(message, DeprecationWarning, stacklevel=3)
-        super().__init__(*args, **kwargs)
-
 
 __all__ = ["CheckpointManager", "CheckpointManagerService"]
