@@ -148,6 +148,18 @@ def _resolve_quality_tool_command(module_name: str) -> list[str] | None:
     return None
 
 
+def _tool_error_preview(errors: list[dict[str, Any]]) -> str:
+    return "\n".join(
+        f"  - {e.get('filename', '?')}:{e.get('location', {}).get('row', '?')}: "
+        f"{e.get('code', '?')} {e.get('message', '')}"
+        for e in errors[:20]
+    )
+
+
+def _mypy_error_lines(stdout: str) -> list[str]:
+    return [line for line in stdout.splitlines() if ": error:" in line]
+
+
 def test_ruff_error_count(
     cached_subprocess_run: Callable[..., subprocess.CompletedProcess[str]],
 ) -> None:
@@ -173,11 +185,7 @@ def test_ruff_error_count(
     error_count = len(errors)
     assert error_count <= max_ruff_errors, (
         f"ruff_error_count={error_count} exceeds budget {max_ruff_errors}\n"
-        + "\n".join(
-            f"  - {e.get('filename', '?')}:{e.get('location', {}).get('row', '?')}: "
-            f"{e.get('code', '?')} {e.get('message', '')}"
-            for e in errors[:20]
-        )
+        + _tool_error_preview(errors)
     )
 
 
@@ -207,7 +215,7 @@ def test_mypy_error_count(
         timeout=300,
     )
 
-    error_lines = [line for line in result.stdout.splitlines() if ": error:" in line]
+    error_lines = _mypy_error_lines(result.stdout)
     error_count = len(error_lines)
     assert error_count <= max_mypy_errors, (
         f"mypy_error_count={error_count} exceeds budget {max_mypy_errors}\n"
@@ -721,15 +729,12 @@ def test_retry_exhausted_counter_exists() -> None:
 ARCH_TEST_P95_BUDGET_SECONDS = 30.0  # ratchet: p95 per-test duration
 
 
-def test_architecture_test_p95_duration_tracked() -> None:
-    """Architecture workflow must keep manual fast + scheduled heavy split."""
-    workflow = Path(".github/workflows/architecture.yml")
-    if not workflow.exists():
-        pytest.skip("Architecture workflow not found")
+def _read_required_file(path: Path, *, missing_message: str) -> str:
+    assert path.exists(), missing_message
+    return path.read_text(encoding="utf-8")
 
-    content = workflow.read_text(encoding="utf-8")
-    makefile = Path("Makefile")
 
+def _assert_architecture_workflow_shape(content: str) -> None:
     assert "architecture-fast-baseline" in content, (
         "Workflow must have architecture-fast-baseline job for fast profile"
     )
@@ -748,18 +753,33 @@ def test_architecture_test_p95_duration_tracked() -> None:
     assert "make qa-arch-fast" in content, (
         "Fast baseline must delegate to the canonical qa-arch-fast target"
     )
-    assert makefile.exists(), "Makefile must define the canonical qa-arch-fast target"
 
-    makefile_content = makefile.read_text(encoding="utf-8")
-    assert "qa-arch-fast:" in makefile_content, (
+
+def _assert_makefile_architecture_target(content: str) -> None:
+    assert "qa-arch-fast:" in content, (
         "Makefile must keep the qa-arch-fast target for architecture CI"
     )
     assert (
         'tests/architecture/ -m "not slow and not serial and not memory"'
-        in makefile_content
+        in content
     ), (
         "qa-arch-fast must exclude @pytest.mark.slow, @pytest.mark.serial, and memory tests"
     )
+
+
+def test_architecture_test_p95_duration_tracked() -> None:
+    """Architecture workflow must keep manual fast + scheduled heavy split."""
+    workflow = Path(".github/workflows/architecture.yml")
+    if not workflow.exists():
+        pytest.skip("Architecture workflow not found")
+
+    workflow_content = workflow.read_text(encoding="utf-8")
+    makefile_content = _read_required_file(
+        Path("Makefile"),
+        missing_message="Makefile must define the canonical qa-arch-fast target",
+    )
+    _assert_architecture_workflow_shape(workflow_content)
+    _assert_makefile_architecture_target(makefile_content)
 
 
 # ---------------------------------------------------------------------------
@@ -852,12 +872,7 @@ def test_scorecard_baseline_matches_registry() -> None:
 
 def test_scorecard_hotspot_budgets_cover_priority_registries() -> None:
     """Hotspot budgets must cover the registries declared in burn-down priorities."""
-    if not DEBT_SCORECARD_YAML.exists():
-        pytest.skip("Debt scorecard YAML not found")
-
-    with open(DEBT_SCORECARD_YAML, encoding="utf-8") as f:
-        scorecard = yaml.safe_load(f)
-
+    scorecard = _load_debt_scorecard()
     governance = scorecard.get("governance", {})
     assert isinstance(governance, dict)
     burn_down = governance.get("burn_down_priorities", {})
