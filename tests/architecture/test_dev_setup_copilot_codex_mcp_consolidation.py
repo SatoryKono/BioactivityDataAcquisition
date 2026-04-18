@@ -82,9 +82,9 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert _posix(servers["memory"]["env"]["MEMORY_FILE_PATH"]).endswith(
         "/docs/00-project/ai/memory/mcp-memory.json"
     )
-    assert _posix(servers["filesystem"]["args"][-1]).endswith(
-        "/BioactivityDataAcquisition2"
-    )
+    filesystem_scope = Path(str(servers["filesystem"]["args"][-1]))
+    assert filesystem_scope.exists()
+    assert filesystem_scope.resolve().samefile(root.resolve())
     assert servers["sequential-thinking"]["args"][1] == (
         "@modelcontextprotocol/server-sequential-thinking@2025.12.18"
     )
