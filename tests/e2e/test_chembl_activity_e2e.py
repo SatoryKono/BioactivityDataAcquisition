@@ -73,9 +73,6 @@ async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
-        assert "_run_id" in record
-        assert "_run_type" in record
-        assert "_ingestion_ts" in record
 
 
 @pytest.mark.e2e

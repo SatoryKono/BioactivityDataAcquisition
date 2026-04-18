@@ -28,6 +28,7 @@ def _build_circuit_breaker_guard() -> CircuitBreakerGuard:
 def integration_relaxed_dq() -> None:
     """Relax DQ thresholds for integration tests using VCR cassettes."""
     os.environ["BIOETL_TEST_RELAXED_DQ"] = "1"
+    os.environ["BIOETL_PIPELINE__RELAXED_DQ"] = "1"
 
 
 @pytest.fixture

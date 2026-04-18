@@ -38,7 +38,9 @@ def _read_framed_message(stream: BinaryIO) -> dict[str, Any] | None:
     while True:
         line = stream.readline()
         if not line:
-            return None if not saw_header else None
+            if saw_header:
+                raise EOFError("Unexpected EOF while reading framed MCP headers.")
+            return None
         saw_header = True
         if line == b"\r\n":
             break

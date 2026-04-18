@@ -12,7 +12,7 @@ Tests cover:
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable
 import time
 from typing import Any
 from unittest.mock import MagicMock
@@ -74,11 +74,11 @@ class MockDataSource:
         for record in self._records:
             yield record
 
-    def health_check(self) -> asyncio.Future[HealthStatus]:
+    def health_check(self) -> Awaitable[HealthStatus]:
         self._health_check_call_count += 1
         return asyncio.sleep(0, result=self._health_status)
 
-    def aclose(self) -> asyncio.Future[None]:
+    def aclose(self) -> Awaitable[None]:
         return asyncio.sleep(0)
 
 

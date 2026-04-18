@@ -18,8 +18,8 @@ from bioetl.infrastructure.adapters._cached_bronze_support import (
 class _ReaderStub:
     """Minimal reader stub for cached-Bronze helper tests."""
 
-    def __init__(self, *, base_path: str, flat_structure: bool) -> None:
-        self.base_path = Path(base_path)
+    def __init__(self, *, base_path: Path, flat_structure: bool) -> None:
+        self.base_path = base_path
         self._flat_structure = flat_structure
 
 
@@ -27,7 +27,7 @@ class _ReaderStub:
 def test_resolve_bronze_path_uses_base_path_for_flat_structure() -> None:
     """Flat layout should keep empty-cache errors anchored at base_path."""
     reader = _ReaderStub(
-        base_path="/tmp/bronze/chembl/activity",
+        base_path=Path("/tmp/bronze/chembl/activity"),
         flat_structure=True,
     )
 
@@ -44,7 +44,7 @@ def test_resolve_bronze_path_uses_base_path_for_flat_structure() -> None:
 def test_resolve_bronze_path_appends_provider_and_entity_for_nested_layout() -> None:
     """Nested layout should point empty-cache errors at provider/entity path."""
     reader = _ReaderStub(
-        base_path="/tmp/bronze",
+        base_path=Path("/tmp/bronze"),
         flat_structure=False,
     )
 
@@ -61,7 +61,7 @@ def test_resolve_bronze_path_appends_provider_and_entity_for_nested_layout() -> 
 def test_raise_if_empty_batches_raises_cached_bronze_empty_error() -> None:
     """Empty batch lists should raise the canonical cached-Bronze error."""
     reader = _ReaderStub(
-        base_path="/tmp/bronze",
+        base_path=Path("/tmp/bronze"),
         flat_structure=False,
     )
 
@@ -85,7 +85,7 @@ def test_raise_if_empty_batches_raises_cached_bronze_empty_error() -> None:
 def test_raise_if_empty_batches_is_noop_when_batches_exist() -> None:
     """Non-empty batch lists should not raise."""
     reader = _ReaderStub(
-        base_path="/tmp/bronze",
+        base_path=Path("/tmp/bronze"),
         flat_structure=False,
     )
 

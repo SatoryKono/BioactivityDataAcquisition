@@ -130,6 +130,7 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
     monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
+    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
 
@@ -221,6 +222,7 @@ async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
     monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
+    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
 
     def _raise_live_data_source(*args: object, **kwargs: object) -> object:
         raise AssertionError(
@@ -268,6 +270,7 @@ async def test_exact_replay_without_materialized_cached_bronze_batches_fails_clo
     monkeypatch.setenv("BIOETL_TEST_MODE", "true")
     monkeypatch.setenv("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
     monkeypatch.setenv("BIOETL_TEST_RELAXED_DQ", "1")
+    monkeypatch.setenv("BIOETL_PIPELINE__RELAXED_DQ", "1")
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
 
