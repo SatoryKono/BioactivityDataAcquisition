@@ -498,6 +498,7 @@ def run(argv: list[str] | None = None) -> int:
     token = _require_token(args.token_env)
     existing_issues = _list_repo_issues(args.owner, args.repo, token)
     resolved_issues: list[IssueRecord] = []
+    created_count = 0
 
     for template in templates:
         existing = _find_existing_issue(existing_issues, title=template.title)
@@ -511,6 +512,7 @@ def run(argv: list[str] | None = None) -> int:
             template=template,
         )
         resolved_issues.append(created)
+        created_count += 1
 
     comment_body = _build_parent_comment(
         parent_issue=args.parent_issue,
@@ -541,7 +543,7 @@ def run(argv: list[str] | None = None) -> int:
             print(f"\nPosted follow-up comment to #{args.parent_issue}.")
         else:
             print(f"\nParent comment preview:\n\n{comment_body}")
-    return len(resolved_issues)
+    return created_count
 
 
 def main(argv: list[str] | None = None) -> int:
