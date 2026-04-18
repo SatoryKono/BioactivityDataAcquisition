@@ -109,24 +109,25 @@ def resolve_replay_parentage(
     ctx: PipelineRunContext,
     runtime_config: object,
 ) -> tuple[str | None, str | None]:
+    """Resolve the replay parentage."""
     runtime_config_mapping = _as_runtime_config_mapping(runtime_config)
-    replay_of_run_id = _coerce_optional_text(getattr(ctx, "replay_of_run_id", None))
-    replay_of_manifest_id = _coerce_optional_text(
-        getattr(ctx, "replay_of_manifest_id", None)
-    )
-    if replay_of_run_id is None:
-        replay_of_run_id = _resolve_replay_parentage_mapping_value(
-            runtime_config_mapping,
-            "replay_of_run_id",
-            "exact_replay_parent_run_id",
-        )
-    if replay_of_manifest_id is None:
-        replay_of_manifest_id = _resolve_replay_parentage_mapping_value(
-            runtime_config_mapping,
-            "replay_of_manifest_id",
-            "exact_replay_parent_manifest_id",
-        )
+    replay_of_run_id = _resolve_replay_id(ctx, "replay_of_run_id", runtime_config_mapping)
+    replay_of_manifest_id = _resolve_replay_id(ctx, "replay_of_manifest_id", runtime_config_mapping)
     return replay_of_run_id, replay_of_manifest_id
+
+
+def _resolve_replay_id(
+    ctx: PipelineRunContext,
+    attr_name: str,
+    runtime_config_mapping: Mapping[str, object],
+) -> str | None:
+    """Resolve the replay ID from context or runtime config."""
+    ctx_value = _coerce_optional_text(getattr(ctx, attr_name, None))
+    if ctx_value is not None:
+        return ctx_value
+    
+    keys = (attr_name, f"exact_replay_parent_{attr_name}")
+    return _resolve_replay_parentage_mapping_value(runtime_config_mapping, *keys)
 
 
 def resolve_provider_entity(
