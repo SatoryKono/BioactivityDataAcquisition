@@ -924,6 +924,37 @@ def _cli_semantics_statement() -> str:
     )
 
 
+QUERY_STATEMENTS: dict[str, Callable[[], str]] = {
+    "neighbors": _neighbors_statement,
+    "docs_drift": _docs_drift_statement,
+    "workflow_gates": _workflow_gates_statement,
+    "workflow_artifacts": _workflow_artifacts_statement,
+    "workflow_execution": _workflow_execution_statement,
+    "storage_lineage": _storage_lineage_statement,
+    "field_lineage": _field_lineage_statement,
+    "schema_drift": _schema_drift_statement,
+    "run_artifacts": _run_artifacts_statement,
+    "runtime_state": _runtime_state_statement,
+    "runtime_locks": lambda: _runtime_state_statement(locks_only=True),
+    "claim_trace": _claim_trace_statement,
+    "cli_semantics": _cli_semantics_statement,
+    "normalization_pipeline": _normalization_pipeline_statement,
+    "fallback_pipelines": _fallback_pipelines_statement,
+    "duplication_cluster": _duplication_cluster_statement,
+    "promotion_candidates": _promotion_candidates_statement,
+    "dead_code_candidates": _dead_code_candidates_statement,
+    "current_cycle_code": _current_cycle_code_statement,
+    "overengineered_candidates": _overengineered_candidates_statement,
+    "removable_complexity": _removable_complexity_statement,
+    "simplification_blockers": _simplification_blockers_statement,
+}
+
+
+def _statement_for_profile_mode(mode: str) -> str:
+    statement_builder = QUERY_STATEMENTS.get(mode, _ownership_statement)
+    return statement_builder()
+
+
 def _run_query(
     root: Path,
     profile: str,
@@ -939,51 +970,7 @@ def _run_query(
     }
     if profile_config["mode"] == "neighbors":
         params["relation_types"] = list(profile_config.get("relation_types", DEFAULT_NEIGHBOR_RELATION_TYPES))
-        statement = _neighbors_statement()
-    elif profile_config["mode"] == "docs_drift":
-        statement = _docs_drift_statement()
-    elif profile_config["mode"] == "workflow_gates":
-        statement = _workflow_gates_statement()
-    elif profile_config["mode"] == "workflow_artifacts":
-        statement = _workflow_artifacts_statement()
-    elif profile_config["mode"] == "workflow_execution":
-        statement = _workflow_execution_statement()
-    elif profile_config["mode"] == "storage_lineage":
-        statement = _storage_lineage_statement()
-    elif profile_config["mode"] == "field_lineage":
-        statement = _field_lineage_statement()
-    elif profile_config["mode"] == "schema_drift":
-        statement = _schema_drift_statement()
-    elif profile_config["mode"] == "run_artifacts":
-        statement = _run_artifacts_statement()
-    elif profile_config["mode"] == "runtime_state":
-        statement = _runtime_state_statement()
-    elif profile_config["mode"] == "runtime_locks":
-        statement = _runtime_state_statement(locks_only=True)
-    elif profile_config["mode"] == "claim_trace":
-        statement = _claim_trace_statement()
-    elif profile_config["mode"] == "cli_semantics":
-        statement = _cli_semantics_statement()
-    elif profile_config["mode"] == "normalization_pipeline":
-        statement = _normalization_pipeline_statement()
-    elif profile_config["mode"] == "fallback_pipelines":
-        statement = _fallback_pipelines_statement()
-    elif profile_config["mode"] == "duplication_cluster":
-        statement = _duplication_cluster_statement()
-    elif profile_config["mode"] == "promotion_candidates":
-        statement = _promotion_candidates_statement()
-    elif profile_config["mode"] == "dead_code_candidates":
-        statement = _dead_code_candidates_statement()
-    elif profile_config["mode"] == "current_cycle_code":
-        statement = _current_cycle_code_statement()
-    elif profile_config["mode"] == "overengineered_candidates":
-        statement = _overengineered_candidates_statement()
-    elif profile_config["mode"] == "removable_complexity":
-        statement = _removable_complexity_statement()
-    elif profile_config["mode"] == "simplification_blockers":
-        statement = _simplification_blockers_statement()
-    else:
-        statement = _ownership_statement()
+    statement = _statement_for_profile_mode(str(profile_config["mode"]))
     return client.query(
         statement,
         params,
