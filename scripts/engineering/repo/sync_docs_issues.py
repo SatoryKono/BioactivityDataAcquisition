@@ -459,7 +459,7 @@ def _print_json_payload(
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
-def run(argv: list[str] | None = None) -> int:
+def run(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     updates = _select_updates(_build_issue_updates(), args.issues)
     if not updates:
@@ -483,7 +483,7 @@ def run(argv: list[str] | None = None) -> int:
                 milestone_title=milestone_title,
                 skip_comments=args.skip_comments,
             )
-        return 0
+        return
 
     token = _require_token(args.token_env)
     milestone: MilestoneRecord | None = None
@@ -550,18 +550,19 @@ def run(argv: list[str] | None = None) -> int:
                 print("  Comment: <skipped>")
             else:
                 print("  Comment: posted")
-    return 0
+    return
 
 
 def main(argv: list[str] | None = None) -> int:
     try:
-        return run(argv)
+        run(argv)
     except ValueError as exc:
         print(f"[FAIL] {exc}", file=sys.stderr)
         return 2
     except RuntimeError as exc:
         print(f"[FAIL] {exc}", file=sys.stderr)
         return 1
+    return 0
 
 
 if __name__ == "__main__":

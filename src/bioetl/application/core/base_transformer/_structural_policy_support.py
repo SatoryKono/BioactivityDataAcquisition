@@ -12,8 +12,8 @@ from bioetl.application.core.base_transformer._structural_policy_types import (
 from bioetl.domain.types import JsonDict, SilverRecord
 
 if TYPE_CHECKING:
-    from bioetl.application.core.base_transformer.field_policy import (
-        FieldPolicyResolver,
+    from bioetl.application.core.base_transformer._structural_policy_types import (
+        StructuralPolicyProtocol,
     )
 
 _SENSITIVE_FIELD_NAME_TOKENS = frozenset(
@@ -118,3 +118,36 @@ def preview_value(
     if len(preview) <= max_length:
         return preview
     return f"{preview[: max_length - 3]}..."
+
+
+def build_structural_policy(
+    *,
+    domain_config: object,
+    pandera_silver_schema: object | None,
+) -> StructuralPolicyProtocol:
+    """Build structural policy from pipeline domain config and Pandera schema."""
+    from bioetl.application.core.base_transformer._structural_policy_contracts import (
+        resolve_field_contracts,
+        resolve_pandera_schema,
+    )
+    from bioetl.application.core.base_transformer.field_policy import (
+        FieldPolicyResolver,
+    )
+    from bioetl.application.core.base_transformer.structural_policy import (
+        SchemaAwareStructuralPolicy,
+    )
+
+    schema = resolve_pandera_schema(pandera_silver_schema)
+    if schema is None:
+        return NoOpStructuralPolicy()
+
+    field_policy_resolver = FieldPolicyResolver.from_domain_config(domain_config)
+    contracts = tuple(
+        resolve_field_contracts(
+            schema=schema,
+            field_policy_resolver=field_policy_resolver,
+        )
+    )
+    if not contracts:
+        return NoOpStructuralPolicy()
+    return SchemaAwareStructuralPolicy(contracts=contracts)

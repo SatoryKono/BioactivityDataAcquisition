@@ -470,7 +470,7 @@ def _print_json_payload(
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
-def run(argv: list[str] | None = None) -> int:
+def run(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     templates = _build_child_issue_templates(args.parent_issue)
 
@@ -493,7 +493,7 @@ def run(argv: list[str] | None = None) -> int:
             )
         else:
             _print_dry_run(templates=templates, comment_body=comment_body)
-        return 0
+        return
 
     token = _require_token(args.token_env)
     existing_issues = _list_repo_issues(args.owner, args.repo, token)
@@ -541,18 +541,19 @@ def run(argv: list[str] | None = None) -> int:
             print(f"\nPosted follow-up comment to #{args.parent_issue}.")
         else:
             print(f"\nParent comment preview:\n\n{comment_body}")
-    return 0
+    return
 
 
 def main(argv: list[str] | None = None) -> int:
     try:
-        return run(argv)
+        run(argv)
     except ValueError as exc:
         print(f"[FAIL] {exc}", file=sys.stderr)
         return 2
     except RuntimeError as exc:
         print(f"[FAIL] {exc}", file=sys.stderr)
         return 1
+    return 0
 
 
 if __name__ == "__main__":

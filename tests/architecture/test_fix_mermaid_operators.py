@@ -87,7 +87,7 @@ def test_fix_file_rewrites_invalid_arrows_in_place(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    replacements = module.fix_file(diagram, dry_run=False)
+    replacements = module.fix_file(diagram, dry_run=False, allow_non_repo_path=True)
     content = diagram.read_text(encoding="utf-8")
 
     assert replacements == 2
@@ -104,7 +104,7 @@ def test_fix_file_dry_run_does_not_modify_file(tmp_path: Path) -> None:
     original = "\n".join(["classDiagram", "A ==> B"]) + "\n"
     diagram.write_text(original, encoding="utf-8")
 
-    replacements = module.fix_file(diagram, dry_run=True)
+    replacements = module.fix_file(diagram, dry_run=True, allow_non_repo_path=True)
     content_after = diagram.read_text(encoding="utf-8")
 
     assert replacements == 1

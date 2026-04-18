@@ -39,5 +39,7 @@ def build_inchikey_endpoint() -> str:
 
 def build_cid_batch_endpoint(batch: list[int]) -> str:
     """Build endpoint for CID batch lookup."""
+    if not batch:
+        raise ValueError("CID batch must contain at least one CID")
     preview = ",".join(map(str, batch[:3]))
     return f"/compound/cid/{preview},.../JSON"

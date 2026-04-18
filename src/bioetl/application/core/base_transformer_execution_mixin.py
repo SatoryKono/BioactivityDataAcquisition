@@ -7,13 +7,16 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core._base_transformer_execution_support import (
     TransformerExecutionOwner,
-    apply_silver_filter,
-    apply_structural_policy,
     handle_transformation_error,
     handle_validation_error,
     record_metrics_and_close_span,
-    record_structural_policy_metrics,
     start_transform_span,
+)
+from bioetl.application.core._base_transformer_structural_support import (
+    apply_silver_filter,
+    apply_structural_policy,
+    evaluate_semantic_shadow_decision,
+    record_structural_policy_metrics,
 )
 from bioetl.application.core.base_transformer.errors import (
     TransformationError,
@@ -50,10 +53,10 @@ class _BaseTransformerExecutionMixin:
         result: SilverRecord | None,
     ) -> FilterDecision | None:
         """Evaluate semantic Silver filters for shadow comparison only."""
-        owner = cast("TransformerExecutionOwner", self)
-        if result is None or owner._silver_filters is None or owner._silver_filters.is_empty():
-            return None
-        return owner._silver_filters.evaluate(cast("dict[str, object]", result))
+        return evaluate_semantic_shadow_decision(
+            cast("TransformerExecutionOwner", self),
+            result,
+        )
 
     def _record_structural_policy_metrics(
         self,

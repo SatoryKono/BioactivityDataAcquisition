@@ -3,30 +3,18 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol
 
-from bioetl.application.core.base_transformer.errors import (
-    FilteredOutError,
-    TransformationError,
-)
+from bioetl.application.core.base_transformer.errors import TransformationError
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer.structural_policy import (
         StructuralPolicyProtocol,
     )
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.filtering import FilterDecision, SilverFilterConfig
+    from bioetl.domain.filtering import SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, TracingPort
-    from bioetl.domain.types import BronzeRecord, GoldRecord, SilverRecord
-
-_STRUCTURAL_ACTION_BY_REASON_CODE: dict[str, str] = {
-    "required_field_missing": "presence_quarantine",
-    "required_field_type_mismatch": "required_type_quarantine",
-    "optional_nonnullable_field_type_mismatch": "optional_nonnullable_quarantine",
-}
-_STRUCTURAL_ACTION_BY_EVENT: dict[str, str] = {
-    "silver_structural_type_coerced_to_null": "nullable_type_to_null",
-}
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class TransformerExecutionOwner(Protocol):
@@ -46,39 +34,6 @@ class TransformerExecutionOwner(Protocol):
         index: int,
     ) -> SilverRecord | None:
         """Implement entity-specific transformation logic."""
-
-
-def classify_structural_action(
-    details: dict[str, object] | None,
-    event_names: set[str],
-) -> str | None:
-    """Map structural details/events to a bounded telemetry action label."""
-    if details is not None:
-        reason_code = details.get("reason_code")
-        if isinstance(reason_code, str):
-            mapped = _STRUCTURAL_ACTION_BY_REASON_CODE.get(reason_code)
-            if mapped is not None:
-                return mapped
-    for event_name in event_names:
-        mapped = _STRUCTURAL_ACTION_BY_EVENT.get(event_name)
-        if mapped is not None:
-            return mapped
-    return None
-
-
-def classify_structural_shadow_comparison(
-    *,
-    structural_rejected: bool,
-    semantic_decision: FilterDecision | None,
-) -> str | None:
-    """Build a bounded comparison label for structural vs semantic filtering."""
-    if semantic_decision is None:
-        return None
-    semantic_state = "reject" if not semantic_decision.include else "pass"
-    structural_state = "reject" if structural_rejected else "pass"
-    return f"structural_{structural_state}_semantic_{semantic_state}"
-
-
 def start_transform_span(
     owner: TransformerExecutionOwner,
     context: PipelineContext,
@@ -97,147 +52,6 @@ def start_transform_span(
     )
     span.__enter__()
     return span
-
-
-def apply_silver_filter(
-    owner: TransformerExecutionOwner,
-    context: PipelineContext,
-    result: SilverRecord | None,
-    index: int,
-) -> None:
-    """Check silver filter and raise FilteredOutError if excluded."""
-    if result is None or owner._silver_filters is None or owner._silver_filters.is_empty():
-        return
-
-    decision = owner._silver_filters.evaluate(cast("GoldRecord", result))
-    if decision.include:
-        return
-
-    context.logger.debug(
-        "silver_filter_quarantined",
-        provider=owner.provider,
-        entity_type=owner.entity_type,
-        record_index=index,
-        filter_reason_code=decision.reason_code,
-        filter_rule_type=decision.rule_type,
-        filter_field=decision.field,
-    )
-    raise FilteredOutError(
-        decision.message or "Record excluded by silver filters",
-        details={"policy_stage": "semantic", **decision.to_dict()},
-    )
-
-
-def evaluate_semantic_shadow_decision(
-    owner: TransformerExecutionOwner,
-    result: SilverRecord | None,
-) -> FilterDecision | None:
-    """Evaluate semantic Silver filters for shadow comparison only."""
-    if result is None or owner._silver_filters is None or owner._silver_filters.is_empty():
-        return None
-    return owner._silver_filters.evaluate(cast("GoldRecord", result))
-
-
-def record_structural_policy_metrics(
-    owner: TransformerExecutionOwner,
-    *,
-    action: str | None,
-    shadow_comparison: str | None,
-) -> None:
-    """Emit bounded telemetry for structural actions and shadow comparisons."""
-    if action is not None:
-        owner._metrics.increment_counter(
-            "bioetl_structural_policy_events_total",
-            1,
-            labels={
-                "provider": owner.provider,
-                "entity_type": owner.entity_type,
-                "action": action,
-            },
-        )
-    if shadow_comparison is not None:
-        owner._metrics.increment_counter(
-            "bioetl_structural_policy_shadow_comparisons_total",
-            1,
-            labels={
-                "provider": owner.provider,
-                "entity_type": owner.entity_type,
-                "comparison": shadow_comparison,
-            },
-        )
-
-
-def apply_structural_policy(
-    owner: TransformerExecutionOwner,
-    context: PipelineContext,
-    result: SilverRecord | None,
-    index: int,
-) -> SilverRecord | None:
-    """Apply schema-aware structural policy before semantic Silver filters."""
-    if result is None:
-        return None
-
-    outcome = owner._structural_policy.apply(result)
-    semantic_shadow_decision = evaluate_semantic_shadow_decision(
-        owner,
-        outcome.record if not outcome.should_quarantine else result,
-    )
-    structural_action = classify_structural_action(
-        cast("dict[str, object] | None", outcome.details),
-        {event.event for event in outcome.events},
-    )
-    shadow_comparison = classify_structural_shadow_comparison(
-        structural_rejected=outcome.should_quarantine,
-        semantic_decision=semantic_shadow_decision,
-    )
-    record_structural_policy_metrics(
-        owner,
-        action=structural_action,
-        shadow_comparison=shadow_comparison,
-    )
-
-    for event in outcome.events:
-        log_method = getattr(context.logger, event.level)
-        log_method(
-            event.event,
-            provider=owner.provider,
-            entity_type=owner.entity_type,
-            record_index=index,
-            **event.details,
-        )
-
-    if not outcome.should_quarantine:
-        return outcome.record
-
-    details = outcome.details or {}
-    context.logger.debug(
-        "silver_structural_quarantined",
-        provider=owner.provider,
-        entity_type=owner.entity_type,
-        record_index=index,
-        reason_code=details.get("reason_code"),
-        field=details.get("field"),
-        action_taken=details.get("action_taken"),
-        shadow_comparison=shadow_comparison,
-        semantic_shadow_reason_code=(
-            semantic_shadow_decision.reason_code
-            if semantic_shadow_decision is not None
-            else None
-        ),
-    )
-    raise FilteredOutError(
-        outcome.quarantine_reason or "Record excluded by structural policy",
-        details={
-            **details,
-            "policy_stage": "structural",
-            "shadow_comparison": shadow_comparison,
-            "semantic_shadow_reason_code": (
-                semantic_shadow_decision.reason_code
-                if semantic_shadow_decision is not None
-                else None
-            ),
-        },
-    )
 
 
 def handle_transformation_error(
