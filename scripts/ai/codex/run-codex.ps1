@@ -10,7 +10,7 @@ param(
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $HelperDir = Join-Path $ScriptDir "helper"
 $RepoWSL = "/mnt/e/g-drive/05_ai/github/BioactivityDataAcquisition2"
-$HelperWSL = "$RepoWSL/script-codex/helper"
+$HelperWSL = "$RepoWSL/scripts/ai/codex/helper"
 
 # Colors
 $Colors = @{ Success = "Green"; Warning = "Yellow"; Error = "Red"; Info = "Cyan" }

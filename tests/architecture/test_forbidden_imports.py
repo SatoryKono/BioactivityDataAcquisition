@@ -23,6 +23,83 @@ import re
 from pathlib import Path
 
 
+def _python_files(path: Path, *, skip_private: bool = False) -> list[Path]:
+    files = sorted(path.rglob("*.py"))
+    if skip_private:
+        files = [py_file for py_file in files if not py_file.name.startswith("_")]
+    return files
+
+
+def _read_file(py_file: Path) -> str:
+    return py_file.read_text(encoding="utf-8")
+
+
+def _parse_file(py_file: Path) -> ast.AST:
+    return ast.parse(_read_file(py_file))
+
+
+def _relative(src_dir: Path, py_file: Path) -> Path:
+    return py_file.relative_to(src_dir)
+
+
+def _interfaces_path(src_dir: Path) -> Path:
+    interfaces_path = src_dir / "bioetl" / "interfaces"
+    assert interfaces_path.exists(), "Interfaces layer not found"
+    return interfaces_path
+
+
+def _module_import_violations(
+    py_file: Path,
+    src_dir: Path,
+    *,
+    exact_modules: set[str] | None = None,
+    startswith_modules: tuple[str, ...] = (),
+) -> list[str]:
+    exact_modules = exact_modules or set()
+    violations: list[str] = []
+    tree = _parse_file(py_file)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            module = node.module
+            if module is None:
+                continue
+            if module in exact_modules or module.startswith(startswith_modules):
+                violations.append(f"{_relative(src_dir, py_file)}:{node.lineno}")
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                module = alias.name
+                if module in exact_modules or module.startswith(startswith_modules):
+                    violations.append(f"{_relative(src_dir, py_file)}:{node.lineno}")
+    return violations
+
+
+def _composition_module_violations(
+    py_file: Path,
+    src_dir: Path,
+    *,
+    allowed_modules: set[str],
+) -> list[str]:
+    violations: list[str] = []
+    tree = _parse_file(py_file)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            module = node.module
+            if module is not None and module.startswith("bioetl.composition."):
+                if module not in allowed_modules:
+                    violations.append(
+                        f"{_relative(src_dir, py_file)}:{node.lineno} -> {module}"
+                    )
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                module = alias.name
+                if module.startswith("bioetl.composition."):
+                    if module not in allowed_modules:
+                        violations.append(
+                            f"{_relative(src_dir, py_file)}:{node.lineno} -> {module}"
+                        )
+    return violations
+
+
 def _is_forbidden_port_import_target(module_name: str) -> bool:
     """Return True for non-sanctioned port submodule imports.
 
@@ -72,9 +149,8 @@ class TestLocalOnlyPolicy:
 
         violations = []
 
-        # Walk through all python files
-        for py_file in source_path.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file in _python_files(source_path):
+            content = _read_file(py_file)
 
             for lib in forbidden_libs:
                 # Check for various import forms:
@@ -89,8 +165,9 @@ class TestLocalOnlyPolicy:
                     # Simple check - could be improved with AST if false positives occur
                     # but these libs are distinct enough.
                     if re.search(r"^" + pattern + r"\b", content, re.MULTILINE):
-                        relative_path = py_file.relative_to(src_dir)
-                        violations.append(f"{relative_path}: imports '{lib}'")
+                        violations.append(
+                            f"{_relative(src_dir, py_file)}: imports '{lib}'"
+                        )
 
         assert not violations, (
             "Violation of Local-Only Architecture (ADR-010).\n"
@@ -116,11 +193,11 @@ class TestOrchestrationIsolation:
         disallowed = ["prefect", "celery", "airflow", "dagster"]
         violations = []
 
-        for py_file in application_path.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file in _python_files(application_path):
+            content = _read_file(py_file)
             for lib in disallowed:
                 if f"from {lib}" in content or f"import {lib}" in content:
-                    violations.append(f"{py_file.relative_to(src_dir)}: imports {lib}")
+                    violations.append(f"{_relative(src_dir, py_file)}: imports {lib}")
 
         assert not violations, (
             "Application layer has direct orchestration imports:\n"
@@ -154,10 +231,8 @@ class TestObservabilityInitialization:
             if not layer_path.exists():
                 continue
 
-            for py_file in layer_path.rglob("*.py"):
-                with py_file.open(encoding="utf-8") as f:
-                    content = f.read()
-                    lines = content.splitlines()
+            for py_file in _python_files(layer_path):
+                lines = _read_file(py_file).splitlines()
 
                 for i, line in enumerate(lines, 1):
                     # Check if line contains actual call to start_metrics_server
@@ -166,8 +241,9 @@ class TestObservabilityInitialization:
                         if any(re.search(p, line) for p in allowed_patterns):
                             continue
 
-                        relative_path = py_file.relative_to(src_dir)
-                        violations.append(f"{relative_path}:{i} - {line.strip()}")
+                        violations.append(
+                            f"{_relative(src_dir, py_file)}:{i} - {line.strip()}"
+                        )
 
         assert not violations, (
             "start_metrics_server() should only be called from composition layer.\n"
@@ -194,9 +270,9 @@ class TestPortImportFacade:
             if not layer_path.exists():
                 continue
 
-            for py_file in layer_path.rglob("*.py"):
-                tree = ast.parse(py_file.read_text(encoding="utf-8"))
-                relative_path = py_file.relative_to(src_dir)
+            for py_file in _python_files(layer_path):
+                tree = _parse_file(py_file)
+                relative_path = _relative(src_dir, py_file)
 
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Import):
@@ -288,8 +364,7 @@ class TestInterfacesFilesystemAccess:
 
         REQ-ARCH-023: CLI delegates to StoragePort, not Path.rglob.
         """
-        interfaces_path = src_dir / "bioetl" / "interfaces"
-        assert interfaces_path.exists(), "Interfaces layer not found"
+        interfaces_path = _interfaces_path(src_dir)
 
         forbidden_patterns = [
             r"\.rglob\(",
@@ -342,13 +417,12 @@ class TestInterfacesBootstrapIsolation:
         ]
 
         violations = []
-        for py_file in interfaces_path.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
+        for py_file in _python_files(interfaces_path):
+            content = _read_file(py_file)
             for pattern in forbidden_patterns:
                 if re.search(pattern, content):
-                    relative_path = py_file.relative_to(src_dir)
                     violations.append(
-                        f"{relative_path}: imports from bootstrap directly"
+                        f"{_relative(src_dir, py_file)}: imports from bootstrap directly"
                     )
                     break
 
@@ -364,26 +438,15 @@ class TestInterfacesBootstrapIsolation:
 
     def test_interfaces_no_direct_entrypoints_imports(self, src_dir: Path) -> None:
         """Interfaces must consume narrow composition APIs, not entrypoints façade."""
-        interfaces_path = src_dir / "bioetl" / "interfaces"
-        assert interfaces_path.exists(), "Interfaces layer not found"
-
         violations: list[str] = []
-        for py_file in interfaces_path.rglob("*.py"):
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ImportFrom):
-                    if node.module == "bioetl.composition.entrypoints":
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
-                elif isinstance(node, ast.Import):
-                    if any(
-                        alias.name == "bioetl.composition.entrypoints"
-                        for alias in node.names
-                    ):
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
+        for py_file in _python_files(_interfaces_path(src_dir)):
+            violations.extend(
+                _module_import_violations(
+                    py_file,
+                    src_dir,
+                    exact_modules={"bioetl.composition.entrypoints"},
+                )
+            )
 
         assert not violations, (
             "Interfaces layer must not import bioetl.composition.entrypoints.\n"
@@ -401,23 +464,15 @@ class TestInterfacesBootstrapIsolation:
 
     def test_interfaces_no_direct_composition_root_imports(self, src_dir: Path) -> None:
         """Interfaces must use specialized composition APIs instead of package root imports."""
-        interfaces_path = src_dir / "bioetl" / "interfaces"
-        assert interfaces_path.exists(), "Interfaces layer not found"
-
         violations: list[str] = []
-        for py_file in interfaces_path.rglob("*.py"):
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ImportFrom):
-                    if node.module == "bioetl.composition":
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
-                elif isinstance(node, ast.Import):
-                    if any(alias.name == "bioetl.composition" for alias in node.names):
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
+        for py_file in _python_files(_interfaces_path(src_dir)):
+            violations.extend(
+                _module_import_violations(
+                    py_file,
+                    src_dir,
+                    exact_modules={"bioetl.composition"},
+                )
+            )
 
         assert not violations, (
             "Interfaces layer must not import the bioetl.composition package root.\n"
@@ -435,26 +490,15 @@ class TestInterfacesBootstrapIsolation:
 
     def test_interfaces_no_direct_services_api_imports(self, src_dir: Path) -> None:
         """Interfaces must consume narrow service APIs instead of services_api."""
-        interfaces_path = src_dir / "bioetl" / "interfaces"
-        assert interfaces_path.exists(), "Interfaces layer not found"
-
         violations: list[str] = []
-        for py_file in interfaces_path.rglob("*.py"):
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ImportFrom):
-                    if node.module == "bioetl.composition.services_api":
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
-                elif isinstance(node, ast.Import):
-                    if any(
-                        alias.name == "bioetl.composition.services_api"
-                        for alias in node.names
-                    ):
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
+        for py_file in _python_files(_interfaces_path(src_dir)):
+            violations.extend(
+                _module_import_violations(
+                    py_file,
+                    src_dir,
+                    exact_modules={"bioetl.composition.services_api"},
+                )
+            )
 
         assert not violations, (
             "Interfaces layer must not import bioetl.composition.services_api.\n"
@@ -474,27 +518,19 @@ class TestInterfacesBootstrapIsolation:
         self, src_dir: Path
     ) -> None:
         """Interfaces must consume registry_api instead of registry internals."""
-        interfaces_path = src_dir / "bioetl" / "interfaces"
-        assert interfaces_path.exists(), "Interfaces layer not found"
-
         forbidden_modules = {
             "bioetl.composition.registry",
             "bioetl.composition.registry_default",
         }
         violations: list[str] = []
-        for py_file in interfaces_path.rglob("*.py"):
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ImportFrom):
-                    if node.module in forbidden_modules:
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
-                elif isinstance(node, ast.Import):
-                    if any(alias.name in forbidden_modules for alias in node.names):
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
+        for py_file in _python_files(_interfaces_path(src_dir)):
+            violations.extend(
+                _module_import_violations(
+                    py_file,
+                    src_dir,
+                    exact_modules=forbidden_modules,
+                )
+            )
 
         assert not violations, (
             "Interfaces layer must not import composition registry internals.\n"
@@ -506,28 +542,15 @@ class TestInterfacesBootstrapIsolation:
         self, src_dir: Path
     ) -> None:
         """Interfaces must not import composition factories directly."""
-        interfaces_path = src_dir / "bioetl" / "interfaces"
-        assert interfaces_path.exists(), "Interfaces layer not found"
-
         violations: list[str] = []
-        for py_file in interfaces_path.rglob("*.py"):
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ImportFrom):
-                    if node.module is not None and node.module.startswith(
-                        "bioetl.composition.factories"
-                    ):
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
-                elif isinstance(node, ast.Import):
-                    if any(
-                        alias.name.startswith("bioetl.composition.factories")
-                        for alias in node.names
-                    ):
-                        violations.append(
-                            f"{py_file.relative_to(src_dir)}:{node.lineno}"
-                        )
+        for py_file in _python_files(_interfaces_path(src_dir)):
+            violations.extend(
+                _module_import_violations(
+                    py_file,
+                    src_dir,
+                    startswith_modules=("bioetl.composition.factories",),
+                )
+            )
 
         assert not violations, (
             "Interfaces layer must not import composition factory internals.\n"
@@ -539,9 +562,6 @@ class TestInterfacesBootstrapIsolation:
         self, src_dir: Path
     ) -> None:
         """Interfaces may import only the approved composition public API modules."""
-        interfaces_path = src_dir / "bioetl" / "interfaces"
-        assert interfaces_path.exists(), "Interfaces layer not found"
-
         allowed_modules = {
             "bioetl.composition.composite_api",
             "bioetl.composition.control_plane_api",
@@ -553,24 +573,14 @@ class TestInterfacesBootstrapIsolation:
             "bioetl.composition.resources_api",
         }
         violations: list[str] = []
-        for py_file in interfaces_path.rglob("*.py"):
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ImportFrom):
-                    module = node.module
-                    if module is not None and module.startswith("bioetl.composition."):
-                        if module not in allowed_modules:
-                            violations.append(
-                                f"{py_file.relative_to(src_dir)}:{node.lineno} -> {module}"
-                            )
-                elif isinstance(node, ast.Import):
-                    for alias in node.names:
-                        module = alias.name
-                        if module.startswith("bioetl.composition."):
-                            if module not in allowed_modules:
-                                violations.append(
-                                    f"{py_file.relative_to(src_dir)}:{node.lineno} -> {module}"
-                                )
+        for py_file in _python_files(_interfaces_path(src_dir)):
+            violations.extend(
+                _composition_module_violations(
+                    py_file,
+                    src_dir,
+                    allowed_modules=allowed_modules,
+                )
+            )
 
         assert not violations, (
             "Interfaces layer imported non-sanctioned composition modules.\n"
@@ -612,15 +622,14 @@ class TestLegacyNormalizersGuardrail:
         violations: list[str] = []
         source_path = src_dir / "bioetl"
 
-        for py_file in source_path.rglob("*.py"):
+        for py_file in _python_files(source_path):
             try:
-                content = py_file.read_text(encoding="utf-8")
+                content = _read_file(py_file)
             except (OSError, UnicodeDecodeError):
                 continue
             for pattern in self.FORBIDDEN_PATTERNS:
                 if pattern.search(content):
-                    relative_path = py_file.relative_to(src_dir)
-                    violations.append(str(relative_path))
+                    violations.append(str(_relative(src_dir, py_file)))
                     break
 
         assert not violations, (

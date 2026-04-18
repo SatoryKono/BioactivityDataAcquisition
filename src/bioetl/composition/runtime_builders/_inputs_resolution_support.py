@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable, Sequence
+from collections.abc import Callable
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
@@ -9,16 +9,14 @@ from bioetl.domain.config import RuntimeConfig
 if TYPE_CHECKING:
     from bioetl.composition.builders import FilterConfigBuilder
     from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.domain.composite.config import ColumnGroupConfig
-    from bioetl.domain.config import TableConfig
-    from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.context import VacuumSettings as CliVacuumSettings
+    from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import MaintenanceConfig, PipelineYamlConfig
     from bioetl.infrastructure.schemas.pipeline_config import (
         InputFilterYamlConfig as YamlInputFilter,
     )
-    from bioetl.infrastructure.schemas.pipeline_config import MaintenanceConfig, PipelineYamlConfig
 
 
 class PaginationConfigLike(Protocol):
