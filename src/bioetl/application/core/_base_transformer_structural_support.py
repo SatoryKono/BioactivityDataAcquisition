@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.core._base_transformer_execution_support import (
     TransformerExecutionOwner,
 )
-from bioetl.application.core.base_transformer.errors import FilteredOutError
 
 if TYPE_CHECKING:
+    from bioetl.application.core.base_transformer.errors import FilteredOutError
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import FilterDecision
     from bioetl.domain.types import GoldRecord, SilverRecord
@@ -62,6 +62,8 @@ def apply_silver_filter(
     index: int,
 ) -> None:
     """Check silver filter and raise FilteredOutError if excluded."""
+    from bioetl.application.core.base_transformer.errors import FilteredOutError
+
     if result is None or owner._silver_filters is None or owner._silver_filters.is_empty():
         return
 
@@ -130,6 +132,8 @@ def apply_structural_policy(
     index: int,
 ) -> SilverRecord | None:
     """Apply schema-aware structural policy before semantic Silver filters."""
+    from bioetl.application.core.base_transformer.errors import FilteredOutError
+
     if result is None:
         return None
 
