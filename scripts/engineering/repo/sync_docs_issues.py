@@ -459,7 +459,7 @@ def _print_json_payload(
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
-def run(argv: list[str] | None = None) -> None:
+def run(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     updates = _select_updates(_build_issue_updates(), args.issues)
     if not updates:
@@ -483,7 +483,7 @@ def run(argv: list[str] | None = None) -> None:
                 milestone_title=milestone_title,
                 skip_comments=args.skip_comments,
             )
-        return
+        return 0
 
     token = _require_token(args.token_env)
     milestone: MilestoneRecord | None = None
@@ -550,7 +550,7 @@ def run(argv: list[str] | None = None) -> None:
                 print("  Comment: <skipped>")
             else:
                 print("  Comment: posted")
-    return
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int | None:
