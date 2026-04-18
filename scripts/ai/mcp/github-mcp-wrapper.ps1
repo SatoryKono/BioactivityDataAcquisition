@@ -12,5 +12,9 @@ if (-not $env:NPM_CONFIG_CACHE) {
     $env:NPM_CONFIG_CACHE = "/tmp/npm-cache"
 }
 
+if (-not $env:GITHUB_PERSONAL_ACCESS_TOKEN -and $env:GITHUB_TOKEN) {
+    $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_TOKEN
+}
+
 & npx -y @modelcontextprotocol/server-github --stdio
 exit $LASTEXITCODE

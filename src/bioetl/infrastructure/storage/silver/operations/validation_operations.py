@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol
@@ -92,9 +93,7 @@ async def _prepare_silver_write_payload_impl(
         key_nullability_rules=key_nullability_rules,
     )
 
-    from bioetl.infrastructure.storage.silver import validation_mixin
-
-    validated = await validation_mixin.asyncio.to_thread(
+    validated = await asyncio.to_thread(
         host._sync_validate_and_build_arrow,
         request,
     )
