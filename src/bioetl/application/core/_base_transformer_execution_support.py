@@ -78,7 +78,7 @@ def handle_validation_error(
     owner: TransformerExecutionOwner,
     error: ValueError,
     context: PipelineContext,
-    span: Any,
+    span: object,  # Any: OpenTelemetry span type is dynamic
 ) -> str:
     """Log and annotate span for validation errors."""
     error_type = "validation_error"
@@ -96,7 +96,7 @@ def record_metrics_and_close_span(
     owner: TransformerExecutionOwner,
     start_time: float,
     error_type: str | None,
-    span: Any,
+    span: object,  # Any: OpenTelemetry span type is dynamic
 ) -> None:
     """Record transform duration/error metrics and close the OTEL span."""
     duration = time.perf_counter() - start_time

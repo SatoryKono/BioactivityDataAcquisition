@@ -54,7 +54,7 @@ async def yield_wrapped_fetch_records(
     iterator = cast(
         "AsyncIterator[RecordT]",
         cast(
-            "Any",
+            "Any",  # Any: Dynamic data source adapter
             data_source,
         ).fetch(**fetch_kwargs),
     )
