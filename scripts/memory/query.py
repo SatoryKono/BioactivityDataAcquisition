@@ -7,7 +7,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Final, NotRequired, TypedDict
+from typing import Callable, Final, NotRequired, TypedDict
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 if str(DEFAULT_ROOT) not in sys.path:
@@ -977,742 +977,727 @@ def _run_query(
     )
 
 
-def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
-    profile_config = QUERY_PROFILES[profile]
-    title = profile_config["title"]
-    if not rows:
-        empty_suffix = {
-            "owner": "no ownership path found",
-            "neighbors": "no semantic neighbors found",
-            "docs_drift": "no docs-to-code drift edges found",
-            "workflow_gates": "no workflow gate coverage found",
-            "workflow_artifacts": "no workflow action or artifact coverage found",
-            "workflow_execution": "no reusable workflow, matrix, or output coverage found",
-            "storage_lineage": "no storage lineage found",
-            "field_lineage": "no field lineage found",
-            "schema_drift": "no schema drift evidence found",
-            "run_artifacts": "no run instance artifact chain found",
-            "runtime_state": "no runtime state found",
-            "runtime_locks": "no runtime lock state found",
-            "claim_trace": "no claim-level traceability found",
-            "cli_semantics": "no CLI semantic coverage found",
-            "duplication_cluster": "no duplication cluster found",
-            "normalization_pipeline": "no pipeline normalization evidence found",
-            "fallback_pipelines": "no fallback-heavy pipelines found",
-            "promotion_candidates": "no promotion candidates found",
-            "dead_code_candidates": "no dead code candidates found",
-            "current_cycle_code": "no current-cycle code surfaces found",
-            "overengineered_candidates": "no overengineered candidates found",
-            "removable_complexity": "no removable complexity candidates found",
-            "simplification_blockers": "no simplification blockers found",
-        }[profile_config["mode"]]
-        return f"{title}: {empty_suffix} for `{name}`."
+EMPTY_SUFFIXES: dict[str, str] = {
+    "owner": "no ownership path found",
+    "neighbors": "no semantic neighbors found",
+    "docs_drift": "no docs-to-code drift edges found",
+    "workflow_gates": "no workflow gate coverage found",
+    "workflow_artifacts": "no workflow action or artifact coverage found",
+    "workflow_execution": "no reusable workflow, matrix, or output coverage found",
+    "storage_lineage": "no storage lineage found",
+    "field_lineage": "no field lineage found",
+    "schema_drift": "no schema drift evidence found",
+    "run_artifacts": "no run instance artifact chain found",
+    "runtime_state": "no runtime state found",
+    "runtime_locks": "no runtime lock state found",
+    "claim_trace": "no claim-level traceability found",
+    "cli_semantics": "no CLI semantic coverage found",
+    "duplication_cluster": "no duplication cluster found",
+    "normalization_pipeline": "no pipeline normalization evidence found",
+    "fallback_pipelines": "no fallback-heavy pipelines found",
+    "promotion_candidates": "no promotion candidates found",
+    "dead_code_candidates": "no dead code candidates found",
+    "current_cycle_code": "no current-cycle code surfaces found",
+    "overengineered_candidates": "no overengineered candidates found",
+    "removable_complexity": "no removable complexity candidates found",
+    "simplification_blockers": "no simplification blockers found",
+}
 
-    if profile_config["mode"] == "neighbors":
-        lines = [f"{title}: `{name}`"]
-        seen: set[tuple[str, str, str, str]] = set()
-        for row in rows:
-            relation_type = str(row.get("relation_type") or "")
-            neighbor_name = str(row.get("neighbor_name") or "")
-            direction = str(row.get("direction") or "")
-            if not relation_type or not neighbor_name:
+
+def _empty_result(title: str, mode: str, name: str) -> str:
+    return f"{title}: {EMPTY_SUFFIXES[mode]} for `{name}`."
+
+
+def _format_neighbors_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    seen: set[tuple[str, str, str, str]] = set()
+    for row in rows:
+        relation_type = str(row.get("relation_type") or "")
+        neighbor_name = str(row.get("neighbor_name") or "")
+        direction = str(row.get("direction") or "")
+        if not relation_type or not neighbor_name:
+            continue
+        neighbor_labels = row.get("neighbor_labels")
+        label_str = ",".join(str(label) for label in neighbor_labels) if isinstance(neighbor_labels, list) else ""
+        key = (direction, relation_type, neighbor_name, label_str)
+        if key in seen:
+            continue
+        seen.add(key)
+        label_suffix = f" | labels={label_str}" if label_str else ""
+        lines.append(
+            f"- direction={direction} | relation={relation_type} | neighbor={neighbor_name}{label_suffix}"
+        )
+    if len(lines) == 1:
+        lines.append("- no semantic edges found")
+    return "\n".join(lines)
+
+
+def _format_docs_drift_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    seen: set[tuple[str, str]] = set()
+    for row in rows:
+        doc_name = str(row.get("doc_name") or "")
+        target_name = str(row.get("target_name") or "")
+        if not doc_name or not target_name:
+            continue
+        key = (doc_name, target_name)
+        if key in seen:
+            continue
+        seen.add(key)
+        doc_labels = row.get("doc_labels")
+        target_labels = row.get("target_labels")
+        doc_label_str = ",".join(str(label) for label in doc_labels) if isinstance(doc_labels, list) else ""
+        target_label_str = ",".join(str(label) for label in target_labels) if isinstance(target_labels, list) else ""
+        doc_path = str(row.get("doc_source_path") or "")
+        target_path = str(row.get("target_source_path") or "")
+        doc_reference = str(row.get("doc_reference") or "")
+        evidence_kind = str(row.get("evidence_kind") or "")
+        confidence = str(row.get("confidence") or "")
+        section_title = str(row.get("section_title") or "")
+        section_anchor = str(row.get("section_anchor") or "")
+        line_number = int(row.get("line_number") or 0)
+        path_suffix = f" | doc_path={doc_path}" if doc_path else ""
+        target_path_suffix = f" | target_path={target_path}" if target_path else ""
+        evidence_suffix = f" | ref={doc_reference}" if doc_reference else ""
+        evidence_suffix += f" | evidence_kind={evidence_kind}" if evidence_kind else ""
+        evidence_suffix += f" | confidence={confidence}" if confidence else ""
+        evidence_suffix += f" | section={section_title}" if section_title else ""
+        evidence_suffix += f" | anchor={section_anchor}" if section_anchor else ""
+        evidence_suffix += f" | line={line_number}" if line_number else ""
+        lines.append(
+            f"- doc={doc_name} | doc_labels={doc_label_str} | target={target_name} | "
+            f"target_labels={target_label_str}{path_suffix}{target_path_suffix}{evidence_suffix}"
+        )
+    if len(lines) == 1:
+        lines.append("- no docs-to-code drift edges found")
+    return "\n".join(lines)
+
+
+def _format_workflow_gates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        workflow_name = str(row.get("workflow_name") or "")
+        job_name = str(row.get("job_name") or "")
+        if not workflow_name or not job_name:
+            continue
+        lines.append(f"- workflow={workflow_name} | job={job_name}")
+        gates = row.get("gates")
+        if isinstance(gates, list):
+            for gate_name in sorted({str(item) for item in gates if item}):
+                lines.append(f"  gate={gate_name}")
+        run_targets = row.get("run_targets")
+        if isinstance(run_targets, list):
+            normalized_targets: set[str] = set()
+            for target in run_targets:
+                if not isinstance(target, dict):
+                    continue
+                target_name = str(target.get("name") or "")
+                if not target_name:
+                    continue
+                labels = target.get("labels")
+                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                label_suffix = f" | labels={label_str}" if label_str else ""
+                normalized_targets.add(f"  runs_via={target_name}{label_suffix}")
+            lines.extend(sorted(normalized_targets))
+    if len(lines) == 1:
+        lines.append("- no workflow gate coverage found")
+    return "\n".join(lines)
+
+
+def _format_workflow_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        workflow_name = str(row.get("workflow_name") or "")
+        job_name = str(row.get("job_name") or "")
+        if not workflow_name or not job_name:
+            continue
+        lines.append(f"- workflow={workflow_name} | job={job_name}")
+        actions = row.get("actions")
+        if isinstance(actions, list):
+            for action_name in sorted({str(item) for item in actions if item}):
+                lines.append(f"  action={action_name}")
+        artifacts = row.get("artifacts")
+        if isinstance(artifacts, list):
+            normalized_artifacts: set[str] = set()
+            for artifact in artifacts:
+                if not isinstance(artifact, dict):
+                    continue
+                artifact_name = str(artifact.get("name") or "")
+                if not artifact_name:
+                    continue
+                relation_name = str(artifact.get("relation") or "")
+                relation_suffix = f" | relation={relation_name}" if relation_name else ""
+                normalized_artifacts.add(f"  artifact={artifact_name}{relation_suffix}")
+            lines.extend(sorted(normalized_artifacts))
+        secrets = row.get("secrets")
+        if isinstance(secrets, list):
+            for secret_name in sorted({str(item) for item in secrets if item}):
+                lines.append(f"  secret={secret_name}")
+    if len(lines) == 1:
+        lines.append("- no workflow action or artifact coverage found")
+    return "\n".join(lines)
+
+
+def _format_workflow_execution_value(field_name: str, prefix: str, value: dict[str, JsonValue]) -> str | None:
+    item_name = str(value.get("name") or "")
+    if not item_name:
+        return None
+    suffix_parts: list[str] = []
+    if field_name == "reusable_calls":
+        target_workflow = str(value.get("target_workflow") or "")
+        reusable_kind = str(value.get("reusable_kind") or "")
+        if target_workflow:
+            suffix_parts.append(f"target_workflow={target_workflow}")
+        if reusable_kind:
+            suffix_parts.append(f"kind={reusable_kind}")
+    elif field_name == "matrix_variants":
+        variant_axes = value.get("variant_axes")
+        if isinstance(variant_axes, dict):
+            suffix_parts.append(
+                "axes=" + ",".join(f"{key}={variant_axes[key]!s}" for key in sorted(variant_axes))
+            )
+    else:
+        output_scope = str(value.get("scope") or "")
+        expression = str(value.get("expression") or "")
+        if output_scope:
+            suffix_parts.append(f"scope={output_scope}")
+        if expression:
+            suffix_parts.append(f"expression={expression}")
+    suffix = f" | {' | '.join(suffix_parts)}" if suffix_parts else ""
+    return f"  {prefix}={item_name}{suffix}"
+
+
+def _format_workflow_execution_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        workflow_name = str(row.get("workflow_name") or "")
+        if not workflow_name:
+            continue
+        job_name = str(row.get("job_name") or "")
+        workflow_concurrency = str(row.get("workflow_concurrency_group") or "")
+        job_concurrency = str(row.get("job_concurrency_group") or "")
+        lines.append(
+            f"- workflow={workflow_name}"
+            + (f" | job={job_name}" if job_name else "")
+            + (f" | workflow_concurrency={workflow_concurrency}" if workflow_concurrency else "")
+            + (f" | job_concurrency={job_concurrency}" if job_concurrency else "")
+        )
+        for field_name, prefix in (
+            ("reusable_calls", "call"),
+            ("matrix_variants", "matrix"),
+            ("workflow_outputs", "workflow_output"),
+            ("job_outputs", "job_output"),
+        ):
+            values = row.get(field_name)
+            if not isinstance(values, list):
                 continue
-            neighbor_labels = row.get("neighbor_labels")
-            if isinstance(neighbor_labels, list):
-                label_str = ",".join(str(label) for label in neighbor_labels)
-            else:
-                label_str = ""
-            key = (direction, relation_type, neighbor_name, label_str)
-            if key in seen:
+            normalized = {
+                rendered
+                for value in values
+                if isinstance(value, dict)
+                for rendered in [_format_workflow_execution_value(field_name, prefix, value)]
+                if rendered
+            }
+            lines.extend(sorted(normalized))
+    if len(lines) == 1:
+        lines.append("- no reusable workflow, matrix, or output coverage found")
+    return "\n".join(lines)
+
+
+def _format_storage_lineage_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        storage_name = str(row.get("storage_name") or "")
+        if not storage_name:
+            continue
+        storage_roles = row.get("storage_roles")
+        roles_str = ",".join(str(item) for item in storage_roles) if isinstance(storage_roles, list) else ""
+        partition_by = row.get("partition_by")
+        partition_str = ",".join(str(item) for item in partition_by) if isinstance(partition_by, list) else ""
+        sort_by = row.get("sort_by")
+        sort_str = ",".join(str(item) for item in sort_by) if isinstance(sort_by, list) else ""
+        lines.append(
+            f"- storage={storage_name} | layer={row.get('layer') or ''!s} | storage_kind={row.get('storage_kind') or ''!s} "
+            f"| format={row.get('storage_format') or ''!s} | roles={roles_str or ''} | schema_present={row.get('schema_present') or False!s}"
+        )
+        versioning_mode = str(row.get("versioning_mode") or "")
+        version_column = str(row.get("version_column") or "")
+        config_version = str(row.get("config_version") or "")
+        quality_version = str(row.get("quality_version") or "")
+        detail_parts = [
+            f"config_version={config_version}" if config_version else "",
+            f"quality_version={quality_version}" if quality_version else "",
+            f"partition_by={partition_str}" if partition_str else "",
+            f"sort_by={sort_str}" if sort_str else "",
+            f"versioning_mode={versioning_mode}" if versioning_mode else "",
+            f"version_column={version_column}" if version_column else "",
+        ]
+        detail_line = " | ".join(part for part in detail_parts if part)
+        if detail_line:
+            lines.append(f"  {detail_line}")
+        producers = row.get("producers")
+        if isinstance(producers, list):
+            normalized_producers: set[str] = set()
+            for producer in producers:
+                if not isinstance(producer, dict):
+                    continue
+                producer_name = str(producer.get("name") or "")
+                if not producer_name:
+                    continue
+                labels = producer.get("labels")
+                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                label_suffix = f" | labels={label_str}" if label_str else ""
+                normalized_producers.add(f"  producer={producer_name}{label_suffix}")
+            lines.extend(sorted(normalized_producers))
+        for field_name, prefix in (
+            ("upstream_surfaces", "upstream"),
+            ("downstream_surfaces", "downstream"),
+            ("defining_configs", "defined_by"),
+        ):
+            values = row.get(field_name)
+            if isinstance(values, list):
+                for value in sorted({str(item) for item in values if item}):
+                    lines.append(f"  {prefix}={value}")
+    if len(lines) == 1:
+        lines.append("- no storage lineage found")
+    return "\n".join(lines)
+
+
+def _format_field_lineage_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        field_name = str(row.get("field_name") or "")
+        storage_ref = str(row.get("storage_ref") or "")
+        if not field_name or not storage_ref:
+            continue
+        lines.append(
+            f"- storage={storage_ref} | field={field_name} | group={row.get('field_group') or ''!s} "
+            f"| drift={row.get('drift_classification') or ''!s} | required={row.get('required_in_quality')!s}"
+        )
+        validation_types = row.get("validation_types")
+        if isinstance(validation_types, list) and validation_types:
+            lines.append(f"  validations={','.join(str(item) for item in validation_types if item)}")
+        for field_name_key, prefix in (
+            ("upstream_fields", "upstream"),
+            ("downstream_fields", "downstream"),
+            ("contracts", "contract"),
+        ):
+            values = row.get(field_name_key)
+            if isinstance(values, list):
+                for value in sorted({str(item) for item in values if item}):
+                    lines.append(f"  {prefix}={value}")
+    if len(lines) == 1:
+        lines.append("- no field lineage found")
+    return "\n".join(lines)
+
+
+def _format_schema_drift_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        field_name = str(row.get("field_name") or "")
+        storage_ref = str(row.get("storage_ref") or "")
+        drift = str(row.get("drift_classification") or "")
+        if not field_name or not storage_ref:
+            continue
+        validation_types = row.get("validation_types")
+        validation_suffix = (
+            f" | validations={','.join(str(item) for item in validation_types if item)}"
+            if isinstance(validation_types, list) and validation_types
+            else ""
+        )
+        lines.append(
+            f"- storage={storage_ref} | field={field_name} | drift={drift} | required={row.get('required_in_quality')!s}{validation_suffix}"
+        )
+    if len(lines) == 1:
+        lines.append("- no schema drift evidence found")
+    return "\n".join(lines)
+
+
+def _format_surface_dict_list(values: object, prefix: str) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    normalized: set[str] = set()
+    for value in values:
+        if not isinstance(value, dict):
+            continue
+        value_name = str(value.get("name") or "")
+        if not value_name:
+            continue
+        labels = value.get("labels")
+        label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+        artifact_family = str(value.get("artifact_family") or "")
+        extras = []
+        if label_str:
+            extras.append(f"labels={label_str}")
+        if artifact_family:
+            extras.append(f"artifact_family={artifact_family}")
+        suffix = f" | {' | '.join(extras)}" if extras else ""
+        normalized.add(f"  {prefix}={value_name}{suffix}")
+    return sorted(normalized)
+
+
+def _format_run_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        run_instance_name = str(row.get("run_instance_name") or "")
+        if not run_instance_name:
+            continue
+        lines.append(
+            f"- run_instance={run_instance_name} | lifecycle_status={row.get('lifecycle_status') or ''!s} "
+            f"| manifest_id={row.get('manifest_id') or ''!s} | run_id={row.get('run_id') or ''!s}"
+        )
+        detail_parts = [
+            f"contract_ref={row.get('contract_ref') or ''!s}" if row.get("contract_ref") else "",
+            f"contract_version={row.get('contract_version') or ''!s}" if row.get("contract_version") else "",
+            f"effective_config_artifact_id={row.get('effective_config_artifact_id') or ''!s}"
+            if row.get("effective_config_artifact_id")
+            else "",
+            f"lineage_fragment_id={row.get('lineage_fragment_id') or ''!s}" if row.get("lineage_fragment_id") else "",
+        ]
+        detail_line = " | ".join(part for part in detail_parts if part)
+        if detail_line:
+            lines.append(f"  {detail_line}")
+        lines.extend(_format_surface_dict_list(row.get("artifacts"), "artifact"))
+        lines.extend(_format_surface_dict_list(row.get("dependencies"), "depends_on"))
+        lines.extend(_format_surface_dict_list(row.get("support_links"), "support"))
+    if len(lines) == 1:
+        lines.append("- no run instance artifact chain found")
+    return "\n".join(lines)
+
+
+def _format_runtime_state_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        state_name = str(row.get("runtime_state_name") or "")
+        if not state_name:
+            continue
+        lines.append(
+            f"- state={state_name} | kind={row.get('state_kind') or ''!s} | status={row.get('state_status') or ''!s} "
+            f"| manifest_id={row.get('manifest_id') or ''!s} | retry_count={row.get('retry_count')!s} | lock_key={row.get('lock_key') or ''!s}"
+        )
+        lines.extend(_format_surface_dict_list(row.get("owners"), "owner"))
+        lines.extend(_format_surface_dict_list(row.get("dependencies"), "dependency"))
+        lines.extend(_format_surface_dict_list(row.get("artifacts"), "artifact"))
+    if len(lines) == 1:
+        lines.append("- no runtime state found")
+    return "\n".join(lines)
+
+
+def _format_claim_trace_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        claim_name = str(row.get("claim_name") or "")
+        if not claim_name:
+            continue
+        lines.append(
+            f"- doc={row.get('doc_name') or ''!s} | claim={claim_name} | modality={row.get('modality') or ''!s} "
+            f"| section={row.get('section_title') or ''!s} | anchor={row.get('section_anchor') or ''!s} "
+            f"| line={row.get('line_number') or 0!s}"
+        )
+        claim_text = str(row.get("claim_text") or "")
+        if claim_text:
+            lines.append(f"  text={claim_text}")
+        targets = row.get("targets")
+        if isinstance(targets, list):
+            normalized_targets: set[str] = set()
+            for target in targets:
+                if not isinstance(target, dict):
+                    continue
+                target_name = str(target.get("name") or "")
+                if not target_name:
+                    continue
+                labels = target.get("labels")
+                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                label_suffix = f" | labels={label_str}" if label_str else ""
+                normalized_targets.add(f"  target={target_name}{label_suffix}")
+            lines.extend(sorted(normalized_targets))
+    if len(lines) == 1:
+        lines.append("- no claim-level traceability found")
+    return "\n".join(lines)
+
+
+def _format_cli_semantics_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        command_name = str(row.get("command_name") or "")
+        if not command_name:
+            continue
+        lines.append(f"- command={command_name} | side_effect_class={row.get('side_effect_class') or ''!s}")
+        options = row.get("options")
+        if isinstance(options, list):
+            for option_name in sorted({str(item) for item in options if item}):
+                lines.append(f"  option={option_name}")
+        gates = row.get("gates")
+        if isinstance(gates, list):
+            for gate_name in sorted({str(item) for item in gates if item}):
+                lines.append(f"  gate={gate_name}")
+        targets = row.get("side_effect_targets")
+        if isinstance(targets, list):
+            normalized_targets: set[str] = set()
+            for target in targets:
+                if not isinstance(target, dict):
+                    continue
+                target_name = str(target.get("name") or "")
+                if not target_name:
+                    continue
+                labels = target.get("labels")
+                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                label_suffix = f" | labels={label_str}" if label_str else ""
+                normalized_targets.add(f"  side_effect_target={target_name}{label_suffix}")
+            lines.extend(sorted(normalized_targets))
+    if len(lines) == 1:
+        lines.append("- no CLI semantic coverage found")
+    return "\n".join(lines)
+
+
+def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    row = rows[0]
+    family_name = str(row.get("family_name") or "")
+    surface_kind = str(row.get("surface_kind") or "")
+    duplicate_count = str(row.get("duplicate_count") or "")
+    promotion_score = str(row.get("promotion_score") or "")
+    promotion_target = str(row.get("promotion_target") or "")
+    target_labels = row.get("promotion_target_labels")
+    members = row.get("members")
+    tests = row.get("tests")
+    lines = [f"{title}: `{name}`"]
+    lines.append(
+        f"- family={family_name} | surface_kind={surface_kind} | duplicates={duplicate_count} | promotion_score={promotion_score}"
+    )
+    if promotion_target:
+        label_str = ",".join(str(label) for label in target_labels) if isinstance(target_labels, list) else ""
+        label_suffix = f" | labels={label_str}" if label_str else ""
+        lines.append(f"- promotion_target={promotion_target}{label_suffix}")
+    if isinstance(members, list):
+        normalized_members = []
+        for member in members:
+            if not isinstance(member, dict):
                 continue
-            seen.add(key)
+            member_name = str(member.get("name") or "")
+            if not member_name:
+                continue
+            labels = member.get("labels")
+            label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
             label_suffix = f" | labels={label_str}" if label_str else ""
-            lines.append(
-                f"- direction={direction} | relation={relation_type} | neighbor={neighbor_name}{label_suffix}"
-            )
-        if len(lines) == 1:
-            lines.append("- no semantic edges found")
-        return "\n".join(lines)
+            normalized_members.append(f"- member={member_name}{label_suffix}")
+        lines.extend(sorted(normalized_members))
+    if isinstance(tests, list):
+        normalized_tests = sorted(
+            {f"- covered_by_test={test_name!s}" for test_name in tests if test_name is not None and str(test_name)}
+        )
+        lines.extend(normalized_tests)
+    return "\n".join(lines)
 
-    if profile_config["mode"] == "docs_drift":
-        lines = [f"{title}: `{name}`"]
-        seen: set[tuple[str, str]] = set()
-        for row in rows:
-            doc_name = str(row.get("doc_name") or "")
-            target_name = str(row.get("target_name") or "")
-            if not doc_name or not target_name:
-                continue
-            key = (doc_name, target_name)
-            if key in seen:
-                continue
-            seen.add(key)
-            doc_labels = row.get("doc_labels")
-            target_labels = row.get("target_labels")
-            doc_label_str = ",".join(str(label) for label in doc_labels) if isinstance(doc_labels, list) else ""
-            target_label_str = ",".join(str(label) for label in target_labels) if isinstance(target_labels, list) else ""
-            doc_path = str(row.get("doc_source_path") or "")
-            target_path = str(row.get("target_source_path") or "")
-            doc_reference = str(row.get("doc_reference") or "")
-            evidence_kind = str(row.get("evidence_kind") or "")
-            confidence = str(row.get("confidence") or "")
-            section_title = str(row.get("section_title") or "")
-            section_anchor = str(row.get("section_anchor") or "")
-            line_number = int(row.get("line_number") or 0)
-            path_suffix = f" | doc_path={doc_path}" if doc_path else ""
-            target_path_suffix = f" | target_path={target_path}" if target_path else ""
-            evidence_suffix = f" | ref={doc_reference}" if doc_reference else ""
-            evidence_suffix += f" | evidence_kind={evidence_kind}" if evidence_kind else ""
-            evidence_suffix += f" | confidence={confidence}" if confidence else ""
-            evidence_suffix += f" | section={section_title}" if section_title else ""
-            evidence_suffix += f" | anchor={section_anchor}" if section_anchor else ""
-            evidence_suffix += f" | line={line_number}" if line_number else ""
-            lines.append(
-                f"- doc={doc_name} | doc_labels={doc_label_str} | target={target_name} | "
-                f"target_labels={target_label_str}{path_suffix}{target_path_suffix}{evidence_suffix}"
-            )
-        if len(lines) == 1:
-            lines.append("- no docs-to-code drift edges found")
-        return "\n".join(lines)
 
-    if profile_config["mode"] == "workflow_gates":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            workflow_name = str(row.get("workflow_name") or "")
-            job_name = str(row.get("job_name") or "")
-            if not workflow_name or not job_name:
-                continue
-            lines.append(f"- workflow={workflow_name} | job={job_name}")
-            gates = row.get("gates")
-            if isinstance(gates, list):
-                for gate_name in sorted({str(item) for item in gates if item}):
-                    lines.append(f"  gate={gate_name}")
-            run_targets = row.get("run_targets")
-            if isinstance(run_targets, list):
-                normalized_targets: set[str] = set()
-                for target in run_targets:
-                    if not isinstance(target, dict):
-                        continue
-                    target_name = str(target.get("name") or "")
-                    if not target_name:
-                        continue
-                    labels = target.get("labels")
-                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                    label_suffix = f" | labels={label_str}" if label_str else ""
-                    normalized_targets.add(f"  runs_via={target_name}{label_suffix}")
-                lines.extend(sorted(normalized_targets))
-        if len(lines) == 1:
-            lines.append("- no workflow gate coverage found")
-        return "\n".join(lines)
+def _format_normalization_pipeline_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    row = rows[0]
+    lines = [f"{title}: `{name}`"]
+    lines.append(
+        "- "
+        f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
+        f"profile_fields={int(row.get('profile_field_count') or 0)} | "
+        f"fallback_fields={int(row.get('fallback_field_count') or 0)} | "
+        f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
+        f"fallback_technical={int(row.get('fallback_technical_passthrough_field_count') or 0)}"
+    )
+    module_path = str(row.get("normalization_profile_module_path") or "")
+    if module_path:
+        lines.append(f"- profile_module={module_path}")
+    modules = row.get("normalization_modules")
+    if isinstance(modules, list):
+        for module in sorted({str(item) for item in modules if str(item)}):
+            lines.append(f"- normalization_module={module}")
+    return "\n".join(lines)
 
-    if profile_config["mode"] == "workflow_artifacts":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            workflow_name = str(row.get("workflow_name") or "")
-            job_name = str(row.get("job_name") or "")
-            if not workflow_name or not job_name:
-                continue
-            lines.append(f"- workflow={workflow_name} | job={job_name}")
-            actions = row.get("actions")
-            if isinstance(actions, list):
-                for action_name in sorted({str(item) for item in actions if item}):
-                    lines.append(f"  action={action_name}")
-            artifacts = row.get("artifacts")
-            if isinstance(artifacts, list):
-                normalized_artifacts: set[str] = set()
-                for artifact in artifacts:
-                    if not isinstance(artifact, dict):
-                        continue
-                    artifact_name = str(artifact.get("name") or "")
-                    if not artifact_name:
-                        continue
-                    relation_name = str(artifact.get("relation") or "")
-                    relation_suffix = f" | relation={relation_name}" if relation_name else ""
-                    normalized_artifacts.add(f"  artifact={artifact_name}{relation_suffix}")
-                lines.extend(sorted(normalized_artifacts))
-            secrets = row.get("secrets")
-            if isinstance(secrets, list):
-                for secret_name in sorted({str(item) for item in secrets if item}):
-                    lines.append(f"  secret={secret_name}")
-        if len(lines) == 1:
-            lines.append("- no workflow action or artifact coverage found")
-        return "\n".join(lines)
 
-    if profile_config["mode"] == "workflow_execution":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            workflow_name = str(row.get("workflow_name") or "")
-            if not workflow_name:
-                continue
-            job_name = str(row.get("job_name") or "")
-            workflow_concurrency = str(row.get("workflow_concurrency_group") or "")
-            job_concurrency = str(row.get("job_concurrency_group") or "")
-            lines.append(
-                f"- workflow={workflow_name}"
-                + (f" | job={job_name}" if job_name else "")
-                + (f" | workflow_concurrency={workflow_concurrency}" if workflow_concurrency else "")
-                + (f" | job_concurrency={job_concurrency}" if job_concurrency else "")
-            )
-            for field_name, prefix in (
-                ("reusable_calls", "call"),
-                ("matrix_variants", "matrix"),
-                ("workflow_outputs", "workflow_output"),
-                ("job_outputs", "job_output"),
-            ):
-                values = row.get(field_name)
-                if not isinstance(values, list):
-                    continue
-                normalized: set[str] = set()
-                for value in values:
-                    if not isinstance(value, dict):
-                        continue
-                    item_name = str(value.get("name") or "")
-                    if not item_name:
-                        continue
-                    suffix_parts: list[str] = []
-                    if field_name == "reusable_calls":
-                        target_workflow = str(value.get("target_workflow") or "")
-                        reusable_kind = str(value.get("reusable_kind") or "")
-                        if target_workflow:
-                            suffix_parts.append(f"target_workflow={target_workflow}")
-                        if reusable_kind:
-                            suffix_parts.append(f"kind={reusable_kind}")
-                    elif field_name == "matrix_variants":
-                        variant_axes = value.get("variant_axes")
-                        if isinstance(variant_axes, dict):
-                            suffix_parts.append(
-                                "axes="
-                                + ",".join(
-                                    f"{key}={variant_axes[key]!s}" for key in sorted(variant_axes)
-                                )
-                            )
-                    else:
-                        output_scope = str(value.get("scope") or "")
-                        expression = str(value.get("expression") or "")
-                        if output_scope:
-                            suffix_parts.append(f"scope={output_scope}")
-                        if expression:
-                            suffix_parts.append(f"expression={expression}")
-                    suffix = f" | {' | '.join(suffix_parts)}" if suffix_parts else ""
-                    normalized.add(f"  {prefix}={item_name}{suffix}")
-                lines.extend(sorted(normalized))
-        if len(lines) == 1:
-            lines.append("- no reusable workflow, matrix, or output coverage found")
-        return "\n".join(lines)
+def _format_fallback_pipelines_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        pipeline_name = str(row.get("pipeline_name") or "")
+        if not pipeline_name:
+            continue
+        lines.append(
+            "- "
+            f"pipeline={pipeline_name} | "
+            f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
+            f"fallback_total={int(row.get('fallback_field_count') or 0)} | "
+            f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
+            f"profile_fields={int(row.get('profile_field_count') or 0)}"
+        )
+    return "\n".join(lines)
 
-    if profile_config["mode"] == "storage_lineage":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            storage_name = str(row.get("storage_name") or "")
-            if not storage_name:
-                continue
-            storage_roles = row.get("storage_roles")
-            roles_str = ",".join(str(item) for item in storage_roles) if isinstance(storage_roles, list) else ""
-            partition_by = row.get("partition_by")
-            partition_str = ",".join(str(item) for item in partition_by) if isinstance(partition_by, list) else ""
-            sort_by = row.get("sort_by")
-            sort_str = ",".join(str(item) for item in sort_by) if isinstance(sort_by, list) else ""
-            lines.append(
-                f"- storage={storage_name} | layer={row.get('layer') or ''!s} | storage_kind={row.get('storage_kind') or ''!s} "
-                f"| format={row.get('storage_format') or ''!s} | roles={roles_str or ''} | schema_present={row.get('schema_present') or False!s}"
-            )
-            versioning_mode = str(row.get("versioning_mode") or "")
-            version_column = str(row.get("version_column") or "")
-            config_version = str(row.get("config_version") or "")
-            quality_version = str(row.get("quality_version") or "")
-            detail_parts = [
-                f"config_version={config_version}" if config_version else "",
-                f"quality_version={quality_version}" if quality_version else "",
-                f"partition_by={partition_str}" if partition_str else "",
-                f"sort_by={sort_str}" if sort_str else "",
-                f"versioning_mode={versioning_mode}" if versioning_mode else "",
-                f"version_column={version_column}" if version_column else "",
-            ]
-            detail_line = " | ".join(part for part in detail_parts if part)
-            if detail_line:
-                lines.append(f"  {detail_line}")
-            producers = row.get("producers")
-            if isinstance(producers, list):
-                normalized_producers: set[str] = set()
-                for producer in producers:
-                    if not isinstance(producer, dict):
-                        continue
-                    producer_name = str(producer.get("name") or "")
-                    if not producer_name:
-                        continue
-                    labels = producer.get("labels")
-                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                    label_suffix = f" | labels={label_str}" if label_str else ""
-                    normalized_producers.add(f"  producer={producer_name}{label_suffix}")
-                lines.extend(sorted(normalized_producers))
-            for field_name, prefix in (
-                ("upstream_surfaces", "upstream"),
-                ("downstream_surfaces", "downstream"),
-                ("defining_configs", "defined_by"),
-            ):
-                values = row.get(field_name)
-                if isinstance(values, list):
-                    for value in sorted({str(item) for item in values if item}):
-                        lines.append(f"  {prefix}={value}")
-        if len(lines) == 1:
-            lines.append("- no storage lineage found")
-        return "\n".join(lines)
 
-    if profile_config["mode"] == "field_lineage":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            field_name = str(row.get("field_name") or "")
-            storage_ref = str(row.get("storage_ref") or "")
-            if not field_name or not storage_ref:
-                continue
-            lines.append(
-                f"- storage={storage_ref} | field={field_name} | group={row.get('field_group') or ''!s} "
-                f"| drift={row.get('drift_classification') or ''!s} | required={row.get('required_in_quality')!s}"
-            )
-            validation_types = row.get("validation_types")
-            if isinstance(validation_types, list) and validation_types:
-                lines.append(f"  validations={','.join(str(item) for item in validation_types if item)}")
-            for field_name_key, prefix in (
-                ("upstream_fields", "upstream"),
-                ("downstream_fields", "downstream"),
-                ("contracts", "contract"),
-            ):
-                values = row.get(field_name_key)
-                if isinstance(values, list):
-                    for value in sorted({str(item) for item in values if item}):
-                        lines.append(f"  {prefix}={value}")
-        if len(lines) == 1:
-            lines.append("- no field lineage found")
-        return "\n".join(lines)
-
-    if profile_config["mode"] == "schema_drift":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            field_name = str(row.get("field_name") or "")
-            storage_ref = str(row.get("storage_ref") or "")
-            drift = str(row.get("drift_classification") or "")
-            if not field_name or not storage_ref:
-                continue
-            validation_types = row.get("validation_types")
-            validation_suffix = (
-                f" | validations={','.join(str(item) for item in validation_types if item)}"
-                if isinstance(validation_types, list) and validation_types
-                else ""
-            )
-            lines.append(
-                f"- storage={storage_ref} | field={field_name} | drift={drift} | required={row.get('required_in_quality')!s}{validation_suffix}"
-            )
-        if len(lines) == 1:
-            lines.append("- no schema drift evidence found")
-        return "\n".join(lines)
-
-    if profile_config["mode"] == "run_artifacts":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            run_instance_name = str(row.get("run_instance_name") or "")
-            if not run_instance_name:
-                continue
-            lines.append(
-                f"- run_instance={run_instance_name} | lifecycle_status={row.get('lifecycle_status') or ''!s} "
-                f"| manifest_id={row.get('manifest_id') or ''!s} | run_id={row.get('run_id') or ''!s}"
-            )
-            detail_parts = [
-                f"contract_ref={row.get('contract_ref') or ''!s}" if row.get("contract_ref") else "",
-                f"contract_version={row.get('contract_version') or ''!s}" if row.get("contract_version") else "",
-                f"effective_config_artifact_id={row.get('effective_config_artifact_id') or ''!s}"
-                if row.get("effective_config_artifact_id")
-                else "",
-                f"lineage_fragment_id={row.get('lineage_fragment_id') or ''!s}" if row.get("lineage_fragment_id") else "",
-            ]
-            detail_line = " | ".join(part for part in detail_parts if part)
-            if detail_line:
-                lines.append(f"  {detail_line}")
-            for field_name, prefix in (
-                ("artifacts", "artifact"),
-                ("dependencies", "depends_on"),
-                ("support_links", "support"),
-            ):
-                values = row.get(field_name)
-                if not isinstance(values, list):
-                    continue
-                normalized: set[str] = set()
-                for value in values:
-                    if not isinstance(value, dict):
-                        continue
-                    value_name = str(value.get("name") or "")
-                    if not value_name:
-                        continue
-                    labels = value.get("labels")
-                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                    artifact_family = str(value.get("artifact_family") or "")
-                    extras = []
-                    if label_str:
-                        extras.append(f"labels={label_str}")
-                    if artifact_family:
-                        extras.append(f"artifact_family={artifact_family}")
-                    suffix = f" | {' | '.join(extras)}" if extras else ""
-                    normalized.add(f"  {prefix}={value_name}{suffix}")
-                lines.extend(sorted(normalized))
-        if len(lines) == 1:
-            lines.append("- no run instance artifact chain found")
-        return "\n".join(lines)
-
-    if profile_config["mode"] in {"runtime_state", "runtime_locks"}:
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            state_name = str(row.get("runtime_state_name") or "")
-            if not state_name:
-                continue
-            lines.append(
-                f"- state={state_name} | kind={row.get('state_kind') or ''!s} | status={row.get('state_status') or ''!s} "
-                f"| manifest_id={row.get('manifest_id') or ''!s} | retry_count={row.get('retry_count')!s} | lock_key={row.get('lock_key') or ''!s}"
-            )
-            for field_name_key, prefix in (("owners", "owner"), ("dependencies", "dependency"), ("artifacts", "artifact")):
-                values = row.get(field_name_key)
-                if not isinstance(values, list):
-                    continue
-                normalized: set[str] = set()
-                for value in values:
-                    if not isinstance(value, dict):
-                        continue
-                    value_name = str(value.get("name") or "")
-                    if not value_name:
-                        continue
-                    labels = value.get("labels")
-                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                    artifact_family = str(value.get("artifact_family") or "")
-                    extras = []
-                    if label_str:
-                        extras.append(f"labels={label_str}")
-                    if artifact_family:
-                        extras.append(f"artifact_family={artifact_family}")
-                    suffix = f" | {' | '.join(extras)}" if extras else ""
-                    normalized.add(f"  {prefix}={value_name}{suffix}")
-                lines.extend(sorted(normalized))
-        if len(lines) == 1:
-            lines.append("- no runtime state found")
-        return "\n".join(lines)
-
-    if profile_config["mode"] == "claim_trace":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            claim_name = str(row.get("claim_name") or "")
-            if not claim_name:
-                continue
-            lines.append(
-                f"- doc={row.get('doc_name') or ''!s} | claim={claim_name} | modality={row.get('modality') or ''!s} "
-                f"| section={row.get('section_title') or ''!s} | anchor={row.get('section_anchor') or ''!s} "
-                f"| line={row.get('line_number') or 0!s}"
-            )
-            claim_text = str(row.get("claim_text") or "")
-            if claim_text:
-                lines.append(f"  text={claim_text}")
-            targets = row.get("targets")
-            if isinstance(targets, list):
-                normalized_targets: set[str] = set()
-                for target in targets:
-                    if not isinstance(target, dict):
-                        continue
-                    target_name = str(target.get("name") or "")
-                    if not target_name:
-                        continue
-                    labels = target.get("labels")
-                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                    label_suffix = f" | labels={label_str}" if label_str else ""
-                    normalized_targets.add(f"  target={target_name}{label_suffix}")
-                lines.extend(sorted(normalized_targets))
-        if len(lines) == 1:
-            lines.append("- no claim-level traceability found")
-        return "\n".join(lines)
-
-    if profile_config["mode"] == "cli_semantics":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            command_name = str(row.get("command_name") or "")
-            if not command_name:
-                continue
-            lines.append(
-                f"- command={command_name} | side_effect_class={row.get('side_effect_class') or ''!s}"
-            )
-            options = row.get("options")
-            if isinstance(options, list):
-                for option_name in sorted({str(item) for item in options if item}):
-                    lines.append(f"  option={option_name}")
-            gates = row.get("gates")
-            if isinstance(gates, list):
-                for gate_name in sorted({str(item) for item in gates if item}):
-                    lines.append(f"  gate={gate_name}")
-            targets = row.get("side_effect_targets")
-            if isinstance(targets, list):
-                normalized_targets: set[str] = set()
-                for target in targets:
-                    if not isinstance(target, dict):
-                        continue
-                    target_name = str(target.get("name") or "")
-                    if not target_name:
-                        continue
-                    labels = target.get("labels")
-                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                    label_suffix = f" | labels={label_str}" if label_str else ""
-                    normalized_targets.add(f"  side_effect_target={target_name}{label_suffix}")
-                lines.extend(sorted(normalized_targets))
-        if len(lines) == 1:
-            lines.append("- no CLI semantic coverage found")
-        return "\n".join(lines)
-
-    if profile_config["mode"] == "duplication_cluster":
-        row = rows[0]
+def _format_promotion_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    seen: set[str] = set()
+    for row in rows:
+        cluster_name = str(row.get("cluster_name") or "")
+        if not cluster_name or cluster_name in seen:
+            continue
+        seen.add(cluster_name)
         family_name = str(row.get("family_name") or "")
         surface_kind = str(row.get("surface_kind") or "")
         duplicate_count = str(row.get("duplicate_count") or "")
         promotion_score = str(row.get("promotion_score") or "")
         promotion_target = str(row.get("promotion_target") or "")
-        target_labels = row.get("promotion_target_labels")
-        members = row.get("members")
-        tests = row.get("tests")
-        lines = [f"{title}: `{name}`"]
+        member_count = str(row.get("member_count") or "")
+        test_count = str(row.get("test_count") or "")
         lines.append(
-            f"- family={family_name} | surface_kind={surface_kind} | duplicates={duplicate_count} | promotion_score={promotion_score}"
+            f"- cluster={cluster_name} | family={family_name} | surface_kind={surface_kind} | "
+            f"duplicates={duplicate_count} | members={member_count} | tests={test_count} | "
+            f"promotion_score={promotion_score} | target={promotion_target}"
         )
-        if promotion_target:
-            if isinstance(target_labels, list):
-                label_str = ",".join(str(label) for label in target_labels)
-            else:
-                label_str = ""
-            label_suffix = f" | labels={label_str}" if label_str else ""
-            lines.append(f"- promotion_target={promotion_target}{label_suffix}")
-        if isinstance(members, list):
-            normalized_members = []
-            for member in members:
-                if not isinstance(member, dict):
-                    continue
-                member_name = str(member.get("name") or "")
-                if not member_name:
-                    continue
-                labels = member.get("labels")
-                if isinstance(labels, list):
-                    label_str = ",".join(str(label) for label in labels)
-                else:
-                    label_str = ""
-                label_suffix = f" | labels={label_str}" if label_str else ""
-                normalized_members.append(f"- member={member_name}{label_suffix}")
-            lines.extend(sorted(normalized_members))
-        if isinstance(tests, list):
-            normalized_tests = sorted(
-                {
-                    f"- covered_by_test={test_name!s}"
-                    for test_name in tests
-                    if test_name is not None and str(test_name)
-                }
-            )
-            lines.extend(normalized_tests)
-        return "\n".join(lines)
+    if len(lines) == 1:
+        lines.append("- no promotion candidates found")
+    return "\n".join(lines)
 
-    if profile_config["mode"] == "normalization_pipeline":
-        row = rows[0]
-        lines = [f"{title}: `{name}`"]
+
+def _format_dead_code_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        target_name = str(row.get("target_name") or "")
+        if not target_name:
+            continue
+        family_name = str(row.get("family_name") or "")
+        target_label = str(row.get("target_label") or "")
+        deletion_score = str(row.get("deletion_score") or "")
+        deletion_confidence = str(row.get("deletion_confidence") or "")
+        recent_age_days = str(row.get("recent_age_days") or "")
+        only_test_referenced = str(row.get("only_test_referenced") or "")
+        runtime_anchor_count = str(row.get("runtime_anchor_count") or "")
+        config_anchor_count = str(row.get("config_anchor_count") or "")
+        doc_anchor_count = str(row.get("doc_anchor_count") or "")
+        test_anchor_count = str(row.get("test_anchor_count") or "")
+        blocked_by_cycle = str(row.get("blocked_by_cycle") or "")
+        deprecation_markers = row.get("deprecation_markers")
+        marker_str = ",".join(str(marker) for marker in deprecation_markers) if isinstance(deprecation_markers, list) else ""
+        blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
+        marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
         lines.append(
-            "- "
-            f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
-            f"profile_fields={int(row.get('profile_field_count') or 0)} | "
-            f"fallback_fields={int(row.get('fallback_field_count') or 0)} | "
-            f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
-            f"fallback_technical={int(row.get('fallback_technical_passthrough_field_count') or 0)}"
+            f"- target={target_name} | label={target_label} | family={family_name} | deletion_score={deletion_score} "
+            f"| confidence={deletion_confidence} | recent_age_days={recent_age_days} | only_test_referenced={only_test_referenced} "
+            f"| runtime={runtime_anchor_count} | config={config_anchor_count} | docs={doc_anchor_count} | tests={test_anchor_count}"
+            f"{marker_suffix}{blocked_suffix}"
         )
-        module_path = str(row.get("normalization_profile_module_path") or "")
-        if module_path:
-            lines.append(f"- profile_module={module_path}")
-        modules = row.get("normalization_modules")
-        if isinstance(modules, list):
-            for module in sorted({str(item) for item in modules if str(item)}):
-                lines.append(f"- normalization_module={module}")
-        return "\n".join(lines)
+    if len(lines) == 1:
+        lines.append("- no dead code candidates found")
+    return "\n".join(lines)
 
-    if profile_config["mode"] == "fallback_pipelines":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            pipeline_name = str(row.get("pipeline_name") or "")
-            if not pipeline_name:
-                continue
-            lines.append(
-                "- "
-                f"pipeline={pipeline_name} | "
-                f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
-                f"fallback_total={int(row.get('fallback_field_count') or 0)} | "
-                f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
-                f"profile_fields={int(row.get('profile_field_count') or 0)}"
-            )
-        return "\n".join(lines)
 
-    if profile_config["mode"] == "promotion_candidates":
-        lines = [f"{title}: `{name}`"]
-        seen: set[str] = set()
-        for row in rows:
-            cluster_name = str(row.get("cluster_name") or "")
-            if not cluster_name or cluster_name in seen:
-                continue
-            seen.add(cluster_name)
-            family_name = str(row.get("family_name") or "")
-            surface_kind = str(row.get("surface_kind") or "")
-            duplicate_count = str(row.get("duplicate_count") or "")
-            promotion_score = str(row.get("promotion_score") or "")
-            promotion_target = str(row.get("promotion_target") or "")
-            member_count = str(row.get("member_count") or "")
-            test_count = str(row.get("test_count") or "")
-            lines.append(
-                f"- cluster={cluster_name} | family={family_name} | surface_kind={surface_kind} | "
-                f"duplicates={duplicate_count} | members={member_count} | tests={test_count} | "
-                f"promotion_score={promotion_score} | target={promotion_target}"
-            )
-        if len(lines) == 1:
-            lines.append("- no promotion candidates found")
-        return "\n".join(lines)
+def _format_current_cycle_code_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        target_name = str(row.get("target_name") or "")
+        if not target_name:
+            continue
+        family_name = str(row.get("family_name") or "")
+        target_label = str(row.get("target_label") or "")
+        cycle_status = str(row.get("cycle_status") or "")
+        cycle_score = str(row.get("cycle_score") or "")
+        recent_age_days = str(row.get("recent_age_days") or "")
+        runtime_anchor_count = str(row.get("runtime_anchor_count") or "")
+        config_anchor_count = str(row.get("config_anchor_count") or "")
+        doc_anchor_count = str(row.get("doc_anchor_count") or "")
+        test_anchor_count = str(row.get("test_anchor_count") or "")
+        wip_markers = row.get("wip_markers")
+        marker_str = ",".join(str(marker) for marker in wip_markers) if isinstance(wip_markers, list) else ""
+        marker_suffix = f" | wip_markers={marker_str}" if marker_str else ""
+        lines.append(
+            f"- target={target_name} | label={target_label} | family={family_name} | cycle_status={cycle_status} "
+            f"| cycle_score={cycle_score} | recent_age_days={recent_age_days} | runtime={runtime_anchor_count} "
+            f"| config={config_anchor_count} | docs={doc_anchor_count} | tests={test_anchor_count}{marker_suffix}"
+        )
+    if len(lines) == 1:
+        lines.append("- no current-cycle code surfaces found")
+    return "\n".join(lines)
 
-    if profile_config["mode"] == "dead_code_candidates":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            target_name = str(row.get("target_name") or "")
-            if not target_name:
-                continue
-            family_name = str(row.get("family_name") or "")
-            target_label = str(row.get("target_label") or "")
-            deletion_score = str(row.get("deletion_score") or "")
-            deletion_confidence = str(row.get("deletion_confidence") or "")
-            recent_age_days = str(row.get("recent_age_days") or "")
-            only_test_referenced = str(row.get("only_test_referenced") or "")
-            runtime_anchor_count = str(row.get("runtime_anchor_count") or "")
-            config_anchor_count = str(row.get("config_anchor_count") or "")
-            doc_anchor_count = str(row.get("doc_anchor_count") or "")
-            test_anchor_count = str(row.get("test_anchor_count") or "")
-            blocked_by_cycle = str(row.get("blocked_by_cycle") or "")
-            deprecation_markers = row.get("deprecation_markers")
-            if isinstance(deprecation_markers, list):
-                marker_str = ",".join(str(marker) for marker in deprecation_markers)
-            else:
-                marker_str = ""
-            blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
-            marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
-            lines.append(
-                f"- target={target_name} | label={target_label} | family={family_name} | deletion_score={deletion_score} "
-                f"| confidence={deletion_confidence} | recent_age_days={recent_age_days} | only_test_referenced={only_test_referenced} "
-                f"| runtime={runtime_anchor_count} | config={config_anchor_count} | docs={doc_anchor_count} | tests={test_anchor_count}"
-                f"{marker_suffix}{blocked_suffix}"
-            )
-        if len(lines) == 1:
-            lines.append("- no dead code candidates found")
-        return "\n".join(lines)
 
-    if profile_config["mode"] == "current_cycle_code":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            target_name = str(row.get("target_name") or "")
-            if not target_name:
-                continue
-            family_name = str(row.get("family_name") or "")
-            target_label = str(row.get("target_label") or "")
-            cycle_status = str(row.get("cycle_status") or "")
-            cycle_score = str(row.get("cycle_score") or "")
-            recent_age_days = str(row.get("recent_age_days") or "")
-            runtime_anchor_count = str(row.get("runtime_anchor_count") or "")
-            config_anchor_count = str(row.get("config_anchor_count") or "")
-            doc_anchor_count = str(row.get("doc_anchor_count") or "")
-            test_anchor_count = str(row.get("test_anchor_count") or "")
-            wip_markers = row.get("wip_markers")
-            if isinstance(wip_markers, list):
-                marker_str = ",".join(str(marker) for marker in wip_markers)
-            else:
-                marker_str = ""
-            marker_suffix = f" | wip_markers={marker_str}" if marker_str else ""
-            lines.append(
-                f"- target={target_name} | label={target_label} | family={family_name} | cycle_status={cycle_status} "
-                f"| cycle_score={cycle_score} | recent_age_days={recent_age_days} | runtime={runtime_anchor_count} "
-                f"| config={config_anchor_count} | docs={doc_anchor_count} | tests={test_anchor_count}{marker_suffix}"
-            )
-        if len(lines) == 1:
-            lines.append("- no current-cycle code surfaces found")
-        return "\n".join(lines)
+def _format_overengineered_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        target_name = str(row.get("target_name") or "")
+        if not target_name:
+            continue
+        blocked_by_cycle = str(row.get("blocked_by_cycle") or "")
+        indirection_markers = row.get("indirection_markers")
+        stateful_markers = row.get("stateful_markers")
+        indirection_str = ",".join(str(marker) for marker in indirection_markers) if isinstance(indirection_markers, list) else ""
+        stateful_str = ",".join(str(marker) for marker in stateful_markers) if isinstance(stateful_markers, list) else ""
+        blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
+        lines.append(
+            f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
+            f"| classification={row.get('classification') or ''!s} | complexity_score={row.get('complexity_score') or ''!s} "
+            f"| simplification_score={row.get('simplification_score') or ''!s} | removable_score={row.get('removable_score') or ''!s} "
+            f"| branches={row.get('branch_count') or ''!s} | nesting={row.get('nesting_depth') or ''!s} "
+            f"| helper_calls={row.get('helper_call_count') or ''!s}{blocked_suffix}"
+        )
+        if indirection_str:
+            lines.append(f"  indirection_markers={indirection_str}")
+        if stateful_str:
+            lines.append(f"  stateful_markers={stateful_str}")
+    if len(lines) == 1:
+        lines.append("- no overengineered candidates found")
+    return "\n".join(lines)
 
-    if profile_config["mode"] == "overengineered_candidates":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            target_name = str(row.get("target_name") or "")
-            if not target_name:
-                continue
-            blocked_by_cycle = str(row.get("blocked_by_cycle") or "")
-            indirection_markers = row.get("indirection_markers")
-            stateful_markers = row.get("stateful_markers")
-            indirection_str = ",".join(str(marker) for marker in indirection_markers) if isinstance(indirection_markers, list) else ""
-            stateful_str = ",".join(str(marker) for marker in stateful_markers) if isinstance(stateful_markers, list) else ""
-            blocked_suffix = f" | blocked_by={blocked_by_cycle}" if blocked_by_cycle else ""
-            lines.append(
-                f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
-                f"| classification={row.get('classification') or ''!s} | complexity_score={row.get('complexity_score') or ''!s} "
-                f"| simplification_score={row.get('simplification_score') or ''!s} | removable_score={row.get('removable_score') or ''!s} "
-                f"| branches={row.get('branch_count') or ''!s} | nesting={row.get('nesting_depth') or ''!s} "
-                f"| helper_calls={row.get('helper_call_count') or ''!s}{blocked_suffix}"
-            )
-            if indirection_str:
-                lines.append(f"  indirection_markers={indirection_str}")
-            if stateful_str:
-                lines.append(f"  stateful_markers={stateful_str}")
-        if len(lines) == 1:
-            lines.append("- no overengineered candidates found")
-        return "\n".join(lines)
 
-    if profile_config["mode"] == "removable_complexity":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            target_name = str(row.get("target_name") or "")
-            if not target_name:
-                continue
-            deprecation_markers = row.get("deprecation_markers")
-            marker_str = ",".join(str(marker) for marker in deprecation_markers) if isinstance(deprecation_markers, list) else ""
-            marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
-            lines.append(
-                f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
-                f"| removable_score={row.get('removable_score') or ''!s} | removal_confidence={row.get('removal_confidence') or ''!s} "
-                f"| runtime={row.get('runtime_anchor_count') or ''!s} | config={row.get('config_anchor_count') or ''!s} "
-                f"| docs={row.get('doc_anchor_count') or ''!s} | tests={row.get('test_anchor_count') or ''!s}{marker_suffix}"
-            )
-        if len(lines) == 1:
-            lines.append("- no removable complexity candidates found")
-        return "\n".join(lines)
+def _format_removable_complexity_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        target_name = str(row.get("target_name") or "")
+        if not target_name:
+            continue
+        deprecation_markers = row.get("deprecation_markers")
+        marker_str = ",".join(str(marker) for marker in deprecation_markers) if isinstance(deprecation_markers, list) else ""
+        marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
+        lines.append(
+            f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
+            f"| removable_score={row.get('removable_score') or ''!s} | removal_confidence={row.get('removal_confidence') or ''!s} "
+            f"| runtime={row.get('runtime_anchor_count') or ''!s} | config={row.get('config_anchor_count') or ''!s} "
+            f"| docs={row.get('doc_anchor_count') or ''!s} | tests={row.get('test_anchor_count') or ''!s}{marker_suffix}"
+        )
+    if len(lines) == 1:
+        lines.append("- no removable complexity candidates found")
+    return "\n".join(lines)
 
-    if profile_config["mode"] == "simplification_blockers":
-        lines = [f"{title}: `{name}`"]
-        for row in rows:
-            target_name = str(row.get("target_name") or "")
-            if not target_name:
-                continue
-            lines.append(
-                f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
-                f"| classification={row.get('classification') or ''!s} | runtime={row.get('runtime_anchor_count') or ''!s} "
-                f"| config={row.get('config_anchor_count') or ''!s} | docs={row.get('doc_anchor_count') or ''!s} "
-                f"| tests={row.get('test_anchor_count') or ''!s}"
-            )
-            cycle_blockers = row.get("cycle_blockers")
-            if isinstance(cycle_blockers, list):
-                for blocker in sorted({str(item) for item in cycle_blockers if item}):
-                    lines.append(f"  cycle_blocker={blocker}")
-            blockers = row.get("blockers")
-            if isinstance(blockers, list):
-                normalized: set[str] = set()
-                for blocker in blockers:
-                    if not isinstance(blocker, dict):
-                        continue
-                    blocker_name = str(blocker.get("name") or "")
-                    if not blocker_name:
-                        continue
-                    relation_name = str(blocker.get("relation") or "")
-                    labels = blocker.get("labels")
-                    label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-                    normalized.add(
-                        f"  blocker={blocker_name} | relation={relation_name}" + (f" | labels={label_str}" if label_str else "")
-                    )
-                lines.extend(sorted(normalized))
-        if len(lines) == 1:
-            lines.append("- no simplification blockers found")
-        return "\n".join(lines)
 
+def _format_simplification_blockers_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    lines = [f"{title}: `{name}`"]
+    for row in rows:
+        target_name = str(row.get("target_name") or "")
+        if not target_name:
+            continue
+        lines.append(
+            f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
+            f"| classification={row.get('classification') or ''!s} | runtime={row.get('runtime_anchor_count') or ''!s} "
+            f"| config={row.get('config_anchor_count') or ''!s} | docs={row.get('doc_anchor_count') or ''!s} "
+            f"| tests={row.get('test_anchor_count') or ''!s}"
+        )
+        cycle_blockers = row.get("cycle_blockers")
+        if isinstance(cycle_blockers, list):
+            for blocker in sorted({str(item) for item in cycle_blockers if item}):
+                lines.append(f"  cycle_blocker={blocker}")
+        blockers = row.get("blockers")
+        if isinstance(blockers, list):
+            normalized: set[str] = set()
+            for blocker in blockers:
+                if not isinstance(blocker, dict):
+                    continue
+                blocker_name = str(blocker.get("name") or "")
+                if not blocker_name:
+                    continue
+                relation_name = str(blocker.get("relation") or "")
+                labels = blocker.get("labels")
+                label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
+                normalized.add(
+                    f"  blocker={blocker_name} | relation={relation_name}" + (f" | labels={label_str}" if label_str else "")
+                )
+            lines.extend(sorted(normalized))
+    if len(lines) == 1:
+        lines.append("- no simplification blockers found")
+    return "\n".join(lines)
+
+
+def _format_owner_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     seen: set[tuple[str, str, str, str]] = set()
     for row in rows:
@@ -1730,6 +1715,43 @@ def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> s
     if len(lines) == 1:
         lines.append("- no directory ownership edges found")
     return "\n".join(lines)
+
+
+ROW_FORMATTERS: dict[str, Callable[[str, str, list[dict[str, JsonValue]]], str]] = {
+    "neighbors": _format_neighbors_rows,
+    "docs_drift": _format_docs_drift_rows,
+    "workflow_gates": _format_workflow_gates_rows,
+    "workflow_artifacts": _format_workflow_artifacts_rows,
+    "workflow_execution": _format_workflow_execution_rows,
+    "storage_lineage": _format_storage_lineage_rows,
+    "field_lineage": _format_field_lineage_rows,
+    "schema_drift": _format_schema_drift_rows,
+    "run_artifacts": _format_run_artifacts_rows,
+    "runtime_state": _format_runtime_state_rows,
+    "runtime_locks": _format_runtime_state_rows,
+    "claim_trace": _format_claim_trace_rows,
+    "cli_semantics": _format_cli_semantics_rows,
+    "duplication_cluster": _format_duplication_cluster_rows,
+    "normalization_pipeline": _format_normalization_pipeline_rows,
+    "fallback_pipelines": _format_fallback_pipelines_rows,
+    "promotion_candidates": _format_promotion_candidates_rows,
+    "dead_code_candidates": _format_dead_code_candidates_rows,
+    "current_cycle_code": _format_current_cycle_code_rows,
+    "overengineered_candidates": _format_overengineered_candidates_rows,
+    "removable_complexity": _format_removable_complexity_rows,
+    "simplification_blockers": _format_simplification_blockers_rows,
+    "owner": _format_owner_rows,
+}
+
+
+def _format_rows(profile: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+    profile_config = QUERY_PROFILES[profile]
+    mode = str(profile_config["mode"])
+    title = profile_config["title"]
+    if not rows:
+        return _empty_result(title, mode, name)
+    formatter = ROW_FORMATTERS.get(mode, _format_owner_rows)
+    return formatter(title, name, rows)
 
 
 def main(argv: list[str] | None = None) -> int:

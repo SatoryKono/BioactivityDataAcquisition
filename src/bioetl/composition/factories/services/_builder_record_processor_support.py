@@ -21,15 +21,12 @@ if TYPE_CHECKING:
         RecordProcessorConfig,
         TransformCallback,
     )
-    from bioetl.application.core.wiring.runtime import BasePipeline
     from bioetl.composition.factories.services.builder import ServicesBuilder
     from bioetl.domain.composite.config import ColumnGroupConfig
-    from bioetl.domain.config import DQConfig, MemoryConfig
+    from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
-        BatchIdGeneratorPort,
         GoldValidatorPort,
-        MemoryMonitorPort,
         TracingPort,
     )
     from bioetl.domain.types import (

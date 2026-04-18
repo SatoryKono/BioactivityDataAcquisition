@@ -1,6 +1,7 @@
 """No-op memory monitor and metadata writer implementations."""
 
 from __future__ import annotations
+import asyncio
 from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -14,6 +15,11 @@ if TYPE_CHECKING:
         SilverMetadata,
     )
     from bioetl.domain.ports.runtime import MemoryStats
+
+
+async def _yield_control() -> None:
+    """Yield once to preserve async contracts in no-op implementations."""
+    await asyncio.sleep(0)
 
 
 class NoOpMemoryMonitor:
@@ -104,6 +110,7 @@ class NoOpMetadataWriter:
         Returns:
             Empty string.
         """
+        await _yield_control()
         del base_path, metadata, provider, entity
         return ""
 
@@ -130,6 +137,7 @@ class NoOpMetadataWriter:
         Returns:
             Empty string.
         """
+        await _yield_control()
         del base_path, metadata, table_name, flat_structure, provider, entity
         return ""
 
@@ -146,6 +154,7 @@ class NoOpMetadataWriter:
         delta_version_after: int | None = None,
     ) -> str | None:
         """No-op Silver finalization returns empty string when invoked."""
+        await _yield_control()
         del base_path, table_name, flat_structure, provider, entity
         del dq_report_path, completed_at, delta_version_after
         return ""
@@ -173,6 +182,7 @@ class NoOpMetadataWriter:
         Returns:
             Empty string.
         """
+        await _yield_control()
         del base_path, metadata, table_name, flat_structure, provider, entity
         return ""
 
@@ -188,10 +198,12 @@ class NoOpMetadataWriter:
         completed_at: datetime | None = None,
     ) -> str | None:
         """No-op Gold finalization returns empty string when invoked."""
+        await _yield_control()
         del base_path, table_name, flat_structure, provider, entity
         del dq_report_path, completed_at
         return ""
 
     async def aclose(self) -> None:
         """No-op implementation of aclose — no resources to release."""
+        await _yield_control()
         return None

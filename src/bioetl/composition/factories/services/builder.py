@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Sequence
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.core.wiring.runtime import (
     BatchExecutor,
@@ -33,11 +33,11 @@ from bioetl.composition.factories.services.pipeline_builder import (
 )
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
+from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
-    import pandera as pdr
     import pyarrow as pa
 
     from bioetl.application.core.wiring.runtime import BasePipeline
@@ -63,11 +63,7 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-__all__ = [
-    "ServicesBuilder",
-    "create_data_normalization_service",
-    "extract_pipeline_callbacks",
-]
+__all__ = ["ServicesBuilder", "create_data_normalization_service", "extract_pipeline_callbacks"]
 
 
 class ServicesBuilder:
@@ -77,15 +73,12 @@ class ServicesBuilder:
     def create_batch_processing_components(
         *,
         services: PipelineService,
-        context: PipelineContext,
-        config: RecordProcessorConfig,
-        error_classifier: ErrorClassifier,
+        context: PipelineContext, config: RecordProcessorConfig, error_classifier: ErrorClassifier,
         transform_callback: TransformCallback,
-        gold_filter_callback: GoldFilterCallback,
-        gold_transform_callback: GoldTransformCallback,
+        gold_filter_callback: GoldFilterCallback, gold_transform_callback: GoldTransformCallback,
         gold_validator: GoldValidatorPort,
         tracer: TracingPort | None = None,
-        domain_event_emitter: DomainEventEmitter | None = None,
+        domain_event_emitter: DomainEventEmitterPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> BatchProcessingComponents:
         """Create batch metrics/transformer/writer stack via composition DI."""
@@ -113,11 +106,8 @@ class ServicesBuilder:
         *,
         loading_strategy: LoadingStrategy | None = None,
         metrics: MetricsPort | None = None,
-        checkpoint_compatibility_service: object | None = None,
-        current_metadata: CheckpointMetadata | None = None,
-        compatibility_policy: Literal[
-            "observe", "soft_fail", "hard_fail"
-        ] = "soft_fail",
+        checkpoint_compatibility_service: object | None = None, current_metadata: CheckpointMetadata | None = None,
+        compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
     ) -> CheckpointManagerService:
         """Create a configured checkpoint manager for one pipeline run."""
         return create_checkpoint_manager(
@@ -200,9 +190,7 @@ class ServicesBuilder:
 
     @staticmethod
     def create_record_processor_from_pipeline(
-        pipeline: BasePipeline,
-        silver_schema: pa.Schema | None,
-        gold_schema: GoldSchemaType,
+        pipeline: BasePipeline, silver_schema: pa.Schema | None, gold_schema: GoldSchemaType,
         *,
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
@@ -223,22 +211,17 @@ class ServicesBuilder:
     @staticmethod
     def create_batch_executor_from_pipeline(
         pipeline: BasePipeline,
-        silver_schema: pa.Schema | None,
-        gold_schema: GoldSchemaType,
-        checkpoint_manager: CheckpointManagerService,
-        shutdown_signal: ShutdownSignal,
+        silver_schema: pa.Schema | None, gold_schema: GoldSchemaType,
+        checkpoint_manager: CheckpointManagerService, shutdown_signal: ShutdownSignal,
         *,
-        strict_gold_validation: bool = True,
-        lock_validator: Callable[[], Awaitable[bool]] | None = None,
+        strict_gold_validation: bool = True, lock_validator: Callable[[], Awaitable[bool]] | None = None,
         tracer: TracingPort | None = None,
-        memory_monitor: MemoryMonitorPort | None = None,
-        memory_config: MemoryConfig | None = None,
+        memory_monitor: MemoryMonitorPort | None = None, memory_config: MemoryConfig | None = None,
         bronze_output_path: str | None = None,
-        silver_output_path: str | None = None,
-        gold_output_path: str | None = None,
+        silver_output_path: str | None = None, gold_output_path: str | None = None,
         flat_structure: bool = False,
         batch_id_factory: BatchIdGeneratorPort | None = None,
-        domain_event_emitter: DomainEventEmitter | None = None,
+        domain_event_emitter: DomainEventEmitterPort | None = None,
     ) -> BatchExecutor:
         """Create a ``BatchExecutor`` from an already configured pipeline."""
         callbacks = extract_pipeline_callbacks(pipeline)
