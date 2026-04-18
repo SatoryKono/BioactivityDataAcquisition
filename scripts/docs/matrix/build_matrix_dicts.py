@@ -254,65 +254,91 @@ def _global_inventory(
 def _column_dictionary(
     workbook_rows: dict[str, list[dict[str, str]]],
 ) -> tuple[dict[str, object], dict[str, object]]:
+    """Build column dictionaries and review queue."""
     dictionaries: dict[str, object] = {}
     review_queue: dict[str, object] = {}
 
     for column in TARGET_COLUMNS:
-        global_counter: Counter[str] = Counter()
-        sheet_occurrences: dict[str, list[dict[str, object]]] = {}
-        for sheet_name, rows in workbook_rows.items():
-            counter = Counter(row.get(column, "") for row in rows)
-            global_counter.update(counter)
-            sheet_occurrences[sheet_name] = [
-                {"raw_value": raw_value, "occurrence_count": occurrence_count}
-                for raw_value, occurrence_count in sorted(
-                    counter.items(), key=lambda item: (-item[1], item[0])
-                )
-            ]
-
-        dictionary_entries = []
-        review_entries = []
-        for raw_value, occurrence_count in sorted(
-            global_counter.items(), key=lambda item: (-item[1], item[0])
-        ):
-            proposed_canonical_value, normalization_rule, review_status = (
-                _propose_value(column, raw_value)
-            )
-            entry = {
-                "raw_value": raw_value,
-                "occurrence_count": occurrence_count,
-                "proposed_canonical_value": proposed_canonical_value,
-                "normalization_rule": normalization_rule,
-                "review_status": review_status,
-                "sheets": [
-                    {
-                        "sheet_name": sheet_name,
-                        "occurrence_count": next(
-                            (
-                                item["occurrence_count"]
-                                for item in occurrences
-                                if item["raw_value"] == raw_value
-                            ),
-                            0,
-                        ),
-                    }
-                    for sheet_name, occurrences in sheet_occurrences.items()
-                    if any(item["raw_value"] == raw_value for item in occurrences)
-                ],
-            }
-            dictionary_entries.append(entry)
-            if review_status != "auto":
-                review_entries.append(entry)
-
-        dictionaries[column] = {
-            "dictionary_entries": dictionary_entries,
-        }
+        global_counter, sheet_occurrences = _collect_column_data(workbook_rows, column)
+        dictionary_entries, review_entries = _build_column_entries(
+            column, global_counter, sheet_occurrences
+        )
+        dictionaries[column] = {"dictionary_entries": dictionary_entries}
         review_queue[column] = {
             "needs_review_count": len(review_entries),
             "review_entries": review_entries,
         }
 
     return dictionaries, review_queue
+
+
+def _collect_column_data(
+    workbook_rows: dict[str, list[dict[str, str]]],
+    column: str,
+) -> tuple[Counter[str], dict[str, list[dict[str, object]]]]:
+    """Collect data for a column across all sheets."""
+    global_counter: Counter[str] = Counter()
+    sheet_occurrences: dict[str, list[dict[str, object]]] = {}
+    for sheet_name, rows in workbook_rows.items():
+        counter = Counter(row.get(column, "") for row in rows)
+        global_counter.update(counter)
+        sheet_occurrences[sheet_name] = [
+            {"raw_value": raw_value, "occurrence_count": occurrence_count}
+            for raw_value, occurrence_count in sorted(
+                counter.items(), key=lambda item: (-item[1], item[0])
+            )
+        ]
+    return global_counter, sheet_occurrences
+
+
+def _build_column_entries(
+    column: str,
+    global_counter: Counter[str],
+    sheet_occurrences: dict[str, list[dict[str, object]]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    """Build dictionary and review entries for a column."""
+    dictionary_entries = []
+    review_entries = []
+    for raw_value, occurrence_count in sorted(
+        global_counter.items(), key=lambda item: (-item[1], item[0])
+    ):
+        proposed_canonical_value, normalization_rule, review_status = (
+            _propose_value(column, raw_value)
+        )
+        entry = {
+            "raw_value": raw_value,
+            "occurrence_count": occurrence_count,
+            "proposed_canonical_value": proposed_canonical_value,
+            "normalization_rule": normalization_rule,
+            "review_status": review_status,
+            "sheets": _build_sheet_occurrences(sheet_occurrences, raw_value),
+        }
+        dictionary_entries.append(entry)
+        if review_status != "auto":
+            review_entries.append(entry)
+    return dictionary_entries, review_entries
+
+
+def _build_sheet_occurrences(
+    sheet_occurrences: dict[str, list[dict[str, object]]],
+    raw_value: str,
+) -> list[dict[str, object]]:
+    """Build sheet occurrences for a raw value."""
+    return [
+        {
+            "sheet_name": sheet_name,
+            "occurrence_count": next(
+                (
+                    item["occurrence_count"]
+                    for item in occurrences
+                    if item["raw_value"] == raw_value
+                ),
+                0,
+            ),
+        }
+        for sheet_name, occurrences in sheet_occurrences.items()
+        if any(item["raw_value"] == raw_value for item in occurrences)
+    ]
 
 
 def _detail_id_dictionary(
