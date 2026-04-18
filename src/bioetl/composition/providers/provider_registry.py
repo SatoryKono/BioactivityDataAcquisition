@@ -1,4 +1,4 @@
-"""Provider registry facade over split metadata and creation helpers.
+"""Provider registry facade over split helpers.
 
 Retained compatibility obligations are intentionally narrow:
 - class-level ``DefaultRegistryMethod`` mirror for legacy call sites;
