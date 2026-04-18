@@ -92,6 +92,27 @@ class SilverMetadataOperations:
         """Build a stable placeholder path when the real table path is unavailable."""
         return f"/tmp/silver/{table_name.replace('.', '/')}"
 
+    def _resolve_manifest_id(
+        self,
+        *,
+        records: list[BronzeRecord],
+    ) -> str | None:
+        """Resolve control-plane manifest id from records, host, or coordinator."""
+        if records and records[0].get("_manifest_id") is not None:
+            return str(records[0]["_manifest_id"])
+
+        host_manifest_id = getattr(self._host, "manifest_id", None)
+        if host_manifest_id is not None:
+            return str(host_manifest_id)
+
+        coordinator = self._metadata_coordinator
+        coordinator_context = getattr(coordinator, "run_context", None)
+        coordinator_manifest_id = getattr(coordinator_context, "manifest_id", None)
+        if coordinator_manifest_id is not None:
+            return str(coordinator_manifest_id)
+
+        return None
+
     @staticmethod
     def _build_column_metrics_dict(
         dq_metrics: BatchDQMetrics | None,
@@ -580,11 +601,7 @@ class SilverMetadataOperations:
             if records and "_run_id" in records[0]
             else "test_run_id"
         )
-        manifest_id = (
-            str(records[0]["_manifest_id"])
-            if records and records[0].get("_manifest_id") is not None
-            else getattr(self._host, "manifest_id", None)
-        )
+        manifest_id = self._resolve_manifest_id(records=records)
         metadata = self._build_silver_metadata(
             _SilverMetadataBuildRequest(
                 table_name=table_name,
@@ -595,7 +612,7 @@ class SilverMetadataOperations:
                 runtime_started_at=started_at,
                 runtime_completed_at=context.completed_at,
                 run_id=run_id,
-                manifest_id=None if manifest_id is None else str(manifest_id),
+                manifest_id=manifest_id,
                 run_type=RunTypeEnum.INCREMENTAL,
                 source_batch_id=source_batch_id,
                 transform_version=None,

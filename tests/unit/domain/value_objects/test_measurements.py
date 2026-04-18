@@ -5,6 +5,8 @@ Tests for Concentration, ConcentrationUnit, ActivityType, PChemblValue.
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from bioetl.domain.value_objects import (
@@ -20,12 +22,12 @@ class TestConcentrationUnit:
 
     def test_molar_factor(self) -> None:
         """Test molar conversion factors."""
-        assert ConcentrationUnit.MOLAR.to_molar_factor == pytest.approx(1.0)
-        assert ConcentrationUnit.MILLIMOLAR.to_molar_factor == pytest.approx(1e-3)
-        assert ConcentrationUnit.MICROMOLAR.to_molar_factor == pytest.approx(1e-6)
-        assert ConcentrationUnit.NANOMOLAR.to_molar_factor == pytest.approx(1e-9)
-        assert ConcentrationUnit.PICOMOLAR.to_molar_factor == pytest.approx(1e-12)
-        assert ConcentrationUnit.FEMTOMOLAR.to_molar_factor == pytest.approx(1e-15)
+        assert math.isclose(ConcentrationUnit.MOLAR.to_molar_factor, 1.0)
+        assert math.isclose(ConcentrationUnit.MILLIMOLAR.to_molar_factor, 1e-3)
+        assert math.isclose(ConcentrationUnit.MICROMOLAR.to_molar_factor, 1e-6)
+        assert math.isclose(ConcentrationUnit.NANOMOLAR.to_molar_factor, 1e-9)
+        assert math.isclose(ConcentrationUnit.PICOMOLAR.to_molar_factor, 1e-12)
+        assert math.isclose(ConcentrationUnit.FEMTOMOLAR.to_molar_factor, 1e-15)
 
     def test_from_string_nm(self) -> None:
         """Test parsing nanomolar unit."""

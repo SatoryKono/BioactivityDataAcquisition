@@ -473,11 +473,7 @@ def _create_minimal_df(columns, provider, entity_id, pk_field, pk_value):
     data["_lookup_method"] = "direct"
     data["title"] = f"Minimal {provider} Publication"
 
-    # Use PUBLICATION for ChEMBL, journal-article for others to satisfy enums
-    if provider == "chembl":
-        data["publication_type"] = "journal-article"
-    else:
-        data["publication_type"] = "journal-article"
+    data["publication_type"] = "journal-article"
 
     # Set PK
     data[pk_field] = pk_value

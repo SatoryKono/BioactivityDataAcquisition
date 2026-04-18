@@ -188,7 +188,7 @@ class TestChemblDateBuilding:
     def test_chembl_none_year_gives_none_date(self) -> None:
         """ChEMBL with None year should give None publication_date."""
         year = None
-        expected = f"{year}-01-01" if year else None
+        expected = None
         assert expected is None
 
 

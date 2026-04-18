@@ -14,6 +14,7 @@ Per RULES.md 4.1 Error Classification:
 from __future__ import annotations
 
 import asyncio
+import math
 from unittest.mock import MagicMock
 from uuid import uuid4
 
@@ -342,8 +343,8 @@ class TestExponentialBackoff:
         # All delays after a point should be capped
         assert all(d <= max_delay for d in delays)
         # Later delays should all be at max
-        assert delays[-1] == pytest.approx(max_delay)
-        assert delays[-2] == pytest.approx(max_delay)
+        assert math.isclose(delays[-1], max_delay)
+        assert math.isclose(delays[-2], max_delay)
 
 
 @pytest.mark.e2e

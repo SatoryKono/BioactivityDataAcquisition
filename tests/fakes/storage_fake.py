@@ -273,7 +273,8 @@ class InMemoryStorage:
     ) -> dict[str, Any]:
         """Preview what would be cleared."""
         silver_count = len(self.silver.get(silver_table, []))
-        gold_count = len(self.gold.get(gold_table or "", [])) if gold_table else 0
+        has_gold_table = gold_table is not None
+        gold_count = len(self.gold.get(gold_table, [])) if has_gold_table else 0
 
         result = {
             "silver": {
@@ -284,7 +285,7 @@ class InMemoryStorage:
             "total_files": silver_count + gold_count,
         }
 
-        if gold_table:
+        if has_gold_table:
             result["gold"] = {
                 "path": f"memory://gold/{gold_table}",
                 "file_count": gold_count,

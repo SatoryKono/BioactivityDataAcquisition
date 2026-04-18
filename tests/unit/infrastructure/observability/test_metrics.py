@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import warnings
 
 import pytest
@@ -36,7 +37,7 @@ class TestPrometheusMetrics:
 
         # Verify delta
         end_val = hist.labels(**labels)._sum.get()
-        assert end_val == pytest.approx(start_val + val)
+        assert math.isclose(end_val, start_val + val)
 
     def test_increment_counter_success(self):
         """Test incrementing a counter."""

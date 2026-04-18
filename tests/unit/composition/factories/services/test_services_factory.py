@@ -90,7 +90,7 @@ def test_extract_pipeline_callbacks_legacy_defaults() -> None:
     assert callbacks.transform is transform_cb
     assert callbacks.gold_filter(None, {"x": 1}) is True
     sample = {"id": "A"}
-    assert callbacks.gold_transform(None, sample) is sample
+    assert callbacks.gold_transform(None, sample) == sample
 
 
 @pytest.mark.unit
