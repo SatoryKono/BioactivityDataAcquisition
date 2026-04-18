@@ -40,6 +40,7 @@ from bioetl.composition.factories.pipeline.runner_constructor import (
     create_pipeline_runner_from_payload,
 )
 from bioetl.composition.factories.services.factory import ServicesBuilder
+from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
@@ -60,7 +61,6 @@ if TYPE_CHECKING:
         RunnerConstructorPayload,
     )
     from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.domain.locking import LockContextHolder
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import GoldSchemaType
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -68,8 +68,6 @@ if TYPE_CHECKING:
 __all__ = [
     "assemble_runner_impl",
 ]
-
-
 def _build_checkpoint_manager(
     *,
     pipeline: BasePipeline,

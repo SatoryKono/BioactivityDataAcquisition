@@ -90,7 +90,7 @@ async def finalize_batch_transform_result(
 
     if threshold_result.breach == ThresholdBreachReason.SOFT:
         context.logger.warning(
-            "DQ threshold breach detected",
+            "DQ Soft Threshold exceeded",
             breach=threshold_result.breach.value,
             error_rate=threshold_result.error_rate,
             soft_threshold=threshold_result.soft_threshold,

@@ -14,9 +14,6 @@ from bioetl.application.core.base_transformer.types import (
 )
 from bioetl.application.core.pipeline_services import PipelineService
 from bioetl.application.core.runner import PipelineRunner
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol,
-)
 from bioetl.composition.factories.pipeline._factory_method_control_plane import (
     apply_optional_control_plane_kwargs as _apply_optional_control_plane_kwargs,
 )
@@ -31,10 +28,20 @@ from bioetl.composition.factories.pipeline._factory_method_types import (
     _BuildFactoryServicesRequest,
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
+)
+from bioetl.composition.factories.pipeline._factory_method_types import (
     build_create_pipeline_with_services_request as _build_create_pipeline_with_services_request,
+)
+from bioetl.composition.factories.pipeline._factory_method_types import (
     build_pipeline_factory_context as _build_pipeline_factory_context,
+)
+from bioetl.composition.factories.pipeline._factory_method_types import (
     create_factory_data_source as _create_factory_data_source,
+)
+from bioetl.composition.factories.pipeline._factory_method_types import (
     extract_entity_type as _extract_entity_type_helper,
+)
+from bioetl.composition.factories.pipeline._factory_method_types import (
     resolve_data_source_creator as _resolve_data_source_creator,
 )
 from bioetl.composition.factories.pipeline.transformer_dependencies import (
@@ -115,6 +122,8 @@ def create_transformer_instance(
         gold_filters=gold_filters,
         dependencies=resolved_dependencies,
     )
+
+
 def build_factory_services(
     *,
     factory_context: _PipelineFactoryContext,
