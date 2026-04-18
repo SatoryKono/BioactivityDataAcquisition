@@ -258,6 +258,14 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             silver_record["issn_list"] = (
                 self.serialize_json_list(issn_raw) if issn_raw else None
             )
+        elif isinstance(issn_raw, str) and "," in issn_raw:
+            issn_values = [
+                value.strip() for value in issn_raw.split(",") if value.strip()
+            ]
+            silver_record["issn"] = issn_values[0] if issn_values else None
+            silver_record["issn_list"] = (
+                self.serialize_json_list(issn_values) if issn_values else None
+            )
         else:
             silver_record.setdefault("issn_list", None)
 

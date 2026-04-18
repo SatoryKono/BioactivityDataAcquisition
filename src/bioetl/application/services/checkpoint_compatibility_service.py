@@ -418,6 +418,31 @@ def _validate_lenient_pipeline_compatibility(
     return pipeline_compatible, messages
 
 
+def _has_explicit_execution_identity_anchor(metadata: CheckpointMetadata) -> bool:
+    """Return whether compatibility must enforce execution identity for lenient mode.
+
+    Lenient compatibility historically tolerated minor/patch resume drift when
+    no explicit resume anchors were persisted. Keep that behavior for older
+    checkpoints that only carry coarse metadata like pipeline version.
+    """
+
+    return any(
+        value is not None and value != () and value != ""
+        for value in (
+            metadata.execution_fingerprint,
+            metadata.composite_run_identity,
+            metadata.manifest_id,
+            metadata.contract_ref,
+            metadata.contract_version,
+            metadata.effective_config_hash,
+            metadata.effective_config_artifact_id,
+            metadata.exact_replay,
+            metadata.input_snapshot_ids,
+            metadata.input_snapshot_fingerprint,
+        )
+    )
+
+
 def _log_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) -> None:
     if compatible:
         logger.info(
@@ -526,12 +551,21 @@ class CheckpointCompatibilityService:
                 checkpoint_metadata,
             )
         )
-        execution_identity_compatible, execution_identity_messages = (
-            _validate_execution_identity_compatibility(
-                current_metadata,
-                checkpoint_metadata,
+        if _has_explicit_execution_identity_anchor(
+            current_metadata
+        ) or _has_explicit_execution_identity_anchor(checkpoint_metadata):
+            execution_identity_compatible, execution_identity_messages = (
+                _validate_execution_identity_compatibility(
+                    current_metadata,
+                    checkpoint_metadata,
+                )
             )
-        )
+        else:
+            execution_identity_compatible = True
+            execution_identity_messages = [
+                "Execution identity compatibility: not enforced in lenient mode "
+                "(missing explicit resume anchors)"
+            ]
         messages = dq_messages + pipeline_messages + execution_identity_messages
         compatible = (
             dq_compatible and pipeline_compatible and execution_identity_compatible
