@@ -56,6 +56,22 @@ def build_launch_context_snapshot(
     execution_context_value: str,
     required_persistence_profile: str,
 ) -> dict[str, object]:
+    """Build a snapshot of the launch context."""
+    snapshot = _build_base_snapshot(ctx, run_type_value, execution_context_value)
+    snapshot.update({
+        "required_persistence_profile": required_persistence_profile,
+        "exact_replay_support_boundary": _determine_replay_support_boundary(execution_context_value),
+    })
+    _add_optional_fields(snapshot, ctx)
+    return snapshot
+
+
+def _build_base_snapshot(
+    ctx: PipelineRunContext,
+    run_type_value: str,
+    execution_context_value: str,
+) -> dict[str, object]:
+    """Build the base snapshot."""
     return {
         "pipeline_name": str(ctx.pipeline_name),
         "run_type": run_type_value,
@@ -69,16 +85,23 @@ def build_launch_context_snapshot(
         "skip_gold": getattr(ctx, "skip_gold", False),
         "exact_replay": getattr(ctx, "exact_replay", False),
         "execution_context": execution_context_value,
-        "required_persistence_profile": required_persistence_profile,
-        "exact_replay_support_boundary": (
-            "snapshot_backed_source_runs_only"
-            if execution_context_value != "composite"
-            else "composite_execution_unsupported"
-        ),
-        "vacuum": to_serializable_mapping(getattr(ctx, "vacuum", None)),
-        "input_filter": to_serializable_mapping(getattr(ctx, "input_filter", None)),
-        "cached_bronze": to_serializable_mapping(getattr(ctx, "cached_bronze", None)),
     }
+
+
+def _determine_replay_support_boundary(execution_context_value: str) -> str:
+    """Determine the replay support boundary."""
+    return (
+        "snapshot_backed_source_runs_only"
+        if execution_context_value != "composite"
+        else "composite_execution_unsupported"
+    )
+
+
+def _add_optional_fields(snapshot: dict[str, object], ctx: PipelineRunContext) -> None:
+    """Add optional fields to the snapshot."""
+    snapshot["vacuum"] = to_serializable_mapping(getattr(ctx, "vacuum", None))
+    snapshot["input_filter"] = to_serializable_mapping(getattr(ctx, "input_filter", None))
+    snapshot["cached_bronze"] = to_serializable_mapping(getattr(ctx, "cached_bronze", None))
 
 
 def resolve_replay_parentage(
