@@ -72,19 +72,19 @@ COLLECTION_PHRASES = {
 }
 VIEW_SUFFIX_ORDER = ("-full", "-overview", "-dataflow", "-domain", "-infra")
 COMMENT_METADATA_PATTERNS = (
-    (re.compile(r"Title:\s*(.+)"), "title"),
-    (re.compile(r"Covers:\s*(.+)"), "covers"),
-    (re.compile(r"Components:\s*(.+)"), "components"),
-    (re.compile(r"@type\s+(.+)"), "type"),
-    (re.compile(r"@date\s+(.+)"), "date"),
-    (re.compile(r"@level\s+(.+)"), "level"),
-    (re.compile(r"@nodes\s+(.+)"), "nodes_meta"),
-    (re.compile(r"@reference\s+(.+)"), "reference"),
-    (re.compile(r"@adr\s+(.+)"), "adr"),
-    (re.compile(r"Parent source:\s*(.+)"), "parent_source"),
+    (re.compile(r"Title:\s*([^\n]+)"), "title"),
+    (re.compile(r"Covers:\s*([^\n]+)"), "covers"),
+    (re.compile(r"Components:\s*([^\n]+)"), "components"),
+    (re.compile(r"@type\s+([^\n]+)"), "type"),
+    (re.compile(r"@date\s+([^\n]+)"), "date"),
+    (re.compile(r"@level\s+([^\n]+)"), "level"),
+    (re.compile(r"@nodes\s+([^\n]+)"), "nodes_meta"),
+    (re.compile(r"@reference\s+([^\n]+)"), "reference"),
+    (re.compile(r"@adr\s+([^\n]+)"), "adr"),
+    (re.compile(r"Parent source:\s*([^\n]+)"), "parent_source"),
 )
 VIEW_PATTERN = re.compile(r"View:\s*(.+?)(?:\s*\|\s*Parent:\s*(.+))?$")
-SHOWS_PATTERN = re.compile(r"Shows\s+(.+)")
+SHOWS_PATTERN = re.compile(r"Shows\s+([^\n]+)")
 
 
 def _extract_comment_metadata(lines: list[str], meta: dict[str, object]) -> None:

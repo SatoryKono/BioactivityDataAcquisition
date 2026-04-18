@@ -18,7 +18,7 @@ __all__ = [
 
 _BAO_IDENTIFIER_RE = re.compile(r"^bao[_:](\d+)$", re.IGNORECASE)
 _UO_IDENTIFIER_RE = re.compile(r"^uo[_:](\d+)$", re.IGNORECASE)
-_ORGANISM_TRAILING_ANNOTATION_RE = re.compile(r"\s+\(.*\)$")
+_ORGANISM_TRAILING_ANNOTATION_RE = re.compile(r"\s+\([^()\n]*\)$")
 _ORGANISM_WHITESPACE_RE = re.compile(r"\s+")
 
 _UNIT_ALIASES: dict[str, str] = {

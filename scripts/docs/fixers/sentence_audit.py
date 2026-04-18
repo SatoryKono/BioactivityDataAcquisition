@@ -178,10 +178,33 @@ def clean_markdown_line(line: str) -> str:
             for part in s.split("|")
             if part.strip() and not set(part.strip()) <= {"-"}
         )
-    s = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1", s)
+    s = _strip_markdown_links(s)
     s = re.sub(r"<[^>]+>", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
     return s
+
+
+def _strip_markdown_links(text: str) -> str:
+    parts: list[str] = []
+    cursor = 0
+    while cursor < len(text):
+        start = text.find("[", cursor)
+        if start == -1:
+            parts.append(text[cursor:])
+            break
+        label_end = text.find("]", start + 1)
+        if label_end == -1 or label_end + 1 >= len(text) or text[label_end + 1] != "(":
+            parts.append(text[cursor : start + 1])
+            cursor = start + 1
+            continue
+        target_end = text.find(")", label_end + 2)
+        if target_end == -1:
+            parts.append(text[cursor:])
+            break
+        parts.append(text[cursor:start])
+        parts.append(text[start + 1 : label_end])
+        cursor = target_end + 1
+    return "".join(parts)
 
 
 def extract_sentences(md_text: str) -> list[str]:

@@ -56,11 +56,19 @@ _LINE_ENDING_HINT = (
 )
 
 
+def _ruff_env() -> dict[str, str]:
+    """Use a writable cache dir across mixed WSL/docker-desktop mounts."""
+    env = os.environ.copy()
+    env.setdefault("RUFF_CACHE_DIR", "/tmp/bioetl-ruff-cache")
+    return env
+
+
 def _run_format_check(target: str) -> subprocess.CompletedProcess[str]:
     """Run `ruff format --check` with Windows retry for line-ending churn."""
     result = subprocess.run(
         [*_RUFF_CMD, "format", "--check", target],  # type: ignore[arg-type]
         capture_output=True,
+        env=_ruff_env(),
         text=True,
     )
     if result.returncode == 0 or platform.system() != "Windows":
@@ -70,11 +78,13 @@ def _run_format_check(target: str) -> subprocess.CompletedProcess[str]:
     subprocess.run(
         [*_RUFF_CMD, "format", target],  # type: ignore[arg-type]
         capture_output=True,
+        env=_ruff_env(),
         text=True,
     )
     return subprocess.run(
         [*_RUFF_CMD, "format", "--check", target],  # type: ignore[arg-type]
         capture_output=True,
+        env=_ruff_env(),
         text=True,
     )
 
@@ -89,6 +99,7 @@ def _run_isort_check() -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [*check_cmd, "check", "--select", "I", "src", "tests"],
         capture_output=True,
+        env=_ruff_env(),
         text=True,
     )
 

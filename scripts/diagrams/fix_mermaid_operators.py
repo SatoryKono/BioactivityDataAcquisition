@@ -75,9 +75,11 @@ def _repo_path(relative_path: Path) -> Path:
     return _repo_root() / relative_path
 
 
-def _read_repo_text(relative_path: Path) -> str:
-    return _repo_path(relative_path).read_text(encoding="utf-8")
-
+def _write_repo_text(relative_path: Path, content: str) -> None:
+    safe_path = _ensure_repo_path(_repo_root() / relative_path)
+    if safe_path.is_dir():
+        raise ValueError(f"refusing to write to directory path: {safe_path}")
+    safe_path.write_text(content, encoding="utf-8", newline="\n")
 
 def _write_repo_text(relative_path: Path, content: str) -> None:
     safe_path = _ensure_repo_path(_repo_path(relative_path))
