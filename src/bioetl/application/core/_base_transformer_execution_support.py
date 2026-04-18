@@ -39,7 +39,7 @@ def start_transform_span(
     owner: TransformerExecutionOwner,
     context: PipelineContext,
     index: int,
-) -> Any:
+) -> object:  # Any: OpenTelemetry span type is dynamic
     """Create and enter an OpenTelemetry span for record transformation."""
     otel_tracer = owner._tracer.get_tracer("bioetl.transformer")
     span = otel_tracer.start_as_current_span(
