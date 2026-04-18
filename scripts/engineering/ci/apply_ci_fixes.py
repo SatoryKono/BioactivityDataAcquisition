@@ -507,29 +507,48 @@ def _patch_file(
 
 
 def apply_ci02(api: GitHubAPI) -> None:
+    """Apply CI-02: Add Python 3.13 to test-matrix."""
     print("\n=== CI-02: Add Python 3.13 to test-matrix ===")
     branch = BRANCHES["ci-02"]
     sha = api.get_sha()
-
-    if api.branch_exists(branch):
-        print(f"  Branch {branch} already exists — skipping branch creation")
-    else:
-        api.create_branch(branch, sha)
-
+    
+    _create_branch_if_not_exists(api, branch, sha)
+    
     path = ".github/workflows/tests.yml"
     read_branch = BASE_BRANCH if api.dry_run else branch
     content, file_sha = api.get_file(path, read_branch)
-
+    
     old_matrix = 'python-version: [ "3.11", "3.12" ]'
     new_matrix = 'python-version: [ "3.11", "3.12", "3.13" ]'
-
+    
     if old_matrix not in content:
         print(f"  WARNING: expected pattern not found in {path}. Already updated?")
         return
+    
+    _apply_ci02_fix(api, path, content, file_sha, branch)
+    
+    if not api.dry_run:
+        pr_url = api.create_pr(
+            title="feat(ci): add Python 3.13 to test-matrix",
+            branch=branch,
+            body=PR_BODIES["ci-02"],
+        )
+        print(f"  PR created: {pr_url}")
 
+
+def _apply_ci02_fix(
+    api: GitHubAPI,
+    path: str,
+    content: str,
+    file_sha: str,
+    branch: str,
+) -> None:
+    """Apply CI-02 fix to the tests.yml file."""
+    old_matrix = 'python-version: [ "3.11", "3.12" ]'
+    new_matrix = 'python-version: [ "3.11", "3.12", "3.13" ]'
     new_content = content.replace(old_matrix, new_matrix, 1)
     print(f"  Patching {path}: adding 3.13 to test matrix")
-
+    
     api.update_file(
         path=path,
         content=new_content,
@@ -542,14 +561,6 @@ def apply_ci02(api: GitHubAPI) -> None:
         ),
         branch=branch,
     )
-
-    if not api.dry_run:
-        pr_url = api.create_pr(
-            title="feat(ci): add Python 3.13 to test-matrix",
-            branch=branch,
-            body=PR_BODIES["ci-02"],
-        )
-        print(f"  PR created: {pr_url}")
 
 
 # ── CI-03 ────────────────────────────────────────────────────────────────────
