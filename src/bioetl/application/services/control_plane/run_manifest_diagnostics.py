@@ -297,13 +297,35 @@ _NEXT_STEP_MAPPING = {
     "run_failed": "Inspect failure classification and decide retry/quarantine/escalation.",
     "artifact_linkage_gap": "Validate artifact publication metadata and repair dataset/lineage links.",
     "lineage_gap": "Investigate lineage persistence for published artifacts before restart.",
-    "immutable_input_snapshot_gap": "Persist immutable cached Bronze input snapshots before treating this run as strict exact-replay capable.",
-    "strict_replay_boundary_gap": "Treat this execution context as outside the strict exact-replay support boundary; use rebuild/resume semantics instead of exact replay.",
-    "composite_resume_reconstructability_gap": "Treat composite resume as checkpoint snapshot plus ledger suffix replay only; do not expect per-provider result maps or other rich checkpoint payloads to be reconstructed.",
-    "replay_ready_gap": "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
-    "forensic_grade_gap": "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction.",
-    "dq_signal_present": "Review DQ report artifacts, rule IDs, and contract policy anchors before retry or escalation.",
-    "cross_validation_signal_present": "Review cross-validation mismatch outcomes and composite policy anchors before retry or quarantine changes.",
+    "immutable_input_snapshot_gap": (
+        "Persist immutable cached Bronze input snapshots before treating this run "
+        "as strict exact-replay capable."
+    ),
+    "strict_replay_boundary_gap": (
+        "Treat this execution context as outside the strict exact-replay support "
+        "boundary; use rebuild/resume semantics instead of exact replay."
+    ),
+    "composite_resume_reconstructability_gap": (
+        "Treat composite resume as checkpoint snapshot plus ledger suffix replay "
+        "only; do not expect per-provider result maps or other rich checkpoint "
+        "payloads to be reconstructed."
+    ),
+    "replay_ready_gap": (
+        "Review replay-ready persistence requirements before treating this run "
+        "as exact-replay capable."
+    ),
+    "forensic_grade_gap": (
+        "Review forensic-grade persistence requirements before using this run "
+        "for full trace/debug reconstruction."
+    ),
+    "dq_signal_present": (
+        "Review DQ report artifacts, rule IDs, and contract policy anchors before "
+        "retry or escalation."
+    ),
+    "cross_validation_signal_present": (
+        "Review cross-validation mismatch outcomes and composite policy anchors "
+        "before retry or quarantine changes."
+    ),
     "run_shutdown": "Confirm graceful shutdown reason and resume policy compatibility.",
 }
 

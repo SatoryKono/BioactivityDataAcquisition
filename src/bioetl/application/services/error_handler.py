@@ -123,7 +123,7 @@ class ErrorHandlerService:
                 self._log_error(exception, context)
                 self._record_error_metrics(exception)
                 if reraise:
-                    raise exception
+                    raise exception from exception
 
     def wrap_function(
         self,
@@ -168,7 +168,7 @@ class ErrorHandlerService:
         context: dict[
             str,
             Any,  # Any: Logging context carries heterogeneous scalar payloads from callers.
-        ] = None,
+        ] | None = None,
     ) -> None:
         """Log an error with full context."""
         log_context = self._prepare_log_context(exception, context)

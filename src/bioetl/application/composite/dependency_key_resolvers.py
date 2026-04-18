@@ -12,7 +12,17 @@ from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
 from bioetl.application.composite.join_key_normalization import (
     JOIN_KEY_NORMALIZATION_POLICIES,
     JoinKeyNormalizationPolicy,
+    normalize_join_key_dataframe_columns,
 )
+from bioetl.domain.composite.config import DependencyConfig
+from bioetl.domain.exceptions import (
+    BioETLError,
+    CheckpointConflictError,
+    DataQualityError,
+    NetworkError,
+    StorageError,
+)
+from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 
 
 def create_resolver_helper(
@@ -26,19 +36,6 @@ def create_resolver_helper(
         or JOIN_KEY_NORMALIZATION_POLICIES,
     )
 
-
-from bioetl.application.composite.join_key_normalization import (
-    normalize_join_key_dataframe_columns,
-)
-from bioetl.domain.composite.config import DependencyConfig
-from bioetl.domain.exceptions import (
-    BioETLError,
-    CheckpointConflictError,
-    DataQualityError,
-    NetworkError,
-    StorageError,
-)
-from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 
 _KEY_FILTER_ERRORS = (ValueError, TypeError, RuntimeError)
 _DEPENDENCY_KEY_READ_ERRORS = (
