@@ -36,7 +36,7 @@ class TestPrometheusMetrics:
 
         # Verify delta
         end_val = hist.labels(**labels)._sum.get()
-        assert end_val == start_val + val
+        assert end_val == pytest.approx(start_val + val)
 
     def test_increment_counter_success(self):
         """Test incrementing a counter."""

@@ -19,7 +19,9 @@ from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
     get_data_source_creator,
 )
-from bioetl.composition.factories.dq.context_resolver import extract_dq_configs
+from bioetl.composition.factories.dq.context_resolver import (
+    extract_dq_configs as _extract_dq_configs,
+)
 from bioetl.composition.factories.pipeline.assembler_helpers import (
     build_factory_context,
     create_runner_from_factory,
@@ -31,10 +33,12 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     create_factory_data_source,
     create_pipeline_instance_with_services,
     create_transformer_instance,
-    extract_entity_type,
+    extract_entity_type as _extract_entity_type,
     resolve_data_source_creator,
 )
-from bioetl.composition.factories.pipeline.runner_assembly import assemble_runner_impl
+from bioetl.composition.factories.pipeline.runner_assembly import (
+    assemble_runner_impl as _assemble_runner_impl,
+)
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers.provider_registry import ProviderRegistry
 from bioetl.domain.config import RuntimeConfig
@@ -60,12 +64,9 @@ from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 TPipeline = TypeVar("TPipeline", bound="BasePipeline")
-_extract_entity_type, _extract_dq_configs = extract_entity_type, extract_dq_configs
-_assemble_runner_impl = assemble_runner_impl
-
 
 class GenericPipelineFactory(Generic[TPipeline]):
-    """Composition-layer factory that assembles pipelines and runners."""
+    """Composition-layer factory for assembling pipelines and runners."""
 
     def __init__(
         self,
@@ -117,12 +118,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
         contract_policy: ContractPolicyPort | None = None,
         dependencies: TransformerDependencyContext | None = None,
     ) -> BaseTransformer | None:
-        """Create the configured transformer instance for this pipeline."""
         return create_transformer_instance(
             transformer_class=self.transformer_class,
             provider=self.provider,
             pipeline_name=self.pipeline_name,
-            extract_entity_type=extract_entity_type,
+            extract_entity_type=_extract_entity_type,
             tracer=tracer,
             metrics=metrics,
             silver_filters=silver_filters,
@@ -141,7 +141,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
-        """Create the data source adapter bound to this factory/provider."""
         return create_factory_data_source(
             create_data_source_fn=self._create_data_source,
             settings=settings,
@@ -160,7 +159,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
-        """Build shared runtime services used by pipeline creation and execution."""
         return build_factory_services(
             factory_context=build_factory_context(self),
             request=_BuildFactoryServicesRequest(
@@ -190,7 +188,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
-        """Create a fully wired pipeline instance with resolved service bundle."""
         return create_with_services_from_factory(
             self,
             run_id,
@@ -224,7 +221,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
-        """Create a pipeline runner wired with runtime observability services."""
         return create_runner_from_factory(
             self,
             run_id=run_id,
@@ -254,7 +250,6 @@ def create_pipeline_factory(
     transformer_class: type[BaseTransformer] | None = None,
     provider_registry: ProviderRegistry | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
-    """Construct a `GenericPipelineFactory` with optional wiring overrides."""
     return GenericPipelineFactory(
         pipeline_name,
         pipeline_class,
@@ -276,7 +271,6 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    """Assemble a pipeline runner instance with schema and DQ extraction hooks."""
     return _assemble_runner_impl(
         pipeline=pipeline,
         observability=observability,

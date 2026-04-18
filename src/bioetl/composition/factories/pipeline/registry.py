@@ -1,27 +1,4 @@
-"""Consolidated pipeline factory definitions.
-
-This module creates all pipeline factories using the GenericPipelineFactory
-pattern with GenericPipeline as the unified pipeline class.
-
-Pipeline registry inventory is defined in registry_manifest.py.
-Contract validation logic is in contract_validator.py.
-
-Thread-safety: Registration uses a module-level lock to prevent TOCTOU race conditions.
-
-Instance-level registry support (2025-12):
-- register_all_pipelines() accepts optional registry parameter
-- Default behavior uses global registry for backward compatibility
-- Tests can use isolated registries for parallel execution
-
-Usage:
-    >>> from bioetl.composition.factories.pipeline.registry import register_all_pipelines
-    >>> register_all_pipelines()  # Call once at application startup
-
-    # For test isolation:
-    >>> from bioetl.composition import create_registry
-    >>> registry = create_registry()
-    >>> register_all_pipelines(registry=registry)
-"""
+"""Consolidated pipeline factory definitions and registration helpers."""
 
 from __future__ import annotations
 
@@ -39,10 +16,6 @@ from bioetl.composition.factories.pipeline.registry_manifest import (
     PIPELINE_CONFIGS,
 )
 from bioetl.domain.ports import PipelineFactoryPort
-
-# =============================================================================
-# Factory Instances (created from PIPELINE_CONFIGS)
-# =============================================================================
 
 
 def _build_factories() -> dict[str, GenericPipelineFactory[GenericPipeline]]:
@@ -76,11 +49,6 @@ pubmed_publication_factory = _factories["pubmed_publication"]
 crossref_publication_factory = _factories["crossref_publication"]
 openalex_publication_factory = _factories["openalex_publication"]
 semanticscholar_publication_factory = _factories["semanticscholar_publication"]
-
-
-# =============================================================================
-# Registration Functions
-# =============================================================================
 
 
 class _PipelineFactoryRegistrationState:
@@ -144,8 +112,6 @@ def register_all_pipelines(registry: PipelineRegistry | None = None) -> None:
 
     Should be called once at application startup (e.g., in cli.py or bootstrap.py).
     """
-    # For custom registries, register directly. _register_factories_to() is
-    # idempotent at the registry level and skips already-registered pipelines.
     if registry is not None:
         _register_to_explicit_registry(registry)
         return
@@ -182,7 +148,6 @@ def is_registered() -> bool:
     Returns:
         True if register_all_pipelines() has been called.
     """
-    # Reading a bool is atomic in Python, no lock needed for read
     return _get_default_registration_state()._registered
 
 
