@@ -227,67 +227,118 @@ def _validate_manifest_entry(
     allowed_validation_statuses: set[str],
     min_tracked_sample_records: int,
 ) -> tuple[list[str], bool]:
+    """Validate a manifest entry."""
     if manifest_entry is None:
         return [], False
 
     invalid_entries: list[str] = []
     has_manifest_fixture = False
+    
+    _validate_fixture_kind(key, manifest_entry, allowed_fixture_kinds, invalid_entries)
+    has_manifest_fixture = _validate_fixture_path(
+        key, manifest_entry, min_tracked_sample_records, invalid_entries
+    )
+    _validate_required_fields(key, manifest_entry, invalid_entries)
+    _validate_validation_status(
+        key, manifest_entry, allowed_validation_statuses, invalid_entries
+    )
+
+    return invalid_entries, has_manifest_fixture
+
+
+def _validate_fixture_kind(
+    key: str,
+    manifest_entry: dict[str, Any],
+    allowed_fixture_kinds: set[str],
+    invalid_entries: list[str],
+) -> None:
+    """Validate the fixture kind."""
     fixture_kind = manifest_entry.get("fixture_kind")
     if fixture_kind not in allowed_fixture_kinds:
         invalid_entries.append(
             f"{key}: fixture_kind must be one of {sorted(allowed_fixture_kinds)}"
         )
 
+
+def _validate_fixture_path(
+    key: str,
+    manifest_entry: dict[str, Any],
+    min_tracked_sample_records: int,
+    invalid_entries: list[str],
+) -> bool:
+    """Validate the fixture path."""
+    has_manifest_fixture = False
     fixture_path_raw = manifest_entry.get("fixture_path")
     if not isinstance(fixture_path_raw, str) or not fixture_path_raw.strip():
         invalid_entries.append(f"{key}: fixture_path is required in manifest")
-    else:
-        fixture_path = PROJECT_ROOT / fixture_path_raw
-        if not fixture_path.exists() or not fixture_path.is_file():
+        return has_manifest_fixture
+    
+    fixture_path = PROJECT_ROOT / fixture_path_raw
+    if not fixture_path.exists() or not fixture_path.is_file():
+        invalid_entries.append(
+            f"{key}: fixture_path does not exist: {fixture_path_raw}"
+        )
+        return has_manifest_fixture
+    
+    if fixture_path.suffix != ".jsonl":
+        invalid_entries.append(
+            f"{key}: fixture_path must point to .jsonl file, "
+            f"found {fixture_path_raw}"
+        )
+        return has_manifest_fixture
+    
+    manifest_lines = _count_jsonl_lines([fixture_path])
+    records = manifest_entry.get("records")
+    if not isinstance(records, int) or records <= 0:
+        invalid_entries.append(f"{key}: records must be positive int in manifest")
+        return has_manifest_fixture
+    
+    if records != manifest_lines:
+        invalid_entries.append(
+            f"{key}: records={records} does not match fixture "
+            f"line count={manifest_lines}"
+        )
+        return has_manifest_fixture
+    
+    if fixture_kind == "tracked_ci_sample":
+        if not fixture_path_raw.startswith("tests/fixtures/bronze/"):
             invalid_entries.append(
-                f"{key}: fixture_path does not exist: {fixture_path_raw}"
+                f"{key}: tracked_ci_sample must live under "
+                "tests/fixtures/bronze/"
             )
-        elif fixture_path.suffix != ".jsonl":
+        if records < min_tracked_sample_records:
             invalid_entries.append(
-                f"{key}: fixture_path must point to .jsonl file, "
-                f"found {fixture_path_raw}"
+                f"{key}: tracked_ci_sample requires at least "
+                f"{min_tracked_sample_records} records"
             )
-        else:
-            manifest_lines = _count_jsonl_lines([fixture_path])
-            records = manifest_entry.get("records")
-            if not isinstance(records, int) or records <= 0:
-                invalid_entries.append(f"{key}: records must be positive int in manifest")
-            elif records != manifest_lines:
-                invalid_entries.append(
-                    f"{key}: records={records} does not match fixture "
-                    f"line count={manifest_lines}"
-                )
-            elif fixture_kind == "tracked_ci_sample":
-                if not fixture_path_raw.startswith("tests/fixtures/bronze/"):
-                    invalid_entries.append(
-                        f"{key}: tracked_ci_sample must live under "
-                        "tests/fixtures/bronze/"
-                    )
-                if records < min_tracked_sample_records:
-                    invalid_entries.append(
-                        f"{key}: tracked_ci_sample requires at least "
-                        f"{min_tracked_sample_records} records"
-                    )
-                has_manifest_fixture = True
+        has_manifest_fixture = True
+    
+    return has_manifest_fixture
 
+
+def _validate_required_fields(
+    key: str, manifest_entry: dict[str, Any], invalid_entries: list[str]
+) -> None:
+    """Validate required fields."""
     for field in ("provenance", "owner", "last_refresh"):
         value = manifest_entry.get(field)
         if not isinstance(value, str) or not value.strip():
             invalid_entries.append(f"{key}: manifest.{field} is required")
 
+
+def _validate_validation_status(
+    key: str,
+    manifest_entry: dict[str, Any],
+    allowed_validation_statuses: set[str],
+    invalid_entries: list[str],
+) -> None:
+    """Validate the validation status."""
     validation_status = manifest_entry.get("validation_status")
     if validation_status not in allowed_validation_statuses:
         invalid_entries.append(
             f"{key}: validation_status must be one of "
             f"{sorted(allowed_validation_statuses)}"
         )
-
-    return invalid_entries, has_manifest_fixture
 
 
 def _validate_gap_entry(
@@ -296,25 +347,59 @@ def _validate_gap_entry(
     *,
     allowed_gap_statuses: set[str],
 ) -> list[str]:
+    """Validate a gap entry."""
     if key not in gaps:
         return []
 
     gap = gaps[key]
     invalid_entries: list[str] = []
+    
+    _validate_gap_reason(key, gap, invalid_entries)
+    _validate_gap_owner(key, gap, invalid_entries)
+    _validate_gap_status(key, gap, allowed_gap_statuses, invalid_entries)
+    _validate_gap_resolution_plan(key, gap, invalid_entries)
+
+    return invalid_entries
+
+
+def _validate_gap_reason(
+    key: str, gap: dict[str, Any], invalid_entries: list[str]
+) -> None:
+    """Validate the gap reason."""
     if not isinstance(gap.get("reason"), str) or not gap.get("reason"):
         invalid_entries.append(f"{key}: gap.reason is required")
+
+
+def _validate_gap_owner(
+    key: str, gap: dict[str, Any], invalid_entries: list[str]
+) -> None:
+    """Validate the gap owner."""
     if not isinstance(gap.get("owner"), str) or not gap.get("owner"):
         invalid_entries.append(f"{key}: gap.owner is required")
+
+
+def _validate_gap_status(
+    key: str,
+    gap: dict[str, Any],
+    allowed_gap_statuses: set[str],
+    invalid_entries: list[str],
+) -> None:
+    """Validate the gap status."""
     status = gap.get("status")
     if status not in allowed_gap_statuses:
         invalid_entries.append(
             f"{key}: gap.status must be one of {sorted(allowed_gap_statuses)}"
         )
+
+
+def _validate_gap_resolution_plan(
+    key: str, gap: dict[str, Any], invalid_entries: list[str]
+) -> None:
+    """Validate the gap resolution plan."""
     if not isinstance(gap.get("resolution_plan"), str) or not gap.get(
         "resolution_plan"
     ):
         invalid_entries.append(f"{key}: gap.resolution_plan is required")
-    return invalid_entries
 
 
 def _fixture_coverage_findings(
