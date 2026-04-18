@@ -125,12 +125,12 @@ class ChEMBLTissueGoldSchema(pa.DataFrameModel):
     )
     efo_id: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^EFO:\d{7}$",
+        str_matches=r"^EFO[:_]\d{7}$",
         description="Experimental Factor Ontology ID",
     )
     uberon_id: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^UBERON:\d{7}$",
+        str_matches=r"^UBERON[:_]\d{7}$",
         description="Uberon Ontology ID",
     )
 
