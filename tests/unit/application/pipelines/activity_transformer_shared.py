@@ -322,8 +322,8 @@ class SharedActivityTransformerTransformTests:
         assert result["action_type_parent_type"] is None
 
 
-class SharedActivityTransformerExtractionTests:
-    """Common extraction-path assertions shared across activity transformer suites."""
+class SharedActivityTransformerLigandExtractionTests:
+    """Common ligand-efficiency extraction assertions."""
 
     def test_extract_ligand_efficiency_valid_dict(self, transformer):
         """Test extraction with valid ligand efficiency dictionary."""
@@ -349,6 +349,10 @@ class SharedActivityTransformerExtractionTests:
         assert result["ligand_efficiency_le"] is None
         assert result["ligand_efficiency_lle"] is None
         assert result["ligand_efficiency_sei"] is None
+
+
+class SharedActivityTransformerActionTypeExtractionTests:
+    """Common action-type extraction assertions."""
 
     def test_extract_action_type_valid_dict(self, transformer):
         """Test extraction with valid action type dictionary."""

@@ -15,7 +15,8 @@ from bioetl.application.pipelines.chembl.activity_transformer import (
 )
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 from tests.unit.application.pipelines.activity_transformer_shared import (
-    SharedActivityTransformerExtractionTests,
+    SharedActivityTransformerActionTypeExtractionTests,
+    SharedActivityTransformerLigandExtractionTests,
     SharedActivityTransformerTransformTests,
     mock_context,
     transformer,
@@ -46,7 +47,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
 
 @pytest.mark.unit
 class TestActivityTransformerLigandEfficiency(
-    SharedActivityTransformerExtractionTests
+    SharedActivityTransformerLigandExtractionTests
 ):
     """Tests for ligand efficiency extraction using flatten_nested_dict."""
 
@@ -157,7 +158,9 @@ class TestActivityTransformerLigandEfficiency(
 
 
 @pytest.mark.unit
-class TestActivityTransformerActionType:
+class TestActivityTransformerActionType(
+    SharedActivityTransformerActionTypeExtractionTests
+):
     """Tests for action type extraction using flatten_nested_dict."""
 
     def test_extract_action_type_empty_dict(self):
