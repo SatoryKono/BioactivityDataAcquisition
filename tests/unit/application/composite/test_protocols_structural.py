@@ -37,25 +37,25 @@ class TestJoinKeyResolverProtocol:
         # A conforming class should pass isinstance check
         class _Impl:
             def find_join_key_column(self, key, columns, pipeline=None):
-                pass
+                return None
 
             def normalize_join_key_columns(self, df, join_keys, pipeline=None):
-                pass
+                return None
 
             def resolve_join_key_names(
                 self, primary_key, seed_pipeline, enricher_pipeline, merged_columns
             ):
-                pass
+                return None
 
             def resolve_join_key_names_asymmetric(
                 self, left_key, right_key, left_pipeline, right_pipeline, merged_columns
             ):
-                pass
+                return None
 
             def resolve_composite_join_keys(
                 self, join_keys_list, left_pipeline, right_pipeline, merged_columns
             ):
-                pass
+                return None
 
         assert isinstance(_Impl(), JoinKeyResolverProtocol)
 
@@ -78,15 +78,15 @@ class TestJoinExecutorProtocol:
             def execute_polars_join(
                 self, left_df, right_df, left_key, right_key, pipeline_name
             ):
-                pass
+                return None
 
             def execute_composite_key_join(
                 self, left_df, right_df, left_keys, right_keys, pipeline_name
             ):
-                pass
+                return None
 
             def get_polars_join_type(self):
-                pass
+                return None
 
         assert isinstance(_Impl(), JoinExecutorProtocol)
 
@@ -109,15 +109,15 @@ class TestDependencyJoinerProtocol:
             def apply_dependency_joins(
                 self, *, merged_df, dependency_dfs, dependencies, seed_pipeline=None
             ):
-                pass
+                return None
 
             def apply_composite_key_dependency_join(
                 self, *, merged_df, dep_df, dep, seed_pipeline=None
             ):
-                pass
+                return None
 
             def drop_system_columns(self, df):
-                pass
+                return None
 
         assert isinstance(_Impl(), DependencyJoinerProtocol)
 

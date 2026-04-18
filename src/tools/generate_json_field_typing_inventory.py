@@ -304,9 +304,15 @@ def _build_inventory_row(
     bronze_nullable: dict[str, bool],
 ) -> tuple[str, str, str, str] | None:
     """Build one formatted markdown row for JSON-like fields."""
-    pandera_dtype = str(pandera_columns[field_name].dtype) if field_name in pandera_columns else ""
-    pyarrow_dtype = str(pyarrow_fields[field_name].type) if field_name in pyarrow_fields else ""
-    gold_dtype = str(gold_columns[field_name].dtype) if field_name in gold_columns else ""
+    pandera_dtype = (
+        str(pandera_columns[field_name].dtype) if field_name in pandera_columns else ""
+    )
+    pyarrow_dtype = (
+        str(pyarrow_fields[field_name].type) if field_name in pyarrow_fields else ""
+    )
+    gold_dtype = (
+        str(gold_columns[field_name].dtype) if field_name in gold_columns else ""
+    )
 
     kinds = {_kind(pandera_dtype), _kind(pyarrow_dtype), _kind(gold_dtype)}
     if not kinds.intersection({"canonical_string", "native_list", "native_object"}):
@@ -317,11 +323,15 @@ def _build_inventory_row(
         _fmt(bronze_type, bronze_nullable.get(field_name, True)),
         _fmt(
             pandera_dtype,
-            pandera_columns[field_name].nullable if field_name in pandera_columns else None,
+            pandera_columns[field_name].nullable
+            if field_name in pandera_columns
+            else None,
         ),
         _fmt(
             pyarrow_dtype,
-            pyarrow_fields[field_name].nullable if field_name in pyarrow_fields else None,
+            pyarrow_fields[field_name].nullable
+            if field_name in pyarrow_fields
+            else None,
         ),
         _fmt(
             gold_dtype,

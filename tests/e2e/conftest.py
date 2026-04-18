@@ -377,6 +377,7 @@ def _create_retry_run_context(
     context: PipelineRunContext, attempt: int
 ) -> PipelineRunContext:
     """Return stable retry context, replacing run_id only after first attempt."""
+    from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.types import RunID
 
     if attempt == 0:

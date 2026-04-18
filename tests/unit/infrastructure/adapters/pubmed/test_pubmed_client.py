@@ -241,8 +241,8 @@ async def test_fetch_applies_resume_offset_before_article_fetch(adapter) -> None
 
     async def _mock_yield_articles(pmids: list[str], limit: int | None):
         called_with.append((pmids, limit))
-        if False:
-            yield {}
+        for record in ():
+            yield record
 
     adapter._yield_articles_from_pmids = _mock_yield_articles  # type: ignore[method-assign]
 
@@ -266,8 +266,8 @@ async def test_fetch_returns_early_when_resume_offset_reaches_limit(adapter) -> 
     async def _mock_yield_articles(pmids: list[str], limit: int | None):
         nonlocal called
         called = True
-        if False:
-            yield {}
+        for record in ():
+            yield record
 
     adapter._yield_articles_from_pmids = _mock_yield_articles  # type: ignore[method-assign]
 

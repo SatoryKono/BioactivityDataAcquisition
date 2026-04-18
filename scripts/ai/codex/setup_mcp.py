@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -19,13 +20,24 @@ NPM_CACHE_DIR = "/tmp/npm-cache"
 FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 
 
+def _normalize_config_root(raw_path: str) -> Path:
+    normalized = raw_path.replace("\\", "/")
+    if os.name == "nt":
+        match = re.match(r"^/mnt/([a-zA-Z])/(.*)$", normalized)
+        if match is not None:
+            drive = match.group(1).upper()
+            suffix = match.group(2)
+            return Path(f"{drive}:/{suffix}")
+    return Path(raw_path)
+
+
 def _config_root_hint() -> Path:
     committed_config = REPO_ROOT / ".mcp.json"
     if committed_config.exists():
         try:
             payload = json.loads(committed_config.read_text(encoding="utf-8"))
             filesystem_root = payload["mcpServers"]["filesystem"]["args"][-1]
-            return Path(str(filesystem_root))
+            return _normalize_config_root(str(filesystem_root))
         except (KeyError, IndexError, TypeError, json.JSONDecodeError):
             pass
     return REPO_ROOT

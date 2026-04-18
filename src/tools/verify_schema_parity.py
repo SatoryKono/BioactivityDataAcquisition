@@ -262,15 +262,27 @@ def _append_baseline_differences(
     blocking: list[str],
 ) -> None:
     """Split gaps into baselined informational warnings and new blocking ones."""
-    new_missing_in_gold = [field for field in missing_in_gold if field not in known_silver_only]
-    new_missing_in_silver = [field for field in missing_in_silver if field not in known_gold_only]
-    baselined_in_gold = [field for field in missing_in_gold if field in known_silver_only]
-    baselined_in_silver = [field for field in missing_in_silver if field in known_gold_only]
+    new_missing_in_gold = [
+        field for field in missing_in_gold if field not in known_silver_only
+    ]
+    new_missing_in_silver = [
+        field for field in missing_in_silver if field not in known_gold_only
+    ]
+    baselined_in_gold = [
+        field for field in missing_in_gold if field in known_silver_only
+    ]
+    baselined_in_silver = [
+        field for field in missing_in_silver if field in known_gold_only
+    ]
 
     if baselined_in_gold:
-        warnings.append(f"{pair_name}: baselined Silver->Gold gaps: {baselined_in_gold}")
+        warnings.append(
+            f"{pair_name}: baselined Silver->Gold gaps: {baselined_in_gold}"
+        )
     if baselined_in_silver:
-        warnings.append(f"{pair_name}: baselined Gold->Silver gaps: {baselined_in_silver}")
+        warnings.append(
+            f"{pair_name}: baselined Gold->Silver gaps: {baselined_in_silver}"
+        )
     if new_missing_in_gold:
         blocking.append(
             f"{pair_name}: NEW fields in Silver but missing in Gold: {new_missing_in_gold}"
@@ -382,6 +394,53 @@ def _build_current_differences() -> dict[str, dict[str, list[str]]]:
     return result
 
 
+def _run_parity_checks(
+    baseline: dict[str, dict[str, list[str]]],
+) -> tuple[list[str], list[str]]:
+    """Run schema parity checks across all configured schema pairs."""
+    blocking_errors: list[str] = []
+    warning_errors: list[str] = []
+    for pair in SCHEMA_PAIRS:
+        blocking, warnings = check_schema_pair(pair, baseline)
+        blocking_errors.extend(blocking)
+        warning_errors.extend(warnings)
+    return blocking_errors, warning_errors
+
+
+def _print_check_results(
+    blocking_errors: list[str],
+    warning_errors: list[str],
+) -> None:
+    """Render blocking and warning parity results to stdout."""
+    print("\n=== Blocking checks (Silver<->Gold parity, PK coverage) ===")
+    if blocking_errors:
+        for error in blocking_errors:
+            print(f"[FAIL] {error}")
+    else:
+        print("[OK] No new blocking schema parity issues.")
+
+    print("\n=== Warning checks (non-blocking quality signals) ===")
+    if warning_errors:
+        for warning in warning_errors:
+            print(f"[WARN] {warning}")
+    else:
+        print("[OK] No schema warnings.")
+
+
+def _resolve_exit_code(
+    *,
+    mode: str,
+    blocking_errors: list[str],
+    warning_errors: list[str],
+) -> int:
+    """Map selected output mode to process exit code."""
+    if mode == "blocking":
+        return 1 if blocking_errors else 0
+    if mode == "warnings":
+        return 1 if warning_errors else 0
+    return 1 if blocking_errors or warning_errors else 0
+
+
 def main() -> int:
     """Run parity checks and return process exit code."""
     parser = argparse.ArgumentParser()
@@ -405,33 +464,13 @@ def main() -> int:
         return 0
 
     baseline = _load_baseline()
-    blocking_errors: list[str] = []
-    warning_errors: list[str] = []
-
-    for pair in SCHEMA_PAIRS:
-        blocking, warnings = check_schema_pair(pair, baseline)
-        blocking_errors.extend(blocking)
-        warning_errors.extend(warnings)
-
-    print("\n=== Blocking checks (Silver<->Gold parity, PK coverage) ===")
-    if blocking_errors:
-        for error in blocking_errors:
-            print(f"[FAIL] {error}")
-    else:
-        print("[OK] No new blocking schema parity issues.")
-
-    print("\n=== Warning checks (non-blocking quality signals) ===")
-    if warning_errors:
-        for warning in warning_errors:
-            print(f"[WARN] {warning}")
-    else:
-        print("[OK] No schema warnings.")
-
-    if args.mode == "blocking":
-        return 1 if blocking_errors else 0
-    if args.mode == "warnings":
-        return 1 if warning_errors else 0
-    return 1 if blocking_errors or warning_errors else 0
+    blocking_errors, warning_errors = _run_parity_checks(baseline)
+    _print_check_results(blocking_errors, warning_errors)
+    return _resolve_exit_code(
+        mode=args.mode,
+        blocking_errors=blocking_errors,
+        warning_errors=warning_errors,
+    )
 
 
 if __name__ == "__main__":
