@@ -69,8 +69,8 @@ class TestResumeFromFailedState:
         logger = create_mock_logger()
 
         deps = CompositeRunnerDependencies(
-        seed_runner_factory=seed_runner_factory(seed_runner),
-        enricher_runner_factory=new_enricher_runner_factory(),
+            seed_runner_factory=seed_runner_factory(seed_runner),
+            enricher_runner_factory=new_enricher_runner_factory(),
             key_extractor=create_mock_key_extractor(),
             coordinator=create_mock_coordinator(),
             merger=create_mock_merger(),

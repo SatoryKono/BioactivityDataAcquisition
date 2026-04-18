@@ -131,8 +131,12 @@ class BatchProcessingSupportService:
             batch_id=batch_id,
             start_index=start_index,
         )
-        self._batch_metrics.track_processed_records("silver", len(transform_result.silver_records))
-        self._batch_metrics.track_processed_records("gold", len(transform_result.gold_records))
+        self._batch_metrics.track_processed_records(
+            "silver", len(transform_result.silver_records)
+        )
+        self._batch_metrics.track_processed_records(
+            "gold", len(transform_result.gold_records)
+        )
         return transform_result
 
     async def write_silver_gold_concurrent(

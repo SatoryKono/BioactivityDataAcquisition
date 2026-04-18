@@ -7,7 +7,7 @@ from logging import Logger
 
 def log_error(logger: Logger, error: str) -> None:
     """Log an error message.
-    
+
     Args:
         logger: Logger instance.
         error: Error message to log.
@@ -17,7 +17,7 @@ def log_error(logger: Logger, error: str) -> None:
 
 def log_debug(logger: Logger, details: str) -> None:
     """Log a debug message.
-    
+
     Args:
         logger: Logger instance.
         details: Debug details to log.

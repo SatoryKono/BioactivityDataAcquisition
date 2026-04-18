@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
+
 @dataclass(frozen=True)
 class CrossRefAdapterComponents:
     metrics: MetricsPort | None
@@ -54,7 +55,10 @@ class CrossRefAdapterComponents:
     search_paginator: CrossRefSearchPaginator
     title_fallback_handler: CrossRefTitleFallbackHandler
 
-def _create_helper_services(logger: LoggerPort, metrics: MetricsPort | None) -> AdapterHelperServices:
+
+def _create_helper_services(
+    logger: LoggerPort, metrics: MetricsPort | None
+) -> AdapterHelperServices:
     return AdapterHelpersFactory.create_http_helpers(
         provider="crossref",
         logger=logger,
@@ -109,7 +113,9 @@ def _create_query_builder(
 
 
 def _create_response_mapper(kwargs: dict[str, object]) -> CrossRefResponseMapper:
-    response_mapper = cast("CrossRefResponseMapper | None", kwargs.get("response_mapper"))
+    response_mapper = cast(
+        "CrossRefResponseMapper | None", kwargs.get("response_mapper")
+    )
     if response_mapper is None:
         response_mapper = _create_default_crossref_response_mapper()
     return response_mapper
@@ -169,7 +175,9 @@ def _create_title_fallback_handler(
     logger: LoggerPort,
     search_fn: Callable[[str, int], AsyncIterator[JsonDict]],
 ) -> CrossRefTitleFallbackHandler:
-    title_fallback_handler = cast("CrossRefTitleFallbackHandler | None", kwargs.get("title_fallback_handler"))
+    title_fallback_handler = cast(
+        "CrossRefTitleFallbackHandler | None", kwargs.get("title_fallback_handler")
+    )
     if title_fallback_handler is None:
         title_fallback_handler = _create_default_crossref_title_fallback_handler(
             logger=logger,

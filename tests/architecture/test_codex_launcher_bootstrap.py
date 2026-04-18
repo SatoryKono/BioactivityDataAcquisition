@@ -54,14 +54,12 @@ def test_windows_launchers_delegate_to_wsl_scripts_without_posix_redirects() -> 
 def test_wsl_setup_uses_local_update_path() -> None:
     """Setup and verification scripts should rely on the repo-local installer."""
     root = _project_root()
-    setup_sh = (root / "scripts" / "ai" / "codex" / "helper" / "setup-wsl.sh").read_text(
-        encoding="utf-8"
-    )
+    setup_sh = (
+        root / "scripts" / "ai" / "codex" / "helper" / "setup-wsl.sh"
+    ).read_text(encoding="utf-8")
     verify_sh = (
         root / "scripts" / "ai" / "codex" / "helper" / "verify-setup.sh"
-    ).read_text(
-        encoding="utf-8"
-    )
+    ).read_text(encoding="utf-8")
 
     assert "ensure-codex-cli.sh" in setup_sh
     assert "--update" in setup_sh

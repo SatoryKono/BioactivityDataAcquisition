@@ -56,7 +56,9 @@ def create_silver_layer_writer_impl(
     merge_resilience_policy: SilverMergeResiliencePolicy,
     resolve_delta_writer_base_path_fn: Callable[..., object],
     resolve_delta_writer_flat_structure_fn: Callable[..., bool],
-    load_contract_rollout_policy_fn: Callable[[PipelineYamlConfig], ContractRolloutPolicy],
+    load_contract_rollout_policy_fn: Callable[
+        [PipelineYamlConfig], ContractRolloutPolicy
+    ],
 ) -> SilverWriter:
     silver_writer_flat = resolve_delta_writer_flat_structure_fn(
         ctx.silver_path,
@@ -104,7 +106,9 @@ def create_gold_layer_writer_impl(
     audit: AuditPort,
     resolve_delta_writer_base_path_fn: Callable[..., object],
     resolve_delta_writer_flat_structure_fn: Callable[..., bool],
-    load_contract_rollout_policy_fn: Callable[[PipelineYamlConfig], ContractRolloutPolicy],
+    load_contract_rollout_policy_fn: Callable[
+        [PipelineYamlConfig], ContractRolloutPolicy
+    ],
 ) -> GoldWriter:
     gold_writer_flat = resolve_delta_writer_flat_structure_fn(
         ctx.gold_path,

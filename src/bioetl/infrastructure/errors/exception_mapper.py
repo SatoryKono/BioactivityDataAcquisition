@@ -253,9 +253,10 @@ class DomainInfraExceptionMapper:
             )
 
         from bioetl.infrastructure.observability.logging_helpers import log_debug
+
         log_debug(
             self._logger,
-            f"error_wrapped_generic: provider={payload.provider}, error_type={payload.error_type.value}, status_code={payload.status_code}, retry_after={payload.retry_after}, original_error={type(payload.error).__name__}"
+            f"error_wrapped_generic: provider={payload.provider}, error_type={payload.error_type.value}, status_code={payload.status_code}, retry_after={payload.retry_after}, original_error={type(payload.error).__name__}",
         )
         mapped_external = ExternalServiceError(
             message=message,
@@ -332,9 +333,10 @@ class DomainInfraExceptionMapper:
     ) -> ExternalServiceError:
         """Map non-auth, non-rate-limit, non-5xx HTTP errors generically."""
         from bioetl.infrastructure.observability.logging_helpers import log_debug
+
         log_debug(
             self._logger,
-            f"http_error_wrapped_generic: provider={payload.provider}, status_code={status_code}, retry_after={payload.retry_after}, recovery_action=no_retry"
+            f"http_error_wrapped_generic: provider={payload.provider}, status_code={status_code}, retry_after={payload.retry_after}, recovery_action=no_retry",
         )
         mapped_external = ExternalServiceError(
             message=message,

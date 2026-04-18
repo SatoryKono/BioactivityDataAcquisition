@@ -39,6 +39,10 @@ from bioetl.infrastructure.storage.delta.resilience import (
 from bioetl.infrastructure.storage.silver.maintenance_mixin import (
     SilverWriterMaintenanceMixin,
 )
+from bioetl.infrastructure.storage.silver.merged_operations import (
+    _MergedSilverWriteRequest,
+    _PreparedMergedSilverWrite,
+)
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     SilverPostwriteOperations,
 )
@@ -46,8 +50,8 @@ from bioetl.infrastructure.storage.silver.operations.postwrite_operations import
 # SilverWriterValidationMixin removed from inheritance (composition pattern)
 # Validation operations now handled by SilverValidationOperations service
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-    _PreparedSilverWritePayload,
     _prepare_silver_write_payload_impl,
+    _PreparedSilverWritePayload,
     _SilverWritePreparationRequest,
 )
 
@@ -70,10 +74,6 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServices,
     SilverWriterRuntimeServicesRequest,
     build_silver_writer_runtime_services,
-)
-from bioetl.infrastructure.storage.silver.merged_operations import (
-    _MergedSilverWriteRequest,
-    _PreparedMergedSilverWrite,
 )
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_write_targets,
@@ -864,11 +864,14 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         completed_at = datetime.now(UTC)
         first_record = records[0] if records else {}
         run_id = str(first_record.get("_run_id") or getattr(self, "run_id", "") or "")
-        manifest_id = str(
-            first_record.get("_manifest_id")
-            or getattr(self, "manifest_id", None)
-            or run_id
-        ).strip() or None
+        manifest_id = (
+            str(
+                first_record.get("_manifest_id")
+                or getattr(self, "manifest_id", None)
+                or run_id
+            ).strip()
+            or None
+        )
         metadata = SilverMetadata(
             table_name=table_name,
             runtime=RuntimeMetadata(

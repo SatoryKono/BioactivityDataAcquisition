@@ -164,9 +164,7 @@ def _call_build_pipeline_runner(
             settings if settings is not None else _build_settings()
         ),
         "load_pipeline_config_fn": lambda _: (
-            pipeline_config
-            if pipeline_config is not None
-            else _build_pipeline_config()
+            pipeline_config if pipeline_config is not None else _build_pipeline_config()
         ),
         "build_observability_bundle_fn": build_observability_bundle_fn
         if build_observability_bundle_fn is not None

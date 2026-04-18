@@ -103,7 +103,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             provider=provider,
             provider_registry=provider_registry,
             data_source_creator=data_source_creator,
-            get_data_source_creator_fn=_public_assembler_seam("get_data_source_creator"),
+            get_data_source_creator_fn=_public_assembler_seam(
+                "get_data_source_creator"
+            ),
         )
 
     def create_transformer(
@@ -240,4 +242,6 @@ class GenericPipelineFactory(Generic[TPipeline]):
             cached_bronze=cached_bronze,
             assemble_runner_fn=_public_assembler_seam("assemble_runner"),
         )
+
+
 __all__ = ["GenericPipelineFactory"]

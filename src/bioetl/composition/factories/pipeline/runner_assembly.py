@@ -68,6 +68,8 @@ if TYPE_CHECKING:
 __all__ = [
     "assemble_runner_impl",
 ]
+
+
 def _build_checkpoint_manager(
     *,
     pipeline: BasePipeline,

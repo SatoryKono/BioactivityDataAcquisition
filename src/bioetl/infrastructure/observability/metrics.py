@@ -9,10 +9,7 @@ from bioetl.infrastructure.observability.metrics_export_names import (
 )
 
 globals().update(
-    {
-        name: getattr(_definitions, name)
-        for name in METRICS_DEFINITION_EXPORT_NAMES
-    }
+    {name: getattr(_definitions, name) for name in METRICS_DEFINITION_EXPORT_NAMES}
 )
 
 __all__ = [*METRICS_DEFINITION_EXPORT_NAMES, "MetricsCollector"]

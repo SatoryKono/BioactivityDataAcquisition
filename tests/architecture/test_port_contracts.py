@@ -69,8 +69,7 @@ def _is_ellipsis_expr(node: ast.expr) -> bool:
     if isinstance(node, ast.Constant) and node.value is ...:
         return True
     return bool(
-        hasattr(ast, "Ellipsis")
-        and isinstance(node, ast.Ellipsis)  # type: ignore[attr-defined]
+        hasattr(ast, "Ellipsis") and isinstance(node, ast.Ellipsis)  # type: ignore[attr-defined]
     )
 
 

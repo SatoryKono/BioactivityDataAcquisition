@@ -1,4 +1,3 @@
-
 """Canonical registry for shipped normalization profiles."""
 
 from __future__ import annotations
@@ -106,7 +105,6 @@ def normalize_normalization_profile_coordinates(
     if not normalized_provider or normalized_entity is None or not normalized_entity:
         return None
     return normalized_provider, normalized_entity
-
 
 
 T = TypeVar("T")

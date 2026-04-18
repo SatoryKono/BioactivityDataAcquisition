@@ -33,7 +33,9 @@ def extract_single_dq_config_impl(
     sink_config = sink.get(layer_name)
     if not sink_config or not hasattr(sink_config, "model_dump"):
         return None
-    validated = config_class.model_validate(cast(ModelDumpable, sink_config).model_dump())
+    validated = config_class.model_validate(
+        cast(ModelDumpable, sink_config).model_dump()
+    )
     dq_report = getattr(validated, "dq_report", None)
     if dq_report is not None and getattr(dq_report, "enabled", False):
         return cast(

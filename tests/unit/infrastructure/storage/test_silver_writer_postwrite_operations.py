@@ -97,7 +97,9 @@ async def test_postwrite_mixin_routes_through_compatibility_hooks() -> None:
 
 
 @pytest.mark.asyncio
-async def test_postwrite_operations_preserve_service_specific_export_and_audit() -> None:
+async def test_postwrite_operations_preserve_service_specific_export_and_audit() -> (
+    None
+):
     payload = _build_payload()
     ctx = _build_context()
     maintenance = Mock()

@@ -225,6 +225,7 @@ class SchemaAwareStructuralPolicy:
             )
         )
 
+
 # Backward-compatible aliases retained for existing imports/tests.
 StructuralFieldContract = StructuralFieldSpec
 StructuralPolicyEvent = StructuralPolicySignal

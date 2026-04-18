@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """BioETL-compatible Prometheus metrics server with sample data."""
 
-import random
+import secrets
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -12,6 +12,8 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from prometheus_client import REGISTRY, Counter, Gauge, Histogram, generate_latest
 from prometheus_client.core import CollectorRegistry
+
+RNG = secrets.SystemRandom()
 
 # Create custom metrics matching BioETL schema
 RECORDS_PROCESSED = Counter(
@@ -65,25 +67,25 @@ class MetricsHandler(BaseHTTPRequestHandler):
         for pipeline in pipelines:
             for stage in stages:
                 # Increment counters with realistic numbers
-                records = random.randint(100, 1000)
+                records = RNG.randint(100, 1000)
                 RECORDS_PROCESSED.labels(
                     pipeline=pipeline, run_id=run_id, stage=stage, status="success"
                 ).inc(records)
 
                 # Small error rate
-                if random.random() > 0.95:
+                if RNG.random() > 0.95:
                     RECORDS_PROCESSED.labels(
                         pipeline=pipeline, run_id=run_id, stage=stage, status="error"
-                    ).inc(random.randint(1, 10))
+                    ).inc(RNG.randint(1, 10))
 
                 # Processing time
                 PROCESSING_TIME.labels(pipeline=pipeline, stage=stage).observe(
-                    random.uniform(0.5, 5.0)
+                    RNG.uniform(0.5, 5.0)
                 )
 
                 # Error rate
                 ERROR_RATE.labels(pipeline=pipeline, stage=stage).set(
-                    random.uniform(0, 0.05)
+                    RNG.uniform(0, 0.05)
                 )
 
     def log_message(self, format, *args):

@@ -20,7 +20,8 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
         "coverage-verify job must download all coverage shard artifacts"
     )
     assert (
-        '--parallel-marker "serial and not e2e and not benchmark and not memory"' in workflow
+        '--parallel-marker "serial and not e2e and not benchmark and not memory"'
+        in workflow
     ), "coverage-verify job must run only serial-marker tests directly"
     assert "coverage combine reports/coverage" in workflow, (
         "coverage-verify job must combine shard coverage instead of rerunning the full suite"
@@ -84,7 +85,7 @@ def test_tests_workflow_has_dedicated_memory_lane_outside_coverage() -> None:
     assert "memory-tests:" in workflow, (
         "tests workflow should define a dedicated memory-tests job"
     )
-    assert '--junitxml=reports/test-telemetry/junit-memory.xml' in workflow, (
+    assert "--junitxml=reports/test-telemetry/junit-memory.xml" in workflow, (
         "memory-tests job should emit its own telemetry artifact"
     )
     assert ' -m "memory" \\' in workflow or '-m "memory"' in workflow, (

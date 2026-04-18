@@ -64,7 +64,11 @@ def apply_silver_filter(
     """Check silver filter and raise FilteredOutError if excluded."""
     from bioetl.application.core.base_transformer.errors import FilteredOutError
 
-    if result is None or owner._silver_filters is None or owner._silver_filters.is_empty():
+    if (
+        result is None
+        or owner._silver_filters is None
+        or owner._silver_filters.is_empty()
+    ):
         return
 
     decision = owner._silver_filters.evaluate(cast("GoldRecord", result))
@@ -91,7 +95,11 @@ def evaluate_semantic_shadow_decision(
     result: SilverRecord | None,
 ) -> FilterDecision | None:
     """Evaluate semantic Silver filters for shadow comparison only."""
-    if result is None or owner._silver_filters is None or owner._silver_filters.is_empty():
+    if (
+        result is None
+        or owner._silver_filters is None
+        or owner._silver_filters.is_empty()
+    ):
         return None
     return owner._silver_filters.evaluate(cast("GoldRecord", result))
 

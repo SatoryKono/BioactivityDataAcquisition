@@ -109,7 +109,9 @@ def test_git_pathspec_rejects_option_like_repo_relative_paths() -> None:
         module._git_pathspec(Path("-unsafe.svg"))
 
 
-def test_check_diag_t026_uses_repo_relative_git_pathspecs(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_check_diag_t026_uses_repo_relative_git_pathspecs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     module = _load_module()
     recorded: dict[str, object] = {}
 
@@ -120,7 +122,9 @@ def test_check_diag_t026_uses_repo_relative_git_pathspecs(monkeypatch: pytest.Mo
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
-    issues = module.check_diag_t026([Path("docs/02-architecture/diagrams/views/svg/demo.svg")])
+    issues = module.check_diag_t026(
+        [Path("docs/02-architecture/diagrams/views/svg/demo.svg")]
+    )
 
     assert issues == []
     assert recorded["cwd"] == module.REPO_ROOT

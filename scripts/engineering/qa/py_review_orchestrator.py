@@ -524,9 +524,13 @@ class ReviewOrchestrator:
         readme_path = self.repo_root / "README.md"
         if readme_path.exists():
             readme = readme_path.read_text(encoding="utf-8")
-            match = re.search(r"RULES\.md.*\(v([^)]+)\)", readme)
-            if match:
-                return match.group(1)
+            for line in readme.splitlines():
+                if "RULES.md" not in line or "(v" not in line:
+                    continue
+                _, _, version_part = line.partition("(v")
+                version, separator, _ = version_part.partition(")")
+                if separator and version:
+                    return version
         return "unknown"
 
     def _today(self) -> str:

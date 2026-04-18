@@ -56,9 +56,7 @@ async def yield_wrapped_fetch_records(
         cast(
             "Any",
             data_source,
-        ).fetch(
-            **fetch_kwargs
-        ),
+        ).fetch(**fetch_kwargs),
     )
     async for record in iterator:
         yield record
