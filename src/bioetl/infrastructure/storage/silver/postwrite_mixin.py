@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+    _complete_silver_write_pipeline_impl,
+)
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
@@ -96,34 +99,53 @@ class _SilverWriterPostwriteSelf(Protocol):
         start_perf: float,
     ) -> SilverWriteResult | None: ...
 
+    async def _run_postwrite_export(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> None: ...
+
+    async def _run_postwrite_audit(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> None: ...
+
+    async def _finalize_postwrite_result(
+        self,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> SilverWriteResult | None: ...
+
 
 class SilverWriterPostwriteMixin:
     """Post-write orchestration extracted from ``SilverWriter``."""
 
-    async def _complete_silver_write_pipeline(
+    async def _run_postwrite_export(
         self: _SilverWriterPostwriteSelf,
         *,
         ctx: _SilverWritePostwriteContext,
         payload: _PreparedSilverWritePayload,
-    ) -> SilverWriteResult | None:
-        """Run post-write stages: CSV export, audit, and result finalization."""
-        # Use maintenance operations if available, otherwise fall back to mixin method
-        if hasattr(self, "_maintenance") and self._maintenance is not None:
-            await self._maintenance.maybe_export_csv(
-                table_name=ctx.table_name,
-                arrow_data=payload.arrow_data,
-                mode=ctx.mode,
-                validated_mode=payload.validated_mode,
-                primary_keys=ctx.primary_keys,
-            )
-        else:
-            await self._maybe_export_csv(
-                table_name=ctx.table_name,
-                arrow_data=payload.arrow_data,
-                mode=ctx.mode,
-                validated_mode=payload.validated_mode,
-                primary_keys=ctx.primary_keys,
-            )
+    ) -> None:
+        """Run the legacy mixin export branch via the compatibility hook."""
+        await self._maybe_export_csv(
+            table_name=ctx.table_name,
+            arrow_data=payload.arrow_data,
+            mode=ctx.mode,
+            validated_mode=payload.validated_mode,
+            primary_keys=ctx.primary_keys,
+        )
+
+    async def _run_postwrite_audit(
+        self: _SilverWriterPostwriteSelf,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> None:
+        """Run the legacy mixin audit branch via the compatibility hook."""
         await self._maybe_log_silver_audit(
             table_name=ctx.table_name,
             records=payload.records,
@@ -133,6 +155,14 @@ class SilverWriterPostwriteMixin:
             source_batch_id=ctx.source_batch_id,
             ingestion_ts=ctx.ingestion_ts,
         )
+
+    async def _finalize_postwrite_result(
+        self: _SilverWriterPostwriteSelf,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> SilverWriteResult | None:
+        """Finalize the legacy mixin postwrite flow."""
         return await self._finalize_silver_write_result(
             table_name=ctx.table_name,
             records=payload.records,
@@ -144,4 +174,17 @@ class SilverWriterPostwriteMixin:
             source_batch_id=ctx.source_batch_id,
             started_at=ctx.started_at,
             start_perf=ctx.start_perf,
+        )
+
+    async def _complete_silver_write_pipeline(
+        self: _SilverWriterPostwriteSelf,
+        *,
+        ctx: _SilverWritePostwriteContext,
+        payload: _PreparedSilverWritePayload,
+    ) -> SilverWriteResult | None:
+        """Run post-write stages: CSV export, audit, and result finalization."""
+        return await _complete_silver_write_pipeline_impl(
+            self,
+            ctx=ctx,
+            payload=payload,
         )
