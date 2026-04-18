@@ -487,6 +487,7 @@ def run(argv: list[str] | None = None) -> int:
 
     token = _require_token(args.token_env)
     milestone: MilestoneRecord | None = None
+    mutation_count = 0
     if not args.skip_milestone:
         milestone = _ensure_milestone(
             owner=args.owner,
@@ -496,6 +497,7 @@ def run(argv: list[str] | None = None) -> int:
             description=args.milestone_description,
             create_missing=args.create_milestone,
         )
+        mutation_count += 1
 
     for issue in updates:
         _patch_issue(
@@ -505,6 +507,7 @@ def run(argv: list[str] | None = None) -> int:
             issue=issue,
             milestone_number=None if milestone is None else milestone.number,
         )
+        mutation_count += 1
         if not args.skip_comments:
             _post_comment(
                 owner=args.owner,
@@ -512,6 +515,7 @@ def run(argv: list[str] | None = None) -> int:
                 token=token,
                 issue=issue,
             )
+            mutation_count += 1
 
     if args.json:
         payload = {
@@ -550,7 +554,7 @@ def run(argv: list[str] | None = None) -> int:
                 print("  Comment: <skipped>")
             else:
                 print("  Comment: posted")
-    return len(updates)
+    return mutation_count
 
 
 def main(argv: list[str] | None = None) -> int:
