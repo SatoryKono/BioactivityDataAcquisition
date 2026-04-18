@@ -188,8 +188,10 @@ fi
 
 if [[ -n "${GITHUB_PERSONAL_ACCESS_TOKEN:-}" ]]; then
   ok "GITHUB_PERSONAL_ACCESS_TOKEN is set (shell or .env)"
+elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
+  ok "GITHUB_TOKEN is set and will be mapped for GitHub MCP auth"
 else
-  warn "GITHUB_PERSONAL_ACCESS_TOKEN is not set in shell or .env (GitHub MCP auth may fail)"
+  warn "Neither GITHUB_PERSONAL_ACCESS_TOKEN nor GITHUB_TOKEN is set (GitHub MCP auth may fail)"
 fi
 
 exit "$status"

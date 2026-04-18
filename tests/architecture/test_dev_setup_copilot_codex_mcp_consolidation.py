@@ -244,3 +244,7 @@ def test_github_mcp_wrappers_load_repo_env() -> None:
 
     assert "load_repo_env.sh" in sh_content
     assert "load_repo_env.ps1" in ps_content
+    assert "GITHUB_PERSONAL_ACCESS_TOKEN" in sh_content
+    assert "GITHUB_TOKEN" in sh_content
+    assert "GITHUB_PERSONAL_ACCESS_TOKEN" in ps_content
+    assert "GITHUB_TOKEN" in ps_content
