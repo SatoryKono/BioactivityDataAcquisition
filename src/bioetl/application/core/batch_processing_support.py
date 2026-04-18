@@ -45,6 +45,7 @@ if TYPE_CHECKING:
         DomainEventEmitterPort,
     )
     from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 _ResultT = TypeVar("_ResultT")
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY

@@ -1,105 +1,17 @@
-"""Pure helper functions for metadata coordinator orchestration."""
+"""Compatibility re-exports for metadata coordinator helpers."""
 
 from __future__ import annotations
 
-from typing import TypeVar
-
-from bioetl.application.services.lineage import MetadataLineageBundle
-from bioetl.domain.lineage import LineageGraphFragment
-from bioetl.domain.models.metadata import (
-    BronzeMetadata,
-    FileOutputMetadata,
-    GoldMetadata,
-    InputSnapshotRef,
-    SilverMetadata,
-    SourceMetadata,
-)
-from bioetl.domain.ports import BronzeMetadataInput
-
-_MetadataT = TypeVar(
-    "_MetadataT",
-    BronzeMetadata,
-    SilverMetadata,
-    GoldMetadata,
+from bioetl.application.services.lineage._metadata_coordinator_helpers import (
+    build_bronze_file_output_metadata,
+    build_bronze_source_metadata,
+    create_metadata_bundle,
+    validate_records_present,
 )
 
-
-def validate_records_present(
-    *,
-    records: object,
-    total_records: object,
-    layer_name: str,
-) -> None:
-    """Reject sidecar creation when neither records nor total count are present."""
-    if not records and total_records is None:
-        raise ValueError(f"Cannot create {layer_name} metadata without records")
-
-
-def create_metadata_bundle(
-    *,
-    metadata: _MetadataT,
-    lineage_fragment: LineageGraphFragment,
-) -> MetadataLineageBundle[_MetadataT]:
-    """Bundle sidecar metadata with its canonical lineage fragment."""
-    return MetadataLineageBundle(
-        metadata=metadata,
-        lineage_fragment=lineage_fragment,
-    )
-
-
-def build_bronze_source_metadata(input_data: BronzeMetadataInput) -> SourceMetadata:
-    """Build Bronze source metadata, injecting query_string when needed."""
-    snapshots = _merge_input_snapshots(
-        source=input_data.source_metadata,
-        input_snapshots=input_data.input_snapshots,
-    )
-    if input_data.source_metadata is not None:
-        source = input_data.source_metadata
-        if (input_data.query_string and source.query_string is None) or snapshots:
-            update_data: dict[str, object] = {}
-            if input_data.query_string and source.query_string is None:
-                update_data["query_string"] = input_data.query_string
-            if snapshots:
-                update_data["input_snapshots"] = snapshots
-            updated_source: SourceMetadata = source.model_copy(update=update_data)
-            return updated_source
-        return source
-
-    return SourceMetadata(
-        type="api",
-        query_string=input_data.query_string,
-        input_snapshots=snapshots,
-    )
-
-
-def _merge_input_snapshots(
-    *,
-    source: SourceMetadata | None,
-    input_snapshots: tuple[InputSnapshotRef, ...],
-) -> list[InputSnapshotRef]:
-    """Merge persisted and newly computed snapshots without duplicate identities."""
-    merged: list[InputSnapshotRef] = []
-    seen: set[tuple[str, str, str | None]] = set()
-
-    for snapshot in [
-        *(source.input_snapshots if source is not None else []),
-        *input_snapshots,
-    ]:
-        key = (snapshot.snapshot_id, snapshot.content_hash, snapshot.immutable_uri)
-        if key in seen:
-            continue
-        seen.add(key)
-        merged.append(snapshot)
-
-    return merged
-
-
-def build_bronze_file_output_metadata(
-    input_data: BronzeMetadataInput,
-) -> FileOutputMetadata:
-    """Build Bronze file metadata for output_ext."""
-    return FileOutputMetadata(
-        path=input_data.output_path,
-        size_bytes=input_data.compressed_size,
-        record_count=input_data.record_count,
-    )
+__all__ = [
+    "build_bronze_file_output_metadata",
+    "build_bronze_source_metadata",
+    "create_metadata_bundle",
+    "validate_records_present",
+]

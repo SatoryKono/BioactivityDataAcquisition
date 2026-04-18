@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -37,6 +38,7 @@ class _Host(BronzeWriterSideEffectsMixin):
         self.base_path = tmp_path
 
     async def _calculate_checksum(self, path: Path) -> str:
+        await asyncio.sleep(0)
         return "abc123checksum"
 
 

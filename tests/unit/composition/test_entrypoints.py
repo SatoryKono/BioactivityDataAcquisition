@@ -11,6 +11,7 @@ This is dedicated entrypoint-boundary coverage and may patch
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
@@ -515,6 +516,7 @@ class TestRunPipelineIntegration:
             called = False
 
             async def run(self):
+                await asyncio.sleep(0)
                 self.called = True
                 return None
 

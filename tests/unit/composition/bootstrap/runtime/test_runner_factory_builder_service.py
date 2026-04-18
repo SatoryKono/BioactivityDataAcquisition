@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 from unittest.mock import MagicMock
 
 import polars as pl
 import pytest
 
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
     CompositeFilterExtractionService,
 )
@@ -37,6 +38,17 @@ def _build_runner(ctx: dict[str, object]) -> dict[str, object]:
     return ctx
 
 
+def _make_runtime(**overrides: object) -> CompositeRuntimeConfig:
+    defaults = {
+        "use_cached_bronze": False,
+        "cached_bronze_path": None,
+        "cached_bronze_date": None,
+        "seed_limit": None,
+    }
+    defaults.update(overrides)
+    return cast(CompositeRuntimeConfig, SimpleNamespace(**defaults))
+
+
 @pytest.mark.unit
 def test_seed_runoptions_snapshot() -> None:
     recorder = _RunOptionsRecorder()
@@ -48,7 +60,7 @@ def test_seed_runoptions_snapshot() -> None:
         filter_extraction_service=CompositeFilterExtractionService(),
     )
 
-    runtime = SimpleNamespace(
+    runtime = _make_runtime(
         seed_limit=123,
         use_cached_bronze=True,
         cached_bronze_path="data/bronze",

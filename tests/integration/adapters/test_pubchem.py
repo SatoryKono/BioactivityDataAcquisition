@@ -15,6 +15,7 @@ Rate Limits:
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Generator
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -74,7 +75,7 @@ def circuit_breaker() -> CircuitBreakerGuard:
 
 
 @pytest.fixture
-def thread_pool() -> ThreadPoolExecutor:
+def thread_pool() -> Generator[ThreadPoolExecutor, None, None]:
     """Create thread pool for PubChem sync operations."""
     pool = ThreadPoolExecutor(max_workers=2)
     yield pool

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock
 
@@ -92,6 +93,7 @@ class TestWriteScd2Once:
         call_count = 0
 
         async def mock_run_in_executor(func, *args):  # type: ignore[no-untyped-def]
+            await asyncio.sleep(0)
             nonlocal call_count
             call_count += 1
             if call_count == 1:

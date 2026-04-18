@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 
 import pytest
 from hypothesis import given
@@ -144,7 +145,7 @@ def test_finalize_pre_silver_attaches_active_and_versioned_content_hashes() -> N
 
     silver_record = processor.finalize_pre_silver(
         pre_silver,
-        context=object(),
+        context=cast("PipelineContext", object()),
         index=0,
     )
 
@@ -195,7 +196,7 @@ def test_finalize_pre_silver_skips_versioned_hash_projection_when_rollout_does_n
 
     silver_record = processor.finalize_pre_silver(
         pre_silver,
-        context=object(),
+        context=cast("PipelineContext", object()),
         index=0,
     )
 

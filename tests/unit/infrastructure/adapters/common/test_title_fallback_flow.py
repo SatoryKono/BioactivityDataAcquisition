@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -73,6 +74,7 @@ async def test_iter_missing_doi_fallback_records_yields_processed_records_and_re
     logger = MagicMock()
 
     async def search_by_title(title: str) -> dict[str, Any] | None:
+        await asyncio.sleep(0)
         return {"id": title.lower(), "title": title}
 
     records = await collect_async_iterator(
@@ -120,6 +122,7 @@ async def test_iter_missing_doi_fallback_records_logs_missing_title_and_not_foun
     logger = MagicMock()
 
     async def search_by_title(title: str) -> dict[str, Any] | None:
+        await asyncio.sleep(0)
         return None
 
     records = await collect_async_iterator(
@@ -158,6 +161,7 @@ async def test_iter_title_only_fallback_records_supports_marker_and_empty_entry_
     logger = MagicMock()
 
     async def search_by_title(title: str) -> dict[str, Any] | None:
+        await asyncio.sleep(0)
         return {"id": title.lower(), "title": title}
 
     records = await collect_async_iterator(

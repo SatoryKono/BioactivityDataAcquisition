@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -236,6 +237,7 @@ class TestSilverWriterCsvExport:
         export_calls = []
 
         async def capture_export(*args, **kwargs):
+            await asyncio.sleep(0)
             export_calls.append(kwargs)
 
         mock_exporter.export = capture_export
@@ -435,6 +437,7 @@ class TestSilverWriterLineage:
             provider=None,
             entity=None,
         ):
+            await asyncio.sleep(0)
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
@@ -489,6 +492,7 @@ class TestSilverWriterLineage:
             provider=None,
             entity=None,
         ):
+            await asyncio.sleep(0)
             write_calls.append({"table_path": table_path, "metadata": metadata})
 
         mock_metadata_writer.write_silver_metadata = capture_write
