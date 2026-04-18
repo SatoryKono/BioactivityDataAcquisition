@@ -1,3 +1,4 @@
+
 """Canonical registry for shipped normalization profiles."""
 
 from __future__ import annotations
@@ -81,6 +82,7 @@ __all__ = [
     "resolve_normalization_profile_module_path",
 ]
 
+
 TValue = TypeVar("TValue")
 
 
@@ -106,7 +108,6 @@ def normalize_normalization_profile_coordinates(
     return normalized_provider, normalized_entity
 
 
-from typing import TypeVar
 
 T = TypeVar("T")
 

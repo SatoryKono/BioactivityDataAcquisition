@@ -24,8 +24,6 @@ services:
       retries: 30
       start_period: 40s
     restart: unless-stopped
-    mem_limit: 3g
-    cpus: "2.0"
     volumes:
       - neo4j_data:/var/lib/neo4j/data
       - neo4j_logs:/var/lib/neo4j/logs

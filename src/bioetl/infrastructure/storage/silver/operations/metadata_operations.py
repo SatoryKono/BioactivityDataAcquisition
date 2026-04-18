@@ -67,11 +67,7 @@ class _SilverMetadataBuildRequest:
 
 @dataclass(frozen=True, slots=True)
 class SilverMetadataOperations:
-    """Metadata operations for Silver layer storage.
-
-    Handles DQ metrics calculation, metadata writing, lineage tracking, and auditing.
-    This service replaces SilverWriterMetadataMixin through composition.
-    """
+    """Silver-layer metadata operations via composition."""
 
     _logger: LoggerPort
     _metrics: MetricsPort | None = None

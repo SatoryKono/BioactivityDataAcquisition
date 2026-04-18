@@ -11,9 +11,9 @@ from __future__ import annotations
 import ast
 from collections.abc import Callable
 import hashlib
+import json
 import os
 from pathlib import Path
-import pickle
 import subprocess
 import tempfile
 
@@ -21,7 +21,7 @@ import pytest
 import yaml
 
 
-_CACHE_VERSION = 2
+_CACHE_VERSION = 3
 
 
 def _list_python_files(root: Path) -> list[Path]:
@@ -97,11 +97,11 @@ def _text_signature(text: str) -> tuple[int, str]:
     return len(text), digest
 
 
-def _load_pickle_cache(path: Path) -> dict[str, object]:
-    """Load a pickle cache payload or return an empty payload on mismatch."""
+def _load_json_cache(path: Path) -> dict[str, object]:
+    """Load a JSON cache payload or return an empty payload on mismatch."""
     try:
-        payload = pickle.loads(path.read_bytes())
-    except (OSError, EOFError, pickle.PickleError, AttributeError, ValueError):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
         return {}
     if not isinstance(payload, dict):
         return {}
@@ -110,9 +110,9 @@ def _load_pickle_cache(path: Path) -> dict[str, object]:
     return payload
 
 
-def _write_pickle_cache(path: Path, payload: dict[str, object]) -> None:
-    """Write pickle cache payload atomically enough for local pytest runs."""
-    path.write_bytes(pickle.dumps(payload, protocol=pickle.HIGHEST_PROTOCOL))
+def _write_json_cache(path: Path, payload: dict[str, object]) -> None:
+    """Write a JSON cache payload atomically enough for local pytest runs."""
+    path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
 
 
 def _build_text_cache(
@@ -120,7 +120,7 @@ def _build_text_cache(
     cache_file: Path,
 ) -> dict[Path, str]:
     """Reuse cached file contents for unchanged files across pytest sessions."""
-    payload = _load_pickle_cache(cache_file)
+    payload = _load_json_cache(cache_file)
     cached_entries = payload.get("entries", {})
     if not isinstance(cached_entries, dict):
         cached_entries = {}
@@ -151,7 +151,7 @@ def _build_text_cache(
         changed = True
 
     if changed or len(updated_entries) != len(cached_entries):
-        _write_pickle_cache(
+        _write_json_cache(
             cache_file,
             {"version": _CACHE_VERSION, "entries": updated_entries},
         )
@@ -163,41 +163,15 @@ def _build_ast_cache(
     cache_file: Path,
 ) -> dict[Path, ast.Module]:
     """Reuse cached ASTs for unchanged files across pytest sessions."""
-    payload = _load_pickle_cache(cache_file)
-    cached_entries = payload.get("entries", {})
-    if not isinstance(cached_entries, dict):
-        cached_entries = {}
-
     result: dict[Path, ast.Module] = {}
-    updated_entries: dict[str, object] = {}
-    changed = False
 
     for path, content in text_cache.items():
-        key = _cache_key(path)
-        signature = _text_signature(content)
-        entry = cached_entries.get(key)
-        if isinstance(entry, dict) and tuple(entry.get("sig", ())) == signature:
-            tree = entry.get("ast")
-            if isinstance(tree, ast.Module):
-                result[path] = tree
-                updated_entries[key] = entry
-                continue
-
         try:
             tree = ast.parse(content)
         except SyntaxError:
-            changed = True
             continue
 
         result[path] = tree
-        updated_entries[key] = {"sig": signature, "ast": tree}
-        changed = True
-
-    if changed or len(updated_entries) != len(cached_entries):
-        _write_pickle_cache(
-            cache_file,
-            {"version": _CACHE_VERSION, "entries": updated_entries},
-        )
     return result
 
 
@@ -206,7 +180,7 @@ def _build_yaml_cache(
     cache_file: Path,
 ) -> dict[Path, object]:
     """Reuse parsed YAML payloads for unchanged files across pytest sessions."""
-    payload = _load_pickle_cache(cache_file)
+    payload = _load_json_cache(cache_file)
     cached_entries = payload.get("entries", {})
     if not isinstance(cached_entries, dict):
         cached_entries = {}
@@ -236,7 +210,7 @@ def _build_yaml_cache(
         changed = True
 
     if changed or len(updated_entries) != len(cached_entries):
-        _write_pickle_cache(
+        _write_json_cache(
             cache_file,
             {"version": _CACHE_VERSION, "entries": updated_entries},
         )
@@ -261,7 +235,7 @@ def source_content_cache(
     src_python_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every source file, keyed by absolute Path."""
-    cache_file = _cache_dir(project_root) / "source_content_cache.pkl"
+    cache_file = _cache_dir(project_root) / "source_content_cache.json"
     return _build_text_cache(src_python_files, cache_file)
 
 
@@ -271,8 +245,7 @@ def source_ast_cache(
     source_content_cache: dict[Path, str],
 ) -> dict[Path, ast.Module]:
     """Parsed AST of every source file, keyed by absolute Path."""
-    cache_file = _cache_dir(project_root) / "source_ast_cache.pkl"
-    return _build_ast_cache(source_content_cache, cache_file)
+    return _build_ast_cache(source_content_cache, _cache_dir(project_root) / "source_ast_cache.json")
 
 
 # ---------------------------------------------------------------------------
@@ -293,7 +266,7 @@ def test_content_cache(
     test_python_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every test file."""
-    cache_file = _cache_dir(project_root) / "test_content_cache.pkl"
+    cache_file = _cache_dir(project_root) / "test_content_cache.json"
     return _build_text_cache(test_python_files, cache_file)
 
 
@@ -303,8 +276,7 @@ def test_ast_cache(
     test_content_cache: dict[Path, str],
 ) -> dict[Path, ast.Module]:
     """Parsed AST of every test file."""
-    cache_file = _cache_dir(project_root) / "test_ast_cache.pkl"
-    return _build_ast_cache(test_content_cache, cache_file)
+    return _build_ast_cache(test_content_cache, _cache_dir(project_root) / "test_ast_cache.json")
 
 
 # ---------------------------------------------------------------------------
@@ -325,7 +297,7 @@ def docs_text_cache(
     docs_markdown_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every docs markdown file."""
-    cache_file = _cache_dir(project_root) / "docs_text_cache.pkl"
+    cache_file = _cache_dir(project_root) / "docs_text_cache.json"
     return _build_text_cache(docs_markdown_files, cache_file)
 
 
@@ -342,7 +314,7 @@ def workflow_text_cache(
     workflow_yaml_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every workflow YAML file."""
-    cache_file = _cache_dir(project_root) / "workflow_text_cache.pkl"
+    cache_file = _cache_dir(project_root) / "workflow_text_cache.json"
     return _build_text_cache(workflow_yaml_files, cache_file)
 
 
@@ -352,7 +324,7 @@ def workflow_yaml_cache(
     workflow_text_cache: dict[Path, str],
 ) -> dict[Path, object]:
     """Parsed YAML payload of every workflow file."""
-    cache_file = _cache_dir(project_root) / "workflow_yaml_cache.pkl"
+    cache_file = _cache_dir(project_root) / "workflow_yaml_cache.json"
     return _build_yaml_cache(workflow_text_cache, cache_file)
 
 
@@ -371,7 +343,7 @@ def config_text_cache(
     config_yaml_files: list[Path],
 ) -> dict[Path, str]:
     """Raw UTF-8 text of every config YAML file."""
-    cache_file = _cache_dir(project_root) / "config_text_cache.pkl"
+    cache_file = _cache_dir(project_root) / "config_text_cache.json"
     return _build_text_cache(config_yaml_files, cache_file)
 
 
@@ -381,7 +353,7 @@ def config_yaml_cache(
     config_text_cache: dict[Path, str],
 ) -> dict[Path, object]:
     """Parsed YAML payload of every config file."""
-    cache_file = _cache_dir(project_root) / "config_yaml_cache.pkl"
+    cache_file = _cache_dir(project_root) / "config_yaml_cache.json"
     return _build_yaml_cache(config_text_cache, cache_file)
 
 

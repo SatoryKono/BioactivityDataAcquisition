@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters._cached_bronze_support import parse_bronze_date
@@ -203,7 +205,7 @@ class TestCachedBronzeDataSourceFetch:
         )
 
         with pytest.raises(StorageError) as exc_info:
-            _ = [record async for record in source.fetch("activity")]
+            _ = await collect_async_iterator(source.fetch("activity"))
 
         error = exc_info.value
         assert error.provider == "chembl"
@@ -234,9 +236,8 @@ class TestCachedBronzeDataSourceFetch:
             logger=base_logger,
         )
 
-        records = [
-            item
-            async for item in source.fetch(
+        records = await collect_async_iterator(
+            source.fetch(
                 "activity",
                 limit=2,
                 query="ignored-query",
@@ -244,7 +245,7 @@ class TestCachedBronzeDataSourceFetch:
                 filter_field="id",
                 offset=10,
             )
-        ]
+        )
 
         assert records == [{"id": 1}, {"id": 2}]
         warning_events = [call.args[0] for call in bound_logger.warning.call_args_list]

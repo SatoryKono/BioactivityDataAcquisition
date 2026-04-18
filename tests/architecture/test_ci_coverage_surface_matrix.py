@@ -43,6 +43,7 @@ class TestCiCoverageSurfaceMatrix:
             "smoke-check",
             "control-plane-e2e",
             "track-d-gates",
+            "memory-tests",
             "test-fast",
             "test-matrix",
             "coverage-verify",
@@ -70,7 +71,7 @@ class TestCiCoverageSurfaceMatrix:
         assert coverage_verify["threshold_enforced_in_job"] is True
         assert coverage_verify["participates_in_hard_threshold"] is True
 
-        execution_only_jobs = {"control-plane-e2e", "track-d-gates"}
+        execution_only_jobs = {"control-plane-e2e", "track-d-gates", "memory-tests"}
         for job in execution_only_jobs:
             entry = entries[job]
             assert entry["lane_type"] == "execution_only"
@@ -94,6 +95,8 @@ class TestCiCoverageSurfaceMatrix:
         assert "name: coverage-data-${{ matrix.test-group.name }}" in workflow
         assert "pattern: coverage-data-*" in workflow
         assert "coverage report --show-missing --fail-under=85" in workflow
+        assert "test-telemetry-memory" in workflow
+        assert "junit-memory.xml" in workflow
 
         coverage_verify = entries["coverage-verify"]
         for excluded_path in coverage_verify.get("known_exclusions", []):

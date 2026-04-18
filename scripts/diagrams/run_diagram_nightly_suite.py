@@ -91,6 +91,12 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
+def _write_repo_text(path: Path, content: str) -> None:
+    """Write generated assets only after repository-root validation."""
+    safe_path = _ensure_repo_path(path)
+    safe_path.write_text(content, encoding="utf-8")
+
+
 def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> list[Path]:
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
@@ -636,12 +642,11 @@ def check_diag_t028(
 
 def build_alt_css(original_css: Path, target_css: Path) -> None:
     safe_original = _ensure_repo_path(original_css)
-    safe_target = _ensure_repo_path(target_css)
     content = safe_original.read_text(encoding="utf-8")
     content = content.replace("#f5f3ff", "#ede9fe")
     content = content.replace("#fff1f2", "#ffe4e6")
     content = content.replace("#111827", "#0f172a")
-    safe_target.write_text(content, encoding="utf-8")
+    _write_repo_text(target_css, content)
 
 
 def check_diag_t029(

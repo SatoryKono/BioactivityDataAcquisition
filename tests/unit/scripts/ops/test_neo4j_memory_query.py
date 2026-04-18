@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from scripts.memory.query import (
     _claim_trace_statement,
     _cli_semantics_statement,
@@ -26,6 +28,8 @@ from scripts.memory.query import (
     _ownership_statement,
     _promotion_candidates_statement,
 )
+
+pytestmark = pytest.mark.memory
 
 
 def test_query_profiles_cover_operator_shortcuts() -> None:

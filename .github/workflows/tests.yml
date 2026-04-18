@@ -386,7 +386,7 @@ jobs:
                     HYPOTHESIS_PROFILE=fast \
                     COVERAGE_FILE=reports/coverage/.coverage.fast \
                     uv run pytest tests/unit/ tests/architecture/ \
-                      -m "not slow and not serial" \
+                      -m "not slow and not serial and not memory" \
                       -n auto --dist loadscope --max-worker-restart=0 \
                       -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-fast.xml \
@@ -458,14 +458,14 @@ jobs:
                     if [ "${{ matrix.python-version }}" = "3.11" ]; then
                       COVERAGE_FILE=reports/coverage/.coverage.${{ matrix.test-group.name }} \
                       uv run pytest ${{ matrix.test-group.path }} \
-                        -m "not serial" \
+                        -m "not serial and not memory" \
                         -n auto --dist loadscope --max-worker-restart=0 \
                         -q --tb=short \
                         --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
                         --cov=src/bioetl --cov-report=
                     else
                       uv run pytest ${{ matrix.test-group.path }} \
-                        -m "not serial" \
+                        -m "not serial and not memory" \
                         -n auto --dist loadscope --max-worker-restart=0 \
                         -q --tb=short
                     fi
@@ -485,6 +485,39 @@ jobs:
                 with:
                     name: test-telemetry-${{ matrix.test-group.name }}
                     path: reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml
+                    if-no-files-found: warn
+                    retention-days: 7
+
+    memory-tests:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        needs: smoke-check
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+                with:
+                    enable-pytest-cache: "true"
+                    pytest-cache-prefix: "pytest-memory"
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/unit/scripts/ops/test_neo4j_memory*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+            -   name: Run dedicated Neo4j memory test lane
+                run: |
+                    mkdir -p reports/test-telemetry
+                    uv run pytest tests/unit/scripts/ops/ \
+                      -m "memory" \
+                      -q --tb=short \
+                      --junitxml=reports/test-telemetry/junit-memory.xml
+
+            -   name: Upload memory test telemetry
+                if: always()
+                uses: actions/upload-artifact@v4
+                with:
+                    name: test-telemetry-memory
+                    path: reports/test-telemetry/junit-memory.xml
                     if-no-files-found: warn
                     retention-days: 7
 
@@ -598,7 +631,7 @@ jobs:
                       scripts/engineering/ci/run_pytest_resilient.py \
                       --target tests/ \
                       --reports-dir reports/pytest/coverage-verify \
-                      --parallel-marker "serial and not e2e and not benchmark" \
+                      --parallel-marker "serial and not e2e and not benchmark and not memory" \
                       --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
                       --skip-serial-pass
 

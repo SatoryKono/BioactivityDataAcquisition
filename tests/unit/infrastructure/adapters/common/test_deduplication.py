@@ -9,6 +9,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.infrastructure.adapters.common.deduplication import (
     async_iter_deduplicated_records,
     build_record_dedup_key,
@@ -164,9 +166,8 @@ async def test_async_iter_deduplicated_records_skips_duplicates_but_keeps_missin
         yield {"record_id": "R1"}
         yield {"other_field": "no-key"}
 
-    records = [
-        record
-        async for record in async_iter_deduplicated_records(
+    records = await collect_async_iterator(
+        async_iter_deduplicated_records(
             _records(),
             seen_keys=set(),
             primary_field="record_id",
@@ -174,7 +175,7 @@ async def test_async_iter_deduplicated_records_skips_duplicates_but_keeps_missin
             logger=logger,
             metrics=metrics,
         )
-    ]
+    )
 
     assert records == [{"record_id": "R1"}, {"other_field": "no-key"}]
     logger.debug.assert_called_once()

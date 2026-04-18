@@ -37,6 +37,16 @@ lanes:
     notes: >-
       Track D linkage and fixture gates are execution-focused and remain outside
       the hard coverage combine path.
+  - job: memory-tests
+    lane_type: execution_only
+    emits_coverage_artifact: false
+    participates_in_hard_threshold: false
+    threshold_enforced_in_job: false
+    execution_confidence_role: neo4j_memory_isolated_execution
+    notes: >-
+      Neo4j project-memory and MCP tests run in a dedicated execution lane so
+      the main coverage-enforced path excludes environment-sensitive memory
+      tooling without losing regression visibility.
   - job: test-fast
     lane_type: coverage_shard
     emits_coverage_artifact: true
@@ -73,8 +83,8 @@ lanes:
     notes: >-
       Coverage verification combines shard artifacts, runs the canonical serial
       subset, and is the only lane that enforces the hard 85 percent coverage
-      threshold. Contract and e2e tests are explicitly excluded from the serial
-      pass here.
+      threshold. Contract, e2e, and dedicated memory tests are explicitly
+      excluded from the serial pass here.
   - job: duration-telemetry
     lane_type: telemetry_only
     emits_coverage_artifact: false

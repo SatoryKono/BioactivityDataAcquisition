@@ -7,6 +7,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.infrastructure.adapters.semanticscholar.batch_request_mixin import (
     SemanticScholarBatchRequestMixin,
 )
@@ -58,7 +60,9 @@ async def test_fetch_by_dois_filters_out_null_records() -> None:
         payload=[{"paperId": "A"}, None, {"paperId": "B"}]
     )
 
-    records = [record async for record in harness._fetch_by_dois(["10.1/a", "10.1/b"])]
+    records = await collect_async_iterator(
+        harness._fetch_by_dois(["10.1/a", "10.1/b"])
+    )
 
     assert records == [{"paperId": "A"}, {"paperId": "B"}]
 

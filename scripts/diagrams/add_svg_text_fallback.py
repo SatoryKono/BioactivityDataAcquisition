@@ -54,6 +54,12 @@ def _ensure_repo_path(path: Path, *, require_repo: bool = True) -> Path:
     return resolved_path
 
 
+def _write_repo_text(path: Path, content: str) -> None:
+    """Write text only after resolving the target inside the repository root."""
+    safe_path = _ensure_repo_path(path)
+    safe_path.write_text(content, encoding="utf-8")
+
+
 def _local_name(tag: str) -> str:
     return tag.split("}", 1)[1] if "}" in tag else tag
 
@@ -469,7 +475,7 @@ def process_files(files: list[Path], mode: str) -> int:
             print(f"+ {safe_path} (added fallback text +{inserted})")
 
         if mode in ("check", "dry-run"):
-            safe_path.write_text(original, encoding="utf-8")
+            _write_repo_text(safe_path, original)
 
     return changed
 

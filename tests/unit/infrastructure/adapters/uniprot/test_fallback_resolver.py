@@ -6,6 +6,8 @@ from collections.abc import AsyncIterator
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.infrastructure.adapters.uniprot.fallback_resolver import (
     iter_uniprot_fallback_records,
     resolve_uniprot_missing_ids,
@@ -42,16 +44,15 @@ async def test_iter_uniprot_fallback_records_reuses_cached_results() -> None:
         if query == "match":
             yield {"accession": "P12345", "query": query}
 
-    records = [
-        record
-        async for record in iter_uniprot_fallback_records(
+    records = await collect_async_iterator(
+        iter_uniprot_fallback_records(
             strategy=strategy,
             missing_ids=["id1", "id2", "id3"],
             fallback_mapping={"id1": "match", "id2": "match", "id3": "miss"},
             limit=None,
             already_fetched=0,
         )
-    ]
+    )
 
     assert len(records) == 2
     assert all(record["accession"] == "P12345" for record in records)
@@ -66,16 +67,15 @@ async def test_iter_uniprot_fallback_records_respects_limit() -> None:
         calls.append(f"{query}:{limit}")
         yield {"accession": "P99999", "query": query}
 
-    records = [
-        record
-        async for record in iter_uniprot_fallback_records(
+    records = await collect_async_iterator(
+        iter_uniprot_fallback_records(
             strategy=strategy,
             missing_ids=["id1", "id2"],
             fallback_mapping={"id1": "first", "id2": "second"},
             limit=1,
             already_fetched=0,
         )
-    ]
+    )
 
     assert len(records) == 1
     assert records[0]["query"] == "first"

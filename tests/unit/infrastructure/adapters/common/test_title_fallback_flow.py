@@ -7,6 +7,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from tests.async_utils import collect_async_iterator
+
 from bioetl.infrastructure.adapters.common._title_fallback_flow import (
     get_fallback_title,
     iter_missing_doi_fallback_records,
@@ -73,9 +75,8 @@ async def test_iter_missing_doi_fallback_records_yields_processed_records_and_re
     async def search_by_title(title: str) -> dict[str, Any] | None:
         return {"id": title.lower(), "title": title}
 
-    records = [
-        record
-        async for record in iter_missing_doi_fallback_records(
+    records = await collect_async_iterator(
+        iter_missing_doi_fallback_records(
             dois=["DOI-1", "DOI-2"],
             found_dois=set(),
             fallback_mapping={
@@ -96,7 +97,7 @@ async def test_iter_missing_doi_fallback_records_yields_processed_records_and_re
             event_fallback_success="title_fallback_success",
             event_fallback_not_found="title_fallback_not_found",
         )
-    ]
+    )
 
     assert records == [
         {
@@ -121,9 +122,8 @@ async def test_iter_missing_doi_fallback_records_logs_missing_title_and_not_foun
     async def search_by_title(title: str) -> dict[str, Any] | None:
         return None
 
-    records = [
-        record
-        async for record in iter_missing_doi_fallback_records(
+    records = await collect_async_iterator(
+        iter_missing_doi_fallback_records(
             dois=["DOI-1", "DOI-2", "DOI-3"],
             found_dois={"doi-1"},
             fallback_mapping={"DOI-2": "Known Title"},
@@ -141,7 +141,7 @@ async def test_iter_missing_doi_fallback_records_logs_missing_title_and_not_foun
             event_fallback_success="title_fallback_success",
             event_fallback_not_found="title_fallback_not_found",
         )
-    ]
+    )
 
     assert records == []
     assert logger.info.call_args_list[0].args[0] == "title_fallback_attempt"
@@ -160,9 +160,8 @@ async def test_iter_title_only_fallback_records_supports_marker_and_empty_entry_
     async def search_by_title(title: str) -> dict[str, Any] | None:
         return {"id": title.lower(), "title": title}
 
-    records = [
-        record
-        async for record in iter_title_only_fallback_records(
+    records = await collect_async_iterator(
+        iter_title_only_fallback_records(
             entries=["__title_only_1__", ""],
             fallback_mapping={
                 "__title_only_1__": "Marker Title",
@@ -179,7 +178,7 @@ async def test_iter_title_only_fallback_records_supports_marker_and_empty_entry_
             event_title_only_success="title_only_success",
             event_title_only_not_found="title_only_not_found",
         )
-    ]
+    )
 
     assert records == [
         {

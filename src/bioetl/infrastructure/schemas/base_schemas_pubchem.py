@@ -61,16 +61,14 @@ class BaseInputFilterConfig(BaseModel):
     @model_validator(mode="after")
     def validate_column_config(self) -> BaseInputFilterConfig:
         """Validate that either columns or column_name/filter_field is provided."""
-        if not self.enabled:
-            return self
-        if self.columns:
-            return self
-        if self.column_name and self.filter_field:
-            return self
-        raise ValueError(
-            "Either 'columns' list or both 'column_name' and 'filter_field' "
-            "must be provided when filter is enabled"
-        )
+        if self.enabled and not self.columns and not (
+            self.column_name and self.filter_field
+        ):
+            raise ValueError(
+                "Either 'columns' list or both 'column_name' and 'filter_field' "
+                "must be provided when filter is enabled"
+            )
+        return self
 
     def to_domain(self) -> DomainInputFilterConfig:
         """Convert to domain InputFilterConfig dataclass."""
