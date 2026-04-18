@@ -7,7 +7,6 @@ These are CLI-layer responsibilities separated for maintainability.
 from __future__ import annotations
 
 import asyncio
-import io
 import sys
 from functools import cache
 from typing import TYPE_CHECKING
@@ -191,13 +190,6 @@ def handle_destructive_run_confirmation(
 
     if not yes:
         echo_warning(f"{run_type} will clear existing data for {pipeline}.")
-        stdin = click.get_text_stream("stdin")
-        try:
-            interactive_stdin = stdin.isatty()
-        except (AttributeError, OSError, ValueError, io.UnsupportedOperation):
-            interactive_stdin = False
-        if not interactive_stdin:
-            raise click.Abort()
         if not click.confirm("Do you want to continue?", default=None):
             echo_info("Operation cancelled.")
             sys.exit(ExitCode.OK)

@@ -12,6 +12,32 @@ class GeneExtractor:
     """Extracts gene-related data from UniProt records."""
 
     @staticmethod
+    def _iter_gene_dicts(genes: object) -> list[dict[str, object]]:
+        """Return only mapping gene entries from a raw genes payload."""
+        if not isinstance(genes, list):
+            return []
+        return [gene for gene in genes if isinstance(gene, dict)]
+
+    @staticmethod
+    def _collect_named_values(
+        genes: object,
+        field_name: str,
+    ) -> list[str]:
+        """Collect ``value`` strings from nested UniProt gene sub-lists."""
+        values: list[str] = []
+        for gene in GeneExtractor._iter_gene_dicts(genes):
+            nested_values = gene.get(field_name, [])
+            if not isinstance(nested_values, list):
+                continue
+            for nested in nested_values:
+                if not isinstance(nested, dict):
+                    continue
+                value = nested.get("value")
+                if value:
+                    values.append(str(value))
+        return values
+
+    @staticmethod
     def extract_gene_names(genes: object) -> list[str]:
         """Extract gene names from genes list.
 
@@ -21,13 +47,8 @@ class GeneExtractor:
         Returns:
             List of gene name strings.
         """
-        if not genes or not isinstance(genes, list):
-            return []
-
         names: list[str] = []
-        for gene in genes:
-            if not isinstance(gene, dict):
-                continue
+        for gene in GeneExtractor._iter_gene_dicts(genes):
             gene_name = gene.get("geneName", {})
             if isinstance(gene_name, dict):
                 name = gene_name.get("value")
@@ -45,16 +66,13 @@ class GeneExtractor:
         Returns:
             Primary gene name or None.
         """
-        if not genes or not isinstance(genes, list):
-            return None
-
-        for gene in genes:
-            if isinstance(gene, dict):
-                gene_name = gene.get("geneName", {})
-                if isinstance(gene_name, dict):
-                    value = gene_name.get("value")
-                    if value:
-                        return str(value)
+        for gene in GeneExtractor._iter_gene_dicts(genes):
+            gene_name = gene.get("geneName", {})
+            if not isinstance(gene_name, dict):
+                continue
+            value = gene_name.get("value")
+            if value:
+                return str(value)
         return None
 
     @staticmethod
@@ -67,20 +85,7 @@ class GeneExtractor:
         Returns:
             JSON array of gene synonyms or None.
         """
-        if not genes or not isinstance(genes, list):
-            return None
-
-        all_synonyms: list[str] = []
-        for gene in genes:
-            if not isinstance(gene, dict):
-                continue
-            synonyms = gene.get("synonyms", [])
-            if isinstance(synonyms, list):
-                for syn in synonyms:
-                    if isinstance(syn, dict):
-                        value = syn.get("value")
-                        if value:
-                            all_synonyms.append(str(value))
+        all_synonyms = GeneExtractor._collect_named_values(genes, "synonyms")
         return (
             serialize_to_json(all_synonyms, ensure_ascii=False)
             if all_synonyms
@@ -97,18 +102,5 @@ class GeneExtractor:
         Returns:
             JSON array of ORF names or None.
         """
-        if not genes or not isinstance(genes, list):
-            return None
-
-        all_orf: list[str] = []
-        for gene in genes:
-            if not isinstance(gene, dict):
-                continue
-            orf_names = gene.get("orfNames", [])
-            if isinstance(orf_names, list):
-                for orf in orf_names:
-                    if isinstance(orf, dict):
-                        value = orf.get("value")
-                        if value:
-                            all_orf.append(str(value))
+        all_orf = GeneExtractor._collect_named_values(genes, "orfNames")
         return serialize_to_json(all_orf, ensure_ascii=False) if all_orf else None

@@ -327,6 +327,44 @@ def _clamp_limit(limit: int, *, default: int = 50, hard_cap: int = 500) -> int:
     return min(limit, hard_cap)
 
 
+def _row_matches_filters(
+    row: JsonDict,
+    *,
+    pipeline_filter: set[str] | None,
+    run_type_filter: set[str] | None,
+    reason_code_filter: set[str] | None,
+    field_filter: set[str] | None,
+    run_id_filter: set[str] | None,
+    payload_hash_filter: set[str] | None,
+) -> bool:
+    """Return True when a normalized row matches all text filters."""
+    return all(
+        (
+            _matches_values_filter(row.get("pipeline"), pipeline_filter),
+            _matches_values_filter(row.get("run_type"), run_type_filter),
+            _matches_values_filter(row.get("reason_code"), reason_code_filter),
+            _matches_values_filter(row.get("field"), field_filter),
+            _matches_values_filter(row.get("run_id"), run_id_filter),
+            _matches_values_filter(row.get("payload_hash"), payload_hash_filter),
+        )
+    )
+
+
+def _row_matches_time_bounds(
+    row: JsonDict,
+    *,
+    from_bound: datetime | None,
+    to_bound: datetime | None,
+) -> bool:
+    """Return True when ingestion timestamp is within optional bounds."""
+    _, parsed_ts = _normalize_timestamp(row.get("ingestion_ts"))
+    if from_bound is not None and (parsed_ts is None or parsed_ts < from_bound):
+        return False
+    if to_bound is not None and (parsed_ts is None or parsed_ts > to_bound):
+        return False
+    return True
+
+
 def _iter_filtered_rows(
     table_records: list[JsonDict],
     *,
@@ -360,23 +398,21 @@ def _iter_filtered_rows(
             include_payload=include_payload,
             include_payload_preview=include_payload_preview,
         )
-        if not _matches_values_filter(row.get("pipeline"), pipeline_filter):
+        if not _row_matches_filters(
+            row,
+            pipeline_filter=pipeline_filter,
+            run_type_filter=run_type_filter,
+            reason_code_filter=reason_code_filter,
+            field_filter=field_filter,
+            run_id_filter=run_id_filter,
+            payload_hash_filter=payload_hash_filter,
+        ):
             continue
-        if not _matches_values_filter(row.get("run_type"), run_type_filter):
-            continue
-        if not _matches_values_filter(row.get("reason_code"), reason_code_filter):
-            continue
-        if not _matches_values_filter(row.get("field"), field_filter):
-            continue
-        if not _matches_values_filter(row.get("run_id"), run_id_filter):
-            continue
-        if not _matches_values_filter(row.get("payload_hash"), payload_hash_filter):
-            continue
-
-        _, parsed_ts = _normalize_timestamp(row.get("ingestion_ts"))
-        if from_bound is not None and (parsed_ts is None or parsed_ts < from_bound):
-            continue
-        if to_bound is not None and (parsed_ts is None or parsed_ts > to_bound):
+        if not _row_matches_time_bounds(
+            row,
+            from_bound=from_bound,
+            to_bound=to_bound,
+        ):
             continue
         rows.append(row)
     return rows

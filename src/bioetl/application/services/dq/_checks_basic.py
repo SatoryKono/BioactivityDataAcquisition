@@ -131,21 +131,7 @@ def check_data_freshness(
     Returns:
         Check result as DataFreshnessResult.
     """
-    timestamp_cols = ["_updated_at", "updated_at", "_ingestion_ts", "created_at"]
-    max_ts = None
-
-    for col in timestamp_cols:
-        if col in df.columns:
-            try:
-                col_max = df[col].max()
-                if col_max is not None:
-                    if isinstance(col_max, datetime):
-                        max_ts = col_max
-                    break
-            except _FRESHNESS_COLUMN_ERRORS:
-                # Catch all: column may not exist, wrong type, or max() unsupported.
-                # Try next candidate column for graceful fallback.
-                pass
+    max_ts = _extract_freshness_timestamp(df)
 
     if max_ts is None:
         return DataFreshnessResult(
@@ -171,3 +157,17 @@ def check_data_freshness(
         freshness_lag_hours=round(lag_hours, 2),
         status=status,
     )
+
+
+def _extract_freshness_timestamp(df: pl.DataFrame) -> datetime | None:
+    """Return the first usable max timestamp from the standard freshness columns."""
+    for col in ["_updated_at", "updated_at", "_ingestion_ts", "created_at"]:
+        if col not in df.columns:
+            continue
+        try:
+            col_max = df[col].max()
+        except _FRESHNESS_COLUMN_ERRORS:
+            continue
+        if isinstance(col_max, datetime):
+            return col_max
+    return None

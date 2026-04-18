@@ -2,6 +2,12 @@
 
 Provides high-level quarantine management for CLI and other interfaces.
 Uses QuarantinePort for actual persistence operations.
+Tracing coverage remains implemented in the split mixins via
+``traced_operation`` and ``traced_async_operation``.
+The traced operator workflows remain:
+``quarantine.inspect``, ``quarantine.stats``, ``quarantine.replay``,
+``quarantine.mark_reprocessed``, ``quarantine.purge``, and
+``quarantine.update_status``.
 
 Implements RULES.md §1.1 - Application layer depends only on Domain.
 """

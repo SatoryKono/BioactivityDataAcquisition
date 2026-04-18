@@ -21,6 +21,13 @@ from bioetl.domain.value_objects.dq_report import (
     SilverDQCheckType,
 )
 
+_DQ_REPORT_ENABLED_DESCRIPTION = "Enable DQ report generation (default: disabled)"
+_DQ_REPORT_OUTPUT_PATH_DESCRIPTION = (
+    "Output path for report. None = alongside data files."
+)
+_DQ_REPORT_OUTPUT_FORMAT_DESCRIPTION = "Report output format"
+_DQ_REPORT_CHECKS_DESCRIPTION = "List of DQ checks to perform"
+
 
 class BronzeDQReportConfig(BaseModel):
     """Configuration for Bronze layer DQ report generation.
@@ -37,15 +44,15 @@ class BronzeDQReportConfig(BaseModel):
 
     enabled: bool = Field(
         default=False,
-        description="Enable DQ report generation (default: disabled)",
+        description=_DQ_REPORT_ENABLED_DESCRIPTION,
     )
     output_path: str | None = Field(
         default=None,
-        description="Output path for report. None = alongside data files.",
+        description=_DQ_REPORT_OUTPUT_PATH_DESCRIPTION,
     )
     format: Literal["json", "yaml", "html"] = Field(
         default="json",
-        description="Report output format",
+        description=_DQ_REPORT_OUTPUT_FORMAT_DESCRIPTION,
     )
     checks: list[str] = Field(
         default_factory=lambda: [
@@ -53,7 +60,7 @@ class BronzeDQReportConfig(BaseModel):
             BronzeDQCheckType.FILE_INTEGRITY.value,
             BronzeDQCheckType.SCHEMA_SNAPSHOT.value,
         ],
-        description="List of DQ checks to perform",
+        description=_DQ_REPORT_CHECKS_DESCRIPTION,
     )
 
     def get_format_enum(self) -> DQReportFormat:
@@ -92,15 +99,15 @@ class SilverDQReportConfig(BaseModel):
 
     enabled: bool = Field(
         default=False,
-        description="Enable DQ report generation (default: disabled)",
+        description=_DQ_REPORT_ENABLED_DESCRIPTION,
     )
     output_path: str | None = Field(
         default=None,
-        description="Output path for report. None = alongside data files.",
+        description=_DQ_REPORT_OUTPUT_PATH_DESCRIPTION,
     )
     format: Literal["json", "yaml", "html"] = Field(
         default="json",
-        description="Report output format",
+        description=_DQ_REPORT_OUTPUT_FORMAT_DESCRIPTION,
     )
     checks: list[str] = Field(
         default_factory=lambda: [
@@ -113,7 +120,7 @@ class SilverDQReportConfig(BaseModel):
             SilverDQCheckType.DEDUPLICATION_STATS.value,
             SilverDQCheckType.KEY_NULLABILITY.value,
         ],
-        description="List of DQ checks to perform",
+        description=_DQ_REPORT_CHECKS_DESCRIPTION,
     )
 
     def get_format_enum(self) -> DQReportFormat:
@@ -152,15 +159,15 @@ class GoldDQReportConfig(BaseModel):
 
     enabled: bool = Field(
         default=False,
-        description="Enable DQ report generation (default: disabled)",
+        description=_DQ_REPORT_ENABLED_DESCRIPTION,
     )
     output_path: str | None = Field(
         default=None,
-        description="Output path for report. None = alongside data files.",
+        description=_DQ_REPORT_OUTPUT_PATH_DESCRIPTION,
     )
     format: Literal["json", "yaml", "html"] = Field(
         default="json",
-        description="Report output format",
+        description=_DQ_REPORT_OUTPUT_FORMAT_DESCRIPTION,
     )
     checks: list[str] = Field(
         default_factory=lambda: [
@@ -171,7 +178,7 @@ class GoldDQReportConfig(BaseModel):
             GoldDQCheckType.STATISTICAL_PROFILE.value,
             GoldDQCheckType.ANOMALY_DETECTION.value,
         ],
-        description="List of DQ checks to perform",
+        description=_DQ_REPORT_CHECKS_DESCRIPTION,
     )
 
     def get_format_enum(self) -> DQReportFormat:

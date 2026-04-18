@@ -5,6 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy as _load_pipeline_contract_policy,
+)
+
 from ._audit import create_audit_port
 from ._bronze import create_bronze_writer
 from ._context_resolution import (
@@ -23,7 +27,6 @@ from ._context_resolution import (
 from ._layer_writers import (
     create_gold_layer_writer_impl,
     create_silver_layer_writer_impl,
-    load_contract_rollout_policy,
 )
 from ._resilience import (
     create_silver_atomic_retry_policy,
@@ -54,6 +57,8 @@ __all__ = [
     "create_layer_exporters",
     "create_storage_adapter",
     "get_layer_configs",
+    "load_contract_rollout_policy",
+    "load_pipeline_contract_policy",
     "log_configured_export_status",
     "log_export_status",
     "resolve_delta_writer_base_path",
@@ -126,6 +131,19 @@ def resolve_delta_writer_flat_structure(
         provider=provider,
         entity_type=entity_type,
     )
+
+
+def load_pipeline_contract_policy(provider: str, entity: str):
+    """Return the pipeline contract policy loader used by storage assembly."""
+    return _load_pipeline_contract_policy(provider, entity)
+
+
+def load_contract_rollout_policy(config: PipelineYamlConfig) -> ContractRolloutPolicy:
+    """Adapt pipeline contract policy into the writer-facing rollout DTO."""
+    return load_pipeline_contract_policy(
+        config.provider,
+        config.entity_type,
+    ).to_contract_rollout_policy()
 
 
 def create_storage_adapter(

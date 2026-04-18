@@ -270,6 +270,7 @@ def _validate_fixture_path(
 ) -> bool:
     """Validate the fixture path."""
     has_manifest_fixture = False
+    fixture_kind = manifest_entry.get("fixture_kind")
     fixture_path_raw = manifest_entry.get("fixture_path")
     if not isinstance(fixture_path_raw, str) or not fixture_path_raw.strip():
         invalid_entries.append(f"{key}: fixture_path is required in manifest")

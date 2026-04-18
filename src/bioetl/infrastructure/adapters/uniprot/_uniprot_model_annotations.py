@@ -23,6 +23,8 @@ __all__ = [
     "UniProtText",
 ]
 
+_SUPPORTING_EVIDENCE_DESCRIPTION = "Supporting evidence"
+
 
 class UniProtEcNumber(BaseModel):
     """EC number entry."""
@@ -150,7 +152,7 @@ class UniProtText(BaseModel):
 
     value: str = Field(description="Text value")
     evidences: list[UniProtEvidence] | None = Field(
-        default_factory=list, description="Supporting evidence"
+        default_factory=list, description=_SUPPORTING_EVIDENCE_DESCRIPTION
     )
 
 
@@ -161,7 +163,7 @@ class UniProtLocation(BaseModel):
 
     value: str = Field(description="Location name")
     evidences: list[UniProtEvidence] | None = Field(
-        default_factory=list, description="Supporting evidence"
+        default_factory=list, description=_SUPPORTING_EVIDENCE_DESCRIPTION
     )
 
 
@@ -185,7 +187,7 @@ class UniProtReaction(BaseModel):
         default=None, alias="ecNumber", description="EC number"
     )
     evidences: list[UniProtEvidence] | None = Field(
-        default_factory=list, description="Supporting evidence"
+        default_factory=list, description=_SUPPORTING_EVIDENCE_DESCRIPTION
     )
 
 

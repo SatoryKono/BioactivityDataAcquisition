@@ -13,6 +13,8 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.ports import LoggerPort
 
+_DEPENDENCY_EXCLUDED_LOG = "Excluding dependency from merge"
+
 
 def add_not_run_results(
     enrichment_results: dict[str, EnrichmentResult],
@@ -87,14 +89,14 @@ def get_mergeable_dependencies(
         result = dependency_results.get(dependency_cfg.pipeline)
         if result is None:
             logger.debug(
-                "Excluding dependency from merge",
+                _DEPENDENCY_EXCLUDED_LOG,
                 dependency=dependency_cfg.pipeline,
                 reason="no_result",
             )
             continue
         if not dependency_cfg.silver_table:
             logger.debug(
-                "Excluding dependency from merge",
+                _DEPENDENCY_EXCLUDED_LOG,
                 dependency=dependency_cfg.pipeline,
                 reason="no_silver_table",
             )
@@ -103,7 +105,7 @@ def get_mergeable_dependencies(
             mergeable.append(dependency_cfg)
             continue
         logger.debug(
-            "Excluding dependency from merge",
+            _DEPENDENCY_EXCLUDED_LOG,
             dependency=dependency_cfg.pipeline,
             status=result.status.value,
             reason="execution_failed_or_timed_out",

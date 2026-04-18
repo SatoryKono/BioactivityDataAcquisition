@@ -39,6 +39,8 @@ from bioetl.domain.value_objects import validate_taxonomy_id
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
+OptionalString = str | None
+
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
 # Source field is 'tax_id' from API, will be renamed to 'taxonomy_id' via renames
@@ -218,10 +220,10 @@ class AssayTransformer(BaseChemblTransformer):
             cast("str | None", business_data.get("bao_format"))
         )
         business_data["bao_label"] = normalize_bao_label(
-            cast("str | None", business_data.get("bao_label")),
-            bao_identifier=cast("str | None", business_data.get("bao_format")),
+            cast(OptionalString, business_data.get("bao_label")),
+            bao_identifier=cast(OptionalString, business_data.get("bao_format")),
         )
         business_data["assay_organism"] = normalize_chembl_organism_name(
-            cast("str | None", business_data.get("assay_organism"))
+            cast(OptionalString, business_data.get("assay_organism"))
         )
         return business_data

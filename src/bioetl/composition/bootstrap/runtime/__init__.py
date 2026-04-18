@@ -17,6 +17,9 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Any
 
+_RUNTIME_OBSERVABILITY_MODULE = "bioetl.composition.bootstrap.runtime.observability"
+_RUNTIME_ASSEMBLY_MODULE = "bioetl.composition.bootstrap.runtime.assembly"
+
 __all__ = [
     "MetricsServerError",
     "assemble_filter_config",
@@ -36,27 +39,23 @@ __all__ = [
 ]
 
 _PUBLIC_EXPORTS: dict[str, str] = {
-    "MetricsServerError": "bioetl.composition.bootstrap.runtime.observability",
-    "assemble_filter_config": "bioetl.composition.bootstrap.runtime.assembly",
-    "assemble_runtime_config": "bioetl.composition.bootstrap.runtime.assembly",
-    "assemble_vacuum_settings": "bioetl.composition.bootstrap.runtime.assembly",
+    "MetricsServerError": _RUNTIME_OBSERVABILITY_MODULE,
+    "assemble_filter_config": _RUNTIME_ASSEMBLY_MODULE,
+    "assemble_runtime_config": _RUNTIME_ASSEMBLY_MODULE,
+    "assemble_vacuum_settings": _RUNTIME_ASSEMBLY_MODULE,
     "bootstrap_composite_runner": "bioetl.composition.bootstrap.runtime.composite",
-    "bootstrap_dq_monitor_port": "bioetl.composition.bootstrap.runtime.observability",
-    "bootstrap_logger_port": "bioetl.composition.bootstrap.runtime.observability",
-    "bootstrap_metrics_port": "bioetl.composition.bootstrap.runtime.observability",
-    "bootstrap_observability_bundle": (
-        "bioetl.composition.bootstrap.runtime.observability"
-    ),
+    "bootstrap_dq_monitor_port": _RUNTIME_OBSERVABILITY_MODULE,
+    "bootstrap_logger_port": _RUNTIME_OBSERVABILITY_MODULE,
+    "bootstrap_metrics_port": _RUNTIME_OBSERVABILITY_MODULE,
+    "bootstrap_observability_bundle": _RUNTIME_OBSERVABILITY_MODULE,
     "bootstrap_pipeline_runner": "bioetl.composition.bootstrap.runtime.pipeline",
     "bootstrap_pipeline_runner_service": (
         "bioetl.composition.bootstrap.runtime.pipeline_runner_service_bootstrap"
     ),
-    "bootstrap_tracer_port": "bioetl.composition.bootstrap.runtime.observability",
+    "bootstrap_tracer_port": _RUNTIME_OBSERVABILITY_MODULE,
     "load_composite_config": "bioetl.composition.bootstrap.runtime.composite",
-    "maybe_start_metrics_server": "bioetl.composition.bootstrap.runtime.observability",
-    "validate_observability_preflight": (
-        "bioetl.composition.bootstrap.runtime.observability"
-    ),
+    "maybe_start_metrics_server": _RUNTIME_OBSERVABILITY_MODULE,
+    "validate_observability_preflight": _RUNTIME_OBSERVABILITY_MODULE,
 }
 
 

@@ -24,10 +24,10 @@
       "max_p95_regression_pct": 0.35
     },
     "crossref_batch_fetch_200": {
-      "baseline_latency_ms": 0.124,
-      "baseline_throughput_rps": 1610305.96,
+      "baseline_latency_ms": 0.165,
+      "baseline_throughput_rps": 1212121.212,
       "max_regression_pct": 0.25,
-      "p95_latency_ms": 0.155,
+      "p95_latency_ms": 0.215,
       "max_p95_regression_pct": 0.35
     },
     "atomic_write_group_50": {

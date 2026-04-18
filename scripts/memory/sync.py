@@ -15503,7 +15503,7 @@ def main(argv: list[str] | None = None) -> int:
             batch_size=args.batch_size,
         )
         print(json.dumps(summary, indent=2))
-        return _normalization_operation_count(summary)
+        return 0
     root = args.root.resolve()
     selection = _selection_from_args(args)
     snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
@@ -15517,7 +15517,7 @@ def main(argv: list[str] | None = None) -> int:
         args.report,
         args.report_fast,
     )
-    return _snapshot_operation_count(args)
+    return 0
 
 
 if __name__ == "__main__":

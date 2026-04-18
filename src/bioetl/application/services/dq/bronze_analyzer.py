@@ -166,21 +166,11 @@ class BronzeDQAnalyzer:
         for record in records:
             try:
                 data = orjson.loads(record)
-                if isinstance(data, dict):
-                    for key, value in data.items():
-                        if key not in field_types:
-                            field_types[key] = set()
-                        field_types[key].add(self._infer_type(value))
+                self._update_field_types(field_types, data)
             except orjson.JSONDecodeError:
                 continue
 
-        # Convert sets to string representation
-        schema = {}
-        for field, types in field_types.items():
-            if len(types) == 1:
-                schema[field] = next(iter(types))
-            else:
-                schema[field] = "|".join(sorted(types))
+        schema = self._render_schema_snapshot(field_types)
 
         return SchemaSnapshotResult(
             fields_detected=len(schema),
@@ -189,6 +179,27 @@ class BronzeDQAnalyzer:
             missing_fields_since_last_run=(),
             status=DQCheckStatus.PASS,
         )
+
+    def _update_field_types(
+        self,
+        field_types: dict[str, set[str]],
+        data: object,
+    ) -> None:
+        """Merge inferred JSON field types from one decoded record."""
+        if not isinstance(data, dict):
+            return
+        for key, value in data.items():
+            field_types.setdefault(key, set()).add(self._infer_type(value))
+
+    def _render_schema_snapshot(
+        self,
+        field_types: dict[str, set[str]],
+    ) -> dict[str, str]:
+        """Convert field type sets into stable string representations."""
+        return {
+            field: next(iter(types)) if len(types) == 1 else "|".join(sorted(types))
+            for field, types in field_types.items()
+        }
 
     def _check_field_presence(self, records: list[bytes]) -> dict[str, float]:
         """Calculate field presence rates."""

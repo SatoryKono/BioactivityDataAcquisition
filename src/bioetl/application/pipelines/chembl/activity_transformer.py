@@ -38,6 +38,8 @@ from bioetl.domain.value_objects import validate_taxonomy_id
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord, PrimaryId
 
+OptionalString = str | None
+
 
 # Mapping for ligand efficiency fields extraction (nested dict)
 _LIGAND_EFFICIENCY_FIELDS: JsonDict = {  # Any: converter callables or None
@@ -258,18 +260,18 @@ class ActivityTransformer(BaseChemblTransformer):
             "publication_id"
         ) or record.get("publication_id")
         business_data["bao_endpoint"] = normalize_bao_identifier(
-            cast("str | None", business_data.get("bao_endpoint"))
+            cast(OptionalString, business_data.get("bao_endpoint"))
         )
         business_data["bao_format"] = normalize_bao_identifier(
-            cast("str | None", business_data.get("bao_format"))
+            cast(OptionalString, business_data.get("bao_format"))
         )
         business_data["uo_units"] = normalize_uo_identifier(
-            cast("str | None", business_data.get("uo_units"))
+            cast(OptionalString, business_data.get("uo_units"))
         )
         business_data["standard_units"] = normalize_standard_unit(
-            cast("str | None", business_data.get("standard_units"))
+            cast(OptionalString, business_data.get("standard_units"))
         )
         business_data["qudt_units"] = normalize_qudt_unit(
-            cast("str | None", business_data.get("qudt_units"))
+            cast(OptionalString, business_data.get("qudt_units"))
         )
         return business_data
