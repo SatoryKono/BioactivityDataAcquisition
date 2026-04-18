@@ -271,27 +271,68 @@ def _update_row(
 
 
 def main() -> int:
+    """Main function to sync the workbook with structural policy."""
     args = _arg_parser().parse_args()
+    input_path, output_path, contract_export_path = _resolve_paths(args)
+    _prepare_output_directory(output_path)
+    contract_rows = _load_contract_rows(args, contract_export_path)
+    contract_index = index_runtime_contract_rows(contract_rows)
+    temp_output_path = _determine_temp_output_path(input_path, output_path, args.check)
+    
+    change_counter = _process_workbook(
+        input_path, temp_output_path, contract_index, args.check
+    )
+    
+    if args.check:
+        return _handle_check_mode(temp_output_path, change_counter, input_path, contract_export_path, contract_rows)
+    
+    _finalize_output(temp_output_path, output_path)
+    _print_summary(input_path, output_path, contract_export_path, contract_rows, change_counter)
+    return 0
+
+
+def _resolve_paths(args: argparse.Namespace) -> tuple[Path, Path, Path]:
+    """Resolve input, output, and contract export paths."""
     input_path = args.input.resolve()
     output_path = args.output.resolve()
     contract_export_path = args.contract_export.resolve()
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    if args.refresh_contract_export or not contract_export_path.exists():
-        contract_rows = write_runtime_contract_export(contract_export_path)
-    else:
-        contract_rows = load_runtime_contract_export(contract_export_path)
-    contract_index = index_runtime_contract_rows(contract_rows)
-    temp_output_path = (
-        output_path.with_name(f".{output_path.stem}.tmp{output_path.suffix}")
-        if input_path == output_path or args.check
-        else output_path
-    )
+    return input_path, output_path, contract_export_path
 
+
+def _prepare_output_directory(output_path: Path) -> None:
+    """Prepare the output directory."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def _load_contract_rows(args: argparse.Namespace, contract_export_path: Path) -> list:
+    """Load or refresh the contract rows."""
+    if args.refresh_contract_export or not contract_export_path.exists():
+        return write_runtime_contract_export(contract_export_path)
+    return load_runtime_contract_export(contract_export_path)
+
+
+def _determine_temp_output_path(
+    input_path: Path, output_path: Path, check: bool
+) -> Path:
+    """Determine the temporary output path."""
+    if input_path == output_path or check:
+        return output_path.with_name(f".{output_path.stem}.tmp{output_path.suffix}")
+    return output_path
+
+
+def _process_workbook(
+    input_path: Path,
+    temp_output_path: Path,
+    contract_index: dict[tuple[str, str, str], MatrixStructuralContractRow],
+    check: bool,
+) -> Counter[str]:
+    """Process the workbook and apply updates."""
+    change_counter: Counter[str] = Counter()
+    
     with zipfile.ZipFile(input_path) as zin:
         shared_strings = load_shared_strings(zin)
         sheet_targets = sheet_target_paths(zin)
-        change_counter: Counter[str] = Counter()
-
+        
         with zipfile.ZipFile(
             temp_output_path, "w", compression=zipfile.ZIP_DEFLATED
         ) as zout:
@@ -300,65 +341,113 @@ def main() -> int:
                 if info.filename not in sheet_targets:
                     zout.writestr(copy.copy(info), data)
                     continue
-
+                
                 root = ET.fromstring(data)
                 rows = root.find("a:sheetData", NS).findall("a:row", NS)
                 if not rows:
                     zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
                     continue
-
-                header_by_index: dict[int, str] = {}
-                for cell in rows[0].findall("a:c", NS):
-                    header_by_index[column_index(cell.attrib["r"])] = cell_text(
-                        cell, shared_strings
-                    )
-                index_by_header = {
-                    header: index for index, header in header_by_index.items()
-                }
-
+                
+                header_by_index, index_by_header = _extract_headers(rows, shared_strings)
+                
                 for row in rows[1:]:
-                    row_map = {
-                        header_by_index[column_index(cell.attrib["r"])]: cell_text(
-                            cell, shared_strings
-                        )
-                        for cell in row.findall("a:c", NS)
-                        if column_index(cell.attrib["r"]) in header_by_index
-                    }
+                    row_map = _build_row_map(row, header_by_index, shared_strings)
                     updated = _update_row(row_map, contract_index=contract_index)
-                    for header, new_value in updated.items():
-                        index = index_by_header.get(header)
-                        if index is None:
-                            continue
-                        target_cell = None
-                        for cell in row.findall("a:c", NS):
-                            if column_index(cell.attrib["r"]) == index:
-                                target_cell = cell
-                                break
-                        if target_cell is None:
-                            continue
-                        raw_value = cell_text(target_cell, shared_strings)
-                        if raw_value == new_value:
-                            continue
-                        set_cell_text(target_cell, new_value)
-                        change_counter[header] += 1
-
+                    _apply_updates(row, updated, index_by_header, shared_strings, change_counter)
+                
                 zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
+    
+    return change_counter
 
-    if args.check:
-        if temp_output_path.exists():
-            temp_output_path.unlink()
-        payload = {
-            "input": str(input_path),
-            "contract_export": str(contract_export_path),
-            "contract_rows": len(contract_rows),
-            "updated_headers": dict(change_counter),
-        }
-        print(payload)
-        return 1 if change_counter else 0
 
+def _extract_headers(
+    rows: list, shared_strings: dict
+) -> tuple[dict[int, str], dict[str, int]]:
+    """Extract headers from the first row."""
+    header_by_index: dict[int, str] = {}
+    for cell in rows[0].findall("a:c", NS):
+        header_by_index[column_index(cell.attrib["r"])] = cell_text(
+            cell, shared_strings
+        )
+    index_by_header = {
+        header: index for index, header in header_by_index.items()
+    }
+    return header_by_index, index_by_header
+
+
+def _build_row_map(
+    row: ET.Element, header_by_index: dict[int, str], shared_strings: dict
+) -> dict[str, str]:
+    """Build a map of header to cell value for a row."""
+    return {
+        header_by_index[column_index(cell.attrib["r"])]: cell_text(
+            cell, shared_strings
+        )
+        for cell in row.findall("a:c", NS)
+        if column_index(cell.attrib["r"]) in header_by_index
+    }
+
+
+def _apply_updates(
+    row: ET.Element,
+    updated: dict[str, str],
+    index_by_header: dict[str, int],
+    shared_strings: dict,
+    change_counter: Counter[str],
+) -> None:
+    """Apply updates to the row cells."""
+    for header, new_value in updated.items():
+        index = index_by_header.get(header)
+        if index is None:
+            continue
+        target_cell = None
+        for cell in row.findall("a:c", NS):
+            if column_index(cell.attrib["r"]) == index:
+                target_cell = cell
+                break
+        if target_cell is None:
+            continue
+        raw_value = cell_text(target_cell, shared_strings)
+        if raw_value == new_value:
+            continue
+        set_cell_text(target_cell, new_value)
+        change_counter[header] += 1
+
+
+def _handle_check_mode(
+    temp_output_path: Path,
+    change_counter: Counter[str],
+    input_path: Path,
+    contract_export_path: Path,
+    contract_rows: list,
+) -> int:
+    """Handle check mode by printing changes and exiting."""
+    if temp_output_path.exists():
+        temp_output_path.unlink()
+    payload = {
+        "input": str(input_path),
+        "contract_export": str(contract_export_path),
+        "contract_rows": len(contract_rows),
+        "updated_headers": dict(change_counter),
+    }
+    print(payload)
+    return 1 if change_counter else 0
+
+
+def _finalize_output(temp_output_path: Path, output_path: Path) -> None:
+    """Finalize the output by moving the temp file to the output path."""
     if temp_output_path != output_path:
         temp_output_path.replace(output_path)
 
+
+def _print_summary(
+    input_path: Path,
+    output_path: Path,
+    contract_export_path: Path,
+    contract_rows: list,
+    change_counter: Counter[str],
+) -> None:
+    """Print a summary of the changes."""
     print(
         {
             "input": str(input_path),
@@ -368,7 +457,6 @@ def main() -> int:
             "updated_headers": dict(change_counter),
         }
     )
-    return 0
 
 
 if __name__ == "__main__":

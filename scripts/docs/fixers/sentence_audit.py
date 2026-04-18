@@ -292,35 +292,60 @@ def find_evidence(
     freq: Counter,
     first_line_idx_by_path: dict[str, int],
 ) -> Evidence | None:
-    def path_weight(path: Path) -> int:
-        parts = {part.lower() for part in path.parts}
-        if any(noisy in parts for noisy in NOISY_PATH_PARTS):
-            return 0
-        if "tests" in parts:
-            return 1
-        if {"configs", "pyproject.toml", "mkdocs.yml"} & parts:
-            return 3
-        if "src" in parts:
-            return 3
-        return 2
+    """Find evidence in code for a given sentence."""
+    backticks = _extract_backticks(sentence)
+    probe_tokens = _get_probe_tokens(sentence, freq)
+    candidate_ids = _find_candidate_ids(probe_tokens, inverted)
+    
+    evidence = _check_backticks(backticks, first_line_idx_by_path, lines)
+    if evidence is not None:
+        return evidence
+    
+    if not candidate_ids:
+        return None
+    
+    return _find_best_evidence(candidate_ids, lines, probe_tokens)
 
-    backticks = [x.strip() for x in BACKTICK_RE.findall(sentence) if x.strip()]
+
+def _extract_backticks(sentence: str) -> list[str]:
+    """Extract backtick-enclosed text from the sentence."""
+    return [x.strip() for x in BACKTICK_RE.findall(sentence) if x.strip()]
+
+
+def _get_probe_tokens(sentence: str, freq: Counter) -> list[str]:
+    """Get the top probe tokens from the sentence."""
     sentence_tokens = tokenize(sentence)
     ranked_tokens = sorted(sentence_tokens, key=lambda token: (freq.get(token, 10**9), token))
-    probe_tokens = ranked_tokens[:5]
+    return ranked_tokens[:5]
 
-    candidate_ids: set[int] = set()
+
+def _find_candidate_ids(
+    probe_tokens: list[str], inverted: dict[str, set[int]]
+) -> set[int]:
+    """Find candidate line indices based on probe tokens."""
     postings = [
         inverted.get(token, set()) for token in probe_tokens if token in inverted
     ]
     postings = sorted(postings, key=len)
+    
     if len(postings) >= 2:
         candidate_ids = postings[0] & postings[1]
         if not candidate_ids:
             candidate_ids = postings[0] | postings[1]
     elif postings:
         candidate_ids = postings[0]
+    else:
+        candidate_ids = set()
+    
+    return candidate_ids
 
+
+def _check_backticks(
+    backticks: list[str],
+    first_line_idx_by_path: dict[str, int],
+    lines: list[tuple[Path, int, str]],
+) -> Evidence | None:
+    """Check backticks for direct code references."""
     for bt in backticks:
         bt_norm = bt.strip().replace("\\", "/")
         if "/" in bt_norm or bt_norm.endswith(
@@ -335,14 +360,19 @@ def find_evidence(
                     return Evidence(
                         path=path, line_no=line_no, line=line.strip(), score=10
                     )
+    return None
 
-    if not candidate_ids:
-        return None
 
+def _find_best_evidence(
+    candidate_ids: set[int],
+    lines: list[tuple[Path, int, str]],
+    probe_tokens: list[str],
+) -> Evidence | None:
+    """Find the best evidence from candidate line indices."""
     best: Evidence | None = None
     for idx in sorted(candidate_ids)[:400]:
         path, line_no, line = lines[idx]
-        weight = path_weight(path)
+        weight = _path_weight(path)
         if weight == 0:
             continue
         line_tokens = set(tokenize(line))
@@ -350,14 +380,38 @@ def find_evidence(
         if score <= 0:
             continue
         candidate = Evidence(path=path, line_no=line_no, line=line.strip(), score=score)
-        best_tuple = (candidate.score, weight, str(candidate.path), candidate.line_no)
-        current_tuple = (
-            (best.score, path_weight(best.path), str(best.path), best.line_no)
-            if best is not None
-            else None
-        )
-        if best is None or best_tuple > current_tuple:
-            best = candidate
+        best = _update_best_evidence(best, candidate, weight)
+    return best
+
+
+def _path_weight(path: Path) -> int:
+    """Calculate the weight of a path based on its location."""
+    parts = {part.lower() for part in path.parts}
+    if any(noisy in parts for noisy in NOISY_PATH_PARTS):
+        return 0
+    if "tests" in parts:
+        return 1
+    if {"configs", "pyproject.toml", "mkdocs.yml"} & parts:
+        return 3
+    if "src" in parts:
+        return 3
+    return 2
+
+
+def _update_best_evidence(
+    best: Evidence | None,
+    candidate: Evidence,
+    weight: int,
+) -> Evidence:
+    """Update the best evidence based on score and weight."""
+    if best is None:
+        return candidate
+    
+    best_tuple = (best.score, _path_weight(best.path), str(best.path), best.line_no)
+    current_tuple = (candidate.score, weight, str(candidate.path), candidate.line_no)
+    
+    if current_tuple > best_tuple:
+        return candidate
     return best
 
 
@@ -404,19 +458,47 @@ def read_text_robust(path: Path) -> str:
 
 
 def generate() -> None:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    """Generate documentation audit reports."""
+    _prepare_output_directory()
     doc_files = iter_doc_files()
     inverted, lines, freq = build_index()
+    first_line_idx_by_path = _build_first_line_index(lines)
+    
+    rows = _process_documents(doc_files, inverted, lines, freq, first_line_idx_by_path)
+    _write_csv_report(rows)
+    _write_summary_report(rows, doc_files)
+    _write_prompt_reports(rows)
+
+
+def _prepare_output_directory() -> None:
+    """Prepare the output directory for reports."""
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _build_first_line_index(
+    lines: list[tuple[Path, int, str]]
+) -> dict[str, int]:
+    """Build an index of the first line for each path."""
     first_line_idx_by_path: dict[str, int] = {}
     for idx, (path, _, _) in enumerate(lines):
         key = str(path).replace("\\", "/").lower()
         if key not in first_line_idx_by_path:
             first_line_idx_by_path[key] = idx
+    return first_line_idx_by_path
 
+
+def _process_documents(
+    doc_files: list[Path],
+    inverted: dict[str, set[int]],
+    lines: list[tuple[Path, int, str]],
+    freq: Counter,
+    first_line_idx_by_path: dict[str, int],
+) -> list[dict[str, str]]:
+    """Process documents and collect rows for the report."""
     rows: list[dict[str, str]] = []
     prompt_map: dict[str, list[dict[str, str]]] = defaultdict(list)
     prompt_map_high: dict[str, list[dict[str, str]]] = defaultdict(list)
-
+    
     for doc in doc_files:
         text = read_text_robust(doc)
         sentences = extract_sentences(text)
@@ -447,9 +529,13 @@ def generate() -> None:
                 prompt_map[rel(doc)].append(row)
                 if risk == "high":
                     prompt_map_high[rel(doc)].append(row)
-
+    
     rows.sort(key=lambda row: (row[DOC_FIELD], int(row[SENTENCE_NUMBER_FIELD])))
+    return rows
 
+
+def _write_csv_report(rows: list[dict[str, str]]) -> None:
+    """Write the CSV report."""
     with OUT_CSV.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
             f,
@@ -468,6 +554,11 @@ def generate() -> None:
         writer.writeheader()
         writer.writerows(rows)
 
+
+def _write_summary_report(
+    rows: list[dict[str, str]], doc_files: list[Path]
+) -> None:
+    """Write the summary report."""
     total = len(rows)
     ok = sum(1 for row in rows if row[STATUS_FIELD] == "да")
     bad = total - ok
@@ -502,6 +593,25 @@ def generate() -> None:
         for doc_name, cnt in bad_by_doc.most_common(20):
             f.write(f"| `{doc_name}` | {cnt} |\n")
 
+
+def _write_prompt_reports(rows: list[dict[str, str]]) -> None:
+    """Write the prompt reports."""
+    prompt_map: dict[str, list[dict[str, str]]] = defaultdict(list)
+    prompt_map_high: dict[str, list[dict[str, str]]] = defaultdict(list)
+    
+    for row in rows:
+        if row[STATUS_FIELD] == "нет":
+            doc_name = row[DOC_FIELD]
+            prompt_map[doc_name].append(row)
+            if row["risk"] == "high":
+                prompt_map_high[doc_name].append(row)
+    
+    _write_prompts_report(prompt_map)
+    _write_prompts_high_report(prompt_map_high)
+
+
+def _write_prompts_report(prompt_map: dict[str, list[dict[str, str]]]) -> None:
+    """Write the prompts report."""
     with OUT_PROMPTS.open("w", encoding="utf-8") as f:
         f.write("# Набор промптов для модификации документов\n\n")
         f.write("Ниже шаблоны для каждого документа, где найдены несоответствия.\n\n")
@@ -532,6 +642,9 @@ def generate() -> None:
                 )
             f.write("```\n\n")
 
+
+def _write_prompts_high_report(prompt_map_high: dict[str, list[dict[str, str]]]) -> None:
+    """Write the high-risk prompts report."""
     with OUT_PROMPTS_HIGH.open("w", encoding="utf-8") as f:
         f.write("# High-risk промпты для модификации документов\n\n")
         f.write(
