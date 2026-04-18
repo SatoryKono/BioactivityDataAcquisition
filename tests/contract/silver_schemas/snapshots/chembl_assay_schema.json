@@ -291,11 +291,14 @@
       {
         "name": "less_than_or_equal_to",
         "type": "le"
+      },
+      {
+        "name": "confidence_score_integer"
       }
     ],
     "coerce": false,
     "description": "Confidence score.",
-    "dtype": "int64",
+    "dtype": "float64",
     "nullable": false,
     "required": true,
     "unique": false
@@ -391,7 +394,7 @@
     "checks": [],
     "coerce": false,
     "description": "Source ID.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false

@@ -53,6 +53,7 @@ class _SilverMetadataBuildRequest:
     runtime_started_at: datetime
     runtime_completed_at: datetime
     run_id: RunID | str | None
+    manifest_id: str | None
     run_type: RunType | object | None
     source_batch_id: BatchID | None
     transform_version: str | None
@@ -219,6 +220,7 @@ class SilverMetadataOperations:
 
         runtime_metadata = RuntimeMetadata(
             run_id=str(request.run_id or "unknown"),
+            manifest_id=request.manifest_id,
             run_type=request.run_type or "incremental",
             started_at_utc=request.runtime_started_at,
             completed_at_utc=request.runtime_completed_at,
@@ -238,7 +240,7 @@ class SilverMetadataOperations:
             version="1.0",
         )
         lineage_metadata = LineageMetadata(
-            source_batch_ids=[request.source_batch_id]
+            source_batch_ids=[str(request.source_batch_id)]
             if request.source_batch_id
             else [],
             bronze_paths=[ref.relative_path for ref in request.bronze_refs]
@@ -382,6 +384,11 @@ class SilverMetadataOperations:
                 runtime_started_at=runtime_anchor,
                 runtime_completed_at=runtime_anchor,
                 run_id=run_id,
+                manifest_id=(
+                    str(records[0]["_manifest_id"])
+                    if records and records[0].get("_manifest_id") is not None
+                    else None
+                ),
                 run_type=run_type,
                 source_batch_id=source_batch_id,
                 transform_version=transform_version,
@@ -586,6 +593,11 @@ class SilverMetadataOperations:
             if records and "_run_id" in records[0]
             else "test_run_id"
         )
+        manifest_id = (
+            str(records[0]["_manifest_id"])
+            if records and records[0].get("_manifest_id") is not None
+            else getattr(self._host, "manifest_id", None)
+        )
         metadata = self._build_silver_metadata(
             _SilverMetadataBuildRequest(
                 table_name=table_name,
@@ -596,6 +608,7 @@ class SilverMetadataOperations:
                 runtime_started_at=started_at,
                 runtime_completed_at=context.completed_at,
                 run_id=run_id,
+                manifest_id=None if manifest_id is None else str(manifest_id),
                 run_type=RunTypeEnum.INCREMENTAL,
                 source_batch_id=source_batch_id,
                 transform_version=None,
