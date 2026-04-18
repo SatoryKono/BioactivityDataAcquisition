@@ -45,7 +45,7 @@ def test_iter_scripts_includes_non_python_entrypoints_in_current_scope() -> None
     assert not any(path.endswith(".sql") for path in rel_paths)
 
 
-def test_discover_refs_normalizes_windows_path_separators(tmp_path: Path) -> None:
+def test_discover_refs_normalizes_windows_path_separators() -> None:
     """Windows-style script refs should resolve through path aliases."""
     module = _load_inventory_module()
     root = _project_root()
@@ -55,8 +55,7 @@ def test_discover_refs_normalizes_windows_path_separators(tmp_path: Path) -> Non
         root / "scripts" / "ops" / "runtime" / "wsl" / "start-wsl-proxy.bat",
     ]
     original_iter_search_files = module._iter_search_files
-    docs_dir = tmp_path / "docs" / "03-guides" / "development"
-    docs_dir.mkdir(parents=True)
+    docs_dir = root / "docs" / "03-guides" / "development"
     docs_file = docs_dir / "codex-paths.md"
     docs_file.write_text(
         "\n".join(
@@ -78,6 +77,7 @@ def test_discover_refs_normalizes_windows_path_separators(tmp_path: Path) -> Non
         refs = module._discover_refs(root, targets)
     finally:
         module._iter_search_files = original_iter_search_files
+        docs_file.unlink(missing_ok=True)
 
     codex_exec_key = "/".join(["scripts", "codex-exec.bat"])
     codex_key = "/".join(["scripts", "codex.bat"])
