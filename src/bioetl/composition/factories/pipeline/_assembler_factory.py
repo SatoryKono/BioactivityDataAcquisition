@@ -240,48 +240,4 @@ class GenericPipelineFactory(Generic[TPipeline]):
             cached_bronze=cached_bronze,
             assemble_runner_fn=_public_assembler_seam("assemble_runner"),
         )
-
-
-def create_pipeline_factory(
-    pipeline_name: str,
-    pipeline_class: type[TPipeline],
-    provider: str,
-    silver_schema: pa.Schema | None = None,
-    gold_schema: GoldSchemaType | None = None,
-    pandera_silver_schema: object | None = None,
-    transformer_class: type[BaseTransformer] | None = None,
-    provider_registry: ProviderRegistry | None = None,
-) -> GenericPipelineFactory[TPipeline]:
-    return GenericPipelineFactory(
-        pipeline_name,
-        pipeline_class,
-        provider,
-        silver_schema,
-        gold_schema,
-        pandera_silver_schema,
-        None,
-        transformer_class,
-        provider_registry,
-    )
-
-
-def assemble_runner(
-    pipeline: BasePipeline,
-    observability: ObservabilityBundle,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    strict_gold_validation: bool,
-    yaml_config: PipelineYamlConfig | None = None,
-) -> PipelineRunner:
-    return _public_assembler_seam("_assemble_runner_impl")(
-        pipeline=pipeline,
-        observability=observability,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        strict_gold_validation=strict_gold_validation,
-        yaml_config=yaml_config,
-        dq_configs_extractor=_public_assembler_seam("_extract_dq_configs"),
-    )
-
-
-__all__ = ["GenericPipelineFactory", "assemble_runner", "create_pipeline_factory"]
+__all__ = ["GenericPipelineFactory"]

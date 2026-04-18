@@ -12,7 +12,6 @@ from bioetl.composition.factories.dq.context_resolver import (
     extract_dq_configs as _rf014_extract_dq_configs,
 )
 from bioetl.composition.factories.pipeline._assembler_factory import (
-    assemble_runner,
     GenericPipelineFactory as _GenericPipelineFactory,
 )
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
@@ -50,6 +49,14 @@ class GenericPipelineFactory(_GenericPipelineFactory[TPipeline]):
 
 def create_pipeline_factory(*args: object, **kwargs: object) -> GenericPipelineFactory[object]:
     return GenericPipelineFactory(*args, **kwargs)
+
+
+def assemble_runner(**kwargs: object) -> object:
+    return _assemble_runner_impl(
+        dq_configs_extractor=_extract_dq_configs,
+        **kwargs,
+    )
+
 
 _RF014_HELPER_OWNERS = (
     get_data_source_creator,

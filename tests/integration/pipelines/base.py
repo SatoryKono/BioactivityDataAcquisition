@@ -74,11 +74,18 @@ class IntegrationPipelineTestCase:
         config: PipelineYamlConfig,
         logger: structlog.BoundLogger,
         metrics: MetricsPort,
+        pipeline_name: str | None = None,
         tracing: Any = None,
         metadata_coordinator: Any = None,
         silver_validator: Any = None,
+        **_kwargs: Any,
     ) -> StorageContext:
         """Create a StorageContext pointing to local temp paths."""
+        del settings
+        del pipeline_name
+        del tracing
+        del metadata_coordinator
+        del silver_validator
         # Create real writers pointing to local paths
 
         # Determine if we should save JSON (mirroring real factory logic)
