@@ -8,6 +8,13 @@ from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING, Final
 
+from bioetl.composition.factories._transformer_spec_rows import (
+    BUILTIN_TRANSFORMER_SPEC_ROWS,
+)
+from bioetl.composition.factories.transformer_dependencies import (
+    build_transformer_dependencies,
+)
+
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.base_transformer.types import (
@@ -23,10 +30,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.services import IdentityService
 
-from bioetl.composition.factories.transformer_dependencies import (
-    build_transformer_dependencies,
-)
-
 # Mapping of (provider, entity_type) to transformer class
 _TRANSFORMER_REGISTRY: dict[tuple[str, str], type[BaseTransformer]] = {}
 
@@ -40,132 +43,8 @@ class TransformerRegistrationSpec:
     module_path: str
     class_name: str
 
-
-_TransformerSpecRow = tuple[str, str, str, str]
-_TRANSFORMER_SPECS: Final[tuple[_TransformerSpecRow, ...]] = (
-    (
-        "chembl",
-        "activity",
-        "bioetl.application.pipelines.chembl.activity_transformer",
-        "ActivityTransformer",
-    ),
-    (
-        "chembl",
-        "assay",
-        "bioetl.application.pipelines.chembl.assay_transformer",
-        "AssayTransformer",
-    ),
-    (
-        "chembl",
-        "assay_parameters",
-        "bioetl.application.pipelines.chembl.assay_parameters_transformer",
-        "AssayParametersTransformer",
-    ),
-    (
-        "chembl",
-        "cell_line",
-        "bioetl.application.pipelines.chembl.cell_line_transformer",
-        "CellLineTransformer",
-    ),
-    (
-        "chembl",
-        "compound_record",
-        "bioetl.application.pipelines.chembl.compound_record_transformer",
-        "CompoundRecordTransformer",
-    ),
-    (
-        "chembl",
-        "document",
-        "bioetl.application.pipelines.chembl.publication_transformer",
-        "PublicationTransformer",
-    ),
-    (
-        "chembl",
-        "document_similarity",
-        "bioetl.application.pipelines.chembl.publication_similarity_transformer",
-        "PublicationSimilarityTransformer",
-    ),
-    (
-        "chembl",
-        "document_term",
-        "bioetl.application.pipelines.chembl.publication_term_transformer",
-        "PublicationTermTransformer",
-    ),
-    (
-        "chembl",
-        "molecule",
-        "bioetl.application.pipelines.chembl.molecule_transformer",
-        "MoleculeTransformer",
-    ),
-    (
-        "chembl",
-        "subcellular_fraction",
-        "bioetl.application.pipelines.chembl.subcellular_fraction_transformer",
-        "SubcellularFractionTransformer",
-    ),
-    (
-        "chembl",
-        "protein_class",
-        "bioetl.application.pipelines.chembl.protein_class_transformer",
-        "ProteinClassTransformer",
-    ),
-    (
-        "chembl",
-        "target",
-        "bioetl.application.pipelines.chembl.target_transformer",
-        "TargetTransformer",
-    ),
-    (
-        "chembl",
-        "target_component",
-        "bioetl.application.pipelines.chembl.target_component_transformer",
-        "TargetComponentTransformer",
-    ),
-    (
-        "pubchem",
-        "compound",
-        "bioetl.application.pipelines.pubchem.transformer",
-        "PubChemCompoundTransformer",
-    ),
-    (
-        "uniprot",
-        "protein",
-        "bioetl.application.pipelines.uniprot.transformer",
-        "UniProtProteinTransformer",
-    ),
-    (
-        "uniprot",
-        "idmapping",
-        "bioetl.application.pipelines.uniprot.idmapping_transformer",
-        "IDMappingTransformer",
-    ),
-    (
-        "pubmed",
-        "publication",
-        "bioetl.application.pipelines.pubmed.transformer",
-        "PubMedPublicationTransformer",
-    ),
-    (
-        "crossref",
-        "publication",
-        "bioetl.application.pipelines.crossref.transformer",
-        "CrossRefPublicationTransformer",
-    ),
-    (
-        "openalex",
-        "publication",
-        "bioetl.application.pipelines.openalex.transformer",
-        "OpenAlexPublicationTransformer",
-    ),
-    (
-        "semanticscholar",
-        "publication",
-        "bioetl.application.pipelines.semanticscholar.transformer",
-        "SemanticScholarPublicationTransformer",
-    ),
-)
 _BUILTIN_TRANSFORMER_SPECS: Final[tuple[TransformerRegistrationSpec, ...]] = tuple(
-    TransformerRegistrationSpec(*spec) for spec in _TRANSFORMER_SPECS
+    TransformerRegistrationSpec(*spec) for spec in BUILTIN_TRANSFORMER_SPEC_ROWS
 )
 
 

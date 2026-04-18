@@ -697,7 +697,17 @@ def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
     table_path = _resolve_silver_table_path(data_dir, table_name)
 
     dt = _load_delta_table()(str(table_path))
-    return dt.to_pyarrow_table().to_pylist()
+    records = dt.to_pyarrow_table().to_pylist()
+    
+    # Validate that records are dictionaries
+    for i, record in enumerate(records):
+        if not isinstance(record, dict):
+            raise TypeError(
+                f"Expected record at index {i} to be a dict, got {type(record).__name__}. "
+                f"Table: {table_name}, Record: {record}"
+            )
+    
+    return records
 
 
 def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:

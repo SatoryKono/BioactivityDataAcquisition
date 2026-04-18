@@ -42,6 +42,14 @@ def vcr_config(request: pytest.FixtureRequest) -> dict[str, Any]:
     }
 
 
+@pytest.fixture
+def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
+    """Route mixed-provider tests to the canonical cassette name they reuse."""
+    if request.node.name == "test_parallel_independent_pipelines":
+        return "test_uniprot_protein_full_cycle"
+    return request.node.name
+
+
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio

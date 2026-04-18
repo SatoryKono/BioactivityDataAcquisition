@@ -71,6 +71,20 @@ COLLECTION_PHRASES = {
     ),
 }
 VIEW_SUFFIX_ORDER = ("-full", "-overview", "-dataflow", "-domain", "-infra")
+COMMENT_METADATA_PATTERNS = (
+    (re.compile(r"Title:\s*(.+)"), "title"),
+    (re.compile(r"Covers:\s*(.+)"), "covers"),
+    (re.compile(r"Components:\s*(.+)"), "components"),
+    (re.compile(r"@type\s+(.+)"), "type"),
+    (re.compile(r"@date\s+(.+)"), "date"),
+    (re.compile(r"@level\s+(.+)"), "level"),
+    (re.compile(r"@nodes\s+(.+)"), "nodes_meta"),
+    (re.compile(r"@reference\s+(.+)"), "reference"),
+    (re.compile(r"@adr\s+(.+)"), "adr"),
+    (re.compile(r"Parent source:\s*(.+)"), "parent_source"),
+)
+VIEW_PATTERN = re.compile(r"View:\s*(.+?)(?:\s*\|\s*Parent:\s*(.+))?$")
+SHOWS_PATTERN = re.compile(r"Shows\s+(.+)")
 
 
 def _extract_comment_metadata(lines: list[str], meta: dict[str, object]) -> None:
@@ -83,41 +97,38 @@ def _extract_comment_metadata(lines: list[str], meta: dict[str, object]) -> None
             continue
 
         stripped = stripped_line.lstrip("% ").strip()
-
-        if m := re.match(r"Title:\s*(.+)", stripped):
-            meta["title"] = m.group(1).strip()
-        elif m := re.match(r"Covers:\s*(.+)", stripped):
-            meta["covers"] = m.group(1).strip()
-        elif m := re.match(r"Components:\s*(.+)", stripped):
-            meta["components"] = m.group(1).strip()
-        elif m := re.match(r"@type\s+(.+)", stripped):
-            meta["type"] = m.group(1).strip()
-        elif m := re.match(r"@date\s+(.+)", stripped):
-            meta["date"] = m.group(1).strip()
-        elif m := re.match(r"@level\s+(.+)", stripped):
-            meta["level"] = m.group(1).strip()
-        elif m := re.match(r"@nodes\s+(.+)", stripped):
-            meta["nodes_meta"] = m.group(1).strip()
-        elif m := re.match(r"@reference\s+(.+)", stripped):
-            meta["reference"] = m.group(1).strip()
-        elif m := re.match(r"@adr\s+(.+)", stripped):
-            meta["adr"] = m.group(1).strip()
-        elif m := re.match(r"View:\s*(.+?)(?:\s*\|\s*Parent:\s*(.+))?$", stripped):
-            meta["view_type"] = m.group(1).strip()
-            if m.group(2):
-                meta["parent"] = m.group(2).strip()
-        elif m := re.match(r"Parent source:\s*(.+)", stripped):
-            meta["parent_source"] = m.group(1).strip()
-        elif m := re.match(r"Shows\s+(.+)", stripped):
-            if "covers" not in meta:
-                meta["covers"] = m.group(1).strip()
-
-        if stripped.startswith("@"):
+        if _apply_comment_metadata_pattern(stripped, meta):
             continue
-        if "title" not in meta and "—" in stripped:
-            meta["title"] = stripped.split("—", 1)[1].strip()
-        elif "covers" not in meta and len(stripped) > 10:
-            meta["covers"] = stripped
+        _apply_comment_fallbacks(stripped, meta)
+
+
+def _apply_comment_metadata_pattern(stripped: str, meta: dict[str, object]) -> bool:
+    for pattern, key in COMMENT_METADATA_PATTERNS:
+        match = pattern.match(stripped)
+        if not match:
+            continue
+        meta[key] = match.group(1).strip()
+        return True
+
+    if match := VIEW_PATTERN.match(stripped):
+        meta["view_type"] = match.group(1).strip()
+        if match.group(2):
+            meta["parent"] = match.group(2).strip()
+        return True
+
+    if "covers" not in meta and (match := SHOWS_PATTERN.match(stripped)):
+        meta["covers"] = match.group(1).strip()
+        return True
+    return False
+
+
+def _apply_comment_fallbacks(stripped: str, meta: dict[str, object]) -> None:
+    if stripped.startswith("@"):
+        return
+    if "title" not in meta and "—" in stripped:
+        meta["title"] = stripped.split("—", 1)[1].strip()
+    elif "covers" not in meta and len(stripped) > 10:
+        meta["covers"] = stripped
 
 
 def _detect_diagram_type(lines: list[str], meta: dict[str, object]) -> None:

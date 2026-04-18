@@ -95,41 +95,6 @@ def collect_stats(src_dir: Path) -> CoverageStats:
     """Walk *src_dir* and gather docstring coverage data."""
     stats = CoverageStats()
 
-    def process_body(nodes: list[ast.stmt], *, rel: Path) -> None:
-        """Collect public classes and functions from one lexical body."""
-        for node in nodes:
-            if isinstance(node, ast.ClassDef):
-                if node.name.startswith("_"):
-                    continue
-                stats.classes_total += 1
-                if ast.get_docstring(node):
-                    stats.classes_with_doc += 1
-                else:
-                    stats.missing.append(
-                        {
-                            "file": str(rel),
-                            "line": str(node.lineno),
-                            "kind": "class",
-                            "name": node.name,
-                        }
-                    )
-                process_body(node.body, rel=rel)
-            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                if node.name.startswith("_"):
-                    continue
-                stats.functions_total += 1
-                if ast.get_docstring(node):
-                    stats.functions_with_doc += 1
-                else:
-                    stats.missing.append(
-                        {
-                            "file": str(rel),
-                            "line": str(node.lineno),
-                            "kind": "function",
-                            "name": node.name,
-                        }
-                    )
-
     for py_file in sorted(src_dir.rglob("*.py")):
         if "__pycache__" in py_file.parts:
             continue
@@ -145,9 +110,68 @@ def collect_stats(src_dir: Path) -> CoverageStats:
             stats.modules_with_doc += 1
         else:
             stats.missing.append({"file": str(rel), "kind": "module", "name": str(rel)})
-        process_body(tree.body, rel=rel)
+        _process_body(tree.body, rel=rel, stats=stats)
 
     return stats
+
+
+def _process_body(
+    nodes: list[ast.stmt],
+    *,
+    rel: Path,
+    stats: CoverageStats,
+) -> None:
+    """Collect public classes and functions from one lexical body."""
+    for node in nodes:
+        if isinstance(node, ast.ClassDef):
+            _process_class_node(node, rel=rel, stats=stats)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            _process_function_node(node, rel=rel, stats=stats)
+
+
+def _process_class_node(
+    node: ast.ClassDef,
+    *,
+    rel: Path,
+    stats: CoverageStats,
+) -> None:
+    if node.name.startswith("_"):
+        return
+    stats.classes_total += 1
+    if ast.get_docstring(node):
+        stats.classes_with_doc += 1
+    else:
+        stats.missing.append(
+            {
+                "file": str(rel),
+                "line": str(node.lineno),
+                "kind": "class",
+                "name": node.name,
+            }
+        )
+    _process_body(node.body, rel=rel, stats=stats)
+
+
+def _process_function_node(
+    node: ast.FunctionDef | ast.AsyncFunctionDef,
+    *,
+    rel: Path,
+    stats: CoverageStats,
+) -> None:
+    if node.name.startswith("_"):
+        return
+    stats.functions_total += 1
+    if ast.get_docstring(node):
+        stats.functions_with_doc += 1
+        return
+    stats.missing.append(
+        {
+            "file": str(rel),
+            "line": str(node.lineno),
+            "kind": "function",
+            "name": node.name,
+        }
+    )
 
 
 def print_report(stats: CoverageStats, *, verbose: bool = True) -> None:

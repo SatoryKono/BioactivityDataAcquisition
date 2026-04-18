@@ -18,6 +18,7 @@ Usage: setup_skills.sh [--dry-run] [--no-agents]
 Sync repository Codex skills into the local Codex home. By default the script
 also syncs paired agents when a matching `.codex/agents/<skill>.md` exists.
 EOF
+    return 0
 }
 
 for arg in "$@"; do

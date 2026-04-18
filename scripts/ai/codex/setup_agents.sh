@@ -14,6 +14,7 @@ Usage: setup_agents.sh [--dry-run]
 
 Sync repository Codex agent markdown files into the local Codex home.
 EOF
+    return 0
 }
 
 for arg in "$@"; do
