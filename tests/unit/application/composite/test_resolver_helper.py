@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock
 
 import polars as pl
-import pytest
 
 from bioetl.application.composite.helpers.resolver_helper import (
     ResolverHelper,

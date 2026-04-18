@@ -5,7 +5,6 @@ Tests for FSM state management during seed pipeline execution phase.
 
 from __future__ import annotations
 
-import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 from unittest.mock import patch

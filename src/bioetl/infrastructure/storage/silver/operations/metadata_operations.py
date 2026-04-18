@@ -536,7 +536,7 @@ class SilverMetadataOperations:
         validated_mode: SilverWriteMode,
         started_at: datetime,
         start_perf: float,
-    ) -> "_PreparedSilverWriteFinalizationContext":
+    ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence.
 
         This method computes DQ metrics, gets the Delta version, and calculates

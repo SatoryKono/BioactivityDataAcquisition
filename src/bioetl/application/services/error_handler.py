@@ -10,8 +10,8 @@ REQ-OBS-001: Errors should be logged with full context
 
 from __future__ import annotations
 
-import logging
-from typing import Any, Callable, Dict, Optional, Type
+from collections.abc import Callable
+from typing import Any
 
 from bioetl.domain.exceptions.base_exceptions import (
     BioETLDomainError,
@@ -47,7 +47,7 @@ class ErrorHandlerService:
     def handle_error(
         self,
         exception: Exception,
-        context: Dict[
+        context: dict[
             str,
             Any,  # Any: Generic context data from various sources
         ]
@@ -78,7 +78,7 @@ class ErrorHandlerService:
         self,
         exception: Exception,
         transform_func: Callable[[Exception], Exception],
-        context: Dict[
+        context: dict[
             str,
             Any,  # Any: Generic context data from various sources
         ]
@@ -128,7 +128,7 @@ class ErrorHandlerService:
     def wrap_function(
         self,
         func: Callable[..., Any],  # Any: Generic function that can return any type
-        error_transformer: Optional[Callable[[Exception], Exception]] = None,
+        error_transformer: Callable[[Exception], Exception] | None = None,
         **kwargs: Any,  # Any: Generic arguments for wrapped functions
     ) -> Any:  # Any: Generic return type from wrapped functions
         """Wrap a function call with error handling.
@@ -165,7 +165,7 @@ class ErrorHandlerService:
     def _log_error(
         self,
         exception: Exception,
-        context: Dict[
+        context: dict[
             str,
             Any,  # Any: Logging context carries heterogeneous scalar payloads from callers.
         ] = None,
@@ -212,12 +212,12 @@ class ErrorHandlerService:
     def _prepare_log_context(
         self,
         exception: Exception,
-        context: Dict[
+        context: dict[
             str,
             Any,  # Any: Generic context data for logging
         ]
         | None = None,
-    ) -> Dict[
+    ) -> dict[
         str,
         Any,  # Any: Prepared log context remains a heterogeneous structured payload.
     ]:
@@ -256,7 +256,7 @@ class ErrorHandlerService:
         message: str,
         field_name: str,
         invalid_value: Any,  # Any: Generic invalid value from various sources
-        context: Dict[
+        context: dict[
             str,
             Any,  # Any: Generic context data for validation errors
         ]
@@ -277,7 +277,7 @@ class ErrorHandlerService:
         self,
         message: str,
         config_key: str,
-        context: Dict[
+        context: dict[
             str,
             Any,  # Any: Generic context data for configuration errors
         ]
@@ -298,7 +298,7 @@ class ErrorHandlerService:
         message: str,
         record_id: str | None = None,
         severity: str = "warning",
-        context: Dict[
+        context: dict[
             str,
             Any,  # Any: Generic context data for data quality errors
         ]
@@ -321,7 +321,7 @@ class ErrorHandlerService:
         service_name: str,
         operation: str,
         is_retryable: bool = True,
-        context: Dict[
+        context: dict[
             str,
             Any,  # Any: Generic context data for integration errors
         ]

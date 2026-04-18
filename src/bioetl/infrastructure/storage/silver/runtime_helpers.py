@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Awaitable
+from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import (
@@ -19,7 +20,6 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
-from bioetl.domain.types import BronzeRecord
 from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.delta.resilience import (

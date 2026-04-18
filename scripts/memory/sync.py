@@ -17,10 +17,11 @@ import shutil
 import subprocess
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timezone
 from pathlib import Path
-from typing import Callable, TypeAlias, TypeVar, cast
+from typing import TypeAlias, TypeVar, cast
 from urllib import error, parse, request
 
 import yaml
@@ -2365,7 +2366,7 @@ def _git_chunk_commit_ages(
         capture_output=True,
         text=True,
     )
-    chunk_results = {path: None for path in chunk}
+    chunk_results = dict.fromkeys(chunk)
     if result.returncode != 0:
         return chunk_results
     return _parse_git_chunk_age_output(result.stdout, chunk, today)
@@ -2376,7 +2377,7 @@ def _parse_git_chunk_age_output(
     chunk: list[str],
     today: date,
 ) -> dict[str, int | None]:
-    chunk_results = {path: None for path in chunk}
+    chunk_results = dict.fromkeys(chunk)
     current_timestamp: int | None = None
     unresolved = set(chunk)
     for raw_line in output.splitlines():
@@ -3153,7 +3154,7 @@ def _select_alert_targets(
     group_name: str,
     expr: str,
     dimensions: set[str],
-) -> "AlertTargetSelection":
+) -> AlertTargetSelection:
     pipeline_targets, provider_targets, contract_targets = _raw_alert_targets(
         context,
         alert_name=alert_name,
@@ -3211,7 +3212,7 @@ def _sorted_alert_targets(
     pipeline_targets: list[NodeKey],
     provider_targets: list[NodeKey],
     contract_targets: list[NodeKey],
-) -> "AlertTargetSelection":
+) -> AlertTargetSelection:
     return AlertTargetSelection(
         selected_pipelines=_sorted_unique_node_keys(pipeline_targets),
         selected_providers=_sorted_unique_node_keys(provider_targets),
@@ -11318,14 +11319,15 @@ def _link_pipeline_normalization_modules(
 
 
 def _build_normalization_pipeline_evidence() -> dict[str, dict[str, JsonValue]]:
-    from bioetl.domain.normalization.profiles.registry import (
-        NORMALIZATION_PROFILE_REGISTRY,
-        resolve_normalization_profile_module_path,
-    )
     from scripts.docs.generate_pipeline_normalization_field_matrix import (
         FALLBACK_BUSINESS,
         FALLBACK_TECHNICAL_PASSTHROUGH,
         build_field_matrix_rows,
+    )
+
+    from bioetl.domain.normalization.profiles.registry import (
+        NORMALIZATION_PROFILE_REGISTRY,
+        resolve_normalization_profile_module_path,
     )
 
     evidence: dict[str, dict[str, JsonValue]] = {}
@@ -13755,7 +13757,7 @@ def _count_rows_by_key(
     keys: tuple[str, ...],
     key_field: str,
 ) -> dict[str, int]:
-    counts = {key: 0 for key in keys}
+    counts = dict.fromkeys(keys, 0)
     for row in rows:
         key_value = row.get(key_field)
         count = row.get("count")

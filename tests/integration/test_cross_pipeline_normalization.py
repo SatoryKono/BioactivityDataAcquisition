@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from typing import Any, cast
 
-import pytest
 
-from bioetl.domain.normalization.profiles.chembl_activity import CHEMBL_ACTIVITY_PROFILE
 from bioetl.domain.normalization.profiles.chembl_assay import CHEMBL_ASSAY_PROFILE
 from bioetl.domain.normalization.profiles.chembl_cell_line import (
     CHEMBL_CELL_LINE_PROFILE,

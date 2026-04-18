@@ -18,18 +18,16 @@ from ._chembl_activity_fields import (
 from ._standard_profile_builder import build_standard_profile
 from .profile_normalizers import (
     normalize_profile_canonical_smiles,
-    normalize_profile_case,
-    normalize_profile_unit,
 )
 
 __all__ = [
+    "ACTIVITY_STANDARD_TYPES",
     "ASSAY_TYPES",
     "CHEMBL_ACTIVITY_PROFILE",
     "CHEMBL_ACTIVITY_SCHEMA_FIELDS",
+    "DATA_VALIDITY_COMMENTS",
     "NULL_FIELDS",
     "STANDARD_RELATIONS",
-    "ACTIVITY_STANDARD_TYPES",
-    "DATA_VALIDITY_COMMENTS",
 ]
 
 # Assay types enum (B, F, A, T, P, U)

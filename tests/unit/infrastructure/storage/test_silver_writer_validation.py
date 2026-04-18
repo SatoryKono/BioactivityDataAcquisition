@@ -452,9 +452,6 @@ class TestSilverWriterPreparePayloadExecutor:
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
-        from bioetl.infrastructure.storage.silver.operations.validation_operations import (
-            _PreparedSilverWritePayload,
-        )
         from bioetl.domain.medallion import WriteModePolicy
 
         writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
@@ -481,9 +478,6 @@ class TestSilverWriterPreparePayloadExecutor:
         # Create validation operations service with proper mocking
         from bioetl.infrastructure.storage.silver.operations.validation_operations import (
             SilverValidationOperations,
-        )
-        from bioetl.infrastructure.storage.silver.pipeline_helpers import (
-            execute_silver_write_pipeline,
         )
 
         # Create a minimal validation operations instance

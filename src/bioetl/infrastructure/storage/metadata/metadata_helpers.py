@@ -2,10 +2,9 @@
 Metadata helpers module for common metadata operations.
 """
 
-from typing import Any, Dict
 
 
-def build_and_validate_metadata(key: str, value: str) -> Dict[str, str]:
+def build_and_validate_metadata(key: str, value: str) -> dict[str, str]:
     """Build and validate metadata dictionary.
 
     Args:

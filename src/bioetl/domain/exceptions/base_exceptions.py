@@ -11,7 +11,7 @@ REQ-ARCH-012: Exceptions should be immutable and include context
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from bioetl.domain.error_types import ErrorType
 
@@ -44,11 +44,11 @@ class BioETLDomainError(BioETLError):
     error_type = ErrorType.INVALID_DATA
 
     message: str
-    context: Dict[
+    context: dict[
         str,
         Any,  # Any: Domain exception context stores JSON-serializable payload values of mixed types.
     ] = None
-    original_exception: Optional[Exception] = None
+    original_exception: Exception | None = None
 
     def __str__(self) -> str:
         """Format exception for human-readable output."""
@@ -61,7 +61,7 @@ class BioETLDomainError(BioETLError):
 
     def to_dict(
         self,
-    ) -> Dict[
+    ) -> dict[
         str,
         Any,  # Any: Generic dictionary for structured logging
     ]:
@@ -86,7 +86,7 @@ class BioETLValidationError(BioETLDomainError):
     should be handled by returning appropriate error responses to callers.
     """
 
-    field_name: Optional[str] = None
+    field_name: str | None = None
     invalid_value: Optional[
         Any  # Any: Generic invalid value from various sources
     ] = None
@@ -111,7 +111,7 @@ class BioETLConfigurationError(BioETLDomainError):
     setup issues.
     """
 
-    config_key: Optional[str] = None
+    config_key: str | None = None
 
     def __post_init__(self):
         """Ensure context includes configuration key."""
@@ -130,7 +130,7 @@ class BioETLDataQualityError(BioETLDomainError):
     These may be recoverable depending on the context.
     """
 
-    record_id: Optional[str] = None
+    record_id: str | None = None
     severity: str = "warning"
 
     def __post_init__(self):
@@ -154,8 +154,8 @@ class BioETLIntegrationError(BioETLDomainError):
     mechanisms.
     """
 
-    service_name: Optional[str] = None
-    operation: Optional[str] = None
+    service_name: str | None = None
+    operation: str | None = None
     is_retryable: bool = True
 
     def __post_init__(self):
@@ -178,8 +178,8 @@ class BioETLNotFoundError(BioETLDomainError):
     appropriate user feedback.
     """
 
-    entity_type: Optional[str] = None
-    entity_id: Optional[str] = None
+    entity_type: str | None = None
+    entity_id: str | None = None
 
     def __post_init__(self):
         """Ensure context includes entity information."""
@@ -200,7 +200,7 @@ class BioETLConflictError(BioETLDomainError):
     user intervention to resolve.
     """
 
-    conflicting_entity: Optional[str] = None
+    conflicting_entity: str | None = None
 
     def __post_init__(self):
         """Ensure context includes conflict information."""

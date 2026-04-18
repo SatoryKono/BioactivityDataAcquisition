@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.helpers.resolver_helper import ResolverHelper
-from bioetl.application.composite.join_key_normalization import (
-    JoinKeyNormalizationPolicy,
-)
 from bioetl.application.composite.join_key_resolution_helpers import (
     find_join_key_column,
-    normalize_join_key_columns,
     resolve_composite_join_keys,
     resolve_join_key_names,
     resolve_join_key_names_asymmetric,

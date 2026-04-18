@@ -24,7 +24,6 @@ from bioetl.infrastructure.adapters.crossref.client_fetch_helpers import (
     fetch_crossref_publications,
     fetch_crossref_publications_filtered,
     fetch_crossref_publications_with_fallback,
-    raise_crossref_multifilter_not_supported,
 )
 from bioetl.infrastructure.adapters.crossref.client_observability_helpers import (
     build_crossref_source_metadata,

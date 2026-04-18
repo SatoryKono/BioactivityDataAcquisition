@@ -278,14 +278,14 @@ def main() -> int:
     contract_rows = _load_contract_rows(args, contract_export_path)
     contract_index = index_runtime_contract_rows(contract_rows)
     temp_output_path = _determine_temp_output_path(input_path, output_path, args.check)
-    
+
     change_counter = _process_workbook(
         input_path, temp_output_path, contract_index, args.check
     )
-    
+
     if args.check:
         return _handle_check_mode(temp_output_path, change_counter, input_path, contract_export_path, contract_rows)
-    
+
     _finalize_output(temp_output_path, output_path)
     _print_summary(input_path, output_path, contract_export_path, contract_rows, change_counter)
     return 0
@@ -328,11 +328,11 @@ def _process_workbook(
 ) -> Counter[str]:
     """Process the workbook and apply updates."""
     change_counter: Counter[str] = Counter()
-    
+
     with zipfile.ZipFile(input_path) as zin:
         shared_strings = load_shared_strings(zin)
         sheet_targets = sheet_target_paths(zin)
-        
+
         with zipfile.ZipFile(
             temp_output_path, "w", compression=zipfile.ZIP_DEFLATED
         ) as zout:
@@ -341,22 +341,22 @@ def _process_workbook(
                 if info.filename not in sheet_targets:
                     zout.writestr(copy.copy(info), data)
                     continue
-                
+
                 root = ET.fromstring(data)
                 rows = root.find("a:sheetData", NS).findall("a:row", NS)
                 if not rows:
                     zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
                     continue
-                
+
                 header_by_index, index_by_header = _extract_headers(rows, shared_strings)
-                
+
                 for row in rows[1:]:
                     row_map = _build_row_map(row, header_by_index, shared_strings)
                     updated = _update_row(row_map, contract_index=contract_index)
                     _apply_updates(row, updated, index_by_header, shared_strings, change_counter)
-                
+
                 zout.writestr(copy.copy(info), ET.tostring(root, encoding="utf-8"))
-    
+
     return change_counter
 
 

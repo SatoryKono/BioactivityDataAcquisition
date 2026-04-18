@@ -3,8 +3,8 @@
 
 from __future__ import annotations
 
-from importlib import import_module
 import sys
+from importlib import import_module
 from pathlib import Path
 
 if __package__ in {None, ""}:

@@ -7,12 +7,12 @@ from typing import Any
 from bioetl.domain.normalization.text import normalize_string
 
 __all__ = [
+    "NULL_PATTERNS",
+    "UNIT_MAPPING",
     "normalize_case",
     "normalize_cross_pipeline_case",
     "normalize_null",
     "normalize_unit",
-    "NULL_PATTERNS",
-    "UNIT_MAPPING",
 ]
 
 # Pseudo-null patterns to convert to None

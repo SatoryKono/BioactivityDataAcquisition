@@ -50,7 +50,7 @@ def _parse_subgraphs(lines: list[str]) -> dict[str, str]:
     """Parse subgraphs and assign nodes to their respective subgraphs."""
     node_sg: dict[str, str] = {}
     stack: list[str] = []
-    
+
     for ln in lines:
         s = ln.strip()
         m = SUBGRAPH_RE.match(s)
@@ -61,7 +61,7 @@ def _parse_subgraphs(lines: list[str]) -> dict[str, str]:
             stack.pop()
             continue
         _assign_nodes_to_subgraphs(s, stack, node_sg)
-    
+
     return node_sg
 
 
@@ -80,14 +80,14 @@ def _parse_linkstyle_single(line: str) -> tuple[str, str, str] | None:
     stripped = line.strip()
     if not stripped.startswith("linkStyle "):
         return None
-    
+
     indent = _extract_indent(line)
     payload = stripped[len("linkStyle ") :].strip()
     index, separator, style = payload.partition(" ")
-    
+
     if not _is_valid_linkstyle(index, separator):
         return None
-    
+
     return indent, index, style.strip()
 
 
@@ -151,17 +151,17 @@ def _extract_edge_endpoints(line: str) -> list[tuple[str, str]]:
 def fix_link002(lines: list[str]) -> list[str]:
     """Fix LINK-002 by grouping linkStyle entries."""
     entries = _collect_linkstyle_entries(lines)
-    
+
     if len(entries) < 12:
         return lines
-    
+
     by_style = _group_linkstyles_by_style(entries)
     indent = entries[0][3]
     grouped = _create_grouped_linkstyles(by_style, indent)
-    
+
     lines = _remove_old_linkstyles(lines, entries)
     lines = _insert_grouped_linkstyles(lines, grouped, entries)
-    
+
     return lines
 
 
@@ -222,30 +222,30 @@ def _insert_grouped_linkstyles(
 def fix_link001(lines: list[str]) -> list[str]:
     """Fix LINK-001 by diversifying arrow types."""
     edge_info = _collect_edge_info(lines)
-    
+
     if len(edge_info) < 8:
         return lines
-    
+
     has_solid, has_dashed, has_thick = _check_arrow_types(edge_info)
     style_count = sum([has_solid, has_dashed, has_thick])
     if style_count >= 2:
         return lines
-    
+
     node_sg = _parse_subgraphs(lines)
     node_labels = _get_node_labels(lines)
-    
+
     changed_types: set[str] = set()
     if has_solid:
         changed_types.add("-->")
-    
+
     lines = _apply_port_protocol_rules(lines, edge_info, node_labels, changed_types)
-    
+
     if len(changed_types) < 2:
         lines = _apply_subgraph_rules(lines, edge_info, node_sg, changed_types)
-    
+
     if len(changed_types) < 2:
         lines = _apply_default_rule(lines, edge_info)
-    
+
     return lines
 
 
@@ -281,12 +281,12 @@ def _apply_port_protocol_rules(
             break
         if "-->" not in ln:
             continue
-        
+
         pairs = _extract_edge_endpoints(ln)
         for src, tgt in pairs:
             src_label = node_labels.get(src, src)
             tgt_label = node_labels.get(tgt, tgt)
-            
+
             if (
                 "Port" in tgt_label
                 or "Protocol" in tgt_label
@@ -296,7 +296,7 @@ def _apply_port_protocol_rules(
                 lines[line_idx] = lines[line_idx].replace("-->", "-.->", 1)
                 changed_types.add("-.->")
                 break
-    
+
     return lines
 
 
@@ -312,7 +312,7 @@ def _apply_subgraph_rules(
             break
         if "-->" not in lines[line_idx]:
             continue
-        
+
         pairs = _extract_edge_endpoints(lines[line_idx])
         for src, tgt in pairs:
             src_sg = node_sg.get(src, "")
@@ -321,7 +321,7 @@ def _apply_subgraph_rules(
                 lines[line_idx] = lines[line_idx].replace("-->", "==>", 1)
                 changed_types.add("==>")
                 break
-    
+
     return lines
 
 
@@ -333,7 +333,7 @@ def _apply_default_rule(
         if "-->" in lines[line_idx]:
             lines[line_idx] = lines[line_idx].replace("-->", "==>", 1)
             break
-    
+
     return lines
 
 

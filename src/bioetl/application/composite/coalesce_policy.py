@@ -285,7 +285,6 @@ class CoalescePolicyService:
         Returns:
             DataFrame with field columns coalesced according to the explicit priority rules.
         """
-        import polars as pl
 
         result = df
         available_columns = set(df.columns)

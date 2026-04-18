@@ -36,7 +36,7 @@ class _RaisingAsyncIterator:
     def __init__(self, exc: BaseException) -> None:
         self._exc = exc
 
-    def __aiter__(self) -> "_RaisingAsyncIterator":
+    def __aiter__(self) -> _RaisingAsyncIterator:
         return self
 
     async def __anext__(self) -> JsonDict:

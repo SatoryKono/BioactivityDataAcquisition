@@ -18,8 +18,6 @@ from bioetl.application.composite.dependency_coordinator import (
     DependencyCoordinatorService,
 )
 from bioetl.application.composite.dependency_key_resolvers import (
-    ChainedKeyResolver,
-    SeedKeyResolver,
     create_chained_key_resolver,
     create_seed_key_resolver,
 )

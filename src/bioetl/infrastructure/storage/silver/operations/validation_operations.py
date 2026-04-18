@@ -16,7 +16,6 @@ from bioetl.domain.value_objects.dq_metrics import SchemaDriftInfo
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _build_prepared_silver_write_payload,
     _check_schema_drift,
-    _deduplicate_by_primary_keys_impl,
     _detect_schema_drift,
     _enforce_write_policy,
     _finalize_silver_write_payload,
@@ -24,21 +23,13 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _SilverSchemaPolicyRequest,
     _SilverWritePreparationRequest,
     _sync_validate_and_build_arrow,
-    _to_policy_write_mode_impl,
-    _validate_key_nullability_impl,
     _validate_records,
     _validate_silver_pandera,
-    _validate_write_mode_impl,
     _ValidatedSilverWriteContext,
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import (
-        AuditPort,
-        LineageStorePort,
-        MetadataCoordinatorPort,
-        MetadataWriterPort,
-    )
+    pass
 
 
 class _SilverPayloadPreparationHostProtocol(Protocol):

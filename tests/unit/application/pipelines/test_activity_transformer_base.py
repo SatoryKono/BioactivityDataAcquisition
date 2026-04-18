@@ -18,8 +18,6 @@ from tests.unit.application.pipelines.activity_transformer_shared import (
     SharedActivityTransformerActionTypeExtractionTests,
     SharedActivityTransformerLigandExtractionTests,
     SharedActivityTransformerTransformTests,
-    mock_context,
-    transformer,
 )
 
 

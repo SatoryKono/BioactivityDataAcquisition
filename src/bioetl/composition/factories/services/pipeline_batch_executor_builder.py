@@ -40,9 +40,6 @@ if TYPE_CHECKING:
         BatchProgressService,
         ShutdownSignal,
     )
-    from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
-    )
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import (
         BatchIdGeneratorPort,

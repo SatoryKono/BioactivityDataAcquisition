@@ -8,7 +8,6 @@ Tests verify that:
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
@@ -24,7 +23,6 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     MergeResult,
 )
-from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.events import PipelineEvent
 from tests.unit.application.composite import runner_test_support as support

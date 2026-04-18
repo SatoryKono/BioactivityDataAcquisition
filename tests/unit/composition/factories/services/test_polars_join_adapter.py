@@ -8,14 +8,12 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.join_execution import JoinExecutorService
-from bioetl.application.composite.protocols import JoinExecutorProtocol
 from bioetl.composition.factories.services.polars_join_adapter import PolarsJoinAdapter
 
 
 @pytest.mark.unit
 def test_polars_join_adapter_is_join_executor_service() -> None:
     """Adapter remains a thin DI-friendly alias over JoinExecutorService."""
-    from bioetl.application.composite.join_execution import JoinExecutorService
 
     mock_join_service = MagicMock(spec=JoinExecutorService)
     mock_join_service.get_polars_join_type.return_value = "left"
@@ -30,7 +28,6 @@ def test_polars_join_adapter_is_join_executor_service() -> None:
 @pytest.mark.unit
 def test_polars_join_adapter_executes_inherited_join_logic() -> None:
     """Adapter exposes inherited join execution behavior unchanged."""
-    from bioetl.application.composite.join_execution import JoinExecutorService
 
     mock_join_service = MagicMock(spec=JoinExecutorService)
     mock_join_service.get_polars_join_type.return_value = "left"
