@@ -79,6 +79,7 @@ from bioetl.infrastructure.schemas.silver import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = PROJECT_ROOT / "docs/03-data-model/json-field-typing-inventory.md"
+_PUBLICATION_INPUT_CSV = "data/input/publication.csv"
 
 
 @dataclass(frozen=True)
@@ -133,7 +134,7 @@ SCHEMA_BUNDLES: tuple[SchemaBundle, ...] = (
         ChemblPublicationSchema,
         CHEMBL_PUBLICATION_SCHEMA,
         ChEMBLPublicationGoldSchema,
-        "data/input/publication.csv",
+        _PUBLICATION_INPUT_CSV,
     ),
     SchemaBundle(
         "chembl_document_similarity",
@@ -203,14 +204,14 @@ SCHEMA_BUNDLES: tuple[SchemaBundle, ...] = (
         OpenAlexPublicationSchema,
         OPENALEX_PUBLICATION_SCHEMA,
         OpenAlexPublicationGoldSchema,
-        "data/input/publication.csv",
+        _PUBLICATION_INPUT_CSV,
     ),
     SchemaBundle(
         "semanticscholar_publication",
         SemanticScholarPublicationSchema,
         SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
         SemanticScholarPublicationGoldSchema,
-        "data/input/publication.csv",
+        _PUBLICATION_INPUT_CSV,
     ),
     SchemaBundle(
         "uniprot_protein",
@@ -271,7 +272,8 @@ def _fmt(dtype: str, nullable: bool | None) -> str:
     return f"`{dtype}` ({nullable_text})"
 
 
-def build_inventory() -> str:
+def _collect_bronze_type_hints() -> tuple[dict[str, set[str]], dict[str, bool]]:
+    """Infer Bronze CSV scalar types across all available sample files."""
     bronze_types: dict[str, set[str]] = defaultdict(set)
     bronze_nullable: dict[str, bool] = defaultdict(bool)
 
@@ -289,6 +291,47 @@ def build_inventory() -> str:
                     bronze_types[field].add(inferred)
                     if inferred == "null":
                         bronze_nullable[field] = True
+    return bronze_types, bronze_nullable
+
+
+def _build_inventory_row(
+    *,
+    field_name: str,
+    pandera_columns: dict[str, Any],
+    pyarrow_fields: dict[str, Any],
+    gold_columns: dict[str, Any],
+    bronze_types: dict[str, set[str]],
+    bronze_nullable: dict[str, bool],
+) -> tuple[str, str, str, str] | None:
+    """Build one formatted markdown row for JSON-like fields."""
+    pandera_dtype = str(pandera_columns[field_name].dtype) if field_name in pandera_columns else ""
+    pyarrow_dtype = str(pyarrow_fields[field_name].type) if field_name in pyarrow_fields else ""
+    gold_dtype = str(gold_columns[field_name].dtype) if field_name in gold_columns else ""
+
+    kinds = {_kind(pandera_dtype), _kind(pyarrow_dtype), _kind(gold_dtype)}
+    if not kinds.intersection({"canonical_string", "native_list", "native_object"}):
+        return None
+
+    bronze_type = "|".join(sorted(bronze_types.get(field_name, {"unknown"})))
+    return (
+        _fmt(bronze_type, bronze_nullable.get(field_name, True)),
+        _fmt(
+            pandera_dtype,
+            pandera_columns[field_name].nullable if field_name in pandera_columns else None,
+        ),
+        _fmt(
+            pyarrow_dtype,
+            pyarrow_fields[field_name].nullable if field_name in pyarrow_fields else None,
+        ),
+        _fmt(
+            gold_dtype,
+            gold_columns[field_name].nullable if field_name in gold_columns else None,
+        ),
+    )
+
+
+def build_inventory() -> str:
+    bronze_types, bronze_nullable = _collect_bronze_type_hints()
 
     rows: dict[str, tuple[str, str, str, str]] = {}
     for bundle in SCHEMA_BUNDLES:
@@ -298,50 +341,17 @@ def build_inventory() -> str:
 
         field_names = set(pandera_columns) | set(pyarrow_fields) | set(gold_columns)
         for field_name in sorted(field_names):
-            pandera_dtype = (
-                str(pandera_columns[field_name].dtype)
-                if field_name in pandera_columns
-                else ""
+            row = _build_inventory_row(
+                field_name=field_name,
+                pandera_columns=pandera_columns,
+                pyarrow_fields=pyarrow_fields,
+                gold_columns=gold_columns,
+                bronze_types=bronze_types,
+                bronze_nullable=bronze_nullable,
             )
-            pyarrow_dtype = (
-                str(pyarrow_fields[field_name].type)
-                if field_name in pyarrow_fields
-                else ""
-            )
-            gold_dtype = (
-                str(gold_columns[field_name].dtype)
-                if field_name in gold_columns
-                else ""
-            )
-
-            kinds = {_kind(pandera_dtype), _kind(pyarrow_dtype), _kind(gold_dtype)}
-            if not kinds.intersection(
-                {"canonical_string", "native_list", "native_object"}
-            ):
+            if row is None:
                 continue
-
-            bronze_type = "|".join(sorted(bronze_types.get(field_name, {"unknown"})))
-            rows[field_name] = (
-                _fmt(bronze_type, bronze_nullable.get(field_name, True)),
-                _fmt(
-                    pandera_dtype,
-                    pandera_columns[field_name].nullable
-                    if field_name in pandera_columns
-                    else None,
-                ),
-                _fmt(
-                    pyarrow_dtype,
-                    pyarrow_fields[field_name].nullable
-                    if field_name in pyarrow_fields
-                    else None,
-                ),
-                _fmt(
-                    gold_dtype,
-                    gold_columns[field_name].nullable
-                    if field_name in gold_columns
-                    else None,
-                ),
-            )
+            rows[field_name] = row
 
     lines = [
         "# JSON Field Typing Inventory (Bronze -> Silver -> Gold)",

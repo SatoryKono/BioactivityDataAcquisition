@@ -98,54 +98,73 @@ def harmonize_sequence(root: ET.Element) -> int:
     return changes
 
 
+def _svg_tag_name(elem: ET.Element) -> str:
+    """Return local SVG tag name without namespace."""
+    return elem.tag.split("}")[-1] if "}" in elem.tag else elem.tag
+
+
+def _style_class_relation(elem: ET.Element) -> bool:
+    """Apply palette styling to a class-diagram relation line."""
+    cls = elem.get("class", "")
+    if "relation" not in cls or _svg_tag_name(elem) not in ("path", "line"):
+        return False
+    style_attr = elem.get("style", "")
+    if "stroke-dasharray" in (elem.get("stroke-dasharray", "") + style_attr):
+        _set_style(elem, "di")
+    else:
+        _set_style(elem, "baseline")
+    return True
+
+
+def _style_extension_group(elem: ET.Element) -> int:
+    """Color inheritance markers embedded inside extension groups."""
+    if "extension" not in elem.get("class", "").lower():
+        return 0
+    changes = 0
+    for child in elem.iter():
+        if _svg_tag_name(child) != "path":
+            continue
+        child.set("fill", PALETTE["di"]["stroke"])
+        child.set("stroke", PALETTE["di"]["stroke"])
+        changes += 1
+    return changes
+
+
+def _style_marker_path(marker_id: str, path: ET.Element) -> bool:
+    """Apply marker-specific arrowhead styling for class diagrams."""
+    if "extension" in marker_id.lower():
+        path.set("fill", PALETTE["di"]["stroke"])
+        path.set("stroke", PALETTE["di"]["stroke"])
+        return True
+    if "composition" in marker_id.lower():
+        path.set("fill", PALETTE["baseline"]["stroke"])
+        path.set("stroke", PALETTE["baseline"]["stroke"])
+        return True
+    if "aggregation" in marker_id.lower():
+        path.set("fill", "white")
+        path.set("stroke", PALETTE["baseline"]["stroke"])
+        return True
+    return False
+
+
 def harmonize_class(root: ET.Element) -> int:
     """Harmonize classDiagram relation colours."""
     changes = 0
 
     for elem in root.iter():
-        cls = elem.get("class", "")
-        tag = elem.tag.split("}")[-1] if "}" in elem.tag else elem.tag
-
-        # Relation lines
-        if "relation" in cls and tag in ("path", "line"):
-            style_attr = elem.get("style", "")
-            # Dashed relations → DI purple
-            if "stroke-dasharray" in (elem.get("stroke-dasharray", "") + style_attr):
-                _set_style(elem, "di")
-            else:
-                _set_style(elem, "baseline")
+        if _style_class_relation(elem):
             changes += 1
-
-        # Inheritance markers
-        if "extension" in cls.lower():
-            for child in elem.iter():
-                child_tag = child.tag.split("}")[-1] if "}" in child.tag else child.tag
-                if child_tag == "path":
-                    child.set("fill", PALETTE["di"]["stroke"])
-                    child.set("stroke", PALETTE["di"]["stroke"])
-                    changes += 1
+        changes += _style_extension_group(elem)
 
     # Marker elements (arrowheads)
     for marker in root.iter():
-        marker_tag = marker.tag.split("}")[-1] if "}" in marker.tag else marker.tag
-        if marker_tag != "marker":
+        if _svg_tag_name(marker) != "marker":
             continue
         marker_id = marker.get("id", "")
         for path in marker.iter():
-            path_tag = path.tag.split("}")[-1] if "}" in path.tag else path.tag
-            if path_tag != "path":
+            if _svg_tag_name(path) != "path":
                 continue
-            if "extension" in marker_id.lower():
-                path.set("fill", PALETTE["di"]["stroke"])
-                path.set("stroke", PALETTE["di"]["stroke"])
-                changes += 1
-            elif "composition" in marker_id.lower():
-                path.set("fill", PALETTE["baseline"]["stroke"])
-                path.set("stroke", PALETTE["baseline"]["stroke"])
-                changes += 1
-            elif "aggregation" in marker_id.lower():
-                path.set("fill", "white")
-                path.set("stroke", PALETTE["baseline"]["stroke"])
+            if _style_marker_path(marker_id, path):
                 changes += 1
 
     return changes
