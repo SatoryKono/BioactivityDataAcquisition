@@ -1,20 +1,6 @@
-"""Pipeline Runner.
-
-Application Service that orchestrates pipeline execution lifecycle.
-Coordinates locking, checkpointing, and execution.
-
-Delegates to specialized services (injected directly via DI):
-- LockCoordinator: Runtime locking
-- PreflightService: Infrastructure health validation
-- PostrunService: DQ checks, VACUUM, cleanup
-- MedallionLifecycleService: Medallion layer clearing and vacuum
-- PipelineObserver: Observability wrapper for tracing, metrics, logging
-"""
+"""Pipeline runner orchestration service."""
 
 from __future__ import annotations
-
-__all__ = ["PipelineRunner"]
-
 
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -22,31 +8,17 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core._runner_dependency_support import (
     PipelineRunnerDependencies,
-    load_runner_checkpoint,
     resolve_legacy_runner_dependencies,
 )
+from bioetl.application.core._runner_support import PipelineRunnerSupportMixin
 from bioetl.application.core._span_helpers import (
     build_pipeline_span_attributes,
     start_current_span,
 )
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
-from bioetl.application.core.runner_execution_flow import (
-    execute_pipeline,
-    prepare_medallion_layers,
-    run_execution_cycle,
-    run_managed_pipeline,
-    run_postrun_phase,
-    validate_infrastructure,
-)
 from bioetl.application.core.runner_flow import (
-    extract_checkpoint_offset,
     record_run_failed,
-    record_run_finished,
-    record_run_shutdown,
     record_run_started,
-    record_stage_completed,
-    record_stage_started,
-    resolve_execution_offset,
 )
 
 if TYPE_CHECKING:
@@ -61,8 +33,7 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import LoggerPort, TracingPort
-    from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-
+__all__ = ["PipelineRunner"]
 
 _RUN_FAILURE_EXCEPTIONS = (
     AssertionError,
@@ -75,26 +46,9 @@ _RUN_FAILURE_EXCEPTIONS = (
     ValueError,
 )
 
-_METRICS_CLOSE_EXCEPTIONS = (
-    AttributeError,
-    OSError,
-    RuntimeError,
-    TypeError,
-    ValueError,
-)
 
-
-class PipelineRunner:
-    """Manages the execution lifecycle of a pipeline.
-
-    It coordinates application services like locking and checkpointing,
-    but remains decoupled from the core business logic of the pipeline itself.
-
-    Delegates specialized operations to:
-    - PreflightService: Pre-flight infrastructure validation
-    - PostrunService: Post-run DQ checks, cleanup
-    - MedallionLifecycleService: Pre-run clearing and post-run VACUUM
-    """
+class PipelineRunner(PipelineRunnerSupportMixin):
+    """Run the pipeline lifecycle while preserving stage and observer seams."""
 
     def __init__(
         self,
@@ -109,27 +63,7 @@ class PipelineRunner:
         logger: LoggerPort | None = None,
         **legacy_kwargs: object,
     ) -> None:
-        """Initialize pipeline runner.
-
-        Args:
-            config: Pipeline configuration.
-            runtime: Runtime configuration.
-            services: Common pipeline services.
-            context: Pipeline execution context.
-            executor: Batch executor instance (unified extraction + processing).
-            checkpoint_manager: Checkpoint manager.
-            shutdown_signal: Shutdown signal for graceful termination.
-            logger: Structured logger.
-            lock_manager: Runtime locking manager.
-            preflight: Pre-flight infrastructure validation service.
-            postrun: Post-run DQ checks service.
-            lifecycle_service: Medallion lifecycle service for clearing and vacuum.
-            observer: Pipeline observability wrapper for tracing, metrics, logging.
-            pipeline: Optional pipeline instance.
-            tracer: Tracing port. Build NoOpTracing in composition or tests when
-                tracing is intentionally disabled.
-            logger: Optional logger override; defaults to context.logger.
-        """
+        """Initialize runner collaborators and enforce explicit tracer injection."""
         self._config = config
         self._runtime = runtime
         self._services = services
@@ -251,82 +185,3 @@ class PipelineRunner:
             finally:
                 self._observer.capture_execution_metrics(self.execution_metrics)
         return shutdown_recorded
-
-    def _record_terminal_shutdown(self) -> None:
-        """Append the canonical graceful-shutdown terminal ledger entry."""
-        record_run_shutdown(self)
-
-    def _record_successful_completion(self) -> None:
-        """Append the canonical successful terminal ledger entry."""
-        record_run_finished(self)
-
-    async def _cleanup_after_run(self) -> None:
-        """Run the always-on cleanup sequence for one pipeline run."""
-        try:
-            await self._postrun_service.cleanup(self._tracer)
-        finally:
-            self._close_metrics()
-
-    def _record_stage_started(self, stage: str) -> None:
-        """Append stage_started ledger entry."""
-        record_stage_started(self, stage)
-
-    def _record_stage_completed(self, stage: str) -> None:
-        """Append stage_completed ledger entry."""
-        record_stage_completed(self, stage)
-
-    async def _run_managed_pipeline(self) -> None:
-        """Run the validated pipeline lifecycle within managed contexts."""
-        await run_managed_pipeline(self)
-
-    async def _run_execution_cycle(self) -> None:
-        """Execute extraction, postrun, and checkpoint finalization."""
-        await run_execution_cycle(self)
-
-    async def _resolve_execution_offset(self) -> int | None:
-        """Resolve the executor start offset from runtime overrides or checkpoint."""
-        return await resolve_execution_offset(
-            self,
-            load_runner_checkpoint,
-        )
-
-    def _extract_checkpoint_offset(
-        self,
-        checkpoint_meta: CheckpointMetadata | dict[str, object] | None,
-    ) -> int | None:
-        """Extract the persisted record offset from checkpoint metadata."""
-        return extract_checkpoint_offset(checkpoint_meta)
-
-    async def _execute_pipeline(self, *, offset: int | None) -> None:
-        """Execute the pipeline batch executor with resolved runtime inputs."""
-        await execute_pipeline(self, offset=offset)
-
-    async def _run_postrun_phase(self) -> None:
-        """Run the postrun workflow using the executor's resolved DQ context."""
-        await run_postrun_phase(self)
-
-    # Backward-compatible private methods (delegate to services)
-    async def _validate_infrastructure(self) -> None:
-        """Validate infrastructure health before pipeline execution."""
-        await validate_infrastructure(self)
-
-    async def _prepare_medallion_layers(self) -> None:
-        """Prepare medallion layers (clear based on run type policy)."""
-        await prepare_medallion_layers(self)
-
-    def _check_data_quality(self) -> None:
-        """Check data quality metrics and report anomalies."""
-        self._postrun_service.run_dq_checks(self._executor)
-
-    def _close_metrics(self) -> None:
-        """Close metrics after outer spans and observer teardown have completed."""
-        try:
-            self._services.metrics.close()
-        except _METRICS_CLOSE_EXCEPTIONS as error:
-            self._logger.warning(
-                "Failed to close metrics",
-                stage="cleanup",
-                error=str(error),
-                error_type=type(error).__name__,
-                reason="metrics_close_failed",
-            )
