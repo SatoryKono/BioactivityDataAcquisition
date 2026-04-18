@@ -9,12 +9,17 @@ from __future__ import annotations
 __all__ = ["CleanupPreview", "CleanupResult", "CleanupService", "LayerInfo"]
 
 
+import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.application.core.lifecycle._cleanup_support import (
+    parse_cleanup_preview_parts,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import JsonDict, MetaDict
+from bioetl.domain.types import MetaDict
 
 
 class CleanupStoragePort(Protocol):
@@ -145,31 +150,27 @@ class CleanupService:
         Returns:
             CleanupPreview with information about affected layers.
         """
+        await asyncio.sleep(0)
         # Use sync preview_cleanup from StoragePort
         preview_dict = self._storage.preview_cleanup(
             silver_table=silver_table,
             gold_table=gold_table,
         )
-
-        silver_info = self._parse_layer_info(preview_dict.get("silver", {}))
-        gold_info = None
-        if preview_dict.get("gold"):
-            gold_info = self._parse_layer_info(preview_dict["gold"])
-
-        total_files = preview_dict.get("total_files", 0)
+        silver_parts, gold_parts, total_files = parse_cleanup_preview_parts(preview_dict)
+        preview = CleanupPreview(
+            silver=LayerInfo(*silver_parts),
+            gold=LayerInfo(*gold_parts) if gold_parts is not None else None,
+            total_files=total_files,
+        )
 
         self._logger.debug(
             "cleanup_preview",
             silver_table=silver_table,
             gold_table=gold_table,
-            total_files=total_files,
+            total_files=preview.total_files,
         )
 
-        return CleanupPreview(
-            silver=silver_info,
-            gold=gold_info,
-            total_files=total_files,
-        )
+        return preview
 
     async def execute(
         self,
@@ -205,24 +206,6 @@ class CleanupService:
         self._log_result(silver_table, gold_table, result)
 
         return result
-
-    def _parse_layer_info(
-        self,
-        info_dict: JsonDict,  # Any: values are heterogeneous
-    ) -> LayerInfo:  # Any: values are heterogeneous
-        """Parse layer info from storage preview response.
-
-        Args:
-            info_dict: Dictionary with layer information.
-
-        Returns:
-            LayerInfo dataclass.
-        """
-        return LayerInfo(
-            path=info_dict.get("path", ""),
-            file_count=info_dict.get("file_count", 0),
-            exists=info_dict.get("exists", False),
-        )
 
     def _log_result(
         self,

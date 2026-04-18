@@ -80,6 +80,7 @@ class ShutdownSignal:
         Args:
             reason: Human-readable reason for shutdown.
         """
+        await asyncio.sleep(0)
         if not self._requested:
             self._requested = True
             self._reason = reason

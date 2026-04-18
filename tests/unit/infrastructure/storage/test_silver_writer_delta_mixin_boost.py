@@ -448,6 +448,7 @@ class TestWriteMergeRetrySuccess:
             dt, records, primary_keys, table_path, *, timeout_seconds, merge_schema
         ):
             _ = merge_schema
+            await asyncio.sleep(0)
             raise _MergeExecutionTimeoutError(timeout_seconds)
 
         mock_module = MagicMock()

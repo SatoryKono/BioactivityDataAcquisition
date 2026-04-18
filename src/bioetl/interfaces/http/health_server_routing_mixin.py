@@ -256,6 +256,7 @@ class HealthServerRoutingMixin:
 
     async def _handle_health(self) -> HealthResponse:
         """Handle /health endpoint - overall health status."""
+        await asyncio.sleep(0)
         state_support = cast(_HealthStateSupport, self)
         status = state_support._get_overall_status()
         checks: JsonDict = {  # Any: response payload values are heterogeneous
@@ -274,6 +275,7 @@ class HealthServerRoutingMixin:
 
     async def _handle_liveness(self) -> HealthResponse:
         """Handle /health/live endpoint."""
+        await asyncio.sleep(0)
         return HealthResponse(
             status="healthy",
             timestamp=datetime.now(tz=UTC).isoformat(),
@@ -287,6 +289,7 @@ class HealthServerRoutingMixin:
 
     async def _handle_readiness(self) -> HealthResponse:
         """Handle /health/ready endpoint."""
+        await asyncio.sleep(0)
         if not self._health_monitor:
             return HealthResponse(
                 status="healthy",
@@ -307,6 +310,7 @@ class HealthServerRoutingMixin:
 
     async def _handle_providers(self) -> HealthResponse:
         """Handle /health/providers endpoint."""
+        await asyncio.sleep(0)
         if not self._health_monitor:
             return HealthResponse(
                 status="healthy",

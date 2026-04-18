@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.batch_transformer import BatchTransformContext
     from bioetl.application.core.transformer_runtime.state import BatchTransformState
     from bioetl.domain.config.pipeline import TransformConfig
-    from bioetl.domain.types import GoldRecord
 
 
 from bioetl.application.core.batch_transformer_state import TransformResult
@@ -50,20 +49,7 @@ async def finalize_batch_transform_result(
     flush_filtered_records: callable,
     flush_dq_records: callable,
 ) -> TransformResult:
-    """Finalize batch transform result with DQ checks and record filtering.
-
-    Args:
-        context: Transform context with run metadata
-        config: Pipeline transform configuration
-        batch_metrics: Collected batch metrics
-        state: Current transform state
-        records: Input records to finalize
-        flush_filtered_records: Callback to flush filtered records
-        flush_dq_records: Callback to flush DQ quarantine records
-
-    Returns:
-        Finalized records ready for Silver write
-    """
+    """Finalize one batch result with DQ checks and quarantine flushing."""
     dq_config = getattr(config, "dq_config", None) or getattr(config, "dq", None)
     soft_threshold = _resolve_threshold_value(
         dq_config,
@@ -126,17 +112,13 @@ async def finalize_stream_transform_result(
     *,
     context: BatchTransformContext,
     config: TransformConfig,
-    batch_metrics: BatchMetrics,
+    batch_metrics: BatchMetricsRecorderService,
     state: BatchTransformState,
     records: list[BronzeRecord],
     flush_filtered_records: callable,
     flush_dq_records: callable,
 ) -> TransformResult:
-    """Finalize stream transform result (alias for batch finalization).
-
-    This provides a consistent interface for both batch and stream processing
-    while maintaining separate type signatures for clarity.
-    """
+    """Finalize one streaming result via the shared batch finalizer."""
     return await finalize_batch_transform_result(
         context=context,
         config=config,
@@ -155,17 +137,7 @@ def check_dq_thresholds(
     soft_threshold: float | None,
     hard_threshold: float | None,
 ) -> DQThresholdCheckResult:
-    """Check if error rate exceeds DQ thresholds.
-
-    Args:
-        error_count: Number of errors in batch
-        record_count: Total records in batch
-        soft_threshold: Soft threshold for warnings
-        hard_threshold: Hard threshold for failures
-
-    Returns:
-        Threshold check result with breach classification
-    """
+    """Check whether the current error rate breaches configured thresholds."""
     if record_count == 0:
         return DQThresholdCheckResult(
             breach=ThresholdBreachReason.NONE,
@@ -205,16 +177,7 @@ def classify_dq_threshold_breach(
     soft_threshold: float | None,
     hard_threshold: float | None,
 ) -> ThresholdBreachReason:
-    """Classify threshold breach based on error rate.
-
-    Args:
-        error_rate: Current error rate
-        soft_threshold: Soft threshold for warnings
-        hard_threshold: Hard threshold for failures
-
-    Returns:
-        Threshold breach classification
-    """
+    """Classify the threshold breach for a concrete error rate."""
     if hard_threshold is not None and error_rate >= hard_threshold:
         return ThresholdBreachReason.HARD
 
@@ -228,15 +191,7 @@ ThresholdBreach = ThresholdBreachReason
 
 
 def compute_error_rate(error_count: int, record_count: int) -> float:
-    """Compute error rate from counts.
-
-    Args:
-        error_count: Number of errors
-        record_count: Total records
-
-    Returns:
-        Error rate (0.0 if record_count is 0)
-    """
+    """Compute the error rate, guarding the zero-record case."""
     return error_count / record_count if record_count > 0 else 0.0
 
 
@@ -273,8 +228,8 @@ async def _await_flush_count(flush_callback: callable) -> int:
 
 
 __all__ = [
-    "ThresholdBreach",
     "DQThresholdCheckResult",
+    "ThresholdBreach",
     "check_dq_thresholds",
     "classify_dq_threshold_breach",
     "compute_error_rate",

@@ -164,6 +164,7 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
 
     async def _return_skipped(self, enricher: EnricherConfig) -> EnrichmentResult:
         """Return a skipped result for an enricher."""
+        await asyncio.sleep(0)
         return EnrichmentResult.skipped(
             enricher_name=enricher.pipeline,
             reason=f"Filter condition excluded all records: {enricher.filter_condition}",

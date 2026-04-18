@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -312,7 +313,7 @@ class TestCreateRecordProcessorFromPipeline:
         )
 
         result = create_record_processor_from_pipeline(
-            pipeline=pipeline,
+            pipeline=cast("BasePipeline", pipeline),
             silver_schema=None,
             gold_schema=MagicMock(),
             callbacks=callbacks,
@@ -350,7 +351,7 @@ class TestCreateRecordProcessorFromPipeline:
         )
 
         create_record_processor_from_pipeline(
-            pipeline=pipeline,
+            pipeline=cast("BasePipeline", pipeline),
             silver_schema=None,
             gold_schema=MagicMock(),
             callbacks=callbacks,

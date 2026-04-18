@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Mapping
 from typing import TypeVar
 
@@ -82,6 +83,7 @@ class SeedKeyResolver:
         Returns:
             The seed_keys DataFrame with canonical join-key normalization applied.
         """
+        await asyncio.sleep(0)
         del dep_config_lookup, delta_reader
         normalized_keys = normalize_join_key_dataframe_columns(
             df=seed_keys,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -129,6 +130,7 @@ class JoinPlannerService(JoinPlannerDelegationMixin):
         Returns:
             Merged DataFrame with all available enricher data joined to the seed frame.
         """
+        await asyncio.sleep(0)
         merged = seed_df
         for enricher in enrichers:
             enricher_df = enricher_dfs.get(enricher.pipeline)

@@ -6,6 +6,7 @@ improve xdist balancing while preserving test behavior 1:1.
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -518,8 +519,6 @@ class TestCircuitBreakerPortConcurrentAccess:
     @pytest.mark.asyncio
     async def test_concurrent_calls_track_failures_correctly(self) -> None:
         """Concurrent failing calls MUST track failure count correctly."""
-        import asyncio
-
         from bioetl.infrastructure.adapters.http.circuit_breaker import (
             CircuitBreakerGuard,
         )
@@ -565,6 +564,7 @@ class TestCircuitBreakerPortConcurrentAccess:
             return await breaker.call(self._async_success)
 
         async def _async_success():
+            await asyncio.sleep(0)
             return "success"
 
         self._async_success = _async_success

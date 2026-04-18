@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import cast
 
 import polars as pl
@@ -104,6 +105,7 @@ class _CompositeRunnerStageEnrichmentMixin:
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
         """Log skipped enrichment stage and keep checkpoint state unchanged."""
+        await asyncio.sleep(0)
         self._logger.info(
             "No enrichers to run, skipping enrichment stage",
             composite=self._config.name,

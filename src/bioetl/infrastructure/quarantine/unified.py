@@ -204,6 +204,7 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         Returns:
             List of quarantine record dicts with payload, error, and status fields.
         """
+        await asyncio.sleep(0)
         return inspect_records(
             self.base_path, None, pipeline, limit, error_code, run_id, dq_status
         )
@@ -325,7 +326,9 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         Returns:
             Dict with counts by error code, status distribution, and totals.
         """
+        await asyncio.sleep(0)
         return get_statistics(self.base_path, None, pipeline, error_code, run_id)
 
     async def aclose(self) -> None:
         """Close resources."""
+        await asyncio.sleep(0)

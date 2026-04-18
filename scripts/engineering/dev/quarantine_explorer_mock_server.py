@@ -218,6 +218,7 @@ class MockQuarantineExplorerService:
         offset: int = 0,
         sort: str = "ingestion_ts_desc",
     ) -> JsonDict:
+        await asyncio.sleep(0)
         rows = self._scoped_rows(
             pipeline=pipeline,
             run_type=run_type,
@@ -247,6 +248,7 @@ class MockQuarantineExplorerService:
         payload_hash: str,
         pipeline: str | None = None,
     ) -> JsonDict | None:
+        await asyncio.sleep(0)
         rows = self._scoped_rows(
             pipeline=pipeline,
             run_type=None,
@@ -279,6 +281,7 @@ class MockQuarantineExplorerService:
         from_ts: str | None = None,
         to_ts: str | None = None,
     ) -> JsonDict:
+        await asyncio.sleep(0)
         rows = self._scoped_rows(
             pipeline=pipeline,
             run_type=run_type,
@@ -351,6 +354,7 @@ class MockQuarantineExplorerService:
         from_ts: str | None = None,
         to_ts: str | None = None,
     ) -> JsonDict:
+        await asyncio.sleep(0)
         rows = self._scoped_rows(
             pipeline=pipeline,
             run_type=run_type,

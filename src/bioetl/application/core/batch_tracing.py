@@ -1,20 +1,16 @@
-"""Batch Tracing Manager for ETL pipeline observability.
-
-Extracted from BatchExecutor to reduce class size and improve separation of concerns.
-Handles all OpenTelemetry span management for batch processing operations.
-
-Responsibilities:
-- Create and manage root execution spans
-- Create per-batch spans with proper nesting
-- Create per-layer spans (transform, write_bronze, write_silver, write_gold)
-- Record span attributes and exceptions
-- Handle span lifecycle (enter/exit/error)
-"""
+"""Batch tracing orchestration for ETL pipeline observability."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core._batch_tracing_support import (
+    build_batch_span_attributes,
+    build_execution_span_attributes,
+    build_layer_span_attributes,
+    set_execution_stats_attributes,
+    set_record_result_attributes,
+)
 from bioetl.application.core._span_helpers import close_span, close_span_with_shutdown
 
 if TYPE_CHECKING:
@@ -28,14 +24,7 @@ if TYPE_CHECKING:
 
 
 class BatchTracingManagerService:
-    """Manages tracing spans for batch ETL operations.
-
-    Provides methods to create, configure, and close OpenTelemetry spans
-    for pipeline execution, batch processing, and layer operations.
-
-    All methods are safe to call with NoOpTracing - they return None spans
-    that are safely ignored throughout the codebase.
-    """
+    """Manage execution, batch, and layer spans for pipeline runs."""
 
     TRACER_NAME = "bioetl.batch_executor"
 
@@ -47,17 +36,7 @@ class BatchTracingManagerService:
         initial_batch_size: int,
         adaptive_sizing_enabled: bool,
     ) -> None:
-        """Initialize batch tracing manager.
-
-        Args:
-            tracer: OpenTelemetry tracer port. Build NoOpTracing in composition or
-                tests when tracing is intentionally disabled.
-            context: Pipeline execution context.
-            config: Record processor configuration.
-            initial_batch_size: Initial batch size for tracking.
-            adaptive_sizing_enabled: Whether adaptive batch sizing is enabled.
-
-        """
+        """Initialize the tracing manager with explicit tracer injection."""
         if tracer is None:
             raise TypeError(
                 "BatchTracingManagerService requires explicit tracer injection. "
@@ -70,25 +49,19 @@ class BatchTracingManagerService:
         self._adaptive_sizing_enabled = adaptive_sizing_enabled
 
     def start_execution_span(self) -> Span | None:
-        """Start root tracing span for pipeline execution.
-
-        Returns:
-            OpenTelemetry span context or None if tracing disabled.
-
-        """
+        """Start the root pipeline execution span."""
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
         span = cast(
             "Span",
             otel_tracer.start_as_current_span(
                 "pipeline_execution",
-                attributes={
-                    "bioetl.pipeline": self._config.pipeline_name or "unknown",
-                    "bioetl.run_id": str(self._context.run_id),
-                    "bioetl.entity_type": self._config.entity_type,
-                    "bioetl.run_type": self._context.run_type.value,
-                    "bioetl.adaptive_batch_sizing": self._adaptive_sizing_enabled,
-                    "bioetl.initial_batch_size": self._initial_batch_size,
-                },
+                attributes=build_execution_span_attributes(
+                    pipeline_name=self._config.pipeline_name,
+                    entity_type=self._config.entity_type,
+                    context=self._context,
+                    adaptive_batch_sizing_enabled=self._adaptive_sizing_enabled,
+                    initial_batch_size=self._initial_batch_size,
+                ),
             ),
         )
         span.__enter__()
@@ -97,29 +70,19 @@ class BatchTracingManagerService:
     def start_batch_span(
         self, batch_id: BatchID, record_count: int, start_index: int
     ) -> Span | None:
-        """Start tracing span for a batch.
-
-        Args:
-            batch_id: Unique identifier for the batch.
-            record_count: Number of records in the batch.
-            start_index: Starting index of records in this batch.
-
-        Returns:
-            OpenTelemetry span context or None if tracing disabled.
-
-        """
+        """Start a tracing span for one batch."""
         otel_tracer = self._tracer.get_tracer(self.TRACER_NAME)
         span = cast(
             "Span",
             otel_tracer.start_as_current_span(
                 f"batch_{batch_id}",
-                attributes={
-                    "bioetl.batch_id": str(batch_id),
-                    "bioetl.record_count": record_count,
-                    "bioetl.run_type": self._context.run_type.value,
-                    "bioetl.entity_type": self._config.entity_type,
-                    "bioetl.start_index": start_index,
-                },
+                attributes=build_batch_span_attributes(
+                    batch_id=batch_id,
+                    record_count=record_count,
+                    run_type=self._context.run_type.value,
+                    entity_type=self._config.entity_type,
+                    start_index=start_index,
+                ),
             ),
         )
         span.__enter__()
@@ -132,24 +95,16 @@ class BatchTracingManagerService:
         count: int,
         input_count: bool = False,
     ) -> Span:
-        """Start a tracing span for a layer operation.
-
-        Args:
-            name: Name of the layer operation (e.g., "write_bronze", "transform").
-            batch_id: Unique identifier for the batch.
-            count: Number of records for this operation.
-            input_count: If True, use "input_count" attribute; else "record_count".
-
-        Returns:
-            OpenTelemetry span context.
-
-        """
-        count_key = "bioetl.input_count" if input_count else "bioetl.record_count"
-        attrs = {"bioetl.batch_id": str(batch_id), count_key: count}
+        """Start a tracing span for one layer operation."""
         span = cast(
             "Span",
             self._tracer.get_tracer(self.TRACER_NAME).start_as_current_span(
-                name, attributes=attrs
+                name,
+                attributes=build_layer_span_attributes(
+                    batch_id=batch_id,
+                    count=count,
+                    input_count=input_count,
+                ),
             ),
         )
         span.__enter__()
@@ -167,29 +122,20 @@ class BatchTracingManagerService:
         batch_size_reductions: int,
         min_batch_size_used: int,
     ) -> None:
-        """Set final statistics on the execution span.
-
-        Args:
-            span: The execution span to update.
-            total_fetched: Total records fetched from source.
-            total_bronze: Total records written to Bronze.
-            total_silver: Total records written to Silver.
-            total_gold: Total records written to Gold.
-            total_quarantined: Total records quarantined.
-            batch_size_reductions: Number of batch size reductions.
-            min_batch_size_used: Minimum batch size used during execution.
-
-        """
+        """Set final execution statistics on the root span."""
         if not span:
             return
 
-        span.set_attribute("bioetl.total_fetched", total_fetched)
-        span.set_attribute("bioetl.total_bronze", total_bronze)
-        span.set_attribute("bioetl.total_silver", total_silver)
-        span.set_attribute("bioetl.total_gold", total_gold)
-        span.set_attribute("bioetl.total_quarantined", total_quarantined)
-        span.set_attribute("bioetl.batch_size_reductions", batch_size_reductions)
-        span.set_attribute("bioetl.min_batch_size_used", min_batch_size_used)
+        set_execution_stats_attributes(
+            span,
+            total_fetched=total_fetched,
+            total_bronze=total_bronze,
+            total_silver=total_silver,
+            total_gold=total_gold,
+            total_quarantined=total_quarantined,
+            batch_size_reductions=batch_size_reductions,
+            min_batch_size_used=min_batch_size_used,
+        )
 
     def set_batch_result(
         self,
@@ -200,23 +146,17 @@ class BatchTracingManagerService:
         gold_count: int,
         quarantined_count: int,
     ) -> None:
-        """Set batch result attributes on span.
-
-        Args:
-            span: The batch span to update.
-            bronze_count: Records written to Bronze.
-            silver_count: Records written to Silver.
-            gold_count: Records written to Gold.
-            quarantined_count: Records quarantined.
-
-        """
+        """Set batch result counters on a batch span."""
         if not span:
             return
 
-        span.set_attribute("bioetl.bronze_count", bronze_count)
-        span.set_attribute("bioetl.silver_count", silver_count)
-        span.set_attribute("bioetl.gold_count", gold_count)
-        span.set_attribute("bioetl.quarantined_count", quarantined_count)
+        set_record_result_attributes(
+            span,
+            bronze_count=bronze_count,
+            silver_count=silver_count,
+            gold_count=gold_count,
+            quarantined_count=quarantined_count,
+        )
 
     def set_transform_result(
         self,
@@ -226,39 +166,23 @@ class BatchTracingManagerService:
         gold_count: int,
         quarantined_count: int,
     ) -> None:
-        """Set transform result attributes on span.
-
-        Args:
-            span: The transform span to update.
-            silver_count: Records transformed to Silver.
-            gold_count: Records transformed to Gold.
-            quarantined_count: Records quarantined during transform.
-
-        """
+        """Set transform result counters on a transform span."""
         if not span:
             return
 
-        span.set_attribute("bioetl.silver_count", silver_count)
-        span.set_attribute("bioetl.gold_count", gold_count)
-        span.set_attribute("bioetl.quarantined_count", quarantined_count)
+        set_record_result_attributes(
+            span,
+            silver_count=silver_count,
+            gold_count=gold_count,
+            quarantined_count=quarantined_count,
+        )
 
     def end_span(self, span: Span | None, error: Exception | None = None) -> None:
-        """End a tracing span.
-
-        Args:
-            span: The span to end.
-            error: Optional exception to record on the span.
-
-        """
+        """End a tracing span and optionally record an error."""
         close_span(cast("_ClosableSpan | None", span), error)
 
     def end_span_with_shutdown(self, span: Span | None) -> None:
-        """End span marking it as shutdown.
-
-        Args:
-            span: The span to end with shutdown marker.
-
-        """
+        """End a tracing span with shutdown markers."""
         close_span_with_shutdown(cast("_ClosableSpan | None", span))
 
 

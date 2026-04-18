@@ -19,6 +19,7 @@ __all__ = ["FileAuditAdapter"]
 
 
 import asyncio
+import asyncio
 import time
 from datetime import datetime
 from pathlib import Path
@@ -321,6 +322,7 @@ class FileAuditAdapter:
 
         This method is idempotent (safe to call multiple times).
         """
+        await asyncio.sleep(0)
         with self._tracer.start_as_current_span("audit.close") as span:
             span.set_attribute("bioetl.audit.already_closed", self._closed)
             if self._closed:

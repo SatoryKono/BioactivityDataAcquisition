@@ -6,6 +6,7 @@ Covers:
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -133,6 +134,7 @@ class TestFetchFlowExecute:
         call_order: list[str] = []
 
         async def track_acquire() -> None:
+            await asyncio.sleep(0)
             call_order.append("acquire")
 
         async def track_cb_call(*args: object, **kwargs: object) -> list[object]:

@@ -47,13 +47,7 @@ class BatchCheckpointRecoveryService:
         resume_offset: int,
         checkpoint_interval: int,
     ) -> None:
-        """Save periodic checkpoint when interval threshold is reached.
-
-        Args:
-            records_fetched: Number of records fetched in the current run.
-            resume_offset: Number of records already processed before resuming.
-            checkpoint_interval: Frequency (in records) at which checkpoints are saved.
-        """
+        """Save a periodic checkpoint when the interval threshold is reached."""
         if records_fetched % checkpoint_interval != 0:
             return
         total = self._total_processed(records_fetched, resume_offset)
@@ -66,13 +60,7 @@ class BatchCheckpointRecoveryService:
         resume_offset: int,
         error: BaseException,
     ) -> None:
-        """Persist checkpoint on runtime exception for future resume.
-
-        Args:
-            records_fetched: Number of records fetched before the exception occurred.
-            resume_offset: Number of records already processed before the current run.
-            error: Exception that triggered checkpoint saving, used for log context.
-        """
+        """Persist a recovery checkpoint after a runtime exception."""
         try:
             total = self._total_processed(records_fetched, resume_offset)
             if total <= 0:
@@ -102,12 +90,7 @@ class BatchCheckpointRecoveryService:
         records_fetched: int,
         resume_offset: int,
     ) -> None:
-        """Persist emergency checkpoint during graceful shutdown.
-
-        Args:
-            records_fetched: Number of records fetched before shutdown was requested.
-            resume_offset: Number of records already processed before the current run.
-        """
+        """Persist an emergency checkpoint during graceful shutdown."""
         try:
             total = self._total_processed(records_fetched, resume_offset)
             await self._save_checkpoint(total, operation="shutdown")
@@ -125,18 +108,13 @@ class BatchCheckpointRecoveryService:
         records_fetched: int,
         resume_offset: int,
     ) -> None:
-        """Persist checkpoint immediately without internal recovery handling.
-
-        Args:
-            records_fetched: Number of records fetched in the current run.
-            resume_offset: Number of records already processed before the current run.
-        """
+        """Persist a checkpoint immediately without recovery wrappers."""
         total = self._total_processed(records_fetched, resume_offset)
         await self._save_checkpoint(total, operation="manual")
 
     @staticmethod
     def _total_processed(records_fetched: int, resume_offset: int) -> int:
-        """Calculate total processed records including resume offset."""
+        """Calculate total processed records including the resume offset."""
         return resume_offset + records_fetched
 
     def _emit_checkpoint_save_event(self, *, operation: str, status: str) -> None:

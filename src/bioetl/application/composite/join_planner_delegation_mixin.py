@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -144,6 +145,7 @@ class JoinPlannerDelegationMixin:
         seed_pipeline: str | None = None,
     ) -> pl.DataFrame:
         """Apply configured dependency joins to merged DataFrame."""
+        await asyncio.sleep(0)
         return self._dependency_joiner.apply_dependency_joins(
             merged_df=merged_df,
             dependency_dfs=dependency_dfs,

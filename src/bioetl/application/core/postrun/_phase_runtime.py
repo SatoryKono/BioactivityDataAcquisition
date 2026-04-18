@@ -31,7 +31,7 @@ _ResultT = TypeVar("_ResultT")
 
 @dataclass(frozen=True, slots=True)
 class PostrunPhaseCompletion:
-    """Phase success metadata for tracing and bounded observability."""
+    """Success metadata for one postrun phase."""
 
     status: str
     span_attributes: dict[str, object]
@@ -40,7 +40,7 @@ class PostrunPhaseCompletion:
 
 
 def resolve_postrun_phase_log_level(status: str) -> PostrunLogLevel:
-    """Map bounded postrun status values to structured log levels."""
+    """Map bounded postrun statuses to structured log levels."""
     if status == "failed":
         return "error"
     if status == "warning":
@@ -61,7 +61,7 @@ def emit_postrun_phase_observability(
     level: PostrunLogLevel | None = None,
     **extra: object,
 ) -> None:
-    """Emit bounded metrics and structured logs for one postrun subphase."""
+    """Emit bounded metrics and logs for one postrun subphase."""
     labels = {
         "pipeline": pipeline_name,
         "phase": phase,
@@ -196,7 +196,7 @@ def run_sync_postrun_phase(
 
 
 def describe_dq_phase(result: DQResult) -> PostrunPhaseCompletion:
-    """Build tracing/logging metadata for the DQ phase."""
+    """Describe tracing and logging metadata for the DQ phase."""
     return PostrunPhaseCompletion(
         status=result.status.value,
         span_attributes={
@@ -214,7 +214,7 @@ def describe_dq_phase(result: DQResult) -> PostrunPhaseCompletion:
 
 
 def describe_compaction_phase(result: CompactionResult) -> PostrunPhaseCompletion:
-    """Build tracing/logging metadata for the compaction phase."""
+    """Describe tracing and logging metadata for the compaction phase."""
     span_attributes: dict[str, object] = {
         "bioetl.compaction_status": result.status,
         "bioetl.compaction_duplicates_removed": result.duplicates_removed,
@@ -235,7 +235,7 @@ def describe_compaction_phase(result: CompactionResult) -> PostrunPhaseCompletio
 def describe_dq_report_phase(
     result: DQReportResult | None,
 ) -> PostrunPhaseCompletion:
-    """Build tracing/logging metadata for the DQ report phase."""
+    """Describe tracing and logging metadata for the DQ report phase."""
     return PostrunPhaseCompletion(
         status="generated" if result and result.any_generated else "skipped",
         span_attributes={
@@ -250,7 +250,7 @@ def describe_dq_report_phase(
 
 
 def describe_vacuum_phase(result: VacuumResult) -> PostrunPhaseCompletion:
-    """Build tracing/logging metadata for the VACUUM phase."""
+    """Describe tracing and logging metadata for the VACUUM phase."""
     return PostrunPhaseCompletion(
         status="skipped" if result.skipped else "success",
         span_attributes={
@@ -271,7 +271,7 @@ def describe_final_metadata_phase(
     wrote_metadata: bool,
     dq_reports: DQReportResult | None,
 ) -> PostrunPhaseCompletion:
-    """Build tracing/logging metadata for the final-metadata phase."""
+    """Describe tracing and logging metadata for the final-metadata phase."""
     return PostrunPhaseCompletion(
         status="success" if wrote_metadata else "skipped",
         span_attributes={

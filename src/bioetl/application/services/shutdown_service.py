@@ -107,6 +107,7 @@ class ShutdownService:
             Idempotent - multiple calls have no additional effect.
             First call sets the reason, subsequent calls are ignored.
         """
+        await asyncio.sleep(0)
         if self._requested:
             return  # Already shutting down, ignore
 
