@@ -456,6 +456,7 @@ class TestExecutePipeline:
 
         def _run_pipeline(_prepared: RunExecutionRequest) -> object:
             async def _inner() -> RunResult:
+                await asyncio.sleep(0)
                 return _make_result()
 
             coro = _inner()

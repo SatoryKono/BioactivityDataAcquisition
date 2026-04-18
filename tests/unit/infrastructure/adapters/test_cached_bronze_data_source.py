@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -38,6 +39,7 @@ class _FakeBronzeReader:
     async def list_batches(
         self, provider: str, entity: str, date: datetime | None = None
     ) -> list[str]:
+        await asyncio.sleep(0)
         self.list_batches_calls.append((provider, entity, date))
         return list(self._batches)
 

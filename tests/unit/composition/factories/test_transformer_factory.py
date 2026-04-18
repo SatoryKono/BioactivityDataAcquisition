@@ -5,6 +5,7 @@ These tests verify the transformer factory for DI-based transformer creation.
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -23,7 +24,7 @@ from bioetl.composition.factories.transformer_factory import (
 
 
 @pytest.fixture(autouse=True)
-def clean_registry() -> None:
+def clean_registry() -> Generator[None, None, None]:
     """Clean the registry before and after each test."""
     _TRANSFORMER_REGISTRY.clear()
     yield

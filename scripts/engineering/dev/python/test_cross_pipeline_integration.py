@@ -3,6 +3,7 @@
 
 import sys
 import os
+from typing import Callable, cast
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -146,15 +147,17 @@ def test_edge_cases():
     print("\n=== Testing Edge Cases ===")
     
     # Case normalization edge cases
-    assert normalize_cross_pipeline_case(None, "uppercase") is None
-    assert normalize_cross_pipeline_case(123, "uppercase") is None
+    normalize_case = cast(Callable[[object, str], object], normalize_cross_pipeline_case)
+    normalize_ontology = cast(Callable[[object], object], normalize_ontology_id)
+    assert normalize_case(None, "uppercase") is None
+    assert normalize_case(123, "uppercase") is None
     assert normalize_cross_pipeline_case("", "uppercase") is None  # Empty string becomes None
     assert normalize_cross_pipeline_case("  ", "uppercase") is None  # Whitespace becomes None
     print("✓ Case normalization edge cases handled")
     
     # Ontology ID edge cases
-    assert normalize_ontology_id(None) is None
-    assert normalize_ontology_id(123) is None
+    assert normalize_ontology(None) is None
+    assert normalize_ontology(123) is None
     assert normalize_ontology_id("") is None
     assert normalize_ontology_id("  ") is None
     print("✓ Ontology ID edge cases handled")

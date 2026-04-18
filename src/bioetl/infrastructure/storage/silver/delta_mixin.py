@@ -8,22 +8,19 @@ from typing import TYPE_CHECKING, Any
 
 import pyarrow as pa
 
-from bioetl.infrastructure.storage.delta.resilience import (
-    DEFAULT_SILVER_MERGE_POLICY,
-    SilverMergeResiliencePolicy,
-)
+from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.silver.delta_helpers import (
-    _build_dispatch_policy,
     _DeltaWriteRequest,
-    _dispatch_request_by_mode,
-    _dispatch_request_with_domain_errors,
-    _merge_records_with_timeout,
-    _write_plain_delta_request,
 )
-from bioetl.infrastructure.storage.silver.merge_resilience_helpers import (
-    _emit_merge_final_event,
-    _emit_merge_retry_event,
-    _execute_merge_write_request,
+from bioetl.infrastructure.storage.silver.operations.delta_operations import (
+    _dispatch_write_impl,
+    _dispatch_write_with_domain_errors_impl,
+    _emit_merge_final_telemetry_impl,
+    _emit_merge_retry_telemetry_impl,
+    _merge_records_impl,
+    _write_append_impl,
+    _write_delete_impl,
+    _write_merge_impl,
 )
 
 if TYPE_CHECKING:
@@ -56,58 +53,28 @@ class SilverWriterDeltaMixin:
         request: _DeltaWriteRequest,
     ) -> None:
         """Write data in delete mode (overwrite table)."""
-        await _write_plain_delta_request(
-            load_module=self._load_silver_writer_module,
-            request=request,
-            mode="overwrite",
-            schema_mode="overwrite",
-        )
+        await _write_delete_impl(self, request)
 
     async def _write_append(
         self,
         request: _DeltaWriteRequest,
     ) -> None:
         """Write data in append mode."""
-        await _write_plain_delta_request(
-            load_module=self._load_silver_writer_module,
-            request=request,
-            mode="append",
-            schema_mode=request.schema_mode,
-        )
+        await _write_append_impl(self, request)
 
     async def _write_merge(
         self,
         request: _DeltaWriteRequest,
     ) -> None:
         """Write data using merge/upsert strategy with conflict retry."""
-        await _execute_merge_write_request(
-            request=request,
-            policy=getattr(
-                self,
-                "_merge_resilience_policy",
-                DEFAULT_SILVER_MERGE_POLICY,
-            ),
-            load_module=self._load_silver_writer_module,
-            write_append=self._write_append,
-            merge_records=self._merge_records,
-            emit_final=self._emit_merge_final_telemetry,
-            emit_retry=self._emit_merge_retry_telemetry,
-            logger=self._logger,
-        )
+        await _write_merge_impl(self, request)
 
     async def _dispatch_write(
         self,
         request: _DeltaWriteRequest,
     ) -> None:
         """Dispatch write call by mode."""
-        await _dispatch_request_by_mode(
-            request=request,
-            policy=_build_dispatch_policy(
-                write_delete=self._write_delete,
-                write_append=self._write_append,
-                write_merge=self._write_merge,
-            ),
-        )
+        await _dispatch_write_impl(self, request)
 
     async def _merge_records(
         self,
@@ -120,12 +87,12 @@ class SilverWriterDeltaMixin:
         merge_schema: bool = False,
     ) -> None:
         """Merge records into an existing Delta table."""
-        await _merge_records_with_timeout(
-            logger=self._logger,
-            dt=dt,
-            records=records,
-            primary_keys=primary_keys,
-            table_path=table_path,
+        await _merge_records_impl(
+            self,
+            dt,
+            records,
+            primary_keys,
+            table_path,
             timeout_seconds=timeout_seconds,
             merge_schema=merge_schema,
         )
@@ -140,9 +107,8 @@ class SilverWriterDeltaMixin:
         delay_seconds: float,
     ) -> None:
         """Emit telemetry for a merge retry attempt."""
-        _emit_merge_retry_event(
-            logger=self._logger,
-            metrics=self._metrics,
+        _emit_merge_retry_telemetry_impl(
+            self,
             table_path=table_path,
             retry_type=retry_type,
             attempt=attempt,
@@ -154,9 +120,8 @@ class SilverWriterDeltaMixin:
         self, *, table_path: str, final_reason: str
     ) -> None:
         """Emit telemetry when merge retries are exhausted."""
-        _emit_merge_final_event(
-            logger=self._logger,
-            metrics=self._metrics,
+        _emit_merge_final_telemetry_impl(
+            self,
             table_path=table_path,
             final_reason=final_reason,
         )
@@ -168,8 +133,8 @@ class SilverWriterDeltaMixin:
         request: _DeltaWriteRequest,
     ) -> None:
         """Dispatch write and translate infrastructure errors to domain errors."""
-        await _dispatch_request_with_domain_errors(
+        await _dispatch_write_with_domain_errors_impl(
+            self,
             table_name=table_name,
             request=request,
-            dispatch_write=self._dispatch_write,
         )
