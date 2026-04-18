@@ -22,8 +22,8 @@ from bioetl.application.core.batch_processing_support import (
     BatchProcessingSupportService,
 )
 from bioetl.application.core.batch_transformer import TransformResult
-from bioetl.domain.aggregates.events import BatchCreated, BatchSealed
-from bioetl.domain.exceptions import BioETLError
+from bioetl.domain.aggregates.events import BatchCreated, BatchFailed, BatchSealed
+from bioetl.domain.exceptions import BioETLError, SchemaViolationError
 from bioetl.domain.types import BatchID, BronzeRecord, RunType
 
 
@@ -710,6 +710,66 @@ class TestProcessBatchErrorPropagation:
         mock_writer.log_and_track_write_error.assert_called_once()
         call_args = mock_writer.log_and_track_write_error.call_args[0]
         assert call_args[0] == "silver"
+
+    async def test_quarantines_schema_violations_and_emits_batch_failed(
+        self,
+        mock_context,
+        mock_services,
+        mock_config,
+        mock_logger,
+        mock_batch_metrics,
+        mock_transformer,
+        mock_writer,
+        mock_tracing,
+        mock_batch_id_factory,
+    ):
+        """Schema-violating Silver writes should quarantine records and keep flow alive."""
+        mock_transformer.transform_batch = AsyncMock(
+            return_value=_make_transform_result(silver=[{"entity_id": "s1"}], gold=[])
+        )
+        mock_writer.write_silver = AsyncMock(
+            side_effect=SchemaViolationError("silver", ["bad field"])
+        )
+        quarantine_manager = MagicMock()
+        quarantine_manager.quarantine_records = AsyncMock()
+        event_emitter = MagicMock()
+        service = BatchProcessingService(
+            services=mock_services,
+            context=mock_context,
+            config=mock_config,
+            components=BatchProcessingComponents(
+                batch_metrics=mock_batch_metrics,
+                transformer=mock_transformer,
+                writer=mock_writer,
+            ),
+            tracing_manager=mock_tracing,
+            batch_id_factory=mock_batch_id_factory,
+            support_service=BatchProcessingSupportService(
+                services=mock_services,
+                logger=mock_logger,
+                batch_metrics=mock_batch_metrics,
+                transformer=mock_transformer,
+                writer=mock_writer,
+                tracing=mock_tracing,
+                quarantine_manager=quarantine_manager,
+                run_id=mock_context.run_id,
+                domain_event_emitter=event_emitter,
+            ),
+        )
+
+        output = await service.process_batch(
+            records=[{"id": "1"}],
+            start_index=0,
+            query_string=None,
+        )
+
+        assert output.silver_records == [{"entity_id": "s1"}]
+        quarantine_manager.quarantine_records.assert_awaited_once()
+        mock_logger.warning.assert_called_once()
+        emitted_events = [
+            call.args[0] for call in event_emitter.emit_domain_event.call_args_list
+        ]
+        assert any(isinstance(event, BatchFailed) for event in emitted_events)
 
 
 # ---------------------------------------------------------------------------

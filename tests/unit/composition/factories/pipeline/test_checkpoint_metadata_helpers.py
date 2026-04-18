@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from types import SimpleNamespace
+from typing import cast
 from uuid import uuid4
 
 from bioetl.application.services.run_manifest_service import (
@@ -20,6 +21,24 @@ from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
+
+
+def _make_pipeline(**overrides: object) -> object:
+    defaults = {
+        "config": SimpleNamespace(
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity_type="activity",
+        ),
+        "runtime": SimpleNamespace(
+            run_type=RunType.INCREMENTAL,
+            exact_replay=True,
+            cached_bronze=CachedBronzeContext.disabled(),
+        ),
+        "services": SimpleNamespace(metadata_coordinator=None),
+    }
+    defaults.update(overrides)
+    return cast("BasePipeline", SimpleNamespace(**defaults))
 
 
 class _InMemoryRunManifestStore:
@@ -60,12 +79,7 @@ def test_build_current_checkpoint_metadata_includes_resume_anchors(tmp_path) -> 
         dq_contract_compatibility_hash="dq-hash",
         effective_config_artifact_id="artifact-1",
     )
-    pipeline = SimpleNamespace(
-        config=SimpleNamespace(
-            pipeline_name="chembl_activity",
-            provider="chembl",
-            entity_type="activity",
-        ),
+    pipeline = _make_pipeline(
         runtime=SimpleNamespace(
             run_type=RunType.INCREMENTAL,
             exact_replay=True,
@@ -113,12 +127,7 @@ def test_checkpoint_metadata_execution_fingerprint_matches_manifest_contract(
         dq_contract_compatibility_hash="dq-hash",
         effective_config_artifact_id="artifact-1",
     )
-    pipeline = SimpleNamespace(
-        config=SimpleNamespace(
-            pipeline_name="chembl_activity",
-            provider="chembl",
-            entity_type="activity",
-        ),
+    pipeline = _make_pipeline(
         runtime=SimpleNamespace(
             run_type=RunType.INCREMENTAL,
             exact_replay=True,

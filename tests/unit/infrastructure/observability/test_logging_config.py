@@ -5,6 +5,7 @@ Tests the centralized structlog configuration.
 
 from __future__ import annotations
 
+from collections.abc import Generator
 import json
 import logging
 from pathlib import Path
@@ -18,7 +19,7 @@ class TestConfigureLogging:
     """Tests for configure_logging function."""
 
     @pytest.fixture(autouse=True)
-    def reset_config(self) -> None:
+    def reset_config(self) -> Generator[None, None, None]:
         """Reset logging configuration before each test."""
         from bioetl.infrastructure.observability.logging_config import (
             reset_logging_config,
@@ -155,7 +156,7 @@ class TestIsLoggingConfigured:
     """Tests for is_logging_configured function."""
 
     @pytest.fixture(autouse=True)
-    def reset_config(self) -> None:
+    def reset_config(self) -> Generator[None, None, None]:
         """Reset logging configuration before each test."""
         from bioetl.infrastructure.observability.logging_config import (
             reset_logging_config,

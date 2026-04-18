@@ -6,6 +6,7 @@ import os
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
+from typing import cast
 
 import pytest
 
@@ -19,6 +20,32 @@ from bioetl.composition.runtime_builders._run_manifest_support import (
     resolve_replay_capability,
 )
 from bioetl.domain.control_plane import ReplayCapability
+from bioetl.domain.context import PipelineRunContext
+from bioetl.infrastructure.config import Settings
+
+
+def _make_settings(**overrides: object) -> Settings:
+    return cast(Settings, SimpleNamespace(bronze_path=Path("/unused"), **overrides))
+
+
+def _make_run_context(**overrides: object) -> PipelineRunContext:
+    defaults = {
+        "pipeline_name": "chembl_activity",
+        "resume": False,
+        "dry_run": False,
+        "limit": None,
+        "query": None,
+        "start_offset": None,
+        "log_level": "INFO",
+        "ignore_yaml_filter": False,
+        "skip_gold": False,
+        "exact_replay": False,
+        "vacuum": None,
+        "input_filter": None,
+        "cached_bronze": None,
+    }
+    defaults.update(overrides)
+    return cast(PipelineRunContext, SimpleNamespace(**defaults))
 
 
 @pytest.mark.unit
@@ -77,12 +104,8 @@ def test_cached_bronze_snapshot_refs_are_sorted_by_snapshot_identity(
 def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots() -> (
     None
 ):
-    settings = SimpleNamespace(bronze_path=Path("/unused"))
-    ctx = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        query=None,
-        exact_replay=True,
-    )
+    settings = _make_settings()
+    ctx = _make_run_context(query=None, exact_replay=True)
     cached_bronze = SimpleNamespace(
         enabled=True,
         bronze_path="/tmp/does-not-exist",
@@ -142,19 +165,10 @@ def test_resolve_replay_capability_requires_persisted_snapshots_for_exact_replay
 
 @pytest.mark.unit
 def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
-    ctx = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        resume=False,
-        dry_run=False,
+    ctx = _make_run_context(
         limit=10,
         query="assay_type=B",
-        start_offset=None,
-        log_level="INFO",
-        ignore_yaml_filter=False,
-        skip_gold=False,
         exact_replay=True,
-        vacuum=None,
-        input_filter=None,
         cached_bronze=SimpleNamespace(enabled=True),
     )
 
@@ -177,21 +191,7 @@ def test_build_launch_context_snapshot_marks_ordinary_source_boundary() -> None:
 def test_build_launch_context_snapshot_marks_composite_boundary_as_unsupported() -> (
     None
 ):
-    ctx = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        resume=False,
-        dry_run=False,
-        limit=10,
-        query=None,
-        start_offset=None,
-        log_level="INFO",
-        ignore_yaml_filter=False,
-        skip_gold=False,
-        exact_replay=False,
-        vacuum=None,
-        input_filter=None,
-        cached_bronze=None,
-    )
+    ctx = _make_run_context(limit=10)
 
     launch_context = build_launch_context_snapshot(
         ctx,

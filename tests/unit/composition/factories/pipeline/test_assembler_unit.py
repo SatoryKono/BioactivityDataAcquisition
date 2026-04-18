@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,6 +14,32 @@ from bioetl.composition.factories.pipeline.assembler import (
     assemble_runner,
     create_pipeline_factory,
 )
+from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.types import RunType
+from bioetl.infrastructure.config import Settings
+
+
+def _make_runtime(*, strict_gold_validation: bool = False) -> RuntimeConfig:
+    return RuntimeConfig(
+        run_type=RunType.INCREMENTAL,
+        strict_gold_validation=strict_gold_validation,
+    )
+
+
+def _make_settings(**overrides: object) -> Settings:
+    defaults = {"env": "dev", "test_mode": False}
+    defaults.update(overrides)
+    return cast(Settings, SimpleNamespace(**defaults))
+
+
+def _make_observability() -> ObservabilityBundle:
+    return ObservabilityBundle(
+        logger=MagicMock(),
+        tracer=MagicMock(),
+        metrics=MagicMock(),
+        dq_monitor=MagicMock(),
+    )
 
 
 @pytest.mark.unit
@@ -246,14 +273,9 @@ class TestGenericPipelineFactory:
             data_source_creator=MagicMock(),
         )
         factory.create_with_services = MagicMock(return_value=pipeline)  # type: ignore[method-assign]
-        runtime = SimpleNamespace(strict_gold_validation=False)
-        settings = SimpleNamespace(env="dev", test_mode=False)
-        observability = SimpleNamespace(
-            logger=MagicMock(),
-            tracer=MagicMock(),
-            dq_monitor=MagicMock(),
-            metrics=MagicMock(),
-        )
+        runtime = _make_runtime(strict_gold_validation=False)
+        settings = _make_settings(env="dev", test_mode=False)
+        observability = _make_observability()
         filter_config = MagicMock()
         cached_bronze = MagicMock()
 
@@ -311,14 +333,9 @@ class TestGenericPipelineFactory:
             data_source_creator=MagicMock(),
         )
         factory.create_with_services = MagicMock(return_value=pipeline)  # type: ignore[method-assign]
-        runtime = SimpleNamespace(strict_gold_validation=False)
-        settings = SimpleNamespace(env="dev", test_mode=False)
-        observability = SimpleNamespace(
-            logger=MagicMock(),
-            tracer=MagicMock(),
-            dq_monitor=MagicMock(),
-            metrics=MagicMock(),
-        )
+        runtime = _make_runtime(strict_gold_validation=False)
+        settings = _make_settings(env="dev", test_mode=False)
+        observability = _make_observability()
         config = MagicMock()
         filter_config = MagicMock()
         cached_bronze = MagicMock()
@@ -379,14 +396,9 @@ class TestGenericPipelineFactory:
             data_source_creator=MagicMock(),
         )
         factory.create_with_services = MagicMock(return_value=pipeline)  # type: ignore[method-assign]
-        runtime = SimpleNamespace(strict_gold_validation=False)
-        settings = SimpleNamespace(env="prod", test_mode=False)
-        observability = SimpleNamespace(
-            logger=MagicMock(),
-            tracer=MagicMock(),
-            dq_monitor=MagicMock(),
-            metrics=MagicMock(),
-        )
+        runtime = _make_runtime(strict_gold_validation=False)
+        settings = _make_settings(env="prod", test_mode=False)
+        observability = _make_observability()
 
         factory.create_runner(
             run_id="run-2",

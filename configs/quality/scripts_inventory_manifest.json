@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-18T08:48:07.659831+00:00",
+  "generated_at": "2026-04-18T09:05:38.991719+00:00",
   "summary": {
-    "total_scripts": 381,
+    "total_scripts": 383,
     "status_counts": {
-      "active": 279,
+      "active": 281,
       "legacy": 15,
       "orphan": 77,
       "unknown": 10
@@ -528,6 +528,21 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/setup_agents.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/launchers/codex/setup_agents.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "exec bash \"$REPO_ROOT/scripts/ai/codex/setup_agents.sh\" \"$@\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/codex/setup_mcp.py",
       "type": "py",
       "status": "active",
@@ -545,6 +560,21 @@
           "line": 3,
           "source_group": "scripts",
           "text": "# Canonical implementation: scripts/ai/codex/setup_mcp.py"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/setup_skills.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/launchers/codex/setup_skills.sh",
+          "line": 8,
+          "source_group": "scripts",
+          "text": "exec bash \"$REPO_ROOT/scripts/ai/codex/setup_skills.sh\" \"$@\""
         }
       ]
     },
@@ -8925,14 +8955,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 54,
-          "source_group": "scripts",
-          "text": "\"setup-agents\": \"launchers/codex/setup_agents.sh\","
-        },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
           "line": 20,
@@ -9003,14 +9027,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ops/__main__.py",
-          "line": 56,
-          "source_group": "scripts",
-          "text": "\"setup-skills\": \"launchers/codex/setup_skills.sh\","
-        },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
           "line": 43,

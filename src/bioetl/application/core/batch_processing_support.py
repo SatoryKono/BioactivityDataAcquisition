@@ -9,6 +9,11 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, TypeVar
 
+from bioetl.application.core._batch_write_support import (
+    emit_batch_written,
+    emit_domain_event,
+    safe_write_layer,
+)
 from bioetl.application.core.batch_processing_runtime import (
     build_bronze_refs,
     execute_transform_with_span,
@@ -23,14 +28,10 @@ from bioetl.application.core.batch_runtime_failure_policy import (
     PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.batch_transformer import TransformResult
-from bioetl.application.core.quarantine_manager import (
-    DQQuarantineEntry,
-    QuarantineManagerService,
-)
-from bioetl.domain.aggregates.events import BatchFailed, BatchWritten, DomainEvent
-from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
+from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata
-from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, RunID
+from bioetl.domain.types import BatchID, BronzeRecord, RunID
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -44,7 +45,6 @@ if TYPE_CHECKING:
         DomainEventEmitterPort,
     )
     from bioetl.domain.ports import LoggerPort
-    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 
 _ResultT = TypeVar("_ResultT")
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
@@ -65,7 +65,7 @@ class BatchProcessingSupportService:
         tracing: BatchTracingManagerService,
         quarantine_manager: QuarantineManagerService,
         run_id: RunID | None = None,
-        domain_event_emitter: DomainEventEmitter | None = None,
+        domain_event_emitter: DomainEventEmitterPort | None = None,
     ) -> None:
         """Store shared collaborators for one batch-processing family slice."""
         self._services = services
@@ -114,16 +114,14 @@ class BatchProcessingSupportService:
         )
         self._batch_metrics.track_batch_size("bronze", len(records))
         self._batch_metrics.track_processed_records("bronze", len(records))
-        if self._run_id is not None:
-            self.emit_domain_event(
-                BatchWritten(
-                    occurred_at=ingestion_ts,
-                    run_id=self._run_id,
-                    batch_id=batch_id,
-                    layer="bronze",
-                    record_count=len(records),
-                )
-            )
+        emit_batch_written(
+            emitter=self._domain_event_emitter,
+            run_id=self._run_id,
+            batch_id=batch_id,
+            layer="bronze",
+            record_count=len(records),
+            occurred_at=ingestion_ts,
+        )
         return result
 
     async def transform_and_track_metrics(
@@ -162,105 +160,42 @@ class BatchProcessingSupportService:
 
         if transform_result.silver_records:
             write_coros.append(
-                self._safe_write_layer(
-                    "silver",
-                    transform_result.silver_records,
-                    batch_id,
-                    ingestion_ts,
-                    bronze_refs,
+                safe_write_layer(
+                    execute_with_span=self._execute_with_span,
+                    writer=self._writer,
+                    quarantine_manager=self._quarantine_manager,
+                    logger=self._logger,
+                    run_id=self._run_id,
+                    domain_event_emitter=self._domain_event_emitter,
+                    layer="silver",
+                    records=transform_result.silver_records,
+                    batch_id=batch_id,
+                    ingestion_ts=ingestion_ts,
+                    bronze_refs=bronze_refs,
+                    operation_errors=_OPERATION_ERRORS,
                 )
             )
 
         if transform_result.gold_records:
             write_coros.append(
-                self._safe_write_layer(
-                    "gold",
-                    transform_result.gold_records,
-                    batch_id,
-                    ingestion_ts,
-                    None,
+                safe_write_layer(
+                    execute_with_span=self._execute_with_span,
+                    writer=self._writer,
+                    quarantine_manager=self._quarantine_manager,
+                    logger=self._logger,
+                    run_id=self._run_id,
+                    domain_event_emitter=self._domain_event_emitter,
+                    layer="gold",
+                    records=transform_result.gold_records,
+                    batch_id=batch_id,
+                    ingestion_ts=ingestion_ts,
+                    bronze_refs=None,
+                    operation_errors=_OPERATION_ERRORS,
                 )
             )
 
         if write_coros:
             await asyncio.gather(*write_coros)
-
-    async def _safe_write_layer(
-        self,
-        layer: str,
-        records: list[dict[str, object]],
-        batch_id: BatchID,
-        ingestion_ts: datetime,
-        bronze_refs: list[BronzeWriteResult] | None,
-    ) -> None:
-        """Execute layer write and quarantine records on SchemaViolationError."""
-        try:
-            if layer == "silver":
-                await self._execute_with_span(
-                    "write_silver",
-                    self._writer.write_silver(
-                        records,
-                        batch_id,
-                        ingestion_ts,
-                        bronze_refs=bronze_refs,
-                    ),
-                    batch_id,
-                    len(records),
-                    on_error=lambda error: self._writer.log_and_track_write_error(
-                        "silver", error, batch_id
-                    ),
-                )
-            else:
-                await self._execute_with_span(
-                    "write_gold",
-                    self._writer.write_gold(records),
-                    batch_id,
-                    len(records),
-                    on_error=lambda error: self._writer.log_and_track_write_error(
-                        "gold", error, batch_id
-                    ),
-                )
-            if self._run_id is not None:
-                self.emit_domain_event(
-                    BatchWritten(
-                        occurred_at=ingestion_ts,
-                        run_id=self._run_id,
-                        batch_id=batch_id,
-                        layer=layer,
-                        record_count=len(records),
-                    )
-                )
-        except SchemaViolationError as e:
-            self._emit_batch_failed(
-                batch_id=batch_id,
-                layer=layer,
-                error=e,
-                occurred_at=ingestion_ts,
-            )
-            self._logger.warning(
-                "schema_violation_quarantined",
-                layer=layer,
-                errors=e.errors,
-            )
-            entries = [
-                DQQuarantineEntry(
-                    record=rec,
-                    error_type=ErrorType.SCHEMA_VIOLATION,
-                    error_details=f"Schema violation in {layer}: {e.errors}",
-                )
-                for rec in records
-            ]
-            await self._quarantine_manager.quarantine_records(
-                entries, batch_id, ingestion_ts=ingestion_ts
-            )
-        except _OPERATION_ERRORS as error:
-            self._emit_batch_failed(
-                batch_id=batch_id,
-                layer=layer,
-                error=error,
-                occurred_at=ingestion_ts,
-            )
-            raise
 
     def finalize_batch_span(
         self,
@@ -335,28 +270,4 @@ class BatchProcessingSupportService:
 
     def emit_domain_event(self, event: DomainEvent) -> None:
         """Best-effort publish of one typed domain event."""
-        if self._domain_event_emitter is None:
-            return
-        self._domain_event_emitter.emit_domain_event(event)
-
-    def _emit_batch_failed(
-        self,
-        *,
-        batch_id: BatchID,
-        layer: str,
-        error: Exception,
-        occurred_at: datetime,
-    ) -> None:
-        """Publish a typed batch-failed event before bubbling the error."""
-        if self._run_id is None:
-            return
-        self.emit_domain_event(
-            BatchFailed(
-                occurred_at=occurred_at,
-                run_id=self._run_id,
-                batch_id=batch_id,
-                layer=layer,
-                error=str(error),
-                error_type=type(error).__name__,
-            )
-        )
+        emit_domain_event(self._domain_event_emitter, event)
