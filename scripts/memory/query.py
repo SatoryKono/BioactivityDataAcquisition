@@ -1009,6 +1009,43 @@ def _empty_result(title: str, mode: str, name: str) -> str:
     return f"{title}: {EMPTY_SUFFIXES[mode]} for `{name}`."
 
 
+def _optional_row_part(
+    row: dict[str, JsonValue],
+    field_name: str,
+    *,
+    label: str | None = None,
+    formatter: Callable[[JsonValue], str] | None = None,
+) -> str:
+    value = row.get(field_name)
+    if value in (None, ""):
+        return ""
+    rendered = formatter(value) if formatter is not None else str(value)
+    return f"{label or field_name}={rendered}" if rendered else ""
+
+
+def _optional_joined_list_part(
+    row: dict[str, JsonValue],
+    field_name: str,
+    *,
+    label: str | None = None,
+) -> str:
+    return _optional_row_part(
+        row,
+        field_name,
+        label=label,
+        formatter=lambda value: _join_string_list(value),
+    )
+
+
+def _append_prefixed_row_values(
+    lines: list[str],
+    row: dict[str, JsonValue],
+    field_mappings: list[tuple[str, str]],
+) -> None:
+    for field_name, prefix in field_mappings:
+        lines.extend(_sorted_prefixed_values(row.get(field_name), prefix))
+
+
 def _format_neighbors_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     seen: set[tuple[str, str, str, str]] = set()
@@ -1040,17 +1077,22 @@ def _docs_drift_row_line(row: dict[str, JsonValue]) -> str | None:
         return None
     detail_parts = [
         f"doc={doc_name}",
-        f"doc_labels={_join_string_list(row.get('doc_labels'))}",
+        _optional_joined_list_part(row, "doc_labels", label="doc_labels"),
         f"target={target_name}",
-        f"target_labels={_join_string_list(row.get('target_labels'))}",
-        f"doc_path={row.get('doc_source_path') or ''!s}" if row.get("doc_source_path") else "",
-        f"target_path={row.get('target_source_path') or ''!s}" if row.get("target_source_path") else "",
-        f"ref={row.get('doc_reference') or ''!s}" if row.get("doc_reference") else "",
-        f"evidence_kind={row.get('evidence_kind') or ''!s}" if row.get("evidence_kind") else "",
-        f"confidence={row.get('confidence') or ''!s}" if row.get("confidence") else "",
-        f"section={row.get('section_title') or ''!s}" if row.get("section_title") else "",
-        f"anchor={row.get('section_anchor') or ''!s}" if row.get("section_anchor") else "",
-        f"line={int(row.get('line_number') or 0)}" if int(row.get("line_number") or 0) else "",
+        _optional_joined_list_part(row, "target_labels", label="target_labels"),
+        _optional_row_part(row, "doc_source_path", label="doc_path"),
+        _optional_row_part(row, "target_source_path", label="target_path"),
+        _optional_row_part(row, "doc_reference", label="ref"),
+        _optional_row_part(row, "evidence_kind"),
+        _optional_row_part(row, "confidence"),
+        _optional_row_part(row, "section_title", label="section"),
+        _optional_row_part(row, "section_anchor", label="anchor"),
+        _optional_row_part(
+            row,
+            "line_number",
+            label="line",
+            formatter=lambda value: str(int(value or 0)) if int(value or 0) else "",
+        ),
     ]
     return "- " + " | ".join(part for part in detail_parts if part)
 
@@ -1101,48 +1143,49 @@ def _format_workflow_artifacts_rows(title: str, name: str, rows: list[dict[str, 
         lines.extend(_sorted_prefixed_values(row.get("actions"), "action"))
         artifacts = row.get("artifacts")
         if isinstance(artifacts, list):
-            normalized_artifacts: set[str] = set()
-            for artifact in artifacts:
-                if not isinstance(artifact, dict):
-                    continue
-                artifact_name = str(artifact.get("name") or "")
-                if not artifact_name:
-                    continue
-                relation_name = str(artifact.get("relation") or "")
-                relation_suffix = f" | relation={relation_name}" if relation_name else ""
-                normalized_artifacts.add(f"  artifact={artifact_name}{relation_suffix}")
-            lines.extend(sorted(normalized_artifacts))
+            lines.extend(_format_surface_dict_list(artifacts, "artifact"))
         lines.extend(_sorted_prefixed_values(row.get("secrets"), "secret"))
     if len(lines) == 1:
         lines.append("- no workflow action or artifact coverage found")
     return "\n".join(lines)
 
 
+def _workflow_execution_suffix_parts(
+    field_name: str,
+    value: dict[str, JsonValue],
+) -> list[str]:
+    if field_name == "reusable_calls":
+        return [
+            part
+            for part in (
+                _optional_row_part(value, "target_workflow"),
+                _optional_row_part(value, "reusable_kind", label="kind"),
+            )
+            if part
+        ]
+    if field_name == "matrix_variants":
+        variant_axes = value.get("variant_axes")
+        if isinstance(variant_axes, dict):
+            return [
+                "axes="
+                + ",".join(f"{key}={variant_axes[key]!s}" for key in sorted(variant_axes))
+            ]
+        return []
+    return [
+        part
+        for part in (
+            _optional_row_part(value, "scope"),
+            _optional_row_part(value, "expression"),
+        )
+        if part
+    ]
+
+
 def _format_workflow_execution_value(field_name: str, prefix: str, value: dict[str, JsonValue]) -> str | None:
     item_name = str(value.get("name") or "")
     if not item_name:
         return None
-    suffix_parts: list[str] = []
-    if field_name == "reusable_calls":
-        target_workflow = str(value.get("target_workflow") or "")
-        reusable_kind = str(value.get("reusable_kind") or "")
-        if target_workflow:
-            suffix_parts.append(f"target_workflow={target_workflow}")
-        if reusable_kind:
-            suffix_parts.append(f"kind={reusable_kind}")
-    elif field_name == "matrix_variants":
-        variant_axes = value.get("variant_axes")
-        if isinstance(variant_axes, dict):
-            suffix_parts.append(
-                "axes=" + ",".join(f"{key}={variant_axes[key]!s}" for key in sorted(variant_axes))
-            )
-    else:
-        output_scope = str(value.get("scope") or "")
-        expression = str(value.get("expression") or "")
-        if output_scope:
-            suffix_parts.append(f"scope={output_scope}")
-        if expression:
-            suffix_parts.append(f"expression={expression}")
+    suffix_parts = _workflow_execution_suffix_parts(field_name, value)
     suffix = f" | {' | '.join(suffix_parts)}" if suffix_parts else ""
     return f"  {prefix}={item_name}{suffix}"
 
@@ -1151,15 +1194,21 @@ def _workflow_execution_header(row: dict[str, JsonValue]) -> str | None:
     workflow_name = str(row.get("workflow_name") or "")
     if not workflow_name:
         return None
-    job_name = str(row.get("job_name") or "")
-    workflow_concurrency = str(row.get("workflow_concurrency_group") or "")
-    job_concurrency = str(row.get("job_concurrency_group") or "")
-    return (
-        f"- workflow={workflow_name}"
-        + (f" | job={job_name}" if job_name else "")
-        + (f" | workflow_concurrency={workflow_concurrency}" if workflow_concurrency else "")
-        + (f" | job_concurrency={job_concurrency}" if job_concurrency else "")
-    )
+    suffix_parts = [
+        part
+        for part in (
+            _optional_row_part(row, "job_name", label="job"),
+            _optional_row_part(
+                row,
+                "workflow_concurrency_group",
+                label="workflow_concurrency",
+            ),
+            _optional_row_part(row, "job_concurrency_group", label="job_concurrency"),
+        )
+        if part
+    ]
+    suffix = f" | {' | '.join(suffix_parts)}" if suffix_parts else ""
+    return f"- workflow={workflow_name}{suffix}"
 
 
 def _format_workflow_execution_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
@@ -1216,12 +1265,12 @@ def _storage_summary_line(row: dict[str, JsonValue], storage_name: str) -> str:
 
 def _storage_detail_line(row: dict[str, JsonValue]) -> str | None:
     detail_parts = [
-        f"config_version={row.get('config_version') or ''!s}" if row.get("config_version") else "",
-        f"quality_version={row.get('quality_version') or ''!s}" if row.get("quality_version") else "",
-        f"partition_by={_join_string_list(row.get('partition_by'))}" if _join_string_list(row.get("partition_by")) else "",
-        f"sort_by={_join_string_list(row.get('sort_by'))}" if _join_string_list(row.get("sort_by")) else "",
-        f"versioning_mode={row.get('versioning_mode') or ''!s}" if row.get("versioning_mode") else "",
-        f"version_column={row.get('version_column') or ''!s}" if row.get("version_column") else "",
+        _optional_row_part(row, "config_version"),
+        _optional_row_part(row, "quality_version"),
+        _optional_joined_list_part(row, "partition_by"),
+        _optional_joined_list_part(row, "sort_by"),
+        _optional_row_part(row, "versioning_mode"),
+        _optional_row_part(row, "version_column"),
     ]
     detail_line = " | ".join(part for part in detail_parts if part)
     return f"  {detail_line}" if detail_line else None
@@ -1274,15 +1323,15 @@ def _format_field_lineage_rows(title: str, name: str, rows: list[dict[str, JsonV
         validation_types = row.get("validation_types")
         if isinstance(validation_types, list) and validation_types:
             lines.append(f"  validations={','.join(str(item) for item in validation_types if item)}")
-        for field_name_key, prefix in (
+        _append_prefixed_row_values(
+            lines,
+            row,
+            [
             ("upstream_fields", "upstream"),
             ("downstream_fields", "downstream"),
             ("contracts", "contract"),
-        ):
-            values = row.get(field_name_key)
-            if isinstance(values, list):
-                for value in sorted({str(item) for item in values if item}):
-                    lines.append(f"  {prefix}={value}")
+            ],
+        )
     if len(lines) == 1:
         lines.append("- no field lineage found")
     return "\n".join(lines)
@@ -1320,14 +1369,15 @@ def _format_surface_dict_list(values: object, prefix: str) -> list[str]:
         value_name = str(value.get("name") or "")
         if not value_name:
             continue
-        labels = value.get("labels")
-        label_str = ",".join(str(label) for label in labels) if isinstance(labels, list) else ""
-        artifact_family = str(value.get("artifact_family") or "")
-        extras = []
-        if label_str:
-            extras.append(f"labels={label_str}")
-        if artifact_family:
-            extras.append(f"artifact_family={artifact_family}")
+        extras = [
+            part
+            for part in (
+                _optional_joined_list_part(value, "labels"),
+                _optional_row_part(value, "artifact_family"),
+                _optional_row_part(value, "relation"),
+            )
+            if part
+        ]
         suffix = f" | {' | '.join(extras)}" if extras else ""
         normalized.add(f"  {prefix}={value_name}{suffix}")
     return sorted(normalized)
@@ -1344,12 +1394,10 @@ def _format_run_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonV
             f"| manifest_id={row.get('manifest_id') or ''!s} | run_id={row.get('run_id') or ''!s}"
         )
         detail_parts = [
-            f"contract_ref={row.get('contract_ref') or ''!s}" if row.get("contract_ref") else "",
-            f"contract_version={row.get('contract_version') or ''!s}" if row.get("contract_version") else "",
-            f"effective_config_artifact_id={row.get('effective_config_artifact_id') or ''!s}"
-            if row.get("effective_config_artifact_id")
-            else "",
-            f"lineage_fragment_id={row.get('lineage_fragment_id') or ''!s}" if row.get("lineage_fragment_id") else "",
+            _optional_row_part(row, "contract_ref"),
+            _optional_row_part(row, "contract_version"),
+            _optional_row_part(row, "effective_config_artifact_id"),
+            _optional_row_part(row, "lineage_fragment_id"),
         ]
         detail_line = " | ".join(part for part in detail_parts if part)
         if detail_line:
@@ -1614,10 +1662,12 @@ def _format_overengineered_candidates_rows(title: str, name: str, rows: list[dic
                 blocked_suffix,
             )
         )
-        if _join_string_list(row.get("indirection_markers")):
-            lines.append(f"  indirection_markers={_join_string_list(row.get('indirection_markers'))}")
-        if _join_string_list(row.get("stateful_markers")):
-            lines.append(f"  stateful_markers={_join_string_list(row.get('stateful_markers'))}")
+        for marker_line in (
+            _optional_joined_list_part(row, "indirection_markers"),
+            _optional_joined_list_part(row, "stateful_markers"),
+        ):
+            if marker_line:
+                lines.append(f"  {marker_line}")
     if len(lines) == 1:
         lines.append("- no overengineered candidates found")
     return "\n".join(lines)
@@ -1629,14 +1679,21 @@ def _format_removable_complexity_rows(title: str, name: str, rows: list[dict[str
         target_name = str(row.get("target_name") or "")
         if not target_name:
             continue
-        deprecation_markers = row.get("deprecation_markers")
-        marker_str = ",".join(str(marker) for marker in deprecation_markers) if isinstance(deprecation_markers, list) else ""
-        marker_suffix = f" | deprecation_markers={marker_str}" if marker_str else ""
+        marker_suffix = _marker_suffix(
+            row,
+            "deprecation_markers",
+            "deprecation_markers",
+        )
         lines.append(
-            f"- target={target_name} | label={row.get('target_label') or ''!s} | family={row.get('family_name') or ''!s} "
-            f"| removable_score={row.get('removable_score') or ''!s} | removal_confidence={row.get('removal_confidence') or ''!s} "
-            f"| runtime={row.get('runtime_anchor_count') or ''!s} | config={row.get('config_anchor_count') or ''!s} "
-            f"| docs={row.get('doc_anchor_count') or ''!s} | tests={row.get('test_anchor_count') or ''!s}{marker_suffix}"
+            _target_row_line(
+                row,
+                [
+                    f"removable_score={row.get('removable_score') or ''!s}",
+                    f"removal_confidence={row.get('removal_confidence') or ''!s}",
+                    *_anchor_count_parts(row),
+                ],
+                marker_suffix,
+            )
         )
     if len(lines) == 1:
         lines.append("- no removable complexity candidates found")

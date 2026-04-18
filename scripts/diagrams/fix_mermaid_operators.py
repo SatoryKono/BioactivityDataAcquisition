@@ -160,7 +160,7 @@ def _collect_issues(lines: list[str]) -> list[OperatorIssue]:
 
 def check_file(path: Path) -> FileCheckResult:
     """Validate one Mermaid file for unsupported operators in target types."""
-    safe_path = _resolve_repo_file_path(path)
+    safe_path = path.resolve()
     lines = safe_path.read_text(encoding="utf-8").splitlines()
     diagram_type = detect_diagram_type(lines)
     if diagram_type not in TARGET_DIAGRAM_TYPES:
