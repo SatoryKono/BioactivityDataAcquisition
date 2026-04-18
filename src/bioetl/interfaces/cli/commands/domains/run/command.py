@@ -156,6 +156,13 @@ def execute_run(
     """Execute run and flush metrics at command boundary."""
     from bioetl.composition.execution_api import push_metrics_to_gateway
 
+    def _flush_metrics_safely(*, pipeline_name: str) -> None:
+        try:
+            push_metrics_to_gateway(pipeline_name=pipeline_name)
+        except Exception:
+            # Metrics publication must never turn a completed CLI run into failure.
+            return
+
     return get_cli_run_orchestration_service().execute_pipeline(
         request=request,
         run_pipeline_async=_build_run_pipeline_callable(
@@ -163,7 +170,7 @@ def execute_run(
             run_pipeline_async_callable=_run_pipeline_async,
         ),
         run_coroutine=asyncio.run,
-        flush_metrics=push_metrics_to_gateway,
+        flush_metrics=_flush_metrics_safely,
     )
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.composite.state import CompositePipelineState
 
@@ -105,4 +105,7 @@ def _replace_checkpoint_state(
 ) -> CompositeCheckpointState:
     # `dataclasses.replace` accepts field-aligned keyword overrides, but mypy
     # cannot infer them from this helper's dynamic kwargs surface.
-    return replace(checkpoint_state, updated_at=datetime.now(tz=UTC), **changes)  # type: ignore[arg-type]
+    return cast(
+        CompositeCheckpointState,
+        replace(checkpoint_state, updated_at=datetime.now(tz=UTC), **changes),
+    )
