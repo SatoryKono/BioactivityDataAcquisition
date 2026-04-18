@@ -1,5 +1,5 @@
 # mypy: disable-error-code=attr-defined
-"""Pagination and filter-query helpers for ChEMBL fetch flows."""
+"""Pagination helpers for ChEMBL fetch flows."""
 
 from __future__ import annotations
 
@@ -46,8 +46,6 @@ CHEMBL_ADAPTER_ERRORS = (
     AttributeError,
     Exception,
 )
-
-
 class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
     """Provides ChEMBL pagination and filtered-page iteration helpers."""
 
@@ -138,10 +136,9 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
         while True:
             params = self._build_params(offset, entity_type)
 
-            # Apply limit constraint for this page
             page_limit = self._calculate_page_limit(params, limit, records_yielded)
             if page_limit is None:
-                break  # Limit reached
+                break
             if page_limit != params.get("limit"):
                 params["limit"] = page_limit
 

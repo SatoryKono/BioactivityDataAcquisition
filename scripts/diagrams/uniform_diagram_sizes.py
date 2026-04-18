@@ -98,11 +98,6 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
-def _write_repo_text(path: Path, content: str) -> None:
-    """Write normalized diagram content only after repository-root validation."""
-    safe_path = _ensure_repo_path(path)
-    safe_path.write_text(content, encoding="utf-8")
-
 # Flowchart node patterns:
 #   ID["Label text"]         — rectangle
 #   ID(["Label text"])       — rounded
@@ -970,7 +965,8 @@ def main() -> int:
             show_diff(path, original, normalized)
             print()
         else:
-            _write_repo_text(path, normalized)
+            safe_path = _ensure_repo_path(path)
+            safe_path.write_text(normalized, encoding="utf-8")
             print(f"  {GREEN}FIXED{NC}  {path}")
 
     # Summary

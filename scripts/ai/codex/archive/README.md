@@ -1,30 +1,20 @@
-# scripts/ai/codex
+# script-codex/archive
 
-Canonical Codex-facing setup, launch, and validation tooling.
+Archived Codex setup materials that previously lived under `scripts/ops/` or
+`scripts/tmp/`.
 
-## Scope
+These files are retained for historical reference only. Active Codex entry
+points and docs are:
 
-- Codex/Copilot MCP configuration
-- Codex agent and skill synchronization
-- Codex interactive, full-auto, and headless launch flows
-- Codex WSL diagnostics and setup verification launchers
-- AI skills layout validation
-- Docs mirror validation for `.codex/skills`
+- `script-codex/run-codex.ps1`
+- `script-codex/run-codex.sh`
+- `script-codex/README.md`
+- `script-codex/md/*.md`
+- `docs/05-operations/tooling/scripts-ops/*.md`
 
-## Entry points
+Active repo-local setup/bootstrap surfaces that remain outside this archive:
 
-```bash
-python -m scripts.ai.codex --help
-python -m scripts.ai.codex setup-mcp
-python -m scripts.ai.codex setup-agents
-python -m scripts.ai.codex setup-skills
-python -m scripts.ai.codex check-skills
-python -m scripts.ai.codex check-mirror
-python -m scripts.ai.codex launch --help
-python -m scripts.ai.codex exec --help
-python -m scripts.ai.codex headless --help
-python -m scripts.ai.codex diagnose-wsl --help
-```
-
-Historical entrypoints in `scripts/dev` and `scripts/ops` remain available as
-compatibility facades during the consolidation window.
+- `scripts/ops/setup-codex-wsl.bat`
+- `scripts/ops/setup-wsl-codex-complete.sh`
+- `scripts/ops/setup_wsl_codex.sh`
+- `scripts/ops/verify_codex_setup.sh`

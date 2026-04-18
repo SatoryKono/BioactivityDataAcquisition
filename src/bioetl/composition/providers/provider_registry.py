@@ -48,7 +48,6 @@ __all__ = [
 # should use DataSourceCreatorProtocol directly.
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
-
 def _ensure_registry_loaded(registry: ProviderRegistry) -> None:
     """Late-bind registry loading to avoid hard import coupling into providers."""
     loading_module = import_module("bioetl.composition.providers._loading")

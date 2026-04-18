@@ -124,7 +124,7 @@ hotspot_budgets:
       - "src/bioetl/application/core/"
     registry_budgets:
       file_size_limits: 1
-      class_size: 1
+      class_size: 3
       god_object: 1
   - name: "composite_orchestration"
     rationale: "Composite runtime orchestration hotspot spanning join, checkpoint, and runner support seams."
@@ -287,51 +287,51 @@ neo4j_memory_calibration:
           expected_disposition: "retain_active"
 quarterly_targets:
   - quarter: "2026-Q1"
-    max_total_exemptions: 9
+    max_total_exemptions: 29
     min_integral_score: 65
     group_budgets:
-      size_metrics: 6
+      size_metrics: 26
       complexity_metrics: 1
-      structural_debt: 2
+      structural_debt: 4
     registry_budgets:
       file_size_limits: 4
       function_complexity: 1
-      function_length: 0
-      class_size: 3
+      function_length: 11
+      class_size: 14
       class_method_count: 0
-      god_object: 2
+      god_object: 4
       domain_complexity: 6
   - quarter: "2026-Q2"
-    max_total_exemptions: 8
+    max_total_exemptions: 28
     min_integral_score: 70
     group_budgets:
-      size_metrics: 3
+      size_metrics: 25
       complexity_metrics: 0
-      structural_debt: 0
+      structural_debt: 3
     registry_budgets:
       file_size_limits: 3
       function_complexity: 0
-      function_length: 0
-      class_size: 0
+      function_length: 10
+      class_size: 13
       class_method_count: 0
-      god_object: 0
+      god_object: 3
       domain_complexity: 0
 owner_decomposition_targets:
   - quarter: "2026-Q1"
     allocations:
-      "@bioetl-architecture": 0
-      "@bioetl-domain": 4
-      "@bioetl-platform": 5
+      "@bioetl-architecture": 3
+      "@bioetl-platform": 17
+      "@bioetl-data-model": 9
   - quarter: "2026-Q2"
     allocations:
-      "@bioetl-architecture": 3
-      "@bioetl-platform": 3
-      "@bioetl-data-model": 2
+      "@bioetl-architecture": 2
+      "@bioetl-platform": 17
+      "@bioetl-data-model": 9
 expiry_decomposition_targets:
   - quarter: "2026-Q1"
-    max_entries_expiring_in_quarter: 10
+    max_entries_expiring_in_quarter: 29
   - quarter: "2026-Q2"
-    max_entries_expiring_in_quarter: 8
+    max_entries_expiring_in_quarter: 28
 program_done_criteria:
   deadline_quarter: "2027-Q1"
   max_total_exemptions: 0

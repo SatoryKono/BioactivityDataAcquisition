@@ -66,12 +66,6 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
-def _write_repo_text(path: Path, content: str) -> None:
-    """Write normalized Mermaid content only after repository-root validation."""
-    safe_path = _ensure_repo_path(path)
-    safe_path.write_text(content, encoding="utf-8", newline="\n")
-
-
 def _display_path(path: Path) -> str:
     root = _repo_root()
     try:
@@ -164,7 +158,11 @@ def fix_file(path: Path, *, dry_run: bool) -> int:
         fixed_lines.append(line.replace("==>>", "-->>").replace("==>", "-->"))
 
     if replaced > 0 and not dry_run:
-        _write_repo_text(safe_path, "\n".join(fixed_lines) + "\n")
+        safe_path.write_text(
+            "\n".join(fixed_lines) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
 
     return replaced
 
