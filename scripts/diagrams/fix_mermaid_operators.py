@@ -71,12 +71,16 @@ def _repo_relative_path(path: Path) -> Path:
     return safe_path.relative_to(_repo_root().resolve())
 
 
+def _repo_path(relative_path: Path) -> Path:
+    return _repo_root() / relative_path
+
+
 def _read_repo_text(relative_path: Path) -> str:
-    return (_repo_root() / relative_path).read_text(encoding="utf-8")
+    return _repo_path(relative_path).read_text(encoding="utf-8")
 
 
 def _write_repo_text(relative_path: Path, content: str) -> None:
-    safe_path = _ensure_repo_path(_repo_root() / relative_path)
+    safe_path = _ensure_repo_path(_repo_path(relative_path))
     safe_path.write_text(content, encoding="utf-8", newline="\n")
 
 
@@ -111,11 +115,14 @@ def _iter_source_files(paths: list[Path]) -> list[Path]:
         path = _ensure_repo_path(raw)
         if path.is_file():
             if path.suffix in SUPPORTED_SUFFIXES:
-                files.append(path)
+                files.append(_repo_relative_path(path))
             continue
         if path.is_dir():
             for suffix in SUPPORTED_SUFFIXES:
-                files.extend(path.rglob(f"*{suffix}"))
+                files.extend(
+                    _repo_relative_path(candidate)
+                    for candidate in path.rglob(f"*{suffix}")
+                )
     return sorted(set(files))
 
 
@@ -144,19 +151,19 @@ def _collect_issues(lines: list[str]) -> list[OperatorIssue]:
 
 def check_file(path: Path) -> FileCheckResult:
     """Validate one Mermaid file for unsupported operators in target types."""
-    lines = path.read_text(encoding="utf-8").splitlines()
+    safe_path = _repo_path(path)
+    lines = safe_path.read_text(encoding="utf-8").splitlines()
     diagram_type = detect_diagram_type(lines)
     if diagram_type not in TARGET_DIAGRAM_TYPES:
-        return FileCheckResult(path=path, diagram_type=diagram_type)
+        return FileCheckResult(path=safe_path, diagram_type=diagram_type)
     return FileCheckResult(
-        path=path, diagram_type=diagram_type, issues=_collect_issues(lines)
+        path=safe_path, diagram_type=diagram_type, issues=_collect_issues(lines)
     )
 
 
 def fix_file(path: Path, *, dry_run: bool) -> int:
     """Rewrite a Mermaid file in-place and return replacement count."""
-    relative_path = _repo_relative_path(path.resolve())
-    lines = _read_repo_text(relative_path).splitlines()
+    lines = _read_repo_text(path).splitlines()
     if detect_diagram_type(lines) not in TARGET_DIAGRAM_TYPES:
         return 0
 
@@ -172,7 +179,7 @@ def fix_file(path: Path, *, dry_run: bool) -> int:
         fixed_lines.append(line.replace("==>>", "-->>").replace("==>", "-->"))
 
     if replaced > 0 and not dry_run:
-        _write_repo_text(relative_path, "\n".join(fixed_lines) + "\n")
+        _write_repo_text(path, "\n".join(fixed_lines) + "\n")
 
     return replaced
 

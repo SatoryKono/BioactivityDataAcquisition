@@ -15481,6 +15481,15 @@ def _write_report_if_requested(
     print(f"Exported audit report to {report_path}")
 
 
+def _normalization_operation_count(summary: dict[str, JsonValue]) -> int:
+    completed = summary.get("completed_statement_count", 0)
+    return max(1, int(completed))
+
+
+def _snapshot_operation_count(args: argparse.Namespace) -> int:
+    return 1 + int(args.export is not None) + int(args.apply) + int(args.report is not None)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
@@ -15492,7 +15501,7 @@ def main(argv: list[str] | None = None) -> int:
             batch_size=args.batch_size,
         )
         print(json.dumps(summary, indent=2))
-        return 0
+        return _normalization_operation_count(summary)
     root = args.root.resolve()
     selection = _selection_from_args(args)
     snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
@@ -15506,8 +15515,8 @@ def main(argv: list[str] | None = None) -> int:
         args.report,
         args.report_fast,
     )
-    return 0
+    return _snapshot_operation_count(args)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
