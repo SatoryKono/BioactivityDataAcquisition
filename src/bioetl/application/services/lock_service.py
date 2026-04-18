@@ -11,6 +11,7 @@ from __future__ import annotations
 __all__ = ["LockInfo", "LockService"]
 
 
+import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -186,6 +187,7 @@ class LockService:
         Returns:
             List of LockInfo for all held locks (currently empty).
         """
+        await asyncio.sleep(0)
         self.logger.warning(
             "list_locks not supported by current LockPort implementation",
             note="Returning empty list - port extension required",

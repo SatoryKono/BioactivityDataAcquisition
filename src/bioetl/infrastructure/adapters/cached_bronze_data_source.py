@@ -17,6 +17,7 @@ from __future__ import annotations
 
 __all__ = ["CachedBronzeDataSource"]
 
+import asyncio
 from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
@@ -101,6 +102,7 @@ class CachedBronzeDataSource:
 
     async def __aenter__(self) -> Self:
         """Enter async context manager (no-op for file-based source)."""
+        await asyncio.sleep(0)
         return self
 
     async def __aexit__(
@@ -110,6 +112,7 @@ class CachedBronzeDataSource:
         exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context manager (no-op for file-based source)."""
+        await asyncio.sleep(0)
 
     async def health_check(self) -> HealthStatus:
         """Check health of the cached Bronze data source.
@@ -119,10 +122,12 @@ class CachedBronzeDataSource:
         Returns:
             The HealthStatus result.
         """
+        await asyncio.sleep(0)
         return HealthStatus.HEALTHY
 
     async def aclose(self) -> None:
         """Close the data source (no-op for file-based source)."""
+        await asyncio.sleep(0)
 
     async def _list_batches_sorted(self) -> list[str]:
         """List batches with deterministic sorting (ADR-014).

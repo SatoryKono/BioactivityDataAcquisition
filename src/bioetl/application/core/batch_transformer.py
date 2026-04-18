@@ -20,6 +20,9 @@ __all__ = [
 import asyncio
 from typing import TYPE_CHECKING
 
+from bioetl.application.core._batch_transformer_support import (
+    build_default_normalization_processor,
+)
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.application.core.record_normalization_processor import (
@@ -67,23 +70,6 @@ if TYPE_CHECKING:
 class BatchTransformer:
     """Transforms Bronze records to Silver/Gold with error handling and DQ checks."""
 
-    @staticmethod
-    def _create_default_normalization_processor(
-        config: RecordProcessorConfig,
-    ) -> RecordNormalizationProcessor | None:
-        """Build the default normalization stage from record-processor config."""
-        if not config.normalization_enabled:
-            return None
-        return RecordNormalizationProcessor(
-            provider=config.provider,
-            entity_type=config.entity_type,
-            rule_set=config.normalization_rule_set,
-            allow_compatibility_fallback=config.allow_compatibility_fallback,
-            content_hash_include_fields=config.content_hash_include_fields,
-            content_hash_exclude_fields=config.content_hash_exclude_fields,
-            content_hash_policy_by_version=config.content_hash_policy_by_version,
-        )
-
     def __init__(
         self,
         context: PipelineContext,
@@ -108,7 +94,7 @@ class BatchTransformer:
         self._normalization_processor = (
             normalization_processor
             if normalization_processor is not None
-            else self._create_default_normalization_processor(config)
+            else build_default_normalization_processor(config)
         )
 
     async def _transform_attempt(

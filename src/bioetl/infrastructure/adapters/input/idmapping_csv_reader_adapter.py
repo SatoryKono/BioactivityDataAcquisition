@@ -44,6 +44,7 @@ class IDMappingCsvReaderAdapter:
         Returns:
             HealthStatus.HEALTHY as local CSV reader is always available.
         """
+        await asyncio.sleep(0)
         return HealthStatus.HEALTHY
 
     def _read_ids_sync(self, source_path: str, id_column: str) -> list[str]:

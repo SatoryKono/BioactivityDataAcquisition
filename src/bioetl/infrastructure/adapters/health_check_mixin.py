@@ -24,6 +24,7 @@ __all__ = [
     "HealthCheckProviderMixin",
 ]
 
+import asyncio
 import time
 from abc import abstractmethod
 from typing import TYPE_CHECKING
@@ -308,6 +309,7 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             HealthStatus from the health probe.
 
         """
+        await asyncio.sleep(0)
         return self._fallback_health_status()
 
     def _fallback_health_status(self) -> HealthStatus:

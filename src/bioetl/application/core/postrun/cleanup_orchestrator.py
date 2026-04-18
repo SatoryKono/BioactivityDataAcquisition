@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -26,6 +27,7 @@ class PostrunCleanupService:
         Args:
             tracer: Optional tracing port to close. If None, the method returns immediately.
         """
+        await asyncio.sleep(0)
         if tracer is None:
             return
         try:

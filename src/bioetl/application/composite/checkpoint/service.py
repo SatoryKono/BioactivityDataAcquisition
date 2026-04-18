@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint._anchor_context import (
@@ -122,22 +123,27 @@ class CompositeCheckpointService:
 
     async def load(self) -> CompositeCheckpointState:
         """Load checkpoint state or create a fresh one."""
+        await asyncio.sleep(0)
         return self._load_service.load()
 
     async def save(self, state: CompositeCheckpointState) -> None:
         """Save checkpoint state to JSON atomically."""
+        await asyncio.sleep(0)
         self._persistence_service.save(state)
 
     async def delete(self) -> None:
         """Delete checkpoint file after successful completion."""
+        await asyncio.sleep(0)
         self._persistence_service.delete()
 
     async def delete_orphaned(self) -> int:
         """Delete orphaned checkpoint files from previous runs."""
+        await asyncio.sleep(0)
         return self._persistence_service.delete_orphaned()
 
     async def list_all(self) -> list[str]:
         """List all checkpoints for this composite pipeline."""
+        await asyncio.sleep(0)
         return self._persistence_service.list_all()
 
 

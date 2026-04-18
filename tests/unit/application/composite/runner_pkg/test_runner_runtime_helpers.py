@@ -174,9 +174,9 @@ async def test_prepare_run_state_normalizes_failed_resume_before_logging() -> No
     )
 
     result = await prepare_run_state(
-        checkpoint_manager=checkpoint_manager,
+        checkpoint_manager=cast("_CheckpointManagerProtocol", checkpoint_manager),
         runtime=_make_runtime(resume=True),
-        fsm=fsm,
+        fsm=cast("_FSMRuntimeHelperProtocol", fsm),
     )
 
     assert result is resumed_state

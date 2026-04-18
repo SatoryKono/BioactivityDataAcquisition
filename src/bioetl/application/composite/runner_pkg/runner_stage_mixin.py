@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 
 import polars as pl
@@ -146,6 +147,7 @@ class CompositeRunnerStageMixin(
         state: CompositeCheckpointState,
     ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
         """Keep checkpoint state unchanged when no dependencies are configured."""
+        await asyncio.sleep(0)
         return state, {}
 
     def _prepare_dependencies_run_context(
