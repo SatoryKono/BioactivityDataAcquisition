@@ -12,7 +12,6 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-LINKSTYLE_SINGLE_RE = re.compile(r"^(\s*)linkStyle\s+(\d+)\s+(.+)$")
 SUBGRAPH_RE = re.compile(r"^\s*subgraph\s+(\S+)")
 END_RE = re.compile(r"^\s*end\s*$")
 NODE_DEF_RE = re.compile(r"\b([A-Za-z_]\w*)\s*[\[\(\{][\"\']?([^\"\')\]\}]+)")
@@ -61,6 +60,18 @@ def _parse_subgraphs(lines: list[str]) -> dict[str, str]:
             if stack:
                 node_sg[nid] = stack[-1]
     return node_sg
+
+
+def _parse_linkstyle_single(line: str) -> tuple[str, str, str] | None:
+    stripped = line.strip()
+    if not stripped.startswith("linkStyle "):
+        return None
+    indent = line[: len(line) - len(line.lstrip())]
+    payload = stripped[len("linkStyle ") :].strip()
+    index, separator, style = payload.partition(" ")
+    if not separator or not index.isdigit():
+        return None
+    return indent, index, style.strip()
 
 
 def _get_node_labels(lines: list[str]) -> dict[str, str]:
