@@ -401,6 +401,7 @@ class TestExecutePipeline:
         flushed = MagicMock()
 
         async def _run_pipeline(prepared: RunExecutionRequest) -> RunResult:
+            await asyncio.sleep(0)
             assert prepared is request
             return expected
 
@@ -425,6 +426,7 @@ class TestExecutePipeline:
         flushed = MagicMock()
 
         async def _run_pipeline(prepared: RunExecutionRequest) -> RunResult:
+            await asyncio.sleep(0)
             assert prepared is request
             return _make_result()
 

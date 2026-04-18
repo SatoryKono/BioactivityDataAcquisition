@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
@@ -644,6 +645,7 @@ class TestChemblAdapterBatchReduction:
         call_count = 0
 
         async def mock_get(url, params=None):
+            await asyncio.sleep(0)
             nonlocal call_count
             call_count += 1
             ids_param = params.get("document_chembl_id__in") or params.get(
@@ -703,6 +705,7 @@ class TestChemblAdapterBatchReduction:
         )
 
         async def mock_get(url, params=None):
+            await asyncio.sleep(0)
             ids_param = params.get("document_chembl_id__in") or params.get(
                 "publication_id__in", ""
             )
@@ -795,6 +798,7 @@ class TestChemblAdapterBatchReduction:
         )
 
         async def mock_get(url, params=None):
+            await asyncio.sleep(0)
             ids_param = params.get("document_chembl_id__in") or params.get(
                 "publication_id__in", ""
             )
@@ -855,6 +859,7 @@ class TestChemblAdapterDirectEndpointFallback:
         call_count = 0
 
         async def mock_get(url, params=None):
+            await asyncio.sleep(0)
             nonlocal call_count
             call_count += 1
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
@@ -20,6 +22,7 @@ async def test_paginated_fetch_basic():
     # Page 2: [3, 4], next=None
 
     async def fetch_page(cursor, _):
+        await asyncio.sleep(0)
         if cursor is None:
             return [1, 2], "c2"
         elif cursor == "c2":
@@ -39,6 +42,7 @@ async def test_paginated_fetch_with_limit():
     fetcher = MockFetcher()
 
     async def fetch_page(cursor, _):
+        await asyncio.sleep(0)
         # Always return 2 items
         # Since we don't have 'fetched' count passed in, we use cursor state or internal state
         # But 'cursor' here is just passed back.
@@ -62,6 +66,7 @@ async def test_paginated_fetch_empty():
     fetcher = MockFetcher()
 
     async def fetch_page(cursor, _):
+        await asyncio.sleep(0)
         return [], None
 
     results = []
@@ -82,6 +87,7 @@ async def test_paginated_fetch_empty_page_with_cursor():
     count = 0
 
     async def fetch_page(cursor, _):
+        await asyncio.sleep(0)
         nonlocal count
         count += 1
         if count == 1:

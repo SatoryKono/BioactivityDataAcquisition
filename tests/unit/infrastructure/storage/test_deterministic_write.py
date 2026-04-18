@@ -6,6 +6,7 @@ of input order, ensuring reproducible output files.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -56,8 +57,9 @@ class TestDeterministicCsvExport:
         csv_path = await csv_exporter.export("test_table", sample_table, append=False)
 
         # Read back and verify order
-        with open(csv_path) as f:
-            lines = f.readlines()
+        lines = (
+            await asyncio.to_thread(Path(csv_path).read_text, encoding="utf-8")
+        ).splitlines(keepends=True)
 
         # Skip header
         data_lines = lines[1:]
@@ -89,8 +91,9 @@ class TestDeterministicCsvExport:
             table = pa.Table.from_pylist(shuffled)
             csv_path = await exporter.export("test", table, append=False)
 
-            with open(csv_path) as f:
-                outputs.append(f.read())
+            outputs.append(
+                await asyncio.to_thread(Path(csv_path).read_text, encoding="utf-8")
+            )
 
         # All outputs should be identical
         assert outputs[0] == outputs[1] == outputs[2], (
@@ -109,8 +112,7 @@ class TestDeterministicCsvExport:
 
         csv_path = await csv_exporter.export("complex_test", table, append=False)
 
-        with open(csv_path) as f:
-            content = f.read()
+        content = await asyncio.to_thread(Path(csv_path).read_text, encoding="utf-8")
 
         # First data row should be Alice (sorted by id)
         lines = content.strip().split("\n")
@@ -133,8 +135,7 @@ class TestDeterministicCsvExport:
 
         csv_path = await exporter.export("json_test", table, append=False)
 
-        with open(csv_path) as f:
-            content = f.read()
+        content = await asyncio.to_thread(Path(csv_path).read_text, encoding="utf-8")
 
         # JSON should have keys in alphabetical order
         assert '"a_key"' in content

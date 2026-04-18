@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import io
 import json
 from datetime import UTC, datetime
@@ -142,8 +143,7 @@ class TestBronzeWriter:
         )
 
         file_path = tmp_path / result.relative_path
-        with open(file_path, "rb") as f:
-            compressed_data = f.read()
+        compressed_data = await asyncio.to_thread(file_path.read_bytes)
 
         # Zstandard frames start with magic bytes 0x28, 0xB5, 0x2F, 0xFD (little-endian)
         assert compressed_data.startswith(b"\x28\xb5\x2f\xfd")
