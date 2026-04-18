@@ -6,6 +6,7 @@ These tests are designed to run in CI pipelines to catch configuration drift.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from unittest.mock import MagicMock

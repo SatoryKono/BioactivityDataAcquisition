@@ -255,12 +255,10 @@ def _record_artifact_publication(
     """Emit the optional control-plane artifact publication callback."""
     if recorder is None:
         return
-    manifest_id = str(
-        metadata.runtime.manifest_id or metadata.runtime.run_id or ""
-    ).strip()
+    manifest_id = str(metadata.runtime.manifest_id or "").strip()
     if not manifest_id:
         raise RuntimeError(
-            "Control-plane artifact publication requires metadata.runtime.manifest_id or runtime.run_id"
+            "Control-plane artifact publication requires metadata.runtime.manifest_id"
         )
     artifact_id = str(metadata.output.artifact_id or "").strip()
     if not artifact_id:
