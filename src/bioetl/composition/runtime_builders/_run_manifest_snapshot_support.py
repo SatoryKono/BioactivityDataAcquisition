@@ -135,20 +135,34 @@ def resolve_provider_entity(
     pipeline_name: str,
     yaml_config: object,
 ) -> tuple[str, str]:
-    if "_" in pipeline_name:
-        fallback_provider, fallback_entity = pipeline_name.split("_", 1)
-    else:
-        fallback_provider = pipeline_name
-        fallback_entity = pipeline_name
-    provider = _resolve_name_component(
-        getattr(yaml_config, "provider", None),
-        fallback=fallback_provider,
-    )
-    entity = _resolve_name_component(
-        getattr(yaml_config, "entity_type", None),
-        fallback=fallback_entity,
-    )
+    """Resolve provider and entity from pipeline name and config."""
+    fallback_provider, fallback_entity = _determine_fallbacks(pipeline_name)
+    provider = _resolve_provider(yaml_config, fallback_provider)
+    entity = _resolve_entity(yaml_config, fallback_entity)
     return provider, entity
+
+
+def _determine_fallbacks(pipeline_name: str) -> tuple[str, str]:
+    """Determine fallback provider and entity from pipeline name."""
+    if "_" in pipeline_name:
+        return pipeline_name.split("_", 1)
+    return pipeline_name, pipeline_name
+
+
+def _resolve_provider(yaml_config: object, fallback: str) -> str:
+    """Resolve provider from config or use fallback."""
+    return _resolve_name_component(
+        getattr(yaml_config, "provider", None),
+        fallback=fallback,
+    )
+
+
+def _resolve_entity(yaml_config: object, fallback: str) -> str:
+    """Resolve entity from config or use fallback."""
+    return _resolve_name_component(
+        getattr(yaml_config, "entity_type", None),
+        fallback=fallback,
+    )
 
 
 def _as_runtime_config_mapping(runtime_config: object) -> Mapping[str, object]:

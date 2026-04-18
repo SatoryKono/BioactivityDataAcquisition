@@ -91,6 +91,7 @@ def _annotation_mentions_forbidden_type(annotation: str, forbidden: str) -> bool
 def _aggregate_reference_violations(
     aggregates_dir: Path,
 ) -> list[str]:
+    """Check for violations of aggregate references."""
     violations: list[str] = []
     for py_file in _iter_aggregate_files(aggregates_dir):
         tree = _aggregate_tree(aggregates_dir, py_file)
@@ -100,36 +101,66 @@ def _aggregate_reference_violations(
         for node in ast.walk(tree):
             if not isinstance(node, ast.ClassDef):
                 continue
-            for item in node.body:
-                if isinstance(item, ast.FunctionDef) and item.name == "__init__":
-                    for arg in item.args.args:
-                        if not arg.annotation:
-                            continue
-                        ann_str = ast.unparse(arg.annotation)
-                        for forbidden in FORBIDDEN_AGGREGATE_TYPES:
-                            if (
-                                _annotation_mentions_forbidden_type(ann_str, forbidden)
-                                and forbidden != current_file_class
-                            ):
-                                violations.append(
-                                    f"{py_file.name}:{item.lineno} - "
-                                    f"Parameter '{arg.arg}' has type "
-                                    f"'{ann_str}' (should use ID type)"
-                                )
-                if isinstance(item, ast.AnnAssign) and item.target:
-                    ann_str = ast.unparse(item.annotation)
-                    target_name = getattr(item.target, "id", "unknown")
-                    for forbidden in FORBIDDEN_AGGREGATE_TYPES:
-                        if (
-                            _annotation_mentions_forbidden_type(ann_str, forbidden)
-                            and forbidden != current_file_class
-                        ):
-                            violations.append(
-                                f"{py_file.name}:{item.lineno} - "
-                                f"Attribute '{target_name}' has type "
-                                f"'{ann_str}' (should use ID type)"
-                            )
+            _check_class_body(node, py_file, current_file_class, violations)
     return violations
+
+
+def _check_class_body(
+    node: ast.ClassDef,
+    py_file: Path,
+    current_file_class: str | None,
+    violations: list[str],
+) -> None:
+    """Check the body of a class for violations."""
+    for item in node.body:
+        if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+            _check_init_args(item, py_file, current_file_class, violations)
+        if isinstance(item, ast.AnnAssign) and item.target:
+            _check_ann_assign(item, py_file, current_file_class, violations)
+
+
+def _check_init_args(
+    item: ast.FunctionDef,
+    py_file: Path,
+    current_file_class: str | None,
+    violations: list[str],
+) -> None:
+    """Check the arguments of __init__ for violations."""
+    for arg in item.args.args:
+        if not arg.annotation:
+            continue
+        ann_str = ast.unparse(arg.annotation)
+        for forbidden in FORBIDDEN_AGGREGATE_TYPES:
+            if (
+                _annotation_mentions_forbidden_type(ann_str, forbidden)
+                and forbidden != current_file_class
+            ):
+                violations.append(
+                    f"{py_file.name}:{item.lineno} - "
+                    f"Parameter '{arg.arg}' has type "
+                    f"'{ann_str}' (should use ID type)"
+                )
+
+
+def _check_ann_assign(
+    item: ast.AnnAssign,
+    py_file: Path,
+    current_file_class: str | None,
+    violations: list[str],
+) -> None:
+    """Check annotated assignments for violations."""
+    ann_str = ast.unparse(item.annotation)
+    target_name = getattr(item.target, "id", "unknown")
+    for forbidden in FORBIDDEN_AGGREGATE_TYPES:
+        if (
+            _annotation_mentions_forbidden_type(ann_str, forbidden)
+            and forbidden != current_file_class
+        ):
+            violations.append(
+                f"{py_file.name}:{item.lineno} - "
+                f"Attribute '{target_name}' has type "
+                f"'{ann_str}' (should use ID type)"
+            )
 
 
 def _immutable_property_violations(aggregates_dir: Path) -> list[str]:
