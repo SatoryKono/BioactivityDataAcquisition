@@ -5,10 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.config import (
-    ContentHashPolicyByVersion,
-    ContentHashVersionPolicy,
+from bioetl.application.core._record_normalization_hash_support import (
+    RecordNormalizationHashSupportMixin,
 )
+from bioetl.application.core.config import ContentHashPolicyByVersion
 from bioetl.application.core.normalization_fallbacks import (
     UNHANDLED_FALLBACK_NORMALIZATION,
     canonicalize_json_like_string,
@@ -29,7 +29,6 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 from bioetl.domain.normalization.text import (
     normalize_string,
 )
-from bioetl.domain.transformations import generate_content_hash
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -43,7 +42,7 @@ class NormalizationContractError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
-class RecordNormalizationProcessor:
+class RecordNormalizationProcessor(RecordNormalizationHashSupportMixin):
     """Normalize transformed Silver payloads before hash and merge steps."""
 
     provider: str
@@ -65,11 +64,6 @@ class RecordNormalizationProcessor:
         if resolved_profile is not None:
             object.__setattr__(self, "profile", resolved_profile)
 
-    def _should_project_hashes_by_version(self) -> bool:
-        """Return True when rollout semantics require versioned content hashes."""
-        policy = self.content_hash_policy_by_version
-        return policy is not None and policy.requires_projected_hashes
-
     def normalize_record(self, record: JsonDict) -> JsonDict:
         """Apply deterministic normalization to one transformed Silver record."""
         normalized = self._normalize_mapping(record)
@@ -84,109 +78,6 @@ class RecordNormalizationProcessor:
     def normalize_business_data(self, business_data: JsonDict) -> JsonDict:
         """Normalize extracted business data before Silver finalization."""
         return self._normalize_mapping(business_data)
-
-    def compute_content_hash(
-        self,
-        record: JsonDict,
-        *,
-        contract_version: str | None = None,
-    ) -> str:
-        """Compute canonical content hash for an already-normalized payload."""
-        include_fields, exclude_fields = self._resolve_hash_policy(
-            contract_version=contract_version
-        )
-        return str(
-            generate_content_hash(
-                record,
-                self.provider,
-                exclude_none=True,
-                include_fields=include_fields,
-                exclude_fields=exclude_fields,
-                set_like_fields=(
-                    None if self.profile is None else set(self.profile.set_like_fields)
-                ),
-            )
-        )
-
-    def compute_content_hashes_by_version(self, record: JsonDict) -> dict[str, str]:
-        """Compute per-version content hashes when rollout policy requires it."""
-        if not self._should_project_hashes_by_version():
-            return {}
-        assert self.content_hash_policy_by_version is not None
-        return {
-            policy.version: self.compute_content_hash(
-                record,
-                contract_version=policy.version,
-            )
-            for policy in self.content_hash_policy_by_version.policies
-        }
-
-    def _profile_hash_fields(self) -> tuple[frozenset[str], frozenset[str]]:
-        """Return include/exclude fields supplied by the normalization profile."""
-        if self.profile is None:
-            return frozenset(), frozenset()
-        return self.profile.hash_included_fields, self.profile.hash_excluded_fields
-
-    def _select_hash_policy(
-        self,
-        *,
-        contract_version: str | None,
-    ) -> ContentHashVersionPolicy | None:
-        """Resolve the version-specific hash policy for one contract version."""
-        if self.content_hash_policy_by_version is None:
-            return None
-        target_version = (
-            contract_version or self.content_hash_policy_by_version.active_version
-        )
-        return (
-            self.content_hash_policy_by_version.for_version(target_version)
-            or self.content_hash_policy_by_version.active_policy
-        )
-
-    def _resolve_hash_include_fields(
-        self,
-        *,
-        profile_include: frozenset[str],
-        policy: ContentHashVersionPolicy | None,
-    ) -> set[str] | None:
-        """Return the include-field set for content hash generation."""
-        if policy is not None and policy.include_fields:
-            include_source = policy.include_fields
-        else:
-            include_source = profile_include or self.content_hash_include_fields
-        return set(include_source) if include_source else None
-
-    def _resolve_hash_exclude_fields(
-        self,
-        *,
-        profile_exclude: frozenset[str],
-        policy: ContentHashVersionPolicy | None,
-    ) -> set[str]:
-        """Return the exclude-field set for content hash generation."""
-        return (
-            set(self.content_hash_exclude_fields)
-            | set(profile_exclude)
-            | (set(policy.exclude_fields) if policy is not None else set())
-            | {"entity_id", "content_hash", "_content_hashes_by_version"}
-        )
-
-    def _resolve_hash_policy(
-        self,
-        *,
-        contract_version: str | None,
-    ) -> tuple[set[str] | None, set[str]]:
-        profile_include, profile_exclude = self._profile_hash_fields()
-        policy = self._select_hash_policy(contract_version=contract_version)
-        return (
-            self._resolve_hash_include_fields(
-                profile_include=profile_include,
-                policy=policy,
-            ),
-            self._resolve_hash_exclude_fields(
-                profile_exclude=profile_exclude,
-                policy=policy,
-            ),
-        )
 
     def finalize_pre_silver(
         self,

@@ -9,16 +9,12 @@ Tests verify that:
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
-from uuid import UUID
 
 import polars as pl
 import pytest
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointState
-from bioetl.application.composite.fsm_helper import FSMStateHelperService
 from bioetl.application.composite.runner_pkg import (
     CompositePipelineRunner,
     CompositeRunnerDependencies,
@@ -31,17 +27,10 @@ from bioetl.domain.composite.result import (
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.events import PipelineEvent
-from bioetl.domain.locking import FencingToken
+from tests.unit.application.composite import runner_test_support as support
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-_MOCK_TOKEN = FencingToken(
-    sequence=1,
-    key="lock:mock",
-    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
-    issued_at=0.0,
-)
 
 
 class TestPipelineEventPhaseHelpers:
@@ -63,44 +52,33 @@ class TestPipelineEventPhaseHelpers:
 @pytest.fixture
 def mock_logger() -> MagicMock:
     """Create a mock LoggerPort that tracks all calls."""
-    logger = MagicMock()
-    logger.info = MagicMock()
-    logger.warning = MagicMock()
-    logger.error = MagicMock()
-    logger.debug = MagicMock()
-    return logger
+    return support.create_mock_logger()
 
 
 @pytest.fixture
 def mock_lock() -> AsyncMock:
     """Create a mock LockPort."""
-    lock = AsyncMock()
-    lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
-    lock.release = AsyncMock()
-    return lock
+    return support.create_mock_lock(release_value=False)
 
 
 @pytest.fixture
 def mock_key_extractor() -> AsyncMock:
     """Create a mock KeyExtractorService."""
-    extractor = AsyncMock()
-    extractor.extract = AsyncMock(
-        return_value=pl.DataFrame(
+    return support.create_mock_key_extractor(
+        pl.DataFrame(
             {
                 "chembl_id": ["CHEMBL1", "CHEMBL2"],
                 "doi": ["10.1000/abc", "10.1000/def"],
             }
         )
     )
-    return extractor
 
 
 @pytest.fixture
 def mock_coordinator() -> AsyncMock:
     """Create a mock EnrichmentCoordinatorService."""
-    coordinator = AsyncMock()
-    coordinator.run_enrichers = AsyncMock(
-        return_value={
+    return support.create_mock_coordinator(
+        {
             "crossref": EnrichmentResult.success(
                 enricher_name="crossref",
                 records_input=2,
@@ -110,15 +88,13 @@ def mock_coordinator() -> AsyncMock:
             ),
         }
     )
-    return coordinator
 
 
 @pytest.fixture
 def mock_merger() -> AsyncMock:
     """Create a mock MergeService."""
-    merger = AsyncMock()
-    merge_call = AsyncMock(
-        return_value=MergeResult(
+    return support.create_mock_merger(
+        MergeResult(
             records_merged=2,
             records_from_seed=2,
             records_enriched=2,
@@ -126,105 +102,39 @@ def mock_merger() -> AsyncMock:
             sources_used=("seed", "crossref"),
         )
     )
-    merger.merge = merge_call
-    merger.execute_request = merge_call
-    return merger
 
 
 @pytest.fixture
 def mock_checkpoint_manager() -> AsyncMock:
     """Create a mock CompositeCheckpointManager."""
-    manager = AsyncMock()
-    manager._saved_states: list[CompositeCheckpointState] = []
-
-    async def load_impl() -> CompositeCheckpointState:
-        await asyncio.sleep(0)
-        return CompositeCheckpointState(
-            composite_name="test_composite",
-            run_id="00000000-0000-0000-0000-000000000123",
-            state=CompositePipelineState.NOT_STARTED,
-            created_at=datetime.now(tz=UTC),
-        )
-
-    async def save_impl(state: CompositeCheckpointState) -> None:
-        await asyncio.sleep(0)
-        manager._saved_states.append(state)
-
-    manager.load = AsyncMock(side_effect=load_impl)
-    manager.save = AsyncMock(side_effect=save_impl)
-    manager.delete = AsyncMock()
-
-    return manager
+    return support.create_tracking_checkpoint_manager()
 
 
 @pytest.fixture
 def mock_seed_runner_factory() -> Callable[[], MagicMock]:
     """Create a mock seed runner factory."""
-
-    def factory() -> MagicMock:
-        runner = MagicMock()
-        runner.run = AsyncMock()
-        executor = MagicMock()
-        executor.records_fetched = 100
-        executor.records_silver = 95
-        runner._executor = executor
-        runner.execution_metrics = {
-            "records_fetched": 100,
-            "records_silver": 95,
-        }
-        return runner
-
-    return factory
+    return support.create_magic_seed_runner_factory()
 
 
 @pytest.fixture
 def mock_enricher_runner_factory() -> Callable[[str, pl.DataFrame], MagicMock]:
     """Create a mock enricher runner factory."""
-
-    def factory(name: str, keys: pl.DataFrame) -> MagicMock:
-        runner = MagicMock()
-        runner.run = AsyncMock()
-        executor = MagicMock()
-        executor.records_silver = len(keys)
-        executor.records_quarantined = 0
-        runner._executor = executor
-        runner.execution_metrics = {
-            "records_silver": len(keys),
-            "records_quarantined": 0,
-        }
-        return runner
-
-    return factory
+    return support.create_magic_enricher_runner_factory()
 
 
 @pytest.fixture
 def sample_composite_config() -> MagicMock:
     """Create a sample CompositeConfig."""
-    config = MagicMock()
-    config.name = "test_composite"
-    config.lock_key = "composite:test_composite"
-
-    config.seed = MagicMock()
-    config.seed.pipeline = "chembl_activity"
-    config.seed.silver_table = "silver/chembl/activity"
-    config.seed.output_keys = ("chembl_id", "doi")
-
     enricher = MagicMock()
     enricher.pipeline = "crossref"
     enricher.required = True
     enricher.silver_table = "silver/crossref/publication"
-    config.enrichers = [enricher]
-    config.required_enrichers = ["crossref"]
-
-    config.merge = MagicMock()
-    config.merge.output_silver_path = "silver/composite/test"
-    config.merge.output_gold_path = "gold/test_composite"
-
-    config.dq = MagicMock()
-    config.dq.soft_fail_threshold = 0.05
-    config.dq.hard_fail_threshold = 0.20
-
-    return config
+    return support.create_magic_composite_config(
+        output_keys=("chembl_id", "doi"),
+        enrichers=[enricher],
+        required_enrichers=["crossref"],
+        output_gold_path="gold/test_composite",
+    )
 
 
 @pytest.fixture
@@ -249,9 +159,9 @@ def runner(
         checkpoint_manager=mock_checkpoint_manager,
         logger=mock_logger,
         lock=mock_lock,
-        fsm_state_helper=FSMStateHelperService(
-            config=sample_composite_config,
+        fsm_state_helper=support.create_mock_fsm_state_helper(
             logger=mock_logger,
+            config=sample_composite_config,
             run_id="00000000-0000-0000-0000-000000000123",
         ),
     )
@@ -520,9 +430,9 @@ class TestFSMFailureLogging:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=FSMStateHelperService(
-                config=sample_composite_config,
+            fsm_state_helper=support.create_mock_fsm_state_helper(
                 logger=mock_logger,
+                config=sample_composite_config,
                 run_id="00000000-0000-0000-0000-000000000123",
             ),
         )
@@ -578,9 +488,9 @@ class TestFSMFailureLogging:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=FSMStateHelperService(
-                config=sample_composite_config,
+            fsm_state_helper=support.create_mock_fsm_state_helper(
                 logger=mock_logger,
+                config=sample_composite_config,
                 run_id="00000000-0000-0000-0000-000000000123",
             ),
         )
@@ -636,9 +546,9 @@ class TestFSMFailureLogging:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=FSMStateHelperService(
-                config=sample_composite_config,
+            fsm_state_helper=support.create_mock_fsm_state_helper(
                 logger=mock_logger,
+                config=sample_composite_config,
                 run_id="00000000-0000-0000-0000-000000000123",
             ),
         )
@@ -694,9 +604,9 @@ class TestDryRunLogging:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=FSMStateHelperService(
-                config=sample_composite_config,
+            fsm_state_helper=support.create_mock_fsm_state_helper(
                 logger=mock_logger,
+                config=sample_composite_config,
                 run_id="00000000-0000-0000-0000-000000000123",
             ),
         )
@@ -754,9 +664,9 @@ class TestNoEnrichersLogging:
             checkpoint_manager=mock_checkpoint_manager,
             logger=mock_logger,
             lock=mock_lock,
-            fsm_state_helper=FSMStateHelperService(
-                config=sample_composite_config,
+            fsm_state_helper=support.create_mock_fsm_state_helper(
                 logger=mock_logger,
+                config=sample_composite_config,
                 run_id="00000000-0000-0000-0000-000000000123",
             ),
         )

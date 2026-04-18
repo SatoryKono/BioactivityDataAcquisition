@@ -15,6 +15,16 @@ from bioetl.composition.factories.services.pipeline_processing import (
 )
 
 
+def _make_callbacks() -> PipelineCallbacksContext:
+    return cast(
+        PipelineCallbacksContext,
+        SimpleNamespace(
+            transform=MagicMock(name="transform"),
+            gold_transform=MagicMock(name="gold_transform"),
+        ),
+    )
+
+
 class TestBuildComponentsAndProcessingService:
     @patch(
         "bioetl.composition.factories.services.pipeline_processing.BatchProcessingService"
@@ -52,10 +62,7 @@ class TestBuildComponentsAndProcessingService:
                 entity_type="test_entity",
             ),
         )
-        callbacks = SimpleNamespace(
-            transform=MagicMock(name="transform"),
-            gold_transform=MagicMock(name="gold_transform"),
-        )
+        callbacks = _make_callbacks()
         components = MagicMock()
         create_components = MagicMock(return_value=components)
         quarantine_manager = MagicMock()
@@ -78,7 +85,7 @@ class TestBuildComponentsAndProcessingService:
             pipeline=cast(BasePipeline, pipeline),
             processor_config=processor_config,
             error_classifier=error_classifier,
-            callbacks=cast(PipelineCallbacksContext, callbacks),
+            callbacks=callbacks,
             gold_filter=gold_filter,
             gold_validator=gold_validator,
             tracing_manager=tracing_manager,

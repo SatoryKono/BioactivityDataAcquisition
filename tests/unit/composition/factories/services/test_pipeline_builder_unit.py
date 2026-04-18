@@ -18,6 +18,17 @@ from bioetl.composition.factories.services.pipeline_builder import (
 )
 
 
+def _make_callbacks() -> PipelineCallbacksContext:
+    return cast(
+        PipelineCallbacksContext,
+        SimpleNamespace(
+            transform=MagicMock(),
+            gold_filter=MagicMock(),
+            gold_transform=MagicMock(),
+        ),
+    )
+
+
 @pytest.mark.unit
 class TestBatchProcessingComponents:
     """Tests for BatchProcessingComponents dataclass."""
@@ -308,17 +319,13 @@ class TestCreateRecordProcessorFromPipeline:
         pipeline.config.column_groups = []
         pipeline.config.scd_config = None
 
-        callbacks = SimpleNamespace(
-            transform=MagicMock(),
-            gold_filter=MagicMock(),
-            gold_transform=MagicMock(),
-        )
+        callbacks = _make_callbacks()
 
         result = create_record_processor_from_pipeline(
             pipeline=cast(BasePipeline, pipeline),
             silver_schema=None,
             gold_schema=MagicMock(),
-            callbacks=cast(PipelineCallbacksContext, callbacks),
+            callbacks=callbacks,
             create_record_processor_fn=create_fn,
         )
 
@@ -346,17 +353,13 @@ class TestCreateRecordProcessorFromPipeline:
         pipeline.config.column_groups = ["system", "business"]
         pipeline.config.scd_config = {"type": 2}
 
-        callbacks = SimpleNamespace(
-            transform=MagicMock(),
-            gold_filter=MagicMock(),
-            gold_transform=MagicMock(),
-        )
+        callbacks = _make_callbacks()
 
         create_record_processor_from_pipeline(
             pipeline=cast(BasePipeline, pipeline),
             silver_schema=None,
             gold_schema=MagicMock(),
-            callbacks=cast(PipelineCallbacksContext, callbacks),
+            callbacks=callbacks,
             create_record_processor_fn=create_fn,
             lock_validator=lock_validator,
             tracer=tracer,

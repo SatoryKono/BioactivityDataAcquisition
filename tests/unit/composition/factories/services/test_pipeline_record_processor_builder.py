@@ -49,6 +49,17 @@ def _make_pipeline() -> BasePipeline:
     return cast(BasePipeline, pipeline)
 
 
+def _make_callbacks() -> PipelineCallbacksContext:
+    return cast(
+        PipelineCallbacksContext,
+        SimpleNamespace(
+            transform=MagicMock(name="transform"),
+            gold_filter=MagicMock(name="gold_filter"),
+            gold_transform=MagicMock(name="gold_transform"),
+        ),
+    )
+
+
 def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> None:
     pipeline = _make_pipeline()
     active_schema = MagicMock(name="active_gold_schema")
@@ -57,18 +68,14 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
         "1.0.0": shadow_schema,
         "2.0.0": active_schema,
     }
-    callbacks = SimpleNamespace(
-        transform=MagicMock(name="transform"),
-        gold_filter=MagicMock(name="gold_filter"),
-        gold_transform=MagicMock(name="gold_transform"),
-    )
+    callbacks = _make_callbacks()
     create_fn = MagicMock(return_value=MagicMock(name="record_processor"))
 
     create_record_processor_from_pipeline(
         pipeline=pipeline,
         silver_schema=None,
         gold_schema=active_schema,
-        callbacks=cast(PipelineCallbacksContext, callbacks),
+        callbacks=callbacks,
         create_record_processor_fn=create_fn,
         lock_validator=MagicMock(name="lock_validator"),
         tracer=MagicMock(name="tracer"),
