@@ -1,5 +1,3 @@
-"""Run manifest creation for control-plane."""
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -65,7 +63,6 @@ def _create_ledger_service(
     inputs: RunnerInputs,
     ctx: PipelineRunContext,
 ) -> RunLedgerService | None:
-    """Create ledger service if enabled."""
     from bioetl.application.services.control_plane.run_ledger_service import (
         RunLedgerService,
     )
@@ -97,7 +94,6 @@ def _build_manifest_create_request(
     dq_contract_compatibility_hash: str,
     effective_config_artifact_id: str,
 ) -> RunManifestCreateSpec:
-    """Build the manifest create request."""
     yaml_config = inputs.yaml_config
     source_refs = _build_run_source_refs(
         ctx=ctx,
@@ -169,7 +165,6 @@ def _validate_required_runtime_persistence_profile(
     request: RunManifestCreateSpec,
     required_persistence_profile: str,
 ) -> None:
-    """Fail closed when the built manifest request cannot satisfy its profile."""
     if required_persistence_profile not in {"replay_ready", "forensic_grade"}:
         return
     if request.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED:
@@ -189,19 +184,12 @@ def create_run_manifest(
     effective_config_hash: str,
     dq_contract_compatibility_hash: str,
 ) -> tuple[_ManifestControlPlaneRefs, RunLedgerService | None]:
-    """Create immutable manifest before pipeline assembly begins."""
     yaml_config = inputs.yaml_config
-
-    # Resolve context values
     run_type_value, execution_context_value = _resolve_run_context_values(ctx)
-
-    # Resolve provider and entity
     provider, entity = _resolve_provider_entity(
         pipeline_name=ctx.pipeline_name,
         yaml_config=yaml_config,
     )
-
-    # Resolve contract identity
     (
         contract_ref,
         contract_version,
@@ -209,19 +197,13 @@ def create_run_manifest(
         dq_policy_ref,
         rule_bundle_version,
     ) = _resolve_contract_identity(provider=provider, entity=entity)
-
-    # Create manifest store
     manifest_store = FileRunManifestStore(
         base_path=_control_plane_root(inputs.settings, "run_manifest"),
         metrics=inputs.observability.metrics,
     )
-
-    # Create ledger service if enabled
     ledger_service: RunLedgerService | None = None
     if ledger_enabled:
         ledger_service = _create_ledger_service(inputs, ctx)
-
-    # Build and create manifest
     manifest_create_request = _build_manifest_create_request(
         ctx,
         inputs,
@@ -242,13 +224,9 @@ def create_run_manifest(
     manifest = RunManifestService(manifest_port=manifest_store).create_manifest(
         manifest_create_request
     )
-
-    # Update ledger service with manifest ID
     if ledger_service is not None:
         ledger_service.manifest_id = manifest.manifest_id
         ledger_service.record_manifest_created(manifest)
-
-    # Create control plane references
     control_plane_refs = _create_control_plane_refs(
         manifest.manifest_id,
         effective_config_hash,
