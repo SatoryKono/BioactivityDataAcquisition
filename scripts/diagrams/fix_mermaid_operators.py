@@ -121,7 +121,7 @@ def _write_validated_repo_text(path: ValidatedRepoPath, content: str) -> None:
     safe_path = path.resolved_path
     if safe_path.is_dir():
         raise ValueError(f"refusing to write to directory path: {safe_path}")
-    safe_path.write_text(content, encoding="utf-8", newline="\n")
+    _write_repo_text(_repo_relative_path(safe_path), content)
 
 
 def _write_repo_text(relative_path: Path, content: str) -> None:

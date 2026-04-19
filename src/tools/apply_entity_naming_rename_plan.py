@@ -180,6 +180,8 @@ def _read_repo_text(path: Path) -> str:
 def _write_repo_text(path: Path, content: str) -> None:
     """Write text to a validated repository-relative path."""
     safe_path = _resolve_repo_path(path)
+    if REPO_ROOT != safe_path and REPO_ROOT not in safe_path.parents:
+        raise ValueError(f"refusing to write outside repository: {safe_path}")
     safe_path.write_text(content, encoding="utf-8")
 
 
