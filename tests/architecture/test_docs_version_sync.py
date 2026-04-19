@@ -149,34 +149,140 @@ def collect_outdated_version_refs(
     current_major_minor = tuple(map(int, rules_version.split(".")))
 
     for md_file in paths:
-        if docs_text_cache is not None and md_file in docs_text_cache:
-            content = docs_text_cache[md_file]
-        else:
-            try:
-                content = md_file.read_text(encoding="utf-8")
-            except UnicodeDecodeError:
-                continue
+        content = _read_doc_text(md_file, docs_text_cache=docs_text_cache)
+        if content is None:
+            continue
 
-        changelog_start = _changelog_start_offset(content)
-
-        for pattern in DOC_VERSION_PATTERNS:
-            for match in pattern.finditer(content):
-                found_version = match.group(1)
-                found_major_minor = tuple(map(int, found_version.split(".")))
-                if found_major_minor < current_major_minor:
-                    if _should_skip_outdated_match(
-                        content=content,
-                        match_start=match.start(),
-                        match_end=match.end(),
-                        changelog_start=changelog_start,
-                    ):
-                        continue
-                    relative_path = md_file.relative_to(project_root)
-                    outdated.append(
-                        f"{relative_path}: v{found_version} (current: v{rules_version})"
-                    )
+        outdated.extend(
+            _iter_outdated_refs_for_doc(
+                md_file=md_file,
+                content=content,
+                project_root=project_root,
+                rules_version=rules_version,
+                current_major_minor=current_major_minor,
+            )
+        )
 
     return sorted(set(outdated))
+
+
+def _read_doc_text(
+    md_file: Path,
+    *,
+    docs_text_cache: dict[Path, str] | None,
+) -> str | None:
+    if docs_text_cache is not None and md_file in docs_text_cache:
+        return docs_text_cache[md_file]
+    try:
+        return md_file.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return None
+
+
+def _iter_outdated_refs_for_doc(
+    *,
+    md_file: Path,
+    content: str,
+    project_root: Path,
+    rules_version: str,
+    current_major_minor: tuple[int, int],
+) -> list[str]:
+    changelog_start = _changelog_start_offset(content)
+    relative_path = md_file.relative_to(project_root)
+    outdated: list[str] = []
+    for pattern in DOC_VERSION_PATTERNS:
+        for match in pattern.finditer(content):
+            found_version = match.group(1)
+            if not _is_outdated_doc_version(found_version, current_major_minor):
+                continue
+            if _should_skip_outdated_match(
+                content=content,
+                match_start=match.start(),
+                match_end=match.end(),
+                changelog_start=changelog_start,
+            ):
+                continue
+            outdated.append(
+                f"{relative_path}: v{found_version} (current: v{rules_version})"
+            )
+    return outdated
+
+
+def _is_outdated_doc_version(
+    found_version: str,
+    current_major_minor: tuple[int, int],
+) -> bool:
+    return tuple(map(int, found_version.split("."))) < current_major_minor
+
+
+def _classify_required_sync_docs(
+    *,
+    project_root: Path,
+    rules_version: str,
+) -> tuple[list[str], list[str], list[str]]:
+    mismatched: list[str] = []
+    missing_version: list[str] = []
+    not_found: list[str] = []
+
+    for doc_path in REQUIRED_SYNC_DOCS:
+        full_path = project_root / doc_path
+        if not full_path.exists():
+            not_found.append(doc_path)
+            continue
+
+        content = full_path.read_text(encoding="utf-8")
+        doc_version = extract_doc_version(content)
+        if doc_version is None:
+            missing_version.append(doc_path)
+            continue
+        if doc_version != rules_version:
+            mismatched.append(
+                f"{doc_path}: v{doc_version} (expected v{rules_version})"
+            )
+
+    return mismatched, missing_version, not_found
+
+
+def _build_required_sync_doc_errors(
+    *,
+    mismatched: list[str],
+    missing_version: list[str],
+    not_found: list[str],
+) -> list[str]:
+    errors: list[str] = []
+    if not_found:
+        errors.append(
+            "Required documents not found:\n"
+            + "\n".join(f"  - {f}" for f in not_found)
+        )
+    if missing_version:
+        errors.append(
+            "Documents missing RULES.md version reference:\n"
+            + "\n".join(f"  - {f}" for f in missing_version)
+        )
+    if mismatched:
+        errors.append(
+            "Documents with outdated RULES.md version:\n"
+            + "\n".join(f"  - {f}" for f in mismatched)
+        )
+    return errors
+
+
+def _iter_canonical_docs(
+    *,
+    project_root: Path,
+    docs_markdown_files: list[Path],
+) -> list[Path]:
+    canonical_root_paths = tuple(project_root / root for root in CANONICAL_VERSION_ROOTS)
+    return [
+        md_file
+        for md_file in docs_markdown_files
+        if any(
+            root_path == md_file.parent or root_path in md_file.parents
+            for root_path in canonical_root_paths
+        )
+        and not is_noncanonical_doc(md_file)
+    ]
 
 
 class TestDocsVersionSync:
@@ -238,43 +344,15 @@ class TestDocsVersionSync:
 
         REQ-DOC-010: Документы в REQUIRED_SYNC_DOCS должны быть синхронизированы.
         """
-        mismatched = []
-        missing_version = []
-        not_found = []
-
-        for doc_path in REQUIRED_SYNC_DOCS:
-            full_path = project_root / doc_path
-            if not full_path.exists():
-                not_found.append(doc_path)
-                continue
-
-            content = full_path.read_text(encoding="utf-8")
-            doc_version = extract_doc_version(content)
-
-            if doc_version is None:
-                missing_version.append(doc_path)
-            elif doc_version != rules_version:
-                mismatched.append(
-                    f"{doc_path}: v{doc_version} (expected v{rules_version})"
-                )
-
-        errors = []
-        if not_found:
-            errors.append(
-                "Required documents not found:\n"
-                + "\n".join(f"  - {f}" for f in not_found)
-            )
-        if missing_version:
-            errors.append(
-                "Documents missing RULES.md version reference:\n"
-                + "\n".join(f"  - {f}" for f in missing_version)
-            )
-        if mismatched:
-            errors.append(
-                "Documents with outdated RULES.md version:\n"
-                + "\n".join(f"  - {f}" for f in mismatched)
-            )
-
+        mismatched, missing_version, not_found = _classify_required_sync_docs(
+            project_root=project_root,
+            rules_version=rules_version,
+        )
+        errors = _build_required_sync_doc_errors(
+            mismatched=mismatched,
+            missing_version=missing_version,
+            not_found=not_found,
+        )
         assert not errors, "\n\n".join(errors)
 
     def test_no_outdated_versions_in_active_docs(
@@ -321,18 +399,10 @@ class TestDocsVersionSync:
         docs_text_cache: dict[Path, str],
     ) -> None:
         """Canonical docs in 02/03/04 MUST not reference stale RULES.md versions."""
-        canonical_root_paths = tuple(
-            project_root / root for root in CANONICAL_VERSION_ROOTS
+        canonical_docs = _iter_canonical_docs(
+            project_root=project_root,
+            docs_markdown_files=docs_markdown_files,
         )
-        canonical_docs = [
-            md_file
-            for md_file in docs_markdown_files
-            if any(
-                root_path == md_file.parent or root_path in md_file.parents
-                for root_path in canonical_root_paths
-            )
-            and not is_noncanonical_doc(md_file)
-        ]
 
         outdated = collect_outdated_version_refs(
             paths=canonical_docs,

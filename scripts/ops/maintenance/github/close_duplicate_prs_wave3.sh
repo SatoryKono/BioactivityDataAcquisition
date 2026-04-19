@@ -25,6 +25,7 @@ Mapping used by this script:
   #2372 -> superseded by #2374
   #2388 -> superseded by #2423 (optional; disabled by default)
 EOF
+  return 0
 }
 
 require_cmd() {
@@ -33,11 +34,14 @@ require_cmd() {
     echo "ERROR: required command not found: $cmd" >&2
     exit 1
   fi
+  return 0
 }
 
 parse_args() {
+  local arg=""
   while [[ $# -gt 0 ]]; do
-    case "$1" in
+    arg="$1"
+    case "$arg" in
       --execute)
         EXECUTE=1
         shift
@@ -55,17 +59,19 @@ parse_args() {
         exit 0
         ;;
       *)
-        echo "ERROR: unknown argument: $1" >&2
+        echo "ERROR: unknown argument: $arg" >&2
         usage
         exit 1
         ;;
     esac
   done
+  return 0
 }
 
 pr_status() {
   local pr="$1"
   gh pr view "$pr" --repo "$REPO" --json state,mergedAt --jq '.state + "|" + (if .mergedAt then "merged" else "not_merged" end)' 2>/dev/null || echo "UNKNOWN|unknown"
+  return 0
 }
 
 close_or_dry_run() {
@@ -97,6 +103,7 @@ close_or_dry_run() {
   else
     echo "[DRY-RUN] gh pr close $pr --repo $REPO --comment \"$comment\""
   fi
+  return 0
 }
 
 main() {

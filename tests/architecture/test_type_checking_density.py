@@ -91,40 +91,47 @@ def _collect_zone_type_checking_stats(
     offenders: list[tuple[int, int, str]] = []
 
     for py_file in sorted(zone_path.rglob("*.py")):
-        try:
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-        except SyntaxError:
+        file_stats = _collect_file_type_checking_stats(py_file, src_root=src_root)
+        if file_stats is None:
             continue
-
-        file_blocks = 0
-        file_imports = 0
-
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.If) or not _is_type_checking_guard(node):
-                continue
-
-            file_blocks += 1
-            for stmt in ast.walk(node):
-                if isinstance(stmt, (ast.Import, ast.ImportFrom)):
-                    file_imports += 1
-
-        if file_blocks:
-            files_with_type_checking += 1
-            type_checking_blocks += file_blocks
-            type_checking_imports += file_imports
-            offenders.append(
-                (
-                    file_imports,
-                    file_blocks,
-                    py_file.relative_to(src_root).as_posix(),
-                )
-            )
+        file_blocks, file_imports, relative_path = file_stats
+        if not file_blocks:
+            continue
+        files_with_type_checking += 1
+        type_checking_blocks += file_blocks
+        type_checking_imports += file_imports
+        offenders.append((file_imports, file_blocks, relative_path))
 
     return ZoneTypeCheckingStats(
         files_with_type_checking=files_with_type_checking,
         type_checking_blocks=type_checking_blocks,
         type_checking_imports=type_checking_imports,
         top_offenders=tuple(sorted(offenders, reverse=True)[:8]),
+    )
+
+
+def _collect_file_type_checking_stats(
+    py_file: Path,
+    *,
+    src_root: Path,
+) -> tuple[int, int, str] | None:
+    try:
+        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return None
+    file_blocks = 0
+    file_imports = 0
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.If) or not _is_type_checking_guard(node):
+            continue
+        file_blocks += 1
+        file_imports += _count_type_checking_imports(node)
+    return file_blocks, file_imports, py_file.relative_to(src_root).as_posix()
+
+
+def _count_type_checking_imports(node: ast.If) -> int:
+    return sum(
+        1 for stmt in ast.walk(node) if isinstance(stmt, (ast.Import, ast.ImportFrom))
     )
 
 
