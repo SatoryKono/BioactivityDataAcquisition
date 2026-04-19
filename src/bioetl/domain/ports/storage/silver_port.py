@@ -93,16 +93,14 @@ def coerce_silver_write_request(
             )
         return request
 
-    legacy_values: list[object]
-    if request is None:
-        legacy_values = list(args)
-    else:
-        legacy_values = [request, *args]
+    legacy_values: list[object] = list(args) if request is None else [request, *args]
 
     if len(legacy_values) > len(_SILVER_WRITE_POSITIONAL_FIELDS):
         raise TypeError("write_silver() received too many positional arguments")
 
-    for field_name, value in zip(_SILVER_WRITE_POSITIONAL_FIELDS, legacy_values):
+    for field_name, value in zip(
+        _SILVER_WRITE_POSITIONAL_FIELDS, legacy_values, strict=True
+    ):
         if field_name in resolved_kwargs:
             raise TypeError(
                 f"write_silver() got multiple values for argument '{field_name}'"
