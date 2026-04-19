@@ -27,6 +27,7 @@ from bioetl.application.services.dq.silver_check_executor import SilverCheckExec
 from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
 from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
 from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
+from bioetl.domain.ports import SilverDQAnalyzeRequest
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     MedallionLayer,
@@ -555,6 +556,30 @@ class TestAnalyze:
         )
         assert report.layer == MedallionLayer.SILVER
         assert "record_count" in report.checks
+
+    def test_analyze_with_request_bundle(
+        self,
+        analyzer: SilverDQAnalyzer,
+        simple_df: pl.DataFrame,
+        mock_config_all_checks: MagicMock,
+    ) -> None:
+        ts = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
+        request = SilverDQAnalyzeRequest(
+            data=simple_df,
+            run_id="request-run",
+            pipeline="chembl.compound",
+            target_table="silver/chembl/compound",
+            source_batch_ids=["batch-request"],
+            config=mock_config_all_checks,
+            timestamp=ts,
+            primary_keys=["record_id"],
+        )
+
+        report = analyzer.analyze(request)
+
+        assert report.layer == MedallionLayer.SILVER
+        assert report.run_id == "request-run"
+        assert report.source_batch_ids == ("batch-request",)
 
     def test_analyze_no_checks_enabled(
         self,

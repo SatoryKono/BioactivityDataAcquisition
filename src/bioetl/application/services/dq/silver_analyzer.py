@@ -20,7 +20,11 @@ from bioetl.application.services.dq.dq_report_builders import build_summary
 from bioetl.application.services.dq.silver_check_executor import SilverCheckExecutor
 from bioetl.application.services.dq.silver_statistics import SilverStatisticsCalculator
 from bioetl.application.services.dq.silver_threshold import SilverThresholdChecker
-from bioetl.domain.ports import SilverDQConfigPort
+from bioetl.domain.ports import (
+    SilverDQAnalyzeRequest,
+    SilverDQConfigPort,
+    coerce_silver_dq_analyze_request,
+)
 from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
     DQReportSummary,
@@ -110,26 +114,9 @@ class SilverDQAnalyzer:
 
     def analyze(
         self,
-        data: pl.DataFrame | pa.Table,
-        *,
-        run_id: str,
-        pipeline: str,
-        target_table: str,
-        source_batch_ids: list[str],
-        config: SilverDQConfigPort,
-        timestamp: datetime,
-        primary_keys: list[str],
-        soft_fail_threshold: float = 0.05,
-        hard_fail_threshold: float = 0.20,
-        input_record_count: int | None = None,
-        quarantined_count: int = 0,
-        previous_schema: dict[str, str] | None = None,
-        key_nullability_rules: (
-            list[
-                JsonDict  # Any: DQ check values vary by check type
-            ]  # Any: DQ rule definitions have heterogeneous values
-            | None
-        ) = None,  # Any: DQ check values vary by check type
+        request: SilverDQAnalyzeRequest | pl.DataFrame | pa.Table | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
 
@@ -155,33 +142,42 @@ class SilverDQAnalyzer:
         Returns:
             SilverDQReport with per-check results, thresholds, and aggregate summary.
         """
-        df = self._to_polars_dataframe(data)
+        analyze_request = coerce_silver_dq_analyze_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
+        df = self._to_polars_dataframe(analyze_request.data)
+        config = cast("SilverDQConfigPort", analyze_request.config)
         enabled_checks = set(config.get_checks_enums())
         checks, passed, failed, warnings = self._check_executor.execute_checks(
             df=df,
             enabled_checks=enabled_checks,
-            primary_keys=primary_keys,
-            input_record_count=input_record_count,
-            quarantined_count=quarantined_count,
-            previous_schema=previous_schema,
-            key_nullability_rules=key_nullability_rules,
+            primary_keys=analyze_request.primary_keys,
+            input_record_count=analyze_request.input_record_count,
+            quarantined_count=analyze_request.quarantined_count,
+            previous_schema=analyze_request.previous_schema,
+            key_nullability_rules=cast(
+                "list[JsonDict] | None",
+                analyze_request.key_nullability_rules,
+            ),
         )
         thresholds, summary = self._calculate_thresholds_and_summary(
             df=df,
-            input_record_count=input_record_count,
-            quarantined_count=quarantined_count,
-            soft_fail_threshold=soft_fail_threshold,
-            hard_fail_threshold=hard_fail_threshold,
+            input_record_count=analyze_request.input_record_count,
+            quarantined_count=analyze_request.quarantined_count,
+            soft_fail_threshold=analyze_request.soft_fail_threshold,
+            hard_fail_threshold=analyze_request.hard_fail_threshold,
             passed=passed,
             failed=failed,
             warnings=warnings,
         )
         return self._build_report(
-            timestamp=timestamp,
-            run_id=run_id,
-            pipeline=pipeline,
-            source_batch_ids=source_batch_ids,
-            target_table=target_table,
+            timestamp=analyze_request.timestamp,
+            run_id=analyze_request.run_id,
+            pipeline=analyze_request.pipeline,
+            source_batch_ids=analyze_request.source_batch_ids,
+            target_table=analyze_request.target_table,
             checks=checks,
             thresholds=thresholds,
             summary=summary,

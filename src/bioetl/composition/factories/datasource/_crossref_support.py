@@ -2,19 +2,21 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
+from typing import cast
 
 from bioetl.composition.factories.datasource._crossref_inputs import resolve_mailto
 from bioetl.composition.factories.datasource.adapter_helpers import (
     AdapterHelperServices,
     AdapterHelpersFactory,
 )
-from bioetl.domain.ports import ErrorHandlerPort
+from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.crossref import CROSSREF_API_BASE
 from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_batch_fetcher,

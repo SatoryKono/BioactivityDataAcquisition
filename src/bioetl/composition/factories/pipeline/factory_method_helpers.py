@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TypeVar
 
-
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.base_transformer.types import (

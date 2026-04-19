@@ -59,6 +59,6 @@ class UnifiedHTTPClient(
     def __post_init__(self) -> None:
         """Capture observability ports resolved by composition-owned wiring."""
         from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
-        
+
         self._tracer = self.tracer if self.tracer is not None else NoOpTracing()
         self._metrics = self.metrics if self.metrics is not None else NoOpMetrics()
