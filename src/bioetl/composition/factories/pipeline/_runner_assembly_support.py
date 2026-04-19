@@ -24,7 +24,11 @@ from bioetl.composition.factories.pipeline.runner_constructor import (
     RunnerAssemblyParts,
     RunnerConstructorPayload,
 )
+from bioetl.composition.factories.services.callbacks import extract_pipeline_callbacks
 from bioetl.composition.factories.services.factory import ServicesBuilder
+from bioetl.composition.factories.services.pipeline_builder import (
+    BatchExecutorBuildRequest,
+)
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import WriteModePolicy
 
@@ -134,19 +138,25 @@ def build_batch_executor(
     """Build the batch executor with YAML-derived DQ output paths."""
     dq_output_paths = extract_dq_output_paths(context.yaml_config)
     return ServicesBuilder.create_batch_executor_from_pipeline(
-        pipeline=context.pipeline,
-        silver_schema=context.silver_schema,
-        gold_schema=context.gold_schema,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=context.pipeline.shutdown_signal,
-        strict_gold_validation=context.strict_gold_validation,
-        lock_validator=lock_manager.validate,
-        tracer=context.observability.tracer,
-        bronze_output_path=dq_output_paths.bronze_path,
-        silver_output_path=dq_output_paths.silver_path,
-        gold_output_path=dq_output_paths.gold_path,
-        flat_structure=dq_output_paths.flat_structure,
-        domain_event_emitter=observer,
+        BatchExecutorBuildRequest(
+            pipeline=context.pipeline,
+            callbacks=extract_pipeline_callbacks(context.pipeline),
+            silver_schema=context.silver_schema,
+            gold_schema=context.gold_schema,
+            checkpoint_manager=checkpoint_manager,
+            shutdown_signal=context.pipeline.shutdown_signal,
+            create_batch_processing_components_fn=(
+                ServicesBuilder.create_batch_processing_components
+            ),
+            strict_gold_validation=context.strict_gold_validation,
+            lock_validator=lock_manager.validate,
+            tracer=context.observability.tracer,
+            bronze_output_path=dq_output_paths.bronze_path,
+            silver_output_path=dq_output_paths.silver_path,
+            gold_output_path=dq_output_paths.gold_path,
+            flat_structure=dq_output_paths.flat_structure,
+            domain_event_emitter=observer,
+        )
     )
 
 

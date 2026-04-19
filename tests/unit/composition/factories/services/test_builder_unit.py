@@ -7,6 +7,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from bioetl.composition.factories.services.builder import ServicesBuilder
+from bioetl.composition.factories.services.pipeline_builder import (
+    BatchExecutorBuildRequest,
+)
 
 
 @pytest.mark.unit
@@ -168,11 +171,15 @@ class TestServicesBuilderCreateBatchExecutorFromPipeline:
         mock_create_be.return_value = expected
 
         result = ServicesBuilder.create_batch_executor_from_pipeline(
-            pipeline=MagicMock(),
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            shutdown_signal=MagicMock(),
+            BatchExecutorBuildRequest(
+                pipeline=MagicMock(),
+                callbacks=MagicMock(),
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                shutdown_signal=MagicMock(),
+                create_batch_processing_components_fn=MagicMock(),
+            )
         )
 
         assert result is expected
