@@ -1052,22 +1052,30 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
 
     lines = content.splitlines()
 
-    issues: list[Issue] = []
-    issues.extend(check_metadata_headers(path, lines))
-    issues.extend(check_naming_convention(path))
-    issues.extend(check_placeholder_content(path, lines))
-    issues.extend(check_staleness(path, lines, stale_days))
-    issues.extend(check_colour_policy(path, lines))
-    issues.extend(check_subgraph_emoji(path, lines))
-    issues.extend(check_node_count_policy(path, lines))
-    issues.extend(check_layout_policy(path, lines))
-    issues.extend(check_link_semantics(path, lines))
-    issues.extend(check_linkstyle_index_fragility(path, lines))
-    issues.extend(check_nbsp_padding(path, lines))
-    issues.extend(check_label_readability(path, lines))
-    issues.extend(check_class_method_render_safety(path, lines))
-    issues.extend(check_orphan_nodes(path, lines))
+    return _collect_file_issues(path=path, lines=lines, stale_days=stale_days)
 
+
+def _collect_file_issues(path: Path, *, lines: list[str], stale_days: int) -> list[Issue]:
+    """Collect all lint issues for a parsed diagram file."""
+    issue_groups = (
+        check_metadata_headers(path, lines),
+        check_naming_convention(path),
+        check_placeholder_content(path, lines),
+        check_staleness(path, lines, stale_days),
+        check_colour_policy(path, lines),
+        check_subgraph_emoji(path, lines),
+        check_node_count_policy(path, lines),
+        check_layout_policy(path, lines),
+        check_link_semantics(path, lines),
+        check_linkstyle_index_fragility(path, lines),
+        check_nbsp_padding(path, lines),
+        check_label_readability(path, lines),
+        check_class_method_render_safety(path, lines),
+        check_orphan_nodes(path, lines),
+    )
+    issues: list[Issue] = []
+    for group in issue_groups:
+        issues.extend(group)
     return issues
 
 
@@ -1088,26 +1096,7 @@ def lint_directory(diagram_dir: Path, stale_days: int) -> LintResult:
 def lint_paths(targets: list[Path], stale_days: int) -> LintResult:
     """Lint a list of file/directory targets."""
     result = LintResult()
-    seen: set[Path] = set()
-    files: list[Path] = []
-
-    for target in targets:
-        if target.is_file():
-            if (
-                target.suffix in SUPPORTED_SUFFIXES
-                and target not in seen
-                and not EXCLUDED_PATH_PARTS.intersection(target.parts)
-            ):
-                seen.add(target)
-                files.append(target)
-            continue
-
-        for path in find_diagram_files(target):
-            if path not in seen:
-                seen.add(path)
-                files.append(path)
-
-    for path in sorted(files):
+    for path in _collect_target_files(targets):
         result.files_checked += 1
         file_issues = lint_file(path, stale_days)
         if not any(i.severity == "ERROR" for i in file_issues):
@@ -1115,6 +1104,34 @@ def lint_paths(targets: list[Path], stale_days: int) -> LintResult:
         result.issues.extend(file_issues)
 
     return result
+
+
+def _collect_target_files(targets: list[Path]) -> list[Path]:
+    """Collect unique diagram files from explicit file and directory targets."""
+    seen: set[Path] = set()
+    files: list[Path] = []
+
+    for target in targets:
+        if _is_explicit_supported_file(target) and target not in seen:
+            seen.add(target)
+            files.append(target)
+            continue
+        for path in find_diagram_files(target):
+            if path in seen:
+                continue
+            seen.add(path)
+            files.append(path)
+
+    return sorted(files)
+
+
+def _is_explicit_supported_file(path: Path) -> bool:
+    """Return whether a target path is a supported direct diagram file."""
+    return (
+        path.is_file()
+        and path.suffix in SUPPORTED_SUFFIXES
+        and not EXCLUDED_PATH_PARTS.intersection(path.parts)
+    )
 
 
 def format_text(result: LintResult) -> str:

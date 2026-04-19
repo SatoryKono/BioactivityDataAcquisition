@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-19T09:09:24.857469+00:00",
+  "generated_at": "2026-04-19T09:26:49.746652+00:00",
   "summary": {
     "total_scripts": 390,
     "status_counts": {
@@ -4930,13 +4930,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 527,
+          "line": 528,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 551,
+          "line": 552,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -4969,13 +4969,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 528,
+          "line": 529,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 552,
+          "line": 553,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -5489,37 +5489,37 @@
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 645,
+          "line": 679,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'"
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 659,
+          "line": 693,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'"
-        },
-        {
-          "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 911,
-          "source_group": "scripts",
-          "text": "- 'entrypoint.sh'\"\"\""
-        },
-        {
-          "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 920,
-          "source_group": "scripts",
-          "text": "- 'entrypoint.sh'\"\"\""
-        },
-        {
-          "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 936,
-          "source_group": "scripts",
-          "text": "- 'entrypoint.sh'\"\"\""
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
           "line": 945,
+          "source_group": "scripts",
+          "text": "- 'entrypoint.sh'\"\"\""
+        },
+        {
+          "path": "scripts/engineering/ci/apply_ci_fixes.py",
+          "line": 954,
+          "source_group": "scripts",
+          "text": "- 'entrypoint.sh'\"\"\""
+        },
+        {
+          "path": "scripts/engineering/ci/apply_ci_fixes.py",
+          "line": 970,
+          "source_group": "scripts",
+          "text": "- 'entrypoint.sh'\"\"\""
+        },
+        {
+          "path": "scripts/engineering/ci/apply_ci_fixes.py",
+          "line": 979,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         }

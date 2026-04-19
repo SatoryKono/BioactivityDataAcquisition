@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -51,6 +52,19 @@ COMMANDS: dict[str, CommandSpec] = {
     "parallel": CommandSpec("All Tests (parallel)", ["tests/", "-n", "auto", "-q"]),
     "failed": CommandSpec("Re-run Failed", ["tests/", "--lf", "-x", "-v"]),
 }
+UNIT_QUICK_ARGS = ["tests/unit/", "-x", "-q"]
+SMOKE_QUICK_ARGS = ["tests/smoke/", "-x", "-q"]
+FAST_UNIT_FALLBACK_ARGS = [
+    "tests/unit/",
+    "-m",
+    "not slow and not serial",
+    "-n",
+    "auto",
+    "--dist",
+    "loadscope",
+    "-q",
+    "--tb=short",
+]
 
 
 def _project_root() -> Path:
@@ -120,27 +134,15 @@ def _run_pytest(
 
 
 def _run_contract_live(extra: list[str]) -> int:
-    env = os.environ.copy()
-    env["BIOETL_LIVE_API_TESTS"] = "true"
-    env["BIOETL_NETWORK_TESTS"] = "true"
-    cmd = [
-        sys.executable,
-        "-m",
-        "pytest",
-        "tests/contract/",
-        "--network",
-        "-v",
-        *extra,
-    ]
-    _print_info("Running: Contract Tests (live APIs + network)")
-    _print_info(f"Command: {' '.join(cmd)}")
-    completed = subprocess.run(cmd, cwd=_project_root(), env=env, check=False)
-    if completed.returncode == 0:
-        _print_ok("Contract Tests (live) passed")
-        return 0
-
-    _print_fail("Contract Tests (live) failed")
-    return completed.returncode
+    return _run_pytest(
+        "Contract Tests (live APIs + network)",
+        ["tests/contract/", "--network", "-v"],
+        extra,
+        env_overrides={
+            "BIOETL_LIVE_API_TESTS": "true",
+            "BIOETL_NETWORK_TESTS": "true",
+        },
+    )
 
 
 def _run_marker(args: list[str]) -> int:
@@ -163,10 +165,10 @@ def _run_file(args: list[str]) -> int:
 
 def _run_quick(extra: list[str]) -> int:
     _print_info("Quick check: unit + smoke")
-    rc = _run_pytest("Unit Tests", ["tests/unit/", "-x", "-q"], extra)
+    rc = _run_pytest("Unit Tests", UNIT_QUICK_ARGS, extra)
     if rc != 0:
         return rc
-    return _run_pytest("Smoke Tests", ["tests/smoke/", "-x", "-q"], extra)
+    return _run_pytest("Smoke Tests", SMOKE_QUICK_ARGS, extra)
 
 
 def _git_changed_python_files(base_branch: str, prefix: str) -> list[str]:
@@ -203,18 +205,6 @@ def _run_changed(args: list[str]) -> int:
         extra = args[1:]
 
     env_overrides = {"HYPOTHESIS_PROFILE": "fast"}
-    fast_unit_fallback = [
-        "tests/unit/",
-        "-m",
-        "not slow and not serial",
-        "-n",
-        "auto",
-        "--dist",
-        "loadscope",
-        "-q",
-        "--tb=short",
-    ]
-
     changed_src = _git_changed_python_files(base_branch, "src/bioetl")
     changed_tests = _git_changed_python_files(base_branch, "tests/")
 
@@ -226,7 +216,7 @@ def _run_changed(args: list[str]) -> int:
             )
             return _run_pytest(
                 "Changed fallback: unit tests",
-                fast_unit_fallback,
+                FAST_UNIT_FALLBACK_ARGS,
                 extra,
                 env_overrides=env_overrides,
             )
@@ -269,10 +259,20 @@ def _run_changed(args: list[str]) -> int:
     _print_info("Keyword-selected changed tests failed or matched nothing.")
     return _run_pytest(
         "Changed fallback: unit tests",
-        fast_unit_fallback,
+        FAST_UNIT_FALLBACK_ARGS,
         extra,
         env_overrides=env_overrides,
     )
+
+
+def _custom_command_handlers() -> dict[str, Callable[[list[str]], int]]:
+    return {
+        "contract-live": _run_contract_live,
+        "marker": _run_marker,
+        "file": _run_file,
+        "quick": _run_quick,
+        "changed": _run_changed,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -284,16 +284,9 @@ def main(argv: list[str] | None = None) -> int:
     command = args[0]
     tail = args[1:]
 
-    if command == "contract-live":
-        return _run_contract_live(tail)
-    if command == "marker":
-        return _run_marker(tail)
-    if command == "file":
-        return _run_file(tail)
-    if command == "quick":
-        return _run_quick(tail)
-    if command == "changed":
-        return _run_changed(tail)
+    custom_handler = _custom_command_handlers().get(command)
+    if custom_handler is not None:
+        return custom_handler(tail)
 
     spec = COMMANDS.get(command)
     if spec is None:

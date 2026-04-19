@@ -18,6 +18,14 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_TIMEOUT_SECONDS = 15.0
+NARROW_PYTEST_PLUGINS = (
+    "anyio.pytest_plugin",
+    "pytest_asyncio.plugin",
+    "_hypothesis_pytestplugin",
+    "pytest_timeout",
+    "syrupy",
+    "pytest_archon.plugin",
+)
 
 
 @dataclass(slots=True)
@@ -185,6 +193,14 @@ def _run_probe(
     )
 
 
+def _narrow_pytest_command(python_bin: str, *extra_args: str) -> list[str]:
+    command = [python_bin, "-m", "pytest"]
+    for plugin in NARROW_PYTEST_PLUGINS:
+        command.extend(["-p", plugin])
+    command.extend(extra_args)
+    return command
+
+
 def _build_probes(python_bin: str) -> list[Probe]:
     return [
         Probe(
@@ -200,62 +216,25 @@ def _build_probes(python_bin: str) -> list[Probe]:
         Probe(
             name="pytest-version-narrow",
             description="Narrow pytest startup with explicit plugin allowlist.",
-            command=[
-                python_bin,
-                "-m",
-                "pytest",
-                "-p",
-                "anyio.pytest_plugin",
-                "-p",
-                "pytest_asyncio.plugin",
-                "--version",
-            ],
+            command=_narrow_pytest_command(python_bin, "--version"),
         ),
         Probe(
             name="pytest-collect-narrow",
             description="Collect-only architecture slice in narrow mode.",
-            command=[
+            command=_narrow_pytest_command(
                 python_bin,
-                "-m",
-                "pytest",
-                "-p",
-                "anyio.pytest_plugin",
-                "-p",
-                "pytest_asyncio.plugin",
-                "-p",
-                "_hypothesis_pytestplugin",
-                "-p",
-                "pytest_timeout",
-                "-p",
-                "syrupy",
-                "-p",
-                "pytest_archon.plugin",
                 "--collect-only",
                 "tests/architecture/test_boundary_assertions.py",
-            ],
+            ),
         ),
         Probe(
             name="pytest-file-narrow",
             description="Single-file architecture pytest slice in narrow mode.",
-            command=[
+            command=_narrow_pytest_command(
                 python_bin,
-                "-m",
-                "pytest",
-                "-p",
-                "anyio.pytest_plugin",
-                "-p",
-                "pytest_asyncio.plugin",
-                "-p",
-                "_hypothesis_pytestplugin",
-                "-p",
-                "pytest_timeout",
-                "-p",
-                "syrupy",
-                "-p",
-                "pytest_archon.plugin",
                 "tests/architecture/test_boundary_assertions.py",
                 "-q",
-            ],
+            ),
         ),
         Probe(
             name="mypy-version",
@@ -290,6 +269,25 @@ def _build_probes(python_bin: str) -> list[Probe]:
             ],
         ),
     ]
+
+
+def _probe_env(base_env: dict[str, str], probe_name: str) -> dict[str, str]:
+    probe_env = base_env.copy()
+    if "pytest" in probe_name and "narrow" in probe_name:
+        probe_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+    return probe_env
+
+
+def _json_payload(
+    python_bin: str,
+    interpreter_kind: str,
+    results: list[ProbeResult],
+) -> dict[str, object]:
+    return {
+        "interpreter": python_bin,
+        "interpreter_kind": interpreter_kind,
+        "results": [result.as_dict() for result in results],
+    }
 
 
 def _print_markdown(
@@ -359,27 +357,24 @@ def main(argv: list[str] | None = None) -> None:
     python_bin, interpreter_kind = _preferred_python()
     probes = _build_probes(python_bin)
     results: list[ProbeResult] = []
+    base_env = os.environ.copy()
 
     for probe in probes:
-        probe_env = os.environ.copy()
-        if "pytest" in probe.name and "narrow" in probe.name:
-            probe_env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
         results.append(
             _run_probe(
                 probe,
                 timeout_seconds=args.timeout,
                 cwd=REPO_ROOT,
-                env=probe_env,
+                env=_probe_env(base_env, probe.name),
             )
         )
 
     if args.json:
-        payload = {
-            "interpreter": python_bin,
-            "interpreter_kind": interpreter_kind,
-            "results": [result.as_dict() for result in results],
-        }
-        json.dump(payload, sys.stdout, indent=2)
+        json.dump(
+            _json_payload(python_bin, interpreter_kind, results),
+            sys.stdout,
+            indent=2,
+        )
         print()
         return
 

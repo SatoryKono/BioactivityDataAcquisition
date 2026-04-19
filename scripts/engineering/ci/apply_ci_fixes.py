@@ -458,6 +458,40 @@ def _workflow_read_branch(api: GitHubAPI, branch: str) -> str:
     return BASE_BRANCH if api.dry_run else branch
 
 
+def _prepare_fix_branch(api: GitHubAPI, branch: str) -> str:
+    """Ensure the working branch exists and return the branch to read from."""
+    _create_branch_if_not_exists(api, branch, api.get_sha())
+    return _workflow_read_branch(api, branch)
+
+
+def _report_checkout_v6_repatch(path: str, count: int) -> None:
+    suffix = "s" if count > 1 else ""
+    print(f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{suffix})")
+
+
+def _repatch_checkout_v6(path: str, content: str) -> tuple[str, bool]:
+    """Re-apply checkout@v4 and report whether content changed."""
+    patched_content, count = _replace_checkout_v6(content)
+    if count:
+        _report_checkout_v6_repatch(path, count)
+        return patched_content, True
+    return content, False
+
+
+def _create_fix_pr(
+    api: GitHubAPI,
+    *,
+    title: str,
+    branch: str,
+    body: str,
+) -> None:
+    """Create a PR for a fix branch when not running in dry-run mode."""
+    if api.dry_run:
+        return
+    pr_url = api.create_pr(title=title, branch=branch, body=body)
+    print(f"  PR created: {pr_url}")
+
+
 def _replace_checkout_v6(content: str) -> tuple[str, int]:
     """Replace checkout@v6 with checkout@v4 and report the occurrence count."""
     count = content.count(CHECKOUT_V6)
@@ -1462,11 +1496,7 @@ def _patch_paths_conflict_content(path: str, content: str) -> tuple[str, bool]:
 def apply_hf_paths_conflict(api: GitHubAPI) -> None:
     print("\n=== HF-paths-conflict: Remove paths-ignore + paths conflicts ===")
     branch = BRANCHES["hf-paths-conflict"]
-    sha = api.get_sha()
-
-    _create_branch_if_not_exists(api, branch, sha)
-
-    read_branch = _workflow_read_branch(api, branch)
+    read_branch = _prepare_fix_branch(api, branch)
     files_to_fix = [
         DOCKER_WORKFLOW_PATH,
         ".github/workflows/skills-consistency.yml",
@@ -1493,13 +1523,12 @@ def apply_hf_paths_conflict(api: GitHubAPI) -> None:
         )
         time.sleep(0.3)
 
-    if not api.dry_run:
-        pr_url = api.create_pr(
-            title="fix(ci): remove paths-ignore/paths conflicts in docker, skills, port-contracts workflows",
-            branch=branch,
-            body=PR_BODIES["hf-paths-conflict"],
-        )
-        print(f"  PR created: {pr_url}")
+    _create_fix_pr(
+        api,
+        title="fix(ci): remove paths-ignore/paths conflicts in docker, skills, port-contracts workflows",
+        branch=branch,
+        body=PR_BODIES["hf-paths-conflict"],
+    )
 
 
 # ── HF-typecheck-warn ─────────────────────────────────────────────────────────
@@ -1510,15 +1539,8 @@ def apply_hf_typecheck_warn(api: GitHubAPI) -> None:
         "\n=== HF-typecheck-warn: Make type-check job non-blocking (continue-on-error) ==="
     )
     branch = BRANCHES["hf-typecheck-warn"]
-    sha = api.get_sha()
-
-    if api.branch_exists(branch):
-        print(f"  Branch {branch} already exists — skipping branch creation")
-    else:
-        api.create_branch(branch, sha)
-
     path = ".github/workflows/type-checking.yml"
-    read_branch = BASE_BRANCH if api.dry_run else branch
+    read_branch = _prepare_fix_branch(api, branch)
     content, file_sha = api.get_file(path, read_branch)
 
     patched = False
@@ -1542,12 +1564,8 @@ def apply_hf_typecheck_warn(api: GitHubAPI) -> None:
             print(f"  WARNING: expected type-check job header not found in {path}")
 
     # Re-apply checkout@v4
-    if "actions/checkout@v6" in content:
-        count = content.count("actions/checkout@v6")
-        content = content.replace("actions/checkout@v6", "actions/checkout@v4")
-        print(
-            f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
-        )
+    content, repatched_checkout = _repatch_checkout_v6(path, content)
+    if repatched_checkout:
         patched = True
 
     if not patched:
@@ -1569,13 +1587,12 @@ def apply_hf_typecheck_warn(api: GitHubAPI) -> None:
         branch=branch,
     )
 
-    if not api.dry_run:
-        pr_url = api.create_pr(
-            title="fix(ci): make type-check non-blocking while mypy errors are fixed",
-            branch=branch,
-            body=PR_BODIES["hf-typecheck-warn"],
-        )
-        print(f"  PR created: {pr_url}")
+    _create_fix_pr(
+        api,
+        title="fix(ci): make type-check non-blocking while mypy errors are fixed",
+        branch=branch,
+        body=PR_BODIES["hf-typecheck-warn"],
+    )
 
 
 def apply_hf_pip_skip_editable(api: GitHubAPI) -> None:
@@ -1583,15 +1600,7 @@ def apply_hf_pip_skip_editable(api: GitHubAPI) -> None:
     print("=== HF-pip-skip-editable: Fix pip-audit — add --skip-editable ===")
     branch = BRANCHES["hf-pip-skip-editable"]
     path = ".github/workflows/security.yml"
-
-    if not api.dry_run:
-        if api.branch_exists(branch):
-            print(f"  Branch {branch} already exists — skipping branch creation")
-        else:
-            sha = api.get_sha()
-            api.create_branch(branch, sha)
-
-    read_branch = BASE_BRANCH if api.dry_run else branch
+    read_branch = _prepare_fix_branch(api, branch)
     content, file_sha = api.get_file(path, read_branch)
 
     old_line = "        run: uv run pip-audit --strict"
@@ -1625,13 +1634,12 @@ def apply_hf_pip_skip_editable(api: GitHubAPI) -> None:
         branch=branch,
     )
 
-    if not api.dry_run:
-        pr_url = api.create_pr(
-            title="fix(ci): add --skip-editable to pip-audit (local package not on PyPI)",
-            branch=branch,
-            body=PR_BODIES["hf-pip-skip-editable"],
-        )
-        print(f"  PR created: {pr_url}")
+    _create_fix_pr(
+        api,
+        title="fix(ci): add --skip-editable to pip-audit (local package not on PyPI)",
+        branch=branch,
+        body=PR_BODIES["hf-pip-skip-editable"],
+    )
 
 
 def apply_hf_stray_dirs(api: GitHubAPI) -> None:
@@ -1736,14 +1744,7 @@ def apply_hf_checkout_hygiene(api: GitHubAPI) -> None:
         ".github/workflows/compiled-artifacts-block.yml",
     ]
 
-    if not api.dry_run:
-        if api.branch_exists(branch):
-            print(f"  Branch {branch} already exists — skipping branch creation")
-        else:
-            sha = api.get_sha()
-            api.create_branch(branch, sha)
-
-    read_branch = BASE_BRANCH if api.dry_run else branch
+    read_branch = _prepare_fix_branch(api, branch)
     changed: list[str] = []
 
     for path in files_to_fix:
@@ -1770,14 +1771,14 @@ def apply_hf_checkout_hygiene(api: GitHubAPI) -> None:
         print("  INFO: No files needed patching")
         return
 
+    _create_fix_pr(
+        api,
+        title="fix(ci): replace actions/checkout@v6 → @v4 in hygiene workflows",
+        branch=branch,
+        body=PR_BODIES["hf-checkout-hygiene"],
+    )
     if not api.dry_run:
-        pr_url = api.create_pr(
-            title="fix(ci): replace actions/checkout@v6 → @v4 in hygiene workflows",
-            branch=branch,
-            body=PR_BODIES["hf-checkout-hygiene"],
-        )
         print(f"  Fixed: {', '.join(changed)}")
-        print(f"  PR created: {pr_url}")
 
 
 def apply_hf_mcp_allowlist(api: GitHubAPI) -> None:

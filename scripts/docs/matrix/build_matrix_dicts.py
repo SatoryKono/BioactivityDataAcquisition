@@ -272,6 +272,24 @@ def _column_dictionary(
     return dictionaries, review_queue
 
 
+def _base_payload(generated_at: str, workbook: Path) -> dict[str, object]:
+    return {
+        "generated_at_utc": generated_at,
+        "source_workbook": str(workbook),
+        "target_columns": list(TARGET_COLUMNS),
+    }
+
+
+def _output_paths(output_dir: Path, stem: str) -> dict[str, Path]:
+    return {
+        "inventory": output_dir / f"{stem}_value_inventory.yaml",
+        "sheet_dictionaries": output_dir / f"{stem}_sheet_dictionaries.yaml",
+        "column_dictionaries": output_dir / f"{stem}_column_dictionaries.yaml",
+        "review_queue": output_dir / f"{stem}_dictionary_review_queue.yaml",
+        "detail_id_dictionary": output_dir / f"{stem}_normalisation_detail_ids.yaml",
+    }
+
+
 def _collect_column_data(
     workbook_rows: dict[str, list[dict[str, str]]],
     column: str,
@@ -393,17 +411,13 @@ def _write_yaml(path: Path, payload: dict[str, object]) -> None:
     )
 
 
-def main() -> int:
-    args = _arg_parser().parse_args()
-    workbook = args.workbook.resolve()
-    output_dir = args.output_dir.resolve()
-    workbook_rows = _read_workbook(workbook)
-    generated_at = datetime.now(UTC).isoformat()
-
-    inventory_payload = {
-        "generated_at_utc": generated_at,
-        "source_workbook": str(workbook),
-        "target_columns": list(TARGET_COLUMNS),
+def _inventory_payload(
+    generated_at: str,
+    workbook: Path,
+    workbook_rows: dict[str, list[dict[str, str]]],
+) -> dict[str, object]:
+    return {
+        **_base_payload(generated_at, workbook),
         "sheets": {
             sheet_name: {
                 "row_count": len(rows),
@@ -413,58 +427,70 @@ def main() -> int:
         },
         "global_columns": _global_inventory(workbook_rows),
     }
-    dictionary_payload = {
-        "generated_at_utc": generated_at,
-        "source_workbook": str(workbook),
-        "target_columns": list(TARGET_COLUMNS),
+
+
+def _sheet_dictionary_payload(
+    generated_at: str,
+    workbook: Path,
+    workbook_rows: dict[str, list[dict[str, str]]],
+) -> dict[str, object]:
+    return {
+        **_base_payload(generated_at, workbook),
         "sheets": {
             sheet_name: _sheet_dictionary(rows)
             for sheet_name, rows in workbook_rows.items()
         },
     }
-    column_dictionaries, review_queue = _column_dictionary(workbook_rows)
-    detail_id_dictionary = _detail_id_dictionary(workbook_rows)
-    column_dictionary_payload = {
-        "generated_at_utc": generated_at,
-        "source_workbook": str(workbook),
-        "target_columns": list(TARGET_COLUMNS),
-        "columns": column_dictionaries,
-    }
-    review_queue_payload = {
-        "generated_at_utc": generated_at,
-        "source_workbook": str(workbook),
-        "target_columns": list(TARGET_COLUMNS),
-        "columns": review_queue,
+
+
+def _detail_id_payload(
+    generated_at: str,
+    workbook: Path,
+    detail_id_dictionary: dict[str, object],
+) -> dict[str, object]:
+    return {
+        **_base_payload(generated_at, workbook),
+        "detail_column": DETAIL_COLUMN,
+        "detail_id_column": DETAIL_ID_COLUMN,
+        **detail_id_dictionary,
     }
 
-    stem = workbook.stem
-    inventory_path = output_dir / f"{stem}_value_inventory.yaml"
-    sheet_dict_path = output_dir / f"{stem}_sheet_dictionaries.yaml"
-    column_dict_path = output_dir / f"{stem}_column_dictionaries.yaml"
-    review_queue_path = output_dir / f"{stem}_dictionary_review_queue.yaml"
-    detail_id_dict_path = output_dir / f"{stem}_normalisation_detail_ids.yaml"
-    _write_yaml(inventory_path, inventory_payload)
-    _write_yaml(sheet_dict_path, dictionary_payload)
-    _write_yaml(column_dict_path, column_dictionary_payload)
-    _write_yaml(review_queue_path, review_queue_payload)
+
+def main() -> int:
+    args = _arg_parser().parse_args()
+    workbook = args.workbook.resolve()
+    output_dir = args.output_dir.resolve()
+    workbook_rows = _read_workbook(workbook)
+    generated_at = datetime.now(UTC).isoformat()
+    column_dictionaries, review_queue = _column_dictionary(workbook_rows)
+    detail_id_dictionary = _detail_id_dictionary(workbook_rows)
+    base_payload = _base_payload(generated_at, workbook)
+    output_paths = _output_paths(output_dir, workbook.stem)
+
     _write_yaml(
-        detail_id_dict_path,
-        {
-            "generated_at_utc": generated_at,
-            "source_workbook": str(workbook),
-            "detail_column": DETAIL_COLUMN,
-            "detail_id_column": DETAIL_ID_COLUMN,
-            **detail_id_dictionary,
-        },
+        output_paths["inventory"],
+        _inventory_payload(generated_at, workbook, workbook_rows),
+    )
+    _write_yaml(
+        output_paths["sheet_dictionaries"],
+        _sheet_dictionary_payload(generated_at, workbook, workbook_rows),
+    )
+    _write_yaml(
+        output_paths["column_dictionaries"],
+        {**base_payload, "columns": column_dictionaries},
+    )
+    _write_yaml(
+        output_paths["review_queue"],
+        {**base_payload, "columns": review_queue},
+    )
+    _write_yaml(
+        output_paths["detail_id_dictionary"],
+        _detail_id_payload(generated_at, workbook, detail_id_dictionary),
     )
 
     print(
         {
-            "inventory": str(inventory_path),
-            "sheet_dictionaries": str(sheet_dict_path),
-            "column_dictionaries": str(column_dict_path),
-            "review_queue": str(review_queue_path),
-            "detail_id_dictionary": str(detail_id_dict_path),
+            **{name: str(path) for name, path in output_paths.items()},
             "sheet_count": len(workbook_rows),
             "target_columns": len(TARGET_COLUMNS),
         }

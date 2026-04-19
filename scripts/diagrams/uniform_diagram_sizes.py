@@ -48,8 +48,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+REPO_ROOT = Path(__file__).resolve().parents[2]
+for candidate in (SCRIPT_DIR, REPO_ROOT):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
 
 try:
     from .diagram_paths import source_dir
@@ -617,47 +620,12 @@ def _normalize_flowchart(lines: list[str]) -> list[str]:
 
     groups = _parse_uniform_groups(lines)
     width_strategy = _parse_uniform_width_strategy(lines)
-
-    if not groups:
-        stats = _compute_flowchart_uniform(nodes)
-        stats_map: dict[str, UniformStats] = {n.node_id: stats for n in nodes}
-        group_stats: dict[str, UniformStats] | None = None
-    else:
-        assignment = _assign_groups([n.node_id for n in nodes], groups)
-        grouped_nodes = _partition_by_group(nodes, assignment)
-
-        group_stats_raw: dict[str, UniformStats] = {}
-        for gname, gnodes in grouped_nodes.items():
-            gs = _compute_flowchart_uniform(gnodes)
-            group_stats_raw[gname] = gs
-
-        group_stats = {}
-        if width_strategy == "global":
-            global_max_width = 0
-            global_max_title = 0
-            for gs in group_stats_raw.values():
-                global_max_width = max(global_max_width, gs.max_visible_width)
-                global_max_title = max(global_max_title, gs.max_title_len)
-            for gname, gs in group_stats_raw.items():
-                group_stats[gname] = UniformStats(
-                    max_visible_width=global_max_width,
-                    max_total_body=gs.max_total_body,
-                    max_title_len=global_max_title,
-                )
-        else:
-            for gname, gs in group_stats_raw.items():
-                group_stats[gname] = UniformStats(
-                    max_visible_width=gs.max_visible_width,
-                    max_total_body=gs.max_total_body,
-                    max_title_len=gs.max_title_len,
-                )
-
-        stats_map = {n.node_id: group_stats[assignment[n.node_id]] for n in nodes}
-
-    # Build index of lines to replace
-    replacements: dict[int, str] = {}
-    for n in nodes:
-        replacements[n.line_index] = _rebuild_flowchart_node(n, stats_map[n.node_id])
+    stats_map, group_stats, stats = _resolve_flowchart_uniform_stats(
+        nodes=nodes,
+        groups=groups,
+        width_strategy=width_strategy,
+    )
+    replacements = _build_flowchart_replacements(nodes, stats_map)
 
     result: list[str] = []
     for i, line in enumerate(lines):
@@ -678,6 +646,59 @@ def _normalize_flowchart(lines: list[str]) -> list[str]:
         result = _update_uniform_tag(result, stats, "flowchart")
 
     return result
+
+
+def _resolve_flowchart_uniform_stats(
+    *,
+    nodes: list[FlowchartNode],
+    groups: list[UniformGroup],
+    width_strategy: str,
+) -> tuple[dict[str, UniformStats], dict[str, UniformStats] | None, UniformStats | None]:
+    """Resolve per-node stats for flowchart nodes, optionally grouped."""
+    if not groups:
+        stats = _compute_flowchart_uniform(nodes)
+        return {node.node_id: stats for node in nodes}, None, stats
+
+    assignment = _assign_groups([node.node_id for node in nodes], groups)
+    grouped_nodes = _partition_by_group(nodes, assignment)
+    group_stats = _build_flowchart_group_stats(grouped_nodes, width_strategy)
+    stats_map = {node.node_id: group_stats[assignment[node.node_id]] for node in nodes}
+    return stats_map, group_stats, None
+
+
+def _build_flowchart_group_stats(
+    grouped_nodes: dict[str, list[FlowchartNode]],
+    width_strategy: str,
+) -> dict[str, UniformStats]:
+    """Build grouped flowchart stats and optionally normalize width globally."""
+    group_stats_raw = {
+        group_name: _compute_flowchart_uniform(group_nodes)
+        for group_name, group_nodes in grouped_nodes.items()
+    }
+    if width_strategy != "global":
+        return dict(group_stats_raw)
+
+    global_max_width = max(stats.max_visible_width for stats in group_stats_raw.values())
+    global_max_title = max(stats.max_title_len for stats in group_stats_raw.values())
+    return {
+        group_name: UniformStats(
+            max_visible_width=global_max_width,
+            max_total_body=stats.max_total_body,
+            max_title_len=global_max_title,
+        )
+        for group_name, stats in group_stats_raw.items()
+    }
+
+
+def _build_flowchart_replacements(
+    nodes: list[FlowchartNode],
+    stats_map: dict[str, UniformStats],
+) -> dict[int, str]:
+    """Build replacement lines for normalized flowchart nodes."""
+    return {
+        node.line_index: _rebuild_flowchart_node(node, stats_map[node.node_id])
+        for node in nodes
+    }
 
 
 # ── @uniform tag management ─────────────────────────────────────────────────
