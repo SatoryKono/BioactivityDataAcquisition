@@ -369,11 +369,11 @@ def test_reproducibility_contract_effective_config_semantic_payload_is_stable() 
         default_disposition_policy=DQDisposition.WARN,
     )
     kwargs = {
-        pipeline_name="chembl_activity",
-        pipeline_kind="standard",
-        resolved_config={"provider": "chembl", "entity_type": "activity"},
-        runtime_overrides={"cli": {"limit": 25}},
-        source_refs=[
+        "pipeline_name": "chembl_activity",
+        "pipeline_kind": "standard",
+        "resolved_config": {"provider": "chembl", "entity_type": "activity"},
+        "runtime_overrides": {"cli": {"limit": 25}},
+        "source_refs": [
             ConfigSourceRef(
                 source_type="fixture",
                 source_path="tests/fixtures/bronze/chembl/activity/sample.jsonl",
@@ -381,8 +381,8 @@ def test_reproducibility_contract_effective_config_semantic_payload_is_stable() 
                 priority=1,
             )
         ],
-        dq_config=dq_config,
-        artifact_id="eca-stable",
+        "dq_config": dq_config,
+        "artifact_id": "eca-stable",
     }
     first = service.create_effective_config_artifact(**kwargs)
     second = service.create_effective_config_artifact(**kwargs)

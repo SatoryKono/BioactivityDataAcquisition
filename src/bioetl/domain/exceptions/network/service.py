@@ -244,7 +244,7 @@ class ServiceAuthenticationError(ExternalServiceError):
         )
 
 
-def DataValidationError(
+def data_validation_error(
     message: str,
     service_name: str | None = None,
     field: str | None = None,
@@ -272,3 +272,6 @@ def DataValidationError(
     )
     error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
     return error
+
+
+DataValidationError = data_validation_error
