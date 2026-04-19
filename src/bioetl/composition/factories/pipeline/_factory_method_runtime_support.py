@@ -9,11 +9,11 @@ from bioetl.composition.factories.pipeline._factory_method_control_plane import 
     resolve_strict_gold_validation,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
+    _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
 )
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationInputs,
-    _CreatePipelineWithServicesRequest,
 )
 
 if TYPE_CHECKING:
