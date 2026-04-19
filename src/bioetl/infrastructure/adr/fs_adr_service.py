@@ -41,6 +41,34 @@ def _parse_h1_title(text: str) -> str | None:
     return None
 
 
+def _extract_prefixed_line_value(
+    stripped: str,
+    lowered: str,
+    label_variants: tuple[str, ...],
+) -> str | None:
+    for label in label_variants:
+        for prefix in (f"**{label}:**", f"{label}:"):
+            if lowered.startswith(prefix):
+                value = stripped[len(prefix) :].strip()
+                return value or None
+    return None
+
+
+def _extract_table_line_value(
+    stripped: str,
+    label_variants: tuple[str, ...],
+) -> str | None:
+    if not stripped.startswith("|"):
+        return None
+    cells = [cell.strip() for cell in stripped.split("|") if cell.strip()]
+    if len(cells) < 2:
+        return None
+    header = cells[0].strip("* ").casefold()
+    if header in label_variants and cells[1]:
+        return cells[1]
+    return None
+
+
 def _extract_labeled_line_value(text: str, labels: tuple[str, ...]) -> str | None:
     label_variants = tuple(label.casefold() for label in labels)
     for line in text.splitlines():
@@ -49,25 +77,17 @@ def _extract_labeled_line_value(text: str, labels: tuple[str, ...]) -> str | Non
             continue
 
         lowered = stripped.casefold()
-        for label in label_variants:
-            prefixes = (
-                f"**{label}:**",
-                f"{label}:",
-            )
-            for prefix in prefixes:
-                if lowered.startswith(prefix):
-                    value = stripped[len(prefix) :].strip()
-                    if value:
-                        return value
-        if not stripped.startswith("|"):
-            continue
+        prefixed_value = _extract_prefixed_line_value(
+            stripped,
+            lowered,
+            label_variants,
+        )
+        if prefixed_value is not None:
+            return prefixed_value
 
-        cells = [cell.strip() for cell in stripped.split("|") if cell.strip()]
-        if len(cells) < 2:
-            continue
-        header = cells[0].strip("* ").casefold()
-        if header in label_variants and cells[1]:
-            return cells[1]
+        table_value = _extract_table_line_value(stripped, label_variants)
+        if table_value is not None:
+            return table_value
     return None
 
 

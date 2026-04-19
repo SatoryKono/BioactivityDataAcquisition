@@ -25,6 +25,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
+DQ_CONTRACTS_COMPATIBLE_MESSAGE = "DQ contracts are compatible"
+PIPELINE_VERSIONS_COMPATIBLE_MESSAGE = "Pipeline versions are compatible"
+
+
 def _emit_checkpoint_metric(
     metrics: MetricsPort | None,
     *,
@@ -65,7 +69,7 @@ def _validate_dq_contract_compatibility(
                 f"checkpoint={checkpoint_metadata.dq_contract_compatibility_hash}"
             )
         else:
-            messages.append("DQ contracts are compatible")
+            messages.append(DQ_CONTRACTS_COMPATIBLE_MESSAGE)
     else:
         messages.append(
             "DQ contract compatibility: not enforced (missing contract info)"
@@ -88,7 +92,7 @@ def _validate_pipeline_version_compatibility(
                 f"checkpoint={checkpoint_metadata.pipeline_version}"
             )
         else:
-            messages.append("Pipeline versions are compatible")
+            messages.append(PIPELINE_VERSIONS_COMPATIBLE_MESSAGE)
     else:
         messages.append(
             "Pipeline version compatibility: not enforced (missing version info)"
@@ -400,11 +404,47 @@ def _validate_lenient_dq_compatibility(
                 f"checkpoint={checkpoint_metadata.dq_contract_compatibility_hash}"
             )
         else:
-            messages.append("DQ contracts are compatible")
+            messages.append(DQ_CONTRACTS_COMPATIBLE_MESSAGE)
     else:
         # In lenient mode, missing DQ hashes are considered compatible
-        messages.append("DQ contracts are compatible")
+        messages.append(DQ_CONTRACTS_COMPATIBLE_MESSAGE)
     return True, messages
+
+
+def _lenient_pipeline_version_message(
+    current_version: str,
+    checkpoint_version: str,
+) -> tuple[bool, str]:
+    current_parts = current_version.split(".")
+    checkpoint_parts = checkpoint_version.split(".")
+    if current_parts[0] != checkpoint_parts[0]:
+        return (
+            False,
+            "Major pipeline version mismatch: "
+            f"current={current_version}, "
+            f"checkpoint={checkpoint_version}",
+        )
+    if len(current_parts) < 2 or len(checkpoint_parts) < 2:
+        return True, PIPELINE_VERSIONS_COMPATIBLE_MESSAGE
+    if current_parts[1] != checkpoint_parts[1]:
+        return (
+            True,
+            "Minor pipeline version changed (lenient mode): "
+            f"current={current_version}, "
+            f"checkpoint={checkpoint_version}",
+        )
+    if (
+        len(current_parts) >= 3
+        and len(checkpoint_parts) >= 3
+        and current_parts[2] != checkpoint_parts[2]
+    ):
+        return (
+            True,
+            "Patch pipeline version changed (lenient mode): "
+            f"current={current_version}, "
+            f"checkpoint={checkpoint_version}",
+        )
+    return True, PIPELINE_VERSIONS_COMPATIBLE_MESSAGE
 
 
 def _validate_lenient_pipeline_compatibility(
@@ -412,41 +452,15 @@ def _validate_lenient_pipeline_compatibility(
     checkpoint_metadata: CheckpointMetadata,
 ) -> tuple[bool, list[str]]:
     messages: list[str] = []
-    pipeline_compatible = True
-    if current_metadata.pipeline_version and checkpoint_metadata.pipeline_version:
-        current_parts = current_metadata.pipeline_version.split(".")
-        checkpoint_parts = checkpoint_metadata.pipeline_version.split(".")
-        if current_parts and checkpoint_parts:
-            if current_parts[0] != checkpoint_parts[0]:
-                pipeline_compatible = False
-                messages.append(
-                    "Major pipeline version mismatch: "
-                    f"current={current_metadata.pipeline_version}, "
-                    f"checkpoint={checkpoint_metadata.pipeline_version}"
-                )
-            elif len(current_parts) >= 2 and len(checkpoint_parts) >= 2:
-                # Check if minor version changed (allowed in lenient mode)
-                if current_parts[1] != checkpoint_parts[1]:
-                    messages.append(
-                        "Minor pipeline version changed (lenient mode): "
-                        f"current={current_metadata.pipeline_version}, "
-                        f"checkpoint={checkpoint_metadata.pipeline_version}"
-                    )
-                # Check if only patch version changed (allowed in lenient mode)
-                elif len(current_parts) >= 3 and len(checkpoint_parts) >= 3:
-                    if current_parts[2] != checkpoint_parts[2]:
-                        messages.append(
-                            "Patch pipeline version changed (lenient mode): "
-                            f"current={current_metadata.pipeline_version}, "
-                            f"checkpoint={checkpoint_metadata.pipeline_version}"
-                        )
-                    else:
-                        messages.append("Pipeline versions are compatible")
-                else:
-                    messages.append("Pipeline versions are compatible")
-            else:
-                messages.append("Pipeline versions are compatible")
-    return pipeline_compatible, messages
+    if not (
+        current_metadata.pipeline_version and checkpoint_metadata.pipeline_version
+    ):
+        return True, messages
+    pipeline_compatible, message = _lenient_pipeline_version_message(
+        current_metadata.pipeline_version,
+        checkpoint_metadata.pipeline_version,
+    )
+    return pipeline_compatible, [message]
 
 
 def _log_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) -> None:
@@ -564,21 +578,9 @@ class CheckpointCompatibilityService:
             )
         )
         messages = dq_messages + pipeline_messages + execution_identity_messages
-        # In lenient mode, allow execution identity mismatch for minor and patch version changes
-        has_version_change = any(
-            "Minor pipeline version changed" in msg or "Patch pipeline version changed" in msg
-            for msg in pipeline_messages
+        compatible = (
+            dq_compatible and pipeline_compatible and execution_identity_compatible
         )
-        if (
-            len(dq_messages) == 1
-            and "DQ contracts are compatible" in dq_messages[0]
-            and has_version_change
-        ):
-            compatible = dq_compatible and pipeline_compatible
-        else:
-            compatible = (
-                dq_compatible and pipeline_compatible and execution_identity_compatible
-            )
         _log_lenient_result(self._logger, compatible=compatible, messages=messages)
         _emit_checkpoint_metric(
             self._metrics,
