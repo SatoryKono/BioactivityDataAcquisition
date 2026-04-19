@@ -220,15 +220,9 @@
     },
     "scripts/common/repo_paths.py": {
       "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
+      "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
-      "next_step": "Retain only as a lightweight shared path helper for older script packages while callers migrate to canonical repo-root discovery patterns; remove it once no orphan or legacy scripts depend on it."
-    },
-    "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "temporary_diagnostic",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded WSL Codex setup helper while mixed Windows-WSL workflows remain operator-maintained; remove it once the bootstrap path is stable."
+      "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on common repository-root resolution; fold it into a canonical scripting utility surface once helper duplication is fully consolidated."
     },
     "scripts/engineering/dev/bash/WSL_COMMANDS.sh": {
       "owner": "@bioetl-platform",
@@ -571,12 +565,6 @@
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded MistrallVibe setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
-    },
-    "scripts/common/repo_paths.py": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on common repository-root resolution; fold it into a canonical scripting utility surface once helper duplication is fully consolidated."
     },
     "scripts/ci/_compatibility_registry.py": {
       "owner": "@bioetl-platform",

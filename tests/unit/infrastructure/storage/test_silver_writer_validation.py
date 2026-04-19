@@ -509,7 +509,7 @@ class TestSilverWriterPreparePayloadExecutor:
                 ),
             ) as mock_sync,
             patch(
-                "bioetl.infrastructure.storage.silver.validation_mixin.asyncio.to_thread",
+                "bioetl.infrastructure.storage.silver.operations.validation_operations.asyncio.to_thread",
                 wraps=asyncio.to_thread,
             ) as mock_to_thread,
         ):

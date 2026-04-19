@@ -2423,13 +2423,13 @@
       "empty_as_missing": null,
       "filter_fail_sink": "quarantine",
       "is_framework_field": false,
-      "logical_type": "integer",
+      "logical_type": "float",
       "nullable": false,
       "optional": false,
       "optionality_sources": [
         "silver_required_fields"
       ],
-      "physical_type": "int64",
+      "physical_type": "float64",
       "pipeline": "chembl_assay",
       "silver_column": "confidence_score",
       "silver_filter_tokens": [
