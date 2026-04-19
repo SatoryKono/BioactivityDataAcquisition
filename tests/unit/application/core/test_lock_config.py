@@ -38,7 +38,7 @@ class TestLockConfigAdaptiveTTL:
             lock_ttl=200,
             batch_size_hint=100,
         )
-        assert cfg.lock_ttl == 200  # max(200, 100*0.3=30) = 200
+        assert cfg.lock_ttl == 200
 
     def test_batch_size_hint_zero_ignored(self) -> None:
         """batch_size_hint=0 must be treated as 'no hint' (guard: > 0)."""

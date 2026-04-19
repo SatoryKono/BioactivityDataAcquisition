@@ -148,12 +148,12 @@ _ALLOWED_STRUCTURAL_COMPARISON_LABELS = frozenset(
 )
 
 _DYNAMIC_ENDPOINT_SEGMENT_PATTERNS = (
-    re.compile(r"^[0-9]+$"),
+    re.compile(r"^\d+$"),
     re.compile(
-        r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        r"^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$",
         re.IGNORECASE,
     ),
-    re.compile(r"^[0-9a-f]{16,}$", re.IGNORECASE),
+    re.compile(r"^[\da-f]{16,}$", re.IGNORECASE),
 )
 
 
