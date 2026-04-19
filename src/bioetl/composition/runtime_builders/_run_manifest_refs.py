@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import tempfile
+from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -50,10 +51,8 @@ def _private_fallback_data_root() -> Path:
 
 def _prepare_private_runtime_dir(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
-    try:
+    with suppress(OSError):
         path.chmod(0o700)
-    except OSError:
-        pass
     return path
 
 
