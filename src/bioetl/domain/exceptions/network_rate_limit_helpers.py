@@ -19,10 +19,11 @@ def resolve_rate_limit_params(
         Tuple of (provider_name, resolved_message, resolved_service_name).
     """
     resolved_service = service_name if service_name is not None else provider
-    resolved_message = (
-        message
-        if message is not None
-        else (provider if provider is not None else "Rate limit exceeded")
-    )
+    if message is not None:
+        resolved_message = message
+    elif provider is not None:
+        resolved_message = provider
+    else:
+        resolved_message = "Rate limit exceeded"
     provider_name = resolved_service if resolved_service is not None else "unknown"
     return provider_name, resolved_message, resolved_service

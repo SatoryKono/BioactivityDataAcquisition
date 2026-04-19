@@ -238,6 +238,7 @@ class ContractAwareGoldValidator(PanderaGoldValidator):
         Returns:
             List of DQRuleOutcome objects from contract validations
         """
+        del df
         outcomes: list[DQRuleOutcome] = []
 
         # Example: Check for required fields specified in contract

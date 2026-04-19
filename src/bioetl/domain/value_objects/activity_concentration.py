@@ -108,7 +108,7 @@ class Concentration:
             Concentration instance with parsed numeric value and unit.
         """
         match = re.match(
-            r"([+-]?[\d.]+(?:[eE][+-]?\d+)?)\s*([a-zμ]+)", s.strip(), re.IGNORECASE
+            r"([+-]?[\d.]+(?:[e][+-]?\d+)?)\s*([a-zμ]+)", s.strip(), re.IGNORECASE
         )
         if not match:
             raise ValueError(f"Cannot parse concentration: {s!r}")

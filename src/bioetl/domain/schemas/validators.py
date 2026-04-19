@@ -15,14 +15,10 @@ Usage in DataFrameModel schemas:
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
 
 import pandas as pd
 import pandera.pandas as pa
 from pandera.extensions import register_check_method  # type: ignore[attr-defined]
-
-if TYPE_CHECKING:
-    pass
 
 __all__ = [
     "JSON_ARRAY_CHECK",

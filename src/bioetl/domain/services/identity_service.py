@@ -103,6 +103,7 @@ class IdentityService:
             EntityID("chembl:a1b2c3d4e5f6...")  # hash-based
 
         """
+        del entity_type
         if source_id:
             return EntityID(f"{provider}:{source_id}")
 

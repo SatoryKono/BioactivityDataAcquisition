@@ -35,7 +35,8 @@ from bioetl.domain.types import JsonDict
 # Thread-safe configuration state
 _config_lock = threading.Lock()
 _configured = False
-_current_format: bool | None = None  # True = JSON, False = Console
+# Logging output mode: True for JSON, False for console rendering.
+_current_format: bool | None = None
 _DEFAULT_LOG_FILE = Path("logs") / "bioetl.log"
 
 # Patterns for secret detection in log values
