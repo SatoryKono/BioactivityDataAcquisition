@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import errno
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -38,6 +39,18 @@ from bioetl.infrastructure.storage.metadata_writer import (
     MetadataWriter,
 )
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-metadata-writer-"))
+DQ_ROOT = TEST_ROOT / "dq"
+BRONZE_ROOT = TEST_ROOT / "bronze"
+SILVER_ROOT = TEST_ROOT / "silver"
+GOLD_ROOT = TEST_ROOT / "gold"
+SILVER_DQ_REPORT_PATH = str(DQ_ROOT / "silver-report.json")
+GOLD_DQ_REPORT_PATH = str(DQ_ROOT / "gold-report.json")
+BRONZE_BASE_PATH = str(BRONZE_ROOT)
+SILVER_TABLE_PATH = str(SILVER_ROOT / "test" / "table")
+SILVER_BASE_PATH = str(SILVER_ROOT)
+GOLD_BASE_PATH = str(GOLD_ROOT)
 
 
 @pytest.fixture
@@ -357,7 +370,7 @@ class TestMetadataWriter:
         completed_at = datetime(2025, 1, 16, 12, 0, 0, tzinfo=UTC)
         result = await metadata_writer.finalize_silver_metadata(
             base_path,
-            dq_report_path="/tmp/dq/silver-report.json",
+            dq_report_path=SILVER_DQ_REPORT_PATH,
             completed_at=completed_at,
             delta_version_after=99,
         )
@@ -366,7 +379,7 @@ class TestMetadataWriter:
         content = yaml.safe_load(metadata_path.read_text())
         expected_completed_at = completed_at.isoformat().replace("+00:00", "Z")
         assert result == str(metadata_path.resolve())
-        assert content["dq_report_path"] == "/tmp/dq/silver-report.json"
+        assert content["dq_report_path"] == SILVER_DQ_REPORT_PATH
         assert content["runtime"]["completed_at_utc"] == expected_completed_at
         assert content["output"]["write_completed_at"] == expected_completed_at
         assert content["delta"]["version_after"] == 99
@@ -387,7 +400,7 @@ class TestMetadataWriter:
         completed_at = datetime(2025, 1, 16, 12, 5, 0, tzinfo=UTC)
         result = await metadata_writer.finalize_gold_metadata(
             base_path,
-            dq_report_path="/tmp/dq/gold-report.json",
+            dq_report_path=GOLD_DQ_REPORT_PATH,
             completed_at=completed_at,
         )
 
@@ -395,7 +408,7 @@ class TestMetadataWriter:
         content = yaml.safe_load(metadata_path.read_text())
         expected_completed_at = completed_at.isoformat().replace("+00:00", "Z")
         assert result == str(metadata_path.resolve())
-        assert content["dq_report_path"] == "/tmp/dq/gold-report.json"
+        assert content["dq_report_path"] == GOLD_DQ_REPORT_PATH
         assert content["runtime"]["completed_at_utc"] == expected_completed_at
         assert content["output"]["write_completed_at"] == expected_completed_at
 
@@ -532,7 +545,7 @@ class TestMetadataWriterOperationPreparation:
 
         operation = _prepare_metadata_write_operation(
             _MetadataWriteRequest(
-                base_path="/tmp/bronze",
+                base_path=BRONZE_BASE_PATH,
                 metadata=bronze_metadata,
                 layer="bronze",
                 provider="chembl",
@@ -550,7 +563,7 @@ class TestMetadataWriterOperationPreparation:
     ) -> None:
         """Public metadata methods should share one normalized request builder."""
         request = metadata_writer._build_metadata_write_request(
-            base_path="/tmp/silver/test/table",
+            base_path=SILVER_TABLE_PATH,
             metadata=silver_metadata,
             layer="silver",
             table_name="chembl_activity",
@@ -577,7 +590,7 @@ class TestNoOpMetadataWriter:
     ) -> None:
         """Test NoOp Bronze write returns empty string."""
         writer = NoOpMetadataWriter()
-        result = await writer.write_bronze_metadata("/tmp/bronze", bronze_metadata)
+        result = await writer.write_bronze_metadata(BRONZE_BASE_PATH, bronze_metadata)
         assert result == ""
 
     @pytest.mark.asyncio
@@ -587,7 +600,7 @@ class TestNoOpMetadataWriter:
     ) -> None:
         """Test NoOp Silver write returns empty string."""
         writer = NoOpMetadataWriter()
-        result = await writer.write_silver_metadata("/tmp/silver", silver_metadata)
+        result = await writer.write_silver_metadata(SILVER_BASE_PATH, silver_metadata)
         assert result == ""
 
     @pytest.mark.asyncio
@@ -597,7 +610,7 @@ class TestNoOpMetadataWriter:
     ) -> None:
         """Test NoOp Gold write returns empty string."""
         writer = NoOpMetadataWriter()
-        result = await writer.write_gold_metadata("/tmp/gold", gold_metadata)
+        result = await writer.write_gold_metadata(GOLD_BASE_PATH, gold_metadata)
         assert result == ""
 
     @pytest.mark.asyncio
@@ -606,8 +619,8 @@ class TestNoOpMetadataWriter:
     ) -> None:
         """Test NoOp finalize helpers return empty strings."""
         writer = NoOpMetadataWriter()
-        assert await writer.finalize_silver_metadata("/tmp/silver") == ""
-        assert await writer.finalize_gold_metadata("/tmp/gold") == ""
+        assert await writer.finalize_silver_metadata(SILVER_BASE_PATH) == ""
+        assert await writer.finalize_gold_metadata(GOLD_BASE_PATH) == ""
 
     @pytest.mark.asyncio
     async def test_noop_aclose_is_idempotent(self) -> None:

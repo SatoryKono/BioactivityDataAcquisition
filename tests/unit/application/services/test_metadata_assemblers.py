@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import tempfile
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -21,6 +23,12 @@ from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput, SilverRe
 from bioetl.domain.types import BatchID, RunID, RunType, ScdConfig
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-metadata-assemblers-"))
+SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "activity")
+GOLD_TABLE_PATH = str(TEST_ROOT / "gold" / "activity")
+SILVER_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "silver_dq.json")
+GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "gold_dq.json")
 
 
 def _make_run_context() -> RunContext:
@@ -92,7 +100,7 @@ def _make_bronze_ref(relative_path: str) -> BronzeWriteResult:
     return BronzeWriteResult(
         batch_id=BatchID(uuid4()),
         relative_path=relative_path,
-        absolute_path=f"/tmp/{relative_path}",
+        absolute_path=str(TEST_ROOT / relative_path),
         record_count=3,
         compressed_size=12,
         uncompressed_size=24,
@@ -112,7 +120,7 @@ class TestSilverMetadataService:
             environment_metadata=_make_environment(),
         )
         input_data = SilverMetadataInput(
-            table_path="/tmp/silver/activity",
+            table_path=SILVER_TABLE_PATH,
             primary_keys=["activity_id"],
             mode=SilverWriteMode.MERGE,
             records=[],
@@ -134,7 +142,7 @@ class TestSilverMetadataService:
         started_at = datetime(2026, 3, 19, 10, 5, tzinfo=UTC)
         completed_at = started_at + timedelta(seconds=15)
         input_data = SilverMetadataInput(
-            table_path="/tmp/silver/activity",
+            table_path=SILVER_TABLE_PATH,
             primary_keys=["activity_id"],
             mode=SilverWriteMode.MERGE,
             records=[
@@ -146,7 +154,7 @@ class TestSilverMetadataService:
             ],
             version_before=3,
             version_after=4,
-            dq_report_path="/tmp/reports/silver_dq.json",
+            dq_report_path=SILVER_DQ_REPORT_PATH,
             dq_rule_provenance=[{"rule_id": "DQ-1", "config_path": "configs/x.yaml"}],
             governance=None,
             partition_by=["activity_id"],
@@ -176,7 +184,7 @@ class TestSilverMetadataService:
         assert result.dq_summary.rule_provenance == [
             {"rule_id": "DQ-1", "config_path": "configs/x.yaml"}
         ]
-        assert result.dq_report_path == "/tmp/reports/silver_dq.json"
+        assert result.dq_report_path == SILVER_DQ_REPORT_PATH
 
 
 @pytest.mark.unit
@@ -191,7 +199,7 @@ class TestGoldMetadataService:
             environment_metadata=_make_environment(),
         )
         input_data = GoldMetadataInput(
-            table_path="/tmp/gold/activity",
+            table_path=GOLD_TABLE_PATH,
             table_name="gold.activity",
             mode=GoldWriteMode.APPEND,
             records=[],
@@ -212,7 +220,7 @@ class TestGoldMetadataService:
         )
         completed_at = datetime(2026, 3, 19, 11, 0, tzinfo=UTC)
         input_data = GoldMetadataInput(
-            table_path="/tmp/gold/activity",
+            table_path=GOLD_TABLE_PATH,
             table_name="gold.activity",
             mode=GoldWriteMode.SCD2,
             records=[
@@ -222,7 +230,7 @@ class TestGoldMetadataService:
                     "_enrichment_status": "{'chembl': 'ok'}",
                 }
             ],
-            silver_refs=[SilverRef("silver.activity", "/tmp/silver/activity", 9)],
+            silver_refs=[SilverRef("silver.activity", SILVER_TABLE_PATH, 9)],
             scd_config=ScdConfig(
                 business_key="activity_id",
                 valid_from_col="_valid_from",
@@ -235,7 +243,7 @@ class TestGoldMetadataService:
             lineage_created_at=datetime(2026, 3, 19, 10, 30, tzinfo=UTC),
             schema_validation_enabled=True,
             schema_validation_strict=False,
-            dq_report_path="/tmp/reports/gold_dq.json",
+            dq_report_path=GOLD_DQ_REPORT_PATH,
             total_bytes=512,
         )
 
@@ -257,4 +265,4 @@ class TestGoldMetadataService:
         assert result.scd is not None
         assert result.scd.enabled is True
         assert result.scd.effective_date_column == "_valid_from"
-        assert result.dq_report_path == "/tmp/reports/gold_dq.json"
+        assert result.dq_report_path == GOLD_DQ_REPORT_PATH
