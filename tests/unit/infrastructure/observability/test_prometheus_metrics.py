@@ -366,7 +366,7 @@ class TestObservabilityMetricContract:
                 labels={
                     "event": "silver_merge_retry",
                     "provider": "storage",
-                    "pipeline": "/tmp/bioetl/silver/chembl_activity__v1_2_3",
+                    "pipeline": "test-output/bioetl/silver/chembl_activity__v1_2_3",
                     "severity": "warning",
                     "error_type": "commit_conflict",
                 },

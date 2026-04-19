@@ -100,7 +100,7 @@ class TestStoragePortProtocol:
                 from pathlib import Path
 
                 del layer
-                return Path("/tmp") / table_name
+                return Path("test-output") / table_name
 
             def read_silver(
                 self,

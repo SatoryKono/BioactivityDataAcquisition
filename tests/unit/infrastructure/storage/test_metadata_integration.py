@@ -544,5 +544,5 @@ class TestNoOpMetadataWriter:
             environment=environment,
         )
 
-        result = await noop.write_silver_metadata("/tmp/test", metadata)
+        result = await noop.write_silver_metadata("test-output/silver/test", metadata)
         assert result == ""

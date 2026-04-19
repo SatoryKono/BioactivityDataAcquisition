@@ -524,7 +524,7 @@ class TestPostrunServiceMetadata:
             ),
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, skip_gold=True)
-        mock_storage.get_table_path = MagicMock(return_value="/tmp/test_gold")
+        mock_storage.get_table_path = MagicMock(return_value="test-output/test_gold")
 
         service = _make_postrun_service(
             config=pipeline_config,

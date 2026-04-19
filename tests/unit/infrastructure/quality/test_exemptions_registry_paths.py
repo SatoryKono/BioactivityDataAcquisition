@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -44,7 +45,7 @@ class TestResolveRegistryPath:
 
     def test_absolute_path_returned_as_is(self) -> None:
         """Absolute path should be returned unchanged (resolved for platform)."""
-        abs_path = Path("/tmp/test.yaml").resolve()
+        abs_path = Path(tempfile.gettempdir(), "test.yaml").resolve()
         result = resolve_registry_path(abs_path)
         assert result == abs_path
 

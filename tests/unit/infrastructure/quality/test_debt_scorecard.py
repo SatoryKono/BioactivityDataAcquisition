@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import tempfile
 from datetime import date
 from pathlib import Path
 from unittest.mock import patch
@@ -179,7 +180,7 @@ class TestResolveScorecardPath:
 
     def test_absolute_path_returned_as_is(self) -> None:
         """Absolute path should be returned unchanged (resolved for platform)."""
-        abs_path = Path("/tmp/scorecard.yaml").resolve()
+        abs_path = Path(tempfile.gettempdir(), "scorecard.yaml").resolve()
         result = _resolve_scorecard_path(abs_path)
         assert result == abs_path
 

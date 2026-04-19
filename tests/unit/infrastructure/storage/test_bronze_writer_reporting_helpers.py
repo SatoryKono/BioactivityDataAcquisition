@@ -81,7 +81,7 @@ class TestBuildBronzeMetadataInput:
                     InputSnapshotRef(
                         snapshot_id="snap-1",
                         content_hash="a" * 64,
-                        immutable_uri="/tmp/batch.jsonl.zst",
+                        immutable_uri="test-output/batch.jsonl.zst",
                     ),
                 ),
             )

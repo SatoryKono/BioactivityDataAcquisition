@@ -192,7 +192,9 @@ def _make_manifest(
                 input_snapshots=input_snapshots,
             ),
         ),
-        planned_artifacts=(RunArtifactRef(layer="silver", path="/tmp/output"),),
+        planned_artifacts=(
+            RunArtifactRef(layer="silver", path="test-output/silver"),
+        ),
     )
 
 

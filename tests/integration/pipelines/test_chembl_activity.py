@@ -79,8 +79,8 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
 
         # assert len(bronze_files) > 0, f"No bronze files found in {self.bronze_path}"
         # The glob might be failing because of double bronze.
-        # self.bronze_path is /tmp/.../storage/bronze
-        # File is /tmp/.../storage/bronze/bronze/v1/...
+        # self.bronze_path is test-output/.../storage/bronze
+        # File is test-output/.../storage/bronze/bronze/v1/...
         # glob should find it with recursive=True.
 
         # Wait, zst vs zstd.

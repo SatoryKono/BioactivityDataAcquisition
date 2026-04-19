@@ -11,12 +11,238 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import cast
 
 from bioetl.domain.types import RunID, RunType
 
 __all__ = [
     "RunContext",
+    "RunContextCreateInput",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class RunContextCreateInput:
+    """Typed input bundle for ``RunContext.create``."""
+
+    run_id: RunID
+    run_type: RunType
+    started_at: datetime
+    provider: str
+    entity: str
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] = ()
+    pipeline_version: str | None = None
+    git_commit: str | None = None
+    config_hash: str | None = None
+    manifest_id: str | None = None
+    contract_ref: str | None = None
+    contract_version: str | None = None
+    contract_schema_hash: str | None = None
+    dq_policy_ref: str | None = None
+    rule_bundle_version: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
+
+
+_RUN_CONTEXT_REQUIRED_FIELDS = (
+    "run_id",
+    "run_type",
+    "started_at",
+    "provider",
+    "entity",
+)
+_RUN_CONTEXT_OPTIONAL_DEFAULTS: dict[str, object] = {
+    "transform_version": None,
+    "transform_steps": (),
+    "pipeline_version": None,
+    "git_commit": None,
+    "config_hash": None,
+    "manifest_id": None,
+    "contract_ref": None,
+    "contract_version": None,
+    "contract_schema_hash": None,
+    "dq_policy_ref": None,
+    "rule_bundle_version": None,
+    "dq_contract_compatibility_hash": None,
+    "effective_config_artifact_id": None,
+}
+
+
+def _resolve_create_input_value(
+    *,
+    field_name: str,
+    inputs: RunContextCreateInput | None,
+    overrides: dict[str, object],
+) -> object:
+    if field_name in overrides:
+        return overrides[field_name]
+    if field_name in _RUN_CONTEXT_OPTIONAL_DEFAULTS and inputs is None:
+        return _RUN_CONTEXT_OPTIONAL_DEFAULTS[field_name]
+    if inputs is None:
+        raise TypeError(f"RunContext.create() missing required argument: '{field_name}'")
+    return getattr(inputs, field_name)
+
+
+def _coerce_run_context_create_input(
+    inputs: RunContextCreateInput | None,
+    overrides: dict[str, object],
+) -> RunContextCreateInput:
+    for field_name in _RUN_CONTEXT_REQUIRED_FIELDS:
+        _resolve_create_input_value(
+            field_name=field_name,
+            inputs=inputs,
+            overrides=overrides,
+        )
+    return RunContextCreateInput(
+        run_id=cast(
+            RunID,
+            _resolve_create_input_value(
+                field_name="run_id",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        run_type=cast(
+            RunType,
+            _resolve_create_input_value(
+                field_name="run_type",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        started_at=cast(
+            datetime,
+            _resolve_create_input_value(
+                field_name="started_at",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        provider=cast(
+            str,
+            _resolve_create_input_value(
+                field_name="provider",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        entity=cast(
+            str,
+            _resolve_create_input_value(
+                field_name="entity",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        transform_version=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="transform_version",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        transform_steps=tuple(
+            cast(
+                tuple[str, ...] | None,
+                _resolve_create_input_value(
+                    field_name="transform_steps",
+                    inputs=inputs,
+                    overrides=overrides,
+                ),
+            )
+            or ()
+        ),
+        pipeline_version=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="pipeline_version",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        git_commit=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="git_commit",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        config_hash=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="config_hash",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        manifest_id=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="manifest_id",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        contract_ref=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="contract_ref",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        contract_version=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="contract_version",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        contract_schema_hash=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="contract_schema_hash",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        dq_policy_ref=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="dq_policy_ref",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        rule_bundle_version=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="rule_bundle_version",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        dq_contract_compatibility_hash=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="dq_contract_compatibility_hash",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+        effective_config_artifact_id=cast(
+            str | None,
+            _resolve_create_input_value(
+                field_name="effective_config_artifact_id",
+                inputs=inputs,
+                overrides=overrides,
+            ),
+        ),
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,63 +328,29 @@ class RunContext:
     @classmethod
     def create(
         cls,
-        run_id: RunID,
-        run_type: RunType,
-        started_at: datetime,
-        provider: str,
-        entity: str,
-        transform_version: str | None = None,
-        transform_steps: tuple[str, ...] | None = None,
-        pipeline_version: str | None = None,
-        git_commit: str | None = None,
-        config_hash: str | None = None,
-        manifest_id: str | None = None,
-        contract_ref: str | None = None,
-        contract_version: str | None = None,
-        contract_schema_hash: str | None = None,
-        dq_policy_ref: str | None = None,
-        rule_bundle_version: str | None = None,
-        dq_contract_compatibility_hash: str | None = None,
-        effective_config_artifact_id: str | None = None,
+        inputs: RunContextCreateInput | None = None,
+        **overrides: object,
     ) -> RunContext:
-        """Factory method to create RunContext with derived pipeline_name.
-
-        Args:
-            run_id: Unique run identifier.
-            run_type: Type of pipeline run.
-            started_at: UTC timestamp when run started.
-            provider: Data provider name.
-            entity: Entity type.
-            transform_version: Optional semver version of transform.
-            transform_steps: Optional tuple of transform step names.
-            pipeline_version: Optional pipeline version for metadata.
-            git_commit: Optional git commit hash for reproducibility.
-            config_hash: Optional SHA256 hash of pipeline config.
-            manifest_id: Optional immutable control-plane manifest identifier.
-            dq_contract_compatibility_hash: Optional DQ-compatibility hash.
-            effective_config_artifact_id: Optional effective-config artifact reference.
-
-        Returns:
-            RunContext with pipeline_name derived as '{provider}_{entity}'.
-        """
+        """Factory method to create RunContext with derived pipeline name."""
+        create_input = _coerce_run_context_create_input(inputs, overrides)
         return cls(
-            run_id=run_id,
-            run_type=run_type,
-            started_at=started_at,
-            pipeline_name=f"{provider}_{entity}",
-            provider=provider,
-            entity=entity,
-            transform_version=transform_version,
-            transform_steps=transform_steps or (),
-            pipeline_version=pipeline_version,
-            git_commit=git_commit,
-            config_hash=config_hash,
-            manifest_id=manifest_id,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            contract_schema_hash=contract_schema_hash,
-            dq_policy_ref=dq_policy_ref,
-            rule_bundle_version=rule_bundle_version,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
+            run_id=create_input.run_id,
+            run_type=create_input.run_type,
+            started_at=create_input.started_at,
+            pipeline_name=f"{create_input.provider}_{create_input.entity}",
+            provider=create_input.provider,
+            entity=create_input.entity,
+            transform_version=create_input.transform_version,
+            transform_steps=create_input.transform_steps,
+            pipeline_version=create_input.pipeline_version,
+            git_commit=create_input.git_commit,
+            config_hash=create_input.config_hash,
+            manifest_id=create_input.manifest_id,
+            contract_ref=create_input.contract_ref,
+            contract_version=create_input.contract_version,
+            contract_schema_hash=create_input.contract_schema_hash,
+            dq_policy_ref=create_input.dq_policy_ref,
+            rule_bundle_version=create_input.rule_bundle_version,
+            dq_contract_compatibility_hash=create_input.dq_contract_compatibility_hash,
+            effective_config_artifact_id=create_input.effective_config_artifact_id,
         )

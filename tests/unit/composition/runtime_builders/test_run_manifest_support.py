@@ -108,7 +108,7 @@ def test_build_run_source_refs_fails_closed_for_exact_replay_without_snapshots()
     ctx = _make_run_context(query=None, exact_replay=True)
     cached_bronze = SimpleNamespace(
         enabled=True,
-        bronze_path="/tmp/does-not-exist",
+        bronze_path="test-output/does-not-exist",
         bronze_date="2026-04-12",
     )
 
