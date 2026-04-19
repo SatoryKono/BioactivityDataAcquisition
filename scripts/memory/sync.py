@@ -2504,7 +2504,8 @@ def _signature_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
         "decorator_count": len(node.decorator_list),
     }
     encoded = json.dumps(payload, sort_keys=True)
-    return hashlib.sha1(encoded.encode("utf-8")).hexdigest()
+    # Deterministic structural fingerprint used for clustering, not for secrets.
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
 class _ShapeNormalizer(ast.NodeTransformer):
@@ -2544,7 +2545,8 @@ def _normalized_callable_hash(node: ast.FunctionDef | ast.AsyncFunctionDef) -> s
     normalized = _ShapeNormalizer().visit(module)
     ast.fix_missing_locations(normalized)
     dumped = ast.dump(normalized, annotate_fields=True, include_attributes=False)
-    return hashlib.sha1(dumped.encode("utf-8")).hexdigest()
+    # Deterministic structural fingerprint used for clustering, not for secrets.
+    return hashlib.sha256(dumped.encode("utf-8")).hexdigest()
 
 
 def _callable_ast_node_count(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:

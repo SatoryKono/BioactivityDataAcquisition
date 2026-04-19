@@ -80,7 +80,7 @@ warn() {
 fail() {
   local message="${1:-}"
   printf "[FAIL] %s\n" "$message" >&2
-  return 0
+  return 1
 }
 
 require_contains() {
