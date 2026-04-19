@@ -33,7 +33,7 @@ def extract_init_version(content: str) -> str:
 
 
 def extract_docs_version(content: str) -> str:
-    match = re.search(r"\*\*v([0-9]+\.[0-9]+\.[0-9]+)\*\*", content)
+    match = re.search(r"\*\*v(\d+\.\d+\.\d+)\*\*", content)
     if match is None:
         raise VersionCheckError(
             "Could not find Current Version in docs/00-project/index.md"
@@ -42,7 +42,7 @@ def extract_docs_version(content: str) -> str:
 
 
 def extract_latest_changelog_version(content: str) -> str:
-    match = re.search(r"^## \[([0-9]+\.[0-9]+\.[0-9]+)\] - ", content, re.MULTILINE)
+    match = re.search(r"^## \[(\d+\.\d+\.\d+)\] - ", content, re.MULTILINE)
     if match is None:
         raise VersionCheckError("Could not find latest release header in CHANGELOG.md")
     return match.group(1)

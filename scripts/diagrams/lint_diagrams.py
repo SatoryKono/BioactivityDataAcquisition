@@ -352,6 +352,8 @@ def check_staleness(
     stale_days: int,
 ) -> list[Issue]:
     """Check if diagram is stale based on %% Updated: or %% @date."""
+    updated_label = "%% Updated:"
+    date_label_token = "%% @date"
     issues: list[Issue] = []
     fname = str(path)
 
@@ -359,13 +361,13 @@ def check_staleness(
     date_label: str | None = None
     for line in lines:
         stripped = line.strip()
-        if stripped.startswith("%% Updated:"):
-            date_str = stripped.replace("%% Updated:", "").strip()
-            date_label = "%% Updated:"
+        if stripped.startswith(updated_label):
+            date_str = stripped.replace(updated_label, "").strip()
+            date_label = updated_label
             break
-        if stripped.startswith("%% @date"):
-            date_str = stripped.replace("%% @date", "").strip()
-            date_label = "%% @date"
+        if stripped.startswith(date_label_token):
+            date_str = stripped.replace(date_label_token, "").strip()
+            date_label = date_label_token
             break
 
     if date_str is None:

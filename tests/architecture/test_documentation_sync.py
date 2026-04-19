@@ -88,6 +88,151 @@ def _iter_canonical_docs_markdown(docs_markdown_files: list[Path]) -> list[Path]
     )
 
 
+def _iter_standard_pipeline_ids(
+    *,
+    config_yaml_files: list[Path],
+    config_text_cache: dict[Path, str],
+) -> list[str]:
+    provider_ids: list[str] = []
+    for path in sorted(config_yaml_files):
+        pipeline_name = _extract_standard_pipeline_id(
+            path=path,
+            config_text_cache=config_text_cache,
+        )
+        if pipeline_name is not None:
+            provider_ids.append(pipeline_name)
+    return provider_ids
+
+
+def _extract_standard_pipeline_id(
+    *,
+    path: Path,
+    config_text_cache: dict[Path, str],
+) -> str | None:
+    if ENTITIES_DIR not in path.parents or path.name in {"_base.yaml", "_schema.json"}:
+        return None
+    raw = yaml.safe_load(config_text_cache[path]) or {}
+    if not isinstance(raw, dict):
+        return None
+    pipeline = raw.get("pipeline")
+    if not isinstance(pipeline, dict):
+        return None
+    pipeline_name = pipeline.get("pipeline_name")
+    return pipeline_name if isinstance(pipeline_name, str) else None
+
+
+def _iter_composite_pipeline_ids(
+    *,
+    composite_dir: Path,
+    config_text_cache: dict[Path, str],
+) -> list[str]:
+    composite_ids: list[str] = []
+    for path in sorted(composite_dir.glob("*.yaml")):
+        pipeline_id = _extract_composite_pipeline_id(
+            path=path,
+            config_text_cache=config_text_cache,
+        )
+        if pipeline_id is not None:
+            composite_ids.append(pipeline_id)
+    return composite_ids
+
+
+def _extract_composite_pipeline_id(
+    *,
+    path: Path,
+    config_text_cache: dict[Path, str],
+) -> str | None:
+    text = config_text_cache.get(path, path.read_text(encoding="utf-8"))
+    match = re.search(
+        r"^\s*name:\s*(composite_[a-z0-9_]+)\s*$", text, flags=re.MULTILINE
+    )
+    return match.group(1) if match is not None else None
+
+
+def _extract_documented_pipeline_ids(reference_text: str) -> list[str]:
+    return sorted(
+        set(
+            re.findall(
+                r"\|\s*\d+\s*\|\s*`([a-z0-9_]+)`\s*\|",
+                reference_text,
+                flags=re.MULTILINE,
+            )
+        )
+    )
+
+
+def _extract_adr_status(text: str) -> str | None:
+    labels = ("status", "статус")
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        inline_status = _extract_inline_adr_status(stripped, labels)
+        if inline_status is not None:
+            return inline_status
+        if not stripped.startswith("|"):
+            continue
+        table_status = _extract_table_adr_status(stripped, labels)
+        if table_status is not None:
+            return table_status
+    return None
+
+
+def _extract_inline_adr_status(
+    stripped: str,
+    labels: tuple[str, ...],
+) -> str | None:
+    lowered = stripped.casefold()
+    for label in labels:
+        prefixes = (
+            f"**{label}:**",
+            f"* **{label}**:",
+            f"{label}:",
+        )
+        for prefix in prefixes:
+            if lowered.startswith(prefix.casefold()):
+                value = stripped[len(prefix) :].strip()
+                return value or None
+    return None
+
+
+def _extract_table_adr_status(
+    stripped: str,
+    labels: tuple[str, ...],
+) -> str | None:
+    cells = [cell.strip() for cell in stripped.split("|") if cell.strip()]
+    if len(cells) < 2:
+        return None
+    header = cells[0].strip("* ").casefold()
+    if header in labels and cells[1]:
+        return cells[1]
+    return None
+
+
+def _normalize_adr_status(raw_status: str) -> str:
+    return re.split(r"[\s(]", raw_status, maxsplit=1)[0].strip().lower()
+
+
+def _iter_adr_status_violations(
+    *,
+    decisions_dir: Path,
+    allowed_statuses: set[str],
+) -> list[str]:
+    violations: list[str] = []
+    for path in sorted(decisions_dir.glob("ADR-*.md")):
+        raw_status = _extract_adr_status(path.read_text(encoding="utf-8"))
+        if raw_status is None:
+            violations.append(f"{path.name}: missing status field")
+            continue
+        normalized = _normalize_adr_status(raw_status)
+        if normalized not in allowed_statuses:
+            violations.append(
+                f"{path.name}: invalid status '{raw_status}' "
+                f"(allowed: {sorted(allowed_statuses)})"
+            )
+    return violations
+
+
 def test_ports_count_matches_docs() -> None:
     actual = len(list(Path("src/bioetl/domain/ports").glob("*.py")))
     text = Path("docs/02-architecture/01-domain-layer.md").read_text(encoding="utf-8")
@@ -115,45 +260,20 @@ def test_pipeline_ids_match_reference_index(
 ) -> None:
     """Pipeline IDs in reference index must match config-defined IDs."""
     composite_dir = _resolve_composite_config_dir()
-    provider_ids: list[str] = []
-    for path in sorted(config_yaml_files):
-        if ENTITIES_DIR not in path.parents:
-            continue
-        if path.name in {"_base.yaml", "_schema.json"}:
-            continue
-        raw = yaml.safe_load(config_text_cache[path]) or {}
-        if not isinstance(raw, dict):
-            continue
-        pipeline = raw.get("pipeline")
-        if not isinstance(pipeline, dict):
-            continue
-        pipeline_name = pipeline.get("pipeline_name")
-        if isinstance(pipeline_name, str):
-            provider_ids.append(pipeline_name)
-
-    composite_ids: list[str] = []
-    for path in sorted(composite_dir.glob("*.yaml")):
-        text = config_text_cache.get(path, path.read_text(encoding="utf-8"))
-        match = re.search(
-            r"^\s*name:\s*(composite_[a-z0-9_]+)\s*$", text, flags=re.MULTILINE
-        )
-        if match is not None:
-            composite_ids.append(match.group(1))
-
+    provider_ids = _iter_standard_pipeline_ids(
+        config_yaml_files=config_yaml_files,
+        config_text_cache=config_text_cache,
+    )
+    composite_ids = _iter_composite_pipeline_ids(
+        composite_dir=composite_dir,
+        config_text_cache=config_text_cache,
+    )
     expected_ids = sorted(provider_ids + composite_ids)
 
     reference_text = Path("docs/04-reference/pipelines/README.md").read_text(
         encoding="utf-8"
     )
-    documented_ids = sorted(
-        set(
-            re.findall(
-                r"\|\s*\d+\s*\|\s*`([a-z0-9_]+)`\s*\|",
-                reference_text,
-                flags=re.MULTILINE,
-            )
-        )
-    )
+    documented_ids = _extract_documented_pipeline_ids(reference_text)
 
     missing_in_docs = sorted(set(expected_ids) - set(documented_ids))
     extra_in_docs = sorted(set(documented_ids) - set(expected_ids))
@@ -229,54 +349,10 @@ def test_adr_status_is_from_allowed_set() -> None:
     """Each ADR file must declare a status from the allowed normalized set."""
     decisions_dir = Path("docs/02-architecture/decisions")
     allowed_statuses = {"accepted", "superseded", "deprecated", "added"}
-    violations: list[str] = []
-
-    def extract_status(text: str) -> str | None:
-        labels = ("status", "статус")
-        for line in text.splitlines():
-            stripped = line.strip()
-            if not stripped:
-                continue
-
-            lowered = stripped.casefold()
-            for label in labels:
-                prefixes = (
-                    f"**{label}:**",
-                    f"* **{label}**:",
-                    f"{label}:",
-                )
-                for prefix in prefixes:
-                    if lowered.startswith(prefix.casefold()):
-                        value = stripped[len(prefix) :].strip()
-                        if value:
-                            return value
-
-            if not stripped.startswith("|"):
-                continue
-
-            cells = [cell.strip() for cell in stripped.split("|") if cell.strip()]
-            if len(cells) < 2:
-                continue
-            header = cells[0].strip("* ").casefold()
-            if header in labels and cells[1]:
-                return cells[1]
-        return None
-
-    for path in sorted(decisions_dir.glob("ADR-*.md")):
-        text = path.read_text(encoding="utf-8")
-        raw_status = extract_status(text)
-
-        if raw_status is None:
-            violations.append(f"{path.name}: missing status field")
-            continue
-
-        normalized = re.split(r"[\s(]", raw_status, maxsplit=1)[0].strip().lower()
-        if normalized not in allowed_statuses:
-            violations.append(
-                f"{path.name}: invalid status '{raw_status}' "
-                f"(allowed: {sorted(allowed_statuses)})"
-            )
-
+    violations = _iter_adr_status_violations(
+        decisions_dir=decisions_dir,
+        allowed_statuses=allowed_statuses,
+    )
     assert not violations, "ADR status validation failed:\n" + "\n".join(violations)
 
 
