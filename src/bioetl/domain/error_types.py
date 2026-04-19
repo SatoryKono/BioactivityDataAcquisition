@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Error types for consistent error handling across the application."""
+
+from __future__ import annotations
 
 from enum import Enum
 

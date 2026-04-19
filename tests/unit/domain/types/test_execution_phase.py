@@ -16,7 +16,6 @@ from bioetl.domain.types.execution_phase import (
 def test_fsm_creation():
     """Test that FSM can be created."""
     fsm = CompositeFSM()
-    assert fsm is not None
     assert fsm.get_current_phase() == ExecutionPhase.NOT_STARTED
     assert len(fsm.get_transition_history()) == 0
 

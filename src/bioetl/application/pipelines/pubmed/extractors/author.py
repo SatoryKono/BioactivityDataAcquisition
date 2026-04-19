@@ -89,8 +89,7 @@ class AuthorExtractor(BaseFieldExtractor):
             return None
 
         raw_authors = [
-            self._build_raw_author(author)
-            for author in author_list.findall("Author")
+            self._build_raw_author(author) for author in author_list.findall("Author")
         ]
 
         return raw_authors if raw_authors else None

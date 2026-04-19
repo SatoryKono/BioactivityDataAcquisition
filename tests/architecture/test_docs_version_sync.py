@@ -108,6 +108,35 @@ def is_noncanonical_doc(md_file: Path) -> bool:
     return any(excluded in md_file.parts for excluded in NONCANONICAL_DOC_PARTS)
 
 
+def _changelog_start_offset(content: str) -> int:
+    """Return the earliest changelog/history section offset or content length."""
+    markers = (
+        "## changelog",
+        "## history",
+        "## история изменений",
+        "## version history",
+        "## изменения",
+    )
+    content_lower = content.lower()
+    offsets = [content_lower.find(marker) for marker in markers]
+    candidates = [offset for offset in offsets if offset != -1]
+    return min(candidates, default=len(content))
+
+
+def _should_skip_outdated_match(
+    *,
+    content: str,
+    match_start: int,
+    match_end: int,
+    changelog_start: int,
+) -> bool:
+    if match_start >= changelog_start:
+        return True
+    line_start = content.rfind("\n", 0, match_start) + 1
+    line = content[line_start : match_end + 50].lower()
+    return any(kw in line for kw in ("changelog", "history", "история", "версия:"))
+
+
 def collect_outdated_version_refs(
     *,
     paths: list[Path],
@@ -128,32 +157,18 @@ def collect_outdated_version_refs(
             except UnicodeDecodeError:
                 continue
 
-        changelog_markers = [
-            "## changelog",
-            "## history",
-            "## история изменений",
-            "## version history",
-            "## изменения",
-        ]
-        changelog_start = len(content)
-        content_lower = content.lower()
-        for marker in changelog_markers:
-            pos = content_lower.find(marker)
-            if pos != -1 and pos < changelog_start:
-                changelog_start = pos
+        changelog_start = _changelog_start_offset(content)
 
         for pattern in DOC_VERSION_PATTERNS:
             for match in pattern.finditer(content):
                 found_version = match.group(1)
                 found_major_minor = tuple(map(int, found_version.split(".")))
                 if found_major_minor < current_major_minor:
-                    if match.start() >= changelog_start:
-                        continue
-                    line_start = content.rfind("\n", 0, match.start()) + 1
-                    line = content[line_start : match.end() + 50].lower()
-                    if any(
-                        kw in line
-                        for kw in ["changelog", "history", "история", "версия:"]
+                    if _should_skip_outdated_match(
+                        content=content,
+                        match_start=match.start(),
+                        match_end=match.end(),
+                        changelog_start=changelog_start,
                     ):
                         continue
                     relative_path = md_file.relative_to(project_root)

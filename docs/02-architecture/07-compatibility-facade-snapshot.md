@@ -8,9 +8,9 @@
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
 - Retained public entrypoints: `16`
-- Measured tracked modules: `47`
-- Measured-only modules outside curated inventory: `31`
-- Discovered docstring-tracked modules: `31`
+- Measured tracked modules: `51`
+- Measured-only modules outside curated inventory: `35`
+- Discovered docstring-tracked modules: `35`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
@@ -30,6 +30,10 @@
 
 - `src/bioetl/application/composite/merger.py`
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
+- `src/bioetl/application/services/_checkpoint_compatibility_messages.py`
+- `src/bioetl/application/services/_metadata_coordinator_helpers.py`
+- `src/bioetl/application/services/_run_ledger_diagnostic_support.py`
+- `src/bioetl/application/services/_run_manifest_diagnostics_helpers.py`
 - `src/bioetl/application/services/cli_run_orchestration_contracts.py`
 - `src/bioetl/application/services/cli_run_orchestration_models.py`
 - `src/bioetl/application/services/cli_run_orchestration_service.py`
@@ -78,6 +82,10 @@
 
 ## Measured-Only Allowlist
 
+- `src/bioetl/application/services/_checkpoint_compatibility_messages.py` — owner: `bioetl.application.services`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for checkpoint message helpers while call sites consolidate on the canonical helper surface.
+- `src/bioetl/application/services/_metadata_coordinator_helpers.py` — owner: `bioetl.application.services.lineage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for metadata coordinator helpers while first-party code keeps using the owning lineage package.
+- `src/bioetl/application/services/_run_ledger_diagnostic_support.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for run-ledger diagnostic helpers while first-party code keeps using the owning control-plane package.
+- `src/bioetl/application/services/_run_manifest_diagnostics_helpers.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for run-manifest diagnostic helpers while first-party code keeps using the owning control-plane package.
 - `src/bioetl/application/pipelines/chembl/_pipelines.py` — owner: `bioetl.application.pipelines.chembl`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export surface for ChEMBL pipeline marker classes.
 - `src/bioetl/interfaces/cli/commands/quarantine_execution.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for quarantine execution helper imports; first-party src should keep importing the canonical domains.quarantine.execution module directly.
 - `src/bioetl/interfaces/cli/commands/quarantine_rendering.py` — owner: `bioetl.interfaces.cli.commands`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility support seam for quarantine rendering helper imports; first-party src should keep importing the canonical domains.quarantine.rendering module directly.
@@ -112,14 +120,14 @@
 
 ## Measured-Only Ratchet
 
-- Max measured-only modules: `31`
-- `src/bioetl/application/services/` <= `15` measured-only modules
+- Max measured-only modules: `35`
+- `src/bioetl/application/services/` <= `19` measured-only modules
 - `src/bioetl/interfaces/cli/commands/` <= `6` measured-only modules
 
 ### Live Ratchet Counts
 
-- Total measured-only modules: `31`
-- `src/bioetl/application/services/` currently has `15` modules
+- Total measured-only modules: `35`
+- `src/bioetl/application/services/` currently has `19` modules
 - `src/bioetl/interfaces/cli/commands/` currently has `6` modules
 
 ### Ratchet Violations
@@ -145,6 +153,10 @@
 ### Discovered Docstring-Tracked Modules
 
 - `src/bioetl/application/pipelines/chembl/_pipelines.py`
+- `src/bioetl/application/services/_checkpoint_compatibility_messages.py`
+- `src/bioetl/application/services/_metadata_coordinator_helpers.py`
+- `src/bioetl/application/services/_run_ledger_diagnostic_support.py`
+- `src/bioetl/application/services/_run_manifest_diagnostics_helpers.py`
 - `src/bioetl/application/services/cli_run_orchestration_contracts.py`
 - `src/bioetl/application/services/cli_run_orchestration_models.py`
 - `src/bioetl/application/services/cli_run_orchestration_service.py`

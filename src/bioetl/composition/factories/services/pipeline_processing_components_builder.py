@@ -22,6 +22,9 @@ from bioetl.application.core.wiring.runtime import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterPort,
+    )
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
@@ -38,7 +41,7 @@ def create_batch_processing_components(
     gold_transform_callback: GoldTransformCallback,
     gold_validator: GoldValidatorPort,
     tracer: TracingPort | None = None,
-    domain_event_emitter: DomainEventEmitter | None = None,
+    domain_event_emitter: DomainEventEmitterPort | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None = None,
 ) -> BatchProcessingComponents:
     """Create batch metrics, transformer, and writer via composition DI."""

@@ -44,6 +44,7 @@ if TYPE_CHECKING:
         SilverValidatorPort,
         TracingPort,
     )
+    from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter

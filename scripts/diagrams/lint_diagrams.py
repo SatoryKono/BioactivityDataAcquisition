@@ -350,9 +350,12 @@ def check_staleness(
     if date_str is None:
         return issues
 
-    try:
-        updated_date = datetime.strptime(date_str, "%Y-%m-%d")
-    except ValueError:
+    updated_date = _parse_staleness_date(
+        fname=fname,
+        date_label=date_label,
+        date_str=date_str,
+    )
+    if updated_date is None:
         issues.append(
             Issue(
                 file=fname,
@@ -366,29 +369,54 @@ def check_staleness(
         )
         return issues
 
-    now = datetime.now()
-    age = now - updated_date
+    issues.extend(
+        _staleness_issues(
+            fname=fname,
+            age=datetime.now() - updated_date,
+            stale_days=stale_days,
+        )
+    )
+    return issues
 
+
+def _parse_staleness_date(
+    *,
+    fname: str,
+    date_label: str | None,
+    date_str: str,
+) -> datetime | None:
+    del fname, date_label
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d")
+    except ValueError:
+        return None
+
+
+def _staleness_issues(
+    *,
+    fname: str,
+    age: timedelta,
+    stale_days: int,
+) -> list[Issue]:
     if age > timedelta(days=WARNING_STALE_DAYS):
-        issues.append(
+        return [
             Issue(
                 file=fname,
                 severity="ERROR",
                 rule="STALE-001",
                 message=f"Diagram is {age.days} days old (>{WARNING_STALE_DAYS}d threshold)",
             )
-        )
-    elif age > timedelta(days=stale_days):
-        issues.append(
+        ]
+    if age > timedelta(days=stale_days):
+        return [
             Issue(
                 file=fname,
                 severity="WARNING",
                 rule="STALE-002",
                 message=f"Diagram is {age.days} days old (>{stale_days}d threshold)",
             )
-        )
-
-    return issues
+        ]
+    return []
 
 
 def check_colour_policy(path: Path, lines: list[str]) -> list[Issue]:
@@ -471,13 +499,7 @@ def check_node_count_policy(path: Path, lines: list[str]) -> list[Issue]:
     if nodes is None:
         return issues
 
-    # Canonical full .mmd may stay above hard limit when decomposed siblings
-    # (e.g. 01a/01b/01c) already exist as focused views.
-    has_decomposed_siblings = False
-    if path.suffix == ".mmd":
-        prefix = path.stem.split("-", 1)[0]
-        sibling_pattern = f"{prefix}[a-z]-*.mmd"
-        has_decomposed_siblings = any(path.parent.glob(sibling_pattern))
+    has_decomposed_siblings = _has_decomposed_siblings(path)
 
     if nodes > SIZE_ERROR_THRESHOLD:
         if has_decomposed_siblings:
@@ -512,6 +534,15 @@ def check_node_count_policy(path: Path, lines: list[str]) -> list[Issue]:
         )
 
     return issues
+
+
+def _has_decomposed_siblings(path: Path) -> bool:
+    """Check whether a canonical full diagram already has focused siblings."""
+    if path.suffix != ".mmd":
+        return False
+    prefix = path.stem.split("-", 1)[0]
+    sibling_pattern = f"{prefix}[a-z]-*.mmd"
+    return any(path.parent.glob(sibling_pattern))
 
 
 def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:

@@ -25,7 +25,6 @@ def _create_validation_service() -> CompositeValidationService:
 def test_preflight_governance_service_creation():
     """Test that governance service can be created."""
     service = PreflightGovernanceService()
-    assert service is not None
     assert service.config.policy == GovernancePolicy.BLOCK_ON_BLOCKERS_ONLY
 
 

@@ -21,11 +21,7 @@ from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
 class ErrorHandlerService:
-    """Centralized error handling service.
-
-    This service provides consistent error handling, logging, and metrics
-    collection across the entire application.
-    """
+    """Centralized error handling service."""
 
     def __init__(
         self,
@@ -33,13 +29,7 @@ class ErrorHandlerService:
         metrics: MetricsPort,
         service_name: str = "bioetl",
     ) -> None:
-        """Initialize error handler.
-
-        Args:
-            logger: Logger port for structured logging
-            metrics: Metrics port for error metrics
-            service_name: Name of the service for context
-        """
+        """Initialize error handler."""
         self._logger = logger
         self._metrics = metrics
         self._service_name = service_name
@@ -54,23 +44,9 @@ class ErrorHandlerService:
         | None = None,
         reraise: bool = True,
     ) -> None:
-        """Handle an exception with logging and metrics.
-
-        Args:
-            exception: The exception to handle
-            context: Additional context for logging
-            reraise: Whether to re-raise the exception after handling
-
-        Raises:
-            The original exception if reraise=True
-        """
-        # Log the error
+        """Handle one exception with logging and metrics."""
         self._log_error(exception, context)
-
-        # Record metrics
         self._record_error_metrics(exception)
-
-        # Re-raise if requested
         if reraise:
             raise exception
 
@@ -85,45 +61,26 @@ class ErrorHandlerService:
         | None = None,
         reraise: bool = True,
     ) -> None:
-        """Handle an exception and transform it to a domain exception.
-
-        Args:
-            exception: The original exception
-            transform_func: Function to transform exception to domain exception
-            context: Additional context for logging
-            reraise: Whether to re-raise the transformed exception
-
-        Raises:
-            The transformed exception if reraise=True
-        """
+        """Transform an exception, then handle the transformed result."""
         domain_exception = None
         try:
-            # Transform the exception
             domain_exception = transform_func(exception)
-
-            # Handle the transformed exception
-            # Note: handle_error will re-raise the domain_exception if reraise=True
             self.handle_error(domain_exception, context, reraise=reraise)
-
         except Exception as transform_error:
-            # Only catch actual transformation errors, not the transformed exception itself
             if domain_exception and isinstance(transform_error, type(domain_exception)):
-                # This is the transformed exception being raised as expected
                 if reraise:
                     raise transform_error
             else:
-                # If transformation fails, log the failure and handle the original exception
                 self._logger.error(
                     "Exception transformation failed",
                     original_exception=str(exception),
                     transformation_error=str(transform_error),
                     context=context or {},
                 )
-                # Log the original exception but don't re-raise to avoid infinite recursion
                 self._log_error(exception, context)
                 self._record_error_metrics(exception)
                 if reraise:
-                    raise exception
+                    raise exception from transform_error
 
     def wrap_function(
         self,
@@ -131,20 +88,7 @@ class ErrorHandlerService:
         error_transformer: Callable[[Exception], Exception] | None = None,
         **kwargs: Any,  # Any: Generic arguments for wrapped functions
     ) -> Any:  # Any: Generic return type from wrapped functions
-        """Wrap a function call with error handling.
-
-        Args:
-            func: Function to wrap
-            error_transformer: Optional function to transform exceptions
-            **kwargs: Arguments to pass to the function
-
-        Returns:
-            Result of the function call
-
-        Raises:
-            Transformed exception if error_transformer is provided
-            Original exception otherwise
-        """
+        """Wrap one function call with error handling."""
         try:
             return func(**kwargs)
         except Exception as e:
@@ -168,7 +112,8 @@ class ErrorHandlerService:
         context: dict[
             str,
             Any,  # Any: Logging context carries heterogeneous scalar payloads from callers.
-        ] = None,
+        ]
+        | None = None,
     ) -> None:
         """Log an error with full context."""
         log_context = self._prepare_log_context(exception, context)

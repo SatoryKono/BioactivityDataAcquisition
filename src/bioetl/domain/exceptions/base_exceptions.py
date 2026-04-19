@@ -11,7 +11,7 @@ REQ-ARCH-012: Exceptions should be immutable and include context
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from bioetl.domain.error_types import ErrorType
 
@@ -87,9 +87,7 @@ class BioETLValidationError(BioETLDomainError):
     """
 
     field_name: str | None = None
-    invalid_value: Optional[
-        Any  # Any: Generic invalid value from various sources
-    ] = None
+    invalid_value: Any | None = None  # Any: Generic invalid value from various sources
 
     def __post_init__(self):
         """Ensure context includes field and value information."""

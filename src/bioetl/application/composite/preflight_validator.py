@@ -9,6 +9,8 @@ See ADR-026 for composite pipeline architectural decisions.
 
 from __future__ import annotations
 
+import warnings
+
 from bioetl.application.composite._preflight_orchestration import (
     PreflightSchemaOrchestrationMixin,
 )
@@ -214,11 +216,6 @@ class CompositePreflightValidationService(
         if fail_on_error and not is_valid:
             raise PreflightValidationError(result)
         return result
-
-
-# Backward-compatible alias for iterative NAME-001 migration.
-import warnings
-
 
 class CompositePreflightValidator(CompositePreflightValidationService):
     def __init__(self, *args, **kwargs):

@@ -8,7 +8,7 @@ from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import polars as pl
 import pyarrow as pa
@@ -86,10 +86,16 @@ write_deltalake = _write_deltalake
 # in this root module while the implementations live in split validation helpers.
 
 if TYPE_CHECKING:
+    from bioetl.domain.models.metadata import SilverMetadata
     from bioetl.domain.ports import LineageStorePort, LoggerPort
     from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
+    from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics, SchemaDriftInfo
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+    from bioetl.infrastructure.storage.silver.delta_helpers import _DeltaWriteRequest
+    from bioetl.infrastructure.storage.silver.metadata_operations import (
+        _PreparedSilverWriteFinalizationContext,
+    )
 
 __all__ = ["SilverWriteMode", "SilverWriter"]
 
@@ -731,9 +737,8 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         started_at: datetime,
         start_perf: float,
     ) -> SilverWriteResult | None:
-
         """Fallback method to finalize silver write result for backward compatibility.
-        
+
         This method provides a fallback when the metadata service is not available.
         It's called by postwrite operations and delegates to the metadata mixin
         for backward compatibility with tests that don't provide full runtime_services.
@@ -1303,10 +1308,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
         # Detect schema drift
         schema_drift = None
-        if isinstance(records, pl.DataFrame):
-            records_list = records.to_dicts()
-        else:
-            records_list = records
+        records_list = records.to_dicts() if isinstance(records, pl.DataFrame) else records
 
         schema_drift = await self._detect_schema_drift(table_name, records_list)
 

@@ -37,7 +37,6 @@ def test_composite_validation_service_creation():
         preflight_governance=preflight_governance,
     )
 
-    assert service is not None
     assert service._aggregation_validator is aggregation_validator
     assert service._cross_validation_validator is cross_validation_validator
     assert service._preflight_governance is preflight_governance

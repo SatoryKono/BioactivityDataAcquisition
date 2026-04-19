@@ -219,10 +219,10 @@ retained_entrypoints:
     exit_criteria: >-
       RF-035 decision is `retain`: direct `client.py` imports stay confined to the provider package root plus dedicated compatibility coverage, and legacy-path references remain reduced to that retained seam.
 measured_only_ratchet:
-  max_total_modules: 31
+  max_total_modules: 35
   scoped_limits:
     - path_prefix: "src/bioetl/application/services/"
-      max_modules: 15
+      max_modules: 19
     - path_prefix: "src/bioetl/interfaces/cli/commands/"
       max_modules: 6
 measured_only_review_workflow:
@@ -238,6 +238,30 @@ measured_only_review_workflow:
     - "remove"
   promotion_requires_curated_row: true
 measured_only_modules:
+  - path: "src/bioetl/application/services/_checkpoint_compatibility_messages.py"
+    owner: "bioetl.application.services"
+    reason: "Compatibility re-export seam for checkpoint message helpers while call sites consolidate on the canonical helper surface."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/application/services/_metadata_coordinator_helpers.py"
+    owner: "bioetl.application.services.lineage"
+    reason: "Compatibility re-export seam for metadata coordinator helpers while first-party code keeps using the owning lineage package."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/application/services/_run_ledger_diagnostic_support.py"
+    owner: "bioetl.application.services.control_plane"
+    reason: "Compatibility re-export seam for run-ledger diagnostic helpers while first-party code keeps using the owning control-plane package."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/application/services/_run_manifest_diagnostics_helpers.py"
+    owner: "bioetl.application.services.control_plane"
+    reason: "Compatibility re-export seam for run-manifest diagnostic helpers while first-party code keeps using the owning control-plane package."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
   - path: "src/bioetl/application/pipelines/chembl/_pipelines.py"
     owner: "bioetl.application.pipelines.chembl"
     reason: "Compatibility re-export surface for ChEMBL pipeline marker classes."

@@ -52,7 +52,7 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
         return [
             Violation(
                 rule="suffix-policy",
-                location=str(script),
+                location="scripts/qa/naming_audit.py",
                 details="scripts/engineering/qa/naming_audit.py not found",
             )
         ]

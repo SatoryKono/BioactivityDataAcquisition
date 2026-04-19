@@ -58,7 +58,7 @@ class ResolverHelper:
             join_keys=join_keys,
             pipeline=pipeline,
             normalization_policies=self._normalization_policies,
-            parse_pipeline_name=parse_pipeline_name or (lambda x: ("", "")),  # type: ignore
+            parse_pipeline_name=parse_pipeline_name or (lambda _value: ("", "")),
         )
 
     def log_info(

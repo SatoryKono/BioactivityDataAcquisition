@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.checkpoint._anchor_context import (
@@ -145,10 +146,6 @@ class CompositeCheckpointService:
         """List all checkpoints for this composite pipeline."""
         await asyncio.sleep(0)
         return self._persistence_service.list_all()
-
-
-import warnings
-
 
 class CompositeCheckpointManager(CompositeCheckpointService):
     def __init__(self, *args, **kwargs):

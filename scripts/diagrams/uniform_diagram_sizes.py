@@ -434,49 +434,74 @@ def _normalize_class_diagram(lines: list[str]) -> list[str]:
 
     groups = _parse_uniform_groups(lines)
     width_strategy = _parse_uniform_width_strategy(lines)
+    stats_map, group_stats = _resolve_class_uniform_stats(
+        blocks=blocks,
+        groups=groups,
+        width_strategy=width_strategy,
+    )
+    result = _rebuild_class_diagram_lines(lines, blocks, stats_map)
+    if group_stats is not None:
+        return _update_uniform_tag_grouped(
+            result,
+            group_stats,
+            groups,
+            "class",
+            width_strategy=width_strategy,
+        )
+    stats = next(iter(stats_map.values()))
+    return _update_uniform_tag(result, stats, "class")
 
+
+def _resolve_class_uniform_stats(
+    *,
+    blocks: list[ClassBlock],
+    groups: list[UniformGroup],
+    width_strategy: str,
+) -> tuple[dict[str, UniformStats], dict[str, UniformStats] | None]:
+    """Resolve per-block stats, optionally with grouped sizing."""
     if not groups:
-        # Backward compatible: single global uniform
         stats = _compute_class_uniform(blocks)
-        stats_map: dict[str, UniformStats] = {b.name: stats for b in blocks}
-        group_stats: dict[str, UniformStats] | None = None
-    else:
-        # Group-aware normalization
-        assignment = _assign_groups([b.name for b in blocks], groups)
-        grouped_blocks = _partition_by_group(blocks, assignment)
+        return {block.name: stats for block in blocks}, None
 
-        # Per-group stats (height always per-group, width by strategy)
-        group_stats_raw: dict[str, UniformStats] = {}
-        for gname, gblocks in grouped_blocks.items():
-            gs = _compute_class_uniform(gblocks)
-            group_stats_raw[gname] = gs
+    assignment = _assign_groups([block.name for block in blocks], groups)
+    grouped_blocks = _partition_by_group(blocks, assignment)
+    group_stats = _build_group_stats(grouped_blocks, width_strategy)
+    return (
+        {block.name: group_stats[assignment[block.name]] for block in blocks},
+        group_stats,
+    )
 
-        group_stats = {}
-        if width_strategy == "global":
-            global_max_width = 0
-            global_max_title = 0
-            for gs in group_stats_raw.values():
-                global_max_width = max(global_max_width, gs.max_visible_width)
-                global_max_title = max(global_max_title, gs.max_title_len)
 
-            # Override width to global max for visual consistency
-            for gname, gs in group_stats_raw.items():
-                group_stats[gname] = UniformStats(
-                    max_visible_width=global_max_width,
-                    max_total_body=gs.max_total_body,
-                    max_title_len=global_max_title,
-                )
-        else:
-            for gname, gs in group_stats_raw.items():
-                group_stats[gname] = UniformStats(
-                    max_visible_width=gs.max_visible_width,
-                    max_total_body=gs.max_total_body,
-                    max_title_len=gs.max_title_len,
-                )
+def _build_group_stats(
+    grouped_blocks: dict[str, list[ClassBlock]],
+    width_strategy: str,
+) -> dict[str, UniformStats]:
+    """Build per-group uniform stats and optionally normalize width globally."""
+    group_stats_raw = {
+        group_name: _compute_class_uniform(group_blocks)
+        for group_name, group_blocks in grouped_blocks.items()
+    }
+    if width_strategy != "global":
+        return dict(group_stats_raw)
 
-        stats_map = {b.name: group_stats[assignment[b.name]] for b in blocks}
+    global_max_width = max(stats.max_visible_width for stats in group_stats_raw.values())
+    global_max_title = max(stats.max_title_len for stats in group_stats_raw.values())
+    return {
+        group_name: UniformStats(
+            max_visible_width=global_max_width,
+            max_total_body=stats.max_total_body,
+            max_title_len=global_max_title,
+        )
+        for group_name, stats in group_stats_raw.items()
+    }
 
-    # Rebuild file, replacing block bodies
+
+def _rebuild_class_diagram_lines(
+    lines: list[str],
+    blocks: list[ClassBlock],
+    stats_map: dict[str, UniformStats],
+) -> list[str]:
+    """Rebuild classDiagram contents with normalized block bodies."""
     result: list[str] = []
     block_map: dict[int, ClassBlock] = {b.start_line: b for b in blocks}
     skip_until: int | None = None
@@ -495,19 +520,6 @@ def _normalize_class_diagram(lines: list[str]) -> list[str]:
             skip_until = b.end_line
         else:
             result.append(line)
-
-    # Update @uniform tag(s)
-    if group_stats is not None:
-        result = _update_uniform_tag_grouped(
-            result,
-            group_stats,
-            groups,
-            "class",
-            width_strategy=width_strategy,
-        )
-    else:
-        result = _update_uniform_tag(result, stats, "class")
-
     return result
 
 

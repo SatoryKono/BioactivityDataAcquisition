@@ -24,7 +24,9 @@ from bioetl.domain.ports import (
 )
 
 if TYPE_CHECKING:
-    pass
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterPort,
+    )
 
 
 def build_components_and_processing_service(
@@ -36,7 +38,7 @@ def build_components_and_processing_service(
     gold_filter: GoldFilterCallback,
     gold_validator: GoldValidatorPort,
     tracer: TracingPort | None,
-    domain_event_emitter: DomainEventEmitter | None = None,
+    domain_event_emitter: DomainEventEmitterPort | None = None,
     lock_validator: Callable[[], Awaitable[bool]] | None,
     tracing_manager: BatchTracingManagerService,
     batch_id_factory: BatchIdGeneratorPort,

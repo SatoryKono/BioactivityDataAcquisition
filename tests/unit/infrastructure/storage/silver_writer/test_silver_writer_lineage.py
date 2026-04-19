@@ -562,7 +562,8 @@ class TestSilverWriterLineage:
             version_after=7,
         )
 
-        assert captured_input is not None
+        if captured_input is None:
+            pytest.fail("metadata coordinator did not capture SilverMetadataInput")
         silver_input = captured_input
         assert silver_input.version_after == 7
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
@@ -841,7 +842,10 @@ class TestSilverWriterLineage:
             completed_at="2025-01-15T12:00:00Z",
         )
 
-        assert captured_input is not None
+        if captured_input is None:
+            pytest.fail(
+                "merged metadata coordinator did not capture SilverMetadataInput"
+            )
         assert captured_input.mode is SilverWriteMode.DELETE
         assert captured_input.version_after == 11
         assert captured_input.records == valid_records

@@ -1258,8 +1258,10 @@ def _sorted_prefixed_values(values: JsonValue, prefix: str) -> list[str]:
 def _storage_summary_line(row: dict[str, JsonValue], storage_name: str) -> str:
     roles_str = _join_string_list(row.get("storage_roles"))
     return (
-        f"- storage={storage_name} | layer={row.get('layer') or ''!s} | storage_kind={row.get('storage_kind') or ''!s} "
-        f"| format={row.get('storage_format') or ''!s} | roles={roles_str or ''} | schema_present={row.get('schema_present') or False!s}"
+        f"- storage={storage_name} | layer={row.get('layer') or ''!s} "
+        f"| storage_kind={row.get('storage_kind') or ''!s} "
+        f"| format={row.get('storage_format') or ''!s} | roles={roles_str or ''} "
+        f"| schema_present={row.get('schema_present') or False!s}"
     )
 
 
@@ -1327,9 +1329,9 @@ def _format_field_lineage_rows(title: str, name: str, rows: list[dict[str, JsonV
             lines,
             row,
             [
-            ("upstream_fields", "upstream"),
-            ("downstream_fields", "downstream"),
-            ("contracts", "contract"),
+                ("upstream_fields", "upstream"),
+                ("downstream_fields", "downstream"),
+                ("contracts", "contract"),
             ],
         )
     if len(lines) == 1:
@@ -1352,7 +1354,8 @@ def _format_schema_drift_rows(title: str, name: str, rows: list[dict[str, JsonVa
             else ""
         )
         lines.append(
-            f"- storage={storage_ref} | field={field_name} | drift={drift} | required={row.get('required_in_quality')!s}{validation_suffix}"
+            f"- storage={storage_ref} | field={field_name} | drift={drift} "
+            f"| required={row.get('required_in_quality')!s}{validation_suffix}"
         )
     if len(lines) == 1:
         lines.append("- no schema drift evidence found")
@@ -1417,8 +1420,11 @@ def _format_runtime_state_rows(title: str, name: str, rows: list[dict[str, JsonV
         if not state_name:
             continue
         lines.append(
-            f"- state={state_name} | kind={row.get('state_kind') or ''!s} | status={row.get('state_status') or ''!s} "
-            f"| manifest_id={row.get('manifest_id') or ''!s} | retry_count={row.get('retry_count')!s} | lock_key={row.get('lock_key') or ''!s}"
+            f"- state={state_name} | kind={row.get('state_kind') or ''!s} "
+            f"| status={row.get('state_status') or ''!s} "
+            f"| manifest_id={row.get('manifest_id') or ''!s} "
+            f"| retry_count={row.get('retry_count')!s} "
+            f"| lock_key={row.get('lock_key') or ''!s}"
         )
         lines.extend(_format_surface_dict_list(row.get("owners"), "owner"))
         lines.extend(_format_surface_dict_list(row.get("dependencies"), "dependency"))
@@ -1475,7 +1481,8 @@ def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str,
     tests = row.get("tests")
     lines = [f"{title}: `{name}`"]
     lines.append(
-        f"- family={family_name} | surface_kind={surface_kind} | duplicates={duplicate_count} | promotion_score={promotion_score}"
+        f"- family={family_name} | surface_kind={surface_kind} "
+        f"| duplicates={duplicate_count} | promotion_score={promotion_score}"
     )
     if promotion_target:
         lines.append(f"- promotion_target={promotion_target}{_label_suffix(target_labels)}")

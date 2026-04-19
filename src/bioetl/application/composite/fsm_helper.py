@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -234,15 +235,10 @@ class FSMStateHelperService:
             completed_enrichers_count=completed_count,
             total_enrichers_count=total_enrichers,
             remaining_enrichers_count=remaining_count,
-            completed_enrichers=list(state.completed_enrichers)
-            if completed_count > 0
-            else None,
+            completed_enrichers=(
+                list(state.completed_enrichers) if completed_count > 0 else None
+            ),
         )
-
-
-# Backward-compatible alias for iterative NAME-001 migration.
-import warnings
-
 
 class FSMStateHelper(FSMStateHelperService):
     def __init__(self, *args, **kwargs):

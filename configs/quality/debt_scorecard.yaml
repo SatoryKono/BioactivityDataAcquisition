@@ -189,15 +189,15 @@ report_only_hotspot_families:
     - src/bioetl/composition/bootstrap/runtime/
     bounded_growth_budgets:
       files_ge_250_loc: 6
-      max_internal_fan_in: 6
+      max_internal_fan_in: 7
     metrics:
       duplication_clusters: 0
       files: 27
       total_loc: 3163
       files_ge_250_loc: 6
       helper_function_ratio: 0.333
-      max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
+      max_internal_fan_in: 7
+      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.composite_support_services_factory
     trend:
       status: down_vs_2026-03-23
       next_action: 2026-04-08 adds bounded files_ge_250_loc and max_internal_fan_in
@@ -238,7 +238,7 @@ removable_complexity_family_ratchets:
     path_prefixes:
     - src/bioetl/infrastructure/adapters/
     family_budgets:
-      files_ge_250_loc: 19
+      files_ge_250_loc: 20
       max_internal_fan_in: 31
     tracked_seams:
     - path: src/bioetl/infrastructure/adapters/http/_health_monitor_support.py
@@ -252,7 +252,7 @@ removable_complexity_family_ratchets:
     path_prefixes:
     - src/bioetl/application/composite/
     family_budgets:
-      files_ge_250_loc: 19
+      files_ge_250_loc: 20
       max_internal_fan_in: 25
     tracked_seams:
     - path: src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py

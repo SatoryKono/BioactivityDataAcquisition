@@ -267,6 +267,31 @@ def _ids_from_edge_line(line: str) -> set[str]:
     return ids
 
 
+def _register_defined_node(
+    *,
+    node_id: str,
+    line_index: int,
+    all_defined: set[str],
+    definition_lines: dict[str, list[int]],
+    node_parent: dict[str, str],
+    subgraph_stack: list[str],
+) -> None:
+    all_defined.add(node_id)
+    definition_lines.setdefault(node_id, []).append(line_index)
+    if subgraph_stack and subgraph_stack[-1]:
+        node_parent[node_id] = subgraph_stack[-1]
+
+
+def _is_skippable_flowchart_line(line: str) -> bool:
+    return bool(
+        re.match(
+            r"^(?:direction\b|classDef\b|linkStyle\b|%%\{|graph\b|flowchart\b)",
+            line,
+            re.IGNORECASE,
+        )
+    )
+
+
 def parse_flowchart_orphans(
     lines: list[str],
     keep: set[str],
@@ -311,12 +336,7 @@ def parse_flowchart_orphans(
                 subgraph_stack.pop()
             continue
 
-        # ── Directives to skip ───────────────────────────────────────────────
-        if re.match(
-            r"^(?:direction\b|classDef\b|linkStyle\b|%%\{|graph\b|flowchart\b)",
-            s,
-            re.IGNORECASE,
-        ):
+        if _is_skippable_flowchart_line(s):
             continue
 
         # ── class directive: `class NodeId className` ────────────────────────
@@ -337,10 +357,14 @@ def parse_flowchart_orphans(
         if m:
             nid = m.group(1)
             if nid and re.match(rf"^{_NID}$", nid):
-                all_defined.add(nid)
-                definition_lines.setdefault(nid, []).append(i)
-                if subgraph_stack and subgraph_stack[-1]:
-                    node_parent[nid] = subgraph_stack[-1]
+                _register_defined_node(
+                    node_id=nid,
+                    line_index=i,
+                    all_defined=all_defined,
+                    definition_lines=definition_lines,
+                    node_parent=node_parent,
+                    subgraph_stack=subgraph_stack,
+                )
             continue
 
         # ── Bare node ID (e.g., just `NodeId` on its own line) ───────────────
@@ -354,10 +378,14 @@ def parse_flowchart_orphans(
                 "flowchart",
                 "sequencediagram",
             }:
-                all_defined.add(nid)
-                definition_lines.setdefault(nid, []).append(i)
-                if subgraph_stack and subgraph_stack[-1]:
-                    node_parent[nid] = subgraph_stack[-1]
+                _register_defined_node(
+                    node_id=nid,
+                    line_index=i,
+                    all_defined=all_defined,
+                    definition_lines=definition_lines,
+                    node_parent=node_parent,
+                    subgraph_stack=subgraph_stack,
+                )
 
     # Subgraph names that appear in edge lines (they act as connected nodes)
     connected_subgraph_names: set[str] = connected & subgraph_names

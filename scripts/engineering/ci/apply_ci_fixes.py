@@ -453,6 +453,61 @@ def _create_branch_if_not_exists(api: GitHubAPI, branch: str, sha: str) -> None:
         api.create_branch(branch, sha)
 
 
+def _workflow_read_branch(api: GitHubAPI, branch: str) -> str:
+    """Return the branch name to read workflow files from."""
+    return BASE_BRANCH if api.dry_run else branch
+
+
+def _replace_checkout_v6(content: str) -> tuple[str, int]:
+    """Replace checkout@v6 with checkout@v4 and report the occurrence count."""
+    count = content.count(CHECKOUT_V6)
+    if count == 0:
+        return content, 0
+    return content.replace(CHECKOUT_V6, CHECKOUT_V4), count
+
+
+def _replace_mypy_txt_report(content: str) -> str:
+    """Remove mypy --txt-report using exact or line-based fallback matching."""
+    old_cmd = (
+        "uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \\\n"
+        "            --txt-report reports/mypy_report \\\n"
+        "            2>&1 | tee -a reports/mypy_strict.log"
+    )
+    new_cmd = (
+        "uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \\\n"
+        "            2>&1 | tee -a reports/mypy_strict.log"
+    )
+    new_content = content.replace(old_cmd, new_cmd, 1)
+    if new_content != content:
+        return new_content
+
+    lines = content.splitlines(keepends=True)
+    for idx in range(len(lines) - 2):
+        if "uv run mypy" not in lines[idx]:
+            continue
+        if "--txt-report reports/mypy_report" not in lines[idx + 1]:
+            continue
+        if "2>&1" not in lines[idx + 2]:
+            continue
+        lines[idx] = lines[idx].rstrip("\n") + " \\\n"
+        del lines[idx + 1]
+        return "".join(lines)
+    return content
+
+
+def _patch_pip_disable(content: str) -> tuple[str, bool]:
+    """Remove --disable-pip when present and report whether a patch was applied."""
+    if "pip-audit --disable-pip" in content:
+        return (
+            content.replace(
+                "uv run pip-audit --disable-pip --strict",
+                "uv run pip-audit --strict",
+            ),
+            True,
+        )
+    return content, False
+
+
 def _apply_ci01_fixes(
     api: GitHubAPI,
     files: list[dict],
@@ -489,14 +544,16 @@ def _patch_file(
     updated: list[str],
 ) -> None:
     """Patch a file with the given content."""
-    new_content = content.replace(CHECKOUT_V6, CHECKOUT_V4)
-    count = content.count(CHECKOUT_V6)
+    new_content, count = _replace_checkout_v6(content)
     print(f"  Patching {path} ({count} occurrence{'s' if count > 1 else ''})")
     api.update_file(
         path=path,
         content=new_content,
         sha=file_sha,
-        message=f"fix(ci): replace checkout@v6 with @v4 in {filename}\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+        message=(
+            f"fix(ci): replace checkout@v6 with @v4 in {filename}\n\n"
+            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+        ),
         branch=branch,
     )
     updated.append(filename)
@@ -672,7 +729,8 @@ jobs:
           load: ${{ !(github.ref == 'refs/heads/main' && github.event_name == 'push') }}
           tags: |
             bioetl:${{ github.sha }}
-            ${{ (github.ref == 'refs/heads/main' && github.event_name == 'push') && format('ghcr.io/{0}:sha-{1}', github.repository, github.sha) || '' }}
+            ${{ (github.ref == 'refs/heads/main' && github.event_name == 'push')
+              && format('ghcr.io/{0}:sha-{1}', github.repository, github.sha) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -1259,45 +1317,17 @@ def apply_hf_lxml(api: GitHubAPI) -> None:
     branch = BRANCHES["hf-lxml"]
     sha = api.get_sha()
 
-    if api.branch_exists(branch):
-        print(f"  Branch {branch} already exists — skipping branch creation")
-    else:
-        api.create_branch(branch, sha)
+    _create_branch_if_not_exists(api, branch, sha)
 
     path = ".github/workflows/type-checking.yml"
-    read_branch = BASE_BRANCH if api.dry_run else branch
+    read_branch = _workflow_read_branch(api, branch)
     content, file_sha = api.get_file(path, read_branch)
-
-    old_cmd = (
-        "uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \\\n"
-        "            --txt-report reports/mypy_report \\\n"
-        "            2>&1 | tee -a reports/mypy_strict.log"
-    )
-    new_cmd = (
-        "uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl \\\n"
-        "            2>&1 | tee -a reports/mypy_strict.log"
-    )
 
     if "--txt-report" not in content:
         print(f"  INFO: --txt-report not found in {path} — already fixed?")
         return
 
-    new_content = content.replace(old_cmd, new_cmd, 1)
-    if new_content == content:
-        # Try a line-based replacement in case of whitespace differences.
-        lines = content.splitlines(keepends=True)
-        for idx in range(len(lines) - 2):
-            if "uv run mypy" not in lines[idx]:
-                continue
-            if "--txt-report reports/mypy_report" not in lines[idx + 1]:
-                continue
-            if "2>&1" not in lines[idx + 2]:
-                continue
-            lines[idx] = lines[idx].rstrip("\n") + " \\\n"
-            del lines[idx + 1]
-            new_content = "".join(lines)
-            break
-
+    new_content = _replace_mypy_txt_report(content)
     if new_content == content:
         print(
             f"  WARNING: Could not patch {path} — pattern mismatch, manual review needed"
@@ -1338,23 +1368,17 @@ def apply_hf_pip_disable(api: GitHubAPI) -> None:
     branch = BRANCHES["hf-pip-disable"]
     sha = api.get_sha()
 
-    if api.branch_exists(branch):
-        print(f"  Branch {branch} already exists — skipping branch creation")
-    else:
-        api.create_branch(branch, sha)
+    _create_branch_if_not_exists(api, branch, sha)
 
-    path = ".github/workflows/security.yml"
-    read_branch = BASE_BRANCH if api.dry_run else branch
+    path = SECURITY_WORKFLOW_PATH
+    read_branch = _workflow_read_branch(api, branch)
     content, file_sha = api.get_file(path, read_branch)
 
     patched = False
 
     # Fix --disable-pip (requires -r, crashes without it)
-    if "pip-audit --disable-pip" in content:
-        content = content.replace(
-            "uv run pip-audit --disable-pip --strict",
-            "uv run pip-audit --strict",
-        )
+    content, pip_disable_removed = _patch_pip_disable(content)
+    if pip_disable_removed:
         print(f"  Patching {path}: removing --disable-pip from pip-audit")
         patched = True
     elif "pip-audit --strict" in content and "--disable-pip" not in content:
@@ -1365,9 +1389,8 @@ def apply_hf_pip_disable(api: GitHubAPI) -> None:
         )
 
     # Re-apply checkout@v4 (may have been overwritten by direct commits)
-    if "actions/checkout@v6" in content:
-        count = content.count("actions/checkout@v6")
-        content = content.replace("actions/checkout@v6", "actions/checkout@v4")
+    content, count = _replace_checkout_v6(content)
+    if count:
         print(
             f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
         )
@@ -1402,7 +1425,7 @@ def apply_hf_pip_disable(api: GitHubAPI) -> None:
 # ── HF-paths-conflict ─────────────────────────────────────────────────────────
 
 
-def _remove_paths_ignore_block(content: str, trigger: str) -> str:
+def _remove_paths_ignore_block(content: str) -> str:
     """Remove the paths-ignore block from a push/pull_request trigger that also has paths."""
     # More targeted: remove just the paths-ignore block under any trigger
     result = _re.sub(
@@ -1413,45 +1436,46 @@ def _remove_paths_ignore_block(content: str, trigger: str) -> str:
     return result
 
 
+def _patch_paths_conflict_content(path: str, content: str) -> tuple[str, bool]:
+    """Patch one workflow file for paths-ignore conflicts and stale checkout refs."""
+    patched = False
+
+    if "    paths-ignore:" in content:
+        new_content = _remove_paths_ignore_block(content)
+        if new_content != content:
+            content = new_content
+            print(f"  Patching {path}: removed paths-ignore blocks")
+            patched = True
+        else:
+            print(f"  WARNING: could not remove paths-ignore from {path}")
+
+    content, count = _replace_checkout_v6(content)
+    if count:
+        print(
+            f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
+        )
+        patched = True
+
+    return content, patched
+
+
 def apply_hf_paths_conflict(api: GitHubAPI) -> None:
     print("\n=== HF-paths-conflict: Remove paths-ignore + paths conflicts ===")
     branch = BRANCHES["hf-paths-conflict"]
     sha = api.get_sha()
 
-    if api.branch_exists(branch):
-        print(f"  Branch {branch} already exists — skipping branch creation")
-    else:
-        api.create_branch(branch, sha)
+    _create_branch_if_not_exists(api, branch, sha)
 
-    read_branch = BASE_BRANCH if api.dry_run else branch
+    read_branch = _workflow_read_branch(api, branch)
     files_to_fix = [
-        ".github/workflows/docker.yml",
+        DOCKER_WORKFLOW_PATH,
         ".github/workflows/skills-consistency.yml",
         ".github/workflows/port-contracts.yml",
     ]
 
     for path in files_to_fix:
         content, file_sha = api.get_file(path, read_branch)
-        patched = False
-
-        # Remove paths-ignore blocks (4-space indented, inside on: triggers)
-        if "    paths-ignore:" in content:
-            new_content = _remove_paths_ignore_block(content, "")
-            if new_content != content:
-                content = new_content
-                print(f"  Patching {path}: removed paths-ignore blocks")
-                patched = True
-            else:
-                print(f"  WARNING: could not remove paths-ignore from {path}")
-
-        # Re-apply checkout@v4
-        if "actions/checkout@v6" in content:
-            count = content.count("actions/checkout@v6")
-            content = content.replace("actions/checkout@v6", "actions/checkout@v4")
-            print(
-                f"  Re-patching {path}: checkout@v6 → @v4 ({count} occurrence{'s' if count > 1 else ''})"
-            )
-            patched = True
+        content, patched = _patch_paths_conflict_content(path, content)
 
         if not patched:
             print(f"  INFO: {path} already correct — nothing to do")
@@ -1504,7 +1528,12 @@ def apply_hf_typecheck_warn(api: GitHubAPI) -> None:
         old_job_header = (
             "  type-check:\n    runs-on: ubuntu-latest\n    timeout-minutes: 40"
         )
-        new_job_header = "  type-check:\n    runs-on: ubuntu-latest\n    timeout-minutes: 40\n    continue-on-error: true"
+        new_job_header = (
+            "  type-check:\n"
+            "    runs-on: ubuntu-latest\n"
+            "    timeout-minutes: 40\n"
+            "    continue-on-error: true"
+        )
         if old_job_header in content:
             content = content.replace(old_job_header, new_job_header, 1)
             print(f"  Patching {path}: added continue-on-error: true to type-check job")
