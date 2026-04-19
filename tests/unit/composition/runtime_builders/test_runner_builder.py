@@ -878,7 +878,7 @@ def test_build_pipeline_runner_requires_ledger_for_forensic_grade_profile(
     tmp_path: Path,
 ) -> None:
     """Forensic-grade runtime profile must fail closed when ledger is disabled."""
-    fake_factory, fake_registry = _build_factory_registry()
+    _, fake_registry = _build_factory_registry()
 
     with pytest.raises(
         RuntimeError,
@@ -906,7 +906,7 @@ def test_build_pipeline_runner_requires_lineage_sidecars_for_forensic_grade_prof
     tmp_path: Path,
 ) -> None:
     """Forensic-grade profile must fail when active sink layers skip metadata."""
-    fake_factory, fake_registry = _build_factory_registry()
+    _, fake_registry = _build_factory_registry()
 
     with pytest.raises(
         RuntimeError,

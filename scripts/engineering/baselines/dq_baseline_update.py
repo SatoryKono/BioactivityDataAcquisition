@@ -377,30 +377,40 @@ def get_known_pipelines(data_dir: Path) -> list[str]:
     """
     pipelines = set()
 
-    # Check audit directory
-    audit_dir = data_dir / "audit"
-    if audit_dir.exists():
-        for item in audit_dir.iterdir():
+    # Collect pipelines from different sources
+    _add_pipelines_from_directory(pipelines, data_dir / "audit")
+    _add_pipelines_from_directory(pipelines, data_dir / "metrics")
+    _add_pipelines_from_silver_tables(pipelines, data_dir / "silver")
+
+    return sorted(pipelines)
+
+
+def _add_pipelines_from_directory(pipelines: set[str], directory: Path) -> None:
+    """Add pipeline names from directory structure.
+    
+    Args:
+        pipelines: Set to add pipeline names to
+        directory: Directory to scan for pipelines
+    """
+    if directory.exists():
+        for item in directory.iterdir():
             if item.is_dir():
                 pipelines.add(item.name)
 
-    # Check metrics directory
-    metrics_dir = data_dir / "metrics"
-    if metrics_dir.exists():
-        for item in metrics_dir.iterdir():
-            if item.is_dir():
-                pipelines.add(item.name)
 
-    # Check silver tables for pipeline inference
-    silver_dir = data_dir / "silver"
+def _add_pipelines_from_silver_tables(pipelines: set[str], silver_dir: Path) -> None:
+    """Add pipeline names from silver table structure.
+    
+    Args:
+        pipelines: Set to add pipeline names to
+        silver_dir: Silver data directory to scan
+    """
     if silver_dir.exists():
         for provider_dir in silver_dir.iterdir():
             if provider_dir.is_dir():
                 for entity_dir in provider_dir.iterdir():
                     if entity_dir.is_dir() and (entity_dir / "_delta_log").exists():
                         pipelines.add(f"{provider_dir.name}_{entity_dir.name}")
-
-    return sorted(pipelines)
 
 
 # =============================================================================

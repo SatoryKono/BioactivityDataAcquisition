@@ -48,7 +48,10 @@ EOF
   return 0
 }
 
-log() { printf '[INFO] %s\n' "$*"; }
+log() {
+  printf '[INFO] %s\n' "$*"
+  return 0
+}
 
 resolve_python() {
   local python_bin=""
