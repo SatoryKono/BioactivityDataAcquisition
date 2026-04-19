@@ -62,37 +62,45 @@ def _find_os_environ_usages(py_file: Path, base_path: Path) -> list[str]:
     - os.environ[...]
     - os.environ.setdefault(...)
     """
-    violations = []
-
     try:
         source = py_file.read_text(encoding="utf-8")
         tree = ast.parse(source)
     except (SyntaxError, UnicodeDecodeError):
         return []
 
-    for node in ast.walk(tree):
-        # Check for os.environ attribute access
-        if isinstance(node, ast.Attribute):
-            if node.attr == "environ":
-                # Check if it's os.environ
-                if isinstance(node.value, ast.Name) and node.value.id == "os":
-                    relative_path = py_file.relative_to(base_path)
-                    violations.append(f"{relative_path}:{node.lineno}: os.environ")
+    relative_path = py_file.relative_to(base_path)
+    return [
+        f"{relative_path}:{node.lineno}: {message}"
+        for node in ast.walk(tree)
+        for message in _iter_os_environ_messages(node)
+    ]
 
-        # Check for subscript access os.environ[...]
-        if isinstance(node, ast.Subscript):
-            if isinstance(node.value, ast.Attribute):
-                if node.value.attr == "environ":
-                    if (
-                        isinstance(node.value.value, ast.Name)
-                        and node.value.value.id == "os"
-                    ):
-                        relative_path = py_file.relative_to(base_path)
-                        violations.append(
-                            f"{relative_path}:{node.lineno}: os.environ[...]"
-                        )
 
-    return violations
+def _iter_os_environ_messages(node: ast.AST) -> list[str]:
+    if _is_os_environ_attribute(node):
+        return ["os.environ"]
+    if _is_os_environ_subscript(node):
+        return ["os.environ[...]"]
+    return []
+
+
+def _is_os_environ_attribute(node: ast.AST) -> bool:
+    return (
+        isinstance(node, ast.Attribute)
+        and node.attr == "environ"
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "os"
+    )
+
+
+def _is_os_environ_subscript(node: ast.AST) -> bool:
+    return (
+        isinstance(node, ast.Subscript)
+        and isinstance(node.value, ast.Attribute)
+        and node.value.attr == "environ"
+        and isinstance(node.value.value, ast.Name)
+        and node.value.value.id == "os"
+    )
 
 
 class TestEnvVarCentralization:
