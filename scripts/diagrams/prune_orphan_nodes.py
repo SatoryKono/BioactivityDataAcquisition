@@ -142,6 +142,13 @@ _SEQ_ACTIVATE_RE = re.compile(r"^\s*(?:activate|deactivate)\s+(\w+)", re.IGNOREC
 
 # Sequence: box … end  (do NOT treat box names as participants)
 _SEQ_BOX_RE = re.compile(r"^\s*box\b", re.IGNORECASE)
+_FLOWCHART_RESERVED_IDS = {
+    "end",
+    "direction",
+    "graph",
+    "flowchart",
+    "sequencediagram",
+}
 
 
 def _parse_class_directive(line: str) -> tuple[str, str] | None:
@@ -297,6 +304,83 @@ def _is_skippable_flowchart_line(line: str) -> bool:
     )
 
 
+def _consume_flowchart_structure_line(
+    stripped_line: str,
+    subgraph_names: set[str],
+    subgraph_stack: list[str],
+) -> bool:
+    if re.match(r"^subgraph\b", stripped_line, re.IGNORECASE):
+        match = _SUBGRAPH_RE.match(stripped_line)
+        subgraph_name = match.group(1) if match else ""
+        if subgraph_name:
+            subgraph_names.add(subgraph_name)
+        subgraph_stack.append(subgraph_name)
+        return True
+
+    if stripped_line.lower() == "end":
+        if subgraph_stack:
+            subgraph_stack.pop()
+        return True
+
+    if _is_skippable_flowchart_line(stripped_line):
+        return True
+
+    if _parse_class_directive(stripped_line) is not None:
+        return True
+
+    return bool(_STYLE_DIRECTIVE_RE.match(stripped_line))
+
+
+def _consume_flowchart_edge_line(stripped_line: str, raw_line: str, connected: set[str]) -> bool:
+    if not _ARROW_RE.search(raw_line):
+        return False
+    connected.update(_ids_from_edge_line(raw_line))
+    return True
+
+
+def _consume_flowchart_node_definition(
+    *,
+    raw_line: str,
+    stripped_line: str,
+    line_index: int,
+    all_defined: set[str],
+    definition_lines: dict[str, list[int]],
+    node_parent: dict[str, str],
+    subgraph_stack: list[str],
+) -> bool:
+    match = _NODE_SHAPE_RE.match(stripped_line)
+    if match:
+        node_id = match.group(1)
+        if node_id and re.match(rf"^{_NID}$", node_id):
+            _register_defined_node(
+                node_id=node_id,
+                line_index=line_index,
+                all_defined=all_defined,
+                definition_lines=definition_lines,
+                node_parent=node_parent,
+                subgraph_stack=subgraph_stack,
+            )
+        return True
+
+    match = re.match(rf"^\s*({_NID})\s*$", raw_line)
+    if not match:
+        return False
+
+    node_id = match.group(1)
+    if node_id.lower() in _FLOWCHART_RESERVED_IDS:
+        return True
+
+    _register_defined_node(
+        node_id=node_id,
+        line_index=line_index,
+        all_defined=all_defined,
+        definition_lines=definition_lines,
+        node_parent=node_parent,
+        subgraph_stack=subgraph_stack,
+    )
+    return True
+
+
 def parse_flowchart_orphans(
     lines: list[str],
     keep: set[str],
@@ -326,71 +410,22 @@ def parse_flowchart_orphans(
         if not s or s.startswith("%%"):
             continue
 
-        # ── Subgraph open ────────────────────────────────────────────────────
-        if re.match(r"^subgraph\b", s, re.IGNORECASE):
-            m = _SUBGRAPH_RE.match(s)
-            sg_name = m.group(1) if m else ""
-            if sg_name:
-                subgraph_names.add(sg_name)
-            subgraph_stack.append(sg_name)
+        if _consume_flowchart_structure_line(s, subgraph_names, subgraph_stack):
             continue
 
-        # ── Subgraph close ───────────────────────────────────────────────────
-        if s.lower() == "end":
-            if subgraph_stack:
-                subgraph_stack.pop()
+        if _consume_flowchart_edge_line(s, ln, connected):
             continue
 
-        if _is_skippable_flowchart_line(s):
+        if _consume_flowchart_node_definition(
+            raw_line=ln,
+            stripped_line=s,
+            line_index=i,
+            all_defined=all_defined,
+            definition_lines=definition_lines,
+            node_parent=node_parent,
+            subgraph_stack=subgraph_stack,
+        ):
             continue
-
-        # ── class directive: `class NodeId className` ────────────────────────
-        if _parse_class_directive(s) is not None:
-            continue
-
-        # ── style directive: `style NodeId ...` ─────────────────────────────
-        if _STYLE_DIRECTIVE_RE.match(s):
-            continue
-
-        # ── Edge line — collect all connected IDs ────────────────────────────
-        if _ARROW_RE.search(ln):
-            connected.update(_ids_from_edge_line(ln))
-            continue
-
-        # ── Standalone node definition (no arrows on this line) ──────────────
-        m = _NODE_SHAPE_RE.match(s)
-        if m:
-            nid = m.group(1)
-            if nid and re.match(rf"^{_NID}$", nid):
-                _register_defined_node(
-                    node_id=nid,
-                    line_index=i,
-                    all_defined=all_defined,
-                    definition_lines=definition_lines,
-                    node_parent=node_parent,
-                    subgraph_stack=subgraph_stack,
-                )
-            continue
-
-        # ── Bare node ID (e.g., just `NodeId` on its own line) ───────────────
-        m = re.match(rf"^\s*({_NID})\s*$", ln)
-        if m:
-            nid = m.group(1)
-            if nid.lower() not in {
-                "end",
-                "direction",
-                "graph",
-                "flowchart",
-                "sequencediagram",
-            }:
-                _register_defined_node(
-                    node_id=nid,
-                    line_index=i,
-                    all_defined=all_defined,
-                    definition_lines=definition_lines,
-                    node_parent=node_parent,
-                    subgraph_stack=subgraph_stack,
-                )
 
     # Subgraph names that appear in edge lines (they act as connected nodes)
     connected_subgraph_names: set[str] = connected & subgraph_names
@@ -496,44 +531,47 @@ def fix_flowchart_lines(
     definition_lines: dict[str, list[int]],
 ) -> list[str]:
     """Remove standalone orphan node definitions, class refs, and style lines."""
-    remove_indices: set[int] = set()
+    remove_indices = {
+        idx for node_id in orphan_ids for idx in definition_lines.get(node_id, [])
+    }
 
-    # 1. Standalone node definition lines
-    for nid in orphan_ids:
-        for idx in definition_lines.get(nid, []):
-            remove_indices.add(idx)
-
-    # 2. `style OrphanId ...` lines
     for i, ln in enumerate(lines):
-        m = _STYLE_DIRECTIVE_RE.match(ln.strip())
-        if m and m.group(1) in orphan_ids:
+        style_match = _STYLE_DIRECTIVE_RE.match(ln.strip())
+        if style_match and style_match.group(1) in orphan_ids:
             remove_indices.add(i)
 
-    # 3. `class OrphanId className` lines — remove or edit
     new_lines: list[str] = []
     for i, ln in enumerate(lines):
         if i in remove_indices:
             continue
 
         class_directive = _parse_class_directive(ln.strip())
-        if class_directive is not None:
-            raw_ids, class_name = class_directive
-            raw_ids = [nid.strip() for nid in re.split(r"[\s,]+", raw_ids)]
-            surviving = [nid for nid in raw_ids if nid and nid not in orphan_ids]
-            if not surviving:
-                # Remove entire line
-                continue
-            elif len(surviving) < len(raw_ids):
-                # Rebuild line with surviving IDs
-                indent = len(ln) - len(ln.lstrip())
-                new_lines.append(
-                    f"{' ' * indent}class {','.join(surviving)} {class_name}\n"
-                )
-                continue
+        if class_directive is None:
+            new_lines.append(ln)
+            continue
 
-        new_lines.append(ln)
-
+        rewritten_line = _rewrite_flowchart_class_directive(ln, class_directive, orphan_ids)
+        if rewritten_line is not None:
+            new_lines.append(rewritten_line)
+        
     return new_lines
+
+
+def _rewrite_flowchart_class_directive(
+    line: str,
+    class_directive: tuple[str, str],
+    orphan_ids: set[str],
+) -> str | None:
+    raw_ids, class_name = class_directive
+    node_ids = [node_id.strip() for node_id in re.split(r"[\s,]+", raw_ids)]
+    surviving = [node_id for node_id in node_ids if node_id and node_id not in orphan_ids]
+    if not surviving:
+        return None
+    if len(surviving) == len(node_ids):
+        return line
+
+    indent = len(line) - len(line.lstrip())
+    return f"{' ' * indent}class {','.join(surviving)} {class_name}\n"
 
 
 # ── Fix: sequence ─────────────────────────────────────────────────────────────

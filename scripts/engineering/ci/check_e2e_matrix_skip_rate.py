@@ -121,41 +121,51 @@ def _classify_failure(code: str) -> str:
     return "unknown"
 
 
-def _build_summary(junit_path: Path) -> MatrixHealthSummary:
-    root = ET.parse(junit_path).getroot()
-    smoke_cases = [
+def _smoke_cases(root: ET.Element) -> list[ET.Element]:
+    """Return matrix smoke testcases from parsed JUnit XML."""
+    return [
         case
         for case in root.iter("testcase")
         if str(case.attrib.get("name", "")).startswith(_SMOKE_TEST_PREFIX)
     ]
 
+
+def _node_payload(node: ET.Element) -> str:
+    """Build message payload used for skip/failure code extraction."""
+    return f"{node.attrib.get('message', '')}\n{node.text or ''}"
+
+
+def _collect_case_outcomes(
+    smoke_cases: list[ET.Element],
+) -> tuple[int, int, Counter[str], Counter[str]]:
+    """Collect skipped/failed counts and their labels."""
     skip_labels: Counter[str] = Counter()
     failure_labels: Counter[str] = Counter()
     skipped = 0
     failed = 0
-
     for case in smoke_cases:
         skipped_node = case.find("skipped")
         failure_node = case.find("failure")
         error_node = case.find("error")
-
         if skipped_node is not None:
             skipped += 1
-            payload = (
-                f"{skipped_node.attrib.get('message', '')}\n{skipped_node.text or ''}"
-            )
-            code = _extract_code(payload, pattern=_SKIP_CODE_RE)
+            code = _extract_code(_node_payload(skipped_node), pattern=_SKIP_CODE_RE)
             skip_labels[_classify_skip(code)] += 1
             continue
+        if failure_node is None and error_node is None:
+            continue
+        failed += 1
+        node = failure_node if failure_node is not None else error_node
+        assert node is not None
+        code = _extract_code(_node_payload(node), pattern=_FAIL_CODE_RE)
+        failure_labels[_classify_failure(code)] += 1
+    return skipped, failed, skip_labels, failure_labels
 
-        if failure_node is not None or error_node is not None:
-            failed += 1
-            node = failure_node if failure_node is not None else error_node
-            assert node is not None
-            payload = f"{node.attrib.get('message', '')}\n{node.text or ''}"
-            code = _extract_code(payload, pattern=_FAIL_CODE_RE)
-            failure_labels[_classify_failure(code)] += 1
 
+def _build_summary(junit_path: Path) -> MatrixHealthSummary:
+    root = ET.parse(junit_path).getroot()
+    smoke_cases = _smoke_cases(root)
+    skipped, failed, skip_labels, failure_labels = _collect_case_outcomes(smoke_cases)
     total = len(smoke_cases)
     passed = total - skipped - failed
     skip_rate = (skipped / total) if total else 0.0
@@ -195,6 +205,62 @@ def _render_markdown(summary: MatrixHealthSummary, violations: list[str]) -> str
     return "\n".join(lines)
 
 
+def _expected_total(args: argparse.Namespace) -> int:
+    """Resolve expected testcase total from args and configs."""
+    if args.expected_total_from_configs:
+        return len(sorted(args.configs_root.rglob("*.yaml")))
+    return args.expected_total
+
+
+def _build_violations(
+    *,
+    summary: MatrixHealthSummary,
+    expected_total: int,
+    max_skips: int,
+    max_skip_rate: float,
+    allow_unknown_labels: bool,
+    ignore_failures: bool,
+) -> list[str]:
+    """Build policy violations from matrix health summary."""
+    violations: list[str] = []
+    if summary.total == 0:
+        violations.append("No matrix smoke test cases found in JUnit report")
+    if expected_total > 0 and summary.total != expected_total:
+        violations.append(
+            f"expected total={expected_total}, observed total={summary.total}"
+        )
+    if summary.skipped > max_skips:
+        violations.append(f"skip count {summary.skipped} exceeds budget {max_skips}")
+    if summary.skip_rate > max_skip_rate:
+        violations.append(
+            f"skip rate {summary.skip_rate:.4f} exceeds budget {max_skip_rate:.4f}"
+        )
+    if summary.failed > 0 and not ignore_failures:
+        violations.append(f"matrix smoke has {summary.failed} failing test(s)")
+    unknown_skip = summary.skip_labels.get("unknown", 0)
+    unknown_failure = summary.failure_labels.get("unknown", 0)
+    if allow_unknown_labels:
+        return violations
+    if unknown_skip:
+        violations.append(f"unknown skip labels detected: {unknown_skip}")
+    if unknown_failure:
+        violations.append(f"unknown failure labels detected: {unknown_failure}")
+    return violations
+
+
+def _print_summary(summary: MatrixHealthSummary) -> None:
+    """Print compact matrix health summary to stdout."""
+    print("[e2e-matrix-health] summary")
+    print(
+        f"  total={summary.total} passed={summary.passed} skipped={summary.skipped} failed={summary.failed}"
+    )
+    print(f"  skip_rate={summary.skip_rate:.4f}")
+    print(f"  skip_labels={dict(summary.skip_labels)}")
+    print(f"  failure_labels={dict(summary.failure_labels)}")
+    print(f"  infra_flaky_total={summary.infra_flaky_total}")
+    print(f"  code_regression_total={summary.code_regression_total}")
+
+
 def main() -> int:
     args = _parse_args()
     if not args.junit.exists():
@@ -205,46 +271,15 @@ def main() -> int:
         return 1
 
     summary = _build_summary(args.junit)
-    expected_total = args.expected_total
-    if args.expected_total_from_configs:
-        expected_total = len(sorted(args.configs_root.rglob("*.yaml")))
-
-    violations: list[str] = []
-
-    if summary.total == 0:
-        violations.append("No matrix smoke test cases found in JUnit report")
-    if expected_total > 0 and summary.total != expected_total:
-        violations.append(
-            f"expected total={expected_total}, observed total={summary.total}"
-        )
-    if summary.skipped > args.max_skips:
-        violations.append(
-            f"skip count {summary.skipped} exceeds budget {args.max_skips}"
-        )
-    if summary.skip_rate > args.max_skip_rate:
-        violations.append(
-            f"skip rate {summary.skip_rate:.4f} exceeds budget {args.max_skip_rate:.4f}"
-        )
-    if summary.failed > 0 and not args.ignore_failures:
-        violations.append(f"matrix smoke has {summary.failed} failing test(s)")
-
-    unknown_skip = summary.skip_labels.get("unknown", 0)
-    unknown_failure = summary.failure_labels.get("unknown", 0)
-    if not args.allow_unknown_labels:
-        if unknown_skip:
-            violations.append(f"unknown skip labels detected: {unknown_skip}")
-        if unknown_failure:
-            violations.append(f"unknown failure labels detected: {unknown_failure}")
-
-    print("[e2e-matrix-health] summary")
-    print(
-        f"  total={summary.total} passed={summary.passed} skipped={summary.skipped} failed={summary.failed}"
+    violations = _build_violations(
+        summary=summary,
+        expected_total=_expected_total(args),
+        max_skips=args.max_skips,
+        max_skip_rate=args.max_skip_rate,
+        allow_unknown_labels=args.allow_unknown_labels,
+        ignore_failures=args.ignore_failures,
     )
-    print(f"  skip_rate={summary.skip_rate:.4f}")
-    print(f"  skip_labels={dict(summary.skip_labels)}")
-    print(f"  failure_labels={dict(summary.failure_labels)}")
-    print(f"  infra_flaky_total={summary.infra_flaky_total}")
-    print(f"  code_regression_total={summary.code_regression_total}")
+    _print_summary(summary)
 
     if args.markdown_out is not None:
         args.markdown_out.parent.mkdir(parents=True, exist_ok=True)

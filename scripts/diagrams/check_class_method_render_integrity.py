@@ -60,6 +60,54 @@ def _strip_class_id_suffix(raw_class_id: str) -> str:
     return candidate
 
 
+def _resolve_methods_group_class_name(
+    methods_group: ET.Element,
+    parent_map: dict[ET.Element, ET.Element],
+) -> str:
+    ancestor = methods_group
+    while ancestor is not None:
+        raw_id = ancestor.attrib.get("id", "")
+        if raw_id.startswith("classId-"):
+            return _strip_class_id_suffix(raw_id)
+        ancestor = parent_map.get(ancestor)
+    return ""
+
+
+def _collect_methods_group_text(methods_group: ET.Element) -> list[str]:
+    method_text_parts = [
+        text
+        for tspan in methods_group.findall(".//svg:tspan", NS)
+        if (text := _normalize_whitespace(tspan.text or ""))
+    ]
+    if method_text_parts:
+        return method_text_parts
+
+    # Fallback when only foreignObject is present.
+    return [
+        text
+        for foreign_object in methods_group.findall(".//svg:foreignObject", NS)
+        if (text := _normalize_whitespace(" ".join(foreign_object.itertext())))
+    ]
+
+
+def _collect_split_method_issues(
+    methods_group: ET.Element,
+    class_name: str,
+) -> list[tuple[str, str, str]]:
+    split_issues: list[tuple[str, str, str]] = []
+    for label in methods_group.findall('./svg:g[@class="label"]', NS):
+        spans = [
+            text
+            for tspan in label.findall(".//svg:tspan", NS)
+            if (text := _normalize_whitespace(tspan.text or ""))
+        ]
+        for left, right in itertools.pairwise(spans):
+            # Broken split example: "start_execution_sp" + "an()"
+            if re.search(r"[A-Za-z0-9_]$", left) and re.match(r"^[A-Za-z0-9_]", right):
+                split_issues.append((class_name, left, right))
+    return split_issues
+
+
 def parse_expected_methods(mmd_path: Path) -> dict[str, list[str]]:
     lines = mmd_path.read_text(encoding="utf-8").splitlines()
     in_class: str | None = None
@@ -103,45 +151,14 @@ def parse_svg_methods(
     split_issues: list[tuple[str, str, str]] = []
 
     for methods_group in root.findall('.//svg:g[@class="methods-group text"]', NS):
-        ancestor = methods_group
-        class_name = ""
-        while ancestor is not None:
-            raw_id = ancestor.attrib.get("id", "")
-            if raw_id.startswith("classId-"):
-                class_name = _strip_class_id_suffix(raw_id)
-                break
-            ancestor = parent_map.get(ancestor)
-
+        class_name = _resolve_methods_group_class_name(methods_group, parent_map)
         if not class_name:
             continue
 
-        method_text_parts: list[str] = []
-        for tspan in methods_group.findall(".//svg:tspan", NS):
-            text = _normalize_whitespace(tspan.text or "")
-            if text:
-                method_text_parts.append(text)
-
-        if not method_text_parts:
-            # Fallback when only foreignObject is present.
-            for foreign_object in methods_group.findall(".//svg:foreignObject", NS):
-                text = _normalize_whitespace(" ".join(foreign_object.itertext()))
-                if text:
-                    method_text_parts.append(text)
-
+        method_text_parts = _collect_methods_group_text(methods_group)
         rendered_by_class[class_name] = " ".join(method_text_parts)
 
-        for label in methods_group.findall('./svg:g[@class="label"]', NS):
-            spans = [
-                _normalize_whitespace(tspan.text or "")
-                for tspan in label.findall(".//svg:tspan", NS)
-            ]
-            spans = [s for s in spans if s]
-            for left, right in itertools.pairwise(spans):
-                # Broken split example: "start_execution_sp" + "an()"
-                if re.search(r"[A-Za-z0-9_]$", left) and re.match(
-                    r"^[A-Za-z0-9_]", right
-                ):
-                    split_issues.append((class_name, left, right))
+        split_issues.extend(_collect_split_method_issues(methods_group, class_name))
 
     return rendered_by_class, split_issues
 
