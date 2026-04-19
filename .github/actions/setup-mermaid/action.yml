@@ -28,9 +28,9 @@ runs:
         MERMAID_VERSION: ${{ inputs.mermaid-version }}
         INSTALL_LIBRSVG: ${{ inputs.install-librsvg }}
       run: |
-        npm install -g "@mermaid-js/mermaid-cli@$MERMAID_VERSION"
+        npm install -g "@mermaid-js/mermaid-cli@$MERMAID_VERSION" --ignore-scripts
         if [ "$INSTALL_LIBRSVG" = "true" ]; then
-          npm install -g svgo
+          npm install -g svgo --ignore-scripts
           sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
         fi
 

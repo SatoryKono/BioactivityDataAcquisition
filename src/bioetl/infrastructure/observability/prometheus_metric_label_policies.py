@@ -169,6 +169,11 @@ def normalize_metric_dispatch_labels(
             **labels,
             "reason": normalize_quarantine_reason(str(labels.get("reason", "other"))),
         }
+    if name == "bioetl_dq_records_quarantined_total":
+        return {
+            **labels,
+            "run_type": str(labels.get("run_type", "unknown")),
+        }
     if name == "bioetl_dq_validation_failures_total":
         return {
             **labels,
