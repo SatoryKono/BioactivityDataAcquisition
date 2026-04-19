@@ -20,6 +20,7 @@ from bioetl.composition.factories.services.pipeline_record_processor_builder imp
 
 if TYPE_CHECKING:
     import pyarrow as pa
+
     from bioetl.application.core.wiring.runtime import (
         BasePipeline,
         BatchExecutor,
