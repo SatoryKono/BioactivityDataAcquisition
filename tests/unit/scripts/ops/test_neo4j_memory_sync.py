@@ -55,6 +55,7 @@ from scripts.memory.sync import (
 )
 
 pytestmark = pytest.mark.memory
+REPORT_PATH = "reports/neo4j-memory-audit.json"
 
 
 def _snapshot() -> tuple[Path, object]:
@@ -272,7 +273,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     ) in node_keys
     assert (
         "execution_path",
-        "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json",
+        f"python -m scripts.memory sync --report {REPORT_PATH}",
     ) in node_keys
     assert (
         "execution_path",
@@ -828,7 +829,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "scripts/memory/__main__.py",
         "PROVIDES",
         "execution_path",
-        "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json",
+        f"python -m scripts.memory sync --report {REPORT_PATH}",
     ),
     (
         "policy_surface",
@@ -1329,7 +1330,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "scripts.memory sync",
         "RUNS_VIA",
         "execution_path",
-        "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json",
+        f"python -m scripts.memory sync --report {REPORT_PATH}",
     ),
     (
         "doc_artifact",

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import tempfile
 from datetime import UTC, datetime
 from functools import cache
+from pathlib import Path
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -24,6 +26,10 @@ from bioetl.infrastructure.storage.gold.pipeline_helpers import (
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
+
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-gold-writer-"))
+GOLD_ROOT = str(TEST_ROOT / "gold")
 
 
 @cache
@@ -142,7 +148,7 @@ class TestGoldWriterInit:
 
         mock_exporter = MagicMock()
         writer = _build_gold_writer(
-            base_path="/tmp/gold",
+            base_path=GOLD_ROOT,
             logger=noop_logger,
             csv_exporter=mock_exporter,
         )
@@ -150,7 +156,7 @@ class TestGoldWriterInit:
 
     def test_init_without_csv_exporter(self, noop_logger):
         """Test initialization without CSV exporter."""
-        writer = _build_gold_writer(base_path="/tmp/gold", logger=noop_logger)
+        writer = _build_gold_writer(base_path=GOLD_ROOT, logger=noop_logger)
         assert writer.csv_exporter is None
 
 
@@ -193,7 +199,7 @@ class TestGoldWriterPipelineHelpers:
         tracing.get_tracer.return_value = tracer
 
         writer = _build_gold_writer(
-            base_path="/tmp/gold",
+            base_path=GOLD_ROOT,
             logger=noop_logger,
             tracing=tracing,
         )

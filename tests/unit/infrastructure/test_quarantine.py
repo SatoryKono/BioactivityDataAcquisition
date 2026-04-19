@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import tempfile
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import patch
 from uuid import UUID
 
@@ -13,6 +15,8 @@ from bioetl.infrastructure.quarantine.unified import UnifiedQuarantineAdapter
 
 # Fixed timestamp for test reproducibility
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-quarantine-"))
+QUARANTINE_ROOT = str(TEST_ROOT / "quarantine")
 
 
 def _extract_record_from_call(mock_call) -> dict:
@@ -43,13 +47,13 @@ class TestUnifiedQuarantine:
 
     def test_unified_quarantine_initialization(self):
         """Test UnifiedQuarantineAdapter can be initialized."""
-        quarantine = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
-        assert quarantine.base_path == "/tmp/quarantine"
+        quarantine = UnifiedQuarantineAdapter(base_path=QUARANTINE_ROOT)
+        assert quarantine.base_path == QUARANTINE_ROOT
 
     @pytest.mark.asyncio
     async def test_write_calls_write_deltalake(self, mock_deltalake):
         """Test that write calls write_deltalake with correct data."""
-        quarantine = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
+        quarantine = UnifiedQuarantineAdapter(base_path=QUARANTINE_ROOT)
         pipeline = "test_pipeline"
         error_code = "INVALID_DATA"
         payload = {"id": 1, "value": "a"}
@@ -80,7 +84,7 @@ class TestUnifiedQuarantine:
 
     async def test_payload_truncation(self, mock_deltalake):
         """Test that large payloads are truncated at 64KB."""
-        quarantine = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
+        quarantine = UnifiedQuarantineAdapter(base_path=QUARANTINE_ROOT)
         # Create a payload larger than 64KB
         large_value = "a" * (70 * 1024)  # 70KB
         payload = {"key": large_value}

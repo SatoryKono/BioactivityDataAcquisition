@@ -101,6 +101,7 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
 
     manifest = _make_manifest()
     manifest_store.save(manifest)
+    artifact_path = str(tmp_path / "output" / "silver" / "chembl" / "activity")
     entry = RunLedgerEntry(
         entry_id="entry-guard",
         manifest_id=manifest.manifest_id,
@@ -112,7 +113,7 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
         lineage_fragment_id="silver:fragment-1",
         details={
             "_diagnostic": {"pipeline": manifest.pipeline_name},
-            "artifact_path": "/tmp/output/silver/chembl/activity",
+            "artifact_path": artifact_path,
             "source_batch_id": "batch-123",
             "dataset_hash": "hash-123",
         },
@@ -144,7 +145,7 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
     forbidden_values = {
         str(manifest.run_id),
         manifest.manifest_id,
-        "/tmp/output/silver/chembl/activity",
+        artifact_path,
         "hash-123",
         "batch-123",
         "silver:chembl.activity@hash-123",
@@ -174,7 +175,7 @@ def test_control_plane_metrics_never_emit_forbidden_labels_or_values(
         for value in labels.values():
             rendered = str(value)
             assert rendered not in forbidden_values
-            assert not rendered.startswith("/tmp/")
+            assert not rendered.startswith(str(tmp_path))
 
     for call in metrics.increment_counter.call_args_list:
         metric_name = call.args[0]

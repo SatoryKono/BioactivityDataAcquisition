@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -19,6 +20,10 @@ from bioetl.composition.factories.services.bundle import (
     build_pipeline_services,
 )
 from bioetl.composition.factories.services.factory import BaseServicesFactory
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-pipeline-factory-"))
+CUSTOM_BRONZE_PATH = str(TEST_ROOT / "custom-bronze")
+CACHED_BRONZE_PATH = str(TEST_ROOT / "bronze")
 
 
 @pytest.mark.unit
@@ -81,15 +86,13 @@ def test_create_cached_bronze_data_source_uses_explicit_path(
         pipeline_config=SimpleNamespace(provider="chembl", entity_type="publication"),
         logger=logger,
         cached_bronze=SimpleNamespace(
-            bronze_path="/tmp/custom-bronze",
+            bronze_path=CUSTOM_BRONZE_PATH,
             bronze_date="2026-03-03",
         ),
     )
 
     assert result is expected_source
-    assert mock_bronze_writer.call_args.kwargs["base_path"] == Path(
-        "/tmp/custom-bronze"
-    )
+    assert mock_bronze_writer.call_args.kwargs["base_path"] == Path(CUSTOM_BRONZE_PATH)
     mock_cached_source.assert_called_once()
 
 
@@ -137,7 +140,7 @@ def test_build_pipeline_services_uses_cached_bronze_when_enabled(
     pipeline_config = SimpleNamespace(provider="chembl", entity_type="publication")
     cached_bronze = SimpleNamespace(
         enabled=True,
-        bronze_path="/tmp/bronze",
+        bronze_path=CACHED_BRONZE_PATH,
         bronze_date="2026-03-02",
     )
 
