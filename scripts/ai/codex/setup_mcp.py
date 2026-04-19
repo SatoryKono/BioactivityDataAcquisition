@@ -57,7 +57,7 @@ def _wrapper_command(script_name: str) -> dict[str, Any]:
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                str(wrapper.with_suffix(".ps1")),
+                wrapper.with_suffix(".ps1").as_posix(),
             ],
         }
     return {"command": "bash", "args": [str(wrapper.with_suffix(".sh"))]}

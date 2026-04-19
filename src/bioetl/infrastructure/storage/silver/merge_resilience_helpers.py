@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from deltalake.exceptions import CommitFailedError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -22,6 +22,8 @@ from bioetl.infrastructure.storage.silver.delta_helpers import (
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
+
+LoadModule = Callable[[], object]
 
 
 def _emit_merge_recovered_after_retry(
@@ -46,7 +48,7 @@ def _emit_merge_recovered_after_retry(
 async def _pre_evolve_existing_table_schema(
     *,
     request: _DeltaWriteRequest,
-    load_module: Callable[[], Any],  # Any: silver_writer module is loaded lazily
+    load_module: LoadModule,
 ) -> tuple[_DeltaWriteRequest, bool]:
     """Pre-evolve schema only when merge-schema targets an existing table."""
     if not request.merge_schema:
@@ -70,7 +72,7 @@ async def _maybe_pre_evolve_on_duplicate_field_error(
     exc: BaseException,
     request: _DeltaWriteRequest,
     schema_pre_evolved: bool,
-    load_module: Callable[[], Any],  # Any: silver_writer module is loaded lazily
+    load_module: LoadModule,
 ) -> tuple[_DeltaWriteRequest, bool] | None:
     """Pre-evolve schema on the known duplicate-field merge quirk."""
     if (
@@ -93,7 +95,7 @@ async def _handle_merge_execution_error(
     schema_pre_evolved: bool,
     timeout_retry_count: int,
     policy: SilverMergeResiliencePolicy,
-    load_module: Callable[[], Any],
+    load_module: LoadModule,
     emit_final: Callable[..., None],
     emit_retry: Callable[..., None],
 ) -> tuple[_DeltaWriteRequest, bool, int]:
@@ -125,7 +127,7 @@ async def _execute_merge_write_request(
     *,
     request: _DeltaWriteRequest,
     policy: SilverMergeResiliencePolicy,
-    load_module: Callable[[], Any],  # Any: silver_writer module varies at runtime
+    load_module: LoadModule,
     write_append: Callable[[_DeltaWriteRequest], Awaitable[None]],
     merge_records: Callable[..., Awaitable[None]],
     emit_final: Callable[..., None],
@@ -175,7 +177,14 @@ async def _execute_merge_write_request(
             if next_commit_retry_count is None:
                 raise
             commit_retry_count = next_commit_retry_count
-        except Exception as exc:
+        except (
+            ValueError,
+            TypeError,
+            RuntimeError,
+            KeyError,
+            AttributeError,
+            OSError,
+        ) as exc:
             (
                 active_request,
                 schema_pre_evolved,

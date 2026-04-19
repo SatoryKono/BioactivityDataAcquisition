@@ -45,7 +45,7 @@ class _ColumnPriorityProvider(Protocol):
         df: pl.DataFrame,
         field: str,
         ordered_cols: list[str],
-        can_coalesce_fn: callable,
+        _can_coalesce_fn: callable,
     ) -> tuple[list[str], list[str]]: ...
 
 

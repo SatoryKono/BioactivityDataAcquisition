@@ -12,7 +12,7 @@ def log_error(logger: Logger, error: str) -> None:
         logger: Logger instance.
         error: Error message to log.
     """
-    logger.error("Error occurred: %s", error)
+    logger.error(f"Error occurred: {error}")
 
 
 def log_debug(logger: Logger, details: str) -> None:
@@ -22,4 +22,4 @@ def log_debug(logger: Logger, details: str) -> None:
         logger: Logger instance.
         details: Debug details to log.
     """
-    logger.debug("Debug info: %s", details)
+    logger.debug(f"Debug info: {details}")

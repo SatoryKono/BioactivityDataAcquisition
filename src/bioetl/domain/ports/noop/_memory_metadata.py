@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -175,7 +174,6 @@ class NoOpMetadataWriter:
         Returns:
             Empty string.
         """
-        await asyncio.sleep(0)
         del base_path, metadata, table_name, flat_structure, provider, entity
         return ""
 
@@ -191,12 +189,10 @@ class NoOpMetadataWriter:
         completed_at: datetime | None = None,
     ) -> str | None:
         """No-op Gold finalization returns empty string when invoked."""
-        await asyncio.sleep(0)
         del base_path, table_name, flat_structure, provider, entity
         del dq_report_path, completed_at
         return ""
 
     async def aclose(self) -> None:
         """No-op implementation of aclose — no resources to release."""
-        await asyncio.sleep(0)
         return None

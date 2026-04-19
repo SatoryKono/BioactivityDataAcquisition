@@ -106,7 +106,7 @@ class _PhaseTransitionRuleBuilder(
         transition: TransitionContraT,
         policy: PolicyContraT,
         requires_validation: bool = True,
-        allows_retry: bool = False,
-        compensation_required: bool = False,
-        degraded_mode_allowed: bool = False,
+        _allows_retry: bool = False,
+        _compensation_required: bool = False,
+        _degraded_mode_allowed: bool = False,
     ) -> RuleCoT: ...
