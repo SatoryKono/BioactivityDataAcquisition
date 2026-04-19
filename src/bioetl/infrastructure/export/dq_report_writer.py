@@ -63,7 +63,7 @@ class DQReportWriter:
         self,
         report: BronzeDQReport,
         output_path: Path | None = None,
-        format: DQReportFormat | None = None,
+        report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
@@ -74,8 +74,9 @@ class DQReportWriter:
         Returns:
             Path to the written Bronze DQ report file.
         """
-        format = format or DQReportFormat.JSON
-        extension = self._get_extension(format)
+        del date_str
+        report_format = report_format or DQReportFormat.JSON
+        extension = self._get_extension(report_format)
 
         # Build filename - unified with Silver pattern: {layer}_{provider}_{entity}_dq_report
         if provider and entity:
@@ -106,7 +107,7 @@ class DQReportWriter:
             output_path.mkdir(parents=True, exist_ok=True)
             output_path = output_path / filename
 
-        return await self._write_report(report, output_path, format)
+        return await self._write_report(report, output_path, report_format)
 
     def _build_layer_filename(
         self,
@@ -172,7 +173,7 @@ class DQReportWriter:
         self,
         report: SilverDQReport,
         output_path: Path | None = None,
-        format: DQReportFormat | None = None,
+        report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
@@ -189,8 +190,8 @@ class DQReportWriter:
         Returns:
             Path to the written report file.
         """
-        format = format or DQReportFormat.JSON
-        extension = self._get_extension(format)
+        report_format = report_format or DQReportFormat.JSON
+        extension = self._get_extension(report_format)
         resolved_path = self._resolve_layer_output_path(
             "silver",
             output_path,
@@ -199,13 +200,13 @@ class DQReportWriter:
             entity,
             report.target_table,
         )
-        return await self._write_report(report, resolved_path, format)
+        return await self._write_report(report, resolved_path, report_format)
 
     async def write_gold_report(
         self,
         report: GoldDQReport,
         output_path: Path | None = None,
-        format: DQReportFormat | None = None,
+        report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
@@ -222,8 +223,8 @@ class DQReportWriter:
         Returns:
             Path to the written report file.
         """
-        format = format or DQReportFormat.JSON
-        extension = self._get_extension(format)
+        report_format = report_format or DQReportFormat.JSON
+        extension = self._get_extension(report_format)
         resolved_path = self._resolve_layer_output_path(
             "gold",
             output_path,
@@ -232,13 +233,13 @@ class DQReportWriter:
             entity,
             report.target_table,
         )
-        return await self._write_report(report, resolved_path, format)
+        return await self._write_report(report, resolved_path, report_format)
 
     async def _write_report(
         self,
         report: BronzeDQReport | SilverDQReport | GoldDQReport,
         output_path: Path,
-        format: DQReportFormat,
+        report_format: DQReportFormat,
     ) -> Path:
         """Write report to file atomically.
 
@@ -254,7 +255,7 @@ class DQReportWriter:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Serialize report
-        content = self._serializer.serialize(report, format)
+        content = self._serializer.serialize(report, report_format)
         content_bytes = content.encode("utf-8")
 
         # Write atomically in executor
@@ -268,15 +269,15 @@ class DQReportWriter:
             "dq_report_written",
             path=str(output_path),
             layer=report.layer.value,
-            format=format.value,
+            format=report_format.value,
             run_id=report.run_id,
             size_bytes=len(content_bytes),
         )
 
         return output_path
 
-    def _get_extension(self, format: DQReportFormat) -> str:
-        """Get file extension for format.
+    def _get_extension(self, report_format: DQReportFormat) -> str:
+        """Get file extension for report format.
 
         Returns:
             File extension string (e.g., '.json', '.yaml', '.html') for the given format.
@@ -286,7 +287,7 @@ class DQReportWriter:
             DQReportFormat.YAML: ".yaml",
             DQReportFormat.HTML: ".html",
         }
-        return extensions.get(format, ".json")
+        return extensions.get(report_format, ".json")
 
 
 __all__ = ["DQReportWriter"]

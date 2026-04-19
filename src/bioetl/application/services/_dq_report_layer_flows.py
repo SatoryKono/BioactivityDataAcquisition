@@ -73,10 +73,9 @@ async def generate_bronze_report(
             output_path=_resolve_output_path(
                 context.bronze_output_path, config.output_path
             ),
-            format=config.get_format_enum(),
+            report_format=config.get_format_enum(),
             provider=context.provider,
             entity=context.entity,
-            date_str=context.bronze_date_str,
         )
         logger.debug(
             "bronze_dq_report_generated",
@@ -149,7 +148,7 @@ async def generate_silver_report(
             output_path=_resolve_output_path(
                 context.silver_output_path, config.output_path
             ),
-            format=config.get_format_enum(),
+            report_format=config.get_format_enum(),
             provider=context.provider,
             entity=context.entity,
         )
@@ -219,7 +218,7 @@ async def generate_gold_report(
             output_path=_resolve_output_path(
                 context.gold_output_path, config.output_path
             ),
-            format=config.get_format_enum(),
+            report_format=config.get_format_enum(),
             provider=context.provider,
             entity=context.entity,
         )

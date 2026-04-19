@@ -255,7 +255,7 @@ class TestWriteBronzeReport:
         report_path = await writer.write_bronze_report(
             report=report,
             output_path=output_dir,
-            format=DQReportFormat.JSON,
+            report_format=DQReportFormat.JSON,
             provider="chembl",
             entity="target",
         )
@@ -320,7 +320,7 @@ class TestWriteBronzeReport:
 
         report_path = await writer.write_bronze_report(
             report=report,
-            format=DQReportFormat.YAML,
+            report_format=DQReportFormat.YAML,
             provider="chembl",
             entity="target",
         )
@@ -383,7 +383,7 @@ class TestWriteSilverReport:
 
         report_path = await writer.write_silver_report(
             report=report,
-            format=DQReportFormat.YAML,
+            report_format=DQReportFormat.YAML,
             provider="chembl",
             entity="activity",
         )
@@ -446,7 +446,7 @@ class TestWriteGoldReport:
 
         report_path = await writer.write_gold_report(
             report=report,
-            format=DQReportFormat.HTML,
+            report_format=DQReportFormat.HTML,
             provider="chembl",
             entity="activity",
         )

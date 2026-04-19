@@ -308,21 +308,19 @@ class DQReportWriterPort(Protocol):
         self,
         report: BronzeDQReport,
         output_path: Path | None = None,
-        format: DQReportFormat | None = None,
+        report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
-        date_str: str | None = None,
     ) -> Path:
         """Write Bronze DQ report to file.
 
         Args:
             report: Bronze DQ report to write.
             output_path: Output path (None = alongside data).
-            format: Output format (None = JSON).
+            report_format: Output format (None = JSON).
             provider: Provider name for filename generation.
             entity: Entity name for filename generation.
-            date_str: Date string for path generation (YYYY-MM-DD).
 
         Returns:
             Path to the written report file.
@@ -333,7 +331,7 @@ class DQReportWriterPort(Protocol):
         self,
         report: SilverDQReport,
         output_path: Path | None = None,
-        format: DQReportFormat | None = None,
+        report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
@@ -343,7 +341,7 @@ class DQReportWriterPort(Protocol):
         Args:
             report: Silver DQ report to write.
             output_path: Output path (None = alongside data).
-            format: Output format (None = JSON).
+            report_format: Output format (None = JSON).
             provider: Provider name for path generation.
             entity: Entity name for path generation.
 
@@ -356,7 +354,7 @@ class DQReportWriterPort(Protocol):
         self,
         report: GoldDQReport,
         output_path: Path | None = None,
-        format: DQReportFormat | None = None,
+        report_format: DQReportFormat | None = None,
         *,
         provider: str | None = None,
         entity: str | None = None,
@@ -366,7 +364,7 @@ class DQReportWriterPort(Protocol):
         Args:
             report: Gold DQ report to write.
             output_path: Output path (None = alongside data).
-            format: Output format (None = JSON).
+            report_format: Output format (None = JSON).
             provider: Provider name for path generation.
             entity: Entity name for path generation.
 

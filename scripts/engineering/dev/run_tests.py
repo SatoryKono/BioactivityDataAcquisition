@@ -24,9 +24,14 @@ class CommandSpec:
     pytest_args: list[str]
 
 
+TESTS_ROOT = "tests/"
+UNIT_TESTS_ROOT = "tests/unit/"
+SHORT_TRACEBACK = "--tb=short"
+
+
 COMMANDS: dict[str, CommandSpec] = {
-    "all": CommandSpec("All Tests", ["tests/", "-x", "-q"]),
-    "unit": CommandSpec("Unit Tests", ["tests/unit/", "-x", "-q"]),
+    "all": CommandSpec("All Tests", [TESTS_ROOT, "-x", "-q"]),
+    "unit": CommandSpec("Unit Tests", [UNIT_TESTS_ROOT, "-x", "-q"]),
     "arch": CommandSpec("Architecture Tests", ["tests/architecture/", "-v"]),
     "integration": CommandSpec("Integration Tests", ["tests/integration/", "-x", "-q"]),
     "contract": CommandSpec("Contract Tests", ["tests/contract/", "-v"]),
@@ -39,7 +44,7 @@ COMMANDS: dict[str, CommandSpec] = {
     "cov": CommandSpec(
         "Tests + Coverage",
         [
-            "tests/",
+            TESTS_ROOT,
             "-m",
             "not memory",
             "--cov=src/bioetl",
@@ -49,13 +54,13 @@ COMMANDS: dict[str, CommandSpec] = {
             "-q",
         ],
     ),
-    "parallel": CommandSpec("All Tests (parallel)", ["tests/", "-n", "auto", "-q"]),
-    "failed": CommandSpec("Re-run Failed", ["tests/", "--lf", "-x", "-v"]),
+    "parallel": CommandSpec("All Tests (parallel)", [TESTS_ROOT, "-n", "auto", "-q"]),
+    "failed": CommandSpec("Re-run Failed", [TESTS_ROOT, "--lf", "-x", "-v"]),
 }
-UNIT_QUICK_ARGS = ["tests/unit/", "-x", "-q"]
+UNIT_QUICK_ARGS = [UNIT_TESTS_ROOT, "-x", "-q"]
 SMOKE_QUICK_ARGS = ["tests/smoke/", "-x", "-q"]
 FAST_UNIT_FALLBACK_ARGS = [
-    "tests/unit/",
+    UNIT_TESTS_ROOT,
     "-m",
     "not slow and not serial",
     "-n",
@@ -63,7 +68,7 @@ FAST_UNIT_FALLBACK_ARGS = [
     "--dist",
     "loadscope",
     "-q",
-    "--tb=short",
+    SHORT_TRACEBACK,
 ]
 
 
@@ -151,7 +156,7 @@ def _run_marker(args: list[str]) -> int:
         return 1
     marker = args[0]
     extra = args[1:]
-    return _run_pytest(f"Marker: {marker}", ["tests/", "-m", marker, "-v"], extra)
+    return _run_pytest(f"Marker: {marker}", [TESTS_ROOT, "-m", marker, "-v"], extra)
 
 
 def _run_file(args: list[str]) -> int:
@@ -224,7 +229,7 @@ def _run_changed(args: list[str]) -> int:
         _print_info("Only test files changed. Running changed test files directly.")
         return _run_pytest(
             "Changed test files",
-            [*changed_tests, "-v", "--tb=short"],
+            [*changed_tests, "-v", SHORT_TRACEBACK],
             extra,
             env_overrides=env_overrides,
         )
@@ -238,7 +243,7 @@ def _run_changed(args: list[str]) -> int:
     rc = _run_pytest(
         "Changed-source keyword tests",
         [
-            "tests/",
+            TESTS_ROOT,
             "-k",
             keyword_expression,
             "-n",
@@ -246,7 +251,7 @@ def _run_changed(args: list[str]) -> int:
             "--dist",
             "loadscope",
             "-v",
-            "--tb=short",
+            SHORT_TRACEBACK,
             "--ignore=tests/e2e/",
             "--ignore=tests/benchmarks/",
         ],
