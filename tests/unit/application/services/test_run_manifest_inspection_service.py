@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import tempfile
 from dataclasses import replace
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import UUID, uuid4
 
 import pytest
@@ -44,6 +46,11 @@ _VALID_CONFIG_HASH = "a" * 64
 _SNAPSHOT_IDENTITY_FINGERPRINT = (
     "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
 )
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-manifest-inspection-"))
+BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
+SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
+GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "gold_dq.json")
+COMPOSITE_CV_REPORT_PATH = str(TEST_ROOT / "reports" / "composite_cv.json")
 
 
 def _expected_canonical_execution_identity(
@@ -267,7 +274,7 @@ def _make_manifest(
                     RunInputSnapshotRef(
                         snapshot_id="snapshot-1",
                         content_hash="sha256:snapshot-1",
-                        immutable_uri="file:///tmp/bronze/batch_1.jsonl.zst",
+                        immutable_uri=BRONZE_BATCH_URI,
                     ),
                 ),
             ),
@@ -347,7 +354,7 @@ def test_show_resolves_manifest_by_run_id_and_includes_ledger_history() -> None:
                 "query": None,
                 "snapshot_id": "snapshot-1",
                 "content_hash": "sha256:snapshot-1",
-                "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                "immutable_uri": BRONZE_BATCH_URI,
                 "query_fingerprint": None,
                 "etag": None,
                 "last_modified": None,
@@ -435,7 +442,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
                 "query": None,
                 "snapshot_id": "snapshot-1",
                 "content_hash": "sha256:snapshot-1",
-                "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                "immutable_uri": BRONZE_BATCH_URI,
                 "query_fingerprint": None,
                 "etag": None,
                 "last_modified": None,
@@ -492,7 +499,7 @@ def test_show_by_manifest_id_without_ledger_port_returns_base_summary() -> None:
                 "query": None,
                 "snapshot_id": "snapshot-1",
                 "content_hash": "sha256:snapshot-1",
-                "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                "immutable_uri": BRONZE_BATCH_URI,
                 "query_fingerprint": None,
                 "etag": None,
                 "last_modified": None,
@@ -785,7 +792,7 @@ def test_show_snapshot_backed_manifest_reports_non_replay_snapshot_mode() -> Non
                     RunInputSnapshotRef(
                         snapshot_id="snapshot-1",
                         content_hash="sha256:snapshot-1",
-                        immutable_uri="file:///tmp/bronze/batch_1.jsonl.zst",
+                        immutable_uri=BRONZE_BATCH_URI,
                     ),
                 ),
             ),
@@ -854,7 +861,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
             stage="silver",
             dataset_ref="silver:chembl.activity@1",
             lineage_fragment_id="silver:fragment-1",
-            details={"artifact_path": "/tmp/output/silver/chembl/activity"},
+            details={"artifact_path": SILVER_ARTIFACT_PATH},
         )
     )
     service = RunManifestInspectionService(
@@ -889,7 +896,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
             "artifact_id": "silver:chembl.activity@1",
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-1",
-            "artifact_path": "/tmp/output/silver/chembl/activity",
+            "artifact_path": SILVER_ARTIFACT_PATH,
         }
     ]
     assert result.identity_graph == result.diagnostics["identity_graph"]
@@ -900,7 +907,7 @@ def test_show_collects_artifact_diagnostic_links() -> None:
             "artifact_id": "silver:chembl.activity@1",
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-1",
-            "artifact_path": "/tmp/output/silver/chembl/activity",
+            "artifact_path": SILVER_ARTIFACT_PATH,
         }
     ]
 
@@ -920,7 +927,7 @@ def test_show_marks_artifact_linkage_gap_signal() -> None:
             occurred_at=datetime.now(UTC),
             status="published",
             stage="silver",
-            details={"artifact_path": "/tmp/output/silver/chembl/activity"},
+            details={"artifact_path": SILVER_ARTIFACT_PATH},
         )
     )
     service = RunManifestInspectionService(
@@ -979,7 +986,7 @@ def test_show_distinguishes_partial_artifact_anchor_gaps(
             stage="silver",
             dataset_ref=dataset_ref,
             lineage_fragment_id=lineage_fragment_id,
-            details={"artifact_path": "/tmp/output/silver/chembl/activity"},
+            details={"artifact_path": SILVER_ARTIFACT_PATH},
         )
     )
     service = RunManifestInspectionService(
@@ -1013,7 +1020,7 @@ def test_show_collects_dq_trace_anchors() -> None:
             details={
                 "rule_id": "gold.not_null.id",
                 "disposition": "fail",
-                "dq_report_path": "/tmp/reports/gold_dq.json",
+                "dq_report_path": GOLD_DQ_REPORT_PATH,
             },
         )
     )
@@ -1026,7 +1033,7 @@ def test_show_collects_dq_trace_anchors() -> None:
 
     assert result.diagnostics["dq_rule_ids"] == ["gold.not_null.id"]
     assert result.diagnostics["dq_dispositions"] == ["fail"]
-    assert result.diagnostics["dq_report_paths"] == ["/tmp/reports/gold_dq.json"]
+    assert result.diagnostics["dq_report_paths"] == [GOLD_DQ_REPORT_PATH]
     assert result.diagnostics["dq_policy_ref"] == "chembl_activity.gold"
     assert result.diagnostics["rule_bundle_version"] == "2026.03"
     assert result.diagnostics["effective_config_artifact_id"] == "eca-123"
@@ -1605,7 +1612,7 @@ def test_show_surfaces_cross_validation_traceability_in_diagnostics() -> None:
                 "artifact_policy": "occurrence_only_diagnostic",
                 "replay_contract": "excluded_from_exact_replay",
                 "diagnostic_scope": "composite_cross_validation_quarantine",
-                "dq_report_path": "/tmp/reports/composite_cv.json",
+                "dq_report_path": COMPOSITE_CV_REPORT_PATH,
             },
         )
     )

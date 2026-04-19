@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import tempfile
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
@@ -26,6 +28,11 @@ from bioetl.interfaces.cli.main import cli
 _SNAPSHOT_IDENTITY_FINGERPRINT = (
     "f29f1a5c18e94a4fe614b59ae8e68c5c65afd078155b95d1e7c4aa32f6291dcd"
 )
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-manifest-cli-"))
+BRONZE_BATCH_URI = (TEST_ROOT / "bronze" / "batch_1.jsonl.zst").as_uri()
+GOLD_ARTIFACT_PATH = str(TEST_ROOT / "output" / "gold" / "chembl" / "activity")
+GOLD_METADATA_PATH = str(Path(GOLD_ARTIFACT_PATH) / "_metadata.yaml")
+GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "reports" / "gold_dq.json")
 
 
 class _FakeRunManifestService:
@@ -105,7 +112,7 @@ class _FakeRunManifestService:
                         "query": None,
                         "snapshot_id": "snapshot-1",
                         "content_hash": "sha256:snapshot-1",
-                        "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                        "immutable_uri": BRONZE_BATCH_URI,
                         "query_fingerprint": None,
                         "etag": None,
                         "last_modified": None,
@@ -121,8 +128,8 @@ class _FakeRunManifestService:
                         "dataset_ref": "gold:chembl.activity@1",
                         "artifact_id": "gold:chembl.activity@1",
                         "lineage_fragment_id": "gold:fragment-1",
-                        "artifact_path": "/tmp/output/gold/chembl/activity",
-                        "metadata_path": "/tmp/output/gold/chembl/activity/_metadata.yaml",
+                        "artifact_path": GOLD_ARTIFACT_PATH,
+                        "metadata_path": GOLD_METADATA_PATH,
                         "run_id": str(self._run_id),
                         "manifest_id": "manifest-1",
                     }
@@ -167,7 +174,7 @@ class _FakeRunManifestService:
                             "query": None,
                             "snapshot_id": "snapshot-1",
                             "content_hash": "sha256:snapshot-1",
-                            "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                            "immutable_uri": BRONZE_BATCH_URI,
                             "query_fingerprint": None,
                             "etag": None,
                             "last_modified": None,
@@ -177,7 +184,7 @@ class _FakeRunManifestService:
                     "planned_artifacts": [
                         {
                             "layer": "gold",
-                            "path": "/tmp/output/gold/chembl/activity",
+                            "path": GOLD_ARTIFACT_PATH,
                         }
                     ],
                     "published_artifacts": [
@@ -187,8 +194,8 @@ class _FakeRunManifestService:
                             "dataset_ref": "gold:chembl.activity@1",
                             "artifact_id": "gold:chembl.activity@1",
                             "lineage_fragment_id": "gold:fragment-1",
-                            "artifact_path": "/tmp/output/gold/chembl/activity",
-                            "metadata_path": "/tmp/output/gold/chembl/activity/_metadata.yaml",
+                            "artifact_path": GOLD_ARTIFACT_PATH,
+                            "metadata_path": GOLD_METADATA_PATH,
                             "run_id": str(self._run_id),
                             "manifest_id": "manifest-1",
                         }
@@ -196,7 +203,7 @@ class _FakeRunManifestService:
                 },
                 "dq_rule_ids": ["gold.not_null.id"],
                 "dq_dispositions": ["fail"],
-                "dq_report_paths": ["/tmp/reports/gold_dq.json"],
+                "dq_report_paths": [GOLD_DQ_REPORT_PATH],
                 "dq_violation_kinds": ["cross_validation_mismatch"],
                 "cross_validation_rule_ids": ["composite.cross_validation.quarantine"],
                 "cross_validation_config_paths": ["cross_validation"],
@@ -284,7 +291,7 @@ class _FakeRunManifestService:
                         "query": None,
                         "snapshot_id": "snapshot-1",
                         "content_hash": "sha256:snapshot-1",
-                        "immutable_uri": "file:///tmp/bronze/batch_1.jsonl.zst",
+                        "immutable_uri": BRONZE_BATCH_URI,
                         "query_fingerprint": None,
                         "etag": None,
                         "last_modified": None,
@@ -294,7 +301,7 @@ class _FakeRunManifestService:
                 "planned_artifacts": [
                     {
                         "layer": "gold",
-                        "path": "/tmp/output/gold/chembl/activity",
+                        "path": GOLD_ARTIFACT_PATH,
                     }
                 ],
                 "published_artifacts": [
@@ -303,8 +310,8 @@ class _FakeRunManifestService:
                         "stage": "gold",
                         "dataset_ref": "gold:chembl.activity@1",
                         "lineage_fragment_id": "gold:fragment-1",
-                        "artifact_path": "/tmp/output/gold/chembl/activity",
-                        "metadata_path": "/tmp/output/gold/chembl/activity/_metadata.yaml",
+                        "artifact_path": GOLD_ARTIFACT_PATH,
+                        "metadata_path": GOLD_METADATA_PATH,
                         "run_id": str(self._run_id),
                         "manifest_id": "manifest-1",
                     }
@@ -481,9 +488,9 @@ class TestRunManifestCommands:
         assert "attained_profile" in result.output
         assert "forensic_grade" in result.output
         assert "composite_resume_reconstructability" in result.output
-        assert "/tmp/reports/gold_dq.json" in result.output
-        assert "/tmp/output/gold/chembl/activity" in result.output
-        assert "/tmp/output/gold/chembl/activity/_metadata.yaml" in result.output
+        assert GOLD_DQ_REPORT_PATH in result.output
+        assert GOLD_ARTIFACT_PATH in result.output
+        assert GOLD_METADATA_PATH in result.output
         assert (
             "Review DQ report artifacts, rule IDs, and contract policy anchors "
             "before retry or escalation." in result.output
