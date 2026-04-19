@@ -75,8 +75,11 @@ for issue_number in issues_to_check:
         print(f'\n❌ JSON decode error for issue #{issue_number}: {e}')
     except KeyError as e:
         print(f'\n❌ Missing expected field in issue #{issue_number}: {e}')
+    except (KeyError, ValueError, IndexError) as e:
+        print(f'\n❌ Expected error checking issue #{issue_number}: {e}')
     except Exception as e:
         print(f'\n❌ Unexpected error checking issue #{issue_number}: {e}')
+        raise
 
 print('\n' + '=' * 60)
 print('📊 SUMMARY ANALYSIS')

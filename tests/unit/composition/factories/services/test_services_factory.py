@@ -171,13 +171,13 @@ def test_create_metrics_returns_noop_when_disabled() -> None:
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.factories.services.port_factories.PrometheusMetrics")
+@patch("bioetl.composition.factories.services.port_factories.resolve_metrics_port")
 def test_create_metrics_returns_prometheus_when_enabled(
-    mock_prometheus_metrics: MagicMock,
+    mock_resolve_metrics_port: MagicMock,
 ) -> None:
     settings = SimpleNamespace(metrics_enabled=True)
     expected = MagicMock()
-    mock_prometheus_metrics.return_value = expected
+    mock_resolve_metrics_port.return_value = expected
 
     metrics = create_metrics(settings)
 

@@ -328,8 +328,9 @@ class TestCreateFactoryRunner:
         )
 
         create_fn.assert_called_once()
-        call_kwargs = create_fn.call_args[1]
-        assert call_kwargs["config"] is yaml_config
+        call_args = create_fn.call_args[0]
+        assert len(call_args) == 1
+        assert call_args[0].config is yaml_config
 
     def test_forces_strict_gold_validation_in_prod(self) -> None:
         """Prod runs should always force strict Gold validation."""
