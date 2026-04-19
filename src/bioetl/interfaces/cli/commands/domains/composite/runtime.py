@@ -2,11 +2,30 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     echo_health_server_info,
 )
 from bioetl.interfaces.cli.formatters import echo_info, echo_warning
+
+
+@dataclass(frozen=True, slots=True)
+class CompositeRuntimeCliInput:
+    """Typed CLI option bundle for composite runtime construction."""
+
+    resume: bool = False
+    dry_run: bool = False
+    seed_limit: int | None = None
+    enrich_only: str | None = None
+    required_only: bool = False
+    force_enricher: str | None = None
+    use_cached_bronze: bool = False
+    cached_bronze_date: str | None = None
+    cached_bronze_path: str | None = None
+    cached_bronze_enrichers: bool | None = None
+    cached_bronze_dependencies: bool = False
 
 
 def parse_enrich_only(enrich_only: str | None) -> tuple[str, ...] | None:
@@ -25,18 +44,8 @@ def parse_enrich_only(enrich_only: str | None) -> tuple[str, ...] | None:
 
 
 def build_runtime_config(
-    *,
-    resume: bool,
-    dry_run: bool,
-    seed_limit: int | None,
-    enrich_only: str | None,
-    required_only: bool,
-    force_enricher: str | None,
-    use_cached_bronze: bool,
-    cached_bronze_date: str | None,
-    cached_bronze_path: str | None,
-    cached_bronze_enrichers: bool | None,
-    cached_bronze_dependencies: bool,
+    inputs: CompositeRuntimeCliInput | None = None,
+    **overrides: object,
 ) -> CompositeRuntimeConfig:
     """Build composite runtime config from CLI options.
 
@@ -61,18 +70,48 @@ def build_runtime_config(
     Returns:
         CompositeRuntimeConfig ready for composite pipeline bootstrap.
     """
+    resolved = inputs or CompositeRuntimeCliInput()
+    if overrides:
+        resolved = CompositeRuntimeCliInput(
+            resume=overrides.get("resume", resolved.resume),  # type: ignore[arg-type]
+            dry_run=overrides.get("dry_run", resolved.dry_run),  # type: ignore[arg-type]
+            seed_limit=overrides.get("seed_limit", resolved.seed_limit),  # type: ignore[arg-type]
+            enrich_only=overrides.get("enrich_only", resolved.enrich_only),  # type: ignore[arg-type]
+            required_only=overrides.get("required_only", resolved.required_only),  # type: ignore[arg-type]
+            force_enricher=overrides.get("force_enricher", resolved.force_enricher),  # type: ignore[arg-type]
+            use_cached_bronze=overrides.get(
+                "use_cached_bronze",
+                resolved.use_cached_bronze,
+            ),  # type: ignore[arg-type]
+            cached_bronze_date=overrides.get(
+                "cached_bronze_date",
+                resolved.cached_bronze_date,
+            ),  # type: ignore[arg-type]
+            cached_bronze_path=overrides.get(
+                "cached_bronze_path",
+                resolved.cached_bronze_path,
+            ),  # type: ignore[arg-type]
+            cached_bronze_enrichers=overrides.get(
+                "cached_bronze_enrichers",
+                resolved.cached_bronze_enrichers,
+            ),  # type: ignore[arg-type]
+            cached_bronze_dependencies=overrides.get(
+                "cached_bronze_dependencies",
+                resolved.cached_bronze_dependencies,
+            ),  # type: ignore[arg-type]
+        )
     return CompositeRuntimeConfig(
-        resume=resume,
-        dry_run=dry_run,
-        enrich_only=parse_enrich_only(enrich_only),
-        required_only=required_only,
-        force_enricher=force_enricher,
-        seed_limit=seed_limit,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_path=cached_bronze_path,
-        cached_bronze_date=cached_bronze_date,
-        cached_bronze_enrichers=cached_bronze_enrichers,
-        cached_bronze_dependencies=cached_bronze_dependencies,
+        resume=resolved.resume,
+        dry_run=resolved.dry_run,
+        enrich_only=parse_enrich_only(resolved.enrich_only),
+        required_only=resolved.required_only,
+        force_enricher=resolved.force_enricher,
+        seed_limit=resolved.seed_limit,
+        use_cached_bronze=resolved.use_cached_bronze,
+        cached_bronze_path=resolved.cached_bronze_path,
+        cached_bronze_date=resolved.cached_bronze_date,
+        cached_bronze_enrichers=resolved.cached_bronze_enrichers,
+        cached_bronze_dependencies=resolved.cached_bronze_dependencies,
     )
 
 

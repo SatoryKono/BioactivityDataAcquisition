@@ -8,7 +8,10 @@ import polars as pl
 
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
-from bioetl.application.composite.join_planner_helpers import prepare_join_frames
+from bioetl.application.composite.join_planner_helpers import (
+    PrepareJoinFramesRequest,
+    prepare_join_frames,
+)
 from bioetl.application.composite.protocols import JoinKeyResolverProtocol
 from bioetl.domain.composite.config import DependencyConfig
 from bioetl.domain.ports import LoggerPort
@@ -78,20 +81,22 @@ def prepare_dependency_join_frames(
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Prepare left and right DataFrames for a dependency join."""
     return prepare_join_frames(
-        merged_df=merged_df,
-        right_df=dep_df,
-        left_join_keys=left_join_keys,
-        right_join_keys=right_join_keys,
-        right_pipeline=dep.pipeline,
-        seed_pipeline=seed_pipeline,
-        deduplicator=deduplicator,
-        join_key_resolver=join_key_resolver,
-        renamer=renamer,
-        logger=logger,
-        field_alias_resolver=field_alias_resolver,
-        drop_system_columns=drop_system_columns,
-        log_message="Renamed dependency columns to qualified format",
-        log_field_name="dependency",
+        PrepareJoinFramesRequest(
+            merged_df=merged_df,
+            right_df=dep_df,
+            left_join_keys=left_join_keys,
+            right_join_keys=right_join_keys,
+            right_pipeline=dep.pipeline,
+            seed_pipeline=seed_pipeline,
+            deduplicator=deduplicator,
+            join_key_resolver=join_key_resolver,
+            renamer=renamer,
+            logger=logger,
+            field_alias_resolver=field_alias_resolver,
+            drop_system_columns=drop_system_columns,
+            log_message="Renamed dependency columns to qualified format",
+            log_field_name="dependency",
+        )
     )
 
 

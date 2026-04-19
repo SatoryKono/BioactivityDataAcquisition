@@ -10,6 +10,7 @@ import polars as pl
 
 from bioetl.application.composite.join_planner_helpers import (
     EnricherJoinMetadataContext,
+    PrepareJoinFramesRequest,
     build_enricher_join_metadata,
     prepare_join_frames,
 )
@@ -82,20 +83,22 @@ def build_prepared_enricher_join_context(
         aggregator=aggregator,
     )
     prepared_merged_df, prepared_enricher_df = prepare_join_frames(
-        merged_df=merged_df,
-        right_df=prepared_enricher_df,
-        left_join_keys=metadata.join_keys_list,
-        right_join_keys=metadata.join_keys_list,
-        right_pipeline=enricher.pipeline,
-        seed_pipeline=seed_pipeline,
-        deduplicator=deduplicator,
-        join_key_resolver=join_key_resolver,
-        renamer=renamer,
-        logger=logger,
-        field_alias_resolver=field_alias_resolver,
-        drop_system_columns=drop_system_columns,
-        log_message="Renamed enricher columns to qualified format",
-        log_field_name="enricher",
+        PrepareJoinFramesRequest(
+            merged_df=merged_df,
+            right_df=prepared_enricher_df,
+            left_join_keys=metadata.join_keys_list,
+            right_join_keys=metadata.join_keys_list,
+            right_pipeline=enricher.pipeline,
+            seed_pipeline=seed_pipeline,
+            deduplicator=deduplicator,
+            join_key_resolver=join_key_resolver,
+            renamer=renamer,
+            logger=logger,
+            field_alias_resolver=field_alias_resolver,
+            drop_system_columns=drop_system_columns,
+            log_message="Renamed enricher columns to qualified format",
+            log_field_name="enricher",
+        )
     )
     return PreparedEnricherJoinContext(
         enricher_pipeline=enricher.pipeline,

@@ -116,6 +116,26 @@ class EnricherJoinMetadataContext:
     join_key_set: set[str]
 
 
+@dataclass(frozen=True, slots=True)
+class PrepareJoinFramesRequest:
+    """Typed input bundle for qualified join-frame preparation."""
+
+    merged_df: pl.DataFrame
+    right_df: pl.DataFrame
+    left_join_keys: list[str]
+    right_join_keys: list[str]
+    right_pipeline: str
+    seed_pipeline: str | None
+    deduplicator: EnricherDeduplicatorService
+    join_key_resolver: JoinKeyResolverProtocol
+    renamer: ColumnRenamer
+    logger: LoggerPort
+    field_alias_resolver: Callable[[str], dict[str, str] | None]
+    drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame]
+    log_message: str
+    log_field_name: str
+
+
 def count_qualified_columns(columns: list[str]) -> int:
     """Count columns in qualified ``provider.entity.field`` format."""
     return len([col for col in columns if "." in col and not col.startswith("_")])
@@ -181,40 +201,26 @@ def prepare_qualified_right_join_dataframe(
 
 
 def prepare_join_frames(
-    *,
-    merged_df: pl.DataFrame,
-    right_df: pl.DataFrame,
-    left_join_keys: list[str],
-    right_join_keys: list[str],
-    right_pipeline: str,
-    seed_pipeline: str | None,
-    deduplicator: EnricherDeduplicatorService,
-    join_key_resolver: JoinKeyResolverProtocol,
-    renamer: ColumnRenamer,
-    logger: LoggerPort,
-    field_alias_resolver: Callable[[str], dict[str, str] | None],
-    drop_system_columns: Callable[[pl.DataFrame], pl.DataFrame],
-    log_message: str,
-    log_field_name: str,
+    request: PrepareJoinFramesRequest,
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Prepare left and right DataFrames for a qualified join."""
-    normalized_merged = join_key_resolver.normalize_join_key_columns(
-        merged_df,
-        left_join_keys,
-        pipeline=seed_pipeline,
+    normalized_merged = request.join_key_resolver.normalize_join_key_columns(
+        request.merged_df,
+        request.left_join_keys,
+        pipeline=request.seed_pipeline,
     )
     prepared_right = prepare_qualified_right_join_dataframe(
-        source_df=right_df,
-        pipeline=right_pipeline,
-        join_keys=right_join_keys,
-        deduplicator=deduplicator,
-        join_key_resolver=join_key_resolver,
-        renamer=renamer,
-        logger=logger,
-        field_alias_resolver=field_alias_resolver,
-        drop_system_columns=drop_system_columns,
-        log_message=log_message,
-        log_field_name=log_field_name,
+        source_df=request.right_df,
+        pipeline=request.right_pipeline,
+        join_keys=request.right_join_keys,
+        deduplicator=request.deduplicator,
+        join_key_resolver=request.join_key_resolver,
+        renamer=request.renamer,
+        logger=request.logger,
+        field_alias_resolver=request.field_alias_resolver,
+        drop_system_columns=request.drop_system_columns,
+        log_message=request.log_message,
+        log_field_name=request.log_field_name,
     )
     return normalized_merged, prepared_right
 
