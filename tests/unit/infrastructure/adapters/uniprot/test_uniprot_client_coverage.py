@@ -330,8 +330,8 @@ async def test_fetch_filtered_with_fallback_branches(adapter):
         yield {"accession": "P1"}, "P1"
 
     async def fallback_unused(*args, **kwargs):
-        if False:  # pragma: no cover
-            yield {}
+        for record in ():
+            yield record
 
     adapter._do_primary_fetch = primary_all  # type: ignore[assignment]
     adapter._do_fallback_search = fallback_unused  # type: ignore[assignment]

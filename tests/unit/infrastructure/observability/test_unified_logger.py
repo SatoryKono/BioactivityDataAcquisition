@@ -29,7 +29,8 @@ class TestUnifiedLogger:
             run_id=run_id,
         )
 
-        assert logger is not None
+        assert logger._pipeline == "test_pipeline"
+        assert logger._run_id == str(run_id)
 
     def test_unified_logger_info_with_stage(self) -> None:
         """Test that info() works with explicit stage parameter."""

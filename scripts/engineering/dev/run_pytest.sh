@@ -310,6 +310,8 @@ should_run_preflight() {
             --help|-h|--version|-V|--collect-only|--co)
                 return 1
                 ;;
+            *)
+                ;;
         esac
     done
 
