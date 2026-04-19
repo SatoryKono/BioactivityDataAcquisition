@@ -110,12 +110,49 @@ def _normalize_path(raw: str) -> Path:
     return Path(raw)
 
 
+def _normalize_repo_relative_path(path: Path) -> Path:
+    """Normalize and validate a repository-relative path."""
+    if path.is_absolute():
+        raise ValueError(f"expected repository-relative path, got absolute path: {path}")
+
+    normalized_parts: list[str] = []
+    for part in path.parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            raise ValueError(f"refusing parent traversal path: {path}")
+        normalized_parts.append(part)
+
+    if not normalized_parts:
+        raise ValueError("refusing empty repository-relative path")
+    return Path(*normalized_parts)
+
+
 def _resolve_repo_path(path: Path) -> Path:
-    candidate = path if path.is_absolute() else REPO_ROOT / path
+    candidate = (
+        path
+        if path.is_absolute()
+        else REPO_ROOT.joinpath(*_normalize_repo_relative_path(path).parts)
+    )
     resolved = candidate.resolve()
     if REPO_ROOT != resolved and REPO_ROOT not in resolved.parents:
         raise ValueError(f"refusing to access path outside repository: {resolved}")
     return resolved
+
+
+def _repo_relative_path(path: Path) -> Path:
+    """Return a repository-relative path for a validated file path."""
+    return _resolve_repo_path(path).relative_to(REPO_ROOT)
+
+
+def _read_repo_text(path: Path) -> str:
+    """Read text from a validated repository-relative path."""
+    return _resolve_repo_path(path).read_text(encoding="utf-8")
+
+
+def _write_repo_text(path: Path, content: str) -> None:
+    """Write text to a validated repository-relative path."""
+    _resolve_repo_path(path).write_text(content, encoding="utf-8")
 
 
 def load_rows(matrix_path: Path) -> list[RenameRow]:
@@ -131,7 +168,7 @@ def load_rows(matrix_path: Path) -> list[RenameRow]:
                     symbol_kind=record["symbol_kind"],
                     old_name=record["old_name"],
                     new_name=record["new_name"],
-                    file_path=_resolve_repo_path(_normalize_path(record["file_path"])),
+                    file_path=_repo_relative_path(_normalize_path(record["file_path"])),
                     file_kind=record["file_kind"],
                     auto_safe=_parse_bool(record["auto_safe"]),
                     notes=record["notes"],
@@ -179,7 +216,7 @@ def _apply_rows_to_file(
         print(f"[missing] {file_path}")
         return 0
 
-    updated_text = safe_file_path.read_text(encoding="utf-8")
+    updated_text = _read_repo_text(file_path)
     file_matches = 0
     for row in rows:
         pattern = patterns[row.old_name]
@@ -193,7 +230,7 @@ def _apply_rows_to_file(
         return 0
 
     if apply:
-        safe_file_path.write_text(updated_text, encoding="utf-8")
+        _write_repo_text(file_path, updated_text)
         print(f"[write] {file_path}")
     else:
         print(f"[dry-run] {file_path}")

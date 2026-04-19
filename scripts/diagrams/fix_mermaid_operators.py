@@ -71,8 +71,27 @@ def _repo_relative_path(path: Path) -> Path:
     return safe_path.relative_to(_repo_root().resolve())
 
 
+def _normalize_repo_relative_path(path: Path) -> Path:
+    """Normalize and validate a repository-relative path."""
+    if path.is_absolute():
+        raise ValueError(f"expected repository-relative path, got absolute path: {path}")
+
+    normalized_parts: list[str] = []
+    for part in path.parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            raise ValueError(f"refusing to process parent traversal path: {path}")
+        normalized_parts.append(part)
+
+    if not normalized_parts:
+        raise ValueError("refusing to process empty repository-relative path")
+    return Path(*normalized_parts)
+
+
 def _repo_path(relative_path: Path) -> Path:
-    return _repo_root() / relative_path
+    safe_relative_path = _normalize_repo_relative_path(relative_path)
+    return _repo_root().joinpath(*safe_relative_path.parts)
 
 
 def _resolve_repo_file_path(path: Path) -> Path:
@@ -86,11 +105,16 @@ def _read_repo_text(path: Path) -> str:
     return safe_path.read_text(encoding="utf-8")
 
 
+def _write_resolved_repo_text(path: Path, content: str) -> None:
+    """Write content to a previously validated repository path."""
+    if path.is_dir():
+        raise ValueError(f"refusing to write to directory path: {path}")
+    path.write_text(content, encoding="utf-8", newline="\n")
+
+
 def _write_repo_text(relative_path: Path, content: str) -> None:
     safe_path = _resolve_repo_file_path(relative_path)
-    if safe_path.is_dir():
-        raise ValueError(f"refusing to write to directory path: {safe_path}")
-    safe_path.write_text(content, encoding="utf-8", newline="\n")
+    _write_resolved_repo_text(safe_path, content)
 
 
 def _display_path(path: Path) -> str:

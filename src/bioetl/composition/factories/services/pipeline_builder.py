@@ -20,7 +20,6 @@ from bioetl.composition.factories.services.pipeline_record_processor_builder imp
 
 if TYPE_CHECKING:
     import pyarrow as pa
-
     from bioetl.application.core.wiring.runtime import (
         BasePipeline,
         BatchExecutor,
@@ -50,7 +49,6 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.types import GoldSchemaType, RunID
     from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
-
 
 def create_batch_processing_components(
     *,
@@ -172,7 +170,6 @@ def create_batch_executor_from_pipeline(
         batch_id_factory=batch_id_factory,
         domain_event_emitter=domain_event_emitter,
     )
-
 
 __all__ = [
     "BatchProcessingComponents",

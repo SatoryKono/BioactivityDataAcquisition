@@ -3,10 +3,10 @@
 # Run from WSL: bash ./script-codex/helper/setup-wsl.sh
 
 set -euo pipefail
-
-echo "=========================================="
+SEPARATOR_LINE="=========================================="
+echo SEPARATOR_LINE
 echo "  WSL Codex Setup"
-echo "=========================================="
+echo SEPARATOR_LINE
 echo ""
 
 # Check if running in WSL
@@ -92,9 +92,9 @@ if ! grep -q "wsl_proxy_env.sh" "$BASHRC" 2>/dev/null; then
 fi
 
 echo ""
-echo "=========================================="
+echo SEPARATOR_LINE
 echo "  Setup Complete!"
-echo "=========================================="
+echo SEPARATOR_LINE
 echo ""
 echo "Quick start:"
 echo "  • Interactive:  $REPO_ROOT/scripts/ops/codex.sh"
