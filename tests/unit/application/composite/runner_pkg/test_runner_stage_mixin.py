@@ -157,7 +157,7 @@ async def test_execute_seed_phase_when_already_completed_then_resumes_without_ru
         seed_completed=True,
     )
 
-    new_state, seed_result = await harness._execute_seed_phase(state)
+    _, seed_result = await harness._execute_seed_phase(state)
 
     assert seed_result.resumed is True
     harness._logger.info.assert_called()
@@ -177,7 +177,7 @@ async def test_execute_seed_phase_when_not_completed_then_runs_seed() -> None:
         seed_completed=False,
     )
 
-    new_state, seed_result = await harness._execute_seed_phase(state)
+    _, seed_result = await harness._execute_seed_phase(state)
 
     assert seed_result.resumed is False
     assert seed_result.records_extracted == 100

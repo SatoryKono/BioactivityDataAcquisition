@@ -110,7 +110,7 @@ class TestValidateOwnerDiversificationPolicy:
         """Non-dict owner_diversification policy should add error."""
         raw = {"governance": {"owner_diversification": "invalid"}}
         errors: list[str] = []
-        starts, min_owners = _validate_owner_diversification_policy(raw, errors)
+        _validate_owner_diversification_policy(raw, errors)
         assert any("owner_diversification" in e for e in errors)
 
     def test_invalid_starts_quarter(self) -> None:

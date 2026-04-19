@@ -216,7 +216,7 @@ class TestFilenameFormat:
 
     def test_filename_format(self) -> None:
         """Filename is composite_{name}_{run_id}.json."""
-        svc, storage, _ = _make_service(composite_name="my_composite", run_id="run-001")
+        svc, _, _ = _make_service(composite_name="my_composite", run_id="run-001")
         assert svc._checkpoint_filename == "composite_my_composite_run-001.json"
 
     def test_glob_pattern(self) -> None:
@@ -900,7 +900,7 @@ class TestSave:
     @pytest.mark.asyncio
     async def test_save_logs_debug_on_success(self) -> None:
         """save() logs a debug message on successful write."""
-        svc, storage, logger = _make_service()
+        svc, _, logger = _make_service()
         checkpoint = CompositeCheckpointState(
             composite_name="my_composite",
             run_id="run-001",
@@ -1179,7 +1179,7 @@ class TestDeleteOrphaned:
     @pytest.mark.asyncio
     async def test_deletes_other_run_checkpoints(self) -> None:
         """delete_orphaned() deletes checkpoints from other runs."""
-        svc, storage, logger = _make_service(
+        svc, storage, _ = _make_service(
             composite_name="my_composite", run_id="run-002"
         )
         storage.list_glob.return_value = [
