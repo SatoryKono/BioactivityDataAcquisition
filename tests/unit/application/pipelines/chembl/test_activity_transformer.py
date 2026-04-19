@@ -27,6 +27,8 @@ from bioetl.infrastructure.schemas.silver_chembl_core import CHEMBL_ACTIVITY_SCH
 from bioetl.infrastructure.validation.pandera_validator import PanderaSilverValidator
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 from tests.unit.application.pipelines.activity_transformer_shared import (
+    mock_context,
+    transformer,
     SharedActivityTransformerActionTypeExtractionTests,
     SharedActivityTransformerLigandExtractionTests,
     SharedActivityTransformerTransformTests,

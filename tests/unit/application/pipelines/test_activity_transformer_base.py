@@ -15,6 +15,8 @@ from bioetl.application.pipelines.chembl.activity_transformer import (
 )
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 from tests.unit.application.pipelines.activity_transformer_shared import (
+    mock_context,
+    transformer,
     SharedActivityTransformerActionTypeExtractionTests,
     SharedActivityTransformerLigandExtractionTests,
     SharedActivityTransformerTransformTests,
