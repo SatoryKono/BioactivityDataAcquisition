@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import asyncio
 import sys
+import tempfile
 import warnings
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -22,6 +24,13 @@ from bioetl.infrastructure.validation.pandera_validator import (
     NoOpValidator,
     PanderaSilverValidator,
 )
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-validation-"))
+SILVER_BASE_PATH = TEST_ROOT / "silver"
+
+
+def _silver_table_path(table_name: str) -> str:
+    return str(SILVER_BASE_PATH / table_name.replace(".", "/"))
 
 
 @pytest.fixture(autouse=True)
@@ -63,7 +72,7 @@ class TestSilverWriterSilverValidatorInit:
         """Test SilverWriter creates NoOpValidator when not provided."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         assert isinstance(writer._silver_validator, NoOpValidator)
 
     def test_init_with_custom_validator(self, noop_logger):
@@ -72,7 +81,7 @@ class TestSilverWriterSilverValidatorInit:
 
         custom_validator = PanderaSilverValidator()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             silver_validator=custom_validator,
         )
@@ -92,7 +101,7 @@ class TestSilverWriterSilverValidatorInit:
         )
         validator = PanderaSilverValidator(schema=schema)
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             silver_validator=validator,
         )
@@ -108,7 +117,7 @@ class TestSilverWriterValidateSilverPandera:
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             silver_validator=NoOpValidator(),
         )
@@ -130,7 +139,7 @@ class TestSilverWriterValidateSilverPandera:
         )
         validator = PanderaSilverValidator(schema=schema)
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             silver_validator=validator,
         )
@@ -156,7 +165,7 @@ class TestSilverWriterValidateSilverPandera:
         )
         validator = PanderaSilverValidator(schema=schema)
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             silver_validator=validator,
         )
@@ -187,7 +196,7 @@ class TestSilverWriterValidateSilverPandera:
         validator = PanderaSilverValidator(schema=schema)
         mock_logger = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=mock_logger,
             silver_validator=validator,
         )
@@ -220,7 +229,7 @@ class TestSilverWriterValidateSilverPandera:
         validator = PanderaSilverValidator(schema=schema)
         mock_metrics = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=NoOpLogger(),
             silver_validator=validator,
             metrics=mock_metrics,
@@ -255,7 +264,7 @@ class TestSilverWriterValidateSilverPandera:
         validator = PanderaSilverValidator(schema=schema)
         mock_metrics = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=NoOpLogger(),
             silver_validator=validator,
             metrics=mock_metrics,
@@ -313,7 +322,7 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
         )
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             silver_validator=validator,
         )
@@ -373,7 +382,7 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
             ) as mock_write,
         ):
             writer = SilverWriter(
-                base_path="/tmp/silver",
+                base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
                 silver_validator=validator,
             )
@@ -422,7 +431,7 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
         ):
             # Default NoOp validator
             writer = SilverWriter(
-                base_path="/tmp/silver",
+                base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
             )
 
@@ -454,7 +463,7 @@ class TestSilverWriterPreparePayloadExecutor:
         )
         from bioetl.domain.medallion import WriteModePolicy
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -487,7 +496,7 @@ class TestSilverWriterPreparePayloadExecutor:
             _metrics=None,
             _silver_validator=None,  # type: ignore
             _get_table_schema=AsyncMock(return_value=None),  # type: ignore
-            _resolve_table_path=lambda x: f"/tmp/silver/{x.replace('.', '/')}",
+            _resolve_table_path=_silver_table_path,
             _prepare_arrow_data=lambda *args, **kwargs: expected_table,
             _validate_write_mode=lambda x: SilverWriteMode.APPEND,
             _deduplicate_by_primary_keys=lambda records, keys: records,
@@ -527,7 +536,7 @@ class TestSilverWriterPreparePayloadExecutor:
 
         assert payload.records == records
         assert payload.validated_mode is SilverWriteMode.APPEND
-        assert payload.table_path == "/tmp/silver/test/table"
+        assert payload.table_path == _silver_table_path("test.table")
         assert payload.arrow_data.equals(expected_table)
         mock_sync.assert_called_once()
         writer._check_schema_drift.assert_awaited_once_with(
@@ -549,7 +558,7 @@ class TestSilverWriterPreparePayloadExecutor:
             _ValidatedSilverWriteContext,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",
@@ -620,7 +629,7 @@ class TestSilverWriterPreparePayloadExecutor:
             _ValidatedSilverWriteContext,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         records = [
             {
                 "entity_id": "CHEMBL123",

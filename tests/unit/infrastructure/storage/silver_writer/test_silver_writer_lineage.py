@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -15,6 +17,13 @@ from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
 )
 
 pytestmark = pytest.mark.unit
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-lineage-"))
+SILVER_BASE_PATH = TEST_ROOT / "silver"
+
+
+def _silver_table_path(table_name: str) -> str:
+    return str(SILVER_BASE_PATH / table_name.replace(".", "/"))
 
 
 def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
@@ -38,7 +47,7 @@ class TestSilverWriterAudit:
         from bioetl.domain.types import BatchID, RunID, RunType
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
         # Should not raise, just return early
         await writer._log_silver_audit(
@@ -63,7 +72,7 @@ class TestSilverWriterAudit:
 
         mock_audit = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
+            base_path=str(SILVER_BASE_PATH), logger=noop_logger, audit=mock_audit
         )
 
         with pytest.raises(ValueError, match="run_id is required"):
@@ -93,7 +102,7 @@ class TestSilverWriterAudit:
         mock_audit.log_write = AsyncMock()
 
         writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
+            base_path=str(SILVER_BASE_PATH), logger=noop_logger, audit=mock_audit
         )
 
         valid_uuid = uuid4()
@@ -123,7 +132,7 @@ class TestSilverWriterAudit:
         mock_audit.log_write = AsyncMock()
 
         writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
+            base_path=str(SILVER_BASE_PATH), logger=noop_logger, audit=mock_audit
         )
 
         valid_uuid = uuid4()
@@ -154,7 +163,7 @@ class TestSilverWriterAudit:
         mock_audit.log_write = AsyncMock()
 
         writer = SilverWriter(
-            base_path="/tmp/silver", logger=noop_logger, audit=mock_audit
+            base_path=str(SILVER_BASE_PATH), logger=noop_logger, audit=mock_audit
         )
 
         valid_uuid = uuid4()
@@ -207,7 +216,7 @@ class TestSilverWriterCsvExport:
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
             writer = SilverWriter(
-                base_path="/tmp/silver",
+                base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
                 csv_exporter=mock_exporter,
             )
@@ -442,14 +451,14 @@ class TestSilverWriterLineage:
         mock_metadata_writer.write_silver_metadata = capture_write
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
-            table_path="/tmp/silver/test/table",
+            table_path=_silver_table_path("test.table"),
             table_name="test_table",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -497,14 +506,14 @@ class TestSilverWriterLineage:
         mock_metadata_writer.write_silver_metadata = capture_write
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
-            table_path="/tmp/silver/test/table",
+            table_path=_silver_table_path("test.table"),
             table_name="test_table",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -547,14 +556,14 @@ class TestSilverWriterLineage:
         mock_metadata_writer.write_silver_metadata = AsyncMock()
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
-            table_path="/tmp/silver/chembl/activity",
+            table_path=_silver_table_path("chembl.activity"),
             table_name="chembl.activity",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -567,7 +576,7 @@ class TestSilverWriterLineage:
         silver_input = captured_input
         assert silver_input.version_after == 7
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
-            "/tmp/silver/chembl/activity",
+            _silver_table_path("chembl.activity"),
             metadata,
             table_name="chembl.activity",
             flat_structure=False,
@@ -599,7 +608,7 @@ class TestSilverWriterLineage:
             create_silver_metadata_bundle
         )
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=MagicMock(),
             metadata_coordinator=mock_metadata_coordinator,
@@ -607,7 +616,7 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_metadata(
-            table_path="/tmp/silver/chembl/activity",
+            table_path=_silver_table_path("chembl.activity"),
             table_name="chembl.activity",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -616,7 +625,7 @@ class TestSilverWriterLineage:
         )
 
         writer._write_silver_metadata_file.assert_awaited_once_with(
-            table_path="/tmp/silver/chembl/activity",
+            table_path=_silver_table_path("chembl.activity"),
             metadata=metadata,
             table_name="chembl.activity",
             provider_name="chembl",
@@ -657,7 +666,7 @@ class TestSilverWriterLineage:
 
         lineage_store = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=MagicMock(),
             metadata_coordinator=_Coordinator(),
@@ -666,7 +675,7 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_metadata(
-            table_path="/tmp/silver/chembl/activity",
+            table_path=_silver_table_path("chembl.activity"),
             table_name="chembl.activity",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -708,14 +717,14 @@ class TestSilverWriterLineage:
                 )
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=_Coordinator(),
         )
         writer._get_delta_version = AsyncMock(return_value=11)  # type: ignore[method-assign]
         await writer._write_silver_merged_metadata(
-            table_path="/tmp/silver/composite/publication",
+            table_path=_silver_table_path("composite.publication"),
             table_name="composite.publication",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -724,11 +733,11 @@ class TestSilverWriterLineage:
         )
 
         input_arg = writer._metadata_coordinator.last_input
-        assert input_arg.table_path == "/tmp/silver/composite/publication"
+        assert input_arg.table_path == _silver_table_path("composite.publication")
         assert input_arg.mode == SilverWriteMode.DELETE
         assert input_arg.version_after == 11
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
-            "/tmp/silver/composite/publication",
+            _silver_table_path("composite.publication"),
             metadata,
             table_name="composite.publication",
             flat_structure=False,
@@ -764,7 +773,7 @@ class TestSilverWriterLineage:
                 )
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=MagicMock(),
             metadata_coordinator=_Coordinator(),
@@ -773,7 +782,7 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_merged_metadata(
-            table_path="/tmp/silver/composite/publication",
+            table_path=_silver_table_path("composite.publication"),
             table_name="composite.publication",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -782,7 +791,7 @@ class TestSilverWriterLineage:
         )
 
         writer._write_silver_metadata_file.assert_awaited_once_with(
-            table_path="/tmp/silver/composite/publication",
+            table_path=_silver_table_path("composite.publication"),
             metadata=metadata,
             table_name="composite.publication",
             provider_name="composite",
@@ -824,7 +833,7 @@ class TestSilverWriterLineage:
 
         lineage_store = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=MagicMock(),
             metadata_coordinator=_Coordinator(),
@@ -834,7 +843,7 @@ class TestSilverWriterLineage:
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
         await writer._write_silver_merged_metadata(
-            table_path="/tmp/silver/composite/publication",
+            table_path=_silver_table_path("composite.publication"),
             table_name="composite.publication",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -850,7 +859,7 @@ class TestSilverWriterLineage:
         assert captured_input.version_after == 11
         assert captured_input.records == valid_records
         writer._write_silver_metadata_file.assert_awaited_once_with(
-            table_path="/tmp/silver/composite/publication",
+            table_path=_silver_table_path("composite.publication"),
             metadata=metadata,
             table_name="composite.publication",
             provider_name="composite",
@@ -868,7 +877,7 @@ class TestSilverWriterLineage:
 
         logger = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=logger,
             metadata_coordinator=None,
         )
@@ -879,7 +888,7 @@ class TestSilverWriterLineage:
         ):
             writer._metadata_writer = MagicMock()
             await writer._write_silver_metadata(
-                table_path="/tmp/silver/chembl/activity",
+                table_path=_silver_table_path("chembl.activity"),
                 table_name="chembl.activity",
                 records=valid_records,
                 primary_keys=["entity_id"],
@@ -891,7 +900,7 @@ class TestSilverWriterLineage:
         ):
             writer._metadata_writer = MagicMock()
             await writer._write_silver_merged_metadata(
-                table_path="/tmp/silver/composite/publication",
+                table_path=_silver_table_path("composite.publication"),
                 table_name="composite.publication",
                 records=valid_records,
                 primary_keys=["entity_id"],

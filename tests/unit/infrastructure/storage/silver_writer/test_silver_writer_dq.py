@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 pytestmark = pytest.mark.unit
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-dq-"))
+SILVER_BASE_PATH = TEST_ROOT / "silver"
 
 
 class TestSilverWriterWriteModePolicy:
@@ -17,7 +22,7 @@ class TestSilverWriterWriteModePolicy:
         from bioetl.domain.medallion import WriteModePolicy
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         assert isinstance(writer._write_policy, WriteModePolicy)
 
     def test_init_with_custom_policy(self, noop_logger):
@@ -27,7 +32,7 @@ class TestSilverWriterWriteModePolicy:
 
         custom_policy = WriteModePolicy()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             write_policy=custom_policy,
         )
@@ -39,7 +44,7 @@ class TestSilverWriterWriteModePolicy:
 
         mock_metrics = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metrics=mock_metrics,
         )
@@ -53,7 +58,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.MERGE)
         assert result == WriteMode.MERGE
 
@@ -65,7 +70,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.APPEND)
         assert result == WriteMode.APPEND
 
@@ -77,7 +82,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         result = writer._to_policy_write_mode(SilverWriteMode.DELETE)
         assert result == WriteMode.OVERWRITE
 
@@ -88,7 +93,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         # Should not raise
         writer._enforce_write_policy(SilverWriteMode.MERGE, "test.table")
 
@@ -99,7 +104,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         # Should not raise
         writer._enforce_write_policy(SilverWriteMode.APPEND, "test.table")
 
@@ -111,7 +116,7 @@ class TestSilverWriterWriteModePolicy:
             SilverWriter,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         with pytest.raises(PolicyViolationError) as exc_info:
             writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
         assert "silver does not allow overwrite" in str(exc_info.value)
@@ -126,7 +131,7 @@ class TestSilverWriterWriteModePolicy:
 
         mock_metrics = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metrics=mock_metrics,
         )
@@ -149,7 +154,7 @@ class TestSilverWriterWriteModePolicy:
         )
 
         mock_logger = MagicMock()
-        writer = SilverWriter(base_path="/tmp/silver", logger=mock_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=mock_logger)
 
         with pytest.raises(PolicyViolationError):
             writer._enforce_write_policy(SilverWriteMode.DELETE, "test.table")
@@ -188,7 +193,7 @@ class TestSilverWriterWriteModePolicy:
             ]
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
         with pytest.raises(PolicyViolationError) as exc_info:
             await writer.write_silver(
@@ -230,7 +235,7 @@ class TestSilverWriterWriteModePolicy:
                 "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             # Should not raise PolicyViolationError
             await writer.write_silver(
@@ -274,7 +279,7 @@ class TestSilverWriterWriteModePolicy:
                 "bioetl.infrastructure.storage.silver_writer.write_deltalake"
             ) as mock_write,
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
 
             # Should not raise PolicyViolationError
             await writer.write_silver(
@@ -311,7 +316,7 @@ class TestSilverWriterWriteModePolicy:
 
         mock_metrics = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metrics=mock_metrics,
         )
