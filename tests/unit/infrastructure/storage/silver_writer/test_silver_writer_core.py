@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import asyncio
+import tempfile
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 pytestmark = pytest.mark.unit
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-core-"))
+SILVER_ROOT = str(TEST_ROOT / "silver")
+SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "test" / "table")
 
 
 class TestSilverWriterInit:
@@ -28,7 +34,7 @@ class TestSilverWriterInit:
 
         mock_exporter = MagicMock()
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=SILVER_ROOT,
             logger=noop_logger,
             csv_exporter=mock_exporter,
         )
@@ -38,7 +44,7 @@ class TestSilverWriterInit:
         """Test initialization without CSV exporter."""
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
         assert writer.csv_exporter is None
 
     def test_runtime_helper_builds_defaults(self) -> None:
@@ -134,7 +140,7 @@ class TestSilverWriterValidation:
             _SilverWritePreparationRequest,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
         schema = pa.schema(
             [
                 pa.field("entity_id", pa.string()),
@@ -436,7 +442,7 @@ class TestSilverWriterValidation:
         payload = _PreparedSilverWritePayload(
             records=payload_records,
             validated_mode=SilverWriteMode.MERGE,
-            table_path="/tmp/silver/test/table",
+            table_path=SILVER_TABLE_PATH,
             arrow_data=pa.Table.from_pylist(payload_records, schema=schema),
             schema_mode=None,
             merge_schema=False,
@@ -530,7 +536,7 @@ class TestSilverWriterValidation:
             _PreparedSilverWritePayload,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
         payload_records = [
             {
                 "entity_id": "CHEMBL123",
@@ -543,7 +549,7 @@ class TestSilverWriterValidation:
         payload = _PreparedSilverWritePayload(
             records=payload_records,
             validated_mode=SilverWriteMode.MERGE,
-            table_path="/tmp/silver/test/table",
+            table_path=SILVER_TABLE_PATH,
             arrow_data=pa.Table.from_pylist(payload_records),
             schema_mode=None,
             merge_schema=False,
@@ -834,7 +840,7 @@ class TestSilverWriterWriteModeEnum:
             SilverWriter,
         )
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=SILVER_ROOT, logger=noop_logger)
 
         assert writer._validate_write_mode("merge") == SilverWriteMode.MERGE
         assert writer._validate_write_mode("append") == SilverWriteMode.APPEND

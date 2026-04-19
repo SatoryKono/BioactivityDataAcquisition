@@ -5,7 +5,9 @@ from __future__ import annotations
 import asyncio
 import io
 import json
+import tempfile
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
@@ -23,6 +25,9 @@ TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 TEST_RUN_TYPE = RunType.INCREMENTAL
 # Fixed timestamp for deterministic tests (see ADR-014)
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-storage-tests-"))
+SILVER_DELTA_ROOT = str(TEST_ROOT / "delta")
+GOLD_ROOT = str(TEST_ROOT / "gold")
 
 
 @pytest.fixture
@@ -335,8 +340,8 @@ class TestSilverWriter:
 
     def test_silver_writer_initialization(self, noop_logger):
         """Test SilverWriter can be initialized."""
-        writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
-        assert writer.base_path == "/tmp/delta"
+        writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
+        assert writer.base_path == SILVER_DELTA_ROOT
 
     @pytest.mark.asyncio
     async def test_write_silver_creates_new_table(
@@ -348,7 +353,7 @@ class TestSilverWriter:
         mock_delta_table, mock_write_deltalake = mock_silver_writer
         mock_delta_table.side_effect = TableNotFoundError("Not found")
 
-        writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
+        writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
 
         # Mock the _get_table_schema method to return None (no existing table)
         writer._get_table_schema = AsyncMock(return_value=None)
@@ -417,7 +422,7 @@ class TestSilverWriter:
         # Mock version() to return an integer for SilverWriteResult
         mock_table_instance.version.return_value = 1
 
-        writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
+        writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
 
         records = [
             {
@@ -443,7 +448,7 @@ class TestSilverWriter:
     @pytest.mark.usefixtures("mock_silver_writer")
     @pytest.mark.asyncio
     async def test_write_silver_empty_records_raises_error(self, noop_logger):
-        writer = SilverWriter(base_path="/tmp/delta", logger=noop_logger)
+        writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
 
         with pytest.raises(ValueError, match="No records to write"):
             await writer.write_silver(
@@ -478,7 +483,7 @@ class TestGoldWriter:
 
         _mock_delta_table, mock_write_deltalake = mock_gold_writer_deps
 
-        writer = GoldWriter(base_path="/tmp/gold", logger=noop_logger)
+        writer = GoldWriter(base_path=GOLD_ROOT, logger=noop_logger)
 
         # Records with mixed key order
         records = [
