@@ -298,8 +298,10 @@ def test_domain_purity_ast(src_dir: Path):
     violations = collect_import_violations(
         domain_files,
         src_dir=src_dir,
-        predicate=lambda imp: not imp["module"].startswith("bioetl.domain")
-        and get_top_level_module(imp["module"]) not in ALLOWED_DOMAIN_IMPORTS,
+        predicate=lambda imp: (
+            not imp["module"].startswith("bioetl.domain")
+            and get_top_level_module(imp["module"]) not in ALLOWED_DOMAIN_IMPORTS
+        ),
         message=lambda imp: f"Forbidden import '{imp['module']}' in Domain",
     )
 

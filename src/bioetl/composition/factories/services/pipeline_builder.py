@@ -107,6 +107,7 @@ def create_checkpoint_manager(
         compatibility_policy=compatibility_policy,
     )
 
+
 def create_record_processor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -128,6 +129,7 @@ def create_record_processor_from_pipeline(
         lock_validator=lock_validator,
         tracer=tracer,
     )
+
 
 def create_batch_executor_from_pipeline(
     *,
@@ -171,10 +173,5 @@ def create_batch_executor_from_pipeline(
         domain_event_emitter=domain_event_emitter,
     )
 
-__all__ = [
-    "BatchProcessingComponents",
-    "create_batch_executor_from_pipeline",
-    "create_batch_processing_components",
-    "create_checkpoint_manager",
-    "create_record_processor_from_pipeline",
-]
+
+__all__ = ["BatchProcessingComponents", "create_batch_executor_from_pipeline", "create_batch_processing_components", "create_checkpoint_manager", "create_record_processor_from_pipeline"]

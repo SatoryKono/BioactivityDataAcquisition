@@ -664,7 +664,6 @@ def _iter_module_import_violations(
     for py_file, tree, rel_path in _iter_non_allowed_cache_items(
         ast_cache, allowed_files=allowed_files
     ):
-        tree = tree  # narrow object payload back to ast.Module for local use
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module is not None:
                 matched_module = _matching_imported_module(
@@ -694,7 +693,6 @@ def _iter_module_import_violations_for_modules(
     for py_file, tree, rel_path in _iter_non_allowed_cache_items(
         ast_cache, allowed_files=allowed_files
     ):
-        tree = tree
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module is not None:
                 matched_module = _matching_imported_module(
@@ -725,7 +723,9 @@ def _iter_symbol_mentions(
         content_cache=content_cache,
         allowed_files=allowed_files,
         predicate=lambda line: symbol in line,
-        render_message=lambda rel_path, lineno, _line: f"{rel_path}:{lineno} mentions {symbol}",
+        render_message=lambda rel_path, lineno, _line: (
+            f"{rel_path}:{lineno} mentions {symbol}"
+        ),
     )
 
 
@@ -739,7 +739,9 @@ def _iter_string_mentions(
         content_cache=content_cache,
         allowed_files=allowed_files,
         predicate=lambda line: needle in line,
-        render_message=lambda rel_path, lineno, _line: f"{rel_path}:{lineno} mentions {needle}",
+        render_message=lambda rel_path, lineno, _line: (
+            f"{rel_path}:{lineno} mentions {needle}"
+        ),
     )
 
 
@@ -770,7 +772,6 @@ def _iter_imported_symbol_violations(
     for _py_file, tree, rel_path in _iter_non_allowed_cache_items(
         ast_cache, allowed_files=allowed_files
     ):
-        tree = tree
         for node in ast.walk(tree):
             if not isinstance(node, ast.ImportFrom):
                 continue
@@ -796,7 +797,6 @@ def _iter_call_keyword_violations(
     for _py_file, tree, rel_path in _iter_non_allowed_cache_items(
         ast_cache, allowed_files=allowed_files
     ):
-        tree = tree
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
                 continue

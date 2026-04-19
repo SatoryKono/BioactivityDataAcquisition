@@ -36,6 +36,7 @@ def create_resolver_helper(
         or JOIN_KEY_NORMALIZATION_POLICIES,
     )
 
+
 _KEY_FILTER_ERRORS = (ValueError, TypeError, RuntimeError)
 _DEPENDENCY_KEY_READ_ERRORS = (
     StorageError,

@@ -110,6 +110,14 @@ def _normalize_path(raw: str) -> Path:
     return Path(raw)
 
 
+def _resolve_repo_path(path: Path) -> Path:
+    candidate = path if path.is_absolute() else REPO_ROOT / path
+    resolved = candidate.resolve()
+    if REPO_ROOT != resolved and REPO_ROOT not in resolved.parents:
+        raise ValueError(f"refusing to access path outside repository: {resolved}")
+    return resolved
+
+
 def load_rows(matrix_path: Path) -> list[RenameRow]:
     rows: list[RenameRow] = []
     with matrix_path.open(encoding="utf-8", newline="") as file_obj:
@@ -123,7 +131,7 @@ def load_rows(matrix_path: Path) -> list[RenameRow]:
                     symbol_kind=record["symbol_kind"],
                     old_name=record["old_name"],
                     new_name=record["new_name"],
-                    file_path=_normalize_path(record["file_path"]),
+                    file_path=_resolve_repo_path(_normalize_path(record["file_path"])),
                     file_kind=record["file_kind"],
                     auto_safe=_parse_bool(record["auto_safe"]),
                     notes=record["notes"],
@@ -166,11 +174,12 @@ def _apply_rows_to_file(
     patterns: dict[str, re.Pattern[str]],
     apply: bool,
 ) -> int:
-    if not file_path.exists():
+    safe_file_path = _resolve_repo_path(file_path)
+    if not safe_file_path.exists():
         print(f"[missing] {file_path}")
         return 0
 
-    updated_text = file_path.read_text(encoding="utf-8")
+    updated_text = safe_file_path.read_text(encoding="utf-8")
     file_matches = 0
     for row in rows:
         pattern = patterns[row.old_name]
@@ -184,7 +193,7 @@ def _apply_rows_to_file(
         return 0
 
     if apply:
-        file_path.write_text(updated_text, encoding="utf-8")
+        safe_file_path.write_text(updated_text, encoding="utf-8")
         print(f"[write] {file_path}")
     else:
         print(f"[dry-run] {file_path}")

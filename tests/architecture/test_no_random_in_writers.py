@@ -18,18 +18,47 @@ STORAGE_DIR = Path("src/bioetl/infrastructure/storage")
 ALLOWED_RANDOM_FILES: set[str] = set()
 
 
+def _storage_base_dir() -> Path:
+    if STORAGE_DIR.exists():
+        return STORAGE_DIR
+    return Path(__file__).parent.parent.parent / STORAGE_DIR
+
+
+def _parsed_tree(py_file: Path) -> ast.AST:
+    return ast.parse(py_file.read_text(encoding="utf-8"))
+
+
+def _random_import_violations(py_file: Path) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(_parsed_tree(py_file)):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == "random":
+                    violations.append(f"{py_file.name}:{node.lineno}: import random")
+        elif isinstance(node, ast.ImportFrom) and node.module == "random":
+            violations.append(f"{py_file.name}:{node.lineno}: from random import ...")
+    return violations
+
+
+def _random_call_violations(py_file: Path, method_name: str) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(_parsed_tree(py_file)):
+        if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+            continue
+        if node.func.attr != method_name:
+            continue
+        if isinstance(node.func.value, ast.Name) and node.func.value.id == "random":
+            violations.append(f"{py_file.name}:{node.lineno}: random.{method_name}()")
+    return violations
+
+
 class TestNoRandomInStorageWriters:
     """Tests ensuring storage writers don't use random module."""
 
     @pytest.fixture
     def storage_python_files(self) -> list[Path]:
         """Get all Python files in storage directory."""
-        # Handle both running from project root and tests directory
-        if STORAGE_DIR.exists():
-            base = STORAGE_DIR
-        else:
-            base = Path(__file__).parent.parent.parent / STORAGE_DIR
-        return list(base.glob("*.py"))
+        return list(_storage_base_dir().glob("*.py"))
 
     def test_no_random_import_in_storage_writers(
         self, storage_python_files: list[Path]
@@ -44,22 +73,7 @@ class TestNoRandomInStorageWriters:
         for py_file in storage_python_files:
             if py_file.name in ALLOWED_RANDOM_FILES:
                 continue
-
-            source = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        if alias.name == "random":
-                            violations.append(
-                                f"{py_file.name}:{node.lineno}: import random"
-                            )
-                elif isinstance(node, ast.ImportFrom):
-                    if node.module == "random":
-                        violations.append(
-                            f"{py_file.name}:{node.lineno}: from random import ..."
-                        )
+            violations.extend(_random_import_violations(py_file))
 
         assert not violations, (
             "Random imports found in storage writers:\n"
@@ -77,19 +91,7 @@ class TestNoRandomInStorageWriters:
         for py_file in storage_python_files:
             if py_file.name in ALLOWED_RANDOM_FILES:
                 continue
-
-            source = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Call):
-                    if isinstance(node.func, ast.Attribute):
-                        if node.func.attr == "uniform":
-                            if isinstance(node.func.value, ast.Name):
-                                if node.func.value.id == "random":
-                                    violations.append(
-                                        f"{py_file.name}:{node.lineno}: random.uniform()"
-                                    )
+            violations.extend(_random_call_violations(py_file, "uniform"))
 
         assert not violations, (
             "random.uniform() calls found:\n"
@@ -106,19 +108,7 @@ class TestNoRandomInStorageWriters:
         for py_file in storage_python_files:
             if py_file.name in ALLOWED_RANDOM_FILES:
                 continue
-
-            source = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Call):
-                    if isinstance(node.func, ast.Attribute):
-                        if node.func.attr == "choice":
-                            if isinstance(node.func.value, ast.Name):
-                                if node.func.value.id == "random":
-                                    violations.append(
-                                        f"{py_file.name}:{node.lineno}: random.choice()"
-                                    )
+            violations.extend(_random_call_violations(py_file, "choice"))
 
         assert not violations, "random.choice() calls found:\n" + "\n".join(
             f"  - {v}" for v in violations

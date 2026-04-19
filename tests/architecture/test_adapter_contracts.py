@@ -64,6 +64,102 @@ def _rel_adapter_path(adapters_path: Path, py_file: Path) -> str:
     return py_file.relative_to(adapters_path).as_posix()
 
 
+def _adapter_entrypoint_files(adapters_path: Path) -> list[Path]:
+    excluded_files = {
+        "base.py",
+        "sync_base.py",
+        "health_check_mixin.py",
+        "base_metrics.py",
+        "types.py",
+        "exceptions.py",
+        "client.py",
+        "pagination.py",
+        "rate_limiter.py",
+        "circuit_breaker.py",
+        "health.py",
+        "health_monitor.py",
+        "error_handling.py",
+        "fallback.py",
+        "base_title_fallback.py",
+    }
+    adapter_files: list[Path] = []
+    for py_file in adapters_path.rglob("*.py"):
+        rel_path = _rel_adapter_path(adapters_path, py_file)
+        if py_file.name.startswith("_"):
+            continue
+        if py_file.name in excluded_files:
+            continue
+        if rel_path in ADAPTER_MIXIN_CANONICAL_FILES:
+            continue
+        if py_file.name.endswith("_mixin.py") or py_file.name.endswith("_helpers.py"):
+            continue
+        adapter_files.append(py_file)
+    return adapter_files
+
+
+def _has_health_check_contract(content: str) -> bool:
+    has_method = "def health_check" in content or "async def health_check" in content
+    inherits_base = re.search(
+        r"class\s+\w+\s*\([^)]*Base(Http|Sync)Adapter",
+        content,
+        re.MULTILINE | re.DOTALL,
+    )
+    has_mixin = "HealthCheckProviderMixin" in content
+    return bool(has_method or inherits_base or has_mixin)
+
+
+def _legacy_module_import_violations(
+    root: Path,
+    ast_caches: tuple[dict[Path, ast.Module], ...],
+) -> list[str]:
+    violations: list[str] = []
+    for ast_cache in ast_caches:
+        for py_file, tree in sorted(ast_cache.items()):
+            rel_path = py_file.relative_to(root).as_posix()
+            for node in ast.walk(tree):
+                if (
+                    isinstance(node, ast.ImportFrom)
+                    and node.module in REMOVED_SHIM_IMPORT_PATHS
+                ):
+                    violations.append(
+                        f"{rel_path}:{node.lineno} imports removed module '{node.module}'"
+                    )
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        if alias.name in REMOVED_SHIM_IMPORT_PATHS:
+                            violations.append(
+                                f"{rel_path}:{node.lineno} imports removed module '{alias.name}'"
+                            )
+    return violations
+
+
+def _package_root_import_violations(
+    root: Path,
+    allowed_files: set[Path],
+    disallowed_modules: dict[str, str],
+    ast_caches: tuple[dict[Path, ast.Module], ...],
+) -> list[str]:
+    violations: list[str] = []
+    for ast_cache in ast_caches:
+        for py_file, tree in sorted(ast_cache.items()):
+            if py_file in allowed_files:
+                continue
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.ImportFrom) or node.module is None:
+                    continue
+                expected_name = disallowed_modules.get(node.module)
+                if expected_name is None:
+                    continue
+                if not any(alias.name == expected_name for alias in node.names):
+                    continue
+                violations.append(
+                    f"{py_file.relative_to(root)}:{node.lineno} imports "
+                    f"{expected_name} from {node.module}; use the provider "
+                    "package root instead"
+                )
+    return violations
+
+
 class TestAdapterHealthCheck:
     """Tests ensuring adapters have proper health check methods."""
 
@@ -77,49 +173,9 @@ class TestAdapterHealthCheck:
         if not adapters_path.exists():
             pytest.skip("Infrastructure adapters not found")
 
-        # Files that define adapter classes (not __init__.py or base classes)
-        # Exclude HTTP infrastructure utilities that are not DataSourcePort adapters
-        excluded_files = {
-            "base.py",  # BaseHttpAdapter - base class providing health_check
-            "sync_base.py",  # BaseSyncAdapter - base class providing health_check
-            "health_check_mixin.py",  # HealthCheckProviderMixin - provides health_check
-            "base_metrics.py",  # Base class for metrics adapters
-            "types.py",
-            "exceptions.py",
-            "client.py",  # HTTP client utility, not a DataSourcePort adapter
-            "pagination.py",  # Pagination mixin, not a DataSourcePort adapter
-            "rate_limiter.py",  # Rate limiting utility
-            "circuit_breaker.py",  # Circuit breaker utility
-            "health.py",  # Health check mixin, not a DataSourcePort adapter
-            "health_monitor.py",  # Health state utility, not a DataSourcePort adapter
-            "error_handling.py",  # Error handling utility, not a DataSourcePort adapter
-            "fallback.py",  # Title fallback handler utility, not a DataSourcePort adapter
-            "base_title_fallback.py",  # Base class for title fallback handlers
-        }
-        adapter_files = []
-        for py_file in adapters_path.rglob("*.py"):
-            rel_path = _rel_adapter_path(adapters_path, py_file)
-            if py_file.name.startswith("_"):
-                continue
-            if py_file.name in excluded_files:
-                continue
-            if rel_path in ADAPTER_MIXIN_CANONICAL_FILES:
-                # Adapter mixins are behavioral fragments, not entrypoints.
-                continue
-            if py_file.name.endswith("_mixin.py"):
-                # Mixins are behavioral fragments, not full DataSourcePort adapters.
-                continue
-            if py_file.name.endswith("_helpers.py"):
-                # Helper modules are not adapter entrypoints.
-                continue
-            adapter_files.append(py_file)
-
         missing_health_check = []
-
-        for py_file in adapter_files:
+        for py_file in _adapter_entrypoint_files(adapters_path):
             content = py_file.read_text(encoding="utf-8")
-
-            # Only scan files that define adapter-like classes.
             adapter_like_class = re.search(
                 r"class\s+\w{0,128}(?:Adapter|Client|Fetcher)\w{0,128}\s*\(",
                 content,
@@ -127,24 +183,7 @@ class TestAdapterHealthCheck:
             )
             if adapter_like_class is None:
                 continue
-
-            # Check for health_check method definition OR inheritance from base adapters
-            # BaseHttpAdapter and BaseSyncAdapter provide health_check()
-            # via HealthCheckProviderMixin (Template Method pattern).
-            # We use regex to handle multi-line inheritance lists.
-            has_method = (
-                "def health_check" in content or "async def health_check" in content
-            )
-            inherits_base = re.search(
-                r"class\s+\w+\s*\([^)]*Base(Http|Sync)Adapter",
-                content,
-                re.MULTILINE | re.DOTALL,
-            )
-            has_mixin = "HealthCheckProviderMixin" in content
-
-            has_health_check = has_method or inherits_base or has_mixin
-
-            if not has_health_check:
+            if not _has_health_check_contract(content):
                 relative_path = py_file.relative_to(src_dir)
                 missing_health_check.append(str(relative_path))
 
@@ -220,24 +259,10 @@ class TestAdapterMixinPolicy:
         """Removed legacy adapter-mixin module paths must stay absent everywhere."""
         violations: list[str] = []
         root = src_dir.parent
-
-        for ast_cache in (source_ast_cache, test_ast_cache):
-            for py_file, tree in sorted(ast_cache.items()):
-                rel_path = py_file.relative_to(root).as_posix()
-                for node in ast.walk(tree):
-                    if (
-                        isinstance(node, ast.ImportFrom)
-                        and node.module in REMOVED_SHIM_IMPORT_PATHS
-                    ):
-                        violations.append(
-                            f"{rel_path}:{node.lineno} imports removed module '{node.module}'"
-                        )
-                    if isinstance(node, ast.Import):
-                        for alias in node.names:
-                            if alias.name in REMOVED_SHIM_IMPORT_PATHS:
-                                violations.append(
-                                    f"{rel_path}:{node.lineno} imports removed module '{alias.name}'"
-                                )
+        violations = _legacy_module_import_violations(
+            root,
+            (source_ast_cache, test_ast_cache),
+        )
 
         assert not violations, (
             "Removed legacy adapter-mixin module imports are forbidden.\n"
@@ -492,27 +517,12 @@ class TestAdapterPortCompliance:
             / "test_compatibility.py",
         }
 
-        violations: list[str] = []
-        root = src_dir.parent
-
-        for ast_cache in (source_ast_cache, test_ast_cache):
-            for py_file, tree in sorted(ast_cache.items()):
-                if py_file in allowed_files:
-                    continue
-                for node in ast.walk(tree):
-                    if not isinstance(node, ast.ImportFrom) or node.module is None:
-                        continue
-                    expected_name = disallowed_modules.get(node.module)
-                    if expected_name is None:
-                        continue
-                    if not any(alias.name == expected_name for alias in node.names):
-                        continue
-
-                    violations.append(
-                        f"{py_file.relative_to(root)}:{node.lineno} imports "
-                        f"{expected_name} from {node.module}; use the provider "
-                        "package root instead"
-                    )
+        violations = _package_root_import_violations(
+            src_dir.parent,
+            allowed_files,
+            disallowed_modules,
+            (source_ast_cache, test_ast_cache),
+        )
 
         assert not violations, (
             "Primary adapter classes must be imported from package-root facades.\n"

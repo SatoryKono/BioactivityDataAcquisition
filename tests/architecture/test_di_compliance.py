@@ -89,6 +89,17 @@ def _files_for_layers(src_dir: Path, layers: list[str]) -> list[Path]:
     return files
 
 
+def _iter_parsed_files(files: list[Path]) -> list[tuple[Path, str, ast.AST]]:
+    parsed_files: list[tuple[Path, str, ast.AST]] = []
+    for py_file in files:
+        parsed = _parse_python_file(py_file)
+        if parsed is None:
+            continue
+        content, tree = parsed
+        parsed_files.append((py_file, content, tree))
+    return parsed_files
+
+
 def _type_checking_line_numbers(lines: list[str]) -> set[int]:
     active_numbers: set[int] = set()
     in_type_checking = False
@@ -103,6 +114,83 @@ def _type_checking_line_numbers(lines: list[str]) -> set[int]:
         if in_type_checking:
             active_numbers.add(index)
     return active_numbers
+
+
+def _internal_creation_violations(
+    application_python_files: list[Path],
+    internal_creation_patterns: list[tuple[str, str]],
+) -> list[str]:
+    violations: list[str] = []
+    for py_file, content, tree in _iter_parsed_files(application_python_files):
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            for item in node.body:
+                if not isinstance(item, ast.FunctionDef) or item.name != "__init__":
+                    continue
+                init_lines = ast.get_source_segment(content, item)
+                if not init_lines:
+                    continue
+                for pattern, desc in internal_creation_patterns:
+                    if re.search(pattern, init_lines):
+                        violations.append(
+                            f"{_relative_to_application(py_file)}:{item.lineno} - "
+                            f"{node.name}.__init__: {desc}"
+                        )
+    return violations
+
+
+def _httpx_import_violations(application_python_files: list[Path]) -> list[str]:
+    violations: list[str] = []
+    for py_file in application_python_files:
+        lines = py_file.read_text(encoding="utf-8").splitlines()
+        type_checking_lines = _type_checking_line_numbers(lines)
+        for i, line in enumerate(lines, 1):
+            stripped = line.strip()
+            if i in type_checking_lines:
+                continue
+            if "import httpx" in stripped or "from httpx" in stripped:
+                if not stripped.startswith('"""') and not stripped.startswith("#"):
+                    violations.append(
+                        f"{_relative_to_application(py_file)}:{i}: {stripped}"
+                    )
+    return violations
+
+
+def _composition_module_imports(composition_path: Path) -> dict[str, set[str]]:
+    module_imports: dict[str, set[str]] = {}
+    for py_file in composition_path.rglob("*.py"):
+        relative = py_file.relative_to(composition_path)
+        module_name = str(relative).replace("/", ".").replace(".py", "")
+        imports: set[str] = set()
+        for line in py_file.read_text(encoding="utf-8").splitlines():
+            if "from bioetl.composition" in line or "from .." in line:
+                match = re.search(r"from bioetl\.composition\.(\w+)", line)
+                if match:
+                    imports.add(match.group(1))
+                match = re.search(r"from \.\.?(\w+)", line)
+                if match:
+                    imports.add(match.group(1))
+        if imports:
+            module_imports[module_name] = imports
+    return module_imports
+
+
+def _domain_infrastructure_import_violations(src_dir: Path) -> list[str]:
+    domain_path = src_dir / "bioetl" / "domain"
+    violations: list[str] = []
+    for py_file in domain_path.rglob("*.py"):
+        lines = py_file.read_text(encoding="utf-8").splitlines()
+        type_checking_lines = _type_checking_line_numbers(lines)
+        for i, line in enumerate(lines, 1):
+            if i in type_checking_lines:
+                continue
+            if (
+                "from bioetl.infrastructure" in line
+                or "import bioetl.infrastructure" in line
+            ):
+                violations.append(f"{py_file.relative_to(src_dir)}:{i}: {line.strip()}")
+    return violations
 
 
 class InstantiationFinder(ast.NodeVisitor):
@@ -175,11 +263,7 @@ class TestDICompliance:
         See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
         """
         violations = []
-        for py_file in application_python_files:
-            parsed = _parse_python_file(py_file)
-            if parsed is None:
-                continue
-            _content, tree = parsed
+        for py_file, _content, tree in _iter_parsed_files(application_python_files):
             finder = InstantiationFinder(
                 FORBIDDEN_INSTANTIATION_CLASSES,
                 FORBIDDEN_ATTRIBUTE_INSTANTIATIONS,
@@ -208,11 +292,9 @@ class TestDICompliance:
         """
         violations = []
         forbidden_layers = ["application", "infrastructure", "domain", "interfaces"]
-        for py_file in _files_for_layers(src_dir, forbidden_layers):
-            parsed = _parse_python_file(py_file)
-            if parsed is None:
-                continue
-            _content, tree = parsed
+        for py_file, _content, tree in _iter_parsed_files(
+            _files_for_layers(src_dir, forbidden_layers)
+        ):
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef) and node.name.endswith("Factory"):
                     violations.append(
@@ -245,27 +327,10 @@ class TestDICompliance:
             ),
             (r"httpx\.(Async)?Client\(\)", "httpx client creation"),
         ]
-
-        for py_file in application_python_files:
-            parsed = _parse_python_file(py_file)
-            if parsed is None:
-                continue
-            content, tree = parsed
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.ClassDef):
-                    continue
-                for item in node.body:
-                    if not isinstance(item, ast.FunctionDef) or item.name != "__init__":
-                        continue
-                    init_lines = ast.get_source_segment(content, item)
-                    if not init_lines:
-                        continue
-                    for pattern, desc in internal_creation_patterns:
-                        if re.search(pattern, init_lines):
-                            violations.append(
-                                f"{_relative_to_application(py_file)}:{item.lineno} - "
-                                f"{node.name}.__init__: {desc}"
-                            )
+        violations = _internal_creation_violations(
+            application_python_files,
+            internal_creation_patterns,
+        )
 
         assert not violations, (
             "Dependencies should be injected, not created internally.\n"
@@ -282,19 +347,7 @@ class TestDICompliance:
         REQ-ARCH-DI-004: HTTP clients are infrastructure concern.
         Application should use DataSourcePort, not httpx.
         """
-        violations = []
-        for py_file in application_python_files:
-            lines = py_file.read_text(encoding="utf-8").splitlines()
-            type_checking_lines = _type_checking_line_numbers(lines)
-            for i, line in enumerate(lines, 1):
-                stripped = line.strip()
-                if i in type_checking_lines:
-                    continue
-                if "import httpx" in stripped or "from httpx" in stripped:
-                    if not stripped.startswith('"""') and not stripped.startswith("#"):
-                        violations.append(
-                            f"{_relative_to_application(py_file)}:{i}: {stripped}"
-                        )
+        violations = _httpx_import_violations(application_python_files)
 
         assert not violations, (
             "Application layer must not import httpx directly.\n"
@@ -365,30 +418,7 @@ class TestCompositionRootIntegrity:
         if not composition_path.exists():
             pytest.skip("Composition layer not found")
 
-        # Track imports between composition modules
-        module_imports: dict[str, set[str]] = {}
-
-        for py_file in composition_path.rglob("*.py"):
-            relative = py_file.relative_to(composition_path)
-            module_name = str(relative).replace("/", ".").replace(".py", "")
-
-            content = py_file.read_text(encoding="utf-8")
-            imports: set[str] = set()
-
-            # Find internal composition imports
-            for line in content.splitlines():
-                if "from bioetl.composition" in line or "from .." in line:
-                    # Extract imported module
-                    match = re.search(r"from bioetl\.composition\.(\w+)", line)
-                    if match:
-                        imports.add(match.group(1))
-                    # Relative imports
-                    match = re.search(r"from \.\.?(\w+)", line)
-                    if match:
-                        imports.add(match.group(1))
-
-            if imports:
-                module_imports[module_name] = imports
+        module_imports = _composition_module_imports(composition_path)
 
         # Simple cycle detection (depth-1)
         cycles = []
@@ -423,33 +453,7 @@ class TestInfrastructureIsolation:
         if not domain_path.exists():
             pytest.skip("Domain layer not found")
 
-        violations = []
-
-        for py_file in domain_path.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
-
-            for i, line in enumerate(content.splitlines(), 1):
-                if (
-                    "from bioetl.infrastructure" in line
-                    or "import bioetl.infrastructure" in line
-                ):
-                    # Check not in TYPE_CHECKING
-                    in_type_checking = False
-                    lines = content.splitlines()
-                    for j, check_line in enumerate(lines):
-                        if "if TYPE_CHECKING:" in check_line:
-                            in_type_checking = True
-                        elif (
-                            in_type_checking
-                            and check_line.strip()
-                            and not check_line.startswith((" ", "\t"))
-                        ):
-                            in_type_checking = False
-                        if j + 1 == i and in_type_checking:
-                            break
-                    else:
-                        relative = py_file.relative_to(src_dir)
-                        violations.append(f"{relative}:{i}: {line.strip()}")
+        violations = _domain_infrastructure_import_violations(src_dir)
 
         assert not violations, (
             "Domain layer must not import from infrastructure.\n"
