@@ -68,7 +68,7 @@ _UNESCAPED_DUNDER_METHOD_RE = re.compile(
     r"^\s*[+\-#~][^\n]*?(?<!\\)__[A-Za-z0-9_]+__(?=\s*\()"
 )
 _STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
-_HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
+_HEX_COLOR_RE = re.compile(r"#[0-9a-f]{6}\b", re.IGNORECASE)
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
 _LINK_STYLE_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)")
 _BR_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)

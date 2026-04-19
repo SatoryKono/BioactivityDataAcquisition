@@ -67,10 +67,8 @@ COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /
 
 # Install development dependencies
 RUN pip install uv && \
-    uv pip install --system -e ".[dev,docs]"
-
-# Create non-root user
-RUN useradd -m -u 1000 bioetl && \
+    uv pip install --system -e ".[dev,docs]"\
+&&  useradd -m -u 1000 bioetl && \
     chown -R bioetl:bioetl /app
 
 USER bioetl
