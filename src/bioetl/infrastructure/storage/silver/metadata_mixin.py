@@ -34,6 +34,7 @@ from bioetl.infrastructure.storage.silver.audit_operations import (
 )
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _build_silver_write_result,
+    _coerce_silver_metadata_write_request,
     _execute_silver_metadata_write,
     _prepare_silver_merged_metadata_write,
     _prepare_silver_metadata_write,
@@ -139,44 +140,25 @@ class SilverWriterMetadataMixin:
 
     async def _write_silver_metadata(
         self,
-        table_path: str,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None = None,
-        dq_metrics: BatchDQMetrics | None = None,
-        dq_report_path: str | None = None,
-        partition_by: list[str] | None = None,
-        source_batch_ids: list[str] | None = None,
-        started_at: datetime | None = None,
-        completed_at: datetime | None = None,
-        version_after: int | None = None,
+        request: _SilverMetadataWriteRequest | str | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> None:
         """Write Silver layer metadata sidecar file."""
+        resolved_request = _coerce_silver_metadata_write_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
         if self._should_skip_silver_metadata_write(
-            records=records,
-            table_path=table_path,
+            records=resolved_request.records,
+            table_path=resolved_request.table_path,
             event_name="silver_metadata_skipped",
         ):
             return
         await _execute_silver_metadata_write(
             self,
-            request=_SilverMetadataWriteRequest(
-                table_path=table_path,
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                mode=mode,
-                bronze_refs=bronze_refs,
-                dq_metrics=dq_metrics,
-                dq_report_path=dq_report_path,
-                partition_by=partition_by,
-                source_batch_ids=source_batch_ids,
-                started_at=started_at,
-                completed_at=completed_at,
-                version_after=version_after,
-            ),
+            request=resolved_request,
             prepare=_prepare_silver_metadata_write,
         )
 
