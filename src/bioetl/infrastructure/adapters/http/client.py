@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 import httpx
 
-from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
 from bioetl.domain.resilience import RetryConfig
 from bioetl.infrastructure.adapters.http.client_context_mixin import (
     HTTPClientContextMixin,
@@ -58,8 +57,6 @@ class UnifiedHTTPClient(
     _metrics: MetricsPort | None = field(init=False)
 
     def __post_init__(self) -> None:
-        """Capture observability ports with explicit no-op fallbacks."""
-        self._tracer = self.tracer if self.tracer is not None else NoOpTracing()
-        self._metrics = (
-            self.metrics if self.metrics is not None else NoOpMetrics(warn_on_use=False)
-        )
+        """Capture observability ports resolved by composition-owned wiring."""
+        self._tracer = self.tracer
+        self._metrics = self.metrics

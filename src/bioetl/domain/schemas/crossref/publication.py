@@ -69,7 +69,6 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{3}[\dX]$",
         description=(
             "Primary ISSN or provider-native serialized ISSN payload. "
             "CrossRef can surface multi-value ISSN strings here; canonical "

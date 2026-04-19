@@ -534,7 +534,9 @@ class CheckpointCompatibilityService:
             )
         )
         messages = dq_messages + pipeline_messages + execution_identity_messages
-        compatible = dq_compatible and pipeline_compatible
+        compatible = (
+            dq_compatible and pipeline_compatible and execution_identity_compatible
+        )
         _log_lenient_result(self._logger, compatible=compatible, messages=messages)
         _emit_checkpoint_metric(
             self._metrics,
