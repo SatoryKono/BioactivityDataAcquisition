@@ -14,6 +14,14 @@ from bioetl.domain.ports import FilterableDataSourcePort
 from bioetl.domain.types import HealthStatus
 
 
+async def _collect_async(async_iterable):
+    """Drain an async iterable and return collected items."""
+    items = []
+    async for item in async_iterable:
+        items.append(item)
+    return items
+
+
 class MockDataSource:
     """Mock data source that yields assay records."""
 
@@ -46,9 +54,13 @@ class MockFilterableDataSource:
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
         self.aclose = AsyncMock()
 
-    async def fetch(self, entity_type: str, **kwargs):
+    async def _yield_assays(self):
         await asyncio.sleep(0)
         for assay in self._assays:
+            yield assay
+
+    async def fetch(self, entity_type: str, **kwargs):
+        async for assay in self._yield_assays():
             yield assay
 
     async def fetch_filtered(
@@ -58,8 +70,7 @@ class MockFilterableDataSource:
         filter_field: str,
         limit: int | None = None,
     ):
-        await asyncio.sleep(0)
-        for assay in self._assays:
+        async for assay in self._yield_assays():
             yield assay
 
     async def fetch_multi_filtered(
@@ -68,8 +79,7 @@ class MockFilterableDataSource:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ):
-        await asyncio.sleep(0)
-        for assay in self._assays:
+        async for assay in self._yield_assays():
             yield assay
 
     async def fetch_filtered_with_fallback(
@@ -80,8 +90,7 @@ class MockFilterableDataSource:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ):
-        await asyncio.sleep(0)
-        for assay in self._assays:
+        async for assay in self._yield_assays():
             yield assay
 
 
@@ -527,12 +536,13 @@ class TestSubcellularFractionFilterable:
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
-            async for _ in wrapper.fetch_filtered(
-                entity_type="subcellular_fraction",
-                filter_ids=["CHEMBL1000"],
-                filter_field="assay_id",
-            ):
-                pass
+            await _collect_async(
+                wrapper.fetch_filtered(
+                    entity_type="subcellular_fraction",
+                    filter_ids=["CHEMBL1000"],
+                    filter_field="assay_id",
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_fetch_multi_filtered_subcellular_fraction(self) -> None:
@@ -589,11 +599,12 @@ class TestSubcellularFractionFilterable:
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
-            async for _ in wrapper.fetch_multi_filtered(
-                entity_type="subcellular_fraction",
-                filters={"assay_id": ["CHEMBL1000"]},
-            ):
-                pass
+            await _collect_async(
+                wrapper.fetch_multi_filtered(
+                    entity_type="subcellular_fraction",
+                    filters={"assay_id": ["CHEMBL1000"]},
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_fallback_subcellular_fraction(self) -> None:
@@ -675,13 +686,7 @@ class TestSubcellularFractionFilterable:
                         "limit": limit,
                     }
                 )
-                async for assay in super().fetch_filtered_with_fallback(
-                    entity_type=entity_type,
-                    filter_ids=filter_ids,
-                    filter_field=filter_field,
-                    fallback_mapping=fallback_mapping,
-                    limit=limit,
-                ):
+                async for assay in self._yield_assays():
                     yield assay
 
         source = _RecordingFilterableDataSource(
@@ -689,14 +694,15 @@ class TestSubcellularFractionFilterable:
         )
         wrapper = SubcellularFractionDataSource(data_source=source)
 
-        async for _ in wrapper.fetch_filtered_with_fallback(
-            entity_type="subcellular_fraction",
-            filter_ids=["CHEMBL1000"],
-            filter_field="assay_id",
-            fallback_mapping={"CHEMBL1000": "Test"},
-            limit=1,
-        ):
-            pass
+        await _collect_async(
+            wrapper.fetch_filtered_with_fallback(
+                entity_type="subcellular_fraction",
+                filter_ids=["CHEMBL1000"],
+                filter_field="assay_id",
+                fallback_mapping={"CHEMBL1000": "Test"},
+                limit=1,
+            )
+        )
 
         assert source.fallback_calls[-1]["entity_type"] == "assay"
         assert source.fallback_calls[-1]["limit"] is None
@@ -709,10 +715,11 @@ class TestSubcellularFractionFilterable:
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
-            async for _ in wrapper.fetch_filtered_with_fallback(
-                entity_type="subcellular_fraction",
-                filter_ids=["CHEMBL1000"],
-                filter_field="assay_id",
-                fallback_mapping={},
-            ):
-                pass
+            await _collect_async(
+                wrapper.fetch_filtered_with_fallback(
+                    entity_type="subcellular_fraction",
+                    filter_ids=["CHEMBL1000"],
+                    filter_field="assay_id",
+                    fallback_mapping={},
+                )
+            )

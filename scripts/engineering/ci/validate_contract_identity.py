@@ -56,97 +56,141 @@ def _build_identity_issues(registry: ContractRegistry) -> list[RegistryValidatio
     """Collect identity-focused issues from loaded registry entries."""
     issues: list[RegistryValidationIssue] = []
     for contract_ref, entry in sorted(registry.entries.items()):
-        identity = entry.identity
-
-        if identity.contract_ref != contract_ref:
-            issues.append(
-                RegistryValidationIssue(
-                    message=(
-                        f"Registry key mismatch with identity.contract_ref: "
-                        f"{identity.contract_ref}"
-                    ),
-                    severity=RegistryValidationSeverity.BLOCKING,
-                    contract_ref=contract_ref,
-                    field="identity.contract_ref",
-                )
-            )
-
-        for message in identity.validate():
-            issues.append(
-                RegistryValidationIssue(
-                    message=message,
-                    severity=RegistryValidationSeverity.BLOCKING,
-                    contract_ref=contract_ref,
-                    field="identity",
-                )
-            )
-
-        has_identity_dq_ref = bool(identity.dq_policy_ref)
-        has_identity_rule_bundle = bool(identity.rule_bundle_version)
-        if has_identity_dq_ref != has_identity_rule_bundle:
-            issues.append(
-                RegistryValidationIssue(
-                    message=(
-                        "identity.dq_policy_ref and identity.rule_bundle_version "
-                        "must be set together"
-                    ),
-                    severity=RegistryValidationSeverity.BLOCKING,
-                    contract_ref=contract_ref,
-                    field="identity",
-                )
-            )
-
-        if (
-            identity.dq_policy_ref
-            and entry.dq_policy_ref
-            and identity.dq_policy_ref != entry.dq_policy_ref
-        ):
-            issues.append(
-                RegistryValidationIssue(
-                    message="dq_policy_ref mismatch between identity and entry",
-                    severity=RegistryValidationSeverity.BLOCKING,
-                    contract_ref=contract_ref,
-                    field="dq_policy_ref",
-                )
-            )
-
-        if (
-            identity.rule_bundle_version
-            and entry.rule_bundle_version
-            and identity.rule_bundle_version != entry.rule_bundle_version
-        ):
-            issues.append(
-                RegistryValidationIssue(
-                    message=("rule_bundle_version mismatch between identity and entry"),
-                    severity=RegistryValidationSeverity.BLOCKING,
-                    contract_ref=contract_ref,
-                    field="rule_bundle_version",
-                )
-            )
-
-        if not entry.supported_versions:
-            issues.append(
-                RegistryValidationIssue(
-                    message="supported_versions is empty",
-                    severity=RegistryValidationSeverity.WARNING,
-                    contract_ref=contract_ref,
-                    field="supported_versions",
-                )
-            )
-        elif identity.contract_version not in entry.supported_versions:
-            issues.append(
-                RegistryValidationIssue(
-                    message=(
-                        f"identity version {identity.contract_version} not present in "
-                        "supported_versions"
-                    ),
-                    severity=RegistryValidationSeverity.BLOCKING,
-                    contract_ref=contract_ref,
-                    field="supported_versions",
-                )
-            )
-
+        issues.extend(_build_entry_identity_issues(contract_ref, entry))
     return issues
+
+
+def _build_entry_identity_issues(
+    contract_ref: str,
+    entry: Any,
+) -> list[RegistryValidationIssue]:
+    identity = entry.identity
+    issues: list[RegistryValidationIssue] = []
+    issues.extend(_build_contract_ref_mismatch_issues(contract_ref, identity))
+    issues.extend(_build_identity_validation_issues(contract_ref, identity))
+    issues.extend(_build_identity_pairing_issues(contract_ref, identity))
+    issues.extend(_build_identity_entry_mismatch_issues(contract_ref, identity, entry))
+    issues.extend(_build_supported_versions_issues(contract_ref, identity, entry))
+    return issues
+
+
+def _build_contract_ref_mismatch_issues(
+    contract_ref: str,
+    identity: Any,
+) -> list[RegistryValidationIssue]:
+    if identity.contract_ref == contract_ref:
+        return []
+    return [
+        RegistryValidationIssue(
+            message=(
+                f"Registry key mismatch with identity.contract_ref: "
+                f"{identity.contract_ref}"
+            ),
+            severity=RegistryValidationSeverity.BLOCKING,
+            contract_ref=contract_ref,
+            field="identity.contract_ref",
+        )
+    ]
+
+
+def _build_identity_validation_issues(
+    contract_ref: str,
+    identity: Any,
+) -> list[RegistryValidationIssue]:
+    return [
+        RegistryValidationIssue(
+            message=message,
+            severity=RegistryValidationSeverity.BLOCKING,
+            contract_ref=contract_ref,
+            field="identity",
+        )
+        for message in identity.validate()
+    ]
+
+
+def _build_identity_pairing_issues(
+    contract_ref: str,
+    identity: Any,
+) -> list[RegistryValidationIssue]:
+    has_identity_dq_ref = bool(identity.dq_policy_ref)
+    has_identity_rule_bundle = bool(identity.rule_bundle_version)
+    if has_identity_dq_ref == has_identity_rule_bundle:
+        return []
+    return [
+        RegistryValidationIssue(
+            message=(
+                "identity.dq_policy_ref and identity.rule_bundle_version "
+                "must be set together"
+            ),
+            severity=RegistryValidationSeverity.BLOCKING,
+            contract_ref=contract_ref,
+            field="identity",
+        )
+    ]
+
+
+def _build_identity_entry_mismatch_issues(
+    contract_ref: str,
+    identity: Any,
+    entry: Any,
+) -> list[RegistryValidationIssue]:
+    issues: list[RegistryValidationIssue] = []
+    if (
+        identity.dq_policy_ref
+        and entry.dq_policy_ref
+        and identity.dq_policy_ref != entry.dq_policy_ref
+    ):
+        issues.append(
+            RegistryValidationIssue(
+                message="dq_policy_ref mismatch between identity and entry",
+                severity=RegistryValidationSeverity.BLOCKING,
+                contract_ref=contract_ref,
+                field="dq_policy_ref",
+            )
+        )
+    if (
+        identity.rule_bundle_version
+        and entry.rule_bundle_version
+        and identity.rule_bundle_version != entry.rule_bundle_version
+    ):
+        issues.append(
+            RegistryValidationIssue(
+                message="rule_bundle_version mismatch between identity and entry",
+                severity=RegistryValidationSeverity.BLOCKING,
+                contract_ref=contract_ref,
+                field="rule_bundle_version",
+            )
+        )
+    return issues
+
+
+def _build_supported_versions_issues(
+    contract_ref: str,
+    identity: Any,
+    entry: Any,
+) -> list[RegistryValidationIssue]:
+    if not entry.supported_versions:
+        return [
+            RegistryValidationIssue(
+                message="supported_versions is empty",
+                severity=RegistryValidationSeverity.WARNING,
+                contract_ref=contract_ref,
+                field="supported_versions",
+            )
+        ]
+    if identity.contract_version in entry.supported_versions:
+        return []
+    return [
+        RegistryValidationIssue(
+            message=(
+                f"identity version {identity.contract_version} not present in "
+                "supported_versions"
+            ),
+            severity=RegistryValidationSeverity.BLOCKING,
+            contract_ref=contract_ref,
+            field="supported_versions",
+        )
+    ]
 
 
 def main() -> int:
