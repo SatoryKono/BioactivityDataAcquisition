@@ -113,7 +113,9 @@ def _normalize_path(raw: str) -> Path:
 def _normalize_repo_relative_path(path: Path) -> Path:
     """Normalize and validate a repository-relative path."""
     if path.is_absolute():
-        raise ValueError(f"expected repository-relative path, got absolute path: {path}")
+        raise ValueError(
+            f"expected repository-relative path, got absolute path: {path}"
+        )
 
     normalized_parts: list[str] = []
     for part in path.parts:
