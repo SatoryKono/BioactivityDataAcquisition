@@ -401,6 +401,9 @@ def _validate_lenient_dq_compatibility(
             )
         else:
             messages.append("DQ contracts are compatible")
+    else:
+        # In lenient mode, missing DQ hashes are considered compatible
+        messages.append("DQ contracts are compatible")
     return True, messages
 
 

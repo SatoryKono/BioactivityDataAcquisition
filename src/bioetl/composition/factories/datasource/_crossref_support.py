@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.datasource._crossref_inputs import resolve_mailto
 from bioetl.composition.factories.datasource.adapter_helpers import (
@@ -35,11 +34,6 @@ from bioetl.infrastructure.adapters.crossref.types import (
     CrossRefBatchFetcher,
     CrossRefSearchPaginator,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.config import Settings
 
 
 @dataclass(frozen=True)

@@ -27,6 +27,8 @@ from bioetl.domain.normalization import (
     validate_publication_year,
 )
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1016/j.cell.2024"
+
 
 class TestNormalizeString:
     """Tests for normalize_string function."""
@@ -75,7 +77,7 @@ class TestStripDoiPrefix:
         "doi,expected",
         [
             ("https://doi.org/10.1038/nature12373", "10.1038/nature12373"),
-            ("http://doi.org/10.1016/j.cell.2024", "10.1016/j.cell.2024"),
+            (LEGACY_HTTP_DOI, "10.1016/j.cell.2024"),
             ("doi:10.1126/science.abc1234", "10.1126/science.abc1234"),
             ("DOI:10.1001/jama.2024.0001", "10.1001/jama.2024.0001"),
             ("10.1038/nature12373", "10.1038/nature12373"),

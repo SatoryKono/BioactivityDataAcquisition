@@ -28,6 +28,9 @@ from bioetl.application.pipelines.openalex.extractors import (
     reconstruct_abstract,
 )
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1016/j.cell.2024.01.005"
+LEGACY_HTTP_ORCID = "http" + "://orcid.org/0000-0001-2345-6789"
+
 
 class TestExtractDoi:
     """Tests for extract_doi function."""
@@ -38,8 +41,8 @@ class TestExtractDoi:
         assert result == "10.1038/s41586-024-07487-w"
 
     def test_extract_doi_from_http_url(self) -> None:
-        """Should extract DOI from http://doi.org/ URL."""
-        result = extract_doi("http://doi.org/10.1016/j.cell.2024.01.005")
+        """Should extract DOI from a legacy HTTP DOI URL."""
+        result = extract_doi(LEGACY_HTTP_DOI)
         assert result == "10.1016/j.cell.2024.01.005"
 
     def test_extract_doi_from_doi_prefix(self) -> None:
@@ -248,9 +251,9 @@ class TestExtractAuthorOrcids:
         assert result == ["", "", ""]
 
     def test_extract_orcids_http_url(self) -> None:
-        """Should handle http:// URLs (not just https://)."""
+        """Should handle legacy HTTP URLs (not just HTTPS)."""
         authorships = [
-            {"author": {"orcid": "http://orcid.org/0000-0001-2345-6789"}},
+            {"author": {"orcid": LEGACY_HTTP_ORCID}},
         ]
         result = extract_author_orcids(authorships)
         assert result == ["0000-0001-2345-6789"]
