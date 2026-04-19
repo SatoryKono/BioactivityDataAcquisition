@@ -192,21 +192,11 @@ def _setup_process_and_validation(command: Sequence[str]) -> tuple[subprocess.Po
         return process, False, "sonarqube MCP smoke could not open process stdio pipes."
     return process, True, ""
 
-def _initialize_smoke_state() -> tuple[bytearray, bytearray, dict[int, dict[str, Any]], bool, bool, queue.Queue[tuple[str, bytes | None]], set[str]]:
-    """Initialize data structures for smoke test."""
-    stdout_buffer = bytearray()
-    stderr_buffer = bytearray()
-    responses: dict[int, dict[str, Any]] = {}
-    ready_seen = False
-    handshake_sent = False
-    chunks: queue.Queue[tuple[str, bytes | None]] = queue.Queue()
-    closed_channels: set[str] = set()
-    return stdout_buffer, stderr_buffer, responses, ready_seen, handshake_sent, chunks, closed_channels
+
 
 def _start_io_threads(
     process: subprocess.Popen[bytes],
     chunks: queue.Queue[tuple[str, bytes | None]],
-    closed_channels: set[str],
 ) -> list[threading.Thread]:
     """Start I/O threads for stdin, stdout, and stderr."""
     readers = [
@@ -223,18 +213,32 @@ def _start_io_threads(
     ]
     for reader in readers:
         reader.start()
+    return readers
 
-    start = time.monotonic()
-    ready_deadline = start + startup_timeout_seconds
+
+def _run_smoke_test_loop(
+    process: subprocess.Popen[bytes],
+    startup_timeout_seconds: float,
+    handshake_timeout_seconds: float,
+    stdout_buffer: bytearray,
+    stderr_buffer: bytearray,
+    responses: dict[int, dict[str, Any]],
+    chunks: queue.Queue[tuple[str, bytes | None]],
+) -> tuple[bool, bool, bool, float | None]:
+    """Run the main smoke test loop."""
+    ready_seen = False
+    handshake_sent = False
     handshake_deadline: float | None = None
-
+    closed_channels: set[str] = set()
+    start = time.monotonic()
+    
     try:
         while True:
             now = time.monotonic()
             if _deadlines_expired(
                 now,
                 ready_seen=ready_seen,
-                ready_deadline=ready_deadline,
+                ready_deadline=start + startup_timeout_seconds,
                 handshake_deadline=handshake_deadline,
             ):
                 break
@@ -244,7 +248,7 @@ def _start_io_threads(
             timeout = _next_chunk_timeout(
                 now,
                 ready_seen=ready_seen,
-                ready_deadline=ready_deadline,
+                ready_deadline=start + startup_timeout_seconds,
                 handshake_deadline=handshake_deadline,
             )
 
@@ -271,26 +275,21 @@ def _start_io_threads(
                 handshake_timeout_seconds=handshake_timeout_seconds,
                 handshake_deadline=handshake_deadline,
             )
+        return ready_seen, handshake_sent, handshake_deadline, now
     except ValueError as exc:
-        return SmokeResult(
-            ok=False,
-            summary=f"sonarqube MCP smoke received invalid stdout transport output: {exc}",
-            responses=tuple(responses.values()),
-            stderr=stderr_buffer.decode("utf-8", errors="replace"),
-            returncode=process.returncode,
-            ready_seen=ready_seen,
-            handshake_sent=handshake_sent,
-        )
-    finally:
-        process.terminate()
-        try:
-            process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=5)
-        for reader in readers:
-            reader.join(timeout=1.0)
+        raise ValueError(f"sonarqube MCP smoke received invalid stdout transport output: {exc}") from exc
 
+
+def _create_result(
+    process: subprocess.Popen[bytes],
+    startup_timeout_seconds: float,
+    ready_seen: bool,
+    handshake_sent: bool,
+    responses: dict[int, dict[str, Any]],
+    stdout_buffer: bytearray,
+    stderr_buffer: bytearray,
+) -> SmokeResult:
+    """Create the final smoke test result."""
     response_list = tuple(
         responses[request_id]
         for request_id in sorted(responses)
@@ -458,6 +457,72 @@ def _handle_stream_chunk(
     stdout_buffer.extend(chunk)
     _drain_stdout_messages(stdout_buffer, responses)
     return ready_seen, handshake_sent, handshake_deadline
+
+
+def run_smoke_command(
+    command: Sequence[str],
+    *,
+    startup_timeout_seconds: float,
+    handshake_timeout_seconds: float,
+) -> SmokeResult:
+    """Run the SonarQube MCP smoke test with proper process management and I/O handling."""
+    # Setup process and validate stdio pipes
+    process, pipes_ok, error_msg = _setup_process_and_validation(command)
+    if not pipes_ok:
+        process.kill()
+        return SmokeResult(ok=False, summary=error_msg)
+    
+    # Initialize smoke test state
+    stdout_buffer = bytearray()
+    stderr_buffer = bytearray()
+    responses: dict[int, dict[str, Any]] = {}
+    chunks: queue.Queue[tuple[str, bytes | None]] = queue.Queue()
+    
+    # Start I/O threads
+    readers = _start_io_threads(process, chunks)
+    
+    try:
+        # Run the smoke test loop
+        ready_seen, handshake_sent, handshake_deadline, _ = _run_smoke_test_loop(
+            process,
+            startup_timeout_seconds,
+            handshake_timeout_seconds,
+            stdout_buffer,
+            stderr_buffer,
+            responses,
+            chunks,
+        )
+    except ValueError as exc:
+        return SmokeResult(
+            ok=False,
+            summary=f"sonarqube MCP smoke received invalid stdout transport output: {exc}",
+            responses=tuple(responses.values()),
+            stderr=stderr_buffer.decode("utf-8", errors="replace"),
+            returncode=process.returncode,
+            ready_seen=ready_seen,
+            handshake_sent=handshake_sent,
+        )
+    finally:
+        # Cleanup process and threads
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+        for reader in readers:
+            reader.join(timeout=1.0)
+
+    # Create final result
+    return _create_result(
+        process,
+        startup_timeout_seconds,
+        ready_seen,
+        handshake_sent,
+        responses,
+        stdout_buffer,
+        stderr_buffer,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

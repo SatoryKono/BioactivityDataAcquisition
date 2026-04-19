@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.wiring.runtime import (
+        BatchProcessingComponents,
         ContentHashPolicyByVersion,
         GoldFilterCallback,
         GoldTransformCallback,
@@ -22,7 +23,6 @@ if TYPE_CHECKING:
         RecordProcessorConfig,
         TransformCallback,
     )
-    from bioetl.composition.factories.services.builder import ServicesBuilder
     from bioetl.domain.composite.config import ColumnGroupConfig
     from bioetl.domain.config import DQConfig
     from bioetl.domain.context import PipelineContext
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True, slots=True)
 class _RecordProcessorBuildRequest:
-    services_builder: type[ServicesBuilder]
+    create_batch_processing_components_fn: object
     services: PipelineService
     context: PipelineContext
     pipeline_name: str
@@ -105,7 +105,9 @@ def create_record_processor_impl(
         content_hash_policy_by_version=request.content_hash_policy_by_version,
         gold_schema_policy_by_version=request.gold_schema_policy_by_version,
     )
-    components = request.services_builder.create_batch_processing_components(
+    components = cast(
+        "BatchProcessingComponents",
+        request.create_batch_processing_components_fn(
         services=request.services,
         context=request.context,
         config=processor_config,
@@ -119,6 +121,7 @@ def create_record_processor_impl(
         ),
         tracer=effective_tracer,
         lock_validator=request.lock_validator,
+        ),
     )
     return request.record_processor_cls(
         context=request.context,

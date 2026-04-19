@@ -13,11 +13,15 @@ from bioetl.application.core.wiring.runtime import (
 from bioetl.composition.factories.services._builder_record_processor_support import (
     _RecordProcessorBuildRequest,
 )
+from bioetl.composition.factories.services.pipeline_processing_components_builder import (
+    create_batch_processing_components as build_batch_processing_components,
+)
 from bioetl.composition.factories.services._record_processor_policy_support import (
     extract_gold_schema_policy_by_version,
     extract_hash_policy,
     extract_hash_policy_by_version,
 )
+from bioetl.domain.config import TableConfig
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
@@ -108,7 +112,7 @@ def create_record_processor_from_pipeline(
     )
     return create_record_processor_fn(
         request=_RecordProcessorBuildRequest(
-            services_builder=ServicesBuilder,
+            create_batch_processing_components_fn=build_batch_processing_components,
             services=pipeline.services,
             context=pipeline.context,
             pipeline_name=pipeline.config.pipeline_name,
