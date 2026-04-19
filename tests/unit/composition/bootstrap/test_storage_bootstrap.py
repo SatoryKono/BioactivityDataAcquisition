@@ -5,6 +5,7 @@ Tests the bootstrap functions for storage components used by CLI operations.
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -25,6 +26,11 @@ from bioetl.composition import PipelineRegistry
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-storage-bootstrap-"))
+BRONZE_PATH = TEST_ROOT / "bronze"
+SILVER_PATH = TEST_ROOT / "silver"
+GOLD_PATH = TEST_ROOT / "gold"
+
 
 def _make_storage_settings(tmp_path: Path) -> SimpleNamespace:
     """Create the minimal settings object required by storage bootstrap."""
@@ -41,9 +47,9 @@ class TestBootstrapStorageAdapter:
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_storage_adapter(self, mock_settings: MagicMock) -> None:
         """Test that bootstrap_storage_adapter returns a StorageAdapter."""
-        mock_settings.return_value.bronze_path = "/tmp/bronze"
-        mock_settings.return_value.silver_path = "/tmp/silver"
-        mock_settings.return_value.gold_path = "/tmp/gold"
+        mock_settings.return_value.bronze_path = str(BRONZE_PATH)
+        mock_settings.return_value.silver_path = str(SILVER_PATH)
+        mock_settings.return_value.gold_path = str(GOLD_PATH)
 
         result = bootstrap_storage_adapter()
 
@@ -114,9 +120,9 @@ class TestBootstrapCleanupService:
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_cleanup_service(self, mock_settings: MagicMock) -> None:
         """Test that bootstrap_cleanup_service returns a CleanupService."""
-        mock_settings.return_value.bronze_path = "/tmp/bronze"
-        mock_settings.return_value.silver_path = "/tmp/silver"
-        mock_settings.return_value.gold_path = "/tmp/gold"
+        mock_settings.return_value.bronze_path = str(BRONZE_PATH)
+        mock_settings.return_value.silver_path = str(SILVER_PATH)
+        mock_settings.return_value.gold_path = str(GOLD_PATH)
 
         result = bootstrap_cleanup_service()
 
@@ -135,9 +141,9 @@ class TestBootstrapLifecycleService:
         mock_settings: MagicMock,
     ) -> None:
         """Test that bootstrap_lifecycle_service returns MedallionLifecycleService."""
-        mock_settings.return_value.bronze_path = "/tmp/bronze"
-        mock_settings.return_value.silver_path = "/tmp/silver"
-        mock_settings.return_value.gold_path = "/tmp/gold"
+        mock_settings.return_value.bronze_path = str(BRONZE_PATH)
+        mock_settings.return_value.silver_path = str(SILVER_PATH)
+        mock_settings.return_value.gold_path = str(GOLD_PATH)
 
         result = bootstrap_lifecycle_service()
 
@@ -158,9 +164,9 @@ class TestBootstrapBronzeCleanupService:
         mock_settings: MagicMock,
     ) -> None:
         """Test that bootstrap_bronze_cleanup_service returns BronzeCleanupService."""
-        mock_settings.return_value.bronze_path = "/tmp/bronze"
-        mock_settings.return_value.silver_path = "/tmp/silver"
-        mock_settings.return_value.gold_path = "/tmp/gold"
+        mock_settings.return_value.bronze_path = str(BRONZE_PATH)
+        mock_settings.return_value.silver_path = str(SILVER_PATH)
+        mock_settings.return_value.gold_path = str(GOLD_PATH)
 
         result = bootstrap_bronze_cleanup_service()
 
@@ -176,9 +182,9 @@ class TestBootstrapVacuumService:
     @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
     def test_returns_vacuum_service(self, mock_settings: MagicMock) -> None:
         """Test that bootstrap_vacuum_service returns VacuumService."""
-        mock_settings.return_value.bronze_path = "/tmp/bronze"
-        mock_settings.return_value.silver_path = "/tmp/silver"
-        mock_settings.return_value.gold_path = "/tmp/gold"
+        mock_settings.return_value.bronze_path = str(BRONZE_PATH)
+        mock_settings.return_value.silver_path = str(SILVER_PATH)
+        mock_settings.return_value.gold_path = str(GOLD_PATH)
 
         result = bootstrap_vacuum_service()
 

@@ -6,6 +6,7 @@ used by CLI inspection operations.
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from uuid import UUID
@@ -41,6 +42,10 @@ from bioetl.infrastructure.storage.support.checkpoint_writer import (
     FileCompositeCheckpointWriter,
 )
 
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-checkpoint-bootstrap-"))
+CHECKPOINT_PATH = TEST_ROOT / "checkpoints"
+QUARANTINE_PATH = TEST_ROOT / "quarantine"
+
 
 @pytest.mark.unit
 class TestBootstrapQuarantinePort:
@@ -52,7 +57,7 @@ class TestBootstrapQuarantinePort:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                quarantine_path=Path("/tmp/quarantine")
+                quarantine_path=QUARANTINE_PATH
             )
             result = bootstrap_quarantine_port()
 
@@ -86,7 +91,7 @@ class TestBootstrapCheckpointPort:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_port("test_pipeline")
 
@@ -99,7 +104,7 @@ class TestBootstrapCheckpointPort:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_port("chembl_activity")
 
@@ -128,7 +133,7 @@ class TestBootstrapCompositeCheckpointPort:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_composite_checkpoint_port()
 
@@ -158,7 +163,7 @@ class TestBootstrapQuarantineManager:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                quarantine_path=Path("/tmp/quarantine")
+                quarantine_path=QUARANTINE_PATH
             )
             result = bootstrap_quarantine_manager("test_pipeline")
 
@@ -170,7 +175,7 @@ class TestBootstrapQuarantineManager:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                quarantine_path=Path("/tmp/quarantine")
+                quarantine_path=QUARANTINE_PATH
             )
             result = bootstrap_quarantine_manager("chembl_activity")
 
@@ -182,7 +187,7 @@ class TestBootstrapQuarantineManager:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                quarantine_path=Path("/tmp/quarantine")
+                quarantine_path=QUARANTINE_PATH
             )
             result = bootstrap_quarantine_manager("test_pipeline")
 
@@ -200,7 +205,7 @@ class TestBootstrapCheckpointManager:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_manager("test_pipeline")
 
@@ -212,7 +217,7 @@ class TestBootstrapCheckpointManager:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_manager("chembl_activity")
 
@@ -224,7 +229,7 @@ class TestBootstrapCheckpointManager:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_manager("test_pipeline")
 
@@ -237,7 +242,7 @@ class TestBootstrapCheckpointManager:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_manager("test_pipeline")
 
@@ -249,7 +254,7 @@ class TestBootstrapCheckpointManager:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_manager("test_pipeline")
 
@@ -266,7 +271,7 @@ class TestBootstrapCheckpointService:
             "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_service()
 
@@ -278,7 +283,7 @@ class TestBootstrapCheckpointService:
             "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_service()
 
@@ -292,7 +297,7 @@ class TestBootstrapCheckpointService:
             "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints")
+                checkpoint_path=CHECKPOINT_PATH
             )
             result = bootstrap_checkpoint_service()
 
@@ -310,7 +315,7 @@ class TestBootstrapQuarantineService:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                quarantine_path=Path("/tmp/quarantine")
+                quarantine_path=QUARANTINE_PATH
             )
             result = bootstrap_quarantine_service()
 
@@ -322,7 +327,7 @@ class TestBootstrapQuarantineService:
             "bioetl.composition.bootstrap.assembly.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                quarantine_path=Path("/tmp/quarantine")
+                quarantine_path=QUARANTINE_PATH
             )
             result = bootstrap_quarantine_service()
 
@@ -346,7 +351,7 @@ class TestBootstrapQuarantineService:
                 return_value=resolved_tracer,
             ) as mock_resolve_tracing,
         ):
-            settings = MagicMock(quarantine_path=Path("/tmp/quarantine"))
+            settings = MagicMock(quarantine_path=QUARANTINE_PATH)
             mock_settings.return_value = settings
             result = bootstrap_quarantine_service()
 
@@ -365,7 +370,7 @@ class TestBootstrapQuarantineService:
             "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                quarantine_path=Path("/tmp/quarantine"),
+                quarantine_path=QUARANTINE_PATH,
                 observability=MagicMock(tracing_enabled=False),
             )
             result = bootstrap_quarantine_service()
@@ -383,7 +388,7 @@ class TestBootstrapObservabilityWorkflowService:
             "bioetl.composition.bootstrap.cli.checkpoint.get_settings"
         ) as mock_settings:
             mock_settings.return_value = MagicMock(
-                checkpoint_path=Path("/tmp/checkpoints"),
+                checkpoint_path=CHECKPOINT_PATH,
                 observability=MagicMock(tracing_enabled=False),
             )
             result = bootstrap_observability_workflow_service()

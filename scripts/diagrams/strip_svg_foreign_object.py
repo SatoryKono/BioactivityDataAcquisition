@@ -111,7 +111,12 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    mode = "check" if args.check else ("dry-run" if args.dry_run else "fix")
+    if args.check:
+        mode = "check"
+    elif args.dry_run:
+        mode = "dry-run"
+    else:
+        mode = "fix"
     files = collect_svg_files(args.file, args.dir)
     if not files:
         print("No SVG files found.")

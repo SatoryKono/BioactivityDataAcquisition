@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import tempfile
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -11,6 +13,13 @@ from .test_silver_writer import mock_metadata_coordinator, noop_logger, valid_re
 
 # Re-export shared fixtures for pytest discovery in this module.
 _FIXTURE_IMPORTS = (noop_logger, valid_records, mock_metadata_coordinator)
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-dq-metrics-"))
+SILVER_BASE_PATH = TEST_ROOT / "silver"
+
+
+def _silver_table_path(table_name: str) -> str:
+    return str(SILVER_BASE_PATH / table_name.replace(".", "/"))
 
 
 @pytest.mark.unit
@@ -31,7 +40,7 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._compute_dq_metrics("test.table", valid_records)
 
             assert isinstance(result, BatchDQMetrics)
@@ -52,7 +61,7 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._compute_dq_metrics("test.table", valid_records)
 
             # Should have column stats for non-internal fields
@@ -92,7 +101,7 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._compute_dq_metrics("test.table", records)
 
             assert result.schema_drift is not None
@@ -111,7 +120,7 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             side_effect=DeltaTableNotFoundError("Not found"),
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._compute_dq_metrics("test.table", valid_records)
 
             assert result.schema_drift is None
@@ -137,7 +146,7 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._detect_schema_drift("test.table", records)
 
             assert isinstance(result, SchemaDriftInfo)
@@ -173,7 +182,7 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._detect_schema_drift("test.table", records)
 
             assert result is not None
@@ -209,7 +218,7 @@ class TestSilverWriterDQMetrics:
             "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
             return_value=mock_table,
         ):
-            writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+            writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
             result = await writer._detect_schema_drift("test.table", records)
 
             assert result is not None
@@ -265,14 +274,14 @@ class TestSilverWriterDQMetrics:
         )
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
-            table_path="/tmp/silver/test/table",
+            table_path=_silver_table_path("test.table"),
             table_name="test_table",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -333,14 +342,14 @@ class TestSilverWriterDQMetrics:
         mock_metadata_writer.write_silver_metadata = capture_write
 
         writer = SilverWriter(
-            base_path="/tmp/silver",
+            base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
             metadata_writer=mock_metadata_writer,
             metadata_coordinator=mock_metadata_coordinator,
         )
 
         await writer._write_silver_metadata(
-            table_path="/tmp/silver/test/table",
+            table_path=_silver_table_path("test.table"),
             table_name="test_table",
             records=valid_records,
             primary_keys=["entity_id"],
@@ -410,7 +419,7 @@ class TestSilverWriterDQMetrics:
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
             writer = SilverWriter(
-                base_path="/tmp/silver",
+                base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
                 metadata_writer=mock_metadata_writer,
                 metadata_coordinator=mock_metadata_coordinator,
@@ -450,7 +459,7 @@ class TestSilverWriterDQMetrics:
         from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         writer._compute_dq_metrics = AsyncMock(
             return_value=BatchDQMetrics(
                 total_records=2,
@@ -465,7 +474,7 @@ class TestSilverWriterDQMetrics:
         result = await writer._finalize_silver_write_result(
             table_name="test.table",
             records=valid_records,
-            table_path="/tmp/silver/test/table",
+            table_path=_silver_table_path("test.table"),
             primary_keys=["entity_id"],
             validated_mode=SilverWriteMode.MERGE,
             bronze_refs=None,
@@ -491,7 +500,7 @@ class TestSilverWriterDQMetrics:
         from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
-        writer = SilverWriter(base_path="/tmp/silver", logger=noop_logger)
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         dq_metrics = BatchDQMetrics(
             total_records=2,
             valid_records=2,
@@ -509,7 +518,7 @@ class TestSilverWriterDQMetrics:
             context = await writer._prepare_silver_write_finalization_context(
                 table_name="test.table",
                 records=valid_records,
-                table_path="/tmp/silver/test/table",
+                table_path=_silver_table_path("test.table"),
                 started_at=started_at,
                 start_perf=4.0,
             )
@@ -527,7 +536,7 @@ class TestSilverWriterDQMetrics:
         assert (
             _build_silver_write_result(
                 table_name="test.table",
-                table_path="/tmp/silver/test/table",
+                table_path=_silver_table_path("test.table"),
                 version_after=None,
                 records_count=2,
             )
@@ -535,7 +544,7 @@ class TestSilverWriterDQMetrics:
         )
         result = _build_silver_write_result(
             table_name="test.table",
-            table_path="/tmp/silver/test/table",
+            table_path=_silver_table_path("test.table"),
             version_after=7,
             records_count=2,
         )
