@@ -169,60 +169,52 @@ def _normalized_gold_export_name(column_name: str) -> str:
     return column_name
 
 
+def _assigned_value(node: ast.stmt) -> ast.AST | None:
+    if isinstance(node, ast.Assign):
+        return node.value
+    if isinstance(node, ast.AnnAssign):
+        return node.value
+    return None
+
+
+def _binding_from_pipeline_call(element: ast.Call) -> PipelineBinding | None:
+    if not isinstance(element.func, ast.Name) or element.func.id != "PipelineFactoryConfig":
+        return None
+
+    kwargs = {kw.arg: kw.value for kw in element.keywords if kw.arg is not None}
+    pipeline_name = _literal_string(kwargs.get("pipeline_name"))
+    if not pipeline_name:
+        return None
+
+    def _symbol_name(keyword: str) -> str:
+        value = kwargs.get(keyword)
+        return value.id if isinstance(value, ast.Name) else ""
+
+    return PipelineBinding(
+        pipeline_name=pipeline_name,
+        provider=_literal_string(kwargs.get("provider")),
+        entity_type=_literal_string(kwargs.get("entity_type")),
+        silver_schema_symbol=_symbol_name("silver_schema"),
+        gold_schema_symbol=_symbol_name("gold_schema"),
+        pandera_silver_symbol=_symbol_name("pandera_silver_schema"),
+    )
+
+
 def _extract_manifest_bindings(path: Path) -> list[PipelineBinding]:
     tree = _read_ast(path)
     bindings: list[PipelineBinding] = []
 
     for node in tree.body:
-        value: ast.AST | None = None
-        if isinstance(node, ast.Assign):
-            value = node.value
-        elif isinstance(node, ast.AnnAssign):
-            value = node.value
+        value = _assigned_value(node)
         if not isinstance(value, (ast.Tuple, ast.List)):
             continue
 
         for element in value.elts:
             if not isinstance(element, ast.Call):
                 continue
-            if not isinstance(element.func, ast.Name):
-                continue
-            if element.func.id != "PipelineFactoryConfig":
-                continue
-
-            kwargs = {kw.arg: kw.value for kw in element.keywords if kw.arg is not None}
-            pipeline_name = _literal_string(kwargs.get("pipeline_name"))
-            provider = _literal_string(kwargs.get("provider"))
-            entity_type = _literal_string(kwargs.get("entity_type"))
-            silver_schema_symbol = (
-                kwargs["silver_schema"].id
-                if isinstance(kwargs.get("silver_schema"), ast.Name)
-                else ""
-            )
-            gold_schema_symbol = (
-                kwargs["gold_schema"].id
-                if isinstance(kwargs.get("gold_schema"), ast.Name)
-                else ""
-            )
-            pandera_silver_symbol = (
-                kwargs["pandera_silver_schema"].id
-                if isinstance(kwargs.get("pandera_silver_schema"), ast.Name)
-                else ""
-            )
-
-            if not pipeline_name:
-                continue
-
-            bindings.append(
-                PipelineBinding(
-                    pipeline_name=pipeline_name,
-                    provider=provider,
-                    entity_type=entity_type,
-                    silver_schema_symbol=silver_schema_symbol,
-                    gold_schema_symbol=gold_schema_symbol,
-                    pandera_silver_symbol=pandera_silver_symbol,
-                )
-            )
+            binding = _binding_from_pipeline_call(element)
+            if binding is not None:
+                bindings.append(binding)
 
     return bindings
 
@@ -373,6 +365,64 @@ def _find_class_node(path: Path, class_name: str) -> ast.ClassDef | None:
     return None
 
 
+def _base_class_names(node: ast.ClassDef) -> list[str]:
+    base_names: list[str] = []
+    for base in node.bases:
+        if isinstance(base, ast.Name):
+            base_names.append(base.id)
+        elif isinstance(base, ast.Attribute):
+            base_names.append(base.attr)
+    return base_names
+
+
+def _merge_base_pandera_fields(
+    *,
+    node: ast.ClassDef,
+    model_locations: dict[str, SymbolLocation],
+    visited: set[tuple[Path, str]],
+) -> dict[str, dict[str, object]]:
+    field_map: dict[str, dict[str, object]] = {}
+    for base_name in _base_class_names(node):
+        base_location = model_locations.get(base_name)
+        if base_location is None:
+            continue
+        for field in _extract_pandera_fields(
+            base_location.path,
+            base_name,
+            model_locations=model_locations,
+            seen=visited,
+        ):
+            field_map[str(field["name"])] = field
+    return field_map
+
+
+def _extract_annassign_field(class_item: ast.stmt) -> dict[str, object] | None:
+    if not isinstance(class_item, ast.AnnAssign):
+        return None
+    if not isinstance(class_item.target, ast.Name):
+        return None
+    if not isinstance(class_item.value, ast.Call):
+        return None
+    func = class_item.value.func
+    if not isinstance(func, ast.Attribute) or func.attr != "Field":
+        return None
+
+    target_name = class_item.target.id
+    alias = _literal_string(_kw_value(class_item.value, "alias"))
+    exported_name = alias or target_name
+    type_hint = ast.unparse(class_item.annotation)
+    nullable = _literal_bool(_kw_value(class_item.value, "nullable"), default=False)
+    description = _literal_string(_kw_value(class_item.value, "description"))
+    return {
+        "name": exported_name,
+        "source_name": target_name,
+        "dtype": type_hint,
+        "nullable": nullable,
+        "required": not nullable,
+        "description": description,
+    }
+
+
 def _extract_pandera_fields(
     path: Path,
     class_name: str,
@@ -390,54 +440,64 @@ def _extract_pandera_fields(
     if node is None:
         return []
 
-    field_map: dict[str, dict[str, object]] = {}
-
-    for base in node.bases:
-        base_name = ""
-        if isinstance(base, ast.Name):
-            base_name = base.id
-        elif isinstance(base, ast.Attribute):
-            base_name = base.attr
-        if not base_name:
-            continue
-        base_location = model_locations.get(base_name)
-        if base_location is None:
-            continue
-        for field in _extract_pandera_fields(
-            base_location.path,
-            base_name,
-            model_locations=model_locations,
-            seen=visited,
-        ):
-            field_map[str(field["name"])] = field
-
+    field_map = _merge_base_pandera_fields(
+        node=node,
+        model_locations=model_locations,
+        visited=visited,
+    )
     for class_item in node.body:
-        if not isinstance(class_item, ast.AnnAssign):
-            continue
-        if not isinstance(class_item.target, ast.Name):
-            continue
-        if not isinstance(class_item.value, ast.Call):
-            continue
-        func = class_item.value.func
-        if not isinstance(func, ast.Attribute) or func.attr != "Field":
-            continue
-
-        target_name = class_item.target.id
-        alias = _literal_string(_kw_value(class_item.value, "alias"))
-        exported_name = alias or target_name
-        type_hint = ast.unparse(class_item.annotation)
-        nullable = _literal_bool(_kw_value(class_item.value, "nullable"), default=False)
-        description = _literal_string(_kw_value(class_item.value, "description"))
-        field_map[exported_name] = {
-            "name": exported_name,
-            "source_name": target_name,
-            "dtype": type_hint,
-            "nullable": nullable,
-            "required": not nullable,
-            "description": description,
-        }
+        extracted = _extract_annassign_field(class_item)
+        if extracted is not None:
+            field_map[str(extracted["name"])] = extracted
 
     return list(field_map.values())
+
+
+def _resolve_required_location(
+    *,
+    locations: dict[str, SymbolLocation],
+    symbol: str,
+    label: str,
+) -> SymbolLocation:
+    location = locations.get(symbol)
+    if location is None:
+        raise ValueError(f"No {label} source found for {symbol}")
+    return location
+
+
+def _column_names(fields: list[dict[str, object]], *, key: str = "name") -> list[object]:
+    return [field[key] for field in fields]
+
+
+def _build_layer_flow_summary(
+    *,
+    bronze_groups: list[dict[str, object]],
+    silver_pyarrow_ref: str,
+    silver_include_groups: list[str],
+    silver_exclude_fields: list[str],
+    silver_pyarrow_columns: list[object],
+    silver_pandera_columns: list[object],
+    gold_contract_ref: str,
+    gold_include_groups: list[str],
+    gold_exclude_fields: list[str],
+    gold_columns: list[object],
+) -> dict[str, object]:
+    return {
+        "bronze": {"column_groups": bronze_groups},
+        "silver": {
+            "pyarrow_schema": silver_pyarrow_ref,
+            "include_groups": silver_include_groups,
+            "exclude_fields": silver_exclude_fields,
+            "columns": silver_pyarrow_columns,
+            "pandera_columns": silver_pandera_columns,
+        },
+        "gold": {
+            "contract_class": gold_contract_ref,
+            "include_groups": gold_include_groups,
+            "exclude_fields": gold_exclude_fields,
+            "columns": gold_columns,
+        },
+    }
 
 
 def _build_gold_json_contract(path: Path, class_name: str) -> dict[str, object]:
@@ -543,21 +603,21 @@ def _build_row(
     entity = str(config.get("entity", binding.entity_type))
     pipeline_name = _pipeline_name(config, path=path)
 
-    pyarrow_location = pyarrow_locations.get(binding.silver_schema_symbol)
-    if pyarrow_location is None:
-        raise ValueError(
-            f"No PyArrow schema source found for {binding.silver_schema_symbol}"
-        )
-
-    pandera_location = pandera_locations.get(binding.pandera_silver_symbol)
-    if pandera_location is None:
-        raise ValueError(f"No Pandera source found for {binding.pandera_silver_symbol}")
-
-    gold_location = gold_locations.get(binding.gold_schema_symbol)
-    if gold_location is None:
-        raise ValueError(
-            f"No Gold contract source found for {binding.gold_schema_symbol}"
-        )
+    pyarrow_location = _resolve_required_location(
+        locations=pyarrow_locations,
+        symbol=binding.silver_schema_symbol,
+        label="PyArrow schema",
+    )
+    pandera_location = _resolve_required_location(
+        locations=pandera_locations,
+        symbol=binding.pandera_silver_symbol,
+        label="Pandera",
+    )
+    gold_location = _resolve_required_location(
+        locations=gold_locations,
+        symbol=binding.gold_schema_symbol,
+        label="Gold contract",
+    )
 
     pyarrow_fields = _extract_pyarrow_fields(
         pyarrow_location.path,
@@ -578,8 +638,8 @@ def _build_row(
     silver_include_groups, silver_exclude_fields = _schema_policy(config, "silver")
     gold_include_groups, gold_exclude_fields = _schema_policy(config, "gold")
 
-    silver_pyarrow_columns = [field["name"] for field in pyarrow_fields]
-    silver_pandera_columns = [field["name"] for field in pandera_fields]
+    silver_pyarrow_columns = _column_names(pyarrow_fields)
+    silver_pandera_columns = _column_names(pandera_fields)
     gold_columns = list(
         cast("dict[str, object]", gold_json_contract["properties"]).keys()
     )
@@ -592,24 +652,18 @@ def _build_row(
     )
     gold_contract_ref = f"{gold_location.qualified_prefix}.{binding.gold_schema_symbol}"
 
-    layer_flow = {
-        "bronze": {
-            "column_groups": bronze_groups,
-        },
-        "silver": {
-            "pyarrow_schema": silver_pyarrow_ref,
-            "include_groups": silver_include_groups,
-            "exclude_fields": silver_exclude_fields,
-            "columns": silver_pyarrow_columns,
-            "pandera_columns": silver_pandera_columns,
-        },
-        "gold": {
-            "contract_class": gold_contract_ref,
-            "include_groups": gold_include_groups,
-            "exclude_fields": gold_exclude_fields,
-            "columns": gold_columns,
-        },
-    }
+    layer_flow = _build_layer_flow_summary(
+        bronze_groups=bronze_groups,
+        silver_pyarrow_ref=silver_pyarrow_ref,
+        silver_include_groups=silver_include_groups,
+        silver_exclude_fields=silver_exclude_fields,
+        silver_pyarrow_columns=silver_pyarrow_columns,
+        silver_pandera_columns=silver_pandera_columns,
+        gold_contract_ref=gold_contract_ref,
+        gold_include_groups=gold_include_groups,
+        gold_exclude_fields=gold_exclude_fields,
+        gold_columns=gold_columns,
+    )
 
     return {
         "provider": provider,
@@ -651,17 +705,16 @@ def build_unified_schema_rows() -> list[dict[str, str]]:
                 f"No pipeline registry entry found for {pipeline_name} "
                 f"({path.relative_to(PROJECT_ROOT).as_posix()})"
             )
-        rows.append(
-            _build_row(
-                path,
-                config=config,
-                binding=binding,
-                pyarrow_locations=pyarrow_locations,
-                pandera_locations=pandera_locations,
-                gold_locations=gold_locations,
-                pyarrow_field_blocks=pyarrow_field_blocks,
-            )
+        row = _build_row(
+            path,
+            config=config,
+            binding=binding,
+            pyarrow_locations=pyarrow_locations,
+            pandera_locations=pandera_locations,
+            gold_locations=gold_locations,
+            pyarrow_field_blocks=pyarrow_field_blocks,
         )
+        rows.append(row)
 
     rows.sort(key=lambda row: (row["provider"], row["entity"], row["pipeline_name"]))
     return rows

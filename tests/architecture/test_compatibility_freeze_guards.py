@@ -593,6 +593,67 @@ def _normalized_allowed_rel_paths(allowed_files: frozenset[Path]) -> frozenset[s
     return frozenset(_relative_to_root(path) for path in allowed_files)
 
 
+def _current_package_parts(py_file: Path) -> list[str]:
+    module_parts = list(py_file.relative_to(ROOT).with_suffix("").parts)
+    return module_parts if py_file.stem == "__init__" else module_parts[:-1]
+
+
+def _resolve_relative_import_module(py_file: Path, node: ast.ImportFrom) -> str | None:
+    if node.module is None or node.level <= 0:
+        return None
+    package_parts = _current_package_parts(py_file)
+    anchor_length = len(package_parts) - (node.level - 1)
+    if anchor_length <= 0:
+        return None
+    return ".".join([*package_parts[:anchor_length], *node.module.split(".")])
+
+
+def _matching_imported_module(
+    *,
+    py_file: Path,
+    node: ast.ImportFrom,
+    module_names: frozenset[str],
+) -> str | None:
+    if node.module in module_names:
+        return node.module
+    resolved = _resolve_relative_import_module(py_file, node)
+    if resolved in module_names:
+        return resolved
+    return None
+
+
+def _iter_non_allowed_cache_items(
+    cache: dict[Path, object],
+    *,
+    allowed_files: frozenset[Path],
+) -> list[tuple[Path, object, str]]:
+    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
+    items: list[tuple[Path, object, str]] = []
+    for py_file, payload in sorted(cache.items()):
+        rel_path = _relative_to_root(py_file)
+        if rel_path in allowed_rel_paths:
+            continue
+        items.append((py_file, payload, rel_path))
+    return items
+
+
+def _iter_text_mentions(
+    *,
+    content_cache: dict[Path, str],
+    allowed_files: frozenset[Path],
+    predicate,
+    render_message,
+) -> list[str]:
+    violations: list[str] = []
+    for _py_file, content, rel_path in _iter_non_allowed_cache_items(
+        content_cache, allowed_files=allowed_files
+    ):
+        for lineno, line in enumerate(content.splitlines(), 1):
+            if predicate(line):
+                violations.append(render_message(rel_path, lineno, line))
+    return violations
+
+
 def _iter_module_import_violations(
     ast_cache: dict[Path, ast.Module],
     *,
@@ -600,32 +661,18 @@ def _iter_module_import_violations(
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
-    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file, tree in sorted(ast_cache.items()):
-        rel_path = _relative_to_root(py_file)
-        if rel_path in allowed_rel_paths:
-            continue
+    for py_file, tree, rel_path in _iter_non_allowed_cache_items(
+        ast_cache, allowed_files=allowed_files
+    ):
+        tree = tree  # narrow object payload back to ast.Module for local use
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module is not None:
-                is_absolute_match = node.module == module_name
-                is_relative_match = False
-                if node.level > 0:
-                    module_parts = list(py_file.relative_to(ROOT).with_suffix("").parts)
-                    current_package_parts = (
-                        module_parts
-                        if py_file.stem == "__init__"
-                        else module_parts[:-1]
-                    )
-                    anchor_length = len(current_package_parts) - (node.level - 1)
-                    if anchor_length > 0:
-                        absolute_module = ".".join(
-                            [
-                                *current_package_parts[:anchor_length],
-                                *node.module.split("."),
-                            ]
-                        )
-                        is_relative_match = absolute_module == module_name
-                if is_absolute_match or is_relative_match:
+                matched_module = _matching_imported_module(
+                    py_file=py_file,
+                    node=node,
+                    module_names=frozenset({module_name}),
+                )
+                if matched_module == module_name:
                     violations.append(f"{rel_path}:{node.lineno} imports {module_name}")
             elif isinstance(node, ast.Import):
                 for alias in node.names:
@@ -644,32 +691,17 @@ def _iter_module_import_violations_for_modules(
 ) -> list[str]:
     """Collect module import violations for several modules in a single AST pass."""
     violations: list[str] = []
-    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file, tree in sorted(ast_cache.items()):
-        rel_path = _relative_to_root(py_file)
-        if rel_path in allowed_rel_paths:
-            continue
-
-        module_parts = list(py_file.relative_to(ROOT).with_suffix("").parts)
-        current_package_parts = (
-            module_parts if py_file.stem == "__init__" else module_parts[:-1]
-        )
+    for py_file, tree, rel_path in _iter_non_allowed_cache_items(
+        ast_cache, allowed_files=allowed_files
+    ):
+        tree = tree
         for node in ast.walk(tree):
             if isinstance(node, ast.ImportFrom) and node.module is not None:
-                matched_module: str | None = None
-                if node.module in module_names:
-                    matched_module = node.module
-                elif node.level > 0:
-                    anchor_length = len(current_package_parts) - (node.level - 1)
-                    if anchor_length > 0:
-                        absolute_module = ".".join(
-                            [
-                                *current_package_parts[:anchor_length],
-                                *node.module.split("."),
-                            ]
-                        )
-                        if absolute_module in module_names:
-                            matched_module = absolute_module
+                matched_module = _matching_imported_module(
+                    py_file=py_file,
+                    node=node,
+                    module_names=module_names,
+                )
                 if matched_module is not None:
                     violations.append(
                         f"{rel_path}:{node.lineno} imports {matched_module}"
@@ -689,16 +721,12 @@ def _iter_symbol_mentions(
     symbol: str,
     allowed_files: frozenset[Path],
 ) -> list[str]:
-    violations: list[str] = []
-    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file, content in sorted(content_cache.items()):
-        rel_path = _relative_to_root(py_file)
-        if rel_path in allowed_rel_paths:
-            continue
-        for lineno, line in enumerate(content.splitlines(), 1):
-            if symbol in line:
-                violations.append(f"{rel_path}:{lineno} mentions {symbol}")
-    return violations
+    return _iter_text_mentions(
+        content_cache=content_cache,
+        allowed_files=allowed_files,
+        predicate=lambda line: symbol in line,
+        render_message=lambda rel_path, lineno, _line: f"{rel_path}:{lineno} mentions {symbol}",
+    )
 
 
 def _iter_string_mentions(
@@ -707,16 +735,12 @@ def _iter_string_mentions(
     needle: str,
     allowed_files: frozenset[Path],
 ) -> list[str]:
-    violations: list[str] = []
-    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file, content in sorted(content_cache.items()):
-        rel_path = _relative_to_root(py_file)
-        if rel_path in allowed_rel_paths:
-            continue
-        for lineno, line in enumerate(content.splitlines(), 1):
-            if needle in line:
-                violations.append(f"{rel_path}:{lineno} mentions {needle}")
-    return violations
+    return _iter_text_mentions(
+        content_cache=content_cache,
+        allowed_files=allowed_files,
+        predicate=lambda line: needle in line,
+        render_message=lambda rel_path, lineno, _line: f"{rel_path}:{lineno} mentions {needle}",
+    )
 
 
 def _iter_text_symbol_mentions(
@@ -743,11 +767,10 @@ def _iter_imported_symbol_violations(
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
-    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file, tree in sorted(ast_cache.items()):
-        rel_path = _relative_to_root(py_file)
-        if rel_path in allowed_rel_paths:
-            continue
+    for _py_file, tree, rel_path in _iter_non_allowed_cache_items(
+        ast_cache, allowed_files=allowed_files
+    ):
+        tree = tree
         for node in ast.walk(tree):
             if not isinstance(node, ast.ImportFrom):
                 continue
@@ -770,11 +793,10 @@ def _iter_call_keyword_violations(
     allowed_files: frozenset[Path],
 ) -> list[str]:
     violations: list[str] = []
-    allowed_rel_paths = _normalized_allowed_rel_paths(allowed_files)
-    for py_file, tree in sorted(ast_cache.items()):
-        rel_path = _relative_to_root(py_file)
-        if rel_path in allowed_rel_paths:
-            continue
+    for _py_file, tree, rel_path in _iter_non_allowed_cache_items(
+        ast_cache, allowed_files=allowed_files
+    ):
+        tree = tree
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
                 continue

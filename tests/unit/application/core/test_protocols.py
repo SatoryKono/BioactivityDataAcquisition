@@ -84,7 +84,7 @@ class TestGoldFilterCallbackProtocol:
                 self, context: PipelineContext, record: dict[str, Any]
             ) -> bool:
                 """Evaluate if record should be included in Gold layer."""
-                return record.get("valid", False) is True
+                return bool(record.get("valid", False))
 
         callback = ValidGoldFilterCallback()
         assert callable(callback)
@@ -134,7 +134,7 @@ class TestTransformerProtocol:
         """Transform method is async (coroutine)."""
         # Get the transform method
         transform_method = getattr(TransformerProtocol, "transform", None)
-        assert transform_method is not None
+        assert transform_method
 
     def test_implementation_satisfies_protocol(self) -> None:
         """Implementation with correct signature satisfies protocol."""
@@ -196,26 +196,26 @@ class TestProtocolCompatibility:
         """Verify TransformCallback signature components."""
         # The protocol should accept PipelineContext, dict, int
         # and return Awaitable[dict | None]
-        assert TransformCallback is not None
+        assert TransformCallback
 
     def test_gold_filter_callback_signature(self) -> None:
         """Verify GoldFilterCallback signature components."""
         # The protocol should accept PipelineContext, dict
         # and return bool
-        assert GoldFilterCallback is not None
+        assert GoldFilterCallback
 
     def test_gold_transform_callback_signature(self) -> None:
         """Verify GoldTransformCallback signature components."""
         # The protocol should accept PipelineContext, dict
         # and return dict
-        assert GoldTransformCallback is not None
+        assert GoldTransformCallback
 
     def test_transformer_protocol_signature(self) -> None:
         """Verify TransformerProtocol signature components."""
         # The protocol should have async transform method
         # accepting PipelineContext, BronzeRecord, int
         # and returning SilverRecord | None
-        assert TransformerProtocol is not None
+        assert TransformerProtocol
 
 
 class TestProtocolDocumentation:
@@ -223,28 +223,28 @@ class TestProtocolDocumentation:
 
     def test_transform_callback_has_docstring(self) -> None:
         """TransformCallback has docstring."""
-        assert TransformCallback.__doc__ is not None
+        assert TransformCallback.__doc__
         assert len(TransformCallback.__doc__) > 0
 
     def test_gold_filter_callback_has_docstring(self) -> None:
         """GoldFilterCallback has docstring."""
-        assert GoldFilterCallback.__doc__ is not None
+        assert GoldFilterCallback.__doc__
         assert len(GoldFilterCallback.__doc__) > 0
 
     def test_gold_transform_callback_has_docstring(self) -> None:
         """GoldTransformCallback has docstring."""
-        assert GoldTransformCallback.__doc__ is not None
+        assert GoldTransformCallback.__doc__
         assert len(GoldTransformCallback.__doc__) > 0
 
     def test_transformer_protocol_has_docstring(self) -> None:
         """TransformerProtocol has docstring."""
-        assert TransformerProtocol.__doc__ is not None
+        assert TransformerProtocol.__doc__
         assert len(TransformerProtocol.__doc__) > 0
 
     def test_transformer_protocol_transform_has_docstring(self) -> None:
         """TransformerProtocol.transform has docstring."""
         transform_doc = TransformerProtocol.transform.__doc__
-        assert transform_doc is not None
+        assert transform_doc
         assert "Bronze" in transform_doc or "Silver" in transform_doc
 
 
@@ -290,7 +290,7 @@ class TestMockImplementations:
 
         result = await transformer.transform(context, record, 0)
 
-        assert result is not None
+        assert result
         assert result["id"] == "test-123"
         assert result["_run_id"] == str(context.run_id)
         assert result["_index"] == 0
@@ -351,14 +351,14 @@ class TestCallbackUsage:
 
         def activity_filter(context: PipelineContext, record: dict[str, Any]) -> bool:
             """Filter records with standard_value."""
-            return record.get("standard_value") is not None
+            return "standard_value" in record and record["standard_value"] is not None
 
         # Test with records
         valid_record = {"id": 1, "standard_value": 100.0}
         invalid_record = {"id": 2}
 
-        assert activity_filter(context, valid_record) is True
-        assert activity_filter(context, invalid_record) is False
+        assert activity_filter(context, valid_record)
+        assert not activity_filter(context, invalid_record)
 
     def test_gold_transform_callback_usage(self, noop_logger) -> None:
         """Demonstrate gold transform callback usage."""

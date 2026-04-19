@@ -74,6 +74,11 @@ REQUIRED_FILTER_TOKENS: Final[frozenset[str]] = frozenset({"required", "not_null
 PROPOSE_NULL_WARN_ERROR_THEN_QUARANTINE: Final[str] = (
     "propose_null_warn_error_then_quarantine"
 )
+NONE_TOKEN: Final[str] = "none"
+NOT_APPLICABLE_TOKEN: Final[str] = "not_applicable"
+EMPTY_SEMANTICS_TOKENS: Final[frozenset[str]] = frozenset(
+    {NONE_TOKEN, NOT_APPLICABLE_TOKEN}
+)
 STRUCTURAL_FILTER_TOKENS: Final[frozenset[str]] = frozenset(
     {STRUCTURAL_PRESENCE_GUARD, STRUCTURAL_TYPE_GUARD}
 )
@@ -166,14 +171,12 @@ def _join_tokens(
             continue
         seen.add(token)
         ordered.append(token)
-    return "; ".join(ordered) if ordered else "none"
+    return "; ".join(ordered) if ordered else NONE_TOKEN
 
 
 def _prepend_action(existing_value: str, action: str) -> str:
     existing_tokens = _parse_tokens(existing_value)
-    return _join_tokens(
-        [action], existing_tokens, drop=frozenset({"not_applicable", "none"})
-    )
+    return _join_tokens([action], existing_tokens, drop=EMPTY_SEMANTICS_TOKENS)
 
 
 def _resolve_runtime_contract(
@@ -225,23 +228,21 @@ def _update_row(
 
     filters = _parse_tokens(
         row.get("Silver Filters", ""),
-        drop=frozenset({"none", "not_applicable"})
-        | REQUIRED_FILTER_TOKENS
-        | STRUCTURAL_FILTER_TOKENS,
+        drop=EMPTY_SEMANTICS_TOKENS | REQUIRED_FILTER_TOKENS | STRUCTURAL_FILTER_TOKENS,
     )
     validation = _parse_tokens(
         row.get("Silver Validation", ""),
-        drop=frozenset({"none", "not_applicable"}) | STRUCTURAL_VALIDATION_TOKENS,
+        drop=EMPTY_SEMANTICS_TOKENS | STRUCTURAL_VALIDATION_TOKENS,
     )
     normalization = _parse_tokens(
         row.get("Silver Normalisation", ""),
-        drop=frozenset({"none", "not_applicable"}) | STRUCTURAL_NORMALISATION_TOKENS,
+        drop=EMPTY_SEMANTICS_TOKENS | STRUCTURAL_NORMALISATION_TOKENS,
     )
     fail_action = row.get("Validation fail action", "")
     fail_sink = row.get("Filter fail sink", "")
     fail_action_tokens = _parse_tokens(
         fail_action,
-        drop=frozenset({"none", "not_applicable"}) | STRUCTURAL_ACTION_TOKENS,
+        drop=EMPTY_SEMANTICS_TOKENS | STRUCTURAL_ACTION_TOKENS,
     )
 
     filters_value = _join_tokens(filters_prefix, filters)
@@ -250,7 +251,7 @@ def _update_row(
     fail_action_value = _join_tokens(
         fail_action_prefix,
         fail_action_tokens,
-        drop=frozenset({"none", "not_applicable"}),
+        drop=EMPTY_SEMANTICS_TOKENS,
     )
     fail_sink_value = (
         fail_sink_override
@@ -279,15 +280,25 @@ def main() -> int:
     contract_index = index_runtime_contract_rows(contract_rows)
     temp_output_path = _determine_temp_output_path(input_path, output_path, args.check)
 
-    change_counter = _process_workbook(
-        input_path, temp_output_path, contract_index, args.check
-    )
+    change_counter = _process_workbook(input_path, temp_output_path, contract_index)
 
     if args.check:
-        return _handle_check_mode(temp_output_path, change_counter, input_path, contract_export_path, contract_rows)
+        return _handle_check_mode(
+            temp_output_path,
+            change_counter,
+            input_path,
+            contract_export_path,
+            contract_rows,
+        )
 
     _finalize_output(temp_output_path, output_path)
-    _print_summary(input_path, output_path, contract_export_path, contract_rows, change_counter)
+    _print_summary(
+        input_path,
+        output_path,
+        contract_export_path,
+        contract_rows,
+        change_counter,
+    )
     return 0
 
 
@@ -324,7 +335,6 @@ def _process_workbook(
     input_path: Path,
     temp_output_path: Path,
     contract_index: dict[tuple[str, str, str], MatrixStructuralContractRow],
-    check: bool,
 ) -> Counter[str]:
     """Process the workbook and apply updates."""
     change_counter: Counter[str] = Counter()

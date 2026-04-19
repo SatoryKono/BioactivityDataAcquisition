@@ -15,6 +15,7 @@ See CLAUDE.md §2 Architecture and §11 Anti-Patterns.
 from __future__ import annotations
 
 import ast
+import importlib.util
 import re
 from pathlib import Path
 
@@ -25,6 +26,91 @@ from bioetl.infrastructure.quality import (
     get_registry_values,
     resolve_registry_value,
 )
+
+
+def _dataclass_flags(node: ast.ClassDef) -> tuple[bool, bool]:
+    is_dataclass = False
+    is_frozen = False
+    for decorator in node.decorator_list:
+        if isinstance(decorator, ast.Name) and decorator.id == "dataclass":
+            is_dataclass = True
+            continue
+        if not isinstance(decorator, ast.Call):
+            continue
+        if not (isinstance(decorator.func, ast.Name) and decorator.func.id == "dataclass"):
+            continue
+        is_dataclass = True
+        for keyword in decorator.keywords:
+            if (
+                keyword.arg == "frozen"
+                and isinstance(keyword.value, ast.Constant)
+                and keyword.value.value is True
+            ):
+                is_frozen = True
+    return is_dataclass, is_frozen
+
+
+def _has_mutable_default(node: ast.AnnAssign) -> bool:
+    if node.value is None:
+        return False
+    if isinstance(node.value, (ast.List, ast.Dict, ast.Set)):
+        return True
+    return (
+        isinstance(node.value, ast.Call)
+        and isinstance(node.value.func, ast.Name)
+        and node.value.func.id in {"list", "dict", "set"}
+    )
+
+
+def _io_violations_in_content(
+    *,
+    content: str,
+    relative_path: Path,
+    io_patterns: list[tuple[str, str]],
+) -> list[str]:
+    violations: list[str] = []
+    for lineno, line in enumerate(content.splitlines(), 1):
+        stripped = line.strip()
+        if stripped.startswith("#") or stripped.startswith('"""'):
+            continue
+        for pattern, description in io_patterns:
+            if re.search(pattern, line):
+                violations.append(
+                    f"{relative_path}:{lineno} - {description}: {stripped[:60]}..."
+                )
+    return violations
+
+
+def _complexity_violations_for_content(
+    *,
+    py_file: Path,
+    content: str,
+    src_dir: Path,
+    exemptions: object,
+    default_max_cc: int,
+) -> list[str]:
+    from radon.complexity import cc_visit
+
+    violations: list[str] = []
+    try:
+        results = cc_visit(content)
+    except SyntaxError:
+        return violations
+
+    for item in results:
+        func_max_cc = resolve_registry_value(
+            exemptions,
+            module_path=build_module_path_key(py_file, src_root=src_dir),
+            symbol_name=item.name,
+        )
+        if func_max_cc is None:
+            func_max_cc = default_max_cc
+        if item.complexity > func_max_cc:
+            violations.append(
+                f"{py_file}:{item.lineno} - {item.name}() "
+                f"has CC={item.complexity} (max={func_max_cc})"
+            )
+    return violations
 
 
 class TestDomainImmutability:
@@ -60,41 +146,16 @@ class TestDomainImmutability:
                 continue
 
             for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Check for @dataclass decorator
-                    is_dataclass = False
-                    is_frozen = False
-
-                    for decorator in node.decorator_list:
-                        # Case 1: @dataclass
-                        if (
-                            isinstance(decorator, ast.Name)
-                            and decorator.id == "dataclass"
-                        ):
-                            is_dataclass = True
-                            # Default is frozen=False
-
-                        # Case 2: @dataclass(...)
-                        elif isinstance(decorator, ast.Call):
-                            func = decorator.func
-                            if isinstance(func, ast.Name) and func.id == "dataclass":
-                                is_dataclass = True
-                                # Check keywords for frozen=True
-                                for keyword in decorator.keywords:
-                                    if (
-                                        keyword.arg == "frozen"
-                                        and isinstance(keyword.value, ast.Constant)
-                                        and keyword.value.value is True
-                                    ):
-                                        is_frozen = True
-
-                    if is_dataclass and not is_frozen:
-                        # Skip exempted service classes
-                        if node.name in self.MUTABLE_SERVICE_EXEMPTIONS:
-                            continue
-                        violations.append(
-                            f"{py_file.name}:{node.lineno} - {node.name} is not frozen"
-                        )
+                if not isinstance(node, ast.ClassDef):
+                    continue
+                is_dataclass, is_frozen = _dataclass_flags(node)
+                if not is_dataclass or is_frozen:
+                    continue
+                if node.name in self.MUTABLE_SERVICE_EXEMPTIONS:
+                    continue
+                violations.append(
+                    f"{py_file.name}:{node.lineno} - {node.name} is not frozen"
+                )
 
         assert not violations, (
             "Found mutable domain dataclasses (must be frozen=True):\n"
@@ -115,47 +176,18 @@ class TestDomainImmutability:
 
         for py_file, tree in source_ast_cache.items():
             for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Check if it's a dataclass
-                    is_dataclass = False
-                    for decorator in node.decorator_list:
-                        if (
-                            isinstance(decorator, ast.Name)
-                            and decorator.id == "dataclass"
-                        ) or (
-                            isinstance(decorator, ast.Call)
-                            and (
-                                isinstance(decorator.func, ast.Name)
-                                and decorator.func.id == "dataclass"
-                            )
-                        ):
-                            is_dataclass = True
-
-                    if not is_dataclass:
-                        continue
-
-                    # Check fields for mutable defaults
-                    for item in node.body:
-                        if isinstance(item, ast.AnnAssign):
-                            if item.value:  # Has a default value
-                                is_mutable = False
-                                if isinstance(
-                                    item.value, (ast.List, ast.Dict, ast.Set)
-                                ):
-                                    is_mutable = True
-                                elif isinstance(item.value, ast.Call):
-                                    # Check for simple calls like list(), dict(), set()
-                                    if isinstance(
-                                        item.value.func, ast.Name
-                                    ) and item.value.func.id in ("list", "dict", "set"):
-                                        is_mutable = True
-
-                                if is_mutable:
-                                    violations.append(
-                                        f"{py_file.name}:{item.lineno} - Field "
-                                        f"'{getattr(item.target, 'id', 'unknown')}' "
-                                        f"in class '{node.name}' has a mutable default value."
-                                    )
+                if not isinstance(node, ast.ClassDef):
+                    continue
+                is_dataclass, _is_frozen = _dataclass_flags(node)
+                if not is_dataclass:
+                    continue
+                for item in node.body:
+                    if isinstance(item, ast.AnnAssign) and _has_mutable_default(item):
+                        violations.append(
+                            f"{py_file.name}:{item.lineno} - Field "
+                            f"'{getattr(item.target, 'id', 'unknown')}' "
+                            f"in class '{node.name}' has a mutable default value."
+                        )
 
         assert not violations, (
             "Found mutable defaults in dataclasses "
@@ -201,21 +233,13 @@ class TestDomainPurity:
                 continue
             if py_file.name in excluded_files:
                 continue
-
-            lines = content.splitlines()
-
-            for i, line in enumerate(lines, 1):
-                # Skip comments and docstrings
-                stripped = line.strip()
-                if stripped.startswith("#") or stripped.startswith('"""'):
-                    continue
-
-                for pattern, description in io_patterns:
-                    if re.search(pattern, line):
-                        relative_path = py_file.relative_to(src_dir)
-                        violations.append(
-                            f"{relative_path}:{i} - {description}: {stripped[:60]}..."
-                        )
+            violations.extend(
+                _io_violations_in_content(
+                    content=content,
+                    relative_path=py_file.relative_to(src_dir),
+                    io_patterns=io_patterns,
+                )
+            )
 
         assert not violations, (
             "Domain layer should not have direct I/O operations.\n"
@@ -236,9 +260,7 @@ class TestDomainComplexity:
         REQ-ARCH-010: Domain logic should be simple and testable.
         Maximum CC = 5 for domain layer functions.
         """
-        try:
-            from radon.complexity import cc_visit
-        except ImportError:
+        if importlib.util.find_spec("radon.complexity") is None:
             pytest.skip("radon not installed")
 
         domain_path = src_dir / "bioetl" / "domain"
@@ -255,24 +277,15 @@ class TestDomainComplexity:
                 continue
             if py_file.name.startswith("__"):
                 continue
-
-            try:
-                results = cc_visit(content)
-                for item in results:
-                    func_max_cc = resolve_registry_value(
-                        exemptions,
-                        module_path=build_module_path_key(py_file, src_root=src_dir),
-                        symbol_name=item.name,
-                    )
-                    if func_max_cc is None:
-                        func_max_cc = max_cc
-                    if item.complexity > func_max_cc:
-                        violations.append(
-                            f"{py_file}:{item.lineno} - {item.name}() "
-                            f"has CC={item.complexity} (max={func_max_cc})"
-                        )
-            except SyntaxError:
-                continue
+            violations.extend(
+                _complexity_violations_for_content(
+                    py_file=py_file,
+                    content=content,
+                    src_dir=src_dir,
+                    exemptions=exemptions,
+                    default_max_cc=max_cc,
+                )
+            )
 
         assert not violations, (
             f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)

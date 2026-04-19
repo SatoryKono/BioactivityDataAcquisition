@@ -20,6 +20,104 @@ from pathlib import Path
 import pytest
 
 
+def _iter_parsed_python_modules(
+    base_dir: Path,
+    *,
+    recursive: bool,
+    excluded_files: set[str],
+) -> list[tuple[Path, ast.Module]]:
+    pattern = "**/*.py" if recursive else "*.py"
+    parsed: list[tuple[Path, ast.Module]] = []
+    for py_file in base_dir.glob(pattern):
+        if py_file.name in excluded_files:
+            continue
+        try:
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+        except SyntaxError:
+            continue
+        parsed.append((py_file, tree))
+    return parsed
+
+
+def _is_protocol_class(node: ast.ClassDef) -> bool:
+    return any(
+        (isinstance(base, ast.Name) and base.id == "Protocol")
+        or (isinstance(base, ast.Attribute) and base.attr == "Protocol")
+        for base in node.bases
+    )
+
+
+def _missing_module_docstrings(
+    parsed_modules: list[tuple[Path, ast.Module]],
+    *,
+    src_dir: Path,
+) -> list[str]:
+    missing: list[str] = []
+    for py_file, tree in parsed_modules:
+        if not ast.get_docstring(tree):
+            missing.append(str(py_file.relative_to(src_dir)))
+    return missing
+
+
+def _missing_protocol_class_docstrings(
+    parsed_modules: list[tuple[Path, ast.Module]],
+    *,
+    src_dir: Path,
+) -> list[str]:
+    missing: list[str] = []
+    for py_file, tree in parsed_modules:
+        relative_path = py_file.relative_to(src_dir)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef) and _is_protocol_class(node):
+                if not ast.get_docstring(node):
+                    missing.append(f"{relative_path}:{node.lineno} - class {node.name}")
+    return missing
+
+
+def _missing_protocol_method_docstrings(
+    parsed_modules: list[tuple[Path, ast.Module]],
+    *,
+    src_dir: Path,
+) -> list[str]:
+    missing: list[str] = []
+    for py_file, tree in parsed_modules:
+        relative_path = py_file.relative_to(src_dir)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef) or not _is_protocol_class(node):
+                continue
+            for item in node.body:
+                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    if item.name.startswith("_") or ast.get_docstring(item):
+                        continue
+                    missing.append(f"{relative_path}:{item.lineno} - {node.name}.{item.name}()")
+    return missing
+
+
+def _missing_exception_docstrings(
+    exception_files: list[Path],
+    *,
+    src_dir: Path,
+) -> list[str]:
+    missing: list[str] = []
+    for py_file in exception_files:
+        try:
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+        except SyntaxError:
+            continue
+        relative_path = py_file.relative_to(src_dir)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            is_exception = any(
+                isinstance(base, ast.Name)
+                and ("Error" in base.id or "Exception" in base.id)
+                for base in node.bases
+            )
+            if is_exception and not ast.get_docstring(node):
+                missing.append(f"{relative_path}:{node.lineno} - class {node.name}")
+    return missing
+
+
 class TestModuleDocstrings:
     """Tests ensuring modules have proper documentation."""
 
@@ -30,23 +128,10 @@ class TestModuleDocstrings:
         """
         ports_dir = src_dir / "bioetl" / "domain" / "ports"
         assert ports_dir.exists(), "Domain ports not found"
-
-        missing_docstrings = []
-
-        for py_file in ports_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read())
-                except SyntaxError:
-                    continue
-
-            # Check for module docstring
-            if not ast.get_docstring(tree):
-                relative_path = py_file.relative_to(src_dir)
-                missing_docstrings.append(str(relative_path))
+        parsed_modules = _iter_parsed_python_modules(
+            ports_dir, recursive=False, excluded_files={"__init__.py"}
+        )
+        missing_docstrings = _missing_module_docstrings(parsed_modules, src_dir=src_dir)
 
         assert not missing_docstrings, (
             "Port modules must have module-level docstrings.\n"
@@ -61,23 +146,10 @@ class TestModuleDocstrings:
         """
         pipelines_dir = src_dir / "bioetl" / "application" / "pipelines"
         assert pipelines_dir.exists(), "Application pipelines not found"
-
-        missing_docstrings = []
-
-        for py_file in pipelines_dir.rglob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read())
-                except SyntaxError:
-                    continue
-
-            # Check for module docstring
-            if not ast.get_docstring(tree):
-                relative_path = py_file.relative_to(src_dir)
-                missing_docstrings.append(str(relative_path))
+        parsed_modules = _iter_parsed_python_modules(
+            pipelines_dir, recursive=True, excluded_files={"__init__.py"}
+        )
+        missing_docstrings = _missing_module_docstrings(parsed_modules, src_dir=src_dir)
 
         assert not missing_docstrings, (
             "Pipeline modules must have module-level docstrings.\n"
@@ -96,33 +168,12 @@ class TestClassDocstrings:
         """
         ports_dir = src_dir / "bioetl" / "domain" / "ports"
         assert ports_dir.exists(), "Domain ports not found"
-
-        missing_docstrings = []
-
-        for py_file in ports_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read())
-                except SyntaxError:
-                    continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Check if it's a Protocol class
-                    is_protocol = any(
-                        (isinstance(base, ast.Name) and base.id == "Protocol")
-                        or (isinstance(base, ast.Attribute) and base.attr == "Protocol")
-                        for base in node.bases
-                    )
-
-                    if is_protocol and not ast.get_docstring(node):
-                        relative_path = py_file.relative_to(src_dir)
-                        missing_docstrings.append(
-                            f"{relative_path}:{node.lineno} - class {node.name}"
-                        )
+        parsed_modules = _iter_parsed_python_modules(
+            ports_dir, recursive=False, excluded_files={"__init__.py"}
+        )
+        missing_docstrings = _missing_protocol_class_docstrings(
+            parsed_modules, src_dir=src_dir
+        )
 
         assert not missing_docstrings, (
             "Port Protocol classes must have docstrings.\n"
@@ -194,44 +245,12 @@ class TestMethodDocstrings:
         """
         ports_dir = src_dir / "bioetl" / "domain" / "ports"
         assert ports_dir.exists(), "Domain ports not found"
-
-        missing_docstrings = []
-
-        for py_file in ports_dir.glob("*.py"):
-            if py_file.name == "__init__.py":
-                continue
-
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read())
-                except SyntaxError:
-                    continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Check if it's a Protocol class
-                    is_protocol = any(
-                        (isinstance(base, ast.Name) and base.id == "Protocol")
-                        or (isinstance(base, ast.Attribute) and base.attr == "Protocol")
-                        for base in node.bases
-                    )
-
-                    if not is_protocol:
-                        continue
-
-                    # Check methods in Protocol
-                    for item in node.body:
-                        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                            # Skip private methods
-                            if item.name.startswith("_"):
-                                continue
-
-                            if not ast.get_docstring(item):
-                                relative_path = py_file.relative_to(src_dir)
-                                missing_docstrings.append(
-                                    f"{relative_path}:{item.lineno} - "
-                                    f"{node.name}.{item.name}()"
-                                )
+        parsed_modules = _iter_parsed_python_modules(
+            ports_dir, recursive=False, excluded_files={"__init__.py"}
+        )
+        missing_docstrings = _missing_protocol_method_docstrings(
+            parsed_modules, src_dir=src_dir
+        )
 
         assert not missing_docstrings, (
             "Port Protocol methods must have docstrings.\n"
@@ -262,29 +281,9 @@ class TestExceptionDocstrings:
         else:
             pytest.fail("Domain exceptions not found")
 
-        missing_docstrings = []
-
-        for py_file in exception_files:
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read())
-                except SyntaxError:
-                    continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Check if it looks like an exception
-                    is_exception = any(
-                        (isinstance(base, ast.Name) and "Error" in base.id)
-                        or (isinstance(base, ast.Name) and "Exception" in base.id)
-                        for base in node.bases
-                    )
-
-                    if is_exception and not ast.get_docstring(node):
-                        relative_path = py_file.relative_to(src_dir)
-                        missing_docstrings.append(
-                            f"{relative_path}:{node.lineno} - class {node.name}"
-                        )
+        missing_docstrings = _missing_exception_docstrings(
+            exception_files, src_dir=src_dir
+        )
 
         # This is a SHOULD, not a MUST, so we only warn
         if missing_docstrings:

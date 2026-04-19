@@ -154,6 +154,27 @@ def _collect_module_string_bindings(path: Path) -> dict[str, str]:
     return bindings
 
 
+def _iter_string_assignments(tree: ast.AST) -> list[tuple[list[ast.expr], str]]:
+    assignments: list[tuple[list[ast.expr], str]] = []
+    for node in ast.walk(tree):
+        value_node: ast.expr | None = None
+        targets: list[ast.expr] = []
+        if isinstance(node, ast.Assign):
+            value_node = node.value
+            targets = list(node.targets)
+        elif isinstance(node, ast.AnnAssign):
+            value_node = node.value
+            targets = [node.target]
+        if (
+            value_node is None
+            or not isinstance(value_node, ast.Constant)
+            or not isinstance(value_node.value, str)
+        ):
+            continue
+        assignments.append((targets, value_node.value))
+    return assignments
+
+
 def _resolve_imported_string_bindings(
     tree: ast.AST,
     *,
@@ -188,23 +209,10 @@ def _collect_class_attribute_bindings(tree: ast.AST) -> dict[str, str]:
         if not isinstance(node, ast.ClassDef):
             continue
         for body_node in node.body:
-            value_node: ast.expr | None = None
-            targets: list[ast.expr] = []
-            if isinstance(body_node, ast.Assign):
-                value_node = body_node.value
-                targets = list(body_node.targets)
-            elif isinstance(body_node, ast.AnnAssign):
-                value_node = body_node.value
-                targets = [body_node.target]
-            if (
-                value_node is None
-                or not isinstance(value_node, ast.Constant)
-                or not isinstance(value_node.value, str)
-            ):
-                continue
-            for target in targets:
-                if isinstance(target, ast.Name):
-                    bindings[target.id] = value_node.value
+            for targets, value in _iter_string_assignments(body_node):
+                for target in targets:
+                    if isinstance(target, ast.Name):
+                        bindings[target.id] = value
     return bindings
 
 
@@ -223,6 +231,112 @@ def _resolve_metric_name_expr(
     return None
 
 
+def _collect_local_string_bindings(tree: ast.AST) -> dict[str, str]:
+    bindings: dict[str, str] = {}
+    for targets, value in _iter_string_assignments(tree):
+        for target in targets:
+            if isinstance(target, ast.Name):
+                bindings[target.id] = value
+    return bindings
+
+
+def _call_method_name(node: ast.Call) -> str | None:
+    func = node.func
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    if isinstance(func, ast.Name):
+        return func.id
+    return None
+
+
+def _helper_metric_candidates(
+    node: ast.Call,
+    *,
+    string_bindings: dict[str, str],
+    attribute_bindings: dict[str, str],
+) -> set[str]:
+    candidates: set[str] = set()
+    for arg in node.args:
+        metric_name = _resolve_metric_name_expr(
+            arg,
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+        )
+        if metric_name is not None:
+            candidates.add(metric_name)
+    for keyword in node.keywords:
+        if keyword.value is None:
+            continue
+        metric_name = _resolve_metric_name_expr(
+            keyword.value,
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+        )
+        if metric_name is None:
+            continue
+        if keyword.arg in _RUNTIME_METRIC_NAME_KEYWORDS or metric_name.startswith("bioetl_"):
+            candidates.add(metric_name)
+    return candidates
+
+
+def _scan_metric_names_in_tree(
+    tree: ast.AST,
+    *,
+    string_bindings: dict[str, str],
+    attribute_bindings: dict[str, str],
+) -> tuple[set[str], set[str], set[str]]:
+    direct_metric_names: set[str] = set()
+    helper_metric_names: set[str] = set()
+    alias_metric_names: set[str] = set()
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        method_name = _call_method_name(node)
+        if method_name in _RUNTIME_METRIC_METHODS:
+            if not node.args:
+                continue
+            metric_name = _resolve_metric_name_expr(
+                node.args[0],
+                string_bindings=string_bindings,
+                attribute_bindings=attribute_bindings,
+            )
+            if metric_name is not None:
+                direct_metric_names.add(metric_name)
+            continue
+
+        for metric_name in _helper_metric_candidates(
+            node,
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+        ):
+            if metric_name.startswith("bioetl_"):
+                helper_metric_names.add(metric_name)
+            else:
+                alias_metric_names.add(metric_name)
+
+    return direct_metric_names, helper_metric_names, alias_metric_names
+
+
+def _record_runtime_mentions(
+    *,
+    canonical_mentions: dict[str, list[str]],
+    helper_backed_mentions: dict[str, list[str]],
+    alias_mentions: dict[str, list[str]],
+    relative_path: str,
+    direct_metric_names: set[str],
+    helper_metric_names: set[str],
+    alias_metric_names: set[str],
+) -> None:
+    for metric_name in sorted(direct_metric_names):
+        target = canonical_mentions if metric_name.startswith("bioetl_") else alias_mentions
+        target[metric_name].append(relative_path)
+    for metric_name in sorted(helper_metric_names - direct_metric_names):
+        helper_backed_mentions[metric_name].append(relative_path)
+    for metric_name in sorted(alias_metric_names):
+        alias_mentions[metric_name].append(relative_path)
+
+
 def _scan_runtime_metric_calls(
     repo_root: Path,
 ) -> tuple[dict[str, list[str]], dict[str, list[str]], dict[str, list[str]]]:
@@ -238,93 +352,24 @@ def _scan_runtime_metric_calls(
             tree = ast.parse(text)
         except SyntaxError:
             continue
-        string_bindings: dict[str, str] = {}
-        string_bindings.update(_resolve_imported_string_bindings(tree, repo_root=repo_root))
+        string_bindings = _resolve_imported_string_bindings(tree, repo_root=repo_root)
+        string_bindings.update(_collect_local_string_bindings(tree))
         attribute_bindings = _collect_class_attribute_bindings(tree)
-        for node in ast.walk(tree):
-            value_node: ast.expr | None = None
-            targets: list[ast.expr] = []
-            if isinstance(node, ast.Assign):
-                value_node = node.value
-                targets = list(node.targets)
-            elif isinstance(node, ast.AnnAssign):
-                value_node = node.value
-                targets = [node.target]
-            if (
-                value_node is None
-                or not isinstance(value_node, ast.Constant)
-                or not isinstance(value_node.value, str)
-            ):
-                continue
-            for target in targets:
-                if isinstance(target, ast.Name):
-                    string_bindings[target.id] = value_node.value
-        direct_metric_names: set[str] = set()
-        helper_metric_names: set[str] = set()
-        alias_metric_names: set[str] = set()
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.Call):
-                continue
-            func = node.func
-            method_name: str | None = None
-            if isinstance(func, ast.Attribute):
-                method_name = func.attr
-            elif isinstance(func, ast.Name):
-                method_name = func.id
-            if method_name in _RUNTIME_METRIC_METHODS:
-                if not node.args:
-                    continue
-                metric_name = _resolve_metric_name_expr(
-                    node.args[0],
-                    string_bindings=string_bindings,
-                    attribute_bindings=attribute_bindings,
-                )
-                if metric_name is None:
-                    continue
-                direct_metric_names.add(metric_name)
-                continue
-
-            helper_candidates: set[str] = set()
-            for arg in node.args:
-                metric_name = _resolve_metric_name_expr(
-                    arg,
-                    string_bindings=string_bindings,
-                    attribute_bindings=attribute_bindings,
-                )
-                if metric_name is not None:
-                    helper_candidates.add(metric_name)
-            for keyword in node.keywords:
-                if keyword.value is None:
-                    continue
-                metric_name = _resolve_metric_name_expr(
-                    keyword.value,
-                    string_bindings=string_bindings,
-                    attribute_bindings=attribute_bindings,
-                )
-                if metric_name is None:
-                    continue
-                if keyword.arg in _RUNTIME_METRIC_NAME_KEYWORDS or metric_name.startswith(
-                    "bioetl_"
-                ):
-                    helper_candidates.add(metric_name)
-            for metric_name in helper_candidates:
-                if metric_name.startswith("bioetl_"):
-                    helper_metric_names.add(metric_name)
-                else:
-                    alias_metric_names.add(metric_name)
-
+        direct_metric_names, helper_metric_names, alias_metric_names = _scan_metric_names_in_tree(
+            tree,
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+        )
         relative_path = _as_repo_relative(path, repo_root)
-        for metric_name in sorted(direct_metric_names):
-            target = (
-                canonical_mentions
-                if metric_name.startswith("bioetl_")
-                else alias_mentions
-            )
-            target[metric_name].append(relative_path)
-        for metric_name in sorted(helper_metric_names - direct_metric_names):
-            helper_backed_mentions[metric_name].append(relative_path)
-        for metric_name in sorted(alias_metric_names):
-            alias_mentions[metric_name].append(relative_path)
+        _record_runtime_mentions(
+            canonical_mentions=canonical_mentions,
+            helper_backed_mentions=helper_backed_mentions,
+            alias_mentions=alias_mentions,
+            relative_path=relative_path,
+            direct_metric_names=direct_metric_names,
+            helper_metric_names=helper_metric_names,
+            alias_metric_names=alias_metric_names,
+        )
     return (
         dict(canonical_mentions),
         dict(helper_backed_mentions),
@@ -406,21 +451,26 @@ def _scan_rule_metric_mentions(repo_root: Path) -> dict[str, list[str]]:
         groups = payload.get("groups", [])
         if not isinstance(groups, list):
             continue
-        for group in groups:
-            if not isinstance(group, dict):
-                continue
-            rules = group.get("rules", [])
-            if not isinstance(rules, list):
-                continue
-            for rule in rules:
-                if not isinstance(rule, dict):
-                    continue
-                expr = rule.get("expr")
-                if not isinstance(expr, str):
-                    continue
-                for metric_name in sorted(set(_CANONICAL_METRIC_RE.findall(expr))):
-                    mentions[metric_name].append(rel_path)
+        for metric_name in _extract_rule_metric_names(groups):
+            mentions[metric_name].append(rel_path)
     return dict(mentions)
+
+
+def _extract_rule_metric_names(groups: list[object]) -> list[str]:
+    metric_names: set[str] = set()
+    for group in groups:
+        if not isinstance(group, dict):
+            continue
+        rules = group.get("rules", [])
+        if not isinstance(rules, list):
+            continue
+        for rule in rules:
+            if not isinstance(rule, dict):
+                continue
+            expr = rule.get("expr")
+            if isinstance(expr, str):
+                metric_names.update(_CANONICAL_METRIC_RE.findall(expr))
+    return sorted(metric_names)
 
 
 def collect_metric_inventory(repo_root: Path) -> dict[str, list[str] | dict[str, list[str]]]:

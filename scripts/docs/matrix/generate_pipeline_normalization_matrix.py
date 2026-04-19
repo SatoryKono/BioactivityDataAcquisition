@@ -92,6 +92,11 @@ CSV_COLUMNS = (
     "set_like",
     "notes",
 )
+ENTITY_PIPELINE_KIND = "entity"
+COMPOSITE_PIPELINE_KIND = "composite"
+PROFILE_NORMALIZATION_SOURCE = "profile"
+NO_NORMALIZER = "none"
+FALSE_TEXT = "false"
 
 FALLBACK_BUSINESS = "fallback_business"
 FALLBACK_TECHNICAL_PASSTHROUGH = "fallback_technical_passthrough"
@@ -303,10 +308,10 @@ def _build_entity_rows_for_pipeline(
             rows.append(
                 {
                     "pipeline_name": pipeline_name,
-                    "pipeline_kind": "entity",
+                    "pipeline_kind": ENTITY_PIPELINE_KIND,
                     "field_name": field_name,
                     "field_type": field_type,
-                    "normalization_source": "profile",
+                    "normalization_source": PROFILE_NORMALIZATION_SOURCE,
                     "normalizer": _normalizer_name(
                         profile_rule.normalizer,
                         field_name=field_name,
@@ -328,14 +333,14 @@ def _build_entity_rows_for_pipeline(
         rows.append(
             {
                 "pipeline_name": pipeline_name,
-                "pipeline_kind": "entity",
+                "pipeline_kind": ENTITY_PIPELINE_KIND,
                 "field_name": field_name,
                 "field_type": field_type,
                 "normalization_source": source,
                 "normalizer": normalizer,
                 "normalization_summary": summary,
                 "include_in_content_hash": "",
-                "set_like": "false",
+                "set_like": FALSE_TEXT,
                 "notes": "",
             }
         )
@@ -419,7 +424,7 @@ def _build_composite_rows_for_pipeline(
             notes = "Applied only while resolving and comparing composite join keys."
         else:
             source = "upstream_inherited"
-            normalizer = "none"
+            normalizer = NO_NORMALIZER
             summary = (
                 "No composite-specific field normalizer is defined; field is inherited "
                 "from already-normalized upstream records."
@@ -430,7 +435,7 @@ def _build_composite_rows_for_pipeline(
         rows.append(
             {
                 "pipeline_name": pipeline_name,
-                "pipeline_kind": "composite",
+                "pipeline_kind": COMPOSITE_PIPELINE_KIND,
                 "field_name": field_name,
                 "field_type": COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY.get(
                     pipeline_name, "unknown"
@@ -439,7 +444,7 @@ def _build_composite_rows_for_pipeline(
                 "normalizer": normalizer,
                 "normalization_summary": summary,
                 "include_in_content_hash": "",
-                "set_like": "false",
+                "set_like": FALSE_TEXT,
                 "notes": notes,
             }
         )
@@ -494,11 +499,13 @@ def build_entity_profile_coverage_kpi(
 ) -> dict[str, object]:
     entity_rows = [
         row for row in (build_field_matrix_rows() if rows is None else rows)
-        if row["pipeline_kind"] == "entity"
+        if row["pipeline_kind"] == ENTITY_PIPELINE_KIND
     ]
     entity_field_count = len(entity_rows)
     explicit_profile_field_count = sum(
-        1 for row in entity_rows if row["normalization_source"] == "profile"
+        1
+        for row in entity_rows
+        if row["normalization_source"] == PROFILE_NORMALIZATION_SOURCE
     )
     value_pct = round(
         (explicit_profile_field_count * 100 / entity_field_count) if entity_field_count else 0.0,
@@ -810,12 +817,18 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         "Generated from active pipeline configs, Silver schemas, and current normalization code paths.",
         "",
         "This matrix is a normalization inventory, not a persisted-row publication contract.",
-        "Occurrence-scoped provenance fields may appear here because normalization or config policy still references them,",
+        (
+            "Occurrence-scoped provenance fields may appear here because normalization "
+            "or config policy still references them,"
+        ),
         "but canonical Silver/Gold row contracts are defined by provider references and Gold contract exports.",
         "",
         "## Surface Coverage Summary",
         "",
-        "Entity coverage is entity-scoped only; composite join-key and control-plane surfaces are reported separately below.",
+        (
+            "Entity coverage is entity-scoped only; composite join-key and "
+            "control-plane surfaces are reported separately below."
+        ),
         "",
     ]
     for kpi in surface_kpis:
