@@ -286,7 +286,6 @@ def _create_result(
     ready_seen: bool,
     handshake_sent: bool,
     responses: dict[int, dict[str, Any]],
-    stdout_buffer: bytearray,
     stderr_buffer: bytearray,
 ) -> SmokeResult:
     """Create the final smoke test result."""

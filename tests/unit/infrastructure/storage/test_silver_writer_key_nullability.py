@@ -11,6 +11,8 @@ from bioetl.domain.config import KeyNullabilityRule
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
+TEST_SILVER_ROOT = "test-output/silver"
+
 
 @pytest.mark.unit
 class TestSilverWriterKeyNullability:
@@ -19,7 +21,7 @@ class TestSilverWriterKeyNullability:
     @pytest.mark.asyncio
     async def test_non_nullable_merge_key_rejects_null(self) -> None:
         """Non-null merge key policy must reject records with null merge key."""
-        writer = SilverWriter(base_path="/tmp/silver", logger=NoOpLogger())
+        writer = SilverWriter(base_path=TEST_SILVER_ROOT, logger=NoOpLogger())
         writer._dispatch_write = AsyncMock()  # type: ignore[method-assign,assignment]
 
         records = [
@@ -60,7 +62,7 @@ class TestSilverWriterKeyNullability:
     @pytest.mark.asyncio
     async def test_nullable_partition_key_allows_null(self) -> None:
         """Nullable partition key policy should allow null partition values."""
-        writer = SilverWriter(base_path="/tmp/silver", logger=NoOpLogger())
+        writer = SilverWriter(base_path=TEST_SILVER_ROOT, logger=NoOpLogger())
 
         writer._dispatch_write = AsyncMock()  # type: ignore[method-assign,assignment]
         writer._dispatch_write.return_value = None

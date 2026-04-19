@@ -39,6 +39,8 @@ from bioetl.interfaces.cli.commands.domains.run.command_policy import (
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
+CACHED_BRONZE_PATH = "test-output/bronze"
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -487,7 +489,7 @@ class TestRunCommandFlow:
                     enable_tracing=None,
                     use_cached_bronze=True,
                     cached_bronze_date="2026-03-12",
-                    cached_bronze_path="/tmp/bronze",
+                    cached_bronze_path=CACHED_BRONZE_PATH,
                     exact_replay=True,
                 ),
                 service=service,
@@ -539,7 +541,7 @@ class TestRunCommandFlow:
                     enable_tracing=None,
                     use_cached_bronze=True,
                     cached_bronze_date="2026-03-12",
-                    cached_bronze_path="/tmp/bronze",
+                    cached_bronze_path=CACHED_BRONZE_PATH,
                     replay_of_run_id="run-parent",
                     replay_of_manifest_id="manifest-parent",
                     exact_replay=True,

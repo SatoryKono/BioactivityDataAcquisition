@@ -10,13 +10,16 @@ import pytest
 from bioetl.application.services.dq_report_models import DQReportContext, DQReportResult
 from bioetl.domain.types import GoldBusinessRuleSpec, ScdConfig
 
+BRONZE_REPORT_PATH = Path("reports/bronze.json")
+GOLD_REPORT_PATH = Path("reports/gold.json")
+
 
 @pytest.mark.unit
 class TestDQReportResult:
     def test_properties_reflect_generated_report_paths(self) -> None:
         result = DQReportResult(
-            bronze_report_path=Path("/tmp/bronze.json"),
-            gold_report_path=Path("/tmp/gold.json"),
+            bronze_report_path=BRONZE_REPORT_PATH,
+            gold_report_path=GOLD_REPORT_PATH,
             bronze_enabled=True,
             gold_enabled=True,
         )

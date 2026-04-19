@@ -16,6 +16,8 @@ from bioetl.interfaces.cli.commands.domains.composite.runtime import (
     parse_enrich_only,
 )
 
+CACHED_BRONZE_PATH = "test-output/bronze"
+
 
 class TestParseEnrichOnly:
     """Tests for parse_enrich_only."""
@@ -75,7 +77,7 @@ class TestBuildRuntimeConfig:
             force_enricher="crossref",
             use_cached_bronze=True,
             cached_bronze_date="2026-01-01",
-            cached_bronze_path="/tmp/bronze",
+            cached_bronze_path=CACHED_BRONZE_PATH,
             cached_bronze_enrichers=False,
             cached_bronze_dependencies=True,
         )
@@ -87,7 +89,7 @@ class TestBuildRuntimeConfig:
         assert result.force_enricher == "crossref"
         assert result.use_cached_bronze is True
         assert result.cached_bronze_date == "2026-01-01"
-        assert result.cached_bronze_path == "/tmp/bronze"
+        assert result.cached_bronze_path == CACHED_BRONZE_PATH
         assert result.cached_bronze_enrichers is False
         assert result.cached_bronze_dependencies is True
 

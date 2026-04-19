@@ -13,6 +13,8 @@ from bioetl.infrastructure.storage.silver.merged_mixin import (
     SilverWriterMergedMixin,
 )
 
+TEST_SILVER_ROOT = "test-output/silver"
+
 
 class _MergedHost(SilverWriterMergedMixin):
     """Minimal host exposing the merged Silver helper surface for unit tests."""
@@ -24,7 +26,7 @@ class _MergedHost(SilverWriterMergedMixin):
         self._write_silver_merged_metadata = AsyncMock()
 
     def _resolve_table_path(self, table_name: str) -> str:
-        return f"/tmp/silver/{table_name.replace('.', '/')}"
+        return f"{TEST_SILVER_ROOT}/{table_name.replace('.', '/')}"
 
 
 @pytest.mark.unit
@@ -53,7 +55,7 @@ class TestSilverWriterMergedMixin:
             )
         )
 
-        assert prepared.table_path == "/tmp/silver/test/table"
+        assert prepared.table_path == f"{TEST_SILVER_ROOT}/test/table"
         assert prepared.arrow_table.column_names == canonical_column_order(
             ["name", "id"]
         )

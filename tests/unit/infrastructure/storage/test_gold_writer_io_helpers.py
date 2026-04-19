@@ -14,6 +14,8 @@ from bioetl.infrastructure.storage.gold.io_helpers import (
     write_scd2_once,
 )
 
+TEST_SCD2_PATH = "test-output/gold/scd2"
+
 
 @pytest.mark.unit
 class TestInitializeScd2Records:
@@ -73,7 +75,7 @@ class TestWriteScd2Once:
         await write_scd2_once(
             writer,
             module=module,
-            table_path="/tmp/gold/scd2",
+            table_path=TEST_SCD2_PATH,
             records=[{"id": 1}],
             business_key="id",
             scd_config=scd_config,
@@ -111,7 +113,7 @@ class TestWriteScd2Once:
         await write_scd2_once(
             writer,
             module=module,
-            table_path="/tmp/gold/scd2",
+            table_path=TEST_SCD2_PATH,
             records=[{"id": 1}],
             business_key="id",
             scd_config=scd_config,
