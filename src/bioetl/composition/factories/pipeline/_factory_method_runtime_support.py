@@ -9,6 +9,9 @@ from bioetl.composition.factories.pipeline._factory_method_control_plane import 
     apply_optional_control_plane_kwargs,
     resolve_strict_gold_validation,
 )
+from bioetl.composition.factories.pipeline._factory_method_types import (
+    _CreatePipelineWithServicesRequest,
+)
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -90,21 +93,12 @@ def create_factory_runner_from_request(
     cached_bronze: CachedBronzeContext | None,
 ) -> PipelineRunner:
     """Create a pipeline and assemble a runner from resolved runtime inputs."""
-    create_with_services_kwargs: dict[str, object] = {
-        "run_id": run_id,
-        "runtime": runtime,
-        "settings": settings,
-        "logger": observability.logger,
-        "config": yaml_config,
-        "filter_config": filter_config,
-        "tracer": observability.tracer,
-        "dq_monitor": observability.dq_monitor,
-        "metrics": observability.metrics,
-        "cached_bronze": cached_bronze,
-    }
     artifacts = control_plane_artifacts
-    apply_optional_control_plane_kwargs(
-        create_with_services_kwargs,
+    pipeline_request = _CreatePipelineWithServicesRequest(
+        run_id=run_id,
+        runtime=runtime,
+        settings=settings,
+        logger=observability.logger,
         manifest_id=None if artifacts is None else artifacts.manifest_id,
         config_hash=None if artifacts is None else artifacts.config_hash,
         dq_contract_compatibility_hash=(
@@ -113,11 +107,17 @@ def create_factory_runner_from_request(
         effective_config_artifact_id=(
             None if artifacts is None else artifacts.effective_config_artifact_id
         ),
+        config=yaml_config,
+        filter_config=filter_config,
+        tracer=observability.tracer,
+        dq_monitor=observability.dq_monitor,
+        metrics=observability.metrics,
+        cached_bronze=cached_bronze,
     )
     pipeline = cast(
         "Any",  # Any: Dynamic factory function
         create_with_services_fn,
-    )(**cast("dict[str, Any]", create_with_services_kwargs))  # Any: Dynamic kwargs dict
+    )(pipeline_request)
     return assemble_runner_fn(
         pipeline=pipeline,
         observability=observability,
