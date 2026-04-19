@@ -89,6 +89,7 @@ require_contains() {
   local message="$3"
   if grep -Fq -- "$pattern" <<<"$text"; then
     ok "$message"
+    return 0
   else
     fail "$message"
     return 1
