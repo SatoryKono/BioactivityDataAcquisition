@@ -46,6 +46,7 @@ class RenameRow:
     old_name: str
     new_name: str
     file_path: Path
+    validated_file_path: ValidatedRepoPath
     file_kind: str
     auto_safe: bool
     notes: str
@@ -172,25 +173,13 @@ def _repo_relative_path(path: Path) -> Path:
     return _resolve_repo_path(path).relative_to(REPO_ROOT)
 
 
-def _read_repo_text(path: Path) -> str:
-    """Read text from a validated repository-relative path."""
-    return _resolve_repo_path(path).read_text(encoding="utf-8")
-
-
-def _write_repo_text(path: Path, content: str) -> None:
-    """Write text to a validated repository-relative path."""
-    safe_path = _resolve_repo_path(path)
-    if REPO_ROOT != safe_path and REPO_ROOT not in safe_path.parents:
-        raise ValueError(f"refusing to write outside repository: {safe_path}")
-    safe_path.write_text(content, encoding="utf-8")
-
-
 def load_rows(matrix_path: ValidatedRepoPath | Path) -> list[RenameRow]:
     safe_matrix_path = _validated_input_path(matrix_path)
     rows: list[RenameRow] = []
     with safe_matrix_path.resolved_path.open(encoding="utf-8", newline="") as file_obj:
         reader = csv.DictReader(file_obj)
         for record in reader:
+            validated_file_path = _resolve_input_path(_normalize_path(record["file_path"]))
             rows.append(
                 RenameRow(
                     wave=record["wave"],
@@ -199,7 +188,8 @@ def load_rows(matrix_path: ValidatedRepoPath | Path) -> list[RenameRow]:
                     symbol_kind=record["symbol_kind"],
                     old_name=record["old_name"],
                     new_name=record["new_name"],
-                    file_path=_repo_relative_path(_normalize_path(record["file_path"])),
+                    file_path=validated_file_path.repo_relative_path,
+                    validated_file_path=validated_file_path,
                     file_kind=record["file_kind"],
                     auto_safe=_parse_bool(record["auto_safe"]),
                     notes=record["notes"],
@@ -224,12 +214,12 @@ def list_waves(rows: list[RenameRow]) -> int:
 
 def _group_executable_rows(
     rows: list[RenameRow],
-) -> tuple[dict[Path, list[RenameRow]], list[RenameRow]]:
-    file_to_rows: dict[Path, list[RenameRow]] = {}
+) -> tuple[dict[ValidatedRepoPath, list[RenameRow]], list[RenameRow]]:
+    file_to_rows: dict[ValidatedRepoPath, list[RenameRow]] = {}
     skipped_rows: list[RenameRow] = []
     for row in rows:
         if row.executable:
-            file_to_rows.setdefault(row.file_path, []).append(row)
+            file_to_rows.setdefault(row.validated_file_path, []).append(row)
         else:
             skipped_rows.append(row)
     return file_to_rows, skipped_rows
@@ -237,34 +227,37 @@ def _group_executable_rows(
 
 def _apply_rows_to_file(
     *,
-    file_path: Path,
+    file_path: ValidatedRepoPath,
     rows: list[RenameRow],
     patterns: dict[str, re.Pattern[str]],
     apply: bool,
 ) -> int:
-    safe_file_path = _resolve_repo_path(file_path)
+    safe_file_path = file_path.resolved_path
+    display_path = file_path.repo_relative_path
     if not safe_file_path.exists():
-        print(f"[missing] {file_path}")
+        print(f"[missing] {display_path}")
         return 0
 
-    updated_text = _read_repo_text(file_path)
+    updated_text = safe_file_path.read_text(encoding="utf-8")
     file_matches = 0
     for row in rows:
         pattern = patterns[row.old_name]
         updated_text, count = pattern.subn(row.new_name, updated_text)
         file_matches += count
         if count:
-            print(f"[match] {file_path} :: {row.old_name} -> {row.new_name} :: {count}")
+            print(
+                f"[match] {display_path} :: {row.old_name} -> {row.new_name} :: {count}"
+            )
 
     if file_matches == 0:
-        print(f"[noop] {file_path}")
+        print(f"[noop] {display_path}")
         return 0
 
     if apply:
-        _write_repo_text(file_path, updated_text)
-        print(f"[write] {file_path}")
+        safe_file_path.write_text(updated_text, encoding="utf-8")
+        print(f"[write] {display_path}")
     else:
-        print(f"[dry-run] {file_path}")
+        print(f"[dry-run] {display_path}")
     return file_matches
 
 

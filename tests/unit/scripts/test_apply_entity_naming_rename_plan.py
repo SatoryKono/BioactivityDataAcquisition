@@ -101,6 +101,7 @@ def test_apply_rows_writes_only_with_repo_relative_paths(
         old_name="LegacyEntity",
         new_name="CanonicalEntity",
         file_path=Path("src/bioetl/sample.py"),
+        validated_file_path=module.ValidatedRepoPath(target),
         file_kind="python",
         auto_safe=True,
         notes="",
