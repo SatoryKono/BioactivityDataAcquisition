@@ -215,7 +215,7 @@ class TestCircuitBreakerMetrics:
 
         mock_metrics.set_gauge.assert_called_once_with(
             METRIC_CIRCUIT_BREAKER_STATE,
-            0.0,  # CLOSED = 0
+            0.0,
             {"adapter": "test"},
         )
 
@@ -242,7 +242,7 @@ class TestCircuitBreakerMetrics:
         # Check state gauge was set to OPEN (2.0)
         mock_metrics.set_gauge.assert_called_with(
             METRIC_CIRCUIT_BREAKER_STATE,
-            2.0,  # OPEN = 2
+            2.0,
             {"adapter": "test"},
         )
 
@@ -291,14 +291,14 @@ class TestCircuitBreakerMetrics:
         # First call should be HALF_OPEN (1.0)
         assert calls[0][0] == (
             METRIC_CIRCUIT_BREAKER_STATE,
-            1.0,  # HALF_OPEN = 1
+            1.0,
             {"adapter": "test"},
         )
 
         # Second call should be CLOSED (0.0)
         assert calls[1][0] == (
             METRIC_CIRCUIT_BREAKER_STATE,
-            0.0,  # CLOSED = 0
+            0.0,
             {"adapter": "test"},
         )
 
@@ -392,7 +392,7 @@ class TestCircuitBreakerMetrics:
 
         mock_metrics.set_gauge.assert_called_with(
             METRIC_CIRCUIT_BREAKER_STATE,
-            2.0,  # OPEN = 2
+            2.0,
             {"adapter": "test"},
         )
         mock_metrics.increment_counter.assert_called_once_with(
@@ -412,7 +412,7 @@ class TestCircuitBreakerMetrics:
 
         mock_metrics.set_gauge.assert_called_with(
             METRIC_CIRCUIT_BREAKER_STATE,
-            0.0,  # CLOSED = 0
+            0.0,
             {"adapter": "test"},
         )
 

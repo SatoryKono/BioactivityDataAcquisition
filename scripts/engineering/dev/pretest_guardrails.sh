@@ -52,6 +52,7 @@ Options:
   --dry-run                     Print commands without executing them
   -h, --help                    Show this help
 EOF
+    return 0
 }
 
 require_python() {
@@ -79,6 +80,7 @@ record_step() {
     local duration_seconds="$3"
     local command_text="$4"
     printf '%s\t%s\t%s\t%s\n' "$label" "$status" "$duration_seconds" "$command_text" >>"$STEP_LOG_FILE"
+    return 0
 }
 
 run_step() {
@@ -144,6 +146,7 @@ if isinstance(value, bool):
 else:
     print(value)
 PY
+    return 0
 }
 
 config_architecture_targets() {
@@ -226,6 +229,7 @@ cleanup_temp() {
     if [[ -n "$STEP_LOG_FILE" && -f "$STEP_LOG_FILE" ]]; then
         rm -f "$STEP_LOG_FILE"
     fi
+    return 0
 }
 
 on_exit() {
@@ -235,11 +239,13 @@ on_exit() {
     fi
     write_report
     cleanup_temp
+    return 0
 }
 
 parse_args() {
     while (($# > 0)); do
-        case "$1" in
+        local arg="$1"
+        case "$arg" in
             --mode)
                 [[ $# -ge 2 ]] || {
                     echo "[pretest-guardrails][error] --mode requires a value" >&2
@@ -293,7 +299,7 @@ parse_args() {
                 exit 0
                 ;;
             *)
-                echo "[pretest-guardrails][error] Unknown argument: $1" >&2
+                echo "[pretest-guardrails][error] Unknown argument: $arg" >&2
                 usage >&2
                 exit 2
                 ;;
@@ -315,6 +321,7 @@ parse_args() {
             exit 2
             ;;
     esac
+    return 0
 }
 
 load_profile() {
@@ -328,6 +335,7 @@ load_profile() {
     if [[ "$STRICT_DOCS" != "1" ]]; then
         STRICT_DOCS="$(config_profile_value "$SCOPE" "strict_docs")"
     fi
+    return 0
 }
 
 run_cleanup() {
@@ -453,6 +461,7 @@ main() {
     run_architecture_checks
 
     echo "[pretest-guardrails] OK"
+    return 0
 }
 
 main "$@"

@@ -110,9 +110,7 @@ class TestExtractionParamsToDomain:
             }
         )
 
-        input_filter, silver_filters, gold_filters, extraction_params = (
-            config.to_domain()
-        )
+        _, _, _, extraction_params = config.to_domain()
 
         assert isinstance(extraction_params, ExtractionParams)
         assert extraction_params.params == {
@@ -124,9 +122,7 @@ class TestExtractionParamsToDomain:
         """to_domain() with no extraction_params should return empty ExtractionParams."""
         config = FilterConfigFile()
 
-        input_filter, silver_filters, gold_filters, extraction_params = (
-            config.to_domain()
-        )
+        _, _, _, extraction_params = config.to_domain()
 
         assert isinstance(extraction_params, ExtractionParams)
         assert extraction_params.is_empty
