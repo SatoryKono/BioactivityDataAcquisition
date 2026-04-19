@@ -110,7 +110,7 @@ class TestColumnOrderer:
         df = pl.DataFrame(
             {
                 "crossref.publication.title": ["T1"],
-                "title": ["T2"],  # Unqualified = seed
+                "title": ["T2"],
             }
         )
         result = orderer.order_columns(df)

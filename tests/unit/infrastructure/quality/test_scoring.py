@@ -58,9 +58,6 @@ class TestComputeIntegralDebtScore:
         score = compute_integral_debt_score(
             total_exemptions=5, expired_entries=2, baseline_total=10
         )
-        # debt_reduction = 100 - (5/10)*100 = 50
-        # expiry_health = 100 - (2/5)*100 = 60
-        # score = 0.7 * 60 + 0.3 * 50 = 42 + 15 = 57
         assert score == pytest.approx(57.0)
 
     def test_score_is_rounded(self) -> None:

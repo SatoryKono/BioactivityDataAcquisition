@@ -201,7 +201,7 @@ class DQReportSerializer:
     def _generate_html(
         self,
         data: JsonDict,
-        report: BronzeDQReport | SilverDQReport | GoldDQReport,  # noqa: ARG002
+        report: BronzeDQReport | SilverDQReport | GoldDQReport,
     ) -> str:
         """Generate HTML report."""
         del report

@@ -219,9 +219,9 @@ class TestPublicationTermDataSourceFetch:
         """Test non-target fetch forwards offset to wrapped adapter."""
         wrapper = PublicationTermDataSource(data_source=mock_data_source)
 
-        async for _ in wrapper.fetch("document", offset=25):
-            pass
+        records = [record async for record in wrapper.fetch("document", offset=25)]
 
+        assert records == []
         assert mock_data_source.fetch_calls[-1]["entity_type"] == "document"
         assert mock_data_source.fetch_calls[-1]["offset"] == 25
 

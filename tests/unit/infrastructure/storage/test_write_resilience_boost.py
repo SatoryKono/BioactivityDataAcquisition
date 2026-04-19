@@ -43,11 +43,8 @@ class TestDeterministicJitter:
 
     def test_phase_cycle(self) -> None:
         """Jitter cycles over 4 phases."""
-        # phase = (retry_count % 4) + 1
-        # phase / 4 * max_jitter
         max_j = 1.0
         results = [_deterministic_jitter_seconds(i, max_j) for i in range(4)]
-        # All should be distinct
         assert len(set(results)) == 4
 
     def test_negative_retry_count_clamped(self) -> None:
