@@ -11,6 +11,7 @@ import pytest
 from tests.async_utils import collect_async_iterator
 
 from bioetl.infrastructure.adapters.common._title_fallback_flow import (
+    MissingDoiTitleFallbackRequest,
     get_fallback_title,
     iter_missing_doi_fallback_records,
     iter_title_only_fallback_records,
@@ -150,6 +151,47 @@ async def test_iter_missing_doi_fallback_records_logs_missing_title_and_not_foun
     assert logger.info.call_args_list[0].args[0] == "title_fallback_attempt"
     assert logger.warning.call_args.args[0] == "title_fallback_not_found"
     assert logger.debug.call_args.args[0] == "no_fallback_title"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_iter_missing_doi_fallback_records_accepts_request_object() -> None:
+    """Request-style invocation should preserve the missing-DOI fallback flow."""
+    logger = MagicMock()
+
+    async def search_by_title(title: str) -> dict[str, Any] | None:
+        await asyncio.sleep(0)
+        return {"id": title.lower(), "title": title}
+
+    request = MissingDoiTitleFallbackRequest(
+        dois=["DOI-1"],
+        found_dois=set(),
+        fallback_mapping={"doi-1": "Alpha Title"},
+        normalize_fn=_normalize_doi_lower,
+        limit=None,
+        fetched=0,
+        get_fallback_title=get_fallback_title,
+        truncate_title=truncate_title,
+        search_by_title=search_by_title,
+        get_result_identifier=_result_identifier,
+        process_found_result=_process_found_title_fallback,
+        logger=logger,
+        event_no_fallback_title="no_fallback_title",
+        event_fallback_attempt="title_fallback_attempt",
+        event_fallback_success="title_fallback_success",
+        event_fallback_not_found="title_fallback_not_found",
+    )
+
+    records = await collect_async_iterator(iter_missing_doi_fallback_records(request))
+
+    assert records == [
+        {
+            "id": "alpha title",
+            "title": "Alpha Title",
+            "_lookup_method": "title_fallback",
+            "_original_id": "DOI-1",
+        }
+    ]
 
 
 @pytest.mark.unit

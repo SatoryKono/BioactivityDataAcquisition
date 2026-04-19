@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common._title_fallback_flow import (
+    MissingDoiTitleFallbackRequest,
     get_fallback_title,
     iter_missing_doi_fallback_records,
     iter_title_only_fallback_records,
@@ -170,7 +171,7 @@ class BaseTitleFallbackHandler(ABC):
             Publication records resolved via title search.
 
         """
-        async for record in iter_missing_doi_fallback_records(
+        request = MissingDoiTitleFallbackRequest(
             dois=dois,
             found_dois=found_dois,
             fallback_mapping=fallback_mapping,
@@ -187,6 +188,9 @@ class BaseTitleFallbackHandler(ABC):
             event_fallback_attempt=self._event_fallback_attempt,
             event_fallback_success=self._event_fallback_success,
             event_fallback_not_found=self._event_fallback_not_found,
+        )
+        async for record in iter_missing_doi_fallback_records(
+            request,
         ):
             yield record
 
