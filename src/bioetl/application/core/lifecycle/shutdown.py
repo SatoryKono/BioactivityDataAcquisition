@@ -94,17 +94,17 @@ class ShutdownSignal:
         """
         await self._event.wait()
 
-    async def wait_for_completion(self, timeout: float) -> bool:
+    async def wait_for_completion(self, timeout_seconds: float) -> bool:
         """Wait for shutdown completion (ShutdownPort compatible).
 
         Args:
-            timeout: Maximum seconds to wait.
+            timeout_seconds: Maximum seconds to wait.
 
         Returns:
             True if completed within timeout, False otherwise.
         """
         try:
-            async with asyncio.timeout(timeout):
+            async with asyncio.timeout(timeout_seconds):
                 await self._completion_event.wait()
             return True
         except TimeoutError:

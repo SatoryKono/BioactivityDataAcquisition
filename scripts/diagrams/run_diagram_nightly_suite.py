@@ -210,55 +210,69 @@ def _element_has_text(elem: ET.Element) -> bool:
     return bool(" ".join(elem.itertext()).strip())
 
 
+def _next_svg_shape_counter_state(
+    counts: _SvgShapeCounterState,
+    *,
+    tag: str,
+    classes: set[str],
+    has_text: bool,
+) -> _SvgShapeCounterState | None:
+    if tag == "g" and "node" in classes:
+        return _SvgShapeCounterState(
+            node_groups=counts.node_groups + 1,
+            edge_paths=counts.edge_paths,
+            edge_labels=counts.edge_labels,
+            text_nodes=counts.text_nodes,
+            foreign_object_text_nodes=counts.foreign_object_text_nodes,
+        )
+    if tag == "g" and "edgePath" in classes:
+        return _SvgShapeCounterState(
+            node_groups=counts.node_groups,
+            edge_paths=counts.edge_paths + 1,
+            edge_labels=counts.edge_labels,
+            text_nodes=counts.text_nodes,
+            foreign_object_text_nodes=counts.foreign_object_text_nodes,
+        )
+    if tag == "g" and "edgeLabel" in classes:
+        return _SvgShapeCounterState(
+            node_groups=counts.node_groups,
+            edge_paths=counts.edge_paths,
+            edge_labels=counts.edge_labels + 1,
+            text_nodes=counts.text_nodes,
+            foreign_object_text_nodes=counts.foreign_object_text_nodes,
+        )
+    if tag == "text" and has_text:
+        return _SvgShapeCounterState(
+            node_groups=counts.node_groups,
+            edge_paths=counts.edge_paths,
+            edge_labels=counts.edge_labels,
+            text_nodes=counts.text_nodes + 1,
+            foreign_object_text_nodes=counts.foreign_object_text_nodes,
+        )
+    if tag == "foreignObject" and has_text:
+        return _SvgShapeCounterState(
+            node_groups=counts.node_groups,
+            edge_paths=counts.edge_paths,
+            edge_labels=counts.edge_labels,
+            text_nodes=counts.text_nodes,
+            foreign_object_text_nodes=counts.foreign_object_text_nodes + 1,
+        )
+    return None
+
+
 def _count_svg_shape_elements(root: ET.Element) -> _SvgShapeCounterState:
     counts = _SvgShapeCounterState()
     for elem in root.iter():
         tag = _element_tag(elem)
         classes = _class_tokens(elem)
-        if tag == "g" and "node" in classes:
-            counts = _SvgShapeCounterState(
-                node_groups=counts.node_groups + 1,
-                edge_paths=counts.edge_paths,
-                edge_labels=counts.edge_labels,
-                text_nodes=counts.text_nodes,
-                foreign_object_text_nodes=counts.foreign_object_text_nodes,
-            )
-            continue
-        if tag == "g" and "edgePath" in classes:
-            counts = _SvgShapeCounterState(
-                node_groups=counts.node_groups,
-                edge_paths=counts.edge_paths + 1,
-                edge_labels=counts.edge_labels,
-                text_nodes=counts.text_nodes,
-                foreign_object_text_nodes=counts.foreign_object_text_nodes,
-            )
-            continue
-        if tag == "g" and "edgeLabel" in classes:
-            counts = _SvgShapeCounterState(
-                node_groups=counts.node_groups,
-                edge_paths=counts.edge_paths,
-                edge_labels=counts.edge_labels + 1,
-                text_nodes=counts.text_nodes,
-                foreign_object_text_nodes=counts.foreign_object_text_nodes,
-            )
-            continue
-        if tag == "text" and _element_has_text(elem):
-            counts = _SvgShapeCounterState(
-                node_groups=counts.node_groups,
-                edge_paths=counts.edge_paths,
-                edge_labels=counts.edge_labels,
-                text_nodes=counts.text_nodes + 1,
-                foreign_object_text_nodes=counts.foreign_object_text_nodes,
-            )
-            continue
-        if tag == "foreignObject" and _element_has_text(elem):
-            counts = _SvgShapeCounterState(
-                node_groups=counts.node_groups,
-                edge_paths=counts.edge_paths,
-                edge_labels=counts.edge_labels,
-                text_nodes=counts.text_nodes,
-                foreign_object_text_nodes=counts.foreign_object_text_nodes + 1,
-            )
+        next_counts = _next_svg_shape_counter_state(
+            counts,
+            tag=tag,
+            classes=classes,
+            has_text=_element_has_text(elem),
+        )
+        if next_counts is not None:
+            counts = next_counts
     return counts
 
 

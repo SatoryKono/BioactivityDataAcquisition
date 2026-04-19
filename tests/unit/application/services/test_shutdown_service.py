@@ -129,7 +129,7 @@ class TestShutdownService:
     @pytest.mark.asyncio
     async def test_wait_for_completion_timeout(self, shutdown_service: ShutdownService):
         """Test wait_for_completion returns False on timeout."""
-        result = await shutdown_service.wait_for_completion(timeout=0.01)
+        result = await shutdown_service.wait_for_completion(timeout_seconds=0.01)
         assert result is False
 
     @pytest.mark.asyncio
@@ -141,7 +141,7 @@ class TestShutdownService:
             shutdown_service.mark_completed()
 
         task = asyncio.create_task(mark_complete_after_delay())
-        result = await shutdown_service.wait_for_completion(timeout=1.0)
+        result = await shutdown_service.wait_for_completion(timeout_seconds=1.0)
 
         assert result is True
         await task

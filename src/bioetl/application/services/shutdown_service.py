@@ -55,7 +55,7 @@ class ShutdownService:
             break
 
         # Wait for graceful completion
-        completed = await shutdown_service.wait_for_completion(timeout=30.0)
+        completed = await shutdown_service.wait_for_completion(timeout_seconds=30.0)
 
     """
 
@@ -154,25 +154,25 @@ class ShutdownService:
         """
         await self._event.wait()
 
-    async def wait_for_completion(self, timeout: float) -> bool:
+    async def wait_for_completion(self, timeout_seconds: float) -> bool:
         """Wait for shutdown completion with timeout.
 
         Blocks until mark_completed() is called or timeout expires.
 
         Args:
-            timeout: Maximum seconds to wait for completion.
+            timeout_seconds: Maximum seconds to wait for completion.
 
         Returns:
             True if shutdown completed within timeout, False if timeout expired.
         """
         try:
-            async with asyncio.timeout(timeout):
+            async with asyncio.timeout(timeout_seconds):
                 await self._completion_event.wait()
             return True
         except TimeoutError:
             self.logger.warning(
                 "Shutdown completion timeout",
-                timeout_seconds=timeout,
+                timeout_seconds=timeout_seconds,
             )
             return False
 

@@ -337,6 +337,34 @@ def _record_runtime_mentions(
         alias_mentions[metric_name].append(relative_path)
 
 
+def _scan_runtime_metric_file(
+    path: Path,
+    *,
+    repo_root: Path,
+) -> tuple[str, set[str], set[str], set[str]] | None:
+    text = path.read_text(encoding="utf-8")
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return None
+    string_bindings = _resolve_imported_string_bindings(tree, repo_root=repo_root)
+    string_bindings.update(_collect_local_string_bindings(tree))
+    attribute_bindings = _collect_class_attribute_bindings(tree)
+    direct_metric_names, helper_metric_names, alias_metric_names = (
+        _scan_metric_names_in_tree(
+            tree,
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+        )
+    )
+    return (
+        _as_repo_relative(path, repo_root),
+        direct_metric_names,
+        helper_metric_names,
+        alias_metric_names,
+    )
+
+
 def _scan_runtime_metric_calls(
     repo_root: Path,
 ) -> tuple[dict[str, list[str]], dict[str, list[str]], dict[str, list[str]]]:
@@ -347,20 +375,12 @@ def _scan_runtime_metric_calls(
         path_str = path.as_posix()
         if any(excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS):
             continue
-        text = path.read_text(encoding="utf-8")
-        try:
-            tree = ast.parse(text)
-        except SyntaxError:
+        scan_result = _scan_runtime_metric_file(path, repo_root=repo_root)
+        if scan_result is None:
             continue
-        string_bindings = _resolve_imported_string_bindings(tree, repo_root=repo_root)
-        string_bindings.update(_collect_local_string_bindings(tree))
-        attribute_bindings = _collect_class_attribute_bindings(tree)
-        direct_metric_names, helper_metric_names, alias_metric_names = _scan_metric_names_in_tree(
-            tree,
-            string_bindings=string_bindings,
-            attribute_bindings=attribute_bindings,
+        relative_path, direct_metric_names, helper_metric_names, alias_metric_names = (
+            scan_result
         )
-        relative_path = _as_repo_relative(path, repo_root)
         _record_runtime_mentions(
             canonical_mentions=canonical_mentions,
             helper_backed_mentions=helper_backed_mentions,
