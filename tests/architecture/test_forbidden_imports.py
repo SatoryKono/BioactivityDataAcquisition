@@ -188,14 +188,13 @@ def _iter_metrics_server_call_violations(src_dir: Path) -> list[str]:
         if not layer_path.exists():
             continue
         for py_file in _python_files(layer_path):
-            for line_number, line in enumerate(_read_file(py_file).splitlines(), 1):
-                if "start_metrics_server(" not in line:
-                    continue
-                if any(re.search(pattern, line) for pattern in allowed_patterns):
-                    continue
-                violations.append(
-                    f"{_relative(src_dir, py_file)}:{line_number} - {line.strip()}"
+            violations.extend(
+                _iter_file_metrics_server_call_violations(
+                    py_file,
+                    src_dir,
+                    allowed_patterns=allowed_patterns,
                 )
+            )
     return violations
 
 
@@ -205,7 +204,6 @@ def _port_import_violations(layer_path: Path, src_dir: Path) -> list[str]:
     for py_file in _python_files(layer_path):
         tree = _parse_file(py_file)
         relative_path = _relative(src_dir, py_file)
-
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
@@ -219,6 +217,31 @@ def _port_import_violations(layer_path: Path, src_dir: Path) -> list[str]:
                         f"{relative_path}:{node.lineno} imports from {node.module}"
                     )
     return violations
+
+
+def _iter_file_metrics_server_call_violations(
+    py_file: Path,
+    src_dir: Path,
+    *,
+    allowed_patterns: tuple[str, ...],
+) -> list[str]:
+    relative_path = _relative(src_dir, py_file)
+    return [
+        f"{relative_path}:{line_number} - {line.strip()}"
+        for line_number, line in enumerate(_read_file(py_file).splitlines(), 1)
+        if _is_forbidden_metrics_server_call_line(line, allowed_patterns)
+    ]
+
+
+def _is_forbidden_metrics_server_call_line(
+    line: str,
+    allowed_patterns: tuple[str, ...],
+) -> bool:
+    if "start_metrics_server(" not in line:
+        return False
+    return not any(re.search(pattern, line) for pattern in allowed_patterns)
+
+
 
 
 class TestLocalOnlyPolicy:

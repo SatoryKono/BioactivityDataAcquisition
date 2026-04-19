@@ -54,18 +54,10 @@ def _collect_forbidden_metrics_server_usage(
     forbidden_imports: set[str] = set()
     forbidden_calls: set[str] = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom):
-            for alias in node.names:
-                if alias.name == "start_metrics_server":
-                    forbidden_imports.add(alias.name)
-            continue
-        if not isinstance(node, ast.Call):
-            continue
-        func = node.func
-        if isinstance(func, ast.Name) and func.id == "start_metrics_server":
-            forbidden_calls.add(func.id)
-        elif isinstance(func, ast.Attribute) and func.attr == "start_metrics_server":
-            forbidden_calls.add(func.attr)
+        forbidden_imports.update(_iter_forbidden_metrics_imports(node))
+        call_name = _get_forbidden_metrics_call_name(node)
+        if call_name is not None:
+            forbidden_calls.add(call_name)
     return forbidden_imports, forbidden_calls
 
 
@@ -78,28 +70,50 @@ def _collect_exported_and_imported_names(path: Path) -> tuple[set[str], set[str]
         if isinstance(node, ast.ImportFrom):
             imported_names.update(alias.name for alias in node.names)
             continue
-        if not isinstance(node, ast.Assign):
-            continue
-        for target in node.targets:
-            if not (
-                isinstance(target, ast.Name)
-                and target.id in {"__all__", "_PUBLIC_EXPORTS"}
-            ):
-                continue
-            value = node.value
-            if isinstance(value, ast.List):
-                exported_names.update(
-                    elt.value
-                    for elt in value.elts
-                    if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
-                )
-            elif isinstance(value, ast.Dict):
-                exported_names.update(
-                    key.value
-                    for key in value.keys
-                    if isinstance(key, ast.Constant) and isinstance(key.value, str)
-                )
+        exported_names.update(_iter_exported_names(node))
     return imported_names, exported_names
+
+
+def _iter_forbidden_metrics_imports(node: ast.AST) -> set[str]:
+    if not isinstance(node, ast.ImportFrom):
+        return set()
+    return {alias.name for alias in node.names if alias.name == "start_metrics_server"}
+
+
+def _get_forbidden_metrics_call_name(node: ast.AST) -> str | None:
+    if not isinstance(node, ast.Call):
+        return None
+    func = node.func
+    if isinstance(func, ast.Name) and func.id == "start_metrics_server":
+        return func.id
+    if isinstance(func, ast.Attribute) and func.attr == "start_metrics_server":
+        return func.attr
+    return None
+
+
+def _iter_exported_names(node: ast.AST) -> set[str]:
+    if not isinstance(node, ast.Assign):
+        return set()
+    if not any(
+        isinstance(target, ast.Name)
+        and target.id in {"__all__", "_PUBLIC_EXPORTS"}
+        for target in node.targets
+    ):
+        return set()
+    value = node.value
+    if isinstance(value, ast.List):
+        return {
+            elt.value
+            for elt in value.elts
+            if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+        }
+    if isinstance(value, ast.Dict):
+        return {
+            key.value
+            for key in value.keys
+            if isinstance(key, ast.Constant) and isinstance(key.value, str)
+        }
+    return set()
 
 
 def test_runtime_metrics_bootstrap_uses_metrics_service_not_raw_infra_starter() -> None:

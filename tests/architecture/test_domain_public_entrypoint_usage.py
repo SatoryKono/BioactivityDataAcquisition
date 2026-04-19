@@ -65,13 +65,24 @@ def _iter_import_records(
     records: list[tuple[Path, int, str]] = []
     for py_file, tree in sorted(ast_cache.items()):
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module in module_names:
-                records.append((py_file, node.lineno, node.module))
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name in module_names:
-                        records.append((py_file, node.lineno, alias.name))
+            records.extend(_iter_node_import_records(py_file, node, module_names))
     return records
+
+
+def _iter_node_import_records(
+    py_file: Path,
+    node: ast.AST,
+    module_names: frozenset[str],
+) -> list[tuple[Path, int, str]]:
+    if isinstance(node, ast.ImportFrom) and node.module in module_names:
+        return [(py_file, node.lineno, node.module)]
+    if isinstance(node, ast.Import):
+        return [
+            (py_file, node.lineno, alias.name)
+            for alias in node.names
+            if alias.name in module_names
+        ]
+    return []
 
 
 def _format_prefix_confined_violations(

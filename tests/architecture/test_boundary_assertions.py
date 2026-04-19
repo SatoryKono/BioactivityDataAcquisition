@@ -57,29 +57,12 @@ class TestBoundaryAssertionsExist:
 
         source = source_file.read_text()
         tree = ast.parse(source)
+        function_node = _find_named_function(tree, func_name)
 
-        # Find the function/method body
-        func_body_found = False
-        has_isinstance_assert = False
-
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                if node.name == func_name:
-                    func_body_found = True
-                    # Check for assert isinstance(...) in function body
-                    for child in ast.walk(node):
-                        if isinstance(child, ast.Assert) and isinstance(
-                            child.test, ast.Call
-                        ):
-                            func = child.test.func
-                            if isinstance(func, ast.Name) and func.id == "isinstance":
-                                # Verify the port name appears in the assertion
-                                func_source = ast.get_source_segment(source, child)
-                                if func_source and port_name in func_source:
-                                    has_isinstance_assert = True
-
-        assert func_body_found, f"Function '{func_name}' not found in {module_path}"
-        assert has_isinstance_assert, (
+        assert function_node is not None, (
+            f"Function '{func_name}' not found in {module_path}"
+        )
+        assert _has_port_isinstance_assert(function_node, source, port_name), (
             f"Function '{func_name}' in {module_path} MUST contain "
             f"`assert isinstance(..., {port_name})` for boundary validation."
         )
@@ -103,3 +86,34 @@ class TestBoundaryAssertionsSufficiency:
             f"Expected at least 5 factory methods with boundary assertions, "
             f"found {count}."
         )
+
+
+def _find_named_function(
+    tree: ast.AST,
+    func_name: str,
+) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func_name:
+            return node
+    return None
+
+
+def _has_port_isinstance_assert(
+    function_node: ast.FunctionDef | ast.AsyncFunctionDef,
+    source: str,
+    port_name: str,
+) -> bool:
+    return any(
+        _is_matching_port_assert(child, source, port_name)
+        for child in ast.walk(function_node)
+    )
+
+
+def _is_matching_port_assert(child: ast.AST, source: str, port_name: str) -> bool:
+    if not isinstance(child, ast.Assert) or not isinstance(child.test, ast.Call):
+        return False
+    func = child.test.func
+    if not isinstance(func, ast.Name) or func.id != "isinstance":
+        return False
+    func_source = ast.get_source_segment(source, child)
+    return bool(func_source and port_name in func_source)
