@@ -13,6 +13,9 @@ _VALID_RUN_ID = "12345678-1234-5678-1234-567812345678"
 from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
     CompositeSupportServices,
 )
+from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
+    CompositeRunnerServiceInputs,
+)
 from bioetl.composition.bootstrap.runtime.runner_assembly import (
     bootstrap_composite_runner,
     create_composite_runner,
@@ -33,18 +36,30 @@ class TestCreateCompositeRunnerService:
         fsm = MagicMock()
 
         result = create_composite_runner_service(
-            config=config,
-            runtime=runtime,
-            seed_runner_factory=MagicMock(),
-            enricher_runner_factory=MagicMock(),
-            key_extractor=MagicMock(),
-            coordinator=MagicMock(),
-            merger=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            logger=logger,
-            lock=lock,
-            fsm_state_helper=fsm,
-            run_id=_VALID_RUN_ID,
+            CompositeRunnerServiceInputs(
+                config=config,
+                runtime=runtime,
+                seed_runner_factory=MagicMock(),
+                enricher_runner_factory=MagicMock(),
+                key_extractor=MagicMock(),
+                coordinator=MagicMock(),
+                merger=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                logger=logger,
+                lock=lock,
+                fsm_state_helper=fsm,
+                run_id=_VALID_RUN_ID,
+                dq_report_service=None,
+                preflight_validator=None,
+                dependencies_runner_factory=None,
+                dependency_coordinator=None,
+                quarantine_port=None,
+                metrics=None,
+                tracer=None,
+                observer=None,
+                manifest_id=None,
+                run_ledger_service=None,
+            )
         )
 
         assert result is not None
@@ -52,28 +67,7 @@ class TestCreateCompositeRunnerService:
     def test_generates_run_id_when_none(self) -> None:
         """When run_id is None a UUID is generated."""
         result = create_composite_runner_service(
-            config=MagicMock(),
-            runtime=MagicMock(),
-            seed_runner_factory=MagicMock(),
-            enricher_runner_factory=MagicMock(),
-            key_extractor=MagicMock(),
-            coordinator=MagicMock(),
-            merger=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            logger=MagicMock(),
-            lock=MagicMock(),
-            fsm_state_helper=MagicMock(),
-            run_id=None,
-        )
-
-        assert result is not None
-
-    def test_requires_fsm_state_helper(self) -> None:
-        """Implicit FSM helper construction is no longer supported."""
-        with pytest.raises(
-            AssertionError, match="Composite runner requires fsm_state_helper"
-        ):
-            create_composite_runner_service(
+            CompositeRunnerServiceInputs(
                 config=MagicMock(),
                 runtime=MagicMock(),
                 seed_runner_factory=MagicMock(),
@@ -84,8 +78,53 @@ class TestCreateCompositeRunnerService:
                 checkpoint_manager=MagicMock(),
                 logger=MagicMock(),
                 lock=MagicMock(),
-                fsm_state_helper=cast(Any, None),
-                run_id=_VALID_RUN_ID,
+                fsm_state_helper=MagicMock(),
+                run_id=None,
+                dq_report_service=None,
+                preflight_validator=None,
+                dependencies_runner_factory=None,
+                dependency_coordinator=None,
+                quarantine_port=None,
+                metrics=None,
+                tracer=None,
+                observer=None,
+                manifest_id=None,
+                run_ledger_service=None,
+            )
+        )
+
+        assert result is not None
+
+    def test_requires_fsm_state_helper(self) -> None:
+        """Implicit FSM helper construction is no longer supported."""
+        with pytest.raises(
+            AssertionError, match="Composite runner requires fsm_state_helper"
+        ):
+            create_composite_runner_service(
+                CompositeRunnerServiceInputs(
+                    config=MagicMock(),
+                    runtime=MagicMock(),
+                    seed_runner_factory=MagicMock(),
+                    enricher_runner_factory=MagicMock(),
+                    key_extractor=MagicMock(),
+                    coordinator=MagicMock(),
+                    merger=MagicMock(),
+                    checkpoint_manager=MagicMock(),
+                    logger=MagicMock(),
+                    lock=MagicMock(),
+                    fsm_state_helper=cast(Any, None),
+                    run_id=_VALID_RUN_ID,
+                    dq_report_service=None,
+                    preflight_validator=None,
+                    dependencies_runner_factory=None,
+                    dependency_coordinator=None,
+                    quarantine_port=None,
+                    metrics=None,
+                    tracer=None,
+                    observer=None,
+                    manifest_id=None,
+                    run_ledger_service=None,
+                )
             )
 
 
@@ -170,15 +209,17 @@ class TestCreateCompositeRunner:
             runner_factory=runner_factory,
         )
 
-        call_kwargs = runner_factory.call_args[1]
-        assert call_kwargs["key_extractor"] is key_extractor
-        assert call_kwargs["dependency_coordinator"] is dependency_coordinator
-        assert call_kwargs["fsm_state_helper"] is fsm_state_helper
-        assert call_kwargs["dq_report_service"] is dq_report_service
-        assert call_kwargs["quarantine_port"] is quarantine_port
-        assert call_kwargs["tracer"] is not None
-        assert call_kwargs["manifest_id"] == "manifest-123"
-        assert call_kwargs["run_ledger_service"] is support_services.run_ledger_service
+        call_args = runner_factory.call_args[0]
+        assert len(call_args) == 1
+        inputs = call_args[0]
+        assert inputs.key_extractor is key_extractor
+        assert inputs.dependency_coordinator is dependency_coordinator
+        assert inputs.fsm_state_helper is fsm_state_helper
+        assert inputs.dq_report_service is dq_report_service
+        assert inputs.quarantine_port is quarantine_port
+        assert inputs.tracer is not None
+        assert inputs.manifest_id == "manifest-123"
+        assert inputs.run_ledger_service is support_services.run_ledger_service
 
 
 @pytest.mark.unit
