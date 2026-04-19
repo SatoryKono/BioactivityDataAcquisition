@@ -5,6 +5,7 @@ Defines protocols for pipeline runner creation and execution.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.ports.config import PipelineYamlConfigPort, SettingsPort
@@ -26,6 +27,7 @@ __all__ = [
     "ExecutionMetricsRunnerPort",
     "ExecutionObservabilityPort",
     "MetricsExtractorPort",
+    "PipelineCreateWithServicesRequest",
     "PipelineFactoryPort",
     "RunnablePort",
     "RunnerFactoryPort",
@@ -172,6 +174,26 @@ class MetricsExtractorPort(Protocol):
         ...
 
 
+@dataclass(frozen=True, slots=True)
+class PipelineCreateWithServicesRequest:
+    """Canonical pipeline-factory request for service-aware pipeline creation."""
+
+    run_id: RunID
+    runtime: RuntimeConfig
+    settings: SettingsPort
+    logger: LoggerPort
+    manifest_id: str | None = None
+    config_hash: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
+    config: PipelineYamlConfigPort | None = None
+    filter_config: InputFilterConfig | None = None
+    tracer: TracingPort | None = None
+    dq_monitor: DQMonitorPort | None = None
+    metrics: MetricsPort | None = None
+    cached_bronze: CachedBronzeContext | None = None
+
+
 @runtime_checkable
 class PipelineFactoryPort(Protocol):
     """Protocol for constructing pipelines and execution runners."""
@@ -182,38 +204,12 @@ class PipelineFactoryPort(Protocol):
 
     def create_with_services(
         self,
-        run_id: RunID,
-        runtime: RuntimeConfig,
-        settings: SettingsPort,
-        logger: LoggerPort,
-        manifest_id: str | None = None,
-        config_hash: str | None = None,
-        dq_contract_compatibility_hash: str | None = None,
-        effective_config_artifact_id: str | None = None,
-        config: PipelineYamlConfigPort | None = ...,
-        filter_config: InputFilterConfig | None = ...,
-        tracer: TracingPort | None = ...,
-        dq_monitor: DQMonitorPort | None = ...,
-        metrics: MetricsPort | None = ...,
-        cached_bronze: CachedBronzeContext | None = ...,
+        request: PipelineCreateWithServicesRequest,
     ) -> object:
         """Create pipeline with services.
 
         Args:
-            run_id: Pipeline run identifier.
-            runtime: Runtime configuration.
-            settings: Domain-facing execution settings contract.
-            logger: Structured logging port for pipeline assembly signals.
-            manifest_id: Optional immutable run-manifest identifier.
-            config_hash: Optional canonical execution config hash.
-            dq_contract_compatibility_hash: Optional DQ compatibility hash.
-            effective_config_artifact_id: Optional effective-config artifact reference.
-            config: Optional pipeline-definition contract for explicit wiring.
-            filter_config: Optional input-filter contract for record selection.
-            tracer: Optional tracing port for execution spans.
-            dq_monitor: Optional data-quality monitoring port.
-            metrics: Optional metrics collection port.
-            cached_bronze: Optional cached Bronze execution context.
+            request: Canonical creation request with runtime and service seams.
 
         Returns:
             Opaque assembled pipeline instance ready for runner wiring.
