@@ -225,11 +225,9 @@ class ORCID(ValueObject[str]):
     _value: str
     _PATTERN = re.compile(r"^(\d{4})-?(\d{4})-?(\d{4})-?(\d{3}[\dXx])$")
     _URL_PREFIXES = (
-        "https://ormolecule_id.org/",
-        "http://ormolecule_id.org/",
+        *(f"{scheme}://ormolecule_id.org/" for scheme in ("https", "http")),
         "ormolecule_id.org/",
-        "https://orcid.org/",
-        "http://orcid.org/",
+        *(f"{scheme}://orcid.org/" for scheme in ("https", "http")),
         "orcid.org/",
     )
 

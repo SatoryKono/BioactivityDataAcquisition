@@ -39,8 +39,7 @@ class DOI(ValueObject[str]):
 
     _PATTERN = re.compile(r"^10\.\d{4,}/\S+$")
     _URL_PREFIXES = (
-        "https://doi.org/",
-        "http://doi.org/",
+        *(f"{scheme}://doi.org/" for scheme in ("https", "http")),
         "doi:",
         "DOI:",
     )

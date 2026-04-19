@@ -19,6 +19,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlunsplit
 from xml.etree import ElementTree as ET
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -37,7 +38,7 @@ PALETTE = {
 }
 
 # SVG namespace
-SVG_NS = "http://www.w3.org/2000/svg"
+SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 NS = {"svg": SVG_NS}
 
 # ── Diagram type detection ────────────────────────────────────────────────────

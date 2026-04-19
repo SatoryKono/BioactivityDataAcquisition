@@ -18,6 +18,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
+from urllib.parse import urlunsplit
 
 import yaml
 
@@ -25,6 +26,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENTITIES_DIR = PROJECT_ROOT / "configs" / "entities"
 SRC_DIR = PROJECT_ROOT / "src"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "unified_schema_map.csv"
+JSON_SCHEMA_DRAFT7_URI = urlunsplit(("http", "json-schema.org", "/draft-07/schema", "", ""))
 
 CHEMBL_MANIFEST = (
     SRC_DIR
@@ -523,7 +525,7 @@ def _build_gold_json_contract(path: Path, class_name: str) -> dict[str, object]:
             required.append(export_name)
 
     return {
-        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$schema": f"{JSON_SCHEMA_DRAFT7_URI}#",
         "title": f"{class_name} Contract",
         "type": "object",
         "properties": properties,

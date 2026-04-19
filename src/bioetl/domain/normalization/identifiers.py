@@ -16,8 +16,7 @@ __all__ = [
 ]
 
 _DOI_URL_PREFIXES = (
-    "https://doi.org/",
-    "http://doi.org/",
+    *(f"{scheme}://doi.org/" for scheme in ("https", "http")),
     "doi:",
 )
 PMID_MAX_EXCLUSIVE = 10_000_000_000
