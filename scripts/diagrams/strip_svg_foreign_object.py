@@ -61,7 +61,7 @@ def _strip_foreign_objects_tree(path: Path) -> tuple[ET.ElementTree[ET.Element[s
     removed = 0
 
     for parent in root.iter():
-        for child in list(parent):
+        for child in tuple(parent):
             if _local_name(child.tag) != "foreignObject":
                 continue
             parent.remove(child)

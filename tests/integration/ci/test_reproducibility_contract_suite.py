@@ -368,7 +368,7 @@ def test_reproducibility_contract_effective_config_semantic_payload_is_stable() 
         rule_bundle_version="dq-rules.v1",
         default_disposition_policy=DQDisposition.WARN,
     )
-    kwargs = dict(
+    kwargs = {
         pipeline_name="chembl_activity",
         pipeline_kind="standard",
         resolved_config={"provider": "chembl", "entity_type": "activity"},
@@ -383,7 +383,7 @@ def test_reproducibility_contract_effective_config_semantic_payload_is_stable() 
         ],
         dq_config=dq_config,
         artifact_id="eca-stable",
-    )
+    }
     first = service.create_effective_config_artifact(**kwargs)
     second = service.create_effective_config_artifact(**kwargs)
 

@@ -220,7 +220,7 @@ class TestHealthService:
                 status=HealthStatus.HEALTHY,
                 latency_ms=100.0,
                 provider="test",
-                endpoint="http://api.example.com/status",
+                endpoint="https://api.example.com/status",
                 checked_at=datetime.now(tz=UTC),
             )
         )

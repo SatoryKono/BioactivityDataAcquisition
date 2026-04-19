@@ -168,8 +168,12 @@ def test_build_dataframe_from_records_emits_metric_on_failure(
     records: list[dict[str, object]] = [
         {"entity_id": "1", "payload": "value"},
     ]
+
+    def _raise_dataframe_error(*args: object, **kwargs: object) -> object:
+        raise RuntimeError("boom")
+
     fake_polars = SimpleNamespace(
-        DataFrame=lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("boom")),
+        DataFrame=_raise_dataframe_error,
         exceptions=SimpleNamespace(PolarsError=RuntimeError),
     )
     monkeypatch.setitem(sys.modules, "polars", fake_polars)

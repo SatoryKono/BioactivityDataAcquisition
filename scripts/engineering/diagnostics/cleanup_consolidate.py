@@ -115,7 +115,7 @@ def find_cache_targets(root: Path) -> list[CleanupTarget]:
             for name in dirnames
             if name not in SKIP_DIRS and not name.startswith(".")
         ]
-        for dirname in list(dirnames):
+        for dirname in dirnames:
             if dirname in PYTHON_CACHE_DIRS:
                 targets.append(
                     CleanupTarget(

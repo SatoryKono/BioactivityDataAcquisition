@@ -36,7 +36,7 @@ class _ConcreteMaintMixin(SilverWriterMaintenanceMixin):
 
 
 @pytest.mark.unit
-class TestMaybeExportCsvLines77_78:
+class TestMaybeExportCsvEdgeCases:
     """Tests for _maybe_export_csv (lines 77-78)."""
 
     @pytest.mark.asyncio
@@ -142,7 +142,7 @@ class TestMaybeExportCsvLines77_78:
 
 
 @pytest.mark.unit
-class TestPreviewCleanupLines212_219:
+class TestPreviewCleanupEdgeCases:
     """Tests for preview_cleanup (lines 212-219)."""
 
     def test_preview_cleanup_existing_table(self, tmp_path: Path) -> None:

@@ -19,7 +19,7 @@ def _run_id(suffix: str = "1") -> str:
 
 
 @pytest.mark.unit
-class TestTryAcquireLines107_122:
+class TestTryAcquireEdgeCases:
     """Tests for _try_acquire edge cases (lines 107, 122)."""
 
     @pytest.mark.asyncio
@@ -154,7 +154,7 @@ class TestReleaseLines193:
 
 
 @pytest.mark.unit
-class TestValidateOwnerLines254_269:
+class TestValidateOwnerEdgeCases:
     """Tests for validate_owner (lines 254-269)."""
 
     @pytest.mark.asyncio

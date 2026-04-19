@@ -100,7 +100,7 @@ def _extract_text_lines(node: ET.Element) -> list[str]:
 
     def visit(elem: ET.Element) -> None:
         _append_raw_text(parts, elem.text)
-        for child in list(elem):
+        for child in elem:
             child_name = _local_name(child.tag).lower()
             if child_name == "br":
                 parts.append("\n")
@@ -402,7 +402,7 @@ def add_fallbacks(
 def _remove_empty_edge_label_groups(root: ET.Element) -> int:
     removed = 0
     for parent in root.iter():
-        for child in list(parent):
+        for child in tuple(parent):
             if not _is_empty_edge_label_group(child):
                 continue
             parent.remove(child)
@@ -493,7 +493,12 @@ def process_files(files: list[Path], mode: str) -> int:
 
 def main() -> int:
     args = parse_args()
-    mode = "check" if args.check else ("dry-run" if args.dry_run else "fix")
+    if args.check:
+        mode = "check"
+    elif args.dry_run:
+        mode = "dry-run"
+    else:
+        mode = "fix"
     files = collect_svg_files(args.file, args.dir)
 
     if not files:

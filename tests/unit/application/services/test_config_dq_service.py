@@ -338,12 +338,13 @@ def test_get_effective_config_artifact_handles_present_and_missing_dq_config() -
         "configs/providers/crossref.yaml",
     ]
 
+    def _missing_dq_config(_pipeline_name: str) -> dict[str, object]:
+        raise FileNotFoundError()
+
     missing_service = ConfigDQService(
         logger=logger,
         _pipeline_yaml_getter=lambda pipeline_name: {"provider": "crossref"},
-        _dq_config_loader=lambda pipeline_name: (_ for _ in ()).throw(
-            FileNotFoundError()
-        ),
+        _dq_config_loader=_missing_dq_config,
         _effective_config_service=effective_service,
     )
     missing_service.get_effective_config_artifact("crossref_publication")

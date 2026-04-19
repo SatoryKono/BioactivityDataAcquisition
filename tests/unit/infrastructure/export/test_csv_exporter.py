@@ -480,11 +480,14 @@ class TestCsvExporterInternals:
             fd = os.open(temp_path, os.O_CREAT | os.O_RDWR)
             return fd, str(temp_path)
 
+        def _raise_write_failed(*args: object, **kwargs: object) -> object:
+            raise RuntimeError("write failed")
+
         monkeypatch.setattr(tempfile, "mkstemp", _fake_mkstemp)
         monkeypatch.setattr(
             pv,
             "write_csv",
-            lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("write failed")),
+            _raise_write_failed,
         )
 
         with pytest.raises(RuntimeError, match="write failed"):

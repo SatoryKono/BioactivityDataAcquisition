@@ -27,8 +27,8 @@ if command -v uv >/dev/null 2>&1; then
     export VIRTUAL_ENV="$VENV_DIR"
     export PATH="$VENV_DIR/bin:$PATH"
     uv sync --active --extra dev --extra tracing || {
-        echo "[setup_env_wsl][error] uv sync failed."
-        echo "[setup_env_wsl][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $UV_HTTP_TIMEOUT seconds."
+        echo "[setup_env_wsl][error] uv sync failed." >&2
+        echo "[setup_env_wsl][hint] Retry with the same command; UV_HTTP_TIMEOUT defaults to $UV_HTTP_TIMEOUT seconds." >&2
         exit 1
     }
 else
@@ -37,7 +37,7 @@ else
     elif command -v python >/dev/null 2>&1; then
         python -m venv "$VENV_DIR"
     else
-        echo "[setup_env_wsl][error] Neither uv, python3, nor python is available."
+        echo "[setup_env_wsl][error] Neither uv, python3, nor python is available." >&2
         exit 1
     fi
 
