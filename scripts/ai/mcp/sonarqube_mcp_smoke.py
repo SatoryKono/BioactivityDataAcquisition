@@ -179,12 +179,8 @@ def _pipe_reader(
         chunks.put((channel, None))
 
 
-def run_smoke_command(
-    command: Sequence[str],
-    *,
-    startup_timeout_seconds: float,
-    handshake_timeout_seconds: float,
-) -> SmokeResult:
+def _setup_process_and_validation(command: Sequence[str]) -> tuple[subprocess.Popen[bytes], bool, str]:
+    """Setup subprocess and validate stdio pipes."""
     process = subprocess.Popen(
         list(command),
         stdin=subprocess.PIPE,
@@ -193,11 +189,11 @@ def run_smoke_command(
     )
     if process.stdin is None or process.stdout is None or process.stderr is None:
         process.kill()
-        return SmokeResult(
-            ok=False,
-            summary="sonarqube MCP smoke could not open process stdio pipes.",
-        )
+        return process, False, "sonarqube MCP smoke could not open process stdio pipes."
+    return process, True, ""
 
+def _initialize_smoke_state() -> tuple[bytearray, bytearray, dict[int, dict[str, Any]], bool, bool, queue.Queue[tuple[str, bytes | None]], set[str]]:
+    """Initialize data structures for smoke test."""
     stdout_buffer = bytearray()
     stderr_buffer = bytearray()
     responses: dict[int, dict[str, Any]] = {}
@@ -205,6 +201,14 @@ def run_smoke_command(
     handshake_sent = False
     chunks: queue.Queue[tuple[str, bytes | None]] = queue.Queue()
     closed_channels: set[str] = set()
+    return stdout_buffer, stderr_buffer, responses, ready_seen, handshake_sent, chunks, closed_channels
+
+def _start_io_threads(
+    process: subprocess.Popen[bytes],
+    chunks: queue.Queue[tuple[str, bytes | None]],
+    closed_channels: set[str],
+) -> list[threading.Thread]:
+    """Start I/O threads for stdin, stdout, and stderr."""
     readers = [
         threading.Thread(
             target=_pipe_reader,

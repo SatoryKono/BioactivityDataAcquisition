@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -31,6 +33,9 @@ from bioetl.application.services.cli_run_orchestration_service import (
     RunPreparedPipelineCallable,
     StartOffsetValidationResult,
 )
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-cli-run-orchestration-"))
+CACHED_BRONZE_PATH = str(TEST_ROOT / "bronze")
 
 
 def _make_result(**kwargs: object) -> RunResult:
@@ -85,7 +90,7 @@ class TestPrepareExecutionRequest:
                     debug=True,
                     use_cached_bronze=True,
                     cached_bronze_date="2026-03-12",
-                    cached_bronze_path="/tmp/bronze",
+                    cached_bronze_path=CACHED_BRONZE_PATH,
                 ),
                 health_server=False,
                 health_port=8081,
@@ -127,7 +132,7 @@ class TestPrepareExecutionRequest:
                     debug=False,
                     use_cached_bronze=True,
                     cached_bronze_date="2026-03-12",
-                    cached_bronze_path="/tmp/bronze",
+                    cached_bronze_path=CACHED_BRONZE_PATH,
                     exact_replay=True,
                 ),
                 health_server=False,
@@ -139,7 +144,7 @@ class TestPrepareExecutionRequest:
         assert result.request is not None
         assert result.request.options.use_cached_bronze is True
         assert result.request.options.cached_bronze_date == "2026-03-12"
-        assert result.request.options.cached_bronze_path == "/tmp/bronze"
+        assert result.request.options.cached_bronze_path == CACHED_BRONZE_PATH
         assert result.request.options.exact_replay is True
 
     def test_invalid_start_offset_returns_error_without_request(self) -> None:
@@ -228,7 +233,7 @@ class TestPrepareExecutionRequest:
                     debug=False,
                     use_cached_bronze=True,
                     cached_bronze_date="2026-03-12",
-                    cached_bronze_path="/tmp/bronze",
+                    cached_bronze_path=CACHED_BRONZE_PATH,
                     replay_of_run_id="run-parent",
                     replay_of_manifest_id="manifest-parent",
                     exact_replay=False,
@@ -314,7 +319,7 @@ class TestPrepareExecutionRequest:
                 debug=False,
                 use_cached_bronze=True,
                 cached_bronze_date="2026-03-12",
-                cached_bronze_path="/tmp/bronze",
+                cached_bronze_path=CACHED_BRONZE_PATH,
                 exact_replay=True,
             )
         )
@@ -340,7 +345,7 @@ class TestPrepareExecutionRequest:
                 debug=False,
                 use_cached_bronze=True,
                 cached_bronze_date="2026-03-12",
-                cached_bronze_path="/tmp/bronze",
+                cached_bronze_path=CACHED_BRONZE_PATH,
                 replay_of_run_id="run-parent",
                 replay_of_manifest_id="manifest-parent",
                 exact_replay=True,
@@ -370,7 +375,7 @@ class TestPrepareExecutionRequest:
                     debug=False,
                     use_cached_bronze=True,
                     cached_bronze_date="2026-03-12",
-                    cached_bronze_path="/tmp/bronze",
+                    cached_bronze_path=CACHED_BRONZE_PATH,
                     replay_of_run_id="run-parent",
                     replay_of_manifest_id="manifest-parent",
                     exact_replay=True,

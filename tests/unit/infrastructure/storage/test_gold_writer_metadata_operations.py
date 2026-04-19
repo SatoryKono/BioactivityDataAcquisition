@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import tempfile
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, call
 
@@ -23,6 +25,11 @@ from bioetl.infrastructure.storage.gold.metadata_operations import (
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-gold-writer-metadata-ops-"))
+GOLD_CHEMBL_COMPOUND_PATH = str(TEST_ROOT / "gold" / "chembl_compound")
+GOLD_COMPOSITE_PUBLICATION_PATH = str(TEST_ROOT / "gold" / "composite" / "publication")
+GOLD_MERGED_PATH = str(TEST_ROOT / "gold" / "merged")
 
 
 def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
@@ -112,7 +119,7 @@ class TestPrepareGoldMetadataWrite:
         from bioetl.domain.medallion import GoldWriteMode
 
         request = _GoldMetadataWriteRequest(
-            table_path="/tmp/gold/chembl_compound",
+            table_path=GOLD_CHEMBL_COMPOUND_PATH,
             table_name="chembl_compound",
             records=[{"id": 1}],
             mode=GoldWriteMode.APPEND,
@@ -136,7 +143,7 @@ class TestPrepareGoldMetadataWrite:
         from bioetl.domain.medallion import GoldWriteMode
 
         request = _GoldMetadataWriteRequest(
-            table_path="/tmp/gold/chembl_compound",
+            table_path=GOLD_CHEMBL_COMPOUND_PATH,
             table_name="chembl_compound",
             records=[{"id": 1}],
             mode=GoldWriteMode.APPEND,
@@ -183,7 +190,7 @@ class TestPrepareGoldMetadataWrite:
         from bioetl.domain.medallion import GoldWriteMode
 
         request = _GoldMetadataWriteRequest(
-            table_path="/tmp/gold/chembl_compound",
+            table_path=GOLD_CHEMBL_COMPOUND_PATH,
             table_name="chembl_compound",
             records=[{"id": 1}],
             mode=GoldWriteMode.APPEND,
@@ -212,7 +219,7 @@ class TestPersistGoldMetadataWrite:
         from bioetl.domain.medallion import GoldWriteMode
 
         request = _GoldMetadataWriteRequest(
-            table_path="/tmp/gold/chembl_compound",
+            table_path=GOLD_CHEMBL_COMPOUND_PATH,
             table_name="chembl_compound",
             records=[{"id": 1}],
             mode=GoldWriteMode.APPEND,
@@ -244,7 +251,7 @@ class TestPersistGoldMetadataWrite:
         from bioetl.domain.medallion import GoldWriteMode
 
         request = _GoldMetadataWriteRequest(
-            table_path="/tmp/gold/chembl_compound",
+            table_path=GOLD_CHEMBL_COMPOUND_PATH,
             table_name="chembl_compound",
             records=[{"id": 1}],
             mode=GoldWriteMode.APPEND,
@@ -311,7 +318,7 @@ class TestPersistGoldMetadataWrite:
         host._metrics = MagicMock()
         metadata = _make_bundle_safe_metadata()
         request = _GoldMergedMetadataWriteRequest(
-            table_path="/tmp/gold/composite/publication",
+            table_path=GOLD_COMPOSITE_PUBLICATION_PATH,
             table_name="composite.publication",
             records=[
                 {
@@ -386,7 +393,7 @@ class TestMaybePrepareGoldMergedMetadataWrite:
         """Should skip when records list is empty."""
         host = MagicMock()
         request = _GoldMergedMetadataWriteRequest(
-            table_path="/tmp/gold/merged",
+            table_path=GOLD_MERGED_PATH,
             table_name="merged_table",
             records=[],
         )
@@ -400,7 +407,7 @@ class TestMaybePrepareGoldMergedMetadataWrite:
         host._transform_version = "1.0.0"
         host._transform_steps = ()
         request = _GoldMergedMetadataWriteRequest(
-            table_path="/tmp/gold/merged",
+            table_path=GOLD_MERGED_PATH,
             table_name="merged_table",
             records=[{"id": 1}],
         )
@@ -433,7 +440,7 @@ class TestMaybePrepareGoldMergedMetadataWrite:
         host._transform_version = "2.0.0"
         host._transform_steps = ("normalize",)
         request = _GoldMergedMetadataWriteRequest(
-            table_path="/tmp/gold/merged",
+            table_path=GOLD_MERGED_PATH,
             table_name="composite.publication",
             records=[{"id": 1}],
         )

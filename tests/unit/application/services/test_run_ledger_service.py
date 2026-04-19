@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import tempfile
 from datetime import UTC, datetime
 from json import dumps
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -17,6 +19,11 @@ from bioetl.domain.control_plane import (
 from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.types.dq_contracts import DQDisposition
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-ledger-service-"))
+SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
+SILVER_METADATA_PATH = str(Path(SILVER_ARTIFACT_PATH) / "_metadata.yaml")
+GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "output" / "gold" / "chembl" / "activity" / "_dq.json")
 
 
 class _InMemoryRunLedgerStore(RunLedgerPort):
@@ -373,10 +380,10 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
 
     entry = service.record_artifact_published(
         layer="silver",
-        artifact_path="/tmp/output/silver/chembl/activity",
+        artifact_path=SILVER_ARTIFACT_PATH,
         dataset_ref="silver:chembl.activity@7",
         lineage_fragment_id="silver:fragment-1",
-        details={"metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml"},
+        details={"metadata_path": SILVER_METADATA_PATH},
     )
 
     assert entry.event_type == "artifact_published"
@@ -386,8 +393,8 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
     assert entry.dataset_ref == "silver:chembl.activity@7"
     assert entry.lineage_fragment_id == "silver:fragment-1"
     assert entry.details == {
-        "artifact_path": "/tmp/output/silver/chembl/activity",
-        "metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml",
+        "artifact_path": SILVER_ARTIFACT_PATH,
+        "metadata_path": SILVER_METADATA_PATH,
         "_diagnostic": {
             "diagnostic_contract_version": "v1",
             "event_type": "artifact_published",
@@ -419,7 +426,7 @@ def test_record_artifact_published_rejects_unlinked_artifact() -> None:
     ):
         service.record_artifact_published(
             layer="silver",
-            artifact_path="/tmp/output/silver/chembl/activity",
+            artifact_path=SILVER_ARTIFACT_PATH,
         )
 
 
@@ -437,7 +444,7 @@ def test_record_dq_policy_applied_captures_trace_anchors() -> None:
         stage="gold",
         rule_id="gold.not_null.id",
         disposition=DQDisposition.FAIL,
-        dq_report_path="/tmp/output/gold/chembl/activity/_dq.json",
+        dq_report_path=GOLD_DQ_REPORT_PATH,
     )
 
     assert entry.event_type == "dq_policy_applied"
@@ -447,7 +454,7 @@ def test_record_dq_policy_applied_captures_trace_anchors() -> None:
     assert entry.details == {
         "rule_id": "gold.not_null.id",
         "disposition": "fail",
-        "dq_report_path": "/tmp/output/gold/chembl/activity/_dq.json",
+        "dq_report_path": GOLD_DQ_REPORT_PATH,
         "_diagnostic": {
             "diagnostic_contract_version": "v1",
             "event_type": "dq_policy_applied",

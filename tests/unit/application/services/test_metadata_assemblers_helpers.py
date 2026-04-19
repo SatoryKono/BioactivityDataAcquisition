@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import tempfile
 from datetime import UTC, datetime
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -33,10 +35,16 @@ from bioetl.domain.types import BatchID, RunID, RunType, ScdConfig
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.run_context import RunContext
 
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-metadata-assemblers-helpers-"))
+SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "table")
+GOLD_TABLE_PATH = str(TEST_ROOT / "gold" / "table")
+SILVER_REF_A_PATH = str(TEST_ROOT / "silver" / "a")
+SILVER_REF_B_PATH = str(TEST_ROOT / "silver" / "b")
+
 
 def _make_silver_input(**overrides: object) -> SilverMetadataInput:
     payload: dict[str, object] = {
-        "table_path": "/tmp/silver/table",
+        "table_path": SILVER_TABLE_PATH,
         "primary_keys": ["id"],
         "mode": SilverWriteMode.MERGE,
         "records": [{"id": 1}],
@@ -50,7 +58,7 @@ def _make_bronze_ref(relative_path: str) -> BronzeWriteResult:
     return BronzeWriteResult(
         batch_id=BatchID(uuid4()),
         relative_path=relative_path,
-        absolute_path=f"/tmp/{relative_path}",
+        absolute_path=str(TEST_ROOT / relative_path),
         record_count=1,
         compressed_size=10,
         uncompressed_size=20,
@@ -60,7 +68,7 @@ def _make_bronze_ref(relative_path: str) -> BronzeWriteResult:
 
 def _make_gold_input(**overrides: object) -> GoldMetadataInput:
     payload: dict[str, object] = {
-        "table_path": "/tmp/gold/table",
+        "table_path": GOLD_TABLE_PATH,
         "table_name": "gold.test",
         "mode": GoldWriteMode.APPEND,
         "records": [{"id": 1}],
@@ -264,7 +272,7 @@ def test_build_silver_delta_maps_modes(mode: SilverWriteMode, operation: str) ->
     delta = _build_silver_delta(input_data, rows_inserted=7)
 
     assert delta.operation == operation
-    assert delta.table_path == "/tmp/silver/table"
+    assert delta.table_path == SILVER_TABLE_PATH
     assert delta.primary_key == ["id"]
     assert delta.partition_by == []
     assert delta.version_after == 42
@@ -407,8 +415,16 @@ def test_resolve_gold_source_tables_handles_empty_and_populates_refs() -> None:
     assert _resolve_gold_source_tables(_make_gold_input(silver_refs=None)) == {}
 
     refs = [
-        SilverRef(table_name="chembl.activity", table_path="/tmp/a", delta_version=10),
-        SilverRef(table_name="chembl.assay", table_path="/tmp/b", delta_version=11),
+        SilverRef(
+            table_name="chembl.activity",
+            table_path=SILVER_REF_A_PATH,
+            delta_version=10,
+        ),
+        SilverRef(
+            table_name="chembl.assay",
+            table_path=SILVER_REF_B_PATH,
+            delta_version=11,
+        ),
     ]
     assert _resolve_gold_source_tables(_make_gold_input(silver_refs=refs)) == {
         "chembl.activity": 10,

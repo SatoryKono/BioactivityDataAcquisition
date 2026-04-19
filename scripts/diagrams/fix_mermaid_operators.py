@@ -96,7 +96,7 @@ def _repo_path(relative_path: Path) -> Path:
 
 def _resolve_repo_file_path(path: Path) -> Path:
     if path.is_absolute():
-        return _ensure_repo_path(path)
+        raise ValueError(f"refusing to process absolute path: {path}")
     return _ensure_repo_path(_repo_path(path))
 
 
