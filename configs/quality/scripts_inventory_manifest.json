@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-18T18:42:55.528967+00:00",
+  "generated_at": "2026-04-19T09:09:24.857469+00:00",
   "summary": {
-    "total_scripts": 389,
+    "total_scripts": 390,
     "status_counts": {
       "active": 284,
       "legacy": 15,
-      "orphan": 80,
+      "orphan": 81,
       "unknown": 10
     },
     "reference_group_coverage": {
@@ -2169,6 +2169,14 @@
           "text": "./run-vibe.sh --help              # Help"
         }
       ]
+    },
+    {
+      "path": "scripts/ai/scripts/ai/analyze_test_failures.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/scripts/ai/check_sonar_issues.py",
@@ -9295,7 +9303,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 442,
+          "line": 140,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh\","
         }
@@ -9310,7 +9318,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 443,
+          "line": 141,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh\","
         }
@@ -9325,7 +9333,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 450,
+          "line": 150,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh\","
         },
@@ -9346,7 +9354,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 447,
+          "line": 147,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_issue_2597.sh\","
         }
@@ -9361,7 +9369,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 451,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh\","
         },
@@ -9382,7 +9390,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 441,
+          "line": 139,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_superseded_prs.sh\","
         }
@@ -9405,7 +9413,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 446,
+          "line": 146,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_2597_progress.sh\","
         }
@@ -9420,7 +9428,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 448,
+          "line": 148,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_rescope_comments.sh\","
         }
@@ -9489,7 +9497,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 449,
+          "line": 149,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/update_issue_rescope_bodies.sh\","
         }
@@ -10451,7 +10459,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 464,
+          "line": 170,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
@@ -11063,7 +11071,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 471,
+          "line": 179,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_application_deps.py\","
         },
@@ -11084,7 +11092,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 470,
+          "line": 178,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_architecture.py\","
         },
@@ -11105,7 +11113,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 472,
+          "line": 180,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_constructor_args.py\","
         },
@@ -11126,7 +11134,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 463,
+          "line": 169,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/config_matrix_generator.py\","
         },
@@ -11171,7 +11179,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 465,
+          "line": 171,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/lint_terminology.py\","
         },
@@ -11192,7 +11200,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 466,
+          "line": 172,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/validate_unified_configs.py\","
         },

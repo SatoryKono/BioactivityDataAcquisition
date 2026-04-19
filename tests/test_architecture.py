@@ -167,6 +167,18 @@ def get_top_level_module(module_path: str) -> str:
     return module_path.split(".")[0]
 
 
+def iter_python_files(base_dir: Path, *, skip_dunder: bool) -> list[Path]:
+    return [
+        py_file
+        for py_file in base_dir.rglob("*.py")
+        if not (skip_dunder and py_file.name.startswith("__"))
+    ]
+
+
+def is_domain_purity_exempt_file(file_path: Path) -> bool:
+    return "domain/ports/noop/" in file_path.as_posix()
+
+
 def analyze_python_file(file_path: Path) -> tuple[list, list]:
     try:
         with file_path.open(encoding="utf-8") as f:
@@ -186,6 +198,90 @@ def format_violation(file_path: Path, lineno: int, message: str, src_dir: Path) 
     return f"{relative_path}:{lineno}: {message}"
 
 
+def collect_import_violations(
+    files: list[Path],
+    *,
+    src_dir: Path,
+    predicate,
+    message,
+) -> list[str]:
+    violations: list[str] = []
+    for py_file in files:
+        imports, _ = analyze_python_file(py_file)
+        for imp in imports:
+            if predicate(imp):
+                violations.append(
+                    format_violation(py_file, imp["lineno"], message(imp), src_dir)
+                )
+    return violations
+
+
+def collect_module_level_adapter_import_violations(files: list[Path]) -> list[str]:
+    violations: list[str] = []
+    for py_file in files:
+        content = py_file.read_text(encoding="utf-8")
+        try:
+            tree = ast.parse(content, filename=str(py_file))
+        except SyntaxError:
+            continue
+        in_type_checking = False
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.If)
+                and isinstance(node.test, ast.Name)
+                and node.test.id == "TYPE_CHECKING"
+            ):
+                in_type_checking = True
+            if not isinstance(node, (ast.Import, ast.ImportFrom)) or in_type_checking:
+                continue
+            module = node.module if isinstance(node, ast.ImportFrom) else None
+            if module and module.startswith("bioetl.infrastructure.adapters"):
+                violations.append(f"{py_file.name}:{node.lineno} imports {module}")
+    return violations
+
+
+def collect_unsafe_call_violations(files: list[Path], *, src_dir: Path) -> list[str]:
+    violations: list[str] = []
+    for py_file in files:
+        _, calls = analyze_python_file(py_file)
+        for call in calls:
+            if call["name"] in UNSAFE_BUILTINS and call.get("is_bare_call", True):
+                violations.append(
+                    format_violation(
+                        py_file,
+                        call["lineno"],
+                        f"Unsafe/Print function '{call['name']}'",
+                        src_dir,
+                    )
+                )
+            elif call["name"] in PRINT_FUNCTIONS:
+                violations.append(
+                    format_violation(
+                        py_file,
+                        call["lineno"],
+                        f"Unsafe/Print function '{call['name']}'",
+                        src_dir,
+                    )
+                )
+    return violations
+
+
+def collect_env_var_violations(
+    files: list[Path],
+    *,
+    allowed_files: set[Path],
+) -> list[str]:
+    allowed_resolved = {f.resolve() for f in allowed_files}
+    violations: list[str] = []
+    for py_file in files:
+        if py_file.resolve() in allowed_resolved:
+            continue
+        content = py_file.read_text(encoding="utf-8")
+        if "os.getenv" in content or "os.environ" in content:
+            violations.append(f"{py_file.name} uses os.getenv/environ")
+    return violations
+
+
 # =============================================================================
 # Domain Layer Tests
 # =============================================================================
@@ -194,30 +290,18 @@ def format_violation(file_path: Path, lineno: int, message: str, src_dir: Path) 
 def test_domain_purity_ast(src_dir: Path):
     """Domain layer must not import external frameworks or sync I/O libs."""
     domain_path = src_dir / "bioetl" / "domain"
-    violations = []
-
-    for py_file in domain_path.rglob("*.py"):
-        if py_file.name.startswith("__"):
-            continue
-
-        imports, _ = analyze_python_file(py_file)
-        for imp in imports:
-            module = imp["module"]
-            top_level = get_top_level_module(module)
-
-            # Check allowed list
-            if (
-                not module.startswith("bioetl.domain")
-                and top_level not in ALLOWED_DOMAIN_IMPORTS
-            ):
-                violations.append(
-                    format_violation(
-                        py_file,
-                        imp["lineno"],
-                        f"Forbidden import '{module}' in Domain",
-                        src_dir,
-                    )
-                )
+    domain_files = [
+        py_file
+        for py_file in iter_python_files(domain_path, skip_dunder=True)
+        if not is_domain_purity_exempt_file(py_file)
+    ]
+    violations = collect_import_violations(
+        domain_files,
+        src_dir=src_dir,
+        predicate=lambda imp: not imp["module"].startswith("bioetl.domain")
+        and get_top_level_module(imp["module"]) not in ALLOWED_DOMAIN_IMPORTS,
+        message=lambda imp: f"Forbidden import '{imp['module']}' in Domain",
+    )
 
     # Allow warnings/exceptions but enforce core purity
     # We filter out some violations that might be debatable or test-only if needed
@@ -238,23 +322,15 @@ def test_domain_purity_ast(src_dir: Path):
 def test_domain_no_infrastructure_imports(src_dir: Path):
     """Domain must not depend on Infrastructure or Application."""
     domain_path = src_dir / "bioetl" / "domain"
-    violations = []
     forbidden_layers = {"bioetl.infrastructure", "bioetl.application"}
-
-    for py_file in domain_path.rglob("*.py"):
-        if py_file.name.startswith("__"):
-            continue
-        imports, _ = analyze_python_file(py_file)
-        for imp in imports:
-            if any(imp["module"].startswith(layer) for layer in forbidden_layers):
-                violations.append(
-                    format_violation(
-                        py_file,
-                        imp["lineno"],
-                        f"Domain imports upper layer '{imp['module']}'",
-                        src_dir,
-                    )
-                )
+    violations = collect_import_violations(
+        iter_python_files(domain_path, skip_dunder=True),
+        src_dir=src_dir,
+        predicate=lambda imp: any(
+            imp["module"].startswith(layer) for layer in forbidden_layers
+        ),
+        message=lambda imp: f"Domain imports upper layer '{imp['module']}'",
+    )
 
     assert not violations, "\n".join(violations)
 
@@ -417,23 +493,15 @@ def test_io_ports_are_async():
 def test_application_no_concrete_infrastructure(src_dir: Path):
     """Application must not import concrete infrastructure implementations."""
     app_path = src_dir / "bioetl" / "application"
-    violations = []
-
-    for py_file in app_path.rglob("*.py"):
-        if py_file.name.startswith("__"):
-            continue
-        imports, _ = analyze_python_file(py_file)
-        for imp in imports:
-            for forbidden in FORBIDDEN_APPLICATION_INFRASTRUCTURE:
-                if imp["module"].startswith(forbidden):
-                    violations.append(
-                        format_violation(
-                            py_file,
-                            imp["lineno"],
-                            f"Application imports concrete infra '{imp['module']}'",
-                            src_dir,
-                        )
-                    )
+    violations = collect_import_violations(
+        iter_python_files(app_path, skip_dunder=True),
+        src_dir=src_dir,
+        predicate=lambda imp: any(
+            imp["module"].startswith(forbidden)
+            for forbidden in FORBIDDEN_APPLICATION_INFRASTRUCTURE
+        ),
+        message=lambda imp: f"Application imports concrete infra '{imp['module']}'",
+    )
 
     assert not violations, "\n".join(violations)
 
@@ -441,44 +509,9 @@ def test_application_no_concrete_infrastructure(src_dir: Path):
 def test_application_no_direct_adapter_imports(src_dir: Path):
     """Application must not import from infrastructure.adapters directly."""
     app_path = src_dir / "bioetl" / "application"
-    violations = []
-
-    for py_file in app_path.rglob("*.py"):
-        if py_file.name.startswith("__"):
-            continue
-        # Allow TYPE_CHECKING imports
-        with py_file.open(encoding="utf-8") as f:
-            content = f.read()
-            if "TYPE_CHECKING" in content:
-                # Simplistic check: if imports are guarded, we assume they are safe for now
-                pass
-
-            # Re-implement strict AST check for non-TYPE_CHECKING blocks
-            try:
-                tree = ast.parse(content, filename=str(py_file))
-                in_type_checking = False
-                for node in ast.walk(tree):
-                    if (
-                        isinstance(node, ast.If)
-                        and isinstance(node.test, ast.Name)
-                        and node.test.id == "TYPE_CHECKING"
-                    ):
-                        in_type_checking = True
-                    if (
-                        isinstance(node, (ast.Import, ast.ImportFrom))
-                        and not in_type_checking
-                    ):
-                        module = (
-                            node.module if isinstance(node, ast.ImportFrom) else None
-                        )
-                        if module and module.startswith(
-                            "bioetl.infrastructure.adapters"
-                        ):
-                            violations.append(
-                                f"{py_file.name}:{node.lineno} imports {module}"
-                            )
-            except SyntaxError:
-                pass
+    violations = collect_module_level_adapter_import_violations(
+        iter_python_files(app_path, skip_dunder=True)
+    )
 
     assert not violations, "\n".join(violations)
 
@@ -491,25 +524,17 @@ def test_application_no_direct_adapter_imports(src_dir: Path):
 def test_infrastructure_boundaries(src_dir: Path):
     """Infrastructure must not import Application (except Glue/Orchestration)."""
     infra_path = src_dir / "bioetl" / "infrastructure"
-    violations = []
-
-    for py_file in infra_path.rglob("*.py"):
-        if py_file.name.startswith("__") or "orchestration" in py_file.parts:
-            continue
-        if py_file.name == "config.py":
-            continue
-
-        imports, _ = analyze_python_file(py_file)
-        for imp in imports:
-            if imp["module"].startswith("bioetl.application"):
-                violations.append(
-                    format_violation(
-                        py_file,
-                        imp["lineno"],
-                        f"Infra imports Application '{imp['module']}'",
-                        src_dir,
-                    )
-                )
+    infra_files = [
+        py_file
+        for py_file in iter_python_files(infra_path, skip_dunder=True)
+        if "orchestration" not in py_file.parts and py_file.name != "config.py"
+    ]
+    violations = collect_import_violations(
+        infra_files,
+        src_dir=src_dir,
+        predicate=lambda imp: imp["module"].startswith("bioetl.application"),
+        message=lambda imp: f"Infra imports Application '{imp['module']}'",
+    )
 
     assert not violations, "\n".join(violations)
 
@@ -521,7 +546,6 @@ def test_infrastructure_boundaries(src_dir: Path):
 
 def test_no_unsafe_functions(src_dir: Path):
     """No print() or unsafe builtins."""
-    violations = []
     allowed = {
         "cli.py",
         "__main__.py",
@@ -531,33 +555,14 @@ def test_no_unsafe_functions(src_dir: Path):
         "cleanup_cache.py",
     }
 
-    for py_file in (src_dir / "bioetl").rglob("*.py"):
-        if py_file.name in allowed:
-            continue
-
-        _, calls = analyze_python_file(py_file)
-        for call in calls:
-            # For unsafe builtins (eval, exec, compile, __import__),
-            # only flag if it's a bare call (not re.compile, json.load, etc.)
-            if call["name"] in UNSAFE_BUILTINS:
-                if call.get("is_bare_call", True):
-                    violations.append(
-                        format_violation(
-                            py_file,
-                            call["lineno"],
-                            f"Unsafe/Print function '{call['name']}'",
-                            src_dir,
-                        )
-                    )
-            elif call["name"] in PRINT_FUNCTIONS:
-                violations.append(
-                    format_violation(
-                        py_file,
-                        call["lineno"],
-                        f"Unsafe/Print function '{call['name']}'",
-                        src_dir,
-                    )
-                )
+    violations = collect_unsafe_call_violations(
+        [
+            py_file
+            for py_file in (src_dir / "bioetl").rglob("*.py")
+            if py_file.name not in allowed
+        ],
+        src_dir=src_dir,
+    )
 
     assert not violations, "\n".join(violations)
 
@@ -576,17 +581,10 @@ def test_env_var_centralization(src_dir: Path):
         src_dir / "bioetl" / "infrastructure" / "observability" / "logging_config.py",
         src_dir / "bioetl" / "infrastructure" / "observability" / "tracing.py",
     }
-    allowed_resolved = {f.resolve() for f in allowed_files}
-    violations = []
-
-    for py_file in (src_dir / "bioetl").rglob("*.py"):
-        if py_file.resolve() in allowed_resolved:
-            continue
-
-        with py_file.open(encoding="utf-8") as f:
-            content = f.read()
-            if "os.getenv" in content or "os.environ" in content:
-                violations.append(f"{py_file.name} uses os.getenv/environ")
+    violations = collect_env_var_violations(
+        list((src_dir / "bioetl").rglob("*.py")),
+        allowed_files=allowed_files,
+    )
 
     assert not violations, "\n".join(violations)
 

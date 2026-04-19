@@ -11,6 +11,11 @@ from bioetl.infrastructure.adapters.common.retry_reduction_policy import (
 )
 
 
+async def _empty_batch_records() -> AsyncIterator[dict[str, str]]:
+    for _ in ():
+        yield {"id": "unused"}
+
+
 @pytest.mark.asyncio
 async def test_run_retry_exhausted_recovery_policy_splits_multi_batch() -> None:
     split_calls: list[tuple[list[str], list[str], str]] = []
@@ -55,8 +60,8 @@ async def test_run_retry_exhausted_recovery_policy_uses_single_fallback() -> Non
 
     async def _fetch_reduced_batch(batch: list[str]) -> AsyncIterator[dict[str, str]]:
         reduced_calls.append(batch)
-        if False:  # pragma: no cover
-            yield {"id": "unused"}
+        async for record in _empty_batch_records():
+            yield record
 
     async def _fetch_single_fallback(
         single_id: str,
@@ -87,8 +92,8 @@ async def test_run_retry_exhausted_recovery_policy_empty_batch_noop() -> None:
 
     async def _fetch_reduced_batch(batch: list[str]) -> AsyncIterator[dict[str, str]]:
         reduced_calls.append(batch)
-        if False:  # pragma: no cover
-            yield {"id": "unused"}
+        async for record in _empty_batch_records():
+            yield record
 
     async def _fetch_single_fallback(
         single_id: str,
@@ -96,8 +101,8 @@ async def test_run_retry_exhausted_recovery_policy_empty_batch_noop() -> None:
     ) -> AsyncIterator[dict[str, str]]:
         del error
         single_calls.append(single_id)
-        if False:  # pragma: no cover
-            yield {"id": "unused"}
+        async for record in _empty_batch_records():
+            yield record
 
     records = await collect_async_iterator(
         run_retry_exhausted_recovery_policy(

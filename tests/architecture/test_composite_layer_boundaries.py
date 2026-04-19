@@ -21,6 +21,69 @@ import re
 from pathlib import Path
 
 
+def _module_import_violations(package_path: Path, import_root: str) -> list[str]:
+    pattern_from = re.compile(rf"^\s*from\s+{re.escape(import_root)}\b", re.MULTILINE)
+    pattern_import = re.compile(rf"^\s*import\s+{re.escape(import_root)}\b", re.MULTILINE)
+    violations: list[str] = []
+    for py_file in package_path.rglob("*.py"):
+        content = py_file.read_text(encoding="utf-8")
+        if pattern_from.search(content):
+            violations.append(f"{py_file.name}: imports from {import_root}")
+        if pattern_import.search(content):
+            violations.append(f"{py_file.name}: imports {import_root}")
+    return violations
+
+
+def _module_level_checkpoint_imports(content: str) -> list[str]:
+    tree = ast.parse(content)
+    checkpoint_imports: list[str] = []
+    in_type_checking = False
+
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.If)
+            and isinstance(node.test, ast.Name)
+            and node.test.id == "TYPE_CHECKING"
+        ):
+            in_type_checking = True
+        if isinstance(node, ast.ImportFrom) and not in_type_checking:
+            if node.module and "checkpoint" in node.module.lower():
+                checkpoint_imports.extend(alias.name for alias in node.names)
+    return checkpoint_imports
+
+
+def _checkpoint_module_content(src_dir: Path) -> str:
+    checkpoint_pkg = src_dir / "bioetl" / "application" / "composite" / "checkpoint"
+    checkpoint_file = src_dir / "bioetl" / "application" / "composite" / "checkpoint.py"
+    if checkpoint_pkg.is_dir():
+        return "\n".join(
+            p.read_text(encoding="utf-8") for p in sorted(checkpoint_pkg.rglob("*.py"))
+        )
+    if checkpoint_file.exists():
+        return checkpoint_file.read_text(encoding="utf-8")
+    raise AssertionError("application/composite/checkpoint not found")
+
+
+def _package_all_exports(content: str) -> list[str] | None:
+    tree = ast.parse(content)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(
+            isinstance(target, ast.Name) and target.id == "__all__"
+            for target in node.targets
+        ):
+            continue
+        if not isinstance(node.value, ast.List):
+            return []
+        return [
+            elt.value
+            for elt in node.value.elts
+            if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+        ]
+    return None
+
+
 def _get_composite_runner_file(src_dir: Path) -> Path:
     """Return the canonical CompositePipelineRunner module path."""
     return src_dir / "bioetl" / "application" / "composite" / "runner_pkg" / "runner.py"
@@ -38,16 +101,9 @@ class TestDomainCompositeLayerBoundaries:
         domain_composite_path = src_dir / "bioetl" / "domain" / "composite"
         assert domain_composite_path.exists(), "domain/composite not found"
 
-        violations = []
-
-        for py_file in domain_composite_path.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
-
-            # Check for direct imports
-            if re.search(r"^\s*from\s+bioetl\.application\b", content, re.MULTILINE):
-                violations.append(f"{py_file.name}: imports from bioetl.application")
-            if re.search(r"^\s*import\s+bioetl\.application\b", content, re.MULTILINE):
-                violations.append(f"{py_file.name}: imports bioetl.application")
+        violations = _module_import_violations(
+            domain_composite_path, "bioetl.application"
+        )
 
         assert not violations, (
             "domain/composite imports from application layer:\n"
@@ -63,17 +119,9 @@ class TestDomainCompositeLayerBoundaries:
         domain_composite_path = src_dir / "bioetl" / "domain" / "composite"
         assert domain_composite_path.exists(), "domain/composite not found"
 
-        violations = []
-
-        for py_file in domain_composite_path.rglob("*.py"):
-            content = py_file.read_text(encoding="utf-8")
-
-            if re.search(r"^\s*from\s+bioetl\.infrastructure\b", content, re.MULTILINE):
-                violations.append(f"{py_file.name}: imports from bioetl.infrastructure")
-            if re.search(
-                r"^\s*import\s+bioetl\.infrastructure\b", content, re.MULTILINE
-            ):
-                violations.append(f"{py_file.name}: imports bioetl.infrastructure")
+        violations = _module_import_violations(
+            domain_composite_path, "bioetl.infrastructure"
+        )
 
         assert not violations, (
             "domain/composite imports from infrastructure layer:\n"
@@ -169,24 +217,7 @@ class TestCoordinatorIsolation:
         )
 
         content = coordinator_file.read_text(encoding="utf-8")
-
-        # Check for checkpoint-related imports (excluding TYPE_CHECKING blocks)
-        # Parse to check if imports are at module level or in TYPE_CHECKING
-        tree = ast.parse(content)
-
-        checkpoint_imports = []
-        in_type_checking = False
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.If):
-                # Check if this is TYPE_CHECKING block
-                if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
-                    in_type_checking = True
-
-            if isinstance(node, ast.ImportFrom) and not in_type_checking:
-                if node.module and "checkpoint" in node.module.lower():
-                    for alias in node.names:
-                        checkpoint_imports.append(alias.name)
+        checkpoint_imports = _module_level_checkpoint_imports(content)
 
         assert not checkpoint_imports, (
             f"EnrichmentCoordinatorService imports checkpoint classes at module level: "
@@ -223,20 +254,7 @@ class TestMergerIsolation:
         assert merger_file.exists(), "application/composite/merger.py not found"
 
         content = merger_file.read_text(encoding="utf-8")
-        tree = ast.parse(content)
-
-        checkpoint_imports = []
-        in_type_checking = False
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.If):
-                if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
-                    in_type_checking = True
-
-            if isinstance(node, ast.ImportFrom) and not in_type_checking:
-                if node.module and "checkpoint" in node.module.lower():
-                    for alias in node.names:
-                        checkpoint_imports.append(alias.name)
+        checkpoint_imports = _module_level_checkpoint_imports(content)
 
         assert not checkpoint_imports, (
             f"MergeService imports checkpoint classes at module level: "
@@ -326,22 +344,7 @@ class TestCheckpointFSMIntegration:
 
         REQ-ARCH-FSM-011: Checkpoint must persist FSM state for resume.
         """
-        # checkpoint may be a single file or a package
-        checkpoint_pkg = src_dir / "bioetl" / "application" / "composite" / "checkpoint"
-        checkpoint_file = (
-            src_dir / "bioetl" / "application" / "composite" / "checkpoint.py"
-        )
-        if checkpoint_pkg.is_dir():
-            # Read all .py files in the package
-            parts = [
-                p.read_text(encoding="utf-8")
-                for p in sorted(checkpoint_pkg.rglob("*.py"))
-            ]
-            content = "\n".join(parts)
-        elif checkpoint_file.exists():
-            content = checkpoint_file.read_text(encoding="utf-8")
-        else:
-            raise AssertionError("application/composite/checkpoint not found")
+        content = _checkpoint_module_content(src_dir)
 
         # Must import FSM state from domain
         has_fsm_import = (
@@ -363,21 +366,7 @@ class TestCheckpointFSMIntegration:
 
         REQ-ARCH-FSM-012: Application imports domain, not vice versa.
         """
-        # checkpoint may be a single file or a package
-        checkpoint_pkg = src_dir / "bioetl" / "application" / "composite" / "checkpoint"
-        checkpoint_file = (
-            src_dir / "bioetl" / "application" / "composite" / "checkpoint.py"
-        )
-        if checkpoint_pkg.is_dir():
-            parts = [
-                p.read_text(encoding="utf-8")
-                for p in sorted(checkpoint_pkg.rglob("*.py"))
-            ]
-            content = "\n".join(parts)
-        elif checkpoint_file.exists():
-            content = checkpoint_file.read_text(encoding="utf-8")
-        else:
-            raise AssertionError("application/composite/checkpoint not found")
+        content = _checkpoint_module_content(src_dir)
 
         # Check for correct import direction
         correct_import = (
@@ -428,21 +417,7 @@ class TestFSMDomainExports:
         assert init_file.exists(), "domain/composite/__init__.py not found"
 
         content = init_file.read_text(encoding="utf-8")
-        tree = ast.parse(content)
-
-        # Find __all__ assignment
-        all_list: list[str] | None = None
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Assign):
-                for target in node.targets:
-                    if isinstance(target, ast.Name) and target.id == "__all__":
-                        if isinstance(node.value, ast.List):
-                            all_list = [
-                                elt.value
-                                for elt in node.value.elts
-                                if isinstance(elt, ast.Constant)
-                                and isinstance(elt.value, str)
-                            ]
+        all_list = _package_all_exports(content)
 
         assert all_list is not None, "__all__ not found in domain/composite/__init__.py"
 

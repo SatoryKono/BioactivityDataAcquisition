@@ -122,6 +122,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical exploratory code-quality probe; prefer canonical architecture and lint/report tooling instead of extending this orphan analysis script."
     },
+    "scripts/ai/scripts/ai/analyze_test_failures.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical manual triage helper for clustered pytest failure analysis; prefer canonical QA reporting and targeted test diagnostics instead of extending this orphan script."
+    },
     "scripts/ai/mcp/mcp_chembl_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",

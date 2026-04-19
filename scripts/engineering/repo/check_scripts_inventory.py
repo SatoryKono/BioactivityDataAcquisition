@@ -130,6 +130,56 @@ LIFECYCLE_REGISTRY_DEFAULT: Final[str] = (
 )
 SCHEMA_VERSION: Final[str] = "1.0"
 MAX_SEARCH_FILE_BYTES: Final[int] = 512 * 1024
+STRONG_ACTIVE_GROUPS: Final[frozenset[str]] = frozenset({"ci", "build", "skills", "agents"})
+LEGACY_ROOT_WRAPPERS: Final[frozenset[str]] = frozenset(
+    {"scripts/run_pytest.sh", "scripts/run_pytest.ps1"}
+)
+LEGACY_MANUAL_OPS_SCRIPTS: Final[frozenset[str]] = frozenset(
+    {
+        "scripts/ops/maintenance/github/close_superseded_prs.sh",
+        "scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh",
+        "scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh",
+    }
+)
+LEGACY_ISSUE_SPECIFIC_OPS_SCRIPTS: Final[frozenset[str]] = frozenset(
+    {
+        "scripts/ops/maintenance/github/post_issue_2597_progress.sh",
+        "scripts/ops/maintenance/github/close_issue_2597.sh",
+        "scripts/ops/maintenance/github/post_issue_rescope_comments.sh",
+        "scripts/ops/maintenance/github/update_issue_rescope_bodies.sh",
+        "scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh",
+        "scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh",
+    }
+)
+LEGACY_INTERNAL_AI_LAUNCHERS: Final[frozenset[str]] = frozenset(
+    {
+        "scripts/ai/code-reviewer.sh",
+        "scripts/ai/data-engineer.sh",
+        "scripts/ai/literature-researcher.sh",
+    }
+)
+LEGACY_NAMED_SCRIPTS: Final[frozenset[str]] = frozenset(
+    {
+        "scripts/engineering/dev/dev_setup.sh",
+        "scripts/engineering/diagnostics/_tmp_inspect_vcr.py",
+    }
+)
+LEGACY_SRC_TOOLS_WRAPPERS: Final[frozenset[str]] = frozenset(
+    {
+        "src/tools/scripts/config_matrix_generator.py",
+        "src/tools/scripts/generate_contracts.py",
+        "src/tools/scripts/lint_terminology.py",
+        "src/tools/scripts/validate_unified_configs.py",
+    }
+)
+DEPRECATED_LEGACY_PATHS: Final[frozenset[str]] = frozenset(
+    {
+        "scripts/engineering/qa/generate_reports.py",
+        "src/tools/scripts/check_architecture.py",
+        "src/tools/scripts/check_application_deps.py",
+        "src/tools/scripts/check_constructor_args.py",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -146,24 +196,28 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
+def _iter_script_files_in_base(base: Path) -> list[Path]:
+    scripts: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(base):
+        dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_NAMES]
+        current_path = Path(dirpath)
+        for filename in filenames:
+            file_path = current_path / filename
+            if not file_path.is_file():
+                continue
+            if file_path.suffix not in SCRIPT_EXTENSIONS or file_path.name == "__init__.py":
+                continue
+            scripts.append(file_path)
+    return scripts
+
+
 def _iter_scripts(root: Path) -> list[Path]:
     scripts: list[Path] = []
     for rel_root in SCRIPT_ROOTS:
         base = root / rel_root
         if not base.exists():
             continue
-        for dirpath, dirnames, filenames in os.walk(base):
-            dirnames[:] = [name for name in dirnames if name not in SKIP_DIR_NAMES]
-            current_path = Path(dirpath)
-            for filename in filenames:
-                file_path = current_path / filename
-                if not file_path.is_file():
-                    continue
-                if file_path.suffix not in SCRIPT_EXTENSIONS:
-                    continue
-                if file_path.name == "__init__.py":
-                    continue
-                scripts.append(file_path)
+        scripts.extend(_iter_script_files_in_base(base))
     return sorted(set(scripts))
 
 
@@ -265,6 +319,102 @@ def _discover_refs(root: Path, scripts: list[Path]) -> dict[str, list[RefEvidenc
     return refs
 
 
+def _line_has_reference_candidate(
+    normalized_line: str,
+    basename_map: dict[str, tuple[str, ...]],
+) -> bool:
+    return (
+        any(token in normalized_line for token in SCRIPT_PATH_TOKENS)
+        or any(token in normalized_line for token in MODULE_REF_TOKENS)
+        or _line_has_basename_script_candidate(normalized_line, basename_map)
+    )
+
+
+def _make_ref_evidence(
+    *,
+    rel: str,
+    line_no: int,
+    raw_line: str,
+    source_group: str,
+) -> RefEvidence:
+    return RefEvidence(
+        path=rel,
+        line=line_no,
+        text=raw_line.strip()[:200],
+        source_group=source_group,
+    )
+
+
+def _discover_script_path_refs(
+    *,
+    rel: str,
+    line_no: int,
+    raw_line: str,
+    normalized_line: str,
+    source_group: str,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    discovered: list[tuple[str, RefEvidence]] = []
+    evidence = _make_ref_evidence(
+        rel=rel, line_no=line_no, raw_line=raw_line, source_group=source_group
+    )
+    for script_rel in set(SCRIPT_PATH_CANDIDATE_PATTERN.findall(normalized_line)):
+        candidate_paths = (script_rel, *SCRIPT_PATH_ALIASES.get(script_rel, ()))
+        for candidate_path in candidate_paths:
+            if candidate_path not in script_set or rel == candidate_path:
+                continue
+            discovered.append((candidate_path, evidence))
+    return discovered
+
+
+def _discover_module_refs(
+    *,
+    rel: str,
+    line_no: int,
+    raw_line: str,
+    normalized_line: str,
+    source_group: str,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    evidence = _make_ref_evidence(
+        rel=rel, line_no=line_no, raw_line=raw_line, source_group=source_group
+    )
+    discovered: list[tuple[str, RefEvidence]] = []
+    for module_name in set(MODULE_REF_CANDIDATE_PATTERN.findall(normalized_line)):
+        candidate_path = f"{module_name.replace('.', '/')}/__main__.py"
+        if candidate_path not in script_set or rel == candidate_path:
+            continue
+        discovered.append((candidate_path, evidence))
+    return discovered
+
+
+def _discover_basename_refs(
+    *,
+    rel: str,
+    line_no: int,
+    raw_line: str,
+    normalized_line: str,
+    source_group: str,
+    script_set: set[str],
+    basename_map: dict[str, tuple[str, ...]],
+) -> list[tuple[str, RefEvidence]]:
+    discovered: list[tuple[str, RefEvidence]] = []
+    evidence = _make_ref_evidence(
+        rel=rel, line_no=line_no, raw_line=raw_line, source_group=source_group
+    )
+    basenames = {
+        match.group(0) for match in BASENAME_REF_CANDIDATE_PATTERN.finditer(normalized_line)
+    }
+    for basename in basenames:
+        for candidate_path in _resolve_basename_candidates(
+            rel=rel, basename=basename, basename_map=basename_map
+        ):
+            if candidate_path not in script_set or rel == candidate_path:
+                continue
+            discovered.append((candidate_path, evidence))
+    return discovered
+
+
 def _build_basename_map(script_paths: list[str]) -> dict[str, tuple[str, ...]]:
     grouped: dict[str, list[str]] = defaultdict(list)
     for script_path in script_paths:
@@ -298,14 +448,10 @@ def _discover_refs_in_file(
     original_lines = text.splitlines()
     normalized_lines = normalized_text.splitlines()
     for line_no, (raw_line, normalized_line) in enumerate(
-        zip(original_lines, normalized_lines),
+        zip(original_lines, normalized_lines, strict=True),
         start=1,
     ):
-        if (
-            not any(token in normalized_line for token in SCRIPT_PATH_TOKENS)
-            and not any(token in normalized_line for token in MODULE_REF_TOKENS)
-            and not _line_has_basename_script_candidate(normalized_line, basename_map)
-        ):
+        if not _line_has_reference_candidate(normalized_line, basename_map):
             continue
         discovered.extend(
             _discover_refs_from_line(
@@ -341,59 +487,37 @@ def _discover_refs_from_line(
     basename_map: dict[str, tuple[str, ...]],
 ) -> list[tuple[str, RefEvidence]]:
     discovered: list[tuple[str, RefEvidence]] = []
-    for script_rel in set(SCRIPT_PATH_CANDIDATE_PATTERN.findall(normalized_line)):
-        candidate_paths = (script_rel, *SCRIPT_PATH_ALIASES.get(script_rel, ()))
-        for candidate_path in candidate_paths:
-            if candidate_path not in script_set or rel == candidate_path:
-                continue
-            discovered.append(
-                (
-                    candidate_path,
-                    RefEvidence(
-                        path=rel,
-                        line=line_no,
-                        text=raw_line.strip()[:200],
-                        source_group=source_group,
-                    ),
-                )
-            )
-    for module_name in set(MODULE_REF_CANDIDATE_PATTERN.findall(normalized_line)):
-        candidate_path = f"{module_name.replace('.', '/')}/__main__.py"
-        if candidate_path not in script_set or rel == candidate_path:
-            continue
-        discovered.append(
-            (
-                candidate_path,
-                RefEvidence(
-                    path=rel,
-                    line=line_no,
-                    text=raw_line.strip()[:200],
-                    source_group=source_group,
-                ),
-            )
-        )
-    for basename in {
-        match.group(0)
-        for match in BASENAME_REF_CANDIDATE_PATTERN.finditer(normalized_line)
-    }:
-        for candidate_path in _resolve_basename_candidates(
+    discovered.extend(
+        _discover_script_path_refs(
             rel=rel,
-            basename=basename,
+            line_no=line_no,
+            raw_line=raw_line,
+            normalized_line=normalized_line,
+            source_group=source_group,
+            script_set=script_set,
+        )
+    )
+    discovered.extend(
+        _discover_module_refs(
+            rel=rel,
+            line_no=line_no,
+            raw_line=raw_line,
+            normalized_line=normalized_line,
+            source_group=source_group,
+            script_set=script_set,
+        )
+    )
+    discovered.extend(
+        _discover_basename_refs(
+            rel=rel,
+            line_no=line_no,
+            raw_line=raw_line,
+            normalized_line=normalized_line,
+            source_group=source_group,
+            script_set=script_set,
             basename_map=basename_map,
-        ):
-            if candidate_path not in script_set or rel == candidate_path:
-                continue
-            discovered.append(
-                (
-                    candidate_path,
-                    RefEvidence(
-                        path=rel,
-                        line=line_no,
-                        text=raw_line.strip()[:200],
-                        source_group=source_group,
-                    ),
-                )
-            )
+        )
+    )
     return discovered
 
 
@@ -432,60 +556,17 @@ def _dedupe_refs(refs: list[RefEvidence]) -> list[RefEvidence]:
 
 def _status_for(script_rel: str, refs: list[RefEvidence]) -> str:
     groups = {item.source_group for item in refs}
-    strong_active_groups = {"ci", "build", "skills", "agents"}
-    legacy_root_wrappers = {
-        "scripts/run_pytest.sh",
-        "scripts/run_pytest.ps1",
-    }
-    legacy_manual_ops_scripts = {
-        "scripts/ops/maintenance/github/close_superseded_prs.sh",
-        "scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh",
-        "scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh",
-    }
-    legacy_issue_specific_ops_scripts = {
-        "scripts/ops/maintenance/github/post_issue_2597_progress.sh",
-        "scripts/ops/maintenance/github/close_issue_2597.sh",
-        "scripts/ops/maintenance/github/post_issue_rescope_comments.sh",
-        "scripts/ops/maintenance/github/update_issue_rescope_bodies.sh",
-        "scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh",
-        "scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh",
-    }
-    legacy_internal_ai_launchers = {
-        "scripts/ai/code-reviewer.sh",
-        "scripts/ai/data-engineer.sh",
-        "scripts/ai/literature-researcher.sh",
-    }
-    legacy_named_scripts = {
-        "scripts/engineering/dev/dev_setup.sh",
-        "scripts/engineering/diagnostics/_tmp_inspect_vcr.py",
-    }
-    legacy_src_tools_wrappers = {
-        "src/tools/scripts/config_matrix_generator.py",
-        "src/tools/scripts/generate_contracts.py",
-        "src/tools/scripts/lint_terminology.py",
-        "src/tools/scripts/validate_unified_configs.py",
-    }
-    deprecated_legacy_paths = {
-        "scripts/engineering/qa/generate_reports.py",
-        "src/tools/scripts/check_architecture.py",
-        "src/tools/scripts/check_application_deps.py",
-        "src/tools/scripts/check_constructor_args.py",
-    }
-
-    if script_rel in legacy_root_wrappers:
-        return "active" if groups & strong_active_groups else "legacy"
-    if script_rel in legacy_manual_ops_scripts:
-        return "active" if groups & strong_active_groups else "legacy"
-    if script_rel in legacy_issue_specific_ops_scripts:
-        return "active" if groups & strong_active_groups else "legacy"
-    if script_rel in legacy_internal_ai_launchers:
-        return "active" if groups & strong_active_groups else "legacy"
-    if script_rel in legacy_named_scripts:
-        return "active" if groups & strong_active_groups else "legacy"
-    if script_rel in legacy_src_tools_wrappers:
-        return "active" if groups & strong_active_groups else "legacy"
-    if script_rel in deprecated_legacy_paths:
-        return "active" if groups & strong_active_groups else "legacy"
+    legacy_status_sets = (
+        LEGACY_ROOT_WRAPPERS,
+        LEGACY_MANUAL_OPS_SCRIPTS,
+        LEGACY_ISSUE_SPECIFIC_OPS_SCRIPTS,
+        LEGACY_INTERNAL_AI_LAUNCHERS,
+        LEGACY_NAMED_SCRIPTS,
+        LEGACY_SRC_TOOLS_WRAPPERS,
+        DEPRECATED_LEGACY_PATHS,
+    )
+    if any(script_rel in candidates for candidates in legacy_status_sets):
+        return "active" if groups & STRONG_ACTIVE_GROUPS else "legacy"
 
     if not refs:
         return (

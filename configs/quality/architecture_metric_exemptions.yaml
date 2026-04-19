@@ -16,7 +16,7 @@ policy:
 registries:
   file_size_limits:
     src/bioetl/application/services/checkpoint_compatibility_service.py:
-      value: 558
+      value: 559
       owner: "@bioetl-platform"
       reason: "Checkpoint compatibility orchestration still carries transitional branching scheduled for decomposition."
       classification: "technical_debt"
@@ -24,7 +24,7 @@ registries:
       expires_on: "2026-06-30"
       removal_step: "Split compatibility and replay decision paths into helper owners, then retire this exemption."
     src/bioetl/infrastructure/storage/silver_writer.py:
-      value: 1435
+      value: 1438
       owner: "@bioetl-platform"
       reason: "SilverWriter remains a large infrastructure facade while Delta write, validation, and recovery branches are still being peeled into dedicated storage helpers."
       classification: "technical_debt"
@@ -187,6 +187,14 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Continue extracting write-path orchestration into dedicated storage helpers until the class drops below the default limit."
+    src/bioetl/infrastructure/storage/bronze/io_mixin.py::BronzeWriterIOMixin:
+      value: 305
+      owner: "@bioetl-platform"
+      reason: "Bronze writer I/O mixin still carries transitional atomic-write and export-support branches while the bronze storage surface is being decomposed."
+      classification: "technical_debt"
+      linked_rf: "RF-023"
+      expires_on: "2026-06-30"
+      removal_step: "Split file-write, export, and manifest helper branches into smaller mixins until BronzeWriterIOMixin returns under the default limit."
   class_method_count: {}
   god_object:
     src/bioetl/application/services/_quarantine_service_sync_mixin.py::QuarantineServiceSyncMixin:

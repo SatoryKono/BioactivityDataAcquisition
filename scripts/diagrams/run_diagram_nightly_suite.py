@@ -46,6 +46,7 @@ QUOTED_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
 TAG_RE = re.compile(r"<[^>]+>")
 EDGE_RE = re.compile(r"\s(?:-->|-.->|==>|---|--x|x--)\s")
 NODE_ID_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\b")
+SOURCE_FILE_MISSING = "source file missing"
 
 
 @dataclass(frozen=True)
@@ -74,6 +75,15 @@ class SvgShape:
     foreign_object_text_nodes: int
     viewbox_width: float
     viewbox_height: float
+
+
+@dataclass(frozen=True)
+class _SvgShapeCounterState:
+    node_groups: int = 0
+    edge_paths: int = 0
+    edge_labels: int = 0
+    text_nodes: int = 0
+    foreign_object_text_nodes: int = 0
 
 
 def _out(message: str) -> None:
@@ -188,6 +198,66 @@ def _class_tokens(elem: ET.Element) -> set[str]:
     return {token for token in raw.split() if token}
 
 
+def _element_tag(elem: ET.Element) -> str:
+    return elem.tag.split("}", 1)[1] if "}" in elem.tag else elem.tag
+
+
+def _element_has_text(elem: ET.Element) -> bool:
+    return bool(" ".join(elem.itertext()).strip())
+
+
+def _count_svg_shape_elements(root: ET.Element) -> _SvgShapeCounterState:
+    counts = _SvgShapeCounterState()
+    for elem in root.iter():
+        tag = _element_tag(elem)
+        classes = _class_tokens(elem)
+        if tag == "g" and "node" in classes:
+            counts = _SvgShapeCounterState(
+                node_groups=counts.node_groups + 1,
+                edge_paths=counts.edge_paths,
+                edge_labels=counts.edge_labels,
+                text_nodes=counts.text_nodes,
+                foreign_object_text_nodes=counts.foreign_object_text_nodes,
+            )
+            continue
+        if tag == "g" and "edgePath" in classes:
+            counts = _SvgShapeCounterState(
+                node_groups=counts.node_groups,
+                edge_paths=counts.edge_paths + 1,
+                edge_labels=counts.edge_labels,
+                text_nodes=counts.text_nodes,
+                foreign_object_text_nodes=counts.foreign_object_text_nodes,
+            )
+            continue
+        if tag == "g" and "edgeLabel" in classes:
+            counts = _SvgShapeCounterState(
+                node_groups=counts.node_groups,
+                edge_paths=counts.edge_paths,
+                edge_labels=counts.edge_labels + 1,
+                text_nodes=counts.text_nodes,
+                foreign_object_text_nodes=counts.foreign_object_text_nodes,
+            )
+            continue
+        if tag == "text" and _element_has_text(elem):
+            counts = _SvgShapeCounterState(
+                node_groups=counts.node_groups,
+                edge_paths=counts.edge_paths,
+                edge_labels=counts.edge_labels,
+                text_nodes=counts.text_nodes + 1,
+                foreign_object_text_nodes=counts.foreign_object_text_nodes,
+            )
+            continue
+        if tag == "foreignObject" and _element_has_text(elem):
+            counts = _SvgShapeCounterState(
+                node_groups=counts.node_groups,
+                edge_paths=counts.edge_paths,
+                edge_labels=counts.edge_labels,
+                text_nodes=counts.text_nodes,
+                foreign_object_text_nodes=counts.foreign_object_text_nodes + 1,
+            )
+    return counts
+
+
 def parse_viewbox(root: ET.Element) -> tuple[float, float]:
     view_box = root.attrib.get("viewBox", "")
     if view_box:
@@ -202,41 +272,71 @@ def parse_viewbox(root: ET.Element) -> tuple[float, float]:
 def analyze_svg_shape(path: Path) -> SvgShape:
     tree = ET.parse(path)
     root = tree.getroot()
-
-    node_groups = 0
-    edge_paths = 0
-    edge_labels = 0
-    text_nodes = 0
-    foreign_object_text_nodes = 0
-
-    for elem in root.iter():
-        tag = elem.tag.split("}", 1)[1] if "}" in elem.tag else elem.tag
-        classes = _class_tokens(elem)
-        if tag == "g" and "node" in classes:
-            node_groups += 1
-        if tag == "g" and "edgePath" in classes:
-            edge_paths += 1
-        if tag == "g" and "edgeLabel" in classes:
-            edge_labels += 1
-        if tag == "text":
-            text = " ".join(elem.itertext()).strip()
-            if text:
-                text_nodes += 1
-        if tag == "foreignObject":
-            text = " ".join(elem.itertext()).strip()
-            if text:
-                foreign_object_text_nodes += 1
-
+    counts = _count_svg_shape_elements(root)
     vb_w, vb_h = parse_viewbox(root)
     return SvgShape(
-        node_groups=node_groups,
-        edge_paths=edge_paths,
-        edge_labels=edge_labels,
-        text_nodes=text_nodes,
-        foreign_object_text_nodes=foreign_object_text_nodes,
+        node_groups=counts.node_groups,
+        edge_paths=counts.edge_paths,
+        edge_labels=counts.edge_labels,
+        text_nodes=counts.text_nodes,
+        foreign_object_text_nodes=counts.foreign_object_text_nodes,
         viewbox_width=vb_w,
         viewbox_height=vb_h,
     )
+
+
+def _append_missing_source_issue(
+    issues: list[Issue],
+    *,
+    rule_id: str,
+    path: Path,
+    message: str,
+) -> None:
+    issues.append(Issue(rule_id, "WARNING", str(path), message))
+
+
+def _append_svg_png_drift_issues(
+    issues: list[Issue],
+    *,
+    svg_rel: Path,
+    png_rel: Path,
+    shape: SvgShape,
+    png_w: int,
+    png_h: int,
+) -> None:
+    if shape.edge_labels > 0 and (shape.text_nodes + shape.foreign_object_text_nodes) == 0:
+        issues.append(
+            Issue(
+                "DIAG-T025",
+                "WARNING",
+                str(svg_rel),
+                "edge labels exist but no readable text in SVG (text/foreignObject)",
+            )
+        )
+
+    if (png_w * png_h) < 300_000:
+        issues.append(
+            Issue(
+                "DIAG-T025",
+                "WARNING",
+                str(png_rel),
+                f"PNG effective area too low ({png_w}x{png_h})",
+            )
+        )
+
+    if shape.viewbox_width <= 0 or shape.viewbox_height <= 0:
+        return
+    svg_ratio = shape.viewbox_width / shape.viewbox_height
+    png_ratio = png_w / max(png_h, 1)
+    if abs(svg_ratio - png_ratio) > 0.6:
+        issues.append(
+            Issue(
+                "DIAG-T025",
+                "WARNING",
+                str(svg_rel),
+                f"aspect drift between SVG ({svg_ratio:.2f}) and PNG ({png_ratio:.2f})",
+            )
+        )
 
 
 def is_flowchart(lines: list[str]) -> bool:
@@ -369,8 +469,8 @@ def check_diag_t024(source_paths: list[Path], max_len: int, max_br: int) -> list
     for rel in source_paths:
         path = REPO_ROOT / rel
         if not path.exists():
-            issues.append(
-                Issue("DIAG-T024", "WARNING", str(rel), "source file missing")
+            _append_missing_source_issue(
+                issues, rule_id="DIAG-T024", path=rel, message=SOURCE_FILE_MISSING
             )
             continue
 
@@ -420,41 +520,14 @@ def check_diag_t025(render_paths: list[Path]) -> list[Issue]:
             issues.append(Issue("DIAG-T025", "WARNING", str(png_rel), str(exc)))
             continue
 
-        if (
-            shape.edge_labels > 0
-            and (shape.text_nodes + shape.foreign_object_text_nodes) == 0
-        ):
-            issues.append(
-                Issue(
-                    "DIAG-T025",
-                    "WARNING",
-                    str(svg_rel),
-                    "edge labels exist but no readable text in SVG (text/foreignObject)",
-                )
-            )
-
-        if (png_w * png_h) < 300_000:
-            issues.append(
-                Issue(
-                    "DIAG-T025",
-                    "WARNING",
-                    str(png_rel),
-                    f"PNG effective area too low ({png_w}x{png_h})",
-                )
-            )
-
-        if shape.viewbox_width > 0 and shape.viewbox_height > 0:
-            svg_ratio = shape.viewbox_width / shape.viewbox_height
-            png_ratio = png_w / max(png_h, 1)
-            if abs(svg_ratio - png_ratio) > 0.6:
-                issues.append(
-                    Issue(
-                        "DIAG-T025",
-                        "WARNING",
-                        str(svg_rel),
-                        f"aspect drift between SVG ({svg_ratio:.2f}) and PNG ({png_ratio:.2f})",
-                    )
-                )
+        _append_svg_png_drift_issues(
+            issues,
+            svg_rel=svg_rel,
+            png_rel=png_rel,
+            shape=shape,
+            png_w=png_w,
+            png_h=png_h,
+        )
 
     return issues
 
@@ -822,32 +895,53 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _resolve_repo_relative_cli_path(path: Path) -> Path:
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def _resolve_optional_cli_path(path: Path | None) -> Path | None:
+    if path is None:
+        return None
+    return _resolve_repo_relative_cli_path(path)
+
+
+def _load_suite_manifests(src_manifest: Path, rnd_manifest: Path) -> tuple[list[Path], list[Path]]:
+    return (
+        load_manifest(src_manifest, (".mmd", ".mermaid")),
+        load_manifest(rnd_manifest, (".svg",)),
+    )
+
+
+def _probe_backend_for_suite(
+    *,
+    args: argparse.Namespace,
+    config: Path,
+    css: Path,
+    puppeteer: Path | None,
+    tmpdir: Path,
+) -> tuple[bool, str]:
+    needs_render_backend = not (args.skip_chaos and args.skip_growth and args.skip_theme)
+    if not needs_render_backend:
+        return True, ""
+    return probe_render_backend(
+        mmdc_bin=args.mmdc_bin,
+        config=config,
+        css=css,
+        puppeteer=puppeteer,
+        tmpdir=tmpdir,
+    )
+
+
 def main() -> int:
     args = parse_args()
-
-    src_manifest = (
-        args.source_manifest
-        if args.source_manifest.is_absolute()
-        else REPO_ROOT / args.source_manifest
-    )
-    rnd_manifest = (
-        args.render_manifest
-        if args.render_manifest.is_absolute()
-        else REPO_ROOT / args.render_manifest
-    )
-    config = args.config if args.config.is_absolute() else REPO_ROOT / args.config
-    css = args.css if args.css.is_absolute() else REPO_ROOT / args.css
-    puppeteer = None
-    if args.puppeteer is not None:
-        puppeteer = (
-            args.puppeteer
-            if args.puppeteer.is_absolute()
-            else REPO_ROOT / args.puppeteer
-        )
+    src_manifest = _resolve_repo_relative_cli_path(args.source_manifest)
+    rnd_manifest = _resolve_repo_relative_cli_path(args.render_manifest)
+    config = _resolve_repo_relative_cli_path(args.config)
+    css = _resolve_repo_relative_cli_path(args.css)
+    puppeteer = _resolve_optional_cli_path(args.puppeteer)
 
     try:
-        source_paths = load_manifest(src_manifest, (".mmd", ".mermaid"))
-        render_paths = load_manifest(rnd_manifest, (".svg",))
+        source_paths, render_paths = _load_suite_manifests(src_manifest, rnd_manifest)
     except (FileNotFoundError, ValueError) as exc:
         _err(f"[ERROR] {exc}")
         return 2
@@ -862,28 +956,22 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory(prefix="diagram-nightly-") as temp_dir:
         tmpdir = Path(temp_dir)
-        needs_render_backend = not (
-            args.skip_chaos and args.skip_growth and args.skip_theme
+        backend_ok, backend_error = _probe_backend_for_suite(
+            args=args,
+            config=config,
+            css=css,
+            puppeteer=puppeteer,
+            tmpdir=tmpdir,
         )
-        backend_ok = True
-        backend_error = ""
-        if needs_render_backend:
-            backend_ok, backend_error = probe_render_backend(
-                mmdc_bin=args.mmdc_bin,
-                config=config,
-                css=css,
-                puppeteer=puppeteer,
-                tmpdir=tmpdir,
-            )
-            if not backend_ok:
-                issues.append(
-                    Issue(
-                        "DIAG-T027",
-                        "WARNING",
-                        "<render-backend>",
-                        f"render backend unavailable, chaos/growth/theme checks skipped: {backend_error}",
-                    )
+        if not backend_ok:
+            issues.append(
+                Issue(
+                    "DIAG-T027",
+                    "WARNING",
+                    "<render-backend>",
+                    f"render backend unavailable, chaos/growth/theme checks skipped: {backend_error}",
                 )
+            )
 
         if not args.skip_chaos and backend_ok:
             issues.extend(
