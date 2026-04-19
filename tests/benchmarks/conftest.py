@@ -10,6 +10,14 @@ from typing import Any
 
 import pytest
 
+try:
+    from pytest_benchmark.fixture import BenchmarkFixture
+
+    HAS_BENCHMARK = True
+except ImportError:
+    HAS_BENCHMARK = False
+    BenchmarkFixture = Any  # type: ignore[misc, assignment]
+
 
 @pytest.fixture
 def small_payload() -> list[dict[str, Any]]:
@@ -116,6 +124,14 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "benchmark: mark test as a performance benchmark"
     )
+
+
+if not HAS_BENCHMARK:
+
+    @pytest.fixture
+    def benchmark() -> BenchmarkFixture:
+        """Skip benchmark tests cleanly when pytest-benchmark is unavailable."""
+        pytest.skip("pytest-benchmark not installed")
 
 
 def calculate_payload_size_mb(payload: list[dict]) -> float:

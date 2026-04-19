@@ -231,27 +231,40 @@ def test_adr_status_is_from_allowed_set() -> None:
     allowed_statuses = {"accepted", "superseded", "deprecated", "added"}
     violations: list[str] = []
 
-    status_patterns = (
-        re.compile(r"^\*\*Status:\*\*\s*([^\n]+)$", flags=re.MULTILINE),
-        re.compile(r"^\*\s+\*\*Status\*\*:\s*([^\n]+)$", flags=re.MULTILINE),
-        re.compile(
-            r"^\|\s*\*\*Статус\*\*\s*\|\s*([^|\n]+)\s*\|$",
-            flags=re.MULTILINE,
-        ),
-        re.compile(
-            r"^\|\s*\*\*Status\*\*\s*\|\s*([^|\n]+)\s*\|$",
-            flags=re.MULTILINE,
-        ),
-    )
+    def extract_status(text: str) -> str | None:
+        labels = ("status", "статус")
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+
+            lowered = stripped.casefold()
+            for label in labels:
+                prefixes = (
+                    f"**{label}:**",
+                    f"* **{label}**:",
+                    f"{label}:",
+                )
+                for prefix in prefixes:
+                    if lowered.startswith(prefix.casefold()):
+                        value = stripped[len(prefix) :].strip()
+                        if value:
+                            return value
+
+            if not stripped.startswith("|"):
+                continue
+
+            cells = [cell.strip() for cell in stripped.split("|") if cell.strip()]
+            if len(cells) < 2:
+                continue
+            header = cells[0].strip("* ").casefold()
+            if header in labels and cells[1]:
+                return cells[1]
+        return None
 
     for path in sorted(decisions_dir.glob("ADR-*.md")):
         text = path.read_text(encoding="utf-8")
-        raw_status: str | None = None
-        for pattern in status_patterns:
-            match = pattern.search(text)
-            if match is not None:
-                raw_status = match.group(1).strip()
-                break
+        raw_status = extract_status(text)
 
         if raw_status is None:
             violations.append(f"{path.name}: missing status field")

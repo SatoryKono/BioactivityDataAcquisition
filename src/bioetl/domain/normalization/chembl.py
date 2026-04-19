@@ -18,7 +18,6 @@ __all__ = [
 
 _BAO_IDENTIFIER_RE = re.compile(r"^bao[_:](\d+)$", re.IGNORECASE)
 _UO_IDENTIFIER_RE = re.compile(r"^uo[_:](\d+)$", re.IGNORECASE)
-_ORGANISM_TRAILING_ANNOTATION_RE = re.compile(r"\s+\([^()\n]*\)$")
 _ORGANISM_WHITESPACE_RE = re.compile(r"\s+")
 
 _UNIT_ALIASES: dict[str, str] = {
@@ -112,6 +111,22 @@ def _normalize_unit_name(unit: str) -> str:
     return _UNIT_ALIASES.get(normalized.lower(), normalized)
 
 
+def _strip_trailing_parenthetical_annotation(value: str) -> str:
+    """Drop a trailing ``(annotation)`` suffix without relying on backtracking regex."""
+    stripped = value.rstrip()
+    if not stripped.endswith(")"):
+        return stripped
+
+    separator_index = stripped.rfind(" (")
+    if separator_index < 0:
+        return stripped
+
+    annotation = stripped[separator_index + 2 : -1]
+    if not annotation or any(char in annotation for char in "()\n\r"):
+        return stripped
+    return stripped[:separator_index]
+
+
 def normalize_bao_identifier(value: str | None) -> str | None:
     """Normalize BAO identifiers to canonical underscore form."""
     return _normalize_prefixed_identifier(
@@ -163,7 +178,7 @@ def normalize_chembl_organism_name(value: str | None) -> str | None:
     if normalized is None:
         return None
 
-    cleaned = _ORGANISM_TRAILING_ANNOTATION_RE.sub("", normalized)
+    cleaned = _strip_trailing_parenthetical_annotation(normalized)
     cleaned = _ORGANISM_WHITESPACE_RE.sub(" ", cleaned).strip()
     if not cleaned:
         return None

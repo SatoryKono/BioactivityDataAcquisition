@@ -21,26 +21,10 @@ from bioetl.domain.ports import (
 )
 
 ADR_FILENAME_RE = re.compile(r"^ADR-(\d+)-(.+)\.md$", re.IGNORECASE)
-STATUS_PATTERNS = (
-    re.compile(r"^\*\*Status:\*\*\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^\*\*Статус:\*\*\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^Status:\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^Статус:\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(
-        r"^\|\s*\*\*(?:Status|Статус)\*\*\s*\|\s*([^|\n]+)\s*\|",
-        flags=re.IGNORECASE | re.MULTILINE,
-    ),
-)
-DATE_PATTERNS = (
-    re.compile(r"^\*\*Date:\*\*\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^\*\*Дата:\*\*\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^Date:\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(r"^Дата:\s*([^\n]+)$", flags=re.IGNORECASE | re.MULTILINE),
-    re.compile(
-        r"^\|\s*\*\*(?:Date|Дата)\*\*\s*\|\s*([^|\n]+)\s*\|",
-        flags=re.IGNORECASE | re.MULTILINE,
-    ),
-)
+STATUS_LABELS = ("Status", "Статус")
+DATE_LABELS = ("Date", "Дата")
+STATUS_PATTERNS = STATUS_LABELS
+DATE_PATTERNS = DATE_LABELS
 
 
 def _iter_adr_files(base_dir: Path) -> Iterable[Path]:
@@ -57,16 +41,39 @@ def _parse_h1_title(text: str) -> str | None:
     return None
 
 
-def _extract_with_patterns(
-    text: str, patterns: tuple[re.Pattern[str], ...]
-) -> str | None:
-    for pattern in patterns:
-        match = pattern.search(text)
-        if match:
-            value = match.group(1).strip()
-            if value:
-                return value
+def _extract_labeled_line_value(text: str, labels: tuple[str, ...]) -> str | None:
+    label_variants = tuple(label.casefold() for label in labels)
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+
+        lowered = stripped.casefold()
+        for label in label_variants:
+            prefixes = (
+                f"**{label}:**",
+                f"{label}:",
+            )
+            for prefix in prefixes:
+                if lowered.startswith(prefix):
+                    value = stripped[len(prefix) :].strip()
+                    if value:
+                        return value
+        if not stripped.startswith("|"):
+            continue
+
+        cells = [cell.strip() for cell in stripped.split("|") if cell.strip()]
+        if len(cells) < 2:
+            continue
+        header = cells[0].strip("* ").casefold()
+        if header in label_variants and cells[1]:
+            return cells[1]
     return None
+
+
+def _extract_with_patterns(text: str, patterns: tuple[str, ...]) -> str | None:
+    """Backward-compatible wrapper kept for unit tests and callers."""
+    return _extract_labeled_line_value(text, patterns)
 
 
 def _first_content_line(lines: list[str], start: int) -> str | None:
@@ -123,11 +130,11 @@ def _extract_from_section(
 
 def _extract_meta(text: str) -> tuple[str | None, str | None]:
     """Extract status and date from common ADR metadata formats."""
-    status = _extract_with_patterns(text, STATUS_PATTERNS)
+    status = _extract_labeled_line_value(text, STATUS_LABELS)
     if status is None:
         status = _extract_from_section(text, ("Status", "Статус"))
 
-    date = _extract_with_patterns(text, DATE_PATTERNS)
+    date = _extract_labeled_line_value(text, DATE_LABELS)
     if date is None:
         date = _extract_from_section(text, ("Date", "Дата"))
 

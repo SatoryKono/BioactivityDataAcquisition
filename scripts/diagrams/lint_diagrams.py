@@ -67,9 +67,6 @@ _CLASS_DIAGRAM_RE = re.compile(r"^\s*classDiagram\b", re.IGNORECASE)
 _UNESCAPED_DUNDER_METHOD_RE = re.compile(
     r"^\s*[+\-#~][^\n]*?(?<!\\)__[A-Za-z0-9_]+__(?=\s*\()"
 )
-_CLASS_METHOD_SIGNATURE_RE = re.compile(
-    r"^\s*[+\-#~]\s*([A-Za-z_\\][A-Za-z0-9_\\]*)\s*\(([^)]*)\)\s*(.*)$"
-)
 _STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
 _HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
@@ -198,6 +195,30 @@ def _iter_edge_lines(lines: list[str]) -> list[str]:
         if "-->" in s or "-.->" in s or "==>" in s:
             edges.append(s)
     return edges
+
+
+def _parse_class_method_signature(line: str) -> tuple[str, str] | None:
+    stripped = line.strip()
+    if not stripped or stripped[0] not in "+-#~":
+        return None
+
+    payload = stripped[1:].lstrip()
+    method_name, separator, remainder = payload.partition("(")
+    if not separator:
+        return None
+
+    method_name = method_name.strip()
+    if not method_name:
+        return None
+    if not (method_name[0].isalpha() or method_name[0] in {"_", "\\"}):
+        return None
+    if any(not (char.isalnum() or char in {"_", "\\"}) for char in method_name):
+        return None
+
+    closing_paren = remainder.find(")")
+    if closing_paren < 0:
+        return None
+    return method_name, remainder[closing_paren + 1 :]
 
 
 def find_diagram_files(base: Path) -> list[Path]:
@@ -903,12 +924,12 @@ def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue
         if _UNESCAPED_DUNDER_METHOD_RE.search(stripped):
             offenders.append(idx)
 
-        method_match = _CLASS_METHOD_SIGNATURE_RE.match(stripped)
-        if not method_match:
+        parsed_signature = _parse_class_method_signature(stripped)
+        if not parsed_signature:
             continue
 
-        method_name = method_match.group(1).replace("\\_", "_")
-        tail = method_match.group(3).strip()
+        method_name = parsed_signature[0].replace("\\_", "_")
+        tail = parsed_signature[1].strip()
         if tail:
             if tail.startswith(":"):
                 colon_return_lines.append(idx)

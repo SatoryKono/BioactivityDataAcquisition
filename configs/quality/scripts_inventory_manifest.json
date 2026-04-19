@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-19T09:26:49.746652+00:00",
+  "generated_at": "2026-04-19T09:59:46.081471+00:00",
   "summary": {
     "total_scripts": 390,
     "status_counts": {
@@ -16,7 +16,7 @@
       "docs": 118,
       "scripts": 273,
       "skills": 8,
-      "tests": 104
+      "tests": 106
     }
   },
   "scripts": [
@@ -4930,13 +4930,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 528,
+          "line": 578,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 552,
+          "line": 602,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -4969,13 +4969,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 529,
+          "line": 579,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 553,
+          "line": 603,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -5867,7 +5867,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 30,
+      "reference_count": 31,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -5926,7 +5926,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 31,
+      "reference_count": 32,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
