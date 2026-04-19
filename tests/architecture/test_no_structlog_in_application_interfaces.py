@@ -173,25 +173,27 @@ def _check_structlog_boundlogger_usage(directory: Path) -> list[str]:
     Returns:
         List of violation messages with file path and line number.
     """
-    violations = []
-
     if not directory.exists():
-        return violations
+        return []
 
+    violations: list[str] = []
     for py_file in directory.rglob("*.py"):
         rel_path = py_file.relative_to(Path("src"))
-
-        try:
-            source = py_file.read_text(encoding="utf-8")
-        except (UnicodeDecodeError, OSError):
-            continue
-
-        # Check for structlog.BoundLogger usage in source
-        for lineno, line in enumerate(source.splitlines(), start=1):
-            if "structlog.BoundLogger" in line:
-                violations.append(f"{rel_path}:{lineno}: {line.strip()}")
+        violations.extend(_iter_boundlogger_line_violations(py_file, rel_path))
 
     return violations
+
+
+def _iter_boundlogger_line_violations(py_file: Path, rel_path: Path) -> list[str]:
+    try:
+        lines = py_file.read_text(encoding="utf-8").splitlines()
+    except (UnicodeDecodeError, OSError):
+        return []
+    return [
+        f"{rel_path}:{lineno}: {line.strip()}"
+        for lineno, line in enumerate(lines, start=1)
+        if "structlog.BoundLogger" in line
+    ]
 
 
 def test_no_structlog_boundlogger_in_application() -> None:
