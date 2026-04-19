@@ -63,7 +63,7 @@ _LR_RE = re.compile("|".join(LR_PATTERNS), re.IGNORECASE)
 _NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
 _GRAPH_LINE_RE = re.compile(r"^(graph|flowchart)\s+(TB|LR|BT|RL|TD)?", re.IGNORECASE)
 _EDGE_ROUTING_RE = re.compile(
-    r"(['\"]?edgeRouting['\"]?\s*:\s*['\"])([A-Za-z_]+)(['\"])",
+    r"(['\"]?edgeRouting['\"]?\s*:\s*['\"])([a-z_]+)(['\"])",
     re.IGNORECASE,
 )
 _DIAGRAM_TYPE_RE = re.compile(

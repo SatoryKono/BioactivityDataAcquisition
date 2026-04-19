@@ -46,26 +46,32 @@ def _iter_compat_import_violations(
     for py_file, tree in sorted(ast_cache.items()):
         rel_path = py_file.relative_to(ROOT).as_posix()
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module in COMPAT_MODULES:
-                violations.append(f"{rel_path}:{node.lineno} imports {node.module}")
-            elif (
-                isinstance(node, ast.ImportFrom)
-                and node.module in COMPAT_PARENT_IMPORTS
-            ):
-                compat_children = COMPAT_PARENT_IMPORTS[node.module]
-                for alias in node.names:
-                    if alias.name in compat_children:
-                        compat_path = f"{node.module}.{alias.name}"
-                        violations.append(
-                            f"{rel_path}:{node.lineno} imports {compat_path}"
-                        )
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name in COMPAT_MODULES:
-                        violations.append(
-                            f"{rel_path}:{node.lineno} imports {alias.name}"
-                        )
+            violations.extend(
+                f"{rel_path}:{node.lineno} imports {compat_path}"
+                for compat_path in _iter_node_compat_paths(node)
+            )
     return violations
+
+
+def _iter_node_compat_paths(node: ast.AST) -> list[str]:
+    if isinstance(node, ast.ImportFrom):
+        return _iter_import_from_compat_paths(node)
+    if isinstance(node, ast.Import):
+        return [alias.name for alias in node.names if alias.name in COMPAT_MODULES]
+    return []
+
+
+def _iter_import_from_compat_paths(node: ast.ImportFrom) -> list[str]:
+    if node.module in COMPAT_MODULES:
+        return [node.module]
+    if node.module not in COMPAT_PARENT_IMPORTS:
+        return []
+    compat_children = COMPAT_PARENT_IMPORTS[node.module]
+    return [
+        f"{node.module}.{alias.name}"
+        for alias in node.names
+        if alias.name in compat_children
+    ]
 
 
 @pytest.mark.architecture

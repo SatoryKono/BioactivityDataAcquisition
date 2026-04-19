@@ -177,6 +177,13 @@ def _repo_relative_path(path: Path) -> Path:
     return _resolve_repo_path(path).relative_to(REPO_ROOT)
 
 
+def _write_validated_repo_text(file_path: ValidatedRepoPath, text: str) -> None:
+    """Write text only after revalidating the target path inside the repository."""
+    safe_path = _resolve_input_path(file_path.resolved_path).resolved_path
+    with safe_path.open("w", encoding="utf-8") as file_obj:
+        file_obj.write(text)
+
+
 def load_rows(matrix_path: ValidatedRepoPath | Path) -> list[RenameRow]:
     safe_matrix_path = _validated_input_path(matrix_path)
     rows: list[RenameRow] = []
@@ -260,7 +267,7 @@ def _apply_rows_to_file(
         return 0
 
     if apply:
-        safe_file_path.write_text(updated_text, encoding="utf-8")
+        _write_validated_repo_text(file_path, updated_text)
         print(f"[write] {display_path}")
     else:
         print(f"[dry-run] {display_path}")

@@ -36,18 +36,21 @@ def _iter_shim_import_violations(
     for py_file, tree in sorted(ast_cache.items()):
         if py_file in allowed_files:
             continue
+        rel_path = py_file.relative_to(ROOT).as_posix()
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module in ALLOWED_SHIM_MODULES:
-                rel_path = py_file.relative_to(ROOT).as_posix()
-                violations.append(f"{rel_path}:{node.lineno} imports {node.module}")
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name in ALLOWED_SHIM_MODULES:
-                        rel_path = py_file.relative_to(ROOT).as_posix()
-                        violations.append(
-                            f"{rel_path}:{node.lineno} imports {alias.name}"
-                        )
+            violations.extend(
+                f"{rel_path}:{node.lineno} imports {compat_path}"
+                for compat_path in _iter_node_shim_paths(node)
+            )
     return violations
+
+
+def _iter_node_shim_paths(node: ast.AST) -> list[str]:
+    if isinstance(node, ast.ImportFrom) and node.module in ALLOWED_SHIM_MODULES:
+        return [node.module]
+    if isinstance(node, ast.Import):
+        return [alias.name for alias in node.names if alias.name in ALLOWED_SHIM_MODULES]
+    return []
 
 
 @pytest.mark.architecture
