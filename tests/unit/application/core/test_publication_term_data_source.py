@@ -221,7 +221,8 @@ class TestPublicationTermDataSourceFetch:
 
         records = [record async for record in wrapper.fetch("document", offset=25)]
 
-        assert records == []
+        assert len(records) == 2
+        assert all("publication_id" in record for record in records)
         assert mock_data_source.fetch_calls[-1]["entity_type"] == "document"
         assert mock_data_source.fetch_calls[-1]["offset"] == 25
 
