@@ -46,11 +46,6 @@ if TYPE_CHECKING:
     )
 
 
-CompositeRunnerFactory = Callable[
-    [CompositeRunnerServiceInputs], CompositePipelineRunner
-]
-
-
 @dataclass(frozen=True, slots=True)
 class CompositeRunnerServiceInputs:
     config: CompositeConfig
@@ -75,6 +70,11 @@ class CompositeRunnerServiceInputs:
     observer: CompositeLifecycleObserverService | None
     manifest_id: str | None
     run_ledger_service: RunLedgerService | None
+
+
+CompositeRunnerFactory = Callable[
+    [CompositeRunnerServiceInputs], CompositePipelineRunner
+]
 
 
 def resolve_effective_run_id(run_id: str | None) -> str:
