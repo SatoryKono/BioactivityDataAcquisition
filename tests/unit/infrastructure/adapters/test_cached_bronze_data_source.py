@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -17,6 +18,10 @@ from bioetl.infrastructure.adapters._cached_bronze_support import parse_bronze_d
 from bioetl.infrastructure.adapters.cached_bronze_data_source import (
     CachedBronzeDataSource,
 )
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-cached-bronze-data-source-"))
+BRONZE_ROOT = TEST_ROOT / "bronze"
+BRONZE_ACTIVITY_ROOT = BRONZE_ROOT / "chembl" / "activity"
 
 
 class _FakeBronzeReader:
@@ -76,7 +81,7 @@ class TestCachedBronzeDataSourceBasics:
     ) -> None:
         """Adapter should expose provider_name and no-op async lifecycle methods."""
         reader = _FakeBronzeReader(
-            base_path="/tmp/bronze",
+            base_path=str(BRONZE_ROOT),
             flat_structure=False,
             batches=[],
             records_by_batch={},
@@ -100,7 +105,7 @@ class TestCachedBronzeDataSourceBasics:
     ) -> None:
         """Canonical helper should return UTC-aware datetime and support None."""
         reader = _FakeBronzeReader(
-            base_path="/tmp/bronze",
+            base_path=str(BRONZE_ROOT),
             flat_structure=False,
             batches=[],
             records_by_batch={},
@@ -131,7 +136,7 @@ class TestCachedBronzeDataSourceBatches:
     ) -> None:
         """Standard structure should call list_batches(provider, entity, date)."""
         reader = _FakeBronzeReader(
-            base_path="/tmp/bronze",
+            base_path=str(BRONZE_ROOT),
             flat_structure=False,
             batches=[
                 "2026-01-02/batch_b.jsonl.zst",
@@ -166,7 +171,7 @@ class TestCachedBronzeDataSourceBatches:
     ) -> None:
         """Flat structure should pass empty provider/entity to list_batches()."""
         reader = _FakeBronzeReader(
-            base_path="/tmp/bronze/chembl/activity",
+            base_path=str(BRONZE_ACTIVITY_ROOT),
             flat_structure=True,
             batches=["2026-01-01/batch_a.jsonl.zst"],
             records_by_batch={},
@@ -220,7 +225,7 @@ class TestCachedBronzeDataSourceFetch:
     ) -> None:
         """Fetch should be deterministic, log unsupported params, and respect limit."""
         reader = _FakeBronzeReader(
-            base_path="/tmp/bronze",
+            base_path=str(BRONZE_ROOT),
             flat_structure=False,
             batches=[
                 "2026-01-02/batch_b.jsonl.zst",
@@ -260,7 +265,7 @@ class TestCachedBronzeDataSourceFetch:
     ) -> None:
         """Total records should sum records from all listed batches."""
         reader = _FakeBronzeReader(
-            base_path="/tmp/bronze",
+            base_path=str(BRONZE_ROOT),
             flat_structure=False,
             batches=["a.jsonl.zst", "b.jsonl.zst"],
             records_by_batch={

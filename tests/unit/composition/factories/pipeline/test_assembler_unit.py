@@ -295,18 +295,18 @@ class TestGenericPipelineFactory:
 
         assert result is runner
         mock_load_pipeline_config.assert_called_once_with("chembl_activity")
-        factory.create_with_services.assert_called_once_with(
-            run_id="run-load-path",
-            runtime=runtime,
-            settings=settings,
-            logger=observability.logger,
-            config=yaml_config,
-            filter_config=filter_config,
-            tracer=observability.tracer,
-            dq_monitor=observability.dq_monitor,
-            metrics=observability.metrics,
-            cached_bronze=cached_bronze,
-        )
+        factory.create_with_services.assert_called_once()
+        create_request = factory.create_with_services.call_args[0][0]
+        assert create_request.run_id == "run-load-path"
+        assert create_request.runtime is runtime
+        assert create_request.settings is settings
+        assert create_request.logger is observability.logger
+        assert create_request.config is yaml_config
+        assert create_request.filter_config is filter_config
+        assert create_request.tracer is observability.tracer
+        assert create_request.dq_monitor is observability.dq_monitor
+        assert create_request.metrics is observability.metrics
+        assert create_request.cached_bronze is cached_bronze
         mock_assemble_runner.assert_called_once_with(
             pipeline=pipeline,
             observability=observability,
@@ -357,18 +357,18 @@ class TestGenericPipelineFactory:
 
         assert result is runner
         mock_load_pipeline_config.assert_not_called()
-        factory.create_with_services.assert_called_once_with(
-            run_id="run-1",
-            runtime=runtime,
-            settings=settings,
-            logger=observability.logger,
-            config=config,
-            filter_config=filter_config,
-            tracer=observability.tracer,
-            dq_monitor=observability.dq_monitor,
-            metrics=observability.metrics,
-            cached_bronze=cached_bronze,
-        )
+        factory.create_with_services.assert_called_once()
+        create_request = factory.create_with_services.call_args[0][0]
+        assert create_request.run_id == "run-1"
+        assert create_request.runtime is runtime
+        assert create_request.settings is settings
+        assert create_request.logger is observability.logger
+        assert create_request.config is config
+        assert create_request.filter_config is filter_config
+        assert create_request.tracer is observability.tracer
+        assert create_request.dq_monitor is observability.dq_monitor
+        assert create_request.metrics is observability.metrics
+        assert create_request.cached_bronze is cached_bronze
         mock_assemble_runner.assert_called_once_with(
             pipeline=pipeline,
             observability=observability,

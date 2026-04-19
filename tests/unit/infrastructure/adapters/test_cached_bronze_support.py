@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -17,6 +18,10 @@ from bioetl.infrastructure.adapters._cached_bronze_support import (
     raise_if_empty_batches,
     resolve_bronze_path,
 )
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-cached-bronze-support-"))
+BRONZE_ROOT = TEST_ROOT / "bronze"
+BRONZE_ACTIVITY_ROOT = BRONZE_ROOT / "chembl" / "activity"
 
 
 class _ReaderStub(BronzeBatchReader):
@@ -53,7 +58,7 @@ class _ReaderStub(BronzeBatchReader):
 def test_resolve_bronze_path_uses_base_path_for_flat_structure() -> None:
     """Flat layout should keep empty-cache errors anchored at base_path."""
     reader: BronzeBatchReader = _ReaderStub(
-        base_path=Path("/tmp/bronze/chembl/activity"),
+        base_path=BRONZE_ACTIVITY_ROOT,
         flat_structure=True,
     )
 
@@ -63,14 +68,14 @@ def test_resolve_bronze_path_uses_base_path_for_flat_structure() -> None:
         entity_type="activity",
     )
 
-    assert bronze_path.replace("\\", "/").endswith("/tmp/bronze/chembl/activity")
+    assert bronze_path.replace("\\", "/").endswith(BRONZE_ACTIVITY_ROOT.as_posix())
 
 
 @pytest.mark.unit
 def test_resolve_bronze_path_appends_provider_and_entity_for_nested_layout() -> None:
     """Nested layout should point empty-cache errors at provider/entity path."""
     reader: BronzeBatchReader = _ReaderStub(
-        base_path=Path("/tmp/bronze"),
+        base_path=BRONZE_ROOT,
         flat_structure=False,
     )
 
@@ -80,14 +85,14 @@ def test_resolve_bronze_path_appends_provider_and_entity_for_nested_layout() -> 
         entity_type="activity",
     )
 
-    assert bronze_path.replace("\\", "/").endswith("/tmp/bronze/chembl/activity")
+    assert bronze_path.replace("\\", "/").endswith(BRONZE_ACTIVITY_ROOT.as_posix())
 
 
 @pytest.mark.unit
 def test_raise_if_empty_batches_raises_cached_bronze_empty_error() -> None:
     """Empty batch lists should raise the canonical cached-Bronze error."""
     reader: BronzeBatchReader = _ReaderStub(
-        base_path=Path("/tmp/bronze"),
+        base_path=BRONZE_ROOT,
         flat_structure=False,
     )
 
@@ -104,14 +109,16 @@ def test_raise_if_empty_batches_raises_cached_bronze_empty_error() -> None:
     assert error.provider == "chembl"
     assert error.entity_type == "activity"
     assert error.date_filter == "2026-03-23"
-    assert error.bronze_path.replace("\\", "/").endswith("/tmp/bronze/chembl/activity")
+    assert error.bronze_path.replace("\\", "/").endswith(
+        BRONZE_ACTIVITY_ROOT.as_posix()
+    )
 
 
 @pytest.mark.unit
 def test_raise_if_empty_batches_is_noop_when_batches_exist() -> None:
     """Non-empty batch lists should not raise."""
     reader: BronzeBatchReader = _ReaderStub(
-        base_path=Path("/tmp/bronze"),
+        base_path=BRONZE_ROOT,
         flat_structure=False,
     )
 

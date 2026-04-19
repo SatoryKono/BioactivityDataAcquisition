@@ -41,28 +41,31 @@ def analyze_python_code():
         except OSError as e:
             print(f"⚠️  Skipping {file_path} due to file access error: {e}")
             continue
-                
-                issues_found['total_lines'] += len(lines)
-                
-                # Check for complex functions (high cyclomatic complexity indicator)
-                if 'def ' in content and ('if ' in content or 'for ' in content or 'while ' in content):
-                    # Simple heuristic for complexity
-                    complexity_indicators = content.count('if') + content.count('for') + content.count('while')
-                    if complexity_indicators > 5:
-                        issues_found['complex_functions'] += 1
-                
-                # Check for long functions
-                if 'def ' in content:
-                    func_lines = len([line for line in lines if line.strip() and not line.strip().startswith('#')])
-                    if func_lines > 50:
-                        issues_found['long_functions'] += 1
-                
-                # Check for missing docstrings (simple check)
-                if 'def ' in content and '"""' not in content and "'''" not in content:
-                    issues_found['missing_docstrings'] += 1
+        
+        issues_found['total_lines'] += len(lines)
+
+        # Check for complex functions (high cyclomatic complexity indicator)
+        if 'def ' in content and ('if ' in content or 'for ' in content or 'while ' in content):
+            # Simple heuristic for complexity
+            complexity_indicators = content.count('if') + content.count('for') + content.count('while')
+            if complexity_indicators > 5:
+                issues_found['complex_functions'] += 1
+
+        # Check for long functions
+        if 'def ' in content:
+            func_lines = len([line for line in lines if line.strip() and not line.strip().startswith('#')])
+            if func_lines > 50:
+                issues_found['long_functions'] += 1
+
+        # Check for missing docstrings (simple check)
+        if 'def ' in content and '"""' not in content and "'''" not in content:
+            issues_found['missing_docstrings'] += 1
                     
-        except Exception as e:
+        except (IOError, UnicodeDecodeError, json.JSONDecodeError) as e:
             print(f"⚠️  Error analyzing {file_path}: {e}")
+        except Exception as e:
+            print(f"⚠️  Unexpected error analyzing {file_path}: {e}")
+            raise
     
     return issues_found
 
