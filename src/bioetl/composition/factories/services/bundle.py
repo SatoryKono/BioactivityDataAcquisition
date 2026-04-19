@@ -10,8 +10,8 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 )
 from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn,
-    _PipelineCreationInputs,
     _create_pipeline_with_services_impl,
+    _PipelineCreationInputs,
     _ServiceBundleDeps,
 )
 from bioetl.composition.factories.services._bundle_support import (

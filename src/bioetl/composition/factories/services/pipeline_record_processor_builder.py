@@ -13,13 +13,13 @@ from bioetl.application.core.wiring.runtime import (
 from bioetl.composition.factories.services._builder_record_processor_support import (
     _RecordProcessorBuildRequest,
 )
-from bioetl.composition.factories.services.pipeline_processing_components_builder import (
-    create_batch_processing_components as build_batch_processing_components,
-)
 from bioetl.composition.factories.services._record_processor_policy_support import (
     extract_gold_schema_policy_by_version,
     extract_hash_policy,
     extract_hash_policy_by_version,
+)
+from bioetl.composition.factories.services.pipeline_processing_components_builder import (
+    create_batch_processing_components as build_batch_processing_components,
 )
 from bioetl.domain.config import TableConfig
 from bioetl.infrastructure.validation import PanderaGoldValidator
