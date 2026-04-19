@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-18T11:01:25.160078+00:00",
+  "generated_at": "2026-04-18T18:42:55.528967+00:00",
   "summary": {
-    "total_scripts": 384,
+    "total_scripts": 389,
     "status_counts": {
-      "active": 281,
+      "active": 284,
       "legacy": 15,
-      "orphan": 78,
+      "orphan": 80,
       "unknown": 10
     },
     "reference_group_coverage": {
@@ -14,9 +14,9 @@
       "build": 1,
       "ci": 49,
       "docs": 118,
-      "scripts": 271,
+      "scripts": 273,
       "skills": 8,
-      "tests": 102
+      "tests": 104
     }
   },
   "scripts": [
@@ -774,6 +774,14 @@
       ]
     },
     {
+      "path": "scripts/ai/group_issues.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ai/mcp/__main__.py",
       "type": "py",
       "status": "active",
@@ -905,13 +913,13 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 81,
+          "line": 105,
           "source_group": "tests",
-          "text": "assert \"github-mcp-wrapper.ps1\" in servers[\"github\"][\"args\"][-1]"
+          "text": "servers[\"github\"], \"powershell\", \"scripts/ai/mcp/github-mcp-wrapper.ps1\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 181,
+          "line": 241,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         }
@@ -932,13 +940,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 107,
+          "line": 162,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
+          "text": "servers[\"github\"], \"bash\", \"scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 178,
+          "line": 238,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         }
@@ -953,9 +961,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 100,
+          "line": 143,
           "source_group": "tests",
-          "text": "assert \"mcp_brave_search_wrapper.ps1\" in servers[\"brave-search\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         }
       ]
     },
@@ -974,9 +982,9 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 142,
+          "line": 196,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         }
       ]
     },
@@ -1005,9 +1013,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 95,
+          "line": 118,
           "source_group": "tests",
-          "text": "assert \"mcp_context7_wrapper.ps1\" in servers[\"context7\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         }
       ]
     },
@@ -1026,9 +1034,9 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 127,
+          "line": 173,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
+          "text": "servers[\"context7\"], \"bash\", \"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         }
       ]
     },
@@ -1041,9 +1049,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 94,
+          "line": 113,
           "source_group": "tests",
-          "text": "assert \"mcp_docker_docs_wrapper.ps1\" in servers[\"docker-docs\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.ps1\","
         }
       ]
     },
@@ -1062,9 +1070,9 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 124,
+          "line": 170,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\","
         }
       ]
     },
@@ -1077,9 +1085,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 93,
+          "line": 108,
           "source_group": "tests",
-          "text": "assert \"mcp_docker_wrapper.ps1\" in servers[\"docker\"][\"args\"][-1]"
+          "text": "servers[\"docker\"], \"powershell\", \"scripts/ai/mcp/mcp_docker_wrapper.ps1\""
         }
       ]
     },
@@ -1098,9 +1106,9 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 121,
+          "line": 165,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
+          "text": "servers[\"docker\"], \"bash\", \"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         }
       ]
     },
@@ -1113,9 +1121,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 97,
+          "line": 128,
           "source_group": "tests",
-          "text": "assert \"mcp_dockerhub_wrapper.ps1\" in servers[\"dockerhub\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.ps1\","
         }
       ]
     },
@@ -1134,9 +1142,9 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 133,
+          "line": 183,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\","
         }
       ]
     },
@@ -1149,9 +1157,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 99,
+          "line": 138,
           "source_group": "tests",
-          "text": "assert \"mcp_grafana_wrapper.ps1\" in servers[\"grafana\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\","
         }
       ]
     },
@@ -1170,9 +1178,9 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 139,
+          "line": 191,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+          "text": "servers[\"grafana\"], \"bash\", \"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         }
       ]
     },
@@ -1201,9 +1209,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 102,
+          "line": 153,
           "source_group": "tests",
-          "text": "assert \"mcp_neo4j_cypher_wrapper.ps1\" in servers[\"neo4j-cypher\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         }
       ]
     },
@@ -1222,19 +1230,26 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 148,
+          "line": 206,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         }
       ]
     },
     {
       "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 158,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
@@ -1302,9 +1317,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 96,
+          "line": 123,
           "source_group": "tests",
-          "text": "assert \"mcp_paper_search_wrapper.ps1\" in servers[\"paper-search\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.ps1\","
         }
       ]
     },
@@ -1323,9 +1338,9 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 130,
+          "line": 178,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\","
         }
       ]
     },
@@ -1338,9 +1353,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 98,
+          "line": 133,
           "source_group": "tests",
-          "text": "assert \"mcp_prometheus_wrapper.ps1\" in servers[\"prometheus\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\","
         }
       ]
     },
@@ -1359,9 +1374,9 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 136,
+          "line": 188,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\","
         }
       ]
     },
@@ -1406,9 +1421,9 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 101,
+          "line": 148,
           "source_group": "tests",
-          "text": "assert \"mcp_sonarqube_wrapper.ps1\" in servers[\"sonarqube\"][\"args\"][-1]"
+          "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.ps1\","
         }
       ]
     },
@@ -1427,15 +1442,15 @@
         },
         {
           "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 145,
+          "line": 201,
           "source_group": "tests",
-          "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
+          "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\","
         }
       ]
     },
@@ -2156,6 +2171,100 @@
       ]
     },
     {
+      "path": "scripts/ai/scripts/ai/check_sonar_issues.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/code_quality_analysis.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/sonar_issue_processor.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "### 1. `sonar_issue_processor.py`"
+        },
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 96,
+          "source_group": "scripts",
+          "text": "python3 sonar_issue_processor.py"
+        },
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 107,
+          "source_group": "scripts",
+          "text": "python3 sonar_issue_processor.py"
+        },
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 113,
+          "source_group": "scripts",
+          "text": "Modify the `LAYER_MAPPING` dictionary in `sonar_issue_processor.py` to match your project structure:"
+        },
+        {
+          "path": "scripts/ai/improved_sonar_prompt.md",
+          "line": 57,
+          "source_group": "scripts",
+          "text": "The script `sonar_issue_processor.py` automates this entire workflow:"
+        },
+        {
+          "path": "scripts/ai/improved_sonar_prompt.md",
+          "line": 69,
+          "source_group": "scripts",
+          "text": "python3 sonar_issue_processor.py"
+        },
+        {
+          "path": "scripts/ai/improved_sonar_prompt.md",
+          "line": 80,
+          "source_group": "scripts",
+          "text": "python3 sonar_issue_processor.py"
+        },
+        {
+          "path": "scripts/ai/sonar_issue_processor_demo.py",
+          "line": 173,
+          "source_group": "scripts",
+          "text": "print(\"   2. Run: python3 sonar_issue_processor.py\")"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/sonar_issue_processor_demo.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 16,
+          "source_group": "scripts",
+          "text": "### 2. `sonar_issue_processor_demo.py`"
+        },
+        {
+          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
+          "line": 57,
+          "source_group": "scripts",
+          "text": "python3 sonar_issue_processor_demo.py"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/vibe/__main__.py",
       "type": "py",
       "status": "orphan",
@@ -2277,7 +2386,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/04-reference/templates/pipeline-review-checklist.md",
@@ -2298,22 +2407,34 @@
           "text": "python -m scripts.data <command> [args...]"
         },
         {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 147,
-          "source_group": "tests",
-          "text": "\"python -m scripts.data check-vcr-secrets\""
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10384,
+          "source_group": "scripts",
+          "text": "- python -m scripts.data check-vcr-placement"
         },
         {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 382,
-          "source_group": "tests",
-          "text": "assert \"python -m scripts.data check-vcr-placement\" in data_readme"
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10385,
+          "source_group": "scripts",
+          "text": "- python -m scripts.data check-vcr-naming"
         },
         {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 383,
-          "source_group": "tests",
-          "text": "assert \"python -m scripts.data check-vcr-secrets\" in data_readme"
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10389,
+          "source_group": "scripts",
+          "text": "- python -m scripts.data check-vcr-placement"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10390,
+          "source_group": "scripts",
+          "text": "- python -m scripts.data check-vcr-naming"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10391,
+          "source_group": "scripts",
+          "text": "- python -m scripts.data check-vcr-secrets"
         }
       ]
     },
@@ -3162,7 +3283,7 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_docs_agent.sh",
-          "line": 169,
+          "line": 162,
           "source_group": "scripts",
           "text": "DOCX_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/scripts/diagrams/generate_with_descriptions_docx.py\")"
         }
@@ -3213,7 +3334,7 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_docs_agent.sh",
-          "line": 178,
+          "line": 171,
           "source_group": "scripts",
           "text": "PDF_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/scripts/diagrams/generate_with_descriptions_pdf.py\")"
         }
@@ -3625,13 +3746,19 @@
       "type": "mjs",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/diagrams/README.md",
           "line": 107,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/svg2png.mjs` | Node.js SVG-to-PNG converter |"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10460,
+          "source_group": "scripts",
+          "text": "- \"scripts/diagrams/svg2png.mjs\""
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
@@ -4795,13 +4922,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 494,
+          "line": 527,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 518,
+          "line": 551,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -4834,13 +4961,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 495,
+          "line": 528,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 519,
+          "line": 552,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -4881,7 +5008,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/reports/evidence/project-test-health/coverage-governance/02-evidence/coverage-governance/EV-project-test-health-coverage-governance-skip-conditioned-confidence-now-uses-canonical-buckets.yaml",
@@ -5354,37 +5481,37 @@
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 543,
+          "line": 645,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'"
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 557,
+          "line": 659,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'"
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 808,
+          "line": 911,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 817,
+          "line": 920,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 833,
+          "line": 936,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 842,
+          "line": 945,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         }
@@ -5858,7 +5985,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 51,
+      "reference_count": 56,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -5917,7 +6044,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 65,
+      "reference_count": 70,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -6176,7 +6303,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 169,
+          "line": 229,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/setup_copilot_codex_mcp.ps1\").read_text("
         }
@@ -6254,7 +6381,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 160,
+          "line": 220,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/setup_copilot_codex_mcp.sh\").read_text("
         }
@@ -6265,7 +6392,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 30,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -6322,7 +6449,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 31,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -6634,7 +6761,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 77,
       "references": [
         {
           "path": ".github/workflows/duplication-complexity.yml",
@@ -6866,19 +6993,19 @@
         },
         {
           "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 13,
+          "line": 18,
           "source_group": "tests",
-          "text": "script = repo_root / \"scripts\" / \"qa\" / \"check_naming_package_consistency.py\""
+          "text": "/ \"check_naming_package_consistency.py\""
         },
         {
           "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 15,
+          "line": 21,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py must exist\""
         },
         {
           "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 36,
+          "line": 51,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py --check\" in workflow"
         }
@@ -7186,7 +7313,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -7232,9 +7359,9 @@
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 56,
+          "line": 55,
           "source_group": "scripts",
-          "text": "details=\"scripts/engineering/qa/naming_audit.py not found\","
+          "text": "location=\"scripts/qa/naming_audit.py\","
         }
       ]
     },
@@ -7440,7 +7567,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
@@ -7479,16 +7606,16 @@
           "text": "\"report-vcr-metadata\": \"report_vcr_metadata_catalog.py\","
         },
         {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 336,
-          "source_group": "tests",
-          "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 9997,
+          "source_group": "scripts",
+          "text": "- scripts/engineering/qa/report_vcr_metadata_catalog.py"
         },
         {
-          "path": "tests/architecture/test_vcr_metadata_catalog_drift.py",
-          "line": 19,
-          "source_group": "tests",
-          "text": "script = Path(\"scripts/engineering/qa/report_vcr_metadata_catalog.py\")"
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10002,
+          "source_group": "scripts",
+          "text": "- scripts/engineering/qa/report_vcr_metadata_catalog.py"
         }
       ]
     },
@@ -7533,7 +7660,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 19,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -7590,7 +7717,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -7617,6 +7744,12 @@
           "text": "\"check-placement\": \"check_root_vcr_cassettes.py\","
         },
         {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10365,
+          "source_group": "scripts",
+          "text": "- scripts/engineering/qa/vcr/check_root_vcr_cassettes.py"
+        },
+        {
           "path": "tests/architecture/test_integration_vcr_policy.py",
           "line": 251,
           "source_group": "tests",
@@ -7635,7 +7768,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -7662,6 +7795,18 @@
           "text": "\"check-naming\": \"check_vcr_filename_policy.py\","
         },
         {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10106,
+          "source_group": "scripts",
+          "text": "- scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10366,
+          "source_group": "scripts",
+          "text": "- scripts/engineering/qa/vcr/check_vcr_filename_policy.py"
+        },
+        {
           "path": "tests/architecture/test_integration_vcr_policy.py",
           "line": 255,
           "source_group": "tests",
@@ -7680,7 +7825,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/data/README.md",
@@ -7699,6 +7844,12 @@
           "line": 23,
           "source_group": "scripts",
           "text": "\"check-secrets\": \"check_vcr_secrets.py\","
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10367,
+          "source_group": "scripts",
+          "text": "- scripts/engineering/qa/vcr/check_vcr_secrets.py"
         }
       ]
     },
@@ -8120,7 +8271,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 127,
+      "reference_count": 128,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -9144,7 +9295,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 437,
+          "line": 442,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_duplicate_prs_wave2.sh\","
         }
@@ -9159,7 +9310,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 438,
+          "line": 443,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_duplicate_prs_wave3.sh\","
         }
@@ -9174,7 +9325,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 445,
+          "line": 450,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_great_expectations_spike_issue.sh\","
         },
@@ -9195,7 +9346,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 442,
+          "line": 447,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_issue_2597.sh\","
         }
@@ -9210,7 +9361,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 446,
+          "line": 451,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_pandera_schema_drift_issue.sh\","
         },
@@ -9231,7 +9382,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 436,
+          "line": 441,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/close_superseded_prs.sh\","
         }
@@ -9254,7 +9405,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 441,
+          "line": 446,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_2597_progress.sh\","
         }
@@ -9269,7 +9420,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 443,
+          "line": 448,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/post_issue_rescope_comments.sh\","
         }
@@ -9338,7 +9489,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 444,
+          "line": 449,
           "source_group": "scripts",
           "text": "\"scripts/ops/maintenance/github/update_issue_rescope_bodies.sh\","
         }
@@ -9376,7 +9527,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
@@ -9397,10 +9548,34 @@
           "text": "- `scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py`"
         },
         {
-          "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 337,
-          "source_group": "tests",
-          "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 9963,
+          "source_group": "scripts",
+          "text": "- scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 9982,
+          "source_group": "scripts",
+          "text": "- scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10015,
+          "source_group": "scripts",
+          "text": "- scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10020,
+          "source_group": "scripts",
+          "text": "- scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 10381,
+          "source_group": "scripts",
+          "text": "metadata_backfill_script: scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py"
         }
       ]
     },
@@ -9969,7 +10144,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 43,
       "references": [
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
@@ -9985,7 +10160,7 @@
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
-          "line": 74,
+          "line": 78,
           "source_group": "docs",
           "text": "- `src/bioetl/interfaces/cli/commands/run.py`"
         },
@@ -10276,7 +10451,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 459,
+          "line": 464,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },
@@ -10888,7 +11063,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 466,
+          "line": 471,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_application_deps.py\","
         },
@@ -10909,7 +11084,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 465,
+          "line": 470,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_architecture.py\","
         },
@@ -10930,7 +11105,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 467,
+          "line": 472,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/check_constructor_args.py\","
         },
@@ -10951,7 +11126,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 458,
+          "line": 463,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/config_matrix_generator.py\","
         },
@@ -10996,7 +11171,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 460,
+          "line": 465,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/lint_terminology.py\","
         },
@@ -11017,7 +11192,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 461,
+          "line": 466,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/validate_unified_configs.py\","
         },

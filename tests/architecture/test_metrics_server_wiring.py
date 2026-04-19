@@ -47,25 +47,66 @@ def _collect_called_names_and_attrs(
     return called_names, called_attrs
 
 
-def test_runtime_metrics_bootstrap_uses_metrics_service_not_raw_infra_starter() -> None:
-    """Runtime bootstrap must use the composition-owned metrics service path."""
-    source = METRICS_BOOTSTRAP_PATH.read_text(encoding="utf-8")
-    tree = ast.parse(source)
-    forbidden_imports = set()
-    forbidden_calls = set()
+def _collect_forbidden_metrics_server_usage(
+    tree: ast.AST,
+) -> tuple[set[str], set[str]]:
+    """Collect forbidden raw metrics-server imports and callsites."""
+    forbidden_imports: set[str] = set()
+    forbidden_calls: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
             for alias in node.names:
                 if alias.name == "start_metrics_server":
                     forbidden_imports.add(alias.name)
-        if isinstance(node, ast.Call):
-            func = node.func
-            if isinstance(func, ast.Name) and func.id == "start_metrics_server":
-                forbidden_calls.add(func.id)
-            elif (
-                isinstance(func, ast.Attribute) and func.attr == "start_metrics_server"
+            continue
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if isinstance(func, ast.Name) and func.id == "start_metrics_server":
+            forbidden_calls.add(func.id)
+        elif isinstance(func, ast.Attribute) and func.attr == "start_metrics_server":
+            forbidden_calls.add(func.attr)
+    return forbidden_imports, forbidden_calls
+
+
+def _collect_exported_and_imported_names(path: Path) -> tuple[set[str], set[str]]:
+    """Collect imported names and explicitly exported names for a module."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    exported_names: set[str] = set()
+    imported_names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            imported_names.update(alias.name for alias in node.names)
+            continue
+        if not isinstance(node, ast.Assign):
+            continue
+        for target in node.targets:
+            if not (
+                isinstance(target, ast.Name)
+                and target.id in {"__all__", "_PUBLIC_EXPORTS"}
             ):
-                forbidden_calls.add(func.attr)
+                continue
+            value = node.value
+            if isinstance(value, ast.List):
+                exported_names.update(
+                    elt.value
+                    for elt in value.elts
+                    if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+                )
+            elif isinstance(value, ast.Dict):
+                exported_names.update(
+                    key.value
+                    for key in value.keys
+                    if isinstance(key, ast.Constant) and isinstance(key.value, str)
+                )
+    return imported_names, exported_names
+
+
+def test_runtime_metrics_bootstrap_uses_metrics_service_not_raw_infra_starter() -> None:
+    """Runtime bootstrap must use the composition-owned metrics service path."""
+    source = METRICS_BOOTSTRAP_PATH.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    forbidden_imports, forbidden_calls = _collect_forbidden_metrics_server_usage(tree)
 
     assert not forbidden_imports and not forbidden_calls, (
         "metrics_bootstrap.py must not call or import raw infrastructure "
@@ -125,34 +166,7 @@ def test_runtime_observability_modules_do_not_reexport_raw_start_metrics_server(
 ):
     """Legacy raw start_metrics_server exports must stay out of runtime bootstrap surface."""
     for path in (RUNTIME_OBSERVABILITY_PATH, RUNTIME_INIT_PATH):
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        exported_names: set[str] = set()
-        imported_names: set[str] = set()
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom):
-                imported_names.update(alias.name for alias in node.names)
-            elif isinstance(node, ast.Assign):
-                for target in node.targets:
-                    if not (
-                        isinstance(target, ast.Name)
-                        and target.id in {"__all__", "_PUBLIC_EXPORTS"}
-                    ):
-                        continue
-                    value = node.value
-                    if isinstance(value, ast.List):
-                        exported_names.update(
-                            elt.value
-                            for elt in value.elts
-                            if isinstance(elt, ast.Constant)
-                            and isinstance(elt.value, str)
-                        )
-                    elif isinstance(value, ast.Dict):
-                        exported_names.update(
-                            key.value
-                            for key in value.keys
-                            if isinstance(key, ast.Constant)
-                            and isinstance(key.value, str)
-                        )
+        imported_names, exported_names = _collect_exported_and_imported_names(path)
 
         assert "start_metrics_server" not in imported_names | exported_names, (
             f"{path} must not import or re-export raw start_metrics_server; "

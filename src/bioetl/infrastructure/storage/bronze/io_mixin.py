@@ -46,7 +46,7 @@ class BronzeWriterIOMixin:
         records: Iterator[bytes],
         target_path: Path,
     ) -> tuple[int, int]:
-        """Stream compress records directly to a temp file, then rename atomically."""
+        """Stream-compress records to a temp file, then rename atomically."""
         target_path.parent.mkdir(parents=True, exist_ok=True)
         fd, temp_path_str = tempfile.mkstemp(
             suffix=".tmp",
@@ -112,7 +112,7 @@ class BronzeWriterIOMixin:
         date_str: str,
         batch_id: BatchID,
     ) -> None:
-        """Write uncompressed JSONL copy of records atomically."""
+        """Write uncompressed JSONL copy atomically."""
         json_filename = f"batch_{date_str}_{batch_id}.jsonl"
         json_relative_path = self._resolve_bronze_path(
             provider, entity, date_str, json_filename
@@ -156,7 +156,7 @@ class BronzeWriterIOMixin:
         entity: str,
         date: datetime | None = None,
     ) -> list[str]:
-        """Sync body for list_batches — blocking Path I/O."""
+        """Sync body for list_batches with blocking Path I/O."""
         if self._flat_structure and not provider and not entity:
             search_path = (
                 self.base_path / date.strftime("%Y-%m-%d") if date else self.base_path
@@ -226,7 +226,7 @@ class BronzeWriterIOMixin:
         provider: str | None,
         entity: str | None,
     ) -> tuple[int, int, int]:
-        """Sync body for cleanup_old_files — blocking Path I/O."""
+        """Sync body for cleanup_old_files with blocking Path I/O."""
         files, bytes_total, dirs = 0, 0, 0
 
         for date_dir in self._find_old_date_dirs(cutoff_str, provider, entity):
@@ -325,7 +325,7 @@ class BronzeWriterIOMixin:
         provider: str | None,
         entity: str | None,
     ) -> Path:
-        """Resolve Bronze preview root path for optional provider/entity filters."""
+        """Resolve Bronze preview root for optional provider/entity filters."""
         if self._flat_structure:
             return self.base_path
         if provider and entity:

@@ -171,6 +171,56 @@ def _is_forbidden_port_import_target(module_name: str) -> bool:
     return module_name != "bioetl.domain.ports.noop"
 
 
+def _iter_metrics_server_call_violations(src_dir: Path) -> list[str]:
+    """Collect forbidden start_metrics_server invocations outside composition."""
+    forbidden_layers = ("interfaces", "application", "domain")
+    allowed_patterns = (
+        r"def start_metrics_server",
+        r"from.*import.*start_metrics_server",
+        r"#.*start_metrics_server",
+        r"\"\"\".*start_metrics_server",
+        r"maybe_start_metrics_server",
+    )
+    violations: list[str] = []
+
+    for layer in forbidden_layers:
+        layer_path = src_dir / "bioetl" / layer
+        if not layer_path.exists():
+            continue
+        for py_file in _python_files(layer_path):
+            for line_number, line in enumerate(_read_file(py_file).splitlines(), 1):
+                if "start_metrics_server(" not in line:
+                    continue
+                if any(re.search(pattern, line) for pattern in allowed_patterns):
+                    continue
+                violations.append(
+                    f"{_relative(src_dir, py_file)}:{line_number} - {line.strip()}"
+                )
+    return violations
+
+
+def _port_import_violations(layer_path: Path, src_dir: Path) -> list[str]:
+    """Collect imports of forbidden deep port modules for a single layer."""
+    violations: list[str] = []
+    for py_file in _python_files(layer_path):
+        tree = _parse_file(py_file)
+        relative_path = _relative(src_dir, py_file)
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if _is_forbidden_port_import_target(alias.name):
+                        violations.append(
+                            f"{relative_path}:{node.lineno} imports {alias.name}"
+                        )
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                if _is_forbidden_port_import_target(node.module):
+                    violations.append(
+                        f"{relative_path}:{node.lineno} imports from {node.module}"
+                    )
+    return violations
+
+
 class TestLocalOnlyPolicy:
     """Tests enforcing the Local-Only Architecture (ADR-010)."""
 
@@ -275,35 +325,7 @@ class TestObservabilityInitialization:
         REQ-ARCH-OBS-001: Observability initialization should only happen
         in the composition root to ensure single point of responsibility.
         """
-        forbidden_layers = ["interfaces", "application", "domain"]
-        allowed_patterns = [
-            r"def start_metrics_server",  # Definition is allowed
-            r"from.*import.*start_metrics_server",  # Import is allowed
-            r"#.*start_metrics_server",  # Comments are allowed
-            r"\"\"\".*start_metrics_server",  # Docstrings are allowed
-            r"maybe_start_metrics_server",  # Entrypoint wrapper is allowed
-        ]
-
-        violations = []
-
-        for layer in forbidden_layers:
-            layer_path = src_dir / "bioetl" / layer
-            if not layer_path.exists():
-                continue
-
-            for py_file in _python_files(layer_path):
-                lines = _read_file(py_file).splitlines()
-
-                for i, line in enumerate(lines, 1):
-                    # Check if line contains actual call to start_metrics_server
-                    if "start_metrics_server(" in line:
-                        # Skip if matches allowed patterns
-                        if any(re.search(p, line) for p in allowed_patterns):
-                            continue
-
-                        violations.append(
-                            f"{_relative(src_dir, py_file)}:{i} - {line.strip()}"
-                        )
+        violations = _iter_metrics_server_call_violations(src_dir)
 
         assert not violations, (
             "start_metrics_server() should only be called from composition layer.\n"
@@ -323,29 +345,11 @@ class TestPortImportFacade:
         Deeper internal modules remain forbidden to preserve clear public entry points.
         """
         violations = []
-
-        # Check all layers except the ports package itself
         for layer in ["application", "composition", "infrastructure", "interfaces"]:
             layer_path = src_dir / "bioetl" / layer
             if not layer_path.exists():
                 continue
-
-            for py_file in _python_files(layer_path):
-                tree = _parse_file(py_file)
-                relative_path = _relative(src_dir, py_file)
-
-                for node in ast.walk(tree):
-                    if isinstance(node, ast.Import):
-                        for alias in node.names:
-                            if _is_forbidden_port_import_target(alias.name):
-                                violations.append(
-                                    f"{relative_path}:{node.lineno} imports {alias.name}"
-                                )
-                    elif isinstance(node, ast.ImportFrom) and node.module:
-                        if _is_forbidden_port_import_target(node.module):
-                            violations.append(
-                                f"{relative_path}:{node.lineno} imports from {node.module}"
-                            )
+            violations.extend(_port_import_violations(layer_path, src_dir))
 
         assert not violations, (
             "Ports must be imported only from sanctioned facades.\n"

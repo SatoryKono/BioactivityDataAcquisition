@@ -44,8 +44,7 @@ __all__ = [
     "resolve_provider_registry",
 ]
 
-# Compatibility alias retained during the RF-008 terminology cleanup. New code
-# should use DataSourceCreatorProtocol directly.
+# Compatibility alias retained during RF-008 cleanup; use DataSourceCreatorProtocol.
 DataSourceCreatorPort = DataSourceCreatorProtocol
 
 

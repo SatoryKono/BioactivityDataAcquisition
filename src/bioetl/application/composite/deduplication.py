@@ -6,6 +6,8 @@ to prevent fan-out when enricher has duplicate values by join keys.
 
 from __future__ import annotations
 
+import warnings
+
 import polars as pl
 
 from bioetl.domain.ports import LoggerPort
@@ -221,11 +223,6 @@ class EnricherDeduplicatorService:
             records_after=records_after,
             columns_with_conflicts=columns_with_conflicts,
         )
-
-
-# Backward-compatible alias for iterative NAME-001 migration.
-import warnings
-
 
 class EnricherDeduplicator(EnricherDeduplicatorService):
     def __init__(self, *args, **kwargs):

@@ -1,4 +1,4 @@
-"""Compatibility re-exports for checkpoint compatibility message helpers."""
+"""Compatibility re-export module for checkpoint message helpers."""
 
 from __future__ import annotations
 

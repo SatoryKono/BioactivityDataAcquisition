@@ -40,6 +40,9 @@ if TYPE_CHECKING:
         BatchProgressService,
         ShutdownSignal,
     )
+    from bioetl.application.observability.domain_event_emitter import (
+        DomainEventEmitterPort,
+    )
     from bioetl.domain.config import MemoryConfig
     from bioetl.domain.ports import (
         BatchIdGeneratorPort,
@@ -68,7 +71,7 @@ def create_batch_executor_from_pipeline(
     gold_output_path: str | None = None,
     flat_structure: bool = False,
     batch_id_factory: BatchIdGeneratorPort | None = None,
-    domain_event_emitter: DomainEventEmitter | None = None,
+    domain_event_emitter: DomainEventEmitterPort | None = None,
 ) -> BatchExecutor:
     """Create BatchExecutor from pipeline using delegated component factories."""
     gold_filter = _resolve_gold_filter(pipeline=pipeline, callbacks=callbacks)

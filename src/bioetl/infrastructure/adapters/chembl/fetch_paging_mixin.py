@@ -157,4 +157,5 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
 
             offset += len(records)
 
+
 __all__ = ["CHEMBL_ADAPTER_ERRORS", "ChemblFetchPagingMixin"]

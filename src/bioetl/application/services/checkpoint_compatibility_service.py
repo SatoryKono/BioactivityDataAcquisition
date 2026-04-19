@@ -231,20 +231,23 @@ def _validate_mismatch_reasons(
     reason = execution_identity_result.get("reason")
     if reason == "checkpoint_execution_identity_fallback_mismatch":
         # Only add message if execution fingerprints are actually present
-        if _has_execution_fingerprint_metadata(
-            current_metadata,
-            checkpoint_metadata,
+        if (
+            _has_execution_fingerprint_metadata(
+                current_metadata,
+                checkpoint_metadata,
+            )
         ):
             messages.append(
                 "Checkpoint execution identity fallback mismatch: "
                 f"current={current_metadata.execution_fingerprint}, "
                 f"checkpoint={checkpoint_metadata.execution_fingerprint}"
             )
-    elif reason == "degraded_runtime_anchor_fingerprint_mismatch":
+    elif reason == "degraded_runtime_anchor_fingerprint_mismatch" and (
         # Runtime anchor fingerprint is computed from metadata fields, not stored directly
         # Add message only if relevant metadata fields are present
-        if _has_runtime_anchor_metadata(current_metadata, checkpoint_metadata):
-            messages.append("Degraded runtime anchor fingerprint mismatch")
+        _has_runtime_anchor_metadata(current_metadata, checkpoint_metadata)
+    ):
+        messages.append("Degraded runtime anchor fingerprint mismatch")
 
 
 def _has_execution_fingerprint_metadata(

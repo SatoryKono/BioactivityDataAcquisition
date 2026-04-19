@@ -1,4 +1,4 @@
-"""Deprecated compatibility facade for semantic column ordering."""
+"""Deprecated facade for semantic column ordering."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ __all__ = ["ColumnOrderer"]
 
 
 class ColumnOrderer(ColumnOrderService):
-    """Backward-compatible alias for :class:`ColumnOrderService`.
+    """Deprecated alias for :class:`ColumnOrderService`.
 
     .. deprecated:: 2024.2
         Use :class:`ColumnOrderService` instead for unified column ordering

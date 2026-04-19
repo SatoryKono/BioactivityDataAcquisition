@@ -79,6 +79,132 @@ def _check_imports_in_content(
     return errors
 
 
+def _find_lint_imports_cmd(project_root: Path) -> str | None:
+    """Resolve the lint-imports executable from PATH or the local virtualenv."""
+    import shutil
+
+    lint_imports_cmd = shutil.which("lint-imports")
+    if lint_imports_cmd is not None:
+        return lint_imports_cmd
+
+    candidates = (
+        project_root / ".venv" / "bin" / "lint-imports",
+        project_root / ".venv" / "Scripts" / "lint-imports.exe",
+        project_root / ".venv" / "Scripts" / "lint-imports",
+    )
+    for candidate in candidates:
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
+def _import_linter_skip_reason(result: subprocess.CompletedProcess[str]) -> str | None:
+    """Return a skip reason for known environment-related import-linter failures."""
+    combined_output = "\n".join(part for part in (result.stdout, result.stderr) if part)
+    if any(
+        marker in combined_output
+        for marker in ("ModuleNotFoundError", "ImportError", "No module named")
+    ):
+        return (
+            "Skipping import-linter due to missing optional dependencies. "
+            "Install test extras and rerun lint-imports."
+        )
+    if result.stderr and (
+        "UnicodeEncodeError" in result.stderr or "charmap" in result.stderr
+    ):
+        return (
+            "Skipping due to Windows encoding issue with rich library. "
+            "Run manually: lint-imports --config .importlinter"
+        )
+    return None
+
+
+def _mark_contentful_dirs(
+    *,
+    bioetl_path: Path,
+    source_content_cache: dict[Path, str],
+) -> set[Path]:
+    """Mark directories whose subtree contains at least one non-empty module."""
+    contentful_dirs: set[Path] = set()
+    for py_file, content in _iter_python_content_under(bioetl_path, source_content_cache):
+        if py_file.name == "__init__.py" or not content.strip():
+            continue
+        current = py_file.parent
+        while current != bioetl_path.parent:
+            contentful_dirs.add(current)
+            if current == bioetl_path:
+                break
+            current = current.parent
+    return contentful_dirs
+
+
+def _is_type_checking_import(
+    *,
+    lines: list[str],
+    line_number: int,
+) -> bool:
+    """Return True when the target line is nested in an if TYPE_CHECKING block."""
+    in_type_checking = False
+    for current_line_number, check_line in enumerate(lines, 1):
+        if "if TYPE_CHECKING:" in check_line:
+            in_type_checking = True
+        elif (
+            in_type_checking
+            and check_line.strip()
+            and not check_line.startswith((" ", "\t"))
+        ):
+            in_type_checking = False
+        if current_line_number == line_number:
+            return in_type_checking
+    return False
+
+
+def _application_infra_import_violations(
+    *,
+    application_path: Path,
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> list[str]:
+    """Collect application imports of infrastructure outside TYPE_CHECKING blocks."""
+    violations: list[str] = []
+    for py_file, content in _iter_python_content_under(
+        application_path, source_content_cache
+    ):
+        lines = content.splitlines()
+        for line_number, line in enumerate(lines, 1):
+            stripped = line.strip()
+            if stripped.startswith((">>>", "#")):
+                continue
+            if "from bioetl.infrastructure" not in line:
+                continue
+            if _is_type_checking_import(lines=lines, line_number=line_number):
+                continue
+            violations.append(f"{py_file.relative_to(src_dir)}:{line_number}: {stripped}")
+    return violations
+
+
+def _is_orphan_directory(
+    *,
+    dir_path: Path,
+    src_dir: Path,
+    source_content_cache: dict[Path, str],
+) -> str | None:
+    """Return the relative orphan path when a leaf directory has only an empty __init__.py."""
+    py_files = list(dir_path.glob("*.py"))
+    subdirs = [child for child in dir_path.iterdir() if child.is_dir()]
+    if subdirs or not py_files:
+        return None
+
+    init_file = dir_path / "__init__.py"
+    if not init_file.exists() or len(py_files) != 1:
+        return None
+
+    init_content = source_content_cache.get(init_file, "").strip()
+    if init_content and ("__all__" in init_content or "import" in init_content):
+        return None
+    return str(dir_path.relative_to(src_dir))
+
+
 BASE_EXCEPTION_CLASSES = {
     "BioETLError",
     "CriticalError",
@@ -433,57 +559,31 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
     if not importlinter_config.exists():
         pytest.skip(".importlinter config not found")
 
-    # Find lint-imports executable (venv first, then system)
-    import shutil
-
-    lint_imports_cmd = shutil.which("lint-imports")
+    lint_imports_cmd = _find_lint_imports_cmd(project_root)
     if lint_imports_cmd is None:
-        # Unix: .venv/bin/lint-imports, Windows: .venv/Scripts/lint-imports
-        for candidate in (
-            project_root / ".venv" / "bin" / "lint-imports",
-            project_root / ".venv" / "Scripts" / "lint-imports.exe",
-            project_root / ".venv" / "Scripts" / "lint-imports",
-        ):
-            if candidate.exists():
-                lint_imports_cmd = str(candidate)
-                break
-        else:
-            pytest.skip("lint-imports executable not found")
+        pytest.skip("lint-imports executable not found")
 
     # Override PYTHONPATH to ensure correct project is used
     env = os.environ.copy()
     env["PYTHONPATH"] = str(src_dir)
 
-    result = subprocess.run(
-        [lint_imports_cmd, "--config", str(importlinter_config)],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        cwd=str(project_root),
-        env=env,
-    )
+    try:
+        result = subprocess.run(
+            [lint_imports_cmd, "--config", str(importlinter_config)],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=str(project_root),
+            env=env,
+        )
+    except PermissionError:
+        pytest.skip("lint-imports executable exists but is not runnable in this environment")
 
     if result.returncode != 0:
-        combined_output = "\n".join(
-            part for part in (result.stdout, result.stderr) if part
-        )
-        if any(
-            marker in combined_output
-            for marker in ("ModuleNotFoundError", "ImportError", "No module named")
-        ):
-            pytest.skip(
-                "Skipping import-linter due to missing optional dependencies. "
-                "Install test extras and rerun lint-imports."
-            )
-        # Skip on Windows/Python encoding issues with rich library
-        if result.stderr and (
-            "UnicodeEncodeError" in result.stderr or "charmap" in result.stderr
-        ):
-            pytest.skip(
-                "Skipping due to Windows encoding issue with rich library. "
-                "Run manually: lint-imports --config .importlinter"
-            )
+        skip_reason = _import_linter_skip_reason(result)
+        if skip_reason is not None:
+            pytest.skip(skip_reason)
         # When output is empty (e.g. Windows console capture), run without capture for diagnostics
         out = result.stdout.strip() or result.stderr.strip() or "(no output captured)"
         pytest.fail(
@@ -570,18 +670,10 @@ def test_no_orphan_directories(
     bioetl_path = src_dir / "bioetl"
     assert bioetl_path.exists(), "bioetl source not found"
 
-    contentful_dirs: set[Path] = set()
-    for py_file, content in _iter_python_content_under(
-        bioetl_path, source_content_cache
-    ):
-        if py_file.name == "__init__.py" or not content.strip():
-            continue
-        current = py_file.parent
-        while current != bioetl_path.parent:
-            contentful_dirs.add(current)
-            if current == bioetl_path:
-                break
-            current = current.parent
+    contentful_dirs = _mark_contentful_dirs(
+        bioetl_path=bioetl_path,
+        source_content_cache=source_content_cache,
+    )
 
     orphan_dirs = []
     for dir_path in bioetl_path.rglob("*"):
@@ -592,20 +684,13 @@ def test_no_orphan_directories(
         if dir_path in contentful_dirs:
             continue
 
-        # Check if this is a leaf directory with only __init__.py
-        py_files = list(dir_path.glob("*.py"))
-        subdirs = [d for d in dir_path.iterdir() if d.is_dir()]
-
-        # Only flag leaf directories (no subdirs) with only __init__.py
-        if not subdirs and py_files:
-            init_file = dir_path / "__init__.py"
-            if init_file.exists() and len(py_files) == 1:
-                init_content = source_content_cache.get(init_file, "").strip()
-                # Allow if __init__.py re-exports or has __all__
-                if not init_content or (
-                    "__all__" not in init_content and "import" not in init_content
-                ):
-                    orphan_dirs.append(str(dir_path.relative_to(src_dir)))
+        orphan_path = _is_orphan_directory(
+            dir_path=dir_path,
+            src_dir=src_dir,
+            source_content_cache=source_content_cache,
+        )
+        if orphan_path is not None:
+            orphan_dirs.append(orphan_path)
 
     assert not orphan_dirs, (
         f"Found {len(orphan_dirs)} orphan directory(s) with no real content:\n"
@@ -640,41 +725,11 @@ def test_application_layer_no_infrastructure_imports(
     application_path = src_dir / "bioetl" / "application"
     assert application_path.exists(), "Application layer not found"
 
-    violations = []
-
-    for py_file, content in _iter_python_content_under(
-        application_path, source_content_cache
-    ):
-        for i, line in enumerate(content.splitlines(), 1):
-            stripped = line.strip()
-
-            # Skip docstring examples (>>> prefix)
-            if stripped.startswith(">>>"):
-                continue
-
-            # Skip comments
-            if stripped.startswith("#"):
-                continue
-
-            if "from bioetl.infrastructure" not in line:
-                continue
-
-            # Check if inside TYPE_CHECKING block (allowed for type hints)
-            lines = content.splitlines()
-            in_type_checking = False
-            for j, check_line in enumerate(lines):
-                if "if TYPE_CHECKING:" in check_line:
-                    in_type_checking = True
-                elif (
-                    in_type_checking
-                    and check_line.strip()
-                    and not check_line.startswith((" ", "\t"))
-                ):
-                    in_type_checking = False
-                if j + 1 == i and in_type_checking:
-                    break
-            else:
-                violations.append(f"{py_file.relative_to(src_dir)}:{i}: {stripped}")
+    violations = _application_infra_import_violations(
+        application_path=application_path,
+        src_dir=src_dir,
+        source_content_cache=source_content_cache,
+    )
 
     assert not violations, (
         "Application layer imports infrastructure directly:\n"

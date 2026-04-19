@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Logging helpers module for common logging operations."""
+
+from __future__ import annotations
 
 from logging import Logger
 

@@ -5,6 +5,7 @@ Coordinates high-level execution flow while delegating stage logic to mixins.
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.application.composite.lifecycle_observer_service import (
@@ -283,11 +284,6 @@ class CompositePipelineRunner(
         state = await self._prepare_run_state()
         state, execution_context = await self._execute_locked_run_phases(state)
         return await self._complete_successful_run(state, execution_context)
-
-
-# Backward-compatible alias for iterative NAME-001 migration.
-import warnings
-
 
 class CompositePipelineRunnerService(CompositePipelineRunner):
     def __init__(self, *args, **kwargs):

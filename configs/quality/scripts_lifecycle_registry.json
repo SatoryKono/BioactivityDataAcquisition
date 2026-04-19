@@ -104,6 +104,24 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the top-level scripts.ai.vibe module router during the Vibe tooling consolidation window; either add stable external call-sites so it becomes active or remove it if the bash launcher remains the only supported entrypoint."
     },
+    "scripts/ai/group_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a narrow stdin-driven Sonar issue grouping helper for historical remediation triage; remove it once issue-wave analysis is fully folded into the canonical quality tooling."
+    },
+    "scripts/ai/scripts/ai/check_sonar_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical GitHub/Sonar reconciliation helper for manual issue review; do not expand it into a supported automation surface without fresh call-site evidence."
+    },
+    "scripts/ai/scripts/ai/code_quality_analysis.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical exploratory code-quality probe; prefer canonical architecture and lint/report tooling instead of extending this orphan analysis script."
+    },
     "scripts/ai/mcp/mcp_chembl_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
@@ -152,12 +170,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway mermaid server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
     },
-    "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_compatibility_launcher",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a thin PowerShell launcher for the specialized Neo4j memory MCP server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
-    },
     "scripts/engineering/dev/run_project_python.py": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
@@ -205,6 +217,12 @@
       "decision": "active",
       "next_step": "Retain as the canonical repository cleanup automation script.",
       "review_by": "2026-07-15"
+    },
+    "scripts/common/repo_paths.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a lightweight shared path helper for older script packages while callers migrate to canonical repo-root discovery patterns; remove it once no orphan or legacy scripts depend on it."
     },
     "scripts/engineering/dev/bash/.setup_wsl_codex.sh": {
       "owner": "@bioetl-platform",
@@ -553,6 +571,12 @@
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded MistrallVibe setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
+    },
+    "scripts/common/repo_paths.py": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_helper_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded shared path helper while governed scripts still depend on common repository-root resolution; fold it into a canonical scripting utility surface once helper duplication is fully consolidated."
     },
     "scripts/ci/_compatibility_registry.py": {
       "owner": "@bioetl-platform",

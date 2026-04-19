@@ -243,7 +243,7 @@ def build_silver_writer_runtime_services(
             _resolve_table_path=lambda table_name: resolve_table_path(
                 request.base_path, table_name
             ),
-            _write_silver_merged_metadata=lambda **kwargs: None,  # Placeholder
+            _write_silver_merged_metadata=lambda **_kwargs: None,  # Placeholder
         )
 
     # Create postwrite operations (will be initialized with host in SilverWriter.__init__)

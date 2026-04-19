@@ -86,27 +86,40 @@ _LEGACY_METRIC_NAMES = (
 )
 
 
-@pytest.mark.architecture
-def test_runtime_metric_callsites_use_canonical_bioetl_prefix() -> None:
-    """Runtime modules must emit observability metrics through canonical names."""
-    violations: list[str] = []
+def _iter_metric_dispatch_lines() -> list[tuple[Path, int, str]]:
+    """Yield source lines that dispatch metrics from runtime modules."""
     metric_dispatch_tokens = (
         "increment_counter(",
         "observe_histogram(",
         "set_gauge(",
     )
-
+    matches: list[tuple[Path, int, str]] = []
     for path in sorted(_SRC_ROOT.rglob("*.py")):
         if not path.is_file():
             continue
-        lines = path.read_text(encoding="utf-8").splitlines()
-        for lineno, line in enumerate(lines, start=1):
-            if not any(token in line for token in metric_dispatch_tokens):
-                continue
-            for metric_name in _LEGACY_METRIC_NAMES:
-                if f'"{metric_name}"' in line or f"'{metric_name}'" in line:
-                    violations.append(f"{path}:{lineno}: {metric_name}")
+        for lineno, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(),
+            start=1,
+        ):
+            if any(token in line for token in metric_dispatch_tokens):
+                matches.append((path, lineno, line))
+    return matches
 
+
+def _collect_legacy_metric_violations() -> list[str]:
+    """Collect runtime callsites still using legacy non-bioetl metric names."""
+    violations: list[str] = []
+    for path, lineno, line in _iter_metric_dispatch_lines():
+        for metric_name in _LEGACY_METRIC_NAMES:
+            if f'"{metric_name}"' in line or f"'{metric_name}'" in line:
+                violations.append(f"{path}:{lineno}: {metric_name}")
+    return violations
+
+
+@pytest.mark.architecture
+def test_runtime_metric_callsites_use_canonical_bioetl_prefix() -> None:
+    """Runtime modules must emit observability metrics through canonical names."""
+    violations = _collect_legacy_metric_violations()
     assert not violations, (
         "Runtime observability callsites must use canonical bioetl_* metric names.\n"
         + "\n".join(f"  - {violation}" for violation in violations[:80])

@@ -188,8 +188,7 @@ class TestChemblDateBuilding:
     def test_chembl_none_year_gives_none_date(self) -> None:
         """ChEMBL with None year should give None publication_date."""
         year = None
-        expected = None
-        assert expected is None
+        assert year is None
 
 
 @pytest.mark.unit
