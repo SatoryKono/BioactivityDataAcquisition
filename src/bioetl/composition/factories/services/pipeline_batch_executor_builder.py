@@ -16,6 +16,9 @@ from bioetl.application.core.wiring.runtime import (
     GoldFilterCallback,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
+from bioetl.composition.factories.services._pipeline_batch_executor_types import (
+    BatchExecutorBuildRequest,
+)
 from bioetl.composition.factories.services.pipeline_processing import (
     build_components_and_processing_service,
 )
@@ -53,47 +56,32 @@ if TYPE_CHECKING:
 
 
 def create_batch_executor_from_pipeline(
-    *,
-    pipeline: BasePipeline,
-    callbacks: PipelineCallbacksContext,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    checkpoint_manager: CheckpointManagerService,
-    shutdown_signal: ShutdownSignal,
-    create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],
-    strict_gold_validation: bool = True,
-    lock_validator: Callable[[], Awaitable[bool]] | None = None,
-    tracer: TracingPort | None = None,
-    memory_monitor: MemoryMonitorPort | None = None,
-    memory_config: MemoryConfig | None = None,
-    bronze_output_path: str | None = None,
-    silver_output_path: str | None = None,
-    gold_output_path: str | None = None,
-    flat_structure: bool = False,
-    batch_id_factory: BatchIdGeneratorPort | None = None,
-    domain_event_emitter: DomainEventEmitterPort | None = None,
+    request: BatchExecutorBuildRequest,
 ) -> BatchExecutor:
     """Create BatchExecutor from pipeline using delegated component factories."""
-    gold_filter = _resolve_gold_filter(pipeline=pipeline, callbacks=callbacks)
+    gold_filter = _resolve_gold_filter(
+        pipeline=request.pipeline,
+        callbacks=request.callbacks,
+    )
     processor_config, gold_validator = build_record_processor_config_and_validator(
-        pipeline=pipeline,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        strict_gold_validation=strict_gold_validation,
-        bronze_output_path=bronze_output_path,
-        silver_output_path=silver_output_path,
-        gold_output_path=gold_output_path,
-        flat_structure=flat_structure,
+        pipeline=request.pipeline,
+        silver_schema=request.silver_schema,
+        gold_schema=request.gold_schema,
+        strict_gold_validation=request.strict_gold_validation,
+        bronze_output_path=request.bronze_output_path,
+        silver_output_path=request.silver_output_path,
+        gold_output_path=request.gold_output_path,
+        flat_structure=request.flat_structure,
         gold_validator_factory=PanderaGoldValidator,
     )
     runtime_managers = build_runtime_managers(
-        pipeline=pipeline,
+        pipeline=request.pipeline,
         processor_config=processor_config,
-        checkpoint_manager=checkpoint_manager,
-        memory_monitor=memory_monitor,
-        memory_config=memory_config,
-        tracer=tracer,
-        batch_id_factory=batch_id_factory,
+        checkpoint_manager=request.checkpoint_manager,
+        memory_monitor=request.memory_monitor,
+        memory_config=request.memory_config,
+        tracer=request.tracer,
+        batch_id_factory=request.batch_id_factory,
     )
     (
         memory_manager,
@@ -104,22 +92,24 @@ def create_batch_executor_from_pipeline(
         execution_run_service,
     ) = runtime_managers
     _, batch_processing_service = build_components_and_processing_service(
-        pipeline=pipeline,
+        pipeline=request.pipeline,
         processor_config=processor_config,
         error_classifier=ErrorClassifier(),
-        callbacks=callbacks,
+        callbacks=request.callbacks,
         gold_filter=gold_filter,
         gold_validator=gold_validator,
-        tracer=tracer,
-        domain_event_emitter=domain_event_emitter,
-        lock_validator=lock_validator,
+        tracer=request.tracer,
+        domain_event_emitter=request.domain_event_emitter,
+        lock_validator=request.lock_validator,
         tracing_manager=tracing_manager,
         batch_id_factory=effective_batch_id_factory,
-        create_batch_processing_components_fn=create_batch_processing_components_fn,
+        create_batch_processing_components_fn=(
+            request.create_batch_processing_components_fn
+        ),
     )
     deps = _build_batch_executor_dependencies(
-        pipeline=pipeline,
-        shutdown_signal=shutdown_signal,
+        pipeline=request.pipeline,
+        shutdown_signal=request.shutdown_signal,
         memory_manager=memory_manager,
         progress_service=progress_service,
         checkpoint_recovery_service=checkpoint_recovery_service,
@@ -127,12 +117,12 @@ def create_batch_executor_from_pipeline(
         batch_processing_service=batch_processing_service,
     )
     return BatchExecutor(
-        services=pipeline.services,
-        context=pipeline.context,
+        services=request.pipeline.services,
+        context=request.pipeline.context,
         config=processor_config,
         dependencies=deps,
-        batch_size=pipeline.config.batch_size,
-        checkpoint_interval=pipeline.config.checkpoint_interval,
+        batch_size=request.pipeline.config.batch_size,
+        checkpoint_interval=request.pipeline.config.checkpoint_interval,
     )
 
 

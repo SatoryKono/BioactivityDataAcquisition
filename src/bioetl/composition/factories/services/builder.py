@@ -25,6 +25,7 @@ from bioetl.composition.factories.services.callbacks import (
     extract_pipeline_callbacks,
 )
 from bioetl.composition.factories.services.pipeline_builder import (
+    BatchExecutorBuildRequest,
     create_batch_executor_from_pipeline,
     create_batch_processing_components,
     create_checkpoint_manager,
@@ -177,24 +178,26 @@ class ServicesBuilder:
     ) -> BatchExecutor:
         callbacks = extract_pipeline_callbacks(pipeline)
         return create_batch_executor_from_pipeline(
-            pipeline=pipeline,
-            callbacks=callbacks,
-            silver_schema=silver_schema,
-            gold_schema=gold_schema,
-            checkpoint_manager=checkpoint_manager,
-            shutdown_signal=shutdown_signal,
-            create_batch_processing_components_fn=(
-                ServicesBuilder.create_batch_processing_components
-            ),
-            strict_gold_validation=strict_gold_validation,
-            lock_validator=lock_validator,
-            tracer=tracer,
-            memory_monitor=memory_monitor,
-            memory_config=memory_config,
-            bronze_output_path=bronze_output_path,
-            silver_output_path=silver_output_path,
-            gold_output_path=gold_output_path,
-            flat_structure=flat_structure,
-            batch_id_factory=batch_id_factory,
-            domain_event_emitter=domain_event_emitter,
+            BatchExecutorBuildRequest(
+                pipeline=pipeline,
+                callbacks=callbacks,
+                silver_schema=silver_schema,
+                gold_schema=gold_schema,
+                checkpoint_manager=checkpoint_manager,
+                shutdown_signal=shutdown_signal,
+                create_batch_processing_components_fn=(
+                    ServicesBuilder.create_batch_processing_components
+                ),
+                strict_gold_validation=strict_gold_validation,
+                lock_validator=lock_validator,
+                tracer=tracer,
+                memory_monitor=memory_monitor,
+                memory_config=memory_config,
+                bronze_output_path=bronze_output_path,
+                silver_output_path=silver_output_path,
+                gold_output_path=gold_output_path,
+                flat_structure=flat_structure,
+                batch_id_factory=batch_id_factory,
+                domain_event_emitter=domain_event_emitter,
+            )
         )

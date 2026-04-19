@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
@@ -39,7 +40,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True, slots=True)
 class _RecordProcessorBuildRequest:
-    create_batch_processing_components_fn: object
+    create_batch_processing_components_fn: Callable[..., BatchProcessingComponents]
     services: PipelineService
     context: PipelineContext
     pipeline_name: str
@@ -59,7 +60,7 @@ class _RecordProcessorBuildRequest:
     gold_transform_callback: GoldTransformCallback
     tracer: TracingPort | None
     strict_gold_validation: bool
-    lock_validator: object
+    lock_validator: Callable[[], Awaitable[bool]] | None
     column_groups: tuple[ColumnGroupConfig, ...]
     scd_config: ScdConfig | None
     content_hash_include_fields: frozenset[str]
@@ -108,19 +109,19 @@ def create_record_processor_impl(
     components = cast(
         "BatchProcessingComponents",
         request.create_batch_processing_components_fn(
-        services=request.services,
-        context=request.context,
-        config=processor_config,
-        error_classifier=ErrorClassifier(),
-        transform_callback=request.transform_callback,
-        gold_filter_callback=request.gold_filter_callback,
-        gold_transform_callback=request.gold_transform_callback,
-        gold_validator=request.gold_validator_factory(
-            cast("pdr.DataFrameSchema | None", active_gold_schema),
-            strict=request.strict_gold_validation,
-        ),
-        tracer=effective_tracer,
-        lock_validator=request.lock_validator,
+            services=request.services,
+            context=request.context,
+            config=processor_config,
+            error_classifier=ErrorClassifier(),
+            transform_callback=request.transform_callback,
+            gold_filter_callback=request.gold_filter_callback,
+            gold_transform_callback=request.gold_transform_callback,
+            gold_validator=request.gold_validator_factory(
+                cast("pdr.DataFrameSchema | None", active_gold_schema),
+                strict=request.strict_gold_validation,
+            ),
+            tracer=effective_tracer,
+            lock_validator=request.lock_validator,
         ),
     )
     return request.record_processor_cls(

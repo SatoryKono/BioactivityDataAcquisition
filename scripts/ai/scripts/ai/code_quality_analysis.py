@@ -12,56 +12,105 @@ print("=" * 50)
 def analyze_python_code():
     python_files = list(Path("./src").rglob("*.py"))
     
-    issues_found = {
+    if not python_files:
+        print("❌ No Python files found in ./src")
+        return _get_empty_issues_dict(0)
+    
+    print(f"📊 Analyzing {len(python_files)} Python files...")
+    
+    return _analyze_file_batch(python_files[:50])  # Limit to first 50 files
+
+
+def _get_empty_issues_dict(total_files: int) -> dict:
+    """Get empty issues dictionary with proper structure."""
+    return {
         'complex_functions': 0,
         'long_functions': 0,
         'unused_imports': 0,
         'missing_docstrings': 0,
-        'total_files': len(python_files),
+        'total_files': total_files,
         'total_lines': 0
     }
-    
-    if not python_files:
-        print("❌ No Python files found in ./src")
-        return issues_found
-    
-    print(f"📊 Analyzing {len(python_files)} Python files...")
-    
-    for i, file_path in enumerate(python_files[:50], 1):  # Limit to first 50 files
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-                lines = content.split('\n')
-        except UnicodeDecodeError:
-            print(f"⚠️  Skipping {file_path} due to encoding issues")
-            continue
-        except PermissionError:
-            print(f"⚠️  Skipping {file_path} due to permission issues")
-            continue
-        except OSError as e:
-            print(f"⚠️  Skipping {file_path} due to file access error: {e}")
-            continue
-        
-        issues_found['total_lines'] += len(lines)
 
-        # Check for complex functions (high cyclomatic complexity indicator)
-        if 'def ' in content and ('if ' in content or 'for ' in content or 'while ' in content):
-            # Simple heuristic for complexity
-            complexity_indicators = content.count('if') + content.count('for') + content.count('while')
-            if complexity_indicators > 5:
-                issues_found['complex_functions'] += 1
 
-        # Check for long functions
-        if 'def ' in content:
-            func_lines = len([line for line in lines if line.strip() and not line.strip().startswith('#')])
-            if func_lines > 50:
-                issues_found['long_functions'] += 1
-
-        # Check for missing docstrings (simple check)
-        if 'def ' in content and '"""' not in content and "'''" not in content:
-            issues_found['missing_docstrings'] += 1
+def _analyze_file_batch(python_files: list[Path]) -> dict:
+    """Analyze a batch of Python files for quality issues."""
+    issues_found = _get_empty_issues_dict(len(python_files))
+    
+    for file_path in python_files:
+        file_issues = _analyze_single_file(file_path)
+        _merge_file_issues(issues_found, file_issues)
     
     return issues_found
+
+
+def _analyze_single_file(file_path: Path) -> dict:
+    """Analyze a single Python file for quality issues."""
+    file_issues = _get_empty_issues_dict(1)
+    
+    try:
+        content, lines = _read_file_content(file_path)
+        file_issues['total_lines'] = len(lines)
+        
+        if 'def ' in content:
+            _check_function_quality(content, lines, file_issues)
+        
+        return file_issues
+        
+    except (UnicodeDecodeError, PermissionError, OSError) as e:
+        _handle_file_read_error(file_path, e)
+        return file_issues
+
+
+def _read_file_content(file_path: Path) -> tuple[str, list[str]]:
+    """Read file content with proper encoding."""
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+        return content, content.split('\n')
+
+
+def _handle_file_read_error(file_path: Path, error: Exception) -> None:
+    """Handle file read errors with appropriate messages."""
+    if isinstance(error, UnicodeDecodeError):
+        print(f"⚠️  Skipping {file_path} due to encoding issues")
+    elif isinstance(error, PermissionError):
+        print(f"⚠️  Skipping {file_path} due to permission issues")
+    else:
+        print(f"⚠️  Skipping {file_path} due to file access error: {error}")
+
+
+def _check_function_quality(content: str, lines: list[str], file_issues: dict) -> None:
+    """Check a function for various quality issues."""
+    _check_function_complexity(content, file_issues)
+    _check_function_length(lines, file_issues)
+    _check_docstring_presence(content, file_issues)
+
+
+def _check_function_complexity(content: str, file_issues: dict) -> None:
+    """Check if function has high cyclomatic complexity."""
+    if 'if ' in content or 'for ' in content or 'while ' in content:
+        complexity_indicators = content.count('if') + content.count('for') + content.count('while')
+        if complexity_indicators > 5:
+            file_issues['complex_functions'] += 1
+
+
+def _check_function_length(lines: list[str], file_issues: dict) -> None:
+    """Check if function is too long."""
+    func_lines = len([line for line in lines if line.strip() and not line.strip().startswith('#')])
+    if func_lines > 50:
+        file_issues['long_functions'] += 1
+
+
+def _check_docstring_presence(content: str, file_issues: dict) -> None:
+    """Check if function has proper docstring."""
+    if '"""' not in content and "'''" not in content:
+        file_issues['missing_docstrings'] += 1
+
+
+def _merge_file_issues(target: dict, source: dict) -> None:
+    """Merge file issues into target dictionary."""
+    for key in ['complex_functions', 'long_functions', 'missing_docstrings', 'total_lines']:
+        target[key] += source[key]
 
 # Analyze code structure
 def analyze_code_structure():
@@ -73,20 +122,39 @@ def analyze_code_structure():
     
     # Find all Python packages and modules
     for root, dirs, files in os.walk("./src"):
-        for dir_name in dirs:
-            if not dir_name.startswith('_'):
-                structure['packages'].add(dir_name)
-        
-        for file_name in files:
-            if file_name.endswith('.py'):
-                if file_name.startswith('test_') or file_name.endswith('_test.py'):
-                    structure['test_files'].add(file_name)
-                else:
-                    module_name = file_name.replace('.py', '')
-                    if not module_name.startswith('_'):
-                        structure['modules'].add(module_name)
+        _process_directories(dirs, structure)
+        _process_files(files, structure)
     
     return structure
+
+
+def _process_directories(dirs: list[str], structure: dict) -> None:
+    """Process directory names to find packages."""
+    for dir_name in dirs:
+        if not dir_name.startswith('_'):
+            structure['packages'].add(dir_name)
+
+
+def _process_files(files: list[str], structure: dict) -> None:
+    """Process file names to find modules and test files."""
+    for file_name in files:
+        if file_name.endswith('.py'):
+            if _is_test_file(file_name):
+                structure['test_files'].add(file_name)
+            else:
+                _add_module_name(file_name, structure)
+
+
+def _is_test_file(file_name: str) -> bool:
+    """Check if a file is a test file."""
+    return file_name.startswith('test_') or file_name.endswith('_test.py')
+
+
+def _add_module_name(file_name: str, structure: dict) -> None:
+    """Add module name to structure if it's not a private module."""
+    module_name = file_name.replace('.py', '')
+    if not module_name.startswith('_'):
+        structure['modules'].add(module_name)
 
 # Main analysis
 if __name__ == "__main__":
