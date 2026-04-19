@@ -42,6 +42,13 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
+for candidate in (SCRIPT_DIR, REPO_ROOT):
+    candidate_str = str(candidate)
+    if candidate_str not in sys.path:
+        sys.path.insert(0, candidate_str)
+
 sys.stdout.reconfigure(encoding="utf-8")
 
 try:
@@ -50,8 +57,6 @@ except ImportError:  # pragma: no cover - direct script execution
     from diagram_paths import DIAGRAM_ROOT, source_dir
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DIRS = [
     DIAGRAM_ROOT,
     source_dir("views"),
@@ -400,13 +405,27 @@ def parse_flowchart_orphans(
 
     # Lenient rule: a node inside a *connected* subgraph is not an orphan —
     # it is a descriptive child of that subgraph.
-    orphans = {
-        nid
-        for nid in raw_orphans
-        if node_parent.get(nid) not in connected_subgraph_names
-    }
+    orphans = _filter_connected_subgraph_orphans(
+        raw_orphans=raw_orphans,
+        node_parent=node_parent,
+        connected_subgraph_names=connected_subgraph_names,
+    )
 
     return orphans, all_defined, definition_lines
+
+
+def _filter_connected_subgraph_orphans(
+    *,
+    raw_orphans: set[str],
+    node_parent: dict[str, str],
+    connected_subgraph_names: set[str],
+) -> set[str]:
+    """Keep only true orphan nodes, excluding children of connected subgraphs."""
+    return {
+        node_id
+        for node_id in raw_orphans
+        if node_parent.get(node_id) not in connected_subgraph_names
+    }
 
 
 # ── Sequence parser ───────────────────────────────────────────────────────────
@@ -584,21 +603,29 @@ def fix_file(path: Path) -> tuple[bool, set[str]]:
         return False, set()
 
     keep = parse_keep_orphans(stripped)
-
-    if dtype == "flowchart":
-        orphans, _, def_lines = parse_flowchart_orphans(stripped, keep)
-        if not orphans:
-            return False, set()
-        new_lines = fix_flowchart_lines(lines, orphans, def_lines)
-    else:
-        orphans, _, decl_lines = parse_sequence_orphans(stripped, keep)
-        if not orphans:
-            return False, set()
-        new_lines = fix_sequence_lines(lines, orphans, decl_lines)
+    orphans, new_lines = _fixed_diagram_lines(dtype=dtype, lines=lines, stripped=stripped, keep=keep)
+    if not orphans:
+        return False, set()
 
     safe_path = _ensure_repo_path(path)
     _write_repo_text(_repo_relative_path(safe_path), "".join(new_lines))
     return True, orphans
+
+
+def _fixed_diagram_lines(
+    *,
+    dtype: str,
+    lines: list[str],
+    stripped: list[str],
+    keep: set[str],
+) -> tuple[set[str], list[str]]:
+    """Return orphan ids and updated lines for a supported diagram."""
+    if dtype == "flowchart":
+        orphans, _, definition_lines = parse_flowchart_orphans(stripped, keep)
+        return orphans, fix_flowchart_lines(lines, orphans, definition_lines)
+
+    orphans, _, declaration_lines = parse_sequence_orphans(stripped, keep)
+    return orphans, fix_sequence_lines(lines, orphans, declaration_lines)
 
 
 # ── File discovery ────────────────────────────────────────────────────────────
@@ -791,44 +818,11 @@ def main() -> int:
         return 0
 
     if args.grandfather:
-        print(f"Grandfathering orphan nodes in {len(files)} files...")
-        print("=" * 60)
-        total_modified = 0
-        total_grandfathered: list[str] = []
-
-        for fpath in files:
-            modified, gf_ids = grandfather_file(fpath)
-            if modified:
-                total_modified += 1
-                total_grandfathered.extend(sorted(gf_ids))
-                print(f"  [GF] {fpath.name}  keep-orphan: {', '.join(sorted(gf_ids))}")
-
-        print("=" * 60)
-        print(f"Modified files:        {total_modified}")
-        print(f"Grandfathered nodes:   {len(total_grandfathered)}")
-        print("")
-        print(
-            "Re-run  --check  to confirm zero orphans. "
-            "GRAPH-001 will now only flag NEW orphans added after this point."
-        )
+        _run_grandfather(files)
         return 0
 
     if args.fix:
-        print(f"Fixing orphan nodes in {len(files)} files...")
-        print("=" * 60)
-        total_modified = 0
-        total_removed: list[str] = []
-
-        for fpath in files:
-            modified, removed = fix_file(fpath)
-            if modified:
-                total_modified += 1
-                total_removed.extend(sorted(removed))
-                print(f"  [FIXED] {fpath.name}  removed: {', '.join(sorted(removed))}")
-
-        print("=" * 60)
-        print(f"Modified files:   {total_modified}")
-        print(f"Removed nodes:    {len(total_removed)}")
+        _run_fix(files)
         return 0
 
     # --check mode
@@ -841,6 +835,53 @@ def main() -> int:
 
     total_orphans = sum(len(r.orphan_ids) for r in results)
     return 1 if total_orphans > 0 else 0
+
+
+def _run_grandfather(files: list[Path]) -> None:
+    """Grandfather orphan nodes across all selected files."""
+    print(f"Grandfathering orphan nodes in {len(files)} files...")
+    print("=" * 60)
+    total_modified = 0
+    total_grandfathered: list[str] = []
+
+    for file_path in files:
+        modified, grandfathered_ids = grandfather_file(file_path)
+        if not modified:
+            continue
+        total_modified += 1
+        total_grandfathered.extend(sorted(grandfathered_ids))
+        print(
+            f"  [GF] {file_path.name}  keep-orphan: {', '.join(sorted(grandfathered_ids))}"
+        )
+
+    print("=" * 60)
+    print(f"Modified files:        {total_modified}")
+    print(f"Grandfathered nodes:   {len(total_grandfathered)}")
+    print("")
+    print(
+        "Re-run  --check  to confirm zero orphans. "
+        "GRAPH-001 will now only flag NEW orphans added after this point."
+    )
+
+
+def _run_fix(files: list[Path]) -> None:
+    """Fix orphan nodes across all selected files."""
+    print(f"Fixing orphan nodes in {len(files)} files...")
+    print("=" * 60)
+    total_modified = 0
+    total_removed: list[str] = []
+
+    for file_path in files:
+        modified, removed_ids = fix_file(file_path)
+        if not modified:
+            continue
+        total_modified += 1
+        total_removed.extend(sorted(removed_ids))
+        print(f"  [FIXED] {file_path.name}  removed: {', '.join(sorted(removed_ids))}")
+
+    print("=" * 60)
+    print(f"Modified files:   {total_modified}")
+    print(f"Removed nodes:    {len(total_removed)}")
 
 
 if __name__ == "__main__":

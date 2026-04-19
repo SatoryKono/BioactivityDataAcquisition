@@ -171,7 +171,6 @@ def create_batch_executor_from_pipeline(
         domain_event_emitter=domain_event_emitter,
     )
 
-
 __all__ = [
     "BatchProcessingComponents",
     "create_batch_executor_from_pipeline",

@@ -1097,6 +1097,35 @@ def _docs_drift_row_line(row: dict[str, JsonValue]) -> str | None:
     return "- " + " | ".join(part for part in detail_parts if part)
 
 
+def _iter_named_rows(
+    rows: list[dict[str, JsonValue]],
+    field_name: str,
+) -> list[tuple[dict[str, JsonValue], str]]:
+    """Return rows paired with a required display field."""
+    named_rows: list[tuple[dict[str, JsonValue], str]] = []
+    for row in rows:
+        field_value = str(row.get(field_name) or "")
+        if field_value:
+            named_rows.append((row, field_value))
+    return named_rows
+
+
+def _append_optional_prefixed_line(lines: list[str], value: str | None) -> None:
+    """Append an optional indented detail line."""
+    if value:
+        lines.append(f"  {value}")
+
+
+def _append_surface_lines(
+    lines: list[str],
+    row: dict[str, JsonValue],
+    field_mappings: list[tuple[str, str]],
+) -> None:
+    """Append surface-dict list renderings for configured row fields."""
+    for field_name, prefix in field_mappings:
+        lines.extend(_format_surface_dict_list(row.get(field_name), prefix))
+
+
 def _format_docs_drift_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     seen: set[str] = set()
@@ -1211,6 +1240,28 @@ def _workflow_execution_header(row: dict[str, JsonValue]) -> str | None:
     return f"- workflow={workflow_name}{suffix}"
 
 
+def _workflow_execution_lines(row: dict[str, JsonValue]) -> list[str]:
+    rendered_lines: list[str] = []
+    for field_name, prefix in (
+        ("reusable_calls", "call"),
+        ("matrix_variants", "matrix"),
+        ("workflow_outputs", "workflow_output"),
+        ("job_outputs", "job_output"),
+    ):
+        values = row.get(field_name)
+        if not isinstance(values, list):
+            continue
+        normalized = {
+            rendered
+            for value in values
+            if isinstance(value, dict)
+            for rendered in [_format_workflow_execution_value(field_name, prefix, value)]
+            if rendered
+        }
+        rendered_lines.extend(sorted(normalized))
+    return rendered_lines
+
+
 def _format_workflow_execution_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
@@ -1218,23 +1269,7 @@ def _format_workflow_execution_rows(title: str, name: str, rows: list[dict[str, 
         if not header:
             continue
         lines.append(header)
-        for field_name, prefix in (
-            ("reusable_calls", "call"),
-            ("matrix_variants", "matrix"),
-            ("workflow_outputs", "workflow_output"),
-            ("job_outputs", "job_output"),
-        ):
-            values = row.get(field_name)
-            if not isinstance(values, list):
-                continue
-            normalized = {
-                rendered
-                for value in values
-                if isinstance(value, dict)
-                for rendered in [_format_workflow_execution_value(field_name, prefix, value)]
-                if rendered
-            }
-            lines.extend(sorted(normalized))
+        lines.extend(_workflow_execution_lines(row))
     if len(lines) == 1:
         lines.append("- no reusable workflow, matrix, or output coverage found")
     return "\n".join(lines)
@@ -1294,14 +1329,9 @@ def _storage_producer_lines(producers: JsonValue) -> list[str]:
 
 def _format_storage_lineage_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
-    for row in rows:
-        storage_name = str(row.get("storage_name") or "")
-        if not storage_name:
-            continue
+    for row, storage_name in _iter_named_rows(rows, "storage_name"):
         lines.append(_storage_summary_line(row, storage_name))
-        detail_line = _storage_detail_line(row)
-        if detail_line:
-            lines.append(detail_line)
+        _append_optional_prefixed_line(lines, _storage_detail_line(row))
         lines.extend(_storage_producer_lines(row.get("producers")))
         lines.extend(_sorted_prefixed_values(row.get("upstream_surfaces"), "upstream"))
         lines.extend(_sorted_prefixed_values(row.get("downstream_surfaces"), "downstream"))
@@ -1311,6 +1341,20 @@ def _format_storage_lineage_rows(title: str, name: str, rows: list[dict[str, Jso
     return "\n".join(lines)
 
 
+def _field_lineage_header(row: dict[str, JsonValue], storage_ref: str, field_name: str) -> str:
+    return (
+        f"- storage={storage_ref} | field={field_name} | group={row.get('field_group') or ''!s} "
+        f"| drift={row.get('drift_classification') or ''!s} | required={row.get('required_in_quality')!s}"
+    )
+
+
+def _validation_line(validation_types: JsonValue) -> str | None:
+    if not isinstance(validation_types, list) or not validation_types:
+        return None
+    normalized = ",".join(str(item) for item in validation_types if item)
+    return f"validations={normalized}" if normalized else None
+
+
 def _format_field_lineage_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
@@ -1318,13 +1362,8 @@ def _format_field_lineage_rows(title: str, name: str, rows: list[dict[str, JsonV
         storage_ref = str(row.get("storage_ref") or "")
         if not field_name or not storage_ref:
             continue
-        lines.append(
-            f"- storage={storage_ref} | field={field_name} | group={row.get('field_group') or ''!s} "
-            f"| drift={row.get('drift_classification') or ''!s} | required={row.get('required_in_quality')!s}"
-        )
-        validation_types = row.get("validation_types")
-        if isinstance(validation_types, list) and validation_types:
-            lines.append(f"  validations={','.join(str(item) for item in validation_types if item)}")
+        lines.append(_field_lineage_header(row, storage_ref, field_name))
+        _append_optional_prefixed_line(lines, _validation_line(row.get("validation_types")))
         _append_prefixed_row_values(
             lines,
             row,
@@ -1347,12 +1386,8 @@ def _format_schema_drift_rows(title: str, name: str, rows: list[dict[str, JsonVa
         drift = str(row.get("drift_classification") or "")
         if not field_name or not storage_ref:
             continue
-        validation_types = row.get("validation_types")
-        validation_suffix = (
-            f" | validations={','.join(str(item) for item in validation_types if item)}"
-            if isinstance(validation_types, list) and validation_types
-            else ""
-        )
+        validation_line = _validation_line(row.get("validation_types"))
+        validation_suffix = f" | {validation_line}" if validation_line else ""
         lines.append(
             f"- storage={storage_ref} | field={field_name} | drift={drift} "
             f"| required={row.get('required_in_quality')!s}{validation_suffix}"
@@ -1388,10 +1423,7 @@ def _format_surface_dict_list(values: object, prefix: str) -> list[str]:
 
 def _format_run_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
-    for row in rows:
-        run_instance_name = str(row.get("run_instance_name") or "")
-        if not run_instance_name:
-            continue
+    for row, run_instance_name in _iter_named_rows(rows, "run_instance_name"):
         lines.append(
             f"- run_instance={run_instance_name} | lifecycle_status={row.get('lifecycle_status') or ''!s} "
             f"| manifest_id={row.get('manifest_id') or ''!s} | run_id={row.get('run_id') or ''!s}"
@@ -1402,12 +1434,16 @@ def _format_run_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonV
             _optional_row_part(row, "effective_config_artifact_id"),
             _optional_row_part(row, "lineage_fragment_id"),
         ]
-        detail_line = " | ".join(part for part in detail_parts if part)
-        if detail_line:
-            lines.append(f"  {detail_line}")
-        lines.extend(_format_surface_dict_list(row.get("artifacts"), "artifact"))
-        lines.extend(_format_surface_dict_list(row.get("dependencies"), "depends_on"))
-        lines.extend(_format_surface_dict_list(row.get("support_links"), "support"))
+        _append_optional_prefixed_line(lines, " | ".join(part for part in detail_parts if part))
+        _append_surface_lines(
+            lines,
+            row,
+            [
+                ("artifacts", "artifact"),
+                ("dependencies", "depends_on"),
+                ("support_links", "support"),
+            ],
+        )
     if len(lines) == 1:
         lines.append("- no run instance artifact chain found")
     return "\n".join(lines)
@@ -1415,10 +1451,7 @@ def _format_run_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonV
 
 def _format_runtime_state_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
-    for row in rows:
-        state_name = str(row.get("runtime_state_name") or "")
-        if not state_name:
-            continue
+    for row, state_name in _iter_named_rows(rows, "runtime_state_name"):
         lines.append(
             f"- state={state_name} | kind={row.get('state_kind') or ''!s} "
             f"| status={row.get('state_status') or ''!s} "
@@ -1426,9 +1459,15 @@ def _format_runtime_state_rows(title: str, name: str, rows: list[dict[str, JsonV
             f"| retry_count={row.get('retry_count')!s} "
             f"| lock_key={row.get('lock_key') or ''!s}"
         )
-        lines.extend(_format_surface_dict_list(row.get("owners"), "owner"))
-        lines.extend(_format_surface_dict_list(row.get("dependencies"), "dependency"))
-        lines.extend(_format_surface_dict_list(row.get("artifacts"), "artifact"))
+        _append_surface_lines(
+            lines,
+            row,
+            [
+                ("owners", "owner"),
+                ("dependencies", "dependency"),
+                ("artifacts", "artifact"),
+            ],
+        )
     if len(lines) == 1:
         lines.append("- no runtime state found")
     return "\n".join(lines)
@@ -1436,10 +1475,7 @@ def _format_runtime_state_rows(title: str, name: str, rows: list[dict[str, JsonV
 
 def _format_claim_trace_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
-    for row in rows:
-        claim_name = str(row.get("claim_name") or "")
-        if not claim_name:
-            continue
+    for row, claim_name in _iter_named_rows(rows, "claim_name"):
         lines.append(
             f"- doc={row.get('doc_name') or ''!s} | claim={claim_name} | modality={row.get('modality') or ''!s} "
             f"| section={row.get('section_title') or ''!s} | anchor={row.get('section_anchor') or ''!s} "
@@ -1448,7 +1484,7 @@ def _format_claim_trace_rows(title: str, name: str, rows: list[dict[str, JsonVal
         claim_text = str(row.get("claim_text") or "")
         if claim_text:
             lines.append(f"  text={claim_text}")
-        lines.extend(_format_surface_dict_list(row.get("targets"), "target"))
+        _append_surface_lines(lines, row, [("targets", "target")])
     if len(lines) == 1:
         lines.append("- no claim-level traceability found")
     return "\n".join(lines)
@@ -1456,17 +1492,35 @@ def _format_claim_trace_rows(title: str, name: str, rows: list[dict[str, JsonVal
 
 def _format_cli_semantics_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
-    for row in rows:
-        command_name = str(row.get("command_name") or "")
-        if not command_name:
-            continue
+    for row, command_name in _iter_named_rows(rows, "command_name"):
         lines.append(f"- command={command_name} | side_effect_class={row.get('side_effect_class') or ''!s}")
         lines.extend(_sorted_prefixed_values(row.get("options"), "option"))
         lines.extend(_sorted_prefixed_values(row.get("gates"), "gate"))
-        lines.extend(_format_surface_dict_list(row.get("side_effect_targets"), "side_effect_target"))
+        _append_surface_lines(lines, row, [("side_effect_targets", "side_effect_target")])
     if len(lines) == 1:
         lines.append("- no CLI semantic coverage found")
     return "\n".join(lines)
+
+
+def _duplication_member_lines(members: JsonValue) -> list[str]:
+    if not isinstance(members, list):
+        return []
+    return [
+        line.replace("  member=", "- member=", 1)
+        for line in _format_surface_dict_list(members, "member")
+    ]
+
+
+def _test_coverage_lines(tests: JsonValue) -> list[str]:
+    if not isinstance(tests, list):
+        return []
+    return sorted(
+        {
+            f"- covered_by_test={test_name!s}"
+            for test_name in tests
+            if test_name is not None and str(test_name)
+        }
+    )
 
 
 def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
@@ -1486,13 +1540,8 @@ def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str,
     )
     if promotion_target:
         lines.append(f"- promotion_target={promotion_target}{_label_suffix(target_labels)}")
-    if isinstance(members, list):
-        lines.extend(line.replace("  member=", "- member=", 1) for line in _format_surface_dict_list(members, "member"))
-    if isinstance(tests, list):
-        normalized_tests = sorted(
-            {f"- covered_by_test={test_name!s}" for test_name in tests if test_name is not None and str(test_name)}
-        )
-        lines.extend(normalized_tests)
+    lines.extend(_duplication_member_lines(members))
+    lines.extend(_test_coverage_lines(tests))
     return "\n".join(lines)
 
 
@@ -1512,26 +1561,44 @@ def _format_normalization_pipeline_rows(title: str, name: str, rows: list[dict[s
         lines.append(f"- profile_module={module_path}")
     modules = row.get("normalization_modules")
     if isinstance(modules, list):
-        for module in sorted({str(item) for item in modules if str(item)}):
-            lines.append(f"- normalization_module={module}")
+        lines.extend(
+            f"- normalization_module={module}"
+            for module in sorted({str(item) for item in modules if str(item)})
+        )
     return "\n".join(lines)
+
+
+def _fallback_pipeline_line(row: dict[str, JsonValue], pipeline_name: str) -> str:
+    return (
+        "- "
+        f"pipeline={pipeline_name} | "
+        f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
+        f"fallback_total={int(row.get('fallback_field_count') or 0)} | "
+        f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
+        f"profile_fields={int(row.get('profile_field_count') or 0)}"
+    )
 
 
 def _format_fallback_pipelines_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
-    for row in rows:
-        pipeline_name = str(row.get("pipeline_name") or "")
-        if not pipeline_name:
-            continue
-        lines.append(
-            "- "
-            f"pipeline={pipeline_name} | "
-            f"fallback_business={int(row.get('fallback_business_field_count') or 0)} | "
-            f"fallback_total={int(row.get('fallback_field_count') or 0)} | "
-            f"profile_registered={bool(row.get('normalization_profile_registered'))} | "
-            f"profile_fields={int(row.get('profile_field_count') or 0)}"
-        )
+    for row, pipeline_name in _iter_named_rows(rows, "pipeline_name"):
+        lines.append(_fallback_pipeline_line(row, pipeline_name))
     return "\n".join(lines)
+
+
+def _promotion_candidate_line(row: dict[str, JsonValue], cluster_name: str) -> str:
+    family_name = str(row.get("family_name") or "")
+    surface_kind = str(row.get("surface_kind") or "")
+    duplicate_count = str(row.get("duplicate_count") or "")
+    promotion_score = str(row.get("promotion_score") or "")
+    promotion_target = str(row.get("promotion_target") or "")
+    member_count = str(row.get("member_count") or "")
+    test_count = str(row.get("test_count") or "")
+    return (
+        f"- cluster={cluster_name} | family={family_name} | surface_kind={surface_kind} | "
+        f"duplicates={duplicate_count} | members={member_count} | tests={test_count} | "
+        f"promotion_score={promotion_score} | target={promotion_target}"
+    )
 
 
 def _format_promotion_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
@@ -1542,18 +1609,7 @@ def _format_promotion_candidates_rows(title: str, name: str, rows: list[dict[str
         if not cluster_name or cluster_name in seen:
             continue
         seen.add(cluster_name)
-        family_name = str(row.get("family_name") or "")
-        surface_kind = str(row.get("surface_kind") or "")
-        duplicate_count = str(row.get("duplicate_count") or "")
-        promotion_score = str(row.get("promotion_score") or "")
-        promotion_target = str(row.get("promotion_target") or "")
-        member_count = str(row.get("member_count") or "")
-        test_count = str(row.get("test_count") or "")
-        lines.append(
-            f"- cluster={cluster_name} | family={family_name} | surface_kind={surface_kind} | "
-            f"duplicates={duplicate_count} | members={member_count} | tests={test_count} | "
-            f"promotion_score={promotion_score} | target={promotion_target}"
-        )
+        lines.append(_promotion_candidate_line(row, cluster_name))
     if len(lines) == 1:
         lines.append("- no promotion candidates found")
     return "\n".join(lines)
