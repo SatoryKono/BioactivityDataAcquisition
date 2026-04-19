@@ -17,7 +17,7 @@ import shutil
 import subprocess
 import sys
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timezone
 from pathlib import Path
@@ -8278,17 +8278,37 @@ def _heading_anchor_slug(title: str) -> str:
 def _markdown_heading_context(text: str, offset: int) -> tuple[str | None, str | None]:
     current_title: str | None = None
     current_anchor: str | None = None
-    for match in _markdown_heading_matches(text):
-        if match.start() > offset:
+    for line_start, title in _markdown_headings(text):
+        if line_start > offset:
             break
-        current_title = match.group(2).strip()
+        current_title = title
         current_anchor = _heading_anchor_slug(current_title)
     return current_title, current_anchor
 
 
-def _markdown_heading_matches(text: str) -> Iterator[re.Match[str]]:
-    heading_pattern = re.compile(r"^(#{1,6})\s+([^\n]*\S)\s*$", re.MULTILINE)
-    return heading_pattern.finditer(text)
+def _markdown_headings(text: str) -> Iterator[tuple[int, str]]:
+    offset = 0
+    for raw_line in text.splitlines(keepends=True):
+        line = raw_line.rstrip("\r\n")
+        stripped = line.lstrip(" \t")
+        leading_indent = len(line) - len(stripped)
+        if leading_indent > 3 or not stripped.startswith("#"):
+            offset += len(raw_line)
+            continue
+
+        level = len(stripped) - len(stripped.lstrip("#"))
+        if level < 1 or level > 6:
+            offset += len(raw_line)
+            continue
+
+        if len(stripped) <= level or stripped[level] not in {" ", "\t"}:
+            offset += len(raw_line)
+            continue
+
+        title = stripped[level:].strip()
+        if title:
+            yield offset, title
+        offset += len(raw_line)
 
 
 def _resolve_docs_reference_target(

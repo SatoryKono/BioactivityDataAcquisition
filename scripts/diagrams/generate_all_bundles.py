@@ -14,12 +14,16 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 
 try:
     from .diagram_paths import DIAGRAM_ROOT, bundle_markdown_path
 except ImportError:  # pragma: no cover - direct script execution
+    REPO_ROOT = Path(__file__).resolve().parents[2]
+    if str(REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(REPO_ROOT))
     from diagram_paths import DIAGRAM_ROOT, bundle_markdown_path
 
 
@@ -83,7 +87,6 @@ COMMENT_METADATA_PATTERNS = (
     (re.compile(r"@adr\s+([^\n]+)"), "adr"),
     (re.compile(r"Parent source:\s*([^\n]+)"), "parent_source"),
 )
-VIEW_PATTERN = re.compile(r"View:\s*(.+?)(?:\s*\|\s*Parent:\s*(.+))?$")
 SHOWS_PATTERN = re.compile(r"Shows\s+([^\n]+)")
 
 
@@ -110,10 +113,10 @@ def _apply_comment_metadata_pattern(stripped: str, meta: dict[str, object]) -> b
         meta[key] = match.group(1).strip()
         return True
 
-    if match := VIEW_PATTERN.match(stripped):
-        meta["view_type"] = match.group(1).strip()
-        if match.group(2):
-            meta["parent"] = match.group(2).strip()
+    if parsed_view := _parse_view_comment(stripped):
+        meta["view_type"] = parsed_view[0]
+        if parsed_view[1]:
+            meta["parent"] = parsed_view[1]
         return True
 
     if "covers" not in meta and (match := SHOWS_PATTERN.match(stripped)):
@@ -129,6 +132,29 @@ def _apply_comment_fallbacks(stripped: str, meta: dict[str, object]) -> None:
         meta["title"] = stripped.split("—", 1)[1].strip()
     elif "covers" not in meta and len(stripped) > 10:
         meta["covers"] = stripped
+
+
+def _parse_view_comment(line: str) -> tuple[str, str | None] | None:
+    if not line.startswith("View:"):
+        return None
+
+    payload = line.partition(":")[2].strip()
+    if not payload:
+        return None
+
+    view_type, separator, remainder = payload.partition("|")
+    parsed_view = view_type.strip()
+    if not parsed_view:
+        return None
+    if not separator:
+        return parsed_view, None
+
+    candidate_parent = remainder.strip()
+    if not candidate_parent.startswith("Parent:"):
+        return parsed_view, None
+
+    parent = candidate_parent.partition(":")[2].strip()
+    return parsed_view, parent or None
 
 
 def _detect_diagram_type(lines: list[str], meta: dict[str, object]) -> None:
@@ -206,14 +232,13 @@ def _count_edges(lines: list[str], is_class_diagram: bool) -> int:
 def _collect_subgraph_names(lines: list[str]) -> list[str]:
     """Extract Mermaid subgraph and namespace labels."""
     subgraph_names: list[str] = []
-    namespace_pattern = re.compile(r"^\s+namespace\s+(\w+)\s*\{?\s*$")
     for line in lines:
         name = _extract_subgraph_name(line)
         if name and name != "direction":
             subgraph_names.append(name)
-        namespace_match = namespace_pattern.match(line)
-        if namespace_match:
-            subgraph_names.append(namespace_match.group(1).replace("_", " "))
+        namespace_name = _extract_namespace_name(line)
+        if namespace_name:
+            subgraph_names.append(namespace_name)
     return subgraph_names
 
 
@@ -232,6 +257,21 @@ def _extract_subgraph_name(line: str) -> str | None:
 
     name = payload.split(maxsplit=1)[0]
     return name or None
+
+
+def _extract_namespace_name(line: str) -> str | None:
+    stripped = line.strip()
+    if not stripped.startswith("namespace "):
+        return None
+
+    payload = stripped[len("namespace ") :].strip()
+    if not payload:
+        return None
+
+    name = payload.rstrip("{").strip().split(maxsplit=1)[0]
+    if not name.isidentifier():
+        return None
+    return name.replace("_", " ")
 
 
 def parse_mermaid(path: Path) -> dict[str, object]:
