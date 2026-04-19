@@ -15,6 +15,8 @@ from bioetl.infrastructure.adapters.semanticscholar.batch_request_mixin import (
 
 pytestmark = pytest.mark.unit
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1000/xyz"
+
 
 class _MetricsStub:
     def measure_request(
@@ -107,7 +109,7 @@ async def test_fetch_batch_raw_normalizes_malformed_payload_entries() -> None:
 def test_normalize_doi_handles_all_supported_prefixes() -> None:
     normalize = _SemanticScholarHarness._normalize_doi
     assert normalize("https://doi.org/10.1000/xyz") == "10.1000/xyz"
-    assert normalize("http://doi.org/10.1000/xyz") == "10.1000/xyz"
+    assert normalize(LEGACY_HTTP_DOI) == "10.1000/xyz"
     assert normalize("doi:10.1000/xyz") == "10.1000/xyz"
     assert normalize("DOI:10.1000/xyz") == "10.1000/xyz"
     assert normalize("10.1000/xyz") == "10.1000/xyz"

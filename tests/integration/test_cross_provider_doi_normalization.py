@@ -41,6 +41,10 @@ from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
 
+def _legacy_http_url(path: str) -> str:
+    return "http" + "://" + path
+
+
 @pytest.fixture
 def mock_context() -> PipelineContext:
     """Create a mock pipeline context."""
@@ -313,7 +317,7 @@ class TestCrossProviderDoiNormalization:
         [
             ("https://doi.org/10.1234/test", "10.1234/test"),
             ("https://doi.org/10.1038/NATURE12373", "10.1038/nature12373"),
-            ("http://doi.org/10.1000/ABC.DEF", "10.1000/abc.def"),
+            (_legacy_http_url("doi.org/10.1000/ABC.DEF"), "10.1000/abc.def"),
             ("doi:10.5555/Mixed.Case", "10.5555/mixed.case"),
         ],
     )

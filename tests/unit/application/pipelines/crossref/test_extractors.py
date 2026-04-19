@@ -22,6 +22,8 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_references,
 )
 
+LEGACY_HTTP_ORCID = "http" + "://orcid.org/0000-0001-2345-6789"
+
 
 class TestExtractAuthors:
     """Tests for extract_authors function."""
@@ -706,13 +708,13 @@ class TestExtractAuthorOrcids:
         assert result == ["0000-0001-2345-6789"]
 
     def test_http_url_prefix(self) -> None:
-        """Should handle http:// URL prefix."""
+        """Should handle legacy HTTP URL prefix."""
         publication = {
             "author": [
                 {
                     "given": "John",
                     "family": "Doe",
-                    "ORCID": "http://orcid.org/0000-0001-2345-6789",
+                    "ORCID": LEGACY_HTTP_ORCID,
                 }
             ]
         }

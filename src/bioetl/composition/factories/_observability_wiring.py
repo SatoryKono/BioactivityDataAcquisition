@@ -3,19 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 
 from .datasource.data_source_factory import DataSourceCreatorProtocol
 from .services.factory import BaseServicesFactory
-
-if TYPE_CHECKING:
-    from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.config import Settings
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 def create_shared_metrics(

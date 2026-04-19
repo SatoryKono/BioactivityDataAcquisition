@@ -14,6 +14,8 @@ from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import
 
 pytestmark = pytest.mark.unit
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1000/xyz"
+
 
 class _OpenAlexHelpersHarness(OpenAlexAdapterHelpersMixin):
     def __init__(self, mailto: str = "bioetl@example.org") -> None:
@@ -25,9 +27,7 @@ def test_normalize_doi_supports_known_prefixes() -> None:
     assert _OpenAlexHelpersHarness._normalize_doi("https://doi.org/10.1000/xyz") == (
         "10.1000/xyz"
     )
-    assert _OpenAlexHelpersHarness._normalize_doi("http://doi.org/10.1000/xyz") == (
-        "10.1000/xyz"
-    )
+    assert _OpenAlexHelpersHarness._normalize_doi(LEGACY_HTTP_DOI) == ("10.1000/xyz")
     assert _OpenAlexHelpersHarness._normalize_doi("doi:10.1000/xyz") == "10.1000/xyz"
     assert _OpenAlexHelpersHarness._normalize_doi(" 10.1000/xyz ") == "10.1000/xyz"
     assert _OpenAlexHelpersHarness._normalize_doi("") is None

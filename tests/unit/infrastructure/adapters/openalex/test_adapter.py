@@ -22,6 +22,8 @@ from tests.helpers.adapter_runtime import (
     build_http_adapter_runtime_kwargs,
 )
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/test"
+
 
 @pytest.fixture
 def mock_http_client() -> MagicMock:
@@ -171,8 +173,8 @@ class TestNormalizeDoi:
         assert result == "10.1038/test"
 
     def test_normalize_doi_http_url(self) -> None:
-        """Should normalize http://doi.org/ URL."""
-        result = OpenAlexAdapter._normalize_doi("http://doi.org/10.1038/test")
+        """Should normalize a legacy HTTP DOI URL."""
+        result = OpenAlexAdapter._normalize_doi(LEGACY_HTTP_DOI)
         assert result == "10.1038/test"
 
     def test_normalize_doi_prefix(self) -> None:

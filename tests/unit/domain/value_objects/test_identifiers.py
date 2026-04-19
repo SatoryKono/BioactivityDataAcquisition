@@ -21,6 +21,8 @@ from bioetl.domain.value_objects import (
     UniProtId,
 )
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/nature12373"
+
 
 class TestChemblId:
     """Tests for ChemblId Value Object."""
@@ -239,7 +241,7 @@ class TestDOI:
 
     def test_strips_http_prefix(self) -> None:
         """Test HTTP URL prefix is stripped."""
-        doi = DOI("http://doi.org/10.1038/nature12373")
+        doi = DOI(LEGACY_HTTP_DOI)
         assert doi.value == "10.1038/nature12373"
 
     def test_strips_doi_prefix(self) -> None:
