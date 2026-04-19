@@ -6,7 +6,10 @@ from uuid import UUID
 import pytest
 
 from bioetl.application.core.config import LockConfig
-from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+from bioetl.application.core.lifecycle.lock_manager import (
+    LockCoordinator,
+    LockCoordinatorCreateRequest,
+)
 from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
     ShutdownSignal,
@@ -236,17 +239,19 @@ def test_lock_key_format_incremental(
     mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
 ) -> None:
     manager = LockCoordinator.create(
-        lock_port=mock_lock_port,
-        run_id=TEST_RUN_ID,
-        provider="chembl",
-        entity_type="activity",
-        run_type=RunType.INCREMENTAL,
-        lock_ttl=60,
-        wait_for_lock=False,
-        wait_timeout=300,
-        heartbeat_interval=20,
-        logger=Mock(),
-        shutdown_signal=mock_shutdown_signal,
+        LockCoordinatorCreateRequest(
+            lock_port=mock_lock_port,
+            run_id=TEST_RUN_ID,
+            provider="chembl",
+            entity_type="activity",
+            run_type=RunType.INCREMENTAL,
+            lock_ttl=60,
+            wait_for_lock=False,
+            wait_timeout=300,
+            heartbeat_interval=20,
+            logger=Mock(),
+            shutdown_signal=mock_shutdown_signal,
+        )
     )
 
     assert manager._config.lock_key == "lock:chembl_activity"
@@ -257,17 +262,19 @@ def test_lock_key_format_exclusive(
     mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
 ) -> None:
     manager = LockCoordinator.create(
-        lock_port=mock_lock_port,
-        run_id=TEST_RUN_ID,
-        provider="chembl",
-        entity_type="activity",
-        run_type=RunType.BACKFILL,
-        lock_ttl=60,
-        wait_for_lock=True,
-        wait_timeout=120,
-        heartbeat_interval=20,
-        logger=Mock(),
-        shutdown_signal=mock_shutdown_signal,
+        LockCoordinatorCreateRequest(
+            lock_port=mock_lock_port,
+            run_id=TEST_RUN_ID,
+            provider="chembl",
+            entity_type="activity",
+            run_type=RunType.BACKFILL,
+            lock_ttl=60,
+            wait_for_lock=True,
+            wait_timeout=120,
+            heartbeat_interval=20,
+            logger=Mock(),
+            shutdown_signal=mock_shutdown_signal,
+        )
     )
 
     assert manager._config.lock_key == "lock:chembl_activity:exclusive"
