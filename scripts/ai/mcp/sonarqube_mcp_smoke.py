@@ -519,7 +519,6 @@ def run_smoke_command(
         ready_seen,
         handshake_sent,
         responses,
-        stdout_buffer,
         stderr_buffer,
     )
 
