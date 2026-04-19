@@ -58,7 +58,7 @@ class ShutdownPort(Protocol):
         """
         ...
 
-    async def wait_for_completion(self, timeout: float) -> bool:
+    async def wait_for_completion(self, timeout_seconds: float) -> bool:
         """Wait for shutdown completion with timeout.
 
         Blocks until either:
@@ -66,7 +66,7 @@ class ShutdownPort(Protocol):
         - Timeout expires
 
         Args:
-            timeout: Maximum seconds to wait for completion.
+            timeout_seconds: Maximum seconds to wait for completion.
 
         Returns:
             True if shutdown completed within timeout, False if timeout expired.
