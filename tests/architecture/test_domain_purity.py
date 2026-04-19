@@ -37,7 +37,9 @@ def _dataclass_flags(node: ast.ClassDef) -> tuple[bool, bool]:
             continue
         if not isinstance(decorator, ast.Call):
             continue
-        if not (isinstance(decorator.func, ast.Name) and decorator.func.id == "dataclass"):
+        if not (
+            isinstance(decorator.func, ast.Name) and decorator.func.id == "dataclass"
+        ):
             continue
         is_dataclass = True
         for keyword in decorator.keywords:

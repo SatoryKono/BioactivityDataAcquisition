@@ -6,6 +6,8 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.ports.noop._async_boundary import noop_async_boundary
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -106,6 +108,7 @@ class NoOpMetadataWriter:
             Empty string.
         """
         del base_path, metadata, provider, entity
+        await noop_async_boundary()
         return ""
 
     async def write_silver_metadata(
@@ -132,6 +135,7 @@ class NoOpMetadataWriter:
             Empty string.
         """
         del base_path, metadata, table_name, flat_structure, provider, entity
+        await noop_async_boundary()
         return ""
 
     async def finalize_silver_metadata(
@@ -149,6 +153,7 @@ class NoOpMetadataWriter:
         """No-op Silver finalization returns empty string when invoked."""
         del base_path, table_name, flat_structure, provider, entity
         del dq_report_path, completed_at, delta_version_after
+        await noop_async_boundary()
         return ""
 
     async def write_gold_metadata(
@@ -175,6 +180,7 @@ class NoOpMetadataWriter:
             Empty string.
         """
         del base_path, metadata, table_name, flat_structure, provider, entity
+        await noop_async_boundary()
         return ""
 
     async def finalize_gold_metadata(
@@ -191,8 +197,9 @@ class NoOpMetadataWriter:
         """No-op Gold finalization returns empty string when invoked."""
         del base_path, table_name, flat_structure, provider, entity
         del dq_report_path, completed_at
+        await noop_async_boundary()
         return ""
 
     async def aclose(self) -> None:
         """No-op implementation of aclose — no resources to release."""
-        return None
+        await noop_async_boundary()

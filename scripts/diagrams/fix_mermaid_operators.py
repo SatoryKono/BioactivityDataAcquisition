@@ -121,7 +121,7 @@ def detect_diagram_type(lines: list[str]) -> str | None:
 def _iter_source_files(paths: list[Path]) -> list[Path]:
     files: list[Path] = []
     for raw in paths:
-        path = _ensure_repo_path(raw)
+        path = _resolve_repo_file_path(raw)
         if path.is_file():
             if path.suffix in SUPPORTED_SUFFIXES:
                 files.append(_repo_relative_path(path))

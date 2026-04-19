@@ -147,6 +147,7 @@ class CompositeCheckpointService:
         await asyncio.sleep(0)
         return self._persistence_service.list_all()
 
+
 class CompositeCheckpointManager(CompositeCheckpointService):
     def __init__(self, *args, **kwargs):
         message = (

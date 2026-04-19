@@ -23,7 +23,9 @@ from pathlib import Path
 
 def _module_import_violations(package_path: Path, import_root: str) -> list[str]:
     pattern_from = re.compile(rf"^\s*from\s+{re.escape(import_root)}\b", re.MULTILINE)
-    pattern_import = re.compile(rf"^\s*import\s+{re.escape(import_root)}\b", re.MULTILINE)
+    pattern_import = re.compile(
+        rf"^\s*import\s+{re.escape(import_root)}\b", re.MULTILINE
+    )
     violations: list[str] = []
     for py_file in package_path.rglob("*.py"):
         content = py_file.read_text(encoding="utf-8")

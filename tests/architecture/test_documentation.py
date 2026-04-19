@@ -89,7 +89,9 @@ def _missing_protocol_method_docstrings(
                 if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
                     if item.name.startswith("_") or ast.get_docstring(item):
                         continue
-                    missing.append(f"{relative_path}:{item.lineno} - {node.name}.{item.name}()")
+                    missing.append(
+                        f"{relative_path}:{item.lineno} - {node.name}.{item.name}()"
+                    )
     return missing
 
 

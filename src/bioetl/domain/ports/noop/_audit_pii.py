@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from bioetl.domain.ports.noop._async_boundary import noop_async_boundary
+
 if TYPE_CHECKING:
     from bioetl.domain.ports.audit import AuditEntry, AuditLayer
     from bioetl.domain.types import RunID
@@ -19,7 +21,7 @@ class NoOpAudit:
         Args:
             _entry: Audit entry to log; intentionally ignored by this no-op.
         """
-        return None
+        await noop_async_boundary()
 
     async def get_entries(
         self,
@@ -44,11 +46,12 @@ class NoOpAudit:
             Empty list.
         """
         del run_id, layer, table_name, start_time, end_time, limit
+        await noop_async_boundary()
         return []
 
     async def aclose(self) -> None:
         """No-op implementation of aclose — no resources to release."""
-        return None
+        await noop_async_boundary()
 
     def log_event(
         self,

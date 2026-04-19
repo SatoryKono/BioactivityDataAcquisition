@@ -231,11 +231,9 @@ def _validate_mismatch_reasons(
     reason = execution_identity_result.get("reason")
     if reason == "checkpoint_execution_identity_fallback_mismatch":
         # Only add message if execution fingerprints are actually present
-        if (
-            _has_execution_fingerprint_metadata(
-                current_metadata,
-                checkpoint_metadata,
-            )
+        if _has_execution_fingerprint_metadata(
+            current_metadata,
+            checkpoint_metadata,
         ):
             messages.append(
                 "Checkpoint execution identity fallback mismatch: "

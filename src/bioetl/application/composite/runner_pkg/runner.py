@@ -285,6 +285,7 @@ class CompositePipelineRunner(
         state, execution_context = await self._execute_locked_run_phases(state)
         return await self._complete_successful_run(state, execution_context)
 
+
 class CompositePipelineRunnerService(CompositePipelineRunner):
     def __init__(self, *args, **kwargs):
         warnings.warn(

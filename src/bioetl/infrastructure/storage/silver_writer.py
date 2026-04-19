@@ -1308,7 +1308,9 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
         # Detect schema drift
         schema_drift = None
-        records_list = records.to_dicts() if isinstance(records, pl.DataFrame) else records
+        records_list = (
+            records.to_dicts() if isinstance(records, pl.DataFrame) else records
+        )
 
         schema_drift = await self._detect_schema_drift(table_name, records_list)
 
