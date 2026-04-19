@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
+    _ControlPlaneArtifacts,
     _PipelineFactoryContext,
     build_create_pipeline_with_services_request,
     build_pipeline_factory_context,
@@ -72,10 +73,12 @@ def create_with_services_from_factory(
                 runtime,
                 settings,
                 logger,
-                manifest_id,
-                config_hash,
-                dq_contract_compatibility_hash,
-                effective_config_artifact_id,
+                _ControlPlaneArtifacts(
+                    manifest_id=manifest_id,
+                    config_hash=config_hash,
+                    dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+                    effective_config_artifact_id=effective_config_artifact_id,
+                ),
                 config,
                 filter_config,
                 tracer,

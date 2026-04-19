@@ -9,8 +9,7 @@ class _ImmediateAwaitable:
     """Trivial awaitable used to preserve async port contracts."""
 
     def __await__(self) -> Generator[None, None, None]:
-        if False:
-            yield None
+        yield from ()
         return None
 
 

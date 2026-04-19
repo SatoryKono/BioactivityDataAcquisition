@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 
 from bioetl.domain.normalization.profiles._standard_profile_rule_families import (
     _rule_family_specs,
@@ -23,6 +24,28 @@ _DEFAULT_RULE_COMPONENT: RuleComponent = (
     normalize_profile_text,
     "Trim and collapse blank textual values to None where applicable.",
 )
+
+
+@dataclass(frozen=True, slots=True)
+class _RuleComponentContext:
+    title_fields: frozenset[str]
+    abstract_fields: frozenset[str]
+    doi_fields: frozenset[str]
+    pmid_fields: frozenset[str]
+    pmc_id_fields: frozenset[str]
+    date_fields: frozenset[str]
+    int_fields: frozenset[str]
+    float_fields: frozenset[str]
+    set_like_fields: frozenset[str]
+    json_string_fields: frozenset[str]
+    enum_fields: Mapping[str, frozenset[str]]
+    case_fields: Mapping[str, frozenset[str] | None]
+    unit_fields: frozenset[str]
+    null_fields: frozenset[str]
+    special_rules: Mapping[str, RuleComponent]
+
+
+_build_rule_component_context = _RuleComponentContext
 
 
 def _normalize_special_rules(
@@ -193,81 +216,41 @@ def _handle_field_families(
 def _rule_components(
     *,
     field_name: str,
-    title_fields: frozenset[str],
-    abstract_fields: frozenset[str],
-    doi_fields: frozenset[str],
-    pmid_fields: frozenset[str],
-    pmc_id_fields: frozenset[str],
-    date_fields: frozenset[str],
-    int_fields: frozenset[str],
-    float_fields: frozenset[str],
-    set_like_fields: frozenset[str],
-    json_string_fields: frozenset[str],
-    enum_fields: Mapping[str, frozenset[str]],
-    case_fields: Mapping[str, frozenset[str] | None],
-    unit_fields: frozenset[str],
-    null_fields: frozenset[str],
-    special_rules: Mapping[str, RuleComponent],
+    context: _RuleComponentContext,
 ) -> RuleComponent:
     base_rule = _resolve_base_rule(
         field_name=field_name,
-        title_fields=title_fields,
-        abstract_fields=abstract_fields,
-        doi_fields=doi_fields,
-        pmid_fields=pmid_fields,
-        pmc_id_fields=pmc_id_fields,
-        date_fields=date_fields,
-        int_fields=int_fields,
-        float_fields=float_fields,
-        set_like_fields=set_like_fields,
-        json_string_fields=json_string_fields,
-        enum_fields=enum_fields,
-        case_fields=case_fields,
-        unit_fields=unit_fields,
-        special_rules=special_rules,
+        context=context,
     )
     return _finalize_rule_component(
         field_name=field_name,
         base_rule=base_rule,
-        null_fields=null_fields,
+        null_fields=context.null_fields,
     )
 
 
 def _resolve_base_rule(
     *,
     field_name: str,
-    title_fields: frozenset[str],
-    abstract_fields: frozenset[str],
-    doi_fields: frozenset[str],
-    pmid_fields: frozenset[str],
-    pmc_id_fields: frozenset[str],
-    date_fields: frozenset[str],
-    int_fields: frozenset[str],
-    float_fields: frozenset[str],
-    set_like_fields: frozenset[str],
-    json_string_fields: frozenset[str],
-    enum_fields: Mapping[str, frozenset[str]],
-    case_fields: Mapping[str, frozenset[str] | None],
-    unit_fields: frozenset[str],
-    special_rules: Mapping[str, RuleComponent],
+    context: _RuleComponentContext,
 ) -> RuleComponent | None:
     handlers = (
-        lambda: _handle_special_rules(field_name, special_rules),
-        lambda: _handle_enum_fields(field_name, enum_fields),
-        lambda: _handle_case_fields(field_name, case_fields),
-        lambda: _handle_unit_fields(field_name, unit_fields),
+        lambda: _handle_special_rules(field_name, context.special_rules),
+        lambda: _handle_enum_fields(field_name, context.enum_fields),
+        lambda: _handle_case_fields(field_name, context.case_fields),
+        lambda: _handle_unit_fields(field_name, context.unit_fields),
         lambda: _handle_field_families(
             field_name=field_name,
-            title_fields=title_fields,
-            abstract_fields=abstract_fields,
-            doi_fields=doi_fields,
-            pmid_fields=pmid_fields,
-            pmc_id_fields=pmc_id_fields,
-            date_fields=date_fields,
-            int_fields=int_fields,
-            float_fields=float_fields,
-            set_like_fields=set_like_fields,
-            json_string_fields=json_string_fields,
+            title_fields=context.title_fields,
+            abstract_fields=context.abstract_fields,
+            doi_fields=context.doi_fields,
+            pmid_fields=context.pmid_fields,
+            pmc_id_fields=context.pmc_id_fields,
+            date_fields=context.date_fields,
+            int_fields=context.int_fields,
+            float_fields=context.float_fields,
+            set_like_fields=context.set_like_fields,
+            json_string_fields=context.json_string_fields,
         ),
     )
     for handler in handlers:
@@ -295,6 +278,7 @@ def _finalize_rule_component(
 __all__ = [
     "RuleComponent",
     "RuleComponentSpec",
+    "_build_rule_component_context",
     "_normalize_special_rules",
     "_rule_components",
 ]

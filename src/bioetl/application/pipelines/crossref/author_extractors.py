@@ -17,6 +17,23 @@ __all__ = ["extract_author_details", "extract_author_orcids"]
 from bioetl.domain.types import JsonDict
 
 
+def _strip_orcid_prefix(orcid: str) -> str:
+    """Strip known ORCID URL prefixes while preserving unknown values."""
+    prefixes = (
+        *(f"{scheme}://orcid.org/" for scheme in ("https", "http")),
+        *(f"{scheme}://ormolecule_id.org/" for scheme in ("https", "http")),
+    )
+    for prefix in prefixes:
+        if orcid.startswith(prefix):
+            return orcid[len(prefix) :]
+    return orcid
+
+
+def _is_orcid_identifier(orcid: str) -> bool:
+    """Validate ORCID identifier layout."""
+    return len(orcid) == 19 and orcid[4] == "-" and orcid[9] == "-" and orcid[14] == "-"
+
+
 def _normalize_orcid(orcid_value: str | None) -> str | None:
     """Normalize ORCID to ID-only format (without URL prefix)."""
     if not isinstance(orcid_value, str):
@@ -24,16 +41,8 @@ def _normalize_orcid(orcid_value: str | None) -> str | None:
     orcid = orcid_value.strip()
     if not orcid:
         return None
-    prefixes = (
-        *(f"{scheme}://orcid.org/" for scheme in ("https", "http")),
-        *(f"{scheme}://ormolecule_id.org/" for scheme in ("https", "http")),
-    )
-    for prefix in prefixes:
-        if orcid.startswith(prefix):
-            orcid = orcid[len(prefix) :]
-            break
-    # Validate format: 0000-0000-0000-000X
-    if len(orcid) != 19 or orcid[4] != "-" or orcid[9] != "-" or orcid[14] != "-":
+    orcid = _strip_orcid_prefix(orcid)
+    if not _is_orcid_identifier(orcid):
         return None
     return orcid
 

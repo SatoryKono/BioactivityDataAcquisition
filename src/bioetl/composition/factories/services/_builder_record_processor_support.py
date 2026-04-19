@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.wiring.runtime import RecordProcessor
@@ -36,86 +37,91 @@ if TYPE_CHECKING:
     )
 
 
+@dataclass(frozen=True, slots=True)
+class _RecordProcessorBuildRequest:
+    services_builder: type[ServicesBuilder]
+    services: PipelineService
+    context: PipelineContext
+    pipeline_name: str
+    provider: str
+    entity_type: str
+    silver_schema: pa.Schema | None
+    gold_schema: GoldSchemaType
+    dq_config: DQConfig | None
+    primary_keys: tuple[str, ...] | list[str]
+    silver_table: str
+    gold_table: str | None
+    silver_write_mode: str
+    gold_write_mode: str
+    on_schema_mismatch: str
+    transform_callback: TransformCallback
+    gold_filter_callback: GoldFilterCallback
+    gold_transform_callback: GoldTransformCallback
+    tracer: TracingPort | None
+    strict_gold_validation: bool
+    lock_validator: object
+    column_groups: tuple[ColumnGroupConfig, ...]
+    scd_config: ScdConfig | None
+    content_hash_include_fields: frozenset[str]
+    content_hash_exclude_fields: frozenset[str]
+    content_hash_policy_by_version: ContentHashPolicyByVersion | None
+    gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None
+    record_processor_config_cls: type[RecordProcessorConfig]
+    table_config_cls: type[TableConfig]
+    gold_validator_factory: type[GoldValidatorPort] | type[PanderaGoldValidator]
+    record_processor_cls: type[RecordProcessor]
+
+
 def create_record_processor_impl(
     *,
-    services_builder: type[ServicesBuilder],
-    services: PipelineService,
-    context: PipelineContext,
-    pipeline_name: str,
-    provider: str,
-    entity_type: str,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    dq_config: DQConfig | None,
-    primary_keys: tuple[str, ...] | list[str],
-    silver_table: str,
-    gold_table: str | None,
-    silver_write_mode: str,
-    gold_write_mode: str,
-    on_schema_mismatch: str,
-    transform_callback: TransformCallback,
-    gold_filter_callback: GoldFilterCallback,
-    gold_transform_callback: GoldTransformCallback,
-    tracer: TracingPort | None,
-    strict_gold_validation: bool,
-    lock_validator,
-    column_groups: tuple[ColumnGroupConfig, ...],
-    scd_config: ScdConfig | None,
-    content_hash_include_fields: frozenset[str],
-    content_hash_exclude_fields: frozenset[str],
-    content_hash_policy_by_version: ContentHashPolicyByVersion | None,
-    gold_schema_policy_by_version: GoldSchemaPolicyByVersion | None,
-    record_processor_config_cls: type[RecordProcessorConfig],
-    table_config_cls: type[TableConfig],
-    gold_validator_factory: type[GoldValidatorPort] | type[PanderaGoldValidator],
-    record_processor_cls: type[RecordProcessor],
+    request: _RecordProcessorBuildRequest,
 ) -> RecordProcessor:
     """Build a RecordProcessor using constructors injected from the public module."""
-    effective_tracer = tracer or services.tracing
+    effective_tracer = request.tracer or request.services.tracing
     active_gold_schema = (
-        gold_schema_policy_by_version.active_schema
-        if gold_schema_policy_by_version is not None
-        else gold_schema
+        request.gold_schema_policy_by_version.active_schema
+        if request.gold_schema_policy_by_version is not None
+        else request.gold_schema
     )
-    processor_config = record_processor_config_cls(
-        pipeline_name=pipeline_name,
-        provider=provider,
-        entity_type=entity_type,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        dq_config=dq_config,
-        table_config=table_config_cls(
-            primary_keys=tuple(primary_keys),
-            silver_table=silver_table,
-            gold_table=gold_table,
-            silver_write_mode=silver_write_mode,
-            gold_write_mode=gold_write_mode,
-            on_schema_mismatch=on_schema_mismatch,
+    processor_config = request.record_processor_config_cls(
+        pipeline_name=request.pipeline_name,
+        provider=request.provider,
+        entity_type=request.entity_type,
+        silver_schema=request.silver_schema,
+        gold_schema=request.gold_schema,
+        dq_config=request.dq_config,
+        table_config=request.table_config_cls(
+            primary_keys=tuple(request.primary_keys),
+            silver_table=request.silver_table,
+            gold_table=request.gold_table,
+            silver_write_mode=request.silver_write_mode,
+            gold_write_mode=request.gold_write_mode,
+            on_schema_mismatch=request.on_schema_mismatch,
         ),
-        column_groups=column_groups,
-        scd_config=scd_config,
-        content_hash_include_fields=content_hash_include_fields,
-        content_hash_exclude_fields=content_hash_exclude_fields,
-        content_hash_policy_by_version=content_hash_policy_by_version,
-        gold_schema_policy_by_version=gold_schema_policy_by_version,
+        column_groups=request.column_groups,
+        scd_config=request.scd_config,
+        content_hash_include_fields=request.content_hash_include_fields,
+        content_hash_exclude_fields=request.content_hash_exclude_fields,
+        content_hash_policy_by_version=request.content_hash_policy_by_version,
+        gold_schema_policy_by_version=request.gold_schema_policy_by_version,
     )
-    components = services_builder.create_batch_processing_components(
-        services=services,
-        context=context,
+    components = request.services_builder.create_batch_processing_components(
+        services=request.services,
+        context=request.context,
         config=processor_config,
         error_classifier=ErrorClassifier(),
-        transform_callback=transform_callback,
-        gold_filter_callback=gold_filter_callback,
-        gold_transform_callback=gold_transform_callback,
-        gold_validator=gold_validator_factory(
+        transform_callback=request.transform_callback,
+        gold_filter_callback=request.gold_filter_callback,
+        gold_transform_callback=request.gold_transform_callback,
+        gold_validator=request.gold_validator_factory(
             cast("pdr.DataFrameSchema | None", active_gold_schema),
-            strict=strict_gold_validation,
+            strict=request.strict_gold_validation,
         ),
         tracer=effective_tracer,
-        lock_validator=lock_validator,
+        lock_validator=request.lock_validator,
     )
-    return record_processor_cls(
-        context=context,
+    return request.record_processor_cls(
+        context=request.context,
         batch_metrics=components.batch_metrics,
         transformer=components.transformer,
         writer=components.writer,

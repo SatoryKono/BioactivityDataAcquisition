@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1642`
-- Internal import edges (raw): `6309`
+- Scanned modules: `1643`
+- Internal import edges (raw): `6310`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `288`
@@ -25,9 +25,9 @@ flowchart LR
     application -->|939 OK| domain
     composition -->|202 OK| application
     composition -->|503 OK| composition
-    composition -->|357 OK| domain
+    composition -->|356 OK| domain
     composition -->|288 OK| infrastructure
-    domain -->|983 OK| domain
+    domain -->|985 OK| domain
     infrastructure -->|690 OK| domain
     infrastructure -->|884 OK| infrastructure
     interfaces -->|64 OK| application
@@ -45,9 +45,9 @@ flowchart LR
 | `application`    | `domain`         |     939 | allowed |
 | `composition`    | `application`    |     202 | allowed |
 | `composition`    | `composition`    |     503 | allowed |
-| `composition`    | `domain`         |     357 | allowed |
+| `composition`    | `domain`         |     356 | allowed |
 | `composition`    | `infrastructure` |     288 | allowed |
-| `domain`         | `domain`         |     983 | allowed |
+| `domain`         | `domain`         |     985 | allowed |
 | `infrastructure` | `domain`         |     690 | allowed |
 | `infrastructure` | `infrastructure` |     884 | allowed |
 | `interfaces`     | `application`    |      64 | allowed |
@@ -75,7 +75,7 @@ flowchart LR
 | `application.services`         | `domain.types`                  |      50 |
 | `interfaces.cli`               | `application.services`          |      44 |
 | `composition.bootstrap`        | `application.composite`         |      43 |
-| `composition.factories`        | `domain.types`                  |      40 |
+| `composition.factories`        | `domain.types`                  |      39 |
 | `composition.bootstrap`        | `application.services`          |      38 |
 | `composition.bootstrap`        | `domain.ports`                  |      38 |
 | `composition.factories`        | `infrastructure.config`         |      38 |

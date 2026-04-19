@@ -7,6 +7,7 @@ from collections.abc import Collection, Mapping
 from bioetl.domain.normalization.profiles._standard_profile_rule_components import (
     RuleComponent,
     RuleComponentSpec,
+    _build_rule_component_context,
     _normalize_special_rules,
     _rule_components,
 )
@@ -36,42 +37,16 @@ def _normalize_mapping_fields(
 def _build_field_rules(
     schema_fields: Collection[str],
     normalized_meta_fields: frozenset[str],
-    normalized_title_fields: frozenset[str],
-    normalized_abstract_fields: frozenset[str],
-    normalized_doi_fields: frozenset[str],
-    normalized_pmid_fields: frozenset[str],
-    normalized_pmc_id_fields: frozenset[str],
-    normalized_date_fields: frozenset[str],
-    normalized_int_fields: frozenset[str],
-    normalized_float_fields: frozenset[str],
     normalized_set_like_fields: frozenset[str],
-    normalized_json_string_fields: frozenset[str],
-    normalized_enum_fields: Mapping[str, frozenset[str]],
-    normalized_case_fields: Mapping[str, frozenset[str] | None],
-    normalized_unit_fields: frozenset[str],
-    normalized_null_fields: frozenset[str],
-    normalized_special_rules: Mapping[str, RuleComponent],
+    rule_context: object,
 ) -> Mapping[str, RuleComponent]:
     """Build field rules for all schema fields."""
     return {
         field_name: _build_field_rule(
             field_name=field_name,
             meta_fields=normalized_meta_fields,
-            title_fields=normalized_title_fields,
-            abstract_fields=normalized_abstract_fields,
-            doi_fields=normalized_doi_fields,
-            pmid_fields=normalized_pmid_fields,
-            pmc_id_fields=normalized_pmc_id_fields,
-            date_fields=normalized_date_fields,
-            int_fields=normalized_int_fields,
-            float_fields=normalized_float_fields,
             set_like_fields=normalized_set_like_fields,
-            json_string_fields=normalized_json_string_fields,
-            enum_fields=normalized_enum_fields,
-            case_fields=normalized_case_fields,
-            unit_fields=normalized_unit_fields,
-            null_fields=normalized_null_fields,
-            special_rules=normalized_special_rules,
+            rule_context=rule_context,
         )
         for field_name in schema_fields
     }
@@ -136,26 +111,30 @@ def build_standard_profile(
     normalized_unit_fields = frozenset(unit_fields or ())
     normalized_null_fields = frozenset(null_fields or ())
     normalized_special_rules = _normalize_special_rules(special_rules)
+    rule_context = _build_rule_component_context(
+        title_fields=normalized_title_fields,
+        abstract_fields=normalized_abstract_fields,
+        doi_fields=normalized_doi_fields,
+        pmid_fields=normalized_pmid_fields,
+        pmc_id_fields=normalized_pmc_id_fields,
+        date_fields=normalized_date_fields,
+        int_fields=normalized_int_fields,
+        float_fields=normalized_float_fields,
+        set_like_fields=normalized_set_like_fields,
+        json_string_fields=normalized_json_string_fields,
+        enum_fields=normalized_enum_fields,
+        case_fields=normalized_case_fields,
+        unit_fields=normalized_unit_fields,
+        null_fields=normalized_null_fields,
+        special_rules=normalized_special_rules,
+    )
 
     # Build field rules
     field_rules = _build_field_rules(
         schema_fields=schema_fields,
         normalized_meta_fields=normalized_meta_fields,
-        normalized_title_fields=normalized_title_fields,
-        normalized_abstract_fields=normalized_abstract_fields,
-        normalized_doi_fields=normalized_doi_fields,
-        normalized_pmid_fields=normalized_pmid_fields,
-        normalized_pmc_id_fields=normalized_pmc_id_fields,
-        normalized_date_fields=normalized_date_fields,
-        normalized_int_fields=normalized_int_fields,
-        normalized_float_fields=normalized_float_fields,
         normalized_set_like_fields=normalized_set_like_fields,
-        normalized_json_string_fields=normalized_json_string_fields,
-        normalized_enum_fields=normalized_enum_fields,
-        normalized_case_fields=normalized_case_fields,
-        normalized_unit_fields=normalized_unit_fields,
-        normalized_null_fields=normalized_null_fields,
-        normalized_special_rules=normalized_special_rules,
+        rule_context=rule_context,
     )
 
     return NormalizationProfile(
@@ -170,21 +149,8 @@ def _build_field_rule(
     *,
     field_name: str,
     meta_fields: frozenset[str],
-    title_fields: frozenset[str],
-    abstract_fields: frozenset[str],
-    doi_fields: frozenset[str],
-    pmid_fields: frozenset[str],
-    pmc_id_fields: frozenset[str],
-    date_fields: frozenset[str],
-    int_fields: frozenset[str],
-    float_fields: frozenset[str],
     set_like_fields: frozenset[str],
-    json_string_fields: frozenset[str],
-    enum_fields: Mapping[str, frozenset[str]],
-    case_fields: Mapping[str, frozenset[str] | None],
-    unit_fields: frozenset[str],
-    null_fields: frozenset[str],
-    special_rules: Mapping[str, RuleComponent],
+    rule_context: object,
 ) -> FieldRule:
     include_in_hash = field_name not in meta_fields
     if field_name in meta_fields:
@@ -197,21 +163,7 @@ def _build_field_rule(
     else:
         normalizer, notes = _rule_components(
             field_name=field_name,
-            title_fields=title_fields,
-            abstract_fields=abstract_fields,
-            doi_fields=doi_fields,
-            pmid_fields=pmid_fields,
-            pmc_id_fields=pmc_id_fields,
-            date_fields=date_fields,
-            int_fields=int_fields,
-            float_fields=float_fields,
-            set_like_fields=set_like_fields,
-            json_string_fields=json_string_fields,
-            enum_fields=enum_fields,
-            case_fields=case_fields,
-            unit_fields=unit_fields,
-            null_fields=null_fields,
-            special_rules=special_rules,
+            context=rule_context,
         )
     return FieldRule(
         field_name=field_name,

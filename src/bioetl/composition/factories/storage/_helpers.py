@@ -25,6 +25,7 @@ from ._context_resolution import (
     resolve_storage_paths,
 )
 from ._layer_writers import (
+    _SilverLayerWriterSupport,
     create_gold_layer_writer_impl,
     create_silver_layer_writer_impl,
 )
@@ -182,9 +183,11 @@ def create_storage_adapter(
         audit=audit,
         metadata_atomic_retry_policy=metadata_atomic_retry_policy,
         merge_resilience_policy=merge_resilience_policy,
-        resolve_delta_writer_base_path_fn=resolve_delta_writer_base_path,
-        resolve_delta_writer_flat_structure_fn=resolve_delta_writer_flat_structure,
-        load_contract_rollout_policy_fn=load_contract_rollout_policy,
+        support=_SilverLayerWriterSupport(
+            resolve_delta_writer_base_path_fn=resolve_delta_writer_base_path,
+            resolve_delta_writer_flat_structure_fn=resolve_delta_writer_flat_structure,
+            load_contract_rollout_policy_fn=load_contract_rollout_policy,
+        ),
     )
     gold_writer = create_gold_layer_writer_impl(
         ctx=ctx,

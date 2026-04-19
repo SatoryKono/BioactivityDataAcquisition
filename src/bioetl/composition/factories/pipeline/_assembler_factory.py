@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from collections.abc import Callable
+from typing import Any, Generic, TypeVar, cast, overload
 
 import pyarrow as pa
 
@@ -63,6 +64,11 @@ def _public_assembler_seam(name: str) -> object:
     from bioetl.composition.factories.pipeline import assembler as public_assembler
 
     return getattr(public_assembler, name)
+
+
+def _public_assembler_callable(name: str) -> Callable[..., object]:
+    """Resolve a callable from the public assembler façade with explicit typing."""
+    return cast(Callable[..., object], _public_assembler_seam(name))
 
 
 class GenericPipelineFactory(Generic[TPipeline]):
@@ -161,18 +167,22 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineService:
-        return _public_assembler_seam("build_factory_services")(
-            factory_context=build_factory_context(self),
-            request=_BuildFactoryServicesRequest(
-                settings,
-                logger,
-                config,
-                filter_config,
-                tracer,
-                dq_monitor,
+        return cast(
+            PipelineService,
+            _public_assembler_callable("build_factory_services")(
+                factory_context=build_factory_context(self),
+                request=_BuildFactoryServicesRequest(
+                    settings,
+                    logger,
+                    config,
+                    filter_config,
+                    tracer,
+                    dq_monitor,
+                ),
             ),
         )
 
+    @overload
     def create_with_services(
         self,
         run_id: RunID,
@@ -189,25 +199,18 @@ class GenericPipelineFactory(Generic[TPipeline]):
         dq_monitor: DQMonitorPort | None = None,
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
-    ) -> TPipeline:
-        return create_with_services_from_factory(
-            self,
-            run_id,
-            runtime,
-            settings,
-            logger,
-            manifest_id,
-            config_hash,
-            dq_contract_compatibility_hash,
-            effective_config_artifact_id,
-            config,
-            filter_config,
-            tracer,
-            dq_monitor,
-            metrics,
-            cached_bronze,
-            create_pipeline_instance_with_services_fn=_public_assembler_seam(
-                "create_pipeline_instance_with_services"
+    ) -> TPipeline: ...
+
+    def create_with_services(self, *args: Any, **kwargs: Any) -> TPipeline:
+        return cast(
+            TPipeline,
+            create_with_services_from_factory(
+                self,
+                *args,
+                **kwargs,
+                create_pipeline_instance_with_services_fn=_public_assembler_callable(
+                    "create_pipeline_instance_with_services"
+                ),
             ),
         )
 

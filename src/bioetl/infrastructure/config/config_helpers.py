@@ -3,11 +3,11 @@ from __future__ import annotations
 """Config helpers module for common configuration operations."""
 
 
-def load_config(config_path: str) -> dict[str, object]:
+def load_config(_config_path: str) -> dict[str, object]:
     """Load configuration from a file.
 
     Args:
-        config_path: Path to the configuration file.
+        _config_path: Path to the configuration file.
 
     Returns:
         Loaded configuration dictionary.

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal, Protocol
+from typing import Literal, Protocol
 
 import pyarrow as pa
 
@@ -28,9 +28,6 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _validate_silver_pandera,
     _ValidatedSilverWriteContext,
 )
-
-if TYPE_CHECKING:
-    pass
 
 
 class _SilverPayloadPreparationHostProtocol(Protocol):
