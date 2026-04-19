@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
@@ -37,7 +38,7 @@ def create_with_services_from_factory(
     factory: GenericPipelineFactory[TPipeline],
     request: _CreatePipelineWithServicesRequest,
     *,
-    create_pipeline_instance_with_services_fn: object,
+    create_pipeline_instance_with_services_fn: Callable[..., BasePipeline],
 ) -> TPipeline:
     """Create a typed pipeline instance using shared factory helper plumbing."""
     return cast(

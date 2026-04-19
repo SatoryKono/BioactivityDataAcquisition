@@ -387,7 +387,7 @@ def get_known_pipelines(data_dir: Path) -> list[str]:
 
 def _add_pipelines_from_directory(pipelines: set[str], directory: Path) -> None:
     """Add pipeline names from directory structure.
-    
+
     Args:
         pipelines: Set to add pipeline names to
         directory: Directory to scan for pipelines
@@ -400,7 +400,7 @@ def _add_pipelines_from_directory(pipelines: set[str], directory: Path) -> None:
 
 def _add_pipelines_from_silver_tables(pipelines: set[str], silver_dir: Path) -> None:
     """Add pipeline names from silver table structure.
-    
+
     Args:
         pipelines: Set to add pipeline names to
         silver_dir: Silver data directory to scan

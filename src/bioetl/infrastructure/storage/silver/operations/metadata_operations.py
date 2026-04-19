@@ -346,8 +346,8 @@ class SilverMetadataOperations:
         dq_input = DQMetricsInput(
             records=records_dict,
             existing_schema_fields=existing_schema_fields,
-            quarantined_count=0,  # TODO: Get actual quarantined count
-            validation_errors=[],  # TODO: Get actual validation errors
+            quarantined_count=0,  # Quarantine counts are unavailable on this path.
+            validation_errors=[],  # Validation errors are unavailable on this path.
         )
 
         return await asyncio.to_thread(self._dq_calculator.calculate, dq_input)

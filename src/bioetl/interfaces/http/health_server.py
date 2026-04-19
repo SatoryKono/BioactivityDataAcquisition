@@ -148,8 +148,6 @@ async def run_health_server(
     try:
         while True:
             await asyncio.sleep(1)
-    except asyncio.CancelledError:
-        raise
     finally:
         await server.stop()
 
