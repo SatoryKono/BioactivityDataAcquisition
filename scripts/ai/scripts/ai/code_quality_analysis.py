@@ -60,12 +60,6 @@ def analyze_python_code():
         # Check for missing docstrings (simple check)
         if 'def ' in content and '"""' not in content and "'''" not in content:
             issues_found['missing_docstrings'] += 1
-                    
-        except (IOError, UnicodeDecodeError, json.JSONDecodeError) as e:
-            print(f"⚠️  Error analyzing {file_path}: {e}")
-        except Exception as e:
-            print(f"⚠️  Unexpected error analyzing {file_path}: {e}")
-            raise
     
     return issues_found
 
