@@ -240,6 +240,7 @@ class FSMStateHelperService:
             ),
         )
 
+
 class FSMStateHelper(FSMStateHelperService):
     def __init__(self, *args, **kwargs):
         warnings.warn(

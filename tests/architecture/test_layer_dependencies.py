@@ -126,7 +126,9 @@ def _mark_contentful_dirs(
 ) -> set[Path]:
     """Mark directories whose subtree contains at least one non-empty module."""
     contentful_dirs: set[Path] = set()
-    for py_file, content in _iter_python_content_under(bioetl_path, source_content_cache):
+    for py_file, content in _iter_python_content_under(
+        bioetl_path, source_content_cache
+    ):
         if py_file.name == "__init__.py" or not content.strip():
             continue
         current = py_file.parent
@@ -179,7 +181,9 @@ def _application_infra_import_violations(
                 continue
             if _is_type_checking_import(lines=lines, line_number=line_number):
                 continue
-            violations.append(f"{py_file.relative_to(src_dir)}:{line_number}: {stripped}")
+            violations.append(
+                f"{py_file.relative_to(src_dir)}:{line_number}: {stripped}"
+            )
     return violations
 
 
@@ -578,7 +582,9 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
             env=env,
         )
     except PermissionError:
-        pytest.skip("lint-imports executable exists but is not runnable in this environment")
+        pytest.skip(
+            "lint-imports executable exists but is not runnable in this environment"
+        )
 
     if result.returncode != 0:
         skip_reason = _import_linter_skip_reason(result)
