@@ -13,6 +13,14 @@ from bioetl.application.core.publication_term_data_source import (
 from bioetl.domain.types import HealthStatus
 
 
+async def _collect_async(async_iterable):
+    """Drain an async iterable and return collected items."""
+    items = []
+    async for item in async_iterable:
+        items.append(item)
+    return items
+
+
 class MockDataSource:
     """Mock data source for testing PublicationTermDataSource wrapper.
 
@@ -557,9 +565,13 @@ class MockFilterableDataSource:
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
         self.aclose = AsyncMock()
 
-    async def fetch(self, entity_type: str, **kwargs):
+    async def _yield_documents(self):
         await asyncio.sleep(0)
         for doc in self._documents:
+            yield doc
+
+    async def fetch(self, entity_type: str, **kwargs):
+        async for doc in self._yield_documents():
             yield doc
 
     async def fetch_filtered(
@@ -569,8 +581,7 @@ class MockFilterableDataSource:
         filter_field: str,
         limit: int | None = None,
     ):
-        await asyncio.sleep(0)
-        for doc in self._documents:
+        async for doc in self._yield_documents():
             yield doc
 
     async def fetch_multi_filtered(
@@ -579,8 +590,7 @@ class MockFilterableDataSource:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ):
-        await asyncio.sleep(0)
-        for doc in self._documents:
+        async for doc in self._yield_documents():
             yield doc
 
     async def fetch_filtered_with_fallback(
@@ -591,8 +601,7 @@ class MockFilterableDataSource:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ):
-        await asyncio.sleep(0)
-        for doc in self._documents:
+        async for doc in self._yield_documents():
             yield doc
 
 
@@ -664,12 +673,13 @@ class TestPublicationTermFilterable:
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
-            async for _ in wrapper.fetch_filtered(
-                entity_type="publication_term",
-                filter_ids=["CHEMBL1123456"],
-                filter_field="publication_id",
-            ):
-                pass
+            await _collect_async(
+                wrapper.fetch_filtered(
+                    entity_type="publication_term",
+                    filter_ids=["CHEMBL1123456"],
+                    filter_field="publication_id",
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_fetch_multi_filtered_publication_term(self):
@@ -747,11 +757,12 @@ class TestPublicationTermFilterable:
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
-            async for _ in wrapper.fetch_multi_filtered(
-                entity_type="publication_term",
-                filters={"publication_id": ["CHEMBL1"]},
-            ):
-                pass
+            await _collect_async(
+                wrapper.fetch_multi_filtered(
+                    entity_type="publication_term",
+                    filters={"publication_id": ["CHEMBL1"]},
+                )
+            )
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_fallback_publication_term(self):
@@ -831,26 +842,21 @@ class TestPublicationTermFilterable:
                         "limit": limit,
                     }
                 )
-                async for doc in super().fetch_filtered_with_fallback(
-                    entity_type=entity_type,
-                    filter_ids=filter_ids,
-                    filter_field=filter_field,
-                    fallback_mapping=fallback_mapping,
-                    limit=limit,
-                ):
+                async for doc in self._yield_documents():
                     yield doc
 
         source = _RecordingFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
         wrapper = PublicationTermDataSource(data_source=source)
 
-        async for _ in wrapper.fetch_filtered_with_fallback(
-            entity_type="publication_term",
-            filter_ids=["CHEMBL1123456"],
-            filter_field="publication_id",
-            fallback_mapping={"CHEMBL1123456": "Test"},
-            limit=2,
-        ):
-            pass
+        await _collect_async(
+            wrapper.fetch_filtered_with_fallback(
+                entity_type="publication_term",
+                filter_ids=["CHEMBL1123456"],
+                filter_field="publication_id",
+                fallback_mapping={"CHEMBL1123456": "Test"},
+                limit=2,
+            )
+        )
 
         assert source.fallback_calls[-1]["entity_type"] == "publication"
         assert source.fallback_calls[-1]["limit"] == 100
@@ -864,13 +870,14 @@ class TestPublicationTermFilterable:
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
-            async for _ in wrapper.fetch_filtered_with_fallback(
-                entity_type="publication_term",
-                filter_ids=["CHEMBL1"],
-                filter_field="publication_id",
-                fallback_mapping={},
-            ):
-                pass
+            await _collect_async(
+                wrapper.fetch_filtered_with_fallback(
+                    entity_type="publication_term",
+                    filter_ids=["CHEMBL1"],
+                    filter_field="publication_id",
+                    fallback_mapping={},
+                )
+            )
 
 
 @pytest.mark.unit
