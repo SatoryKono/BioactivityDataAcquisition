@@ -654,32 +654,41 @@ def _iter_text_mentions(
     return violations
 
 
+def _iter_matching_import_nodes(
+    tree: ast.Module,
+    *,
+    py_file: Path,
+    module_names: frozenset[str],
+) -> list[tuple[int, str]]:
+    matches: list[tuple[int, str]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module is not None:
+            matched_module = _matching_imported_module(
+                py_file=py_file,
+                node=node,
+                module_names=module_names,
+            )
+            if matched_module is not None:
+                matches.append((node.lineno, matched_module))
+            continue
+        if isinstance(node, ast.Import):
+            matches.extend(
+                (node.lineno, alias.name) for alias in node.names if alias.name in module_names
+            )
+    return matches
+
+
 def _iter_module_import_violations(
     ast_cache: dict[Path, ast.Module],
     *,
     module_name: str,
     allowed_files: frozenset[Path],
 ) -> list[str]:
-    violations: list[str] = []
-    for py_file, tree, rel_path in _iter_non_allowed_cache_items(
-        ast_cache, allowed_files=allowed_files
-    ):
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module is not None:
-                matched_module = _matching_imported_module(
-                    py_file=py_file,
-                    node=node,
-                    module_names=frozenset({module_name}),
-                )
-                if matched_module == module_name:
-                    violations.append(f"{rel_path}:{node.lineno} imports {module_name}")
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name == module_name:
-                        violations.append(
-                            f"{rel_path}:{node.lineno} imports {module_name}"
-                        )
-    return violations
+    return _iter_module_import_violations_for_modules(
+        ast_cache,
+        module_names=frozenset({module_name}),
+        allowed_files=allowed_files,
+    )
 
 
 def _iter_module_import_violations_for_modules(
@@ -693,23 +702,12 @@ def _iter_module_import_violations_for_modules(
     for py_file, tree, rel_path in _iter_non_allowed_cache_items(
         ast_cache, allowed_files=allowed_files
     ):
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module is not None:
-                matched_module = _matching_imported_module(
-                    py_file=py_file,
-                    node=node,
-                    module_names=module_names,
-                )
-                if matched_module is not None:
-                    violations.append(
-                        f"{rel_path}:{node.lineno} imports {matched_module}"
-                    )
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name in module_names:
-                        violations.append(
-                            f"{rel_path}:{node.lineno} imports {alias.name}"
-                        )
+        for lineno, matched_module in _iter_matching_import_nodes(
+            tree,
+            py_file=py_file,
+            module_names=module_names,
+        ):
+            violations.append(f"{rel_path}:{lineno} imports {matched_module}")
     return violations
 
 
@@ -786,6 +784,14 @@ def _iter_imported_symbol_violations(
     return violations
 
 
+def _call_target_name(node: ast.Call) -> str | None:
+    if isinstance(node.func, ast.Name):
+        return node.func.id
+    if isinstance(node.func, ast.Attribute):
+        return node.func.attr
+    return None
+
+
 def _iter_call_keyword_violations(
     ast_cache: dict[Path, ast.Module],
     *,
@@ -800,12 +806,7 @@ def _iter_call_keyword_violations(
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call):
                 continue
-            target_name: str | None = None
-            if isinstance(node.func, ast.Name):
-                target_name = node.func.id
-            elif isinstance(node.func, ast.Attribute):
-                target_name = node.func.attr
-            if target_name != call_name:
+            if _call_target_name(node) != call_name:
                 continue
             used_keywords = {
                 keyword.arg for keyword in node.keywords if keyword.arg is not None
