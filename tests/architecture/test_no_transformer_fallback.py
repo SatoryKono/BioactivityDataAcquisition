@@ -94,22 +94,9 @@ class TestNoTransformerFallback:
         if not pipelines_path.exists():
             pytest.skip("Pipelines directory not found")
 
-        violations = []
-
-        for py_file in pipelines_path.rglob("*.py"):
-            # Skip transformers and other non-pipeline files
-            if "transformer" in py_file.name.lower():
-                continue
-            if py_file.name.startswith("_"):
-                continue
-
-            content = py_file.read_text(encoding="utf-8")
-
-            # Check for default_transformer_class assignment
-            pattern = r"default_transformer_class\s*="
-            if re.search(pattern, content):
-                relative = py_file.relative_to(_get_base_path(PIPELINES_DIR))
-                violations.append(str(relative))
+        violations = _find_pipeline_subclass_default_transformer_violations(
+            pipelines_path
+        )
 
         assert not violations, (
             "Pipeline subclasses must not define default_transformer_class.\n"
@@ -134,19 +121,13 @@ class TestNoTransformerFallback:
             pytest.skip("pipeline/registry.py not found")
 
         content = factories_file.read_text(encoding="utf-8")
-
-        # Find all GenericPipelineFactory instantiations
-        factory_pattern = r"GenericPipelineFactory\([^)]+\)"
-
-        # Check that each factory has transformer_class parameter
-        for match in re.finditer(factory_pattern, content, re.DOTALL):
-            factory_def = match.group(0)
-            if "transformer_class=" not in factory_def:
-                pytest.fail(
-                    f"Factory missing transformer_class:\n{factory_def[:200]}...\n"
-                    "All factories must specify transformer_class for DI.\n"
-                    "See REQ-ARCH-DI-007"
-                )
+        factory_without_transformer = _find_factory_missing_transformer_class(content)
+        if factory_without_transformer is not None:
+            pytest.fail(
+                f"Factory missing transformer_class:\n{factory_without_transformer[:200]}...\n"
+                "All factories must specify transformer_class for DI.\n"
+                "See REQ-ARCH-DI-007"
+            )
 
 
 class TestTransformerInjectionPath:
@@ -235,4 +216,32 @@ def _find_forbidden_transformer_pattern(
     for pattern in forbidden_patterns:
         if re.search(pattern, init_source):
             return pattern
+    return None
+
+
+def _find_pipeline_subclass_default_transformer_violations(
+    pipelines_path: Path,
+) -> list[str]:
+    pattern = r"default_transformer_class\s*="
+    base_path = _get_base_path(PIPELINES_DIR)
+    violations: list[str] = []
+    for py_file in pipelines_path.rglob("*.py"):
+        if _is_skipped_pipeline_file(py_file):
+            continue
+        content = py_file.read_text(encoding="utf-8")
+        if re.search(pattern, content):
+            violations.append(str(py_file.relative_to(base_path)))
+    return violations
+
+
+def _is_skipped_pipeline_file(py_file: Path) -> bool:
+    return "transformer" in py_file.name.lower() or py_file.name.startswith("_")
+
+
+def _find_factory_missing_transformer_class(content: str) -> str | None:
+    factory_pattern = r"GenericPipelineFactory\([^)]+\)"
+    for match in re.finditer(factory_pattern, content, re.DOTALL):
+        factory_def = match.group(0)
+        if "transformer_class=" not in factory_def:
+            return factory_def
     return None
