@@ -8,7 +8,10 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.lifecycle.lock_manager import LockCoordinator
+from bioetl.application.core.lifecycle.lock_manager import (
+    LockCoordinator,
+    LockCoordinatorCreateRequest,
+)
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
 
@@ -58,17 +61,19 @@ def _build_lock_manager(
     run_type: RunType,
 ) -> LockCoordinator:
     return LockCoordinator.create(
-        lock_port=mock_lock_port,
-        run_id=run_id,
-        provider="chembl",
-        entity_type="activity",
-        run_type=run_type,
-        lock_ttl=3600,
-        wait_for_lock=False,
-        wait_timeout=300,
-        heartbeat_interval=60,
-        logger=mock_logger,
-        shutdown_signal=mock_shutdown_signal,
+        LockCoordinatorCreateRequest(
+            lock_port=mock_lock_port,
+            run_id=run_id,
+            provider="chembl",
+            entity_type="activity",
+            run_type=run_type,
+            lock_ttl=3600,
+            wait_for_lock=False,
+            wait_timeout=300,
+            heartbeat_interval=60,
+            logger=mock_logger,
+            shutdown_signal=mock_shutdown_signal,
+        )
     )
 
 

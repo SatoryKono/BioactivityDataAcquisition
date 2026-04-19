@@ -183,7 +183,7 @@ class ChemblPublicationResponse(BaseModel):
         default_factory=list, description="List of publication records"
     )
     page_meta: ChemblPageMeta | None = Field(
-        default=None, description="Pagination metadata"
+        default=None, description=_PAGINATION_METADATA_DESCRIPTION
     )
 
 
@@ -237,7 +237,7 @@ class ChemblTargetComponentResponse(BaseModel):
         default_factory=list, description="List of target component records"
     )
     page_meta: ChemblPageMeta | None = Field(
-        default=None, description="Pagination metadata"
+        default=None, description=_PAGINATION_METADATA_DESCRIPTION
     )
 
 
@@ -267,5 +267,5 @@ class ChemblCellLineResponse(BaseModel):
         default_factory=list, description="List of cell line records"
     )
     page_meta: ChemblPageMeta | None = Field(
-        default=None, description="Pagination metadata"
+        default=None, description=_PAGINATION_METADATA_DESCRIPTION
     )
