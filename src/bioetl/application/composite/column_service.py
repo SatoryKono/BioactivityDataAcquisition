@@ -49,19 +49,20 @@ def sort_columns_by_provider(
     provider_order: tuple[str, ...],
 ) -> list[str]:
     """Sort columns by provider prefix order."""
+    # Pre-compute indices for O(1) lookups instead of O(N) list.index()
+    provider_idx = {p: i + 1 for i, p in enumerate(provider_order)}
+    default_idx = len(provider_order) + 1
 
     def sort_key(col: str) -> tuple[int, str]:
         """Return ``(provider_index, name)`` placing seed columns first."""
-        parts = col.split(".")
+        # Use bounded split to limit list allocation overhead
+        parts = col.split(".", maxsplit=2)
         if len(parts) < 3:
             return (0, col.lower())
 
         provider = parts[0].lower()
-        try:
-            idx = provider_order.index(provider)
-            return (idx + 1, col.lower())
-        except ValueError:
-            return (len(provider_order) + 1, col.lower())
+        idx = provider_idx.get(provider, default_idx)
+        return (idx, col.lower())
 
     return sorted(columns, key=sort_key)
 
