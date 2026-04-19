@@ -17,7 +17,9 @@ PROJECT_ROOT = CURRENT_FILE.parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from scripts.schema.generate_unified_schema_map import build_unified_schema_rows
+from scripts.schema.generate_unified_schema_map import (  # noqa: E402
+    build_unified_schema_rows,
+)
 
 PUBLICATION_ALIAS_FILE = (
     PROJECT_ROOT / "src" / "bioetl" / "application" / "core" / "publication_aliases.py"
@@ -103,33 +105,38 @@ def _normalize_gold_nullable(type_value: object, nullable: object) -> bool:
     return False
 
 
+def _assignment_target(node: ast.stmt) -> tuple[str, ast.AST | None]:
+    if isinstance(node, ast.Assign):
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            return node.targets[0].id, node.value
+        return "", None
+    if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+        return node.target.id, node.value
+    return "", None
+
+
+def _string_dict_literal(node: ast.Dict) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for key_node, value_node in zip(node.keys, node.values, strict=False):
+        if (
+            isinstance(key_node, ast.Constant)
+            and isinstance(key_node.value, str)
+            and isinstance(value_node, ast.Constant)
+            and isinstance(value_node.value, str)
+        ):
+            values[key_node.value] = value_node.value
+    return values
+
+
 def _parse_publication_aliases() -> dict[str, str]:
     tree = ast.parse(PUBLICATION_ALIAS_FILE.read_text(encoding="utf-8"))
     for node in tree.body:
-        target_name = ""
-        value: ast.AST | None = None
-        if isinstance(node, ast.Assign):
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                target_name = node.targets[0].id
-                value = node.value
-        elif isinstance(node, ast.AnnAssign):
-            if isinstance(node.target, ast.Name):
-                target_name = node.target.id
-                value = node.value
+        target_name, value = _assignment_target(node)
         if target_name != "PUBLICATION_SCHEMA_FIELD_ALIASES":
             continue
         if not isinstance(value, ast.Dict):
             continue
-        aliases: dict[str, str] = {}
-        for key_node, value_node in zip(value.keys, value.values):
-            if (
-                isinstance(key_node, ast.Constant)
-                and isinstance(key_node.value, str)
-                and isinstance(value_node, ast.Constant)
-                and isinstance(value_node.value, str)
-            ):
-                aliases[key_node.value] = value_node.value
-        return aliases
+        return _string_dict_literal(value)
     return {}
 
 
@@ -137,16 +144,7 @@ def _parse_molecule_aliases() -> dict[str, dict[str, str]]:
     tree = ast.parse(MOLECULE_ALIAS_FILE.read_text(encoding="utf-8"))
     provider_maps: dict[str, dict[str, str]] = {}
     for node in tree.body:
-        target_name = ""
-        value: ast.AST | None = None
-        if isinstance(node, ast.Assign):
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                target_name = node.targets[0].id
-                value = node.value
-        elif isinstance(node, ast.AnnAssign):
-            if isinstance(node.target, ast.Name):
-                target_name = node.target.id
-                value = node.value
+        target_name, value = _assignment_target(node)
         if target_name != "MOLECULE_FIELD_ALIASES":
             continue
         if not isinstance(value, ast.Tuple):
@@ -167,14 +165,7 @@ def _parse_molecule_aliases() -> dict[str, dict[str, str]]:
                     if isinstance(kw.value.value, str):
                         canonical_name = kw.value.value
                 elif kw.arg == "provider_aliases" and isinstance(kw.value, ast.Dict):
-                    for key_node, value_node in zip(kw.value.keys, kw.value.values):
-                        if (
-                            isinstance(key_node, ast.Constant)
-                            and isinstance(key_node.value, str)
-                            and isinstance(value_node, ast.Constant)
-                            and isinstance(value_node.value, str)
-                        ):
-                            provider_aliases[key_node.value] = value_node.value
+                    provider_aliases.update(_string_dict_literal(kw.value))
 
             if not canonical_name:
                 continue
@@ -224,6 +215,61 @@ def _field_groups_for_name(
             except re.error:
                 continue
     return matched
+
+
+def _layer_row(
+    provider: str,
+    entity: str,
+    field_name: str,
+    record: dict[str, Any],
+) -> dict[str, str]:
+    return {
+        "provider": provider,
+        "entity": entity,
+        "field": field_name,
+        "bronze_groups_json": _json_dump(sorted(record["bronze_groups"])),
+        "bronze_field_names_json": _json_dump(sorted(record["bronze_field_names"])),
+        "silver_pyarrow_field_names_json": _json_dump(
+            sorted(record["silver_pyarrow_field_names"])
+        ),
+        "silver_pandera_field_names_json": _json_dump(
+            sorted(record["silver_pandera_field_names"])
+        ),
+        "gold_field_names_json": _json_dump(sorted(record["gold_field_names"])),
+        "silver_pyarrow_types_json": _json_dump(sorted(record["silver_pyarrow_types"])),
+        "silver_pandera_types_json": _json_dump(sorted(record["silver_pandera_types"])),
+        "gold_types_json": _json_dump(sorted(record["gold_types"])),
+        "silver_pyarrow_nullable_json": _json_dump(
+            sorted(record["silver_pyarrow_nullable"])
+        ),
+        "silver_pandera_nullable_json": _json_dump(
+            sorted(record["silver_pandera_nullable"])
+        ),
+        "gold_nullable_json": _json_dump(sorted(record["gold_nullable"])),
+        "type_inconsistency": str(_type_inconsistency(record)).lower(),
+        "json_usage": _json_usage(record),
+        "nullable_violation": str(_nullable_violation(record)).lower(),
+        "redundancy": str(_redundancy(record)).lower(),
+    }
+
+
+def _unified_row_payload(
+    unified_row: dict[str, str],
+) -> tuple[str, str, list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    provider = unified_row["provider"]
+    entity = unified_row["entity"]
+    bronze_groups = json.loads(unified_row["bronze_column_groups_json"])
+    silver_pyarrow_fields = json.loads(unified_row["silver_pyarrow_fields_json"])
+    silver_pandera_fields = json.loads(unified_row["silver_pandera_fields_json"])
+    gold_properties = json.loads(unified_row["gold_json_contract"])["properties"]
+    return (
+        provider,
+        entity,
+        bronze_groups,
+        silver_pyarrow_fields,
+        silver_pandera_fields,
+        gold_properties,
+    )
 
 
 def _collect_layer_items(
@@ -360,13 +406,14 @@ def _redundancy(record: dict[str, Any]) -> bool:
 def build_field_level_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     for unified_row in build_unified_schema_rows():
-        provider = unified_row["provider"]
-        entity = unified_row["entity"]
-
-        bronze_groups = json.loads(unified_row["bronze_column_groups_json"])
-        silver_pyarrow_fields = json.loads(unified_row["silver_pyarrow_fields_json"])
-        silver_pandera_fields = json.loads(unified_row["silver_pandera_fields_json"])
-        gold_properties = json.loads(unified_row["gold_json_contract"])["properties"]
+        (
+            provider,
+            entity,
+            bronze_groups,
+            silver_pyarrow_fields,
+            silver_pandera_fields,
+            gold_properties,
+        ) = _unified_row_payload(unified_row)
 
         diagnostics = _collect_layer_items(
             provider,
@@ -378,44 +425,7 @@ def build_field_level_rows() -> list[dict[str, str]]:
         )
 
         for field_name, record in sorted(diagnostics.items()):
-            rows.append(
-                {
-                    "provider": provider,
-                    "entity": entity,
-                    "field": field_name,
-                    "bronze_groups_json": _json_dump(sorted(record["bronze_groups"])),
-                    "bronze_field_names_json": _json_dump(
-                        sorted(record["bronze_field_names"])
-                    ),
-                    "silver_pyarrow_field_names_json": _json_dump(
-                        sorted(record["silver_pyarrow_field_names"])
-                    ),
-                    "silver_pandera_field_names_json": _json_dump(
-                        sorted(record["silver_pandera_field_names"])
-                    ),
-                    "gold_field_names_json": _json_dump(
-                        sorted(record["gold_field_names"])
-                    ),
-                    "silver_pyarrow_types_json": _json_dump(
-                        sorted(record["silver_pyarrow_types"])
-                    ),
-                    "silver_pandera_types_json": _json_dump(
-                        sorted(record["silver_pandera_types"])
-                    ),
-                    "gold_types_json": _json_dump(sorted(record["gold_types"])),
-                    "silver_pyarrow_nullable_json": _json_dump(
-                        sorted(record["silver_pyarrow_nullable"])
-                    ),
-                    "silver_pandera_nullable_json": _json_dump(
-                        sorted(record["silver_pandera_nullable"])
-                    ),
-                    "gold_nullable_json": _json_dump(sorted(record["gold_nullable"])),
-                    "type_inconsistency": str(_type_inconsistency(record)).lower(),
-                    "json_usage": _json_usage(record),
-                    "nullable_violation": str(_nullable_violation(record)).lower(),
-                    "redundancy": str(_redundancy(record)).lower(),
-                }
-            )
+            rows.append(_layer_row(provider, entity, field_name, record))
 
     rows.sort(key=lambda row: (row["provider"], row["entity"], row["field"]))
     return rows

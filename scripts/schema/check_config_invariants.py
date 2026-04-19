@@ -33,7 +33,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if __package__ in {None, ""}:
     sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from bioetl.infrastructure.config.config_ci_contract import (
+from bioetl.infrastructure.config.config_ci_contract import (  # noqa: E402
     COMPOSITE_ALLOWED_KEYS,
     CONTRACT_ALLOWED_KEYS,
     ENTITY_ALLOWED_KEYS,
@@ -87,11 +87,14 @@ def _composite_configs() -> list[Path]:
     )
 
 
+def _all_config_paths() -> list[Path]:
+    return [*_entity_configs(), *_provider_configs(), *_composite_configs()]
+
+
 def check_inv_001(verbose: bool) -> list[str]:
     """INV-CFG-001: No legacy naming."""
     errors: list[str] = []
-    all_config_paths = [*_entity_configs(), *_provider_configs(), *_composite_configs()]
-    for path in all_config_paths:
+    for path in _all_config_paths():
         data = _load_yaml(path)
         entity = ""
         pipeline = data.get("pipeline")
@@ -226,75 +229,60 @@ def check_inv_004(verbose: bool) -> list[str]:
     return errors
 
 
+def _append_unknown_key_errors(
+    errors: list[str],
+    path: Path,
+    data: dict[str, Any],
+    *,
+    top_level_keys: set[str],
+    nested_fields: list[tuple[str, set[str], str]],
+) -> None:
+    unknown = set(data.keys()) - top_level_keys
+    if unknown:
+        errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
+    for field_name, allowed_keys, label in nested_fields:
+        nested = data.get(field_name)
+        if not isinstance(nested, dict):
+            continue
+        unknown_nested = set(nested.keys()) - allowed_keys
+        if unknown_nested:
+            errors.append(
+                f"INV-CFG-005 {_rel(path)}: unknown {label} keys {unknown_nested}"
+            )
+
+
 def check_inv_005(verbose: bool) -> list[str]:
     """INV-CFG-005: No unknown keys in unified entity/composite/provider configs."""
     errors: list[str] = []
 
-    # Entity configs
     for path in _entity_configs():
         data = _load_yaml(path)
-        unknown = set(data.keys()) - ENTITY_ALLOWED_KEYS
-        if unknown:
-            errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
+        _append_unknown_key_errors(
+            errors,
+            path,
+            data,
+            top_level_keys=ENTITY_ALLOWED_KEYS,
+            nested_fields=[
+                ("pipeline", PIPELINE_ALLOWED_KEYS, "pipeline"),
+                ("quality", QUALITY_ALLOWED_KEYS, "quality"),
+                ("filters", FILTER_ALLOWED_KEYS, "filters"),
+                ("contracts", CONTRACT_ALLOWED_KEYS, "contracts"),
+            ],
+        )
 
-        pipeline = data.get("pipeline")
-        if isinstance(pipeline, dict):
-            unknown_pipeline = set(pipeline.keys()) - PIPELINE_ALLOWED_KEYS
-            if unknown_pipeline:
-                errors.append(
-                    f"INV-CFG-005 {_rel(path)}: unknown pipeline keys {unknown_pipeline}"
-                )
-
-        quality = data.get("quality")
-        if isinstance(quality, dict):
-            unknown_quality = set(quality.keys()) - QUALITY_ALLOWED_KEYS
-            if unknown_quality:
-                errors.append(
-                    f"INV-CFG-005 {_rel(path)}: unknown quality keys {unknown_quality}"
-                )
-
-        filters = data.get("filters")
-        if isinstance(filters, dict):
-            unknown_filters = set(filters.keys()) - FILTER_ALLOWED_KEYS
-            if unknown_filters:
-                errors.append(
-                    f"INV-CFG-005 {_rel(path)}: unknown filters keys {unknown_filters}"
-                )
-
-        contracts = data.get("contracts")
-        if isinstance(contracts, dict):
-            unknown_contracts = set(contracts.keys()) - CONTRACT_ALLOWED_KEYS
-            if unknown_contracts:
-                errors.append(
-                    f"INV-CFG-005 {_rel(path)}: unknown contracts keys {unknown_contracts}"
-                )
-
-    # Provider configs
     for path in _provider_configs():
         data = _load_yaml(path)
-        unknown = set(data.keys()) - PROVIDER_ALLOWED_KEYS
-        if unknown:
-            errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
+        _append_unknown_key_errors(
+            errors,
+            path,
+            data,
+            top_level_keys=PROVIDER_ALLOWED_KEYS,
+            nested_fields=[
+                ("quality", QUALITY_ALLOWED_KEYS, "provider quality"),
+                ("filters", FILTER_ALLOWED_KEYS, "provider filters"),
+            ],
+        )
 
-        quality = data.get("quality")
-        if isinstance(quality, dict):
-            unknown_quality = set(quality.keys()) - QUALITY_ALLOWED_KEYS
-            if unknown_quality:
-                errors.append(
-                    f"INV-CFG-005 {_rel(path)}: unknown provider quality keys "
-                    f"{unknown_quality}"
-                )
-
-        filters = data.get("filters")
-        if isinstance(filters, dict):
-            unknown_filters = set(filters.keys()) - FILTER_ALLOWED_KEYS
-            if unknown_filters:
-                errors.append(
-                    f"INV-CFG-005 {_rel(path)}: unknown provider filters keys "
-                    f"{unknown_filters}"
-                )
-
-    # Composite configs
     for path in _composite_configs():
         data = _load_yaml(path)
         unknown = set(data.keys()) - COMPOSITE_ALLOWED_KEYS
@@ -329,6 +317,16 @@ def check_inv_006(verbose: bool) -> list[str]:
     return errors
 
 
+CHECK_FUNCTIONS = (
+    check_inv_001,
+    check_inv_002,
+    check_inv_003,
+    check_inv_004,
+    check_inv_005,
+    check_inv_006,
+)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate CI invariants for configs/**"
@@ -337,14 +335,7 @@ def main() -> int:
     args = parser.parse_args()
 
     all_errors: list[str] = []
-    for check_fn in [
-        check_inv_001,
-        check_inv_002,
-        check_inv_003,
-        check_inv_004,
-        check_inv_005,
-        check_inv_006,
-    ]:
+    for check_fn in CHECK_FUNCTIONS:
         all_errors.extend(check_fn(args.verbose))
 
     if all_errors:
