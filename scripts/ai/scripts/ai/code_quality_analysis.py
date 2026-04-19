@@ -32,6 +32,15 @@ def analyze_python_code():
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 lines = content.split('\n')
+        except UnicodeDecodeError:
+            print(f"⚠️  Skipping {file_path} due to encoding issues")
+            continue
+        except PermissionError:
+            print(f"⚠️  Skipping {file_path} due to permission issues")
+            continue
+        except OSError as e:
+            print(f"⚠️  Skipping {file_path} due to file access error: {e}")
+            continue
                 
                 issues_found['total_lines'] += len(lines)
                 

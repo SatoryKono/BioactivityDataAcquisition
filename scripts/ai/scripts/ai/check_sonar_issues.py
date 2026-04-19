@@ -69,8 +69,14 @@ for issue_number in issues_to_check:
         else:
             print(f'\n❌ Issue #{issue_number}: Not found or inaccessible')
             
+    except requests.exceptions.RequestException as e:
+        print(f'\n❌ Network error checking issue #{issue_number}: {e}')
+    except json.JSONDecodeError as e:
+        print(f'\n❌ JSON decode error for issue #{issue_number}: {e}')
+    except KeyError as e:
+        print(f'\n❌ Missing expected field in issue #{issue_number}: {e}')
     except Exception as e:
-        print(f'\n❌ Error checking issue #{issue_number}: {e}')
+        print(f'\n❌ Unexpected error checking issue #{issue_number}: {e}')
 
 print('\n' + '=' * 60)
 print('📊 SUMMARY ANALYSIS')
