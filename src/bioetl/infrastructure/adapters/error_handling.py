@@ -25,6 +25,7 @@ from bioetl.infrastructure.errors import (
     DomainErrorMappingInput,
     DomainInfraExceptionMapper,
 )
+from bioetl.infrastructure.errors.exception_mapper import InfrastructureSourceError
 
 if TYPE_CHECKING:
     from httpx import Response
@@ -68,7 +69,7 @@ class ErrorService:
         _ = response
         return self._adapter_classifier.classify_http_status(status_code)
 
-    def classify_exception(self, error: Exception) -> ErrorCategory:
+    def classify_exception(self, error: InfrastructureSourceError) -> ErrorCategory:
         """Classify exception into error category.
 
         Uses ErrorClassifier to determine ErrorType, then maps to ErrorCategory.
@@ -81,7 +82,7 @@ class ErrorService:
         """
         return self._adapter_classifier.classify_exception(error)
 
-    def get_error_type(self, error: Exception) -> ErrorType:
+    def get_error_type(self, error: InfrastructureSourceError) -> ErrorType:
         """Get ErrorType for an exception.
 
         Args:
@@ -96,7 +97,7 @@ class ErrorService:
         self,
         provider: str,
         operation: str,
-        error: Exception,
+        error: InfrastructureSourceError,
         context: JsonDict | None = None,  # Any: untyped API JSON record
     ) -> AdapterErrorContext:
         """Log error with unified structured context.
@@ -134,7 +135,7 @@ class ErrorService:
     def _resolve_error_category(
         self,
         *,
-        error: Exception,
+        error: InfrastructureSourceError,
         status_code: int | None,
     ) -> ErrorCategory:
         """Resolve error category from HTTP status code or exception type."""
@@ -143,7 +144,7 @@ class ErrorService:
             status_code=status_code,
         )
 
-    def should_retry(self, error: Exception) -> bool:
+    def should_retry(self, error: InfrastructureSourceError) -> bool:
         """Determine if error should be retried.
 
         Args:
@@ -199,7 +200,7 @@ class ErrorService:
 
     def wrap_error(
         self,
-        error: Exception,
+        error: InfrastructureSourceError,
         provider: str,
         status_code: int | None = None,
         retry_after: float | None = None,
@@ -228,7 +229,7 @@ class ErrorService:
 
     def handle_error(
         self,
-        error: Exception,
+        error: InfrastructureSourceError,
         provider: str,
         operation: str,
         context: JsonDict | None = None,  # Any: untyped API JSON record

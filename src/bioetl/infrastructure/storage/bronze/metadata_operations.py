@@ -6,7 +6,7 @@ import hashlib
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze.metadata_paths import (
@@ -19,9 +19,13 @@ from bioetl.infrastructure.storage.bronze.reporting_helpers import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.services.lineage.metadata_lineage_bundle import (
+        MetadataLineageBundle,
+    )
     from bioetl.domain.lineage import LineageGraphFragment
     from bioetl.domain.models.metadata import (
         BronzeMetadata,
+        BronzeMetadataInput,
         InputSnapshotRef,
         SourceMetadata,
     )
@@ -66,6 +70,16 @@ class _BronzeMetadataWriteHostProtocol(Protocol):
     _metadata_coordinator: MetadataCoordinatorPort | None
     _flat_structure: bool
     base_path: Path
+
+
+class _BronzeMetadataBundleFactory(Protocol):
+    """Callable contract exposed by coordinator bundle factory hooks."""
+
+    def __call__(
+        self,
+        input_data: BronzeMetadataInput,
+    ) -> MetadataLineageBundle[BronzeMetadata]:
+        """Build bundled bronze metadata and lineage."""
 
 
 def prepare_bronze_metadata_write(
@@ -158,7 +172,7 @@ def _build_bronze_metadata_input_request(
 
 def _resolve_bronze_metadata_bundle_factory(
     coordinator: MetadataCoordinatorPort,
-) -> object:
+) -> _BronzeMetadataBundleFactory | None:
     """Return bundle factory only when the coordinator exposes the override hook."""
     if (
         "create_bronze_metadata_bundle" not in vars(coordinator)
@@ -170,7 +184,10 @@ def _resolve_bronze_metadata_bundle_factory(
         is None
     ):
         return None
-    return getattr(coordinator, "create_bronze_metadata_bundle", None)
+    return cast(
+        _BronzeMetadataBundleFactory | None,
+        getattr(coordinator, "create_bronze_metadata_bundle", None),
+    )
 
 
 def _build_bronze_source_metadata_with_live_snapshot(

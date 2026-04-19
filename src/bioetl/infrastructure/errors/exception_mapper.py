@@ -31,13 +31,21 @@ _MappedExternalError = TypeVar(
     "_MappedExternalError",
     bound=ExternalServiceError,
 )
+InfrastructureSourceError = (
+    OSError
+    | RuntimeError
+    | ValueError
+    | LookupError
+    | AssertionError
+    | BioETLError
+)
 
 
 @dataclass(frozen=True, slots=True)
 class DomainErrorMappingInput:
     """Normalized data needed to map infrastructure failures into domain errors."""
 
-    error: Exception
+    error: InfrastructureSourceError
     provider: str
     error_type: ErrorType
     status_code: int | None = None
