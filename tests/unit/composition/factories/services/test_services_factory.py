@@ -160,7 +160,7 @@ def test_create_common_services_uses_noop_tracing_when_not_provided(
 
 @pytest.mark.unit
 def test_create_metrics_returns_noop_when_disabled() -> None:
-    settings = SimpleNamespace(metrics_enabled=False)
+    settings = SimpleNamespace(observability=SimpleNamespace(metrics_enabled=False))
 
     metrics = create_metrics(settings)
 
@@ -168,11 +168,11 @@ def test_create_metrics_returns_noop_when_disabled() -> None:
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.factories.services.port_factories.PrometheusMetrics")
+@patch("bioetl.composition.bootstrap.runtime.metrics_bootstrap.PrometheusMetrics")
 def test_create_metrics_returns_prometheus_when_enabled(
     mock_prometheus_metrics: MagicMock,
 ) -> None:
-    settings = SimpleNamespace(metrics_enabled=True)
+    settings = SimpleNamespace(observability=SimpleNamespace(metrics_enabled=True))
     expected = MagicMock()
     mock_prometheus_metrics.return_value = expected
 

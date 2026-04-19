@@ -44,7 +44,7 @@ def test_create_quarantine_returns_quarantine_port(tmp_path: Path) -> None:
 @pytest.mark.unit
 def test_create_metrics_with_prometheus_enabled() -> None:
     """create_metrics returns PrometheusMetrics when enabled."""
-    settings = SimpleNamespace(metrics_enabled=True)
+    settings = SimpleNamespace(observability=SimpleNamespace(metrics_enabled=True))
     metrics = create_metrics(settings)  # type: ignore[arg-type]
     assert isinstance(metrics, MetricsPort)
 
@@ -52,7 +52,7 @@ def test_create_metrics_with_prometheus_enabled() -> None:
 @pytest.mark.unit
 def test_create_metrics_with_noop() -> None:
     """create_metrics returns NoOpMetrics when disabled."""
-    settings = SimpleNamespace(metrics_enabled=False)
+    settings = SimpleNamespace(observability=SimpleNamespace(metrics_enabled=False))
     metrics = create_metrics(settings)  # type: ignore[arg-type]
     assert isinstance(metrics, MetricsPort)
 

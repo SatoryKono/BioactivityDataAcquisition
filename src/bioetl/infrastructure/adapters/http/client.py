@@ -58,5 +58,6 @@ class UnifiedHTTPClient(
 
     def __post_init__(self) -> None:
         """Capture injected observability ports without local fallback creation."""
-        self._tracer = self.tracer
-        self._metrics = self.metrics
+        from bioetl.domain.ports.noop import NoOpMetrics, NoOpTracing
+        self._tracer = self.tracer if self.tracer is not None else NoOpTracing()
+        self._metrics = self.metrics if self.metrics is not None else NoOpMetrics(warn_on_use=False)

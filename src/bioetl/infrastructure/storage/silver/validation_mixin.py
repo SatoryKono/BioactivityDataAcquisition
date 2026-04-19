@@ -7,6 +7,7 @@ __all__ = ["SilverWriterValidationMixin", "_PreparedSilverWritePayload"]
 from collections.abc import Awaitable, Callable
 from typing import Literal
 
+import asyncio
 import pyarrow as pa
 
 from bioetl.domain.config import KeyNullabilityRule

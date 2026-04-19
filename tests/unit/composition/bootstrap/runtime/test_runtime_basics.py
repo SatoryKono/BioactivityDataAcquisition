@@ -38,7 +38,7 @@ class TestBootstrapRuntimeBasics:
     def test_returns_seven_element_tuple(self) -> None:
         """bootstrap_runtime_basics returns run_id/settings/logger/metrics/tracer/storage/lock."""
         config = _make_config()
-        settings = SimpleNamespace(metrics_enabled=False)
+        settings = SimpleNamespace(observability=SimpleNamespace(metrics_enabled=False))
         logger = MagicMock()
         tracer = MagicMock()
         storage = MagicMock()
@@ -74,7 +74,7 @@ class TestBootstrapRuntimeBasics:
             config=config,
             run_id=provided_run_id,
             settings_provider=MagicMock(
-                return_value=SimpleNamespace(metrics_enabled=False)
+                return_value=SimpleNamespace(observability=SimpleNamespace(metrics_enabled=False))
             ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
             tracer_bootstrapper=lambda _settings: MagicMock(),
@@ -93,7 +93,7 @@ class TestBootstrapRuntimeBasics:
             config=_make_config("p"),
             run_id=None,
             settings_provider=MagicMock(
-                return_value=SimpleNamespace(metrics_enabled=False)
+                return_value=SimpleNamespace(observability=SimpleNamespace(metrics_enabled=False))
             ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
             tracer_bootstrapper=lambda _settings: MagicMock(),
@@ -113,7 +113,7 @@ class TestBootstrapRuntimeBasics:
             config=_make_config("p"),
             run_id=str(_FIXED_UUID),
             settings_provider=MagicMock(
-                return_value=SimpleNamespace(metrics_enabled=False)
+                return_value=SimpleNamespace(observability=SimpleNamespace(metrics_enabled=False))
             ),
             logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
             tracer_bootstrapper=lambda _settings: MagicMock(),
@@ -136,7 +136,7 @@ class TestBootstrapRuntimeBasics:
             config=_make_config("my_composite"),
             run_id=str(_FIXED_UUID),
             settings_provider=MagicMock(
-                return_value=SimpleNamespace(metrics_enabled=False)
+                return_value=SimpleNamespace(observability=SimpleNamespace(metrics_enabled=False))
             ),
             logger_bootstrapper=_logger_bootstrapper,
             tracer_bootstrapper=lambda _settings: MagicMock(),
