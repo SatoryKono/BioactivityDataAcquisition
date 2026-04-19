@@ -117,7 +117,7 @@ def create_github_issue_simulation(layer: str, issues: list[dict[str, Any]]) -> 
     print(f"    URL: {mock_url}")
 
     # Show issue details
-    print(f"    Issues included:")
+    print("    Issues included:")
     for i, issue in enumerate(issues, 1):
         print(f"      {i}. [{issue['severity']}] {issue['message']} ({issue['component']}:{issue['line']})")
 
