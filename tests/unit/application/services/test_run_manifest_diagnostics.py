@@ -444,7 +444,7 @@ def test_build_diagnostics_summary_distinguishes_snapshot_backed_runs_from_exact
                     RunInputSnapshotRef(
                         snapshot_id="snapshot-1",
                         content_hash="sha256:snapshot-1",
-                        immutable_uri="file:///tmp/bronze/batch_1.jsonl.zst",
+                        immutable_uri="file:///workspace/bronze/batch_1.jsonl.zst",
                     ),
                 ),
             ),

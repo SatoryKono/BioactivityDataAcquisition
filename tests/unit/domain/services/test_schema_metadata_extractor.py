@@ -77,7 +77,7 @@ def test_extract_schema_metadata_contract_path_vector(
     import bioetl.domain.services.schema_metadata_extractor as extractor_module
 
     fake_module = SimpleNamespace(
-        __file__="/tmp/work/src/bioetl/domain/contracts/gold/fake_schema.py"
+        __file__="/workspace/src/bioetl/domain/contracts/gold/fake_schema.py"
     )
     monkeypatch.setattr(extractor_module.inspect, "getmodule", lambda _: fake_module)
 

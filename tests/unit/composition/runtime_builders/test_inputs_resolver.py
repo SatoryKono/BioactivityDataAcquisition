@@ -145,7 +145,7 @@ def test_assemble_runtime_config_propagates_replay_anchor_date_for_exact_replay(
             exact_replay=True,
             cached_bronze=SimpleNamespace(
                 enabled=True,
-                bronze_path="/tmp/bronze",
+                bronze_path="test-output/bronze",
                 bronze_date="2026-04-10",
             ),
         ),

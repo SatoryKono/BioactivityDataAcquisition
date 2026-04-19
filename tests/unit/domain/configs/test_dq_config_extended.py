@@ -30,7 +30,7 @@ class TestDQReportConfig:
             format="yaml",
             include_sample_failures=False,
             sample_size=50,
-            output_path="/tmp/reports",
+            output_path="reports",
         )
         assert rc.format == "yaml"
         assert rc.sample_size == 50

@@ -18,7 +18,7 @@ from bioetl.composition.services.versioning import (
     get_git_commit,
     get_pipeline_version,
 )
-from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.domain.value_objects.run_context import RunContext, RunContextCreateInput
 
 if TYPE_CHECKING:
     from bioetl.domain.config import RuntimeConfig
@@ -132,22 +132,24 @@ class RunContextFactory:
             self.config_hash_getter(yaml_config) if config_hash is None else config_hash
         )
         return RunContext.create(
-            run_id=run_id,
-            run_type=runtime.run_type,
-            started_at=datetime.now(UTC),
-            provider=self.provider,
-            entity=entity,
-            transform_version=self.transform_version_getter(yaml_config),
-            transform_steps=self.transform_steps_getter(yaml_config),
-            pipeline_version=self.pipeline_version_getter(yaml_config),
-            git_commit=self.git_commit_getter(),
-            config_hash=resolved_config_hash,
-            manifest_id=manifest_id,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            contract_schema_hash=contract_schema_hash,
-            dq_policy_ref=dq_policy_ref,
-            rule_bundle_version=rule_bundle_version,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
+            RunContextCreateInput(
+                run_id=run_id,
+                run_type=runtime.run_type,
+                started_at=datetime.now(UTC),
+                provider=self.provider,
+                entity=entity,
+                transform_version=self.transform_version_getter(yaml_config),
+                transform_steps=self.transform_steps_getter(yaml_config),
+                pipeline_version=self.pipeline_version_getter(yaml_config),
+                git_commit=self.git_commit_getter(),
+                config_hash=resolved_config_hash,
+                manifest_id=manifest_id,
+                contract_ref=contract_ref,
+                contract_version=contract_version,
+                contract_schema_hash=contract_schema_hash,
+                dq_policy_ref=dq_policy_ref,
+                rule_bundle_version=rule_bundle_version,
+                dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+                effective_config_artifact_id=effective_config_artifact_id,
+            )
         )

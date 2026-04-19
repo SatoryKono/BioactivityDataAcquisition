@@ -215,7 +215,7 @@ async def test_archive_nonexistent_returns_zero() -> None:
         get_table_path=MagicMock(return_value=Path("/nonexistent/gold")),
     )  # type: ignore[assignment]
 
-    result = await mixin.archive("test.table", "/tmp/archive")
+    result = await mixin.archive("test.table", "test-output/archive")
     assert result == 0
 
 

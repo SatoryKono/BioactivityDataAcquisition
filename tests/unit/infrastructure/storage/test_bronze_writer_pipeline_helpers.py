@@ -19,7 +19,7 @@ from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
 
 class _HostStub:
     def __init__(self) -> None:
-        self.base_path = Path("/tmp/bronze")
+        self.base_path = Path("test-output/bronze")
         self.save_json = True
         self.validate_json = False
         self.validated_requests: list[BronzeWriteRequest] = []

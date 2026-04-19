@@ -156,7 +156,7 @@ def test_build_payload_enriches_event_family_and_correlation_defaults() -> None:
 def test_normalize_observability_pipeline_label_extracts_table_name_from_path() -> None:
     assert (
         normalize_observability_pipeline_label(
-            "/tmp/bioetl/silver/chembl_activity__v1_2_3"
+            "test-output/bioetl/silver/chembl_activity__v1_2_3"
         )
         == "chembl_activity"
     )

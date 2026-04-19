@@ -26,7 +26,7 @@ def test_get_run_statistics_returns_empty_dict_without_hook() -> None:
 async def test_build_final_metadata_write_coroutines_builds_silver_only() -> None:
     """Silver metadata finalization should remain executable after extraction."""
     storage = MagicMock()
-    storage.get_table_path = MagicMock(return_value="/tmp/test_silver")
+    storage.get_table_path = MagicMock(return_value="test-output/test_silver")
     storage.is_table_initialized = MagicMock(return_value=False)
 
     metadata_coordinator = MagicMock()

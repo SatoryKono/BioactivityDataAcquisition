@@ -139,7 +139,7 @@ def test_create_common_services_uses_noop_tracing_when_not_provided(
     pipeline_config = _make_pipeline_config()
 
     storage_ctx = SimpleNamespace(
-        adapter=MagicMock(), checkpoints_path="/tmp/checkpoints"
+        adapter=MagicMock(), checkpoints_path="test-output/checkpoints"
     )
     mock_storage_create.return_value = storage_ctx
     mock_create_lock.return_value = MagicMock()

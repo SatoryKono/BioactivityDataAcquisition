@@ -28,7 +28,7 @@ class TestDQReportConfig:
             enabled=False,
             format="csv",
             sample_size=50,
-            output_path="/tmp/reports",
+            output_path="reports",
         )
         assert config.enabled is False
         assert config.format == "csv"
