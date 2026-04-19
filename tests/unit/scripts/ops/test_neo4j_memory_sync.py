@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import io
-import pytest
+import tempfile
 from datetime import date
+from pathlib import Path
 from urllib import error
 
-from pathlib import Path
+import pytest
 
 from scripts.memory.sync import (
     _add_complexity_analysis_surfaces,
@@ -55,7 +56,7 @@ from scripts.memory.sync import (
 )
 
 pytestmark = pytest.mark.memory
-REPORT_PATH = "reports/neo4j-memory-audit.json"
+LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
 
 
 def _snapshot() -> tuple[Path, object]:
@@ -273,7 +274,7 @@ def test_snapshot_contains_core_repo_surfaces() -> None:
     ) in node_keys
     assert (
         "execution_path",
-        f"python -m scripts.memory sync --report {REPORT_PATH}",
+        f"python -m scripts.memory sync --report {LEGACY_REPORT_PATH}",
     ) in node_keys
     assert (
         "execution_path",
@@ -829,7 +830,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "scripts/memory/__main__.py",
         "PROVIDES",
         "execution_path",
-        f"python -m scripts.memory sync --report {REPORT_PATH}",
+        f"python -m scripts.memory sync --report {LEGACY_REPORT_PATH}",
     ),
     (
         "policy_surface",
@@ -1330,7 +1331,7 @@ EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (
         "scripts.memory sync",
         "RUNS_VIA",
         "execution_path",
-        f"python -m scripts.memory sync --report {REPORT_PATH}",
+        f"python -m scripts.memory sync --report {LEGACY_REPORT_PATH}",
     ),
     (
         "doc_artifact",
