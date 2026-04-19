@@ -51,6 +51,7 @@ def _normalize_execution_identity_payload(
     input_snapshot_fingerprint: str | None,
 ) -> dict[str, str | None]:
     """Return the canonical checkpoint execution-identity payload."""
+    del manifest_id
     return build_execution_identity_payload(
         pipeline_name=pipeline_name,
         run_type=run_type,

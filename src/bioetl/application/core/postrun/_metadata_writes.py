@@ -103,7 +103,7 @@ def _build_silver_metadata_write_coro(
     resolve_delta_version: Callable[[str, Literal["silver", "gold"]], int | None],
 ) -> Awaitable[object] | None:
     """Build coroutine for finalizing an existing Silver metadata sidecar."""
-    _ = metadata_coordinator
+    _ = metadata_coordinator, stats
     if not metadata_writer:
         return None
     silver_table = config.table.silver_table

@@ -40,7 +40,7 @@ ET.register_namespace("", SVG_NS)
 _OBJECT_SUFFIX_SPACING_RE = re.compile(
     r"(?<=\S)(Mixin|Adapter|Port|Validator|Runer|Runner|Coordinator)\b"
 )
-_CLASS_METHOD_LINE_RE = re.compile(r"^\s*[+\-#~]\s*[A-Za-z_][A-Za-z0-9_]*\s*\(")
+_CLASS_METHOD_LINE_RE = re.compile(r"^\s*[+\-#~]\s*[A-Za-z_]\w*\s*\(")
 
 SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
 

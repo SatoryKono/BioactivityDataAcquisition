@@ -99,7 +99,7 @@ class MedlineDateParser:
 
     # Pattern for month range: "Jan-Feb", "Dec-Jan" (NOT "Dec-2023")
     _MONTH_RANGE_PATTERN: ClassVar[re.Pattern[str]] = re.compile(
-        r"\b([a-zA-Z]{3,9})-([a-zA-Z]{3,9})\b", re.IGNORECASE
+        r"\b([a-z]{3,9})-([a-z]{3,9})\b", re.IGNORECASE
     )
 
     # Pattern to find 4-digit years in text

@@ -47,6 +47,7 @@ class StorageAdapterMaintenanceMixin:
         layer: Literal["silver", "gold"] = "silver",
     ) -> int | None:
         """Return the current Delta table version, or None if table does not exist."""
+        del layer
         path = Path(table_path)
         if not _is_delta_table_dir(path):
             return None

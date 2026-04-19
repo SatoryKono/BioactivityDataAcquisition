@@ -79,6 +79,7 @@ class _NormalizationActivityMixin:
         validate: bool = True,
     ) -> NormalizationResult:
         """Normalize a single activity value to canonical unit with pChEMBL."""
+        del activity_type
         if validate:
             is_valid, error = self.validator.validate_concentration(value, unit)
             if not is_valid:
@@ -242,6 +243,7 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
             Single NormalizationResult with aggregated value. Returns an invalid result if
             concentrations is empty.
         """
+        del activity_type
         if not concentrations:
             return NormalizationResult(
                 value=0.0,

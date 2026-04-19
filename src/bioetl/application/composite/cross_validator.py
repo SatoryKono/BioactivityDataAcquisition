@@ -220,6 +220,7 @@ class EnrichmentCrossValidator:
         seed_entity: str,
     ) -> tuple[pl.DataFrame, CrossValidationStats]:
         """Add CV metadata columns and compute aggregate stats."""
+        del seed_provider, seed_entity
         is_quarantine = enricher_error_counts >= self._config.quarantine_threshold
         quarantine_count = int(is_quarantine.sum())
         cv_details = _combine_cv_details(enricher_details, total_records)

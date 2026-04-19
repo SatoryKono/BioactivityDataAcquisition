@@ -119,10 +119,10 @@ class UniProtId(ValueObject[str]):
     _value: str
 
     # Primary accession pattern (6 characters)
-    _PRIMARY_PATTERN = re.compile(r"^[OPQ][0-9][A-Z0-9]{3}[0-9]$")
+    _PRIMARY_PATTERN = re.compile(r"^[OPQ]\d[A-Z\d]{3}\d$")
 
     # Secondary accession pattern for other letters (6 or 10 characters)
-    _SECONDARY_PATTERN = re.compile(r"^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$")
+    _SECONDARY_PATTERN = re.compile(r"^[A-NR-Z]\d([A-Z][A-Z\d]{2}\d){1,2}$")
 
     def _validate_format(self, normalized: str) -> bool:
         """Check if normalized string matches UniProt format."""

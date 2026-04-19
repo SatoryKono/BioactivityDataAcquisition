@@ -43,12 +43,6 @@ class MoleculeSchema(ETLRecordSchema):
         str_matches=CHEMBL_ID_PATTERN,
         description="Canonical molecule ID (ChEMBL ID).",
     )
-    # chebi_id: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="ChEBI ID."
-    # )
-    # chebi_par_id: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="Parent ChEBI ID."
-    # )
 
     # === Core Properties ===
     pref_name: Series[str] | None = pa.Field(
@@ -72,19 +66,11 @@ class MoleculeSchema(ETLRecordSchema):
     first_approval: Series[float] | None = pa.Field(
         nullable=True, description="Year of first approval (float for nullable int)."
     )
-    # chirality: Optional[Series[int]] = pa.Field(
-    #     nullable=True,
-    #     isin=[-1, 0, 1, 2],
-    #     description="Chirality.",
-    # )
 
     # === Flags ===
     therapeutic_flag: Series[bool] | None = pa.Field(
         nullable=True, description="Therapeutic flag."
     )
-    # dosed_ingredient: Optional[Series[int]] = pa.Field(
-    #     nullable=True, isin=[0, 1], description="Dosed ingredient flag."
-    # )
     oral: Series[bool] | None = pa.Field(
         nullable=True, description="Oral administration flag."
     )
@@ -115,12 +101,6 @@ class MoleculeSchema(ETLRecordSchema):
     withdrawn_flag: Series[bool] | None = pa.Field(
         nullable=True, description="Withdrawn flag."
     )
-    # downgraded: Optional[Series[int]] = pa.Field(
-    #     nullable=True, isin=[0, 1], description="Downgraded flag."
-    # )
-    # nomerge: Optional[Series[int]] = pa.Field(
-    #     nullable=True, isin=[0, 1], description="No merge flag."
-    # )
 
     # === Other Properties ===
     chirality: Series[int] | None = pa.Field(

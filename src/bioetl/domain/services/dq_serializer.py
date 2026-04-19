@@ -204,6 +204,7 @@ class DQReportSerializer:
         report: BronzeDQReport | SilverDQReport | GoldDQReport,  # noqa: ARG002
     ) -> str:
         """Generate HTML report."""
+        del report
         return generate_html_report(data)
 
     def _status_color(self, status: str) -> str:

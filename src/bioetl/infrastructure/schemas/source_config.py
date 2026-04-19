@@ -328,11 +328,12 @@ class SourceYamlConfig(BaseModel):
             >>> adapter_config.batch_size
             20
         """
-        effective_page_size = (
-            page_size_override
-            if page_size_override is not None
-            else (self.page_size if self.page_size is not None else default_page_size)
-        )
+        if page_size_override is not None:
+            effective_page_size = page_size_override
+        elif self.page_size is not None:
+            effective_page_size = self.page_size
+        else:
+            effective_page_size = default_page_size
         return DomainAdapterConfig(
             batch_size=self.batch_size,
             page_size=effective_page_size,

@@ -95,7 +95,6 @@ def apply_pipeline_schema_normalization(
     if unified_schema:
         _validate_schema_config(unified_schema, "entities/*/*:schema")
         _project_schema_fields_into_config(config, unified_schema)
-        return
 
 
 __all__ = ["apply_pipeline_schema_normalization"]

@@ -231,6 +231,7 @@ def _build_crossref_reference_fields(
     references: str | None,
 ) -> GoldRecord:
     """Build reference and DQ fields for CrossRef payloads."""
+    del record
     return {
         "references": references,
         # DQ flags (MUST be last, per RULES.md §2.4)

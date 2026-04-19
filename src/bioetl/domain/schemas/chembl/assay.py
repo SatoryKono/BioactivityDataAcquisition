@@ -134,9 +134,6 @@ class AssaySchema(ETLRecordSchema):
         nullable=True, description="FK to cell_line."
     )
     tissue_id: Series[str] | None = pa.Field(nullable=True, description="FK to tissue.")
-    # variant_id: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="FK to variant_sequences."
-    # )
 
     # === Other Fields ===
     bao_format: Series[str] = pa.Field(
@@ -145,40 +142,7 @@ class AssaySchema(ETLRecordSchema):
         description="BAO format.",
     )
     bao_label: Series[str] | None = pa.Field(nullable=True, description="BAO label.")
-    # a2t_complex: Optional[Series[int]] = pa.Field(
-    #     nullable=True,
-    #     isin=[0, 1],
-    #     description="Assay-to-target complex flag.",
-    # )
-    # a2t_multi: Optional[Series[int]] = pa.Field(
-    #     nullable=True,
-    #     isin=[0, 1],
-    #     description="Assay-to-target multi flag.",
-    # )
-    # mc_tax_id: Optional[Series[int]] = pa.Field(
-    #     nullable=True, description="MC Tax ID."
-    # )
-    # mc_organism: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="MC Organism."
-    # )
-    # mc_target_type: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="MC Target Type."
-    # )
-    # mc_target_name: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="MC Target Name."
-    # )
-    # mc_target_accession: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="MC Target Accession."
-    # )
     aidx: Series[str] | None = pa.Field(nullable=True, description="Assay index.")
-    # ridx: Optional[Series[str]] = pa.Field(
-    #     nullable=True, description="Record index."
-    # )
-    # tid_fixed: Optional[Series[int]] = pa.Field(
-    #     nullable=True,
-    #     isin=[0, 1],
-    #     description="TID fixed flag.",
-    # )
 
     # === Variant Information (Flattened) ===
     variant_accession: Series[str] | None = pa.Field(
