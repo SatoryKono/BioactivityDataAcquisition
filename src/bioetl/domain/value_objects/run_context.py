@@ -80,7 +80,9 @@ def _resolve_create_input_value(
     if field_name in _RUN_CONTEXT_OPTIONAL_DEFAULTS and inputs is None:
         return _RUN_CONTEXT_OPTIONAL_DEFAULTS[field_name]
     if inputs is None:
-        raise TypeError(f"RunContext.create() missing required argument: '{field_name}'")
+        raise TypeError(
+            f"RunContext.create() missing required argument: '{field_name}'"
+        )
     return getattr(inputs, field_name)
 
 

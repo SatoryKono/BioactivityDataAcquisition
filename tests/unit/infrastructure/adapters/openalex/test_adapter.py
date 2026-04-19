@@ -194,7 +194,10 @@ class TestOpenAlexAdapter:
 
         runtime_services = build_openalex_runtime_services_from_request(request)
 
-        assert runtime_services.fallback_fetch_service is runtime_bundle.fallback_fetch_service
+        assert (
+            runtime_services.fallback_fetch_service
+            is runtime_bundle.fallback_fetch_service
+        )
         assert runtime_services.query_executor is query_executor
         assert runtime_services.response_mapper is response_mapper
         assert runtime_services.cursor_flow is cursor_flow

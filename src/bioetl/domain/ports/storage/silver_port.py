@@ -98,7 +98,9 @@ def coerce_silver_write_request(
     if len(legacy_values) > len(_SILVER_WRITE_POSITIONAL_FIELDS):
         raise TypeError("write_silver() received too many positional arguments")
 
-    for field_name, value in zip(_SILVER_WRITE_POSITIONAL_FIELDS, legacy_values, strict=True):
+    for field_name, value in zip(
+        _SILVER_WRITE_POSITIONAL_FIELDS, legacy_values, strict=True
+    ):
         if field_name in resolved_kwargs:
             raise TypeError(
                 f"write_silver() got multiple values for argument '{field_name}'"
@@ -108,7 +110,9 @@ def coerce_silver_write_request(
     unexpected_fields = sorted(set(resolved_kwargs) - _SILVER_WRITE_ALLOWED_FIELDS)
     if unexpected_fields:
         unexpected = ", ".join(unexpected_fields)
-        raise TypeError(f"write_silver() got unexpected keyword arguments: {unexpected}")
+        raise TypeError(
+            f"write_silver() got unexpected keyword arguments: {unexpected}"
+        )
 
     missing_fields = [
         field_name

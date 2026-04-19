@@ -93,20 +93,23 @@ def _coerce_publication_transformer_init(
             "BasePublicationTransformerInit."
         )
 
-    unexpected = sorted(kwargs.keys() - {
-        "entity_type",
-        "silver_filters",
-        "gold_filters",
-        "tracer",
-        "metrics",
-        "identity_service",
-        "pii_hasher",
-        "dependencies",
-        "data_extractor",
-        "identifier_resolver",
-        "metadata_strategy",
-        "record_normalizer",
-    })
+    unexpected = sorted(
+        kwargs.keys()
+        - {
+            "entity_type",
+            "silver_filters",
+            "gold_filters",
+            "tracer",
+            "metrics",
+            "identity_service",
+            "pii_hasher",
+            "dependencies",
+            "data_extractor",
+            "identifier_resolver",
+            "metadata_strategy",
+            "record_normalizer",
+        }
+    )
     if unexpected:
         unexpected_args = ", ".join(unexpected)
         raise TypeError(
@@ -117,7 +120,9 @@ def _coerce_publication_transformer_init(
     return BasePublicationTransformerInit(
         provider=provider,
         entity_type=cast(str, kwargs.pop("entity_type", "publication")),
-        silver_filters=cast("SilverFilterConfig | None", kwargs.pop("silver_filters", None)),
+        silver_filters=cast(
+            "SilverFilterConfig | None", kwargs.pop("silver_filters", None)
+        ),
         gold_filters=cast("GoldFilterConfig | None", kwargs.pop("gold_filters", None)),
         tracer=cast("TracingPort | None", kwargs.pop("tracer", None)),
         metrics=cast("MetricsPort | None", kwargs.pop("metrics", None)),
@@ -294,9 +299,12 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         self._metadata_strategy = resolved.metadata_strategy or cast(
             "PublicationMetadataStrategy", self
         )
-        self._record_normalizer = resolved.record_normalizer or RecordNormalizationProcessor(
-            provider=resolved.provider,
-            entity_type=resolved.entity_type,
+        self._record_normalizer = (
+            resolved.record_normalizer
+            or RecordNormalizationProcessor(
+                provider=resolved.provider,
+                entity_type=resolved.entity_type,
+            )
         )
 
     def pre_extract_validation(

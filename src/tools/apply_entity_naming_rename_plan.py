@@ -115,10 +115,14 @@ def _validated_input_path(path: ValidatedRepoPath | Path) -> ValidatedRepoPath:
 
 def load_plan_id(plan_path: ValidatedRepoPath | Path) -> str:
     safe_plan_path = _validated_input_path(plan_path)
-    payload = yaml.safe_load(safe_plan_path.resolved_path.read_text(encoding="utf-8")) or {}
+    payload = (
+        yaml.safe_load(safe_plan_path.resolved_path.read_text(encoding="utf-8")) or {}
+    )
     plan_id = payload.get("plan_id")
     if not isinstance(plan_id, str) or not plan_id:
-        raise ValueError(f"{safe_plan_path.resolved_path} does not contain a valid plan_id")
+        raise ValueError(
+            f"{safe_plan_path.resolved_path} does not contain a valid plan_id"
+        )
     return plan_id
 
 
@@ -179,7 +183,9 @@ def load_rows(matrix_path: ValidatedRepoPath | Path) -> list[RenameRow]:
     with safe_matrix_path.resolved_path.open(encoding="utf-8", newline="") as file_obj:
         reader = csv.DictReader(file_obj)
         for record in reader:
-            validated_file_path = _resolve_input_path(_normalize_path(record["file_path"]))
+            validated_file_path = _resolve_input_path(
+                _normalize_path(record["file_path"])
+            )
             rows.append(
                 RenameRow(
                     wave=record["wave"],

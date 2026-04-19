@@ -452,9 +452,7 @@ def _validate_lenient_pipeline_compatibility(
     checkpoint_metadata: CheckpointMetadata,
 ) -> tuple[bool, list[str]]:
     messages: list[str] = []
-    if not (
-        current_metadata.pipeline_version and checkpoint_metadata.pipeline_version
-    ):
+    if not (current_metadata.pipeline_version and checkpoint_metadata.pipeline_version):
         return True, messages
     pipeline_compatible, message = _lenient_pipeline_version_message(
         current_metadata.pipeline_version,

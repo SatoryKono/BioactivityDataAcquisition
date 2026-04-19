@@ -23,7 +23,9 @@ from bioetl.domain.types.dq_contracts import DQDisposition
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-run-ledger-service-"))
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
 SILVER_METADATA_PATH = str(Path(SILVER_ARTIFACT_PATH) / "_metadata.yaml")
-GOLD_DQ_REPORT_PATH = str(TEST_ROOT / "output" / "gold" / "chembl" / "activity" / "_dq.json")
+GOLD_DQ_REPORT_PATH = str(
+    TEST_ROOT / "output" / "gold" / "chembl" / "activity" / "_dq.json"
+)
 
 
 class _InMemoryRunLedgerStore(RunLedgerPort):

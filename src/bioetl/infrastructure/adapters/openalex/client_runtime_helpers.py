@@ -140,7 +140,9 @@ def _coerce_openalex_runtime_services_request(
         openalex_response_mapper=kwargs.pop("openalex_response_mapper", None),  # type: ignore[arg-type]
         openalex_cursor_flow=kwargs.pop("openalex_cursor_flow", None),  # type: ignore[arg-type]
         title_fallback_handler=kwargs.pop("title_fallback_handler", None),  # type: ignore[arg-type]
-        openalex_fallback_orchestrator=kwargs.pop("openalex_fallback_orchestrator", None),  # type: ignore[arg-type]
+        openalex_fallback_orchestrator=kwargs.pop(
+            "openalex_fallback_orchestrator", None
+        ),  # type: ignore[arg-type]
         http_client=kwargs.pop("http_client"),  # type: ignore[arg-type]
         adapter_metrics=kwargs.pop("adapter_metrics"),  # type: ignore[arg-type]
         request_collector=kwargs.pop("request_collector"),  # type: ignore[arg-type]
