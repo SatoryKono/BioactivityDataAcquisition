@@ -193,6 +193,66 @@ def analyze_python_file(file_path: Path) -> tuple[list, list]:
         return [], []
 
 
+def _safe_get_type_hints(obj: Any) -> dict[str, Any]:
+    try:
+        return get_type_hints(obj)
+    except (NameError, TypeError, AttributeError):
+        return getattr(obj, "__annotations__", {})
+
+
+def _is_async_protocol_method(method: Any) -> bool:
+    if inspect.iscoroutinefunction(method) or inspect.isasyncgenfunction(method):
+        return True
+    return_type = _safe_get_type_hints(method).get("return")
+    if return_type is None:
+        return False
+    return get_origin(return_type) in (AsyncIterator, AsyncGenerator)
+
+
+def _missing_protocol_members(adapter_cls: type[Any], protocol: type[Any]) -> list[str]:
+    proto_annotations = get_type_hints(protocol)
+    proto_dir = set(dir(protocol))
+    cls_dir = set(dir(adapter_cls))
+    cls_annotations = _safe_get_type_hints(adapter_cls)
+
+    missing_members = [
+        member
+        for member in proto_dir
+        if not (member.startswith("_") and member not in ("__aenter__", "__aexit__"))
+        and member not in cls_dir
+    ]
+    missing_fields = [
+        field
+        for field in proto_annotations
+        if not field.startswith("_") and field not in cls_dir and field not in cls_annotations
+    ]
+    return missing_members + missing_fields
+
+
+def _iter_public_method_docstring_violations(py_file: Path, src_dir: Path) -> list[str]:
+    try:
+        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return []
+
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef):
+            continue
+        for item in node.body:
+            if isinstance(item, ast.FunctionDef) and not item.name.startswith("_"):
+                if not ast.get_docstring(item):
+                    violations.append(
+                        format_violation(
+                            py_file,
+                            item.lineno,
+                            f"Public method '{item.name}' missing docstring",
+                            src_dir,
+                        )
+                    )
+    return violations
+
+
 def format_violation(file_path: Path, lineno: int, message: str, src_dir: Path) -> str:
     relative_path = file_path.relative_to(src_dir)
     return f"{relative_path}:{lineno}: {message}"
@@ -458,31 +518,13 @@ def test_io_ports_are_async():
     for port, methods in async_io_ports:
         for method_name in methods:
             if not hasattr(port, method_name):
-                # __aenter__ and __aexit__ are sometimes implicit in Protocol but should be checked if defined
                 if method_name.startswith("__"):
                     continue
                 violations.append(f"{port.__name__} missing method {method_name}")
                 continue
 
             method = getattr(port, method_name)
-            # Check if it's an async function (coroutine or async generator)
-            is_async = inspect.iscoroutinefunction(
-                method
-            ) or inspect.isasyncgenfunction(method)
-
-            # Also check if return type is AsyncIterator/AsyncGenerator (for Protocol definitions)
-            if not is_async:
-                try:
-                    hints = get_type_hints(method)
-                    return_type = hints.get("return")
-                    if return_type is not None:
-                        origin = get_origin(return_type)
-                        if origin in (AsyncIterator, AsyncGenerator):
-                            is_async = True
-                except (NameError, TypeError, AttributeError):
-                    pass  # Type hints may not be resolvable in all cases
-
-            if not is_async:
+            if not _is_async_protocol_method(method):
                 violations.append(f"{port.__name__}.{method_name} should be async")
     assert not violations, "\n".join(violations)
 
@@ -726,41 +768,7 @@ def test_adapters_implement_protocols(src_dir: Path):
 
     violations = []
     for adapter_cls, protocol in expectations:
-        # Custom check because some protocols have non-callable members
-        # causing TypeError with issubclass()
-
-        # Get all members of the protocol
-        # We look at annotations for fields and dir() for methods
-        proto_annotations = get_type_hints(protocol)
-        proto_dir = set(dir(protocol))
-
-        cls_dir = set(dir(adapter_cls))
-
-        # Robustly get annotations (handle TYPE_CHECKING imports)
-        try:
-            cls_annotations = get_type_hints(adapter_cls)
-        except NameError:
-            # Fallback to raw __annotations__ if resolution fails
-            cls_annotations = getattr(adapter_cls, "__annotations__", {})
-
-        missing = []
-
-        # Check methods/properties in dir()
-        for member in proto_dir:
-            if member.startswith("_") and member not in ("__aenter__", "__aexit__"):
-                continue
-            if member not in cls_dir:
-                missing.append(member)
-
-        # Check fields in annotations (e.g. provider_name)
-        for field in proto_annotations:
-            if field.startswith("_"):
-                continue
-            # It should be either in annotations (dataclass) or in dir (property/attribute)
-            # Note: Protocol fields might be implemented as properties, so checking cls_dir is important
-            if field not in cls_dir and field not in cls_annotations:
-                missing.append(field)
-
+        missing = _missing_protocol_members(adapter_cls, protocol)
         if missing:
             violations.append(
                 f"{adapter_cls.__name__} does not implement {protocol.__name__}. Missing members: {missing}"
@@ -802,33 +810,12 @@ def test_public_methods_have_docstrings(src_dir: Path):
     """All public methods in Application/Infrastructure must have docstrings."""
     violations = []
 
-    # Check Application and Infrastructure
     for layer in ["application", "infrastructure"]:
         layer_path = src_dir / "bioetl" / layer
         for py_file in layer_path.rglob("*.py"):
             if py_file.name.startswith("__") or py_file.name.startswith("test_"):
                 continue
-
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read())
-                    for node in ast.walk(tree):
-                        if isinstance(node, ast.ClassDef):
-                            for item in node.body:
-                                if isinstance(item, ast.FunctionDef):
-                                    # Public method (not starting with _)
-                                    if not item.name.startswith("_"):
-                                        if not ast.get_docstring(item):
-                                            violations.append(
-                                                format_violation(
-                                                    py_file,
-                                                    item.lineno,
-                                                    f"Public method '{item.name}' missing docstring",
-                                                    src_dir,
-                                                )
-                                            )
-                except SyntaxError:
-                    pass
+            violations.extend(_iter_public_method_docstring_violations(py_file, src_dir))
 
     # We might have too many existing violations, so we'll assert strictly only for new code
     # or limit the scope. For this exercise, we'll just check if there are violations.
