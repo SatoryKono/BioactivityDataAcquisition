@@ -49,35 +49,40 @@ def _classify_failure(code: str) -> str:
     return "unknown"
 
 
+def _smoke_test_name(name: str) -> bool:
+    """Return True when testcase name belongs to matrix smoke suite."""
+    return name.startswith(_SMOKE_TEST_PREFIX)
+
+
+def _node_payload(node: ET.Element) -> str:
+    """Build message payload used for code extraction."""
+    return f"{node.attrib.get('message', '')}\n{node.text or ''}"
+
+
+def _case_outcome(case: ET.Element) -> CaseOutcome:
+    """Parse one testcase node into normalized outcome."""
+    skipped_node = case.find("skipped")
+    failure_node = case.find("failure")
+    error_node = case.find("error")
+    if skipped_node is not None:
+        code = _extract_code(_node_payload(skipped_node), pattern=_SKIP_CODE_RE)
+        return CaseOutcome("skipped", _classify_skip(code))
+    if failure_node is not None or error_node is not None:
+        node = failure_node if failure_node is not None else error_node
+        assert node is not None
+        code = _extract_code(_node_payload(node), pattern=_FAIL_CODE_RE)
+        return CaseOutcome("failed", _classify_failure(code))
+    return CaseOutcome("passed", "passed")
+
+
 def _parse_junit(path: Path) -> dict[str, CaseOutcome]:
     root = ET.parse(path).getroot()
     result: dict[str, CaseOutcome] = {}
     for case in root.iter("testcase"):
         name = str(case.attrib.get("name", ""))
-        if not name.startswith(_SMOKE_TEST_PREFIX):
+        if not _smoke_test_name(name):
             continue
-
-        skipped_node = case.find("skipped")
-        failure_node = case.find("failure")
-        error_node = case.find("error")
-
-        if skipped_node is not None:
-            payload = (
-                f"{skipped_node.attrib.get('message', '')}\n{skipped_node.text or ''}"
-            )
-            code = _extract_code(payload, pattern=_SKIP_CODE_RE)
-            result[name] = CaseOutcome("skipped", _classify_skip(code))
-            continue
-
-        if failure_node is not None or error_node is not None:
-            node = failure_node if failure_node is not None else error_node
-            assert node is not None
-            payload = f"{node.attrib.get('message', '')}\n{node.text or ''}"
-            code = _extract_code(payload, pattern=_FAIL_CODE_RE)
-            result[name] = CaseOutcome("failed", _classify_failure(code))
-            continue
-
-        result[name] = CaseOutcome("passed", "passed")
+        result[name] = _case_outcome(case)
     return result
 
 
@@ -150,22 +155,23 @@ def _build_markdown(
     return "\n".join(lines)
 
 
-def main() -> int:
-    args = _parse_args()
-    paths = sorted(Path().glob(args.junit_glob))
+def _selected_runs(paths: list[Path], required_runs: int) -> tuple[list[Path], list[str]]:
+    """Select rerun reports and emit count violation when incomplete."""
     violations: list[str] = []
-    if len(paths) < args.required_runs:
+    if len(paths) < required_runs:
         violations.append(
-            f"expected at least {args.required_runs} rerun reports, got {len(paths)}"
+            f"expected at least {required_runs} rerun reports, got {len(paths)}"
         )
-    runs = paths[: args.required_runs]
+    return paths[:required_runs], violations
 
-    run_outcomes = [_parse_junit(path) for path in runs]
-    case_names = sorted({name for report in run_outcomes for name in report})
 
+def _recurrent_cases(
+    run_outcomes: list[dict[str, CaseOutcome]],
+) -> tuple[Counter[str], list[tuple[str, str]]]:
+    """Collect recurrently unstable cases across reruns."""
     recurrent_counters: Counter[str] = Counter()
     recurrent_cases: list[tuple[str, str]] = []
-
+    case_names = sorted({name for report in run_outcomes for name in report})
     for name in case_names:
         outcomes = [
             report.get(name, CaseOutcome("missing", "unknown"))
@@ -181,24 +187,56 @@ def main() -> int:
         )
         recurrent_counters[classification] += 1
         recurrent_cases.append((name, classification))
+    return recurrent_counters, recurrent_cases
 
+
+def _budget_violations(
+    *,
+    recurrent_counters: Counter[str],
+    max_recurrent_infra_flaky: int,
+    max_recurrent_code_regression: int,
+) -> list[str]:
+    """Return budget violations for recurrent instability counters."""
+    violations: list[str] = []
     recurrent_infra = recurrent_counters.get("infra_flaky", 0)
     recurrent_code = recurrent_counters.get("code_regression", 0)
-    if recurrent_infra > args.max_recurrent_infra_flaky:
+    if recurrent_infra > max_recurrent_infra_flaky:
         violations.append(
             "recurrent infra_flaky cases "
-            f"{recurrent_infra} exceed budget {args.max_recurrent_infra_flaky}"
+            f"{recurrent_infra} exceed budget {max_recurrent_infra_flaky}"
         )
-    if recurrent_code > args.max_recurrent_code_regression:
+    if recurrent_code > max_recurrent_code_regression:
         violations.append(
             "recurrent code_regression cases "
-            f"{recurrent_code} exceed budget {args.max_recurrent_code_regression}"
+            f"{recurrent_code} exceed budget {max_recurrent_code_regression}"
         )
+    return violations
 
+
+def _print_summary(runs: list[Path], recurrent_counters: Counter[str]) -> None:
+    """Print compact rerun stability summary."""
     print("[e2e-rerun-stability] summary")
     print(f"  runs={len(runs)} reports={[str(path) for path in runs]}")
-    print(f"  recurrent_infra_flaky={recurrent_infra}")
-    print(f"  recurrent_code_regression={recurrent_code}")
+    print(f"  recurrent_infra_flaky={recurrent_counters.get('infra_flaky', 0)}")
+    print(
+        f"  recurrent_code_regression={recurrent_counters.get('code_regression', 0)}"
+    )
+
+
+def main() -> int:
+    args = _parse_args()
+    paths = sorted(Path().glob(args.junit_glob))
+    runs, violations = _selected_runs(paths, args.required_runs)
+    run_outcomes = [_parse_junit(path) for path in runs]
+    recurrent_counters, recurrent_cases = _recurrent_cases(run_outcomes)
+    violations.extend(
+        _budget_violations(
+            recurrent_counters=recurrent_counters,
+            max_recurrent_infra_flaky=args.max_recurrent_infra_flaky,
+            max_recurrent_code_regression=args.max_recurrent_code_regression,
+        )
+    )
+    _print_summary(runs, recurrent_counters)
 
     if args.markdown_out is not None:
         args.markdown_out.parent.mkdir(parents=True, exist_ok=True)

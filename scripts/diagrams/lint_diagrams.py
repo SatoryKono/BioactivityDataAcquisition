@@ -568,6 +568,31 @@ def _has_decomposed_siblings(path: Path) -> bool:
     return any(path.parent.glob(sibling_pattern))
 
 
+def _uses_flowchart_layout_policy(lines: list[str]) -> bool:
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("%%"):
+            continue
+        return bool(_GRAPH_LINE_RE.match(stripped))
+    return False
+
+
+def _extract_layout_nodes(lines: list[str]) -> int | None:
+    for line in lines:
+        match = _NODES_RE.search(line)
+        if match:
+            return int(match.group(1))
+    return None
+
+
+def _extract_edge_routing(lines: list[str]) -> str | None:
+    for line in lines:
+        match = _EDGE_ROUTING_VALUE_RE.search(line)
+        if match:
+            return match.group(1).upper()
+    return None
+
+
 def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
     """Check adaptive layout rules (ADR-040).
 
@@ -578,51 +603,19 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
     issues: list[Issue] = []
     fname = str(path)
 
-    # Only applies to .mmd canonical files
     if path.suffix != ".mmd":
         return issues
 
-    # Determine diagram type — skip non-flowchart types
-    is_flowchart = False
-    for ln in lines:
-        s = ln.strip()
-        if not s or s.startswith("%%"):
-            # skip init directives and comments
-            if s.startswith("%%{"):
-                continue
-            continue
-        if _GRAPH_LINE_RE.match(s):
-            is_flowchart = True
-            break
-        if _NON_FLOW_RE.match(s):
-            return issues  # not a flowchart — skip
-        break
-
-    if not is_flowchart:
+    if not _uses_flowchart_layout_policy(lines):
         return issues
 
-    # Parse @nodes count
-    nodes: int | None = None
-    for ln in lines:
-        m = _NODES_RE.search(ln)
-        if m:
-            nodes = int(m.group(1))
-            break
-
+    nodes = _extract_layout_nodes(lines)
     if nodes is None:
         return issues
 
-    # Check ELK presence
     has_elk = any(_has_elk_layout_init(ln) for ln in lines)
-    edge_routing: str | None = None
-    for ln in lines:
-        match = _EDGE_ROUTING_VALUE_RE.search(ln)
-        if match:
-            edge_routing = match.group(1).upper()
-            break
-    allow_polyline = any(
-        "@allow-polyline-routing" in ln or "@allow-polyline" in ln for ln in lines
-    )
+    edge_routing = _extract_edge_routing(lines)
+    allow_polyline = any("@allow-polyline-routing" in ln or "@allow-polyline" in ln for ln in lines)
 
     if not has_elk and nodes > ELK_ERROR_THRESHOLD:
         issues.append(
@@ -815,6 +808,39 @@ def _normalize_label_fragment(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def _record_label_readability_observations(
+    *,
+    line_no: int,
+    raw_label: str,
+    long_segments: list[str],
+    over_tall_labels: list[str],
+    padded_labels: list[int],
+) -> None:
+    if re.search(
+        rf"(?:<br\s*/?>\s*){{{LABEL_WARN_PADDING_BREAKS},}}",
+        raw_label,
+        flags=re.IGNORECASE,
+    ):
+        padded_labels.append(line_no)
+
+    split_parts = _BR_RE.split(raw_label)
+    normalized_parts = [
+        _normalize_label_fragment(_HTML_TAG_RE.sub("", part)) for part in split_parts
+    ]
+    nonempty_parts = [part for part in normalized_parts if part]
+
+    if len(nonempty_parts) > LABEL_WARN_MAX_LINES:
+        over_tall_labels.append(f"L{line_no}:{len(nonempty_parts)}")
+
+    for part in nonempty_parts:
+        if len(part) <= LABEL_WARN_LINE_CHARS:
+            continue
+        sample = part[:32]
+        if len(part) > 32:
+            sample += "..."
+        long_segments.append(f"L{line_no}:{len(part)}:'{sample}'")
+
+
 def check_label_readability(path: Path, lines: list[str]) -> list[Issue]:
     """Check node-label readability heuristics — LABEL-001/002/003 (WARNING)."""
     issues: list[Issue] = []
@@ -833,29 +859,13 @@ def check_label_readability(path: Path, lines: list[str]) -> list[Issue]:
             continue
 
         for raw_label in labels:
-            if re.search(
-                rf"(?:<br\s*/?>\s*){{{LABEL_WARN_PADDING_BREAKS},}}",
-                raw_label,
-                flags=re.IGNORECASE,
-            ):
-                padded_labels.append(line_no)
-
-            split_parts = _BR_RE.split(raw_label)
-            normalized_parts = [
-                _normalize_label_fragment(_HTML_TAG_RE.sub("", part))
-                for part in split_parts
-            ]
-            nonempty_parts = [part for part in normalized_parts if part]
-
-            if len(nonempty_parts) > LABEL_WARN_MAX_LINES:
-                over_tall_labels.append(f"L{line_no}:{len(nonempty_parts)}")
-
-            for part in nonempty_parts:
-                if len(part) > LABEL_WARN_LINE_CHARS:
-                    sample = part[:32]
-                    if len(part) > 32:
-                        sample += "..."
-                    long_segments.append(f"L{line_no}:{len(part)}:'{sample}'")
+            _record_label_readability_observations(
+                line_no=line_no,
+                raw_label=raw_label,
+                long_segments=long_segments,
+                over_tall_labels=over_tall_labels,
+                padded_labels=padded_labels,
+            )
 
     if long_segments:
         preview = ", ".join(long_segments[:4])

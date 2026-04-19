@@ -331,7 +331,7 @@ def _consume_flowchart_structure_line(
     return bool(_STYLE_DIRECTIVE_RE.match(stripped_line))
 
 
-def _consume_flowchart_edge_line(stripped_line: str, raw_line: str, connected: set[str]) -> bool:
+def _consume_flowchart_edge_line(raw_line: str, connected: set[str]) -> bool:
     if not _ARROW_RE.search(raw_line):
         return False
     connected.update(_ids_from_edge_line(raw_line))
@@ -381,6 +381,42 @@ def _consume_flowchart_node_definition(
     return True
 
 
+def _consume_sequence_declaration(
+    stripped_line: str,
+    line_index: int,
+    all_declared: set[str],
+    declaration_lines: dict[str, list[int]],
+) -> bool:
+    participant_id = _parse_sequence_participant(stripped_line)
+    if participant_id is None:
+        return False
+    all_declared.add(participant_id)
+    declaration_lines.setdefault(participant_id, []).append(line_index)
+    return True
+
+
+def _consume_sequence_interaction(stripped_line: str, messaged: set[str]) -> bool:
+    message_match = _SEQ_MESSAGE_RE.match(stripped_line)
+    if message_match:
+        messaged.add(message_match.group(1))
+        messaged.add(message_match.group(2))
+        return True
+
+    note_targets = _parse_sequence_note_targets(stripped_line)
+    if note_targets is not None:
+        for node_id in re.split(r"[\s,]+", note_targets):
+            if node_id and re.match(rf"^{_NID}$", node_id):
+                messaged.add(node_id)
+        return True
+
+    activate_match = _SEQ_ACTIVATE_RE.match(stripped_line)
+    if activate_match:
+        messaged.add(activate_match.group(1))
+        return True
+
+    return False
+
+
 def parse_flowchart_orphans(
     lines: list[str],
     keep: set[str],
@@ -413,7 +449,7 @@ def parse_flowchart_orphans(
         if _consume_flowchart_structure_line(s, subgraph_names, subgraph_stack):
             continue
 
-        if _consume_flowchart_edge_line(s, ln, connected):
+        if _consume_flowchart_edge_line(ln, connected):
             continue
 
         if _consume_flowchart_node_definition(
@@ -486,37 +522,13 @@ def parse_sequence_orphans(
         if not s or s.startswith("%%"):
             continue
 
-        # box … end blocks — skip the box label, not a participant
         if _SEQ_BOX_RE.match(s):
             continue
 
-        # participant / actor declaration
-        participant_id = _parse_sequence_participant(s)
-        if participant_id is not None:
-            nid = participant_id
-            all_declared.add(nid)
-            declaration_lines.setdefault(nid, []).append(i)
+        if _consume_sequence_declaration(s, i, all_declared, declaration_lines):
             continue
 
-        # message line: A ->> B: msg
-        m = _SEQ_MESSAGE_RE.match(s)
-        if m:
-            messaged.add(m.group(1))
-            messaged.add(m.group(2))
-            continue
-
-        # Note over A,B
-        note_targets = _parse_sequence_note_targets(s)
-        if note_targets is not None:
-            for nid in re.split(r"[\s,]+", note_targets):
-                if nid and re.match(rf"^{_NID}$", nid):
-                    messaged.add(nid)
-            continue
-
-        # activate/deactivate A
-        m = _SEQ_ACTIVATE_RE.match(s)
-        if m:
-            messaged.add(m.group(1))
+        _consume_sequence_interaction(s, messaged)
 
     orphans = (all_declared - messaged) - keep
     return orphans, all_declared, declaration_lines
@@ -553,7 +565,7 @@ def fix_flowchart_lines(
         rewritten_line = _rewrite_flowchart_class_directive(ln, class_directive, orphan_ids)
         if rewritten_line is not None:
             new_lines.append(rewritten_line)
-        
+
     return new_lines
 
 

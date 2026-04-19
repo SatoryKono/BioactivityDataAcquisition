@@ -96,46 +96,29 @@ def _build_snapshot(
 ) -> WeeklyDebtSnapshot:
     inventory = build_exemption_inventory(registry_path=registry_path, today=today)
     scorecard = load_debt_scorecard(scorecard_path)
-    violations, evaluation = evaluate_debt_scorecard(
+    violations, evaluation = _scorecard_evaluation(
         registry_path=registry_path,
         scorecard_path=scorecard_path,
         today=today,
     )
-    if evaluation is None:
-        raise ValueError("Debt scorecard evaluation failed; no summary produced.")
-
-    baseline = scorecard.get("baseline", {})
-    baseline_total = int(baseline.get("total_exemptions", inventory.total_exemptions))
-    new_debt = max(0, inventory.total_exemptions - baseline_total)
-    compatibility_surface = collect_compatibility_surface_snapshot()
-
+    baseline_total = _baseline_total_debt(inventory.total_exemptions, scorecard)
     return WeeklyDebtSnapshot(
         generated_at_utc=datetime.now(UTC).isoformat(),
         quarter=evaluation.quarter,
         total_debt=inventory.total_exemptions,
         expired_debt=inventory.expired_entries,
-        new_debt=new_debt,
+        new_debt=_new_debt_total(inventory.total_exemptions, baseline_total),
         baseline_total_debt=baseline_total,
         total_budget=evaluation.total_budget,
         integral_score=evaluation.integral_score,
         growth_violations=len(violations),
         by_registry=evaluation.by_registry,
         by_owner=evaluation.by_owner,
-        compatibility_surface=compatibility_surface,
+        compatibility_surface=collect_compatibility_surface_snapshot(),
     )
 
 
 def _render_markdown(snapshot: WeeklyDebtSnapshot) -> str:
-    by_registry_lines = "\n".join(
-        f"- `{name}`: {count}" for name, count in snapshot.by_registry.items()
-    )
-    by_owner_lines = "\n".join(
-        f"- `{name}`: {count}" for name, count in snapshot.by_owner.items()
-    )
-    compatibility_section = render_compatibility_surface_section(
-        snapshot.compatibility_surface,
-        heading="## Compatibility Surface",
-    )
     return (
         "# Weekly Quality Debt Report\n\n"
         f"- Generated (UTC): `{snapshot.generated_at_utc}`\n"
@@ -147,11 +130,97 @@ def _render_markdown(snapshot: WeeklyDebtSnapshot) -> str:
         f"- Quarter budget: `{snapshot.total_budget}`\n"
         f"- Integral debt score: `{snapshot.integral_score}`\n"
         f"- Growth violations: `{snapshot.growth_violations}`\n\n"
-        f"{compatibility_section}\n\n"
+        f"{_compatibility_section(snapshot, heading='## Compatibility Surface')}\n\n"
         "## By Registry\n\n"
-        f"{by_registry_lines or '- (none)'}\n\n"
+        f"{_render_count_lines(snapshot.by_registry) or '- (none)'}\n\n"
         "## By Owner\n\n"
-        f"{by_owner_lines or '- (none)'}\n"
+        f"{_render_count_lines(snapshot.by_owner) or '- (none)'}\n"
+    )
+
+
+def _scorecard_evaluation(
+    *,
+    registry_path: Path,
+    scorecard_path: Path,
+    today: date,
+):
+    """Return evaluated scorecard or raise when summary is unavailable."""
+    violations, evaluation = evaluate_debt_scorecard(
+        registry_path=registry_path,
+        scorecard_path=scorecard_path,
+        today=today,
+    )
+    if evaluation is None:
+        raise ValueError("Debt scorecard evaluation failed; no summary produced.")
+    return violations, evaluation
+
+
+def _baseline_total_debt(current_total: int, scorecard: dict[str, object]) -> int:
+    """Resolve baseline debt total from scorecard payload."""
+    baseline = scorecard.get("baseline", {})
+    return int(baseline.get("total_exemptions", current_total))
+
+
+def _new_debt_total(current_total: int, baseline_total: int) -> int:
+    """Resolve debt growth relative to baseline."""
+    return max(0, current_total - baseline_total)
+
+
+def _render_count_lines(counts: dict[str, int]) -> str:
+    """Render simple bullet list for count mappings."""
+    return "\n".join(f"- `{name}`: {count}" for name, count in counts.items())
+
+
+def _compatibility_section(snapshot: WeeklyDebtSnapshot, *, heading: str) -> str:
+    """Render compatibility surface section for markdown outputs."""
+    return render_compatibility_surface_section(
+        snapshot.compatibility_surface,
+        heading=heading,
+    )
+
+
+def _write_json_report(path: Path, snapshot: WeeklyDebtSnapshot) -> None:
+    """Write JSON debt snapshot report."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(asdict(snapshot), ensure_ascii=False, indent=2, sort_keys=True)
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _write_markdown_report(path: Path, snapshot: WeeklyDebtSnapshot) -> None:
+    """Write markdown debt snapshot report."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(_render_markdown(snapshot), encoding="utf-8")
+
+
+def _write_summary_append(path: Path, snapshot: WeeklyDebtSnapshot) -> None:
+    """Append compact summary block for CI step summary usage."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as stream:
+        stream.write(
+            "\n".join(
+                [
+                    "## Weekly Quality Debt Snapshot",
+                    f"- total_debt: `{snapshot.total_debt}`",
+                    f"- expired_debt: `{snapshot.expired_debt}`",
+                    f"- new_debt: `{snapshot.new_debt}`",
+                    f"- quarter: `{snapshot.quarter}`",
+                    _compatibility_section(
+                        snapshot,
+                        heading="## Compatibility Surface Snapshot",
+                    ),
+                ]
+            )
+            + "\n"
+        )
+
+
+def _should_fail(args: argparse.Namespace, snapshot: WeeklyDebtSnapshot) -> bool:
+    """Return True when configured breach policy should fail the run."""
+    return bool(args.fail_on_breach) and (
+        snapshot.expired_debt > 0 or snapshot.growth_violations > 0
     )
 
 
@@ -164,44 +233,13 @@ def main() -> int:
         scorecard_path=Path(args.scorecard),
         today=today,
     )
-
-    json_path = Path(args.json_out)
-    json_path.parent.mkdir(parents=True, exist_ok=True)
-    json_path.write_text(
-        json.dumps(asdict(snapshot), ensure_ascii=False, indent=2, sort_keys=True)
-        + "\n",
-        encoding="utf-8",
-    )
-
-    markdown_path = Path(args.markdown_out)
-    markdown_path.parent.mkdir(parents=True, exist_ok=True)
-    markdown = _render_markdown(snapshot)
-    markdown_path.write_text(markdown, encoding="utf-8")
+    _write_json_report(Path(args.json_out), snapshot)
+    _write_markdown_report(Path(args.markdown_out), snapshot)
 
     if args.summary_out:
-        summary_path = Path(args.summary_out)
-        summary_path.parent.mkdir(parents=True, exist_ok=True)
-        with summary_path.open("a", encoding="utf-8") as stream:
-            stream.write(
-                "\n".join(
-                    [
-                        "## Weekly Quality Debt Snapshot",
-                        f"- total_debt: `{snapshot.total_debt}`",
-                        f"- expired_debt: `{snapshot.expired_debt}`",
-                        f"- new_debt: `{snapshot.new_debt}`",
-                        f"- quarter: `{snapshot.quarter}`",
-                        render_compatibility_surface_section(
-                            snapshot.compatibility_surface,
-                            heading="## Compatibility Surface Snapshot",
-                        ),
-                    ]
-                )
-                + "\n"
-            )
+        _write_summary_append(Path(args.summary_out), snapshot)
 
-    if args.fail_on_breach and (
-        snapshot.expired_debt > 0 or snapshot.growth_violations > 0
-    ):
+    if _should_fail(args, snapshot):
         return 1
     return 0
 
