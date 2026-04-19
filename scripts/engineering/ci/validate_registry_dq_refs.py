@@ -82,50 +82,58 @@ def _expected_ref(entry: dict[str, Any], key: str) -> str | None:
     return None
 
 
-def _validate_entry(
+def _expected_contract_version(entry: dict[str, Any]) -> str | None:
+    """Resolve expected contract version from entry identity."""
+    identity = entry.get("identity")
+    if not isinstance(identity, dict):
+        return None
+    value = identity.get("contract_version")
+    if isinstance(value, str):
+        return value
+    return None
+
+
+def _contract_ref_issues(
     *,
     contract_ref: str,
-    entry: dict[str, Any],
     contract_data: dict[str, Any],
-    contract_path: Path,
+    contract_path_str: str,
 ) -> list[dict[str, Any]]:
-    """Validate one registry entry against one DQ contract file."""
-    issues: list[dict[str, Any]] = []
-    identity = entry.get("identity")
-    expected_version = (
-        identity.get("contract_version")
-        if isinstance(identity, dict)
-        and isinstance(identity.get("contract_version"), str)
-        else None
-    )
-    expected_rule_bundle = _expected_ref(entry, "rule_bundle_version")
-    expected_dq_policy_ref = _expected_ref(entry, "dq_policy_ref")
-    contract_path_str = str(contract_path)
-
-    if contract_data.get("contract_ref") != contract_ref:
-        issues.append(
-            _issue(
-                severity="blocking",
-                contract_ref=contract_ref,
-                path=contract_path_str,
-                message=(
-                    "contract_ref mismatch between registry and DQ config: "
-                    f"{contract_data.get('contract_ref')!r} != {contract_ref!r}"
-                ),
-            )
+    """Validate contract_ref parity between registry and DQ config."""
+    if contract_data.get("contract_ref") == contract_ref:
+        return []
+    return [
+        _issue(
+            severity="blocking",
+            contract_ref=contract_ref,
+            path=contract_path_str,
+            message=(
+                "contract_ref mismatch between registry and DQ config: "
+                f"{contract_data.get('contract_ref')!r} != {contract_ref!r}"
+            ),
         )
+    ]
 
+
+def _contract_version_issues(
+    *,
+    contract_ref: str,
+    expected_version: str | None,
+    contract_data: dict[str, Any],
+    contract_path_str: str,
+) -> list[dict[str, Any]]:
+    """Validate contract version parity and semantic version format."""
     if expected_version is None:
-        issues.append(
+        return [
             _issue(
                 severity="warning",
                 contract_ref=contract_ref,
                 path=contract_path_str,
                 message="registry identity.contract_version is missing",
             )
-        )
-    elif contract_data.get("contract_version") != expected_version:
-        issues.append(
+        ]
+    if contract_data.get("contract_version") != expected_version:
+        return [
             _issue(
                 severity="blocking",
                 contract_ref=contract_ref,
@@ -135,65 +143,101 @@ def _validate_entry(
                     f"{contract_data.get('contract_version')!r} != {expected_version!r}"
                 ),
             )
+        ]
+    if _is_semver(str(expected_version)):
+        return []
+    return [
+        _issue(
+            severity="blocking",
+            contract_ref=contract_ref,
+            path=contract_path_str,
+            message=(
+                f"registry contract_version {expected_version!r} "
+                "is not semantic version"
+            ),
         )
-    elif not _is_semver(str(expected_version)):
-        issues.append(
-            _issue(
-                severity="blocking",
-                contract_ref=contract_ref,
-                path=contract_path_str,
-                message=(
-                    f"registry contract_version {expected_version!r} "
-                    "is not semantic version"
-                ),
-            )
-        )
+    ]
 
-    if expected_rule_bundle is None:
-        issues.append(
+
+def _expected_ref_issues(
+    *,
+    contract_ref: str,
+    field_name: str,
+    expected_value: str | None,
+    actual_value: object,
+    contract_path_str: str,
+) -> list[dict[str, Any]]:
+    """Validate one expected reference field against DQ contract config."""
+    if expected_value is None:
+        return [
             _issue(
                 severity="warning",
                 contract_ref=contract_ref,
                 path=contract_path_str,
-                message="rule_bundle_version missing in registry identity/entry",
+                message=f"{field_name} missing in registry identity/entry",
             )
+        ]
+    if actual_value == expected_value:
+        return []
+    return [
+        _issue(
+            severity="blocking",
+            contract_ref=contract_ref,
+            path=contract_path_str,
+            message=(
+                f"{field_name} mismatch between registry and DQ config: "
+                f"{actual_value!r} != {expected_value!r}"
+            ),
         )
-    elif contract_data.get("rule_bundle_version") != expected_rule_bundle:
-        issues.append(
-            _issue(
-                severity="blocking",
-                contract_ref=contract_ref,
-                path=contract_path_str,
-                message=(
-                    "rule_bundle_version mismatch between registry and DQ config: "
-                    f"{contract_data.get('rule_bundle_version')!r} "
-                    f"!= {expected_rule_bundle!r}"
-                ),
-            )
-        )
+    ]
 
-    if expected_dq_policy_ref is None:
-        issues.append(
-            _issue(
-                severity="warning",
-                contract_ref=contract_ref,
-                path=contract_path_str,
-                message="dq_policy_ref missing in registry identity/entry",
-            )
-        )
-    elif contract_data.get("dq_policy_ref") != expected_dq_policy_ref:
-        issues.append(
-            _issue(
-                severity="blocking",
-                contract_ref=contract_ref,
-                path=contract_path_str,
-                message=(
-                    "dq_policy_ref mismatch between registry and DQ config: "
-                    f"{contract_data.get('dq_policy_ref')!r} != {expected_dq_policy_ref!r}"
-                ),
-            )
-        )
 
+def _validate_entry(
+    *,
+    contract_ref: str,
+    entry: dict[str, Any],
+    contract_data: dict[str, Any],
+    contract_path: Path,
+) -> list[dict[str, Any]]:
+    """Validate one registry entry against one DQ contract file."""
+    issues: list[dict[str, Any]] = []
+    expected_version = _expected_contract_version(entry)
+    expected_rule_bundle = _expected_ref(entry, "rule_bundle_version")
+    expected_dq_policy_ref = _expected_ref(entry, "dq_policy_ref")
+    contract_path_str = str(contract_path)
+    issues.extend(
+        _contract_ref_issues(
+            contract_ref=contract_ref,
+            contract_data=contract_data,
+            contract_path_str=contract_path_str,
+        )
+    )
+    issues.extend(
+        _contract_version_issues(
+            contract_ref=contract_ref,
+            expected_version=expected_version,
+            contract_data=contract_data,
+            contract_path_str=contract_path_str,
+        )
+    )
+    issues.extend(
+        _expected_ref_issues(
+            contract_ref=contract_ref,
+            field_name="rule_bundle_version",
+            expected_value=expected_rule_bundle,
+            actual_value=contract_data.get("rule_bundle_version"),
+            contract_path_str=contract_path_str,
+        )
+    )
+    issues.extend(
+        _expected_ref_issues(
+            contract_ref=contract_ref,
+            field_name="dq_policy_ref",
+            expected_value=expected_dq_policy_ref,
+            actual_value=contract_data.get("dq_policy_ref"),
+            contract_path_str=contract_path_str,
+        )
+    )
     return issues
 
 
@@ -229,6 +273,107 @@ def _collect_orphan_contract_files(
     return issues
 
 
+def _missing_registry_payload(registry_path: Path) -> dict[str, Any]:
+    """Build diagnostics payload for missing registry file."""
+    return {
+        "valid": False,
+        "checked_entries_count": 0,
+        "issue_count": 1,
+        "issues": [
+            _issue(
+                severity="blocking",
+                contract_ref=None,
+                path=str(registry_path),
+                message="contract registry file not found",
+            )
+        ],
+    }
+
+
+def _validate_registry_entries(
+    *,
+    repo_root: Path,
+    registry_path: Path,
+    entries: dict[str, Any],
+) -> tuple[list[dict[str, Any]], int]:
+    """Validate registry entries against matching DQ contract configs."""
+    issues: list[dict[str, Any]] = []
+    checked_entries = 0
+    for contract_ref, entry in sorted(entries.items()):
+        if not isinstance(entry, dict):
+            issues.append(
+                _issue(
+                    severity="blocking",
+                    contract_ref=str(contract_ref),
+                    path=str(registry_path),
+                    message="registry entry is not a mapping",
+                )
+            )
+            continue
+        checked_entries += 1
+        issues.extend(
+            _validate_registry_contract(
+                repo_root=repo_root,
+                contract_ref=str(contract_ref),
+                entry=entry,
+            )
+        )
+    return issues, checked_entries
+
+
+def _validate_registry_contract(
+    *,
+    repo_root: Path,
+    contract_ref: str,
+    entry: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Validate one registry contract entry against its DQ contract file."""
+    candidates = _contract_file_candidates(repo_root, contract_ref)
+    contract_path = _find_existing(candidates)
+    if contract_path is None:
+        return [
+            _issue(
+                severity="blocking",
+                contract_ref=contract_ref,
+                path=str(candidates[0]) if candidates else None,
+                message="missing DQ contract config file for registry entry",
+            )
+        ]
+    try:
+        contract_data = _load_contract_file(contract_path)
+    except Exception as exc:  # pragma: no cover - defensive script path
+        return [
+            _issue(
+                severity="blocking",
+                contract_ref=contract_ref,
+                path=str(contract_path),
+                message=f"failed to load DQ contract file: {exc!s}",
+            )
+        ]
+    return _validate_entry(
+        contract_ref=contract_ref,
+        entry=entry,
+        contract_data=contract_data,
+        contract_path=contract_path,
+    )
+
+
+def _diagnostics_payload(
+    *,
+    checked_entries: int,
+    issues: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Build diagnostics payload for registry<->DQ validation."""
+    blocking_issues = [issue for issue in issues if issue["severity"] == "blocking"]
+    return {
+        "valid": len(blocking_issues) == 0,
+        "checked_entries_count": checked_entries,
+        "issue_count": len(issues),
+        "blocking_issue_count": len(blocking_issues),
+        "issues": issues,
+    }
+
+
 def main() -> int:
     """Run registry<->DQ consistency validation."""
     repo_root = Path(__file__).resolve().parents[3]
@@ -238,19 +383,7 @@ def main() -> int:
     if not registry_path.exists():
         diagnostics_path.write_text(
             json.dumps(
-                {
-                    "valid": False,
-                    "checked_entries_count": 0,
-                    "issue_count": 1,
-                    "issues": [
-                        _issue(
-                            severity="blocking",
-                            contract_ref=None,
-                            path=str(registry_path),
-                            message="contract registry file not found",
-                        )
-                    ],
-                },
+                _missing_registry_payload(registry_path),
                 indent=2,
                 ensure_ascii=False,
             )
@@ -265,67 +398,15 @@ def main() -> int:
     if not isinstance(entries, dict):
         raise ValueError("contract registry entries must be a mapping")
 
-    issues: list[dict[str, Any]] = []
     known_refs = set(entries.keys())
-    checked_entries = 0
-
-    for contract_ref, entry in sorted(entries.items()):
-        if not isinstance(entry, dict):
-            issues.append(
-                _issue(
-                    severity="blocking",
-                    contract_ref=str(contract_ref),
-                    path=str(registry_path),
-                    message="registry entry is not a mapping",
-                )
-            )
-            continue
-        checked_entries += 1
-        candidates = _contract_file_candidates(repo_root, str(contract_ref))
-        contract_path = _find_existing(candidates)
-        if contract_path is None:
-            issues.append(
-                _issue(
-                    severity="blocking",
-                    contract_ref=str(contract_ref),
-                    path=str(candidates[0]) if candidates else None,
-                    message="missing DQ contract config file for registry entry",
-                )
-            )
-            continue
-
-        try:
-            contract_data = _load_contract_file(contract_path)
-        except Exception as exc:  # pragma: no cover - defensive script path
-            issues.append(
-                _issue(
-                    severity="blocking",
-                    contract_ref=str(contract_ref),
-                    path=str(contract_path),
-                    message=f"failed to load DQ contract file: {exc!s}",
-                )
-            )
-            continue
-
-        issues.extend(
-            _validate_entry(
-                contract_ref=str(contract_ref),
-                entry=entry,
-                contract_data=contract_data,
-                contract_path=contract_path,
-            )
-        )
-
+    issues, checked_entries = _validate_registry_entries(
+        repo_root=repo_root,
+        registry_path=registry_path,
+        entries=entries,
+    )
     issues.extend(_collect_orphan_contract_files(repo_root, known_refs))
-
+    payload = _diagnostics_payload(checked_entries=checked_entries, issues=issues)
     blocking_issues = [issue for issue in issues if issue["severity"] == "blocking"]
-    payload = {
-        "valid": len(blocking_issues) == 0,
-        "checked_entries_count": checked_entries,
-        "issue_count": len(issues),
-        "blocking_issue_count": len(blocking_issues),
-        "issues": issues,
-    }
     diagnostics_path.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
