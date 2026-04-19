@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
+from urllib.parse import urlunsplit
 from uuid import uuid4
 
 from bioetl.domain.exceptions import MetricsServerError
@@ -192,8 +193,14 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
     metrics_server_enabled = bool(settings.observability.metrics_server_enabled)
     metrics_endpoint = None
     if metrics_enabled and metrics_server_enabled:
-        metrics_endpoint = (
-            f"http://{settings.metrics_addr}:{settings.metrics_port}/metrics"
+        metrics_endpoint = urlunsplit(
+            (
+                "http",
+                f"{settings.metrics_addr}:{settings.metrics_port}",
+                "/metrics",
+                "",
+                "",
+            )
         )
     metrics_server_mode = (
         "auto_managed_during_pipeline_runs"

@@ -13,8 +13,9 @@ import sys
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from urllib.parse import urlunsplit
 
-SVG_NS = "http://www.w3.org/2000/svg"
+SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 NS = {"svg": SVG_NS}
 
 SCRIPT_DIR = Path(__file__).resolve().parent

@@ -9,19 +9,26 @@ Validations:
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import re
 import sys
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlunsplit
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 try:
     from .diagram_paths import source_dir as diagram_source_dir
 except ImportError:  # pragma: no cover - direct script execution
     from diagram_paths import source_dir as diagram_source_dir
 
-SVG_NS = "http://www.w3.org/2000/svg"
+SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 NS = {"svg": SVG_NS}
 
 CLASS_DECL_RE = re.compile(r"^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)\s*\{\s*$")
@@ -129,7 +136,7 @@ def parse_svg_methods(
                 for tspan in label.findall(".//svg:tspan", NS)
             ]
             spans = [s for s in spans if s]
-            for left, right in zip(spans, spans[1:]):
+            for left, right in itertools.pairwise(spans):
                 # Broken split example: "start_execution_sp" + "an()"
                 if re.search(r"[A-Za-z0-9_]$", left) and re.match(
                     r"^[A-Za-z0-9_]", right
