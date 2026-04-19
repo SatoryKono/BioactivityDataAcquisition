@@ -126,6 +126,16 @@ def test_fix_file_rejects_paths_outside_repo(tmp_path: Path) -> None:
         module.fix_file(diagram, dry_run=False)
 
 
+def test_fix_file_rejects_parent_traversal_relative_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = _load_module()
+    monkeypatch.setattr(module, "_repo_root", lambda: tmp_path)
+
+    with pytest.raises(ValueError, match="parent traversal"):
+        module.fix_file(Path("../escape.mmd"), dry_run=False)
+
+
 @pytest.mark.slow
 def test_repo_regression_has_no_thick_arrows_in_class_sequence_sources() -> None:
     module = _load_module()

@@ -83,10 +83,14 @@ def get_chembl_enum(entity: str, field: str) -> list[str]:
 
     Raises:
         KeyError: If entity or field not found in enum configuration
+        TypeError: If the retrieved value is not a list
     """
     enums = load_chembl_enums()
     try:
-        return enums[entity][field]
+        value = enums[entity][field]
+        if not isinstance(value, list):
+            raise TypeError(f"Expected list but got {type(value).__name__} for entity='{entity}', field='{field}'")
+        return value
     except KeyError as e:
         raise KeyError(f"Enum not found: entity='{entity}', field='{field}'") from e
 

@@ -3,10 +3,10 @@
 # This is a minimal test that doesn't require API calls
 
 set -euo pipefail
-
-echo "=========================================="
+SEPARATOR_LINE="=========================================="
+echo SEPARATOR_LINE
 echo "  Codex WSL Quick Test"
-echo "=========================================="
+echo SEPARATOR_LINE
 echo ""
 
 # Test 1: Node.js available
@@ -59,9 +59,9 @@ else
 fi
 echo ""
 
-echo "=========================================="
+echo SEPARATOR_LINE
 echo "  ✓ All basic tests passed!"
-echo "=========================================="
+echo SEPARATOR_LINE
 echo ""
 echo "You can now run:"
 echo "  ./scripts/ops/codex.sh \"analyze this code\""
