@@ -468,6 +468,7 @@ class SilverMetadataOperations:
             success: Whether the operation succeeded
             error: Optional error message
         """
+        del success
         if not self._audit:
             return
 

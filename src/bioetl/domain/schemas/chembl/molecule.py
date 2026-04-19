@@ -32,10 +32,7 @@ class MoleculeSchema(ETLRecordSchema):
     """Molecule validation schema for Silver layer."""
 
     # === Primary Key ===
-    # molregno: Series[int] = pa.Field(
-    #     nullable=False, description="Primary key."
-    # )
-    # Removed molregno as it is not in Silver schema. molecule_id is the PK.
+    # `molecule_id` is the Silver-layer primary key; legacy `molregno` is omitted.
 
     # === Identifiers ===
     molecule_id: Series[str] = pa.Field(
