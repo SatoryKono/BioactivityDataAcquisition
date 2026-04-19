@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -11,6 +13,11 @@ from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.composition.factories.services.pipeline_builder import (
     create_batch_executor_from_pipeline,
 )
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-pipeline-batch-executor-"))
+BRONZE_ROOT = str(TEST_ROOT / "bronze")
+SILVER_ROOT = str(TEST_ROOT / "silver")
+GOLD_ROOT = str(TEST_ROOT / "gold")
 
 
 def _make_pipeline(
@@ -267,16 +274,16 @@ class TestCreateBatchExecutorFromPipeline:
             checkpoint_manager=MagicMock(),
             shutdown_signal=MagicMock(),
             create_batch_processing_components_fn=MagicMock(),
-            bronze_output_path="/tmp/bronze",
-            silver_output_path="/tmp/silver",
-            gold_output_path="/tmp/gold",
+            bronze_output_path=BRONZE_ROOT,
+            silver_output_path=SILVER_ROOT,
+            gold_output_path=GOLD_ROOT,
             flat_structure=True,
         )
 
         config = mock_batch_executor.call_args.kwargs["config"]
-        assert config.bronze_output_path == "/tmp/bronze"
-        assert config.silver_output_path == "/tmp/silver"
-        assert config.gold_output_path == "/tmp/gold"
+        assert config.bronze_output_path == BRONZE_ROOT
+        assert config.silver_output_path == SILVER_ROOT
+        assert config.gold_output_path == GOLD_ROOT
         assert config.flat_structure is True
         mock_extraction_loop.assert_called_once()
 
