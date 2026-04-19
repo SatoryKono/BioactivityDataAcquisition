@@ -52,23 +52,44 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _audit_issues(report: dict[str, object]) -> list[str]:
-    issues: list[str] = []
     live = report.get("live", {})
     if not isinstance(live, dict):
         return ["live report payload is malformed"]
+    issues: list[str] = []
+    issues.extend(_live_payload_issues(live))
+    issues.extend(_diff_payload_issues(report.get("diff", {})))
+    return issues
+
+
+def _live_payload_issues(live: dict[str, object]) -> list[str]:
+    """Return issues derived from live graph audit payload."""
+    issues: list[str] = []
     if int(live.get("unmanaged_repo_node_total", 0)) > 0:
         issues.append("live graph contains unmanaged repo-derived nodes")
     orphan_summary = live.get("orphan_summary", {})
     if isinstance(orphan_summary, dict) and int(orphan_summary.get("total", 0)) > 0:
         issues.append("live graph contains managed orphan nodes")
-    diff = report.get("diff", {})
-    if isinstance(diff, dict):
-        label_diffs = diff.get("labels", [])
-        if isinstance(label_diffs, list) and any(int(entry.get("delta", 0)) != 0 for entry in label_diffs if isinstance(entry, dict)):
-            issues.append("label counts differ between snapshot and live managed graph")
-        relation_diffs = diff.get("relation_types", [])
-        if isinstance(relation_diffs, list) and any(int(entry.get("delta", 0)) != 0 for entry in relation_diffs if isinstance(entry, dict)):
-            issues.append("relation counts differ between snapshot and live managed graph")
+    return issues
+
+
+def _has_non_zero_delta(entries: object) -> bool:
+    """Return True when diff payload contains a non-zero delta entry."""
+    return isinstance(entries, list) and any(
+        int(entry.get("delta", 0)) != 0
+        for entry in entries
+        if isinstance(entry, dict)
+    )
+
+
+def _diff_payload_issues(diff: object) -> list[str]:
+    """Return issues derived from diff section of live audit report."""
+    if not isinstance(diff, dict):
+        return []
+    issues: list[str] = []
+    if _has_non_zero_delta(diff.get("labels", [])):
+        issues.append("label counts differ between snapshot and live managed graph")
+    if _has_non_zero_delta(diff.get("relation_types", [])):
+        issues.append("relation counts differ between snapshot and live managed graph")
     return issues
 
 
