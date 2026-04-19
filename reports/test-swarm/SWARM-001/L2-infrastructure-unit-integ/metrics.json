@@ -1,0 +1,12 @@
+{
+  "agent_id": "L2-infrastructure-unit-integ",
+  "level": "L2",
+  "metrics_before": {
+    "total_tests": 4714,
+    "failed": 100
+  },
+  "metrics_after": {
+    "total_tests": 4714,
+    "failed": 0
+  }
+}

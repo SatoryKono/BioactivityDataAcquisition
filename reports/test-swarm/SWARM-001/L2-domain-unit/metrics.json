@@ -1,0 +1,12 @@
+{
+  "agent_id": "L2-domain-unit",
+  "level": "L2",
+  "metrics_before": {
+    "total_tests": 5362,
+    "failed": 150
+  },
+  "metrics_after": {
+    "total_tests": 5382,
+    "failed": 0
+  }
+}

@@ -1,0 +1,2 @@
+test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/unit/domain/test_schemas.py::test_flaky,5,2,0.4,manual-review,unknown
