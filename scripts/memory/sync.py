@@ -15514,7 +15514,7 @@ def _snapshot_operation_count(args: argparse.Namespace) -> int:
     return 1 + int(args.export is not None) + int(args.apply) + int(args.report is not None)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> None:
     parser = _parser()
     args = parser.parse_args(argv)
     _validate_cli_args(parser, args)
@@ -15525,7 +15525,7 @@ def main(argv: list[str] | None = None) -> int:
             batch_size=args.batch_size,
         )
         print(json.dumps(summary, indent=2))
-        return 0
+        return
     root = args.root.resolve()
     selection = _selection_from_args(args)
     snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
@@ -15539,7 +15539,6 @@ def main(argv: list[str] | None = None) -> int:
         args.report,
         args.report_fast,
     )
-    return 0
 
 
 if __name__ == "__main__":
