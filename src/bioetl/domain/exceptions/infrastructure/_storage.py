@@ -14,7 +14,7 @@ class StorageError(RecoverableError):
     error_type = ErrorType.NETWORK_ERROR
 
 
-def BucketNotFoundError(bucket: str) -> StorageError:
+def bucket_not_found_error(bucket: str) -> StorageError:
     """Compatibility constructor for legacy BucketNotFoundError.
 
     Args:
@@ -39,7 +39,7 @@ class TableNotFoundError(StorageError):
         super().__init__(f"Table not found: '{table_path}'")
 
 
-def UploadError(key: str, reason: str) -> StorageError:
+def upload_error(key: str, reason: str) -> StorageError:
     """Compatibility constructor for legacy UploadError.
 
     Args:
@@ -196,7 +196,7 @@ class SchemaEvolutionError(StorageError):
         )
 
 
-def BronzeValidationError(
+def bronze_validation_error(
     message: str,
     record_index: int | None = None,
     original_error: str | None = None,
@@ -228,7 +228,7 @@ def BronzeValidationError(
     return error
 
 
-def CachedBronzeEmptyError(
+def cached_bronze_empty_error(
     provider: str,
     entity_type: str,
     bronze_path: str,
@@ -262,3 +262,9 @@ def CachedBronzeEmptyError(
     )
     error.error_type = ErrorType.INVALID_DATA  # type: ignore[misc]  # instance override of ClassVar
     return error
+
+
+BucketNotFoundError = bucket_not_found_error
+UploadError = upload_error
+BronzeValidationError = bronze_validation_error
+CachedBronzeEmptyError = cached_bronze_empty_error

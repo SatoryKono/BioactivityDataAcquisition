@@ -11,7 +11,7 @@ from bioetl.domain.exceptions.infrastructure._storage import (
 from bioetl.domain.types import ErrorType
 
 
-def DeltaWriteConflictError(
+def delta_write_conflict_error(
     table_path: str,
     operation: str = "write",
     conflicting_version: int | None = None,
@@ -90,7 +90,7 @@ def _build_schema_validation_message(
     return ", ".join(parts)
 
 
-def DeltaSchemaValidationError(
+def delta_schema_validation_error(
     table_path: str,
     expected_columns: list[str] | None = None,
     actual_columns: list[str] | None = None,
@@ -132,7 +132,7 @@ def DeltaSchemaValidationError(
     return error
 
 
-def DeltaOptimizeError(
+def delta_optimize_error(
     table_path: str,
     operation: str,
     reason: str,
@@ -158,3 +158,8 @@ def DeltaOptimizeError(
     )
     error.error_type = ErrorType.NETWORK_ERROR  # type: ignore[misc]  # instance override of ClassVar
     return error
+
+
+DeltaWriteConflictError = delta_write_conflict_error
+DeltaSchemaValidationError = delta_schema_validation_error
+DeltaOptimizeError = delta_optimize_error
