@@ -49,7 +49,6 @@ class TestDeterministicJitter:
 
     def test_negative_retry_count_clamped(self) -> None:
         """max(0, retry_count) clamps negative values."""
-        # retry_count=-1 => phase=(0%4)+1=1 => 1/4 * max
         result = _deterministic_jitter_seconds(-1, 1.0)
         assert result == pytest.approx(0.25)
 

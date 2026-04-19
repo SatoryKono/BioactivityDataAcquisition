@@ -319,7 +319,7 @@ def test_observer_does_not_emit_traced_run_metric_for_noop_tracing(
     )
 
     with observer:
-        pass
+        assert observer.start_time is not None
 
     traced_run_calls = [
         call

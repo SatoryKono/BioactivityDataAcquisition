@@ -129,9 +129,7 @@ def coerce_silver_dq_analyze_request(
     if len(legacy_values) > len(_SILVER_DQ_ANALYZE_POSITIONAL_FIELDS):
         raise TypeError("analyze() received too many positional arguments")
 
-    for field_name, value in zip(
-        _SILVER_DQ_ANALYZE_POSITIONAL_FIELDS, legacy_values, strict=True
-    ):
+    for field_name, value in zip(_SILVER_DQ_ANALYZE_POSITIONAL_FIELDS, legacy_values):
         if field_name in resolved_kwargs:
             raise TypeError(
                 f"analyze() got multiple values for argument '{field_name}'"

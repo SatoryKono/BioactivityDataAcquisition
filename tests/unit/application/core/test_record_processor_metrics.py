@@ -138,21 +138,15 @@ class TestRecordProcessorMetrics:
 
         await record_processor.process_batch(records, batch_id)
 
-        pipeline_label = "test_entity"  # "test_entity" since provider="test", entity="entity" -> "test_entity"
+        pipeline_label = "test_entity"
         run_type_label = mock_context.run_type.value
 
-        # Verify batch size histogram
         mock_metrics.observe_histogram.assert_called_with(
             "bioetl_batch_size_records",
             2,
             {"pipeline": pipeline_label, "stage": "bronze"},
         )
 
-        # Verify counters
-        # We expect calls for bronze, quarantined (0), silver (2), gold (2)
-        # Using any_order=True or checking specific calls
-
-        # Bronze count
         mock_metrics.increment_counter.assert_any_call(
             "bioetl_records_processed_total",
             2,

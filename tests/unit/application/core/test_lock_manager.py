@@ -171,10 +171,12 @@ class TestLockCoordinator:
     ) -> None:
         """Test context manager raises if lock not acquired."""
         mock_lock_port.acquire.return_value = None
+        entered = False
 
         with pytest.raises(PipelineShutdownError):
             async with lock_manager:
-                pass
+                entered = True
+        assert entered is False
 
     async def test_validate_uses_fencing_token(
         self, lock_manager: LockCoordinator, mock_lock_port: AsyncMock

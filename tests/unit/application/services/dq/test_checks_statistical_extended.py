@@ -22,25 +22,23 @@ class TestStatisticalProfileExtended:
 
     def test_null_rate_warn_2x_above_baseline(self) -> None:
         """null rate > 2x baseline → WARN."""
-        # Create DataFrame with ~50% nulls
         df = pl.DataFrame({"id": [1, None, None, None, 1]})
-        baseline_stats = {"null_rate_ma30": 0.1}  # 10% baseline, current ~60%
+        baseline_stats = {"null_rate_ma30": 0.1}
         result = check_statistical_profile(df, baseline_stats)
-        # ratio ≈ 0.6/0.1 = 6 → > 5 → FAIL or ratio > 2 → WARN
         assert result.status in [DQCheckStatus.WARN, DQCheckStatus.FAIL]
         assert "null_rate_avg" in result.metrics
 
     def test_null_rate_fail_5x_above_baseline(self) -> None:
         """null rate > 5x baseline → FAIL."""
         df = pl.DataFrame({"id": [None, None, None, None, None]})
-        baseline_stats = {"null_rate_ma30": 0.01}  # 1% baseline, current 100%
+        baseline_stats = {"null_rate_ma30": 0.01}
         result = check_statistical_profile(df, baseline_stats)
         assert result.status == DQCheckStatus.FAIL
 
     def test_null_rate_pass_within_baseline(self) -> None:
         """null rate < 2x baseline → PASS."""
         df = pl.DataFrame({"id": [1, 2, 3, 4, 5]})
-        baseline_stats = {"null_rate_ma30": 0.5}  # 50% baseline, current 0%
+        baseline_stats = {"null_rate_ma30": 0.5}
         result = check_statistical_profile(df, baseline_stats)
         assert result.metrics["null_rate_avg"].status == DQCheckStatus.PASS
 
@@ -49,13 +47,12 @@ class TestStatisticalProfileExtended:
         df = pl.DataFrame({"id": [1, 2, 3]})
         baseline_stats = {"null_rate_ma30": 0.0}
         result = check_statistical_profile(df, baseline_stats)
-        # ratio = 1.0 which is < 2.0 warning threshold
         assert result.metrics["null_rate_avg"].status == DQCheckStatus.PASS
 
     def test_record_count_warn_on_70_percent_drop(self) -> None:
         """Record count < 70% of baseline → WARN."""
-        df = pl.DataFrame({"id": list(range(60))})  # 60 records
-        baseline_stats = {"record_count_ma30": 100}  # 60% of baseline
+        df = pl.DataFrame({"id": list(range(60))})
+        baseline_stats = {"record_count_ma30": 100}
         result = check_statistical_profile(df, baseline_stats)
         assert result.metrics["record_count_daily"].status == DQCheckStatus.WARN
 
@@ -111,11 +108,10 @@ class TestAnomalyDetectionExtended:
 
     def test_null_rate_anomaly_detected_zscore_above_3(self) -> None:
         """null_rate z-score > 3 → anomaly detected."""
-        # Current null rate = 1.0, baseline = 0.1 → zscore = (1.0-0.1)/0.1 = 9.0
-        df = pl.DataFrame({"id": [None, None, None, None, None]})  # 100% nulls
+        df = pl.DataFrame({"id": [None, None, None, None, None]})
         baseline_stats = {
             "days_since_start": 45,
-            "null_rate_ma30": 0.01,  # 1% baseline
+            "null_rate_ma30": 0.01,
         }
         result = check_anomaly_detection(df, baseline_stats)
         assert result.cold_start_mode is False
@@ -124,29 +120,25 @@ class TestAnomalyDetectionExtended:
 
     def test_record_count_anomaly_detected_zscore_above_3(self) -> None:
         """record_count z-score > 3 → anomaly detected."""
-        df = pl.DataFrame({"id": list(range(1))})  # 1 record
+        df = pl.DataFrame({"id": list(range(1))})
         baseline_stats = {
             "days_since_start": 45,
             "null_rate_ma30": 0.0,
-            "record_count_ma30": 100.0,  # baseline = 100, current = 1, zscore = -0.99
+            "record_count_ma30": 100.0,
         }
         result = check_anomaly_detection(df, baseline_stats)
-        # zscore = (1 - 100) / 100 = -0.99 which is NOT > 3 in absolute value
-        # We need a bigger drop. Let's check: (1-1000)/1000 = -0.999 → |.999| < 3
-        # Actually: abs(-0.99) < 3 → NOT an anomaly
         assert result.cold_start_mode is False
+        assert "record_count" not in result.anomalies_detected
 
     def test_record_count_anomaly_large_zscore(self) -> None:
         """Large record count deviation → anomaly."""
         baseline_stats = {
             "days_since_start": 45,
             "null_rate_ma30": 0.0,
-            "record_count_ma30": 1.0,  # baseline = 1, and we have 1000
+            "record_count_ma30": 1.0,
         }
-        # Build a df with 1000 rows
         big_df = pl.DataFrame({"id": list(range(1000))})
         result = check_anomaly_detection(big_df, baseline_stats)
-        # zscore = (1000 - 1) / 1 = 999 → |999| > 3 → anomaly
         assert result.cold_start_mode is False
         assert "record_count" in result.anomalies_detected
 

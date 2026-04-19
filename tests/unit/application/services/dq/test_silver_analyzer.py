@@ -140,7 +140,7 @@ class TestCalculateThresholds:
         result = analyzer._threshold.calculate_thresholds(
             df_len=90,
             input_record_count=None,
-            quarantined_count=10,  # total=100, rate=0.10
+            quarantined_count=10,
             soft_fail_threshold=0.05,
             hard_fail_threshold=0.20,
         )
@@ -211,7 +211,7 @@ class TestCheckNullRates:
 
     def test_overall_rate_calculation(self, analyzer: SilverDQAnalyzer) -> None:
         """Overall rate is total nulls / total cells."""
-        df = pl.DataFrame({"a": [None, None], "b": [1, 1]})  # 2 nulls / 4 cells = 0.5
+        df = pl.DataFrame({"a": [None, None], "b": [1, 1]})
         _, overall = analyzer._statistics.check_null_rates(df)
         assert overall == pytest.approx(0.5)
 
@@ -639,7 +639,7 @@ class TestAnalyze:
             timestamp=ts,
             primary_keys=[],
             input_record_count=10,
-            quarantined_count=3,  # 30% → FAIL (hard_fail_threshold=0.20)
+            quarantined_count=3,
         )
         assert report.thresholds.threshold_status == DQCheckStatus.FAIL
 
