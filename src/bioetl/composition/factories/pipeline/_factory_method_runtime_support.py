@@ -9,6 +9,10 @@ from bioetl.composition.factories.pipeline._factory_method_control_plane import 
     resolve_strict_gold_validation,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
+    _PipelineFactoryContext,
+)
+from bioetl.composition.factories.pipeline.creation_support import (
+    _PipelineCreationInputs,
     _CreatePipelineWithServicesRequest,
 )
 
@@ -20,7 +24,6 @@ if TYPE_CHECKING:
     from bioetl.composition.factories.pipeline._factory_method_types import (
         _ControlPlaneArtifacts,
         _CreatePipelineWithServicesRequest,
-        _PipelineFactoryContext,
     )
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
@@ -43,35 +46,20 @@ def create_pipeline_instance_from_request(
         raise AssertionError(
             "factory_context must include pipeline_class and provider for pipeline creation"
         )
-    create_pipeline_kwargs: dict[str, object] = {
-        "pipeline_name": factory_context.pipeline_name,
-        "pipeline_class": factory_context.pipeline_class,
-        "provider": factory_context.provider,
-        "create_data_source_fn": factory_context.create_data_source_fn,
-        "transformer_class": factory_context.transformer_class,
-        "pandera_silver_schema": factory_context.pandera_silver_schema,
-        "run_id": request.run_id,
-        "runtime": request.runtime,
-        "settings": request.settings,
-        "logger": request.logger,
-        "config": request.config,
-        "filter_config": cast("InputFilterConfig | None", request.filter_config),
-        "tracer": request.tracer,
-        "dq_monitor": request.dq_monitor,
-        "metrics": request.metrics,
-        "cached_bronze": cast("CachedBronzeContext | None", request.cached_bronze),
-    }
-    apply_optional_control_plane_kwargs_fn(
-        create_pipeline_kwargs,
-        manifest_id=request.manifest_id,
-        config_hash=request.config_hash,
-        dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
-        effective_config_artifact_id=request.effective_config_artifact_id,
+    del apply_optional_control_plane_kwargs_fn
+    pipeline_inputs = _PipelineCreationInputs(
+        pipeline_name=factory_context.pipeline_name,
+        pipeline_class=factory_context.pipeline_class,
+        provider=factory_context.provider,
+        create_data_source_fn=factory_context.create_data_source_fn,
+        transformer_class=factory_context.transformer_class,
+        request=request,
+        pandera_silver_schema=factory_context.pandera_silver_schema,
     )
     return cast(
         "BasePipeline",
         cast("Any", create_pipeline_with_services_fn)(  # Any: Dynamic factory function
-            **cast("dict[str, Any]", create_pipeline_kwargs)  # Any: Dynamic kwargs dict
+            inputs=pipeline_inputs,
         ),
     )
 

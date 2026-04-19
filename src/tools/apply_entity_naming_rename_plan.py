@@ -106,11 +106,18 @@ def _resolve_input_path(path: Path) -> ValidatedRepoPath:
     return ValidatedRepoPath(candidate)
 
 
-def load_plan_id(plan_path: ValidatedRepoPath) -> str:
-    payload = yaml.safe_load(plan_path.resolved_path.read_text(encoding="utf-8")) or {}
+def _validated_input_path(path: ValidatedRepoPath | Path) -> ValidatedRepoPath:
+    if isinstance(path, ValidatedRepoPath):
+        return path
+    return _resolve_input_path(path)
+
+
+def load_plan_id(plan_path: ValidatedRepoPath | Path) -> str:
+    safe_plan_path = _validated_input_path(plan_path)
+    payload = yaml.safe_load(safe_plan_path.resolved_path.read_text(encoding="utf-8")) or {}
     plan_id = payload.get("plan_id")
     if not isinstance(plan_id, str) or not plan_id:
-        raise ValueError(f"{plan_path.resolved_path} does not contain a valid plan_id")
+        raise ValueError(f"{safe_plan_path.resolved_path} does not contain a valid plan_id")
     return plan_id
 
 
@@ -176,9 +183,10 @@ def _write_repo_text(path: Path, content: str) -> None:
     safe_path.write_text(content, encoding="utf-8")
 
 
-def load_rows(matrix_path: ValidatedRepoPath) -> list[RenameRow]:
+def load_rows(matrix_path: ValidatedRepoPath | Path) -> list[RenameRow]:
+    safe_matrix_path = _validated_input_path(matrix_path)
     rows: list[RenameRow] = []
-    with matrix_path.resolved_path.open(encoding="utf-8", newline="") as file_obj:
+    with safe_matrix_path.resolved_path.open(encoding="utf-8", newline="") as file_obj:
         reader = csv.DictReader(file_obj)
         for record in reader:
             rows.append(
