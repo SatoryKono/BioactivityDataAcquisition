@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
 
 __all__ = [
     "DQDetailsSummary",
@@ -31,7 +30,7 @@ load_str_collection = _IMPL.load_str_collection
 update_correlation_anchor_gaps = _IMPL.update_correlation_anchor_gaps
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> object:
     if name not in __all__:
         raise AttributeError(name)
     return getattr(_IMPL, name)

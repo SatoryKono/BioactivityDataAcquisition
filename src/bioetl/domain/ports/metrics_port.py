@@ -25,7 +25,7 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float = 1.0,
-        tags: dict[
+        _tags: dict[
             str,
             Any,  # Any: Generic tag values for metric filtering
         ]
@@ -44,7 +44,7 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: dict[
+        _tags: dict[
             str,
             Any,  # Any: Generic tag values for metric filtering
         ]
@@ -63,7 +63,7 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: dict[
+        _tags: dict[
             str,
             Any,  # Any: Generic tag values for metric filtering
         ]
@@ -82,7 +82,7 @@ class MetricsPort(Protocol):
         self,
         metric_name: str,
         value: float,
-        tags: dict[
+        _tags: dict[
             str,
             Any,  # Any: Generic tag values for metric filtering
         ]

@@ -25,6 +25,14 @@ __all__ = [
 ]
 
 
+def _metrics_enabled(settings: object) -> bool:
+    """Support both nested Settings.observability and legacy flat test doubles."""
+    observability = getattr(settings, "observability", None)
+    if observability is not None and hasattr(observability, "metrics_enabled"):
+        return bool(observability.metrics_enabled)
+    return bool(getattr(settings, "metrics_enabled", False))
+
+
 def bootstrap_metrics_port(
     settings: Settings,
     metrics_factory: MetricsFactory | None = None,
@@ -39,7 +47,7 @@ def bootstrap_metrics_port(
     Returns:
         Configured MetricsPort, or NoOpMetrics if metrics are disabled.
     """
-    if not settings.observability.metrics_enabled:
+    if not _metrics_enabled(settings):
         return NoOpMetrics(warn_on_use=False)
 
     factory = metrics_factory or PrometheusMetrics
@@ -60,13 +68,17 @@ def maybe_start_metrics_server(
     Returns:
         True if the metrics server was started, False otherwise.
     """
-    if not settings.observability.metrics_enabled:
+    if not _metrics_enabled(settings):
         return False
 
-    if not settings.observability.metrics_server_enabled:
+    observability = getattr(settings, "observability", None)
+    if observability is None:
         return False
 
-    obs = settings.observability
+    if not observability.metrics_server_enabled:
+        return False
+
+    obs = observability
     service_factory = metrics_service_factory or create_metrics_service
     service = service_factory()
     result = service.start(

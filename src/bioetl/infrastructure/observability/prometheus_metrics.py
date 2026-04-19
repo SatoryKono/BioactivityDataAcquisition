@@ -23,11 +23,11 @@ __all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
 
 
 class _HistogramObserver(Protocol):
-    def observe(self, amount: float) -> None: ...
+    def observe(self, _amount: float) -> None: ...
 
 
 class _CounterObserver(Protocol):
-    def inc(self, amount: float = 1) -> None: ...
+    def inc(self, _amount: float = 1) -> None: ...
 
 
 class _GaugeObserver(Protocol):

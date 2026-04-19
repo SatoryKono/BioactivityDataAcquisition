@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
 
 __all__ = [
     "build_bronze_file_output_metadata",
@@ -21,7 +20,7 @@ create_metadata_bundle = _IMPL.create_metadata_bundle
 validate_records_present = _IMPL.validate_records_present
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> object:
     if name not in __all__:
         raise AttributeError(name)
     return getattr(_IMPL, name)

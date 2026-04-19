@@ -107,7 +107,6 @@ def create_checkpoint_manager(
         compatibility_policy=compatibility_policy,
     )
 
-
 def create_record_processor_from_pipeline(
     *,
     pipeline: BasePipeline,
@@ -129,7 +128,6 @@ def create_record_processor_from_pipeline(
         lock_validator=lock_validator,
         tracer=tracer,
     )
-
 
 def create_batch_executor_from_pipeline(
     *,

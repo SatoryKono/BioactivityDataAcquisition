@@ -154,7 +154,6 @@ class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
             # Check if we should continue to next page
             if not has_next or (limit is not None and records_yielded >= limit):
                 break
-
             offset += len(records)
 
 

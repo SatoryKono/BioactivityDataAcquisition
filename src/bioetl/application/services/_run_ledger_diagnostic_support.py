@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
 
 __all__ = [
     "LEDGER_DIAGNOSTIC_CONTRACT_VERSION",
@@ -25,7 +24,7 @@ sync_manifest_contract_defaults = _IMPL.sync_manifest_contract_defaults
 sync_manifest_runtime_defaults = _IMPL.sync_manifest_runtime_defaults
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> object:
     if name not in __all__:
         raise AttributeError(name)
     return getattr(_IMPL, name)
