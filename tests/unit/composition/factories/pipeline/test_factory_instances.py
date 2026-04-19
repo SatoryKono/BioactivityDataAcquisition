@@ -8,6 +8,9 @@ from uuid import uuid4
 
 import pytest
 
+from bioetl.composition.factories.pipeline.factory_method_helpers import (
+    build_create_pipeline_with_services_request,
+)
 from bioetl.domain.types import RunType
 
 
@@ -194,10 +197,12 @@ class TestChemblActivityFactory:
         run_id = uuid4()
 
         result = chembl_activity_factory.create_with_services(
-            run_id=run_id,
-            runtime=runtime,
-            settings=mock_settings,
-            logger=mock_logger,
+            build_create_pipeline_with_services_request(
+                run_id=run_id,
+                runtime=runtime,
+                settings=mock_settings,
+                logger=mock_logger,
+            )
         )
 
         mock_pipeline_class.create.assert_called_once_with(

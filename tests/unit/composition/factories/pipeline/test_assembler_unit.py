@@ -14,6 +14,9 @@ from bioetl.composition.factories.pipeline.assembler import (
     assemble_runner,
     create_pipeline_factory,
 )
+from bioetl.composition.factories.pipeline.factory_method_helpers import (
+    build_create_pipeline_with_services_request,
+)
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.types import RunType
@@ -209,16 +212,18 @@ class TestGenericPipelineFactory:
         cached_bronze = MagicMock()
 
         result = factory.create_with_services(
-            run_id=run_id,
-            runtime=runtime,
-            settings=settings,
-            logger=logger,
-            config=config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
-            metrics=metrics,
-            cached_bronze=cached_bronze,
+            build_create_pipeline_with_services_request(
+                run_id=run_id,
+                runtime=runtime,
+                settings=settings,
+                logger=logger,
+                config=config,
+                filter_config=filter_config,
+                tracer=tracer,
+                dq_monitor=dq_monitor,
+                metrics=metrics,
+                cached_bronze=cached_bronze,
+            )
         )
 
         assert result is expected_pipeline

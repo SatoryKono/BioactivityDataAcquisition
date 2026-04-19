@@ -9,6 +9,7 @@ import pytest
 
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
+    _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
     build_factory_services,
@@ -277,21 +278,23 @@ class TestCreateFactoryRunner:
         runtime = SimpleNamespace(strict_gold_validation=True)
 
         create_factory_runner(
-            pipeline_name="test",
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            run_id="r1",
-            runtime=runtime,
-            settings=settings,
-            observability=MagicMock(
-                logger=MagicMock(),
-                tracer=MagicMock(),
-                metrics=MagicMock(),
-                dq_monitor=None,
+            request=_CreateFactoryRunnerRequest(
+                pipeline_name="test",
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                run_id="r1",
+                runtime=runtime,
+                settings=settings,
+                observability=MagicMock(
+                    logger=MagicMock(),
+                    tracer=MagicMock(),
+                    metrics=MagicMock(),
+                    dq_monitor=None,
+                ),
+                config=None,
             ),
             create_with_services_fn=create_fn,
             assemble_runner_fn=assemble_fn,
-            config=None,
         )
 
         mock_load.assert_called_once_with("test")
@@ -305,21 +308,23 @@ class TestCreateFactoryRunner:
         runtime = SimpleNamespace(strict_gold_validation=True)
 
         create_factory_runner(
-            pipeline_name="test",
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            run_id="r1",
-            runtime=runtime,
-            settings=settings,
-            observability=MagicMock(
-                logger=MagicMock(),
-                tracer=MagicMock(),
-                metrics=MagicMock(),
-                dq_monitor=None,
+            request=_CreateFactoryRunnerRequest(
+                pipeline_name="test",
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                run_id="r1",
+                runtime=runtime,
+                settings=settings,
+                observability=MagicMock(
+                    logger=MagicMock(),
+                    tracer=MagicMock(),
+                    metrics=MagicMock(),
+                    dq_monitor=None,
+                ),
+                config=yaml_config,
             ),
             create_with_services_fn=create_fn,
             assemble_runner_fn=assemble_fn,
-            config=yaml_config,
         )
 
         create_fn.assert_called_once()
@@ -335,21 +340,23 @@ class TestCreateFactoryRunner:
         runtime = SimpleNamespace(strict_gold_validation=False)
 
         create_factory_runner(
-            pipeline_name="test",
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            run_id="r1",
-            runtime=runtime,
-            settings=settings,
-            observability=MagicMock(
-                logger=MagicMock(),
-                tracer=MagicMock(),
-                metrics=MagicMock(),
-                dq_monitor=None,
+            request=_CreateFactoryRunnerRequest(
+                pipeline_name="test",
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                run_id="r1",
+                runtime=runtime,
+                settings=settings,
+                observability=MagicMock(
+                    logger=MagicMock(),
+                    tracer=MagicMock(),
+                    metrics=MagicMock(),
+                    dq_monitor=None,
+                ),
+                config=yaml_config,
             ),
             create_with_services_fn=create_fn,
             assemble_runner_fn=assemble_fn,
-            config=yaml_config,
         )
 
         assert assemble_fn.call_args.kwargs["strict_gold_validation"] is True

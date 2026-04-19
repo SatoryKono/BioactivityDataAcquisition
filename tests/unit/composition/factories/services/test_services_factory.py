@@ -13,6 +13,9 @@ from bioetl.composition.factories.services.callbacks import (
     create_data_normalization_service,
     extract_pipeline_callbacks,
 )
+from bioetl.composition.factories.services._builder_record_processor_support import (
+    _RecordProcessorBuildRequest,
+)
 from bioetl.composition.factories.services.factory import (
     BaseServicesFactory,
     ServicesBuilder,
@@ -343,23 +346,41 @@ def test_create_record_processor_builds_dependencies(
     context = MagicMock()
 
     result = ServicesBuilder.create_record_processor(
-        services=services,
-        context=context,
-        pipeline_name="chembl_activity",
-        provider="chembl",
-        entity_type="activity",
-        silver_schema=MagicMock(),
-        gold_schema=MagicMock(),
-        dq_config=MagicMock(),
-        primary_keys=("activity_id",),
-        silver_table="activity",
-        gold_table="activity_gold",
-        silver_write_mode="merge",
-        gold_write_mode="overwrite",
-        on_schema_mismatch="error",
-        transform_callback=MagicMock(),
-        gold_filter_callback=MagicMock(),
-        gold_transform_callback=MagicMock(),
+        request=_RecordProcessorBuildRequest(
+            create_batch_processing_components_fn=(
+                ServicesBuilder.create_batch_processing_components
+            ),
+            services=services,
+            context=context,
+            pipeline_name="chembl_activity",
+            provider="chembl",
+            entity_type="activity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            dq_config=MagicMock(),
+            primary_keys=("activity_id",),
+            silver_table="activity",
+            gold_table="activity_gold",
+            silver_write_mode="merge",
+            gold_write_mode="overwrite",
+            on_schema_mismatch="error",
+            transform_callback=MagicMock(),
+            gold_filter_callback=MagicMock(),
+            gold_transform_callback=MagicMock(),
+            tracer=None,
+            strict_gold_validation=True,
+            lock_validator=None,
+            column_groups=(),
+            scd_config=None,
+            content_hash_include_fields=frozenset(),
+            content_hash_exclude_fields=frozenset(),
+            content_hash_policy_by_version=None,
+            gold_schema_policy_by_version=None,
+            record_processor_config_cls=mock_processor_config,
+            table_config_cls=mock_table_config,
+            gold_validator_factory=mock_gold_validator,
+            record_processor_cls=mock_record_processor,
+        ),
     )
 
     assert result is mock_record_processor.return_value
