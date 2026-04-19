@@ -16,7 +16,6 @@ from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorServi
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.crossref import CROSSREF_API_BASE
 from bioetl.infrastructure.adapters.crossref.client_builders import (
     _create_default_crossref_batch_fetcher,
@@ -36,6 +35,8 @@ from bioetl.infrastructure.adapters.crossref.types import (
     CrossRefBatchFetcher,
     CrossRefSearchPaginator,
 )
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.config import Settings
 
 
 @dataclass(frozen=True)
