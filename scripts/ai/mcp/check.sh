@@ -100,6 +100,7 @@ require_wrapper_path() {
   local expected_path="$2"
   local message="$3"
   require_contains "$text" "args: ${expected_path}" "$message"
+  return $?
 }
 
 if ! command -v codex >/dev/null 2>&1; then
