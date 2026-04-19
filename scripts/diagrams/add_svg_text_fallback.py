@@ -21,18 +21,21 @@ import sys
 import textwrap
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from urllib.parse import urlunsplit
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[1]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 try:
     from .diagram_paths import SOURCE_FAMILIES, render_dir
 except ImportError:  # pragma: no cover - direct script execution
     from diagram_paths import SOURCE_FAMILIES, render_dir
 
-SVG_NS = "http://www.w3.org/2000/svg"
+SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 ET.register_namespace("", SVG_NS)
 _OBJECT_SUFFIX_SPACING_RE = re.compile(
     r"(?<=\S)(Mixin|Adapter|Port|Validator|Runer|Runner|Coordinator)\b"

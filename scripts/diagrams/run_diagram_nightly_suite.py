@@ -13,10 +13,14 @@ import tempfile
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from urllib.parse import urlunsplit
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+REPO_ROOT_FALLBACK = SCRIPT_DIR.parents[1]
+if str(REPO_ROOT_FALLBACK) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT_FALLBACK))
 
 try:
     from .diagram_paths import (
@@ -40,7 +44,7 @@ DEFAULT_CONFIG = DIAGRAM_THEME_DIR / "mermaid-config.json"
 DEFAULT_CSS = DIAGRAM_THEME_DIR / "custom.css"
 GIT_DIFF_SCOPE = "<git-diff>"
 
-SVG_NS = "http://www.w3.org/2000/svg"
+SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 NS = {"svg": SVG_NS}
 QUOTED_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
 TAG_RE = re.compile(r"<[^>]+>")

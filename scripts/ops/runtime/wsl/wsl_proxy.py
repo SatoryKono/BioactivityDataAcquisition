@@ -15,6 +15,7 @@ import logging
 import select
 import socket
 import threading
+from urllib.parse import urlsplit
 
 LISTEN_HOST = "0.0.0.0"
 LISTEN_PORT = 3128
@@ -65,13 +66,22 @@ def handle_connect(client: socket.socket, host: str, port: int) -> None:
 
 def handle_plain(client: socket.socket, method: str, url: str, rest: bytes) -> None:
     """Forward plain HTTP request."""
-    if url.startswith("http://"):
-        url = url[7:]
-    slash = url.find("/")
-    if slash == -1:
-        host_port, path = url, "/"
+    parsed_url = urlsplit(url)
+    if parsed_url.scheme:
+        if parsed_url.scheme != "http":
+            client.sendall(b"HTTP/1.1 400 Bad Request\r\n\r\nUnsupported scheme\r\n")
+            client.close()
+            return
+        host_port = parsed_url.netloc
+        path = parsed_url.path or "/"
+        if parsed_url.query:
+            path = f"{path}?{parsed_url.query}"
     else:
-        host_port, path = url[:slash], url[slash:]
+        slash = url.find("/")
+        if slash == -1:
+            host_port, path = url, "/"
+        else:
+            host_port, path = url[:slash], url[slash:]
 
     if ":" in host_port:
         host, port_text = host_port.rsplit(":", 1)
