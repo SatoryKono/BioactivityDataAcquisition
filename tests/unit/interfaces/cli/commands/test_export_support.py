@@ -6,6 +6,7 @@ preview, and export execution helpers.
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -27,6 +28,10 @@ from bioetl.interfaces.cli.commands.export_support import (
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-export-support-"))
+DELTA_TABLE_PATH = TEST_ROOT / "delta" / "silver" / "chembl_activity"
+EXPORT_OUTPUT_PATH = TEST_ROOT / "output.csv"
+
 
 def _make_service(
     *,
@@ -47,7 +52,7 @@ def _make_table_info(name: str = "chembl_activity") -> TableInfo:
     return TableInfo(
         name=name,
         layer="silver",
-        path=Path("/tmp/delta/silver/chembl_activity"),
+        path=DELTA_TABLE_PATH,
     )
 
 
@@ -68,7 +73,7 @@ def _make_export_result(*, error: str | None = None) -> ExportResult:
         table_name="chembl_activity",
         layer="silver",
         format="csv",
-        output_path=Path("/tmp/output.csv") if error is None else None,
+        output_path=EXPORT_OUTPUT_PATH if error is None else None,
         row_count=100 if error is None else 0,
         error=error,
     )
@@ -118,7 +123,7 @@ class TestBuildExportOptions:
 
     def test_builds_options_with_output_path(self) -> None:
         """Test that output path is passed through to ExportOptions."""
-        path = Path("/tmp/output.csv")
+        path = EXPORT_OUTPUT_PATH
         options = _build_export_options(
             output_format="csv",
             output=path,

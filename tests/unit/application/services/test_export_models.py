@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,10 @@ from bioetl.application.services.export_models import (
     TablePreview,
 )
 
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-export-models-"))
+ACTIVITY_CSV_PATH = TEST_ROOT / "activity.csv"
+SILVER_ACTIVITY_PATH = TEST_ROOT / "silver" / "activity"
+
 
 @pytest.mark.unit
 class TestExportResult:
@@ -22,7 +27,7 @@ class TestExportResult:
             table_name="silver.activity",
             layer="silver",
             format="csv",
-            output_path=Path("/tmp/activity.csv"),
+            output_path=ACTIVITY_CSV_PATH,
             row_count=10,
         )
 
@@ -62,9 +67,9 @@ class TestExportOptionsAndTableModels:
         table_info = TableInfo(
             name="silver.activity",
             layer="silver",
-            path=Path("/tmp/silver/activity"),
+            path=SILVER_ACTIVITY_PATH,
         )
 
         assert preview.columns[0].name == "id"
         assert preview.sample_rows[1]["id"] == 2
-        assert table_info.path == Path("/tmp/silver/activity")
+        assert table_info.path == SILVER_ACTIVITY_PATH

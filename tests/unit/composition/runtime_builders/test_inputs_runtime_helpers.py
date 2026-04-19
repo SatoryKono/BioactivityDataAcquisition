@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from bioetl.composition.runtime_builders import inputs_runtime_helpers
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-inputs-runtime-"))
+BRONZE_DISABLED_PATH = str(TEST_ROOT / "bronze-disabled")
+BRONZE_ENABLED_PATH = str(TEST_ROOT / "bronze-enabled")
 
 
 def _make_settings(
@@ -154,7 +160,7 @@ def test_log_cached_bronze_only_logs_when_enabled() -> None:
         observability=observability,
         cached_bronze=SimpleNamespace(
             enabled=False,
-            bronze_path="/tmp/bronze-disabled",
+            bronze_path=BRONZE_DISABLED_PATH,
             bronze_date="2026-01-01",
         ),
     )
@@ -162,7 +168,7 @@ def test_log_cached_bronze_only_logs_when_enabled() -> None:
         observability=observability,
         cached_bronze=SimpleNamespace(
             enabled=True,
-            bronze_path="/tmp/bronze-enabled",
+            bronze_path=BRONZE_ENABLED_PATH,
             bronze_date="2026-01-02",
         ),
     )
@@ -171,7 +177,7 @@ def test_log_cached_bronze_only_logs_when_enabled() -> None:
         (
             "cached_bronze_mode_enabled",
             {
-                "bronze_path": "/tmp/bronze-enabled",
+                "bronze_path": BRONZE_ENABLED_PATH,
                 "bronze_date": "2026-01-02",
             },
         )
