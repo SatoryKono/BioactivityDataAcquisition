@@ -20,11 +20,9 @@ NEO4J_URI="${NEO4J_URI:-bolt://localhost:7687}"
 NEO4J_USERNAME="${NEO4J_USERNAME:-${NEO4J_AUTH_USERNAME:-}}"
 NEO4J_PASSWORD="${NEO4J_PASSWORD:-${NEO4J_AUTH_PASSWORD:-}}"
 
-if [[ -z "${NEO4J_USERNAME}" || -z "${NEO4J_PASSWORD}" ]]; then
-    if mapfile -t auth_parts < <(parse_neo4j_auth "${NEO4J_AUTH:-}"); then
-        NEO4J_USERNAME="${NEO4J_USERNAME:-${auth_parts[0]}}"
-        NEO4J_PASSWORD="${NEO4J_PASSWORD:-${auth_parts[1]}}"
-    fi
+if [[ -z "${NEO4J_USERNAME}" || -z "${NEO4J_PASSWORD}" ]] && mapfile -t auth_parts < <(parse_neo4j_auth "${NEO4J_AUTH:-}"); then
+    NEO4J_USERNAME="${NEO4J_USERNAME:-${auth_parts[0]}}"
+    NEO4J_PASSWORD="${NEO4J_PASSWORD:-${auth_parts[1]}}"
 fi
 
 export NEO4J_URI
