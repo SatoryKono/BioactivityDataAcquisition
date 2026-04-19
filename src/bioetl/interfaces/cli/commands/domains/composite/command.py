@@ -6,6 +6,7 @@ multiple data sources (seed + enrichers) into a unified dataset.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import click
@@ -24,6 +25,7 @@ from bioetl.interfaces.cli.commands.domains.composite.execution import (
     run_composite_inner as _run_composite_inner_impl,
 )
 from bioetl.interfaces.cli.commands.domains.composite.runtime import (
+    CompositeRuntimeCliInput,
     build_runtime_config,
 )
 from bioetl.interfaces.cli.commands.domains.composite.support import (
@@ -55,6 +57,27 @@ if TYPE_CHECKING:
 __all__ = [
     "run_composite",
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class CompositeRunCommandInput:
+    """Typed CLI bundle for the ``run-composite`` command callback."""
+
+    composite: str
+    resume: bool = False
+    dry_run: bool = False
+    seed_limit: int | None = None
+    enrich_only: str | None = None
+    required_only: bool = False
+    force_enricher: str | None = None
+    use_cached_bronze: bool = False
+    cached_bronze_date: str | None = None
+    cached_bronze_path: str | None = None
+    cached_bronze_enrichers: bool | None = None
+    cached_bronze_dependencies: bool = False
+    debug: bool = False
+    health_server: bool = True
+    health_port: int = DEFAULT_HEALTH_SERVER_PORT
 
 
 def _validate_composite_name(
@@ -264,23 +287,7 @@ def _exit_with_composite_result(success: bool, error_message: str | None) -> Non
     help="Port for the HTTP health server.",
     show_default=True,
 )
-def run_composite(
-    composite: str,
-    resume: bool,
-    dry_run: bool,
-    seed_limit: int | None,
-    enrich_only: str | None,
-    required_only: bool,
-    force_enricher: str | None,
-    use_cached_bronze: bool,
-    cached_bronze_date: str | None,
-    cached_bronze_path: str | None,
-    cached_bronze_enrichers: bool | None,
-    cached_bronze_dependencies: bool,
-    debug: bool,
-    health_server: bool,
-    health_port: int,
-) -> None:
+def run_composite(**options: object) -> None:
     """Run a composite pipeline that combines multiple data sources.
 
     Composite pipelines orchestrate a seed pipeline (e.g., ChEMBL publications)
@@ -313,35 +320,38 @@ def run_composite(
         health_server: When True, starts an HTTP health server during execution.
         health_port: TCP port for the HTTP health server.
     """
+    cli_input = CompositeRunCommandInput(**options)
     runtime = build_runtime_config(
-        resume=resume,
-        dry_run=dry_run,
-        seed_limit=seed_limit,
-        enrich_only=enrich_only,
-        required_only=required_only,
-        force_enricher=force_enricher,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_date=cached_bronze_date,
-        cached_bronze_path=cached_bronze_path,
-        cached_bronze_enrichers=cached_bronze_enrichers,
-        cached_bronze_dependencies=cached_bronze_dependencies,
+        CompositeRuntimeCliInput(
+            resume=cli_input.resume,
+            dry_run=cli_input.dry_run,
+            seed_limit=cli_input.seed_limit,
+            enrich_only=cli_input.enrich_only,
+            required_only=cli_input.required_only,
+            force_enricher=cli_input.force_enricher,
+            use_cached_bronze=cli_input.use_cached_bronze,
+            cached_bronze_date=cli_input.cached_bronze_date,
+            cached_bronze_path=cli_input.cached_bronze_path,
+            cached_bronze_enrichers=cli_input.cached_bronze_enrichers,
+            cached_bronze_dependencies=cli_input.cached_bronze_dependencies,
+        )
     )
     _echo_composite_startup(
-        composite=composite,
-        dry_run=dry_run,
-        resume=resume,
+        composite=cli_input.composite,
+        dry_run=cli_input.dry_run,
+        resume=cli_input.resume,
         cached_bronze_enabled=(
             runtime.use_cached_bronze
             or runtime.cached_bronze_enrichers is True
             or runtime.cached_bronze_dependencies
         ),
-        health_server=health_server,
-        health_port=health_port,
+        health_server=cli_input.health_server,
+        health_port=cli_input.health_port,
     )
     success, error_message = _run_composite_with_cli_policy(
-        composite=composite,
+        composite=cli_input.composite,
         runtime=runtime,
-        health_server=health_server,
-        health_port=health_port,
+        health_server=cli_input.health_server,
+        health_port=cli_input.health_port,
     )
     _exit_with_composite_result(success, error_message)
