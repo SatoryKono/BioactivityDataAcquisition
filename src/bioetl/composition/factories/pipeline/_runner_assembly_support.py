@@ -7,6 +7,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.lifecycle import LockCoordinator
+from bioetl.application.core.lifecycle.lock_manager import (
+    LockCoordinatorCreateRequest,
+)
 from bioetl.application.core.preflight import (
     HealthAggregator,
     MedallionConfigValidator,
@@ -61,19 +64,21 @@ def build_lock_manager(
     """Build the lock coordinator for one assembled runner."""
     pipeline = context.pipeline
     return LockCoordinator.create(
-        lock_port=pipeline.services.lock,
-        run_id=pipeline.context.run_id,
-        provider=pipeline.config.provider,
-        entity_type=pipeline.config.entity_type,
-        run_type=pipeline.runtime.run_type,
-        lock_ttl=pipeline.runtime.effective_lock_ttl,
-        wait_for_lock=pipeline.runtime.wait_for_lock,
-        wait_timeout=pipeline.runtime.lock_wait_timeout,
-        heartbeat_interval=pipeline.runtime.heartbeat_interval,
-        logger=context.logger_port,
-        shutdown_signal=pipeline.shutdown_signal,
-        checkpoint_manager=checkpoint_manager,
-        context_holder=context_holder,
+        LockCoordinatorCreateRequest(
+            lock_port=pipeline.services.lock,
+            run_id=pipeline.context.run_id,
+            provider=pipeline.config.provider,
+            entity_type=pipeline.config.entity_type,
+            run_type=pipeline.runtime.run_type,
+            lock_ttl=pipeline.runtime.effective_lock_ttl,
+            wait_for_lock=pipeline.runtime.wait_for_lock,
+            wait_timeout=pipeline.runtime.lock_wait_timeout,
+            heartbeat_interval=pipeline.runtime.heartbeat_interval,
+            logger=context.logger_port,
+            shutdown_signal=pipeline.shutdown_signal,
+            checkpoint_manager=checkpoint_manager,
+            context_holder=context_holder,
+        )
     )
 
 

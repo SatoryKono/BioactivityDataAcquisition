@@ -38,9 +38,7 @@ class HealthResponse:
     @property
     def http_status(self) -> int:
         """Return HTTP status code based on health status."""
-        if self.status == "healthy":
-            return 200
-        elif self.status == "degraded":
+        if self.status in {"healthy", "degraded"}:
             return 200  # Still operational
         return 503  # Service Unavailable
 

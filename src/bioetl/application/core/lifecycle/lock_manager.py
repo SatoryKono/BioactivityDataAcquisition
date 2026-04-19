@@ -6,6 +6,7 @@ __all__ = ["LockCoordinator"]
 
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.config import LockConfig
@@ -30,6 +31,24 @@ if TYPE_CHECKING:
         CheckpointManagerService,
     )
     from bioetl.domain.ports import LockPort, LoggerPort
+
+
+@dataclass(frozen=True, slots=True)
+class LockCoordinatorCreateRequest:
+    lock_port: LockPort
+    run_id: RunID
+    provider: str
+    entity_type: str
+    run_type: RunType
+    lock_ttl: int
+    wait_for_lock: bool
+    wait_timeout: int
+    heartbeat_interval: int
+    logger: LoggerPort
+    shutdown_signal: ShutdownSignal
+    checkpoint_manager: CheckpointManagerService | None = None
+    context_holder: LockContextHolder | None = None
+    heartbeat_factory: Callable[..., HeartbeatTask] | None = None
 
 
 class LockCoordinator:
@@ -98,20 +117,7 @@ class LockCoordinator:
     @classmethod
     def create(
         cls,
-        lock_port: LockPort,
-        run_id: RunID,
-        provider: str,
-        entity_type: str,
-        run_type: RunType,
-        lock_ttl: int,
-        wait_for_lock: bool,
-        wait_timeout: int,
-        heartbeat_interval: int,
-        logger: LoggerPort,
-        shutdown_signal: ShutdownSignal,
-        checkpoint_manager: CheckpointManagerService | None = None,
-        context_holder: LockContextHolder | None = None,
-        heartbeat_factory: Callable[..., HeartbeatTask] | None = None,
+        request: LockCoordinatorCreateRequest,
     ) -> LockCoordinator:
         """Create a LockCoordinator instance.
 
@@ -139,24 +145,24 @@ class LockCoordinator:
 
         """
         config = build_lock_config(
-            provider=provider,
-            entity_type=entity_type,
-            run_type=run_type,
-            lock_ttl=lock_ttl,
-            wait_for_lock=wait_for_lock,
-            wait_timeout=wait_timeout,
-            heartbeat_interval=heartbeat_interval,
+            provider=request.provider,
+            entity_type=request.entity_type,
+            run_type=request.run_type,
+            lock_ttl=request.lock_ttl,
+            wait_for_lock=request.wait_for_lock,
+            wait_timeout=request.wait_timeout,
+            heartbeat_interval=request.heartbeat_interval,
         )
 
         return cls(
-            lock_port=lock_port,
-            run_id=run_id,
+            lock_port=request.lock_port,
+            run_id=request.run_id,
             config=config,
-            logger=logger,
-            shutdown_signal=shutdown_signal,
-            checkpoint_manager=checkpoint_manager,
-            context_holder=context_holder,
-            heartbeat_factory=heartbeat_factory,
+            logger=request.logger,
+            shutdown_signal=request.shutdown_signal,
+            checkpoint_manager=request.checkpoint_manager,
+            context_holder=request.context_holder,
+            heartbeat_factory=request.heartbeat_factory,
         )
 
     async def acquire(self) -> FencingToken | None:

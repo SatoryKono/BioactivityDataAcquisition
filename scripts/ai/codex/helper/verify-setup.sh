@@ -4,9 +4,12 @@
 
 set -euo pipefail
 
-echo "=========================================="
+# Constants
+readonly SEPARATOR="=========================================="
+
+echo "$SEPARATOR"
 echo "  Codex WSL Setup Verification"
-echo "=========================================="
+echo "$SEPARATOR"
 echo ""
 
 ERRORS=0
@@ -82,10 +85,10 @@ fi
 echo ""
 
 # Summary
-echo "=========================================="
+echo "$SEPARATOR"
 if [[ $ERRORS -eq 0 ]]; then
     echo "  ✓ Setup verification successful!"
-    echo "=========================================="
+    echo "$SEPARATOR"
     echo ""
     echo "You can now use Codex:"
     echo ""
@@ -95,7 +98,7 @@ if [[ $ERRORS -eq 0 ]]; then
     echo ""
 else
     echo "  ✗ Setup verification found $ERRORS issue(s)"
-    echo "=========================================="
+    echo "$SEPARATOR"
     echo ""
     echo "Please fix the issues above, then run:"
     echo "  bash ./script-codex/helper/setup-wsl.sh"

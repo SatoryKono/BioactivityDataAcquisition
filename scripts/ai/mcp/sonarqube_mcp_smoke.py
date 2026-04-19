@@ -483,7 +483,7 @@ def run_smoke_command(
     
     try:
         # Run the smoke test loop
-        ready_seen, handshake_sent, handshake_deadline, _ = _run_smoke_test_loop(
+        ready_seen, handshake_sent, _, _ = _run_smoke_test_loop(
             process,
             startup_timeout_seconds,
             handshake_timeout_seconds,
