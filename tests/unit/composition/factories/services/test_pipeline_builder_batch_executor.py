@@ -11,6 +11,7 @@ import pytest
 
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.composition.factories.services.pipeline_builder import (
+    BatchExecutorBuildRequest,
     create_batch_executor_from_pipeline,
 )
 
@@ -100,13 +101,15 @@ class TestCreateBatchExecutorFromPipeline:
         mock_batch_executor.return_value = expected
 
         result = create_batch_executor_from_pipeline(
-            pipeline=pipeline,
-            callbacks=callbacks,
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            shutdown_signal=MagicMock(),
-            create_batch_processing_components_fn=MagicMock(),
+            BatchExecutorBuildRequest(
+                pipeline=pipeline,
+                callbacks=callbacks,
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                shutdown_signal=MagicMock(),
+                create_batch_processing_components_fn=MagicMock(),
+            )
         )
 
         gold_filter = mock_build_components.call_args.kwargs["gold_filter"]
@@ -158,17 +161,19 @@ class TestCreateBatchExecutorFromPipeline:
         )
 
         create_batch_executor_from_pipeline(
-            pipeline=pipeline,
-            callbacks=callbacks,
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            checkpoint_manager=checkpoint_manager,
-            shutdown_signal=MagicMock(),
-            create_batch_processing_components_fn=MagicMock(),
-            memory_monitor=memory_monitor,
-            memory_config=memory_config,
-            tracer=tracer,
-            batch_id_factory=batch_id_factory,
+            BatchExecutorBuildRequest(
+                pipeline=pipeline,
+                callbacks=callbacks,
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                checkpoint_manager=checkpoint_manager,
+                shutdown_signal=MagicMock(),
+                create_batch_processing_components_fn=MagicMock(),
+                memory_monitor=memory_monitor,
+                memory_config=memory_config,
+                tracer=tracer,
+                batch_id_factory=batch_id_factory,
+            )
         )
 
         mock_build_runtime_managers.assert_called_once()
@@ -218,13 +223,15 @@ class TestCreateBatchExecutorFromPipeline:
         mock_build_components.return_value = (MagicMock(), MagicMock())
 
         create_batch_executor_from_pipeline(
-            pipeline=pipeline,
-            callbacks=_make_callbacks(),
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            shutdown_signal=MagicMock(),
-            create_batch_processing_components_fn=MagicMock(),
+            BatchExecutorBuildRequest(
+                pipeline=pipeline,
+                callbacks=_make_callbacks(),
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                shutdown_signal=MagicMock(),
+                create_batch_processing_components_fn=MagicMock(),
+            )
         )
 
         assert (
@@ -267,17 +274,19 @@ class TestCreateBatchExecutorFromPipeline:
         mock_build_components.return_value = (MagicMock(), MagicMock())
 
         create_batch_executor_from_pipeline(
-            pipeline=pipeline,
-            callbacks=_make_callbacks(),
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            shutdown_signal=MagicMock(),
-            create_batch_processing_components_fn=MagicMock(),
-            bronze_output_path=BRONZE_ROOT,
-            silver_output_path=SILVER_ROOT,
-            gold_output_path=GOLD_ROOT,
-            flat_structure=True,
+            BatchExecutorBuildRequest(
+                pipeline=pipeline,
+                callbacks=_make_callbacks(),
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                shutdown_signal=MagicMock(),
+                create_batch_processing_components_fn=MagicMock(),
+                bronze_output_path=BRONZE_ROOT,
+                silver_output_path=SILVER_ROOT,
+                gold_output_path=GOLD_ROOT,
+                flat_structure=True,
+            )
         )
 
         config = mock_batch_executor.call_args.kwargs["config"]
@@ -322,13 +331,15 @@ class TestCreateBatchExecutorFromPipeline:
         mock_build_components.return_value = (MagicMock(), MagicMock())
 
         create_batch_executor_from_pipeline(
-            pipeline=pipeline,
-            callbacks=_make_callbacks(),
-            silver_schema=None,
-            gold_schema=MagicMock(),
-            checkpoint_manager=MagicMock(),
-            shutdown_signal=MagicMock(),
-            create_batch_processing_components_fn=MagicMock(),
+            BatchExecutorBuildRequest(
+                pipeline=pipeline,
+                callbacks=_make_callbacks(),
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                shutdown_signal=MagicMock(),
+                create_batch_processing_components_fn=MagicMock(),
+            )
         )
 
         call_kwargs = mock_batch_executor.call_args.kwargs

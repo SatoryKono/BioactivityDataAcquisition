@@ -8,6 +8,10 @@ from bioetl.application.core.wiring.runtime import (
     CheckpointManagerService,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
+from bioetl.composition.factories.services._pipeline_batch_executor_types import (
+    BatchExecutorBuildRequest,
+    BatchProcessingComponentsFactory,
+)
 from bioetl.composition.factories.services.pipeline_batch_executor_builder import (
     create_batch_executor_from_pipeline as build_batch_executor_from_pipeline,
 )
@@ -132,50 +136,15 @@ def create_record_processor_from_pipeline(
 
 
 def create_batch_executor_from_pipeline(
-    *,
-    pipeline: BasePipeline,
-    callbacks: PipelineCallbacksContext,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    checkpoint_manager: CheckpointManagerService,
-    shutdown_signal: ShutdownSignal,
-    create_batch_processing_components_fn: Callable[..., BatchProcessingComponents],
-    strict_gold_validation: bool = True,
-    lock_validator: Callable[[], Awaitable[bool]] | None = None,
-    tracer: TracingPort | None = None,
-    memory_monitor: MemoryMonitorPort | None = None,
-    memory_config: MemoryConfig | None = None,
-    bronze_output_path: str | None = None,
-    silver_output_path: str | None = None,
-    gold_output_path: str | None = None,
-    flat_structure: bool = False,
-    batch_id_factory: BatchIdGeneratorPort | None = None,
-    domain_event_emitter: DomainEventEmitterPort | None = None,
+    request: BatchExecutorBuildRequest,
 ) -> BatchExecutor:
-    return build_batch_executor_from_pipeline(
-        pipeline=pipeline,
-        callbacks=callbacks,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=shutdown_signal,
-        create_batch_processing_components_fn=create_batch_processing_components_fn,
-        strict_gold_validation=strict_gold_validation,
-        lock_validator=lock_validator,
-        tracer=tracer,
-        memory_monitor=memory_monitor,
-        memory_config=memory_config,
-        bronze_output_path=bronze_output_path,
-        silver_output_path=silver_output_path,
-        gold_output_path=gold_output_path,
-        flat_structure=flat_structure,
-        batch_id_factory=batch_id_factory,
-        domain_event_emitter=domain_event_emitter,
-    )
+    return build_batch_executor_from_pipeline(request)
 
 
 __all__ = [
+    "BatchExecutorBuildRequest",
     "BatchProcessingComponents",
+    "BatchProcessingComponentsFactory",
     "create_batch_executor_from_pipeline",
     "create_batch_processing_components",
     "create_checkpoint_manager",
