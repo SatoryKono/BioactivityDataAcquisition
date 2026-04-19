@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio as _asyncio
 import time
 from collections.abc import Callable, Mapping
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -913,33 +914,45 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
     async def _write_silver_metadata(
         self,
-        table_path: str,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None = None,
-        dq_metrics: BatchDQMetrics | None = None,
-        dq_report_path: str | None = None,
-        partition_by: list[str] | None = None,
-        source_batch_ids: list[str] | None = None,
-        started_at: datetime | None = None,
-        completed_at: datetime | None = None,
-        version_after: int | None = None,
+        request: object = None,
+        *args: object,
+        **kwargs: object,
     ) -> None:
         """Backward compatibility method for writing Silver metadata.
 
         This method provides the old interface for tests that call _write_silver_metadata
         directly. It delegates to the new metadata operations service.
         """
-        if dq_metrics is None:
+        from bioetl.infrastructure.storage.silver.metadata_operations import (
+            _SilverMetadataWriteRequest,
+            _coerce_silver_metadata_write_request,
+        )
+
+        request_input: _SilverMetadataWriteRequest | str | None
+        legacy_args: tuple[object, ...]
+        if isinstance(request, (_SilverMetadataWriteRequest, str)) or request is None:
+            request_input = request
+            legacy_args = args
+        else:
+            request_input = None
+            legacy_args = (request, *args)
+
+        resolved_request = _coerce_silver_metadata_write_request(
+            request_input,
+            args=legacy_args,
+            kwargs=kwargs,
+        )
+        if resolved_request.dq_metrics is None:
             from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 
-            dq_metrics = BatchDQMetrics(
-                total_records=len(records),
-                valid_records=len(records),
-                error_records=0,
-                warning_records=0,
+            resolved_request = replace(
+                resolved_request,
+                dq_metrics=BatchDQMetrics(
+                    total_records=len(resolved_request.records),
+                    valid_records=len(resolved_request.records),
+                    error_records=0,
+                    warning_records=0,
+                ),
             )
 
         from bioetl.infrastructure.storage.silver.metadata_mixin import (
@@ -948,19 +961,7 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
         await SilverWriterMetadataMixin._write_silver_metadata(
             self,
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            mode=mode,
-            bronze_refs=bronze_refs,
-            dq_metrics=dq_metrics,
-            dq_report_path=dq_report_path,
-            partition_by=partition_by,
-            source_batch_ids=source_batch_ids,
-            started_at=started_at,
-            completed_at=completed_at,
-            version_after=version_after,
+            resolved_request,
         )
 
     async def _write_single_target(

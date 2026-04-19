@@ -103,7 +103,10 @@ _SILVER_METADATA_WRITE_DEFAULTS: dict[str, object] = {
     "version_after": None,
 }
 _SILVER_METADATA_WRITE_ALLOWED_FIELDS = frozenset(
-    {*_SILVER_METADATA_WRITE_POSITIONAL_FIELDS, *tuple(_SILVER_METADATA_WRITE_DEFAULTS)}
+    {
+        *_SILVER_METADATA_WRITE_POSITIONAL_FIELDS,
+        *tuple(_SILVER_METADATA_WRITE_DEFAULTS),
+    }
 )
 
 
@@ -129,9 +132,14 @@ def _coerce_silver_metadata_write_request(
         legacy_values = [request, *args]
 
     if len(legacy_values) > len(_SILVER_METADATA_WRITE_POSITIONAL_FIELDS):
-        raise TypeError("_write_silver_metadata() received too many positional arguments")
+        raise TypeError(
+            "_write_silver_metadata() received too many positional arguments"
+        )
 
-    for field_name, value in zip(_SILVER_METADATA_WRITE_POSITIONAL_FIELDS, legacy_values):
+    for field_name, value in zip(
+        _SILVER_METADATA_WRITE_POSITIONAL_FIELDS,
+        legacy_values,
+    ):
         if field_name in resolved_kwargs:
             raise TypeError(
                 f"_write_silver_metadata() got multiple values for argument '{field_name}'"
@@ -155,7 +163,9 @@ def _coerce_silver_metadata_write_request(
     ]
     if missing_fields:
         missing = ", ".join(missing_fields)
-        raise TypeError(f"_write_silver_metadata() missing required arguments: {missing}")
+        raise TypeError(
+            f"_write_silver_metadata() missing required arguments: {missing}"
+        )
 
     for field_name, default in _SILVER_METADATA_WRITE_DEFAULTS.items():
         resolved_kwargs.setdefault(field_name, default)
