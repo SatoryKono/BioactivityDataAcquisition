@@ -281,7 +281,7 @@ class TestPersistGoldMetadataWrite:
         from bioetl.domain.medallion import GoldWriteMode
 
         request = _GoldMetadataWriteRequest(
-            table_path="/tmp/gold/chembl_compound",
+            table_path=GOLD_CHEMBL_COMPOUND_PATH,
             table_name="chembl_compound",
             records=[{"id": 1}],
             mode=GoldWriteMode.APPEND,

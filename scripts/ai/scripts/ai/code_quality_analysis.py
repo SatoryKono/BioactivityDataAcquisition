@@ -2,7 +2,6 @@
 """Analyze code quality to determine relevance of Sonar remediation issues."""
 
 import os
-import ast
 from pathlib import Path
 from collections import defaultdict
 
