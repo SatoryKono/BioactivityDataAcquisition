@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.run_ledger_service import (
@@ -59,6 +60,24 @@ if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
 
 
+@dataclass(frozen=True, slots=True)
+class _RunManifestCreateRequestInputs:
+    ctx: PipelineRunContext
+    inputs: RunnerInputs
+    provider: str
+    entity: str
+    run_type_value: str
+    execution_context_value: str
+    effective_config_hash: str
+    contract_ref: str
+    contract_version: str | None
+    contract_schema_hash: str | None
+    dq_policy_ref: str | None
+    rule_bundle_version: str | None
+    dq_contract_compatibility_hash: str
+    effective_config_artifact_id: str
+
+
 def _create_ledger_service(
     inputs: RunnerInputs,
     ctx: PipelineRunContext,
@@ -79,21 +98,12 @@ def _create_ledger_service(
 
 
 def _build_manifest_create_request(
-    ctx: PipelineRunContext,
-    inputs: RunnerInputs,
-    provider: str,
-    entity: str,
-    run_type_value: str,
-    execution_context_value: str,
-    effective_config_hash: str,
-    contract_ref: str,
-    contract_version: str | None,
-    contract_schema_hash: str | None,
-    dq_policy_ref: str | None,
-    rule_bundle_version: str | None,
-    dq_contract_compatibility_hash: str,
-    effective_config_artifact_id: str,
+    request_inputs: _RunManifestCreateRequestInputs,
 ) -> RunManifestCreateSpec:
+    ctx = request_inputs.ctx
+    inputs = request_inputs.inputs
+    provider = request_inputs.provider
+    entity = request_inputs.entity
     yaml_config = inputs.yaml_config
     source_refs = _build_run_source_refs(
         ctx=ctx,
@@ -124,8 +134,8 @@ def _build_manifest_create_request(
         entity=entity,
         launch_context=_build_launch_context_snapshot(
             ctx,
-            run_type_value=run_type_value,
-            execution_context_value=execution_context_value,
+            run_type_value=request_inputs.run_type_value,
+            execution_context_value=request_inputs.execution_context_value,
             required_persistence_profile=required_persistence_profile,
         ),
         runtime_config=_to_serializable_mapping(inputs.runtime_config),
@@ -140,14 +150,14 @@ def _build_manifest_create_request(
         ),
         pipeline_version=get_pipeline_version(yaml_config),
         git_commit=get_git_commit(),
-        config_hash=effective_config_hash,
-        contract_ref=contract_ref,
-        contract_version=contract_version,
-        contract_schema_hash=contract_schema_hash,
-        dq_policy_ref=dq_policy_ref,
-        rule_bundle_version=rule_bundle_version,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
+        config_hash=request_inputs.effective_config_hash,
+        contract_ref=request_inputs.contract_ref,
+        contract_version=request_inputs.contract_version,
+        contract_schema_hash=request_inputs.contract_schema_hash,
+        dq_policy_ref=request_inputs.dq_policy_ref,
+        rule_bundle_version=request_inputs.rule_bundle_version,
+        dq_contract_compatibility_hash=request_inputs.dq_contract_compatibility_hash,
+        effective_config_artifact_id=request_inputs.effective_config_artifact_id,
         replay_capability=_resolve_replay_capability(
             source_refs=source_refs,
             resume_requested=bool(getattr(ctx, "resume", False)),
@@ -205,20 +215,22 @@ def create_run_manifest(
     if ledger_enabled:
         ledger_service = _create_ledger_service(inputs, ctx)
     manifest_create_request = _build_manifest_create_request(
-        ctx,
-        inputs,
-        provider,
-        entity,
-        run_type_value,
-        execution_context_value,
-        effective_config_hash,
-        contract_ref,
-        contract_version,
-        contract_schema_hash,
-        dq_policy_ref,
-        rule_bundle_version,
-        dq_contract_compatibility_hash,
-        effective_config_artifact_id,
+        _RunManifestCreateRequestInputs(
+            ctx=ctx,
+            inputs=inputs,
+            provider=provider,
+            entity=entity,
+            run_type_value=run_type_value,
+            execution_context_value=execution_context_value,
+            effective_config_hash=effective_config_hash,
+            contract_ref=contract_ref,
+            contract_version=contract_version,
+            contract_schema_hash=contract_schema_hash,
+            dq_policy_ref=dq_policy_ref,
+            rule_bundle_version=rule_bundle_version,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
+        )
     )
 
     manifest = RunManifestService(manifest_port=manifest_store).create_manifest(

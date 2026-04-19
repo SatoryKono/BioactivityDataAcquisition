@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from bioetl.application.services.control_plane._run_ledger_diagnostic_support import (
+    _RunLedgerDiagnosticRequest,
     build_run_ledger_diagnostic_details,
     sync_manifest_contract_defaults,
     sync_manifest_runtime_defaults,
@@ -255,28 +256,34 @@ class RunLedgerService:
                 "lineage_fragment_id": lineage_fragment_id,
                 "metrics_snapshot": metrics_snapshot,
                 "details": build_run_ledger_diagnostic_details(
-                    event_type=event_type,
-                    event_family=event_family,
-                    manifest_id=self.manifest_id,
-                    run_id=self.run_id,
-                    pipeline_name=self.pipeline_name,
-                    provider=self.provider,
-                    entity=self.entity,
-                    run_type=self.run_type,
-                    effective_config_hash=self.effective_config_hash,
-                    contract_ref=self.contract_ref,
-                    contract_version=self.contract_version,
-                    dq_policy_ref=self.dq_policy_ref,
-                    rule_bundle_version=self.rule_bundle_version,
-                    dq_contract_compatibility_hash=self.dq_contract_compatibility_hash,
-                    effective_config_artifact_id=self.effective_config_artifact_id,
-                    composite_run_id=self.composite_run_id,
-                    status=status,
-                    stage=stage,
-                    error_type=error_type,
-                    dataset_ref=dataset_ref,
-                    lineage_fragment_id=lineage_fragment_id,
-                    details=details,
+                    _RunLedgerDiagnosticRequest(
+                        event_type=event_type,
+                        event_family=event_family,
+                        manifest_id=self.manifest_id,
+                        run_id=self.run_id,
+                        pipeline_name=self.pipeline_name,
+                        provider=self.provider,
+                        entity=self.entity,
+                        run_type=self.run_type,
+                        effective_config_hash=self.effective_config_hash,
+                        contract_ref=self.contract_ref,
+                        contract_version=self.contract_version,
+                        dq_policy_ref=self.dq_policy_ref,
+                        rule_bundle_version=self.rule_bundle_version,
+                        dq_contract_compatibility_hash=(
+                            self.dq_contract_compatibility_hash
+                        ),
+                        effective_config_artifact_id=(
+                            self.effective_config_artifact_id
+                        ),
+                        composite_run_id=self.composite_run_id,
+                        status=status,
+                        stage=stage,
+                        error_type=error_type,
+                        dataset_ref=dataset_ref,
+                        lineage_fragment_id=lineage_fragment_id,
+                        details=details,
+                    )
                 ),
             }
         )

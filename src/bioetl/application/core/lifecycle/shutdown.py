@@ -104,7 +104,8 @@ class ShutdownSignal:
             True if completed within timeout, False otherwise.
         """
         try:
-            await asyncio.wait_for(self._completion_event.wait(), timeout=timeout)
+            async with asyncio.timeout(timeout):
+                await self._completion_event.wait()
             return True
         except TimeoutError:
             return False
