@@ -64,19 +64,27 @@ def check_no_circular_imports(base_path: Path) -> list[str]:
     return violations
 
 
+def _iter_infrastructure_python_files(base_path: Path) -> list[Path]:
+    infra_dir = base_path / "src" / "bioetl" / "infrastructure"
+    if not infra_dir.exists():
+        return []
+    return [py_file for py_file in infra_dir.rglob("*.py") if not py_file.name.startswith("__")]
+
+
+def _collect_adapter_violations(base_path: Path) -> list[str]:
+    violations: list[str] = []
+    for py_file in _iter_infrastructure_python_files(base_path):
+        violations.extend(check_adapter_implements_port(py_file))
+    return violations
+
+
 def main() -> int:
     """Run infrastructure architecture checks."""
     base_path = Path("")
     all_violations: list[str] = []
 
     all_violations.extend(check_no_circular_imports(base_path))
-
-    infra_dir = base_path / "src" / "bioetl" / "infrastructure"
-    if infra_dir.exists():
-        for py_file in infra_dir.rglob("*.py"):
-            if py_file.name.startswith("__"):
-                continue
-            all_violations.extend(check_adapter_implements_port(py_file))
+    all_violations.extend(_collect_adapter_violations(base_path))
 
     if all_violations:
         print("Architecture violations found:")
