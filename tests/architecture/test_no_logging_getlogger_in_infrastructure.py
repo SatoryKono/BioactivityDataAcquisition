@@ -47,36 +47,17 @@ def _check_logging_getlogger_imports(
 
     for py_file in directory.rglob("*.py"):
         rel_path = py_file.relative_to(Path("src"))
-        # Skip allowed files (normalize path separators)
-        rel_path_str = str(rel_path).replace("\\", "/")
-        if rel_path_str in allowed:
+        if _normalize_rel_path(rel_path) in allowed:
             continue
 
-        try:
-            source = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-        except (SyntaxError, UnicodeDecodeError):
+        parsed = _read_source_and_ast(py_file)
+        if parsed is None:
             continue
+        source, tree = parsed
 
-        for node in ast.walk(tree):
-            # Check for: import logging
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name == "logging":
-                        # Check if logging.getLogger is called later in the file
-                        if "logging.getLogger" in source:
-                            violations.append(
-                                f"{rel_path}:{node.lineno}: import logging with getLogger usage"
-                            )
-
-            # Check for: from logging import getLogger
-            elif isinstance(node, ast.ImportFrom):
-                if node.module == "logging":
-                    for alias in node.names:
-                        if alias.name == "getLogger":
-                            violations.append(
-                                f"{rel_path}:{node.lineno}: from logging import getLogger"
-                            )
+        violations.extend(
+            _iter_logging_import_violations(tree, rel_path, source=source)
+        )
 
     return violations
 
@@ -103,33 +84,82 @@ def _check_getlogger_calls(
 
     for py_file in directory.rglob("*.py"):
         rel_path = py_file.relative_to(Path("src"))
-        rel_path_str = str(rel_path).replace("\\", "/")
-        if rel_path_str in allowed:
+        if _normalize_rel_path(rel_path) in allowed:
             continue
 
-        try:
-            source = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-        except (SyntaxError, UnicodeDecodeError):
+        parsed = _read_source_and_ast(py_file)
+        if parsed is None:
             continue
+        _, tree = parsed
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Call):
-                # Check for logging.getLogger()
-                if isinstance(node.func, ast.Attribute):
-                    if (
-                        isinstance(node.func.value, ast.Name)
-                        and node.func.value.id == "logging"
-                        and node.func.attr == "getLogger"
-                    ):
-                        violations.append(
-                            f"{rel_path}:{node.lineno}: logging.getLogger() call"
-                        )
-                # Check for direct getLogger() call
-                elif isinstance(node.func, ast.Name) and node.func.id == "getLogger":
-                    violations.append(f"{rel_path}:{node.lineno}: getLogger() call")
+        violations.extend(_iter_getlogger_call_violations(tree, rel_path))
 
     return violations
+
+
+def _normalize_rel_path(rel_path: Path) -> str:
+    return str(rel_path).replace("\\", "/")
+
+
+def _read_source_and_ast(py_file: Path) -> tuple[str, ast.Module] | None:
+    try:
+        source = py_file.read_text(encoding="utf-8")
+        return source, ast.parse(source)
+    except (SyntaxError, UnicodeDecodeError):
+        return None
+
+
+def _iter_logging_import_violations(
+    tree: ast.Module,
+    rel_path: Path,
+    *,
+    source: str,
+) -> list[str]:
+    violations: list[str] = []
+    has_logging_getlogger_usage = "logging.getLogger" in source
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            violations.extend(
+                f"{rel_path}:{node.lineno}: import logging with getLogger usage"
+                for alias in node.names
+                if alias.name == "logging" and has_logging_getlogger_usage
+            )
+            continue
+        if isinstance(node, ast.ImportFrom) and node.module == "logging":
+            violations.extend(
+                f"{rel_path}:{node.lineno}: from logging import getLogger"
+                for alias in node.names
+                if alias.name == "getLogger"
+            )
+    return violations
+
+
+def _iter_getlogger_call_violations(tree: ast.Module, rel_path: Path) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        message = _get_getlogger_call_message(node)
+        if message:
+            violations.append(f"{rel_path}:{node.lineno}: {message}")
+    return violations
+
+
+def _get_getlogger_call_message(node: ast.Call) -> str | None:
+    if _is_logging_getlogger_call(node):
+        return "logging.getLogger() call"
+    if isinstance(node.func, ast.Name) and node.func.id == "getLogger":
+        return "getLogger() call"
+    return None
+
+
+def _is_logging_getlogger_call(node: ast.Call) -> bool:
+    return (
+        isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "logging"
+        and node.func.attr == "getLogger"
+    )
 
 
 class TestNoLoggingGetLoggerInInfrastructure:

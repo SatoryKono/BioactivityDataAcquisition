@@ -43,29 +43,48 @@ def _check_structlog_imports(
 
     for py_file in directory.rglob("*.py"):
         rel_path = py_file.relative_to(Path("src"))
-        # Skip exempted files (normalize path separators)
-        rel_path_str = str(rel_path).replace("\\", "/")
-        if rel_path_str in exempted:
+        if _normalize_rel_path(rel_path) in exempted:
             continue
 
-        try:
-            source = py_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-        except (SyntaxError, UnicodeDecodeError):
+        tree = _read_ast_or_none(py_file)
+        if tree is None:
             continue
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name == "structlog":
-                        violations.append(f"{rel_path}:{node.lineno}: import structlog")
-            elif isinstance(node, ast.ImportFrom):
-                if node.module and node.module.startswith("structlog"):
-                    violations.append(
-                        f"{rel_path}:{node.lineno}: from {node.module} import ..."
-                    )
+        violations.extend(_iter_structlog_import_violations(tree, rel_path))
 
     return violations
+
+
+def _normalize_rel_path(rel_path: Path) -> str:
+    return str(rel_path).replace("\\", "/")
+
+
+def _read_ast_or_none(py_file: Path) -> ast.Module | None:
+    try:
+        return ast.parse(py_file.read_text(encoding="utf-8"))
+    except (SyntaxError, UnicodeDecodeError):
+        return None
+
+
+def _iter_structlog_import_violations(tree: ast.Module, rel_path: Path) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            violations.extend(
+                f"{rel_path}:{node.lineno}: import structlog"
+                for alias in node.names
+                if alias.name == "structlog"
+            )
+            continue
+        if isinstance(node, ast.ImportFrom) and _is_structlog_import_from(node):
+            violations.append(
+                f"{rel_path}:{node.lineno}: from {node.module} import ..."
+            )
+    return violations
+
+
+def _is_structlog_import_from(node: ast.ImportFrom) -> bool:
+    return bool(node.module and node.module.startswith("structlog"))
 
 
 class TestNoStructlogInApplicationLayer:
