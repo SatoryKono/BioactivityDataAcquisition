@@ -345,7 +345,7 @@ def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
 
 def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> None:
     """Builder should register pipelines against the created runtime registry."""
-    fake_factory, created_registry = _build_factory_registry()
+    _, created_registry = _build_factory_registry()
     calls: dict[str, object] = {}
 
     result = _call_build_pipeline_runner(

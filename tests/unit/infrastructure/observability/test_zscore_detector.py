@@ -87,16 +87,13 @@ class TestZScoreCalculation:
     def test_calculate_z_score_normal(self, detector: ZScoreDetector) -> None:
         """Test Z-score calculation with normal values."""
         z_score = detector._calculate_z_score(value=130.0, mean=100.0, stddev=10.0)
-        assert z_score == pytest.approx(3.0)  # (130 - 100) / 10 = 3.0
+        assert z_score == pytest.approx(3.0)
 
     def test_calculate_z_score_zero_stddev_nonzero_mean(
         self, detector: ZScoreDetector
     ) -> None:
         """Test Z-score calculation when stddev is 0 but mean is nonzero."""
-        # When stddev is 0 and mean != 0, use percentage-based deviation
         z_score = detector._calculate_z_score(value=150.0, mean=100.0, stddev=0.0)
-        # deviation_pct = abs(150 - 100) / abs(100) = 0.5
-        # z_score = 0.5 * 2 = 1.0
         assert z_score == pytest.approx(1.0)
 
     def test_calculate_z_score_zero_stddev_zero_mean(
@@ -110,7 +107,6 @@ class TestZScoreCalculation:
         self, detector: ZScoreDetector
     ) -> None:
         """Test Z-score calculation returns None when deviation is small."""
-        # deviation_pct = abs(110 - 100) / abs(100) = 0.1 < 0.5
         z_score = detector._calculate_z_score(value=110.0, mean=100.0, stddev=0.0)
         assert z_score is None
 

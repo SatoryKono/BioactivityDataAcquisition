@@ -53,8 +53,6 @@ class TestCompositePublicationColumns:
 
     def test_column_groups_count(self, column_groups: list[ColumnGroupConfig]) -> None:
         """Verify the number of semantic groups in the configuration."""
-        # system, provider_ids, journal, pagination, authors, affiliations,
-        # date, subjects, biomedical, citations, doc_type
         assert len(column_groups) == 11
 
     def test_expected_group_names(self, column_groups: list[ColumnGroupConfig]) -> None:

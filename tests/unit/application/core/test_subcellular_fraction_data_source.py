@@ -254,9 +254,9 @@ class TestSubcellularFractionDataSourceFetch:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
-        async for _ in wrapper.fetch("assay", offset=12):
-            pass
+        records = [record async for record in wrapper.fetch("assay", offset=12)]
 
+        assert records == [ASSAY_WITH_FRACTION]
         assert source.fetch_calls[-1]["entity_type"] == "assay"
         assert source.fetch_calls[-1]["offset"] == 12
 

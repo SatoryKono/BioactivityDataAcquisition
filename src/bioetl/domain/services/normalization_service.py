@@ -74,7 +74,7 @@ class _NormalizationActivityMixin:
         self,
         value: float,
         unit: str,
-        activity_type: str,  # noqa: ARG002 - reserved for type-specific validation
+        activity_type: str,
         *,
         validate: bool = True,
     ) -> NormalizationResult:
@@ -231,7 +231,7 @@ class _NormalizationBatchMixin(_NormalizationActivityMixin):
     def normalize_concentrations(
         self,
         concentrations: Sequence[Concentration],
-        activity_type: str = "IC50",  # noqa: ARG002 - reserved for type-specific
+        activity_type: str = "IC50",
     ) -> NormalizationResult:
         """Normalize and aggregate Concentration objects.
 

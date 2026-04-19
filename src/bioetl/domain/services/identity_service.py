@@ -76,7 +76,7 @@ class IdentityService:
     def compute_entity_id(
         self,
         provider: str,
-        entity_type: str,  # noqa: ARG002 - reserved for future use
+        entity_type: str,
         source_id: str | None,
         record: JsonDict,  # Any: record values are heterogeneous
     ) -> EntityID:

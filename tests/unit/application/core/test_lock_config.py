@@ -75,4 +75,4 @@ class TestLockConfigAdaptiveTTL:
             lock_ttl=500,
             batch_size_hint=10000,
         )
-        assert cfg.lock_ttl == 600  # min(max(500, 3000), 600) = 600
+        assert cfg.lock_ttl == 600
