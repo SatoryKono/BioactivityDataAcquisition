@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-19T11:22:11.941831+00:00",
+  "generated_at": "2026-04-19T15:52:14.039020+00:00",
   "summary": {
-    "total_scripts": 390,
+    "total_scripts": 416,
     "status_counts": {
-      "active": 284,
+      "active": 287,
       "legacy": 15,
-      "orphan": 81,
+      "orphan": 104,
       "unknown": 10
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 1,
       "ci": 49,
-      "docs": 118,
-      "scripts": 273,
+      "docs": 119,
+      "scripts": 275,
       "skills": 8,
-      "tests": 106
+      "tests": 108
     }
   },
   "scripts": [
@@ -25,11 +25,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/README.md",
           "line": 51,
+          "source_group": "scripts",
+          "text": "python -m scripts.ai --help"
+        },
+        {
+          "path": "scripts/ai/src/__main__.py",
+          "line": 5,
+          "source_group": "scripts",
+          "text": "python -m scripts.ai <surface> [args...]"
+        },
+        {
+          "path": "scripts/ai/src/__main__.py",
+          "line": 6,
           "source_group": "scripts",
           "text": "python -m scripts.ai --help"
         },
@@ -123,7 +135,7 @@
         },
         {
           "path": "scripts/ai/codex/helper/verify-setup.sh",
-          "line": 49,
+          "line": 52,
           "source_group": "scripts",
           "text": "ENSURE_SCRIPT=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)/ensure-codex-cli.sh\""
         },
@@ -930,8 +942,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 57,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/github-mcp-wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 57,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/github-mcp-wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 8,
@@ -972,8 +996,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 108,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 108,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 16,
@@ -1024,8 +1060,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 78,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_context7_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 78,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_context7_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 11,
@@ -1060,8 +1108,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 72,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 10,
@@ -1096,8 +1156,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 66,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 66,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 9,
@@ -1132,8 +1204,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 90,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 90,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 13,
@@ -1168,8 +1252,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 102,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 102,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 15,
@@ -1220,8 +1316,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 120,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 120,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 18,
@@ -1256,7 +1364,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 25,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -1328,8 +1436,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 84,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 84,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 12,
@@ -1364,8 +1484,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 96,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 96,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 14,
@@ -1432,8 +1564,20 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 114,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
+        },
+        {
+          "path": "scripts/ai/.vscode/mcp.json",
+          "line": 114,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_sonarqube_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 17,
@@ -1442,6 +1586,12 @@
         },
         {
           "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
+        },
+        {
+          "path": "scripts/ai/src/sonarqube_mcp_smoke.py",
           "line": 40,
           "source_group": "scripts",
           "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
@@ -1463,7 +1613,7 @@
       "references": [
         {
           "path": "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
-          "line": 55,
+          "line": 53,
           "source_group": "scripts",
           "text": "exec \"${PYTHON_BIN}\" \"${REPO_ROOT}/scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" -- \\"
         },
@@ -2195,6 +2345,102 @@
       "references": []
     },
     {
+      "path": "scripts/ai/scripts/ai/mcp/github-mcp-wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_brave_search_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_context7_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_docker_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_grafana_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_paper_search_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_prometheus_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/scripts/ai/mcp/mcp_sonarqube_wrapper.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ai/sonar_issue_processor.py",
       "type": "py",
       "status": "active",
@@ -2245,7 +2491,7 @@
         },
         {
           "path": "scripts/ai/sonar_issue_processor_demo.py",
-          "line": 173,
+          "line": 174,
           "source_group": "scripts",
           "text": "print(\"   2. Run: python3 sonar_issue_processor.py\")"
         }
@@ -2271,6 +2517,193 @@
           "text": "python3 sonar_issue_processor_demo.py"
         }
       ]
+    },
+    {
+      "path": "scripts/ai/src/__main__.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/analyze_test_failures.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/bioetl/application/composite/runtime_wiring_api.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 9614,
+          "source_group": "scripts",
+          "text": "- module_path: src/bioetl/application/composite/runtime_wiring_api.py"
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 11039,
+          "source_group": "scripts",
+          "text": "name: \"src/bioetl/application/composite/runtime_wiring_api.py\""
+        },
+        {
+          "path": "src/tools/reports/configs_merged.md",
+          "line": 11040,
+          "source_group": "scripts",
+          "text": "module_path: \"src/bioetl/application/composite/runtime_wiring_api.py\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/src/bioetl/composition/bootstrap/runtime/runner_assembly.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 39,
+      "references": [
+        {
+          "path": "docs/02-architecture/05-composition-layer.md",
+          "line": 69,
+          "source_group": "docs",
+          "text": "| `runner_assembly.py`                                                      | Runner assembly helpers                                              |"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/bundles/foundation.bundle.md",
+          "line": 969,
+          "source_group": "docs",
+          "text": "Диаграмма «PipelineRunner Collaborator Diagram» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате диаграмма классов (class diagr"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/descriptions/foundation/38-runtime-assembly-sequence.md",
+          "line": 20,
+          "source_group": "docs",
+          "text": "Диаграмма Title: Runtime Assembly Sequence — build_pipeline_runner to PipelineRunner из foundation-набора фиксирует актуальный runtime assembly path проекта BioETL после выноса composition wiring в `r"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/descriptions/foundation/42-pipeline-runner-class.md",
+          "line": 20,
+          "source_group": "docs",
+          "text": "Диаграмма Title: PipelineRunner Collaborator Diagram показывает актуальную модель `PipelineRunner` после перехода на grouped dependency contract `PipelineRunnerDependencies` и выделенные lifecycle/pre"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/foundation/38-runtime-assembly-sequence.mmd",
+          "line": 24,
+          "source_group": "docs",
+          "text": "participant RA as runner_assembly.py"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/foundation/42-pipeline-runner-class.mmd",
+          "line": 2,
+          "source_group": "docs",
+          "text": "%% Covers: application/core/runner.py, application/core/pipeline_services.py, composition/factories/pipeline/runner_assembly.py"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/foundation/svg/38-runtime-assembly-sequence.svg",
+          "line": 1,
+          "source_group": "docs",
+          "text": "<svg id=\"my-svg\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" style=\"max-width: 3534px; background-color: white;\" viewBox=\"-50 -16 3534 2640\" role=\"graphi"
+        },
+        {
+          "path": "docs/plans/consolidated-open-tasks-plan-2026-03-21.md",
+          "line": 141,
+          "source_group": "docs",
+          "text": "- `src/bioetl/composition/bootstrap/runtime/runner_assembly.py`"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/src/bioetl/composition/factories/pipeline/_factory_method_types.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/check_sonar_issues.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/code_quality_analysis.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/group_issues.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/neo4j_memory_mcp_adapter.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/neo4j_memory_mcp_smoke.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/setup_mcp.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/sonar_issue_processor.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/src/sonar_issue_processor_demo.py",
+          "line": 174,
+          "source_group": "scripts",
+          "text": "print(\"   2. Run: python3 sonar_issue_processor.py\")"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/src/sonar_issue_processor_demo.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/src/sonarqube_mcp_smoke.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/vibe/__main__.py",
@@ -10812,7 +11245,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "src/tools/README.md",
@@ -10837,6 +11270,12 @@
           "line": 220,
           "source_group": "scripts",
           "text": "python src/tools/apply_entity_naming_rename_plan.py --wave W2-gold-contract-schemas --apply"
+        },
+        {
+          "path": "tests/unit/scripts/test_apply_entity_naming_rename_plan.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "module_path = repo_root / \"src\" / \"tools\" / \"apply_entity_naming_rename_plan.py\""
         }
       ]
     },

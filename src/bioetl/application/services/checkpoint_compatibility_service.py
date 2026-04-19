@@ -421,15 +421,27 @@ def _validate_lenient_pipeline_compatibility(
                     f"current={current_metadata.pipeline_version}, "
                     f"checkpoint={checkpoint_metadata.pipeline_version}"
                 )
-            elif (
-                current_metadata.pipeline_version
-                != checkpoint_metadata.pipeline_version
-            ):
-                messages.append(
-                    "Minor pipeline version changed (lenient mode): "
-                    f"current={current_metadata.pipeline_version}, "
-                    f"checkpoint={checkpoint_metadata.pipeline_version}"
-                )
+            elif len(current_parts) >= 2 and len(checkpoint_parts) >= 2:
+                # Check if minor version changed
+                if current_parts[1] != checkpoint_parts[1]:
+                    pipeline_compatible = False
+                    messages.append(
+                        "Minor pipeline version changed (lenient mode): "
+                        f"current={current_metadata.pipeline_version}, "
+                        f"checkpoint={checkpoint_metadata.pipeline_version}"
+                    )
+                # Check if only patch version changed (allowed in lenient mode)
+                elif len(current_parts) >= 3 and len(checkpoint_parts) >= 3:
+                    if current_parts[2] != checkpoint_parts[2]:
+                        messages.append(
+                            "Patch pipeline version changed (lenient mode): "
+                            f"current={current_metadata.pipeline_version}, "
+                            f"checkpoint={checkpoint_metadata.pipeline_version}"
+                        )
+                    else:
+                        messages.append("Pipeline versions are compatible")
+                else:
+                    messages.append("Pipeline versions are compatible")
             else:
                 messages.append("Pipeline versions are compatible")
     return pipeline_compatible, messages

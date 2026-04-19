@@ -14,6 +14,7 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,
 )
+from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
 from bioetl.domain.ports import (
@@ -25,10 +26,10 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.composition.observability import ObservabilityBundle
 
 if TYPE_CHECKING:
     import pyarrow as pa
+
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.types import GoldSchemaType
 
