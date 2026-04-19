@@ -51,55 +51,10 @@ def get_pipeline_runner_service(
 
 
 def build_run_command_input(
-    *,
-    pipeline: str,
-    run_type: str,
-    resume: bool,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    dry_run: bool,
-    yes: bool,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    debug: bool,
-    health_server: bool,
-    health_port: int,
-    enable_tracing: bool | None,
-    use_cached_bronze: bool,
-    cached_bronze_date: str | None,
-    cached_bronze_path: str | None,
-    replay_of_run_id: str | None = None,
-    replay_of_manifest_id: str | None = None,
-    exact_replay: bool = False,
+    cli_input: RunCommandInput,
 ) -> RunCommandInput:
     """Build normalized CLI payload for policy-based execution."""
-    return RunCommandInput(
-        pipeline=pipeline,
-        run_type=run_type,
-        resume=resume,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        dry_run=dry_run,
-        yes=yes,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        debug=debug,
-        health_server=health_server,
-        health_port=health_port,
-        enable_tracing=enable_tracing,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_date=cached_bronze_date,
-        cached_bronze_path=cached_bronze_path,
-        replay_of_run_id=replay_of_run_id,
-        replay_of_manifest_id=replay_of_manifest_id,
-        exact_replay=exact_replay,
-    )
+    return cli_input
 
 
 async def run_pipeline_async(

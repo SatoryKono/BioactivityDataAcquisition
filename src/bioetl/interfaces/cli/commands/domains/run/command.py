@@ -279,35 +279,34 @@ def _run_callback(
             "Strict exact replay requires snapshot-backed cached Bronze inputs; "
             "without --use-cached-bronze this run is outside the strict exact-replay boundary."
         )
-    cli_input_kwargs = {
-        "pipeline": pipeline,
-        "run_type": run_type,
-        "resume": resume,
-        "start_offset": start_offset,
-        "limit": limit,
-        "input_csv": input_csv,
-        "filter_column": filter_column,
-        "filter_field": filter_field,
-        "dry_run": dry_run,
-        "yes": yes,
-        "vacuum_after_run": vacuum_after_run,
-        "vacuum_retention_days": vacuum_retention_days,
-        "debug": debug,
-        "health_server": health_server,
-        "health_port": health_port,
-        "enable_tracing": enable_tracing,
-        "use_cached_bronze": use_cached_bronze,
-        "cached_bronze_date": cached_bronze_date,
-        "cached_bronze_path": cached_bronze_path,
-        "replay_of_run_id": replay_of_run_id,
-        "replay_of_manifest_id": replay_of_manifest_id,
-    }
-    if exact_replay:
-        cli_input_kwargs["exact_replay"] = True
+    cli_input = RunCommandInput(
+        pipeline=pipeline,
+        run_type=run_type,
+        resume=resume,
+        start_offset=start_offset,
+        limit=limit,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        dry_run=dry_run,
+        yes=yes,
+        vacuum_after_run=vacuum_after_run,
+        vacuum_retention_days=vacuum_retention_days,
+        debug=debug,
+        health_server=health_server,
+        health_port=health_port,
+        enable_tracing=enable_tracing,
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_date=cached_bronze_date,
+        cached_bronze_path=cached_bronze_path,
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
+        exact_replay=exact_replay,
+    )
 
     dispatch_cli_callback(
         ctx,
-        build_cli_input=lambda: _build_run_command_input(**cli_input_kwargs),
+        build_cli_input=lambda: _build_run_command_input(cli_input),
         run_with_cli_policy=_run_command_with_cli_policy,
     )
 

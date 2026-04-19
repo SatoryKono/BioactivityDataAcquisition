@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, TypeVar, cast
 from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _ControlPlaneArtifacts,
+    _CreateFactoryRunnerRequest,
+    _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
     build_create_pipeline_with_services_request,
     build_pipeline_factory_context,
@@ -46,20 +48,7 @@ def build_factory_context(
 
 def create_with_services_from_factory(
     factory: GenericPipelineFactory[TPipeline],
-    run_id: RunID,
-    runtime: RuntimeConfig,
-    settings: Settings,
-    logger: LoggerPort,
-    manifest_id: str | None = None,
-    config_hash: str | None = None,
-    dq_contract_compatibility_hash: str | None = None,
-    effective_config_artifact_id: str | None = None,
-    config: PipelineYamlConfig | None = None,
-    filter_config: InputFilterConfig | None = None,
-    tracer: TracingPort | None = None,
-    dq_monitor: DQMonitorPort | None = None,
-    metrics: MetricsPort | None = None,
-    cached_bronze: CachedBronzeContext | None = None,
+    request: _CreatePipelineWithServicesRequest,
     *,
     create_pipeline_instance_with_services_fn: object,
 ) -> TPipeline:
@@ -68,62 +57,20 @@ def create_with_services_from_factory(
         TPipeline,
         create_pipeline_instance_with_services_fn(
             factory_context=build_factory_context(factory),
-            request=build_create_pipeline_with_services_request(
-                run_id,
-                runtime,
-                settings,
-                logger,
-                _ControlPlaneArtifacts(
-                    manifest_id=manifest_id,
-                    config_hash=config_hash,
-                    dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-                    effective_config_artifact_id=effective_config_artifact_id,
-                ),
-                config,
-                filter_config,
-                tracer,
-                dq_monitor,
-                metrics,
-                cached_bronze,
-            ),
+            request=request,
         ),
     )
 
 
 def create_runner_from_factory(
     factory: GenericPipelineFactory[TPipeline],
-    run_id: RunID,
-    runtime: RuntimeConfig,
-    settings: Settings,
-    observability: ObservabilityBundle,
+    request: _CreateFactoryRunnerRequest,
     *,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    manifest_id: str | None = None,
-    config_hash: str | None = None,
-    dq_contract_compatibility_hash: str | None = None,
-    effective_config_artifact_id: str | None = None,
-    filter_config: InputFilterConfig | None = None,
-    config: PipelineYamlConfig | None = None,
-    cached_bronze: CachedBronzeContext | None = None,
     assemble_runner_fn: object,
 ) -> PipelineRunner:
     """Create a runner using the factory's current bound service constructor."""
     return create_factory_runner(
-        pipeline_name=factory.pipeline_name,
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        run_id=run_id,
-        runtime=runtime,
-        settings=settings,
-        observability=observability,
-        manifest_id=manifest_id,
-        config_hash=config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
+        request=request,
         create_with_services_fn=factory.create_with_services,
         assemble_runner_fn=assemble_runner_fn,
-        filter_config=filter_config,
-        config=config,
-        cached_bronze=cached_bronze,
     )

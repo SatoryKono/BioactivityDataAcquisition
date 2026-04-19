@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
@@ -46,14 +46,16 @@ if TYPE_CHECKING:
     )
 
 
-CompositeRunnerFactory = Callable[..., CompositePipelineRunner]
+CompositeRunnerFactory = Callable[
+    [CompositeRunnerServiceInputs], CompositePipelineRunner
+]
 
 
 @dataclass(frozen=True, slots=True)
 class CompositeRunnerServiceInputs:
     config: CompositeConfig
     runtime: CompositeRuntimeConfig
-    run_id: str
+    run_id: str | None
     logger: LoggerPort
     lock: LockPort
     seed_runner_factory: Callable[[], PipelineRunner]
@@ -62,7 +64,7 @@ class CompositeRunnerServiceInputs:
     coordinator: EnrichmentCoordinatorService
     merger: _MergeService
     checkpoint_manager: CompositeCheckpointService
-    fsm_state_helper: FSMStateHelperService
+    fsm_state_helper: FSMStateHelperService | None
     dq_report_service: DQReportService | None
     preflight_validator: CompositePreflightValidationService | None
     dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner] | None
@@ -70,7 +72,7 @@ class CompositeRunnerServiceInputs:
     quarantine_port: QuarantinePort | None
     metrics: MetricsPort | None
     tracer: TracingPort | None
-    observer: CompositeLifecycleObserverService
+    observer: CompositeLifecycleObserverService | None
     manifest_id: str | None
     run_ledger_service: RunLedgerService | None
 
@@ -149,44 +151,42 @@ def build_composite_runner_service_inputs(
     )
 
 
+def normalize_composite_runner_service_inputs(
+    inputs: CompositeRunnerServiceInputs,
+) -> CompositeRunnerServiceInputs:
+    if inputs.fsm_state_helper is None:
+        raise AssertionError("Composite runner requires fsm_state_helper")
+    if inputs.observer is None:
+        inputs = replace(
+            inputs,
+            observer=CompositeLifecycleObserverService(
+                logger=inputs.logger,
+                metrics=inputs.metrics,
+                tracer=inputs.tracer,
+            ),
+        )
+    if inputs.run_id is None:
+        inputs = replace(inputs, run_id=resolve_effective_run_id(inputs.run_id))
+    return inputs
+
+
 def invoke_composite_runner_factory(
     *,
     runner_factory: CompositeRunnerFactory,
     inputs: CompositeRunnerServiceInputs,
 ) -> CompositePipelineRunner:
-    return runner_factory(
-        config=inputs.config,
-        runtime=inputs.runtime,
-        seed_runner_factory=inputs.seed_runner_factory,
-        enricher_runner_factory=inputs.enricher_runner_factory,
-        key_extractor=inputs.key_extractor,
-        coordinator=inputs.coordinator,
-        merger=inputs.merger,
-        checkpoint_manager=inputs.checkpoint_manager,
-        logger=inputs.logger,
-        lock=inputs.lock,
-        fsm_state_helper=inputs.fsm_state_helper,
-        run_id=inputs.run_id,
-        dq_report_service=inputs.dq_report_service,
-        preflight_validator=inputs.preflight_validator,
-        dependencies_runner_factory=inputs.dependencies_runner_factory,
-        dependency_coordinator=inputs.dependency_coordinator,
-        quarantine_port=inputs.quarantine_port,
-        metrics=inputs.metrics,
-        tracer=inputs.tracer,
-        observer=inputs.observer,
-        manifest_id=inputs.manifest_id,
-        run_ledger_service=inputs.run_ledger_service,
-    )
+    return runner_factory(inputs)
 
 
 def create_composite_runner_service_from_inputs(
     inputs: CompositeRunnerServiceInputs,
 ) -> CompositePipelineRunner:
-    deps = build_composite_runner_dependencies(inputs)
+    normalized_inputs = normalize_composite_runner_service_inputs(inputs)
+    effective_run_id = resolve_effective_run_id(normalized_inputs.run_id)
+    deps = build_composite_runner_dependencies(normalized_inputs)
     return CompositePipelineRunner(
-        config=inputs.config,
-        runtime=inputs.runtime,
+        config=normalized_inputs.config,
+        runtime=normalized_inputs.runtime,
         deps=deps,
-        run_id=inputs.run_id,
+        run_id=effective_run_id,
     )

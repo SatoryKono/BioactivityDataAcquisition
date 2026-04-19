@@ -24,6 +24,7 @@ from bioetl.composition.factories.pipeline._factory_method_runtime_support impor
 from bioetl.composition.factories.pipeline._factory_method_types import (
     _BuildFactoryServicesRequest,
     _ControlPlaneArtifacts,
+    _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
 )
@@ -157,40 +158,27 @@ def create_pipeline_instance_with_services(
 
 def create_factory_runner(
     *,
-    pipeline_name: str,
-    silver_schema: pa.Schema | None,
-    gold_schema: GoldSchemaType,
-    run_id: RunID,
-    runtime: RuntimeConfig,
-    settings: Settings,
-    observability: ObservabilityBundle,
-    manifest_id: str | None = None,
-    config_hash: str | None = None,
-    dq_contract_compatibility_hash: str | None = None,
-    effective_config_artifact_id: str | None = None,
+    request: _CreateFactoryRunnerRequest,
     create_with_services_fn: Callable[..., TPipeline],
     assemble_runner_fn: Callable[..., PipelineRunner],
-    filter_config: InputFilterConfig | None = None,
-    config: PipelineYamlConfig | None = None,
-    cached_bronze: CachedBronzeContext | None = None,
 ) -> PipelineRunner:
-    yaml_config = config or load_pipeline_config(pipeline_name)
+    yaml_config = request.config or load_pipeline_config(request.pipeline_name)
     return create_factory_runner_from_request(
-        silver_schema=silver_schema,
-        gold_schema=gold_schema,
-        run_id=run_id,
-        runtime=runtime,
-        settings=settings,
-        observability=observability,
+        silver_schema=request.silver_schema,
+        gold_schema=request.gold_schema,
+        run_id=request.run_id,
+        runtime=request.runtime,
+        settings=request.settings,
+        observability=request.observability,
         yaml_config=yaml_config,
         control_plane_artifacts=_ControlPlaneArtifacts(
-            manifest_id=manifest_id,
-            config_hash=config_hash,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
+            manifest_id=request.manifest_id,
+            config_hash=request.config_hash,
+            dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
+            effective_config_artifact_id=request.effective_config_artifact_id,
         ),
         create_with_services_fn=create_with_services_fn,
         assemble_runner_fn=assemble_runner_fn,
-        filter_config=filter_config,
-        cached_bronze=cached_bronze,
+        filter_config=request.filter_config,
+        cached_bronze=request.cached_bronze,
     )

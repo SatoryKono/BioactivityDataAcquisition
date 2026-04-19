@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
@@ -24,6 +25,12 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.composition.observability import ObservabilityBundle
+
+if TYPE_CHECKING:
+    import pyarrow as pa
+    from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.types import GoldSchemaType
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +62,24 @@ class _ControlPlaneArtifacts:
     config_hash: str | None = None
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _CreateFactoryRunnerRequest:
+    pipeline_name: str
+    silver_schema: pa.Schema | None
+    gold_schema: GoldSchemaType
+    run_id: RunID
+    runtime: RuntimeConfig
+    settings: Settings
+    observability: ObservabilityBundle
+    manifest_id: str | None = None
+    config_hash: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
+    filter_config: InputFilterConfig | None = None
+    config: PipelineYamlConfig | None = None
+    cached_bronze: CachedBronzeContext | None = None
 
 
 def extract_entity_type(pipeline_name: str) -> str | None:

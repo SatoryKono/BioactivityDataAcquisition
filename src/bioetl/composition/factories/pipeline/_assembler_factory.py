@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, Generic, TypeVar, cast, overload
+from typing import Generic, TypeVar, cast
 
 import pyarrow as pa
 
@@ -26,6 +26,8 @@ from bioetl.composition.factories.pipeline.assembler_helpers import (
 )
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _BuildFactoryServicesRequest,
+    _CreateFactoryRunnerRequest,
+    _CreatePipelineWithServicesRequest,
     create_factory_data_source,
     create_transformer_instance,
     resolve_data_source_creator,
@@ -182,32 +184,15 @@ class GenericPipelineFactory(Generic[TPipeline]):
             ),
         )
 
-    @overload
     def create_with_services(
         self,
-        run_id: RunID,
-        runtime: RuntimeConfig,
-        settings: Settings,
-        logger: LoggerPort,
-        manifest_id: str | None = None,
-        config_hash: str | None = None,
-        dq_contract_compatibility_hash: str | None = None,
-        effective_config_artifact_id: str | None = None,
-        config: PipelineYamlConfig | None = None,
-        filter_config: InputFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        dq_monitor: DQMonitorPort | None = None,
-        metrics: MetricsPort | None = None,
-        cached_bronze: CachedBronzeContext | None = None,
-    ) -> TPipeline: ...
-
-    def create_with_services(self, *args: Any, **kwargs: Any) -> TPipeline:
+        request: _CreatePipelineWithServicesRequest,
+    ) -> TPipeline:
         return cast(
             TPipeline,
             create_with_services_from_factory(
                 self,
-                *args,
-                **kwargs,
+                request=request,
                 create_pipeline_instance_with_services_fn=_public_assembler_callable(
                     "create_pipeline_instance_with_services"
                 ),
@@ -230,19 +215,22 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> PipelineRunner:
         return create_runner_from_factory(
             self,
-            run_id=run_id,
-            runtime=runtime,
-            settings=settings,
-            observability=observability,
-            silver_schema=self.silver_schema,
-            gold_schema=self.gold_schema,
-            manifest_id=manifest_id,
-            config_hash=config_hash,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
-            filter_config=filter_config,
-            config=config,
-            cached_bronze=cached_bronze,
+            request=_CreateFactoryRunnerRequest(
+                pipeline_name=self.pipeline_name,
+                silver_schema=self.silver_schema,
+                gold_schema=self.gold_schema,
+                run_id=run_id,
+                runtime=runtime,
+                settings=settings,
+                observability=observability,
+                manifest_id=manifest_id,
+                config_hash=config_hash,
+                dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+                effective_config_artifact_id=effective_config_artifact_id,
+                filter_config=filter_config,
+                config=config,
+                cached_bronze=cached_bronze,
+            ),
             assemble_runner_fn=_public_assembler_seam("assemble_runner"),
         )
 
