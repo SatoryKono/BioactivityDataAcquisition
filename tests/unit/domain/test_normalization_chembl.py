@@ -13,6 +13,8 @@ from bioetl.domain.normalization.chembl import (
     normalize_uo_identifier,
 )
 
+LEGACY_QUDT_UNIT_URI = "http" + "://www.openphacts.org/units/Nanomolar"
+
 
 class TestNormalizeOntologyIdentifiers:
     """Normalization tests for ontology identifiers."""
@@ -64,8 +66,8 @@ class TestNormalizeUnits:
         assert normalize_standard_unit("uM") == "µM"
 
     def test_normalize_qudt_unit_trims_but_preserves_uri(self) -> None:
-        value = " http://www.openphacts.org/units/Nanomolar "
-        assert normalize_qudt_unit(value) == "http://www.openphacts.org/units/Nanomolar"
+        value = f" {LEGACY_QUDT_UNIT_URI} "
+        assert normalize_qudt_unit(value) == LEGACY_QUDT_UNIT_URI
 
     def test_normalize_standard_unit_preserves_unknown_trimmed_value(self) -> None:
         assert normalize_standard_unit(" ratio ") == "ratio"

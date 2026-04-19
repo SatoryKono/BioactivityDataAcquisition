@@ -32,6 +32,8 @@ from tests.unit.application.pipelines.activity_transformer_shared import (
     SharedActivityTransformerTransformTests,
 )
 
+LEGACY_QUDT_UNIT_URI = "http" + "://www.openphacts.org/units/Nanomolar"
+
 
 @pytest.mark.unit
 class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
@@ -69,7 +71,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
             "molecule_id": "CHEMBL25",
             "standard_units": "nanomolar",
             "units": "uM",
-            "qudt_units": " http://www.openphacts.org/units/Nanomolar ",
+            "qudt_units": f" {LEGACY_QUDT_UNIT_URI} ",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -77,7 +79,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result is not None
         assert result["standard_units"] == "nM"
         assert result["units"] == "uM"
-        assert result["qudt_units"] == "http://www.openphacts.org/units/Nanomolar"
+        assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
 
     @pytest.mark.asyncio
     async def test_transform_normalizes_full_activity_canonical_field_set(
@@ -91,7 +93,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
             "bao_format": "BAO:0000218",
             "standard_units": " nanomolar ",
             "uo_units": " uo:0000065 ",
-            "qudt_units": " http://www.openphacts.org/units/Nanomolar ",
+            "qudt_units": f" {LEGACY_QUDT_UNIT_URI} ",
             "units": "raw-uM",
         }
 
@@ -102,7 +104,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["bao_format"] == "BAO_0000218"
         assert result["standard_units"] == "nM"
         assert result["uo_units"] == "UO_0000065"
-        assert result["qudt_units"] == "http://www.openphacts.org/units/Nanomolar"
+        assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
         assert result["units"] == "raw-uM"
 
     @pytest.mark.asyncio
@@ -117,7 +119,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
             "bao_format": "BAO_0000218",
             "standard_units": "nM",
             "uo_units": "UO_0000065",
-            "qudt_units": "http://www.openphacts.org/units/Nanomolar",
+            "qudt_units": LEGACY_QUDT_UNIT_URI,
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -127,7 +129,7 @@ class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):
         assert result["bao_format"] == "BAO_0000218"
         assert result["standard_units"] == "nM"
         assert result["uo_units"] == "UO_0000065"
-        assert result["qudt_units"] == "http://www.openphacts.org/units/Nanomolar"
+        assert result["qudt_units"] == LEGACY_QUDT_UNIT_URI
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(

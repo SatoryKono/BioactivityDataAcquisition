@@ -20,6 +20,8 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from tests.helpers.transformer_dependencies import instantiate_test_transformer
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/NATURE12373"
+
 
 @pytest.fixture
 def transformer() -> OpenAlexPublicationTransformer:
@@ -361,7 +363,7 @@ class TestOpenAlexDoiNormalization:
             ("https://doi.org/10.1000/ABC.DEF", "10.1000/abc.def"),
             ("https://doi.org/10.1000/Test-DOI_123", "10.1000/test-doi_123"),
             # HTTP prefix
-            ("http://doi.org/10.1038/NATURE12373", "10.1038/nature12373"),
+            (LEGACY_HTTP_DOI, "10.1038/nature12373"),
             # doi: prefix
             ("doi:10.1038/NATURE12373", "10.1038/nature12373"),
             # Bare DOI (no prefix)

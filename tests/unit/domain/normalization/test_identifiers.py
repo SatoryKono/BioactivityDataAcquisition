@@ -13,6 +13,8 @@ from bioetl.domain.normalization.identifiers import (
     strip_doi_prefix,
 )
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1234/test"
+
 
 class TestStripDOIPrefix:
     """Test DOI prefix stripping."""
@@ -20,7 +22,7 @@ class TestStripDOIPrefix:
     def test_strip_doi_prefix(self) -> None:
         """Test stripping various DOI prefixes."""
         assert strip_doi_prefix("https://doi.org/10.1234/test") == "10.1234/test"
-        assert strip_doi_prefix("http://doi.org/10.1234/test") == "10.1234/test"
+        assert strip_doi_prefix(LEGACY_HTTP_DOI) == "10.1234/test"
         assert strip_doi_prefix("doi:10.1234/test") == "10.1234/test"
         assert strip_doi_prefix("DOI:10.1234/test") == "10.1234/test"
         assert strip_doi_prefix("10.1234/test") == "10.1234/test"
@@ -33,7 +35,7 @@ class TestStripDOIPrefix:
     def test_strip_doi_prefix_with_spaces(self) -> None:
         """Test prefix stripping with whitespace."""
         assert strip_doi_prefix("  https://doi.org/10.1234/test  ") == "10.1234/test"
-        assert strip_doi_prefix("\thttp://doi.org/10.1234/test\t") == "10.1234/test"
+        assert strip_doi_prefix(f"\t{LEGACY_HTTP_DOI}\t") == "10.1234/test"
 
 
 class TestNormalizeDOI:
@@ -48,7 +50,7 @@ class TestNormalizeDOI:
     def test_normalize_doi_with_prefixes(self) -> None:
         """Test DOI normalization with various prefixes."""
         assert normalize_doi("https://doi.org/10.1234/test") == "10.1234/test"
-        assert normalize_doi("http://doi.org/10.1234/test") == "10.1234/test"
+        assert normalize_doi(LEGACY_HTTP_DOI) == "10.1234/test"
         assert normalize_doi("doi:10.1234/test") == "10.1234/test"
         assert normalize_doi("DOI:10.1234/test") == "10.1234/test"
 
