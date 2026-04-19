@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import tempfile
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
@@ -18,13 +20,18 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
 
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-postwrite-"))
+SILVER_ROOT = str(TEST_ROOT / "silver")
+SILVER_TABLE_PATH = str(TEST_ROOT / "silver" / "test.table")
+SILVER_EXPORT_PATH = str(TEST_ROOT / "silver" / "test.table.csv")
+
 
 def _build_payload() -> _PreparedSilverWritePayload:
     records = [{"entity_id": "CHEMBL1", "value": 1.0}]
     return _PreparedSilverWritePayload(
         records=records,
         validated_mode=SilverWriteMode.MERGE,
-        table_path="/tmp/silver/test.table",
+        table_path=SILVER_TABLE_PATH,
         arrow_data=pa.Table.from_pylist(records),
         schema_mode=None,
         merge_schema=False,
@@ -85,7 +92,7 @@ async def test_postwrite_mixin_routes_through_compatibility_hooks() -> None:
     harness._finalize_silver_write_result.assert_awaited_once_with(
         table_name="test.table",
         records=payload.records,
-        table_path="/tmp/silver/test.table",
+        table_path=SILVER_TABLE_PATH,
         primary_keys=["entity_id"],
         validated_mode=SilverWriteMode.MERGE,
         bronze_refs=None,
@@ -107,7 +114,7 @@ async def test_postwrite_operations_preserve_service_specific_export_and_audit()
     metadata = Mock()
     metadata.log_silver_audit = AsyncMock()
     host = SimpleNamespace(
-        base_path="/tmp/silver",
+        base_path=SILVER_ROOT,
         _maintenance=maintenance,
         _metadata=metadata,
         _maybe_export_csv=AsyncMock(),
@@ -125,7 +132,7 @@ async def test_postwrite_operations_preserve_service_specific_export_and_audit()
     maintenance.maybe_export_csv.assert_awaited_once_with(
         table_name="test.table",
         arrow_data=payload.arrow_data,
-        export_path="/tmp/silver/test.table.csv",
+        export_path=SILVER_EXPORT_PATH,
         primary_keys=["entity_id"],
     )
     host._maybe_export_csv.assert_not_awaited()
@@ -142,7 +149,7 @@ async def test_postwrite_operations_preserve_service_specific_export_and_audit()
     host._finalize_silver_write_result.assert_awaited_once_with(
         table_name="test.table",
         records=payload.records,
-        table_path="/tmp/silver/test.table",
+        table_path=SILVER_TABLE_PATH,
         primary_keys=["entity_id"],
         validated_mode=SilverWriteMode.MERGE,
         bronze_refs=None,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -13,6 +14,13 @@ from bioetl.composition.factories.storage.adapter import StorageAdapter
 from bioetl.domain.ports import StoragePort
 from bioetl.domain.types import RunType
 
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-storage-adapter-"))
+BRONZE_ROOT = str(TEST_ROOT / "bronze")
+SILVER_ROOT = str(TEST_ROOT / "silver")
+GOLD_ROOT = str(TEST_ROOT / "gold")
+SILVER_TABLE_PATH = TEST_ROOT / "silver" / "table"
+GOLD_TABLE_PATH = TEST_ROOT / "gold" / "table"
+
 
 @pytest.fixture
 def mock_bronze_writer() -> MagicMock:
@@ -20,7 +28,7 @@ def mock_bronze_writer() -> MagicMock:
     writer = MagicMock()
     writer.write_bronze = AsyncMock()
     writer.cleanup_old_files = AsyncMock()
-    writer.base_path = "/tmp/bronze"
+    writer.base_path = BRONZE_ROOT
     return writer
 
 
@@ -33,8 +41,8 @@ def mock_silver_writer() -> MagicMock:
     writer.read_silver = AsyncMock(return_value=[{"id": 1}])
     writer.vacuum = AsyncMock()
     writer.clear = MagicMock(return_value=1)
-    writer.get_table_path = MagicMock(return_value=Path("/tmp/silver/table"))
-    writer.base_path = "/tmp/silver"
+    writer.get_table_path = MagicMock(return_value=SILVER_TABLE_PATH)
+    writer.base_path = SILVER_ROOT
     writer.csv_exporter = None
     return writer
 
@@ -46,8 +54,8 @@ def mock_gold_writer() -> MagicMock:
     writer.write_gold = AsyncMock()
     writer.write_gold_merged = AsyncMock()
     writer.clear = MagicMock(return_value=1)
-    writer.get_table_path = MagicMock(return_value=Path("/tmp/gold/table"))
-    writer.base_path = "/tmp/gold"
+    writer.get_table_path = MagicMock(return_value=GOLD_TABLE_PATH)
+    writer.base_path = GOLD_ROOT
     writer.csv_exporter = None
     return writer
 
@@ -391,7 +399,7 @@ class TestStorageAdapterAdditionalPaths:
         """get_table_path should resolve via Silver writer by default."""
         result = storage_adapter.get_table_path("chembl.activity")
 
-        assert result == Path("/tmp/silver/table")
+        assert result == SILVER_TABLE_PATH
         mock_silver_writer.get_table_path.assert_called_once_with("chembl.activity")
 
     def test_get_table_path_gold_layer_uses_gold_writer(
@@ -400,7 +408,7 @@ class TestStorageAdapterAdditionalPaths:
         """get_table_path(layer='gold') should resolve via Gold writer."""
         result = storage_adapter.get_table_path("chembl.activity", layer="gold")
 
-        assert result == Path("/tmp/gold/table")
+        assert result == GOLD_TABLE_PATH
         mock_gold_writer.get_table_path.assert_called_once_with("chembl.activity")
 
     @pytest.mark.asyncio

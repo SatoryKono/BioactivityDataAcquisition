@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
@@ -13,12 +14,17 @@ from bioetl.composition.factories.storage.health_mixin import (
 )
 from bioetl.domain.types import HealthStatus
 
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-health-mixin-"))
+BRONZE_ROOT = str(TEST_ROOT / "bronze")
+SILVER_ROOT = str(TEST_ROOT / "silver")
+GOLD_ROOT = str(TEST_ROOT / "gold")
+
 
 def _make_mixin(
     *,
-    bronze_base: str = "/tmp/bronze",
-    silver_base: str = "/tmp/silver",
-    gold_base: str = "/tmp/gold",
+    bronze_base: str = BRONZE_ROOT,
+    silver_base: str = SILVER_ROOT,
+    gold_base: str = GOLD_ROOT,
 ) -> StorageAdapterHealthMixin:
     """Create a HealthMixin with stub writers."""
     mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
@@ -48,14 +54,14 @@ async def test_aclose_closes_shared_audit_once() -> None:
     """Shared audit adapter should be closed once through adapter shutdown."""
     audit = SimpleNamespace(aclose=AsyncMock())
     mixin = StorageAdapterHealthMixin.__new__(StorageAdapterHealthMixin)
-    mixin.bronze = SimpleNamespace(base_path="/tmp/bronze", _audit=audit)  # type: ignore[assignment]
+    mixin.bronze = SimpleNamespace(base_path=BRONZE_ROOT, _audit=audit)  # type: ignore[assignment]
     mixin.silver = SimpleNamespace(  # type: ignore[assignment]
-        base_path="/tmp/silver",
+        base_path=SILVER_ROOT,
         get_table_path=MagicMock(),
         _audit=audit,
     )
     mixin.gold = SimpleNamespace(  # type: ignore[assignment]
-        base_path="/tmp/gold",
+        base_path=GOLD_ROOT,
         get_table_path=MagicMock(),
         _audit=audit,
     )

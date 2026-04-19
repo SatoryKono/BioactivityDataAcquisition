@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import tempfile
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pyarrow as pa
@@ -16,6 +18,10 @@ from bioetl.infrastructure.storage.gold.io_delta_mixins import (
     _run_gold_write_with_retry,
 )
 from datetime import UTC
+
+TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-gold-io-delta-"))
+GOLD_TEST_PATH = str(TEST_ROOT / "gold" / "test")
+GOLD_SCD2_PATH = str(TEST_ROOT / "gold" / "scd2")
 
 
 class _ArrowHost(_GoldWriterExecutorArrowMixin):
@@ -36,7 +42,7 @@ class TestBuildSimpleGoldWrite:
         host._to_arrow_table.return_value = arrow_table
 
         request = _SimpleGoldWriteRequest(
-            table_path="/tmp/gold/test",
+            table_path=GOLD_TEST_PATH,
             table_name="test_table",
             records=[{"id": 1, "name": "a"}, {"id": 2, "name": "b"}],
             mode="overwrite",
@@ -52,7 +58,7 @@ class TestBuildSimpleGoldWrite:
         host._to_arrow_table.return_value = pa.table({"id": [1]})
 
         request = _SimpleGoldWriteRequest(
-            table_path="/tmp/gold/test",
+            table_path=GOLD_TEST_PATH,
             table_name="test_table",
             records=[{"id": 1}],
             mode="append",
@@ -68,7 +74,7 @@ class TestBuildSimpleGoldWrite:
         host._to_arrow_table.return_value = arrow_table
 
         request = _SimpleGoldWriteRequest(
-            table_path="/tmp/gold/test",
+            table_path=GOLD_TEST_PATH,
             table_name="test_table",
             records=[{"id": 3}, {"id": 1}, {"id": 2}],
             mode="overwrite",
@@ -178,7 +184,7 @@ class TestPrepareScd2GoldWrite:
         ts = datetime(2025, 1, 15, 12, 0, 0, tzinfo=UTC)
 
         prepared = _prepare_scd2_gold_write(
-            table_path="/tmp/gold/scd2",
+            table_path=GOLD_SCD2_PATH,
             records=records,
             scd_config=scd_config,
             partition_cols=None,
