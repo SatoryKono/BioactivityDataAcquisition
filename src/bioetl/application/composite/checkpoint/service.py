@@ -46,9 +46,9 @@ class CompositeCheckpointServiceInit:
     expected_manifest_id: str | None = None
     run_ledger_port: RunLedgerPort | None = None
     metrics: MetricsPort | None = None
-    load_service_factory: Callable[
-        ..., CompositeCheckpointLoadService
-    ] = CompositeCheckpointLoadService
+    load_service_factory: Callable[..., CompositeCheckpointLoadService] = (
+        CompositeCheckpointLoadService
+    )
     persistence_service_factory: Callable[
         ..., CompositeCheckpointPersistenceService
     ] = CompositeCheckpointPersistenceService
@@ -81,8 +81,7 @@ def _resolve_checkpoint_init_value(
         return _CHECKPOINT_INIT_OPTIONAL_DEFAULTS[field_name]
     if init is None:
         raise TypeError(
-            "CompositeCheckpointService() missing required argument: "
-            f"'{field_name}'"
+            f"CompositeCheckpointService() missing required argument: '{field_name}'"
         )
     return getattr(init, field_name)
 

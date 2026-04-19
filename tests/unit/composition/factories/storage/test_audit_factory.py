@@ -79,9 +79,7 @@ def test_create_audit_port_uses_default_output_audit_path() -> None:
 @pytest.mark.unit
 def test_create_audit_port_uses_noop_observability_when_ports_not_passed() -> None:
     """Audit factory should still construct a valid adapter without explicit ports."""
-    settings = _make_settings(
-        audit_enabled=True, audit_base_path=CUSTOM_AUDIT_ROOT
-    )
+    settings = _make_settings(audit_enabled=True, audit_base_path=CUSTOM_AUDIT_ROOT)
 
     result = create_audit_port(settings=settings, logger=MagicMock())
 

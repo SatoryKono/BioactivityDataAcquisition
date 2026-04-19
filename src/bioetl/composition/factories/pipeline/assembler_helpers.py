@@ -14,7 +14,6 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 )
 
 if TYPE_CHECKING:
-
     from bioetl.composition.factories.pipeline.assembler import GenericPipelineFactory
 
 TPipeline = TypeVar("TPipeline", bound=BasePipeline)

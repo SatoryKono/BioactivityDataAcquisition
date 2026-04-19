@@ -150,8 +150,7 @@ def _coerce_silver_metadata_write_request(
     if unexpected_fields:
         unexpected = ", ".join(unexpected_fields)
         raise TypeError(
-            "_write_silver_metadata() got unexpected keyword arguments: "
-            f"{unexpected}"
+            f"_write_silver_metadata() got unexpected keyword arguments: {unexpected}"
         )
 
     missing_fields = [

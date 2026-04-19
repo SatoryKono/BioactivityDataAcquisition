@@ -29,7 +29,6 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
-
     from bioetl.application.core.wiring.runtime import (
         BasePipeline,
         BatchCheckpointRecoveryService,
