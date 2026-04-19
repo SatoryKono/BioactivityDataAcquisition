@@ -23,6 +23,11 @@ BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
+POSIX_VENV_PYTHON=".venv/bin/python"
+WINDOWS_LOCAL_VENV_PYTHON=".venv/Scripts/python.exe"
+WINDOWS_REPO_VENV_PYTHON=".venv-win/Scripts/python.exe"
+PYTHON_KIND_POSIX_VENV="posix-venv"
+PYTHON_KIND_WINDOWS_VENV="windows-venv"
 
 BIOETL_WSL_VENV_DIR="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}"
 PYTEST_RUNTIME_ENV_FILE="$REPO_ROOT/.pytest_cache/setup_plugins_runtime.sh"
@@ -90,10 +95,10 @@ to_windows_path() {
 if [[ "$IS_WSL" == true ]]; then
     if [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]]; then
         PYTHON_BIN="$BIOETL_WSL_VENV_DIR/bin/python"
-        PYTHON_KIND="posix-venv"
-    elif [[ -x ".venv/bin/python" ]]; then
-        PYTHON_BIN=".venv/bin/python"
-        PYTHON_KIND="posix-venv"
+        PYTHON_KIND="$PYTHON_KIND_POSIX_VENV"
+    elif [[ -x "$POSIX_VENV_PYTHON" ]]; then
+        PYTHON_BIN="$POSIX_VENV_PYTHON"
+        PYTHON_KIND="$PYTHON_KIND_POSIX_VENV"
     elif command -v uv >/dev/null 2>&1; then
         USE_UV=true
         PYTHON_KIND="uv"
@@ -103,30 +108,30 @@ if [[ "$IS_WSL" == true ]]; then
     elif command -v python >/dev/null 2>&1; then
         PYTHON_BIN="python"
         PYTHON_KIND="system-python"
-    elif [[ -x ".venv-win/Scripts/python.exe" ]]; then
-        PYTHON_BIN=".venv-win/Scripts/python.exe"
-        PYTHON_KIND="windows-venv"
-    elif [[ -x ".venv/Scripts/python.exe" ]]; then
-        PYTHON_BIN=".venv/Scripts/python.exe"
-        PYTHON_KIND="windows-venv"
+    elif [[ -x "$WINDOWS_REPO_VENV_PYTHON" ]]; then
+        PYTHON_BIN="$WINDOWS_REPO_VENV_PYTHON"
+        PYTHON_KIND="$PYTHON_KIND_WINDOWS_VENV"
+    elif [[ -x "$WINDOWS_LOCAL_VENV_PYTHON" ]]; then
+        PYTHON_BIN="$WINDOWS_LOCAL_VENV_PYTHON"
+        PYTHON_KIND="$PYTHON_KIND_WINDOWS_VENV"
     else
         log_warn "Python runtime not found."
         log_warn "Install uv or activate a Python environment, then rerun:"
         echo "  uv sync --extra dev --extra tests --extra tracing"
         exit 1
     fi
-elif [[ -x ".venv-win/Scripts/python.exe" ]]; then
-    PYTHON_BIN=".venv-win/Scripts/python.exe"
-    PYTHON_KIND="windows-venv"
+elif [[ -x "$WINDOWS_REPO_VENV_PYTHON" ]]; then
+    PYTHON_BIN="$WINDOWS_REPO_VENV_PYTHON"
+    PYTHON_KIND="$PYTHON_KIND_WINDOWS_VENV"
 elif [[ -x "$BIOETL_WSL_VENV_DIR/bin/python" ]]; then
     PYTHON_BIN="$BIOETL_WSL_VENV_DIR/bin/python"
-    PYTHON_KIND="posix-venv"
-elif [[ -x ".venv/Scripts/python.exe" ]]; then
-    PYTHON_BIN=".venv/Scripts/python.exe"
-    PYTHON_KIND="windows-venv"
-elif [[ -x ".venv/bin/python" ]]; then
-    PYTHON_BIN=".venv/bin/python"
-    PYTHON_KIND="posix-venv"
+    PYTHON_KIND="$PYTHON_KIND_POSIX_VENV"
+elif [[ -x "$WINDOWS_LOCAL_VENV_PYTHON" ]]; then
+    PYTHON_BIN="$WINDOWS_LOCAL_VENV_PYTHON"
+    PYTHON_KIND="$PYTHON_KIND_WINDOWS_VENV"
+elif [[ -x "$POSIX_VENV_PYTHON" ]]; then
+    PYTHON_BIN="$POSIX_VENV_PYTHON"
+    PYTHON_KIND="$PYTHON_KIND_POSIX_VENV"
 elif command -v uv >/dev/null 2>&1; then
     USE_UV=true
     PYTHON_KIND="uv"
@@ -373,7 +378,7 @@ install_dev_dependencies() {
         if "$PYTHON_BIN" -m pip install -e ".[dev,tests,tracing]"; then
             return 0
         fi
-        if [[ "$PYTHON_KIND" == "posix-venv" || "$PYTHON_KIND" == "windows-venv" ]]; then
+        if [[ "$PYTHON_KIND" == "$PYTHON_KIND_POSIX_VENV" || "$PYTHON_KIND" == "$PYTHON_KIND_WINDOWS_VENV" ]]; then
             log_warn "Editable install failed; creating temporary pytest runtime under /tmp"
             ensure_temp_pytest_runtime_venv "${pytest_pkgs[@]}"
             return 0
@@ -472,7 +477,7 @@ install_precommit() {
     export GOPATH="$go_path_runtime"
     export UV_CACHE_DIR="$uv_cache_runtime"
 
-    if [[ "$PYTHON_KIND" == "windows-venv" ]] && [[ "$IS_WSL" == false ]] && command -v powershell.exe >/dev/null 2>&1; then
+    if [[ "$PYTHON_KIND" == "$PYTHON_KIND_WINDOWS_VENV" ]] && [[ "$IS_WSL" == false ]] && command -v powershell.exe >/dev/null 2>&1; then
         local repo_root_win=""
         local python_bin_win=""
         local precommit_home_win=""
