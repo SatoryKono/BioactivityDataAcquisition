@@ -10,6 +10,7 @@ from bioetl.application.services.dq_report_models import (
     _DQ_REPORT_ERRORS,
     DQReportContext,
 )
+from bioetl.domain.ports.quality.dq_report import SilverDQAnalyzeRequest
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -126,7 +127,7 @@ async def generate_silver_report(
         return None
 
     try:
-        report = analyzer.analyze(
+        analyze_request = SilverDQAnalyzeRequest(
             data=context.silver_data,
             run_id=context.run_id,
             pipeline=context.pipeline_name,
@@ -142,6 +143,7 @@ async def generate_silver_report(
             previous_schema=context.silver_previous_schema,
             key_nullability_rules=context.silver_key_nullability_rules,
         )
+        report = analyzer.analyze(analyze_request)
         path = await report_writer.write_silver_report(
             report=report,
             output_path=_resolve_output_path(

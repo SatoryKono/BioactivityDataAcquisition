@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from bioetl.domain.ports import LoggerPort
+from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.config import Settings
 
 

@@ -6,6 +6,13 @@ from pathlib import Path
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 
+# Import types used in function signatures (runtime imports handled by composition)
+from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.filtering import InputFilterConfig
+from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+from bioetl.infrastructure.config import Settings
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
 from .datasource.data_source_factory import DataSourceCreatorProtocol
 from .services.factory import BaseServicesFactory
 

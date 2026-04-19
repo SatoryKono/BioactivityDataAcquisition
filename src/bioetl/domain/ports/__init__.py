@@ -97,9 +97,11 @@ from bioetl.domain.ports.quality import (
     GoldValidatorPort,
     QuarantinePort,
     QuarantineWriteRequest,
+    SilverDQAnalyzeRequest,
     SilverDQAnalyzerPort,
     SilverDQConfigPort,
     SilverValidatorPort,
+    coerce_silver_dq_analyze_request,
 )
 from bioetl.domain.ports.resilience import CircuitBreakerPort, RateLimiterPort
 from bioetl.domain.ports.runtime import (
@@ -226,18 +228,20 @@ __all__ = [
     "SettingsLoaderPort",
     "SettingsPort",
     "ShutdownPort",
+    "SilverDQAnalyzeRequest",
     "SilverDQAnalyzerPort",
     "SilverDQConfigPort",
     "SilverMetadataInput",
     "SilverRef",
-    "SilverWriteRequest",
     "SilverStoragePort",
     "SilverValidatorPort",
+    "SilverWriteRequest",
     "StageBreakpoint",
     "StorageLifecyclePort",
     "StorageMaintenancePort",
     "StoragePort",
     "TracingPort",
+    "coerce_silver_dq_analyze_request",
     "resolve_metric_labels",
 ]
 

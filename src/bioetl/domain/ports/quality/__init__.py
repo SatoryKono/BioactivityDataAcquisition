@@ -12,7 +12,9 @@ from bioetl.domain.ports.quality.dq_report import (
     BronzeDQAnalyzerPort,
     DQReportWriterPort,
     GoldDQAnalyzerPort,
+    SilverDQAnalyzeRequest,
     SilverDQAnalyzerPort,
+    coerce_silver_dq_analyze_request,
 )
 from bioetl.domain.ports.quality.error_classifier import ErrorClassifierPort
 from bioetl.domain.ports.quality.error_handler import ErrorHandlerPort
@@ -39,7 +41,9 @@ __all__ = [
     "GoldValidatorPort",
     "QuarantinePort",
     "QuarantineWriteRequest",
+    "SilverDQAnalyzeRequest",
     "SilverDQAnalyzerPort",
     "SilverDQConfigPort",
     "SilverValidatorPort",
+    "coerce_silver_dq_analyze_request",
 ]
