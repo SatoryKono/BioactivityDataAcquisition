@@ -43,9 +43,8 @@ from bioetl.infrastructure.config.pipeline_config_api import (
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
-    from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
+    from bioetl.domain.config import DQConfig, PipelineConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
@@ -56,7 +55,6 @@ if TYPE_CHECKING:
         SilverValidatorPort,
         TracingPort,
     )
-    from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 

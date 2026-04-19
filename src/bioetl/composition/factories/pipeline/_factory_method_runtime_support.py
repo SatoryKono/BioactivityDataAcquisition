@@ -6,7 +6,6 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.factories.pipeline._factory_method_control_plane import (
-    apply_optional_control_plane_kwargs,
     resolve_strict_gold_validation,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
