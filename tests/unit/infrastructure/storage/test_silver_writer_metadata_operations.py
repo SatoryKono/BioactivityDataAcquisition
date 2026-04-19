@@ -14,6 +14,9 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _execute_prepared_silver_metadata_write_operation,
 )
 
+TEST_ACTIVITY_TABLE_PATH = "test-output/silver/chembl/activity"
+TEST_COMPOSITE_TABLE_PATH = "test-output/silver/composite/publication"
+
 
 @pytest.mark.unit
 class TestExecutePreparedSilverMetadataWriteOperation:
@@ -26,7 +29,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
         host._metrics = MagicMock()
         metadata = MagicMock()
         request = _SilverMetadataWriteRequest(
-            table_path="/tmp/silver/chembl/activity",
+            table_path=TEST_ACTIVITY_TABLE_PATH,
             table_name="chembl.activity",
             records=[{"entity_id": "1"}],
             primary_keys=["entity_id"],
@@ -62,7 +65,7 @@ class TestExecutePreparedSilverMetadataWriteOperation:
         host._metrics = MagicMock()
         metadata = MagicMock()
         request = _SilverMergedMetadataWriteRequest(
-            table_path="/tmp/silver/composite/publication",
+            table_path=TEST_COMPOSITE_TABLE_PATH,
             table_name="composite.publication",
             records=[
                 {

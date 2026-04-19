@@ -28,6 +28,8 @@ from bioetl.composition.entrypoints import (
 )
 from bioetl.domain.types import RunType
 
+CACHED_BRONZE_PATH = "test-output/bronze"
+
 
 @pytest.mark.unit
 class TestRunOptions:
@@ -290,7 +292,7 @@ class TestBuildPipelineContext:
         """Legacy entrypoint should preserve replay intent when cache mode is enabled."""
         options = RunOptions(
             use_cached_bronze=True,
-            cached_bronze_path="/tmp/bronze",
+            cached_bronze_path=CACHED_BRONZE_PATH,
             cached_bronze_date="2026-03-12",
             exact_replay=True,
         )
@@ -298,7 +300,7 @@ class TestBuildPipelineContext:
 
         assert ctx.exact_replay is True
         assert ctx.cached_bronze.enabled is True
-        assert ctx.cached_bronze.bronze_path == "/tmp/bronze"
+        assert ctx.cached_bronze.bronze_path == CACHED_BRONZE_PATH
         assert ctx.cached_bronze.bronze_date == "2026-03-12"
 
 

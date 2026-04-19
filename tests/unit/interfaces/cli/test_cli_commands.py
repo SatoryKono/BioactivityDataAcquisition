@@ -20,6 +20,9 @@ from click.testing import CliRunner
 from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.interfaces.cli.main import cli
 
+TEST_SILVER_PATH = "test-output/silver/chembl/activity"
+TEST_GOLD_PATH = "test-output/gold/chembl/activity"
+
 
 @pytest.fixture
 def cli_runner() -> CliRunner:
@@ -149,12 +152,12 @@ class TestCleanupPreviewCommand:
         """Test cleanup-preview renders dry-run layer preview."""
         preview = CleanupPreview(
             silver=LayerInfo(
-                path="/tmp/silver/chembl/activity",
+                path=TEST_SILVER_PATH,
                 file_count=3,
                 exists=True,
             ),
             gold=LayerInfo(
-                path="/tmp/gold/chembl/activity",
+                path=TEST_GOLD_PATH,
                 file_count=1,
                 exists=True,
             ),

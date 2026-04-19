@@ -16,6 +16,7 @@ from bioetl.infrastructure.quarantine.record_encoding import calculate_hash
 
 # Fixed timestamp for test reproducibility
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
+QUARANTINE_ROOT = "test-output/quarantine"
 
 
 def _extract_record_from_call(mock_call) -> dict:
@@ -128,8 +129,8 @@ class TestUnifiedQuarantineInit:
 
     def test_init_stores_base_path(self):
         """Test initialization stores base path."""
-        q = UnifiedQuarantineAdapter(base_path="/tmp/quarantine")
-        assert q.base_path == "/tmp/quarantine"
+        q = UnifiedQuarantineAdapter(base_path=QUARANTINE_ROOT)
+        assert q.base_path == QUARANTINE_ROOT
 
 
 @pytest.mark.unit

@@ -17,6 +17,9 @@ from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import observability_builder
 from bioetl.composition.runtime_builders import runner_builder
 
+SILVER_OUTPUT_PATH = "test-output/silver/chembl/activity"
+SILVER_METADATA_PATH = "test-output/silver/chembl/activity/_metadata.yaml"
+
 
 class _FakeRunner:
     def __init__(self) -> None:
@@ -1091,9 +1094,9 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
     assert isinstance(manifest_id, str)
     silver_writer.recorder(
         "silver",
-        "/tmp/output/silver/chembl/activity",
+        SILVER_OUTPUT_PATH,
         {
-            "metadata_path": "/tmp/output/silver/chembl/activity/_metadata.yaml",
+            "metadata_path": SILVER_METADATA_PATH,
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-1",
         },

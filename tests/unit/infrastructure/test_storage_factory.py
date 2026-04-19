@@ -15,6 +15,9 @@ from bioetl.composition.factories.storage import (
     StorageFactory,
 )
 
+TEST_SILVER_PATH = "test-output/silver/chembl/activity"
+TEST_GOLD_PATH = "test-output/gold/chembl/activity"
+
 
 @pytest.fixture
 def mock_logger():
@@ -666,13 +669,13 @@ class TestStorageAdapterPreviewCleanup:
 
         silver = MagicMock(spec=SilverWriter)
         silver.preview_cleanup.return_value = {
-            "path": "/tmp/silver/chembl/activity",
+            "path": TEST_SILVER_PATH,
             "file_count": 4,
             "exists": True,
         }
         gold = MagicMock(spec=GoldWriter)
         gold.preview_cleanup.return_value = {
-            "path": "/tmp/gold/chembl/activity",
+            "path": TEST_GOLD_PATH,
             "file_count": 2,
             "exists": True,
         }

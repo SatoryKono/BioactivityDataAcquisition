@@ -17,6 +17,8 @@ from bioetl.domain.context import (
 )
 from bioetl.domain.types import BatchID, RunID, RunType
 
+CACHED_BRONZE_PATH = "test-output/bronze"
+
 
 class TestPipelineContext:
     """Tests for the PipelineContext class."""
@@ -337,10 +339,12 @@ class TestRunContextValidationAndProperties:
         }
 
     def test_cached_bronze_from_options_and_validation(self) -> None:
-        ctx = CachedBronzeContext.from_options(path="/tmp/bronze", date="2026-01-20")
+        ctx = CachedBronzeContext.from_options(
+            path=CACHED_BRONZE_PATH, date="2026-01-20"
+        )
 
         assert ctx.enabled is True
-        assert ctx.bronze_path == "/tmp/bronze"
+        assert ctx.bronze_path == CACHED_BRONZE_PATH
         assert ctx.bronze_date == "2026-01-20"
 
         # Exercise early return branch in _validate_date_format

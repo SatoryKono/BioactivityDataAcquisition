@@ -16,6 +16,9 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli import cli
 from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run
 
+TEST_SILVER_PATH = "test-output/silver/chembl/activity"
+TEST_GOLD_PATH = "test-output/gold/chembl/activity"
+
 
 @dataclass
 class _MockCleanupResult:
@@ -161,12 +164,12 @@ class TestCleanupPreviewCommand:
         """Test cleanup-preview renders Silver and Gold layer info."""
         preview = CleanupPreview(
             silver=LayerInfo(
-                path="/tmp/silver/chembl/activity",
+                path=TEST_SILVER_PATH,
                 file_count=3,
                 exists=True,
             ),
             gold=LayerInfo(
-                path="/tmp/gold/chembl/activity",
+                path=TEST_GOLD_PATH,
                 file_count=1,
                 exists=True,
             ),
