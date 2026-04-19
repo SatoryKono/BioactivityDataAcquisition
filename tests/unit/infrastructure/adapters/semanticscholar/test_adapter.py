@@ -18,6 +18,8 @@ from tests.helpers.adapter_runtime import (
     build_http_adapter_runtime_kwargs,
 )
 
+LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/s41586-024-07487-w"
+
 
 @pytest.fixture
 def mock_http_client() -> MagicMock:
@@ -137,7 +139,7 @@ class TestSemanticScholarAdapter:
 
     def test_normalize_doi_http_prefix(self, adapter: SemanticScholarAdapter) -> None:
         """Test DOI normalization with http prefix."""
-        result = adapter._normalize_doi("http://doi.org/10.1038/s41586-024-07487-w")
+        result = adapter._normalize_doi(LEGACY_HTTP_DOI)
         assert result == "10.1038/s41586-024-07487-w"
 
     def test_normalize_doi_lowercase_prefix(

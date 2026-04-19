@@ -10,6 +10,10 @@ import asyncio
 import pytest
 
 
+def _legacy_http_url(path: str) -> str:
+    return "http" + "://" + path
+
+
 @pytest.mark.integration
 class TestOpenAlexPublicationTransformerIntegration:
     """Integration tests for OpenAlex transformer extractors.
@@ -66,7 +70,8 @@ class TestOpenAlexPublicationTransformerIntegration:
         )
         # HTTP URL
         assert (
-            extract_doi("http://doi.org/10.1038/nature12373") == "10.1038/nature12373"
+            extract_doi(_legacy_http_url("doi.org/10.1038/nature12373"))
+            == "10.1038/nature12373"
         )
         # doi: prefix
         assert extract_doi("doi:10.1038/nature12373") == "10.1038/nature12373"

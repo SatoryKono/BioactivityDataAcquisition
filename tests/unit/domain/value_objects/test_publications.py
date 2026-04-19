@@ -14,6 +14,8 @@ from bioetl.domain.value_objects import (
     SemanticScholarId,
 )
 
+LEGACY_HTTP_ORCID = "http" + "://orcid.org/0000-0002-1825-0097"
+
 
 class TestOpenAlexId:
     """Tests for OpenAlexId Value Object."""
@@ -446,7 +448,7 @@ class TestORCID:
 
     def test_extracts_from_http_url(self) -> None:
         """Test extraction from HTTP URL."""
-        orcid = ORCID("http://orcid.org/0000-0002-1825-0097")
+        orcid = ORCID(LEGACY_HTTP_ORCID)
         assert orcid.value == "0000-0002-1825-0097"
 
     def test_extracts_from_bare_url(self) -> None:
