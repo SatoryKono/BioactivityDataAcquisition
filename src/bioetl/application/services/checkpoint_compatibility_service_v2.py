@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from enum import Enum
 
 from bioetl.application.services.checkpoint_compatibility_runtime import (
+    CheckpointExecutionIdentityFallbackInput,
+    ExecutionIdentityCompatibilityInput,
     IdentityDetailsRequest,
     build_identity_details,
     check_config_compatibility,
@@ -103,41 +105,51 @@ class CheckpointCompatibilityV2Service:
             checkpoint_hash=checkpoint_identity.effective_config_hash,
         )
         execution_identity_compatibility = check_execution_identity_compatibility(
-            current_composite_run_identity=current_identity.composite_run_identity,
-            checkpoint_composite_run_identity=(
-                checkpoint_identity.composite_run_identity
+            current=ExecutionIdentityCompatibilityInput(
+                composite_run_identity=current_identity.composite_run_identity,
+                execution_fingerprint=current_identity.execution_fingerprint,
+                manifest_id=current_identity.manifest_id,
+                fallback=CheckpointExecutionIdentityFallbackInput(
+                    pipeline_name=current_identity.pipeline_name,
+                    run_type=current_identity.run_type,
+                    pipeline_version=current_identity.pipeline_version,
+                    effective_config_hash=current_identity.effective_config_hash,
+                    dq_contract_compatibility_hash=(
+                        current_identity.dq_contract_compatibility_hash
+                    ),
+                    contract_ref=current_identity.contract_ref,
+                    contract_version=current_identity.contract_version,
+                    effective_config_artifact_id=(
+                        current_identity.effective_config_artifact_id
+                    ),
+                    exact_replay=current_identity.exact_replay,
+                    input_snapshot_fingerprint=(
+                        current_identity.input_snapshot_fingerprint
+                    ),
+                ),
             ),
-            current_execution_fingerprint=current_identity.execution_fingerprint,
-            checkpoint_execution_fingerprint=checkpoint_identity.execution_fingerprint,
-            current_pipeline_name=current_identity.pipeline_name,
-            checkpoint_pipeline_name=checkpoint_identity.pipeline_name,
-            current_run_type=current_identity.run_type,
-            checkpoint_run_type=checkpoint_identity.run_type,
-            current_pipeline_version=current_identity.pipeline_version,
-            checkpoint_pipeline_version=checkpoint_identity.pipeline_version,
-            current_manifest_id=current_identity.manifest_id,
-            checkpoint_manifest_id=checkpoint_identity.manifest_id,
-            current_dq_contract_compatibility_hash=(
-                current_identity.dq_contract_compatibility_hash
-            ),
-            checkpoint_dq_contract_compatibility_hash=(
-                checkpoint_identity.dq_contract_compatibility_hash
-            ),
-            current_contract_ref=current_identity.contract_ref,
-            checkpoint_contract_ref=checkpoint_identity.contract_ref,
-            current_contract_version=current_identity.contract_version,
-            checkpoint_contract_version=checkpoint_identity.contract_version,
-            current_effective_config_hash=current_identity.effective_config_hash,
-            checkpoint_effective_config_hash=checkpoint_identity.effective_config_hash,
-            current_effective_config_artifact_id=current_identity.effective_config_artifact_id,
-            checkpoint_effective_config_artifact_id=checkpoint_identity.effective_config_artifact_id,
-            current_exact_replay=current_identity.exact_replay,
-            checkpoint_exact_replay=checkpoint_identity.exact_replay,
-            current_input_snapshot_fingerprint=(
-                current_identity.input_snapshot_fingerprint
-            ),
-            checkpoint_input_snapshot_fingerprint=(
-                checkpoint_identity.input_snapshot_fingerprint
+            checkpoint=ExecutionIdentityCompatibilityInput(
+                composite_run_identity=checkpoint_identity.composite_run_identity,
+                execution_fingerprint=checkpoint_identity.execution_fingerprint,
+                manifest_id=checkpoint_identity.manifest_id,
+                fallback=CheckpointExecutionIdentityFallbackInput(
+                    pipeline_name=checkpoint_identity.pipeline_name,
+                    run_type=checkpoint_identity.run_type,
+                    pipeline_version=checkpoint_identity.pipeline_version,
+                    effective_config_hash=checkpoint_identity.effective_config_hash,
+                    dq_contract_compatibility_hash=(
+                        checkpoint_identity.dq_contract_compatibility_hash
+                    ),
+                    contract_ref=checkpoint_identity.contract_ref,
+                    contract_version=checkpoint_identity.contract_version,
+                    effective_config_artifact_id=(
+                        checkpoint_identity.effective_config_artifact_id
+                    ),
+                    exact_replay=checkpoint_identity.exact_replay,
+                    input_snapshot_fingerprint=(
+                        checkpoint_identity.input_snapshot_fingerprint
+                    ),
+                ),
             ),
         )
         schema_compatibility = check_schema_compatibility(
