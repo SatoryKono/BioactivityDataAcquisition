@@ -924,8 +924,8 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
         directly. It delegates to the new metadata operations service.
         """
         from bioetl.infrastructure.storage.silver.metadata_operations import (
-            _SilverMetadataWriteRequest,
             _coerce_silver_metadata_write_request,
+            _SilverMetadataWriteRequest,
         )
 
         request_input: _SilverMetadataWriteRequest | str | None

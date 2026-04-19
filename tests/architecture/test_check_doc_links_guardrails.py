@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 from pathlib import Path
 from types import ModuleType
 from uuid import uuid4
@@ -341,6 +342,9 @@ def test_load_nav_docs_ignores_exclude_docs_entries(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module()
+    repo_root = Path(tempfile.gettempdir()) / "example-repo"
+    docs_dir = repo_root / "docs"
+    mkdocs_file = repo_root / "mkdocs.yml"
     mkdocs_payload = """
 site_name: Example
 exclude_docs: |
@@ -353,14 +357,13 @@ nav:
     monkeypatch.setattr(
         module,
         "PROJECT_ROOT",
-        Path("/tmp/example-repo"),
+        repo_root,
     )
     monkeypatch.setattr(
         module,
         "DOCS_DIR",
-        Path("/tmp/example-repo/docs"),
+        docs_dir,
     )
-    mkdocs_file = Path("/tmp/example-repo/mkdocs.yml")
     monkeypatch.setattr(
         Path,
         "read_text",
@@ -372,12 +375,9 @@ nav:
 
     nav_docs = module._load_nav_docs()
 
-    assert Path("/tmp/example-repo/docs/BioETL.md") not in nav_docs
+    assert docs_dir / "BioETL.md" not in nav_docs
     assert (
-        Path(
-            "/tmp/example-repo/docs/00-project/governance/"
-            "01-documentation-governance-style-guide.md"
-        )
+        docs_dir / "00-project/governance/01-documentation-governance-style-guide.md"
         in nav_docs
     )
 

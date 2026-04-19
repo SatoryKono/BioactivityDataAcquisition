@@ -12,6 +12,7 @@ import os
 import platform
 import subprocess
 import sys
+import tempfile
 from importlib.util import find_spec
 from pathlib import Path
 
@@ -59,7 +60,10 @@ _LINE_ENDING_HINT = (
 def _ruff_env() -> dict[str, str]:
     """Use a writable cache dir across mixed WSL/docker-desktop mounts."""
     env = os.environ.copy()
-    env.setdefault("RUFF_CACHE_DIR", "/tmp/bioetl-ruff-cache")
+    env.setdefault(
+        "RUFF_CACHE_DIR",
+        str(Path(tempfile.gettempdir()) / "bioetl-ruff-cache"),
+    )
     return env
 
 
