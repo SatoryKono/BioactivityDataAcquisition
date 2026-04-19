@@ -2,9 +2,10 @@
 """Check the relevance of existing Sonar remediation issues."""
 
 import os
+from datetime import UTC, datetime, timezone
+
 import requests
 from dotenv import load_dotenv
-from datetime import datetime, timezone
 
 load_dotenv()
 
@@ -26,28 +27,28 @@ for issue_number in issues_to_check:
                 'Accept': 'application/vnd.github.v3+json'
             }
         )
-        
+
         if response.status_code == 200:
             issue = response.json()
-            
+
             # Calculate age
             created_at = datetime.fromisoformat(issue['created_at'].replace('Z', '+00:00'))
-            now_utc = datetime.now(timezone.utc)  # Use timezone-aware datetime
+            now_utc = datetime.now(UTC)  # Use timezone-aware datetime
             age_days = (now_utc - created_at).days
-            
+
             # Get comments count
             comments_response = requests.get(
                 f'https://api.github.com/repos/{repo}/issues/{issue_number}/comments',
                 headers={'Authorization': f'token {github_token}'}
             )
             comments_count = len(comments_response.json()) if comments_response.status_code == 200 else 0
-            
+
             print(f'\n📋 Issue #{issue_number}: {issue["title"]}')
             print(f'Status: {"OPEN" if issue["state"] == "open" else "CLOSED"}')
             print(f'Age: {age_days} days old')
             print(f'Comments: {comments_count}')
             print(f'Updated: {issue["updated_at"]}')
-            
+
             # Check for activity
             if age_days > 30 and comments_count == 0:
                 status = '⚠️  STALE - No recent activity'
@@ -55,20 +56,20 @@ for issue_number in issues_to_check:
                 status = '✅ COMPLETED'
             else:
                 status = '🔄 ACTIVE'
-            
+
             print(f'Relevance: {status}')
-            
+
             # Show first line of body if available
             body = issue.get('body', '')
             if body:
                 first_line = body.split('\n')[0][:80]
                 print(f'Content: {first_line}...')
-            
+
             print(f'URL: {issue["html_url"]}')
-            
+
         else:
             print(f'\n❌ Issue #{issue_number}: Not found or inaccessible')
-            
+
     except requests.exceptions.RequestException as e:
         print(f'\n❌ Network error checking issue #{issue_number}: {e}')
     except json.JSONDecodeError as e:

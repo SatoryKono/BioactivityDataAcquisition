@@ -82,7 +82,7 @@ print(f"📋 Unique Test Classes: {len(test_categories)}")
 # Analyze by test class
 for test_class, failures in test_categories.items():
     print(f"\n📋 {test_class}: {len(failures)} failures")
-    
+
     # Show first 3 examples
     for i, failure in enumerate(failures[:3]):
         test_name = failure.split('::')[-1]

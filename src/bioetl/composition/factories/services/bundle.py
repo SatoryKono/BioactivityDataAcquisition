@@ -10,14 +10,12 @@ from bioetl.composition.factories.datasource.data_source_factory import (
 )
 from bioetl.composition.factories.pipeline.creation_support import (
     _BuildPipelineServicesFn,
+    _PipelineCreationInputs,
     _create_pipeline_with_services_impl,
-    _PipelineCreationRequest,
     _ServiceBundleDeps,
 )
 from bioetl.composition.factories.services._bundle_support import (
     ServiceBundleDependencies,
-    _PipelineCreationIdentity,
-    build_pipeline_creation_inputs,
     resolve_service_bundle_dependencies,
 )
 from bioetl.composition.factories.services._bundle_support import (
@@ -63,12 +61,15 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
+    "PipelineCreationInputs",
     "ServiceBundleDependencies",
     "_create_cached_bronze_data_source",
     "_create_data_source",
     "build_pipeline_services",
     "create_pipeline_with_services",
 ]
+
+PipelineCreationInputs = _PipelineCreationInputs
 
 
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
@@ -185,26 +186,7 @@ def build_pipeline_services(
 
 
 def create_pipeline_with_services(
-    pipeline_name: str,
-    pipeline_class: type[BasePipeline],
-    provider: str,
-    create_data_source_fn: DataSourceCreatorProtocol,
-    transformer_class: type[BaseTransformer] | None,
-    run_id: RunID,
-    runtime: RuntimeConfig,
-    settings: Settings,
-    logger: LoggerPort,
-    manifest_id: str | None = None,
-    config_hash: str | None = None,
-    dq_contract_compatibility_hash: str | None = None,
-    effective_config_artifact_id: str | None = None,
-    config: PipelineYamlConfig | None = None,
-    filter_config: InputFilterConfig | None = None,
-    tracer: TracingPort | None = None,
-    dq_monitor: DQMonitorPort | None = None,
-    metrics: MetricsPort | None = None,
-    cached_bronze: CachedBronzeContext | None = None,
-    pandera_silver_schema: object | None = None,
+    inputs: PipelineCreationInputs,
     _deps: ServiceBundleDependencies | None = None,
 ) -> BasePipeline:
     """Create a pipeline instance with its resolved service bundle."""
@@ -216,32 +198,7 @@ def create_pipeline_with_services(
         _resolve_service_bundle_dependencies(_deps),
     )
     return _create_pipeline_with_services_impl(
-        build_pipeline_creation_inputs(
-            identity=_PipelineCreationIdentity(
-                pipeline_name=pipeline_name,
-                pipeline_class=pipeline_class,
-                provider=provider,
-                create_data_source_fn=create_data_source_fn,
-                transformer_class=transformer_class,
-                pandera_silver_schema=pandera_silver_schema,
-            ),
-            request=_PipelineCreationRequest(
-                run_id=run_id,
-                runtime=runtime,
-                settings=settings,
-                logger=logger,
-                manifest_id=manifest_id,
-                config_hash=config_hash,
-                dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-                effective_config_artifact_id=effective_config_artifact_id,
-                config=config,
-                filter_config=filter_config,
-                tracer=tracer,
-                dq_monitor=dq_monitor,
-                metrics=metrics,
-                cached_bronze=cached_bronze,
-            ),
-        ),
+        inputs,
         deps=resolved_deps,
         extract_entity_type=_extract_entity_type,
         build_pipeline_services_fn=cast(

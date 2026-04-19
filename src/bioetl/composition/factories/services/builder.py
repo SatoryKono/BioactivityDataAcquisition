@@ -158,46 +158,30 @@ class ServicesBuilder:
 
     @staticmethod
     def create_batch_executor_from_pipeline(
-        pipeline: BasePipeline,
-        silver_schema: pa.Schema | None,
-        gold_schema: GoldSchemaType,
-        checkpoint_manager: CheckpointManagerService,
-        shutdown_signal: ShutdownSignal,
-        *,
-        strict_gold_validation: bool = True,
-        lock_validator: Callable[[], Awaitable[bool]] | None = None,
-        tracer: TracingPort | None = None,
-        memory_monitor: MemoryMonitorPort | None = None,
-        memory_config: MemoryConfig | None = None,
-        bronze_output_path: str | None = None,
-        silver_output_path: str | None = None,
-        gold_output_path: str | None = None,
-        flat_structure: bool = False,
-        batch_id_factory: BatchIdGeneratorPort | None = None,
-        domain_event_emitter: DomainEventEmitterPort | None = None,
+        request: BatchExecutorBuildRequest,
     ) -> BatchExecutor:
-        callbacks = extract_pipeline_callbacks(pipeline)
+        callbacks = extract_pipeline_callbacks(request.pipeline)
         return create_batch_executor_from_pipeline(
             BatchExecutorBuildRequest(
-                pipeline=pipeline,
+                pipeline=request.pipeline,
                 callbacks=callbacks,
-                silver_schema=silver_schema,
-                gold_schema=gold_schema,
-                checkpoint_manager=checkpoint_manager,
-                shutdown_signal=shutdown_signal,
+                silver_schema=request.silver_schema,
+                gold_schema=request.gold_schema,
+                checkpoint_manager=request.checkpoint_manager,
+                shutdown_signal=request.shutdown_signal,
                 create_batch_processing_components_fn=(
                     ServicesBuilder.create_batch_processing_components
                 ),
-                strict_gold_validation=strict_gold_validation,
-                lock_validator=lock_validator,
-                tracer=tracer,
-                memory_monitor=memory_monitor,
-                memory_config=memory_config,
-                bronze_output_path=bronze_output_path,
-                silver_output_path=silver_output_path,
-                gold_output_path=gold_output_path,
-                flat_structure=flat_structure,
-                batch_id_factory=batch_id_factory,
-                domain_event_emitter=domain_event_emitter,
+                strict_gold_validation=request.strict_gold_validation,
+                lock_validator=request.lock_validator,
+                tracer=request.tracer,
+                memory_monitor=request.memory_monitor,
+                memory_config=request.memory_config,
+                bronze_output_path=request.bronze_output_path,
+                silver_output_path=request.silver_output_path,
+                gold_output_path=request.gold_output_path,
+                flat_structure=request.flat_structure,
+                batch_id_factory=request.batch_id_factory,
+                domain_event_emitter=request.domain_event_emitter,
             )
         )

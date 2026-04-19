@@ -231,7 +231,7 @@ def _run_smoke_test_loop(
     handshake_deadline: float | None = None
     closed_channels: set[str] = set()
     start = time.monotonic()
-    
+
     try:
         while True:
             now = time.monotonic()
@@ -470,16 +470,16 @@ def run_smoke_command(
     if not pipes_ok:
         process.kill()
         return SmokeResult(ok=False, summary=error_msg)
-    
+
     # Initialize smoke test state
     stdout_buffer = bytearray()
     stderr_buffer = bytearray()
     responses: dict[int, dict[str, Any]] = {}
     chunks: queue.Queue[tuple[str, bytes | None]] = queue.Queue()
-    
+
     # Start I/O threads
     readers = _start_io_threads(process, chunks)
-    
+
     try:
         # Run the smoke test loop
         ready_seen, handshake_sent, _, _ = _run_smoke_test_loop(

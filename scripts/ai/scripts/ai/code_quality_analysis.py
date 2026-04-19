@@ -2,22 +2,20 @@
 """Analyze code quality to determine relevance of Sonar remediation issues."""
 
 import os
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
-print("🔍 Comprehensive Code Quality Analysis")
-print("=" * 50)
 
 # Analyze Python files for common quality issues
 def analyze_python_code():
     python_files = list(Path("./src").rglob("*.py"))
-    
+
     if not python_files:
         print("❌ No Python files found in ./src")
         return _get_empty_issues_dict(0)
-    
+
     print(f"📊 Analyzing {len(python_files)} Python files...")
-    
+
     return _analyze_file_batch(python_files[:50])  # Limit to first 50 files
 
 
@@ -36,27 +34,27 @@ def _get_empty_issues_dict(total_files: int) -> dict:
 def _analyze_file_batch(python_files: list[Path]) -> dict:
     """Analyze a batch of Python files for quality issues."""
     issues_found = _get_empty_issues_dict(len(python_files))
-    
+
     for file_path in python_files:
         file_issues = _analyze_single_file(file_path)
         _merge_file_issues(issues_found, file_issues)
-    
+
     return issues_found
 
 
 def _analyze_single_file(file_path: Path) -> dict:
     """Analyze a single Python file for quality issues."""
     file_issues = _get_empty_issues_dict(1)
-    
+
     try:
         content, lines = _read_file_content(file_path)
         file_issues['total_lines'] = len(lines)
-        
+
         if 'def ' in content:
             _check_function_quality(content, lines, file_issues)
-        
+
         return file_issues
-        
+
     except (UnicodeDecodeError, PermissionError, OSError) as e:
         _handle_file_read_error(file_path, e)
         return file_issues
@@ -119,12 +117,12 @@ def analyze_code_structure():
         'modules': set(),
         'test_files': set()
     }
-    
+
     # Find all Python packages and modules
     for root, dirs, files in os.walk("./src"):
         _process_directories(dirs, structure)
         _process_files(files, structure)
-    
+
     return structure
 
 
@@ -158,39 +156,42 @@ def _add_module_name(file_name: str, structure: dict) -> None:
 
 # Main analysis
 if __name__ == "__main__":
+    print("🔍 Comprehensive Code Quality Analysis")
+    print("=" * 50)
+
     # Code structure analysis
     print("\n🏗️  Code Structure Analysis:")
     structure = analyze_code_structure()
     print(f"   Packages: {len(structure['packages'])}")
     print(f"   Modules: {len(structure['modules'])}")
     print(f"   Test files: {len(structure['test_files'])}")
-    
+
     # Code quality analysis
     print("\n🔬 Code Quality Analysis:")
     quality_issues = analyze_python_code()
-    
+
     print(f"   Files analyzed: {quality_issues['total_files']}")
     print(f"   Total lines: {quality_issues['total_lines']}")
     print(f"   Complex functions: {quality_issues['complex_functions']}")
     print(f"   Long functions: {quality_issues['long_functions']}")
     print(f"   Missing docstrings: {quality_issues['missing_docstrings']}")
-    
+
     # Calculate quality score
-    total_issues = (quality_issues['complex_functions'] + 
-                   quality_issues['long_functions'] + 
+    total_issues = (quality_issues['complex_functions'] +
+                   quality_issues['long_functions'] +
                    quality_issues['missing_docstrings'])
-    
+
     if quality_issues['total_files'] > 0:
         issues_per_file = total_issues / quality_issues['total_files']
         quality_score = max(0, 100 - (issues_per_file * 10))
     else:
         quality_score = 100
-    
+
     print(f"\n📊 Quality Score: {quality_score:.1f}/100")
-    
+
     # Relevance assessment for Sonar issues
     print("\n🎯 Sonar Remediation Issues Relevance:")
-    
+
     if quality_score >= 90:
         print("   ✅ EXCELLENT - Code quality is very high")
         print("   📋 Sonar issues may be proactive/preventive")
@@ -207,7 +208,7 @@ if __name__ == "__main__":
         print("   ❌ POOR - Code quality needs significant improvement")
         print("   📋 Sonar issues are critical and urgent")
         print("   🔮 Immediate action required on remediation")
-    
+
     # Specific recommendations
     print("\n💡 Specific Recommendations:")
     if quality_issues['complex_functions'] > 5:
@@ -216,5 +217,5 @@ if __name__ == "__main__":
         print("   • Split long functions into smaller, focused methods")
     if quality_issues['missing_docstrings'] > 10:
         print("   • Add docstrings for better documentation (Wave 4: hygiene)")
-    
+
     print("\n✅ Analysis complete!")
