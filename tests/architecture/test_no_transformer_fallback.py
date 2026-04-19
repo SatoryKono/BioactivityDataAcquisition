@@ -72,30 +72,17 @@ class TestNoTransformerFallback:
         except SyntaxError:
             pytest.fail("Failed to parse base.py")
 
-        # Find BasePipeline class
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef) and node.name == "BasePipeline":
-                # Find __init__ method
-                for item in node.body:
-                    if isinstance(item, ast.FunctionDef) and item.name == "__init__":
-                        init_source = ast.get_source_segment(content, item)
-                        if init_source:
-                            # Check for patterns that indicate transformer creation
-                            forbidden_patterns = [
-                                r"self\.default_transformer_class\(",
-                                r"Transformer\(\)",  # Any Transformer() call
-                                r"transformer_class\(",  # transformer_class() call
-                            ]
-                            for pattern in forbidden_patterns:
-                                if re.search(pattern, init_source):
-                                    pytest.fail(
-                                        f"BasePipeline.__init__ contains forbidden pattern: {pattern}\n"
-                                        "Transformers must be injected via DI, not created internally.\n"
-                                        "See REQ-ARCH-DI-007"
-                                    )
-                        return
+        init_method = _find_basepipeline_init(tree)
+        if init_method is None:
+            pytest.fail("Could not find BasePipeline.__init__ method")
 
-        pytest.fail("Could not find BasePipeline.__init__ method")
+        forbidden_pattern = _find_forbidden_transformer_pattern(content, init_method)
+        if forbidden_pattern is not None:
+            pytest.fail(
+                f"BasePipeline.__init__ contains forbidden pattern: {forbidden_pattern}\n"
+                "Transformers must be injected via DI, not created internally.\n"
+                "See REQ-ARCH-DI-007"
+            )
 
     def test_no_default_transformer_class_in_pipeline_subclasses(self) -> None:
         """Pipeline subclasses must not define default_transformer_class.
@@ -221,3 +208,31 @@ class TestTransformerInjectionPath:
         assert "transformer=transformer" in combined_content, (
             "pipeline_factory must pass transformer to pipeline constructor"
         )
+
+
+def _find_basepipeline_init(tree: ast.AST) -> ast.FunctionDef | None:
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef) or node.name != "BasePipeline":
+            continue
+        for item in node.body:
+            if isinstance(item, ast.FunctionDef) and item.name == "__init__":
+                return item
+    return None
+
+
+def _find_forbidden_transformer_pattern(
+    content: str,
+    init_method: ast.FunctionDef,
+) -> str | None:
+    init_source = ast.get_source_segment(content, init_method)
+    if not init_source:
+        return None
+    forbidden_patterns = [
+        r"self\.default_transformer_class\(",
+        r"Transformer\(\)",
+        r"transformer_class\(",
+    ]
+    for pattern in forbidden_patterns:
+        if re.search(pattern, init_source):
+            return pattern
+    return None
