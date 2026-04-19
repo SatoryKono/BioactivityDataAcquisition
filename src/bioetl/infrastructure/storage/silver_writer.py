@@ -26,6 +26,10 @@ from bioetl.domain.ports import (
     SilverValidatorPort,
     TracingPort,
 )
+from bioetl.domain.ports.storage.silver_port import (
+    SilverWriteRequest,
+    coerce_silver_write_request,
+)
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
@@ -1055,21 +1059,9 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
 
     async def write_silver(
         self,
-        table_name: str,
-        records: list[BronzeRecord],
-        primary_keys: list[str],
-        schema: pa.Schema,
-        mode: str = "merge",
-        partition_cols: list[str] | None = None,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-        column_order: list[str] | None = None,
-        bronze_refs: list[BronzeWriteResult] | None = None,
-        key_nullability_rules: list[KeyNullabilityRule] | None = None,
-        *,
-        run_id: RunID | None = None,
-        run_type: RunType | None = None,
-        source_batch_id: BatchID | None = None,
-        ingestion_ts: datetime | None = None,
+        request: SilverWriteRequest | str | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> SilverWriteResult | None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -1098,6 +1090,25 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
             SilverWriteResult with record count and write metadata, or None if
             no records were provided.
         """
+        write_request = coerce_silver_write_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
+        table_name = write_request.table_name
+        records = write_request.records
+        primary_keys = write_request.primary_keys
+        schema = write_request.schema
+        mode = write_request.mode
+        partition_cols = write_request.partition_cols
+        on_schema_mismatch = write_request.on_schema_mismatch
+        column_order = write_request.column_order
+        bronze_refs = write_request.bronze_refs
+        key_nullability_rules = write_request.key_nullability_rules
+        run_id = write_request.run_id
+        run_type = write_request.run_type
+        source_batch_id = write_request.source_batch_id
+        ingestion_ts = write_request.ingestion_ts
         if not self._should_dual_write():
             return await self._write_single_target(
                 table_name=table_name,

@@ -4,15 +4,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.domain.ports.storage.silver_port import (
+    SilverWriteRequest,
+    coerce_silver_write_request,
+)
 from bioetl.domain.types import JsonDict, ScdConfig
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
 
-    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.models.metadata import SourceMetadata
-    from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
+    from bioetl.domain.types import BatchID, RunID, RunType
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -79,21 +82,9 @@ class StorageAdapterWriteMixin:
 
     async def write_silver(
         self,
-        table_name: str,
-        records: list[JsonDict],  # Any: record/metadata values are heterogeneous
-        primary_keys: list[str],
-        schema: ArrowSchema,
-        mode: Literal["merge", "append", "delete"] = "merge",
-        partition_cols: list[str] | None = None,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-        column_order: list[str] | None = None,
-        bronze_refs: list[BronzeWriteResult] | None = None,
-        key_nullability_rules: list[KeyNullabilityRule] | None = None,
-        *,
-        run_id: RunID | None = None,
-        run_type: RunType | None = None,
-        source_batch_id: BatchID | None = None,
-        ingestion_ts: datetime | None = None,
+        request: SilverWriteRequest | str | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> SilverWriteResult | None:
         """Write transformed records to Silver layer.
 
@@ -124,21 +115,26 @@ class StorageAdapterWriteMixin:
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
         """
+        write_request = coerce_silver_write_request(
+            request,
+            args=args,
+            kwargs=kwargs,
+        )
         return await self.silver.write_silver(
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            schema=schema,
-            mode=mode,
-            partition_cols=partition_cols,
-            on_schema_mismatch=on_schema_mismatch,
-            column_order=column_order,
-            bronze_refs=bronze_refs,
-            key_nullability_rules=key_nullability_rules,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            table_name=write_request.table_name,
+            records=write_request.records,
+            primary_keys=write_request.primary_keys,
+            schema=write_request.schema,
+            mode=write_request.mode,
+            partition_cols=write_request.partition_cols,
+            on_schema_mismatch=write_request.on_schema_mismatch,
+            column_order=write_request.column_order,
+            bronze_refs=write_request.bronze_refs,
+            key_nullability_rules=write_request.key_nullability_rules,
+            run_id=write_request.run_id,
+            run_type=write_request.run_type,
+            source_batch_id=write_request.source_batch_id,
+            ingestion_ts=write_request.ingestion_ts,
         )
 
     async def write_gold(

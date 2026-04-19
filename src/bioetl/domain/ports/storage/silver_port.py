@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import ArrowSchema, BronzeRecord
@@ -14,7 +16,132 @@ if TYPE_CHECKING:
     from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.types import BatchID, RunID, RunType
 
-__all__ = ["SilverStoragePort"]
+__all__ = [
+    "SilverStoragePort",
+    "SilverWriteRequest",
+    "coerce_silver_write_request",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class SilverWriteRequest:
+    """Canonical Silver-write request shared across storage seams."""
+
+    table_name: str
+    records: list[BronzeRecord]
+    primary_keys: list[str]
+    schema: ArrowSchema
+    mode: Literal["merge", "append", "delete"] = "merge"
+    partition_cols: list[str] | None = None
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
+    column_order: list[str] | None = None
+    bronze_refs: list[BronzeWriteResult] | None = None
+    key_nullability_rules: list[KeyNullabilityRule] | None = None
+    run_id: RunID | None = None
+    run_type: RunType | None = None
+    source_batch_id: BatchID | None = None
+    ingestion_ts: datetime | None = None
+
+
+_SILVER_WRITE_POSITIONAL_FIELDS = (
+    "table_name",
+    "records",
+    "primary_keys",
+    "schema",
+    "mode",
+    "partition_cols",
+    "on_schema_mismatch",
+    "column_order",
+    "bronze_refs",
+    "key_nullability_rules",
+)
+_SILVER_WRITE_REQUIRED_FIELDS = (
+    "table_name",
+    "records",
+    "primary_keys",
+    "schema",
+)
+_SILVER_WRITE_DEFAULTS: dict[str, object] = {
+    "mode": "merge",
+    "partition_cols": None,
+    "on_schema_mismatch": "error",
+    "column_order": None,
+    "bronze_refs": None,
+    "key_nullability_rules": None,
+    "run_id": None,
+    "run_type": None,
+    "source_batch_id": None,
+    "ingestion_ts": None,
+}
+_SILVER_WRITE_ALLOWED_FIELDS = frozenset(
+    {*_SILVER_WRITE_POSITIONAL_FIELDS, *tuple(_SILVER_WRITE_DEFAULTS)}
+)
+
+
+def coerce_silver_write_request(
+    request: SilverWriteRequest | str | None = None,
+    *,
+    args: tuple[object, ...] = (),
+    kwargs: Mapping[str, object] | None = None,
+) -> SilverWriteRequest:
+    """Normalize legacy or request-style Silver-write arguments."""
+    resolved_kwargs = dict(kwargs or {})
+    if isinstance(request, SilverWriteRequest):
+        if args or resolved_kwargs:
+            raise TypeError(
+                "SilverWriteRequest cannot be combined with legacy args/kwargs"
+            )
+        return request
+
+    legacy_values: list[object]
+    if request is None:
+        legacy_values = list(args)
+    else:
+        legacy_values = [request, *args]
+
+    if len(legacy_values) > len(_SILVER_WRITE_POSITIONAL_FIELDS):
+        raise TypeError("write_silver() received too many positional arguments")
+
+    for field_name, value in zip(_SILVER_WRITE_POSITIONAL_FIELDS, legacy_values):
+        if field_name in resolved_kwargs:
+            raise TypeError(
+                f"write_silver() got multiple values for argument '{field_name}'"
+            )
+        resolved_kwargs[field_name] = value
+
+    unexpected_fields = sorted(set(resolved_kwargs) - _SILVER_WRITE_ALLOWED_FIELDS)
+    if unexpected_fields:
+        unexpected = ", ".join(unexpected_fields)
+        raise TypeError(f"write_silver() got unexpected keyword arguments: {unexpected}")
+
+    missing_fields = [
+        field_name
+        for field_name in _SILVER_WRITE_REQUIRED_FIELDS
+        if field_name not in resolved_kwargs
+    ]
+    if missing_fields:
+        missing = ", ".join(missing_fields)
+        raise TypeError(f"write_silver() missing required arguments: {missing}")
+
+    for field_name, default in _SILVER_WRITE_DEFAULTS.items():
+        resolved_kwargs.setdefault(field_name, default)
+
+    return SilverWriteRequest(
+        table_name=resolved_kwargs["table_name"],  # type: ignore[arg-type]
+        records=resolved_kwargs["records"],  # type: ignore[arg-type]
+        primary_keys=resolved_kwargs["primary_keys"],  # type: ignore[arg-type]
+        schema=resolved_kwargs["schema"],  # type: ignore[arg-type]
+        mode=resolved_kwargs["mode"],  # type: ignore[arg-type]
+        partition_cols=resolved_kwargs["partition_cols"],  # type: ignore[arg-type]
+        on_schema_mismatch=resolved_kwargs["on_schema_mismatch"],  # type: ignore[arg-type]
+        column_order=resolved_kwargs["column_order"],  # type: ignore[arg-type]
+        bronze_refs=resolved_kwargs["bronze_refs"],  # type: ignore[arg-type]
+        key_nullability_rules=resolved_kwargs["key_nullability_rules"],  # type: ignore[arg-type]
+        run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]
+        run_type=resolved_kwargs["run_type"],  # type: ignore[arg-type]
+        source_batch_id=resolved_kwargs["source_batch_id"],  # type: ignore[arg-type]
+        ingestion_ts=resolved_kwargs["ingestion_ts"],  # type: ignore[arg-type]
+    )
 
 
 @runtime_checkable
@@ -26,54 +153,12 @@ class SilverStoragePort(Protocol):
 
     async def write_silver(
         self,
-        table_name: str,
-        records: list[
-            BronzeRecord
-        ],  # BronzeRecord: normalized records before Silver write
-        primary_keys: list[str],
-        schema: ArrowSchema,
-        mode: Literal["merge", "append", "delete"] = "merge",
-        partition_cols: list[str] | None = None,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-        column_order: list[str] | None = None,
-        bronze_refs: list[BronzeWriteResult] | None = None,
-        key_nullability_rules: list[KeyNullabilityRule] | None = None,
-        *,
-        run_id: RunID | None = None,
-        run_type: RunType | None = None,
-        source_batch_id: BatchID | None = None,
-        ingestion_ts: datetime | None = None,
+        request: SilverWriteRequest | str | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> SilverWriteResult | None:
-        """Write transformed records to the Silver layer.
-
-        Args:
-            table_name: The name of the table to write to.
-            records: A list of dictionaries, where each dictionary is a transformed record.
-            primary_keys: A list of column names that form the primary key.
-            schema: The PyArrow schema definition for the records (ArrowSchema alias).
-            mode: The write mode (e.g., 'merge', 'append', 'delete').
-            partition_cols: Optional list of columns to partition by.
-            on_schema_mismatch: How to handle schema drift:
-                - 'error': Raise SchemaEvolutionError (default)
-                - 'evolve': Allow schema evolution (add new columns)
-                - 'ignore': Proceed without changes (filter to existing schema)
-            column_order: Optional explicit column order to apply.
-            bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
-                If provided, bronze_paths will be populated in Silver metadata
-                for complete lineage tracking (REQ-LINEAGE-001).
-            key_nullability_rules: Optional rules for key nullability handling.
-            run_id: Optional pipeline run identifier for tracing/audit metadata.
-            run_type: Optional pipeline run type for tracing/audit metadata.
-            source_batch_id: Optional source batch identifier for Silver lineage.
-            ingestion_ts: Optional ingestion timestamp used for audit/forensics.
-
-        Returns:
-            SilverWriteResult with table info and Delta version for Gold lineage tracking
-            (REQ-LINEAGE-002), or None if no records were written.
-
-        Raises:
-            SchemaEvolutionError: If schema drift detected and on_schema_mismatch='error'
-        """
+        """Write transformed records to the Silver layer."""
+        del request, args, kwargs
         ...
 
     async def read_silver(

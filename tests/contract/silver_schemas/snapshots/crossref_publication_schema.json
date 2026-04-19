@@ -256,14 +256,9 @@
     "unique": false
   },
   "issn": {
-    "checks": [
-      {
-        "name": "str_matches",
-        "regex": "^\\d{4}-\\d{3}[\\dX]$"
-      }
-    ],
+    "checks": [],
     "coerce": false,
-    "description": "Primary ISSN (first from ISSN array)",
+    "description": "Primary ISSN or provider-native serialized ISSN payload. CrossRef can surface multi-value ISSN strings here; canonical typed variants remain in issn_print / issn_electronic / issn_list.",
     "dtype": "str",
     "nullable": true,
     "required": true,

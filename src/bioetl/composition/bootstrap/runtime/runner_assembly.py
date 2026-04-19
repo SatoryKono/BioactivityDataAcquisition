@@ -7,10 +7,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runner_pkg import CompositePipelineRunner
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-from bioetl.application.composite.runtime_wiring_api import (
-    CompositeCheckpointService,
-    CompositeLifecycleObserverService,
-)
 from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
     CompositeRunnerFactory,
     CompositeRunnerServiceInputs,
@@ -24,9 +20,6 @@ from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
 from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
     invoke_composite_runner_factory as _invoke_composite_runner_factory_impl,
 )
-from bioetl.composition.bootstrap.runtime._runner_assembly_support import (
-    resolve_effective_run_id as _resolve_effective_run_id_impl,
-)
 from bioetl.composition.bootstrap.runtime.runner_bootstrap_wiring import (
     bootstrap_composite_runner_via_wiring,
 )
@@ -37,26 +30,12 @@ if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_wiring_api import (
-        CompositePreflightValidationService,
-        DependencyCoordinatorService,
-        EnrichmentCoordinatorService,
-        FSMStateHelperService,
         PipelineRunner,
     )
-    from bioetl.application.composite.runtime_wiring_api import (
-        KeyExtractorService as _KeyExtractorService,
-    )
-    from bioetl.application.composite.runtime_wiring_api import (
-        MergeService as _MergeService,
-    )
-    from bioetl.application.services.control_plane.run_ledger_service import (
-        RunLedgerService,
-    )
-    from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
         CompositeSupportServices,
     )
-    from bioetl.domain.ports import LockPort, MetricsPort, QuarantinePort, TracingPort
+    from bioetl.domain.ports import LockPort, MetricsPort, TracingPort
     from bioetl.infrastructure.config import Settings
 
 

@@ -33,22 +33,18 @@ if TYPE_CHECKING:
         PipelineService,
         RecordProcessor,
         RecordProcessorConfig,
-        ShutdownSignal,
         TransformCallback,
     )
     from bioetl.application.observability.domain_event_emitter import (
         DomainEventEmitterPort,
     )
-    from bioetl.domain.config import MemoryConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.medallion import LoadingStrategy
     from bioetl.domain.ports import (
-        BatchIdGeneratorPort,
         CheckpointPort,
         GoldValidatorPort,
         LoggerPort,
-        MemoryMonitorPort,
         MetricsPort,
         TracingPort,
     )

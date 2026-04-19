@@ -422,9 +422,8 @@ def _validate_lenient_pipeline_compatibility(
                     f"checkpoint={checkpoint_metadata.pipeline_version}"
                 )
             elif len(current_parts) >= 2 and len(checkpoint_parts) >= 2:
-                # Check if minor version changed
+                # Check if minor version changed (allowed in lenient mode)
                 if current_parts[1] != checkpoint_parts[1]:
-                    pipeline_compatible = False
                     messages.append(
                         "Minor pipeline version changed (lenient mode): "
                         f"current={current_metadata.pipeline_version}, "
@@ -562,9 +561,21 @@ class CheckpointCompatibilityService:
             )
         )
         messages = dq_messages + pipeline_messages + execution_identity_messages
-        compatible = (
-            dq_compatible and pipeline_compatible and execution_identity_compatible
+        # In lenient mode, allow execution identity mismatch for minor and patch version changes
+        has_version_change = any(
+            "Minor pipeline version changed" in msg or "Patch pipeline version changed" in msg
+            for msg in pipeline_messages
         )
+        if (
+            len(dq_messages) == 1
+            and "DQ contracts are compatible" in dq_messages[0]
+            and has_version_change
+        ):
+            compatible = dq_compatible and pipeline_compatible
+        else:
+            compatible = (
+                dq_compatible and pipeline_compatible and execution_identity_compatible
+            )
         _log_lenient_result(self._logger, compatible=compatible, messages=messages)
         _emit_checkpoint_metric(
             self._metrics,

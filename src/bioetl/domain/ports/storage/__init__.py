@@ -25,7 +25,10 @@ from bioetl.domain.ports.storage.bronze_port import BronzeStoragePort
 from bioetl.domain.ports.storage.gold_port import GoldStoragePort
 from bioetl.domain.ports.storage.lifecycle_port import StorageLifecyclePort
 from bioetl.domain.ports.storage.merged_port import MergedStoragePort
-from bioetl.domain.ports.storage.silver_port import SilverStoragePort
+from bioetl.domain.ports.storage.silver_port import (
+    SilverStoragePort,
+    SilverWriteRequest,
+)
 from bioetl.domain.ports.storage_maintenance import StorageMaintenancePort
 
 __all__ = [
@@ -33,6 +36,7 @@ __all__ = [
     "GoldStoragePort",
     "MergedStoragePort",
     "SilverStoragePort",
+    "SilverWriteRequest",
     "StorageLifecyclePort",
     "StorageMaintenancePort",
     "StoragePort",

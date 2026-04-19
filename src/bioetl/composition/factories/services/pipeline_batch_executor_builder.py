@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.wiring.runtime import (
@@ -11,8 +10,6 @@ from bioetl.application.core.wiring.runtime import (
     BatchExecutor,
     BatchExecutorDependencies,
     BatchExtractionLoopService,
-    BatchProcessingComponents,
-    CheckpointManagerService,
     GoldFilterCallback,
 )
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
@@ -32,7 +29,6 @@ from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.infrastructure.validation import PanderaGoldValidator
 
 if TYPE_CHECKING:
-    import pyarrow as pa
 
     from bioetl.application.core.wiring.runtime import (
         BasePipeline,
@@ -43,16 +39,6 @@ if TYPE_CHECKING:
         BatchProgressService,
         ShutdownSignal,
     )
-    from bioetl.application.observability.domain_event_emitter import (
-        DomainEventEmitterPort,
-    )
-    from bioetl.domain.config import MemoryConfig
-    from bioetl.domain.ports import (
-        BatchIdGeneratorPort,
-        MemoryMonitorPort,
-        TracingPort,
-    )
-    from bioetl.domain.types import GoldSchemaType
 
 
 def create_batch_executor_from_pipeline(
