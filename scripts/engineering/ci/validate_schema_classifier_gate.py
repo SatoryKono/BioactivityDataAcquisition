@@ -358,6 +358,156 @@ def _write_diagnostics(
     )
 
 
+def _changed_contract_sources(changed: set[str]) -> list[str]:
+    """Return changed contract source modules from the git diff."""
+    return sorted(
+        path
+        for path in changed
+        if path.startswith("src/bioetl/domain/contracts/") and path.endswith(".py")
+    )
+
+
+def _source_without_artifact_issues(
+    *,
+    changed_sources: list[str],
+    changed_artifacts: list[str],
+) -> list[GateIssue]:
+    """Return issue when contract source changed without artifact update."""
+    if not changed_sources or changed_artifacts:
+        return []
+    return [
+        GateIssue(
+            contract_ref=None,
+            artifact_path=None,
+            message=(
+                "contract source changed but no published contract artifact changed; "
+                "cannot classify schema diff"
+            ),
+        )
+    ]
+
+
+def _classify_artifact_change(
+    *,
+    repo_root: Path,
+    base_ref: str,
+    relpath: str,
+    classifier: Any,
+) -> tuple[ChangeClassification, int, int, bool]:
+    """Classify one changed published artifact against its base revision."""
+    new_schema = _read_json_file(repo_root / relpath)
+    old_schema = _read_json_from_git(repo_root, base_ref=base_ref, relpath=relpath)
+    if old_schema is None:
+        # New artifact in current diff; classify as MINOR by policy default.
+        return ChangeClassification.MINOR, 0, 0, False
+    result = classifier.classify_changes(old_schema, new_schema)
+    return (
+        result.classification,
+        len(result.breaking_changes),
+        len(result.non_breaking_changes),
+        result.requires_manual_review,
+    )
+
+
+def _artifact_classification_record(
+    *,
+    contract_ref: str,
+    relpath: str,
+    classification: ChangeClassification,
+    old_version: str | None,
+    new_version: str | None,
+    breaking_changes_count: int,
+    non_breaking_changes_count: int,
+    requires_manual_review: bool,
+) -> ClassificationRecord:
+    """Build one serialized classification record."""
+    return ClassificationRecord(
+        contract_ref=contract_ref,
+        artifact_path=relpath,
+        classification=classification.value,
+        old_version=old_version,
+        new_version=new_version,
+        breaking_changes_count=breaking_changes_count,
+        non_breaking_changes_count=non_breaking_changes_count,
+        requires_manual_review=requires_manual_review,
+    )
+
+
+def _classification_gate_issues(
+    *,
+    contract_ref: str,
+    relpath: str,
+    classification: ChangeClassification,
+    old_version: str | None,
+    new_version: str | None,
+    current_entry: dict[str, Any] | None,
+) -> list[GateIssue]:
+    """Return governance issues for one classification outcome."""
+    if classification == ChangeClassification.MANUAL_REVIEW:
+        return [
+            GateIssue(
+                contract_ref=contract_ref,
+                artifact_path=relpath,
+                message=(
+                    "schema diff classified as manual_review; provide explicit "
+                    "migration/change decision before merge"
+                ),
+            )
+        ]
+    if classification != ChangeClassification.MAJOR:
+        return []
+    return _major_transition_issues(
+        contract_ref=contract_ref,
+        old_version=old_version,
+        new_version=new_version,
+        migration_guides=_entry_migration_guides(current_entry),
+    )
+
+
+def _evaluate_changed_artifact(
+    *,
+    repo_root: Path,
+    base_ref: str,
+    relpath: str,
+    contract_ref: str,
+    classifier: Any,
+    current_entry: dict[str, Any] | None,
+    base_entry: dict[str, Any] | None,
+) -> tuple[ClassificationRecord, list[GateIssue]]:
+    """Classify one changed artifact and derive governance issues."""
+    (
+        classification,
+        breaking_changes_count,
+        non_breaking_changes_count,
+        requires_manual_review,
+    ) = _classify_artifact_change(
+        repo_root=repo_root,
+        base_ref=base_ref,
+        relpath=relpath,
+        classifier=classifier,
+    )
+    old_version = _entry_version(base_entry)
+    new_version = _entry_version(current_entry)
+    record = _artifact_classification_record(
+        contract_ref=contract_ref,
+        relpath=relpath,
+        classification=classification,
+        old_version=old_version,
+        new_version=new_version,
+        breaking_changes_count=breaking_changes_count,
+        non_breaking_changes_count=non_breaking_changes_count,
+        requires_manual_review=requires_manual_review,
+    )
+    return record, _classification_gate_issues(
+        contract_ref=contract_ref,
+        relpath=relpath,
+        classification=classification,
+        old_version=old_version,
+        new_version=new_version,
+        current_entry=current_entry,
+    )
+
+
 def _parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser()
@@ -392,11 +542,7 @@ def main() -> int:
         base_entries = {}
 
     changed = _changed_paths(repo_root, base_ref=base_ref, head_ref=head_ref)
-    changed_sources = sorted(
-        path
-        for path in changed
-        if path.startswith("src/bioetl/domain/contracts/") and path.endswith(".py")
-    )
+    changed_sources = _changed_contract_sources(changed)
     artifact_index = _contract_artifact_index(
         repo_root=repo_root,
         registry_path=registry_path,
@@ -407,77 +553,28 @@ def main() -> int:
     records: list[ClassificationRecord] = []
     issues: list[GateIssue] = []
     classifier = create_schema_classifier()
-
-    if changed_sources and not changed_artifacts:
-        issues.append(
-            GateIssue(
-                contract_ref=None,
-                artifact_path=None,
-                message=(
-                    "contract source changed but no published contract artifact changed; "
-                    "cannot classify schema diff"
-                ),
-            )
+    issues.extend(
+        _source_without_artifact_issues(
+            changed_sources=changed_sources,
+            changed_artifacts=changed_artifacts,
         )
+    )
 
     for relpath in changed_artifacts:
         contract_ref = artifact_index[relpath]
-        artifact_abspath = repo_root / relpath
         current_entry = current_entries.get(contract_ref)
         base_entry = base_entries.get(contract_ref)
-
-        new_schema = _read_json_file(artifact_abspath)
-        old_schema = _read_json_from_git(repo_root, base_ref=base_ref, relpath=relpath)
-        if old_schema is None:
-            # New artifact in current diff; classify as MINOR by policy default.
-            classification = ChangeClassification.MINOR
-            breaking_changes_count = 0
-            non_breaking_changes_count = 0
-            requires_manual_review = False
-        else:
-            result = classifier.classify_changes(old_schema, new_schema)
-            classification = result.classification
-            breaking_changes_count = len(result.breaking_changes)
-            non_breaking_changes_count = len(result.non_breaking_changes)
-            requires_manual_review = result.requires_manual_review
-
-        old_version = _entry_version(base_entry)
-        new_version = _entry_version(current_entry)
-        records.append(
-            ClassificationRecord(
-                contract_ref=contract_ref,
-                artifact_path=relpath,
-                classification=classification.value,
-                old_version=old_version,
-                new_version=new_version,
-                breaking_changes_count=breaking_changes_count,
-                non_breaking_changes_count=non_breaking_changes_count,
-                requires_manual_review=requires_manual_review,
-            )
+        record, artifact_issues = _evaluate_changed_artifact(
+            repo_root=repo_root,
+            base_ref=base_ref,
+            relpath=relpath,
+            contract_ref=contract_ref,
+            classifier=classifier,
+            current_entry=current_entry,
+            base_entry=base_entry,
         )
-
-        if classification == ChangeClassification.MANUAL_REVIEW:
-            issues.append(
-                GateIssue(
-                    contract_ref=contract_ref,
-                    artifact_path=relpath,
-                    message=(
-                        "schema diff classified as manual_review; provide explicit "
-                        "migration/change decision before merge"
-                    ),
-                )
-            )
-            continue
-
-        if classification == ChangeClassification.MAJOR:
-            issues.extend(
-                _major_transition_issues(
-                    contract_ref=contract_ref,
-                    old_version=old_version,
-                    new_version=new_version,
-                    migration_guides=_entry_migration_guides(current_entry),
-                )
-            )
+        records.append(record)
+        issues.extend(artifact_issues)
 
     _write_diagnostics(
         diagnostics_path,
