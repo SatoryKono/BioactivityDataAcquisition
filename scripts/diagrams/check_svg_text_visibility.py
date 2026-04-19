@@ -199,30 +199,77 @@ def _err(message: str) -> None:
 
 def _collect_targets(args: argparse.Namespace, repo_root: Path) -> list[Path]:
     if args.file or args.dir:
-        targets: list[Path] = []
-        for file_path in args.file or []:
-            targets.append(
-                file_path if file_path.is_absolute() else repo_root / file_path
-            )
-        for directory in args.dir or []:
-            abs_dir = directory if directory.is_absolute() else repo_root / directory
-            if abs_dir.is_dir():
-                targets.extend(sorted(abs_dir.glob("*.svg")))
-        # Preserve order for files while deduplicating.
-        unique: list[Path] = []
-        seen: set[str] = set()
-        for path in targets:
-            key = str(path.resolve()) if path.exists() else str(path)
-            if key not in seen:
-                unique.append(path)
-                seen.add(key)
-        return unique
+        return _deduplicate_targets(
+            [
+                *(_resolve_target_path(repo_root, file_path) for file_path in args.file or []),
+                *(
+                    path
+                    for directory in args.dir or []
+                    for path in _svg_targets_in_directory(repo_root, directory)
+                ),
+            ]
+        )
 
     manifest = (
         args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
     )
     rel_paths = load_manifest(manifest)
     return [repo_root / rel for rel in rel_paths]
+
+
+def _resolve_target_path(repo_root: Path, path: Path) -> Path:
+    return path if path.is_absolute() else repo_root / path
+
+
+def _svg_targets_in_directory(repo_root: Path, directory: Path) -> list[Path]:
+    abs_dir = _resolve_target_path(repo_root, directory)
+    if not abs_dir.is_dir():
+        return []
+    return sorted(abs_dir.glob("*.svg"))
+
+
+def _deduplicate_targets(targets: list[Path]) -> list[Path]:
+    unique: list[Path] = []
+    seen: set[str] = set()
+    for path in targets:
+        key = str(path.resolve()) if path.exists() else str(path)
+        if key in seen:
+            continue
+        unique.append(path)
+        seen.add(key)
+    return unique
+
+
+def _relative_path(path: Path, repo_root: Path) -> str:
+    if path.is_absolute() and str(path).startswith(str(repo_root)):
+        return str(path.relative_to(repo_root))
+    return str(path)
+
+
+def _json_payload(
+    targets: list[Path],
+    metrics_out: list[SvgMetrics],
+    failures: list[tuple[str, list[str]]],
+) -> str:
+    payload = {
+        "ok": not failures,
+        "checked": len(targets),
+        "metrics": [asdict(m) for m in metrics_out],
+        "failures": [{"file": f, "issues": i} for f, i in failures],
+    }
+    return json.dumps(payload, ensure_ascii=True, indent=2)
+
+
+def _print_text_report(targets: list[Path], metrics_out: list[SvgMetrics]) -> None:
+    _out(f"[INFO] Checked {len(targets)} SVG file(s).")
+    for m in metrics_out:
+        _out(
+            "[INFO] "
+            f"{Path(m.file).name}: edgeLabels={m.edge_label_groups}, "
+            f"withText={m.edge_label_groups_with_text}, "
+            f"foreignObject={m.foreign_objects}, "
+            f"foFallback={m.fallback_text_nodes}"
+        )
 
 
 def main() -> int:
@@ -242,11 +289,7 @@ def main() -> int:
     failures: list[tuple[str, list[str]]] = []
 
     for path in targets:
-        rel = (
-            str(path.relative_to(repo_root))
-            if path.is_absolute() and str(path).startswith(str(repo_root))
-            else str(path)
-        )
+        rel = _relative_path(path, repo_root)
         if not path.exists():
             failures.append((rel, ["file not found"]))
             continue
@@ -260,23 +303,9 @@ def main() -> int:
             failures.append((rel, issues))
 
     if args.json:
-        payload = {
-            "ok": not failures,
-            "checked": len(targets),
-            "metrics": [asdict(m) for m in metrics_out],
-            "failures": [{"file": f, "issues": i} for f, i in failures],
-        }
-        _out(json.dumps(payload, ensure_ascii=True, indent=2))
+        _out(_json_payload(targets, metrics_out, failures))
     else:
-        _out(f"[INFO] Checked {len(targets)} SVG file(s).")
-        for m in metrics_out:
-            _out(
-                "[INFO] "
-                f"{Path(m.file).name}: edgeLabels={m.edge_label_groups}, "
-                f"withText={m.edge_label_groups_with_text}, "
-                f"foreignObject={m.foreign_objects}, "
-                f"foFallback={m.fallback_text_nodes}"
-            )
+        _print_text_report(targets, metrics_out)
 
     if failures:
         _err("[ERROR] SVG text visibility check failed:")
