@@ -451,7 +451,6 @@ class SilverMetadataOperations:
         run_type: RunType | None = None,
         source_batch_id: BatchID | None = None,
         ingestion_ts: datetime | None = None,
-        success: bool = True,
         error: str | None = None,
     ) -> None:
         """Log Silver write audit event.
@@ -465,10 +464,8 @@ class SilverMetadataOperations:
             run_type: Optional run type
             source_batch_id: Optional source batch ID
             ingestion_ts: Optional ingestion timestamp
-            success: Whether the operation succeeded
             error: Optional error message
         """
-        del success
         if not self._audit:
             return
 

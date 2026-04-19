@@ -9,6 +9,7 @@ Usage:
 
 Prints ready-to-paste @neo4j-memory prompts for seeding BioETL project memory.
 EOF
+  return 0
 }
 
 phase="${1:-all}"
@@ -26,6 +27,7 @@ print_architecture() {
 
 Свяжи эти факты с проектом BioETL и покажи краткое summary сохранённого.
 EOF
+  return 0
 }
 
 print_runtime() {
@@ -42,6 +44,7 @@ print_runtime() {
 
 Свяжи bootstrap entrypoints, runtime builders, and execution services.
 EOF
+  return 0
 }
 
 print_providers() {
@@ -56,6 +59,7 @@ print_providers() {
 
 Создай связи между provider inventory, config surface, and runtime registration.
 EOF
+  return 0
 }
 
 print_operations() {
@@ -72,6 +76,7 @@ print_operations() {
 
 Свяжи эти факты как operational memory for BioETL.
 EOF
+  return 0
 }
 
 print_domain() {
@@ -96,6 +101,7 @@ print_domain() {
 
 Свяжи domain families, core concepts, canonical identifiers, and provider semantics с проектом BioETL.
 EOF
+  return 0
 }
 
 case "$phase" in
