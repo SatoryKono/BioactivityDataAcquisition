@@ -304,7 +304,7 @@ def reset_logging_config() -> None:
     with _config_lock:
         logging.shutdown()
         root_logger = logging.getLogger()
-        for handler in list(root_logger.handlers):
+        for handler in tuple(root_logger.handlers):
             root_logger.removeHandler(handler)
         _configured = False
         _current_format = None

@@ -212,9 +212,11 @@ class TestGetDeltaVersion:
     async def test_delta_version_table_not_found_returns_none(self) -> None:
         """Line 300-301: TableNotFoundError returns None."""
         mixin = _ConcreteGoldMixin()
-        NotFoundErr = mixin._gold_module.TableNotFoundError
+        not_found_err_cls = mixin._gold_module.TableNotFoundError
 
-        mixin._gold_module.DeltaTable = MagicMock(side_effect=NotFoundErr("not found"))
+        mixin._gold_module.DeltaTable = MagicMock(
+            side_effect=not_found_err_cls("not found")
+        )
 
         result = await mixin._get_delta_version("gold/path")
 

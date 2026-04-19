@@ -57,7 +57,7 @@ if command -v python3 >/dev/null 2>&1; then
     exec python3 -m mypy "${ARGS[@]}"
 fi
 
-echo "[run_mypy][error] Python runtime is not available."
-echo "[run_mypy][hint] Install dependencies first:"
-echo "  bash scripts/engineering/dev/setup_env_wsl.sh"
+echo "[run_mypy][error] Python runtime is not available." >&2
+echo "[run_mypy][hint] Install dependencies first:" >&2
+echo "  bash scripts/engineering/dev/setup_env_wsl.sh" >&2
 exit 1

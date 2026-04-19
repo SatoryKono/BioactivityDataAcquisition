@@ -157,5 +157,5 @@ def test_add_fallbacks_methods_group_keeps_method_format_and_supports_escaped_ne
     ]
     assert len(fallback_nodes) == 1
 
-    tspans = [child for child in list(fallback_nodes[0]) if child.tag.endswith("tspan")]
+    tspans = [child for child in fallback_nodes[0] if child.tag.endswith("tspan")]
     assert [t.text for t in tspans[:2]] == ["+fetch(entity_type, limit)", "+aclose()"]

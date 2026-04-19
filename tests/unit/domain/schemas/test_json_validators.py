@@ -143,21 +143,21 @@ class TestRowsAreValidJsonObject:
 class TestPanderaChecks:
     """Tests for pre-built Pandera checks."""
 
-    def test_JSON_CHECK_importable(self) -> None:
+    def test_json_check_importable(self) -> None:
         """Should be able to import JSON_CHECK."""
         from bioetl.domain.schemas.validators import JSON_CHECK
 
         assert JSON_CHECK is not None
         assert JSON_CHECK.name == "valid_json"
 
-    def test_JSON_ARRAY_CHECK_importable(self) -> None:
+    def test_json_array_check_importable(self) -> None:
         """Should be able to import JSON_ARRAY_CHECK."""
         from bioetl.domain.schemas.validators import JSON_ARRAY_CHECK
 
         assert JSON_ARRAY_CHECK is not None
         assert JSON_ARRAY_CHECK.name == "valid_json_array"
 
-    def test_JSON_OBJECT_CHECK_importable(self) -> None:
+    def test_json_object_check_importable(self) -> None:
         """Should be able to import JSON_OBJECT_CHECK."""
         from bioetl.domain.schemas.validators import JSON_OBJECT_CHECK
 

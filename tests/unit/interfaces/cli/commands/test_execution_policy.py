@@ -123,8 +123,11 @@ def test_execute_with_cli_failure_policy_returns_action_result() -> None:
 def test_execute_with_cli_failure_policy_delegates_failure_and_returns_none() -> None:
     seen: list[tuple[str, str, str]] = []
 
+    def _raise_runtime_error() -> str:
+        raise RuntimeError("boom")
+
     result = execute_with_cli_failure_policy(
-        lambda: (_ for _ in ()).throw(RuntimeError("boom")),
+        _raise_runtime_error,
         subject="chembl_activity",
         reason_codes=ExecutionFailureReasonCodes(
             config="CFG",

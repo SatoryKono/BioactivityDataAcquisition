@@ -64,7 +64,7 @@ def cell_text(cell: ET.Element, shared_strings: list[str]) -> str:
 
 def set_cell_text(cell: ET.Element, value: str) -> None:
     """Replace a cell payload with inline string content."""
-    for child in list(cell):
+    for child in tuple(cell):
         if child.tag in {f"{{{MAIN_NS}}}v", f"{{{MAIN_NS}}}is"}:
             cell.remove(child)
     cell.set("t", "inlineStr")

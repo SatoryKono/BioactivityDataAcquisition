@@ -188,7 +188,7 @@ def _sorted_inventory(policy: dict[str, object]) -> dict[str, object]:
         raise TypeError("tracked_suite_inventory sections must stay mappings")
 
     # Drop stale paths while preserving the current bucket topology.
-    for bucket_name, bucket_value in list(integration.items()):
+    for bucket_name, bucket_value in integration.items():
         if isinstance(bucket_value, list):
             integration[bucket_name] = _sorted_unique(
                 value for value in bucket_value if _path_exists(value)
@@ -204,7 +204,7 @@ def _sorted_inventory(policy: dict[str, object]) -> dict[str, object]:
                     cleaned[key] = value.replace("\\", "/")
             integration[bucket_name] = cleaned
 
-    for bucket_name, bucket_value in list(e2e.items()):
+    for bucket_name, bucket_value in e2e.items():
         if isinstance(bucket_value, list):
             e2e[bucket_name] = _sorted_unique(
                 value for value in bucket_value if _path_exists(value)
@@ -237,7 +237,7 @@ def _sorted_inventory(policy: dict[str, object]) -> dict[str, object]:
         if relative_path not in tracked_paths:
             _classify_e2e(relative_path, e2e)
 
-    for bucket_name, bucket_value in list(integration.items()):
+    for bucket_name, bucket_value in integration.items():
         if isinstance(bucket_value, list):
             integration[bucket_name] = _sorted_unique(bucket_value)
         elif isinstance(bucket_value, dict):
@@ -249,7 +249,7 @@ def _sorted_inventory(policy: dict[str, object]) -> dict[str, object]:
                     cleaned[key] = value.replace("\\", "/")
             integration[bucket_name] = cleaned
 
-    for bucket_name, bucket_value in list(e2e.items()):
+    for bucket_name, bucket_value in e2e.items():
         if isinstance(bucket_value, list):
             e2e[bucket_name] = _sorted_unique(bucket_value)
         elif isinstance(bucket_value, dict):

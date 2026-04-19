@@ -37,7 +37,7 @@ class _ConcreteBronzeMixin(BronzeWriterIOMixin):
 
 
 @pytest.mark.unit
-class TestWriteAtomicStreamLines78_79:
+class TestWriteAtomicStreamEdgeCases:
     """Tests for _write_atomic_stream (lines 78-79)."""
 
     def test_write_atomic_stream_empty_buffer_flushes(self, tmp_path: Path) -> None:

@@ -14,8 +14,8 @@ PYTEST_ONLY=false
 if [[ "${1:-}" == "--pytest-only" ]]; then
     PYTEST_ONLY=true
 elif [[ -n "${1:-}" ]]; then
-    echo "[setup-plugins][error] Unknown argument: $1"
-    echo "[setup-plugins][hint] Supported arguments: --pytest-only"
+    echo "[setup-plugins][error] Unknown argument: $1" >&2
+    echo "[setup-plugins][hint] Supported arguments: --pytest-only" >&2
     exit 2
 fi
 

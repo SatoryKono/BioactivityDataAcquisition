@@ -73,7 +73,7 @@ class TestPmidValidation:
         assert re.match(pattern, invalid_pmid) is None
 
 
-class TestPmmolecule_idValidation:
+class TestPmcIdValidation:
     """Tests for PMCID field validation."""
 
     def test_valid_pmc_id_format(self) -> None:

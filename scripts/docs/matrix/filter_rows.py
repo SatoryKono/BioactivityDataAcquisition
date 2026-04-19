@@ -114,7 +114,7 @@ def main() -> int:
                         continue
                     kept_rows.append(row)
 
-                for row in list(sheet_data):
+                for row in tuple(sheet_data):
                     sheet_data.remove(row)
 
                 for idx, row in enumerate(kept_rows, start=1):
