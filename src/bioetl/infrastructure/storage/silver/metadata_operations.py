@@ -126,10 +126,7 @@ def _coerce_silver_metadata_write_request(
         return request
 
     legacy_values: list[object]
-    if request is None:
-        legacy_values = list(args)
-    else:
-        legacy_values = [request, *args]
+    legacy_values = list(args) if request is None else [request, *args]
 
     if len(legacy_values) > len(_SILVER_METADATA_WRITE_POSITIONAL_FIELDS):
         raise TypeError(
@@ -139,6 +136,7 @@ def _coerce_silver_metadata_write_request(
     for field_name, value in zip(
         _SILVER_METADATA_WRITE_POSITIONAL_FIELDS,
         legacy_values,
+        strict=True,
     ):
         if field_name in resolved_kwargs:
             raise TypeError(
