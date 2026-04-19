@@ -367,7 +367,7 @@ def merge_project_code_layers(
     print("=" * 80)
     print(f"Base directory: {base_dir}")
     print(f"Layers: {', '.join(layers)}")
-    print(f"Output files: {{layer}}_merged.md")
+    print("Output files: {layer}_merged.md")
     print("=" * 80)
 
     # Extensions for Python code
@@ -593,12 +593,12 @@ def create_project_structure(
             for line in tree_lines:
                 f.write(line + "\n")
             f.write("```\n\n")
-            f.write(f"**Statistics:**\n")
+            f.write("**Statistics:**\n")
             f.write(f"- Directories: {dir_count}\n")
             f.write(f"- Files: {file_count}\n")
             f.write(f"- Total items: {total_lines}\n")
 
-        print(f"\nTree structure generated successfully!")
+        print("\nTree structure generated successfully!")
         print(f"Directories: {dir_count}")
         print(f"Files: {file_count}")
         print(f"Total items: {total_lines}")
