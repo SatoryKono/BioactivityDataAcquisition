@@ -30,6 +30,7 @@ create_namespace() {
     echo "📁 Creating namespace: $NAMESPACE"
     kubectl create namespace "$NAMESPACE"
   fi
+  return 0
 }
 
 # Deploy application
@@ -55,6 +56,7 @@ deploy() {
   echo "  - Metrics: http://bioetl.${ENV}.internal:8000/metrics"
   echo "  - Prometheus: kubectl port-forward -n $NAMESPACE svc/prometheus 9090:9090"
   echo "  - Grafana: kubectl port-forward -n $NAMESPACE svc/grafana 3000:3000"
+  return 0
 }
 
 # Update image
@@ -70,6 +72,7 @@ update() {
   kubectl rollout status deployment/bioetl -n "$NAMESPACE" --timeout=5m
 
   echo "✅ Update complete!"
+  return 0
 }
 
 # Delete deployment
@@ -84,6 +87,7 @@ delete() {
   else
     echo "❌ Cancelled."
   fi
+  return 0
 }
 
 # Show status
@@ -115,31 +119,34 @@ status() {
   echo ""
   echo "🔹 Recent Events:"
   kubectl get events -n "$NAMESPACE" --sort-by='.lastTimestamp' | tail -5
+  return 0
 }
 
 # Show logs
 logs() {
-  COMPONENT=${3:-bioetl}
-  echo "📝 Logs for $COMPONENT in $NAMESPACE"
+  local component="${3:-bioetl}"
+  echo "📝 Logs for $component in $NAMESPACE"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-  if [[ "$COMPONENT" = "all" ]]; then
+  if [[ "$component" = "all" ]]; then
     kubectl logs -n "$NAMESPACE" -l app=bioetl -f --max-log-requests=10
   else
-    kubectl logs -n "$NAMESPACE" -l app="$COMPONENT" -f
+    kubectl logs -n "$NAMESPACE" -l app="$component" -f
   fi
+  return 0
 }
 
 # Port forwarding
 port_forward() {
-  SERVICE=$3
-  LOCAL_PORT=$4
-  REMOTE_PORT=$5
+  local service="$3"
+  local local_port="$4"
+  local remote_port="$5"
 
-  echo "🔗 Port forwarding $SERVICE..."
-  echo "   Local: $LOCAL_PORT → Remote: $REMOTE_PORT"
+  echo "🔗 Port forwarding $service..."
+  echo "   Local: $local_port → Remote: $remote_port"
 
-  kubectl port-forward -n "$NAMESPACE" "svc/$SERVICE" "$LOCAL_PORT:$REMOTE_PORT"
+  kubectl port-forward -n "$NAMESPACE" "svc/$service" "$local_port:$remote_port"
+  return 0
 }
 
 # Execute based on action

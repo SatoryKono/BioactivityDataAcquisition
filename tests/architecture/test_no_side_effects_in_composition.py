@@ -13,6 +13,60 @@ from pathlib import Path
 COMPOSITION_DIR = Path("src/bioetl/composition")
 
 
+def _find_side_effect_import_violations() -> list[str]:
+    violations: list[str] = []
+    for py_file in COMPOSITION_DIR.rglob("*.py"):
+        if py_file.name == "__init__.py":
+            continue
+        violations.extend(_iter_file_side_effect_import_violations(py_file))
+    return violations
+
+
+def _iter_file_side_effect_import_violations(py_file: Path) -> list[str]:
+    source = py_file.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    lines = source.split("\n")
+    return [
+        f"{py_file.name}:{node.lineno}: side-effect import with noqa: F401"
+        for node in ast.walk(tree)
+        if _is_side_effect_import(node, lines)
+    ]
+
+
+def _is_side_effect_import(node: ast.AST, lines: list[str]) -> bool:
+    if not isinstance(node, (ast.Import, ast.ImportFrom)):
+        return False
+    if node.lineno > len(lines):
+        return False
+    line = lines[node.lineno - 1]
+    return "noqa: F401" in line or "noqa:F401" in line
+
+
+def _get_bootstrap_pipeline_runner_function() -> ast.FunctionDef:
+    bootstrap_file = COMPOSITION_DIR / "bootstrap" / "runtime" / "pipeline.py"
+    source = bootstrap_file.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    bootstrap_func = _find_named_function(tree, "bootstrap_pipeline_runner")
+    assert bootstrap_func is not None, "bootstrap_pipeline_runner function not found"
+    return bootstrap_func
+
+
+def _find_named_function(tree: ast.AST, name: str) -> ast.FunctionDef | None:
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == name:
+            return node
+    return None
+
+
+def _function_calls_name(function_node: ast.FunctionDef, name: str) -> bool:
+    return any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == name
+        for node in ast.walk(function_node)
+    )
+
+
 def test_no_side_effect_imports():
     """Composition layer MUST NOT use side-effect imports.
 
@@ -22,25 +76,7 @@ def test_no_side_effect_imports():
     Side-effect imports are identified by the noqa: F401 comment,
     which indicates an unused import kept only for its side effects.
     """
-    violations = []
-
-    for py_file in COMPOSITION_DIR.rglob("*.py"):
-        if py_file.name == "__init__.py":
-            continue
-
-        source = py_file.read_text(encoding="utf-8")
-        tree = ast.parse(source)
-        lines = source.split("\n")
-
-        for node in ast.walk(tree):
-            # Check for noqa: F401 comments (indicates unused import = side-effect)
-            if isinstance(node, ast.Import | ast.ImportFrom):
-                if node.lineno <= len(lines):
-                    line = lines[node.lineno - 1]
-                    if "noqa: F401" in line or "noqa:F401" in line:
-                        violations.append(
-                            f"{py_file.name}:{node.lineno}: side-effect import with noqa: F401"
-                        )
+    violations = _find_side_effect_import_violations()
 
     assert not violations, (
         "Side-effect imports found in composition:\n"
@@ -58,33 +94,8 @@ def test_bootstrap_uses_explicit_registration():
     a deprecated alias) defined in composition/bootstrap/runtime/pipeline.py
     as part of the CLI/runtime split (see CLAUDE.md §2.1).
     """
-    # bootstrap_pipeline_runner is in composition/bootstrap/runtime/pipeline.py
-    bootstrap_file = COMPOSITION_DIR / "bootstrap" / "runtime" / "pipeline.py"
-    source = bootstrap_file.read_text(encoding="utf-8")
-    tree = ast.parse(source)
-
-    # Find bootstrap_pipeline_runner function (canonical name)
-    bootstrap_func = None
-    for node in ast.walk(tree):
-        if (
-            isinstance(node, ast.FunctionDef)
-            and node.name == "bootstrap_pipeline_runner"
-        ):
-            bootstrap_func = node
-            break
-
-    assert bootstrap_func is not None, "bootstrap_pipeline_runner function not found"
-
-    # Check that register_all_pipelines() is called in the function body
-    calls_register = False
-    for node in ast.walk(bootstrap_func):
-        if isinstance(node, ast.Call):
-            if (
-                isinstance(node.func, ast.Name)
-                and node.func.id == "register_all_pipelines"
-            ):
-                calls_register = True
-                break
+    bootstrap_func = _get_bootstrap_pipeline_runner_function()
+    calls_register = _function_calls_name(bootstrap_func, "register_all_pipelines")
 
     assert calls_register, (
         "bootstrap_pipeline_runner() must explicitly call register_all_pipelines() "
@@ -102,31 +113,10 @@ def test_no_metrics_server_direct_call_in_bootstrap_pipeline():
     a deprecated alias) defined in composition/bootstrap/runtime/pipeline.py
     as part of the CLI/runtime split (see CLAUDE.md §2.1).
     """
-    # bootstrap_pipeline_runner is in composition/bootstrap/runtime/pipeline.py
-    bootstrap_file = COMPOSITION_DIR / "bootstrap" / "runtime" / "pipeline.py"
-    source = bootstrap_file.read_text(encoding="utf-8")
-    tree = ast.parse(source)
+    bootstrap_func = _get_bootstrap_pipeline_runner_function()
 
-    # Find bootstrap_pipeline_runner function (canonical name)
-    bootstrap_func = None
-    for node in ast.walk(tree):
-        if (
-            isinstance(node, ast.FunctionDef)
-            and node.name == "bootstrap_pipeline_runner"
-        ):
-            bootstrap_func = node
-            break
-
-    assert bootstrap_func is not None, "bootstrap_pipeline_runner function not found"
-
-    # Check that start_metrics_server() is NOT called directly
-    for node in ast.walk(bootstrap_func):
-        if isinstance(node, ast.Call):
-            if (
-                isinstance(node.func, ast.Name)
-                and node.func.id == "start_metrics_server"
-            ):
-                raise AssertionError(
-                    "bootstrap_pipeline_runner() must not call start_metrics_server() directly. "
-                    "Use bootstrap_metrics_port() or bootstrap_observability_bundle() instead."
-                )
+    if _function_calls_name(bootstrap_func, "start_metrics_server"):
+        raise AssertionError(
+            "bootstrap_pipeline_runner() must not call start_metrics_server() directly. "
+            "Use bootstrap_metrics_port() or bootstrap_observability_bundle() instead."
+        )

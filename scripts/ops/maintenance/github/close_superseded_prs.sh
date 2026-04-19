@@ -27,6 +27,7 @@ Examples:
   bash scripts/close_superseded_prs.sh --new-pr 2440 --execute
   bash scripts/close_superseded_prs.sh --new-pr 2440 --prs "2430 2431 2432 2436 2441" --execute
 EOF
+  return 0
 }
 
 require_cmd() {
@@ -35,11 +36,14 @@ require_cmd() {
     echo "ERROR: required command not found: $cmd" >&2
     exit 1
   fi
+  return 0
 }
 
 parse_args() {
+  local arg=""
   while [[ $# -gt 0 ]]; do
-    case "$1" in
+    arg="$1"
+    case "$arg" in
       --new-pr)
         NEW_PR="${2:-}"
         shift 2
@@ -61,12 +65,13 @@ parse_args() {
         exit 0
         ;;
       *)
-        echo "ERROR: unknown argument: $1" >&2
+        echo "ERROR: unknown argument: $arg" >&2
         usage
         exit 1
         ;;
     esac
   done
+  return 0
 }
 
 validate_inputs() {
@@ -85,6 +90,7 @@ validate_inputs() {
     echo "ERROR: target PR list is empty." >&2
     exit 1
   fi
+  return 0
 }
 
 print_plan() {
@@ -97,6 +103,7 @@ print_plan() {
     echo "Mode: DRY-RUN"
   fi
   echo
+  return 0
 }
 
 run() {
@@ -121,6 +128,7 @@ run() {
       echo "[DRY-RUN] gh pr close $pr --repo $REPO --comment \"$comment\""
     fi
   done
+  return 0
 }
 
 main() {

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any, AsyncIterator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -25,6 +26,14 @@ from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMa
 from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
     PubChemFetchStrategies,
 )
+
+
+async def _consume_async(iterator: AsyncIterator[Any]) -> list[Any]:
+    """Drain an async iterator and return collected items."""
+    items: list[Any] = []
+    async for item in iterator:
+        items.append(item)
+    return items
 
 
 @pytest.fixture
@@ -228,29 +237,25 @@ async def test_fetch_assay(pubchem_adapter, mock_pcp_assay):
 async def test_fetch_unsupported_entity(pubchem_adapter):
     """Test fetching unsupported entity raises ValueError."""
     with pytest.raises(ValueError, match="Unsupported entity type"):
-        async for _ in pubchem_adapter.fetch("invalid_entity"):
-            pass
+        await _consume_async(pubchem_adapter.fetch("invalid_entity"))
 
 
 async def test_fetch_compound_missing_query(pubchem_adapter):
     """Test fetching compound without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required for compound fetch"):
-        async for _ in pubchem_adapter.fetch("compound"):
-            pass
+        await _consume_async(pubchem_adapter.fetch("compound"))
 
 
 async def test_fetch_substance_missing_query(pubchem_adapter):
     """Test fetching substance without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required"):
-        async for _ in pubchem_adapter.fetch("substance"):
-            pass
+        await _consume_async(pubchem_adapter.fetch("substance"))
 
 
 async def test_fetch_assay_missing_query(pubchem_adapter):
     """Test fetching assay without query raises ValueError."""
     with pytest.raises(ValueError, match="Query is required"):
-        async for _ in pubchem_adapter.fetch("assay"):
-            pass
+        await _consume_async(pubchem_adapter.fetch("assay"))
 
 
 async def test_health_check_healthy(pubchem_adapter, mock_pcp_compound):
@@ -299,15 +304,13 @@ async def test_circuit_breaker(pubchem_adapter):
     with patch("pubchempy.get_compounds", side_effect=RuntimeError("API Error")):
         # First call fails and increments failure count
         try:
-            async for _ in pubchem_adapter.fetch("compound", query="fail"):
-                pass
+            await _consume_async(pubchem_adapter.fetch("compound", query="fail"))
         except RuntimeError:
             pass
 
         # Second call should raise CircuitBreakerOpenError
         with pytest.raises(CircuitBreakerOpenError):
-            async for _ in pubchem_adapter.fetch("compound", query="fail"):
-                pass
+            await _consume_async(pubchem_adapter.fetch("compound", query="fail"))
 
 
 async def test_rate_limiter_called_once_per_compound_fetch(
