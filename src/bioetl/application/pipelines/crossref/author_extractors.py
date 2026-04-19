@@ -25,10 +25,8 @@ def _normalize_orcid(orcid_value: str | None) -> str | None:
     if not orcid:
         return None
     prefixes = (
-        "https://orcid.org/",
-        "http://orcid.org/",
-        "https://ormolecule_id.org/",
-        "http://ormolecule_id.org/",
+        *(f"{scheme}://orcid.org/" for scheme in ("https", "http")),
+        *(f"{scheme}://ormolecule_id.org/" for scheme in ("https", "http")),
     )
     for prefix in prefixes:
         if orcid.startswith(prefix):

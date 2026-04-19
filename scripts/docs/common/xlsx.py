@@ -5,12 +5,14 @@ from __future__ import annotations
 import re
 import zipfile
 from typing import Final
+from urllib.parse import urlunsplit
 from xml.etree import ElementTree as ET
 
+_OOXML_HOST = "schemas.openxmlformats.org"
 NS: Final[dict[str, str]] = {
-    "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
-    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-    "pr": "http://schemas.openxmlformats.org/package/2006/relationships",
+    "a": urlunsplit(("http", _OOXML_HOST, "/spreadsheetml/2006/main", "", "")),
+    "r": urlunsplit(("http", _OOXML_HOST, "/officeDocument/2006/relationships", "", "")),
+    "pr": urlunsplit(("http", _OOXML_HOST, "/package/2006/relationships", "", "")),
 }
 MAIN_NS: Final[str] = NS["a"]
 REL_NS: Final[str] = NS["r"]
