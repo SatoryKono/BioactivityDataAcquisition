@@ -166,7 +166,8 @@ class ShutdownService:
             True if shutdown completed within timeout, False if timeout expired.
         """
         try:
-            await asyncio.wait_for(self._completion_event.wait(), timeout=timeout)
+            async with asyncio.timeout(timeout):
+                await self._completion_event.wait()
             return True
         except TimeoutError:
             self.logger.warning(

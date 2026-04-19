@@ -89,30 +89,28 @@ def test_create_record_processor_from_pipeline_projects_pipeline_fields() -> Non
     )
 
     call_kwargs = create_fn.call_args.kwargs
-    assert call_kwargs["services"] is pipeline.services
-    assert call_kwargs["context"] is pipeline.context
-    assert call_kwargs["pipeline_name"] == "chembl_activity"
-    assert call_kwargs["provider"] == "chembl"
-    assert call_kwargs["entity_type"] == "activity"
-    assert call_kwargs["column_groups"] == ("system", "business")
-    assert call_kwargs["scd_config"] == {"type": 2}
-    assert call_kwargs["content_hash_include_fields"] == frozenset({"doi"})
-    assert call_kwargs["content_hash_exclude_fields"] == frozenset(
+    request = call_kwargs["request"]
+    assert request.services is pipeline.services
+    assert request.context is pipeline.context
+    assert request.pipeline_name == "chembl_activity"
+    assert request.provider == "chembl"
+    assert request.entity_type == "activity"
+    assert request.column_groups == ("system", "business")
+    assert request.scd_config == {"type": 2}
+    assert request.content_hash_include_fields == frozenset({"doi"})
+    assert request.content_hash_exclude_fields == frozenset(
         {"journal", "publisher", "entity_id", "content_hash"}
     )
-    assert call_kwargs["content_hash_policy_by_version"] is not None
-    assert call_kwargs["content_hash_policy_by_version"].active_version == "2.0.0"
-    assert call_kwargs["content_hash_policy_by_version"].affects_hash is True
-    assert call_kwargs["content_hash_policy_by_version"].versions == (
+    assert request.content_hash_policy_by_version is not None
+    assert request.content_hash_policy_by_version.active_version == "2.0.0"
+    assert request.content_hash_policy_by_version.affects_hash is True
+    assert request.content_hash_policy_by_version.versions == (
         "1.0.0",
         "2.0.0",
     )
-    assert call_kwargs["gold_schema_policy_by_version"] is not None
-    assert call_kwargs["gold_schema_policy_by_version"].active_schema is active_schema
-    assert (
-        call_kwargs["gold_schema_policy_by_version"].for_version("1.0.0")
-        is shadow_schema
-    )
+    assert request.gold_schema_policy_by_version is not None
+    assert request.gold_schema_policy_by_version.active_schema is active_schema
+    assert request.gold_schema_policy_by_version.for_version("1.0.0") is shadow_schema
 
 
 def test_build_record_processor_config_and_validator_forwards_paths_and_strict() -> (
