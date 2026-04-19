@@ -14,6 +14,7 @@ Reduces code duplication by extracting shared logic:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from functools import partial
 from typing import TYPE_CHECKING, Any, cast
 
@@ -49,6 +50,103 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.services import IdentityService
     from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
+
+
+@dataclass(frozen=True, slots=True)
+class BasePublicationTransformerInit:
+    """Typed constructor input for publication transformer wiring."""
+
+    provider: str
+    entity_type: str = "publication"
+    silver_filters: SilverFilterConfig | None = None
+    gold_filters: GoldFilterConfig | None = None
+    tracer: TracingPort | None = None
+    metrics: MetricsPort | None = None
+    identity_service: IdentityService | None = None
+    pii_hasher: PiiHasherPort | None = None
+    dependencies: TransformerDependencyContext | None = None
+    data_extractor: DataExtractorStrategy | None = None
+    identifier_resolver: IdentifierResolverStrategy | None = None
+    metadata_strategy: PublicationMetadataStrategy | None = None
+    record_normalizer: RecordNormalizationProcessor | None = None
+
+
+def _coerce_publication_transformer_init(
+    init: BasePublicationTransformerInit | str | None,
+    /,
+    **kwargs: object,
+) -> BasePublicationTransformerInit:
+    """Normalize compact and legacy constructor styles to one typed input."""
+    if isinstance(init, BasePublicationTransformerInit):
+        if kwargs:
+            unexpected = ", ".join(sorted(kwargs))
+            raise TypeError(
+                "BasePublicationTransformer received unexpected keyword arguments "
+                f"with init spec: {unexpected}"
+            )
+        return init
+
+    provider = init if isinstance(init, str) else kwargs.pop("provider", None)
+    if not isinstance(provider, str) or not provider:
+        raise TypeError(
+            "BasePublicationTransformer requires a provider string or "
+            "BasePublicationTransformerInit."
+        )
+
+    unexpected = sorted(kwargs.keys() - {
+        "entity_type",
+        "silver_filters",
+        "gold_filters",
+        "tracer",
+        "metrics",
+        "identity_service",
+        "pii_hasher",
+        "dependencies",
+        "data_extractor",
+        "identifier_resolver",
+        "metadata_strategy",
+        "record_normalizer",
+    })
+    if unexpected:
+        unexpected_args = ", ".join(unexpected)
+        raise TypeError(
+            "BasePublicationTransformer received unexpected keyword arguments: "
+            f"{unexpected_args}"
+        )
+
+    return BasePublicationTransformerInit(
+        provider=provider,
+        entity_type=cast(str, kwargs.pop("entity_type", "publication")),
+        silver_filters=cast("SilverFilterConfig | None", kwargs.pop("silver_filters", None)),
+        gold_filters=cast("GoldFilterConfig | None", kwargs.pop("gold_filters", None)),
+        tracer=cast("TracingPort | None", kwargs.pop("tracer", None)),
+        metrics=cast("MetricsPort | None", kwargs.pop("metrics", None)),
+        identity_service=cast(
+            "IdentityService | None",
+            kwargs.pop("identity_service", None),
+        ),
+        pii_hasher=cast("PiiHasherPort | None", kwargs.pop("pii_hasher", None)),
+        dependencies=cast(
+            "TransformerDependencyContext | None",
+            kwargs.pop("dependencies", None),
+        ),
+        data_extractor=cast(
+            "DataExtractorStrategy | None",
+            kwargs.pop("data_extractor", None),
+        ),
+        identifier_resolver=cast(
+            "IdentifierResolverStrategy | None",
+            kwargs.pop("identifier_resolver", None),
+        ),
+        metadata_strategy=cast(
+            "PublicationMetadataStrategy | None",
+            kwargs.pop("metadata_strategy", None),
+        ),
+        record_normalizer=cast(
+            "RecordNormalizationProcessor | None",
+            kwargs.pop("record_normalizer", None),
+        ),
+    )
 
 
 def _classification_payload(
@@ -168,43 +266,37 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
 
     def __init__(
         self,
-        provider: str,
-        entity_type: str = "publication",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: IdentityService | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-        data_extractor: DataExtractorStrategy | None = None,
-        identifier_resolver: IdentifierResolverStrategy | None = None,
-        metadata_strategy: PublicationMetadataStrategy | None = None,
-        record_normalizer: RecordNormalizationProcessor | None = None,
+        init: BasePublicationTransformerInit | str | None = None,
+        /,
+        **kwargs: object,
     ) -> None:
         """Initialize publication transformer with explicit DI seams."""
+        resolved = _coerce_publication_transformer_init(init, **kwargs)
         super().__init__(
-            provider=provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
+            provider=resolved.provider,
+            entity_type=resolved.entity_type,
+            silver_filters=resolved.silver_filters,
+            gold_filters=resolved.gold_filters,
+            tracer=resolved.tracer,
+            metrics=resolved.metrics,
+            identity_service=resolved.identity_service,
+            pii_hasher=resolved.pii_hasher,
+            dependencies=resolved.dependencies,
         )
         # Fallback to self if strategies are not provided (legacy subclass support)
-        self._data_extractor = data_extractor or cast("DataExtractorStrategy", self)
-        self._identifier_resolver = identifier_resolver or cast(
+        self._data_extractor = resolved.data_extractor or cast(
+            "DataExtractorStrategy",
+            self,
+        )
+        self._identifier_resolver = resolved.identifier_resolver or cast(
             "IdentifierResolverStrategy", self
         )
-        self._metadata_strategy = metadata_strategy or cast(
+        self._metadata_strategy = resolved.metadata_strategy or cast(
             "PublicationMetadataStrategy", self
         )
-        self._record_normalizer = record_normalizer or RecordNormalizationProcessor(
-            provider=provider,
-            entity_type=entity_type,
+        self._record_normalizer = resolved.record_normalizer or RecordNormalizationProcessor(
+            provider=resolved.provider,
+            entity_type=resolved.entity_type,
         )
 
     def pre_extract_validation(

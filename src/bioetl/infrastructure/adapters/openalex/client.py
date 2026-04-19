@@ -34,7 +34,6 @@ from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import
     OpenAlexAdapterHelpersMixin,
 )
 from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
-    OpenAlexRuntimeServicesRequest,
     build_openalex_runtime_services,
 )
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
@@ -144,34 +143,43 @@ class OpenAlexAdapter(
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and decomposed OpenAlex components."""
-        self._bootstrap_dataclass_http_adapter()
-        self._bind_fallback_fetch_service(self.fallback_fetch_service)
-        
-        # Build runtime services using new request-style API
-        runtime_services_request = OpenAlexRuntimeServicesRequest(
-            settings=self._settings,  # type: ignore
-            http_client=self._http_client,
-            tracer=self._tracer,  # type: ignore
-            metrics=self._metrics,  # type: ignore
-            logger=self._logger,
+        BaseHttpAdapter.__init__(
+            self,
+            http_client=self.http_client,
+            logger=self.logger,
+            metrics=self.metrics,
+            dependency_context=self.dependency_context,
+            error_handler=self.error_handler,
+            adapter_metrics=self.adapter_metrics,
+            request_collector=self.request_collector,
         )
+        self._fallback_fetch_service = self.fallback_fetch_service
         runtime_services = build_openalex_runtime_services(
-            settings=self._settings,  # type: ignore
+            fallback_fetch_service=self._fallback_fetch_service,
+            openalex_query_executor=self.openalex_query_executor,
+            openalex_response_mapper=self.openalex_response_mapper,
+            openalex_cursor_flow=self.openalex_cursor_flow,
+            title_fallback_handler=self.title_fallback_handler,
+            openalex_fallback_orchestrator=self.openalex_fallback_orchestrator,
             http_client=self._http_client,
-            tracer=self._tracer,  # type: ignore
-            metrics=self._metrics,  # type: ignore
+            adapter_metrics=self._adapter_metrics,
+            request_collector=self._request_collector,
+            headers_provider=self._build_headers,
+            api_base=OPENALEX_API_BASE,
+            mailto=self.mailto,
+            batch_size=self.batch_size,
+            title_search_cache_size=self.title_search_cache_size,
+            normalize_doi=self._normalize_doi,
+            escape_title_for_search=self._escape_title_for_search,
+            extract_record_id=self._extract_doi_from_record,
+            search_by_title=self._search_by_title,
             logger=self._logger,
+            runtime_errors=OPENALEX_RUNTIME_ERRORS,
         )
-        # Note: New runtime_services is a bundle with basic services only
-        # The old complex wiring is now handled separately
-        self._http_client = runtime_services.http_client
-        self._tracer = runtime_services.tracer
-        self._metrics = runtime_services.metrics
-        self._logger = runtime_services.logger
-        
-        # TODO: Rewire the rest of the services using the new bundle
-        # For now, keep using the old wiring for compatibility
-        # This will be cleaned up in the next phase
+        self._query_executor = runtime_services.query_executor
+        self._response_mapper = runtime_services.response_mapper
+        self._cursor_flow = runtime_services.cursor_flow
+        self._fallback_handler = runtime_services.fallback_handler
         self._fallback_orchestrator = runtime_services.fallback_orchestrator
         self.configure_fallback_policy(None)
 
