@@ -369,7 +369,7 @@ class TestResolveLayerColumns:
         schema.silver = layer_config
 
         writer = _Writer(column_orderer=None, data_schema=schema)
-        _, renames = writer._resolve_layer_columns(
+        col_order, renames = writer._resolve_layer_columns(
             "silver", ["entity_id", "name", "extra"]
         )
 

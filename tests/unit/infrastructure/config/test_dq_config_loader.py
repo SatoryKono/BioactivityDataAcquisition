@@ -487,7 +487,6 @@ class TestDeepMerge:
         result = loader._deep_merge(base, override)
 
         validations = result["entity_field_validations"]
-        # a(required) + b(range) + b(pattern) + c(enum) = 4
         assert len(validations) == 4
         b_validations = [v for v in validations if v["field"] == "b"]
         assert len(b_validations) == 2
@@ -538,7 +537,6 @@ class TestMergeValidationLists:
 
         result = loader._merge_validation_lists(base, override)
 
-        # a + b(range) + b(pattern) = 3
         assert len(result) == 3
         b_items = [v for v in result if v["field"] == "b"]
         assert len(b_items) == 2

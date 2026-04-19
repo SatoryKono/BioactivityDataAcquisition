@@ -100,7 +100,7 @@ class TestUnifiedHTTPClientContextManager:
     async def test_aexit_closes_client(self, http_client):
         """Test __aexit__ closes httpx client."""
         async with http_client:
-            pass
+            assert http_client._client is not None
         assert http_client._client is None
 
     @pytest.mark.asyncio

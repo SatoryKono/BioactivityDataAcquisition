@@ -356,7 +356,7 @@ class TestHealthServerHTTP:
         self, port: int, method: str = "GET", path: str = "/health"
     ) -> tuple[int, str, str]:
         """Send HTTP request and return status code, status text, and body."""
-        _, writer = await asyncio.open_connection("127.0.0.1", port)
+        reader, writer = await asyncio.open_connection("127.0.0.1", port)
         try:
             request = f"{method} {path} HTTP/1.1\r\nHost: localhost\r\n\r\n"
             writer.write(request.encode())

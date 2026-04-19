@@ -177,10 +177,8 @@ class TestPublicationTermDataSourceFetch:
         async for term in wrapper.fetch("publication_term"):
             terms.append(term)
 
-        # Expected: 2 MESH_HEADING + 1 MESH_QUALIFIER + 3 KEYWORD = 6 terms
         assert len(terms) == 6
 
-        # Check term types
         term_types = [t["term_type"] for t in terms]
         assert term_types.count("MESH_HEADING") == 2
         assert term_types.count("MESH_QUALIFIER") == 1

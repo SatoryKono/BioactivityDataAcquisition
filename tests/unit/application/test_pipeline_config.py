@@ -271,7 +271,6 @@ class TestRuntimeConfig:
         """Test effective_lock_ttl with default values returns 90s."""
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
-        # With default lock_ttl=90, effective_lock_ttl should be 90
         assert runtime.effective_lock_ttl == 90
 
     def test_lock_ttl_ratio(self):
@@ -282,7 +281,6 @@ class TestRuntimeConfig:
         """
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
 
-        # Default: heartbeat=20, ttl=60 → ratio = 3
         assert runtime.lock_ttl / runtime.heartbeat_interval == 3
 
     def test_invalid_heartbeat_interval_raises(self):

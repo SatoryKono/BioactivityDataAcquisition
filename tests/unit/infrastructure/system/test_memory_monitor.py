@@ -360,7 +360,6 @@ class TestEstimateBatchMemoryMb:
     def test_estimate_uses_overhead_factor(self) -> None:
         """Estimate applies 2.5x overhead factor."""
         monitor = _make_monitor()
-        # 100 records * 1024 bytes * 2.5 / (1024*1024) = 0.244140625 MB
         expected = (100 * 1024 * 2.5) / (1024 * 1024)
         result = monitor.estimate_batch_memory_mb(100, avg_record_size_bytes=1024)
         assert result == pytest.approx(expected, abs=0.001)

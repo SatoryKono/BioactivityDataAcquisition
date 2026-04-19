@@ -149,7 +149,7 @@ class TestTransformSingle:
         result = await batch_transformer.transform_single(record, batch_id)
 
         assert result.silver_record is not None
-        assert result.gold_record is None  # Filtered out
+        assert result.gold_record is None
         assert result.is_quarantined is False
 
     async def test_transform_single_quarantine(
@@ -518,8 +518,6 @@ class TestStreamingBatchProcessor:
         ):
             chunk_sizes.append(len(chunk.silver_records))
 
-        # Should process all records in smaller chunks of 5
-        # 20 records / 5 per chunk = 4 chunks
         assert len(chunk_sizes) == 4
         assert all(size == 5 for size in chunk_sizes)
         assert sum(chunk_sizes) == 20
@@ -628,5 +626,5 @@ class TestIntegration:
             chunk_count += 1
 
         assert total_silver == 1000
-        assert total_gold == 490  # Values 51-99 for each 100 = 49 * 10 = 490
+        assert total_gold == 490
         assert chunk_count == 10

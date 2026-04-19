@@ -458,51 +458,75 @@ def save_baselines(
 
 def log_report(report: UpdateReport, output_file: Path | None) -> None:
     """Log baseline update report."""
+    _log_report_header()
+    _log_report_mode(report.dry_run)
+
+    # Successful updates
+    successful = [r for r in report.results if r.success]
+    if successful:
+        _log_successful_updates(successful)
+
+    # Failed updates
+    failed = [r for r in report.results if not r.success]
+    if failed:
+        _log_failed_updates(failed)
+
+    _log_report_footer(report, output_file)
+
+
+def _log_report_header() -> None:
+    """Log report header."""
     logger.info("")
     logger.info("=" * 70)
     logger.info("DQ Baseline Update Report")
     logger.info("=" * 70)
     logger.info("")
 
-    if report.dry_run:
+
+def _log_report_mode(dry_run: bool) -> None:
+    """Log report mode."""
+    if dry_run:
         logger.info("MODE: Dry-run (no changes saved)")
     else:
         logger.info("MODE: Apply")
     logger.info("")
 
-    # Successful updates
-    successful = [r for r in report.results if r.success]
-    if successful:
-        logger.info("## SUCCESSFUL (%d pipelines)", len(successful))
-        logger.info("")
-        for result in successful:
-            b = result.baseline
-            if b:
-                logger.info("  Pipeline: %s", b.pipeline)
-                logger.info("    Runs analyzed:    %d", b.runs_analyzed)
-                logger.info(
-                    "    Avg error rate:   %.4f (%.2f%%)",
-                    b.avg_error_rate,
-                    b.avg_error_rate * 100,
-                )
-                logger.info("    Stdev error rate: %.4f", b.stdev_error_rate)
-                logger.info(
-                    "    Error range:      %.4f - %.4f",
-                    b.min_error_rate,
-                    b.max_error_rate,
-                )
-                logger.info("    Avg records:      %.0f", b.avg_records)
-                logger.info("    Avg duration:     %.0f ms", b.avg_duration_ms)
-                logger.info("")
 
-    # Failed updates
-    failed = [r for r in report.results if not r.success]
-    if failed:
-        logger.info("## FAILED (%d pipelines)", len(failed))
-        for result in failed:
-            logger.info("  %s: %s", result.pipeline, result.error)
-        logger.info("")
+def _log_successful_updates(successful: list[UpdateResult]) -> None:
+    """Log successful updates."""
+    logger.info("## SUCCESSFUL (%d pipelines)", len(successful))
+    logger.info("")
+    for result in successful:
+        b = result.baseline
+        if b:
+            logger.info("  Pipeline: %s", b.pipeline)
+            logger.info("    Runs analyzed:    %d", b.runs_analyzed)
+            logger.info(
+                "    Avg error rate:   %.4f (%.2f%%)",
+                b.avg_error_rate,
+                b.avg_error_rate * 100,
+            )
+            logger.info("    Stdev error rate: %.4f", b.stdev_error_rate)
+            logger.info(
+                "    Error range:      %.4f - %.4f",
+                b.min_error_rate,
+                b.max_error_rate,
+            )
+            logger.info("    Avg records:      %.0f", b.avg_records)
+            logger.info("    Avg duration:     %.0f ms", b.avg_duration_ms)
+            logger.info("")
 
+
+def _log_failed_updates(failed: list[UpdateResult]) -> None:
+    """Log failed updates."""
+    logger.info("## FAILED (%d pipelines)", len(failed))
+    for result in failed:
+        logger.info("  %s: %s", result.pipeline, result.error)
+    logger.info("")
+
+
+def _log_report_footer(report: UpdateReport, output_file: Path | None) -> None:
+    """Log report footer."""
     logger.info("=" * 70)
     logger.info("Summary: %d successful, %d failed", report.successful, report.failed)
     if output_file and not report.dry_run:
