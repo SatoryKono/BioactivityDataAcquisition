@@ -146,7 +146,7 @@ class TestResolveGraceAllowances:
                 }
             ]
         }
-        active, total, by_registry, by_group = resolve_grace_allowances(
+        active, total, by_registry, _ = resolve_grace_allowances(
             scorecard, today=date(2025, 6, 15)
         )
         assert len(active) == 1
@@ -166,7 +166,7 @@ class TestResolveGraceAllowances:
                 }
             ]
         }
-        active, total, by_registry, by_group = resolve_grace_allowances(
+        active, total, _, _ = resolve_grace_allowances(
             scorecard, today=date(2025, 6, 15)
         )
         assert active == []
@@ -185,7 +185,7 @@ class TestResolveGraceAllowances:
                 }
             ]
         }
-        active, total, by_registry, by_group = resolve_grace_allowances(
+        active, total, _, _ = resolve_grace_allowances(
             scorecard, today=date(2025, 6, 15)
         )
         assert active == []

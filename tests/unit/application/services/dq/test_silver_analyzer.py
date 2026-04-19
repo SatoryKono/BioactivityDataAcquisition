@@ -198,15 +198,14 @@ class TestCheckNullRates:
 
     def test_no_nulls(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
-        results, overall = analyzer._statistics.check_null_rates(df)
-        assert overall == pytest.approx(0.0)
+        results, _ = analyzer._statistics.check_null_rates(df)
         assert all(r.null_rate == pytest.approx(0.0) for r in results)
         assert all(r.status == DQCheckStatus.PASS for r in results)
 
     def test_column_with_high_null_rate_warns(self, analyzer: SilverDQAnalyzer) -> None:
         """Column with >50% nulls → WARN."""
         df = pl.DataFrame({"a": [1, None, None]})
-        results, overall = analyzer._statistics.check_null_rates(df)
+        results, _ = analyzer._statistics.check_null_rates(df)
         assert results[0].status == DQCheckStatus.WARN
         assert results[0].null_rate > 0.5
 

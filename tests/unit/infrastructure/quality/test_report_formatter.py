@@ -101,7 +101,7 @@ class TestCollectAllowances:
                 }
             }
         ]
-        total, by_registry, by_group = _collect_allowances(windows)
+        total, by_registry, _ = _collect_allowances(windows)
         assert total == 5
         assert by_registry["reg_a"] == 3
         assert by_group["grp1"] == 2
@@ -122,7 +122,7 @@ class TestCollectAllowances:
                 }
             },
         ]
-        total, by_registry, by_group = _collect_allowances(windows)
+        total, _, _ = _collect_allowances(windows)
         assert total == 7
         assert by_registry["reg_a"] == 3
 
@@ -136,7 +136,7 @@ class TestCollectAllowances:
     def test_window_without_allowances(self) -> None:
         """Window without 'allowances' key should be skipped."""
         windows = [{"rf_id": "RF-001"}]
-        total, by_registry, by_group = _collect_allowances(windows)
+        total, _, _ = _collect_allowances(windows)
         assert total == 0
 
     def test_non_dict_allowances_skipped(self) -> None:

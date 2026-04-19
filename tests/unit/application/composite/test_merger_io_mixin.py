@@ -121,7 +121,7 @@ class TestRunCrossValidation:
         mixin = _make_mixin(_cross_validator=MagicMock())
         df = pl.DataFrame({"x": [1]})
 
-        result_df, stats, quarantine = mixin._run_cross_validation(
+        result_df, stats, _ = mixin._run_cross_validation(
             merged_df=df,
             enrichers=[_enricher_config("e1")],
             enricher_dfs={"e1": pl.DataFrame()},

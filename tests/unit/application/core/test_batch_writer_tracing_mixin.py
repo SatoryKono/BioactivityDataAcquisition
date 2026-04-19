@@ -164,7 +164,7 @@ class TestStartSpan:
 
     def test_creates_span_with_correct_name(self):
         """Span is created with the given operation name."""
-        tracer, inner, span = _make_tracer_mock()
+        tracer, inner, _ = _make_tracer_mock()
         writer = _TracingWriter(tracer=tracer)
 
         writer._start_span("write_bronze", "bronze", 10)
@@ -175,7 +175,7 @@ class TestStartSpan:
 
     def test_span_attributes_contain_layer_and_record_count(self):
         """Span attributes include layer and record_count."""
-        tracer, inner, span = _make_tracer_mock()
+        tracer, inner, _ = _make_tracer_mock()
         writer = _TracingWriter(
             tracer=tracer, provider="chembl", entity_type="activity"
         )
@@ -190,7 +190,7 @@ class TestStartSpan:
 
     def test_span_attributes_include_batch_id_when_provided(self):
         """batch_id attribute is set when batch_id is given."""
-        tracer, inner, span = _make_tracer_mock()
+        tracer, inner, _ = _make_tracer_mock()
         writer = _TracingWriter(tracer=tracer)
         batch_id = BatchID(uuid4())
 
@@ -201,7 +201,7 @@ class TestStartSpan:
 
     def test_span_attributes_omit_batch_id_when_none(self):
         """batch_id attribute is absent when batch_id is None."""
-        tracer, inner, span = _make_tracer_mock()
+        tracer, inner, _ = _make_tracer_mock()
         writer = _TracingWriter(tracer=tracer)
 
         writer._start_span("write_gold", "gold", 10, None)
@@ -211,7 +211,7 @@ class TestStartSpan:
 
     def test_span_enter_is_called(self):
         """span.__enter__ is called to activate the span."""
-        tracer, inner, span = _make_tracer_mock()
+        tracer, _, span = _make_tracer_mock()
         writer = _TracingWriter(tracer=tracer)
 
         writer._start_span("write_bronze", "bronze", 1)
@@ -220,7 +220,7 @@ class TestStartSpan:
 
     def test_returns_span_object(self):
         """Returns the span object (not None) when tracer is set."""
-        tracer, inner, span = _make_tracer_mock()
+        tracer, _, span = _make_tracer_mock()
         writer = _TracingWriter(tracer=tracer)
 
         result = writer._start_span("write_bronze", "bronze", 1)

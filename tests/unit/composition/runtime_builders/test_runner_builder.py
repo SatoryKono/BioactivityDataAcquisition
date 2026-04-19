@@ -345,7 +345,7 @@ def test_build_pipeline_runner_creates_registry_when_not_provided() -> None:
 
 def test_build_pipeline_runner_registers_pipelines_into_created_registry() -> None:
     """Builder should register pipelines against the created runtime registry."""
-    _, created_registry = _build_factory_registry()
+    created_registry = _build_factory_registry()[1]
     calls: dict[str, object] = {}
 
     result = _call_build_pipeline_runner(
@@ -878,7 +878,7 @@ def test_build_pipeline_runner_requires_ledger_for_forensic_grade_profile(
     tmp_path: Path,
 ) -> None:
     """Forensic-grade runtime profile must fail closed when ledger is disabled."""
-    _, fake_registry = _build_factory_registry()
+    fake_registry = _build_factory_registry()[1]
 
     with pytest.raises(
         RuntimeError,
@@ -906,7 +906,7 @@ def test_build_pipeline_runner_requires_lineage_sidecars_for_forensic_grade_prof
     tmp_path: Path,
 ) -> None:
     """Forensic-grade profile must fail when active sink layers skip metadata."""
-    _, fake_registry = _build_factory_registry()
+    fake_registry = _build_factory_registry()[1]
 
     with pytest.raises(
         RuntimeError,
