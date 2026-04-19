@@ -68,63 +68,9 @@ __all__ = [
 
 
 def create_composite_runner_service(
-    *,
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    seed_runner_factory: Callable[[], PipelineRunner],
-    enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
-    key_extractor: _KeyExtractorService,
-    coordinator: EnrichmentCoordinatorService,
-    merger: _MergeService,
-    checkpoint_manager: CompositeCheckpointService,
-    logger: LoggerPort,
-    lock: LockPort,
-    fsm_state_helper: FSMStateHelperService,
-    run_id: str | None = None,
-    dq_report_service: DQReportService | None = None,
-    preflight_validator: CompositePreflightValidationService | None = None,
-    dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
-    | None = None,
-    dependency_coordinator: DependencyCoordinatorService | None = None,
-    quarantine_port: QuarantinePort | None = None,
-    metrics: MetricsPort | None = None,
-    tracer: TracingPort | None = None,
-    observer: CompositeLifecycleObserverService | None = None,
-    manifest_id: str | None = None,
-    run_ledger_service: RunLedgerService | None = None,
+    inputs: CompositeRunnerServiceInputs,
 ) -> CompositePipelineRunner:
     """Create a composite runner service from fully resolved dependencies."""
-    if fsm_state_helper is None:
-        raise AssertionError("Composite runner requires fsm_state_helper")
-    inputs = CompositeRunnerServiceInputs(
-        config=config,
-        runtime=runtime,
-        run_id=_resolve_effective_run_id_impl(run_id),
-        logger=logger,
-        lock=lock,
-        seed_runner_factory=seed_runner_factory,
-        enricher_runner_factory=enricher_runner_factory,
-        key_extractor=key_extractor,
-        coordinator=coordinator,
-        merger=merger,
-        checkpoint_manager=checkpoint_manager,
-        fsm_state_helper=fsm_state_helper,
-        dq_report_service=dq_report_service,
-        preflight_validator=preflight_validator,
-        dependencies_runner_factory=dependencies_runner_factory,
-        dependency_coordinator=dependency_coordinator,
-        quarantine_port=quarantine_port,
-        metrics=metrics,
-        tracer=tracer,
-        observer=observer
-        or CompositeLifecycleObserverService(
-            logger=logger,
-            metrics=metrics,
-            tracer=tracer,
-        ),
-        manifest_id=manifest_id,
-        run_ledger_service=run_ledger_service,
-    )
     return _create_composite_runner_service_from_inputs_impl(inputs)
 
 

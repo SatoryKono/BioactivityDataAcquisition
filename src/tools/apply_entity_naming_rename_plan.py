@@ -154,7 +154,8 @@ def _read_repo_text(path: Path) -> str:
 
 def _write_repo_text(path: Path, content: str) -> None:
     """Write text to a validated repository-relative path."""
-    _resolve_repo_path(path).write_text(content, encoding="utf-8")
+    safe_path = _resolve_repo_path(path)
+    safe_path.write_text(content, encoding="utf-8")
 
 
 def load_rows(matrix_path: Path) -> list[RenameRow]:
