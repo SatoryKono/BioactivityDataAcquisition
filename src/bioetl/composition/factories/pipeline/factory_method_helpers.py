@@ -17,15 +17,13 @@ from bioetl.application.core.runner import PipelineRunner
 from bioetl.composition.factories.pipeline._factory_method_control_plane import (
     apply_optional_control_plane_kwargs as _apply_optional_control_plane_kwargs,
 )
-from bioetl.composition.factories.pipeline._factory_method_control_plane import (
-    resolve_strict_gold_validation as _resolve_strict_gold_validation,
-)
 from bioetl.composition.factories.pipeline._factory_method_runtime_support import (
     create_factory_runner_from_request,
     create_pipeline_instance_from_request,
 )
 from bioetl.composition.factories.pipeline._factory_method_types import (
     _BuildFactoryServicesRequest,
+    _ControlPlaneArtifacts,
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
 )
@@ -178,7 +176,6 @@ def create_factory_runner(
 ) -> PipelineRunner:
     yaml_config = config or load_pipeline_config(pipeline_name)
     return create_factory_runner_from_request(
-        pipeline_name=pipeline_name,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
         run_id=run_id,
@@ -186,14 +183,14 @@ def create_factory_runner(
         settings=settings,
         observability=observability,
         yaml_config=yaml_config,
-        manifest_id=manifest_id,
-        config_hash=config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
+        control_plane_artifacts=_ControlPlaneArtifacts(
+            manifest_id=manifest_id,
+            config_hash=config_hash,
+            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+            effective_config_artifact_id=effective_config_artifact_id,
+        ),
         create_with_services_fn=create_with_services_fn,
         assemble_runner_fn=assemble_runner_fn,
         filter_config=filter_config,
         cached_bronze=cached_bronze,
-        apply_optional_control_plane_kwargs_fn=_apply_optional_control_plane_kwargs,
-        resolve_strict_gold_validation_fn=_resolve_strict_gold_validation,
     )

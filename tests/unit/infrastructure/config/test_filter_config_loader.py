@@ -677,9 +677,7 @@ gold_filters:
         )
 
         loader = FilterConfigLoader(tmp_path)
-        input_filter, _, _, extraction_params = loader.load(
-            "chembl", "assay"
-        )
+        input_filter, _, _, extraction_params = loader.load("chembl", "assay")
 
         # Extraction params loaded
         assert not extraction_params.is_empty

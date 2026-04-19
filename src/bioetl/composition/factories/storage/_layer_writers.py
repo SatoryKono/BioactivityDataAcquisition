@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.config.contract_policy_loader import (
@@ -41,6 +42,15 @@ def load_contract_rollout_policy(config: PipelineYamlConfig) -> ContractRolloutP
     ).to_contract_rollout_policy()
 
 
+@dataclass(frozen=True, slots=True)
+class _SilverLayerWriterSupport:
+    resolve_delta_writer_base_path_fn: Callable[..., object]
+    resolve_delta_writer_flat_structure_fn: Callable[..., bool]
+    load_contract_rollout_policy_fn: Callable[
+        [PipelineYamlConfig], ContractRolloutPolicy
+    ]
+
+
 def create_silver_layer_writer_impl(
     *,
     ctx: StorageCreationContext,
@@ -54,13 +64,9 @@ def create_silver_layer_writer_impl(
     audit: AuditPort,
     metadata_atomic_retry_policy: AdaptiveRetryPolicy,
     merge_resilience_policy: SilverMergeResiliencePolicy,
-    resolve_delta_writer_base_path_fn: Callable[..., object],
-    resolve_delta_writer_flat_structure_fn: Callable[..., bool],
-    load_contract_rollout_policy_fn: Callable[
-        [PipelineYamlConfig], ContractRolloutPolicy
-    ],
+    support: _SilverLayerWriterSupport,
 ) -> SilverWriter:
-    silver_writer_flat = resolve_delta_writer_flat_structure_fn(
+    silver_writer_flat = support.resolve_delta_writer_flat_structure_fn(
         ctx.silver_path,
         provider=config.provider,
         entity_type=config.entity_type,
@@ -69,7 +75,7 @@ def create_silver_layer_writer_impl(
     return create_silver_writer(
         CreateSilverWriterRequest(
             writer_cls=silver_writer_cls,
-            base_path=resolve_delta_writer_base_path_fn(
+            base_path=support.resolve_delta_writer_base_path_fn(
                 ctx.silver_path,
                 provider=config.provider,
                 entity_type=config.entity_type,
@@ -88,7 +94,7 @@ def create_silver_layer_writer_impl(
             metrics=metrics,
             metadata_atomic_retry_policy=metadata_atomic_retry_policy,
             merge_resilience_policy=merge_resilience_policy,
-            contract_rollout_policy=load_contract_rollout_policy_fn(config),
+            contract_rollout_policy=support.load_contract_rollout_policy_fn(config),
             pipeline_name=ctx.pipeline_name,
         )
     )

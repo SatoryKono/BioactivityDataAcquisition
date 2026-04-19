@@ -46,8 +46,7 @@ from bioetl.infrastructure.storage.silver.operations.postwrite_operations import
     SilverPostwriteOperations,
 )
 
-# SilverWriterValidationMixin removed from inheritance (composition pattern)
-# Validation operations now handled by SilverValidationOperations service
+# SilverWriterValidationMixin removed; validation handled by SilverValidationOperations service
 from bioetl.infrastructure.storage.silver.operations.validation_operations import (
     _prepare_silver_write_payload_impl,
     _PreparedSilverWritePayload,
@@ -96,7 +95,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver.metadata_operations import (
         _PreparedSilverWriteFinalizationContext,
     )
-
 __all__ = ["SilverWriteMode", "SilverWriter"]
 
 _UTC_OFFSET_SUFFIX = "+00:00"

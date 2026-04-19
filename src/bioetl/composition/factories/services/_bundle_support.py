@@ -18,17 +18,14 @@ if TYPE_CHECKING:
         DataSourceCreatorProtocol,
     )
     from bioetl.composition.factories.services.factory import BaseServicesFactory
-    from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
+    from bioetl.domain.config import DQConfig, PipelineConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
         DataSourcePort,
-        DQMonitorPort,
         LoggerPort,
         MetricsPort,
-        TracingPort,
     )
-    from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -105,51 +102,30 @@ def create_pipeline_data_source(
     )
 
 
+@dataclass(frozen=True, slots=True)
+class _PipelineCreationIdentity:
+    """Immutable identity bundle for pipeline creation input assembly."""
+
+    pipeline_name: str
+    pipeline_class: type[BasePipeline]
+    provider: str
+    create_data_source_fn: DataSourceCreatorProtocol
+    transformer_class: type[BaseTransformer] | None
+    pandera_silver_schema: object | None
+
+
 def build_pipeline_creation_inputs(
     *,
-    pipeline_name: str,
-    pipeline_class: type[BasePipeline],
-    provider: str,
-    create_data_source_fn: DataSourceCreatorProtocol,
-    transformer_class: type[BaseTransformer] | None,
-    run_id: RunID,
-    runtime: RuntimeConfig,
-    settings: Settings,
-    logger: LoggerPort,
-    manifest_id: str | None,
-    config_hash: str | None,
-    dq_contract_compatibility_hash: str | None,
-    effective_config_artifact_id: str | None,
-    config: PipelineYamlConfig | None,
-    filter_config: InputFilterConfig | None,
-    tracer: TracingPort | None,
-    dq_monitor: DQMonitorPort | None,
-    metrics: MetricsPort | None,
-    cached_bronze: CachedBronzeContext | None,
-    pandera_silver_schema: object | None,
+    identity: _PipelineCreationIdentity,
+    request: _PipelineCreationRequest,
 ) -> _PipelineCreationInputs:
     """Build the delegated pipeline-creation envelope."""
     return _PipelineCreationInputs(
-        pipeline_name=pipeline_name,
-        pipeline_class=pipeline_class,
-        provider=provider,
-        create_data_source_fn=create_data_source_fn,
-        transformer_class=transformer_class,
-        request=_PipelineCreationRequest(
-            run_id=run_id,
-            runtime=runtime,
-            settings=settings,
-            logger=logger,
-            manifest_id=manifest_id,
-            config_hash=config_hash,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
-            config=config,
-            filter_config=filter_config,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
-            metrics=metrics,
-            cached_bronze=cached_bronze,
-        ),
-        pandera_silver_schema=pandera_silver_schema,
+        pipeline_name=identity.pipeline_name,
+        pipeline_class=identity.pipeline_class,
+        provider=identity.provider,
+        create_data_source_fn=identity.create_data_source_fn,
+        transformer_class=identity.transformer_class,
+        request=request,
+        pandera_silver_schema=identity.pandera_silver_schema,
     )

@@ -5,12 +5,18 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.composition.factories.pipeline._factory_method_control_plane import (
+    apply_optional_control_plane_kwargs,
+    resolve_strict_gold_validation,
+)
+
 if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.factories.pipeline._factory_method_types import (
+        _ControlPlaneArtifacts,
         _CreatePipelineWithServicesRequest,
         _PipelineFactoryContext,
     )
@@ -70,7 +76,6 @@ def create_pipeline_instance_from_request(
 
 def create_factory_runner_from_request(
     *,
-    pipeline_name: str,
     silver_schema: pa.Schema | None,
     gold_schema: GoldSchemaType,
     run_id: RunID,
@@ -78,16 +83,11 @@ def create_factory_runner_from_request(
     settings: Settings,
     observability: ObservabilityBundle,
     yaml_config: PipelineYamlConfig,
-    manifest_id: str | None,
-    config_hash: str | None,
-    dq_contract_compatibility_hash: str | None,
-    effective_config_artifact_id: str | None,
+    control_plane_artifacts: _ControlPlaneArtifacts | None,
     create_with_services_fn: Callable[..., BasePipeline],
     assemble_runner_fn: Callable[..., PipelineRunner],
     filter_config: InputFilterConfig | None,
     cached_bronze: CachedBronzeContext | None,
-    apply_optional_control_plane_kwargs_fn: Callable[..., None],
-    resolve_strict_gold_validation_fn: Callable[..., bool],
 ) -> PipelineRunner:
     """Create a pipeline and assemble a runner from resolved runtime inputs."""
     create_with_services_kwargs: dict[str, object] = {
@@ -102,12 +102,17 @@ def create_factory_runner_from_request(
         "metrics": observability.metrics,
         "cached_bronze": cached_bronze,
     }
-    apply_optional_control_plane_kwargs_fn(
+    artifacts = control_plane_artifacts
+    apply_optional_control_plane_kwargs(
         create_with_services_kwargs,
-        manifest_id=manifest_id,
-        config_hash=config_hash,
-        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-        effective_config_artifact_id=effective_config_artifact_id,
+        manifest_id=None if artifacts is None else artifacts.manifest_id,
+        config_hash=None if artifacts is None else artifacts.config_hash,
+        dq_contract_compatibility_hash=(
+            None if artifacts is None else artifacts.dq_contract_compatibility_hash
+        ),
+        effective_config_artifact_id=(
+            None if artifacts is None else artifacts.effective_config_artifact_id
+        ),
     )
     pipeline = cast(
         "Any",  # Any: Dynamic factory function
@@ -118,7 +123,7 @@ def create_factory_runner_from_request(
         observability=observability,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
-        strict_gold_validation=resolve_strict_gold_validation_fn(
+        strict_gold_validation=resolve_strict_gold_validation(
             runtime=runtime,
             settings=settings,
         ),

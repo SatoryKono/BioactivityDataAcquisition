@@ -111,6 +111,11 @@ def _normalize_unit_name(unit: str) -> str:
     return _UNIT_ALIASES.get(normalized.lower(), normalized)
 
 
+def _has_invalid_parenthetical_annotation(annotation: str) -> bool:
+    """Return True when the trailing parenthetical payload should be preserved."""
+    return not annotation or any(char in annotation for char in "()\n\r")
+
+
 def _strip_trailing_parenthetical_annotation(value: str) -> str:
     """Drop a trailing ``(annotation)`` suffix without relying on backtracking regex."""
     stripped = value.rstrip()
@@ -122,7 +127,7 @@ def _strip_trailing_parenthetical_annotation(value: str) -> str:
         return stripped
 
     annotation = stripped[separator_index + 2 : -1]
-    if not annotation or any(char in annotation for char in "()\n\r"):
+    if _has_invalid_parenthetical_annotation(annotation):
         return stripped
     return stripped[:separator_index]
 

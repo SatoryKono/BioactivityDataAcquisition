@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-19T09:59:46.081471+00:00",
+  "generated_at": "2026-04-19T11:22:11.941831+00:00",
   "summary": {
     "total_scripts": 390,
     "status_counts": {
@@ -8139,7 +8139,7 @@
         },
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
-          "line": 336,
+          "line": 344,
           "source_group": "scripts",
           "text": "run_step cleanup env BIOETL_PREFLIGHT_PRESERVE_PYTEST_CACHE=1 bash scripts/engineering/repo/preflight_cleanup.sh"
         },

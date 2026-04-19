@@ -49,6 +49,14 @@ class _BuildFactoryServicesRequest:
 _CreatePipelineWithServicesRequest = _PipelineCreationRequest
 
 
+@dataclass(frozen=True, slots=True)
+class _ControlPlaneArtifacts:
+    manifest_id: str | None = None
+    config_hash: str | None = None
+    dq_contract_compatibility_hash: str | None = None
+    effective_config_artifact_id: str | None = None
+
+
 def extract_entity_type(pipeline_name: str) -> str | None:
     """Extract trailing entity token from `<provider>_<entity>` pipeline names."""
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
@@ -92,10 +100,7 @@ def build_create_pipeline_with_services_request(
     runtime: object,
     settings: Settings,
     logger: LoggerPort,
-    manifest_id: str | None = None,
-    config_hash: str | None = None,
-    dq_contract_compatibility_hash: str | None = None,
-    effective_config_artifact_id: str | None = None,
+    control_plane_artifacts: _ControlPlaneArtifacts | None = None,
     config: PipelineYamlConfig | None = None,
     filter_config: InputFilterConfig | None = None,
     tracer: TracingPort | None = None,
@@ -104,15 +109,16 @@ def build_create_pipeline_with_services_request(
     cached_bronze: CachedBronzeContext | None = None,
 ) -> _CreatePipelineWithServicesRequest:
     """Pack runtime pipeline-creation arguments into a typed request object."""
+    artifacts = control_plane_artifacts or _ControlPlaneArtifacts()
     return _CreatePipelineWithServicesRequest(
         run_id,
         runtime,
         settings,
         logger,
-        manifest_id,
-        config_hash,
-        dq_contract_compatibility_hash,
-        effective_config_artifact_id,
+        artifacts.manifest_id,
+        artifacts.config_hash,
+        artifacts.dq_contract_compatibility_hash,
+        artifacts.effective_config_artifact_id,
         config,
         filter_config,
         tracer,
