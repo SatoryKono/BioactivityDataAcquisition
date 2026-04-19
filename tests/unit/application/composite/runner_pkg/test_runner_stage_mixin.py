@@ -130,10 +130,12 @@ class _StageMixinHarness(CompositeRunnerStageMixin):
         return []
 
     def _check_required_enrichers(self, results: Any) -> None:
-        pass
+        # Test double intentionally disables required-enricher validation.
+        return None
 
     def _call_check_required_enrichers(self, results: Any) -> None:
-        pass
+        # Test double intentionally bypasses the wrapper hook.
+        return None
 
     def _call_get_enrichers_to_run(self, state: Any) -> list[Any]:
         return []

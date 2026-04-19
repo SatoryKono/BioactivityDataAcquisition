@@ -121,8 +121,8 @@ async def test_retry_with_split_batches(adapter, mock_http_client):
     # Mock _fetch_batch_with_reduction to avoid complex recursion logic
     # We just want to see if it splits
     async def empty_async_gen(*args, **kwargs):
-        if False:
-            yield {}
+        for record in ():
+            yield record
 
     adapter._fetch_batch_with_reduction = MagicMock(side_effect=empty_async_gen)
 

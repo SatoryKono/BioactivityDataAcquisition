@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from collections.abc import AsyncIterator, Awaitable, Callable
+from dataclasses import dataclass
 
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict

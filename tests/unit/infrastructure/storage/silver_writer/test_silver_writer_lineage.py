@@ -34,6 +34,12 @@ def _make_bundle_safe_metadata(run_id: str = "test-run") -> MagicMock:
     return metadata
 
 
+def _require_captured_input(value: object, message: str) -> object:
+    if value is None:
+        pytest.fail(message)
+    return value
+
+
 class TestSilverWriterAudit:
     """Tests for SilverWriter audit logging."""
 
@@ -571,9 +577,10 @@ class TestSilverWriterLineage:
             version_after=7,
         )
 
-        if captured_input is None:
-            pytest.fail("metadata coordinator did not capture SilverMetadataInput")
-        silver_input = captured_input
+        silver_input = _require_captured_input(
+            captured_input,
+            "metadata coordinator did not capture SilverMetadataInput",
+        )
         assert silver_input.version_after == 7
         mock_metadata_writer.write_silver_metadata.assert_awaited_once_with(
             _silver_table_path("chembl.activity"),
@@ -851,10 +858,10 @@ class TestSilverWriterLineage:
             completed_at="2025-01-15T12:00:00Z",
         )
 
-        if captured_input is None:
-            pytest.fail(
-                "merged metadata coordinator did not capture SilverMetadataInput"
-            )
+        captured_input = _require_captured_input(
+            captured_input,
+            "merged metadata coordinator did not capture SilverMetadataInput",
+        )
         assert captured_input.mode is SilverWriteMode.DELETE
         assert captured_input.version_after == 11
         assert captured_input.records == valid_records

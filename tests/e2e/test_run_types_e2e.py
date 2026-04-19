@@ -229,8 +229,8 @@ class TestMedallionPolicyIntegration:
 
         policy = MedallionPolicy()
 
-        # Default policy exists
-        assert policy is not None
+        assert policy.should_clear_silver is False
+        assert policy.should_clear_gold is False
 
     def test_policy_respects_run_type(self):
         """E2E: Policy decisions should respect run type."""

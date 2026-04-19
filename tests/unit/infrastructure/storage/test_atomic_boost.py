@@ -177,7 +177,8 @@ class TestAtomicWriteGroupAddFailure:
                 return self
 
             def __exit__(self, *a):
-                pass
+                # No-op context-manager cleanup for the failing file stub.
+                return None
 
         def failing_fdopen(fd: int, mode: str, **kw) -> FakeFile:
             # Close the fd to avoid leaks
@@ -210,7 +211,8 @@ class TestAtomicWriteGroupAddFailure:
                 return self
 
             def __exit__(self, *a):
-                pass
+                # No-op context-manager cleanup for the failing file stub.
+                return None
 
         def bad_fdopen(fd: int, mode: str, **kw) -> BadFile:
             try:

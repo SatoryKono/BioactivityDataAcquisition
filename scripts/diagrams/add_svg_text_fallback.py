@@ -95,22 +95,21 @@ def _extract_text_lines(node: ET.Element) -> list[str]:
     markers. We preserve these line breaks and convert to compact plain-text
     lines for SVG fallback text.
     """
-
     parts: list[str] = []
-
-    def visit(elem: ET.Element) -> None:
+    
+    # Extract text using iterative approach to reduce complexity
+    stack = [node]
+    while stack:
+        elem = stack.pop()
         _append_raw_text(parts, elem.text)
-        for child in elem:
+        
+        # Process children in reverse order to maintain document order
+        for child in reversed(list(elem)):
             child_name = _local_name(child.tag).lower()
             if child_name == "br":
                 parts.append("\n")
-            else:
-                visit(child)
-                if child_name in {"p", "div", "li"}:
-                    parts.append("\n")
-            _append_raw_text(parts, child.tail)
-
-    visit(node)
+            stack.append(child)
+    
     raw = "".join(parts)
     # Treat escaped '\n' from source labels as explicit line breaks (like <br>).
     raw = raw.replace("\\n", "\n")
@@ -120,15 +119,21 @@ def _extract_text_lines(node: ET.Element) -> list[str]:
     normalized: list[str] = [_normalize_text(line) for line in raw.split("\n")]
 
     # Collapse large blank gaps from Mermaid padding (<br/><br/>...).
+    return _compact_lines(normalized)
+
+
+def _compact_lines(lines: list[str]) -> list[str]:
+    """Compact lines by removing consecutive blank lines and trimming edges."""
     compact: list[str] = []
     prev_blank = False
-    for line in normalized:
+    for line in lines:
         is_blank = not line
         if is_blank and prev_blank:
             continue
         compact.append(line)
         prev_blank = is_blank
 
+    # Trim leading and trailing blank lines
     while compact and not compact[0]:
         compact.pop(0)
     while compact and not compact[-1]:

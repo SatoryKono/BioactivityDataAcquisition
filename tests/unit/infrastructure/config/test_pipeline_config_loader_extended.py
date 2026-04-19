@@ -60,12 +60,14 @@ class _DummyDQLoader:
         return DQConfig()
 
     def clear_cache(self) -> None:
-        pass
+        # In-memory test double does not maintain a cache.
+        return None
 
 
 class _DummyFilterLoader:
     def clear_cache(self) -> None:
-        pass
+        # In-memory test double does not maintain a cache.
+        return None
 
 
 # ---------------------------------------------------------------------------
