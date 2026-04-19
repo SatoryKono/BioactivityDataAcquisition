@@ -59,26 +59,7 @@ def _iter_import_records(
     records: list[tuple[Path, int, str]] = []
     for py_file, tree in sorted(ast_cache.items()):
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module in ALLOWED_SRC_IMPORTS:
-                records.append((py_file, node.lineno, node.module))
-            elif (
-                isinstance(node, ast.ImportFrom)
-                and node.module in COMPAT_PARENT_IMPORTS
-            ):
-                compat_children = COMPAT_PARENT_IMPORTS[node.module]
-                for alias in node.names:
-                    if alias.name in compat_children:
-                        records.append(
-                            (
-                                py_file,
-                                node.lineno,
-                                f"{node.module}.{alias.name}",
-                            )
-                        )
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name in ALLOWED_SRC_IMPORTS:
-                        records.append((py_file, node.lineno, alias.name))
+            records.extend(_iter_node_import_records(py_file, node))
     return records
 
 
@@ -102,30 +83,67 @@ def _iter_removed_import_records(
     records: list[tuple[Path, int, str]] = []
     for py_file, tree in sorted(ast_cache.items()):
         for node in ast.walk(tree):
-            if (
-                isinstance(node, ast.ImportFrom)
-                and node.module in REMOVED_COMPAT_MODULES
-            ):
-                records.append((py_file, node.lineno, node.module))
-            elif (
-                isinstance(node, ast.ImportFrom)
-                and node.module in REMOVED_COMPAT_PARENT_IMPORTS
-            ):
-                removed_children = REMOVED_COMPAT_PARENT_IMPORTS[node.module]
-                for alias in node.names:
-                    if alias.name in removed_children:
-                        records.append(
-                            (
-                                py_file,
-                                node.lineno,
-                                f"{node.module}.{alias.name}",
-                            )
-                        )
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name in REMOVED_COMPAT_MODULES:
-                        records.append((py_file, node.lineno, alias.name))
+            records.extend(_iter_removed_node_import_records(py_file, node))
     return records
+
+
+def _iter_node_import_records(
+    py_file: Path,
+    node: ast.AST,
+) -> list[tuple[Path, int, str]]:
+    if isinstance(node, ast.ImportFrom):
+        return _iter_import_from_records(
+            py_file,
+            node,
+            direct_modules=ALLOWED_SRC_IMPORTS,
+            parent_imports=COMPAT_PARENT_IMPORTS,
+        )
+    if isinstance(node, ast.Import):
+        return [
+            (py_file, node.lineno, alias.name)
+            for alias in node.names
+            if alias.name in ALLOWED_SRC_IMPORTS
+        ]
+    return []
+
+
+def _iter_removed_node_import_records(
+    py_file: Path,
+    node: ast.AST,
+) -> list[tuple[Path, int, str]]:
+    if isinstance(node, ast.ImportFrom):
+        return _iter_import_from_records(
+            py_file,
+            node,
+            direct_modules=REMOVED_COMPAT_MODULES,
+            parent_imports=REMOVED_COMPAT_PARENT_IMPORTS,
+        )
+    if isinstance(node, ast.Import):
+        return [
+            (py_file, node.lineno, alias.name)
+            for alias in node.names
+            if alias.name in REMOVED_COMPAT_MODULES
+        ]
+    return []
+
+
+def _iter_import_from_records(
+    py_file: Path,
+    node: ast.ImportFrom,
+    *,
+    direct_modules: set[str] | frozenset[str] | dict[str, frozenset[Path]],
+    parent_imports: dict[str, frozenset[str]],
+) -> list[tuple[Path, int, str]]:
+    if node.module in direct_modules:
+        return [(py_file, node.lineno, node.module)]
+    if node.module not in parent_imports:
+        return []
+    compat_children = parent_imports[node.module]
+    return [
+        (py_file, node.lineno, f"{node.module}.{alias.name}")
+        for alias in node.names
+        if alias.name in compat_children
+    ]
 
 
 @pytest.mark.architecture
