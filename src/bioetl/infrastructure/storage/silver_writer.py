@@ -657,7 +657,6 @@ class SilverWriter(  # type: ignore[misc]  # Callable vs async-def in MRO
                 validated_mode=validated_mode,
                 primary_keys=primary_keys,
             )
-            return
 
     async def _maybe_log_silver_audit(
         self,

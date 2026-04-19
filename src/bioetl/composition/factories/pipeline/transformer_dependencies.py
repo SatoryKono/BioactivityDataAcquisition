@@ -59,21 +59,19 @@ def build_transformer_dependencies(
             contract_policy_loader=contract_policy_loader,
         )
 
+    resolved_identity_service = identity_service
+    if resolved_identity_service is None:
+        resolved_identity_service = IdentityService(
+            content_hash_include_fields=(
+                set(content_hash_include_fields) if content_hash_include_fields else None
+            ),
+            content_hash_exclude_fields=set(content_hash_exclude_fields or ()),
+        )
+
     return TransformerDependencyContext(
         tracer=resolve_tracing_port(tracer=tracer),
         metrics=resolve_metrics_port(metrics=metrics),
-        identity_service=(
-            identity_service
-            if identity_service is not None
-            else IdentityService(
-                content_hash_include_fields=(
-                    set(content_hash_include_fields)
-                    if content_hash_include_fields
-                    else None
-                ),
-                content_hash_exclude_fields=set(content_hash_exclude_fields or ()),
-            )
-        ),
+        identity_service=resolved_identity_service,
         pii_hasher=pii_hasher if pii_hasher is not None else NoOpPiiHasher(),
         data_normalizer=(
             data_normalizer

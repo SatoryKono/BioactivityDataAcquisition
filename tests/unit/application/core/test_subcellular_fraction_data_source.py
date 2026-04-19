@@ -299,13 +299,11 @@ class TestSubcellularFractionDataSourceFetch:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
-        # First fetch
         records1 = []
         async for record in wrapper.fetch("subcellular_fraction"):
             records1.append(record)
         assert len(records1) == 1
 
-        # Second fetch should still yield because _seen_fractions is reset
         records2 = []
         async for record in wrapper.fetch("subcellular_fraction"):
             records2.append(record)

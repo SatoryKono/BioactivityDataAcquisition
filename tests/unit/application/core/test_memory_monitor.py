@@ -80,7 +80,6 @@ class TestMemoryStats:
             process_mb=500.0,
         )
 
-        # Exactly 80% should not be under pressure (> 0.8, not >=)
         assert stats_exactly_80.is_under_pressure is False
 
         stats_over_80 = MemoryStats(
@@ -258,7 +257,6 @@ class TestMemoryMonitor:
 
     def test_estimate_batch_memory(self, monitor):
         """Test batch memory estimation."""
-        # 100 records * 1KB * 2.5 overhead = 250KB = 0.244MB
         memory_mb = monitor.estimate_batch_memory_mb(100, 1024)
 
         assert memory_mb == pytest.approx(0.244, rel=0.01)
@@ -271,7 +269,6 @@ class TestMemoryMonitor:
         )
         monitor = MemoryMonitor(config=config, logger=mock_logger)
 
-        # 256MB / (1KB * 2.5) = 104857 records
         max_size = monitor.calculate_max_batch_size(1024)
 
         assert max_size > 100000
