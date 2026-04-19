@@ -173,7 +173,7 @@ class TestFullPipelineColumnOrder:
                 "_run_id": ["r1"],
                 "entity_id": ["e1"],
                 "content_hash": ["hash"],
-                "pdf_url": ["http://example.com"],
+                "pdf_url": ["https://example.com"],
             }
         )
 

@@ -202,7 +202,7 @@ class TestColumnOrderer:
                 "_run_id": ["r1"],
                 "entity_id": ["e1"],
                 "content_hash": ["hash1"],
-                "pdf_url": ["http://example.com/pdf"],
+                "pdf_url": ["https://example.com/pdf"],
             }
         )
         result = orderer.order_columns(df)

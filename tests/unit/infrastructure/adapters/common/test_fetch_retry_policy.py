@@ -92,7 +92,7 @@ def test_split_filter_ids_for_fallback_partition_property(
 
 
 def test_is_retry_exhausted_error_direct_and_wrapped() -> None:
-    retry_error = RetryExhaustedError("http://x", attempts=3)
+    retry_error = RetryExhaustedError("https://x", attempts=3)
     wrapped = ExternalServiceError("wrapped")
     wrapped.__cause__ = retry_error
     unrelated = ValueError("nope")

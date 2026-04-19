@@ -88,11 +88,11 @@ class TestHealthResult:
     def test_to_dict_with_endpoint(self) -> None:
         """Test to_dict includes endpoint when set."""
         result = HealthResult(
-            provider="test", status="healthy", endpoint="http://example.com"
+            provider="test", status="healthy", endpoint="https://example.com"
         )
         d = result.to_dict()
 
-        assert d["endpoint"] == "http://example.com"
+        assert d["endpoint"] == "https://example.com"
 
     def test_to_dict_with_error(self) -> None:
         """Test to_dict includes error when set."""
@@ -109,14 +109,14 @@ class TestHealthResult:
             provider="test",
             status="degraded",
             latency_ms=500.0,
-            endpoint="http://api.example.com/health",
+            endpoint="https://api.example.com/health",
             error="Slow response",
         )
         d = result.to_dict()
 
         assert d["status"] == "degraded"
         assert d["latency_ms"] == "500.00"
-        assert d["endpoint"] == "http://api.example.com/health"
+        assert d["endpoint"] == "https://api.example.com/health"
         assert d["error"] == "Slow response"
 
 

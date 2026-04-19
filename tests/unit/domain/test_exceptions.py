@@ -97,8 +97,8 @@ class TestExceptions:
 
     def test_retry_exhausted_error_without_last_error(self) -> None:
         """Test RetryExhaustedError without last_error."""
-        e = RetryExhaustedError("http://example.com/api", 5)
-        assert e.url == "http://example.com/api"
+        e = RetryExhaustedError("https://example.com/api", 5)
+        assert e.url == "https://example.com/api"
         assert e.attempts == 5
         assert e.last_error is None
         assert "Exhausted 5 retry attempts" in str(e)

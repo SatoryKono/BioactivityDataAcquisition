@@ -64,10 +64,10 @@ if __package__ in {None, ""}:
 from scripts.docs.common.markdown import (
     FENCE_END_RE,
     INLINE_CODE_RE,
-    MD_HEADING_RE,
     MD_LINK_RE,
     MD_PATH_RE,
     PYTHON_FENCE_START_RE,
+    extract_md_heading,
 )
 from scripts.docs.common.paths import DOCS_DIR, PROJECT_ROOT, is_generated_docs_artifact
 
@@ -396,12 +396,10 @@ def _extract_headings(md_file: Path) -> set[str]:
 
     headings: set[str] = set()
     for line in lines:
-        match = MD_HEADING_RE.match(line)
-        if not match:
+        heading = extract_md_heading(line)
+        if heading is None:
             continue
-        heading = match.group(1).strip().strip("#").strip()
-        if heading:
-            headings.add(heading.casefold())
+        headings.add(heading.casefold())
     return headings
 
 
