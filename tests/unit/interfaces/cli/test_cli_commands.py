@@ -1576,6 +1576,9 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
 def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
     """Click callback should stay a thin entrypoint over the run-policy seams."""
     from bioetl.interfaces.cli.commands import run as run_module
+    from bioetl.interfaces.cli.commands.domains.run.command_policy import (
+        RunCommandInput,
+    )
 
     ctx = MagicMock(name="click_context")
     cli_input = MagicMock(name="cli_input")
@@ -1617,29 +1620,34 @@ def test_run_callback_delegates_to_input_builder_and_cli_policy() -> None:
             exact_replay=False,
         )
 
-    mock_build_input.assert_called_once_with(
-        pipeline="chembl_activity",
-        run_type="incremental",
-        resume=False,
-        start_offset=None,
-        limit=10,
-        input_csv=None,
-        filter_column="compound_id",
-        filter_field="compound_id",
-        dry_run=False,
-        yes=True,
-        vacuum_after_run=None,
-        vacuum_retention_days=None,
-        debug=False,
-        health_server=True,
-        health_port=8081,
-        enable_tracing=True,
-        use_cached_bronze=False,
-        cached_bronze_date=None,
-        cached_bronze_path=None,
-        replay_of_run_id=None,
-        replay_of_manifest_id=None,
+    mock_build_input.assert_called_once()
+    assert mock_build_input.call_args.args == (
+        RunCommandInput(
+            pipeline="chembl_activity",
+            run_type="incremental",
+            resume=False,
+            start_offset=None,
+            limit=10,
+            input_csv=None,
+            filter_column="compound_id",
+            filter_field="compound_id",
+            dry_run=False,
+            yes=True,
+            vacuum_after_run=None,
+            vacuum_retention_days=None,
+            debug=False,
+            health_server=True,
+            health_port=8081,
+            enable_tracing=True,
+            use_cached_bronze=False,
+            cached_bronze_date=None,
+            cached_bronze_path=None,
+            replay_of_run_id=None,
+            replay_of_manifest_id=None,
+            exact_replay=False,
+        ),
     )
+    assert mock_build_input.call_args.kwargs == {}
     mock_run_with_policy.assert_called_once_with(ctx, cli_input)
 
 
