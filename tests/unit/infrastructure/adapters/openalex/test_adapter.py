@@ -16,6 +16,10 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 )
 from bioetl.infrastructure.adapters.openalex import OpenAlexAdapter
 from bioetl.infrastructure.adapters.openalex.client import _create_openalex_adapter
+from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
+    OpenAlexRuntimeServicesRequest,
+    build_openalex_runtime_services_from_request,
+)
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from tests.helpers.adapter_runtime import (
     build_http_adapter_runtime_bundle,
@@ -146,6 +150,56 @@ class TestOpenAlexAdapter:
         assert adapter._cursor_flow is cursor_flow
         assert adapter._fallback_handler is fallback_handler
         assert adapter._fallback_orchestrator is fallback_orchestrator
+
+    def test_runtime_services_request_preserves_injected_collaborators(
+        self,
+        mock_http_client: MagicMock,
+        logger: NoOpLogger,
+    ) -> None:
+        """Request-style runtime assembly should preserve injected seams."""
+        query_executor = MagicMock()
+        response_mapper = MagicMock()
+        cursor_flow = MagicMock()
+        fallback_handler = MagicMock()
+        fallback_orchestrator = MagicMock()
+        runtime_bundle = build_http_adapter_runtime_bundle(
+            "openalex",
+            logger=logger,
+        )
+        adapter_metrics = AdapterMetricsRecorder(MagicMock(), "openalex")
+        request_collector = APIRequestCollector()
+
+        request = OpenAlexRuntimeServicesRequest(
+            fallback_fetch_service=runtime_bundle.fallback_fetch_service,
+            openalex_query_executor=query_executor,
+            openalex_response_mapper=response_mapper,
+            openalex_cursor_flow=cursor_flow,
+            title_fallback_handler=fallback_handler,
+            openalex_fallback_orchestrator=fallback_orchestrator,
+            http_client=mock_http_client,
+            adapter_metrics=adapter_metrics,
+            request_collector=request_collector,
+            headers_provider=lambda: {"Accept": "application/json"},
+            api_base="https://api.openalex.org",
+            mailto="test@example.com",
+            batch_size=10,
+            title_search_cache_size=128,
+            normalize_doi=lambda doi: doi.lower(),
+            escape_title_for_search=lambda title: title.replace(" ", "+"),
+            extract_record_id=lambda record: record.get("doi"),
+            search_by_title=AsyncMock(),
+            logger=logger,
+            runtime_errors=(RuntimeError,),
+        )
+
+        runtime_services = build_openalex_runtime_services_from_request(request)
+
+        assert runtime_services.fallback_fetch_service is runtime_bundle.fallback_fetch_service
+        assert runtime_services.query_executor is query_executor
+        assert runtime_services.response_mapper is response_mapper
+        assert runtime_services.cursor_flow is cursor_flow
+        assert runtime_services.fallback_handler is fallback_handler
+        assert runtime_services.fallback_orchestrator is fallback_orchestrator
 
     def test_adapter_provider_name(self, adapter: OpenAlexAdapter) -> None:
         """Should return correct provider name."""

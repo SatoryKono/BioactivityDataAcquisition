@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
 from bioetl.infrastructure.adapters.common import FallbackFetchOrchestratorService
@@ -31,12 +31,17 @@ from bioetl.infrastructure.adapters.openalex.response_mapping import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.config import Settings
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 __all__ = [
     "OpenAlexRuntimeServices",
+    "OpenAlexRuntimeServicesRequest",
     "build_openalex_runtime_services",
+    "build_openalex_runtime_services_from_request",
 ]
 
 HeadersProvider = Callable[[], dict[str, str]]
@@ -56,6 +61,101 @@ class OpenAlexRuntimeServices:
     cursor_flow: OpenAlexCursorFlowService
     fallback_handler: OpenAlexTitleFallbackHandler
     fallback_orchestrator: OpenAlexFallbackOrchestrator
+
+
+@dataclass(frozen=True, slots=True)
+class OpenAlexRuntimeServicesRequest:
+    """Typed input for OpenAlex runtime collaborator assembly."""
+
+    fallback_fetch_service: FallbackFetchOrchestratorService
+    openalex_query_executor: OpenAlexQueryExecutor | None
+    openalex_response_mapper: OpenAlexResponseMapper | None
+    openalex_cursor_flow: OpenAlexCursorFlowService | None
+    title_fallback_handler: OpenAlexTitleFallbackHandler | None
+    openalex_fallback_orchestrator: OpenAlexFallbackOrchestrator | None
+    http_client: UnifiedHTTPClient
+    adapter_metrics: AdapterMetricsRecorder
+    request_collector: APIRequestCollector
+    headers_provider: HeadersProvider
+    api_base: str
+    mailto: str
+    batch_size: int
+    title_search_cache_size: int
+    normalize_doi: NormalizeDoiFn
+    escape_title_for_search: EscapeTitleForSearchFn
+    extract_record_id: ExtractRecordIdFn
+    search_by_title: SearchByTitleFn
+    logger: LoggerPort
+    runtime_errors: tuple[type[Exception], ...]
+
+
+def _coerce_openalex_runtime_services_request(
+    request: OpenAlexRuntimeServicesRequest | None = None,
+    /,
+    **kwargs: object,
+) -> OpenAlexRuntimeServicesRequest:
+    """Normalize request-style and legacy kwargs runtime inputs."""
+    if request is not None:
+        if kwargs:
+            unexpected = ", ".join(sorted(kwargs))
+            raise TypeError(
+                "build_openalex_runtime_services received unexpected keyword "
+                f"arguments with request object: {unexpected}"
+            )
+        return request
+
+    expected_keys = {
+        "fallback_fetch_service",
+        "openalex_query_executor",
+        "openalex_response_mapper",
+        "openalex_cursor_flow",
+        "title_fallback_handler",
+        "openalex_fallback_orchestrator",
+        "http_client",
+        "adapter_metrics",
+        "request_collector",
+        "headers_provider",
+        "api_base",
+        "mailto",
+        "batch_size",
+        "title_search_cache_size",
+        "normalize_doi",
+        "escape_title_for_search",
+        "extract_record_id",
+        "search_by_title",
+        "logger",
+        "runtime_errors",
+    }
+    unexpected = sorted(kwargs.keys() - expected_keys)
+    if unexpected:
+        unexpected_args = ", ".join(unexpected)
+        raise TypeError(
+            "build_openalex_runtime_services received unexpected keyword "
+            f"arguments: {unexpected_args}"
+        )
+
+    return OpenAlexRuntimeServicesRequest(
+        fallback_fetch_service=kwargs.pop("fallback_fetch_service"),  # type: ignore[arg-type]
+        openalex_query_executor=kwargs.pop("openalex_query_executor", None),  # type: ignore[arg-type]
+        openalex_response_mapper=kwargs.pop("openalex_response_mapper", None),  # type: ignore[arg-type]
+        openalex_cursor_flow=kwargs.pop("openalex_cursor_flow", None),  # type: ignore[arg-type]
+        title_fallback_handler=kwargs.pop("title_fallback_handler", None),  # type: ignore[arg-type]
+        openalex_fallback_orchestrator=kwargs.pop("openalex_fallback_orchestrator", None),  # type: ignore[arg-type]
+        http_client=kwargs.pop("http_client"),  # type: ignore[arg-type]
+        adapter_metrics=kwargs.pop("adapter_metrics"),  # type: ignore[arg-type]
+        request_collector=kwargs.pop("request_collector"),  # type: ignore[arg-type]
+        headers_provider=kwargs.pop("headers_provider"),  # type: ignore[arg-type]
+        api_base=kwargs.pop("api_base"),  # type: ignore[arg-type]
+        mailto=kwargs.pop("mailto"),  # type: ignore[arg-type]
+        batch_size=kwargs.pop("batch_size"),  # type: ignore[arg-type]
+        title_search_cache_size=kwargs.pop("title_search_cache_size"),  # type: ignore[arg-type]
+        normalize_doi=kwargs.pop("normalize_doi"),  # type: ignore[arg-type]
+        escape_title_for_search=kwargs.pop("escape_title_for_search"),  # type: ignore[arg-type]
+        extract_record_id=kwargs.pop("extract_record_id"),  # type: ignore[arg-type]
+        search_by_title=kwargs.pop("search_by_title"),  # type: ignore[arg-type]
+        logger=kwargs.pop("logger"),  # type: ignore[arg-type]
+        runtime_errors=kwargs.pop("runtime_errors"),  # type: ignore[arg-type]
+    )
 
 
 def _create_default_openalex_query_executor(
@@ -135,81 +235,64 @@ def _create_default_openalex_fallback_orchestrator(
 
 
 def build_openalex_runtime_services(
-    *,
-    fallback_fetch_service: FallbackFetchOrchestratorService,
-    openalex_query_executor: OpenAlexQueryExecutor | None,
-    openalex_response_mapper: OpenAlexResponseMapper | None,
-    openalex_cursor_flow: OpenAlexCursorFlowService | None,
-    title_fallback_handler: OpenAlexTitleFallbackHandler | None,
-    openalex_fallback_orchestrator: OpenAlexFallbackOrchestrator | None,
-    http_client: UnifiedHTTPClient,
-    adapter_metrics: AdapterMetricsRecorder,
-    request_collector: APIRequestCollector,
-    headers_provider: HeadersProvider,
-    api_base: str,
-    mailto: str,
-    batch_size: int,
-    title_search_cache_size: int,
-    normalize_doi: NormalizeDoiFn,
-    escape_title_for_search: EscapeTitleForSearchFn,
-    extract_record_id: ExtractRecordIdFn,
-    search_by_title: SearchByTitleFn,
-    logger: LoggerPort,
-    runtime_errors: tuple[type[Exception], ...],
+    request: OpenAlexRuntimeServicesRequest | None = None,
+    /,
+    **kwargs: object,
 ) -> OpenAlexRuntimeServices:
     """Resolve OpenAlex runtime collaborators using injected overrides or defaults."""
+    resolved = _coerce_openalex_runtime_services_request(request, **kwargs)
     query_executor = (
-        openalex_query_executor
-        if openalex_query_executor is not None
+        resolved.openalex_query_executor
+        if resolved.openalex_query_executor is not None
         else _create_default_openalex_query_executor(
-            http_client=http_client,
-            adapter_metrics=adapter_metrics,
-            request_collector=request_collector,
-            headers_provider=headers_provider,
-            api_base=api_base,
+            http_client=resolved.http_client,
+            adapter_metrics=resolved.adapter_metrics,
+            request_collector=resolved.request_collector,
+            headers_provider=resolved.headers_provider,
+            api_base=resolved.api_base,
         )
     )
     response_mapper = (
-        openalex_response_mapper
-        if openalex_response_mapper is not None
+        resolved.openalex_response_mapper
+        if resolved.openalex_response_mapper is not None
         else _create_default_openalex_response_mapper()
     )
     cursor_flow = (
-        openalex_cursor_flow
-        if openalex_cursor_flow is not None
+        resolved.openalex_cursor_flow
+        if resolved.openalex_cursor_flow is not None
         else _create_default_openalex_cursor_flow(
-            mailto=mailto,
-            batch_size=batch_size,
-            title_search_cache_size=title_search_cache_size,
-            normalize_doi=normalize_doi,
-            escape_title_for_search=escape_title_for_search,
+            mailto=resolved.mailto,
+            batch_size=resolved.batch_size,
+            title_search_cache_size=resolved.title_search_cache_size,
+            normalize_doi=resolved.normalize_doi,
+            escape_title_for_search=resolved.escape_title_for_search,
             query_executor=query_executor,
             response_mapper=response_mapper,
-            logger=logger,
-            runtime_errors=runtime_errors,
+            logger=resolved.logger,
+            runtime_errors=resolved.runtime_errors,
         )
     )
     fallback_handler = (
-        title_fallback_handler
-        if title_fallback_handler is not None
+        resolved.title_fallback_handler
+        if resolved.title_fallback_handler is not None
         else _create_default_openalex_title_fallback_handler(
-            logger=logger,
-            search_fn=search_by_title,
+            logger=resolved.logger,
+            search_fn=resolved.search_by_title,
         )
     )
     fallback_orchestrator = (
-        openalex_fallback_orchestrator
-        if openalex_fallback_orchestrator is not None
+        resolved.openalex_fallback_orchestrator
+        if resolved.openalex_fallback_orchestrator is not None
         else _create_default_openalex_fallback_orchestrator(
-            fallback_fetch_service=fallback_fetch_service,
+            fallback_fetch_service=resolved.fallback_fetch_service,
             fallback_handler=fallback_handler,
-            normalize_id=normalize_doi,
-            extract_record_id=extract_record_id,
-            logger=logger,
+            normalize_id=resolved.normalize_doi,
+            extract_record_id=resolved.extract_record_id,
+            logger=resolved.logger,
         )
     )
     return OpenAlexRuntimeServices(
-        fallback_fetch_service=fallback_fetch_service,
+        fallback_fetch_service=resolved.fallback_fetch_service,
         query_executor=query_executor,
         response_mapper=response_mapper,
         cursor_flow=cursor_flow,
@@ -218,67 +301,8 @@ def build_openalex_runtime_services(
     )
 
 
-# ============================================================================
-# New Request-Style API (Phase 1: Basic Infrastructure)
-# ============================================================================
-
-@dataclass(frozen=True)
-class OpenAlexRuntimeServicesRequest:
-    """Request object for OpenAlex runtime services (new API).
-
-    Phase 1: Basic infrastructure for request-style wiring.
-    Centralizes core dependencies needed for OpenAlex adapter.
-    """
-    settings: Settings | None
-    http_client: UnifiedHTTPClient
-    tracer: TracingPort | None
-    metrics: MetricsPort
-    logger: LoggerPort
-
-
-@dataclass(frozen=True)
-class OpenAlexRuntimeServicesBundle:
-    """Bundle of OpenAlex runtime services (new API).
-
-    Phase 1: Basic bundle with core services only.
-    Contains essential services needed for OpenAlex adapter operation.
-    """
-    http_client: UnifiedHTTPClient
-    tracer: TracingPort | None
-    metrics: MetricsPort
-    logger: LoggerPort
-
-
 def build_openalex_runtime_services_from_request(
     request: OpenAlexRuntimeServicesRequest,
-) -> OpenAlexRuntimeServicesBundle:
-    """Build OpenAlex runtime services bundle from request (new API).
-
-    Phase 1: Basic implementation that validates and returns core services.
-    This is the foundation for future refactoring.
-    """
-    # Validate request
-    if not request.http_client:
-        raise ValueError("HTTP client is required")
-    if not request.metrics:
-        raise ValueError("Metrics port is required")
-    if not request.logger:
-        raise ValueError("Logger is required")
-
-    # Build and return bundle
-    return OpenAlexRuntimeServicesBundle(
-        http_client=request.http_client,
-        tracer=request.tracer,
-        metrics=request.metrics,
-        logger=request.logger,
-    )
-
-
-# Update __all__ to include new API
-__all__ = [
-    "OpenAlexRuntimeServices",
-    "OpenAlexRuntimeServicesBundle",
-    "OpenAlexRuntimeServicesRequest",
-    "build_openalex_runtime_services",
-    "build_openalex_runtime_services_from_request",
-]
+) -> OpenAlexRuntimeServices:
+    """Request-style alias for OpenAlex runtime collaborator assembly."""
+    return build_openalex_runtime_services(request)

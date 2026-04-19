@@ -96,20 +96,27 @@ def _extract_text_lines(node: ET.Element) -> list[str]:
     lines for SVG fallback text.
     """
     parts: list[str] = []
-    
+
     # Extract text using iterative approach to reduce complexity
-    stack = [node]
+    stack = [(node, False)]  # (element, processed)
     while stack:
-        elem = stack.pop()
-        _append_raw_text(parts, elem.text)
-        
-        # Process children in reverse order to maintain document order
-        for child in reversed(list(elem)):
-            child_name = _local_name(child.tag).lower()
-            if child_name == "br":
+        elem, processed = stack.pop()
+        if not processed:
+            _append_raw_text(parts, elem.text)
+            # Push back with processed=True and add children in reverse order
+            stack.append((elem, True))
+            for child in reversed(list(elem)):
+                child_name = _local_name(child.tag).lower()
+                if child_name == "br":
+                    parts.append("\n")
+                else:
+                    stack.append((child, False))
+        else:
+            _append_raw_text(parts, elem.tail)
+            child_name = _local_name(elem.tag).lower()
+            if child_name in {"p", "div", "li"}:
                 parts.append("\n")
-            stack.append(child)
-    
+
     raw = "".join(parts)
     # Treat escaped '\n' from source labels as explicit line breaks (like <br>).
     raw = raw.replace("\\n", "\n")
@@ -239,46 +246,72 @@ def _add_suffix_spacing_for_long_object_name(
 
 def _wrap_label_lines(lines: list[str], max_chars: int, label_kind: str) -> list[str]:
     wrapped: list[str] = []
+
     for raw in lines:
         line = _sanitize_label_line(raw, label_kind=label_kind)
         line = _add_suffix_spacing_for_long_object_name(
-            line,
-            max_chars=max_chars,
-            label_kind=label_kind,
+            line, max_chars=max_chars, label_kind=label_kind
         )
+
         if not line:
-            if wrapped and wrapped[-1]:
-                wrapped.append("")
+            _handle_empty_line(wrapped)
             continue
-        chunks = textwrap.wrap(
-            line,
-            width=max_chars,
-            break_long_words=False,
-            break_on_hyphens=False,
-        )
-        if not chunks:
-            chunks = [line]
 
-        # If a token still exceeds width (no spaces), hard-wrap it.
-        # Method signatures should stay semantically intact: avoid splitting
-        # identifiers like get_completed_stages into broken fragments.
-        for chunk in chunks:
-            if len(chunk) <= max_chars:
-                wrapped.append(chunk)
-                continue
-            if label_kind == "methods" or _is_method_signature_line(chunk):
-                wrapped.append(chunk)
-                continue
-            start = 0
-            while start < len(chunk):
-                wrapped.append(chunk[start : start + max_chars])
-                start += max_chars
+        chunks = _wrap_text_safe(line, max_chars)
+        wrapped.extend(_process_chunks(chunks, max_chars, label_kind))
 
-    while wrapped and not wrapped[0]:
-        wrapped.pop(0)
-    while wrapped and not wrapped[-1]:
-        wrapped.pop()
+    return _trim_empty_lines(wrapped)
+
+
+def _handle_empty_line(wrapped: list[str]) -> None:
+    """Handle empty line by adding it if previous line is not empty."""
+    if wrapped and wrapped[-1]:
+        wrapped.append("")
+
+
+def _wrap_text_safe(line: str, max_chars: int) -> list[str]:
+    """Safely wrap text with fallback to original line."""
+    chunks = textwrap.wrap(
+        line,
+        width=max_chars,
+        break_long_words=False,
+        break_on_hyphens=False,
+    )
+    return chunks if chunks else [line]
+
+
+def _process_chunks(
+    chunks: list[str], max_chars: int, label_kind: str
+) -> list[str]:
+    """Process text chunks, handling long tokens appropriately."""
+    processed: list[str] = []
+    for chunk in chunks:
+        if len(chunk) <= max_chars:
+            processed.append(chunk)
+        elif label_kind == "methods" or _is_method_signature_line(chunk):
+            processed.append(chunk)
+        else:
+            processed.extend(_hard_wrap_chunk(chunk, max_chars))
+    return processed
+
+
+def _hard_wrap_chunk(chunk: str, max_chars: int) -> list[str]:
+    """Hard-wrap a chunk that exceeds maximum character limit."""
+    wrapped: list[str] = []
+    start = 0
+    while start < len(chunk):
+        wrapped.append(chunk[start : start + max_chars])
+        start += max_chars
     return wrapped
+
+
+def _trim_empty_lines(lines: list[str]) -> list[str]:
+    """Trim leading and trailing empty lines."""
+    while lines and not lines[0]:
+        lines.pop(0)
+    while lines and not lines[-1]:
+        lines.pop()
+    return lines
 
 
 def _is_empty_edge_label_group(node: ET.Element) -> bool:

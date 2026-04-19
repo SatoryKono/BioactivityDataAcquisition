@@ -34,6 +34,7 @@ from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import
     OpenAlexAdapterHelpersMixin,
 )
 from bioetl.infrastructure.adapters.openalex.client_runtime_helpers import (
+    OpenAlexRuntimeServicesRequest,
     build_openalex_runtime_services,
 )
 from bioetl.infrastructure.adapters.openalex.cursor_flow import (
@@ -154,7 +155,7 @@ class OpenAlexAdapter(
             request_collector=self.request_collector,
         )
         self._fallback_fetch_service = self.fallback_fetch_service
-        runtime_services = build_openalex_runtime_services(
+        runtime_request = OpenAlexRuntimeServicesRequest(
             fallback_fetch_service=self._fallback_fetch_service,
             openalex_query_executor=self.openalex_query_executor,
             openalex_response_mapper=self.openalex_response_mapper,
@@ -176,6 +177,7 @@ class OpenAlexAdapter(
             logger=self._logger,
             runtime_errors=OPENALEX_RUNTIME_ERRORS,
         )
+        runtime_services = build_openalex_runtime_services(runtime_request)
         self._query_executor = runtime_services.query_executor
         self._response_mapper = runtime_services.response_mapper
         self._cursor_flow = runtime_services.cursor_flow
