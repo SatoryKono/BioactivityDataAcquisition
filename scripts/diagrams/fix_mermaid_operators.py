@@ -54,6 +54,17 @@ class FileCheckResult:
     issues: list[OperatorIssue] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class ValidatedRepoPath:
+    """Repository-scoped path validated before filesystem access."""
+
+    resolved_path: Path
+
+    @property
+    def repo_relative_path(self) -> Path:
+        return self.resolved_path.relative_to(_repo_root().resolve())
+
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -94,20 +105,20 @@ def _repo_path(relative_path: Path) -> Path:
     return _repo_root().joinpath(*safe_relative_path.parts)
 
 
-def _resolve_repo_file_path(path: Path) -> Path:
+def _resolve_repo_file_path(path: Path) -> ValidatedRepoPath:
     if path.is_absolute():
         raise ValueError(f"refusing to process absolute path: {path}")
-    return _ensure_repo_path(_repo_path(path))
+    return ValidatedRepoPath(_ensure_repo_path(_repo_path(path)))
 
 
 def _read_repo_text(path: Path) -> str:
     safe_path = _resolve_repo_file_path(path)
-    return safe_path.read_text(encoding="utf-8")
+    return safe_path.resolved_path.read_text(encoding="utf-8")
 
 
-def _write_resolved_repo_text(path: Path, content: str) -> None:
+def _write_validated_repo_text(path: ValidatedRepoPath, content: str) -> None:
     """Write content to a previously validated repository path."""
-    safe_path = _ensure_repo_path(path)
+    safe_path = path.resolved_path
     if safe_path.is_dir():
         raise ValueError(f"refusing to write to directory path: {safe_path}")
     safe_path.write_text(content, encoding="utf-8", newline="\n")
@@ -115,7 +126,7 @@ def _write_resolved_repo_text(path: Path, content: str) -> None:
 
 def _write_repo_text(relative_path: Path, content: str) -> None:
     safe_path = _resolve_repo_file_path(relative_path)
-    _write_resolved_repo_text(safe_path, content)
+    _write_validated_repo_text(safe_path, content)
 
 
 def _display_path(path: Path) -> str:
@@ -147,15 +158,16 @@ def _iter_source_files(paths: list[Path]) -> list[Path]:
     files: list[Path] = []
     for raw in paths:
         path = _resolve_repo_file_path(raw)
-        if path.is_file():
-            if path.suffix in SUPPORTED_SUFFIXES:
-                files.append(_repo_relative_path(path))
+        resolved_path = path.resolved_path
+        if resolved_path.is_file():
+            if resolved_path.suffix in SUPPORTED_SUFFIXES:
+                files.append(path.repo_relative_path)
             continue
-        if path.is_dir():
+        if resolved_path.is_dir():
             for suffix in SUPPORTED_SUFFIXES:
                 files.extend(
                     _repo_relative_path(candidate)
-                    for candidate in path.rglob(f"*{suffix}")
+                    for candidate in resolved_path.rglob(f"*{suffix}")
                 )
     return sorted(set(files))
 

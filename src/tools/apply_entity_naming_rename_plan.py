@@ -55,6 +55,17 @@ class RenameRow:
         return self.action == "replace_symbol" and self.auto_safe
 
 
+@dataclass(frozen=True, slots=True)
+class ValidatedRepoPath:
+    """Repository-scoped path validated before filesystem access."""
+
+    resolved_path: Path
+
+    @property
+    def repo_relative_path(self) -> Path:
+        return self.resolved_path.relative_to(REPO_ROOT)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -88,11 +99,18 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_plan_id(plan_path: Path) -> str:
-    payload = yaml.safe_load(plan_path.read_text(encoding="utf-8")) or {}
+def _resolve_input_path(path: Path) -> ValidatedRepoPath:
+    candidate = _resolve_repo_path(path)
+    if not candidate.is_file():
+        raise ValueError(f"expected file path, got: {candidate}")
+    return ValidatedRepoPath(candidate)
+
+
+def load_plan_id(plan_path: ValidatedRepoPath) -> str:
+    payload = yaml.safe_load(plan_path.resolved_path.read_text(encoding="utf-8")) or {}
     plan_id = payload.get("plan_id")
     if not isinstance(plan_id, str) or not plan_id:
-        raise ValueError(f"{plan_path} does not contain a valid plan_id")
+        raise ValueError(f"{plan_path.resolved_path} does not contain a valid plan_id")
     return plan_id
 
 
@@ -158,9 +176,9 @@ def _write_repo_text(path: Path, content: str) -> None:
     safe_path.write_text(content, encoding="utf-8")
 
 
-def load_rows(matrix_path: Path) -> list[RenameRow]:
+def load_rows(matrix_path: ValidatedRepoPath) -> list[RenameRow]:
     rows: list[RenameRow] = []
-    with matrix_path.open(encoding="utf-8", newline="") as file_obj:
+    with matrix_path.resolved_path.open(encoding="utf-8", newline="") as file_obj:
         reader = csv.DictReader(file_obj)
         for record in reader:
             rows.append(
@@ -298,16 +316,15 @@ def apply_rows(rows: list[RenameRow], *, apply: bool) -> int:
 
 def main() -> int:
     args = parse_args()
-
-    if not args.matrix.exists():
-        print(f"Matrix not found: {args.matrix}", file=sys.stderr)
+    try:
+        matrix_path = _resolve_input_path(args.matrix)
+        plan_path = _resolve_input_path(args.plan)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
         return 2
-    if not args.plan.exists():
-        print(f"Plan not found: {args.plan}", file=sys.stderr)
-        return 2
 
-    plan_id = load_plan_id(args.plan)
-    rows = load_rows(args.matrix)
+    plan_id = load_plan_id(plan_path)
+    rows = load_rows(matrix_path)
     selected_rows = select_rows(rows, args.wave)
 
     if not selected_rows:
@@ -315,7 +332,7 @@ def main() -> int:
         return 2
 
     print(f"Plan: {plan_id}")
-    print(f"Matrix: {args.matrix}")
+    print(f"Matrix: {matrix_path.resolved_path}")
 
     if args.list_waves:
         return list_waves(rows)

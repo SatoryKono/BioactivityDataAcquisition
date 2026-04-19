@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1644,
-    "total_internal_imports": 6292,
+    "total_internal_imports": 6297,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 287,
@@ -35,13 +35,13 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 342,
+      "imports": 343,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 280,
+      "imports": 283,
       "allowed": true
     },
     {
@@ -59,7 +59,7 @@
     {
       "source": "infrastructure",
       "target": "infrastructure",
-      "imports": 884,
+      "imports": 885,
       "allowed": true
     },
     {
@@ -135,14 +135,14 @@
       "imports": 63
     },
     {
-      "source": "infrastructure.storage",
+      "source": "composition.factories",
       "target": "domain.ports",
       "imports": 59
     },
     {
-      "source": "composition.factories",
+      "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 58
+      "imports": 59
     },
     {
       "source": "infrastructure.storage",
@@ -185,6 +185,11 @@
       "imports": 37
     },
     {
+      "source": "composition.factories",
+      "target": "infrastructure.config",
+      "imports": 37
+    },
+    {
       "source": "composition.bootstrap",
       "target": "application.services",
       "imports": 36
@@ -192,11 +197,6 @@
     {
       "source": "composition.factories",
       "target": "domain.types",
-      "imports": 36
-    },
-    {
-      "source": "composition.factories",
-      "target": "infrastructure.config",
       "imports": 36
     },
     {
@@ -210,13 +210,13 @@
       "imports": 34
     },
     {
-      "source": "application.core",
-      "target": "domain.context",
-      "imports": 29
-    },
-    {
       "source": "composition.factories",
       "target": "infrastructure.adapters",
+      "imports": 31
+    },
+    {
+      "source": "application.core",
+      "target": "domain.context",
       "imports": 29
     },
     {
