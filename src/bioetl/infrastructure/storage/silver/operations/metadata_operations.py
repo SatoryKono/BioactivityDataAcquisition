@@ -90,7 +90,7 @@ class SilverMetadataOperations:
     @staticmethod
     def _placeholder_table_path(table_name: str) -> str:
         """Build a stable placeholder path when the real table path is unavailable."""
-        return f"/tmp/silver/{table_name.replace('.', '/')}"
+        return f"data/output/silver/{table_name.replace('.', '/')}"
 
     def _resolve_manifest_id(
         self,

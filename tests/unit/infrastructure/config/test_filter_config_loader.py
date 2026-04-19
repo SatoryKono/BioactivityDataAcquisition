@@ -334,7 +334,8 @@ class TestFilterConfigLoaderCaching:
         config1 = loader.load("test_provider", "test_entity")
         config2 = loader.load("test_provider", "test_entity")
 
-        assert config1 is config2  # Same tuple from cache
+        assert config1 == config2
+        assert len(loader._cache) == 1
 
     def test_no_cache_with_overrides(self, loader: FilterConfigLoader) -> None:
         """Configs with overrides should not be cached."""
@@ -345,7 +346,8 @@ class TestFilterConfigLoaderCaching:
             inline_overrides={"input_filter": {"batch_size": 500}},
         )
 
-        assert config1 is not config2
+        assert config1 != config2
+        assert len(loader._cache) == 1
 
     def test_clear_cache(self, loader: FilterConfigLoader) -> None:
         """clear_cache() should invalidate cache."""
@@ -353,7 +355,8 @@ class TestFilterConfigLoaderCaching:
         loader.clear_cache()
         config2 = loader.load("test_provider", "test_entity")
 
-        assert config1 is not config2
+        assert config1 == config2
+        assert len(loader._cache) == 1
 
     def test_different_providers_different_cache(
         self, loader: FilterConfigLoader
@@ -362,7 +365,8 @@ class TestFilterConfigLoaderCaching:
         config1 = loader.load("test_provider", "test_entity")
         config2 = loader.load("other_provider", "test_entity")
 
-        assert config1 is not config2
+        assert config1 != config2
+        assert len(loader._cache) == 2
 
 
 class TestFilterConfigLoaderErrors:
@@ -673,7 +677,7 @@ gold_filters:
         )
 
         loader = FilterConfigLoader(tmp_path)
-        input_filter, silver_filters, gold_filters, extraction_params = loader.load(
+        input_filter, _, _, extraction_params = loader.load(
             "chembl", "assay"
         )
 

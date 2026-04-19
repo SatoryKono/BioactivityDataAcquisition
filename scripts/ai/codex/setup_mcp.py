@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-NPM_CACHE_DIR = "/tmp/npm-cache"
 FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 
 
@@ -45,6 +44,7 @@ def _config_root_hint() -> Path:
 
 CONFIG_ROOT = _config_root_hint()
 MEMORY_FILE_PATH = CONFIG_ROOT / "docs/00-project/ai/memory/mcp-memory.json"
+NPM_CACHE_DIR = str((CONFIG_ROOT / ".cache" / "npm-cache").resolve())
 
 
 def _wrapper_command(script_name: str) -> dict[str, Any]:

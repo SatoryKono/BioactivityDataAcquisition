@@ -93,16 +93,21 @@ class TestAdapterMetrics:
             metrics=noop_metrics, provider="chembl"
         )
 
-        # Should not raise any exceptions
+        entered_context = False
         with adapter_metrics.measure_request("/activity"):
-            pass
+            entered_context = True
+
+        assert entered_context is True
 
     def test_measure_request_without_metrics_is_best_effort(self):
         """Missing metrics port should not break adapter request flow."""
         adapter_metrics = AdapterMetricsRecorder(metrics=None, provider="chembl")
 
+        entered_context = False
         with adapter_metrics.measure_request("/activity"):
-            pass
+            entered_context = True
+
+        assert entered_context is True
 
     def test_record_batch_size(self):
         """Test that record_batch_size records histogram metric."""
@@ -126,11 +131,16 @@ class TestAdapterMetrics:
             metrics=mock_metrics, provider="uniprot"
         )
 
+        search_request_recorded = False
         with adapter_metrics.measure_request("/uniprotkb/search"):
-            pass
+            search_request_recorded = True
 
+        stream_request_recorded = False
         with adapter_metrics.measure_request("/uniprotkb/stream"):
-            pass
+            stream_request_recorded = True
+
+        assert search_request_recorded is True
+        assert stream_request_recorded is True
 
         # Verify two different endpoints were recorded
         assert mock_metrics.observe_histogram.call_count == 2
@@ -143,15 +153,19 @@ class TestAdapterMetrics:
         mock_metrics = MagicMock()
 
         chembl_metrics = AdapterMetricsRecorder(metrics=mock_metrics, provider="chembl")
+        chembl_recorded = False
         with chembl_metrics.measure_request("/activity"):
-            pass
+            chembl_recorded = True
 
         uniprot_metrics = AdapterMetricsRecorder(
             metrics=mock_metrics, provider="uniprot"
         )
+        uniprot_recorded = False
         with uniprot_metrics.measure_request("/protein"):
-            pass
+            uniprot_recorded = True
 
+        assert chembl_recorded is True
+        assert uniprot_recorded is True
         calls = mock_metrics.observe_histogram.call_args_list
         assert calls[0][0][2]["provider"] == "chembl"
         assert calls[1][0][2]["provider"] == "uniprot"
@@ -163,9 +177,11 @@ class TestAdapterMetrics:
             metrics=mock_metrics, provider="chembl"
         )
 
+        request_recorded = False
         with adapter_metrics.measure_request("/activity"):
-            pass
+            request_recorded = True
 
+        assert request_recorded is True
         mock_metrics.set_gauge.assert_called_once()
         call_args = mock_metrics.set_gauge.call_args
         assert call_args[0][0] == "bioetl_adapter_request_p95_seconds"
@@ -179,9 +195,11 @@ class TestAdapterMetrics:
             metrics=mock_metrics, provider="crossref"
         )
 
+        request_recorded = False
         with adapter_metrics.measure_request("/works/123456789"):
-            pass
+            request_recorded = True
 
+        assert request_recorded is True
         histogram_call = mock_metrics.observe_histogram.call_args
         assert histogram_call[0][2] == {
             "provider": "crossref",

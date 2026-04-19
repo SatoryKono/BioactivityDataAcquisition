@@ -31,10 +31,30 @@ def _resolve_data_root(settings: Settings) -> Path:
     try:
         candidate.mkdir(parents=True, exist_ok=True)
     except OSError:
-        return Path(tempfile.gettempdir()) / "bioetl-data"
+        return _private_fallback_data_root()
     if not os.access(candidate, os.W_OK):
-        return Path(tempfile.gettempdir()) / "bioetl-data"
+        return _private_fallback_data_root()
     return candidate
+
+
+def _private_fallback_data_root() -> Path:
+    """Return a user-private fallback data root when the checkout is read-only."""
+    preferred = Path.home() / ".cache" / "bioetl-data"
+    try:
+        return _prepare_private_runtime_dir(preferred)
+    except OSError:
+        runtime_user = getattr(os, "getuid", lambda: "user")()
+        fallback = Path(tempfile.gettempdir()) / f"bioetl-data-{runtime_user}"
+        return _prepare_private_runtime_dir(fallback)
+
+
+def _prepare_private_runtime_dir(path: Path) -> Path:
+    path.mkdir(parents=True, exist_ok=True, mode=0o700)
+    try:
+        path.chmod(0o700)
+    except OSError:
+        pass
+    return path
 
 
 def build_planned_artifacts(
