@@ -459,32 +459,36 @@ def _print_json_payload(
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
-def run(argv: list[str] | None = None) -> int:
-    args = _parse_args(argv)
-    updates = _select_updates(_build_issue_updates(), args.issues)
-    if not updates:
-        raise ValueError("No matching docs-sync issues selected.")
+def _preview_updates(
+    *,
+    args: argparse.Namespace,
+    updates: list[IssueUpdate],
+    milestone_title: str | None,
+) -> int:
+    if args.json:
+        _print_json_payload(
+            owner=args.owner,
+            repo=args.repo,
+            updates=updates,
+            milestone_title=milestone_title,
+            skip_comments=args.skip_comments,
+        )
+    else:
+        _print_dry_run(
+            owner=args.owner,
+            repo=args.repo,
+            updates=updates,
+            milestone_title=milestone_title,
+            skip_comments=args.skip_comments,
+        )
+    return len(updates)
 
-    milestone_title = None if args.skip_milestone else args.milestone_title
-    if not args.apply:
-        if args.json:
-            _print_json_payload(
-                owner=args.owner,
-                repo=args.repo,
-                updates=updates,
-                milestone_title=milestone_title,
-                skip_comments=args.skip_comments,
-            )
-        else:
-            _print_dry_run(
-                owner=args.owner,
-                repo=args.repo,
-                updates=updates,
-                milestone_title=milestone_title,
-                skip_comments=args.skip_comments,
-            )
-        return len(updates)
 
+def _apply_updates(
+    *,
+    args: argparse.Namespace,
+    updates: list[IssueUpdate],
+) -> tuple[MilestoneRecord | None, int]:
     token = _require_token(args.token_env)
     milestone: MilestoneRecord | None = None
     mutation_count = 0
@@ -508,15 +512,24 @@ def run(argv: list[str] | None = None) -> int:
             milestone_number=None if milestone is None else milestone.number,
         )
         mutation_count += 1
-        if not args.skip_comments:
-            _post_comment(
-                owner=args.owner,
-                repo=args.repo,
-                token=token,
-                issue=issue,
-            )
-            mutation_count += 1
+        if args.skip_comments:
+            continue
+        _post_comment(
+            owner=args.owner,
+            repo=args.repo,
+            token=token,
+            issue=issue,
+        )
+        mutation_count += 1
+    return milestone, mutation_count
 
+
+def _print_apply_result(
+    *,
+    args: argparse.Namespace,
+    updates: list[IssueUpdate],
+    milestone: MilestoneRecord | None,
+) -> None:
     if args.json:
         payload = {
             "owner": args.owner,
@@ -539,21 +552,38 @@ def run(argv: list[str] | None = None) -> int:
             ],
         }
         print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return
+
+    print("Applied docs-sync issue updates:")
+    if milestone is None:
+        print("- Milestone: <not set>")
     else:
-        print("Applied docs-sync issue updates:")
-        if milestone is None:
-            print("- Milestone: <not set>")
+        print(f"- Milestone: {milestone.title} (#{milestone.number}, {milestone.url})")
+    for issue in updates:
+        print(f"- #{issue.number} {issue.title}")
+        print(f"  Labels: {', '.join(issue.labels)}")
+        if args.skip_comments:
+            print("  Comment: <skipped>")
         else:
-            print(
-                f"- Milestone: {milestone.title} (#{milestone.number}, {milestone.url})"
-            )
-        for issue in updates:
-            print(f"- #{issue.number} {issue.title}")
-            print(f"  Labels: {', '.join(issue.labels)}")
-            if args.skip_comments:
-                print("  Comment: <skipped>")
-            else:
-                print("  Comment: posted")
+            print("  Comment: posted")
+
+
+def run(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
+    updates = _select_updates(_build_issue_updates(), args.issues)
+    if not updates:
+        raise ValueError("No matching docs-sync issues selected.")
+
+    milestone_title = None if args.skip_milestone else args.milestone_title
+    if not args.apply:
+        return _preview_updates(
+            args=args,
+            updates=updates,
+            milestone_title=milestone_title,
+        )
+
+    milestone, mutation_count = _apply_updates(args=args, updates=updates)
+    _print_apply_result(args=args, updates=updates, milestone=milestone)
     return mutation_count
 
 
