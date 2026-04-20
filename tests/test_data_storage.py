@@ -151,4 +151,4 @@ def test_req_partition_004_no_high_cardinality_keys(config_path):
 
 def test_req_quarantine_001_unified_table_exists():
     """A unified quarantine table should be conceptually present."""
-    assert True, "Conceptual test for a unified quarantine table."
+    assert get_all_pipeline_configs(), "Expected at least one pipeline config."

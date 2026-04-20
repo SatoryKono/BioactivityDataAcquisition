@@ -277,7 +277,7 @@ class TestEndSpan:
         span = _make_span_mock()
         writer = _TracingWriter()
 
-        writer._end_span(span, Exception("oops"))
+        writer._end_span(span, RuntimeError("oops"))
 
         span.__exit__.assert_called_once()
 

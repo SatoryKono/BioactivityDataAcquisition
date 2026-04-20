@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.postrun.service import PostrunService
@@ -17,6 +18,18 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+@dataclass(frozen=True)
+class PostrunDependencyOverrides:
+    """Optional dependency overrides for PostrunService test assembly."""
+
+    metadata_coordinator: object | None = None
+    metadata_writer: object | None = None
+    dq_report_service: object | None = None
+    bronze_dq_config: object | None = None
+    silver_dq_config: object | None = None
+    gold_dq_config: object | None = None
+
+
 def build_test_postrun_service(
     *,
     config: object,
@@ -28,14 +41,10 @@ def build_test_postrun_service(
     logger: LoggerPort,
     metrics: object | None = None,
     tracer: object | None = None,
-    metadata_coordinator: object | None = None,
-    metadata_writer: object | None = None,
-    dq_report_service: object | None = None,
-    bronze_dq_config: object | None = None,
-    silver_dq_config: object | None = None,
-    gold_dq_config: object | None = None,
+    overrides: PostrunDependencyOverrides | None = None,
 ) -> PostrunService:
     """Build PostrunService with explicit injected collaborators for tests."""
+    dependency_overrides = overrides or PostrunDependencyOverrides()
     return PostrunService(
         config=config,
         runtime=runtime,
@@ -52,11 +61,11 @@ def build_test_postrun_service(
             context=context,
             storage=storage,
             logger_port=logger,
-            dq_report_service=dq_report_service,
-            bronze_dq_config=bronze_dq_config,
-            silver_dq_config=silver_dq_config,
-            gold_dq_config=gold_dq_config,
-            metadata_coordinator=metadata_coordinator,
-            metadata_writer=metadata_writer,
+            dq_report_service=dependency_overrides.dq_report_service,
+            bronze_dq_config=dependency_overrides.bronze_dq_config,
+            silver_dq_config=dependency_overrides.silver_dq_config,
+            gold_dq_config=dependency_overrides.gold_dq_config,
+            metadata_coordinator=dependency_overrides.metadata_coordinator,
+            metadata_writer=dependency_overrides.metadata_writer,
         ),
     )

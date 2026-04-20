@@ -50,16 +50,15 @@ def _extract_docstrings(source: str) -> list[tuple[int, str]]:
         # Module, class, and function docstrings
         if isinstance(
             node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        ) and (
+            node.body
+            and isinstance(node.body[0], ast.Expr)
+            and isinstance(node.body[0].value, ast.Constant)
+            and isinstance(node.body[0].value.value, str)
         ):
-            if (
-                node.body
-                and isinstance(node.body[0], ast.Expr)
-                and isinstance(node.body[0].value, ast.Constant)
-                and isinstance(node.body[0].value.value, str)
-            ):
-                docstring = node.body[0].value.value
-                lineno = node.body[0].lineno
-                docstrings.append((lineno, docstring))
+            docstring = node.body[0].value.value
+            lineno = node.body[0].lineno
+            docstrings.append((lineno, docstring))
 
     return docstrings
 

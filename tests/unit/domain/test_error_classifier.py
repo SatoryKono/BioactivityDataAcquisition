@@ -83,7 +83,7 @@ class TestErrorClassifier:
         assert (
             classifier.classify(RuntimeError("runtime issue")) == ErrorType.INVALID_DATA
         )
-        assert classifier.classify(Exception("generic")) == ErrorType.INVALID_DATA
+        assert classifier.classify(UnicodeError("generic")) == ErrorType.INVALID_DATA
 
     def test_classify_builtin_exceptions(self, classifier: ErrorClassifier) -> None:
         """Built-in exceptions should be classified as INVALID_DATA."""

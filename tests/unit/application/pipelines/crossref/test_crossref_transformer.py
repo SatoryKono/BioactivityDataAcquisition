@@ -622,7 +622,7 @@ def test_doc_type_mapping_all_types():
         "other",
     ]
     for doc_type in container_types:
-        result = classify_publication_type("crossref", raw_type=doc_type)
+        classify_publication_type("crossref", raw_type=doc_type)
         # These may be unmapped - transformer handles with raw type preservation
         # Just verify they don't crash - any result is acceptable
         pass  # No assertion - these are edge cases

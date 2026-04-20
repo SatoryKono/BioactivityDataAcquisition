@@ -94,12 +94,6 @@ class TestTracingPortContract:
         from bioetl.domain.ports import TracingPort
 
         # Check protocol methods
-        src_path = Path("src/bioetl/domain/ports/__init__.py")
-        if not src_path.exists():
-            src_path = Path("src/bioetl/domain/ports.py")
-
-        # TracingPort should be a Protocol
-
         # Get TracingPort members
         members = [m for m in dir(TracingPort) if not m.startswith("_")]
         assert len(members) > 0, "TracingPort should have methods"
