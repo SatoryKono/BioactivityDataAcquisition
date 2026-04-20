@@ -230,6 +230,83 @@ def _require_token(token_env: str) -> str:
     return token
 
 
+def _request_headers(token: str, payload: dict[str, object] | None) -> tuple[dict[str, str], bytes | None]:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "User-Agent": "bioetl-testing-roadmap-splitter",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    if payload is None:
+        return headers, None
+
+    headers["Content-Type"] = "application/json"
+    return headers, json.dumps(payload).encode("utf-8")
+
+
+def _decode_response_body(response: Any) -> Any:
+    charset = response.headers.get_content_charset("utf-8")
+    raw = response.read().decode(charset)
+    return json.loads(raw) if raw else None
+
+
+def _http_error_detail(exc: urllib.error.HTTPError) -> str:
+    charset = exc.headers.get_content_charset("utf-8")
+    raw = exc.read().decode(charset)
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
+    return json.dumps(parsed, ensure_ascii=True)
+
+
+def _maybe_retry_http_error(
+    *,
+    exc: urllib.error.HTTPError,
+    attempt: int,
+    method: str,
+    url: str,
+) -> bool:
+    if exc.code not in RETRYABLE_HTTP_STATUS_CODES or attempt >= MAX_HTTP_RETRIES:
+        return False
+
+    retry_after = exc.headers.get("Retry-After")
+    delay = _resolve_retry_delay_seconds(
+        retry_after=retry_after,
+        attempt=attempt,
+    )
+    print(
+        f"[WARN] GitHub API {method} {url} returned {exc.code}; retrying in {delay:.1f}s "
+        f"(attempt {attempt}/{MAX_HTTP_RETRIES})",
+        file=sys.stderr,
+    )
+    time.sleep(delay)
+    return True
+
+
+def _maybe_retry_url_error(
+    *,
+    exc: urllib.error.URLError,
+    attempt: int,
+    method: str,
+    url: str,
+) -> bool:
+    if attempt >= MAX_HTTP_RETRIES:
+        return False
+
+    delay = _resolve_retry_delay_seconds(
+        retry_after=None,
+        attempt=attempt,
+    )
+    print(
+        f"[WARN] GitHub API {method} {url} failed with network error {exc.reason!r}; retrying in {delay:.1f}s "
+        f"(attempt {attempt}/{MAX_HTTP_RETRIES})",
+        file=sys.stderr,
+    )
+    time.sleep(delay)
+    return True
+
+
 def _github_request(
     *,
     method: str,
@@ -237,16 +314,7 @@ def _github_request(
     token: str,
     payload: dict[str, object] | None = None,
 ) -> tuple[Any, dict[str, str]]:
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "Authorization": f"Bearer {token}",
-        "User-Agent": "bioetl-testing-roadmap-splitter",
-        "X-GitHub-Api-Version": "2022-11-28",
-    }
-    data = None
-    if payload is not None:
-        data = json.dumps(payload).encode("utf-8")
-        headers["Content-Type"] = "application/json"
+    headers, data = _request_headers(token, payload)
 
     request = urllib.request.Request(
         url,
@@ -259,47 +327,15 @@ def _github_request(
         attempt += 1
         try:
             with urllib.request.urlopen(request) as response:
-                charset = response.headers.get_content_charset("utf-8")
-                raw = response.read().decode(charset)
-                body = json.loads(raw) if raw else None
+                body = _decode_response_body(response)
                 return body, dict(response.headers.items())
         except urllib.error.HTTPError as exc:  # pragma: no cover - CLI path
-            charset = exc.headers.get_content_charset("utf-8")
-            raw = exc.read().decode(charset)
-            detail = raw
-            try:
-                parsed = json.loads(raw)
-                detail = json.dumps(parsed, ensure_ascii=True)
-            except json.JSONDecodeError:
-                pass
-
-            if exc.code in RETRYABLE_HTTP_STATUS_CODES and attempt < MAX_HTTP_RETRIES:
-                retry_after = exc.headers.get("Retry-After")
-                delay = _resolve_retry_delay_seconds(
-                    retry_after=retry_after,
-                    attempt=attempt,
-                )
-                print(
-                    f"[WARN] GitHub API {method} {url} returned {exc.code}; retrying in {delay:.1f}s "
-                    f"(attempt {attempt}/{MAX_HTTP_RETRIES})",
-                    file=sys.stderr,
-                )
-                time.sleep(delay)
+            if _maybe_retry_http_error(exc=exc, attempt=attempt, method=method, url=url):
                 continue
-
+            detail = _http_error_detail(exc)
             raise RuntimeError(f"GitHub API {method} {url} failed: {detail}") from exc
         except urllib.error.URLError as exc:  # pragma: no cover - CLI path
-            if attempt < MAX_HTTP_RETRIES:
-                delay = _resolve_retry_delay_seconds(
-                    retry_after=None,
-                    attempt=attempt,
-                )
-                print(
-                    f"[WARN] GitHub API {method} {url} failed with network error {exc.reason!r}; retrying in {delay:.1f}s "
-                    f"(attempt {attempt}/{MAX_HTTP_RETRIES})",
-                    file=sys.stderr,
-                )
-                time.sleep(delay)
+            if _maybe_retry_url_error(exc=exc, attempt=attempt, method=method, url=url):
                 continue
             raise RuntimeError(
                 f"GitHub API {method} {url} failed with network error: {exc.reason!r}"
