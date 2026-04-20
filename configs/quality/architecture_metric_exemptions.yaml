@@ -32,7 +32,7 @@ registries:
       expires_on: "2026-06-30"
       removal_step: "Split compatibility and replay decision paths into helper owners, then retire this exemption."
     src/bioetl/infrastructure/storage/silver_writer.py:
-      value: 1452
+      value: 1450
       owner: "@bioetl-platform"
       reason: "SilverWriter remains a large infrastructure facade while Delta write, validation, and recovery branches are still being peeled into dedicated storage helpers."
       classification: "technical_debt"
