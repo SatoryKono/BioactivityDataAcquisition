@@ -149,6 +149,58 @@ def _clip_payload(rows: list[JsonDict]) -> list[JsonDict]:
     return clipped
 
 
+def _scoped_allowed_values(
+    *,
+    pipeline: str | None,
+    run_type: str | None,
+    reason_code: str | None,
+    field: str | None,
+    run_id: str | None,
+    payload_hash: str | None,
+) -> tuple[set[str] | None, set[str] | None, set[str] | None, set[str] | None, set[str] | None, set[str] | None]:
+    return (
+        _normalize_multi(pipeline),
+        _normalize_multi(run_type),
+        _normalize_multi(reason_code),
+        _normalize_multi(field),
+        _normalize_multi(run_id),
+        _normalize_multi(payload_hash),
+    )
+
+
+def _row_matches_scope(
+    row: JsonDict,
+    *,
+    pipeline_allowed: set[str] | None,
+    run_type_allowed: set[str] | None,
+    reason_allowed: set[str] | None,
+    field_allowed: set[str] | None,
+    run_id_allowed: set[str] | None,
+    payload_hash_allowed: set[str] | None,
+    from_bound: datetime | None,
+    to_bound: datetime | None,
+) -> bool:
+    if not _matches(row.get("pipeline"), pipeline_allowed):
+        return False
+    if not _matches(row.get("run_type"), run_type_allowed):
+        return False
+    if not _matches(row.get("reason_code"), reason_allowed):
+        return False
+    if not _matches(row.get("field"), field_allowed):
+        return False
+    if not _matches(row.get("run_id"), run_id_allowed):
+        return False
+    if not _matches(row.get("payload_hash"), payload_hash_allowed):
+        return False
+
+    row_ts = _parse_iso(str(row.get("ingestion_ts", "")))
+    if from_bound is not None and (row_ts is None or row_ts < from_bound):
+        return False
+    if to_bound is not None and (row_ts is None or row_ts > to_bound):
+        return False
+    return True
+
+
 class MockQuarantineExplorerService:
     """Minimal async service compatible with HealthServer quarantine endpoints."""
 
@@ -171,34 +223,37 @@ class MockQuarantineExplorerService:
         from_ts: str | None,
         to_ts: str | None,
     ) -> list[JsonDict]:
-        pipeline_allowed = _normalize_multi(pipeline)
-        run_type_allowed = _normalize_multi(run_type)
-        reason_allowed = _normalize_multi(reason_code)
-        field_allowed = _normalize_multi(field)
-        run_id_allowed = _normalize_multi(run_id)
-        payload_hash_allowed = _normalize_multi(payload_hash)
+        (
+            pipeline_allowed,
+            run_type_allowed,
+            reason_allowed,
+            field_allowed,
+            run_id_allowed,
+            payload_hash_allowed,
+        ) = _scoped_allowed_values(
+            pipeline=pipeline,
+            run_type=run_type,
+            reason_code=reason_code,
+            field=field,
+            run_id=run_id,
+            payload_hash=payload_hash,
+        )
         from_bound = _parse_iso(from_ts)
         to_bound = _parse_iso(to_ts)
 
         rows: list[JsonDict] = []
         for row in self._rows:
-            if not _matches(row.get("pipeline"), pipeline_allowed):
-                continue
-            if not _matches(row.get("run_type"), run_type_allowed):
-                continue
-            if not _matches(row.get("reason_code"), reason_allowed):
-                continue
-            if not _matches(row.get("field"), field_allowed):
-                continue
-            if not _matches(row.get("run_id"), run_id_allowed):
-                continue
-            if not _matches(row.get("payload_hash"), payload_hash_allowed):
-                continue
-
-            row_ts = _parse_iso(str(row.get("ingestion_ts", "")))
-            if from_bound is not None and (row_ts is None or row_ts < from_bound):
-                continue
-            if to_bound is not None and (row_ts is None or row_ts > to_bound):
+            if not _row_matches_scope(
+                row,
+                pipeline_allowed=pipeline_allowed,
+                run_type_allowed=run_type_allowed,
+                reason_allowed=reason_allowed,
+                field_allowed=field_allowed,
+                run_id_allowed=run_id_allowed,
+                payload_hash_allowed=payload_hash_allowed,
+                from_bound=from_bound,
+                to_bound=to_bound,
+            ):
                 continue
             rows.append(dict(row))
         return rows

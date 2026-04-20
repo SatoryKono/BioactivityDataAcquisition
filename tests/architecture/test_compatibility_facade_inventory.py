@@ -291,7 +291,9 @@ def test_snapshot_generator_rejects_noncanonical_repo_output() -> None:
     )
 
     with pytest.raises(ValueError, match="canonical tracked artifact"):
-        module._resolve_canonical_output_path("docs/02-architecture/not-the-snapshot.md")
+        module._resolve_canonical_output_path(
+            "docs/02-architecture/not-the-snapshot.md"
+        )
 
 
 @pytest.mark.architecture

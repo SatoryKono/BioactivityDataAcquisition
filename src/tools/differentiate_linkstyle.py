@@ -99,7 +99,9 @@ def _normalize_relative_mermaid_path(path: Path) -> Path:
 def _resolve_mermaid_path(path: Path) -> Path:
     """Resolve a Mermaid file path within the canonical Mermaid directory."""
     candidate = (
-        path if path.is_absolute() else MERMAID_DIR / _normalize_relative_mermaid_path(path)
+        path
+        if path.is_absolute()
+        else MERMAID_DIR / _normalize_relative_mermaid_path(path)
     )
     return _ensure_path_within_root(candidate, MERMAID_DIR)
 
