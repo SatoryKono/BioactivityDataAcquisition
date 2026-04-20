@@ -315,6 +315,22 @@ def get_runtime_imports_from_file(file_path: Path) -> list[str]:
     return imports
 
 
+def _runtime_infrastructure_imports(py_file: Path) -> list[str]:
+    imports = get_runtime_imports_from_file(py_file)
+    return [imp for imp in imports if "bioetl.infrastructure" in imp]
+
+
+def _http_runtime_infrastructure_violations(http_dir: Path) -> list[str]:
+    violations: list[str] = []
+    for py_file in http_dir.glob("*.py"):
+        if py_file.name == "__init__.py":
+            continue
+        infrastructure_imports = _runtime_infrastructure_imports(py_file)
+        if infrastructure_imports:
+            violations.append(f"{py_file.name}: {infrastructure_imports}")
+    return violations
+
+
 @pytest.mark.architecture
 class TestHttpInterfaceNoInfrastructure:
     """Test that HTTP interface module doesn't have runtime infrastructure imports."""
@@ -384,20 +400,7 @@ class TestHttpInterfaceNoInfrastructure:
         http_dir = SRC_PATH / "interfaces" / "http"
         assert http_dir.exists(), "http/ directory not found"
 
-        violations = []
-
-        for py_file in http_dir.glob("*.py"):
-            # Skip __init__.py - it typically just re-exports
-            if py_file.name == "__init__.py":
-                continue
-
-            imports = get_runtime_imports_from_file(py_file)
-            infrastructure_imports = [
-                imp for imp in imports if "bioetl.infrastructure" in imp
-            ]
-
-            if infrastructure_imports:
-                violations.append(f"{py_file.name}: {infrastructure_imports}")
+        violations = _http_runtime_infrastructure_violations(http_dir)
 
         assert violations == [], (
             "HTTP interface files should not import from infrastructure at runtime. "
