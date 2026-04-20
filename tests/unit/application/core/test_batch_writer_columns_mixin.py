@@ -339,9 +339,7 @@ class TestResolveLayerColumns:
         orderer.order_column_names.return_value = ["entity_id", "value"]
         writer = _Writer(column_orderer=orderer, data_schema=None)
 
-        _, renames = writer._resolve_layer_columns(
-            "silver", ["entity_id", "value"]
-        )
+        _, renames = writer._resolve_layer_columns("silver", ["entity_id", "value"])
 
         assert renames == {}
         orderer.order_column_names.assert_called_once()

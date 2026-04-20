@@ -209,7 +209,7 @@ class TestCreatePipelineInstanceWithServices:
         # The function now passes parameters as structured objects
         call_kwargs = mock_create_pipeline_with_services.call_args.kwargs
         inputs = call_kwargs["inputs"]
-        
+
         assert inputs.pipeline_name == "chembl_activity"
         assert inputs.pipeline_class is pipeline_class
         assert inputs.provider == "chembl"
@@ -260,7 +260,7 @@ class TestCreatePipelineInstanceWithServices:
         # The function now passes parameters as structured objects
         call_kwargs = mock_create_pipeline_with_services.call_args.kwargs
         inputs = call_kwargs["inputs"]
-        
+
         assert inputs.request.manifest_id == "manifest-123"
         assert inputs.request.config_hash == "hash-123"
         assert inputs.request.dq_contract_compatibility_hash == "dq-hash-123"

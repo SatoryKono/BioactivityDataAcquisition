@@ -63,7 +63,9 @@ def build_transformer_dependencies(
     if resolved_identity_service is None:
         resolved_identity_service = IdentityService(
             content_hash_include_fields=(
-                set(content_hash_include_fields) if content_hash_include_fields else None
+                set(content_hash_include_fields)
+                if content_hash_include_fields
+                else None
             ),
             content_hash_exclude_fields=set(content_hash_exclude_fields or ()),
         )

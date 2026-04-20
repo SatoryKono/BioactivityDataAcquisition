@@ -93,7 +93,10 @@ def _find_named_function(
     func_name: str,
 ) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func_name:
+        if (
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name == func_name
+        ):
             return node
     return None
 

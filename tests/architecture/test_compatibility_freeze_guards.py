@@ -673,7 +673,9 @@ def _iter_matching_import_nodes(
             continue
         if isinstance(node, ast.Import):
             matches.extend(
-                (node.lineno, alias.name) for alias in node.names if alias.name in module_names
+                (node.lineno, alias.name)
+                for alias in node.names
+                if alias.name in module_names
             )
     return matches
 
@@ -790,7 +792,9 @@ def _iter_imported_symbol_violations(
             module_names=module_names,
             symbol=symbol,
         ):
-            violations.append(f"{rel_path}:{lineno} imports {symbol} from {module_name}")
+            violations.append(
+                f"{rel_path}:{lineno} imports {symbol} from {module_name}"
+            )
     return violations
 
 
@@ -1092,10 +1096,7 @@ _IMPORTED_SYMBOL_SCOPE_CASES = (
         frozenset({"bioetl.composition.registry"}),
         "get_default_registry",
         ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES,
-        (
-            "composition.registry.get_default_registry leaked into new src call "
-            "sites:"
-        ),
+        ("composition.registry.get_default_registry leaked into new src call sites:"),
         id="default-registry-src",
     ),
     pytest.param(
@@ -1104,10 +1105,7 @@ _IMPORTED_SYMBOL_SCOPE_CASES = (
         frozenset({"bioetl.composition.registry"}),
         "get_default_registry",
         ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES,
-        (
-            "composition.registry.get_default_registry leaked into new test call "
-            "sites:"
-        ),
+        ("composition.registry.get_default_registry leaked into new test call sites:"),
         id="default-registry-tests",
     ),
 )
