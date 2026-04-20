@@ -27,6 +27,24 @@ def _strip_inline_comment(line: str, *, marker: str) -> str:
     return line.split(marker)[0] if marker in line else line
 
 
+def _next_docstring_state(
+    stripped: str,
+    *,
+    in_docstring: bool,
+    docstring_char: str,
+) -> tuple[bool, str, bool]:
+    if in_docstring:
+        return (
+            not _docstring_closed_on_line(stripped, docstring_char),
+            docstring_char,
+            True,
+        )
+    quote_prefix = _docstring_quote_prefix(stripped)
+    if quote_prefix is None:
+        return False, docstring_char, False
+    return stripped.count(quote_prefix) == 1, quote_prefix, True
+
+
 def _strip_docstrings_and_comments(text: str) -> dict[int, str]:
     """Return mapping of line_number -> code_only for non-docstring, non-comment lines."""
     result: dict[int, str] = {}
@@ -34,15 +52,12 @@ def _strip_docstrings_and_comments(text: str) -> dict[int, str]:
     docstring_char = ""
     for i, line in enumerate(text.splitlines(), 1):
         stripped = line.strip()
-        if in_docstring:
-            if _docstring_closed_on_line(stripped, docstring_char):
-                in_docstring = False
-            continue
-        quote_prefix = _docstring_quote_prefix(stripped)
-        if quote_prefix is not None:
-            docstring_char = quote_prefix
-            if stripped.count(docstring_char) == 1:
-                in_docstring = True
+        in_docstring, docstring_char, skip_line = _next_docstring_state(
+            stripped,
+            in_docstring=in_docstring,
+            docstring_char=docstring_char,
+        )
+        if skip_line:
             continue
         if stripped.startswith("#"):
             continue
@@ -50,6 +65,17 @@ def _strip_docstrings_and_comments(text: str) -> dict[int, str]:
         code_part = _strip_inline_comment(line, marker="  #")
         result[i] = code_part
     return result
+
+
+def _non_cli_source_items(source_content_cache: dict) -> list[tuple[Path, str]]:
+    return [
+        (path, text)
+        for path, text in source_content_cache.items()
+        if not (
+            path.match("src/bioetl/interfaces/cli/*")
+            or "interfaces/cli" in str(path)
+        )
+    ]
 
 
 def test_no_sentinel_values(source_content_cache: dict) -> None:
@@ -114,9 +140,7 @@ def test_no_hardcoded_secrets() -> None:
 
 def test_no_print_in_production(source_content_cache: dict) -> None:
     violations: list[str] = []
-    for path, text in source_content_cache.items():
-        if path.match("src/bioetl/interfaces/cli/*") or "interfaces/cli" in str(path):
-            continue
+    for path, text in _non_cli_source_items(source_content_cache):
         for i, line in enumerate(text.splitlines(), 1):
             if re.match(r"^\s*print\(", line):
                 violations.append(f"{path}:{i}: {line.strip()}")

@@ -455,53 +455,56 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _exit_code(result: RotationResult) -> int:
+    log_result(result)
+    return 0 if result.success else 1
+
+
+def _log_emergency_warning() -> None:
+    logger.warning("")
+    logger.warning("!" * 70)
+    logger.warning("! EMERGENCY SALT ROTATION")
+    logger.warning("!" * 70)
+    logger.warning("!")
+    logger.warning("! This will IMMEDIATELY invalidate ALL existing PII hashes!")
+    logger.warning("! Records hashed with the old salt CANNOT be matched.")
+    logger.warning("!")
+    logger.warning("! Use only in case of:")
+    logger.warning("!   - Security incident (salt compromised)")
+    logger.warning("!   - Regulatory requirement")
+    logger.warning("!")
+    logger.warning("!" * 70)
+    logger.warning("")
+
+
+def _run_requested_action(args: argparse.Namespace) -> RotationResult | None:
+    actions: list[tuple[str, callable[[], RotationResult]]] = [
+        ("initiate", initiate_rotation),
+        ("complete", complete_rotation),
+        ("cancel", cancel_rotation),
+    ]
+    for attr, action in actions:
+        if getattr(args, attr):
+            return action()
+    if args.emergency:
+        _log_emergency_warning()
+        return emergency_rotation()
+    return None
+
+
 def main() -> int:
     """Entry point."""
     args = parse_args()
 
     # Get current status first
     status = get_current_status()
+    result = _run_requested_action(args)
+    if result is not None:
+        return _exit_code(result)
 
-    if args.initiate:
-        result = initiate_rotation()
-        log_result(result)
-        return 0 if result.success else 1
-
-    elif args.complete:
-        result = complete_rotation()
-        log_result(result)
-        return 0 if result.success else 1
-
-    elif args.cancel:
-        result = cancel_rotation()
-        log_result(result)
-        return 0 if result.success else 1
-
-    elif args.emergency:
-        # Confirm emergency action
-        logger.warning("")
-        logger.warning("!" * 70)
-        logger.warning("! EMERGENCY SALT ROTATION")
-        logger.warning("!" * 70)
-        logger.warning("!")
-        logger.warning("! This will IMMEDIATELY invalidate ALL existing PII hashes!")
-        logger.warning("! Records hashed with the old salt CANNOT be matched.")
-        logger.warning("!")
-        logger.warning("! Use only in case of:")
-        logger.warning("!   - Security incident (salt compromised)")
-        logger.warning("!   - Regulatory requirement")
-        logger.warning("!")
-        logger.warning("!" * 70)
-        logger.warning("")
-
-        result = emergency_rotation()
-        log_result(result)
-        return 0 if result.success else 1
-
-    else:
-        # Default: verify status
-        log_status(status)
-        return 0 if status.valid else 1
+    # Default: verify status
+    log_status(status)
+    return 0 if status.valid else 1
 
 
 if __name__ == "__main__":
