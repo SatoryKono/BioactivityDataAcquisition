@@ -69,8 +69,8 @@ class _BronzeMetadataWriteHostProtocol(Protocol):
     base_path: Path
 
 
-class _BronzeMetadataBundleFactory(Protocol):
-    """Callable contract exposed by coordinator bundle factory hooks."""
+class _BronzeMetadataBundleBuilder(Protocol):
+    """Callable contract exposed by coordinator bundle builder hooks."""
 
     def __call__(
         self,
@@ -126,7 +126,7 @@ def prepare_bronze_metadata_write(
             live_snapshot=live_snapshot,
         )
     )
-    create_bundle = _resolve_bronze_metadata_bundle_factory(coordinator)
+    create_bundle = _resolve_bronze_metadata_bundle_builder(coordinator)
     if not callable(create_bundle):
         raise RuntimeError(
             "MetadataCoordinator with create_bronze_metadata_bundle is required "
@@ -167,9 +167,9 @@ def _build_bronze_metadata_input_request(
     )
 
 
-def _resolve_bronze_metadata_bundle_factory(
+def _resolve_bronze_metadata_bundle_builder(
     coordinator: MetadataCoordinatorPort,
-) -> _BronzeMetadataBundleFactory | None:
+) -> _BronzeMetadataBundleBuilder | None:
     """Return bundle factory only when the coordinator exposes the override hook."""
     if (
         "create_bronze_metadata_bundle" not in vars(coordinator)
@@ -182,7 +182,7 @@ def _resolve_bronze_metadata_bundle_factory(
     ):
         return None
     return cast(
-        _BronzeMetadataBundleFactory | None,
+        _BronzeMetadataBundleBuilder | None,
         getattr(coordinator, "create_bronze_metadata_bundle", None),
     )
 

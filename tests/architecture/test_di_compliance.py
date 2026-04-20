@@ -122,21 +122,14 @@ def _internal_creation_violations(
 ) -> list[str]:
     violations: list[str] = []
     for py_file, content, tree in _iter_parsed_files(application_python_files):
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.ClassDef):
-                continue
-            for item in node.body:
-                if not isinstance(item, ast.FunctionDef) or item.name != "__init__":
-                    continue
-                init_lines = ast.get_source_segment(content, item)
-                if not init_lines:
-                    continue
-                for pattern, desc in internal_creation_patterns:
-                    if re.search(pattern, init_lines):
-                        violations.append(
-                            f"{_relative_to_application(py_file)}:{item.lineno} - "
-                            f"{node.name}.__init__: {desc}"
-                        )
+        for class_name, lineno, init_lines in _class_init_segments(content, tree):
+            for desc in _matching_creation_descriptions(
+                init_lines, internal_creation_patterns
+            ):
+                violations.append(
+                    f"{_relative_to_application(py_file)}:{lineno} - "
+                    f"{class_name}.__init__: {desc}"
+                )
     return violations
 
 
@@ -160,20 +153,65 @@ def _httpx_import_violations(application_python_files: list[Path]) -> list[str]:
 def _composition_module_imports(composition_path: Path) -> dict[str, set[str]]:
     module_imports: dict[str, set[str]] = {}
     for py_file in composition_path.rglob("*.py"):
-        relative = py_file.relative_to(composition_path)
-        module_name = str(relative).replace("/", ".").replace(".py", "")
-        imports: set[str] = set()
-        for line in py_file.read_text(encoding="utf-8").splitlines():
-            if "from bioetl.composition" in line or "from .." in line:
-                match = re.search(r"from bioetl\.composition\.(\w+)", line)
-                if match:
-                    imports.add(match.group(1))
-                match = re.search(r"from \.\.?(\w+)", line)
-                if match:
-                    imports.add(match.group(1))
+        module_name = _composition_module_name(composition_path, py_file)
+        imports = _composition_file_imports(py_file)
         if imports:
             module_imports[module_name] = imports
     return module_imports
+
+
+def _class_init_segments(
+    content: str,
+    tree: ast.AST,
+) -> list[tuple[str, int, str]]:
+    segments: list[tuple[str, int, str]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef):
+            continue
+        for item in node.body:
+            if not isinstance(item, ast.FunctionDef) or item.name != "__init__":
+                continue
+            init_lines = ast.get_source_segment(content, item)
+            if not init_lines:
+                continue
+            segments.append((node.name, item.lineno, init_lines))
+    return segments
+
+
+def _matching_creation_descriptions(
+    init_lines: str,
+    internal_creation_patterns: list[tuple[str, str]],
+) -> list[str]:
+    return [
+        desc
+        for pattern, desc in internal_creation_patterns
+        if re.search(pattern, init_lines)
+    ]
+
+
+def _composition_module_name(composition_path: Path, py_file: Path) -> str:
+    relative = py_file.relative_to(composition_path)
+    return str(relative).replace("/", ".").replace(".py", "")
+
+
+def _composition_file_imports(py_file: Path) -> set[str]:
+    imports: set[str] = set()
+    for line in py_file.read_text(encoding="utf-8").splitlines():
+        imports.update(_composition_import_targets(line))
+    return imports
+
+
+def _composition_import_targets(line: str) -> set[str]:
+    if "from bioetl.composition" not in line and "from .." not in line:
+        return set()
+    imports: set[str] = set()
+    absolute_match = re.search(r"from bioetl\.composition\.(\w+)", line)
+    if absolute_match:
+        imports.add(absolute_match.group(1))
+    relative_match = re.search(r"from \.\.?(\w+)", line)
+    if relative_match:
+        imports.add(relative_match.group(1))
+    return imports
 
 
 def _domain_infrastructure_import_violations(src_dir: Path) -> list[str]:

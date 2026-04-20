@@ -461,6 +461,39 @@ def _validate_lenient_pipeline_compatibility(
     return pipeline_compatible, [message]
 
 
+def _has_explicit_execution_identity(metadata: CheckpointMetadata) -> bool:
+    """Return ``True`` when strict execution anchors are explicitly present."""
+    return any(
+        (
+            metadata.execution_fingerprint,
+            metadata.composite_run_identity,
+            metadata.manifest_id,
+        )
+    )
+
+
+def _validate_lenient_execution_identity_compatibility(
+    current_metadata: CheckpointMetadata,
+    checkpoint_metadata: CheckpointMetadata,
+) -> tuple[bool, list[str]]:
+    """Relax degraded identity checks for lenient compatibility mode.
+
+    Lenient mode should not fail solely because fallback execution identity
+    includes version-only anchors. When both sides lack explicit execution
+    identity anchors, compatibility is determined by the lenient DQ/version
+    checks instead.
+    """
+    if not (
+        _has_explicit_execution_identity(current_metadata)
+        or _has_explicit_execution_identity(checkpoint_metadata)
+    ):
+        return True, []
+    return _validate_execution_identity_compatibility(
+        current_metadata,
+        checkpoint_metadata,
+    )
+
+
 def _log_result(logger: LoggerPort, *, compatible: bool, messages: list[str]) -> None:
     if compatible:
         logger.info(
@@ -524,7 +557,7 @@ class CheckpointCompatibilityService:
             checkpoint_metadata,
         )
         execution_identity_compatible, execution_identity_messages = (
-            _validate_execution_identity_compatibility(
+            _validate_lenient_execution_identity_compatibility(
                 current_metadata,
                 checkpoint_metadata,
             )

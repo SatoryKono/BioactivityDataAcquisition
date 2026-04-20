@@ -72,9 +72,7 @@ class CompositeRunnerServiceInputs:
     run_ledger_service: RunLedgerService | None
 
 
-CompositeRunnerFactory = Callable[
-    [CompositeRunnerServiceInputs], CompositePipelineRunner
-]
+CompositeRunnerFactory = Callable[..., CompositePipelineRunner]
 
 
 def resolve_effective_run_id(run_id: str | None) -> str:
@@ -175,7 +173,30 @@ def invoke_composite_runner_factory(
     runner_factory: CompositeRunnerFactory,
     inputs: CompositeRunnerServiceInputs,
 ) -> CompositePipelineRunner:
-    return runner_factory(inputs)
+    return runner_factory(
+        config=inputs.config,
+        runtime=inputs.runtime,
+        run_id=inputs.run_id,
+        logger=inputs.logger,
+        lock=inputs.lock,
+        seed_runner_factory=inputs.seed_runner_factory,
+        dependencies_runner_factory=inputs.dependencies_runner_factory,
+        enricher_runner_factory=inputs.enricher_runner_factory,
+        key_extractor=inputs.key_extractor,
+        coordinator=inputs.coordinator,
+        merger=inputs.merger,
+        checkpoint_manager=inputs.checkpoint_manager,
+        fsm_state_helper=inputs.fsm_state_helper,
+        dq_report_service=inputs.dq_report_service,
+        preflight_validator=inputs.preflight_validator,
+        dependency_coordinator=inputs.dependency_coordinator,
+        quarantine_port=inputs.quarantine_port,
+        metrics=inputs.metrics,
+        tracer=inputs.tracer,
+        observer=inputs.observer,
+        manifest_id=inputs.manifest_id,
+        run_ledger_service=inputs.run_ledger_service,
+    )
 
 
 def create_composite_runner_service_from_inputs(
