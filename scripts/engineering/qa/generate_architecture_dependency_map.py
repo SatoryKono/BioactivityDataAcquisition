@@ -164,36 +164,52 @@ def _resolve_relative_import_base(source_module: str, level: int) -> list[str]:
     return package_parts[:-depth]
 
 
+def _import_targets_from_import(node: ast.Import) -> list[str]:
+    return [alias.name for alias in node.names]
+
+
+def _import_targets_from_absolute_import_from(node: ast.ImportFrom) -> list[str]:
+    if not node.module:
+        return []
+    targets = [node.module]
+    if node.module == "bioetl":
+        targets.extend(
+            f"bioetl.{alias.name}" for alias in node.names if alias.name != "*"
+        )
+    return targets
+
+
+def _import_targets_from_relative_import_from(
+    node: ast.ImportFrom,
+    source_module: str,
+) -> list[str]:
+    base_parts = _resolve_relative_import_base(source_module, node.level)
+    if not base_parts:
+        return []
+    if node.module:
+        return [".".join([*base_parts, node.module])]
+    return [
+        ".".join([*base_parts, alias.name])
+        for alias in node.names
+        if alias.name != "*"
+    ]
+
+
 def _extract_import_targets(tree: ast.AST, source_module: str) -> list[str]:
     targets: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            for alias in node.names:
-                targets.append(alias.name)
+            targets.extend(_import_targets_from_import(node))
             continue
 
         if not isinstance(node, ast.ImportFrom):
             continue
 
         if node.level == 0:
-            if node.module:
-                targets.append(node.module)
-                if node.module == "bioetl":
-                    for alias in node.names:
-                        if alias.name != "*":
-                            targets.append(f"bioetl.{alias.name}")
+            targets.extend(_import_targets_from_absolute_import_from(node))
             continue
 
-        base_parts = _resolve_relative_import_base(source_module, node.level)
-        if not base_parts:
-            continue
-        if node.module:
-            targets.append(".".join([*base_parts, node.module]))
-            continue
-        for alias in node.names:
-            if alias.name == "*":
-                continue
-            targets.append(".".join([*base_parts, alias.name]))
+        targets.extend(_import_targets_from_relative_import_from(node, source_module))
 
     return targets
 
@@ -201,6 +217,37 @@ def _extract_import_targets(tree: ast.AST, source_module: str) -> list[str]:
 def _allowed_edge(source_layer: str, target_layer: str) -> bool:
     allowed_targets = LAYER_IMPORT_MATRIX.get(source_layer, frozenset())
     return target_layer in allowed_targets
+
+
+def _parsed_module_tree(source_file: Path) -> ast.AST | None:
+    try:
+        source = source_file.read_text(encoding="utf-8")
+        return ast.parse(source)
+    except SyntaxError:
+        return None
+
+
+def _record_import_target(
+    target_module: str,
+    *,
+    source_layer: str,
+    source_group: str,
+    layer_counter: Counter[tuple[str, str]],
+    group_counter: Counter[tuple[str, str]],
+) -> int:
+    if not target_module.startswith("bioetl."):
+        return 0
+
+    target_layer = _layer_of(target_module)
+    if target_layer is None:
+        return 0
+
+    layer_counter[(source_layer, target_layer)] += 1
+    if source_layer != target_layer:
+        target_group = _group_of(target_module)
+        if target_group is not None:
+            group_counter[(source_group, target_group)] += 1
+    return 1
 
 
 def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
@@ -218,26 +265,18 @@ def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
             continue
 
         scanned_modules += 1
-        try:
-            source = source_file.read_text(encoding="utf-8")
-            tree = ast.parse(source)
-        except SyntaxError:
+        tree = _parsed_module_tree(source_file)
+        if tree is None:
             continue
 
         for target_module in _extract_import_targets(tree, source_module):
-            if not target_module.startswith("bioetl."):
-                continue
-            target_layer = _layer_of(target_module)
-            if target_layer is None:
-                continue
-
-            total_internal_imports += 1
-            layer_counter[(source_layer, target_layer)] += 1
-
-            if source_layer != target_layer:
-                target_group = _group_of(target_module)
-                if target_group is not None:
-                    group_counter[(source_group, target_group)] += 1
+            total_internal_imports += _record_import_target(
+                target_module,
+                source_layer=source_layer,
+                source_group=source_group,
+                layer_counter=layer_counter,
+                group_counter=group_counter,
+            )
 
     layer_edges = [
         LayerEdge(
