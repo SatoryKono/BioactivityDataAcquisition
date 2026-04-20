@@ -636,29 +636,51 @@ def analyse_file(path: Path) -> OrphanResult:
     return OrphanResult(path, "skipped", skipped_reason=f"unsupported={dtype}")
 
 
-def fix_file(path: Path) -> tuple[bool, set[str]]:
-    """Fix orphan nodes in a single file. Returns (was_modified, removed_ids)."""
+def _load_diagram_content(
+    path: Path,
+) -> tuple[Path, list[str], list[str]] | None:
+    """Return validated path plus original/stripped line buffers for a diagram file."""
     try:
-        content = path.read_text(encoding="utf-8")
+        safe_path = _ensure_repo_path(path)
+        content = safe_path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
-        return False, set()
+        return None
 
-    if path.stem.startswith("00-legend"):
-        return False, set()
+    if safe_path.stem.startswith("00-legend"):
+        return None
 
     lines = content.splitlines(keepends=True)
-    stripped = [ln.rstrip("\n") for ln in lines]
+    stripped = [line.rstrip("\n") for line in lines]
+    return safe_path, lines, stripped
 
+
+def _fixable_diagram_type(stripped: list[str]) -> str | None:
     dtype = detect_diagram_type(stripped)
     if dtype not in {"flowchart", "sequence"}:
+        return None
+    return dtype
+
+
+def fix_file(path: Path) -> tuple[bool, set[str]]:
+    """Fix orphan nodes in a single file. Returns (was_modified, removed_ids)."""
+    loaded = _load_diagram_content(path)
+    if loaded is None:
+        return False, set()
+    safe_path, lines, stripped = loaded
+    dtype = _fixable_diagram_type(stripped)
+    if dtype is None:
         return False, set()
 
     keep = parse_keep_orphans(stripped)
-    orphans, new_lines = _fixed_diagram_lines(dtype=dtype, lines=lines, stripped=stripped, keep=keep)
+    orphans, new_lines = _fixed_diagram_lines(
+        dtype=dtype,
+        lines=lines,
+        stripped=stripped,
+        keep=keep,
+    )
     if not orphans:
         return False, set()
 
-    safe_path = _ensure_repo_path(path)
     _write_repo_text(_repo_relative_path(safe_path), "".join(new_lines))
     return True, orphans
 
@@ -695,18 +717,28 @@ def _iter_discoverable_files(target: Path) -> list[Path]:
         return [target] if _is_supported_input_file(target) else []
     if not target.is_dir():
         return []
-    return sorted(path for path in target.rglob("*") if _is_discoverable_diagram_file(path))
+    return sorted(
+        path for path in target.rglob("*") if _is_discoverable_diagram_file(path)
+    )
+
+
+def _append_unseen_paths(
+    result: list[Path],
+    seen: set[Path],
+    paths: list[Path],
+) -> None:
+    for path in paths:
+        if path in seen:
+            continue
+        seen.add(path)
+        result.append(path)
 
 
 def find_files(targets: list[Path]) -> list[Path]:
     result: list[Path] = []
     seen: set[Path] = set()
     for target in targets:
-        for path in _iter_discoverable_files(target):
-            if path in seen:
-                continue
-            seen.add(path)
-            result.append(path)
+        _append_unseen_paths(result, seen, _iter_discoverable_files(target))
     return result
 
 
@@ -819,6 +851,26 @@ def grandfather_file(path: Path) -> tuple[bool, set[str]]:
     return True, orphans
 
 
+def _parse_targets(raw_paths: list[str]) -> list[Path]:
+    return [Path(path) for path in raw_paths] if raw_paths else DEFAULT_DIRS
+
+
+def _print_missing_targets(missing: list[Path]) -> None:
+    for target in missing:
+        print(f"Error: {target} does not exist", file=sys.stderr)
+
+
+def _run_check(files: list[Path], *, json_output: bool) -> int:
+    results = [analyse_file(path) for path in files]
+    if json_output:
+        print(format_json_check(results))
+    else:
+        print(format_text_check(results))
+
+    total_orphans = sum(len(result.orphan_ids) for result in results)
+    return 1 if total_orphans > 0 else 0
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 
@@ -861,11 +913,10 @@ def main() -> int:
     if not args.fix and not args.grandfather:
         args.check = True
 
-    targets = [Path(p) for p in args.paths] if args.paths else DEFAULT_DIRS
+    targets = _parse_targets(args.paths)
     missing = [t for t in targets if not t.exists()]
     if missing:
-        for t in missing:
-            print(f"Error: {t} does not exist", file=sys.stderr)
+        _print_missing_targets(missing)
         return 2
 
     files = find_files(targets)
@@ -881,16 +932,7 @@ def main() -> int:
         _run_fix(files)
         return 0
 
-    # --check mode
-    results = [analyse_file(f) for f in files]
-
-    if args.json_output:
-        print(format_json_check(results))
-    else:
-        print(format_text_check(results))
-
-    total_orphans = sum(len(r.orphan_ids) for r in results)
-    return 1 if total_orphans > 0 else 0
+    return _run_check(files, json_output=args.json_output)
 
 
 def _run_grandfather(files: list[Path]) -> None:

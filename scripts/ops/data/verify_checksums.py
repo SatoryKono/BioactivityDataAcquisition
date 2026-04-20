@@ -313,6 +313,80 @@ def save_manifest(manifest: ChecksumManifest, manifest_path: Path) -> None:
         json.dump(manifest.to_dict(), f, indent=2)
 
 
+def _current_critical_files(root: Path) -> dict[str, tuple[Path, str]]:
+    return {
+        str(path.relative_to(root)): (path, category)
+        for path, category in find_critical_files(root)
+    }
+
+
+def _verified_manifest_result(
+    *,
+    rel_path: str,
+    file_path: Path,
+    category: str,
+    expected: FileChecksum,
+) -> VerificationResult:
+    actual_hash = compute_sha256(file_path)
+    actual_size = file_path.stat().st_size
+    status = "ok" if actual_hash == expected.sha256 else "modified"
+    return VerificationResult(
+        path=rel_path,
+        category=category,
+        status=status,
+        expected_hash=expected.sha256,
+        actual_hash=actual_hash,
+        size_change=actual_size - expected.size if status == "modified" else None,
+    )
+
+
+def _verify_manifest_entry(
+    *,
+    rel_path: str,
+    current_file: tuple[Path, str] | None,
+    expected: FileChecksum,
+) -> VerificationResult:
+    if current_file is None:
+        return VerificationResult(
+            path=rel_path,
+            category=expected.category,
+            status="missing",
+            expected_hash=expected.sha256,
+        )
+
+    file_path, category = current_file
+    try:
+        return _verified_manifest_result(
+            rel_path=rel_path,
+            file_path=file_path,
+            category=category,
+            expected=expected,
+        )
+    except Exception as e:
+        logger.warning("Could not verify %s: %s", rel_path, e)
+        return VerificationResult(
+            path=rel_path,
+            category=expected.category,
+            status="error",
+        )
+
+
+def _new_file_result(
+    rel_path: str,
+    file_path: Path,
+    category: str,
+) -> VerificationResult | None:
+    try:
+        return VerificationResult(
+            path=rel_path,
+            category=category,
+            status="new",
+            actual_hash=compute_sha256(file_path),
+        )
+    except Exception:
+        return None
+
+
 def verify_checksums(
     root: Path,
     manifest: ChecksumManifest,
@@ -331,74 +405,21 @@ def verify_checksums(
         manifest_date=manifest.generated_at,
     )
 
-    # Get current files
-    current_files = {
-        str(path.relative_to(root)): (path, category)
-        for path, category in find_critical_files(root)
-    }
+    current_files = _current_critical_files(root)
 
-    # Check files in manifest
     for rel_path, expected in manifest.files.items():
-        if rel_path in current_files:
-            file_path, category = current_files[rel_path]
-            try:
-                actual_hash = compute_sha256(file_path)
-                actual_size = file_path.stat().st_size
-
-                if actual_hash == expected.sha256:
-                    status = "ok"
-                else:
-                    status = "modified"
-
-                report.results.append(
-                    VerificationResult(
-                        path=rel_path,
-                        category=category,
-                        status=status,
-                        expected_hash=expected.sha256,
-                        actual_hash=actual_hash,
-                        size_change=actual_size - expected.size
-                        if status == "modified"
-                        else None,
-                    )
-                )
-            except Exception as e:
-                logger.warning("Could not verify %s: %s", rel_path, e)
-                report.results.append(
-                    VerificationResult(
-                        path=rel_path,
-                        category=expected.category,
-                        status="error",
-                    )
-                )
-
-            # Remove from current to track new files
-            del current_files[rel_path]
-        else:
-            # File in manifest but not on disk
-            report.results.append(
-                VerificationResult(
-                    path=rel_path,
-                    category=expected.category,
-                    status="missing",
-                    expected_hash=expected.sha256,
-                )
+        current_file = current_files.pop(rel_path, None)
+        report.results.append(
+            _verify_manifest_entry(
+                rel_path=rel_path,
+                current_file=current_file,
+                expected=expected,
             )
+        )
 
-    # New files not in manifest
     for rel_path, (file_path, category) in current_files.items():
-        try:
-            actual_hash = compute_sha256(file_path)
-            report.results.append(
-                VerificationResult(
-                    path=rel_path,
-                    category=category,
-                    status="new",
-                    actual_hash=actual_hash,
-                )
-            )
-        except Exception:
-            pass
+        if result := _new_file_result(rel_path, file_path, category):
+            report.results.append(result)
 
     return report
 

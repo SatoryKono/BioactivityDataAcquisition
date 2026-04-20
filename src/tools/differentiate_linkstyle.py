@@ -74,33 +74,9 @@ def _ensure_path_within_root(path: Path, root: Path) -> Path:
     return resolved_path
 
 
-def _mermaid_relative_path(path: Path) -> Path:
-    safe_path = _ensure_path_within_root(path, MERMAID_DIR)
-    return safe_path.relative_to(MERMAID_DIR.resolve())
-
-
-def _normalize_mermaid_relative_path(path: Path) -> Path:
-    """Normalize and validate a Mermaid-root-relative path."""
-    if path.is_absolute():
-        raise ValueError(f"expected Mermaid-relative path, got absolute path: {path}")
-
-    normalized_parts: list[str] = []
-    for part in path.parts:
-        if part in {"", "."}:
-            continue
-        if part == "..":
-            raise ValueError(f"refusing parent traversal path: {path}")
-        normalized_parts.append(part)
-
-    if not normalized_parts:
-        raise ValueError("refusing empty Mermaid-relative path")
-    return Path(*normalized_parts)
-
-
 def _write_validated_mermaid_text(path: Path, content: str) -> None:
     """Write Mermaid content to a previously validated Mermaid file path."""
-    safe_path = _ensure_path_within_root(path, MERMAID_DIR)
-    safe_path.write_text(content, encoding="utf-8")
+    path.write_text(content, encoding="utf-8")
 
 
 def build_node_layer_map(lines: list[str]) -> dict[str, str]:

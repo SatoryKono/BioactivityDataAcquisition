@@ -247,12 +247,12 @@ def find_diagram_files(base: Path) -> list[Path]:
 
 def _missing_mmd_metadata_tags(lines: list[str]) -> list[str]:
     required_tags = {"@version", "@date", "@type", "@level"}
-    found_tags: set[str] = set()
-    for line in lines:
-        stripped = line.strip()
-        for tag in required_tags:
-            if stripped.startswith(f"%% {tag}"):
-                found_tags.add(tag)
+    stripped_lines = [line.strip() for line in lines]
+    found_tags = {
+        tag
+        for tag in required_tags
+        if any(line.startswith(f"%% {tag}") for line in stripped_lines)
+    }
     return sorted(required_tags - found_tags)
 
 

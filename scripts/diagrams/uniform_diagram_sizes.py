@@ -101,34 +101,9 @@ def _ensure_repo_path(path: Path) -> Path:
     return resolved_path
 
 
-def _repo_relative_path(path: Path) -> Path:
-    safe_path = _ensure_repo_path(path)
-    return safe_path.relative_to(SCRIPT_DIR.parents[1].resolve())
-
-
-def _normalize_repo_relative_path(path: Path) -> Path:
-    """Normalize and validate a repository-relative path."""
-    if path.is_absolute():
-        raise ValueError(f"expected repository-relative path, got absolute path: {path}")
-
-    normalized_parts: list[str] = []
-    for part in path.parts:
-        if part in {"", "."}:
-            continue
-        if part == "..":
-            raise ValueError(f"refusing parent traversal path: {path}")
-        normalized_parts.append(part)
-
-    if not normalized_parts:
-        raise ValueError("refusing empty repository-relative path")
-    return Path(*normalized_parts)
-
-
-def _write_repo_text(relative_path: Path, content: str) -> None:
-    """Write normalized diagram text via a repository-relative path."""
-    safe_relative_path = _normalize_repo_relative_path(relative_path)
-    target_path = _ensure_repo_path(SCRIPT_DIR.parents[1] / safe_relative_path)
-    target_path.write_text(content, encoding="utf-8")
+def _write_repo_text(path: Path, content: str) -> None:
+    """Write normalized diagram text to a previously validated repository path."""
+    path.write_text(content, encoding="utf-8")
 
 
 # Flowchart node patterns:
@@ -1188,7 +1163,7 @@ def _handle_changed_diagram(
         print()
         return
     safe_path = _ensure_repo_path(path)
-    _write_repo_text(_repo_relative_path(safe_path), normalized)
+    _write_repo_text(safe_path, normalized)
     print(f"  {GREEN}FIXED{NC}  {path}")
 
 
