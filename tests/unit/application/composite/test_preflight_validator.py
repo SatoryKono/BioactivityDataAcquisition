@@ -529,7 +529,7 @@ class TestValidateFieldPriority:
             "seed": {"title": FieldInfo("title", "str", True, "seed")},
         }
 
-        issues, resolved = validator._validate_field_priority(
+        issues, _resolved = validator._validate_field_priority(
             field_name="title",
             priorities=("unknown", "chembl"),
             valid_sources=valid_sources,
