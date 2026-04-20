@@ -422,8 +422,9 @@ def _split_frontmatter(text: str) -> tuple[str | None, str]:
 
 
 def _write_text(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    safe_path = PROJECT_ROOT / path.relative_to(PROJECT_ROOT)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(content, encoding="utf-8")
 
 
 def _check_file_sync(path: Path, expected: str) -> bool:

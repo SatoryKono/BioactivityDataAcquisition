@@ -88,6 +88,25 @@ def _append_raw_text(parts: list[str], raw: str | None) -> None:
         parts.append(raw)
 
 
+def _collect_text_parts(node: ET.Element, parts: list[str]) -> None:
+    """Collect text fragments in document order, preserving <br/> line breaks."""
+    _append_raw_text(parts, node.text)
+
+    for child in node:
+        child_name = _local_name(child.tag).lower()
+        if child_name == "br":
+            parts.append("\n")
+            _append_raw_text(parts, child.tail)
+            continue
+
+        _collect_text_parts(child, parts)
+
+    if _local_name(node.tag).lower() in {"p", "div", "li"}:
+        parts.append("\n")
+
+    _append_raw_text(parts, node.tail)
+
+
 def _extract_text_lines(node: ET.Element) -> list[str]:
     """Extract semantic text lines from foreignObject HTML content.
 
@@ -96,26 +115,7 @@ def _extract_text_lines(node: ET.Element) -> list[str]:
     lines for SVG fallback text.
     """
     parts: list[str] = []
-
-    # Extract text using iterative approach to reduce complexity
-    stack = [(node, False)]  # (element, processed)
-    while stack:
-        elem, processed = stack.pop()
-        if not processed:
-            _append_raw_text(parts, elem.text)
-            # Push back with processed=True and add children in reverse order
-            stack.append((elem, True))
-            for child in reversed(list(elem)):
-                child_name = _local_name(child.tag).lower()
-                if child_name == "br":
-                    parts.append("\n")
-                else:
-                    stack.append((child, False))
-        else:
-            _append_raw_text(parts, elem.tail)
-            child_name = _local_name(elem.tag).lower()
-            if child_name in {"p", "div", "li"}:
-                parts.append("\n")
+    _collect_text_parts(node, parts)
 
     raw = "".join(parts)
     # Treat escaped '\n' from source labels as explicit line breaks (like <br>).
