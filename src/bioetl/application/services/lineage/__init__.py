@@ -11,9 +11,7 @@ from bioetl.application.services.lineage.lineage_inspection_service import (
     LineageTraceResult,
 )
 from bioetl.application.services.lineage.metadata_coordinator import MetadataCoordinator
-from bioetl.application.services.lineage.metadata_lineage_bundle import (
-    MetadataLineageBundle,
-)
+from bioetl.domain.lineage import MetadataLineageBundle
 
 __all__ = [
     "LineageFragmentInspectionResult",

@@ -19,10 +19,7 @@ from bioetl.infrastructure.storage.bronze.reporting_helpers import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.lineage.metadata_lineage_bundle import (
-        MetadataLineageBundle,
-    )
-    from bioetl.domain.lineage import LineageGraphFragment
+    from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundle
     from bioetl.domain.models.metadata import (
         BronzeMetadata,
         BronzeMetadataInput,

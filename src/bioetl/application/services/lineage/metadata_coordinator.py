@@ -35,15 +35,12 @@ from bioetl.application.services.lineage.metadata_assemblers import (
     GoldMetadataService,
     SilverMetadataService,
 )
-from bioetl.application.services.lineage.metadata_lineage_bundle import (
-    MetadataLineageBundle,
-)
 from bioetl.application.services.lineage.metadata_lineage_fragments import (
     build_bronze_lineage_fragment,
     build_gold_lineage_fragment,
     build_silver_lineage_fragment,
 )
-from bioetl.domain.lineage import LineageGraphFragment
+from bioetl.domain.lineage import LineageGraphFragment, MetadataLineageBundle
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     BronzeMetadata,
