@@ -129,6 +129,62 @@ def _iter_layer_modules(
             yield path, tree
 
 
+def _parent_map(tree: ast.Module) -> dict[ast.AST, ast.AST]:
+    return {
+        child: parent
+        for parent in ast.walk(tree)
+        for child in ast.iter_child_nodes(parent)
+    }
+
+
+def _matches_forbidden_prefix(
+    module_name: str,
+    forbidden_prefixes: tuple[str, ...],
+) -> bool:
+    return any(
+        module_name == prefix or module_name.startswith(prefix + ".")
+        for prefix in forbidden_prefixes
+    )
+
+
+def _import_violations(
+    *,
+    py_file: Path,
+    node: ast.Import,
+    forbidden_prefixes: tuple[str, ...],
+    sanctioned_exceptions: set[str],
+) -> list[str]:
+    rel_path = py_file.as_posix()
+    violations: list[str] = []
+    for alias in node.names:
+        module_name = alias.name
+        if module_name in sanctioned_exceptions:
+            continue
+        if _matches_forbidden_prefix(module_name, forbidden_prefixes):
+            violations.append(f"{rel_path}:{node.lineno} imports {module_name}")
+    return violations
+
+
+def _import_from_violation(
+    *,
+    py_file: Path,
+    node: ast.ImportFrom,
+    importer_module: str,
+    forbidden_prefixes: tuple[str, ...],
+    sanctioned_exceptions: set[str],
+) -> str | None:
+    resolved_module = _resolve_relative_module(
+        importer_module=importer_module,
+        module=node.module,
+        level=node.level,
+    )
+    if not resolved_module or resolved_module in sanctioned_exceptions:
+        return None
+    if _matches_forbidden_prefix(resolved_module, forbidden_prefixes):
+        return f"{py_file.as_posix()}:{node.lineno} imports from {resolved_module}"
+    return None
+
+
 def _collect_edge_violations(
     *,
     src_dir: Path,
@@ -144,48 +200,34 @@ def _collect_edge_violations(
         source_ast_cache=source_ast_cache,
         layer_name=importer_layer,
     ):
-        parents = {
-            child: parent
-            for parent in ast.walk(tree)
-            for child in ast.iter_child_nodes(parent)
-        }
+        parents = _parent_map(tree)
         importer_module = _module_name_for_path(src_dir, py_file)
+        rel_path = py_file.relative_to(src_dir)
 
         for node in ast.walk(tree):
             if _is_inside_type_checking(node, parents):
                 continue
 
             if isinstance(node, ast.Import):
-                for alias in node.names:
-                    module_name = alias.name
-                    if module_name in sanctioned_exceptions:
-                        continue
-                    if any(
-                        module_name == prefix or module_name.startswith(prefix + ".")
-                        for prefix in forbidden_prefixes
-                    ):
-                        rel_path = py_file.relative_to(src_dir).as_posix()
-                        violations.append(
-                            f"{rel_path}:{node.lineno} imports {module_name}"
-                        )
+                violations.extend(
+                    _import_violations(
+                        py_file=rel_path,
+                        node=node,
+                        forbidden_prefixes=forbidden_prefixes,
+                        sanctioned_exceptions=sanctioned_exceptions,
+                    )
+                )
 
             if isinstance(node, ast.ImportFrom):
-                resolved_module = _resolve_relative_module(
+                violation = _import_from_violation(
+                    py_file=rel_path,
+                    node=node,
                     importer_module=importer_module,
-                    module=node.module,
-                    level=node.level,
+                    forbidden_prefixes=forbidden_prefixes,
+                    sanctioned_exceptions=sanctioned_exceptions,
                 )
-                if not resolved_module or resolved_module in sanctioned_exceptions:
-                    continue
-                if any(
-                    resolved_module == prefix
-                    or resolved_module.startswith(prefix + ".")
-                    for prefix in forbidden_prefixes
-                ):
-                    rel_path = py_file.relative_to(src_dir).as_posix()
-                    violations.append(
-                        f"{rel_path}:{node.lineno} imports from {resolved_module}"
-                    )
+                if violation is not None:
+                    violations.append(violation)
 
     return violations
 

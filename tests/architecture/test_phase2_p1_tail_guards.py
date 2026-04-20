@@ -53,82 +53,134 @@ def _has_bioetl_error_name(node: ast.expr) -> bool:
     return False
 
 
+def _broad_handler_violation(
+    path: str,
+    handler: ast.ExceptHandler,
+) -> str | None:
+    if handler.type is None:
+        return f"{path}:{handler.lineno} uses bare except"
+    if _has_exception_name(handler.type):
+        return f"{path}:{handler.lineno} catches Exception"
+    return None
+
+
 def test_critical_modules_have_no_broad_exception_handlers() -> None:
     """Critical modules should not use except Exception or bare except."""
     violations: list[str] = []
     for path in CRITICAL_MODULES:
         tree = _load_tree(path)
         for node in ast.walk(tree):
-            if not isinstance(node, ast.ExceptHandler):
-                continue
-            if node.type is None:
-                violations.append(f"{path}:{node.lineno} uses bare except")
-                continue
-            if _has_exception_name(node.type):
-                violations.append(f"{path}:{node.lineno} catches Exception")
+            if isinstance(node, ast.ExceptHandler):
+                violation = _broad_handler_violation(path, node)
+                if violation is not None:
+                    violations.append(violation)
 
     assert not violations, "Broad exception handlers found:\n" + "\n".join(violations)
 
 
-def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:
-    """Allow `except Exception` only in top-level CLI entrypoints with guard rails."""
+def _require_preceding_bioetl_handler(node: ast.Try, index: int) -> bool:
+    return any(
+        handler.type is not None and _has_bioetl_error_name(handler.type)
+        for handler in node.handlers[:index]
+    )
+
+
+def _reason_code_policy_violations(
+    *,
+    rel_path: str,
+    handler: ast.ExceptHandler,
+    allowed_reason_codes: frozenset[str],
+    source: str,
+) -> tuple[list[str], set[str]]:
+    if not allowed_reason_codes:
+        return [], set()
+
     violations: list[str] = []
-    seen_reason_codes: dict[str, set[str]] = {
-        file_path: set() for file_path in ALLOWED_BROAD_EXCEPTION_POLICIES
+    handler_source = ast.get_source_segment(source, handler) or ""
+    if "reason_code=" not in handler_source:
+        return [
+            f"{rel_path}:{handler.lineno} missing reason_code in fallback handler"
+        ], set()
+
+    matched_reason_codes = {
+        code for code in allowed_reason_codes if code in handler_source
     }
+    if matched_reason_codes:
+        return violations, matched_reason_codes
 
-    for file_path in Path("src/bioetl").rglob("*.py"):
-        rel_path = str(file_path).replace("\\", "/")
-        source = file_path.read_text(encoding="utf-8")
-        tree = ast.parse(source, filename=rel_path)
+    violations.append(
+        f"{rel_path}:{handler.lineno} reason_code not in allowlist "
+        f"{sorted(allowed_reason_codes)}"
+    )
+    return violations, set()
 
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.Try):
-                continue
 
-            for index, handler in enumerate(node.handlers):
-                if handler.type is None:
-                    violations.append(f"{rel_path}:{handler.lineno} uses bare except")
-                    continue
-                if not _has_exception_name(handler.type):
-                    continue
+def _evaluate_broad_exception_handler(
+    *,
+    rel_path: str,
+    source: str,
+    node: ast.Try,
+    index: int,
+    handler: ast.ExceptHandler,
+) -> tuple[list[str], set[str]]:
+    if handler.type is None:
+        return [f"{rel_path}:{handler.lineno} uses bare except"], set()
+    if not _has_exception_name(handler.type):
+        return [], set()
 
-                allowed_reason_codes = ALLOWED_BROAD_EXCEPTION_POLICIES.get(rel_path)
-                if allowed_reason_codes is None:
-                    violations.append(
-                        f"{rel_path}:{handler.lineno} catches Exception outside CLI allowlist"
-                    )
-                    continue
+    allowed_reason_codes = ALLOWED_BROAD_EXCEPTION_POLICIES.get(rel_path)
+    if allowed_reason_codes is None:
+        return [
+            f"{rel_path}:{handler.lineno} catches Exception outside CLI allowlist"
+        ], set()
 
-                if allowed_reason_codes:
-                    has_bioetl_before = any(
-                        h.type is not None and _has_bioetl_error_name(h.type)
-                        for h in node.handlers[:index]
-                    )
-                    if not has_bioetl_before:
-                        violations.append(
-                            f"{rel_path}:{handler.lineno} missing preceding except BioETLError"
-                        )
+    violations: list[str] = []
+    if allowed_reason_codes and not _require_preceding_bioetl_handler(node, index):
+        violations.append(
+            f"{rel_path}:{handler.lineno} missing preceding except BioETLError"
+        )
 
-                    handler_source = ast.get_source_segment(source, handler) or ""
-                    if "reason_code=" not in handler_source:
-                        violations.append(
-                            f"{rel_path}:{handler.lineno} missing reason_code in fallback handler"
-                        )
-                        continue
+    reason_violations, matched_reason_codes = _reason_code_policy_violations(
+        rel_path=rel_path,
+        handler=handler,
+        allowed_reason_codes=allowed_reason_codes,
+        source=source,
+    )
+    violations.extend(reason_violations)
+    return violations, matched_reason_codes
 
-                    matched_reason_codes = {
-                        code for code in allowed_reason_codes if code in handler_source
-                    }
-                    if not matched_reason_codes:
-                        violations.append(
-                            f"{rel_path}:{handler.lineno} reason_code not in allowlist "
-                            f"{sorted(allowed_reason_codes)}"
-                        )
-                        continue
 
-                    seen_reason_codes[rel_path].update(matched_reason_codes)
+def _file_broad_exception_violations(
+    file_path: Path,
+    seen_reason_codes: dict[str, set[str]],
+) -> list[str]:
+    rel_path = str(file_path).replace("\\", "/")
+    source = file_path.read_text(encoding="utf-8")
+    tree = ast.parse(source, filename=rel_path)
+    violations: list[str] = []
 
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Try):
+            continue
+        for index, handler in enumerate(node.handlers):
+            handler_violations, matched_reason_codes = _evaluate_broad_exception_handler(
+                rel_path=rel_path,
+                source=source,
+                node=node,
+                index=index,
+                handler=handler,
+            )
+            violations.extend(handler_violations)
+            if matched_reason_codes:
+                seen_reason_codes[rel_path].update(matched_reason_codes)
+
+    return violations
+
+
+def _reason_code_coverage_violations(
+    seen_reason_codes: dict[str, set[str]],
+) -> list[str]:
+    violations: list[str] = []
     for rel_path, allowed_reason_codes in ALLOWED_BROAD_EXCEPTION_POLICIES.items():
         missing = allowed_reason_codes - seen_reason_codes[rel_path]
         if missing:
@@ -141,6 +193,20 @@ def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:
                 f"{rel_path} has unexpected broad-exception reason_code values "
                 f"{sorted(unexpected)}"
             )
+    return violations
+
+
+def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:
+    """Allow `except Exception` only in top-level CLI entrypoints with guard rails."""
+    violations: list[str] = []
+    seen_reason_codes: dict[str, set[str]] = {
+        file_path: set() for file_path in ALLOWED_BROAD_EXCEPTION_POLICIES
+    }
+
+    for file_path in Path("src/bioetl").rglob("*.py"):
+        violations.extend(_file_broad_exception_violations(file_path, seen_reason_codes))
+
+    violations.extend(_reason_code_coverage_violations(seen_reason_codes))
 
     assert not violations, "Broad exception policy violations:\n" + "\n".join(
         violations

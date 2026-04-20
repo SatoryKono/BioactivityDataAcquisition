@@ -434,7 +434,7 @@
             },
             "targets": [
                 {
-                    "expr": "(sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}) or vector(0))",
+                    "expr": "(sum(bioetl_runtime_alert_condition_provider_failure_rate_high_15m{pipeline=~\"$pipeline\"}) or vector(0)) + (sum(bioetl_runtime_alert_condition_provider_retries_exhausted_1h{pipeline=~\"$pipeline\"}) or vector(0))",
                     "refId": "A"
                 }
             ],
@@ -738,7 +738,7 @@
             },
             "targets": [
                 {
-                    "expr": "sum(increase(bioetl_control_plane_reads_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}[$__interval])) by (store, status) or label_replace(label_replace(vector(0), \"store\", \"none\", \"\", \"\"), \"status\", \"none\", \"\", \"\")",
+                    "expr": "sum(increase(bioetl_control_plane_reads_total{pipeline=~\"$pipeline\"}[$__interval])) by (store, status) or label_replace(label_replace(vector(0), \"store\", \"none\", \"\", \"\"), \"status\", \"none\", \"\", \"\")",
                     "legendFormat": "{{store}} / {{status}}",
                     "refId": "A"
                 }
@@ -799,7 +799,7 @@
             },
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{pipeline=~\"$pipeline\", run_id=~\"$run_id\", status!=\"failed\"}[$__range]))) or vector(0)",
+                    "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{pipeline=~\"$pipeline\", status!=\"failed\"}[$__range]))) or vector(0)",
                     "refId": "A"
                 }
             ],
@@ -1080,15 +1080,15 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
                 "hide": 0,
                 "includeAll": true,
-                "label": "Run ID",
+                "label": "Run Type",
                 "multi": true,
-                "name": "run_id",
+                "name": "run_type",
                 "options": [],
                 "query": {
-                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,

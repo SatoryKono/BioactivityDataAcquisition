@@ -30,6 +30,45 @@ CHECKED_DIRS = [
 PRINT_PATTERN = re.compile(r"(?<![a-zA-Z_])print\s*\(")
 
 
+def _docstring_nodes(tree: ast.AST) -> list[ast.AST]:
+    return [
+        node
+        for node in ast.walk(tree)
+        if isinstance(
+            node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        )
+    ]
+
+
+def _docstring_entry(node: ast.AST) -> tuple[int, str] | None:
+    body = getattr(node, "body", None)
+    if not body:
+        return None
+    first_stmt = body[0]
+    if not (
+        isinstance(first_stmt, ast.Expr)
+        and isinstance(first_stmt.value, ast.Constant)
+        and isinstance(first_stmt.value.value, str)
+    ):
+        return None
+    return first_stmt.lineno, first_stmt.value.value
+
+
+def _docstring_print_violations(
+    *,
+    rel_path: Path,
+    lineno: int,
+    docstring: str,
+) -> list[str]:
+    if ">>>" not in docstring or not PRINT_PATTERN.search(docstring):
+        return []
+    return [
+        f"{rel_path}:{lineno + offset}: print() in docstring example"
+        for offset, line in enumerate(docstring.splitlines())
+        if PRINT_PATTERN.search(line)
+    ]
+
+
 def _extract_docstrings(source: str) -> list[tuple[int, str]]:
     """Extract all docstrings from Python source with line numbers.
 
@@ -44,27 +83,11 @@ def _extract_docstrings(source: str) -> list[tuple[int, str]]:
     except SyntaxError:
         return []
 
-    docstrings: list[tuple[int, str]] = []
-
-    for node in ast.walk(tree):
-        if not isinstance(
-            node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-        ):
-            continue
-        if not node.body:
-            continue
-        first_stmt = node.body[0]
-        if not (
-            isinstance(first_stmt, ast.Expr)
-            and isinstance(first_stmt.value, ast.Constant)
-            and isinstance(first_stmt.value.value, str)
-        ):
-            continue
-        docstring = first_stmt.value.value
-        lineno = first_stmt.lineno
-        docstrings.append((lineno, docstring))
-
-    return docstrings
+    return [
+        entry
+        for node in _docstring_nodes(tree)
+        if (entry := _docstring_entry(node)) is not None
+    ]
 
 
 def _check_print_in_docstrings(directory: Path) -> list[str]:
@@ -76,7 +99,7 @@ def _check_print_in_docstrings(directory: Path) -> list[str]:
     Returns:
         List of violation messages with file path and line number.
     """
-    violations = []
+    violations: list[str] = []
 
     if not directory.exists():
         return violations
@@ -90,14 +113,13 @@ def _check_print_in_docstrings(directory: Path) -> list[str]:
             continue
 
         for lineno, docstring in _extract_docstrings(source):
-            # Check if docstring contains Example: section with print()
-            if ">>>" in docstring and PRINT_PATTERN.search(docstring):
-                # Find which line in docstring has print
-                for i, line in enumerate(docstring.splitlines()):
-                    if PRINT_PATTERN.search(line):
-                        violations.append(
-                            f"{rel_path}:{lineno + i}: print() in docstring example"
-                        )
+            violations.extend(
+                _docstring_print_violations(
+                    rel_path=rel_path,
+                    lineno=lineno,
+                    docstring=docstring,
+                )
+            )
 
     return violations
 

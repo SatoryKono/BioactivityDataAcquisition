@@ -16,6 +16,10 @@ from bioetl.domain.ports import (
     QuarantinePort,
     StoragePort,
 )
+from bioetl.domain.ports.storage.silver_port import (
+    SilverWriteRequest,
+    coerce_silver_write_request,
+)
 from bioetl.domain.types import BatchID, RunID
 
 
@@ -56,24 +60,14 @@ class TestStoragePortProtocol:
                     checksum="sha256:test",
                 )
 
-            def write_silver(  # NOSONAR - example intentionally mirrors StoragePort
+            async def write_silver(
                 self,
-                table_name: str,
-                records: list[dict[str, Any]],
-                primary_keys: list[str],
-                schema: Any,
-                mode: Literal["merge", "append", "delete"] = "merge",
-                partition_cols: list[str] | None = None,
-                on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-                column_order: list[str] | None = None,
-                bronze_refs: list[BronzeWriteResult] | None = None,
-                key_nullability_rules: list[Any] | None = None,
-                *,
-                run_id: RunID | None = None,
-                run_type: Any = None,
-                source_batch_id: BatchID | None = None,
-                ingestion_ts: datetime | None = None,
+                request: SilverWriteRequest | str | None = None,
+                *args: object,
+                **kwargs: object,
             ) -> SilverWriteResult | None:
+                del coerce_silver_write_request(request, args=args, kwargs=kwargs)
+                await _yield_once()
                 return None
 
             async def write_gold(
