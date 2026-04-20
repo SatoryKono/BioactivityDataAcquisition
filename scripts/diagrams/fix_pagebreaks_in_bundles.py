@@ -34,7 +34,8 @@ def _safe_bundle_path(path: Path) -> Path:
 
 def _write_bundle_text(path: Path, content: str) -> None:
     """Write bundle content to a previously validated DIAGRAM_ROOT path."""
-    _safe_bundle_path(path).write_text(content, encoding="utf-8")
+    safe_path = _safe_bundle_path(path)
+    safe_path.write_text(content, encoding="utf-8")
 
 
 def _heading_text(line: str) -> str | None:

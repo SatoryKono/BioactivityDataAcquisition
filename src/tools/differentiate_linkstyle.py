@@ -108,7 +108,8 @@ def _resolve_mermaid_path(path: Path) -> Path:
 
 def _write_validated_mermaid_text(path: Path, content: str) -> None:
     """Write Mermaid content to a previously validated Mermaid file path."""
-    path.write_text(content, encoding="utf-8")
+    safe_path = _ensure_path_within_root(path, MERMAID_DIR)
+    safe_path.write_text(content, encoding="utf-8")
 
 
 def build_node_layer_map(lines: list[str]) -> dict[str, str]:

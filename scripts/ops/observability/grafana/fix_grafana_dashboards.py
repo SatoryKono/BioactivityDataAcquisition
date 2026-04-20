@@ -124,7 +124,8 @@ def _rewrite_panel_targets(panel: dict[str, object]) -> None:
 
 
 def _write_dashboard(path: Path, data: dict[str, object]) -> None:
-    _resolve_dashboard_path(path).write_text(json.dumps(data, indent=4), encoding="utf-8")
+    safe_path = _resolve_dashboard_path(path)
+    safe_path.write_text(json.dumps(data, indent=4), encoding="utf-8")
 
 
 def fix_dashboard(path):
