@@ -108,28 +108,100 @@ def _has_health_check_contract(content: str) -> bool:
     return bool(has_method or inherits_base or has_mixin)
 
 
+def _iter_cached_modules(
+    ast_caches: tuple[dict[Path, ast.Module], ...],
+) -> list[tuple[Path, ast.Module]]:
+    modules: list[tuple[Path, ast.Module]] = []
+    for ast_cache in ast_caches:
+        modules.extend(sorted(ast_cache.items()))
+    return modules
+
+
+def _legacy_import_from_violation(
+    rel_path: str,
+    node: ast.ImportFrom,
+) -> str | None:
+    if node.module not in REMOVED_SHIM_IMPORT_PATHS:
+        return None
+    return f"{rel_path}:{node.lineno} imports removed module '{node.module}'"
+
+
+def _legacy_import_violations(
+    rel_path: str,
+    node: ast.Import,
+) -> list[str]:
+    return [
+        f"{rel_path}:{node.lineno} imports removed module '{alias.name}'"
+        for alias in node.names
+        if alias.name in REMOVED_SHIM_IMPORT_PATHS
+    ]
+
+
+def _legacy_module_violations_for_tree(rel_path: str, tree: ast.Module) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            violation = _legacy_import_from_violation(rel_path, node)
+            if violation is not None:
+                violations.append(violation)
+            continue
+        if isinstance(node, ast.Import):
+            violations.extend(_legacy_import_violations(rel_path, node))
+    return violations
+
+
 def _legacy_module_import_violations(
     root: Path,
     ast_caches: tuple[dict[Path, ast.Module], ...],
 ) -> list[str]:
     violations: list[str] = []
-    for ast_cache in ast_caches:
-        for py_file, tree in sorted(ast_cache.items()):
-            rel_path = py_file.relative_to(root).as_posix()
-            for node in ast.walk(tree):
-                if (
-                    isinstance(node, ast.ImportFrom)
-                    and node.module in REMOVED_SHIM_IMPORT_PATHS
-                ):
-                    violations.append(
-                        f"{rel_path}:{node.lineno} imports removed module '{node.module}'"
-                    )
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        if alias.name in REMOVED_SHIM_IMPORT_PATHS:
-                            violations.append(
-                                f"{rel_path}:{node.lineno} imports removed module '{alias.name}'"
-                            )
+    for py_file, tree in _iter_cached_modules(ast_caches):
+        rel_path = py_file.relative_to(root).as_posix()
+        violations.extend(_legacy_module_violations_for_tree(rel_path, tree))
+    return violations
+
+
+def _expected_root_import_name(
+    node: ast.ImportFrom,
+    disallowed_modules: dict[str, str],
+) -> str | None:
+    if node.module is None:
+        return None
+    expected_name = disallowed_modules.get(node.module)
+    if expected_name is None:
+        return None
+    if not any(alias.name == expected_name for alias in node.names):
+        return None
+    return expected_name
+
+
+def _package_root_violation(
+    root: Path,
+    py_file: Path,
+    node: ast.ImportFrom,
+    expected_name: str,
+) -> str:
+    return (
+        f"{py_file.relative_to(root)}:{node.lineno} imports "
+        f"{expected_name} from {node.module}; use the provider "
+        "package root instead"
+    )
+
+
+def _package_root_violations_for_tree(
+    root: Path,
+    py_file: Path,
+    tree: ast.Module,
+    disallowed_modules: dict[str, str],
+) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        expected_name = _expected_root_import_name(node, disallowed_modules)
+        if expected_name is None:
+            continue
+        violations.append(_package_root_violation(root, py_file, node, expected_name))
     return violations
 
 
@@ -140,23 +212,12 @@ def _package_root_import_violations(
     ast_caches: tuple[dict[Path, ast.Module], ...],
 ) -> list[str]:
     violations: list[str] = []
-    for ast_cache in ast_caches:
-        for py_file, tree in sorted(ast_cache.items()):
-            if py_file in allowed_files:
-                continue
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.ImportFrom) or node.module is None:
-                    continue
-                expected_name = disallowed_modules.get(node.module)
-                if expected_name is None:
-                    continue
-                if not any(alias.name == expected_name for alias in node.names):
-                    continue
-                violations.append(
-                    f"{py_file.relative_to(root)}:{node.lineno} imports "
-                    f"{expected_name} from {node.module}; use the provider "
-                    "package root instead"
-                )
+    for py_file, tree in _iter_cached_modules(ast_caches):
+        if py_file in allowed_files:
+            continue
+        violations.extend(
+            _package_root_violations_for_tree(root, py_file, tree, disallowed_modules)
+        )
     return violations
 
 

@@ -8,6 +8,16 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Final
 
+if __package__ in {None, ""}:
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _bootstrap import PROJECT_ROOT, ensure_repo_imports
+else:
+    from scripts.docs.matrix._bootstrap import PROJECT_ROOT, ensure_repo_imports
+
+ensure_repo_imports(include_src=True)
+
 from bioetl.application.core.base_transformer._structural_policy_contracts import (
     resolve_field_contracts,
     resolve_pandera_schema,
@@ -20,7 +30,6 @@ from bioetl.infrastructure.config.domain_config_resolver import (
     load_domain_pipeline_config,
 )
 
-PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[3]
 DEFAULT_CONTRACT_EXPORT: Final[Path] = (
     PROJECT_ROOT / "docs/reports/generated/chembl_matrix_structural_contract_v1.json"
 )

@@ -28,9 +28,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _bootstrap import PROJECT_ROOT
+else:
+    from scripts.docs.checks._bootstrap import PROJECT_ROOT
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SRC_DIR = PROJECT_ROOT / "src" / "bioetl"
 
 # Default thresholds (percent)

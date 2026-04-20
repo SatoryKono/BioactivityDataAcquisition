@@ -13,7 +13,12 @@ from typing import Final
 from xml.etree import ElementTree as ET
 
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _bootstrap import PROJECT_ROOT, ensure_repo_imports
+else:
+    from scripts.docs.matrix._bootstrap import PROJECT_ROOT, ensure_repo_imports
+
+ensure_repo_imports(include_src=True)
 
 from scripts.docs.common.xlsx import (
     MAIN_NS,
@@ -49,7 +54,6 @@ from scripts.docs.matrix.structural_contract import (
     write_runtime_contract_export,
 )
 
-PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[3]
 DEFAULT_INPUT: Final[Path] = (
     PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
 )

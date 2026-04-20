@@ -405,12 +405,23 @@ def _add_pipelines_from_silver_tables(pipelines: set[str], silver_dir: Path) -> 
         pipelines: Set to add pipeline names to
         silver_dir: Silver data directory to scan
     """
-    if silver_dir.exists():
-        for provider_dir in silver_dir.iterdir():
-            if provider_dir.is_dir():
-                for entity_dir in provider_dir.iterdir():
-                    if entity_dir.is_dir() and (entity_dir / "_delta_log").exists():
-                        pipelines.add(f"{provider_dir.name}_{entity_dir.name}")
+    if not silver_dir.exists():
+        return
+    for provider_dir in _provider_directories(silver_dir):
+        for entity_dir in _silver_entity_directories(provider_dir):
+            pipelines.add(f"{provider_dir.name}_{entity_dir.name}")
+
+
+def _provider_directories(silver_dir: Path) -> list[Path]:
+    return [provider_dir for provider_dir in silver_dir.iterdir() if provider_dir.is_dir()]
+
+
+def _silver_entity_directories(provider_dir: Path) -> list[Path]:
+    return [
+        entity_dir
+        for entity_dir in provider_dir.iterdir()
+        if entity_dir.is_dir() and (entity_dir / "_delta_log").exists()
+    ]
 
 
 # =============================================================================

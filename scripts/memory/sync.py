@@ -13173,7 +13173,6 @@ class Neo4jHttpClient:
         if endpoint != self._primary_endpoint or self._is_last_attempt(attempt):
             raise runtime_error from exc
         self._sleep_before_retry(attempt)
-        return
 
     @staticmethod
     def _should_retry_http_error(exc: error.HTTPError) -> bool:

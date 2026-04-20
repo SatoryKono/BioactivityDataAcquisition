@@ -15,7 +15,12 @@ from xml.etree import ElementTree as ET
 import yaml
 
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _bootstrap import PROJECT_ROOT, ensure_repo_imports
+else:
+    from scripts.docs.matrix._bootstrap import PROJECT_ROOT, ensure_repo_imports
+
+ensure_repo_imports()
 
 from scripts.docs.common.xlsx import (
     NS,
@@ -25,7 +30,6 @@ from scripts.docs.common.xlsx import (
     load_shared_strings,
 )
 
-PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[3]
 DEFAULT_WORKBOOK: Final[Path] = (
     PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
 )
@@ -56,6 +60,8 @@ COMPLEX_REVIEW_COLUMNS: Final[frozenset[str]] = frozenset(
         "Validation fail action",
     }
 )
+JSON_OBJECT_TYPE: Final[str] = "json/object"
+JSON_ARRAY_TYPE: Final[str] = "json/array"
 TYPE_CANONICAL: Final[dict[str, str]] = {
     "string": "string",
     "text": "string",
@@ -70,10 +76,10 @@ TYPE_CANONICAL: Final[dict[str, str]] = {
     "date": "date",
     "datetime": "datetime",
     "timestamp": "datetime",
-    "json/object": "json/object",
-    "object": "json/object",
-    "json/array": "json/array",
-    "array": "json/array",
+    JSON_OBJECT_TYPE: JSON_OBJECT_TYPE,
+    "object": JSON_OBJECT_TYPE,
+    JSON_ARRAY_TYPE: JSON_ARRAY_TYPE,
+    "array": JSON_ARRAY_TYPE,
     "derived": "derived",
     "runtime": "runtime",
     "not_mapped": "not_mapped",
@@ -359,13 +365,10 @@ def _build_sheet_occurrences(
     ]
 
 
-def _detail_id_dictionary(
+def _iter_detail_id_pairs(
     workbook_rows: dict[str, list[dict[str, str]]],
-) -> dict[str, object]:
-    """Build workbook-global mapping from detail IDs to detail strings."""
-    pairs: dict[int, str] = {}
-    detail_to_id: dict[str, int] = {}
-
+) -> list[tuple[int, str]]:
+    pairs: list[tuple[int, str]] = []
     for rows in workbook_rows.values():
         for row in rows:
             detail = row.get(DETAIL_COLUMN, "")
@@ -376,27 +379,68 @@ def _detail_id_dictionary(
                 detail_id = int(raw_id)
             except ValueError:
                 continue
+            pairs.append((detail_id, detail))
+    return pairs
 
-            existing_detail = pairs.get(detail_id)
-            if existing_detail is not None and existing_detail != detail:
-                raise ValueError(
-                    f"Conflicting detail text for ID {detail_id}: "
-                    f"{existing_detail!r} != {detail!r}"
-                )
-            existing_id = detail_to_id.get(detail)
-            if existing_id is not None and existing_id != detail_id:
-                raise ValueError(
-                    f"Conflicting detail ID for {detail!r}: "
-                    f"{existing_id} != {detail_id}"
-                )
 
-            pairs[detail_id] = detail
-            detail_to_id[detail] = detail_id
+def _raise_conflicting_detail_text(
+    detail_id: int,
+    existing_detail: str,
+    detail: str,
+) -> None:
+    raise ValueError(
+        f"Conflicting detail text for ID {detail_id}: "
+        f"{existing_detail!r} != {detail!r}"
+    )
 
-    entries = [
+
+def _raise_conflicting_detail_id(
+    detail: str,
+    existing_id: int,
+    detail_id: int,
+) -> None:
+    raise ValueError(
+        f"Conflicting detail ID for {detail!r}: "
+        f"{existing_id} != {detail_id}"
+    )
+
+
+def _merge_detail_id_pair(
+    pairs: dict[int, str],
+    detail_to_id: dict[str, int],
+    detail_id: int,
+    detail: str,
+) -> None:
+    existing_detail = pairs.get(detail_id)
+    if existing_detail is not None and existing_detail != detail:
+        _raise_conflicting_detail_text(detail_id, existing_detail, detail)
+
+    existing_id = detail_to_id.get(detail)
+    if existing_id is not None and existing_id != detail_id:
+        _raise_conflicting_detail_id(detail, existing_id, detail_id)
+
+    pairs[detail_id] = detail
+    detail_to_id[detail] = detail_id
+
+
+def _detail_id_entries(pairs: dict[int, str]) -> list[dict[str, object]]:
+    return [
         {"id": detail_id, "detail": detail}
         for detail_id, detail in sorted(pairs.items())
     ]
+
+
+def _detail_id_dictionary(
+    workbook_rows: dict[str, list[dict[str, str]]],
+) -> dict[str, object]:
+    """Build workbook-global mapping from detail IDs to detail strings."""
+    pairs: dict[int, str] = {}
+    detail_to_id: dict[str, int] = {}
+
+    for detail_id, detail in _iter_detail_id_pairs(workbook_rows):
+        _merge_detail_id_pair(pairs, detail_to_id, detail_id, detail)
+
+    entries = _detail_id_entries(pairs)
     return {
         "unique_detail_count": len(entries),
         "entries": entries,

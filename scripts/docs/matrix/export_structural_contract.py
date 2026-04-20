@@ -9,7 +9,12 @@ import sys
 from pathlib import Path
 
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _bootstrap import ensure_repo_imports
+else:
+    from scripts.docs.matrix._bootstrap import ensure_repo_imports
+
+ensure_repo_imports(include_src=True)
 
 from scripts.docs.matrix.structural_contract import (
     DEFAULT_CONTRACT_EXPORT,

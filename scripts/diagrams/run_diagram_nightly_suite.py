@@ -617,7 +617,7 @@ def check_diag_t027(
         path = REPO_ROOT / rel
         if not path.exists():
             issues.append(
-                Issue("DIAG-T027", "WARNING", str(rel), "source file missing")
+                Issue("DIAG-T027", "WARNING", str(rel), SOURCE_FILE_MISSING)
             )
             continue
 
@@ -707,7 +707,7 @@ def check_diag_t028(
         path = REPO_ROOT / rel
         if not path.exists():
             issues.append(
-                Issue("DIAG-T028", "WARNING", str(rel), "source file missing")
+                Issue("DIAG-T028", "WARNING", str(rel), SOURCE_FILE_MISSING)
             )
             continue
 
@@ -808,7 +808,7 @@ def check_diag_t029(
         path = REPO_ROOT / rel
         if not path.exists():
             issues.append(
-                Issue("DIAG-T029", "WARNING", str(rel), "source file missing")
+                Issue("DIAG-T029", "WARNING", str(rel), SOURCE_FILE_MISSING)
             )
             continue
 

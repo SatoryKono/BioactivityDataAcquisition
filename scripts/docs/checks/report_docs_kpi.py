@@ -24,7 +24,12 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _bootstrap import ensure_repo_imports
+else:
+    from scripts.docs.checks._bootstrap import ensure_repo_imports
+
+ensure_repo_imports()
 
 from scripts.docs.common.markdown import INLINE_CODE_RE, MD_LINK_RE, load_nav_docs
 from scripts.docs.common.paths import (

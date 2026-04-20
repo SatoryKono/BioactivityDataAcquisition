@@ -16,7 +16,12 @@ from xml.etree import ElementTree as ET
 import yaml
 
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _bootstrap import PROJECT_ROOT, ensure_repo_imports
+else:
+    from scripts.docs.matrix._bootstrap import PROJECT_ROOT, ensure_repo_imports
+
+ensure_repo_imports()
 
 from scripts.docs.common.xlsx import (
     MAIN_NS,
@@ -28,7 +33,6 @@ from scripts.docs.common.xlsx import (
     sheet_target_paths,
 )
 
-PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[3]
 DEFAULT_INPUT: Final[Path] = (
     PROJECT_ROOT / "docs/reports/chembl_pipeline_silver_matrices_v12.xlsx"
 )
