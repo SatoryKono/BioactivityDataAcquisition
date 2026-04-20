@@ -1,3 +1,5 @@
+"""CrossRef datasource factory support helpers."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable

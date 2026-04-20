@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HELPER_DIR="${SCRIPT_DIR}/helper"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
 
 # Colors
 RED='\033[0;31m'
@@ -70,6 +70,19 @@ EOF
     exit 0
 fi
 
+COMMAND="${1:-start}"
+
+case "$COMMAND" in
+    check)
+        bash "${HELPER_DIR}/check-env.sh"
+        exit $?
+        ;;
+    setup)
+        bash "${HELPER_DIR}/setup-env.sh"
+        exit $?
+        ;;
+esac
+
 # Check environment
 log_info "Checking environment setup..."
 echo ""
@@ -90,7 +103,6 @@ log_info "Environment ready - launching Codex"
 echo ""
 
 # Process command
-COMMAND="${1:-start}"
 shift || true
 
 case "$COMMAND" in
@@ -112,16 +124,6 @@ case "$COMMAND" in
     
     device-login)
         codex login --device-auth
-        ;;
-    
-    check)
-        bash "${HELPER_DIR}/check-env.sh"
-        exit 0
-        ;;
-    
-    setup)
-        bash "${HELPER_DIR}/setup-env.sh"
-        exit $?
         ;;
     
     *)

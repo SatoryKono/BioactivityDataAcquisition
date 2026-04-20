@@ -151,7 +151,9 @@ def _httpx_import_violations(application_python_files: list[Path]) -> list[str]:
 
 
 def _source_python_files(src: Path) -> list[Path]:
-    return [py_file for py_file in src.rglob("*.py") if "composition" not in str(py_file)]
+    return [
+        py_file for py_file in src.rglob("*.py") if "composition" not in str(py_file)
+    ]
 
 
 def _composition_module_imports(composition_path: Path) -> dict[str, set[str]]:

@@ -68,7 +68,9 @@ def _required_provider_names(matrix: YamlMap, field: str) -> list[str]:
 
 def _must_unit_layers(matrix: YamlMap) -> list[str]:
     return [
-        layer for layer, config in matrix["layers"].items() if config.get("unit") == "MUST"
+        layer
+        for layer, config in matrix["layers"].items()
+        if config.get("unit") == "MUST"
     ]
 
 
@@ -87,9 +89,7 @@ def _represented_golden_master_entities() -> dict[str, set[str]]:
     for provider, entity, config_path in _iter_entity_configs():
         lines = config_path.read_text(encoding="utf-8").splitlines()
         pipeline_name = next(
-            line.split(":", 1)[1].strip()
-            for line in lines
-            if "pipeline_name:" in line
+            line.split(":", 1)[1].strip() for line in lines if "pipeline_name:" in line
         )
         if pipeline_name in PIPELINES:
             represented.setdefault(provider, set()).add(entity)

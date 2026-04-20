@@ -473,9 +473,7 @@ class TestPIIHandling:
             if self._file_mentions_hashing(content):
                 continue
             rel_path = py_file.relative_to(PROJECT_ROOT)
-            violations.append(
-                f"{rel_path}: PII field '{pattern_name}' without hashing"
-            )
+            violations.append(f"{rel_path}: PII field '{pattern_name}' without hashing")
         return violations
 
     def test_silver_layer_uses_hashing(self) -> None:

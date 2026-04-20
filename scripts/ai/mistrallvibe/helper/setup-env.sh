@@ -163,8 +163,8 @@ echo ""
 log_info "Next steps:"
 echo "  1. Get your API key: https://console.mistral.ai/api-keys/"
 echo "  2. Edit .env.mistrallvibe and add VIBE_API_KEY"
-echo "  3. Start Vibe: ./run-mistrallvibe.sh start"
-echo "  4. Or run interactive chat: ./run-mistrallvibe.sh chat large"
+echo "  3. Start Vibe: ./run-vibe.sh"
+echo "  4. Or run with a prompt: ./run-vibe.sh \"inspect the failing tests\""
 echo ""
 
 if ! command -v vibe >/dev/null 2>&1; then

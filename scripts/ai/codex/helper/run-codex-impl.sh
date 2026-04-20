@@ -6,7 +6,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
+ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 
 # Load environment
 ENV_FILE="${ROOT_DIR}/.env.codex"
@@ -23,53 +24,26 @@ if [[ -z "${OPENAI_API_KEY:-}" ]]; then
     exit 1
 fi
 
-# Find Codex binary - try multiple locations
-CODEX_BIN=""
-
-# Try 1: In PATH (most common - installed via npm -g)
-if command -v codex >/dev/null 2>&1; then
-    CODEX_BIN="codex"
-    echo "[INFO] Using Codex from PATH: $(which codex)"
+if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
+    echo "[ERROR] Codex bootstrap helper not found: ${ENSURE_SCRIPT}" >&2
+    exit 1
 fi
 
-# Try 2: Custom npm prefix location
-if [[ -z "$CODEX_BIN" ]] && [[ -x "${HOME}/.cache/tools/codex-cli/npm-global/bin/codex" ]]; then
-    CODEX_BIN="${HOME}/.cache/tools/codex-cli/npm-global/bin/codex"
-    echo "[INFO] Using Codex from custom location: ${CODEX_BIN}"
-fi
-
-# Try 3: Default npm location
-if [[ -z "$CODEX_BIN" ]] && [[ -x "${HOME}/.npm/bin/codex" ]]; then
-    CODEX_BIN="${HOME}/.npm/bin/codex"
-    echo "[INFO] Using Codex from npm bin: ${CODEX_BIN}"
-fi
-
-# If not found anywhere, try to install
-if [[ -z "$CODEX_BIN" ]]; then
-    echo "[INFO] Codex not found, attempting to install..." >&2
-    if timeout 180 npm install -g @openai/codex@latest 2>&1 | tail -10; then
-        if command -v codex >/dev/null 2>&1; then
-            CODEX_BIN="codex"
-            echo "[INFO] Codex installed successfully"
-        else
-            echo "[ERROR] npm install succeeded but codex not found in PATH" >&2
-            exit 1
-        fi
-    else
-        echo "[ERROR] Failed to install Codex" >&2
-        exit 1
-    fi
-fi
+CODEX_BIN="$("${ENSURE_SCRIPT}" --print-bin)"
+CODEX_PREFIX="$("${ENSURE_SCRIPT}" --print-prefix)"
+echo "[INFO] Using Codex from managed prefix: ${CODEX_BIN}"
 
 # Verify we found it
-if [[ -z "$CODEX_BIN" ]] || ! command -v "$CODEX_BIN" >/dev/null 2>&1; then
+if [[ -z "$CODEX_BIN" ]] || [[ ! -x "${CODEX_BIN}" ]]; then
     echo "[ERROR] Codex binary not found" >&2
-    echo "[INFO] Try installing manually: npm install -g @openai/codex" >&2
+    echo "[INFO] Try running: bash ${ENSURE_SCRIPT} --ensure" >&2
     exit 1
 fi
 
 # Setup environment
-export PATH="/usr/local/bin:${PATH}"
+export NPM_CONFIG_PREFIX="${CODEX_PREFIX}"
+export npm_config_prefix="${CODEX_PREFIX}"
+export PATH="${CODEX_PREFIX}/bin:/usr/local/bin:${PATH}"
 
 # Load proxy if available
 if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then

@@ -5,7 +5,11 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
-ENSURE_SCRIPT="${REPO_ROOT}/script-codex/helper/ensure-codex-cli.sh"
+ENSURE_SCRIPT="${REPO_ROOT}/scripts/ai/codex/helper/ensure-codex-cli.sh"
+
+if [[ ! -f "${ENSURE_SCRIPT}" ]]; then
+    ENSURE_SCRIPT="${REPO_ROOT}/script-codex/helper/ensure-codex-cli.sh"
+fi
 
 if [[ ! -f "${ENSURE_SCRIPT}" ]]; then
     echo "[codex-exec] ERROR: bootstrap helper not found: ${ENSURE_SCRIPT}" >&2

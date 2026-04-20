@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Helper: Run Mistral Vibe operations
-# Called by: run-mistrallvibe.sh
+# Historical manager helper retained for compatibility only.
 
 set -euo pipefail
 
@@ -106,7 +106,7 @@ status_vibe() {
         log_info "Web UI: http://${VIBE_HOST}:${VIBE_PORT}"
     else
         log_warn "Vibe is NOT running"
-        log_info "Start with: ./run-mistrallvibe.sh start"
+        log_info "Start with: ./run-vibe.sh"
     fi
     return 0
 }

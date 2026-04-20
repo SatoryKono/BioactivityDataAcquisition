@@ -9,6 +9,20 @@ param(
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent $ScriptDir
 $HelperDir = Join-Path $ScriptDir "helper"
+$RepoWin = (Resolve-Path (Join-Path $ScriptDir "..\..\..")).Path
+$RepoWSL = $null
+
+try {
+    $RepoWSL = (wsl -d Ubuntu -- wslpath -a "$RepoWin" 2>$null | Select-Object -First 1).Trim()
+} catch {
+    $RepoWSL = $null
+}
+
+if (-not $RepoWSL) {
+    $drive = $RepoWin.Substring(0, 1).ToLowerInvariant()
+    $pathPart = $RepoWin.Substring(2).Replace('\', '/')
+    $RepoWSL = "/mnt/$drive$pathPart"
+}
 
 # Colors
 $Colors = @{
@@ -76,7 +90,8 @@ if ($?) {
 
 # 4. Check Codex binary
 Log-Info "Checking Codex CLI..."
-$codexCheck = wsl -- bash -c 'test -x ~/.cache/tools/codex-cli/npm-global/bin/codex && echo "OK"' 2>$null
+$RepoWSLQuoted = $RepoWSL.Replace("'", "'\"'\"'")
+$codexCheck = wsl -- bash -lc "test -x '$RepoWSLQuoted/.cache/tools/codex-cli/npm-global/bin/codex' && echo OK" 2>$null
 if ($codexCheck -eq "OK") {
     Log-Success "Codex CLI is installed"
 } else {

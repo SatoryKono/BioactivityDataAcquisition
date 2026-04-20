@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -19,36 +18,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 
 
-def _normalize_config_root(raw_path: str) -> Path:
-    normalized = raw_path.replace("\\", "/")
-    if os.name == "nt":
-        match = re.match(r"^/mnt/([a-zA-Z])/(.*)$", normalized)
-        if match is not None:
-            drive = match.group(1).upper()
-            suffix = match.group(2)
-            return Path(f"{drive}:/{suffix}")
-    return Path(raw_path)
-
-
-def _config_root_hint() -> Path:
-    committed_config = REPO_ROOT / ".mcp.json"
-    if committed_config.exists():
-        try:
-            payload = json.loads(committed_config.read_text(encoding="utf-8"))
-            filesystem_root = payload["mcpServers"]["filesystem"]["args"][-1]
-            return _normalize_config_root(str(filesystem_root))
-        except (KeyError, IndexError, TypeError, json.JSONDecodeError):
-            pass
-    return REPO_ROOT
-
-
-CONFIG_ROOT = _config_root_hint()
-MEMORY_FILE_PATH = CONFIG_ROOT / "docs/00-project/ai/memory/mcp-memory.json"
-NPM_CACHE_DIR = str((CONFIG_ROOT / ".cache" / "npm-cache").resolve())
-
-
-def _wrapper_command(script_name: str) -> dict[str, Any]:
-    wrapper = CONFIG_ROOT / "scripts/ai/mcp" / script_name
+def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
+    wrapper = workspace_root / "scripts/ai/mcp" / script_name
     if os.name == "nt":
         return {
             "command": "powershell",
@@ -63,14 +34,16 @@ def _wrapper_command(script_name: str) -> dict[str, Any]:
     return {"command": "bash", "args": [str(wrapper.with_suffix(".sh"))]}
 
 
-def _canonical_servers() -> dict[str, dict[str, Any]]:
+def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
+    memory_file_path = workspace_root / "docs/00-project/ai/memory/mcp-memory.json"
+    npm_cache_dir = str((workspace_root / ".cache" / "npm-cache").resolve())
     servers: dict[str, dict[str, Any]] = {
         "memory": {
             "command": "npx",
             "args": ["-y", "@modelcontextprotocol/server-memory@2026.1.26"],
             "env": {
-                "MEMORY_FILE_PATH": str(MEMORY_FILE_PATH),
-                "NPM_CONFIG_CACHE": NPM_CACHE_DIR,
+                "MEMORY_FILE_PATH": str(memory_file_path),
+                "NPM_CONFIG_CACHE": npm_cache_dir,
             },
         },
         "filesystem": {
@@ -78,33 +51,34 @@ def _canonical_servers() -> dict[str, dict[str, Any]]:
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-filesystem@2026.1.14",
-                str(CONFIG_ROOT),
+                str(workspace_root),
             ],
-            "env": {"NPM_CONFIG_CACHE": NPM_CACHE_DIR},
+            "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
         },
         "sequential-thinking": {
             "command": "npx",
             "args": ["-y", "@modelcontextprotocol/server-sequential-thinking@2025.12.18"],
-            "env": {"NPM_CONFIG_CACHE": NPM_CACHE_DIR},
+            "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
         },
         "fetch": {"command": "uvx", "args": FETCH_SPEC},
         "pdf": {
             "command": "npx",
             "args": ["-y", "@modelcontextprotocol/server-pdf@1.3.1", "--stdio"],
-            "env": {"NPM_CONFIG_CACHE": NPM_CACHE_DIR},
+            "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
         },
-        "github": _wrapper_command("github-mcp-wrapper"),
-        "docker": _wrapper_command("mcp_docker_wrapper"),
-        "docker-docs": _wrapper_command("mcp_docker_docs_wrapper"),
-        "context7": _wrapper_command("mcp_context7_wrapper"),
-        "paper-search": _wrapper_command("mcp_paper_search_wrapper"),
-        "dockerhub": _wrapper_command("mcp_dockerhub_wrapper"),
-        "prometheus": _wrapper_command("mcp_prometheus_wrapper"),
-        "grafana": _wrapper_command("mcp_grafana_wrapper"),
-        "brave-search": _wrapper_command("mcp_brave_search_wrapper"),
-        "sonarqube": _wrapper_command("mcp_sonarqube_wrapper"),
-        "neo4j-cypher": _wrapper_command("mcp_neo4j_cypher_wrapper"),
-        "neo4j-memory": _wrapper_command("mcp_neo4j_memory_wrapper"),
+        "github": _wrapper_command("github-mcp-wrapper", workspace_root),
+        "docker": _wrapper_command("mcp_docker_wrapper", workspace_root),
+        "docker-docs": _wrapper_command("mcp_docker_docs_wrapper", workspace_root),
+        "context7": _wrapper_command("mcp_context7_wrapper", workspace_root),
+        "paper-search": _wrapper_command("mcp_paper_search_wrapper", workspace_root),
+        "dockerhub": _wrapper_command("mcp_dockerhub_wrapper", workspace_root),
+        "prometheus": _wrapper_command("mcp_prometheus_wrapper", workspace_root),
+        "grafana": _wrapper_command("mcp_grafana_wrapper", workspace_root),
+        "brave-search": _wrapper_command("mcp_brave_search_wrapper", workspace_root),
+        "sonarqube": _wrapper_command("mcp_sonarqube_wrapper", workspace_root),
+        "neo4j-cypher": _wrapper_command("mcp_neo4j_cypher_wrapper", workspace_root),
+        "neo4j-memory": _wrapper_command("mcp_neo4j_memory_wrapper", workspace_root),
+        "needle": _wrapper_command("mcp_needle_wrapper", workspace_root),
         "openaiDeveloperDocs": {
             "type": "http",
             "url": "https://developers.openai.com/mcp",
@@ -112,7 +86,7 @@ def _canonical_servers() -> dict[str, dict[str, Any]]:
     }
 
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.
-    servers["github"]["env"] = {"NPM_CONFIG_CACHE": NPM_CACHE_DIR}
+    servers["github"]["env"] = {"NPM_CONFIG_CACHE": npm_cache_dir}
     return servers
 
 
@@ -122,8 +96,8 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(rendered, encoding="utf-8")
 
 
-def _write_configs(output_root: Path) -> tuple[Path, Path]:
-    servers = _canonical_servers()
+def _write_configs(output_root: Path, workspace_root: Path) -> tuple[Path, Path]:
+    servers = _canonical_servers(workspace_root)
     codex_payload = {"mcpServers": deepcopy(servers)}
     vscode_payload = {"servers": deepcopy(servers)}
 
@@ -134,14 +108,14 @@ def _write_configs(output_root: Path) -> tuple[Path, Path]:
     return mcp_path, vscode_path
 
 
-def _run_codex_validation() -> None:
+def _run_codex_validation(workspace_root: Path) -> None:
     codex_bin = shutil.which("codex")
     if codex_bin is None:
         print("codex CLI not found; wrote workspace configs only.")
         return
     result = subprocess.run(
         [codex_bin, "mcp", "list"],
-        cwd=CONFIG_ROOT,
+        cwd=workspace_root,
         capture_output=True,
         text=True,
         check=False,
@@ -157,8 +131,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--root",
         type=Path,
-        default=CONFIG_ROOT,
+        default=REPO_ROOT,
         help="Directory where .mcp.json and .vscode/mcp.json should be written.",
+    )
+    parser.add_argument(
+        "--workspace-root",
+        type=Path,
+        default=REPO_ROOT,
+        help="Workspace directory referenced inside the generated MCP server config.",
     )
     parser.add_argument(
         "--skip-codex",
@@ -168,12 +148,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     output_root = args.root.resolve()
-    mcp_path, vscode_path = _write_configs(output_root)
+    workspace_root = args.workspace_root.resolve()
+    mcp_path, vscode_path = _write_configs(output_root, workspace_root)
     print(f"Wrote {mcp_path}")
     print(f"Wrote {vscode_path}")
 
     if not args.skip_codex:
-        _run_codex_validation()
+        _run_codex_validation(workspace_root)
 
     return 0
 

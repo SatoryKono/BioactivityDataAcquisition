@@ -98,7 +98,7 @@ registries:
       linked_rf: "RF-023"
       expires_on: "2026-06-30"
       removal_step: "Extract identity-graph node and edge builders into dedicated helpers until the function returns under the default limit."
-    src/bioetl/infrastructure/storage/silver/operations/metadata_operations.py::_build_silver_metadata:
+    src/bioetl/infrastructure/storage/silver/operations/metadata_builders.py::_build_silver_metadata:
       value: 109
       owner: "@bioetl-platform"
       reason: "Silver metadata assembly still combines multiple metadata derivation branches while storage helper extraction is in progress."

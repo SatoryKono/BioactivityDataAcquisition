@@ -1,3 +1,5 @@
+"""Support helpers for resolving runtime builder inputs."""
+
 from __future__ import annotations
 
 from collections.abc import Callable

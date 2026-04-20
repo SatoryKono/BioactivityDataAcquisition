@@ -1,3 +1,5 @@
+"""Factory helpers for composing Silver and Gold layer writers."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

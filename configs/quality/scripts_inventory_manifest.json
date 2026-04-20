@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-20T11:40:04.763333+00:00",
+  "generated_at": "2026-04-20T16:08:02.309869+00:00",
   "summary": {
     "total_scripts": 421,
     "status_counts": {
@@ -958,7 +958,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
@@ -989,6 +989,12 @@
           "line": 228,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
+        },
+        {
+          "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
+          "line": 37,
+          "source_group": "tests",
+          "text": "(workspace_root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").resolve()"
         }
       ]
     },
@@ -7242,7 +7248,7 @@
         },
         {
           "path": "scripts/engineering/diagnostics/generate_src_bioetl_refactor_evidence.py",
-          "line": 567,
+          "line": 582,
           "source_group": "scripts",
           "text": "else f\"| `{shard}` | `src/bioetl/__init__.py`, `src/bioetl/__main__.py` | `{output_root / topic_id / shard}` | planned |\""
         }
@@ -8438,7 +8444,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 293,
+          "line": 312,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_root_vcr_cassettes.py\" in workflow"
         }
@@ -8495,7 +8501,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_coverage.py",
-          "line": 296,
+          "line": 315,
           "source_group": "tests",
           "text": "\"python scripts/engineering/qa/vcr/check_vcr_filename_policy.py\" in workflow"
         }
@@ -8952,7 +8958,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 128,
+      "reference_count": 129,
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -9032,8 +9038,26 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
+          "line": 203,
+          "source_group": "docs",
+          "text": "query.py"
+        },
+        {
+          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
+          "line": 477,
+          "source_group": "docs",
+          "text": "- `src/memory/graph/query.py`"
+        },
+        {
+          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
+          "line": 725,
+          "source_group": "docs",
+          "text": "- `src/memory/graph/query.py`"
+        },
         {
           "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
           "line": 205,
@@ -9122,8 +9146,32 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
+          "line": 105,
+          "source_group": "docs",
+          "text": "- `scripts/memory/sync.py`"
+        },
+        {
+          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
+          "line": 202,
+          "source_group": "docs",
+          "text": "sync.py"
+        },
+        {
+          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
+          "line": 476,
+          "source_group": "docs",
+          "text": "- `src/memory/graph/sync.py`"
+        },
+        {
+          "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
+          "line": 724,
+          "source_group": "docs",
+          "text": "- `src/memory/graph/sync.py`"
+        },
         {
           "path": "docs/reports/audits/compatibility-surface-issue-pack-20260413.md",
           "line": 206,

@@ -54,3 +54,46 @@ async def test_write_silver_metadata_uses_record_ingestion_anchor_when_explicit_
     metadata = captured["metadata"]
     assert metadata.runtime.started_at_utc == expected
     assert metadata.runtime.completed_at_utc == expected
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_resolve_finalization_dq_metrics_normalizes_mixed_struct_and_string_values() -> (
+    None
+):
+    """Mixed structured/string column values should not break DQ metrics finalization."""
+    dq_calculator = MagicMock()
+    dq_calculator.calculate.return_value = BatchDQMetrics(
+        total_records=2,
+        valid_records=2,
+        error_records=0,
+        warning_records=0,
+    )
+    ops = SilverMetadataOperations(
+        _logger=MagicMock(),
+        _dq_calculator=dq_calculator,
+    )
+
+    records = [
+        {
+            "entity_id": "CHEMBL1",
+            "assay_taxonomy": {
+                "assay_class_id": 322,
+                "class_type": "In vivo efficacy",
+            },
+        },
+        {
+            "entity_id": "CHEMBL2",
+            "assay_taxonomy": '{"assay_class_id":322,"class_type":"In vivo efficacy"}',
+        },
+    ]
+
+    metrics = await ops._resolve_finalization_dq_metrics(
+        table_name="chembl.assay",
+        records=records,
+    )
+
+    assert metrics.total_records == 2
+    dq_input = dq_calculator.calculate.call_args.args[0]
+    normalized_records = dq_input.records
+    assert all(isinstance(row["assay_taxonomy"], str) for row in normalized_records)

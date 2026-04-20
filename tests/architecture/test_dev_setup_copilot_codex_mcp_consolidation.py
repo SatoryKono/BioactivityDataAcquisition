@@ -66,6 +66,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "sonarqube",
         "neo4j-cypher",
         "neo4j-memory",
+        "needle",
         "openaiDeveloperDocs",
     }
     assert servers["memory"]["command"] == "npx"
@@ -202,6 +203,15 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
+    assert servers["needle"]["command"] == "npx"
+    assert servers["needle"]["args"] == [
+        "-y",
+        "mcp-remote",
+        "https://mcp.needle-ai.com/mcp",
+        "--header",
+        "Authorization:Bearer ${NEEDLE_API_KEY}",
+    ]
+    assert servers["needle"]["env"]["NEEDLE_API_KEY"] == "${env:NEEDLE_API_KEY}"
 
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:

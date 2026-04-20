@@ -1,3 +1,5 @@
+"""Public runtime input resolver facade."""
+
 from __future__ import annotations
 
 from collections.abc import Callable

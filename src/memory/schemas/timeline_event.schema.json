@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TimelineEvent",
+  "type": "object",
+  "required": ["id", "event_type", "occurred_at", "source_refs"],
+  "properties": {
+    "id": {"type": "string"},
+    "event_type": {"type": "string"},
+    "occurred_at": {"type": "string"},
+    "source_refs": {"type": "array", "items": {"type": "string"}},
+    "payload": {"type": "object"},
+    "confidence": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}
