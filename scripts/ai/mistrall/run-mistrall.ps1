@@ -56,6 +56,21 @@ if ($Command -eq "help" -or $Command -eq "-h" -or $Command -eq "--help") {
     exit 0
 }
 
+# Process administrative commands before launch preflight.
+switch -Regex ($Command) {
+    "^check$" {
+        & "$HelperDir\check-env.ps1"
+        exit $LASTEXITCODE
+    }
+    "^setup$" {
+        Write-Warn "Setup on Windows requires Docker Desktop"
+        Write-Info "Please ensure Docker Desktop is installed and running"
+        Write-Host ""
+        & "$HelperDir\check-env.ps1"
+        exit $LASTEXITCODE
+    }
+}
+
 # Check Docker
 Write-Info "Checking Docker installation..."
 $dockerExists = $false
@@ -126,19 +141,6 @@ switch -Regex ($Command) {
         Write-Info "Pulling latest Mistral model..."
         Write-Host ""
         & "$HelperDir\run-mistrall-impl.ps1" pull @Args
-    }
-    
-    "^check$" {
-        & "$HelperDir\check-env.ps1"
-        exit 0
-    }
-    
-    "^setup$" {
-        Write-Warn "Setup on Windows requires Docker Desktop"
-        Write-Info "Please ensure Docker Desktop is installed and running"
-        Write-Host ""
-        & "$HelperDir\check-env.ps1"
-        exit 0
     }
     
     default {

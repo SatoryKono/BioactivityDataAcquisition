@@ -6,14 +6,17 @@ import argparse
 from pathlib import Path
 
 from memory.notes import parse_markdown_note, utc_now_iso, write_markdown_note
+from memory.resources import discover_memory_root
 
-MEMORY_ROOT = Path(__file__).resolve().parents[1]
-CURATED_TARGETS = {
-    "decision": MEMORY_ROOT / "curated" / "decisions",
-    "incident": MEMORY_ROOT / "curated" / "incidents",
-    "lesson": MEMORY_ROOT / "curated" / "lessons",
-    "domain_knowledge": MEMORY_ROOT / "curated" / "domain_knowledge",
-}
+
+def _curated_targets() -> dict[str, Path]:
+    memory_root = discover_memory_root()
+    return {
+        "decision": memory_root / "curated" / "decisions",
+        "incident": memory_root / "curated" / "incidents",
+        "lesson": memory_root / "curated" / "lessons",
+        "domain_knowledge": memory_root / "curated" / "domain_knowledge",
+    }
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -23,7 +26,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source", type=Path, required=True, help="Source episodic markdown note.")
     parser.add_argument(
         "--target-kind",
-        choices=sorted(CURATED_TARGETS),
+        choices=sorted(_curated_targets()),
         required=True,
         help="Curated target family.",
     )
@@ -56,6 +59,7 @@ def promote_note(
     metadata.pop("task_id", None)
     metadata.pop("ttl_days", None)
     metadata.pop("created_at", None)
+    metadata.pop("confidence", None)
     metadata["id"] = note_id
     metadata["title"] = title
     metadata["kind"] = target_kind
@@ -64,7 +68,7 @@ def promote_note(
     metadata["promoted_from"] = source.as_posix()
     metadata["summary"] = metadata.get("summary") or "Promoted from episodic memory."
 
-    output = output_path or (CURATED_TARGETS[target_kind] / f"{note_id}.md")
+    output = output_path or (_curated_targets()[target_kind] / f"{note_id}.md")
     write_markdown_note(output, metadata, note.body)
 
     if move:

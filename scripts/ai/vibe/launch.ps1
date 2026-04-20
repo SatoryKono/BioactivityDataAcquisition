@@ -17,6 +17,8 @@ $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 
 $WSLRepoRoot = $RepoRoot -replace '\\', '/' -replace '^([A-Z]):', '/mnt/$1'
 $WSLRepoRoot = $WSLRepoRoot.ToLower()
+$CompatEnvWSL = "$WSLRepoRoot/scripts/ai/mistrallvibe/.env.mistrallvibe"
+$ProxyEnvWSL = "$WSLRepoRoot/.wsl_proxy_env.sh"
 
 $Colors = @{ Error = "Red"; Warning = "Yellow"; Info = "Cyan" }
 
@@ -59,13 +61,21 @@ $vibeVersion = wsl -e bash -c 'export PATH="$HOME/.local/bin:$PATH" && vibe --ve
 Write-MistralInfo "Using Vibe $vibeVersion (via WSL)"
 Write-MistralInfo "Working directory: $RepoRoot"
 
+$EnvPrelude = @(
+    'export PATH="$HOME/.local/bin:$PATH"',
+    'source "$HOME/.local/bin/env" 2>/dev/null || true',
+    "source '$ProxyEnvWSL' 2>/dev/null || true",
+    "if [ -f '$CompatEnvWSL' ]; then set -a; source '$CompatEnvWSL' 2>/dev/null || true; set +a; fi",
+    'if [ -n "${VIBE_API_KEY:-}" ] && [ -z "${MISTRAL_API_KEY:-}" ]; then export MISTRAL_API_KEY="$VIBE_API_KEY"; fi'
+) -join ' && '
+
 if ($Args.Count -eq 0) {
     Write-MistralInfo "Starting interactive mode..."
-    wsl -e bash -c "export PATH=`$HOME/.local/bin:`$PATH && source `$HOME/.local/bin/env 2>/dev/null || true && vibe --workdir '$WSLRepoRoot'"
+    wsl -e bash -c "$EnvPrelude && vibe --workdir '$WSLRepoRoot'"
 } else {
     $PromptText = $Args -join ' '
     Write-MistralInfo "Prompt: $PromptText"
-    wsl -e bash -c "export PATH=`$HOME/.local/bin:`$PATH && source `$HOME/.local/bin/env 2>/dev/null || true && vibe --workdir '$WSLRepoRoot' '$PromptText'"
+    wsl -e bash -c "$EnvPrelude && vibe --workdir '$WSLRepoRoot' '$PromptText'"
 }
 
 exit $LASTEXITCODE

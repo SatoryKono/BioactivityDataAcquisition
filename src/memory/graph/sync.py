@@ -43,7 +43,8 @@ if str(DEFAULT_ROOT) not in sys.path:
 DEFAULT_BATCH_SIZE = 20
 DEFAULT_INGEST_WAVE = "repo_sync_v1"
 DEFAULT_MANAGED_BY = "neo4j_memory_sync"
-DEFAULT_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
+DEFAULT_MEMORY_MAPPING_PATH = "src/memory/graph/mappings.yaml"
+LEGACY_MEMORY_MAPPING_PATH = "configs/quality/neo4j_memory_mapping.yaml"
 INIT_PY = "__init__.py"
 MAIN_PY = "__main__.py"
 GITHUB_DIR = ".github"
@@ -2046,7 +2047,13 @@ def _mapping_section(memory_mapping: dict[str, object], section: str) -> dict[st
 
 
 def _memory_mapping_path(root: Path) -> Path:
-    return root / DEFAULT_MEMORY_MAPPING_PATH
+    preferred = root / DEFAULT_MEMORY_MAPPING_PATH
+    if preferred.is_file():
+        return preferred
+    legacy = root / LEGACY_MEMORY_MAPPING_PATH
+    if legacy.is_file():
+        return legacy
+    return preferred
 
 
 def _mapping_dict_or_empty(payload: object) -> dict[str, object]:

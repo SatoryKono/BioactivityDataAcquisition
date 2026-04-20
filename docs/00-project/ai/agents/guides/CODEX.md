@@ -32,6 +32,21 @@
 
 Если уверенность недостаточна — помечай **Requires Manual Review**, а не делай предположений.
 
+### Daily Memory Workflow
+
+Для ежедневной engineering- и audit-работы используй canonical memory workflow,
+а не ad-hoc task memory:
+
+1. перед задачей запускай `python -m memory.tooling.workflow pre-task ...`
+1. просматривай контекст в порядке `catalog -> graph -> rag -> source`
+1. после завершения запускай `python -m memory.tooling.workflow post-task ...`
+1. промоутируй в curated memory только durable lessons/incidents/decisions
+
+Подробности и операционные примеры:
+
+- `src/memory/DAILY_WORKFLOW.md`
+- `src/memory/README.md`
+
 ### Evidence Anchors For Structural Claims
 
 Перед выводами о repo layout, package sprawl, hotspot families и reorg priority сверяйся с:

@@ -22,6 +22,7 @@ from scripts.memory.sync import (
     _live_managed_node_counts,
     _live_managed_relation_counts,
     _load_memory_mapping,
+    _memory_mapping_path,
     _merge_storage_layer_config,
     _missing_managed_anchor_keys,
     _normalize_docs_repo_reference,
@@ -62,6 +63,19 @@ LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json"
 def _snapshot() -> tuple[Path, object]:
     root = Path(__file__).resolve().parents[4]
     return root, build_snapshot(root, verified_at="2026-04-09")
+
+
+def test_memory_mapping_path_prefers_canonical_graph_mapping(tmp_path: Path) -> None:
+    canonical = tmp_path / "src/memory/graph"
+    canonical.mkdir(parents=True)
+    (canonical / "mappings.yaml").write_text("version: '1.0.0'\n", encoding="utf-8")
+    legacy = tmp_path / "configs/quality"
+    legacy.mkdir(parents=True)
+    (legacy / "neo4j_memory_mapping.yaml").write_text(
+        "version: '0.9.0'\n", encoding="utf-8"
+    )
+
+    assert _memory_mapping_path(tmp_path) == canonical / "mappings.yaml"
 
 
 def test_derive_http_uri_from_bolt() -> None:

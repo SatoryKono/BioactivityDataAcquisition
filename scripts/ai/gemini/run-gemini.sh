@@ -65,6 +65,32 @@ EOF
     exit 0
 fi
 
+# Process administrative commands before any launch preflight.
+case "${1:-start}" in
+    check)
+        bash "${HELPER_DIR}/check-env.sh"
+        exit $?
+        ;;
+    setup)
+        log_info "Running setup (this may take 2-3 minutes)..."
+        log_warn "DO NOT CLOSE THIS WINDOW"
+        echo ""
+
+        bash "${HELPER_DIR}/setup-env.sh"
+        setupExit=$?
+
+        echo ""
+        if [[ $setupExit -eq 0 ]]; then
+            log_success "Setup completed!"
+            log_info "Now run: ./run-gemini.sh"
+        else
+            log_error "Setup failed with exit code: $setupExit"
+            log_info "Check system logs for details"
+        fi
+        exit $setupExit
+        ;;
+esac
+
 # Check environment without blocking
 log_info "Checking environment..."
 
@@ -94,8 +120,8 @@ fi
 
 echo ""
 
-# If anything missing and not already running setup
-if { [[ "$PYTHON_OK" == "false" ]] || [[ "$GEMINI_OK" == "false" ]]; } && [[ "${1:-}" != "setup" ]]; then
+# If anything missing, block launch and ask for setup.
+if [[ "$PYTHON_OK" == "false" ]] || [[ "$GEMINI_OK" == "false" ]]; then
     log_warn "Some components missing"
     log_info "Run setup first: ./run-gemini.sh setup"
     echo ""
@@ -116,30 +142,6 @@ case "$COMMAND" in
         else
             bash "${HELPER_DIR}/run-gemini-impl.sh"
         fi
-        ;;
-    
-    check)
-        bash "${HELPER_DIR}/check-env.sh"
-        exit 0
-        ;;
-    
-    setup)
-        log_info "Running setup (this may take 2-3 minutes)..."
-        log_warn "DO NOT CLOSE THIS WINDOW"
-        echo ""
-        
-        bash "${HELPER_DIR}/setup-env.sh"
-        setupExit=$?
-        
-        echo ""
-        if [[ $setupExit -eq 0 ]]; then
-            log_success "Setup completed!"
-            log_info "Now run: ./run-gemini.sh"
-        else
-            log_error "Setup failed with exit code: $setupExit"
-            log_info "Check system logs for details"
-        fi
-        exit $setupExit
         ;;
     
     *)

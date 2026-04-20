@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     AuditPort,
     LineageStorePort,

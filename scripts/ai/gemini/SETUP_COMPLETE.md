@@ -7,7 +7,7 @@
 ## 📁 Structure
 
 ```
-script-gemini/
+scripts/ai/gemini/
 ├── run-gemini.ps1 ⭐           Main entry point (PowerShell)
 ├── run-gemini.sh ⭐            Main entry point (Bash)
 ├── .env.gemini                API key config
@@ -24,7 +24,7 @@ script-gemini/
 ### PowerShell
 
 ```powershell
-cd script-gemini
+cd scripts/ai/gemini
 
 # Get API key from: https://aistudio.google.com/app/apikeys
 notepad .env.gemini
@@ -37,7 +37,7 @@ notepad .env.gemini
 ### WSL/Bash
 
 ```bash
-cd script-gemini
+cd scripts/ai/gemini
 
 # Get API key from: https://aistudio.google.com/app/apikeys
 nano .env.gemini
@@ -73,7 +73,7 @@ bash run-gemini.sh "what is AI?"
 ✅ Clear status messages
 ✅ Interactive and prompt modes
 ✅ Works on first run
-✅ Portable (copy entire folder)
+✅ Portable inside the repository
 
 ## 🎓 How It Works
 
@@ -102,7 +102,7 @@ GEMINI_API_KEY=AIzaSy...
 ## ✅ Ready!
 
 ```powershell
-cd script-gemini
+cd scripts/ai/gemini
 .\run-gemini.ps1
 ```
 
@@ -128,7 +128,7 @@ Gemini will:
 
 **Both ready to use!**
 
-- `script-codex/run-codex.ps1`
-- `script-gemini/run-gemini.ps1`
+- `scripts/ai/codex/run-codex.ps1`
+- `scripts/ai/gemini/run-gemini.ps1`
 
 🚀

@@ -27,6 +27,14 @@ ______________________________________________________________________
 > При старте новой сессии — попроси агент прочитать этот файл:
 > `Прочитай docs/00-project/ai/memory/agent-memory.md и следуй его инструкциям.`
 
+> **Daily workflow note:** для ежедневной инженерной работы используй
+> canonical memory workflow из `src/memory/DAILY_WORKFLOW.md`:
+> `python -m memory.tooling.workflow pre-task ...`
+> перед задачей и
+> `python -m memory.tooling.workflow post-task ...`
+> после задачи. Session/summary notes должны жить в `src/memory/episodic/`,
+> а durable lessons — промоутиться в `src/memory/curated/`.
+
 ______________________________________________________________________
 
 ## 1. Проект BioETL — Краткая Справка
@@ -189,6 +197,30 @@ uv run python -m scripts.engineering.ci run-tests
 
 # Baselines
 uv run python -m scripts.engineering.baselines dq-baseline --dry-run
+```
+
+### Daily Memory Workflow
+
+Перед обычной engineering/audit задачей не изобретай собственный memory-loop.
+Используй стандартный порядок:
+
+1. `python -m memory.tooling.workflow pre-task ...`
+1. `catalog -> graph -> rag -> source`
+1. правка или аудит canonical source
+1. `python -m memory.tooling.workflow post-task ...`
+1. promotion только для durable knowledge
+
+Минимальный пример:
+
+```bash
+python -m memory.tooling.workflow pre-task \
+  --task-id task-123 \
+  --title "Investigate chembl activity ownership"
+
+python -m memory.tooling.workflow post-task \
+  --task-id task-123 \
+  --title "Investigate chembl activity ownership" \
+  --summary "Verified source surfaces and refreshed memory."
 ```
 
 ### Dashboard-specific note

@@ -158,6 +158,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a compatibility-era mirror under scripts.ai.src for historical import stability; remove it once all legacy references have converged on the canonical src/bioetl package path."
     },
+    "scripts/ai/src/bioetl/application/composite/runtime_wiring_api.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a compatibility-era mirror under scripts.ai.src for historical import stability around composite runtime wiring; remove it once all legacy references have converged on the canonical src/bioetl package path."
+    },
     "scripts/ai/src/check_sonar_issues.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -632,6 +638,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded Mistrall setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
     },
+    "scripts/ai/mistral/run-mistral.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_alias_orphan",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a thin PowerShell compatibility alias to the canonical Mistrall launcher while historical operator paths still reference scripts/ai/mistral; remove it once the alias surface is retired."
+    },
     "scripts/ai/mistrallvibe/helper/check-env.ps1": {
       "owner": "@bioetl-platform",
       "decision": "internal_helper_orphan",
@@ -655,12 +667,6 @@
       "decision": "internal_helper_orphan",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded implementation helper for the historical MistrallVibe launcher stack; remove it when the remaining launcher flow is sunset."
-    },
-    "scripts/ai/mistrallvibe/helper/setup-env.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "internal_helper_orphan",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded MistrallVibe setup helper while environment bootstrap still depends on helper scripts; fold into the canonical setup path when the surface is simplified."
     },
     "scripts/ai/mistrallvibe/helper/setup-env.sh": {
       "owner": "@bioetl-platform",

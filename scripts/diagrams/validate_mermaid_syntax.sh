@@ -12,6 +12,7 @@ PUPPETEER_CFG="$DIAGRAM_THEME_DIR/puppeteer-config.json"
 TEMP_PUPPETEER_CFG=""
 TMP_DIR=""
 PYTHON_BIN=""
+MMDC_BIN="${MMDC_BIN:-$REPO_ROOT/scripts/diagrams/mmdc_wrapper.sh}"
 
 usage() {
   cat <<EOF
@@ -161,8 +162,8 @@ case "$SCOPE" in
     ;;
 esac
 
-if ! command -v mmdc >/dev/null 2>&1; then
-  echo "Error: mmdc not found. Install with: npm install -g @mermaid-js/mermaid-cli" >&2
+if [[ ! -x "$MMDC_BIN" ]]; then
+  echo "Error: mmdc wrapper is not executable: $MMDC_BIN" >&2
   exit 2
 fi
 
@@ -207,9 +208,9 @@ while IFS= read -r -d '' file; do
   out="$TMP_DIR/${count}_${base}.svg"
   err="$TMP_DIR/${count}_${base}.err"
   echo "Validating $file"
-  if ! mmdc -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
+  if ! "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
     # Retry once to reduce flaky Puppeteer/mmdc startup failures.
-    if mmdc -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
+    if "$MMDC_BIN" -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
       continue
     fi
     echo "ERROR: Mermaid validation failed for $file" >&2

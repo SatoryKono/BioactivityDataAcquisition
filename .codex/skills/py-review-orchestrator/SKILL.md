@@ -14,7 +14,9 @@ Run the role-specific workflow as defined in the py-review-orchestrator profile.
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 
 ## Workflow
-1. Open and follow `../../../.claude/agents/py-review-orchestrator.md`.
-2. Execute hierarchical review orchestration (Wave 1, then Wave 2) and respect sector dependencies.
-3. Aggregate sector reports into `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md` (LLM = caller) with complete critical/high issue rollup.
-4. Keep scoring and status thresholds aligned with the profile and BioETL rules.
+1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the review task.
+2. Open and follow `../../../.claude/agents/py-review-orchestrator.md`.
+3. Execute hierarchical review orchestration (Wave 1, then Wave 2) and respect sector dependencies.
+4. Aggregate sector reports into `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md` (LLM = caller) with complete critical/high issue rollup.
+5. Keep scoring and status thresholds aligned with the profile and BioETL rules.
+6. After the review, run `python -m memory.tooling.workflow post-task ...` and promote only durable review knowledge.

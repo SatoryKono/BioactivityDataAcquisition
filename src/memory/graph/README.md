@@ -7,6 +7,8 @@ Current state:
 
 - `sync.py` builds and optionally applies the graph snapshot
 - `query.py` exposes operator-facing query shortcuts over the canonical graph
+- `mappings.yaml` is the canonical graph mapping/configuration surface
+- `ontology.yaml` records the high-signal ontology families and invariants
 - `scripts/memory/` still exists as a compatibility surface for legacy callers
 
 Primary entrypoints:

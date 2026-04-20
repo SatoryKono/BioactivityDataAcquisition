@@ -80,6 +80,18 @@ EOF
     exit 0
 fi
 
+# Process administrative commands before launch preflight.
+case "${1:-start}" in
+    check)
+        bash "${HELPER_DIR}/check-env.sh"
+        exit $?
+        ;;
+    setup)
+        bash "${HELPER_DIR}/setup-env.sh"
+        exit $?
+        ;;
+esac
+
 # Check environment
 log_info "Checking environment setup..."
 echo ""
@@ -130,16 +142,6 @@ case "$COMMAND" in
     
     pull)
         bash "${HELPER_DIR}/run-mistrall-impl.sh" pull "$@"
-        ;;
-    
-    check)
-        bash "${HELPER_DIR}/check-env.sh"
-        exit 0
-        ;;
-    
-    setup)
-        bash "${HELPER_DIR}/setup-env.sh"
-        exit $?
         ;;
     
     *)

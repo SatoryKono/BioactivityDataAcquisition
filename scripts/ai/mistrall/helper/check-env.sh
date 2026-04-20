@@ -85,6 +85,24 @@ else
     ALL_CHECKS=false
 fi
 
+if [[ ! -f "${ENV_FILE}" ]]; then
+    log_warn "Creating .env.mistrall template..."
+    cat > "${ENV_FILE}" <<'EOF'
+# Mistral Configuration
+MISTRALL_PORT=11434
+MISTRALL_MODEL=mistral:latest
+MISTRALL_MEMORY=2g
+DOCKER_BUILDKIT=1
+
+# Ollama container name
+OLLAMA_CONTAINER=mistral-ollama
+
+# API endpoint
+OLLAMA_API_URL=http://localhost:${MISTRALL_PORT}
+EOF
+    log_warn ".env.mistrall created - review values before first run"
+fi
+
 # 5. Check docker-compose.mistrall.yml
 log_info "Checking docker-compose.mistrall.yml..."
 COMPOSE_FILE="${ROOT_DIR}/docker-compose.mistrall.yml"
@@ -110,6 +128,6 @@ if [[ "${ALL_CHECKS}" == "true" ]]; then
     log_success "All checks passed"
     exit 0
 else
-    log_warn "Some checks failed - will attempt to fix"
+    log_warn "Some checks failed"
     exit 1
 fi

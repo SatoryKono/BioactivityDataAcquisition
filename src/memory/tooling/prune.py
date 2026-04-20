@@ -11,10 +11,13 @@ from typing import Any
 
 import yaml
 
-from memory.resources import POLICY_DIR, load_yaml_resource
+from memory.resources import POLICY_DIR, discover_memory_root, load_yaml_resource
 
-EPISODIC_ROOT = Path(__file__).resolve().parents[1] / "episodic"
 SUPPORTED_NOTE_EXTENSIONS = {".json", ".yaml", ".yml", ".md"}
+
+
+def _episodic_root() -> Path:
+    return discover_memory_root() / "episodic"
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,7 +70,7 @@ def _extract_metadata(path: Path) -> dict[str, Any]:
 
 
 def find_prunable_episodic_notes(
-    root: Path = EPISODIC_ROOT,
+    root: Path | None = None,
     *,
     now: datetime | None = None,
 ) -> list[PruneCandidate]:
@@ -75,11 +78,12 @@ def find_prunable_episodic_notes(
     current_time = now or datetime.now(UTC)
     default_ttl = _default_ttl_days()
     candidates: list[PruneCandidate] = []
+    resolved_root = root or _episodic_root()
 
-    if not root.exists():
+    if not resolved_root.exists():
         return candidates
 
-    for path in sorted(root.rglob("*")):
+    for path in sorted(resolved_root.rglob("*")):
         if not path.is_file() or path.suffix not in SUPPORTED_NOTE_EXTENSIONS:
             continue
         if path.name == "README.md":
@@ -103,7 +107,7 @@ def find_prunable_episodic_notes(
 
 
 def prune_episodic_notes(
-    root: Path = EPISODIC_ROOT,
+    root: Path | None = None,
     *,
     apply: bool = False,
     now: datetime | None = None,
@@ -133,7 +137,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--root",
         type=Path,
-        default=EPISODIC_ROOT,
+        default=_episodic_root(),
         help="Episodic memory root to scan.",
     )
     parser.add_argument(

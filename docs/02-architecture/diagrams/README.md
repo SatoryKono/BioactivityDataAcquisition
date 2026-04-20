@@ -241,7 +241,7 @@ ______________________________________________________________________
 ### Prerequisites
 
 ```bash
-# Mermaid CLI (required)
+# Mermaid CLI (required for native/local mode)
 npm install -g @mermaid-js/mermaid-cli
 
 # Browser runtime for mmdc (required by Puppeteer in local validation)
@@ -256,6 +256,13 @@ brew install librsvg
 # Ubuntu/Debian:
 sudo apt-get install librsvg2-bin
 ```
+
+Tooling note:
+
+- repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;
+- if a native `mmdc` is unavailable, the wrapper can fall back to Docker image `minlag/mermaid-cli`;
+- to force Docker mode even when a local `mmdc` exists, set `MMDC_FORCE_DOCKER=1`;
+- to pin an explicit binary, set `MMDC_BIN=/path/to/mmdc`.
 
 ### Quick start
 

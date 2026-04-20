@@ -16,6 +16,7 @@ venv/
 env/
 ENV/
 .python-user/
+MagicMock/
 
 # AI agent temporary files
 .codex_tmp/
@@ -73,6 +74,7 @@ data/input/bronze/
 
 # Logs and reports
 logs/
+test-output/
 *.log
 *.tmp
 *report*.txt
@@ -92,6 +94,7 @@ log_test.txt
 .idea/
 .vscode/
 .cursor/
+.sonarlint/
 .trae/
 .windsurf/
 .cursorrules
@@ -172,6 +175,7 @@ nul
 .mkdocs-site-tmp/
 output/
 site/
+src/tools/reports/
 docs/site/
 docs/exports/*.merged.md
 tests.zip
@@ -203,6 +207,7 @@ docs/02-architecture/mmd-diagrams/**/svg/*.svg
 /test_author_quick.py
 /temp_batch_executor.txt
 /.tmp_*
+/contract-registry-diagnostics.json
 /.tmp_mypy_*.log
 /mypy_*.log
 /bash.exe.stackdump

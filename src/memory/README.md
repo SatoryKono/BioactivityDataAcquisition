@@ -44,6 +44,8 @@ The validator checks:
 - YAML and JSON resources parse successfully
 - schema files expose basic JSON Schema contracts
 - source priority references valid source-registry entries
+- storage policy covers every retained artifact class and keeps memory paths under
+  `src/memory/`
 
 ## Graph entrypoints
 
@@ -67,13 +69,18 @@ python -m scripts.memory sync --help
 python -m scripts.memory query --help
 ```
 
+These legacy `scripts.memory.*` modules now resolve to the canonical
+`memory.graph.*` implementations.
+
 ## RAG manifest MVP
 
-The initial RAG MVP builds deterministic markdown manifests for:
+The current RAG MVP builds deterministic manifests for:
 
-- `docs/00-project/`
-- `docs/02-architecture/decisions/`
-- `docs/05-operations/runbooks/`
+- active project and operations docs
+- accepted ADRs
+- runtime code under `src/bioetl/`
+- test evidence under `tests/`
+- project configs under `configs/`
 
 Generate manifests with:
 
@@ -124,6 +131,46 @@ Apply pruning:
 python -m memory.tooling.prune --apply
 ```
 
+Run the canonical daily agent/engineering workflow:
+
+```bash
+python -m memory.tooling.workflow pre-task --task-id task-123 --title "Investigate chembl memory"
+python -m memory.tooling.workflow post-task --task-id task-123 --title "Investigate chembl memory" --summary "Validated and refreshed memory surfaces."
+```
+
+Detailed daily playbook:
+
+- [DAILY_WORKFLOW.md](DAILY_WORKFLOW.md)
+
+## Unified query facade
+
+Local memory retrieval can be routed through one entry point:
+
+```bash
+python -m memory.query catalog sources
+python -m memory.query rag --query chembl_activity --source-type code --profile implementation
+python -m memory.query timeline --event-family run --query manifest --profile operations
+python -m memory.query all chembl_activity --profile architecture
+python -m memory.query graph owner-pipeline chembl_activity
+
+Task-aware retrieval profiles:
+- `general`: balanced default retrieval across memory surfaces.
+- `architecture`: prefer ADR, architecture docs, and structural evidence.
+- `implementation`: prefer runtime code, configs, and test-adjacent implementation surfaces.
+- `operations`: prefer runbooks, incident context, and run/CI operational evidence.
+- `audit`: prefer tests, ADRs, configs, and broad review evidence.
+```
+
+## Storage policy
+
+Artifact storage policy is declared in `policy/storage.yaml`.
+
+Current default stance:
+
+- `policy/`, `catalog/`, `schemas/`, and `curated/` are versioned
+- `episodic/` is ephemeral and prunable
+- `rag/manifests/`, `graph/exports/`, and `timeline/events/` are rebuild-only
+
 ## Notes workflow
 
 Create a note from a built-in template:
@@ -139,3 +186,17 @@ Promote an episodic note into curated memory:
 python -m memory.tooling.promote_note --source src/memory/episodic/summaries/example.md --target-kind lesson
 python -m memory.tooling.promote_note --source src/memory/episodic/summaries/example.md --target-kind lesson --move
 ```
+
+## Daily Agent Workflow
+
+Canonical daily sequence for agents and engineers:
+
+1. run `python -m memory.tooling.workflow pre-task ...`
+2. inspect `catalog -> graph -> rag -> source`
+3. update canonical source files
+4. run `python -m memory.tooling.workflow post-task ...`
+5. promote only durable lessons, incidents, decisions, or domain knowledge
+
+`pre-task` auto-refreshes rebuild-only RAG and timeline artifacts if manifests
+are missing, so the workflow remains usable even when `src/memory/` does not
+store generated manifests in git.

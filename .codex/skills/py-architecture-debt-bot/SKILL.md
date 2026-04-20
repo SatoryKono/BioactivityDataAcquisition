@@ -19,7 +19,9 @@ Run the role-specific workflow as defined in the py-architecture-debt-bot profil
 
 ## Workflow
 
+1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the debt-reduction task.
 1. Open and follow `../../../.claude/agents/py-architecture-debt-bot.md`.
 1. Use the deterministic helpers before editing code or delegating subagents.
 1. Keep `configs/` mutations delegated to `py-config-bot`.
 1. Close every debt-reduction wave with `py-test-bot`, `py-doc-bot`, and `py-audit-bot`.
+1. After closeout, run `python -m memory.tooling.workflow post-task ...` and promote only durable debt-reduction lessons or architecture incidents.

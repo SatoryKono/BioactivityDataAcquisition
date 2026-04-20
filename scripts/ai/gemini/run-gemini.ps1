@@ -9,8 +9,18 @@ param(
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $HelperDir = Join-Path $ScriptDir "helper"
-$RepoWSL = "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2"
-$HelperWSL = "$RepoWSL/script-gemini/helper"
+$RepoRootWin = [System.IO.Path]::GetFullPath((Join-Path $ScriptDir "..\..\.."))
+try {
+    $RepoWSL = (wsl -d Ubuntu -- wslpath -a ($RepoRootWin -replace "\\", "/") 2>$null | Out-String).Trim()
+} catch {
+    $RepoWSL = ""
+}
+if (-not $RepoWSL) {
+    $DriveLetter = $RepoRootWin.Substring(0, 1).ToLowerInvariant()
+    $DrivePath = $RepoRootWin.Substring(2) -replace "\\", "/"
+    $RepoWSL = "/mnt/$DriveLetter$DrivePath"
+}
+$HelperWSL = "$RepoWSL/scripts/ai/gemini/helper"
 $InvocationHint = Resolve-Path -Relative -LiteralPath $MyInvocation.MyCommand.Path
 $SetupHint = "$InvocationHint setup"
 
@@ -45,6 +55,40 @@ if ($Command -eq "help" -or $Command -eq "-h" -or $Command -eq "--help") {
     Write-Host "  $InvocationHint 'explain quantum computing'"
     Write-Host ""
     exit 0
+}
+
+# Process administrative commands before any launch preflight.
+switch -Regex ($Command) {
+    "^check$" {
+        & (Join-Path $HelperDir "check-env.ps1")
+        exit $LASTEXITCODE
+    }
+    "^setup$" {
+        Write-Info "Running setup (this may take 2-3 minutes)..."
+        Write-Warn "DO NOT CLOSE THIS WINDOW"
+        Write-Host ""
+
+        $hostIP = wsl -d Ubuntu -- bash -lc 'ip route show default 2>/dev/null | cut -d" " -f3 | head -n 1' 2>$null
+        $hostIP = ($hostIP | Out-String).Trim()
+
+        if ($hostIP) {
+            Write-Info "Proxy host: $hostIP:3128"
+            wsl -d Ubuntu -- bash -lc "export http_proxy=http://${hostIP}:3128 https_proxy=http://${hostIP}:3128; '$HelperWSL/setup-env.sh'"
+        } else {
+            wsl -d Ubuntu -e bash -- "$HelperWSL/setup-env.sh"
+        }
+        $setupExit = $LASTEXITCODE
+
+        Write-Host ""
+        if ($setupExit -eq 0) {
+            Write-Success "Setup completed!"
+            Write-Info "Now run: $InvocationHint"
+        } else {
+            Write-Error "Setup failed with exit code: $setupExit"
+            Write-Info "Check WSL logs: wsl -d Ubuntu -- journalctl -xe"
+        }
+        exit $setupExit
+    }
 }
 
 # Check environment without blocking
@@ -82,14 +126,12 @@ if ($geminiExists) {
 
 Write-Host ""
 
-# If anything missing and not already running setup, prompt user
+# If anything missing, block launch and ask for setup.
 if (-not $pythonExists -or -not $geminiExists) {
-    if ($Command -ne "setup") {
-        Write-Warn "Some components missing"
-        Write-Info "Run setup first: $SetupHint"
-        Write-Host ""
-        exit 1
-    }
+    Write-Warn "Some components missing"
+    Write-Info "Run setup first: $SetupHint"
+    Write-Host ""
+    exit 1
 }
 
 # Process command
@@ -109,40 +151,6 @@ switch -Regex ($Command) {
         } else {
             wsl -d Ubuntu -e bash -- "$HelperWSL/run-gemini-impl.sh"
         }
-    }
-    
-    "^check$" {
-        & (Join-Path $HelperDir "check-env.ps1")
-        exit 0
-    }
-    
-    "^setup$" {
-        Write-Info "Running setup (this may take 2-3 minutes)..."
-        Write-Warn "DO NOT CLOSE THIS WINDOW"
-        Write-Host ""
-        
-        # Get Windows host IP for proxy
-        $hostIP = wsl -d Ubuntu -- bash -lc 'ip route show default 2>/dev/null | cut -d" " -f3 | head -n 1' 2>$null
-        $hostIP = ($hostIP | Out-String).Trim()
-        
-        # Run setup with proxy environment variables
-        if ($hostIP) {
-            Write-Info "Proxy host: $hostIP:3128"
-            wsl -d Ubuntu -- bash -lc "export http_proxy=http://${hostIP}:3128 https_proxy=http://${hostIP}:3128; '$HelperWSL/setup-env.sh'"
-        } else {
-            wsl -d Ubuntu -e bash -- "$HelperWSL/setup-env.sh"
-        }
-        $setupExit = $LASTEXITCODE
-        
-        Write-Host ""
-        if ($setupExit -eq 0) {
-            Write-Success "Setup completed!"
-            Write-Info "Now run: $InvocationHint"
-        } else {
-            Write-Error "Setup failed with exit code: $setupExit"
-            Write-Info "Check WSL logs: wsl -d Ubuntu -- journalctl -xe"
-        }
-        exit $setupExit
     }
     
     default {

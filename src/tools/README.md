@@ -88,7 +88,7 @@ python src/tools/file_merger.py --merge_project_code
 Merges all markdown files from `docs/` directory:
 
 ```bash
-# Default output: documentation_merged.md
+# Default output: reports/documentation_merged.md
 python src/tools/file_merger.py --merge_documentation
 
 # Custom output file
@@ -100,7 +100,7 @@ python src/tools/file_merger.py --merge_documentation -o my_docs.md
 Merges all YAML files from `configs/` directory:
 
 ```bash
-# Default output: configs_merged.md
+# Default output: reports/configs_merged.md
 python src/tools/file_merger.py --merge_configs
 
 # Custom output file
@@ -112,7 +112,7 @@ python src/tools/file_merger.py --merge_configs -o my_configs.md
 Creates ASCII tree visualization of entire project:
 
 ```bash
-# Default output: project_structure.md
+# Default output: reports/project_structure.md
 python src/tools/file_merger.py --project_structure
 
 # Custom output file

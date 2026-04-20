@@ -5,7 +5,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from memory.rag.chunking import infer_domain, infer_source_type, split_markdown_sections
+from memory.rag.chunking import (
+    infer_domain,
+    infer_source_type,
+    split_config_sections,
+    split_markdown_sections,
+    split_python_symbols,
+)
 from memory.rag.indexing import build_rag_manifests, write_rag_manifests
 from memory.rag.retrieval import filter_chunks, load_chunk_manifest
 
@@ -31,16 +37,56 @@ def test_infer_source_metadata_from_repo_paths() -> None:
     assert infer_source_type(Path("docs/02-architecture/decisions/ADR-043-example.md")) == "adr"
     assert infer_source_type(Path("docs/05-operations/runbooks/example.md")) == "runbook"
     assert infer_source_type(Path("docs/00-project/overview.md")) == "doc"
+    assert infer_source_type(Path("src/bioetl/application/service.py")) == "code"
+    assert infer_source_type(Path("tests/unit/test_service.py")) == "test"
+    assert infer_source_type(Path("configs/app.yaml")) == "config"
     assert infer_domain(Path("docs/02-architecture/decisions/ADR-043-example.md")) == "architecture"
     assert infer_domain(Path("docs/05-operations/runbooks/example.md")) == "operations"
     assert infer_domain(Path("docs/00-project/overview.md")) == "project"
+    assert infer_domain(Path("src/bioetl/application/service.py")) == "runtime"
+    assert infer_domain(Path("tests/unit/test_service.py")) == "quality"
+    assert infer_domain(Path("configs/app.yaml")) == "configuration"
 
 
-def test_build_rag_manifests_indexes_selected_markdown_sources(tmp_path: Path) -> None:
+def test_split_python_symbols_extracts_module_preamble_and_top_level_symbols() -> None:
+    text = '''"""Module."""
+
+from __future__ import annotations
+
+import os
+
+
+class Demo:
+    pass
+
+
+def run() -> None:
+    return None
+'''
+    sections = split_python_symbols(text)
+    assert [section.title for section in sections] == ["module-preamble", "Demo", "run"]
+    assert [section.symbol_kind for section in sections] == ["module_preamble", "class", "function"]
+
+
+def test_split_config_sections_extracts_top_level_keys() -> None:
+    text = """
+version: 1
+sources:
+  enabled: true
+"""
+    sections = split_config_sections(text, Path("configs/example.yaml"))
+    assert [section.title for section in sections] == ["version", "sources"]
+    assert all(section.symbol_kind == "config_section" for section in sections)
+
+
+def test_build_rag_manifests_indexes_docs_code_tests_and_configs(tmp_path: Path) -> None:
     (tmp_path / "docs/00-project").mkdir(parents=True)
     (tmp_path / "docs/02-architecture/decisions").mkdir(parents=True)
     (tmp_path / "docs/05-operations/runbooks").mkdir(parents=True)
     (tmp_path / "docs/99-archive").mkdir(parents=True)
+    (tmp_path / "src/bioetl/application").mkdir(parents=True)
+    (tmp_path / "tests/unit").mkdir(parents=True)
+    (tmp_path / "configs").mkdir(parents=True)
 
     (tmp_path / "docs/00-project/overview.md").write_text("# Overview\nAlpha\n", encoding="utf-8")
     (tmp_path / "docs/02-architecture/decisions/ADR-999-test.md").write_text(
@@ -51,21 +97,61 @@ def test_build_rag_manifests_indexes_selected_markdown_sources(tmp_path: Path) -
         "# Runbook\nRecovery steps.\n",
         encoding="utf-8",
     )
+    (tmp_path / "src/bioetl/application/service.py").write_text(
+        "class Demo:\n    pass\n\n\ndef run() -> None:\n    return None\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tests/unit/test_service.py").write_text(
+        "def test_demo() -> None:\n    assert True\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "configs/app.yaml").write_text(
+        "version: 1\nfeature_flags:\n  enabled: true\n",
+        encoding="utf-8",
+    )
     (tmp_path / "docs/99-archive/ignored.md").write_text("# Ignore\n", encoding="utf-8")
 
     catalog, chunks = build_rag_manifests(tmp_path)
 
-    assert catalog["source_count"] == 3
-    assert {item["source_type"] for item in catalog["sources"]} == {"doc", "adr", "runbook"}
+    assert catalog["source_count"] == 6
+    assert {item["source_type"] for item in catalog["sources"]} == {
+        "doc",
+        "adr",
+        "runbook",
+        "code",
+        "test",
+        "config",
+    }
     assert all("99-archive" not in chunk["source_path"] for chunk in chunks)
+    assert {chunk["repo_zone"] for chunk in chunks if chunk["source_type"] == "code"} == {"canonical_runtime"}
+    assert any(chunk["symbol_kind"] == "config_section" for chunk in chunks)
+    code_chunk = next(chunk for chunk in chunks if chunk["source_type"] == "code" and chunk["symbol_kind"] == "class")
+    assert "module_surface:src/bioetl/application/service.py" in code_chunk["graph_node_refs"]
+    assert "class_surface:src.bioetl.application.service.Demo" in code_chunk["graph_node_refs"]
+    assert "module::src.bioetl.application.service" in code_chunk["related_refs"]
+    assert "class::src.bioetl.application.service.Demo" in code_chunk["related_refs"]
+    test_chunk = next(chunk for chunk in chunks if chunk["source_type"] == "test")
+    assert "test_artifact:tests/unit/test_service.py" in test_chunk["graph_node_refs"]
+    assert "test_surface:unit tests" in test_chunk["graph_node_refs"]
+    assert "test-artifact::tests/unit/test_service.py" in test_chunk["related_refs"]
+    assert "test-suite::unit tests" in test_chunk["related_refs"]
+    config_chunk = next(chunk for chunk in chunks if chunk["source_type"] == "config")
+    assert "config::configs/app.yaml" in config_chunk["related_refs"]
 
 
 def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:
     (tmp_path / "docs/00-project").mkdir(parents=True)
+    (tmp_path / "src/bioetl/application").mkdir(parents=True)
+    (tmp_path / "configs").mkdir(parents=True)
     (tmp_path / "docs/00-project/overview.md").write_text(
         "# Overview\nAlpha\n\n## Scope\nBeta\n",
         encoding="utf-8",
     )
+    (tmp_path / "src/bioetl/application/service.py").write_text(
+        "def run() -> None:\n    return None\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "configs/app.yaml").write_text("version: 1\n", encoding="utf-8")
 
     output_dir = tmp_path / "out"
     catalog_path, chunks_path = write_rag_manifests(tmp_path, output_dir)
@@ -73,7 +159,9 @@ def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
     chunks = load_chunk_manifest(chunks_path)
 
-    assert catalog["source_count"] == 1
-    assert catalog["chunk_count"] == 2
-    assert len(chunks) == 2
+    assert catalog["source_count"] == 3
+    assert catalog["chunk_count"] == 4
+    assert len(chunks) == 4
     assert len(filter_chunks(chunks, source_type="doc", query="scope")) == 1
+    assert len(filter_chunks(chunks, source_type="code", symbol_kind="function", query="run")) == 1
+    assert len(filter_chunks(chunks, source_type="config", repo_zone="unclassified", query="version")) == 1

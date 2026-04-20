@@ -65,7 +65,9 @@ if [[ -f "${ENV_FILE}" ]]; then
 else
     cat > "${ENV_FILE}" <<'EOF'
 # Mistral Vibe Configuration
-VIBE_API_KEY=your-api-key-here
+MISTRAL_API_KEY=your-api-key-here
+# Legacy compatibility alias:
+# VIBE_API_KEY=your-api-key-here
 VIBE_PORT=5173
 VIBE_HOST=localhost
 EOF
@@ -162,7 +164,7 @@ echo "${SEPARATOR}"
 echo ""
 log_info "Next steps:"
 echo "  1. Get your API key: https://console.mistral.ai/api-keys/"
-echo "  2. Edit .env.mistrallvibe and add VIBE_API_KEY"
+echo "  2. Edit .env.mistrallvibe and add MISTRAL_API_KEY"
 echo "  3. Start Vibe: ./run-vibe.sh"
 echo "  4. Or run with a prompt: ./run-vibe.sh \"inspect the failing tests\""
 echo ""

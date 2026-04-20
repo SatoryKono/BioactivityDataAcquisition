@@ -1,11 +1,11 @@
-# Gemini - Consolidated Setup
+# Gemini - Local Launcher
 
-Единая точка входа для запуска Google Gemini AI на безголовой машине.
+Автономная точка входа для запуска Google Gemini AI из `scripts/ai/gemini`.
 
 ## 📁 Структура
 
 ```
-script-gemini/
+scripts/ai/gemini/
 ├── run-gemini.ps1             ⭐ Main entry point (PowerShell)
 ├── run-gemini.sh              ⭐ Main entry point (WSL/Bash)
 ├── .env.gemini                # API key configuration
@@ -23,7 +23,7 @@ script-gemini/
 ### From PowerShell (Windows)
 
 ```powershell
-cd script-gemini
+cd scripts/ai/gemini
 
 # First time: check and setup
 .\run-gemini.ps1 check
@@ -40,7 +40,7 @@ notepad .env.gemini
 ### From WSL (Ubuntu)
 
 ```bash
-cd script-gemini
+cd scripts/ai/gemini
 
 # First time: check and setup
 bash run-gemini.sh check
@@ -143,6 +143,10 @@ Get from: https://aistudio.google.com/app/apikeys
 - Google account (for API key)
 
 Python3 and pip3 are auto-installed if missing.
+
+Жёсткие пути вида `/mnt/e/...` не используются: PowerShell launcher вычисляет
+WSL-путь от текущего расположения репозитория, а Bash helper'ы определяют
+корень через `git rev-parse` с локальным fallback.
 
 ## 🆘 Troubleshooting
 

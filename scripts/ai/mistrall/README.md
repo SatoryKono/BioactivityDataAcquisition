@@ -1,16 +1,17 @@
 # Mistral - AI Model Server (via Ollama)
 
-Analogous scripts to `script-codex` for running Mistral models via Ollama in Docker.
+Canonical local-model launcher for running Mistral-compatible models via Ollama in Docker.
+The path `scripts/ai/mistral` is available as a thin compatibility alias.
 
 ## Quick Start
 
 ### Linux/WSL
 ```bash
-chmod +x script-mistrall/*.sh script-mistrall/helper/*.sh
-./run-mistrall.sh daemon  # Start in background
-./run-mistrall.sh pull    # Pull Mistral model
-./run-mistrall.sh status  # Check if running
-./run-mistrall.sh logs    # View logs
+chmod +x scripts/ai/mistrall/*.sh scripts/ai/mistrall/helper/*.sh
+bash scripts/ai/mistrall/run-mistrall.sh daemon  # Start in background
+bash scripts/ai/mistrall/run-mistrall.sh pull    # Pull model
+bash scripts/ai/mistrall/run-mistrall.sh status  # Check if running
+bash scripts/ai/mistrall/run-mistrall.sh logs    # View logs
 ```
 
 ### Windows (PowerShell)
@@ -38,7 +39,7 @@ chmod +x script-mistrall/*.sh script-mistrall/helper/*.sh
 
 ## Environment Variables
 
-Edit `.env.mistrall` to customize:
+Edit `scripts/ai/mistrall/.env.mistrall` to customize:
 
 - `MISTRALL_PORT` - Ollama API port (default: 11434)
 - `MISTRALL_MODEL` - Model to pull (default: mistral:latest)
@@ -48,7 +49,7 @@ Edit `.env.mistrall` to customize:
 ## Structure
 
 ```
-script-mistrall/
+scripts/ai/mistrall/
 ├── run-mistrall.sh              # Main entry point (Linux/WSL)
 ├── run-mistrall.ps1             # Main entry point (Windows)
 ├── .env.mistrall                # Configuration
@@ -85,7 +86,7 @@ curl -X POST http://localhost:11434/api/generate \
 ## Troubleshooting
 
 ### Port already in use
-Change `MISTRALL_PORT` in `.env.mistrall`:
+Change `MISTRALL_PORT` in `scripts/ai/mistrall/.env.mistrall`:
 ```bash
 MISTRALL_PORT=11435
 ```
@@ -94,7 +95,7 @@ MISTRALL_PORT=11435
 Models require internet. For offline use, pre-pull the model on a connected machine.
 
 ### Out of memory
-Adjust `MISTRALL_MEMORY` in `.env.mistrall` and Docker resource limits.
+Adjust `MISTRALL_MEMORY` in `scripts/ai/mistrall/.env.mistrall` and Docker resource limits.
 
 ### Docker not found
 Ensure Docker is installed and running. On Windows, start Docker Desktop first.

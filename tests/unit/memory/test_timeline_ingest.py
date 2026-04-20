@@ -54,6 +54,17 @@ def test_build_run_events_projects_manifest_and_ledger(tmp_path: Path) -> None:
         "run.manifest_registered",
         "run.run_started",
     }
+    manifest_event = next(event for event in events if event["event_type"] == "run.manifest_registered")
+    assert manifest_event["event_family"] == "run"
+    assert "runtime_evidence_surface:run_manifest" in manifest_event["graph_node_refs"]
+    assert "pipeline_surface:chembl_activity" in manifest_event["graph_node_refs"]
+    assert "pipeline::chembl_activity" in manifest_event["related_refs"]
+    assert "provider::chembl" in manifest_event["related_refs"]
+    assert "entity::chembl.activity" in manifest_event["related_refs"]
+    assert "run-id::r1" in manifest_event["related_refs"]
+    ledger_event = next(event for event in events if event["event_type"] == "run.run_started")
+    assert "run-manifest::m1" in ledger_event["related_refs"]
+    assert "runtime-evidence::run_ledger" in ledger_event["related_refs"]
 
 
 def test_build_ci_events_projects_workflows_and_jobs(tmp_path: Path) -> None:
@@ -74,6 +85,11 @@ jobs:
     events = build_ci_events(tmp_path)
     assert any(event["event_type"] == "ci.workflow_defined" for event in events)
     assert any(event["event_type"] == "ci.job_defined" for event in events)
+    job_event = next(event for event in events if event["event_type"] == "ci.job_defined")
+    assert "workflow_job_surface:Tests::lint" in job_event["graph_node_refs"]
+    assert "workflow::Tests" in job_event["related_refs"]
+    assert "workflow-job::Tests::lint" in job_event["related_refs"]
+    assert "workflow-path::.github/workflows/tests.yml" in job_event["related_refs"]
 
 
 def test_build_incident_events_projects_incident_runbooks(tmp_path: Path) -> None:
@@ -91,6 +107,10 @@ def test_build_incident_events_projects_incident_runbooks(tmp_path: Path) -> Non
     events = build_incident_events(tmp_path)
     assert len(events) == 1
     assert events[0]["event_type"] == "incident.runbook_defined"
+    assert events[0]["event_family"] == "incident"
+    assert "doc_artifact:docs/05-operations/runbooks/incident-response.md" in events[0]["graph_node_refs"]
+    assert "runbook::docs/05-operations/runbooks/incident-response.md" in events[0]["related_refs"]
+    assert "incident::incident-response" in events[0]["related_refs"]
 
 
 def test_write_timeline_outputs(tmp_path: Path) -> None:

@@ -21,6 +21,7 @@ def test_create_episodic_session_note(tmp_path: Path) -> None:
     note = parse_markdown_note(path)
     assert note.metadata["task_id"] == "task-123"
     assert note.metadata["ttl_days"] == 14
+    assert note.metadata["confidence"] == "episodic"
     assert "Context" in note.body
 
 

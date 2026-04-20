@@ -11,6 +11,15 @@ from memory.resources import MEMORY_ROOT
 DEFAULT_EVENTS_DIR = MEMORY_ROOT / "timeline" / "events"
 
 
+def dedupe_preserve_order(values: list[str]) -> list[str]:
+    """Return a stable de-duplicated list preserving original order."""
+    result: list[str] = []
+    for value in values:
+        if value not in result:
+            result.append(value)
+    return result
+
+
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> Path:
     """Write a deterministic JSONL artifact."""
     path.parent.mkdir(parents=True, exist_ok=True)

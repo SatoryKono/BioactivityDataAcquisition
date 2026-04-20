@@ -7,14 +7,14 @@ Compatibility surface for the canonical `scripts/ai/vibe` launcher.
 ### Windows (PowerShell)
 ```powershell
 cd scripts/ai/mistrallvibe
-notepad .env.mistrallvibe    # Add VIBE_API_KEY
+notepad .env.mistrallvibe    # Add MISTRAL_API_KEY
 .\run-vibe.ps1
 ```
 
 ### Linux/WSL (Bash)
 ```bash
 cd scripts/ai/mistrallvibe
-nano .env.mistrallvibe       # Add VIBE_API_KEY
+nano .env.mistrallvibe       # Add MISTRAL_API_KEY
 ./run-vibe.sh
 ```
 
@@ -32,7 +32,7 @@ nano .env.mistrallvibe       # Add VIBE_API_KEY
 
 Edit `.env.mistrallvibe`:
 ```bash
-VIBE_API_KEY=your-api-key-here
+MISTRAL_API_KEY=your-api-key-here
 ```
 
 Get API key from: https://console.mistral.ai/api-keys/

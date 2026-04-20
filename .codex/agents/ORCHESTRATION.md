@@ -65,6 +65,27 @@ Operational defaults:
 - family-level topology важнее whole-layer breadth;
 - topology показывает, где смотреть, а governance signals — где реально действовать.
 
+## 1.2 Memory-Enabled Task Loop
+
+Перед стандартным subagent workflow оркестратор и role-specific profiles должны
+использовать canonical memory loop из `src/memory/DAILY_WORKFLOW.md`.
+
+Минимальный порядок:
+
+1. `python -m memory.tooling.workflow pre-task --task-id <id> --title "<task>"`
+1. retrieval order: `catalog -> graph -> rag -> source`
+1. baseline/profile-specific work
+1. `python -m memory.tooling.workflow post-task --task-id <id> --title "<task>" --summary "<result>"`
+1. promotion только для durable knowledge
+
+Это не заменяет runtime source или `.codex/agents/*.md`, а стандартизирует:
+
+- pre-task retrieval
+- session-note creation
+- post-task summary
+- refresh rebuild-only memory artifacts
+- optional promotion into curated memory
+
 ---
 
 ## 2. Стандартный workflow задачи

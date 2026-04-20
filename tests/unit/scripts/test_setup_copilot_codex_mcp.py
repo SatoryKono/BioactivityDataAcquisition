@@ -36,6 +36,6 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert servers["github"]["args"][0] == str(
         (workspace_root / "scripts/ai/mcp/github-mcp-wrapper.sh").resolve()
     )
-    assert servers["needle"]["type"] == "http"
-    assert servers["needle"]["url"] == "https://mcp.needle-ai.com/mcp"
-    assert servers["needle"]["bearer_token_env_var"] == "NEEDLE_API_KEY"
+    assert servers["needle"]["args"][0] == str(
+        (workspace_root / "scripts/ai/mcp/mcp_needle_wrapper.sh").resolve()
+    )
