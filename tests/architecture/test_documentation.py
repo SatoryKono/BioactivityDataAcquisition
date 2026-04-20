@@ -137,6 +137,32 @@ def _missing_exception_docstrings(
     return missing
 
 
+def _iter_public_class_defs(tree: ast.AST) -> list[ast.ClassDef]:
+    return [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef) and not node.name.startswith("_")
+    ]
+
+
+def _looks_like_adapter_class(node: ast.ClassDef) -> bool:
+    return any(marker in node.name for marker in ("Adapter", "Client", "Fetcher"))
+
+
+def _missing_adapter_class_docstrings(py_file: Path, *, src_dir: Path) -> list[str]:
+    try:
+        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return []
+
+    relative_path = py_file.relative_to(src_dir)
+    return [
+        f"{relative_path}:{node.lineno} - class {node.name}"
+        for node in _iter_public_class_defs(tree)
+        if _looks_like_adapter_class(node) and not ast.get_docstring(node)
+    ]
+
+
 class TestModuleDocstrings:
     """Tests ensuring modules have proper documentation."""
 
@@ -221,31 +247,9 @@ class TestClassDocstrings:
         for py_file in adapters_dir.rglob("*.py"):
             if py_file.name in excluded_files:
                 continue
-
-            with py_file.open(encoding="utf-8") as f:
-                try:
-                    tree = ast.parse(f.read())
-                except SyntaxError:
-                    continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Skip private classes
-                    if node.name.startswith("_"):
-                        continue
-
-                    # Check if it looks like an adapter
-                    is_adapter = (
-                        "Adapter" in node.name
-                        or "Client" in node.name
-                        or "Fetcher" in node.name
-                    )
-
-                    if is_adapter and not ast.get_docstring(node):
-                        relative_path = py_file.relative_to(src_dir)
-                        missing_docstrings.append(
-                            f"{relative_path}:{node.lineno} - class {node.name}"
-                        )
+            missing_docstrings.extend(
+                _missing_adapter_class_docstrings(py_file, src_dir=src_dir)
+            )
 
         assert not missing_docstrings, (
             "Adapter classes must have docstrings.\n"
