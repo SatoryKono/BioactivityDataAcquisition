@@ -52,6 +52,7 @@ CONFIGS_DIR = PROJECT_ROOT / "configs"
 ENTITIES_DIR = CONFIGS_DIR / "entities"
 COMPOSITES_DIR = CONFIGS_DIR / "composites"
 PROVIDERS_DIR = CONFIGS_DIR / "providers"
+YAML_GLOB = "*.yaml"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -74,21 +75,71 @@ def _deep_string_search(obj: Any, fragment: str) -> bool:
 
 
 def _entity_configs() -> list[Path]:
-    return sorted(p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_"))
+    return sorted(p for p in ENTITIES_DIR.rglob(YAML_GLOB) if not p.name.startswith("_"))
 
 
 def _provider_configs() -> list[Path]:
-    return sorted(p for p in PROVIDERS_DIR.glob("*.yaml") if not p.name.startswith("_"))
+    return sorted(p for p in PROVIDERS_DIR.glob(YAML_GLOB) if not p.name.startswith("_"))
 
 
 def _composite_configs() -> list[Path]:
-    return sorted(
-        p for p in COMPOSITES_DIR.glob("*.yaml") if not p.name.startswith("_")
-    )
+    return sorted(p for p in COMPOSITES_DIR.glob(YAML_GLOB) if not p.name.startswith("_"))
 
 
 def _all_config_paths() -> list[Path]:
     return [*_entity_configs(), *_provider_configs(), *_composite_configs()]
+
+
+def _provider_declared_pairs(
+    provider_data_by_name: dict[str, dict[str, Any]],
+    errors: list[str],
+) -> set[tuple[str, str]]:
+    """Collect declared provider/entity pairs from provider configs."""
+    declared_pairs: set[tuple[str, str]] = set()
+    for provider, pdata in provider_data_by_name.items():
+        entities = pdata.get("entities")
+        if not isinstance(entities, list) or not entities:
+            errors.append(
+                f"INV-CFG-002 configs/providers/{provider}.yaml: missing/non-list entities"
+            )
+            continue
+        for entity in entities:
+            declared_pairs.add((provider, str(entity)))
+    return declared_pairs
+
+
+def _append_entity_config_consistency_errors(
+    path: Path,
+    *,
+    provider_data_by_name: dict[str, dict[str, Any]],
+    errors: list[str],
+) -> tuple[str, str]:
+    """Validate one entity config and return its provider/entity pair."""
+    provider = path.parent.name
+    entity = path.stem
+    data = _load_yaml(path)
+    missing_sections = REQUIRED_ENTITY_SECTIONS - set(data.keys())
+    if missing_sections:
+        errors.append(
+            f"INV-CFG-002 {_rel(path)}: missing sections {sorted(missing_sections)}"
+        )
+
+    provider_path = PROVIDERS_DIR / f"{provider}.yaml"
+    if not provider_path.exists():
+        errors.append(
+            f"INV-CFG-002 {_rel(path)}: missing provider config "
+            f"configs/providers/{provider}.yaml"
+        )
+        return provider, entity
+
+    entities = provider_data_by_name.get(provider, {}).get("entities")
+    declared_entities = {str(item) for item in entities} if isinstance(entities, list) else set()
+    if declared_entities and entity not in declared_entities:
+        errors.append(
+            f"INV-CFG-002 {_rel(path)}: entity {entity!r} not declared in "
+            f"configs/providers/{provider}.yaml entities[]"
+        )
+    return provider, entity
 
 
 def check_inv_001(verbose: bool) -> list[str]:
@@ -120,43 +171,17 @@ def check_inv_002(verbose: bool) -> list[str]:
     provider_data_by_name = {
         path.stem: _load_yaml(path) for path in _provider_configs()
     }
-    declared_pairs: set[tuple[str, str]] = set()
-    for provider, pdata in provider_data_by_name.items():
-        entities = pdata.get("entities")
-        if not isinstance(entities, list) or not entities:
-            errors.append(
-                f"INV-CFG-002 configs/providers/{provider}.yaml: missing/non-list entities"
-            )
-            continue
-        for entity in entities:
-            declared_pairs.add((provider, str(entity)))
+    declared_pairs = _provider_declared_pairs(provider_data_by_name, errors)
 
     actual_pairs: set[tuple[str, str]] = set()
     for path in _entity_configs():
-        provider = path.parent.name
-        entity = path.stem
-        actual_pairs.add((provider, entity))
-
-        data = _load_yaml(path)
-        missing_sections = REQUIRED_ENTITY_SECTIONS - set(data.keys())
-        if missing_sections:
-            errors.append(
-                f"INV-CFG-002 {_rel(path)}: missing sections {sorted(missing_sections)}"
+        actual_pairs.add(
+            _append_entity_config_consistency_errors(
+                path,
+                provider_data_by_name=provider_data_by_name,
+                errors=errors,
             )
-
-        if not (PROVIDERS_DIR / f"{provider}.yaml").exists():
-            errors.append(
-                f"INV-CFG-002 {_rel(path)}: missing provider config "
-                f"configs/providers/{provider}.yaml"
-            )
-
-        if provider in provider_data_by_name:
-            entities = provider_data_by_name[provider].get("entities")
-            if isinstance(entities, list) and entity not in {str(e) for e in entities}:
-                errors.append(
-                    f"INV-CFG-002 {_rel(path)}: entity {entity!r} not declared in "
-                    f"configs/providers/{provider}.yaml entities[]"
-                )
+        )
 
     undeclared = actual_pairs - declared_pairs
     for provider, entity in sorted(undeclared):

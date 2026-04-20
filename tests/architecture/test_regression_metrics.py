@@ -365,10 +365,11 @@ def _collect_architecture_skip_count() -> int:
         ],
         plugins=[counter],
     )
-    if counter.total == 0 and exit_code not in (
+    accepted_exit_codes = (
         pytest.ExitCode.OK,
         pytest.ExitCode.NO_TESTS_COLLECTED,
-    ):
+    )
+    if exit_code not in accepted_exit_codes:
         pytest.fail(
             "Nested architecture collection failed while counting skip markers: "
             f"exit_code={exit_code}"
@@ -460,37 +461,52 @@ def _adapter_instantiations_in_tree(
     return violations
 
 
+def _cached_adapter_instantiations(
+    src_dir: Path,
+    source_ast_cache: dict[Path, ast.Module],
+) -> list[str]:
+    """Collect adapter instantiations from a prebuilt AST cache."""
+    violations: list[str] = []
+    for py_file, tree in source_ast_cache.items():
+        if py_file.name.startswith("__") or not _file_in_forbidden_layer(src_dir, py_file):
+            continue
+        violations.extend(_adapter_instantiations_in_tree(src_dir, py_file, tree))
+    return violations
+
+
+def _parsed_tree(path: Path) -> ast.AST | None:
+    """Parse a Python file into AST, tolerating syntax errors."""
+    try:
+        return ast.parse(path.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return None
+
+
+def _filesystem_adapter_instantiations(src_dir: Path) -> list[str]:
+    """Collect adapter instantiations by parsing forbidden layers on disk."""
+    violations: list[str] = []
+    for layer in _FORBIDDEN_LAYERS:
+        layer_path = src_dir / "bioetl" / layer
+        if not layer_path.exists():
+            continue
+        for py_file in sorted(layer_path.rglob("*.py")):
+            if py_file.name.startswith("__"):
+                continue
+            tree = _parsed_tree(py_file)
+            if tree is None:
+                continue
+            violations.extend(_adapter_instantiations_in_tree(src_dir, py_file, tree))
+    return violations
+
+
 def _find_adapter_instantiations(
     src_dir: Path,
     source_ast_cache: dict[Path, ast.Module] | None = None,
 ) -> list[str]:
     """Find direct adapter class instantiations outside composition/."""
-    violations: list[str] = []
-
     if source_ast_cache is not None:
-        for py_file, tree in source_ast_cache.items():
-            if py_file.name.startswith("__"):
-                continue
-            if not _file_in_forbidden_layer(src_dir, py_file):
-                continue
-            violations.extend(_adapter_instantiations_in_tree(src_dir, py_file, tree))
-    else:
-        for layer in _FORBIDDEN_LAYERS:
-            layer_path = src_dir / "bioetl" / layer
-            if not layer_path.exists():
-                continue
-            for py_file in sorted(layer_path.rglob("*.py")):
-                if py_file.name.startswith("__"):
-                    continue
-                source = py_file.read_text(encoding="utf-8")
-                try:
-                    tree = ast.parse(source)
-                except SyntaxError:
-                    continue
-                violations.extend(
-                    _adapter_instantiations_in_tree(src_dir, py_file, tree)
-                )
-    return violations
+        return _cached_adapter_instantiations(src_dir, source_ast_cache)
+    return _filesystem_adapter_instantiations(src_dir)
 
 
 def test_inline_adapter_construction_budget(
