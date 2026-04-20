@@ -990,6 +990,21 @@ _TEST_FACING_HELPER_SEAM_CASES = (
     ),
 )
 
+_TRANSFORMER_DEPENDENCY_SHIM_ABSENCE_CASES = (
+    pytest.param(
+        "src",
+        "source_ast_cache",
+        "base_transformer dependency compatibility shim is still imported from src/:",
+        id="src",
+    ),
+    pytest.param(
+        "tests",
+        "test_ast_cache",
+        "base_transformer dependency compatibility shim must stay removed from tests:",
+        id="tests",
+    ),
+)
+
 _CLI_REGISTRY_HELPER_SYMBOL_ABSENCE_CASES = (
     pytest.param(
         "src",
@@ -1077,35 +1092,25 @@ def test_transformer_dependency_compat_shim_file_has_been_removed() -> None:
 
 
 @pytest.mark.architecture
-def test_transformer_dependency_compat_shim_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
+@pytest.mark.parametrize(
+    ("scope_label", "cache_fixture_name", "failure_message"),
+    _TRANSFORMER_DEPENDENCY_SHIM_ABSENCE_CASES,
+)
+def test_transformer_dependency_compat_shim_is_not_used(
+    request: pytest.FixtureRequest,
+    scope_label: str,
+    cache_fixture_name: str,
+    failure_message: str,
 ) -> None:
-    """First-party src must use canonical base-transformer dependency types directly."""
+    """Removed dependency shim must stay absent from src and tests."""
+    del scope_label
+    ast_cache = request.getfixturevalue(cache_fixture_name)
     violations = _iter_module_import_violations(
-        source_ast_cache,
+        ast_cache,
         module_name=TRANSFORMER_DEPENDENCY_SHIM,
         allowed_files=frozenset(),
     )
-    assert not violations, (
-        "base_transformer dependency compatibility shim is still imported from src/:\n"
-        + "\n".join(violations)
-    )
-
-
-@pytest.mark.architecture
-def test_transformer_dependency_compat_shim_is_not_used_in_tests(
-    test_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Tests must not keep importing the removed dependency shim."""
-    violations = _iter_module_import_violations(
-        test_ast_cache,
-        module_name=TRANSFORMER_DEPENDENCY_SHIM,
-        allowed_files=frozenset(),
-    )
-    assert not violations, (
-        "base_transformer dependency compatibility shim must stay removed from tests:\n"
-        + "\n".join(violations)
-    )
+    assert not violations, failure_message + "\n" + "\n".join(violations)
 
 
 @pytest.mark.architecture
