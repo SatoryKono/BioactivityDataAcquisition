@@ -1656,6 +1656,36 @@ def _blocker_detail_lines(blockers: JsonValue) -> list[str]:
     return sorted(normalized)
 
 
+def _append_target_row_if_named(
+    lines: list[str],
+    row: dict[str, JsonValue],
+    extra_parts: list[str],
+    suffix: str = "",
+) -> bool:
+    """Append a formatted target row when the row has a target_name."""
+    if not row.get("target_name"):
+        return False
+    lines.append(_target_row_line(row, extra_parts, suffix))
+    return True
+
+
+def _append_indented_nonempty_lines(lines: list[str], values: list[str]) -> None:
+    """Append non-empty lines indented by two spaces."""
+    for value in values:
+        if value:
+            lines.append(f"  {value}")
+
+
+def _current_cycle_parts(row: dict[str, JsonValue]) -> list[str]:
+    """Render current-cycle summary fields."""
+    return [
+        f"cycle_status={row.get('cycle_status') or ''!s}",
+        f"cycle_score={row.get('cycle_score') or ''!s}",
+        f"recent_age_days={row.get('recent_age_days') or ''!s}",
+        *_anchor_count_parts(row),
+    ]
+
+
 def _format_dead_code_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
