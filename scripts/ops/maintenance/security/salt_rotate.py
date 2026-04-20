@@ -380,33 +380,41 @@ def log_result(result: RotationResult) -> None:
     logger.info("")
 
     if result.success:
-        logger.info("Message: %s", result.message)
-        logger.info("")
-
-        if result.new_salt_id:
-            logger.info("New Salt ID: %s", result.new_salt_id)
-        logger.info("")
-
-        if result.env_updates:
-            logger.info("## Required Environment Updates")
-            logger.info("")
-            logger.info("Add/update these in your environment or .env file:")
-            logger.info("")
-            for key, value in result.env_updates.items():
-                if value is None:
-                    logger.info("  unset %s", key)
-                else:
-                    # Show truncated value for security
-                    display_value = value[:16] + "..." if len(value) > 20 else value
-                    logger.info("  %s=%s", key, display_value)
-            logger.info("")
-            logger.info("NOTE: This tool does NOT modify your environment.")
-            logger.info("      You must update these values manually.")
+        _log_success_result(result)
     else:
         logger.info("Error: %s", result.error)
 
     logger.info("")
     logger.info("=" * 70)
+
+
+def _log_success_result(result: RotationResult) -> None:
+    logger.info("Message: %s", result.message)
+    logger.info("")
+
+    if result.new_salt_id:
+        logger.info("New Salt ID: %s", result.new_salt_id)
+    logger.info("")
+
+    if not result.env_updates:
+        return
+
+    logger.info("## Required Environment Updates")
+    logger.info("")
+    logger.info("Add/update these in your environment or .env file:")
+    logger.info("")
+    for key, value in result.env_updates.items():
+        logger.info("  %s", _format_env_update(key, value))
+    logger.info("")
+    logger.info("NOTE: This tool does NOT modify your environment.")
+    logger.info("      You must update these values manually.")
+
+
+def _format_env_update(key: str, value: str | None) -> str:
+    if value is None:
+        return f"unset {key}"
+    display_value = value[:16] + "..." if len(value) > 20 else value
+    return f"{key}={display_value}"
 
 
 def parse_args() -> argparse.Namespace:

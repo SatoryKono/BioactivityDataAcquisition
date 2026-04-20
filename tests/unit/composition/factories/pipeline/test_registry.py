@@ -18,6 +18,30 @@ def ensure_registration():
     register_all_pipelines()
 
 
+def _pipeline_config_name(path: Path, *, config_dir: Path) -> str | None:
+    relative_path = path.relative_to(config_dir)
+    parts = relative_path.parts
+    if len(parts) < 2:
+        return None
+    provider = parts[0]
+    if provider.startswith("_"):
+        return None
+    entity = os.path.splitext(parts[1])[0]
+    return f"{provider}_{entity}"
+
+
+def _iter_pipeline_config_names(config_dir: Path) -> list[str]:
+    found_configs: list[str] = []
+    for root, _, files in os.walk(config_dir):
+        for file in files:
+            if not (file.endswith(".yaml") or file.endswith(".yml")):
+                continue
+            pipeline_name = _pipeline_config_name(Path(root) / file, config_dir=config_dir)
+            if pipeline_name is not None:
+                found_configs.append(pipeline_name)
+    return found_configs
+
+
 def test_registry_completeness():
     """
     Verify that every unified entity pipeline configuration file in configs/entities
@@ -33,27 +57,7 @@ def test_registry_completeness():
     # These are new providers in development that will be registered later
     pipelines_in_development: set[str] = set()  # All pipelines are now fully integrated
 
-    # Walk through the config directory
-    found_configs = []
-    for root, _, files in os.walk(config_dir):
-        for file in files:
-            if file.endswith(".yaml") or file.endswith(".yml"):
-                # Structure is configs/entities/{provider}/{entity}.yaml
-                # The pipeline name is {provider}_{entity}
-                path = Path(root) / file
-
-                # Check if it's in a provider subdirectory
-                relative_path = path.relative_to(config_dir)
-                parts = relative_path.parts
-
-                if len(parts) >= 2:
-                    provider = parts[0]
-                    # Skip internal directories (documentation, templates, etc.)
-                    if provider.startswith("_"):
-                        continue
-                    entity = os.path.splitext(parts[1])[0]
-                    pipeline_name = f"{provider}_{entity}"
-                    found_configs.append(pipeline_name)
+    found_configs = _iter_pipeline_config_names(config_dir)
 
     # Get registered pipelines
     registered_pipelines = registry.list_pipelines()

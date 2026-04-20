@@ -406,25 +406,26 @@ class TestMandatorySpans:
         ("gold_writer.py", ["write_gold"]),
     ]
 
+    def _file_contains_any_method(self, path: Path, methods: list[str]) -> bool:
+        source = path.read_text(encoding="utf-8")
+        return any(
+            f"def {method}" in source or f"async def {method}" in source
+            for method in methods
+        )
+
+    def _has_operation_file(self, filename: str, methods: list[str]) -> bool:
+        for layer in ["application", "infrastructure"]:
+            for path in Path(f"src/bioetl/{layer}").rglob(filename):
+                if path.exists() and self._file_contains_any_method(path, methods):
+                    return True
+        return False
+
     def test_critical_operations_exist(self):
         """Critical operations that should have spans should exist."""
         for filename, methods in self.MANDATORY_SPAN_LOCATIONS:
-            # Find file in infrastructure or application
-            found = False
-            for layer in ["application", "infrastructure"]:
-                for path in Path(f"src/bioetl/{layer}").rglob(filename):
-                    if path.exists():
-                        source = path.read_text(encoding="utf-8")
-                        for method in methods:
-                            if (
-                                f"def {method}" in source
-                                or f"async def {method}" in source
-                            ):
-                                found = True
-                                break
+            found = self._has_operation_file(filename, methods)
 
             if not found and filename in ["runner.py", "batch_executor.py"]:
-                # These are critical - fail if not found
                 assert found, f"Critical file {filename} should have methods {methods}"
 
 
