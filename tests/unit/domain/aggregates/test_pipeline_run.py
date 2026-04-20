@@ -30,11 +30,6 @@ def _ts(minutes: int = 0, seconds: int = 0) -> datetime:
     return datetime(2026, 3, 31, 12, minutes, seconds, tzinfo=UTC)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Fixtures
-# ──────────────────────────────────────────────────────────────────────────────
-
-
 @pytest.fixture
 def run_id() -> RunID:
     """Create a test run ID."""

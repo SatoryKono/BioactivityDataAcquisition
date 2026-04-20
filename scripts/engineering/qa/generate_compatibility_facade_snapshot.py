@@ -46,9 +46,28 @@ def _repo_relative_path(path: Path) -> Path:
     return safe_path.relative_to(ROOT.resolve())
 
 
+def _normalize_repo_relative_path(path: Path) -> Path:
+    """Normalize and validate a repository-relative path."""
+    if path.is_absolute():
+        raise ValueError(f"expected repository-relative path, got absolute path: {path}")
+
+    normalized_parts: list[str] = []
+    for part in path.parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            raise ValueError(f"refusing parent traversal path: {path}")
+        normalized_parts.append(part)
+
+    if not normalized_parts:
+        raise ValueError("refusing empty repository-relative path")
+    return Path(*normalized_parts)
+
+
 def _write_repo_text(relative_path: Path, content: str) -> None:
     """Write generated snapshot content via a repository-relative path."""
-    target_path = ROOT / relative_path
+    safe_relative_path = _normalize_repo_relative_path(relative_path)
+    target_path = _ensure_repo_path(ROOT / safe_relative_path)
     target_path.write_text(content, encoding="utf-8")
 
 
