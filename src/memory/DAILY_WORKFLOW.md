@@ -22,6 +22,7 @@ Use this sequence for normal task work:
 4. perform the engineering change or audit
 5. `post-task` workflow
 6. promote only durable lessons or incidents
+7. on a regular cadence run `review-curated` and archive superseded curated notes
 
 The intended retrieval order is:
 
@@ -118,6 +119,29 @@ Supported promotion targets:
 - `incident`
 - `lesson`
 - `domain_knowledge`
+
+## Curated Review Ritual
+
+Curated memory review is part of the regular engineering ritual, not an optional
+cleanup command. Run it on a recurring cadence and before release, governance,
+or architecture-review checkpoints:
+
+```bash
+python -m memory.tooling.workflow review-curated --json
+```
+
+What it does:
+
+- reviews active curated notes
+- classifies them as `current`, `due`, or `stale`
+- highlights review candidates such as duplicate themes or thin provenance
+- points you toward `keep`, `review`, or `review_or_archive`
+
+Use it to keep curated memory small and durable:
+
+- refresh `last_verified` when the note still matches source reality
+- improve or merge notes when the knowledge is still useful but underspecified
+- archive superseded notes with `python -m memory.tooling.archive_note ...`
 
 ## Engineering Scenarios
 

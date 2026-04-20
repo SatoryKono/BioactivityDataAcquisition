@@ -14,6 +14,7 @@ from memory.resources import discover_memory_root, discover_repo_root
 from memory.tooling.promote_note import promote_note
 from memory.tooling.prune import prune_episodic_notes
 from memory.tooling.refresh_all import refresh_all
+from memory.tooling.review_curated import review_curated_notes
 from memory.validation import validate_memory_scaffold
 
 
@@ -223,6 +224,27 @@ def post_task_workflow(
     }
 
 
+def review_curated_workflow(
+    *,
+    curated_root: Path | None = None,
+) -> dict[str, Any]:
+    """Run the regular curated-memory review ritual."""
+    report = review_curated_notes(curated_root)
+    summary = report["summary"]
+    cadence = "Run this review on a regular engineering cadence and before release or audit checkpoints."
+    next_action = (
+        "Review due and stale notes, refresh last_verified for durable knowledge, and archive superseded notes."
+    )
+    return {
+        "kind": "review-curated",
+        "ok": True,
+        "cadence": cadence,
+        "next_action": next_action,
+        "summary": summary,
+        "records": report["records"],
+    }
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Run the daily pre-task and post-task memory workflow."
@@ -262,6 +284,13 @@ def _build_parser() -> argparse.ArgumentParser:
     post_parser.add_argument("--move-on-promote", action="store_true")
     post_parser.add_argument("--json", action="store_true")
 
+    review_parser = subparsers.add_parser(
+        "review-curated",
+        help="Run the regular curated-memory review ritual.",
+    )
+    review_parser.add_argument("--root", type=Path, default=None)
+    review_parser.add_argument("--json", action="store_true")
+
     return parser
 
 
@@ -289,6 +318,8 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
     if payload.get("promoted_note"):
         print(f"- promoted note: {payload['promoted_note']}")
     return 0 if payload.get("ok", True) else 1
+
+    
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -323,6 +354,22 @@ def main(argv: list[str] | None = None) -> int:
             move_on_promote=args.move_on_promote,
         )
         return _emit(payload, as_json=args.json)
+
+    if args.command == "review-curated":
+        payload = review_curated_workflow(curated_root=args.root)
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
+            return 0
+
+        summary = payload["summary"]
+        print("Curated review ritual:")
+        print(f"- notes: {summary['note_count']}")
+        print(f"- due: {summary['due_count']}")
+        print(f"- stale: {summary['stale_count']}")
+        print(f"- review candidates: {summary['review_candidates']}")
+        print(f"- cadence: {payload['cadence']}")
+        print(f"- next action: {payload['next_action']}")
+        return 0
 
     parser.error(f"unsupported command: {args.command}")
     return 2

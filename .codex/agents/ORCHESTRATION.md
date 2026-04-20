@@ -85,6 +85,14 @@ Operational defaults:
 - post-task summary
 - refresh rebuild-only memory artifacts
 - optional promotion into curated memory
+- periodic curated review via `python -m memory.tooling.workflow review-curated`
+- archive of superseded curated notes instead of silent stale accumulation
+
+Regular ritual rule:
+
+- run `review-curated` on a recurring engineering cadence
+- run it again before release-readiness, governance, or architecture-review checkpoints
+- treat `due` notes as verification work and `stale` notes as review-or-archive candidates
 
 ---
 
