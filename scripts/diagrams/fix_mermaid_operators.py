@@ -18,6 +18,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -120,9 +121,15 @@ def _read_validated_repo_text(path: ValidatedRepoPath) -> str:
 
 def _write_validated_repo_text(path: ValidatedRepoPath, content: str) -> None:
     """Write content only to a previously validated repository path."""
-    if path.resolved_path.is_dir():
-        raise ValueError(f"refusing to write to directory path: {path.resolved_path}")
-    path.resolved_path.write_text(content, encoding="utf-8")
+    repo_root = _repo_root().resolve()
+    resolved_path = path.resolved_path.resolve()
+    common_root = Path(os.path.commonpath([str(repo_root), str(resolved_path)]))
+    if common_root != repo_root:
+        raise ValueError(f"refusing to write path outside {repo_root}: {resolved_path}")
+    if resolved_path.is_dir():
+        raise ValueError(f"refusing to write to directory path: {resolved_path}")
+    with resolved_path.open("w", encoding="utf-8") as handle:
+        handle.write(content)
 
 
 def _display_path(path: Path) -> str:
