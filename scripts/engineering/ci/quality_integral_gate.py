@@ -178,58 +178,76 @@ def _resolve_ruff_cmd() -> list[str]:
     return [sys.executable, "-m", "ruff"]
 
 
+def _architecture_test_cmd(pytest_path: str, junit_path: Path) -> list[str]:
+    """Build pytest command for architecture suite execution."""
+    return [
+        sys.executable,
+        "-m",
+        "pytest",
+        pytest_path,
+        "-q",
+        "--tb=no",
+        f"--junitxml={junit_path}",
+    ]
+
+
+def _missing_architecture_stats(returncode: int) -> ArchitectureTestStats:
+    """Return fallback stats when JUnit report was not produced."""
+    return ArchitectureTestStats(
+        tests=0,
+        failures=0,
+        errors=1,
+        skipped=0,
+        returncode=returncode,
+    )
+
+
+def _parse_architecture_junit(junit_path: Path, *, returncode: int) -> ArchitectureTestStats:
+    """Parse architecture JUnit XML into stable counters."""
+    if not junit_path.exists():
+        return _missing_architecture_stats(returncode)
+    tree = ET.parse(junit_path)
+    root = tree.getroot()
+    suites = _junit_suites(root)
+    total_tests = 0
+    total_failures = 0
+    total_errors = 0
+    total_skipped = 0
+    for suite in suites:
+        total_tests += int(suite.attrib.get("tests", "0"))
+        total_failures += int(suite.attrib.get("failures", "0"))
+        total_errors += int(suite.attrib.get("errors", "0"))
+        total_skipped += int(suite.attrib.get("skipped", "0"))
+    return ArchitectureTestStats(
+        tests=total_tests,
+        failures=total_failures,
+        errors=total_errors,
+        skipped=total_skipped,
+        returncode=returncode,
+    )
+
+
+def _junit_suites(root: ET.Element) -> list[ET.Element]:
+    """Return testsuite nodes from pytest JUnit root element."""
+    if root.tag == "testsuite":
+        return [root]
+    if root.tag == "testsuites":
+        return [elem for elem in root if elem.tag == "testsuite"]
+    return []
+
+
 def _run_architecture_tests(pytest_path: str) -> ArchitectureTestStats:
     with tempfile.TemporaryDirectory(prefix="quality-arch-") as tmp_dir:
         junit_path = Path(tmp_dir) / "architecture.junit.xml"
-        cmd = [
-            sys.executable,
-            "-m",
-            "pytest",
-            pytest_path,
-            "-q",
-            "--tb=no",
-            f"--junitxml={junit_path}",
-        ]
+        cmd = _architecture_test_cmd(pytest_path, junit_path)
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             env={k: v for k, v in os.environ.items() if k != "PYTEST_CURRENT_TEST"},
         )
-
-        if not junit_path.exists():
-            return ArchitectureTestStats(
-                tests=0,
-                failures=0,
-                errors=1,
-                skipped=0,
-                returncode=result.returncode,
-            )
-
-        tree = ET.parse(junit_path)
-        root = tree.getroot()
-        suites = []
-        if root.tag == "testsuite":
-            suites = [root]
-        elif root.tag == "testsuites":
-            suites = [elem for elem in root if elem.tag == "testsuite"]
-
-        total_tests = 0
-        total_failures = 0
-        total_errors = 0
-        total_skipped = 0
-
-        for suite in suites:
-            total_tests += int(suite.attrib.get("tests", "0"))
-            total_failures += int(suite.attrib.get("failures", "0"))
-            total_errors += int(suite.attrib.get("errors", "0"))
-            total_skipped += int(suite.attrib.get("skipped", "0"))
-
-        return ArchitectureTestStats(
-            tests=total_tests,
-            failures=total_failures,
-            errors=total_errors,
-            skipped=total_skipped,
+        return _parse_architecture_junit(
+            junit_path,
             returncode=result.returncode,
         )
 
@@ -647,6 +665,200 @@ def _require_float(mapping: dict[str, object], key: str) -> float:
     raise TypeError(f"{key} must be float-compatible, got {type(value)!r}")
 
 
+def _bonus_score(
+    *,
+    arch_failures: int,
+    total_exemptions: int,
+    max_total_exemptions: int,
+    max_class_loc: int,
+    max_class_loc_target: int,
+    coverage_percent: float | None,
+    coverage_threshold: float,
+) -> float:
+    """Compute deterministic bonus added to the base integral score."""
+    bonus = 0.0
+    if arch_failures == 0:
+        bonus += 0.5
+    if total_exemptions < max_total_exemptions:
+        bonus += 0.5
+    if max_class_loc <= max_class_loc_target:
+        bonus += 1.5
+    if coverage_percent is not None and coverage_percent >= coverage_threshold:
+        bonus += 0.5
+    return bonus
+
+
+def _metric_comparison(
+    *,
+    ci_target: dict[str, object],
+    arch_failures: int,
+    total_exemptions: int,
+    max_class_loc: int,
+    domain_cc_exemptions: int,
+    min_provider_vcr: int,
+    ruff_violations: int,
+    coverage_percent: float | None,
+) -> dict[str, bool]:
+    """Build metric-to-target comparison payload."""
+    return {
+        "architecture_test_failures_ok": arch_failures
+        <= _require_int(ci_target, "architecture_test_failures_max"),
+        "total_exemptions_ok": total_exemptions
+        <= _require_int(ci_target, "total_exemptions_max"),
+        "max_class_loc_ok": max_class_loc
+        <= _require_int(ci_target, "max_class_loc_max"),
+        "domain_cc_gt5_exemptions_ok": domain_cc_exemptions
+        <= _require_int(ci_target, "domain_cc_gt5_exemptions_max"),
+        "vcr_cassettes_min_per_provider_ok": min_provider_vcr
+        >= _require_int(ci_target, "vcr_cassettes_min_per_provider"),
+        "ruff_formatting_violations_ok": ruff_violations
+        <= _require_int(ci_target, "ruff_formatting_violations_max"),
+        "coverage_ok": (
+            coverage_percent is not None
+            and coverage_percent >= _require_float(ci_target, "coverage_threshold_percent")
+        ),
+    }
+
+
+def _quality_gate_output(
+    *,
+    quarter: str,
+    architecture_stats: ArchitectureTestStats,
+    max_total_exemptions: int,
+    min_integral_score: float,
+    ci_target: dict[str, object],
+    arch_failures: int,
+    total_exemptions: int,
+    max_class_loc: int,
+    domain_cc_exemptions: int,
+    min_provider_vcr: int,
+    provider_vcr_counts: dict[str, int],
+    ruff_violations: int,
+    coverage_percent: float | None,
+    compatibility_surface: object,
+    test_health_payload: dict[str, object],
+    bonus: float,
+    summary: object,
+    adjusted_integral_score: float,
+    gate_pass: bool,
+    violations: list[str],
+) -> dict[str, object]:
+    """Build JSON payload emitted by the quality gate."""
+    return {
+        "generated_at_utc": datetime.now(UTC).isoformat(),
+        "quarter": quarter,
+        "architecture_tests": asdict(architecture_stats),
+        "quarterly_target": {
+            "max_total_exemptions": max_total_exemptions,
+            "min_integral_score": min_integral_score,
+        },
+        "ci_metric_targets": ci_target,
+        "metrics": {
+            "architecture_test_failures": arch_failures,
+            "total_exemptions": total_exemptions,
+            "max_class_loc": max_class_loc,
+            "domain_cc_gt5_exemptions": domain_cc_exemptions,
+            "vcr_cassettes_min_per_provider": min_provider_vcr,
+            "vcr_cassettes_by_provider": provider_vcr_counts,
+            "ruff_formatting_violations": ruff_violations,
+            "coverage_percent": coverage_percent,
+            "coverage_verified": coverage_percent is not None,
+        },
+        "compatibility_surface": compatibility_surface.as_dict(),
+        "test_health": test_health_payload,
+        "integral_score": {
+            "base": summary.integral_score,
+            "bonus": bonus,
+            "adjusted": adjusted_integral_score,
+            "min_required": min_integral_score,
+            "pass": gate_pass,
+        },
+        "debt_scorecard": {
+            "violations_count": len(violations),
+            "violations": violations,
+        },
+        "metric_comparison": _metric_comparison(
+            ci_target=ci_target,
+            arch_failures=arch_failures,
+            total_exemptions=total_exemptions,
+            max_class_loc=max_class_loc,
+            domain_cc_exemptions=domain_cc_exemptions,
+            min_provider_vcr=min_provider_vcr,
+            ruff_violations=ruff_violations,
+            coverage_percent=coverage_percent,
+        ),
+    }
+
+
+def _summary_lines(
+    *,
+    quarter: str,
+    adjusted_integral_score: float,
+    min_integral_score: float,
+    arch_failures: int,
+    test_health: TestHealthClassification,
+    test_health_payload: dict[str, object],
+    total_exemptions: int,
+    compatibility_surface: object,
+) -> list[str]:
+    """Build compact markdown summary lines."""
+    skip_classes_detail = test_health_payload["skip_classes_detail"]
+    skip_classes_rendered = (
+        ", ".join(
+            f"{item['short_label']}={item['count']}"
+            for item in skip_classes_detail
+        )
+        if skip_classes_detail
+        else "none"
+    )
+    staged_flags_rendered = (
+        ", ".join(test_health.staged_rollout_flags)
+        if test_health.staged_rollout_flags
+        else "none"
+    )
+    return [
+        "## CI Quality Metrics Snapshot",
+        f"- quarter: `{quarter}`",
+        f"- adjusted_integral_score: `{adjusted_integral_score}`",
+        f"- min_required: `{min_integral_score}`",
+        f"- architecture_test_failures: `{arch_failures}`",
+        f"- test_health_status: `{test_health.status}`",
+        f"- test_health_label: `{test_health_payload['short_label']}`",
+        f"- test_health_summary: {test_health.summary}",
+        f"- test_health_definition: {test_health_payload['definition']}",
+        f"- test_health_merge_semantics: `{test_health_payload['merge_semantics']}`",
+        (
+            "- test_health_merge_blocking_source: `"
+            + str(test_health_payload["merge_blocking_source"])
+            + "`"
+        ),
+        f"- architecture_skipped: `{test_health.architecture_skip_count}`",
+        f"- test_health_skip_classes: `{skip_classes_rendered}`",
+        f"- staged_rollout_flags: `{staged_flags_rendered}`",
+        f"- total_exemptions: `{total_exemptions}`",
+        render_compatibility_surface_section(
+            compatibility_surface,
+            heading="## Compatibility Surface Snapshot",
+        ),
+    ]
+
+
+def _write_output(path: Path, output: dict[str, object]) -> None:
+    """Write JSON quality gate payload."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(output, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _append_summary(path: Path, summary_lines: list[str]) -> None:
+    """Append markdown summary to the requested file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as stream:
+        stream.write("\n".join(summary_lines) + "\n")
+
+
 def main() -> int:
     args = _parse_args()
     registry_path = Path(args.registry)
@@ -700,16 +912,15 @@ def main() -> int:
     test_matrix = _load_yaml_mapping(test_matrix_path)
     test_health_taxonomy = _load_yaml_mapping(test_health_taxonomy_path)
 
-    bonus = 0.0
-    if arch_failures == 0:
-        bonus += 0.5
-    if total_exemptions < max_total_exemptions:
-        bonus += 0.5
-    if max_class_loc <= args.max_class_loc_target:
-        bonus += 1.5
-    if coverage_percent is not None and coverage_percent >= coverage_threshold:
-        bonus += 0.5
-
+    bonus = _bonus_score(
+        arch_failures=arch_failures,
+        total_exemptions=total_exemptions,
+        max_total_exemptions=max_total_exemptions,
+        max_class_loc=max_class_loc,
+        max_class_loc_target=args.max_class_loc_target,
+        coverage_percent=coverage_percent,
+        coverage_threshold=coverage_threshold,
+    )
     adjusted_integral_score = round(min(100.0, summary.integral_score + bonus), 2)
     gate_pass = adjusted_integral_score >= min_integral_score
     test_health = _classify_test_health(
@@ -719,114 +930,46 @@ def main() -> int:
     )
     test_health_payload = _build_test_health_payload(test_health, test_health_taxonomy)
 
-    output = {
-        "generated_at_utc": datetime.now(UTC).isoformat(),
-        "quarter": quarter,
-        "architecture_tests": asdict(architecture_stats),
-        "quarterly_target": {
-            "max_total_exemptions": max_total_exemptions,
-            "min_integral_score": min_integral_score,
-        },
-        "ci_metric_targets": ci_target,
-        "metrics": {
-            "architecture_test_failures": arch_failures,
-            "total_exemptions": total_exemptions,
-            "max_class_loc": max_class_loc,
-            "domain_cc_gt5_exemptions": domain_cc_exemptions,
-            "vcr_cassettes_min_per_provider": min_provider_vcr,
-            "vcr_cassettes_by_provider": provider_vcr_counts,
-            "ruff_formatting_violations": ruff_violations,
-            "coverage_percent": coverage_percent,
-            "coverage_verified": coverage_percent is not None,
-        },
-        "compatibility_surface": compatibility_surface.as_dict(),
-        "test_health": test_health_payload,
-        "integral_score": {
-            "base": summary.integral_score,
-            "bonus": bonus,
-            "adjusted": adjusted_integral_score,
-            "min_required": min_integral_score,
-            "pass": gate_pass,
-        },
-        "debt_scorecard": {
-            "violations_count": len(violations),
-            "violations": violations,
-        },
-        "metric_comparison": {
-            "architecture_test_failures_ok": arch_failures
-            <= _require_int(ci_target, "architecture_test_failures_max"),
-            "total_exemptions_ok": total_exemptions
-            <= _require_int(ci_target, "total_exemptions_max"),
-            "max_class_loc_ok": max_class_loc
-            <= _require_int(ci_target, "max_class_loc_max"),
-            "domain_cc_gt5_exemptions_ok": domain_cc_exemptions
-            <= _require_int(ci_target, "domain_cc_gt5_exemptions_max"),
-            "vcr_cassettes_min_per_provider_ok": min_provider_vcr
-            >= _require_int(ci_target, "vcr_cassettes_min_per_provider"),
-            "ruff_formatting_violations_ok": ruff_violations
-            <= _require_int(ci_target, "ruff_formatting_violations_max"),
-            "coverage_ok": (
-                coverage_percent is not None
-                and coverage_percent
-                >= _require_float(ci_target, "coverage_threshold_percent")
-            ),
-        },
-    }
-
-    output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    output = _quality_gate_output(
+        quarter=quarter,
+        architecture_stats=architecture_stats,
+        max_total_exemptions=max_total_exemptions,
+        min_integral_score=min_integral_score,
+        ci_target=ci_target,
+        arch_failures=arch_failures,
+        total_exemptions=total_exemptions,
+        max_class_loc=max_class_loc,
+        domain_cc_exemptions=domain_cc_exemptions,
+        min_provider_vcr=min_provider_vcr,
+        provider_vcr_counts=provider_vcr_counts,
+        ruff_violations=ruff_violations,
+        coverage_percent=coverage_percent,
+        compatibility_surface=compatibility_surface,
+        test_health_payload=test_health_payload,
+        bonus=bonus,
+        summary=summary,
+        adjusted_integral_score=adjusted_integral_score,
+        gate_pass=gate_pass,
+        violations=violations,
     )
 
+    output_path = Path(args.output)
+    _write_output(output_path, output)
+
     if args.summary_out:
-        summary_path = Path(args.summary_out)
-        summary_path.parent.mkdir(parents=True, exist_ok=True)
-        summary_lines = [
-            "## CI Quality Metrics Snapshot",
-            f"- quarter: `{quarter}`",
-            f"- adjusted_integral_score: `{adjusted_integral_score}`",
-            f"- min_required: `{min_integral_score}`",
-            f"- architecture_test_failures: `{arch_failures}`",
-            f"- test_health_status: `{test_health.status}`",
-            f"- test_health_label: `{test_health_payload['short_label']}`",
-            f"- test_health_summary: {test_health.summary}",
-            f"- test_health_definition: {test_health_payload['definition']}",
-            f"- test_health_merge_semantics: `{test_health_payload['merge_semantics']}`",
-            (
-                "- test_health_merge_blocking_source: `"
-                + str(test_health_payload["merge_blocking_source"])
-                + "`"
+        _append_summary(
+            Path(args.summary_out),
+            _summary_lines(
+                quarter=quarter,
+                adjusted_integral_score=adjusted_integral_score,
+                min_integral_score=min_integral_score,
+                arch_failures=arch_failures,
+                test_health=test_health,
+                test_health_payload=test_health_payload,
+                total_exemptions=total_exemptions,
+                compatibility_surface=compatibility_surface,
             ),
-            f"- architecture_skipped: `{test_health.architecture_skip_count}`",
-            (
-                "- test_health_skip_classes: `"
-                + (
-                    ", ".join(
-                        f"{item['short_label']}={item['count']}"
-                        for item in test_health_payload["skip_classes_detail"]
-                    )
-                    if test_health_payload["skip_classes_detail"]
-                    else "none"
-                )
-                + "`"
-            ),
-            (
-                "- staged_rollout_flags: `"
-                + (
-                    ", ".join(test_health.staged_rollout_flags)
-                    if test_health.staged_rollout_flags
-                    else "none"
-                )
-                + "`"
-            ),
-            f"- total_exemptions: `{total_exemptions}`",
-            render_compatibility_surface_section(
-                compatibility_surface, heading="## Compatibility Surface Snapshot"
-            ),
-        ]
-        with summary_path.open("a", encoding="utf-8") as stream:
-            stream.write("\n".join(summary_lines) + "\n")
+        )
 
     print(
         "[quality-integral-gate] "
