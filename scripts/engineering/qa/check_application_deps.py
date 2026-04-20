@@ -21,22 +21,44 @@ FORBIDDEN_PREFIXES = [
 ALLOWED_FILES: list[str] = []
 
 
-def get_imports(filepath: Path) -> list[str]:
-    """Extract all import statements from a Python file."""
+def _parse_file_tree(filepath: Path) -> ast.AST | None:
+    """Parse Python file into AST, returning None on syntax errors."""
     try:
-        tree = ast.parse(filepath.read_text(encoding="utf-8"))
+        return ast.parse(filepath.read_text(encoding="utf-8"))
     except SyntaxError:
-        return []
+        return None
 
+
+def _iter_import_names(tree: ast.AST) -> list[str]:
+    """Return normalized import module names from an AST."""
     imports: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            for alias in node.names:
-                imports.append(alias.name)
+            imports.extend(alias.name for alias in node.names)
         elif isinstance(node, ast.ImportFrom) and node.module:
             imports.append(node.module)
-
     return imports
+
+
+def get_imports(filepath: Path) -> list[str]:
+    """Extract all import statements from a Python file."""
+    tree = _parse_file_tree(filepath)
+    if tree is None:
+        return []
+    return _iter_import_names(tree)
+
+
+def _forbidden_import_violations(
+    filepath: Path,
+    imports: list[str],
+) -> list[str]:
+    """Return forbidden import violations for one application file."""
+    return [
+        f"{filepath}: forbidden import '{imported_name}'"
+        for imported_name in imports
+        for prefix in FORBIDDEN_PREFIXES
+        if imported_name.startswith(prefix)
+    ]
 
 
 def check_file(filepath: Path) -> list[str]:
@@ -44,15 +66,16 @@ def check_file(filepath: Path) -> list[str]:
     if filepath.name in ALLOWED_FILES:
         return []
 
-    violations: list[str] = []
-    imports = get_imports(filepath)
+    return _forbidden_import_violations(filepath, get_imports(filepath))
 
-    for imported_name in imports:
-        for prefix in FORBIDDEN_PREFIXES:
-            if imported_name.startswith(prefix):
-                violations.append(f"{filepath}: forbidden import '{imported_name}'")
 
-    return violations
+def _iter_application_python_files(app_dir: Path) -> list[Path]:
+    """Return non-dunder Python files from the application package."""
+    return [
+        py_file
+        for py_file in app_dir.rglob("*.py")
+        if not py_file.name.startswith("__")
+    ]
 
 
 def main() -> int:
@@ -63,9 +86,7 @@ def main() -> int:
         return 1
 
     all_violations: list[str] = []
-    for py_file in app_dir.rglob("*.py"):
-        if py_file.name.startswith("__"):
-            continue
+    for py_file in _iter_application_python_files(app_dir):
         all_violations.extend(check_file(py_file))
 
     if all_violations:

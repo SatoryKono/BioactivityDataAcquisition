@@ -912,17 +912,9 @@ def check_label_readability(path: Path, lines: list[str]) -> list[Issue]:
     return issues
 
 
-def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue]:
-    """Check classDiagram method signatures for known render pitfalls."""
-    issues: list[Issue] = []
-    fname = str(path)
-
-    if "class-diagrams" not in path.parts:
-        return issues
-
-    if not any(_CLASS_DIAGRAM_RE.match(line) for line in lines):
-        return issues
-
+def _collect_class_method_render_observations(
+    lines: list[str],
+) -> tuple[list[int], list[int], list[int], list[tuple[int, int, str]]]:
     offenders: list[int] = []
     colon_return_lines: list[int] = []
     bare_return_lines: list[int] = []
@@ -943,13 +935,29 @@ def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue
         method_name = parsed_signature[0].replace("\\_", "_")
         tail = parsed_signature[1].strip()
         if tail:
-            if tail.startswith(":"):
-                colon_return_lines.append(idx)
-            else:
-                bare_return_lines.append(idx)
+            target_lines = colon_return_lines if tail.startswith(":") else bare_return_lines
+            target_lines.append(idx)
 
         if len(stripped) > CLASS_METHOD_WARN_LINE_CHARS:
             long_method_lines.append((idx, len(stripped), method_name))
+
+    return offenders, colon_return_lines, bare_return_lines, long_method_lines
+
+
+def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue]:
+    """Check classDiagram method signatures for known render pitfalls."""
+    issues: list[Issue] = []
+    fname = str(path)
+
+    if "class-diagrams" not in path.parts:
+        return issues
+
+    if not any(_CLASS_DIAGRAM_RE.match(line) for line in lines):
+        return issues
+
+    offenders, colon_return_lines, bare_return_lines, long_method_lines = (
+        _collect_class_method_render_observations(lines)
+    )
 
     if offenders:
         first = ", ".join(str(x) for x in offenders[:6])

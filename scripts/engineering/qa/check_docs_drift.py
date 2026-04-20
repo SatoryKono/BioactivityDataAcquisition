@@ -7,25 +7,39 @@ import re
 import sys
 from pathlib import Path
 
+_FORBIDDEN_PATTERNS = (
+    r"/mnt/\S+",
+    r"C:\\\\\S+",
+    r"file:///\S+",
+    r"BioactivityDataAcquisition2",
+)
+
+
+def _file_content(file_path: Path) -> str:
+    """Read markdown file content."""
+    return file_path.read_text(encoding="utf-8")
+
+
+def _matched_patterns(content: str) -> list[str]:
+    """Return forbidden regex patterns found in content."""
+    return [
+        pattern
+        for pattern in _FORBIDDEN_PATTERNS
+        if re.search(pattern, content)
+    ]
+
 
 def check_file_forbidden_patterns(file_path: Path) -> list[str]:
     """Проверяет файл на наличие запрещённых шаблонов."""
-    forbidden_patterns = [
-        r"/mnt/\S+",  # Абсолютные пути в Linux
-        r"C:\\\\\S+",  # Абсолютные пути в Windows
-        r"file:///\S+",  # Локальные файловые ссылки
-        r"BioactivityDataAcquisition2",  # Ссылки на другой репозиторий
+    return [
+        f"Forbidden pattern '{pattern}' found in {file_path}"
+        for pattern in _matched_patterns(_file_content(file_path))
     ]
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        content = f.read()
 
-    violations = []
-    for pattern in forbidden_patterns:
-        if re.search(pattern, content):
-            violations.append(f"Forbidden pattern '{pattern}' found in {file_path}")
-
-    return violations
+def _markdown_files(docs_dir: Path, readme_file: Path) -> list[Path]:
+    """Return README plus docs markdown files."""
+    return [readme_file, *docs_dir.rglob("*.md")]
 
 
 def main() -> int:
@@ -33,10 +47,8 @@ def main() -> int:
     docs_dir = Path("docs")
     readme_file = Path("README.md")
 
-    files_to_check = [readme_file] + list(docs_dir.rglob("*.md"))
-
     all_violations = []
-    for file_path in files_to_check:
+    for file_path in _markdown_files(docs_dir, readme_file):
         if file_path.is_file():
             violations = check_file_forbidden_patterns(file_path)
             all_violations.extend(violations)

@@ -253,6 +253,56 @@ def _iter_public_method_docstring_violations(py_file: Path, src_dir: Path) -> li
     return violations
 
 
+def _is_type_checking_guard(node: ast.AST) -> bool:
+    return (
+        isinstance(node, ast.If)
+        and isinstance(node.test, ast.Name)
+        and node.test.id == "TYPE_CHECKING"
+    )
+
+
+def _iter_top_level_import_nodes(tree: ast.AST) -> list[ast.Import | ast.ImportFrom]:
+    return [
+        node
+        for node in tree.body
+        if isinstance(node, (ast.Import, ast.ImportFrom)) and not _is_type_checking_guard(node)
+    ]
+
+
+def _should_validate_pipeline_yaml(yaml_file: Path, config_dir: Path) -> bool:
+    if yaml_file.name.startswith("_"):
+        return False
+    relative_parts = yaml_file.relative_to(config_dir).parts
+    if any(part.startswith("_") for part in relative_parts[:-1]):
+        return False
+    if "sources" in yaml_file.parts or "composite" in yaml_file.parts:
+        return False
+    return True
+
+
+def _is_observability_prometheus_exempt(py_file: Path) -> bool:
+    if "observability" in py_file.parts and "infrastructure" in py_file.parts:
+        return True
+    return "interfaces" in py_file.parts and py_file.name == "observability.py"
+
+
+def _iter_metrics_protocol_violations(py_file: Path) -> list[str]:
+    try:
+        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return []
+
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ClassDef) and node.name.endswith("Metrics"):
+            bases = [base.id for base in node.bases if isinstance(base, ast.Name)]
+            if "MetricsPort" not in bases:
+                violations.append(
+                    f"{node.name} in {py_file.name} must implement MetricsPort"
+                )
+    return violations
+
+
 def format_violation(file_path: Path, lineno: int, message: str, src_dir: Path) -> str:
     relative_path = file_path.relative_to(src_dir)
     return f"{relative_path}:{lineno}: {message}"
@@ -284,16 +334,7 @@ def collect_module_level_adapter_import_violations(files: list[Path]) -> list[st
             tree = ast.parse(content, filename=str(py_file))
         except SyntaxError:
             continue
-        in_type_checking = False
-        for node in ast.walk(tree):
-            if (
-                isinstance(node, ast.If)
-                and isinstance(node.test, ast.Name)
-                and node.test.id == "TYPE_CHECKING"
-            ):
-                in_type_checking = True
-            if not isinstance(node, (ast.Import, ast.ImportFrom)) or in_type_checking:
-                continue
+        for node in _iter_top_level_import_nodes(tree):
             module = node.module if isinstance(node, ast.ImportFrom) else None
             if module and module.startswith("bioetl.infrastructure.adapters"):
                 violations.append(f"{py_file.name}:{node.lineno} imports {module}")
@@ -669,18 +710,7 @@ def test_pipeline_configs_schema(project_root: Path):
         return
 
     for yaml_file in config_dir.rglob("*.yaml"):
-        # Skip internal files starting with '_' (defaults, base schema, etc.)
-        if yaml_file.name.startswith("_"):
-            continue
-        # Skip internal directories starting with '_' (like _providers/)
-        relative_parts = yaml_file.relative_to(config_dir).parts
-        if any(part.startswith("_") for part in relative_parts[:-1]):
-            continue
-        # Skip source configs
-        if "sources" in yaml_file.parts:
-            continue
-        # Skip composite configs (different schema, see ADR-026)
-        if "composite" in yaml_file.parts:
+        if not _should_validate_pipeline_yaml(yaml_file, config_dir):
             continue
 
         with yaml_file.open(encoding="utf-8") as f:
@@ -701,12 +731,7 @@ def test_observability_library_isolation(src_dir: Path):
     violations = []
 
     for py_file in (src_dir / "bioetl").rglob("*.py"):
-        # Skip the observability module itself (bioetl/infrastructure/observability)
-        if "observability" in py_file.parts and "infrastructure" in py_file.parts:
-            continue
-
-        # Also skip interfaces/observability.py as it is an entry point for observability
-        if "interfaces" in py_file.parts and py_file.name == "observability.py":
+        if _is_observability_prometheus_exempt(py_file):
             continue
 
         imports, _ = analyze_python_file(py_file)
@@ -834,20 +859,6 @@ def test_metrics_implementations_are_compliant(src_dir: Path):
         return
 
     for py_file in observability_dir.glob("*_metrics.py"):
-        with py_file.open(encoding="utf-8") as f:
-            content = f.read()
-
-        try:
-            tree = ast.parse(content)
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef) and node.name.endswith("Metrics"):
-                    # Check base classes
-                    bases = [b.id for b in node.bases if isinstance(b, ast.Name)]
-                    if "MetricsPort" not in bases:
-                        violations.append(
-                            f"{node.name} in {py_file.name} must implement MetricsPort"
-                        )
-        except SyntaxError:
-            pass
+        violations.extend(_iter_metrics_protocol_violations(py_file))
 
     assert not violations, "\n".join(violations)

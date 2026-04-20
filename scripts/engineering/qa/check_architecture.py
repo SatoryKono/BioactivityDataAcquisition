@@ -11,33 +11,60 @@ import ast
 import sys
 from pathlib import Path
 
+_ADAPTER_DIRECTORIES = ("adapters", "storage", "locking", "checkpoint", "quarantine")
+
+
+def _parse_file_tree(filepath: Path) -> ast.AST | None:
+    """Parse Python file into AST, returning None on syntax errors."""
+    try:
+        return ast.parse(filepath.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return None
+
+
+def _is_port_related_import(node: ast.ImportFrom) -> bool:
+    """Return True when import comes from domain ports/types surface."""
+    module = node.module
+    return bool(module) and (
+        "domain.ports" in module or "domain.types" in module
+    )
+
+
+def _is_adapter_like_path(filepath: Path) -> bool:
+    """Return True for infrastructure adapter/storage-like modules."""
+    return any(directory in str(filepath) for directory in _ADAPTER_DIRECTORIES)
+
 
 def check_adapter_implements_port(filepath: Path) -> list[str]:
     """Check if adapter classes reference domain ports."""
     violations: list[str] = []
-
-    try:
-        tree = ast.parse(filepath.read_text(encoding="utf-8"))
-    except SyntaxError:
+    tree = _parse_file_tree(filepath)
+    if tree is None:
         return [f"{filepath}: syntax error"]
 
-    has_port_import = False
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom):
-            if node.module and "domain.ports" in node.module:
-                has_port_import = True
-                break
-            if node.module and "domain.types" in node.module:
-                has_port_import = True
-                break
-
-    adapter_dirs = ["adapters", "storage", "locking", "checkpoint", "quarantine"]
-    if any(directory in str(filepath) for directory in adapter_dirs):
-        if not has_port_import and filepath.name.endswith("client.py"):
-            # Client modules may not always import ports directly.
-            pass
+    has_port_import = any(
+        _is_port_related_import(node)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom)
+    )
+    if _is_adapter_like_path(filepath) and not has_port_import and filepath.name.endswith(
+        "client.py"
+    ):
+        # Client modules may not always import ports directly.
+        return violations
 
     return violations
+
+
+def _infrastructure_import_violation(py_file: Path) -> str | None:
+    """Return violation message when infrastructure imports application layer."""
+    content = py_file.read_text(encoding="utf-8")
+    if (
+        "from bioetl.application" in content
+        or "import bioetl.application" in content
+    ):
+        return f"{py_file}: infrastructure imports from application layer"
+    return None
 
 
 def check_no_circular_imports(base_path: Path) -> list[str]:
@@ -51,15 +78,9 @@ def check_no_circular_imports(base_path: Path) -> list[str]:
     for py_file in infra_dir.rglob("*.py"):
         if py_file.name.startswith("__"):
             continue
-
-        content = py_file.read_text(encoding="utf-8")
-        if (
-            "from bioetl.application" in content
-            or "import bioetl.application" in content
-        ):
-            violations.append(
-                f"{py_file}: infrastructure imports from application layer"
-            )
+        violation = _infrastructure_import_violation(py_file)
+        if violation is not None:
+            violations.append(violation)
 
     return violations
 
@@ -68,7 +89,11 @@ def _iter_infrastructure_python_files(base_path: Path) -> list[Path]:
     infra_dir = base_path / "src" / "bioetl" / "infrastructure"
     if not infra_dir.exists():
         return []
-    return [py_file for py_file in infra_dir.rglob("*.py") if not py_file.name.startswith("__")]
+    return [
+        py_file
+        for py_file in infra_dir.rglob("*.py")
+        if not py_file.name.startswith("__")
+    ]
 
 
 def _collect_adapter_violations(base_path: Path) -> list[str]:
