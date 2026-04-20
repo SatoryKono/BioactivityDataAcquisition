@@ -18,15 +18,7 @@ MetadataT = TypeVar("MetadataT", BronzeMetadata, SilverMetadata, GoldMetadata)
 
 def _resolve_primary_artifact_id(fragment: LineageGraphFragment) -> str:
     """Resolve the canonical produced artifact id for one lineage fragment."""
-    node_index = {node.node_id: node for node in fragment.nodes}
-    produced_artifact_ids: list[str] = []
-    for edge in fragment.edges:
-        if edge.edge_type is not LineageEdgeType.PRODUCED_BY:
-            continue
-        node = node_index.get(edge.source.node_id, edge.source)
-        if node.node_type in {LineageNodeType.DATASET, LineageNodeType.BRONZE_BATCH}:
-            produced_artifact_ids.append(node.node_id)
-    unique_artifact_ids = tuple(dict.fromkeys(produced_artifact_ids))
+    unique_artifact_ids = _produced_artifact_ids(fragment)
     if not unique_artifact_ids:
         raise ValueError(
             f"Lineage fragment {fragment.fragment_id} does not expose a produced artifact node"
@@ -38,6 +30,28 @@ def _resolve_primary_artifact_id(fragment: LineageGraphFragment) -> str:
     return unique_artifact_ids[0]
 
 
+def _produced_artifact_ids(fragment: LineageGraphFragment) -> tuple[str, ...]:
+    node_index = {node.node_id: node for node in fragment.nodes}
+    artifact_ids = [
+        artifact_id
+        for edge in fragment.edges
+        if (artifact_id := _produced_artifact_id_for_edge(edge, node_index)) is not None
+    ]
+    return tuple(dict.fromkeys(artifact_ids))
+
+
+def _produced_artifact_id_for_edge(
+    edge: object,
+    node_index: dict[str, object],
+) -> str | None:
+    if edge.edge_type is not LineageEdgeType.PRODUCED_BY:
+        return None
+    node = node_index.get(edge.source.node_id, edge.source)
+    if node.node_type not in {LineageNodeType.DATASET, LineageNodeType.BRONZE_BATCH}:
+        return None
+    return str(node.node_id)
+
+
 def _attach_fragment_anchor(
     metadata: object,
     fragment_id: str,
@@ -47,13 +61,19 @@ def _attach_fragment_anchor(
     output = getattr(metadata, "output", None)
     if output is None or not hasattr(output, "lineage_fragment_id"):
         return
-    existing_fragment_id = str(getattr(output, "lineage_fragment_id", "") or "").strip()
-    if not existing_fragment_id:
-        output.lineage_fragment_id = fragment_id
+    _set_missing_anchor(output, "lineage_fragment_id", fragment_id)
     if hasattr(output, "artifact_id"):
-        existing_artifact_id = str(getattr(output, "artifact_id", "") or "").strip()
-        if not existing_artifact_id:
-            output.artifact_id = artifact_id
+        _set_missing_anchor(output, "artifact_id", artifact_id)
+
+
+def _set_missing_anchor(output: object, attribute_name: str, value: str) -> None:
+    if _normalized_attr(output, attribute_name):
+        return
+    setattr(output, attribute_name, value)
+
+
+def _normalized_attr(target: object, attribute_name: str) -> str:
+    return str(getattr(target, attribute_name, "") or "").strip()
 
 
 def _validate_runtime_identity_contract(
@@ -92,16 +112,16 @@ def _validate_runtime_manifest_matches_fragment(
     fragment: LineageGraphFragment,
 ) -> None:
     """Ensure runtime.manifest_id matches the lineage fragment manifest identity."""
-    runtime_manifest_id = str(getattr(runtime, "manifest_id", "") or "").strip()
+    runtime_manifest_id = _normalized_attr(runtime, "manifest_id")
     fragment_manifest_id = str(fragment.manifest_id or "").strip()
-    if (
-        runtime_manifest_id
-        and fragment_manifest_id
-        and runtime_manifest_id != fragment_manifest_id
-    ):
+    if _non_empty_mismatch(runtime_manifest_id, fragment_manifest_id):
         raise ValueError(
             "Sidecar runtime.manifest_id does not match lineage fragment manifest_id"
         )
+
+
+def _non_empty_mismatch(left: str, right: str) -> bool:
+    return bool(left and right and left != right)
 
 
 def _validate_output_identity_contract(
@@ -113,16 +133,25 @@ def _validate_output_identity_contract(
     output = getattr(metadata, "output", None)
     if output is None:
         raise ValueError("Sidecar metadata must include output metadata")
-    output_fragment_id = str(getattr(output, "lineage_fragment_id", "") or "").strip()
-    if output_fragment_id and output_fragment_id != fragment.fragment_id:
-        raise ValueError(
-            "Sidecar output.lineage_fragment_id does not match lineage fragment fragment_id"
-        )
-    output_artifact_id = str(getattr(output, "artifact_id", "") or "").strip()
-    if output_artifact_id and output_artifact_id != artifact_id:
-        raise ValueError(
-            "Sidecar output.artifact_id does not match lineage fragment produced artifact"
-        )
+    _raise_if_anchor_mismatch(
+        actual=_normalized_attr(output, "lineage_fragment_id"),
+        expected=fragment.fragment_id,
+        message="Sidecar output.lineage_fragment_id does not match lineage fragment fragment_id",
+    )
+    _raise_if_anchor_mismatch(
+        actual=_normalized_attr(output, "artifact_id"),
+        expected=artifact_id,
+        message="Sidecar output.artifact_id does not match lineage fragment produced artifact",
+    )
+    _require_non_empty_artifact_id(artifact_id)
+
+
+def _raise_if_anchor_mismatch(*, actual: str, expected: str, message: str) -> None:
+    if _non_empty_mismatch(actual, expected):
+        raise ValueError(message)
+
+
+def _require_non_empty_artifact_id(artifact_id: str) -> None:
     if not str(artifact_id).strip():
         raise ValueError("Sidecar metadata must resolve a canonical artifact_id")
 

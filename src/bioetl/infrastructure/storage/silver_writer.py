@@ -81,6 +81,11 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_write_targets,
 )
+from bioetl.infrastructure.storage.writer_common import (
+    get_write_targets,
+    iterate_write_targets,
+    validate_write_versions,
+)
 
 # Backward-compatible module aliases for tests patching historical symbols.
 asyncio = _asyncio
@@ -212,20 +217,12 @@ async def _write_dual_targets(
 
     active_result: SilverWriteResult | None = None
     write_versions = writer._contract_rollout_policy.write_versions
-    write_targets = resolve_write_targets(
-        invocation.table_name,
-        write_versions,
-    )
     
-    # Guard against empty write_versions to avoid zip() ValueError
-    if not write_versions:
-        raise ValueError("Contract rollout policy must specify at least one write version")
+    # Use common functions to reduce duplication
+    validate_write_versions(write_versions)
+    write_targets = get_write_targets(invocation.table_name, write_versions)
     
-    for contract_version, physical_table in zip(
-        write_versions,
-        write_targets,
-        strict=True,
-    ):
+    for contract_version, physical_table in iterate_write_targets(write_versions, write_targets):
         try:
             result = await writer._write_single_target(
                 table_name=physical_table,

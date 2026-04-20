@@ -85,46 +85,17 @@ def coerce_silver_write_request(
     kwargs: Mapping[str, object] | None = None,
 ) -> SilverWriteRequest:
     """Normalize legacy or request-style Silver-write arguments."""
-    resolved_kwargs = dict(kwargs or {})
     if isinstance(request, SilverWriteRequest):
-        if args or resolved_kwargs:
+        if args or kwargs:
             raise TypeError(
                 "SilverWriteRequest cannot be combined with legacy args/kwargs"
             )
         return request
-
-    legacy_values: list[object] = list(args) if request is None else [request, *args]
-
-    if len(legacy_values) > len(_SILVER_WRITE_POSITIONAL_FIELDS):
-        raise TypeError("write_silver() received too many positional arguments")
-
-    positional_fields = _SILVER_WRITE_POSITIONAL_FIELDS[: len(legacy_values)]
-    for field_name, value in zip(positional_fields, legacy_values, strict=False):
-        if field_name in resolved_kwargs:
-            raise TypeError(
-                f"write_silver() got multiple values for argument '{field_name}'"
-            )
-        resolved_kwargs[field_name] = value
-
-    unexpected_fields = sorted(set(resolved_kwargs) - _SILVER_WRITE_ALLOWED_FIELDS)
-    if unexpected_fields:
-        unexpected = ", ".join(unexpected_fields)
-        raise TypeError(
-            f"write_silver() got unexpected keyword arguments: {unexpected}"
-        )
-
-    missing_fields = [
-        field_name
-        for field_name in _SILVER_WRITE_REQUIRED_FIELDS
-        if field_name not in resolved_kwargs
-    ]
-    if missing_fields:
-        missing = ", ".join(missing_fields)
-        raise TypeError(f"write_silver() missing required arguments: {missing}")
-
-    for field_name, default in _SILVER_WRITE_DEFAULTS.items():
-        resolved_kwargs.setdefault(field_name, default)
-
+    resolved_kwargs = _resolve_silver_write_kwargs(
+        request=request,
+        args=args,
+        kwargs=kwargs,
+    )
     return SilverWriteRequest(
         table_name=resolved_kwargs["table_name"],  # type: ignore[arg-type]
         records=resolved_kwargs["records"],  # type: ignore[arg-type]
@@ -141,6 +112,57 @@ def coerce_silver_write_request(
         source_batch_id=resolved_kwargs["source_batch_id"],  # type: ignore[arg-type]
         ingestion_ts=resolved_kwargs["ingestion_ts"],  # type: ignore[arg-type]
     )
+
+
+def _resolve_silver_write_kwargs(
+    *,
+    request: SilverWriteRequest | str | None,
+    args: tuple[object, ...],
+    kwargs: Mapping[str, object] | None,
+) -> dict[str, object]:
+    resolved_kwargs = dict(kwargs or {})
+    legacy_values = list(args) if request is None else [request, *args]
+    _merge_silver_write_legacy_values(resolved_kwargs, legacy_values)
+    _raise_on_unexpected_silver_write_fields(resolved_kwargs)
+    _raise_on_missing_silver_write_fields(resolved_kwargs)
+    for field_name, default in _SILVER_WRITE_DEFAULTS.items():
+        resolved_kwargs.setdefault(field_name, default)
+    return resolved_kwargs
+
+
+def _merge_silver_write_legacy_values(
+    resolved_kwargs: dict[str, object],
+    legacy_values: list[object],
+) -> None:
+    if len(legacy_values) > len(_SILVER_WRITE_POSITIONAL_FIELDS):
+        raise TypeError("write_silver() received too many positional arguments")
+    positional_fields = _SILVER_WRITE_POSITIONAL_FIELDS[: len(legacy_values)]
+    for field_name, value in zip(positional_fields, legacy_values, strict=False):
+        if field_name in resolved_kwargs:
+            raise TypeError(
+                f"write_silver() got multiple values for argument '{field_name}'"
+            )
+        resolved_kwargs[field_name] = value
+
+
+def _raise_on_unexpected_silver_write_fields(resolved_kwargs: dict[str, object]) -> None:
+    unexpected_fields = sorted(set(resolved_kwargs) - _SILVER_WRITE_ALLOWED_FIELDS)
+    if unexpected_fields:
+        unexpected = ", ".join(unexpected_fields)
+        raise TypeError(
+            f"write_silver() got unexpected keyword arguments: {unexpected}"
+        )
+
+
+def _raise_on_missing_silver_write_fields(resolved_kwargs: dict[str, object]) -> None:
+    missing_fields = [
+        field_name
+        for field_name in _SILVER_WRITE_REQUIRED_FIELDS
+        if field_name not in resolved_kwargs
+    ]
+    if missing_fields:
+        missing = ", ".join(missing_fields)
+        raise TypeError(f"write_silver() missing required arguments: {missing}")
 
 
 @runtime_checkable
