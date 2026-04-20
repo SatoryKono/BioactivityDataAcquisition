@@ -91,24 +91,38 @@ def _get_composite_runner_file(src_dir: Path) -> Path:
     return src_dir / "bioetl" / "application" / "composite" / "runner_pkg" / "runner.py"
 
 
+def _is_allowed_fsm_import(module_name: str, *, allowed_modules: set[str]) -> bool:
+    root_module = module_name.split(".")[0]
+    return root_module in allowed_modules or module_name.startswith("bioetl.domain")
+
+
+def _node_fsm_state_import_violations(
+    node: ast.AST, *, allowed_modules: set[str]
+) -> list[str]:
+    if isinstance(node, ast.Import):
+        return [
+            f"import {alias.name}"
+            for alias in node.names
+            if not _is_allowed_fsm_import(alias.name, allowed_modules=allowed_modules)
+        ]
+    if isinstance(node, ast.ImportFrom) and node.module:
+        if _is_allowed_fsm_import(node.module, allowed_modules=allowed_modules):
+            return []
+        return [f"from {node.module} import ..."]
+    return []
+
+
 def _fsm_state_import_violations(
     tree: ast.AST, *, allowed_modules: set[str]
 ) -> list[str]:
     violations: list[str] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                module = alias.name.split(".")[0]
-                if module not in allowed_modules and not alias.name.startswith(
-                    "bioetl.domain"
-                ):
-                    violations.append(f"import {alias.name}")
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            module = node.module.split(".")[0]
-            if module not in allowed_modules and not node.module.startswith(
-                "bioetl.domain"
-            ):
-                violations.append(f"from {node.module} import ...")
+        violations.extend(
+            _node_fsm_state_import_violations(
+                node,
+                allowed_modules=allowed_modules,
+            )
+        )
     return violations
 
 

@@ -132,6 +132,18 @@ def _iter_domain_class_defs(
     ]
 
 
+def _domain_source_entries(
+    source_content_cache: dict,
+    *,
+    domain_path: Path,
+) -> list[tuple[Path, str]]:
+    return [
+        (py_file, content)
+        for py_file, content in source_content_cache.items()
+        if domain_path in py_file.parents and py_file.name != "__init__.py"
+    ]
+
+
 def _non_frozen_dataclass_violation(
     *,
     py_file: Path,
@@ -163,6 +175,64 @@ def _mutable_default_violations_for_class(
                 f"in class '{node.name}' has a mutable default value."
             )
     return violations
+
+
+def _all_mutable_default_violations(source_ast_cache: dict) -> list[str]:
+    return [
+        violation
+        for py_file, tree in source_ast_cache.items()
+        for node in _iter_class_defs(tree)
+        for violation in _mutable_default_violations_for_class(
+            py_file=py_file,
+            node=node,
+        )
+    ]
+
+
+def _domain_io_violations(
+    *,
+    source_content_cache: dict,
+    src_dir: Path,
+    domain_path: Path,
+    io_patterns: list[tuple[str, str]],
+) -> list[str]:
+    return [
+        violation
+        for py_file, content in _domain_source_entries(
+            source_content_cache,
+            domain_path=domain_path,
+        )
+        for violation in _io_violations_in_content(
+            content=content,
+            relative_path=py_file.relative_to(src_dir),
+            io_patterns=io_patterns,
+        )
+    ]
+
+
+def _domain_complexity_violations(
+    *,
+    source_content_cache: dict,
+    src_dir: Path,
+    domain_path: Path,
+    exemptions: object,
+    max_cc: int,
+) -> list[str]:
+    return [
+        violation
+        for py_file, content in _domain_source_entries(
+            source_content_cache,
+            domain_path=domain_path,
+        )
+        if not py_file.name.startswith("__")
+        for violation in _complexity_violations_for_content(
+            py_file=py_file,
+            content=content,
+            src_dir=src_dir,
+            exemptions=exemptions,
+            default_max_cc=max_cc,
+        )
+    ]
 
 
 class TestDomainImmutability:
@@ -219,16 +289,7 @@ class TestDomainImmutability:
         REQ-ARCH-016: Mutable defaults (list, dict, set) in dataclasses
         cause shared state issues even if the class is frozen.
         """
-        violations = []
-
-        for py_file, tree in source_ast_cache.items():
-            for node in _iter_class_defs(tree):
-                violations.extend(
-                    _mutable_default_violations_for_class(
-                        py_file=py_file,
-                        node=node,
-                    )
-                )
+        violations = _all_mutable_default_violations(source_ast_cache)
 
         assert not violations, (
             "Found mutable defaults in dataclasses "
@@ -264,23 +325,12 @@ class TestDomainPurity:
             (r"shutil\.(copy|move|rmtree)", "shutil I/O operations"),
         ]
 
-        # Excluded files
-        excluded_files = {"__init__.py"}
-
-        violations = []
-
-        for py_file, content in source_content_cache.items():
-            if domain_path not in py_file.parents:
-                continue
-            if py_file.name in excluded_files:
-                continue
-            violations.extend(
-                _io_violations_in_content(
-                    content=content,
-                    relative_path=py_file.relative_to(src_dir),
-                    io_patterns=io_patterns,
-                )
-            )
+        violations = _domain_io_violations(
+            source_content_cache=source_content_cache,
+            src_dir=src_dir,
+            domain_path=domain_path,
+            io_patterns=io_patterns,
+        )
 
         assert not violations, (
             "Domain layer should not have direct I/O operations.\n"
@@ -310,23 +360,14 @@ class TestDomainComplexity:
 
         exemptions = get_registry_values("domain_complexity")
 
-        violations = []
         max_cc = 5  # Strict threshold for domain layer
-
-        for py_file, content in source_content_cache.items():
-            if domain_path not in py_file.parents:
-                continue
-            if py_file.name.startswith("__"):
-                continue
-            violations.extend(
-                _complexity_violations_for_content(
-                    py_file=py_file,
-                    content=content,
-                    src_dir=src_dir,
-                    exemptions=exemptions,
-                    default_max_cc=max_cc,
-                )
-            )
+        violations = _domain_complexity_violations(
+            source_content_cache=source_content_cache,
+            src_dir=src_dir,
+            domain_path=domain_path,
+            exemptions=exemptions,
+            max_cc=max_cc,
+        )
 
         assert not violations, (
             f"Domain layer has functions with CC > {max_cc}:\n" + "\n".join(violations)

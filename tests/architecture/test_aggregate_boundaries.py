@@ -254,6 +254,15 @@ def _cross_aggregate_import_violations(
     return violations
 
 
+def _aggregate_file_contents(aggregates_dir: Path) -> list[tuple[Path, str]]:
+    return [
+        (py_file, py_file.read_text(encoding="utf-8"))
+        for py_file in aggregates_dir.glob("*.py")
+        if py_file.name not in ("__init__.py", "events.py")
+        and not py_file.name.startswith("_")
+    ]
+
+
 class TestAggregateBoundaryIsolation:
     """Tests ensuring aggregates don't reference each other directly."""
 
@@ -287,24 +296,15 @@ class TestAggregateBoundaryIsolation:
             },
         }
 
-        violations = []
-
-        for py_file in aggregates_dir.glob("*.py"):
-            if py_file.name in ("__init__.py", "events.py"):
-                continue
-            # Skip private sub-modules (part of their parent aggregate)
-            if py_file.name.startswith("_"):
-                continue
-
-            with py_file.open(encoding="utf-8") as f:
-                content = f.read()
-            violations.extend(
-                _cross_aggregate_import_violations(
-                    py_file=py_file,
-                    content=content,
-                    aggregate_classes=aggregate_classes,
-                )
+        violations = [
+            violation
+            for py_file, content in _aggregate_file_contents(aggregates_dir)
+            for violation in _cross_aggregate_import_violations(
+                py_file=py_file,
+                content=content,
+                aggregate_classes=aggregate_classes,
             )
+        ]
 
         assert not violations, (
             "Aggregates should not import other aggregate classes. "
