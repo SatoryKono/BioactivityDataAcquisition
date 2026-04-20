@@ -63,43 +63,15 @@ class MockFilterableDataSource:
         async for assay in self._yield_assays():
             yield assay
 
-    async def fetch(self, entity_type: str, **kwargs):
-        del entity_type, kwargs
+    async def _passthrough_fetch(self, *args: object, **kwargs: object):
+        del args, kwargs
         async for assay in self._delegate_assays():
             yield assay
 
-    async def fetch_filtered(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        limit: int | None = None,
-    ):
-        del filter_ids, filter_field, limit
-        async for assay in self.fetch(entity_type=entity_type):
-            yield assay
-
-    async def fetch_multi_filtered(
-        self,
-        entity_type: str,
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ):
-        del filters, limit
-        async for assay in self.fetch(entity_type=entity_type):
-            yield assay
-
-    async def fetch_filtered_with_fallback(
-        self,
-        entity_type: str,
-        filter_ids: list[str],
-        filter_field: str,
-        fallback_mapping: dict[str, str],
-        limit: int | None = None,
-    ):
-        del filter_ids, filter_field, fallback_mapping, limit
-        async for assay in self.fetch(entity_type=entity_type):
-            yield assay
+    fetch = _passthrough_fetch
+    fetch_filtered = _passthrough_fetch
+    fetch_multi_filtered = _passthrough_fetch
+    fetch_filtered_with_fallback = _passthrough_fetch
 
 
 assert isinstance(MockFilterableDataSource(), FilterableDataSourcePort)
