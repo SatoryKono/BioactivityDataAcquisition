@@ -359,6 +359,68 @@ def _schema_field_aliases() -> dict[str, str]:
     }
 
 
+def _strict_domain_framework_violations(violations: list[str]) -> list[str]:
+    return [
+        violation
+        for violation in violations
+        if any(f"'{framework}" in violation for framework in FORBIDDEN_DOMAIN_FRAMEWORKS)
+    ]
+
+
+def _iter_ports_files(ports_dir: Path) -> list[Path]:
+    return [
+        port_file
+        for port_file in ports_dir.glob("*.py")
+        if port_file.name not in ("__init__.py", "noop.py")
+    ]
+
+
+def _allowed_env_var_files(src_dir: Path) -> set[Path]:
+    return {
+        src_dir / "bioetl" / "infrastructure" / "config.py",
+        src_dir / "bioetl" / "infrastructure" / "serialization" / "encoders.py",
+        src_dir / "bioetl" / "infrastructure" / "security" / "pii_hasher.py",
+        src_dir / "bioetl" / "infrastructure" / "config" / "dq_config_loader.py",
+        src_dir / "bioetl" / "infrastructure" / "observability" / "logging_config.py",
+        src_dir / "bioetl" / "infrastructure" / "observability" / "tracing.py",
+    }
+
+
+def _load_adapter_protocol_expectations() -> list[tuple[type[Any], type[Any]]]:
+    from bioetl.composition.factories.storage import StorageAdapter
+    from bioetl.domain.ports.noop import NoOpMetrics
+    from bioetl.infrastructure.adapters.chembl import ChemblAdapter
+    from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
+    from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+    from bioetl.infrastructure.checkpoint.local_checkpoint import (
+        LocalCheckpointAdapter,
+    )
+    from bioetl.infrastructure.locking.memory_lock import MemoryLock
+    from bioetl.infrastructure.observability.prometheus_metrics import (
+        PrometheusMetrics,
+    )
+    from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
+
+    return [
+        (ChemblAdapter, DataSourcePort),
+        (PubChemAdapter, DataSourcePort),
+        (UniProtAdapter, DataSourcePort),
+        (LocalCheckpointAdapter, CheckpointPort),
+        (MemoryLock, LockPort),
+        (UnifiedQuarantineAdapter, QuarantinePort),
+        (StorageAdapter, StoragePort),
+        (PrometheusMetrics, MetricsPort),
+        (NoOpMetrics, MetricsPort),
+    ]
+
+
+def _load_http_adapters() -> list[type[Any]]:
+    from bioetl.infrastructure.adapters.chembl import ChemblAdapter
+    from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+
+    return [ChemblAdapter, UniProtAdapter]
+
+
 def format_violation(file_path: Path, lineno: int, message: str, src_dir: Path) -> str:
     relative_path = file_path.relative_to(src_dir)
     return f"{relative_path}:{lineno}: {message}"
@@ -449,16 +511,8 @@ def test_domain_purity_ast(src_dir: Path):
         message=lambda imp: f"Forbidden import '{imp['module']}' in Domain",
     )
 
-    # Allow warnings/exceptions but enforce core purity
-    # We filter out some violations that might be debatable or test-only if needed
-    # But for now, we enforce strictly.
     if violations:
-        # Check against strict forbidden list as a double check for clearer error messages
-        strict_violations = [
-            v
-            for v in violations
-            if any(f"'{f}" in v for f in FORBIDDEN_DOMAIN_FRAMEWORKS)
-        ]
+        strict_violations = _strict_domain_framework_violations(violations)
         assert not strict_violations, (
             "Domain layer contains strictly forbidden imports.\n"
             + "\n".join(strict_violations)
@@ -523,13 +577,9 @@ def test_ports_are_protocols(src_dir: Path):
     ports_dir = src_dir / "bioetl" / "domain" / "ports"
     assert ports_dir.is_dir(), f"Ports directory not found: {ports_dir}"
 
-    # Collect all port files (exclude __init__.py and noop.py implementations)
-    port_files = [
-        f for f in ports_dir.glob("*.py") if f.name not in ("__init__.py", "noop.py")
-    ]
+    port_files = _iter_ports_files(ports_dir)
     assert port_files, "No port files found in ports directory"
 
-    # Check each port file contains Protocol definitions
     for port_file in port_files:
         content = port_file.read_text(encoding="utf-8")
         assert "Protocol" in content, f"{port_file.name} must use Protocol"
@@ -646,21 +696,9 @@ def test_no_unsafe_functions(src_dir: Path):
 
 def test_env_var_centralization(src_dir: Path):
     """os.getenv only in config.py, encoders.py, and pii_hasher.py."""
-    # Files allowed to use os.getenv/environ
-    allowed_files = {
-        src_dir / "bioetl" / "infrastructure" / "config.py",
-        src_dir / "bioetl" / "infrastructure" / "serialization" / "encoders.py",
-        # pii_hasher.py reads BIOETL_PII_SALT_* for security-critical salt
-        src_dir / "bioetl" / "infrastructure" / "security" / "pii_hasher.py",
-        # dq_config_loader.py uses os.environ for relaxed DQ thresholds in tests
-        src_dir / "bioetl" / "infrastructure" / "config" / "dq_config_loader.py",
-        # observability bootstrap reads runtime env knobs for sink selection and local test behavior
-        src_dir / "bioetl" / "infrastructure" / "observability" / "logging_config.py",
-        src_dir / "bioetl" / "infrastructure" / "observability" / "tracing.py",
-    }
     violations = collect_env_var_violations(
         list((src_dir / "bioetl").rglob("*.py")),
-        allowed_files=allowed_files,
+        allowed_files=_allowed_env_var_files(src_dir),
     )
 
     assert not violations, "\n".join(violations)
@@ -735,45 +773,10 @@ def test_observability_library_isolation(src_dir: Path):
 
 def test_adapters_implement_protocols(src_dir: Path):
     """Infrastructure adapters must implement Domain Protocols."""
-
-    # Import Protocols
-    from bioetl.domain.ports import (
-        CheckpointPort,
-        DataSourcePort,
-        LockPort,
-        StoragePort,
-    )
-
-    # Import Adapters (Lazy import to avoid import errors if deps are missing)
     try:
-        from bioetl.composition.factories.storage import StorageAdapter
-        from bioetl.infrastructure.adapters.chembl import ChemblAdapter
-        from bioetl.infrastructure.adapters.pubchem import PubChemAdapter
-        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
-        from bioetl.infrastructure.checkpoint.local_checkpoint import (
-            LocalCheckpointAdapter,
-        )
-        from bioetl.infrastructure.locking.memory_lock import MemoryLock
-        from bioetl.domain.ports.noop import NoOpMetrics
-        from bioetl.infrastructure.observability.prometheus_metrics import (
-            PrometheusMetrics,
-        )
-        from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
+        expectations = _load_adapter_protocol_expectations()
     except ImportError as e:
         pytest.fail(f"Could not import adapters for protocol check: {e}")
-
-    # Define Expectations
-    expectations = [
-        (ChemblAdapter, DataSourcePort),
-        (PubChemAdapter, DataSourcePort),
-        (UniProtAdapter, DataSourcePort),
-        (LocalCheckpointAdapter, CheckpointPort),
-        (MemoryLock, LockPort),
-        (UnifiedQuarantineAdapter, QuarantinePort),
-        (StorageAdapter, StoragePort),
-        (PrometheusMetrics, MetricsPort),
-        (NoOpMetrics, MetricsPort),
-    ]
 
     violations = []
     for adapter_cls, protocol in expectations:
@@ -794,18 +797,9 @@ def test_http_adapters_inherit_base(src_dir: Path):
     from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 
     try:
-        from bioetl.infrastructure.adapters.chembl import ChemblAdapter
-        from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
+        http_adapters = _load_http_adapters()
     except ImportError as e:
         pytest.fail(f"Could not import adapters: {e}")
-
-    # List of adapters that are considered "HTTP Adapters"
-    # PubChemAdapter is excluded as it uses a sync library (pubchempy)
-    # and manages its own thread pool / connection logic.
-    http_adapters = [
-        ChemblAdapter,
-        UniProtAdapter,
-    ]
 
     violations = []
     for adapter in http_adapters:
