@@ -43,6 +43,40 @@ def get_imports_from_file(file_path: Path) -> list[str]:
     return imports
 
 
+def _parsed_import_tree(file_path: Path) -> ast.AST | None:
+    with open(file_path) as f:
+        try:
+            return ast.parse(f.read(), filename=str(file_path))
+        except SyntaxError:
+            return None
+
+
+def _type_checking_import_lines(tree: ast.AST) -> set[int]:
+    type_checking_imports: set[int] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.If):
+            continue
+        if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
+            for stmt in ast.walk(node):
+                if isinstance(stmt, (ast.Import, ast.ImportFrom)):
+                    type_checking_imports.add(stmt.lineno)
+    return type_checking_imports
+
+
+def _runtime_import_from_node(
+    node: ast.AST,
+    *,
+    type_checking_imports: set[int],
+) -> list[str]:
+    if getattr(node, "lineno", None) in type_checking_imports:
+        return []
+    if isinstance(node, ast.Import):
+        return [alias.name for alias in node.names]
+    if isinstance(node, ast.ImportFrom) and node.module:
+        return [node.module]
+    return []
+
+
 @pytest.mark.architecture
 class TestInterfacesNoDIrectInfrastructure:
     """Test that interfaces don't directly import infrastructure."""
@@ -265,34 +299,19 @@ def get_runtime_imports_from_file(file_path: Path) -> list[str]:
     Returns:
         List of imported module paths (runtime only).
     """
-    with open(file_path) as f:
-        try:
-            tree = ast.parse(f.read(), filename=str(file_path))
-        except SyntaxError:
-            return []
+    tree = _parsed_import_tree(file_path)
+    if tree is None:
+        return []
 
-    imports = []
-    type_checking_imports: set[int] = set()
-
-    # First pass: find line numbers inside TYPE_CHECKING blocks
+    imports: list[str] = []
+    type_checking_imports = _type_checking_import_lines(tree)
     for node in ast.walk(tree):
-        if isinstance(node, ast.If):
-            # Check if this is `if TYPE_CHECKING:`
-            if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
-                for stmt in ast.walk(node):
-                    if isinstance(stmt, (ast.Import, ast.ImportFrom)):
-                        type_checking_imports.add(stmt.lineno)
-
-    # Second pass: collect imports NOT in TYPE_CHECKING
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            if node.lineno not in type_checking_imports:
-                for alias in node.names:
-                    imports.append(alias.name)
-        elif isinstance(node, ast.ImportFrom):
-            if node.lineno not in type_checking_imports and node.module:
-                imports.append(node.module)
-
+        imports.extend(
+            _runtime_import_from_node(
+                node,
+                type_checking_imports=type_checking_imports,
+            )
+        )
     return imports
 
 

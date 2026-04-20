@@ -313,6 +313,16 @@ def normalize_name(value: str) -> str:
     return re.sub(r"[-_.]+", "-", value.strip().lower())
 
 
+def _imported_modules_from_tree(tree: ast.AST) -> set[str]:
+    imported: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imported.update(alias.name.split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            imported.add(node.module.split(".")[0])
+    return imported
+
+
 def collect_imported_modules(paths: Iterable[Path]) -> set[str]:
     imported: set[str] = set()
     for path in paths:
@@ -320,14 +330,7 @@ def collect_imported_modules(paths: Iterable[Path]) -> set[str]:
             tree = ast.parse(path.read_text(encoding="utf-8"))
         except (OSError, SyntaxError):
             continue
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    imported.add(alias.name.split(".")[0])
-            elif isinstance(node, ast.ImportFrom):
-                if node.level != 0 or not node.module:
-                    continue
-                imported.add(node.module.split(".")[0])
+        imported.update(_imported_modules_from_tree(tree))
     return {normalize_name(name) for name in imported}
 
 
@@ -396,6 +399,34 @@ def format_path(path: Path, root: Path) -> str:
         return str(path)
 
 
+def _python_source_paths(root: Path) -> list[Path]:
+    python_paths = list(iter_files(root / "src", (".py",)))
+    python_paths.extend(iter_files(root / "scripts", (".py",)))
+    python_paths.extend(iter_files(root / "tests", (".py",)))
+    return python_paths
+
+
+def _emit_cache_target_section(
+    *,
+    root: Path,
+    cache_targets: list[CleanupTarget],
+    apply: bool,
+) -> None:
+    typer.echo("\n-- Очистка артефактов --")
+    typer.echo(f"Кандидатов: {len(cache_targets)}")
+    for target in cache_targets:
+        typer.echo(f"  - {format_path(target.path, root)} [{target.category}]")
+
+    if not apply or not cache_targets:
+        return
+
+    errors = delete_targets(cache_targets)
+    if errors:
+        typer.echo("Ошибки при удалении:")
+        for err in errors:
+            typer.echo(f"  - {err}")
+
+
 @app.command()
 def main(
     apply: bool = typer.Option(
@@ -420,25 +451,12 @@ def main(
     unused_yaml = find_unused_yaml_configs(root)
 
     duplicate_functions = find_duplicate_functions(root)
-    python_paths = list(iter_files(root / "src", (".py",)))
-    python_paths.extend(iter_files(root / "scripts", (".py",)))
-    python_paths.extend(iter_files(root / "tests", (".py",)))
+    python_paths = _python_source_paths(root)
     unused_imports, unused_imports_per_file = find_unused_imports(python_paths)
 
     unused_deps = find_unused_dependencies(root, root / "pyproject.toml")
 
-    typer.echo("\n-- Очистка артефактов --")
-    typer.echo(f"Кандидатов: {len(cache_targets)}")
-    if cache_targets:
-        for target in cache_targets:
-            typer.echo(f"  - {format_path(target.path, root)} [{target.category}]")
-    errors: list[str] = []
-    if apply and cache_targets:
-        errors = delete_targets(cache_targets)
-        if errors:
-            typer.echo("Ошибки при удалении:")
-            for err in errors:
-                typer.echo(f"  - {err}")
+    _emit_cache_target_section(root=root, cache_targets=cache_targets, apply=apply)
 
     typer.echo("\n-- YAML конфиги без ссылок --")
     typer.echo(f"Кандидатов: {len(unused_yaml)}")
