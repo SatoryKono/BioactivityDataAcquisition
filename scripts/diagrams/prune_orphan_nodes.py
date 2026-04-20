@@ -62,6 +62,7 @@ DEFAULT_DIRS = [
     source_dir("views"),
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
+NODE_ID_SPLIT_PATTERN = r"[\s,]+"
 
 
 def _ensure_repo_path(path: Path) -> Path:
@@ -248,12 +249,11 @@ def detect_diagram_type(lines: list[str]) -> str:
 
 def parse_keep_orphans(lines: list[str]) -> set[str]:
     """Return set of node IDs explicitly exempted from orphan detection."""
-    split_pattern = r"[\s,]+"
     kept: set[str] = set()
     for ln in lines:
         m = _KEEP_ORPHAN_RE.search(ln)
         if m:
-            for nid in re.split(split_pattern, m.group(1).strip()):
+            for nid in re.split(NODE_ID_SPLIT_PATTERN, m.group(1).strip()):
                 if nid:
                     kept.add(nid)
     return kept
@@ -405,7 +405,7 @@ def _consume_sequence_interaction(stripped_line: str, messaged: set[str]) -> boo
 
     note_targets = _parse_sequence_note_targets(stripped_line)
     if note_targets is not None:
-        for node_id in re.split(r"[\s,]+", note_targets):
+        for node_id in re.split(NODE_ID_SPLIT_PATTERN, note_targets):
             if node_id and re.match(rf"^{_NID}$", node_id):
                 messaged.add(node_id)
         return True
@@ -576,7 +576,7 @@ def _rewrite_flowchart_class_directive(
     orphan_ids: set[str],
 ) -> str | None:
     raw_ids, class_name = class_directive
-    node_ids = [node_id.strip() for node_id in re.split(r"[\s,]+", raw_ids)]
+    node_ids = [node_id.strip() for node_id in re.split(NODE_ID_SPLIT_PATTERN, raw_ids)]
     surviving = [node_id for node_id in node_ids if node_id and node_id not in orphan_ids]
     if not surviving:
         return None

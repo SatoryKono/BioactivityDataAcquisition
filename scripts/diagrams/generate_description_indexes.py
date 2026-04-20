@@ -18,6 +18,8 @@ DESCRIPTION_ROOT = DIAGRAM_ROOT / "descriptions"
 INDEX_FILENAME = "INDEX.md"
 ROOT_INDEX_PATH = DESCRIPTION_ROOT / INDEX_FILENAME
 CLASS_INDEX_PATH = DESCRIPTION_ROOT / "class" / INDEX_FILENAME
+CLASS_INDEX_LINK = f"./class/{INDEX_FILENAME}"
+ROOT_INDEX_LINK = f"../{INDEX_FILENAME}"
 TARGETS = ("root", "class")
 VIEW_SUFFIX_ORDER = ("-full", "-overview", "-dataflow", "-domain", "-infra")
 FAMILY_DIR_LABELS = {
@@ -121,7 +123,7 @@ def build_root_index_markdown(cards_by_family: dict[str, list[Path]]) -> str:
     lines.append("")
     lines.append("## Related Indexes")
     lines.append("")
-    lines.append("- [Class descriptions family index](./class/INDEX.md)")
+    lines.append(f"- [Class descriptions family index]({CLASS_INDEX_LINK})")
     lines.append("- [MMD diagram descriptions map](./class-summary.md)")
     lines.append(
         "- [Architecture bundle with descriptions](../bundles/architecture.bundle.md)"
@@ -149,7 +151,7 @@ def build_root_index_markdown(cards_by_family: dict[str, list[Path]]) -> str:
     lines.append("")
     lines.append("## Class Diagram Cards")
     lines.append("")
-    lines.append("- Dedicated family index: [class/INDEX.md](./class/INDEX.md)")
+    lines.append(f"- Dedicated family index: [class/{INDEX_FILENAME}]({CLASS_INDEX_LINK})")
     lines.append(
         "- Narrative map for class-diagram families: [class-summary.md](./class-summary.md)"
     )
@@ -179,7 +181,7 @@ def build_class_index_markdown(class_cards: list[Path]) -> str:
     lines.append("")
     lines.append("## Related Indexes")
     lines.append("")
-    lines.append("- [Diagram descriptions root index](../INDEX.md)")
+    lines.append(f"- [Diagram descriptions root index]({ROOT_INDEX_LINK})")
     lines.append("- [MMD diagram descriptions map](../class-summary.md)")
     lines.append("- [Class bundle with descriptions](../../bundles/class.bundle.md)")
     lines.append("")

@@ -92,8 +92,7 @@ class _RuntimeInlineConstructionFinder(ast.NodeVisitor):
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         self._visit_function_scope(node)
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        self._visit_function_scope(node)
+    visit_AsyncFunctionDef = visit_FunctionDef  # type: ignore[assignment]
 
     def visit_Assign(self, node: ast.Assign) -> None:
         target = node.targets[0] if node.targets else None
