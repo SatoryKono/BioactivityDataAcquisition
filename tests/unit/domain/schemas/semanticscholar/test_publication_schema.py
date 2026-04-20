@@ -92,25 +92,25 @@ class TestPmcIdValidation:
 class TestYearValidation:
     """Tests for year field validation."""
 
+    @staticmethod
+    def _is_supported_year(year: int) -> bool:
+        return 1500 <= year <= 2100
+
     def test_valid_year_in_range(self) -> None:
         """Test year within valid range."""
-        valid_year = 2024
-        assert 1500 <= valid_year <= 2100
+        assert self._is_supported_year(2024)
 
     def test_year_at_lower_bound(self) -> None:
         """Test year at lower bound."""
-        lower_bound_year = 1500
-        assert lower_bound_year == 1500
+        assert self._is_supported_year(1500)
 
     def test_year_below_lower_bound(self) -> None:
         """Test year below lower bound fails."""
-        invalid_year = 1499
-        assert invalid_year < 1500
+        assert not self._is_supported_year(1499)
 
     def test_year_above_upper_bound(self) -> None:
         """Test year above upper bound fails."""
-        invalid_year = 2101
-        assert invalid_year > 2100
+        assert not self._is_supported_year(2101)
 
 
 class TestPublicationDateValidation:

@@ -56,7 +56,7 @@ class TestStoragePortProtocol:
                     checksum="sha256:test",
                 )
 
-            def write_silver(
+            def write_silver(  # NOSONAR - example intentionally mirrors StoragePort
                 self,
                 table_name: str,
                 records: list[dict[str, Any]],

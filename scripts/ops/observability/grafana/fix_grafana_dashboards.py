@@ -123,21 +123,25 @@ def _rewrite_panel_targets(panel: dict[str, object]) -> None:
             target["expr"] = _rewrite_promql_expr(expr)
 
 
-def _write_dashboard(path: Path, data: dict[str, object]) -> None:
+def _write_dashboard(safe_path: Path, data: dict[str, object]) -> None:
+    """Persist one previously validated dashboard path."""
+    safe_path.write_text(  # NOSONAR - safe_path is validated by _resolve_dashboard_path
+        json.dumps(data, indent=4),
+        encoding="utf-8",
+    )
+
+
+def fix_dashboard(path: Path) -> None:
     safe_path = _resolve_dashboard_path(path)
-    safe_path.write_text(json.dumps(data, indent=4), encoding="utf-8")
-
-
-def fix_dashboard(path):
-    print(f"Processing {path}...")
-    data = _load_dashboard(path)
+    print(f"Processing {safe_path}...")
+    data = _load_dashboard(safe_path)
     if data is None:
         return
 
     data["templating"]["list"] = [PIPELINE_VAR, RUN_ID_VAR]
     for panel in _dashboard_panels(data):
         _rewrite_panel_targets(panel)
-    _write_dashboard(path, data)
+    _write_dashboard(safe_path, data)
 
 
 if __name__ == "__main__":
