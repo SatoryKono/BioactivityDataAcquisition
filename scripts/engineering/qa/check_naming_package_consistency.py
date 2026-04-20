@@ -85,6 +85,59 @@ def _run_suffix_policy_check(repo_root: Path) -> list[Violation]:
     ]
 
 
+def _factory_module_violation(py_file: Path, *, repo_root: Path) -> Violation | None:
+    if py_file.name not in {"factory.py"} and not py_file.name.endswith("_factory.py"):
+        return None
+
+    rel = py_file.relative_to(repo_root).as_posix()
+    if rel in ALLOWED_FACTORY_FACADES:
+        return None
+    return Violation(
+        rule="factory-only-in-composition",
+        location=rel,
+        details="Factory module is outside src/bioetl/composition",
+    )
+
+
+def _load_python_ast(py_file: Path) -> ast.AST | None:
+    try:
+        return ast.parse(py_file.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return None
+
+
+def _factory_class_violations(py_file: Path, *, repo_root: Path) -> list[Violation]:
+    tree = _load_python_ast(py_file)
+    if tree is None:
+        return []
+
+    rel = py_file.relative_to(repo_root).as_posix()
+    return [
+        Violation(
+            rule="factory-only-in-composition",
+            location=f"{rel}:{node.lineno}",
+            details=f"class {node.name} must live in composition layer",
+        )
+        for node in ast.walk(tree)
+        if (
+            isinstance(node, ast.ClassDef)
+            and node.name.endswith("Factory")
+            and not node.name.startswith("_")
+        )
+    ]
+
+
+def _violations_for_forbidden_factory_file(
+    py_file: Path, *, repo_root: Path
+) -> list[Violation]:
+    violations: list[Violation] = []
+    module_violation = _factory_module_violation(py_file, repo_root=repo_root)
+    if module_violation is not None:
+        violations.append(module_violation)
+    violations.extend(_factory_class_violations(py_file, repo_root=repo_root))
+    return violations
+
+
 def _factory_violations(repo_root: Path) -> list[Violation]:
     violations: list[Violation] = []
 
@@ -95,37 +148,9 @@ def _factory_violations(repo_root: Path) -> list[Violation]:
         for py_file in layer_path.rglob("*.py"):
             if "__pycache__" in py_file.parts:
                 continue
-
-            if py_file.name == "factory.py" or py_file.name.endswith("_factory.py"):
-                rel = py_file.relative_to(repo_root).as_posix()
-                if rel in ALLOWED_FACTORY_FACADES:
-                    continue
-                violations.append(
-                    Violation(
-                        rule="factory-only-in-composition",
-                        location=rel,
-                        details="Factory module is outside src/bioetl/composition",
-                    )
-                )
-
-            try:
-                tree = ast.parse(py_file.read_text(encoding="utf-8"))
-            except SyntaxError:
-                continue
-            for node in ast.walk(tree):
-                if (
-                    isinstance(node, ast.ClassDef)
-                    and node.name.endswith("Factory")
-                    and not node.name.startswith("_")
-                ):
-                    rel = py_file.relative_to(repo_root).as_posix()
-                    violations.append(
-                        Violation(
-                            rule="factory-only-in-composition",
-                            location=f"{rel}:{node.lineno}",
-                            details=f"class {node.name} must live in composition layer",
-                        )
-                    )
+            violations.extend(
+                _violations_for_forbidden_factory_file(py_file, repo_root=repo_root)
+            )
     return violations
 
 

@@ -118,16 +118,6 @@ def test_bootstrap_composite_runner_generates_run_id() -> None:
     runtime = _make_runtime(use_cached_bronze=False)
 
     generated_run_id = UUID("00000000-0000-0000-0000-000000000002")
-    support_bundle = SimpleNamespace(
-        key_extractor=MagicMock(),
-        dependency_coordinator=MagicMock(),
-        coordinator=MagicMock(),
-        merger=MagicMock(),
-        checkpoint_manager=MagicMock(),
-        dq_report_service=MagicMock(),
-        fsm_state_helper=MagicMock(),
-        quarantine_port=None,
-    )
     runtime_basics = SimpleNamespace(
         run_id=str(generated_run_id),
         settings=MagicMock(),
@@ -148,9 +138,6 @@ def test_bootstrap_composite_runner_generates_run_id() -> None:
         patch(
             "bioetl.composition.bootstrap.runtime.composite._build_support_services"
         ) as mock_build_support_services,
-        patch(
-            "bioetl.composition.bootstrap.runtime.composite.create_composite_runner_service"
-        ) as mock_runner_cls,
     ):
         mock_runtime_basics.return_value = runtime_basics
         mock_build_runner_factories.return_value = (
@@ -158,17 +145,16 @@ def test_bootstrap_composite_runner_generates_run_id() -> None:
             MagicMock(),
             MagicMock(),
         )
-        mock_build_support_services.return_value = support_bundle
-        mock_runner_cls.return_value = MagicMock()
+        mock_build_support_services.return_value = MagicMock()
 
-        composite_runtime.bootstrap_composite_runner(
+        plan = composite_runtime._build_composite_bootstrap_plan(
             config=config,
             runtime=runtime,
             run_id=None,
         )
 
-    runner_call = mock_runner_cls.call_args.kwargs
-    assert runner_call["run_id"] == str(generated_run_id)
+    mock_runtime_basics.assert_called_once_with(config=config, run_id=None)
+    assert plan.run_id == str(generated_run_id)
 
 
 @pytest.mark.unit

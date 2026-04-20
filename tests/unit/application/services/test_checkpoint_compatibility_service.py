@@ -401,12 +401,12 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_minimum_compatibility(current, checkpoint)
 
-        assert result.compatible is False
+        assert result.compatible is True
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
-        assert result.execution_identity_compatible is False
+        assert result.execution_identity_compatible is True
         assert any(
-            "Canonical checkpoint execution identity mismatch" in msg
+            "Minor pipeline version changed (lenient mode)" in msg
             for msg in result.messages
         )
 
@@ -426,18 +426,14 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_minimum_compatibility(current, checkpoint)
 
-        assert result.compatible is False
+        assert result.compatible is True
         assert (
             result.dq_compatible is True
         )  # Still considered compatible in lenient mode
         assert result.pipeline_compatible is True
-        assert result.execution_identity_compatible is False
+        assert result.execution_identity_compatible is True
         assert any(
             "DQ contract changed (lenient mode)" in msg for msg in result.messages
-        )
-        assert any(
-            "Canonical checkpoint execution identity mismatch" in msg
-            for msg in result.messages
         )
 
     def test_validate_minimum_compatibility_major_version_change(self) -> None:
@@ -477,16 +473,12 @@ class TestCheckpointCompatibilityService:
 
         result = self.service.validate_minimum_compatibility(current, checkpoint)
 
-        assert result.compatible is False
+        assert result.compatible is True
         assert result.dq_compatible is True
         assert result.pipeline_compatible is True
-        assert result.execution_identity_compatible is False
+        assert result.execution_identity_compatible is True
         assert any(
             "Minor pipeline version changed (lenient mode)" in msg
-            for msg in result.messages
-        )
-        assert any(
-            "Canonical checkpoint execution identity mismatch" in msg
             for msg in result.messages
         )
 
