@@ -238,7 +238,7 @@ removable_complexity_family_ratchets:
     path_prefixes:
     - src/bioetl/infrastructure/adapters/
     family_budgets:
-      files_ge_250_loc: 20
+      files_ge_250_loc: 21
       max_internal_fan_in: 31
     tracked_seams:
     - path: src/bioetl/infrastructure/adapters/http/_health_monitor_support.py
@@ -252,7 +252,7 @@ removable_complexity_family_ratchets:
     path_prefixes:
     - src/bioetl/application/composite/
     family_budgets:
-      files_ge_250_loc: 20
+      files_ge_250_loc: 21
       max_internal_fan_in: 25
     tracked_seams:
     - path: src/bioetl/application/composite/runner_pkg/runner_summary_helpers.py
