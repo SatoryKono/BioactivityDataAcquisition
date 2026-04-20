@@ -1,8 +1,13 @@
 """Script to inject Grafana variables and fix PromQL queries for BioETL pipelines."""
 
+from __future__ import annotations
+
 import json
 import re
 from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+DASHBOARD_ROOT = REPO_ROOT / "grafana" / "dashboards"
 
 PIPELINE_VAR = {
     "allValue": None,
@@ -65,6 +70,20 @@ def _load_dashboard(path: Path) -> dict[str, object] | None:
         return None
 
 
+def _resolve_dashboard_path(path: Path) -> Path:
+    """Resolve and validate one dashboard path inside the canonical dashboard root."""
+    resolved_root = DASHBOARD_ROOT.resolve()
+    candidate = path if path.is_absolute() else REPO_ROOT / path
+    resolved_path = candidate.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(
+            f"refusing to write dashboard outside {resolved_root}: {resolved_path}"
+        )
+    if resolved_path.suffix != ".json":
+        raise ValueError(f"expected Grafana dashboard JSON file, got: {resolved_path}")
+    return resolved_path
+
+
 def _dashboard_panels(data: dict[str, object]) -> list[dict[str, object]]:
     panels = list(data.get("panels", []))
     for row in data.get("rows", []):
@@ -105,7 +124,7 @@ def _rewrite_panel_targets(panel: dict[str, object]) -> None:
 
 
 def _write_dashboard(path: Path, data: dict[str, object]) -> None:
-    path.write_text(json.dumps(data, indent=4), encoding="utf-8")
+    _resolve_dashboard_path(path).write_text(json.dumps(data, indent=4), encoding="utf-8")
 
 
 def fix_dashboard(path):
@@ -121,6 +140,5 @@ def fix_dashboard(path):
 
 
 if __name__ == "__main__":
-    dashboard_dir = Path("grafana/dashboards")
-    for file in dashboard_dir.glob("*.json"):
+    for file in DASHBOARD_ROOT.glob("*.json"):
         fix_dashboard(file)

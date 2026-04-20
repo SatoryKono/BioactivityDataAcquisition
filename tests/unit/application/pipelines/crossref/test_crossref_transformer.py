@@ -625,7 +625,6 @@ def test_doc_type_mapping_all_types():
         classify_publication_type("crossref", raw_type=doc_type)
         # These may be unmapped - transformer handles with raw type preservation
         # Just verify they don't crash - any result is acceptable
-        pass  # No assertion - these are edge cases
 
 
 def test_doc_type_unknown_handling():

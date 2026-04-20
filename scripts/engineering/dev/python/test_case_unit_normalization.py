@@ -60,8 +60,8 @@ def test_normalization_rules():
     print("✓ Unit canonicalization tests passed!")
 
     print("\n=== Unit Mapping Info ===")
-    print(f"Total unit mappings: {len(UNIT_MAPPING)}")
-    print(f"Sample mappings: {list(UNIT_MAPPING.items())[:5]}")
+    print("Total unit mappings:", len(UNIT_MAPPING))
+    print("Sample mappings:", list(UNIT_MAPPING.items())[:5])
 
 def test_profile_integration():
     """Test that the profile integration works correctly."""

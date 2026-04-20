@@ -62,16 +62,13 @@ def _files_using_broad_storage_port() -> list[str]:
                 has_annotation = True
                 break
             # Check function parameter annotations
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                for arg in node.args.args + node.args.kwonlyargs:
-                    if (
-                        isinstance(arg.annotation, ast.Name)
-                        and arg.annotation.id == "StoragePort"
-                    ):
-                        has_annotation = True
-                        break
-                if has_annotation:
-                    break
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and any(
+                isinstance(arg.annotation, ast.Name)
+                and arg.annotation.id == "StoragePort"
+                for arg in node.args.args + node.args.kwonlyargs
+            ):
+                has_annotation = True
+                break
 
         if has_annotation:
             hits.append(_to_posix(py_file.relative_to(_APPLICATION_ROOT)))

@@ -87,6 +87,52 @@ _TOKEN_DETAILS: Final[dict[str, str]] = {
     "runtime_state_propagated": "runtime state propagated",
     "runtime_managed": "runtime-managed field",
 }
+_SHEET_COLUMN_OVERRIDES: Final[dict[tuple[str, str], str]] = {
+    ("chembl_publication", "title"): "normalize_title(): html strip; NFC; ws collapse",
+    ("chembl_publication", "abstract"): "normalize_abstract(): html strip; NFC; ws collapse",
+    ("chembl_publication", "authors"): "normalize_author_list(): parse -> JSON",
+    ("chembl_publication", "author_keys"): "normalize_author_keys(): Surname_F pipe-joined",
+    ("chembl_publication", "publication_type"): "doc_type -> canonical kebab-case type",
+    ("chembl_publication", "publication_year"): "publication_year via INT coercion",
+    ("chembl_publication", "creation_date"): "nested chembl_release.creation_date passthrough",
+    ("chembl_assay", "bao_format"): "trim; blank->null; BAO id -> canonical BAO_########",
+    ("chembl_assay", "bao_label"): "canonical from BAO format when known; else trim; lower",
+    ("chembl_assay", "assay_organism"): "trim; blank->null; ws collapse; drop trailing strain notes",
+    ("chembl_activity", "standard_units"): "trim; blank->null; shared unit aliases -> canonical symbol",
+    ("chembl_activity", "uo_units"): "trim; blank->null; UO id -> canonical UO_########",
+    ("chembl_activity", "qudt_units"): "trim; blank->null; preserve full URI",
+    ("chembl_activity", "target_taxonomy_id"): "target_tax_id -> target_taxonomy_id; validate",
+    ("chembl_target", "organism_class"): "derived via organism classifier; taxonomy first",
+    ("chembl_target", "organism"): "trim; blank->null; ws collapse; drop trailing strain notes",
+    ("chembl_target", "taxonomy_id"): "TaxonomyId.from_raw(): trim; int; invalid->null",
+    ("chembl_molecule", "canonical_smiles"): "SMILES.from_raw(canonical=True); trim; empty->null",
+    ("chembl_molecule", "inchi_key"): "InChIKey.from_raw(): trim; upper; pattern check",
+}
+_SHEET_COLUMN_SET_OVERRIDES: Final[dict[tuple[str, frozenset[str]], str]] = {
+    (
+        "chembl_publication",
+        frozenset({"publication_doi", "doi"}),
+    ): "DOI: strip prefix; trim; lower; invalid->null",
+    (
+        "chembl_publication",
+        frozenset({"publication_pmid", "pmid"}),
+    ): "PMID: digits only; int->str; invalid->null",
+    (
+        "chembl_publication",
+        frozenset({"page_first", "page_last"}),
+    ): "renamed page field; trimmed text passthrough",
+    (
+        "chembl_activity",
+        frozenset({"bao_endpoint", "bao_format"}),
+    ): "trim; blank->null; BAO id -> canonical BAO_########",
+}
+_COLUMN_ONLY_OVERRIDES: Final[dict[str, str]] = {
+    "bao_label": "BAO label passthrough",
+    "author_orcids": "no extra ChEMBL-specific rewrite",
+    "affiliation_list": "no extra ChEMBL-specific rewrite",
+    "publication_type_unified": "no extra ChEMBL-specific rewrite",
+    "publication_date": "no extra ChEMBL-specific rewrite",
+}
 
 
 def _arg_parser() -> argparse.ArgumentParser:
@@ -153,77 +199,20 @@ def _token_clauses(tokens: list[str], row: dict[str, str]) -> list[str]:
     return clauses
 
 
+def _sheet_set_override(sheet_name: str, silver_column: str) -> str | None:
+    for (candidate_sheet, columns), detail in _SHEET_COLUMN_SET_OVERRIDES.items():
+        if sheet_name == candidate_sheet and silver_column in columns:
+            return detail
+    return None
+
+
 def _override_detail(sheet_name: str, row: dict[str, str]) -> str | None:
     silver_column = row.get("Silver column", "")
-
-    if sheet_name == "chembl_publication" and silver_column in {
-        "publication_doi",
-        "doi",
-    }:
-        return "DOI: strip prefix; trim; lower; invalid->null"
-    if sheet_name == "chembl_publication" and silver_column in {
-        "publication_pmid",
-        "pmid",
-    }:
-        return "PMID: digits only; int->str; invalid->null"
-    if sheet_name == "chembl_publication" and silver_column == "title":
-        return "normalize_title(): html strip; NFC; ws collapse"
-    if sheet_name == "chembl_publication" and silver_column == "abstract":
-        return "normalize_abstract(): html strip; NFC; ws collapse"
-    if sheet_name == "chembl_publication" and silver_column == "authors":
-        return "normalize_author_list(): parse -> JSON"
-    if sheet_name == "chembl_publication" and silver_column == "author_keys":
-        return "normalize_author_keys(): Surname_F pipe-joined"
-    if sheet_name == "chembl_publication" and silver_column == "publication_type":
-        return "doc_type -> canonical kebab-case type"
-    if sheet_name == "chembl_publication" and silver_column in {
-        "page_first",
-        "page_last",
-    }:
-        return "renamed page field; trimmed text passthrough"
-    if sheet_name == "chembl_publication" and silver_column == "publication_year":
-        return "publication_year via INT coercion"
-    if sheet_name == "chembl_publication" and silver_column == "creation_date":
-        return "nested chembl_release.creation_date passthrough"
-    if sheet_name == "chembl_activity" and silver_column in {
-        "bao_endpoint",
-        "bao_format",
-    }:
-        return "trim; blank->null; BAO id -> canonical BAO_########"
-    if sheet_name == "chembl_assay" and silver_column == "bao_format":
-        return "trim; blank->null; BAO id -> canonical BAO_########"
-    if sheet_name == "chembl_assay" and silver_column == "bao_label":
-        return "canonical from BAO format when known; else trim; lower"
-    if sheet_name == "chembl_assay" and silver_column == "assay_organism":
-        return "trim; blank->null; ws collapse; drop trailing strain notes"
-    if sheet_name == "chembl_activity" and silver_column == "standard_units":
-        return "trim; blank->null; shared unit aliases -> canonical symbol"
-    if sheet_name == "chembl_activity" and silver_column == "uo_units":
-        return "trim; blank->null; UO id -> canonical UO_########"
-    if sheet_name == "chembl_activity" and silver_column == "qudt_units":
-        return "trim; blank->null; preserve full URI"
-    if silver_column == "bao_label":
-        return "BAO label passthrough"
-    if sheet_name == "chembl_activity" and silver_column == "target_taxonomy_id":
-        return "target_tax_id -> target_taxonomy_id; validate"
-    if sheet_name == "chembl_target" and silver_column == "organism_class":
-        return "derived via organism classifier; taxonomy first"
-    if sheet_name == "chembl_target" and silver_column == "organism":
-        return "trim; blank->null; ws collapse; drop trailing strain notes"
-    if sheet_name == "chembl_target" and silver_column == "taxonomy_id":
-        return "TaxonomyId.from_raw(): trim; int; invalid->null"
-    if sheet_name == "chembl_molecule" and silver_column == "canonical_smiles":
-        return "SMILES.from_raw(canonical=True); trim; empty->null"
-    if sheet_name == "chembl_molecule" and silver_column == "inchi_key":
-        return "InChIKey.from_raw(): trim; upper; pattern check"
-    if silver_column in {
-        "author_orcids",
-        "affiliation_list",
-        "publication_type_unified",
-        "publication_date",
-    }:
-        return "no extra ChEMBL-specific rewrite"
-    return None
+    return (
+        _sheet_set_override(sheet_name, silver_column)
+        or _SHEET_COLUMN_OVERRIDES.get((sheet_name, silver_column))
+        or _COLUMN_ONLY_OVERRIDES.get(silver_column)
+    )
 
 
 def _build_detail(sheet_name: str, row: dict[str, str]) -> str:

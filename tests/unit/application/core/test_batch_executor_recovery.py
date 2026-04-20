@@ -32,7 +32,6 @@ class FakeDataSource:
     async def __aexit__(self, *args: object) -> None:
         """No cleanup needed for fake data source."""
         await asyncio.sleep(0)
-        pass
 
     async def fetch(self, entity_type: str, limit: int | None = None, **kwargs: object):
         await asyncio.sleep(0)

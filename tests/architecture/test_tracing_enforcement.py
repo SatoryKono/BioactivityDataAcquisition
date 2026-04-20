@@ -96,7 +96,7 @@ class TestTracingPortContract:
         # Check protocol methods
         # Get TracingPort members
         members = [m for m in dir(TracingPort) if not m.startswith("_")]
-        assert len(members) > 0, "TracingPort should have methods"
+        assert members, "TracingPort should have methods"
 
     def test_noop_tracing_exists(self):
         """NoOpTracing implementation should exist for testing."""
