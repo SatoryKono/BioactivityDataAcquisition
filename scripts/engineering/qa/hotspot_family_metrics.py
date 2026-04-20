@@ -168,26 +168,50 @@ def resolve_internal_import_targets(
     family_modules: set[str],
 ) -> tuple[str, ...]:
     """Resolve import targets that remain inside the same hotspot family."""
-    targets: list[str] = []
-
     if isinstance(node, ast.Import):
-        for alias in node.names:
-            if alias.name in family_modules:
-                targets.append(alias.name)
-        return tuple(targets)
+        return _import_targets(node, family_modules=family_modules)
+    return _import_from_targets(
+        node,
+        source_module=source_module,
+        family_modules=family_modules,
+    )
 
+
+def _import_targets(
+    node: ast.Import,
+    *,
+    family_modules: set[str],
+) -> tuple[str, ...]:
+    """Resolve direct import targets that stay inside the hotspot family."""
+    return tuple(alias.name for alias in node.names if alias.name in family_modules)
+
+
+def _import_from_base_module(
+    node: ast.ImportFrom,
+    *,
+    source_module: str,
+) -> str | None:
+    """Resolve the base module for an ImportFrom node."""
     if node.level == 0:
-        if not node.module:
-            return ()
-        base_module = node.module
-    else:
-        base_parts = resolve_relative_import_base(source_module, node.level)
-        if not base_parts:
-            return ()
-        base_module = ".".join([*base_parts, node.module]) if node.module else ".".join(
-            base_parts
-        )
+        return node.module or None
+    base_parts = resolve_relative_import_base(source_module, node.level)
+    if not base_parts:
+        return None
+    return ".".join([*base_parts, node.module]) if node.module else ".".join(base_parts)
 
+
+def _import_from_targets(
+    node: ast.ImportFrom,
+    *,
+    source_module: str,
+    family_modules: set[str],
+) -> tuple[str, ...]:
+    """Resolve import-from targets that remain inside the hotspot family."""
+    base_module = _import_from_base_module(node, source_module=source_module)
+    if base_module is None:
+        return ()
+
+    targets: list[str] = []
     for alias in node.names:
         if alias.name == "*":
             continue
