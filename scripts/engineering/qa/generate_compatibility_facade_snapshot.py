@@ -64,11 +64,23 @@ def _normalize_repo_relative_path(path: Path) -> Path:
     return Path(*normalized_parts)
 
 
-def _write_repo_text(relative_path: Path, content: str) -> None:
-    """Write generated snapshot content via a repository-relative path."""
-    safe_relative_path = _normalize_repo_relative_path(relative_path)
-    target_path = _ensure_repo_path(ROOT / safe_relative_path)
-    target_path.write_text(content, encoding="utf-8")
+def _resolve_canonical_output_path(raw_output: str | Path) -> Path:
+    """Allow writes only to the canonical tracked snapshot artifact."""
+    candidate = Path(raw_output)
+    resolved_candidate = _ensure_repo_path(candidate if candidate.is_absolute() else ROOT / candidate)
+    canonical_output = _ensure_repo_path(DEFAULT_OUTPUT)
+    if resolved_candidate != canonical_output:
+        raise ValueError(
+            "compatibility facade snapshot may only write to the canonical tracked "
+            f"artifact: {canonical_output}"
+        )
+    return canonical_output
+
+
+def _write_snapshot_text(path: Path, content: str) -> None:
+    """Write generated snapshot content to the canonical tracked artifact."""
+    safe_path = _resolve_canonical_output_path(path)
+    safe_path.write_text(content, encoding="utf-8")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -379,7 +391,7 @@ def main() -> int:
         ratchet_violations=ratchet_violations,
         scoped_ratchet_counts=scoped_ratchet_counts,
     )
-    output_path = _ensure_repo_path(Path(args.output))
+    output_path = _resolve_canonical_output_path(args.output)
     current = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
     frontmatter, current_body = _split_frontmatter(current)
     if args.check:
@@ -405,10 +417,9 @@ def main() -> int:
             return 1
         print("[ok] compatibility facade snapshot is up to date")
         return 0
-    output_path = _ensure_repo_path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     rendered_with_frontmatter = f"{frontmatter}{rendered}" if frontmatter else rendered
-    _write_repo_text(_repo_relative_path(output_path), rendered_with_frontmatter)
+    _write_snapshot_text(output_path, rendered_with_frontmatter)
     print(f"[updated] wrote {output_path.as_posix()}")
     if _validation_has_issues(
         unexpected=unexpected,

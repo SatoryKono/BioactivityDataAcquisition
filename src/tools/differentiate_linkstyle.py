@@ -97,11 +97,10 @@ def _normalize_mermaid_relative_path(path: Path) -> Path:
     return Path(*normalized_parts)
 
 
-def _write_mermaid_text(relative_path: Path, content: str) -> None:
-    """Write Mermaid content via a MERMAID_DIR-relative path."""
-    safe_relative_path = _normalize_mermaid_relative_path(relative_path)
-    target_path = _ensure_path_within_root(MERMAID_DIR / safe_relative_path, MERMAID_DIR)
-    target_path.write_text(content, encoding="utf-8")
+def _write_validated_mermaid_text(path: Path, content: str) -> None:
+    """Write Mermaid content to a previously validated Mermaid file path."""
+    safe_path = _ensure_path_within_root(path, MERMAID_DIR)
+    safe_path.write_text(content, encoding="utf-8")
 
 
 def build_node_layer_map(lines: list[str]) -> dict[str, str]:
@@ -311,7 +310,7 @@ def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
     new_content = "\n".join(new_lines).rstrip("\n") + "\n"
 
     if not dry_run:
-        _write_mermaid_text(_mermaid_relative_path(safe_path), new_content)
+        _write_validated_mermaid_text(safe_path, new_content)
 
     details = f"{len(conns)} conn, types={sorted(type_set)}"
     return True, details
@@ -370,7 +369,7 @@ def update_legend(fpath: Path, dry_run: bool = False) -> bool:
     )
     new_content = "\n".join(new_lines).rstrip("\n") + "\n"
     if not dry_run:
-        _write_mermaid_text(_mermaid_relative_path(safe_path), new_content)
+        _write_validated_mermaid_text(safe_path, new_content)
     return True
 
 
