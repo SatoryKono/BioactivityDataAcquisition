@@ -126,7 +126,6 @@ def _parse_pylint_duplicate_output(stdout: str) -> list[DuplicateCluster]:
                     end_line=int(module_match.group("end")),
                 )
             )
-            continue
 
     flush()
     return clusters
@@ -185,50 +184,16 @@ def _build_trend_summary(
     if not history_records:
         return {"status": "no_prior_snapshot", "snapshot_date": snapshot_date}
 
-    previous: dict[str, object] | None = None
-    for candidate in reversed(history_records):
-        candidate_snapshot_date = candidate.get("snapshot_date")
-        if candidate_snapshot_date != snapshot_date:
-            previous = candidate
-            break
+    previous = _previous_history_record(history_records, snapshot_date=snapshot_date)
     if previous is None:
         return {"status": "no_prior_distinct_snapshot", "snapshot_date": snapshot_date}
 
     previous_summary = previous.get("summary", {})
-    previous_targets_raw = previous.get("targets", [])
-    previous_targets = {
-        item.get("target"): item
-        for item in previous_targets_raw
-        if isinstance(item, dict) and isinstance(item.get("target"), str)
-    }
-
-    comparison_rows: list[dict[str, object]] = []
-    for item in current_targets:
-        target = item.get("target")
-        if not isinstance(target, str):
-            continue
-        current_count = item.get("duplicate_count")
-        if not isinstance(current_count, int):
-            continue
-        previous_item = previous_targets.get(target)
-        previous_count = (
-            previous_item.get("duplicate_count")
-            if isinstance(previous_item, dict)
-            and isinstance(previous_item.get("duplicate_count"), int)
-            else None
-        )
-        comparison_rows.append(
-            {
-                "target": target,
-                "current_duplicate_count": current_count,
-                "previous_duplicate_count": previous_count,
-                "delta_duplicate_count": (
-                    current_count - previous_count
-                    if previous_count is not None
-                    else None
-                ),
-            }
-        )
+    previous_targets = _previous_target_map(previous.get("targets", []))
+    comparison_rows = _comparison_rows(
+        current_targets,
+        previous_targets=previous_targets,
+    )
 
     previous_total = previous_summary.get("total_duplicate_clusters")
     total_delta = (
@@ -246,6 +211,72 @@ def _build_trend_summary(
         "total_duplicate_cluster_delta": total_delta,
         "targets": comparison_rows,
     }
+
+
+def _previous_history_record(
+    history_records: list[dict[str, object]],
+    *,
+    snapshot_date: str,
+) -> dict[str, object] | None:
+    """Return the most recent prior snapshot with a different date label."""
+    for candidate in reversed(history_records):
+        if candidate.get("snapshot_date") != snapshot_date:
+            return candidate
+    return None
+
+
+def _previous_target_map(
+    previous_targets_raw: object,
+) -> dict[str, dict[str, object]]:
+    """Build a lookup of prior target summaries by target path."""
+    if not isinstance(previous_targets_raw, list):
+        return {}
+    return {
+        item.get("target"): item
+        for item in previous_targets_raw
+        if isinstance(item, dict) and isinstance(item.get("target"), str)
+    }
+
+
+def _comparison_row(
+    item: dict[str, object],
+    *,
+    previous_targets: dict[str, dict[str, object]],
+) -> dict[str, object] | None:
+    """Build one comparison row when the target payload is valid."""
+    target = item.get("target")
+    current_count = item.get("duplicate_count")
+    if not isinstance(target, str) or not isinstance(current_count, int):
+        return None
+    previous_item = previous_targets.get(target)
+    previous_count = (
+        previous_item.get("duplicate_count")
+        if isinstance(previous_item, dict)
+        and isinstance(previous_item.get("duplicate_count"), int)
+        else None
+    )
+    return {
+        "target": target,
+        "current_duplicate_count": current_count,
+        "previous_duplicate_count": previous_count,
+        "delta_duplicate_count": (
+            current_count - previous_count if previous_count is not None else None
+        ),
+    }
+
+
+def _comparison_rows(
+    current_targets: list[dict[str, object]],
+    *,
+    previous_targets: dict[str, dict[str, object]],
+) -> list[dict[str, object]]:
+    """Build comparison rows against the previous snapshot."""
+    rows: list[dict[str, object]] = []
+    for item in current_targets:
+        row = _comparison_row(item, previous_targets=previous_targets)
+        if row is not None:
+            rows.append(row)
+    return rows
 
 
 def _scan_target(
@@ -366,7 +397,34 @@ def _render_markdown(
         else r.duplicate_count
         for r in reports
     )
-    normalized = bool(exclude_module_patterns)
+    lines = _markdown_summary_lines(
+        reports,
+        total=total,
+        raw_total=raw_total,
+        exclude_module_patterns=exclude_module_patterns,
+        trend_summary=trend_summary,
+    )
+    for report in reports:
+        lines.append(f"| `{report.target}` | {report.duplicate_count} |")
+
+    for report in reports:
+        lines.extend(_report_markdown_section(report))
+
+    lines.extend(_trend_markdown_section(trend_summary))
+
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _markdown_summary_lines(
+    reports: list[TargetDuplicationReport],
+    *,
+    total: int,
+    raw_total: int,
+    exclude_module_patterns: tuple[str, ...],
+    trend_summary: dict[str, object] | None,
+) -> list[str]:
+    """Render top-of-report summary bullets and table header."""
     lines = [
         "# Duplication Baseline Report",
         "",
@@ -374,7 +432,7 @@ def _render_markdown(
         f"- targets: {len(reports)}",
         f"- total_duplicate_clusters: {total}",
     ]
-    if normalized:
+    if exclude_module_patterns:
         lines.extend(
             [
                 f"- total_raw_duplicate_clusters: {raw_total}",
@@ -403,106 +461,114 @@ def _render_markdown(
             "| --- | ---: |",
         ]
     )
-    for report in reports:
-        lines.append(f"| `{report.target}` | {report.duplicate_count} |")
+    return lines
 
-    for report in reports:
-        lines.extend(
-            [
-                "",
-                f"## {report.target}",
-                "",
-                f"- duplicate clusters: {report.duplicate_count}",
-            ]
-        )
-        raw_duplicate_count = (
-            report.raw_duplicate_count
-            if report.raw_duplicate_count is not None
-            else report.duplicate_count
-        )
-        if raw_duplicate_count != report.duplicate_count:
-            lines.extend(
-                [
-                    f"- raw duplicate clusters: {raw_duplicate_count}",
-                    f"- excluded duplicate clusters: "
-                    f"{raw_duplicate_count - report.duplicate_count}",
-                ]
-            )
-        top_pairs = _top_duplicate_pairs(report.clusters)
-        if top_pairs:
-            lines.extend(
-                [
-                    "",
-                    "| Top recurring module pairs | Duplicate clusters |",
-                    "| --- | ---: |",
-                ]
-            )
-            for item in top_pairs:
-                modules = item.get("modules", [])
-                count = item.get("duplicate_clusters")
-                if (
-                    isinstance(modules, list)
-                    and len(modules) == 2
-                    and isinstance(modules[0], str)
-                    and isinstance(modules[1], str)
-                    and isinstance(count, int)
-                ):
-                    lines.append(f"| `{modules[0]}` <-> `{modules[1]}` | {count} |")
-        if not report.clusters:
-            lines.append("- no `R0801` findings")
-            continue
-        lines.extend(
-            [
-                "",
-                "| Cluster path | Compared modules |",
-                "| --- | --- |",
-            ]
-        )
-        for cluster in report.clusters[:12]:
-            module_summary = ", ".join(
-                f"`{m.module}`[{m.start_line}:{m.end_line}]"
-                for m in cluster.modules[:2]
-            )
-            lines.append(f"| `{cluster.path}:{cluster.line}` | {module_summary} |")
-        if len(report.clusters) > 12:
-            lines.append(
-                f"\n- … truncated {len(report.clusters) - 12} additional clusters for brevity"
-            )
 
-    if trend_summary and trend_summary.get("status") == "compared_to_previous":
-        target_rows = trend_summary.get("targets", [])
+def _top_pairs_markdown_section(report: TargetDuplicationReport) -> list[str]:
+    """Render top recurring pair table when available."""
+    top_pairs = _top_duplicate_pairs(report.clusters)
+    if not top_pairs:
+        return []
+    lines = [
+        "",
+        "| Top recurring module pairs | Duplicate clusters |",
+        "| --- | ---: |",
+    ]
+    for item in top_pairs:
+        modules = item.get("modules", [])
+        count = item.get("duplicate_clusters")
+        if (
+            isinstance(modules, list)
+            and len(modules) == 2
+            and isinstance(modules[0], str)
+            and isinstance(modules[1], str)
+            and isinstance(count, int)
+        ):
+            lines.append(f"| `{modules[0]}` <-> `{modules[1]}` | {count} |")
+    return lines
+
+
+def _report_markdown_section(report: TargetDuplicationReport) -> list[str]:
+    """Render one per-target markdown section."""
+    lines = [
+        "",
+        f"## {report.target}",
+        "",
+        f"- duplicate clusters: {report.duplicate_count}",
+    ]
+    raw_duplicate_count = (
+        report.raw_duplicate_count
+        if report.raw_duplicate_count is not None
+        else report.duplicate_count
+    )
+    if raw_duplicate_count != report.duplicate_count:
         lines.extend(
             [
-                "",
-                "## Trend vs Previous Snapshot",
-                "",
-                f"- previous snapshot: `{trend_summary.get('previous_snapshot_date')}`",
-                "- total duplicate cluster delta: "
-                f"{trend_summary.get('total_duplicate_cluster_delta'):+d}",
-                "",
-                "| Target | Current | Previous | Delta |",
-                "| --- | ---: | ---: | ---: |",
+                f"- raw duplicate clusters: {raw_duplicate_count}",
+                f"- excluded duplicate clusters: "
+                f"{raw_duplicate_count - report.duplicate_count}",
             ]
         )
+    lines.extend(_top_pairs_markdown_section(report))
+    if not report.clusters:
+        lines.append("- no `R0801` findings")
+        return lines
+    lines.extend(
+        [
+            "",
+            "| Cluster path | Compared modules |",
+            "| --- | --- |",
+        ]
+    )
+    for cluster in report.clusters[:12]:
+        module_summary = ", ".join(
+            f"`{m.module}`[{m.start_line}:{m.end_line}]" for m in cluster.modules[:2]
+        )
+        lines.append(f"| `{cluster.path}:{cluster.line}` | {module_summary} |")
+    if len(report.clusters) > 12:
+        lines.append(
+            f"\n- … truncated {len(report.clusters) - 12} additional clusters for brevity"
+        )
+    return lines
+
+
+def _trend_markdown_row(item: object) -> str | None:
+    """Render one trend row when the payload is valid."""
+    if not isinstance(item, dict):
+        return None
+    target = item.get("target")
+    current_count = item.get("current_duplicate_count")
+    previous_count = item.get("previous_duplicate_count")
+    delta = item.get("delta_duplicate_count")
+    if not isinstance(target, str) or not isinstance(current_count, int):
+        return None
+    previous_text = str(previous_count) if isinstance(previous_count, int) else "n/a"
+    delta_text = f"{delta:+d}" if isinstance(delta, int) else "n/a"
+    return f"| `{target}` | {current_count} | {previous_text} | {delta_text} |"
+
+
+def _trend_markdown_section(trend_summary: dict[str, object] | None) -> list[str]:
+    """Render trend comparison section when available."""
+    if not trend_summary or trend_summary.get("status") != "compared_to_previous":
+        return []
+    lines = [
+        "",
+        "## Trend vs Previous Snapshot",
+        "",
+        f"- previous snapshot: `{trend_summary.get('previous_snapshot_date')}`",
+        "- total duplicate cluster delta: "
+        f"{trend_summary.get('total_duplicate_cluster_delta'):+d}",
+        "",
+        "| Target | Current | Previous | Delta |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    target_rows = trend_summary.get("targets", [])
+    if isinstance(target_rows, list):
         for item in target_rows:
-            if not isinstance(item, dict):
-                continue
-            target = item.get("target")
-            current_count = item.get("current_duplicate_count")
-            previous_count = item.get("previous_duplicate_count")
-            delta = item.get("delta_duplicate_count")
-            if not isinstance(target, str) or not isinstance(current_count, int):
-                continue
-            previous_text = (
-                str(previous_count) if isinstance(previous_count, int) else "n/a"
-            )
-            delta_text = f"{delta:+d}" if isinstance(delta, int) else "n/a"
-            lines.append(
-                f"| `{target}` | {current_count} | {previous_text} | {delta_text} |"
-            )
-
-    lines.append("")
-    return "\n".join(lines)
+            row = _trend_markdown_row(item)
+            if row is not None:
+                lines.append(row)
+    return lines
 
 
 def _write_text(path: Path, content: str) -> None:

@@ -114,6 +114,26 @@ def _parse_python_ast(path: Path) -> ast.AST | None:
         return None
 
 
+def _is_counted_function(node: ast.AST) -> bool:
+    """Return whether the AST node counts as a user-defined function."""
+    if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return False
+    return not (node.name.startswith("__") and node.name.endswith("__"))
+
+
+def _function_count_delta(tree: ast.AST) -> tuple[int, int]:
+    """Return total/helper function increments for one AST."""
+    total_functions = 0
+    helper_functions = 0
+    for node in ast.walk(tree):
+        if not _is_counted_function(node):
+            continue
+        total_functions += 1
+        if node.name.startswith("_"):
+            helper_functions += 1
+    return total_functions, helper_functions
+
+
 def helper_function_ratio(*, files: list[Path]) -> float:
     """Return the ratio of underscore-prefixed helper functions in the family."""
     total_functions = 0
@@ -122,14 +142,9 @@ def helper_function_ratio(*, files: list[Path]) -> float:
         tree = _parse_python_ast(path)
         if tree is None:
             continue
-        for node in ast.walk(tree):
-            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                continue
-            if node.name.startswith("__") and node.name.endswith("__"):
-                continue
-            total_functions += 1
-            if node.name.startswith("_"):
-                helper_functions += 1
+        total_delta, helper_delta = _function_count_delta(tree)
+        total_functions += total_delta
+        helper_functions += helper_delta
     if total_functions == 0:
         return 0.0
     return round(helper_functions / total_functions, 3)
@@ -188,6 +203,40 @@ def resolve_internal_import_targets(
     return tuple(targets)
 
 
+def _seen_internal_targets_for_module(
+    tree: ast.AST,
+    *,
+    source_module: str,
+    family_modules: set[str],
+) -> set[str]:
+    """Collect unique internal import targets referenced by one module."""
+    seen_targets: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.Import, ast.ImportFrom)):
+            continue
+        seen_targets.update(
+            resolve_internal_import_targets(
+                node,
+                source_module=source_module,
+                family_modules=family_modules,
+            )
+        )
+    return seen_targets
+
+
+def _update_fan_in_counter(
+    fan_in_counter: Counter[str],
+    *,
+    source_module: str,
+    seen_targets: set[str],
+) -> None:
+    """Apply one module's unique internal dependencies to the fan-in counter."""
+    for target in seen_targets:
+        if target == source_module:
+            continue
+        fan_in_counter[target] += 1
+
+
 def count_internal_fan_in(*, files: list[Path]) -> tuple[int, str | None]:
     """Count the maximum family-internal fan-in across the file set."""
     module_map = {module_name_from_path(path): path for path in files}
@@ -199,22 +248,16 @@ def count_internal_fan_in(*, files: list[Path]) -> tuple[int, str | None]:
         if tree is None:
             continue
 
-        seen_targets: set[str] = set()
-        for node in ast.walk(tree):
-            if not isinstance(node, (ast.Import, ast.ImportFrom)):
-                continue
-            seen_targets.update(
-                resolve_internal_import_targets(
-                    node,
-                    source_module=source_module,
-                    family_modules=family_modules,
-                )
-            )
-
-        for target in seen_targets:
-            if target == source_module:
-                continue
-            fan_in_counter[target] += 1
+        seen_targets = _seen_internal_targets_for_module(
+            tree,
+            source_module=source_module,
+            family_modules=family_modules,
+        )
+        _update_fan_in_counter(
+            fan_in_counter,
+            source_module=source_module,
+            seen_targets=seen_targets,
+        )
 
     if not fan_in_counter:
         return 0, None

@@ -3,20 +3,14 @@
 from __future__ import annotations
 
 import json
-import subprocess
-import sys
-from pathlib import Path
 
 import pytest
-
-
-def _project_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+from tests.helpers import repo_root, run_repo_python
 
 
 def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
     """Inventory manifest must exist and keep a stable schema."""
-    root = _project_root()
+    root = repo_root()
     manifest_path = root / "configs" / "quality" / "scripts_inventory_manifest.json"
 
     assert manifest_path.exists(), (
@@ -40,22 +34,16 @@ def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
 @pytest.mark.timeout(600)
 def test_scripts_inventory_manifest_drift_check_passes() -> None:
     """Committed manifest must match current scripts inventory."""
-    root = _project_root()
+    root = repo_root()
     script_path = (
         root / "scripts" / "engineering" / "repo" / "check_scripts_inventory.py"
     )
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(script_path),
-            "--check",
-            "--manifest",
-            "configs/quality/scripts_inventory_manifest.json",
-        ],
+    result = run_repo_python(
+        str(script_path),
+        "--check",
+        "--manifest",
+        "configs/quality/scripts_inventory_manifest.json",
         cwd=root,
-        capture_output=True,
-        text=True,
-        check=False,
         timeout=600,
     )
 

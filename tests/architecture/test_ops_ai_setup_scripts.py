@@ -3,26 +3,19 @@
 from __future__ import annotations
 
 import os
-import subprocess
-from pathlib import Path
 
-
-def _project_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+from tests.helpers import repo_root, run_repo_command
 
 
 def test_setup_agents_dry_run_lists_expected_agent_entries(tmp_path: Path) -> None:
     """setup_agents dry-run should enumerate the agent surface it will sync."""
-    root = _project_root()
-    env = os.environ | {"CODEX_HOME": str(tmp_path / ".codex-home")}
-
-    result = subprocess.run(
-        ["bash", "scripts/ops/launchers/codex/setup_agents.sh", "--dry-run"],
+    root = repo_root()
+    result = run_repo_command(
+        "bash",
+        "scripts/ops/launchers/codex/setup_agents.sh",
+        "--dry-run",
         cwd=root,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
+        env={"CODEX_HOME": str(tmp_path / ".codex-home")},
     )
 
     assert result.returncode == 0, result.stderr
@@ -36,16 +29,13 @@ def test_setup_skills_dry_run_includes_paired_agent_sync_by_default(
     tmp_path: Path,
 ) -> None:
     """setup_skills should announce paired agent sync unless disabled."""
-    root = _project_root()
-    env = os.environ | {"CODEX_HOME": str(tmp_path / ".codex-home")}
-
-    result = subprocess.run(
-        ["bash", "scripts/ops/launchers/codex/setup_skills.sh", "--dry-run"],
+    root = repo_root()
+    result = run_repo_command(
+        "bash",
+        "scripts/ops/launchers/codex/setup_skills.sh",
+        "--dry-run",
         cwd=root,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
+        env={"CODEX_HOME": str(tmp_path / ".codex-home")},
     )
 
     assert result.returncode == 0, result.stderr
@@ -57,7 +47,7 @@ def test_setup_skills_dry_run_includes_paired_agent_sync_by_default(
 
 def test_setup_plugins_uses_repo_root_from_ops_directory() -> None:
     """setup_plugins must resolve the repository root, not scripts/."""
-    root = _project_root()
+    root = repo_root()
     content = (root / "scripts/ops/launchers/codex/setup_plugins.sh").read_text(
         encoding="utf-8"
     )
@@ -67,7 +57,7 @@ def test_setup_plugins_uses_repo_root_from_ops_directory() -> None:
 
 def test_setup_plugins_prefers_local_venv_and_windows_git_fallback() -> None:
     """setup_plugins should avoid uv when a working local venv already exists."""
-    root = _project_root()
+    root = repo_root()
     content = (root / "scripts/ops/launchers/codex/setup_plugins.sh").read_text(
         encoding="utf-8"
     )

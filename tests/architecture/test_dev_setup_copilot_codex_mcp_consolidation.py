@@ -4,13 +4,9 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
-import sys
 from pathlib import Path
 
-
-def _project_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+from tests.helpers import repo_root, run_repo_python
 
 
 def _posix(path_str: str) -> str:
@@ -21,18 +17,12 @@ def _load_workspace_mcp_config(
     root: Path, tmp_path: Path
 ) -> tuple[dict[str, object], Path]:
     """Load generated config when backend works, else fall back to committed artifact."""
-    result = subprocess.run(
-        [
-            sys.executable,
-            "scripts/engineering/dev/setup_copilot_codex_mcp.py",
-            "--root",
-            str(tmp_path),
-            "--skip-codex",
-        ],
+    result = run_repo_python(
+        "scripts/engineering/dev/setup_copilot_codex_mcp.py",
+        "--root",
+        str(tmp_path),
+        "--skip-codex",
         cwd=root,
-        capture_output=True,
-        text=True,
-        check=False,
     )
     if result.returncode == 0:
         mcp_path = tmp_path / ".vscode" / "mcp.json"
@@ -55,7 +45,7 @@ def _assert_shell_wrapper(
 
 def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None:
     """Workspace MCP config should match the canonical server layout."""
-    root = _project_root()
+    root = repo_root()
     payload, _config_root = _load_workspace_mcp_config(root, tmp_path)
     servers = payload["servers"]
     assert set(servers) == {
@@ -216,7 +206,7 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:
     """Bash wrapper must stay a thin facade over the Python backend."""
-    root = _project_root()
+    root = repo_root()
     content = (root / "scripts/engineering/dev/setup_copilot_codex_mcp.sh").read_text(
         encoding="utf-8"
     )
@@ -225,7 +215,7 @@ def test_setup_sh_wrapper_delegates_to_backend() -> None:
 
 def test_setup_ps1_wrapper_delegates_to_backend() -> None:
     """PowerShell wrapper must stay a thin facade over the Python backend."""
-    root = _project_root()
+    root = repo_root()
     content = (root / "scripts/engineering/dev/setup_copilot_codex_mcp.ps1").read_text(
         encoding="utf-8"
     )
@@ -234,7 +224,7 @@ def test_setup_ps1_wrapper_delegates_to_backend() -> None:
 
 def test_github_mcp_wrappers_load_repo_env() -> None:
     """GitHub MCP wrappers should load repo .env before fallback auth."""
-    root = _project_root()
+    root = repo_root()
     sh_content = (root / "scripts/ai/mcp/github-mcp-wrapper.sh").read_text(
         encoding="utf-8"
     )
