@@ -40,6 +40,7 @@ DEFAULT_OUTPUT: Final[Path] = (
 DETAIL_HEADER: Final[str] = "Silver Normalisation Detail"
 DETAIL_ID_HEADER: Final[str] = "Silver Normalisation Detail ID"
 MAX_DETAIL_LENGTH: Final[int] = 100
+_NO_EXTRA_CHEMBL_REWRITE: Final[str] = "no extra ChEMBL-specific rewrite"
 _SOURCE_NORMALIZATION_DETAILS: Final[dict[str, str]] = {
     "trim; blank_to_null": "trim; blank->null",
     "runtime-managed": "runtime-managed",
@@ -128,10 +129,10 @@ _SHEET_COLUMN_SET_OVERRIDES: Final[dict[tuple[str, frozenset[str]], str]] = {
 }
 _COLUMN_ONLY_OVERRIDES: Final[dict[str, str]] = {
     "bao_label": "BAO label passthrough",
-    "author_orcids": "no extra ChEMBL-specific rewrite",
-    "affiliation_list": "no extra ChEMBL-specific rewrite",
-    "publication_type_unified": "no extra ChEMBL-specific rewrite",
-    "publication_date": "no extra ChEMBL-specific rewrite",
+    "author_orcids": _NO_EXTRA_CHEMBL_REWRITE,
+    "affiliation_list": _NO_EXTRA_CHEMBL_REWRITE,
+    "publication_type_unified": _NO_EXTRA_CHEMBL_REWRITE,
+    "publication_date": _NO_EXTRA_CHEMBL_REWRITE,
 }
 
 

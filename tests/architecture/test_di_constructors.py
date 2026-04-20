@@ -59,6 +59,43 @@ def _get_base_path(relative_path: Path) -> Path:
     return Path(__file__).parent.parent.parent / relative_path
 
 
+def _is_application_source_file(py_file: Path) -> bool:
+    return not (
+        py_file.name.startswith("__") or py_file.name.startswith("test_")
+    )
+
+
+def _iter_application_source_files(app_path: Path) -> list[Path]:
+    return [
+        py_file for py_file in app_path.rglob("*.py") if _is_application_source_file(py_file)
+    ]
+
+
+def _parse_python_tree(py_file: Path) -> ast.AST | None:
+    try:
+        content = py_file.read_text(encoding="utf-8")
+        return ast.parse(content)
+    except (SyntaxError, UnicodeDecodeError):
+        return None
+
+
+def _is_public_service_like_class(node: ast.AST) -> bool:
+    if not isinstance(node, ast.ClassDef):
+        return False
+    if node.name.startswith("_"):
+        return False
+    return node.name.endswith("Service") or node.name.endswith("Manager")
+
+
+def _service_like_classes_in_file(py_file: Path) -> set[str]:
+    tree = _parse_python_tree(py_file)
+    if tree is None:
+        return set()
+    return {
+        node.name for node in ast.walk(tree) if _is_public_service_like_class(node)
+    }
+
+
 class Violation(NamedTuple):
     """Represents a DI violation found in code."""
 
@@ -282,24 +319,8 @@ class TestDIConstructors:
 
         found_services: set[str] = set()
 
-        for py_file in app_path.rglob("*.py"):
-            # Skip __init__.py and test files
-            if py_file.name.startswith("__") or py_file.name.startswith("test_"):
-                continue
-
-            try:
-                content = py_file.read_text(encoding="utf-8")
-                tree = ast.parse(content)
-            except (SyntaxError, UnicodeDecodeError):
-                continue
-
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef):
-                    # Check for Service or Manager suffix
-                    if node.name.endswith("Service") or node.name.endswith("Manager"):
-                        # Exclude data classes and simple containers
-                        if not node.name.startswith("_"):
-                            found_services.add(node.name)
+        for py_file in _iter_application_source_files(app_path):
+            found_services.update(_service_like_classes_in_file(py_file))
 
         # Filter out known exceptions (data containers, not services)
         exceptions = {

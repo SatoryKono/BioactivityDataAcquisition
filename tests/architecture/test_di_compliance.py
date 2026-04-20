@@ -160,6 +160,21 @@ def _composition_module_imports(composition_path: Path) -> dict[str, set[str]]:
     return module_imports
 
 
+def _simple_composition_cycles(module_imports: dict[str, set[str]]) -> list[str]:
+    cycles: list[str] = []
+    for module_a, imports_a in module_imports.items():
+        for module_b in imports_a:
+            if module_b not in module_imports:
+                continue
+            if module_a not in module_imports.get(module_b, set()):
+                continue
+            cycle = f"{module_a} <-> {module_b}"
+            reverse_cycle = f"{module_b} <-> {module_a}"
+            if cycle not in cycles and reverse_cycle not in cycles:
+                cycles.append(cycle)
+    return cycles
+
+
 def _class_init_segments(
     content: str,
     tree: ast.AST,
@@ -457,19 +472,7 @@ class TestCompositionRootIntegrity:
             pytest.skip("Composition layer not found")
 
         module_imports = _composition_module_imports(composition_path)
-
-        # Simple cycle detection (depth-1)
-        cycles = []
-        for module_a, imports_a in module_imports.items():
-            for module_b in imports_a:
-                if module_b in module_imports:
-                    if module_a in module_imports.get(module_b, set()):
-                        cycle = f"{module_a} <-> {module_b}"
-                        if (
-                            cycle not in cycles
-                            and f"{module_b} <-> {module_a}" not in cycles
-                        ):
-                            cycles.append(cycle)
+        cycles = _simple_composition_cycles(module_imports)
 
         # Note: Some circular imports in composition may be acceptable
         # This test is informational to track them

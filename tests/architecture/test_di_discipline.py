@@ -44,6 +44,32 @@ def _get_base_path(relative_path: Path) -> Path:
     return Path(__file__).parent.parent.parent / relative_path
 
 
+def _line_pattern_violations(content: str, *, pattern: str, relative: Path) -> list[str]:
+    return [
+        f"{relative}:{line_number}: {pattern}"
+        for line_number, line in enumerate(content.splitlines(), 1)
+        if pattern in line
+    ]
+
+
+def _pattern_violations_for_file(
+    *,
+    content: str,
+    relative: Path,
+    relative_str: str,
+) -> list[str]:
+    violations: list[str] = []
+    for pattern in FORBIDDEN_IN_APPLICATION:
+        allowed_files = DEFINITION_FILES.get(pattern, set())
+        if relative_str in allowed_files:
+            continue
+        if pattern in content:
+            violations.extend(
+                _line_pattern_violations(content, pattern=pattern, relative=relative)
+            )
+    return violations
+
+
 class TestDIDiscipline:
     """Tests ensuring DI discipline in application layer."""
 
@@ -85,18 +111,13 @@ class TestDIDiscipline:
             content = py_file.read_text(encoding="utf-8")
             relative = py_file.relative_to(_get_base_path(APPLICATION_DIR))
             relative_str = str(relative).replace("\\", "/")
-
-            for pattern in FORBIDDEN_IN_APPLICATION:
-                # Skip files where the class is defined
-                allowed_files = DEFINITION_FILES.get(pattern, set())
-                if relative_str in allowed_files:
-                    continue
-
-                if pattern in content:
-                    # Find line numbers for better error messages
-                    for i, line in enumerate(content.splitlines(), 1):
-                        if pattern in line:
-                            violations.append(f"{relative}:{i}: {pattern}")
+            violations.extend(
+                _pattern_violations_for_file(
+                    content=content,
+                    relative=relative,
+                    relative_str=relative_str,
+                )
+            )
 
         assert not violations, (
             "DI discipline violations: Application layer must not create "

@@ -14,7 +14,10 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from datetime import datetime
 
+    from bioetl.domain.ports.storage.silver_port import SilverWriteRequest
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
+
+from bioetl.domain.ports.storage.silver_port import coerce_silver_write_request
 
 
 class InMemoryStorage:
@@ -82,38 +85,20 @@ class InMemoryStorage:
         )
         return Path(key)
 
-    async def write_silver(  # NOSONAR - test double mirrors StoragePort contract
+    async def write_silver(
         self,
-        table_name: str,
-        records: list[dict[str, Any]],
-        primary_keys: list[str],
-        schema: ArrowSchema,
-        mode: Literal["merge", "append", "delete"] = "merge",
-        partition_cols: list[str] | None = None,
-        on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
-        column_order: list[str] | None = None,
-        bronze_refs: list[Any] | None = None,
-        key_nullability_rules: list[Any] | None = None,
-        *,
-        run_id: RunID | None = None,
-        run_type: RunType | None = None,
-        source_batch_id: BatchID | None = None,
-        ingestion_ts: datetime | None = None,
+        request: SilverWriteRequest | str | None = None,
+        *args: object,
+        **kwargs: object,
     ) -> None:
         """Write transformed records to the Silver layer."""
-        del (
-            schema,
-            partition_cols,
-            on_schema_mismatch,
-            column_order,
-            bronze_refs,
-            key_nullability_rules,
-            run_id,
-            run_type,
-            source_batch_id,
-            ingestion_ts,
-        )
+        resolved = coerce_silver_write_request(request, args=args, kwargs=kwargs)
         await asyncio.sleep(0)
+        table_name = resolved.table_name
+        records = resolved.records
+        primary_keys = resolved.primary_keys
+        mode = resolved.mode
+
         if mode == "merge":
             # Simple merge: replace by primary keys
             pk_set = set(primary_keys)
