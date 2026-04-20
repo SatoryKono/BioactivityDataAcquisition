@@ -164,149 +164,114 @@ def _get_dir_size(path: Path) -> int:
     return total
 
 
+def _is_venv_path(path: Path) -> bool:
+    """Return True when the path is inside a virtual environment tree."""
+    return ".venv" in path.parts or "venv" in path.parts
+
+
+def _safe_file_size(path: Path) -> int:
+    """Return file size, tolerating transient filesystem errors."""
+    try:
+        return path.stat().st_size
+    except OSError:
+        return 0
+
+
+def _file_target(path: Path, category: str) -> CleanupTarget:
+    """Build a CleanupTarget for a file."""
+    return CleanupTarget(
+        path=path,
+        category=category,
+        size_bytes=_safe_file_size(path),
+        is_dir=False,
+    )
+
+
+def _dir_target(path: Path, category: str) -> CleanupTarget:
+    """Build a CleanupTarget for a directory."""
+    return CleanupTarget(
+        path=path,
+        category=category,
+        size_bytes=_get_dir_size(path),
+        is_dir=True,
+    )
+
+
+def _rglob_file_targets(
+    root: Path,
+    patterns: tuple[str, ...],
+    category: str,
+    *,
+    excluded_parts: tuple[str, ...] = (),
+) -> list[CleanupTarget]:
+    """Collect matching files under root while honoring path exclusions."""
+    targets: list[CleanupTarget] = []
+    excluded_parts_set = set(excluded_parts)
+    for pattern in patterns:
+        for matched_path in root.rglob(pattern):
+            if not matched_path.is_file() or _is_venv_path(matched_path):
+                continue
+            if excluded_parts_set.intersection(matched_path.parts):
+                continue
+            targets.append(_file_target(matched_path, category))
+    return targets
+
+
 def _find_cache_dirs(root: Path) -> list[CleanupTarget]:
     """Find Python cache directories."""
-    targets = []
+    targets: list[CleanupTarget] = []
     for name in PYTHON_CACHE_DIRS:
         for cache_dir in root.rglob(name):
-            if cache_dir.is_dir():
-                # Skip if in .venv
-                if ".venv" in cache_dir.parts or "venv" in cache_dir.parts:
-                    continue
-                targets.append(
-                    CleanupTarget(
-                        path=cache_dir,
-                        category="python_cache",
-                        size_bytes=_get_dir_size(cache_dir),
-                        is_dir=True,
-                    )
-                )
+            if not cache_dir.is_dir() or _is_venv_path(cache_dir):
+                continue
+            targets.append(_dir_target(cache_dir, "python_cache"))
     return targets
 
 
 def _find_build_dirs(root: Path) -> list[CleanupTarget]:
     """Find build artifact directories."""
-    targets = []
+    targets: list[CleanupTarget] = []
     for name in BUILD_DIRS:
         build_dir = root / name
         if build_dir.exists() and build_dir.is_dir():
-            targets.append(
-                CleanupTarget(
-                    path=build_dir,
-                    category="build_artifact",
-                    size_bytes=_get_dir_size(build_dir),
-                    is_dir=True,
-                )
-            )
+            targets.append(_dir_target(build_dir, "build_artifact"))
 
     # Egg-info directories
     for egg_dir in root.glob(EGGINFO_PATTERN):
         if egg_dir.is_dir():
-            targets.append(
-                CleanupTarget(
-                    path=egg_dir,
-                    category="build_artifact",
-                    size_bytes=_get_dir_size(egg_dir),
-                    is_dir=True,
-                )
-            )
+            targets.append(_dir_target(egg_dir, "build_artifact"))
 
     return targets
 
 
 def _find_coverage_files(root: Path) -> list[CleanupTarget]:
     """Find coverage-related files."""
-    targets = []
+    targets: list[CleanupTarget] = []
     for pattern in COVERAGE_FILES:
         for cov_file in root.glob(pattern):
             if cov_file.is_file():
-                try:
-                    size = cov_file.stat().st_size
-                except OSError:
-                    size = 0
-                targets.append(
-                    CleanupTarget(
-                        path=cov_file,
-                        category="coverage",
-                        size_bytes=size,
-                        is_dir=False,
-                    )
-                )
+                targets.append(_file_target(cov_file, "coverage"))
     return targets
 
 
 def _find_compiled_files(root: Path) -> list[CleanupTarget]:
     """Find compiled Python files outside cache dirs."""
-    targets = []
-    for pattern in COMPILED_PATTERNS:
-        for pyc_file in root.rglob(pattern):
-            if pyc_file.is_file():
-                # Skip if in .venv or __pycache__ (handled separately)
-                if ".venv" in pyc_file.parts or "venv" in pyc_file.parts:
-                    continue
-                if "__pycache__" in pyc_file.parts:
-                    continue
-                try:
-                    size = pyc_file.stat().st_size
-                except OSError:
-                    size = 0
-                targets.append(
-                    CleanupTarget(
-                        path=pyc_file,
-                        category="compiled",
-                        size_bytes=size,
-                        is_dir=False,
-                    )
-                )
-    return targets
+    return _rglob_file_targets(
+        root,
+        COMPILED_PATTERNS,
+        "compiled",
+        excluded_parts=("__pycache__",),
+    )
 
 
 def _find_log_files(root: Path) -> list[CleanupTarget]:
     """Find log files."""
-    targets = []
-    for pattern in LOG_PATTERNS:
-        for log_file in root.rglob(pattern):
-            if log_file.is_file():
-                # Skip if in .venv
-                if ".venv" in log_file.parts or "venv" in log_file.parts:
-                    continue
-                try:
-                    size = log_file.stat().st_size
-                except OSError:
-                    size = 0
-                targets.append(
-                    CleanupTarget(
-                        path=log_file,
-                        category="log",
-                        size_bytes=size,
-                        is_dir=False,
-                    )
-                )
-    return targets
+    return _rglob_file_targets(root, LOG_PATTERNS, "log")
 
 
 def _find_temp_files(root: Path) -> list[CleanupTarget]:
     """Find temporary files."""
-    targets = []
-    for pattern in TEMP_PATTERNS:
-        for temp_file in root.rglob(pattern):
-            if temp_file.is_file():
-                # Skip if in .venv
-                if ".venv" in temp_file.parts or "venv" in temp_file.parts:
-                    continue
-                try:
-                    size = temp_file.stat().st_size
-                except OSError:
-                    size = 0
-                targets.append(
-                    CleanupTarget(
-                        path=temp_file,
-                        category="temp",
-                        size_bytes=size,
-                        is_dir=False,
-                    )
-                )
-    return targets
+    return _rglob_file_targets(root, TEMP_PATTERNS, "temp")
 
 
 def _format_size(size_bytes: int) -> str:
@@ -415,52 +380,65 @@ def delete_targets(
 # =============================================================================
 
 
-def log_report(result: CleanupResult) -> None:
-    """Log cleanup report."""
+def _targets_by_category(targets: list[CleanupTarget]) -> dict[str, list[CleanupTarget]]:
+    """Group targets by cleanup category."""
+    by_category: dict[str, list[CleanupTarget]] = {}
+    for target in targets:
+        by_category.setdefault(target.category, []).append(target)
+    return by_category
+
+
+def _log_report_header(result: CleanupResult) -> None:
+    """Emit report header and mode."""
     logger.info("=" * 70)
     logger.info("BioETL Project Cleanup Report")
     logger.info("=" * 70)
     logger.info("")
-
-    if result.dry_run:
-        logger.info("MODE: Dry-run (no changes made)")
-    else:
-        logger.info("MODE: Apply (changes applied)")
+    logger.info(
+        "MODE: %s",
+        "Dry-run (no changes made)" if result.dry_run else "Apply (changes applied)",
+    )
     logger.info("")
 
-    # Group targets by category
-    by_category: dict[str, list[CleanupTarget]] = {}
-    for target in result.targets:
-        by_category.setdefault(target.category, []).append(target)
 
-    for category, targets in sorted(by_category.items()):
-        cat_size = sum(t.size_bytes for t in targets)
-        logger.info(
-            "## %s (%d items, %s)",
-            category.upper(),
-            len(targets),
-            _format_size(cat_size),
-        )
-        for target in targets:
-            rel_path = target.path.relative_to(PROJECT_ROOT)
-            marker = "[D]" if target.is_dir else "[F]"
-            logger.info(
-                "  %s %s (%s)", marker, rel_path, _format_size(target.size_bytes)
-            )
-        logger.info("")
+def _log_category_targets(category: str, targets: list[CleanupTarget]) -> None:
+    """Emit all targets for one cleanup category."""
+    cat_size = sum(t.size_bytes for t in targets)
+    logger.info(
+        "## %s (%d items, %s)",
+        category.upper(),
+        len(targets),
+        _format_size(cat_size),
+    )
+    for target in targets:
+        rel_path = target.path.relative_to(PROJECT_ROOT)
+        marker = "[D]" if target.is_dir else "[F]"
+        logger.info("  %s %s (%s)", marker, rel_path, _format_size(target.size_bytes))
+    logger.info("")
 
-    if result.archived:
-        logger.info("## ARCHIVED (%d items)", len(result.archived))
-        for target in result.archived:
-            logger.info("  %s", target.path.name)
-        logger.info("")
 
-    if result.errors:
-        logger.info("## ERRORS (%d)", len(result.errors))
-        for error in result.errors:
-            logger.info("  %s", error)
-        logger.info("")
+def _log_archived_targets(archived: list[CleanupTarget]) -> None:
+    """Emit archived log section."""
+    if not archived:
+        return
+    logger.info("## ARCHIVED (%d items)", len(archived))
+    for target in archived:
+        logger.info("  %s", target.path.name)
+    logger.info("")
 
+
+def _log_errors(errors: list[str]) -> None:
+    """Emit error section."""
+    if not errors:
+        return
+    logger.info("## ERRORS (%d)", len(errors))
+    for error in errors:
+        logger.info("  %s", error)
+    logger.info("")
+
+
+def _log_report_summary(result: CleanupResult) -> None:
+    """Emit final cleanup summary."""
     logger.info("=" * 70)
     logger.info(
         "Summary: %d targets (%s total)",
@@ -474,6 +452,16 @@ def log_report(result: CleanupResult) -> None:
             _format_size(result.deleted_size),
         )
     logger.info("=" * 70)
+
+
+def log_report(result: CleanupResult) -> None:
+    """Log cleanup report."""
+    _log_report_header(result)
+    for category, targets in sorted(_targets_by_category(result.targets).items()):
+        _log_category_targets(category, targets)
+    _log_archived_targets(result.archived)
+    _log_errors(result.errors)
+    _log_report_summary(result)
 
 
 def parse_args() -> argparse.Namespace:
