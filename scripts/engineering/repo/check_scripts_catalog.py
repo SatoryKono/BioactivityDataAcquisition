@@ -126,6 +126,138 @@ def _check_root_wrappers(
             violations.append(f"root script is not a wrapper: {rel}")
 
 
+def _lifecycle_manifest_and_registry_paths(
+    *, root: Path, lifecycle: dict[str, object], violations: list[str]
+) -> tuple[Path, Path, str, str] | None:
+    manifest_rel = lifecycle.get(
+        "manifest_path", "configs/quality/scripts_inventory_manifest.json"
+    )
+    registry_rel = lifecycle.get(
+        "registry_path", "configs/quality/scripts_lifecycle_registry.json"
+    )
+    if not isinstance(manifest_rel, str) or not manifest_rel:
+        violations.append("lifecycle.manifest_path must be a non-empty string")
+        return None
+    if not isinstance(registry_rel, str) or not registry_rel:
+        violations.append("lifecycle.registry_path must be a non-empty string")
+        return None
+
+    manifest_path = root / manifest_rel
+    registry_path = root / registry_rel
+    if not manifest_path.exists():
+        violations.append(f"manifest not found: {manifest_rel}")
+        return None
+    if not registry_path.exists():
+        violations.append(f"registry not found: {registry_rel}")
+        return None
+    return manifest_path, registry_path, manifest_rel, registry_rel
+
+
+def _load_lifecycle_payloads(
+    *, manifest_path: Path, registry_path: Path, manifest_rel: str, registry_rel: str, violations: list[str]
+) -> tuple[dict[str, object], dict[str, object]] | None:
+    manifest_payload = _load_json_object_with_retry(manifest_path)
+    registry_payload = _load_json_object_with_retry(registry_path)
+    if manifest_payload is None:
+        violations.append(f"manifest JSON is invalid: {manifest_rel}")
+        return None
+    if registry_payload is None:
+        violations.append(f"registry JSON is invalid: {registry_rel}")
+        return None
+    return manifest_payload, registry_payload
+
+
+def _check_deprecated_lifecycle_fields(
+    *,
+    path: str,
+    entry: dict[str, object],
+    deprecated_required_fields: list[str],
+    violations: list[str],
+) -> None:
+    for field in deprecated_required_fields:
+        raw = entry.get(field)
+        if not isinstance(raw, str) or not raw.strip():
+            violations.append(f"{path}: deprecated entry missing field '{field}'")
+
+    replacement = entry.get("replacement")
+    if isinstance(replacement, str) and replacement.strip() == path:
+        violations.append(f"{path}: replacement must differ from deprecated script path")
+
+    sunset_date = entry.get("sunset_date")
+    if isinstance(sunset_date, str) and sunset_date.strip():
+        if not _parse_iso_date(sunset_date.strip()):
+            violations.append(
+                f"{path}: sunset_date must be YYYY-MM-DD, got {sunset_date!r}"
+            )
+
+
+def _check_non_active_script_entry(
+    *,
+    path: str,
+    entry: dict[str, object] | None,
+    required_registry_fields: list[str],
+    deprecated_decisions: set[str],
+    deprecated_required_fields: list[str],
+    violations: list[str],
+) -> None:
+    if not isinstance(entry, dict):
+        violations.append(f"missing lifecycle entry for non-active script: {path}")
+        return
+
+    for field in required_registry_fields:
+        raw = entry.get(field)
+        if not isinstance(raw, str) or not raw.strip():
+            violations.append(f"{path}: missing lifecycle field '{field}'")
+
+    decision_raw = entry.get("decision")
+    decision = decision_raw.strip() if isinstance(decision_raw, str) else ""
+    if decision in deprecated_decisions:
+        _check_deprecated_lifecycle_fields(
+            path=path,
+            entry=entry,
+            deprecated_required_fields=deprecated_required_fields,
+            violations=violations,
+        )
+
+
+def _check_registry_entry_coverage(
+    *,
+    scripts: list[object],
+    entries: dict[str, object],
+    non_active_statuses: set[str],
+    required_registry_fields: list[str],
+    deprecated_decisions: set[str],
+    deprecated_required_fields: list[str],
+    violations: list[str],
+) -> set[str]:
+    manifest_paths = {
+        item.get("path")
+        for item in scripts
+        if isinstance(item, dict) and isinstance(item.get("path"), str)
+    }
+
+    for item in scripts:
+        if not isinstance(item, dict):
+            continue
+        path = item.get("path")
+        status = item.get("status")
+        if not isinstance(path, str) or not isinstance(status, str):
+            continue
+        if status not in non_active_statuses:
+            continue
+
+        _check_non_active_script_entry(
+            path=path,
+            entry=entries.get(path) if isinstance(entries, dict) else None,
+            required_registry_fields=required_registry_fields,
+            deprecated_decisions=deprecated_decisions,
+            deprecated_required_fields=deprecated_required_fields,
+            violations=violations,
+        )
+
+    return manifest_paths
+
+
 def _check_lifecycle_coverage(
     *,
     root: Path,
@@ -137,36 +269,23 @@ def _check_lifecycle_coverage(
         violations.append("catalog missing lifecycle policy section")
         return
 
-    manifest_rel = lifecycle.get(
-        "manifest_path", "configs/quality/scripts_inventory_manifest.json"
+    lifecycle_paths = _lifecycle_manifest_and_registry_paths(
+        root=root, lifecycle=lifecycle, violations=violations
     )
-    registry_rel = lifecycle.get(
-        "registry_path", "configs/quality/scripts_lifecycle_registry.json"
+    if lifecycle_paths is None:
+        return
+    manifest_path, registry_path, manifest_rel, registry_rel = lifecycle_paths
+
+    payloads = _load_lifecycle_payloads(
+        manifest_path=manifest_path,
+        registry_path=registry_path,
+        manifest_rel=manifest_rel,
+        registry_rel=registry_rel,
+        violations=violations,
     )
-    if not isinstance(manifest_rel, str) or not manifest_rel:
-        violations.append("lifecycle.manifest_path must be a non-empty string")
+    if payloads is None:
         return
-    if not isinstance(registry_rel, str) or not registry_rel:
-        violations.append("lifecycle.registry_path must be a non-empty string")
-        return
-
-    manifest_path = root / manifest_rel
-    registry_path = root / registry_rel
-    if not manifest_path.exists():
-        violations.append(f"manifest not found: {manifest_rel}")
-        return
-    if not registry_path.exists():
-        violations.append(f"registry not found: {registry_rel}")
-        return
-
-    manifest_payload = _load_json_object_with_retry(manifest_path)
-    registry_payload = _load_json_object_with_retry(registry_path)
-    if manifest_payload is None:
-        violations.append(f"manifest JSON is invalid: {manifest_rel}")
-        return
-    if registry_payload is None:
-        violations.append(f"registry JSON is invalid: {registry_rel}")
-        return
+    manifest_payload, registry_payload = payloads
     scripts = manifest_payload.get("scripts", [])
     entries = _as_dict(registry_payload.get("entries"))
     if not isinstance(scripts, list):
@@ -190,53 +309,15 @@ def _check_lifecycle_coverage(
         lifecycle.get("deprecated_required_fields")
     ) or ["replacement", "sunset_date"]
 
-    manifest_paths = {
-        item.get("path")
-        for item in scripts
-        if isinstance(item, dict) and isinstance(item.get("path"), str)
-    }
-
-    for item in scripts:
-        if not isinstance(item, dict):
-            continue
-        path = item.get("path")
-        status = item.get("status")
-        if not isinstance(path, str) or not isinstance(status, str):
-            continue
-        if status not in non_active_statuses:
-            continue
-
-        entry = entries.get(path)
-        if not isinstance(entry, dict):
-            violations.append(f"missing lifecycle entry for non-active script: {path}")
-            continue
-
-        for field in required_registry_fields:
-            raw = entry.get(field)
-            if not isinstance(raw, str) or not raw.strip():
-                violations.append(f"{path}: missing lifecycle field '{field}'")
-
-        decision_raw = entry.get("decision")
-        decision = decision_raw.strip() if isinstance(decision_raw, str) else ""
-        if decision in deprecated_decisions:
-            for field in deprecated_required_fields:
-                raw = entry.get(field)
-                if not isinstance(raw, str) or not raw.strip():
-                    violations.append(
-                        f"{path}: deprecated entry missing field '{field}'"
-                    )
-
-            replacement = entry.get("replacement")
-            if isinstance(replacement, str) and replacement.strip() == path:
-                violations.append(
-                    f"{path}: replacement must differ from deprecated script path"
-                )
-            sunset_date = entry.get("sunset_date")
-            if isinstance(sunset_date, str) and sunset_date.strip():
-                if not _parse_iso_date(sunset_date.strip()):
-                    violations.append(
-                        f"{path}: sunset_date must be YYYY-MM-DD, got {sunset_date!r}"
-                    )
+    manifest_paths = _check_registry_entry_coverage(
+        scripts=scripts,
+        entries=entries,
+        non_active_statuses=non_active_statuses,
+        required_registry_fields=required_registry_fields,
+        deprecated_decisions=deprecated_decisions,
+        deprecated_required_fields=deprecated_required_fields,
+        violations=violations,
+    )
 
     enforce_known_registry_paths = bool(
         lifecycle.get("enforce_known_registry_paths", True)
