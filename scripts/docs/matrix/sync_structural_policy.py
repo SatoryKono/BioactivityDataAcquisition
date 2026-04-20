@@ -103,15 +103,20 @@ STRUCTURAL_ACTION_TOKENS: Final[frozenset[str]] = frozenset(
         PROPOSE_NULL_WARN_ERROR_THEN_QUARANTINE,
     }
 )
+SILVER_FILTERS_HEADER: Final[str] = "Silver Filters"
+FILTER_FAIL_SINK_HEADER: Final[str] = "Filter fail sink"
+SILVER_NORMALISATION_HEADER: Final[str] = "Silver Normalisation"
+SILVER_VALIDATION_HEADER: Final[str] = "Silver Validation"
+VALIDATION_FAIL_ACTION_HEADER: Final[str] = "Validation fail action"
 HEADERS_TO_UPDATE: Final[tuple[str, ...]] = (
     "Type",
     "Nullable",
     "Required",
-    "Silver Filters",
-    "Filter fail sink",
-    "Silver Normalisation",
-    "Silver Validation",
-    "Validation fail action",
+    SILVER_FILTERS_HEADER,
+    FILTER_FAIL_SINK_HEADER,
+    SILVER_NORMALISATION_HEADER,
+    SILVER_VALIDATION_HEADER,
+    VALIDATION_FAIL_ACTION_HEADER,
 )
 
 
@@ -221,25 +226,25 @@ def _update_row(
         validation_prefix = []
         normalization_prefix = []
         fail_action_prefix = []
-        fail_sink_override = row.get("Filter fail sink", "") or NOT_APPLICABLE
+        fail_sink_override = row.get(FILTER_FAIL_SINK_HEADER, "") or NOT_APPLICABLE
         type_value = row.get("Type", "")
         nullable_value = row.get("Nullable", "")
         required_value = row.get("Required", "")
 
     filters = _parse_tokens(
-        row.get("Silver Filters", ""),
+        row.get(SILVER_FILTERS_HEADER, ""),
         drop=EMPTY_SEMANTICS_TOKENS | REQUIRED_FILTER_TOKENS | STRUCTURAL_FILTER_TOKENS,
     )
     validation = _parse_tokens(
-        row.get("Silver Validation", ""),
+        row.get(SILVER_VALIDATION_HEADER, ""),
         drop=EMPTY_SEMANTICS_TOKENS | STRUCTURAL_VALIDATION_TOKENS,
     )
     normalization = _parse_tokens(
-        row.get("Silver Normalisation", ""),
+        row.get(SILVER_NORMALISATION_HEADER, ""),
         drop=EMPTY_SEMANTICS_TOKENS | STRUCTURAL_NORMALISATION_TOKENS,
     )
-    fail_action = row.get("Validation fail action", "")
-    fail_sink = row.get("Filter fail sink", "")
+    fail_action = row.get(VALIDATION_FAIL_ACTION_HEADER, "")
+    fail_sink = row.get(FILTER_FAIL_SINK_HEADER, "")
     fail_action_tokens = _parse_tokens(
         fail_action,
         drop=EMPTY_SEMANTICS_TOKENS | STRUCTURAL_ACTION_TOKENS,
@@ -263,11 +268,11 @@ def _update_row(
         "Type": type_value,
         "Nullable": nullable_value,
         "Required": required_value,
-        "Silver Filters": filters_value,
-        "Filter fail sink": fail_sink_value,
-        "Silver Normalisation": normalization_value,
-        "Silver Validation": validation_value,
-        "Validation fail action": fail_action_value,
+        SILVER_FILTERS_HEADER: filters_value,
+        FILTER_FAIL_SINK_HEADER: fail_sink_value,
+        SILVER_NORMALISATION_HEADER: normalization_value,
+        SILVER_VALIDATION_HEADER: validation_value,
+        VALIDATION_FAIL_ACTION_HEADER: fail_action_value,
     }
 
 
