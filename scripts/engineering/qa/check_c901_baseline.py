@@ -164,6 +164,64 @@ def _print_violation_list(title: str, violations: list[Violation]) -> None:
         )
 
 
+def _complexity_regressions(
+    current_map: dict[str, Violation],
+    baseline_map: dict[str, Violation],
+) -> list[tuple[Violation, Violation]]:
+    regressions: list[tuple[Violation, Violation]] = []
+    for key in sorted(set(current_map) & set(baseline_map)):
+        cur = current_map[key]
+        base = baseline_map[key]
+        if cur.complexity > base.complexity:
+            regressions.append((base, cur))
+    return regressions
+
+
+def _folder_budget_violations(
+    current: list[Violation],
+    folder_budgets: dict[str, int],
+) -> list[tuple[str, int, int]]:
+    violations: list[tuple[str, int, int]] = []
+    for prefix, limit in sorted(folder_budgets.items()):
+        count = _count_by_prefix(current, prefix)
+        if count > limit:
+            violations.append((prefix, count, limit))
+    return violations
+
+
+def _print_folder_budget_summary(
+    current: list[Violation],
+    folder_budgets: dict[str, int],
+) -> None:
+    if not folder_budgets:
+        return
+    print("  Folder budgets:")
+    for prefix, limit in sorted(folder_budgets.items()):
+        count = _count_by_prefix(current, prefix)
+        print(f"    - {prefix}: {count}/{limit}")
+
+
+def _print_regressions(regressions: list[tuple[Violation, Violation]]) -> None:
+    if not regressions:
+        return
+    print("\n[BLOCKER] Complexity regression in baseline violations:")
+    for base, cur in regressions:
+        print(
+            f"  - {cur.file}:{cur.row} :: {cur.function} "
+            f"({base.complexity} -> {cur.complexity})"
+        )
+
+
+def _print_budget_violations(
+    budget_violations: list[tuple[str, int, int]],
+) -> None:
+    if not budget_violations:
+        return
+    print("\n[BLOCKER] Folder budget exceeded:")
+    for prefix, count, limit in budget_violations:
+        print(f"  - {prefix}: {count} > {limit}")
+
+
 def _evaluate_policy(
     current: list[Violation],
     baseline_map: dict[str, Violation],
@@ -174,50 +232,21 @@ def _evaluate_policy(
 
     new_keys = sorted(set(current_map) - set(baseline_map))
     resolved_keys = sorted(set(baseline_map) - set(current_map))
-
-    regressions: list[tuple[Violation, Violation]] = []
-    for key in sorted(set(current_map) & set(baseline_map)):
-        cur = current_map[key]
-        base = baseline_map[key]
-        if cur.complexity > base.complexity:
-            regressions.append((base, cur))
-
-    budget_violations: list[tuple[str, int, int]] = []
-    for prefix, limit in sorted(folder_budgets.items()):
-        count = _count_by_prefix(current, prefix)
-        if count > limit:
-            budget_violations.append((prefix, count, limit))
-
     new_violations = [current_map[key] for key in new_keys]
     resolved_violations = [baseline_map[key] for key in resolved_keys]
+    regressions = _complexity_regressions(current_map, baseline_map)
+    budget_violations = _folder_budget_violations(current, folder_budgets)
 
     print("C901 Governance Report")
     print(f"  Current violations: {len(current)}")
     print(f"  Baseline violations: {len(baseline_map)}")
     print(f"  New violations: {len(new_violations)}")
     print(f"  Resolved vs baseline: {len(resolved_violations)}")
-
-    if folder_budgets:
-        print("  Folder budgets:")
-        for prefix, limit in sorted(folder_budgets.items()):
-            count = _count_by_prefix(current, prefix)
-            print(f"    - {prefix}: {count}/{limit}")
+    _print_folder_budget_summary(current, folder_budgets)
 
     _print_violation_list("\n[BLOCKER] New C901 violations:", new_violations)
-
-    if regressions:
-        print("\n[BLOCKER] Complexity regression in baseline violations:")
-        for base, cur in regressions:
-            print(
-                f"  - {cur.file}:{cur.row} :: {cur.function} "
-                f"({base.complexity} -> {cur.complexity})"
-            )
-
-    if budget_violations:
-        print("\n[BLOCKER] Folder budget exceeded:")
-        for prefix, count, limit in budget_violations:
-            print(f"  - {prefix}: {count} > {limit}")
-
+    _print_regressions(regressions)
+    _print_budget_violations(budget_violations)
     if resolved_violations:
         _print_violation_list(
             "\n[INFO] Resolved baseline violations:", resolved_violations

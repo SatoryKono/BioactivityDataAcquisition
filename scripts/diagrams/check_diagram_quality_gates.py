@@ -123,6 +123,20 @@ def load_manifest(manifest_path: Path) -> list[Path]:
     return files
 
 
+def _is_discoverable_file(path: Path) -> bool:
+    return (
+        path.suffix in SUPPORTED_SUFFIXES
+        and not path.name.startswith("_")
+        and "99-archive" not in path.parts
+    )
+
+
+def _append_file_if_new(path: Path, *, seen: set[Path], files: list[Path]) -> None:
+    if path not in seen:
+        seen.add(path)
+        files.append(path)
+
+
 def discover_files(targets: list[Path]) -> list[Path]:
     seen: set[Path] = set()
     files: list[Path] = []
@@ -130,9 +144,8 @@ def discover_files(targets: list[Path]) -> list[Path]:
     for target in targets:
         resolved = _ensure_repo_path(target)
         if resolved.is_file():
-            if resolved.suffix in SUPPORTED_SUFFIXES and resolved not in seen:
-                seen.add(resolved)
-                files.append(resolved)
+            if _is_discoverable_file(resolved):
+                _append_file_if_new(resolved, seen=seen, files=files)
             continue
 
         if not resolved.exists():
@@ -140,13 +153,8 @@ def discover_files(targets: list[Path]) -> list[Path]:
 
         for pattern in ("*.mmd", "*.mermaid"):
             for candidate in resolved.rglob(pattern):
-                if candidate.name.startswith("_"):
-                    continue
-                if "99-archive" in candidate.parts:
-                    continue
-                if candidate not in seen:
-                    seen.add(candidate)
-                    files.append(candidate)
+                if _is_discoverable_file(candidate):
+                    _append_file_if_new(candidate, seen=seen, files=files)
 
     return sorted(files)
 
@@ -531,24 +539,81 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _resolved_manifest_path(manifest: Path) -> Path:
+    if manifest == DEFAULT_MANIFEST:
+        return DEFAULT_MANIFEST
+    return _resolve_repo_relative_path(manifest)
+
+
+def _resolved_targets(paths: list[str]) -> list[Path]:
+    if not paths:
+        return [DEFAULT_TARGET]
+    return [_resolve_repo_relative_path(path) for path in paths]
+
+
+def _resolve_input_files(args: argparse.Namespace) -> list[Path]:
+    if not args.no_manifest:
+        return load_manifest(_resolved_manifest_path(args.manifest))
+    return discover_files(_resolved_targets(args.paths))
+
+
+def _evaluate_files(
+    files: list[Path], *, large_threshold: int, max_label_length: int, max_br: int
+) -> list[Violation]:
+    violations: list[Violation] = []
+    for file_path in files:
+        violations.extend(
+            evaluate_file(
+                file_path,
+                large_threshold=large_threshold,
+                max_label_length=max_label_length,
+                max_br=max_br,
+            )
+        )
+    return violations
+
+
+def _build_report(files: list[Path], violations: list[Violation]) -> Report:
+    hard_failures = sum(
+        1
+        for violation in violations
+        if violation.rule_id in {"DIAG-T018", "DIAG-T020", "DIAG-T021"}
+    )
+    return Report(
+        checked_files=len(files),
+        hard_failures=hard_failures,
+        warning_failures=len(violations) - hard_failures,
+        rules=summarize(violations),
+        violations=violations,
+    )
+
+
+def _report_payload(report: Report) -> dict[str, object]:
+    return {
+        "checked_files": report.checked_files,
+        "hard_failures": report.hard_failures,
+        "warning_failures": report.warning_failures,
+        "rules": [asdict(item) for item in report.rules],
+        "violations": [asdict(item) for item in report.violations],
+    }
+
+
+def _write_optional_reports(args: argparse.Namespace, report: Report) -> None:
+    payload = _report_payload(report)
+    if args.json_out is not None:
+        _write_report_output(
+            args.json_out,
+            json.dumps(payload, indent=2, ensure_ascii=True) + "\n",
+        )
+    if args.markdown_out is not None:
+        _write_report_output(args.markdown_out, render_markdown(report))
+
+
 def main() -> int:
     args = parse_args()
 
     try:
-        if not args.no_manifest:
-            manifest = (
-                DEFAULT_MANIFEST
-                if args.manifest == DEFAULT_MANIFEST
-                else _resolve_repo_relative_path(args.manifest)
-            )
-            files = load_manifest(manifest)
-        else:
-            targets = (
-                [_resolve_repo_relative_path(path) for path in args.paths]
-                if args.paths
-                else [DEFAULT_TARGET]
-            )
-            files = discover_files(targets)
+        files = _resolve_input_files(args)
     except (FileNotFoundError, ValueError) as exc:
         _err(f"[ERROR] {exc}")
         return 2
@@ -557,71 +622,24 @@ def main() -> int:
         _err("[ERROR] No diagram files resolved for quality-gate check.")
         return 2
 
-    violations: list[Violation] = []
-    for file_path in files:
-        violations.extend(
-            evaluate_file(
-                file_path,
-                large_threshold=args.large_threshold,
-                max_label_length=args.max_label_length,
-                max_br=args.max_br,
-            )
-        )
-
-    summaries = summarize(violations)
-    hard_failures = sum(
-        1
-        for violation in violations
-        if violation.rule_id in {"DIAG-T018", "DIAG-T020", "DIAG-T021"}
-    )
-    warning_failures = len(violations) - hard_failures
-
-    report = Report(
-        checked_files=len(files),
-        hard_failures=hard_failures,
-        warning_failures=warning_failures,
-        rules=summaries,
-        violations=violations,
+    report = _build_report(
+        files,
+        _evaluate_files(
+            files,
+            large_threshold=args.large_threshold,
+            max_label_length=args.max_label_length,
+            max_br=args.max_br,
+        ),
     )
 
     try:
-        if args.json_out is not None:
-            _write_report_output(
-                args.json_out,
-                json.dumps(
-                    {
-                        "checked_files": report.checked_files,
-                        "hard_failures": report.hard_failures,
-                        "warning_failures": report.warning_failures,
-                        "rules": [asdict(item) for item in report.rules],
-                        "violations": [asdict(item) for item in report.violations],
-                    },
-                    indent=2,
-                    ensure_ascii=True,
-                )
-                + "\n",
-            )
-
-        if args.markdown_out is not None:
-            _write_report_output(args.markdown_out, render_markdown(report))
+        _write_optional_reports(args, report)
     except ValueError as exc:
         _err(f"[ERROR] {exc}")
         return 2
 
     if args.json:
-        _out(
-            json.dumps(
-                {
-                    "checked_files": report.checked_files,
-                    "hard_failures": report.hard_failures,
-                    "warning_failures": report.warning_failures,
-                    "rules": [asdict(item) for item in report.rules],
-                    "violations": [asdict(item) for item in report.violations],
-                },
-                indent=2,
-                ensure_ascii=True,
-            )
-        )
+        _out(json.dumps(_report_payload(report), indent=2, ensure_ascii=True))
     else:
         _out(
             "[INFO] Diagram quality gates: "
