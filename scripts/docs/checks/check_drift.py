@@ -226,51 +226,19 @@ def _extract_runtime_version(text: str) -> str | None:
 def check_ports(report: DriftReport) -> None:
     """Verify port classes referenced in domain-layer docs exist in code."""
     ports_dir = SRC_DIR / "domain" / "ports"
-    if not ports_dir.exists():
-        report.add(
-            "ports",
-            "ERROR",
-            "src/bioetl/domain/ports/",
-            "Ports directory does not exist",
-        )
+    if _report_missing_ports_dir(report, ports_dir):
         return
 
     code_classes = _collect_classes(ports_dir)
 
     doc_path = DOCS_DIR / "02-architecture" / "01-domain-layer.md"
     doc_text = _read_doc(doc_path)
-    if not doc_text:
-        report.add(
-            "ports",
-            "WARNING",
-            str(doc_path.relative_to(PROJECT_ROOT)),
-            "Domain layer doc not found — cannot verify port references",
-        )
+    if _report_missing_domain_layer_doc(report, doc_path, doc_text):
         return
 
-    refs = _extract_backtick_refs(doc_text)
-    port_refs = {ref for ref in refs if ref.endswith("Port") and ref[0].isupper()}
-
-    for port_name in sorted(port_refs):
-        if port_name not in code_classes:
-            report.add(
-                "ports",
-                "ERROR",
-                str(doc_path.relative_to(PROJECT_ROOT)),
-                f"Port `{port_name}` referenced in docs but not found in domain/ports/",
-            )
-
-    init_file = ports_dir / "__init__.py"
-    if init_file.exists():
-        init_text = init_file.read_text(encoding="utf-8")
-        for port_name in sorted(port_refs):
-            if port_name in code_classes and port_name not in init_text:
-                report.add(
-                    "ports",
-                    "WARNING",
-                    "src/bioetl/domain/ports/__init__.py",
-                    f"Port `{port_name}` exists but not re-exported in ports facade",
-                )
+    port_refs = _documented_port_refs(doc_text)
+    _report_missing_documented_ports(report, doc_path, port_refs, code_classes)
+    _report_ports_facade_gaps(report, ports_dir, port_refs, code_classes)
 
 
 def check_classes(report: DriftReport) -> None:
@@ -317,33 +285,135 @@ def check_classes(report: DriftReport) -> None:
     ]
 
     for doc_path, expected_classes in doc_checks:
-        if not doc_path.exists():
+        if _report_missing_architecture_doc(report, doc_path):
+            continue
+        doc_text = _read_doc(doc_path)
+        doc_refs = set(_extract_backtick_refs(doc_text))
+        _report_expected_class_refs(
+            report,
+            doc_path=doc_path,
+            expected_classes=expected_classes,
+            all_classes=all_classes,
+            doc_refs=doc_refs,
+        )
+
+
+def _report_missing_ports_dir(report: DriftReport, ports_dir: Path) -> bool:
+    """Report and return whether the domain ports directory is missing."""
+    if ports_dir.exists():
+        return False
+    report.add(
+        "ports",
+        "ERROR",
+        "src/bioetl/domain/ports/",
+        "Ports directory does not exist",
+    )
+    return True
+
+
+def _report_missing_domain_layer_doc(
+    report: DriftReport,
+    doc_path: Path,
+    doc_text: str,
+) -> bool:
+    """Report and return whether the domain layer doc is unavailable."""
+    if doc_text:
+        return False
+    report.add(
+        "ports",
+        "WARNING",
+        str(doc_path.relative_to(PROJECT_ROOT)),
+        "Domain layer doc not found — cannot verify port references",
+    )
+    return True
+
+
+def _documented_port_refs(doc_text: str) -> set[str]:
+    """Return documented public port names from the domain-layer markdown."""
+    refs = _extract_backtick_refs(doc_text)
+    return {ref for ref in refs if ref.endswith("Port") and ref[0].isupper()}
+
+
+def _report_missing_documented_ports(
+    report: DriftReport,
+    doc_path: Path,
+    port_refs: set[str],
+    code_classes: set[str],
+) -> None:
+    """Report documented ports that are no longer defined in code."""
+    missing_ports = sorted(port_ref for port_ref in port_refs if port_ref not in code_classes)
+    for port_name in missing_ports:
+        report.add(
+            "ports",
+            "ERROR",
+            str(doc_path.relative_to(PROJECT_ROOT)),
+            f"Port `{port_name}` referenced in docs but not found in domain/ports/",
+        )
+
+
+def _report_ports_facade_gaps(
+    report: DriftReport,
+    ports_dir: Path,
+    port_refs: set[str],
+    code_classes: set[str],
+) -> None:
+    """Report documented ports that exist but are not re-exported via the facade."""
+    init_file = ports_dir / "__init__.py"
+    if not init_file.exists():
+        return
+    init_text = init_file.read_text(encoding="utf-8")
+    missing_exports = sorted(
+        port_name
+        for port_name in port_refs
+        if port_name in code_classes and port_name not in init_text
+    )
+    for port_name in missing_exports:
+        report.add(
+            "ports",
+            "WARNING",
+            "src/bioetl/domain/ports/__init__.py",
+            f"Port `{port_name}` exists but not re-exported in ports facade",
+        )
+
+
+def _report_missing_architecture_doc(report: DriftReport, doc_path: Path) -> bool:
+    """Report and return whether a required architecture doc is missing."""
+    if doc_path.exists():
+        return False
+    report.add(
+        "classes",
+        "WARNING",
+        str(doc_path.relative_to(PROJECT_ROOT)),
+        "Architecture doc not found — cannot verify class references",
+    )
+    return True
+
+
+def _report_expected_class_refs(
+    report: DriftReport,
+    *,
+    doc_path: Path,
+    expected_classes: list[str],
+    all_classes: set[str],
+    doc_refs: set[str],
+) -> None:
+    """Report missing or undocumented expected architecture classes."""
+    for class_name in expected_classes:
+        if class_name not in all_classes:
+            report.add(
+                "classes",
+                "ERROR",
+                str(doc_path.relative_to(PROJECT_ROOT)),
+                f"Class `{class_name}` expected from docs but not found in codebase",
+            )
+            continue
+        if class_name not in doc_refs:
             report.add(
                 "classes",
                 "WARNING",
                 str(doc_path.relative_to(PROJECT_ROOT)),
-                "Architecture doc not found — cannot verify class references",
+                f"Class `{class_name}` exists in code but not referenced in doc",
             )
-            continue
-
-        doc_text = _read_doc(doc_path)
-        doc_refs = set(_extract_backtick_refs(doc_text))
-
-        for class_name in expected_classes:
-            if class_name not in all_classes:
-                report.add(
-                    "classes",
-                    "ERROR",
-                    str(doc_path.relative_to(PROJECT_ROOT)),
-                    f"Class `{class_name}` expected from docs but not found in codebase",
-                )
-            elif class_name not in doc_refs:
-                report.add(
-                    "classes",
-                    "WARNING",
-                    str(doc_path.relative_to(PROJECT_ROOT)),
-                    f"Class `{class_name}` exists in code but not referenced in doc",
-                )
 
 
 def check_modules(report: DriftReport) -> None:
