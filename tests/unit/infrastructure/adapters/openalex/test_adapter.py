@@ -29,12 +29,6 @@ from tests.helpers.adapter_runtime import (
 LEGACY_HTTP_DOI = "http" + "://doi.org/10.1038/test"
 
 
-async def _drain_async_iterable(iterable) -> None:
-    """Consume an async iterable when the test only cares about side effects."""
-    async for _ in iterable:
-        continue
-
-
 @pytest.fixture
 def mock_http_client() -> MagicMock:
     """Create a mock HTTP client."""
@@ -316,7 +310,7 @@ class TestFetchFiltered:
     ) -> None:
         """Should raise ValueError for invalid entity type."""
         with pytest.raises(ValueError, match="supports 'work' or 'publication'"):
-            await _drain_async_iterable(
+            await anext(
                 adapter.fetch_filtered("invalid_type", ["10.1038/test"], "doi")
             )
 
@@ -540,7 +534,7 @@ class TestFetchFilteredWithFallback:
     ) -> None:
         """Should raise ValueError for invalid entity type."""
         with pytest.raises(ValueError, match="supports 'work'/'publication'"):
-            await _drain_async_iterable(
+            await anext(
                 adapter.fetch_filtered_with_fallback(
                     "invalid_type",
                     ["10.1038/test"],
@@ -559,7 +553,7 @@ class TestFetchMultiFiltered:
     ) -> None:
         """Should raise NotImplementedError."""
         with pytest.raises(NotImplementedError):
-            await _drain_async_iterable(
+            await anext(
                 adapter.fetch_multi_filtered("publication", {"doi": ["test"]})
             )
 
@@ -622,7 +616,7 @@ class TestFetch:
     async def test_fetch_invalid_entity_type(self, adapter: OpenAlexAdapter) -> None:
         """Should raise ValueError for invalid entity type."""
         with pytest.raises(ValueError, match="supports 'work' or 'publication'"):
-            await _drain_async_iterable(adapter.fetch("invalid", query="test"))
+            await anext(adapter.fetch("invalid", query="test"))
 
     @pytest.mark.asyncio
     async def test_fetch_requires_query_or_filter_ids(
@@ -630,7 +624,7 @@ class TestFetch:
     ) -> None:
         """Should raise ValueError when neither query nor filter_ids provided."""
         with pytest.raises(ValueError, match="requires either filter_ids"):
-            await _drain_async_iterable(adapter.fetch("publication"))
+            await anext(adapter.fetch("publication"))
 
 
 class TestHealthCheck:

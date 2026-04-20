@@ -1,7 +1,7 @@
 {
   "summary": {
     "scanned_modules": 1646,
-    "total_internal_imports": 6301,
+    "total_internal_imports": 6300,
     "layer_edges": 14,
     "cross_layer_group_edges": 60,
     "cross_layer_group_edges_total": 287,
@@ -53,7 +53,7 @@
     {
       "source": "infrastructure",
       "target": "domain",
-      "imports": 690,
+      "imports": 689,
       "allowed": true
     },
     {
@@ -142,7 +142,7 @@
     {
       "source": "infrastructure.storage",
       "target": "domain.ports",
-      "imports": 59
+      "imports": 58
     },
     {
       "source": "infrastructure.storage",
