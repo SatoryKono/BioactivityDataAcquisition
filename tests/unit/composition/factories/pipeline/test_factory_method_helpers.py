@@ -206,23 +206,30 @@ class TestCreatePipelineInstanceWithServices:
         )
 
         assert result is expected_pipeline
-        mock_create_pipeline_with_services.assert_called_once_with(
+        from bioetl.composition.factories.pipeline.creation_support import _PipelineCreationInputs, _PipelineCreationRequest
+
+        expected_inputs = _PipelineCreationInputs(
             pipeline_name="chembl_activity",
             pipeline_class=pipeline_class,
             provider="chembl",
             create_data_source_fn=create_data_source_fn,
             transformer_class=transformer_class,
             pandera_silver_schema=factory_context.pandera_silver_schema,
-            run_id=request.run_id,
-            runtime=request.runtime,
-            settings=request.settings,
-            logger=request.logger,
-            config=request.config,
-            filter_config=request.filter_config,
-            tracer=request.tracer,
-            dq_monitor=request.dq_monitor,
-            metrics=request.metrics,
-            cached_bronze=request.cached_bronze,
+            request=_PipelineCreationRequest(
+                run_id=request.run_id,
+                runtime=request.runtime,
+                settings=request.settings,
+                logger=request.logger,
+                config=request.config,
+                filter_config=request.filter_config,
+                tracer=request.tracer,
+                dq_monitor=request.dq_monitor,
+                metrics=request.metrics,
+                cached_bronze=request.cached_bronze,
+            ),
+        )
+        mock_create_pipeline_with_services.assert_called_once_with(
+            inputs=expected_inputs,
         )
 
     @patch(
@@ -256,10 +263,11 @@ class TestCreatePipelineInstanceWithServices:
         )
 
         call_kwargs = mock_create_pipeline_with_services.call_args.kwargs
-        assert call_kwargs["manifest_id"] == "manifest-123"
-        assert call_kwargs["config_hash"] == "hash-123"
-        assert call_kwargs["dq_contract_compatibility_hash"] == "dq-hash-123"
-        assert call_kwargs["effective_config_artifact_id"] == "artifact-123"
+        inputs = call_kwargs["inputs"]
+        assert inputs.request.manifest_id == "manifest-123"
+        assert inputs.request.config_hash == "hash-123"
+        assert inputs.request.dq_contract_compatibility_hash == "dq-hash-123"
+        assert inputs.request.effective_config_artifact_id == "artifact-123"
 
 
 @pytest.mark.unit

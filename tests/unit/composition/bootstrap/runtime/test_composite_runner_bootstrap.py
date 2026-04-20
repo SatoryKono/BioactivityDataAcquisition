@@ -140,16 +140,16 @@ def test_bootstrap_composite_runner_generates_run_id() -> None:
 
     with (
         patch(
-            "bioetl.composition.bootstrap.runtime.composite._bootstrap_runtime_basics"
+            "bioetl.composition.bootstrap.runtime.composite._bootstrap_runtime_basics_impl"
         ) as mock_runtime_basics,
         patch(
-            "bioetl.composition.bootstrap.runtime.composite._build_runner_factories"
+            "bioetl.composition.bootstrap.runtime.composite._build_runner_factories_impl"
         ) as mock_build_runner_factories,
         patch(
-            "bioetl.composition.bootstrap.runtime.composite._build_support_services"
+            "bioetl.composition.bootstrap.runtime.composite._build_support_services_impl"
         ) as mock_build_support_services,
         patch(
-            "bioetl.composition.bootstrap.runtime.composite.create_composite_runner_service"
+            "bioetl.composition.bootstrap.runtime.composite._create_composite_runner_from_plan_impl"
         ) as mock_runner_cls,
     ):
         mock_runtime_basics.return_value = runtime_basics
@@ -168,7 +168,7 @@ def test_bootstrap_composite_runner_generates_run_id() -> None:
         )
 
     runner_call = mock_runner_cls.call_args.kwargs
-    assert runner_call["run_id"] == str(generated_run_id)
+    assert runner_call["plan"].run_id == str(generated_run_id)
 
 
 @pytest.mark.unit

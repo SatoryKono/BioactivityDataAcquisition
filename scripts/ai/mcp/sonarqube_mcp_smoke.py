@@ -480,6 +480,8 @@ def run_smoke_command(
     # Start I/O threads
     readers = _start_io_threads(process, chunks)
 
+    ready_seen = False
+    handshake_sent = False
     try:
         # Run the smoke test loop
         ready_seen, handshake_sent, _, _ = _run_smoke_test_loop(

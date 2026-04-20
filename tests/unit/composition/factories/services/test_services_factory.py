@@ -332,10 +332,10 @@ def test_create_dq_services_builds_enabled_stack(
 
 
 @pytest.mark.unit
-@patch("bioetl.composition.factories.services.builder.RecordProcessor")
-@patch("bioetl.composition.factories.services.builder.PanderaGoldValidator")
-@patch("bioetl.composition.factories.services.builder.RecordProcessorConfig")
-@patch("bioetl.composition.factories.services.builder.TableConfig")
+@patch("bioetl.application.core.record_processor.RecordProcessor")
+@patch("bioetl.infrastructure.validation.pandera_validator.PanderaGoldValidator")
+@patch("bioetl.application.core.config.RecordProcessorConfig")
+@patch("bioetl.domain.config.table.TableConfig")
 def test_create_record_processor_builds_dependencies(
     mock_table_config: MagicMock,
     mock_processor_config: MagicMock,

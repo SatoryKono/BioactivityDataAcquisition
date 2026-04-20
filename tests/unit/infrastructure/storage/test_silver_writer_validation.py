@@ -461,7 +461,7 @@ class TestSilverWriterPreparePayloadExecutor:
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
-        from bioetl.domain.medallion import WriteModePolicy
+        from bioetl.domain.medallion import WriteMode, WriteModePolicy
 
         writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
         records = [
@@ -518,7 +518,7 @@ class TestSilverWriterPreparePayloadExecutor:
                 ),
             ) as mock_sync,
             patch(
-                "bioetl.infrastructure.storage.silver.validation_mixin.asyncio.to_thread",
+                "bioetl.infrastructure.storage.silver.operations.validation_operations.asyncio.to_thread",
                 wraps=asyncio.to_thread,
             ) as mock_to_thread,
         ):

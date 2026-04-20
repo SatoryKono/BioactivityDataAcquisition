@@ -99,7 +99,7 @@ def coerce_silver_write_request(
         raise TypeError("write_silver() received too many positional arguments")
 
     for field_name, value in zip(
-        _SILVER_WRITE_POSITIONAL_FIELDS, legacy_values, strict=True
+        _SILVER_WRITE_POSITIONAL_FIELDS, legacy_values, strict=False
     ):
         if field_name in resolved_kwargs:
             raise TypeError(
