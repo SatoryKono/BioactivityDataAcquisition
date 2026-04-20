@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from memory.notes import slugify, utc_now_iso, write_markdown_note
+from memory.notes import parse_markdown_note, slugify, utc_now_iso, write_markdown_note
 from memory.resources import discover_memory_root
 
 
@@ -13,28 +13,38 @@ NOTE_KINDS: dict[str, dict[str, str]] = {
     "episodic-session": {
         "target_dir": "episodic/sessions",
         "kind": "session",
+        "template": "episodic/templates/session.md",
     },
     "episodic-summary": {
         "target_dir": "episodic/summaries",
         "kind": "summary",
+        "template": "episodic/templates/summary.md",
     },
     "curated-decision": {
         "target_dir": "curated/decisions",
         "kind": "decision",
+        "template": "curated/templates/decision.md",
     },
     "curated-incident": {
         "target_dir": "curated/incidents",
         "kind": "incident",
+        "template": "curated/templates/incident.md",
     },
     "curated-lesson": {
         "target_dir": "curated/lessons",
         "kind": "lesson",
+        "template": "curated/templates/lesson.md",
     },
     "curated-domain-knowledge": {
         "target_dir": "curated/domain_knowledge",
         "kind": "domain_knowledge",
+        "template": "curated/templates/domain_knowledge.md",
     },
 }
+
+
+def _template_note(memory_root: Path, template_rel_path: str):
+    return parse_markdown_note(memory_root / template_rel_path)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -70,8 +80,10 @@ def create_note(
     memory_root = discover_memory_root()
     output = output_path or (memory_root / config["target_dir"] / f"{slug}.md")
     timestamp = utc_now_iso()
+    template = _template_note(memory_root, config["template"])
 
     metadata = {
+        **template.metadata,
         "id": slug,
         "title": title,
         "source_refs": source_refs or ["<add-source-ref>"],
@@ -82,6 +94,7 @@ def create_note(
             raise ValueError("--task-id is required for episodic notes")
         metadata.update(
             {
+                "kind": config["kind"],
                 "task_id": task_id,
                 "created_at": timestamp,
                 "ttl_days": 14,
@@ -89,14 +102,7 @@ def create_note(
                 "summary": "Short-lived working context.",
             }
         )
-        heading = "Session note" if note_kind == "episodic-session" else "Episodic summary"
-        body = (
-            f"# {heading}\n\n"
-            "## Context\n\n"
-            "- Replace with task-local context\n\n"
-            "## Working notes\n\n"
-            "- Replace with current findings\n"
-        )
+        body = template.body
     else:
         metadata.update(
             {
@@ -106,13 +112,7 @@ def create_note(
                 "summary": "Replace with a durable summary.",
             }
         )
-        body = (
-            f"# {title}\n\n"
-            "## Context\n\n"
-            "- Replace with durable context\n\n"
-            "## Guidance\n\n"
-            "- Replace with reusable guidance\n"
-        )
+        body = template.body
 
     return write_markdown_note(output, metadata, body)
 

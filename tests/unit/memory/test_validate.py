@@ -46,7 +46,7 @@ def test_memory_scaffold_validation_accepts_valid_note_files(tmp_path: Path) -> 
             "last_verified": "2026-04-20T00:00:00Z",
             "summary": "Durable lesson.",
         },
-        body="# Lesson\n\n- Durable guidance\n",
+        body="# Lesson\n\n## Observation\n\n- Durable guidance\n\n## Reuse guidance\n\n- Apply again when the same conditions hold.\n",
     )
     write_markdown_note(
         memory_root / "episodic" / "sessions" / "valid-session.md",
@@ -76,18 +76,60 @@ def test_memory_scaffold_validation_flags_invalid_note_files(tmp_path: Path) -> 
             "id": "broken-lesson",
             "title": "Broken lesson",
             "kind": "lesson",
-            "source_refs": [],
+            "source_refs": ["<add-source-ref>"],
             "confidence": "episodic",
-            "summary": "Missing verification and wrong confidence.",
+            "summary": "Replace with a durable summary.",
         },
-        body="# Broken\n",
+        body="# Lesson\n\n## Observation\n\n- Replace with current findings\n",
     )
 
     issues = validate_memory_scaffold(memory_root)
     messages = {issue.message for issue in issues if issue.path.endswith("broken-lesson.md")}
     assert "note missing required field: last_verified" in messages
-    assert "note source_refs must be a non-empty list" in messages
     assert "note confidence must be 'curated' for curated_note" in messages
+    assert "curated note summary contains placeholder text" in messages
+    assert "curated note source_refs contain placeholder text" in messages
+    assert "curated note body contains placeholder text" in messages
+    assert "curated note missing required heading: ## Reuse guidance" in messages
+
+
+def test_memory_scaffold_validation_flags_duplicate_curated_titles(tmp_path: Path) -> None:
+    memory_root = tmp_path / "memory"
+    shutil.copytree(MEMORY_ROOT, memory_root)
+
+    body = (
+        "# Lesson\n\n## Observation\n\n- Stable lesson\n\n## Reuse guidance\n\n- Reuse again later.\n"
+    )
+    write_markdown_note(
+        memory_root / "curated" / "lessons" / "duplicate-a.md",
+        metadata={
+            "id": "duplicate-a",
+            "title": "Duplicate title",
+            "kind": "lesson",
+            "source_refs": ["src/memory/README.md"],
+            "confidence": "curated",
+            "last_verified": "2026-04-20T00:00:00Z",
+            "summary": "First durable lesson for duplicate detection.",
+        },
+        body=body,
+    )
+    write_markdown_note(
+        memory_root / "curated" / "lessons" / "duplicate-b.md",
+        metadata={
+            "id": "duplicate-b",
+            "title": "Duplicate   title",
+            "kind": "lesson",
+            "source_refs": ["src/memory/DAILY_WORKFLOW.md"],
+            "confidence": "curated",
+            "last_verified": "2026-04-20T00:00:00Z",
+            "summary": "Second durable lesson for duplicate detection.",
+        },
+        body=body,
+    )
+
+    issues = validate_memory_scaffold(memory_root)
+    messages = {issue.message for issue in issues if issue.path.endswith("duplicate-b.md")}
+    assert any(message.startswith("duplicate curated note title also used by ") for message in messages)
 
 
 def test_memory_scaffold_validation_flags_invalid_storage_policy(tmp_path: Path) -> None:

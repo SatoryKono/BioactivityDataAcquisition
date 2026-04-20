@@ -12,6 +12,7 @@ import yaml
 
 FRONTMATTER_DELIMITER = "---"
 SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
+HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,6 +34,11 @@ def slugify(value: str) -> str:
     return slug or "note"
 
 
+def normalize_text_key(value: str) -> str:
+    """Normalize a text key for duplicate detection and loose comparisons."""
+    return " ".join(value.strip().lower().split())
+
+
 def parse_markdown_note(path: Path) -> MemoryNote:
     """Parse a markdown note with YAML frontmatter."""
     text = path.read_text(encoding="utf-8")
@@ -46,6 +52,15 @@ def parse_markdown_note(path: Path) -> MemoryNote:
     if not isinstance(metadata, dict):
         raise ValueError(f"note frontmatter must be a mapping: {path}")
     return MemoryNote(metadata=metadata, body=parts[1].lstrip("\n"))
+
+
+def extract_markdown_headings(body: str) -> list[str]:
+    """Return markdown headings in their rendered form."""
+    headings: list[str] = []
+    for match in HEADING_PATTERN.finditer(body):
+        level_marks, title = match.groups()
+        headings.append(f"{level_marks} {title.strip()}")
+    return headings
 
 
 def render_markdown_note(metadata: dict[str, Any], body: str) -> str:
