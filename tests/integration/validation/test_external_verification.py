@@ -210,7 +210,7 @@ class TestPubMedExternalVerification:
                     filter_ids=["35486828"],
                     filter_field="pmid",
                 ):
-                    pass
+                    continue
 
 
 @pytest.mark.integration

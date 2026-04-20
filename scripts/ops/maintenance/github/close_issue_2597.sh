@@ -26,6 +26,7 @@ Behavior:
   - closes issue #2597
   - keeps the workflow shell-friendly for WSL/bash maintainers
 EOF
+  return 0
 }
 
 OWNER="$DEFAULT_OWNER"

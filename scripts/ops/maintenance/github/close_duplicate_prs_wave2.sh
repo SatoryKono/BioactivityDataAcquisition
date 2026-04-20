@@ -138,6 +138,7 @@ main() {
   else
     echo "Dry-run finished. Re-run with --execute to apply."
   fi
+  return 0
 }
 
 main "$@"

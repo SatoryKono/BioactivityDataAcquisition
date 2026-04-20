@@ -23,6 +23,7 @@ Behavior:
   - creates the RunManifest-and-Run-Ledger issue with the prepared title/body
   - uses dry-run by default so the payload can be reviewed safely first
 EOF
+  return 0
 }
 
 OWNER="$DEFAULT_OWNER"
@@ -273,6 +274,7 @@ payload = {
 
 print(json.dumps(payload))
 PY
+  return 0
 }
 
 API_URL="${API_ROOT}/${OWNER}/${REPO}/issues"

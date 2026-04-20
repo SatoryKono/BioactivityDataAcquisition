@@ -391,7 +391,7 @@ class TestFetchMultiFiltered:
                 entity_type="publication",
                 filters={"doi": ["doi1"], "pmid": ["12345"]},
             ):
-                pass
+                continue
 
 
 class TestFetch:
@@ -455,4 +455,4 @@ class TestFetch:
                 entity_type="invalid",
                 query="test",
             ):
-                pass
+                continue

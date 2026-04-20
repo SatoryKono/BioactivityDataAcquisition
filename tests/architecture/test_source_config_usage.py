@@ -7,13 +7,9 @@ are used instead of hardcoded values.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import pytest
 import yaml
-
-if TYPE_CHECKING:
-    pass
 
 
 class TestSourceConfigFilesExist:

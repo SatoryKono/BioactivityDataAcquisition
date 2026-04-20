@@ -44,7 +44,7 @@ async def test_multi_filter_stub_raises_with_provider_name() -> None:
             filters={"doi": ["10.1000/test"]},
             limit=10,
         ):
-            pass
+            continue
 
 
 @pytest.mark.unit

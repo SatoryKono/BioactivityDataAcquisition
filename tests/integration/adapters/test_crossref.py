@@ -324,7 +324,7 @@ async def test_invalid_entity_type_raises(crossref_adapter: CrossRefAdapter) -> 
                 filter_ids=["10.1234/test"],
                 filter_field="doi",
             ):
-                pass
+                continue
 
 
 @pytest.mark.integration

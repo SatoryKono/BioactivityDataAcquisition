@@ -98,7 +98,7 @@ class TestFetchAsModels:
     ) -> None:
         with pytest.raises(ValueError, match="No DTO model for entity_type"):
             async for _ in adapter.fetch_as_models("unknown_entity"):
-                pass
+                continue
 
     async def test_validate_false_uses_construct(
         self, adapter: _FakePubChemAdapter

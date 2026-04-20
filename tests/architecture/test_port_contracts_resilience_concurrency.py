@@ -321,7 +321,7 @@ class TestRateLimiterPortErrorConditions:
 
         # Drain tokens
         while bucket.try_acquire():
-            pass
+            continue
 
         result = bucket.available_tokens()
         assert result >= 0, (

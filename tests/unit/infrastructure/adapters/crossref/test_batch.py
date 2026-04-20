@@ -382,7 +382,7 @@ async def test_search_api_error(search_paginator, mock_http):
 
     with pytest.raises(CrossRefApiError, match="CrossRef search failed"):
         async for _ in search_paginator.search("test"):
-            pass
+            continue
 
 
 @pytest.mark.asyncio
@@ -392,7 +392,7 @@ async def test_search_network_error(search_paginator, mock_http, mock_logger):
 
     with pytest.raises(CrossRefApiError, match="CrossRef search failed"):
         async for _ in search_paginator.search("test"):
-            pass
+            continue
 
     mock_logger.error.assert_called_once()
 

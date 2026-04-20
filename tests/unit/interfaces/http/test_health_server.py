@@ -506,7 +506,7 @@ class TestHealthServerHTTP:
     async def test_http_empty_request(self, running_server: HealthServer) -> None:
         """Test handling of empty request."""
         port = self._get_server_port(running_server)
-        reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        _reader, writer = await asyncio.open_connection("127.0.0.1", port)
         try:
             # Send empty request and close
             writer.write_eof()
