@@ -444,6 +444,22 @@ def collect_import_violations(
     return violations
 
 
+def assert_no_import_violations(
+    files: list[Path],
+    *,
+    src_dir: Path,
+    predicate,
+    message,
+) -> None:
+    violations = collect_import_violations(
+        files,
+        src_dir=src_dir,
+        predicate=predicate,
+        message=message,
+    )
+    assert not violations, "\n".join(violations)
+
+
 def collect_module_level_adapter_import_violations(files: list[Path]) -> list[str]:
     violations: list[str] = []
     for py_file in files:
@@ -523,7 +539,7 @@ def test_domain_no_infrastructure_imports(src_dir: Path):
     """Domain must not depend on Infrastructure or Application."""
     domain_path = src_dir / "bioetl" / "domain"
     forbidden_layers = {"bioetl.infrastructure", "bioetl.application"}
-    violations = collect_import_violations(
+    assert_no_import_violations(
         iter_python_files(domain_path, skip_dunder=True),
         src_dir=src_dir,
         predicate=lambda imp: any(
@@ -531,8 +547,6 @@ def test_domain_no_infrastructure_imports(src_dir: Path):
         ),
         message=lambda imp: f"Domain imports upper layer '{imp['module']}'",
     )
-
-    assert not violations, "\n".join(violations)
 
 
 def test_silver_schemas_match_domain_entities(src_dir: Path):
@@ -620,7 +634,7 @@ def test_io_ports_are_async():
 def test_application_no_concrete_infrastructure(src_dir: Path):
     """Application must not import concrete infrastructure implementations."""
     app_path = src_dir / "bioetl" / "application"
-    violations = collect_import_violations(
+    assert_no_import_violations(
         iter_python_files(app_path, skip_dunder=True),
         src_dir=src_dir,
         predicate=lambda imp: any(
@@ -629,8 +643,6 @@ def test_application_no_concrete_infrastructure(src_dir: Path):
         ),
         message=lambda imp: f"Application imports concrete infra '{imp['module']}'",
     )
-
-    assert not violations, "\n".join(violations)
 
 
 def test_application_no_direct_adapter_imports(src_dir: Path):
@@ -656,14 +668,12 @@ def test_infrastructure_boundaries(src_dir: Path):
         for py_file in iter_python_files(infra_path, skip_dunder=True)
         if "orchestration" not in py_file.parts and py_file.name != "config.py"
     ]
-    violations = collect_import_violations(
+    assert_no_import_violations(
         infra_files,
         src_dir=src_dir,
         predicate=lambda imp: imp["module"].startswith("bioetl.application"),
         message=lambda imp: f"Infra imports Application '{imp['module']}'",
     )
-
-    assert not violations, "\n".join(violations)
 
 
 # =============================================================================
@@ -757,7 +767,7 @@ def test_pipeline_configs_schema(project_root: Path):
 
 def test_observability_library_isolation(src_dir: Path):
     """Prometheus client must only be used in infrastructure.observability."""
-    violations = collect_import_violations(
+    assert_no_import_violations(
         [
             py_file
             for py_file in (src_dir / "bioetl").rglob("*.py")
@@ -767,8 +777,6 @@ def test_observability_library_isolation(src_dir: Path):
         predicate=lambda imp: imp["module"].startswith("prometheus_client"),
         message=lambda _imp: "Forbidden import 'prometheus_client' outside observability",
     )
-
-    assert not violations, "\n".join(violations)
 
 
 def test_adapters_implement_protocols(src_dir: Path):
