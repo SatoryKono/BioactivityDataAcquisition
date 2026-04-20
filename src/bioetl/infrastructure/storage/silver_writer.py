@@ -24,8 +24,8 @@ from bioetl.domain.ports import (
     MetadataCoordinatorPort,
     MetadataWriterPort,
     MetricsPort,
-    SilverWriteRequest,
     SilverValidatorPort,
+    SilverWriteRequest,
     TracingPort,
     coerce_silver_write_request,
 )

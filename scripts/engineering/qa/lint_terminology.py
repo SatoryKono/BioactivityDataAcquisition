@@ -25,6 +25,10 @@ import tokenize
 from dataclasses import dataclass
 from pathlib import Path
 
+PYCACHE_NAME = "__pycache__"
+TEST_PREFIX = "test_"
+TEST_SUFFIX = "_test.py"
+PYC_EXTENSIONS = {".pyc", ".pyo"}
 
 @dataclass(frozen=True)
 class TermViolation:
@@ -95,11 +99,10 @@ CONTEXT_SENSITIVE_TERMS: dict[str, tuple[str, str, list[str]]] = {
 
 # Files to skip
 SKIP_FILES = {
-    "__pycache__",
-    ".pyc",
-    ".pyo",
-    "test_",  # Don't lint test files for now
-    "_test.py",
+    PYCACHE_NAME,
+    *PYC_EXTENSIONS,
+    TEST_PREFIX,  # Don't lint test files for now
+    TEST_SUFFIX,
 }
 
 # Paths to skip (relative to search root)
@@ -107,7 +110,7 @@ SKIP_PATHS = {
     ".venv",
     "venv",
     ".git",
-    "__pycache__",
+    PYCACHE_NAME,
     ".mypy_cache",
     ".pytest_cache",
     ".ruff_cache",
@@ -120,28 +123,31 @@ SKIP_PATH_PREFIXES = ("docs/00-project/ai/",)
 def should_skip_file(filepath: Path) -> bool:
     """Check if file should be skipped."""
     normalized = filepath.as_posix()
+    return (
+        _has_skipped_path_component(filepath)
+        or _has_skipped_path_prefix(normalized)
+        or _has_skipped_filename(filepath.name)
+    )
 
-    # Skip based on path components
-    for part in filepath.parts:
-        if part in SKIP_PATHS:
-            return True
 
-    # Skip known non-product documentation/tooling subtrees.
-    for prefix in SKIP_PATH_PREFIXES:
-        if normalized.startswith(prefix) or f"/{prefix}" in normalized:
-            return True
+def _has_skipped_path_component(filepath: Path) -> bool:
+    """Return True when any path segment belongs to the skip set."""
+    return any(part in SKIP_PATHS for part in filepath.parts)
 
-    # Skip based on file name patterns
-    filename = filepath.name
-    for pattern in SKIP_FILES:
-        if pattern == "test_" and filename.startswith("test_"):
-            return True
-        if pattern == "_test.py" and filename.endswith("_test.py"):
-            return True
-        if pattern in {"__pycache__", ".pyc", ".pyo"} and pattern in filename:
-            return True
 
-    return False
+def _has_skipped_path_prefix(normalized_path: str) -> bool:
+    """Return True when the normalized path is under a skipped subtree."""
+    return any(
+        normalized_path.startswith(prefix) or f"/{prefix}" in normalized_path
+        for prefix in SKIP_PATH_PREFIXES
+    )
+
+
+def _has_skipped_filename(filename: str) -> bool:
+    """Return True when the file name matches a skipped naming pattern."""
+    if filename.startswith(TEST_PREFIX) or filename.endswith(TEST_SUFFIX):
+        return True
+    return PYCACHE_NAME in filename or any(ext in filename for ext in PYC_EXTENSIONS)
 
 
 def _is_skippable_line(line: str) -> bool:
@@ -175,32 +181,53 @@ def _mask_non_code_segments(content: str) -> list[str]:
         return masked_lines
 
     for token in token_stream:
-        if token.type not in (tokenize.STRING, tokenize.COMMENT):
-            continue
-
-        start_line, start_col = token.start
-        end_line, end_col = token.end
-        if start_line <= 0 or start_line > len(masked_lines):
-            continue
-
-        if start_line == end_line:
-            idx = start_line - 1
-            masked_lines[idx] = _mask_line_segment(
-                masked_lines[idx], start_col, end_col
-            )
-            continue
-
-        for line_no in range(start_line, min(end_line, len(masked_lines)) + 1):
-            idx = line_no - 1
-            line = masked_lines[idx]
-            if line_no == start_line:
-                masked_lines[idx] = _mask_line_segment(line, start_col, len(line))
-            elif line_no == end_line:
-                masked_lines[idx] = _mask_line_segment(line, 0, end_col)
-            else:
-                masked_lines[idx] = " " * len(line)
+        _mask_token_if_needed(masked_lines, token)
 
     return masked_lines
+
+
+def _mask_token_if_needed(
+    masked_lines: list[str], token: tokenize.TokenInfo
+) -> None:
+    """Mask one token when it represents non-code text."""
+    if token.type not in (tokenize.STRING, tokenize.COMMENT):
+        return
+
+    start_line, start_col = token.start
+    end_line, end_col = token.end
+    if start_line <= 0 or start_line > len(masked_lines):
+        return
+    if start_line == end_line:
+        _mask_single_line_token(masked_lines, start_line, start_col, end_col)
+        return
+    _mask_multi_line_token(masked_lines, start_line, start_col, end_line, end_col)
+
+
+def _mask_single_line_token(
+    masked_lines: list[str], line_no: int, start_col: int, end_col: int
+) -> None:
+    """Mask a token fully contained on one line."""
+    idx = line_no - 1
+    masked_lines[idx] = _mask_line_segment(masked_lines[idx], start_col, end_col)
+
+
+def _mask_multi_line_token(
+    masked_lines: list[str],
+    start_line: int,
+    start_col: int,
+    end_line: int,
+    end_col: int,
+) -> None:
+    """Mask a token spanning multiple lines."""
+    for line_no in range(start_line, min(end_line, len(masked_lines)) + 1):
+        idx = line_no - 1
+        line = masked_lines[idx]
+        if line_no == start_line:
+            masked_lines[idx] = _mask_line_segment(line, start_col, len(line))
+        elif line_no == end_line:
+            masked_lines[idx] = _mask_line_segment(line, 0, end_col)
+        else:
+            masked_lines[idx] = " " * len(line)
 
 
 def _make_violation(

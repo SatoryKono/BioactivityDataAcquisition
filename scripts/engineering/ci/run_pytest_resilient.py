@@ -21,6 +21,7 @@ _WORKER_CRASH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"worker.+(crash|terminated unexpectedly)", re.IGNORECASE),
     re.compile(r"xdist.+(internal error|Interrupted)", re.IGNORECASE),
 )
+SUMMARY_FILENAME = "summary.txt"
 
 
 @dataclass(frozen=True)
@@ -148,6 +149,102 @@ def _write_summary(path: Path, lines: list[str]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _summary_path(reports_dir: Path) -> Path:
+    """Return the summary artifact path."""
+    return reports_dir / SUMMARY_FILENAME
+
+
+def _append_pass_summary(
+    summary_lines: list[str],
+    *,
+    result: PassResult,
+    effective_rc: int,
+) -> None:
+    """Append one pass summary and optional failed nodeids."""
+    summary_lines.append(
+        f"{result.name}: rc={result.return_code} effective_rc={effective_rc} "
+        f"{_summary_state_fields(result)} "
+        f"log={result.log_path} junit={result.junit_path}"
+    )
+    _append_failed_nodeids(summary_lines, result=result)
+
+
+def _summary_state_fields(result: PassResult) -> str:
+    """Render summary state fields for a pass result."""
+    fields = [f"timed_out={result.timed_out}"]
+    if result.name == "parallel":
+        fields.insert(0, f"worker_crash={result.worker_crash_detected}")
+    return " ".join(fields)
+
+
+def _append_failed_nodeids(summary_lines: list[str], *, result: PassResult) -> None:
+    """Append failed nodeids when present."""
+    if not result.failed_nodeids:
+        return
+    summary_lines.append(f"{result.name}_failed_nodeids:")
+    summary_lines.extend(f"  - {nodeid}" for nodeid in result.failed_nodeids)
+
+
+def _run_named_pass(
+    *,
+    name: str,
+    base_command: list[str],
+    target: str,
+    marker_expr: str,
+    addopts: str,
+    reports_dir: Path,
+    timeout_seconds: float | None,
+) -> PassResult:
+    """Run a named pass using shell-split addopts."""
+    return _run_pass(
+        name=name,
+        base_command=base_command,
+        target=target,
+        marker_expr=marker_expr,
+        addopts=_split_args(addopts),
+        reports_dir=reports_dir,
+        timeout_seconds=timeout_seconds,
+    )
+
+
+def _run_serial_pass(
+    *,
+    base_command: list[str],
+    args: argparse.Namespace,
+    reports_dir: Path,
+    serial_timeout: float | None,
+    summary_lines: list[str],
+) -> int:
+    """Run dedicated serial marker pass and record the summary."""
+    serial_result = _run_named_pass(
+        name="serial",
+        base_command=base_command,
+        target=args.target,
+        marker_expr=args.serial_marker,
+        addopts=args.serial_addopts,
+        reports_dir=reports_dir,
+        timeout_seconds=serial_timeout,
+    )
+    serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
+    _append_pass_summary(summary_lines, result=serial_result, effective_rc=serial_rc)
+    return serial_rc
+
+
+def _parallel_failure_is_stable(parallel_result: PassResult) -> bool:
+    """Return True when the parallel failure should not trigger fallback."""
+    return not parallel_result.worker_crash_detected and not parallel_result.timed_out
+
+
+def _append_parallel_instability_markers(
+    summary_lines: list[str], *, parallel_result: PassResult
+) -> None:
+    """Annotate summary when fallback was triggered by instability."""
+    if parallel_result.worker_crash_detected:
+        summary_lines.append("worker_crash_detected=true")
+    if parallel_result.timed_out:
+        summary_lines.append("parallel_timeout_detected=true")
+
+
 def _create_parser() -> argparse.ArgumentParser:
     """Build CLI parser."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -253,113 +350,74 @@ def main() -> int:
     )
 
     parallel_rc = _effective_exit_code(parallel_result)
-
-    summary_lines.append(
-        f"parallel: rc={parallel_result.return_code} effective_rc={parallel_rc} "
-        f"worker_crash={parallel_result.worker_crash_detected} "
-        f"timed_out={parallel_result.timed_out} "
-        f"log={parallel_result.log_path} junit={parallel_result.junit_path}"
+    _append_pass_summary(
+        summary_lines,
+        result=parallel_result,
+        effective_rc=parallel_rc,
     )
-
-    if parallel_result.failed_nodeids:
-        summary_lines.append("parallel_failed_nodeids:")
-        summary_lines.extend(
-            f"  - {nodeid}" for nodeid in parallel_result.failed_nodeids
-        )
 
     run_serial_pass = not args.skip_serial_pass
 
     if parallel_rc == 0:
         if not run_serial_pass:
-            _write_summary(reports_dir / "summary.txt", summary_lines)
+            _write_summary(_summary_path(reports_dir), summary_lines)
             return 0
 
-        serial_result = _run_pass(
-            name="serial",
+        serial_rc = _run_serial_pass(
             base_command=base_command,
-            target=args.target,
-            marker_expr=args.serial_marker,
-            addopts=_split_args(args.serial_addopts),
+            args=args,
             reports_dir=reports_dir,
-            timeout_seconds=serial_timeout,
+            serial_timeout=serial_timeout,
+            summary_lines=summary_lines,
         )
-        serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
-        summary_lines.append(
-            f"serial: rc={serial_result.return_code} effective_rc={serial_rc} "
-            f"timed_out={serial_result.timed_out} "
-            f"log={serial_result.log_path} junit={serial_result.junit_path}"
-        )
-        if serial_result.failed_nodeids:
-            summary_lines.append("serial_failed_nodeids:")
-            summary_lines.extend(
-                f"  - {nodeid}" for nodeid in serial_result.failed_nodeids
-            )
-        _write_summary(reports_dir / "summary.txt", summary_lines)
+        _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc
 
-    if not parallel_result.worker_crash_detected and not parallel_result.timed_out:
+    if _parallel_failure_is_stable(parallel_result):
         summary_lines.append("parallel_failed_without_worker_crash=true")
-        _write_summary(reports_dir / "summary.txt", summary_lines)
+        _write_summary(_summary_path(reports_dir), summary_lines)
         return parallel_rc
 
-    if parallel_result.worker_crash_detected:
-        summary_lines.append("worker_crash_detected=true")
-    if parallel_result.timed_out:
-        summary_lines.append("parallel_timeout_detected=true")
+    _append_parallel_instability_markers(
+        summary_lines,
+        parallel_result=parallel_result,
+    )
     sys.stdout.write(
         "\nparallel pass unstable (worker crash/timeout), running serial fallback pass.\n"
     )
 
-    fallback_result = _run_pass(
+    fallback_result = _run_named_pass(
         name="fallback",
         base_command=base_command,
         target=args.target,
         marker_expr=args.parallel_marker,
-        addopts=_split_args(args.fallback_addopts),
+        addopts=args.fallback_addopts,
         reports_dir=reports_dir,
         timeout_seconds=fallback_timeout,
     )
     fallback_rc = _effective_exit_code(fallback_result)
-    summary_lines.append(
-        f"fallback: rc={fallback_result.return_code} effective_rc={fallback_rc} "
-        f"timed_out={fallback_result.timed_out} "
-        f"log={fallback_result.log_path} junit={fallback_result.junit_path}"
+    _append_pass_summary(
+        summary_lines,
+        result=fallback_result,
+        effective_rc=fallback_rc,
     )
-    if fallback_result.failed_nodeids:
-        summary_lines.append("fallback_failed_nodeids:")
-        summary_lines.extend(
-            f"  - {nodeid}" for nodeid in fallback_result.failed_nodeids
-        )
 
     if fallback_rc != 0:
-        _write_summary(reports_dir / "summary.txt", summary_lines)
+        _write_summary(_summary_path(reports_dir), summary_lines)
         return fallback_rc
 
     if run_serial_pass:
-        serial_result = _run_pass(
-            name="serial",
+        serial_rc = _run_serial_pass(
             base_command=base_command,
-            target=args.target,
-            marker_expr=args.serial_marker,
-            addopts=_split_args(args.serial_addopts),
+            args=args,
             reports_dir=reports_dir,
-            timeout_seconds=serial_timeout,
+            serial_timeout=serial_timeout,
+            summary_lines=summary_lines,
         )
-        serial_rc = _effective_exit_code(serial_result, allow_no_tests=True)
-        summary_lines.append(
-            f"serial: rc={serial_result.return_code} effective_rc={serial_rc} "
-            f"timed_out={serial_result.timed_out} "
-            f"log={serial_result.log_path} junit={serial_result.junit_path}"
-        )
-        if serial_result.failed_nodeids:
-            summary_lines.append("serial_failed_nodeids:")
-            summary_lines.extend(
-                f"  - {nodeid}" for nodeid in serial_result.failed_nodeids
-            )
-        _write_summary(reports_dir / "summary.txt", summary_lines)
+        _write_summary(_summary_path(reports_dir), summary_lines)
         return serial_rc
 
-    _write_summary(reports_dir / "summary.txt", summary_lines)
+    _write_summary(_summary_path(reports_dir), summary_lines)
     return 0
 
 
