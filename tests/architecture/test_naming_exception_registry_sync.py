@@ -49,20 +49,30 @@ def _collect_class_names(src_root: Path) -> set[str]:
     return names
 
 
+def _exported_names_from_all_assign(node: ast.Assign) -> set[str]:
+    if not isinstance(node.value, (ast.List, ast.Tuple)):
+        return set()
+    return {
+        elt.value
+        for elt in node.value.elts
+        if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+    }
+
+
+def _is_all_assignment(node: ast.AST) -> bool:
+    if not isinstance(node, ast.Assign):
+        return False
+    return any(
+        isinstance(target, ast.Name) and target.id == "__all__"
+        for target in node.targets
+    )
+
+
 def _extract_all_exports(path: Path) -> set[str]:
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     for node in tree.body:
-        if not isinstance(node, ast.Assign):
-            continue
-        for target in node.targets:
-            if isinstance(target, ast.Name) and target.id == "__all__":
-                if not isinstance(node.value, (ast.List, ast.Tuple)):
-                    return set()
-                exports: set[str] = set()
-                for elt in node.value.elts:
-                    if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
-                        exports.add(elt.value)
-                return exports
+        if _is_all_assignment(node):
+            return _exported_names_from_all_assign(node)
     return set()
 
 

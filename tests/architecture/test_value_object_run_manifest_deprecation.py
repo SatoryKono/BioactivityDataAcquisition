@@ -17,6 +17,26 @@ RUN_MANIFEST_MODULE = (
 )
 
 
+def _imports_deprecated_run_manifest(node: ast.AST) -> bool:
+    if isinstance(node, ast.ImportFrom):
+        return node.module == SRC_RUN_MANIFEST_MODULE
+    if isinstance(node, ast.Import):
+        return any(alias.name == SRC_RUN_MANIFEST_MODULE for alias in node.names)
+    return False
+
+
+def _deprecated_run_manifest_import_violations_for_tree(
+    *,
+    tree: ast.Module,
+    rel_path: str,
+) -> list[str]:
+    return [
+        f"{rel_path}:{node.lineno} imports {SRC_RUN_MANIFEST_MODULE}"
+        for node in ast.walk(tree)
+        if _imports_deprecated_run_manifest(node)
+    ]
+
+
 def _iter_run_manifest_import_violations(
     ast_cache: dict[Path, ast.Module],
     *,
@@ -27,18 +47,12 @@ def _iter_run_manifest_import_violations(
         if py_file in allowed_files:
             continue
         rel_path = py_file.relative_to(ROOT).as_posix()
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom):
-                if node.module == SRC_RUN_MANIFEST_MODULE:
-                    violations.append(
-                        f"{rel_path}:{node.lineno} imports {SRC_RUN_MANIFEST_MODULE}"
-                    )
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name == SRC_RUN_MANIFEST_MODULE:
-                        violations.append(
-                            f"{rel_path}:{node.lineno} imports {SRC_RUN_MANIFEST_MODULE}"
-                        )
+        violations.extend(
+            _deprecated_run_manifest_import_violations_for_tree(
+                tree=tree,
+                rel_path=rel_path,
+            )
+        )
     return violations
 
 

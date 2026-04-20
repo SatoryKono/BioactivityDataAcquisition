@@ -317,7 +317,7 @@
             },
             "targets": [
                 {
-                    "expr": "round(sum(increase(bioetl_control_plane_reads_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\", status=\"failed\"}[$__range])) or vector(0))",
+                    "expr": "round(sum(increase(bioetl_control_plane_reads_total{pipeline=~\"$pipeline\", status=\"failed\"}[$__range])) or vector(0))",
                     "legendFormat": "Read failures",
                     "refId": "A"
                 }
@@ -397,7 +397,7 @@
             },
             "targets": [
                 {
-                    "expr": "sum by (store, status) (increase(bioetl_control_plane_reads_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}[$__interval]))",
+                    "expr": "sum by (store, status) (increase(bioetl_control_plane_reads_total{pipeline=~\"$pipeline\"}[$__interval]))",
                     "legendFormat": "{{store}} / {{status}}",
                     "refId": "A"
                 }
@@ -487,15 +487,15 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
                 "hide": 0,
                 "includeAll": true,
-                "label": "Run ID",
+                "label": "Run Type",
                 "multi": true,
-                "name": "run_id",
+                "name": "run_type",
                 "options": [],
                 "query": {
-                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,

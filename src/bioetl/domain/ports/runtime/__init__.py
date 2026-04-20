@@ -49,6 +49,7 @@ __all__ = [
     "PipelineDebugPort",
     "PipelineFactoryPort",
     "PipelineRegistryPort",
+    "RegistryAccessorPort",
     "PipelineSnapshot",
     "RunnablePort",
     "RunnerFactoryPort",

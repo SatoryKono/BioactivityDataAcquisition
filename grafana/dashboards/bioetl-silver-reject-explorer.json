@@ -522,17 +522,20 @@
             {
                 "allValue": null,
                 "current": {},
-                "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+                "datasource": "Quarantine Explorer",
+                "definition": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline:csv}",
                 "hide": 0,
                 "includeAll": true,
-                "label": "Run ID",
+                "label": "Run Type",
                 "multi": true,
-                "name": "run_id",
+                "name": "run_type",
                 "options": [],
                 "query": {
-                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
-                    "refId": "StandardVariableQuery"
+                    "infinityQuery": {
+                        "type": "json",
+                        "source": "url",
+                        "url": "/ops/quarantine/filter-options?dimension=run_type&pipeline=${pipeline:csv}"
+                    }
                 },
                 "refresh": 1,
                 "regex": "",
@@ -543,6 +546,104 @@
                 "tagsQuery": "",
                 "type": "query",
                 "useTags": false
+            },
+            {
+                "allValue": null,
+                "current": {},
+                "datasource": "Quarantine Explorer",
+                "definition": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline:csv}&run_type=${run_type:csv}",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Reason Code",
+                "multi": true,
+                "name": "reason_code",
+                "options": [],
+                "query": {
+                    "infinityQuery": {
+                        "type": "json",
+                        "source": "url",
+                        "url": "/ops/quarantine/filter-options?dimension=reason_code&pipeline=${pipeline:csv}&run_type=${run_type:csv}"
+                    }
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allValue": null,
+                "current": {},
+                "datasource": "Quarantine Explorer",
+                "definition": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Field",
+                "multi": true,
+                "name": "field",
+                "options": [],
+                "query": {
+                    "infinityQuery": {
+                        "type": "json",
+                        "source": "url",
+                        "url": "/ops/quarantine/filter-options?dimension=field&pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}"
+                    }
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "allValue": null,
+                "current": {},
+                "datasource": "Quarantine Explorer",
+                "definition": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Run ID",
+                "multi": true,
+                "name": "run_id",
+                "options": [],
+                "query": {
+                    "infinityQuery": {
+                        "type": "json",
+                        "source": "url",
+                        "url": "/ops/quarantine/filter-options?dimension=run_id&pipeline=${pipeline:csv}&run_type=${run_type:csv}&reason_code=${reason_code:csv}&field=${field:csv}"
+                    }
+                },
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+            },
+            {
+                "current": {
+                    "selected": false,
+                    "text": "",
+                    "value": ""
+                },
+                "hide": 0,
+                "label": "Payload Hash",
+                "name": "payload_hash",
+                "options": [],
+                "query": "",
+                "skipUrlSync": false,
+                "type": "textbox"
             }
         ]
     },

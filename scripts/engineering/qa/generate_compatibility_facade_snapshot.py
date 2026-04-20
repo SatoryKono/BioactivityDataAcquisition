@@ -95,6 +95,14 @@ def _validate_canonical_output_path(raw_output: str | Path) -> None:
             "compatibility facade snapshot may only write to the canonical tracked "
             f"artifact: {canonical_output}"
         )
+
+
+def _resolve_canonical_output_path(raw_output: str | Path) -> Path:
+    """Validate a requested output and return the single canonical snapshot path."""
+    _validate_canonical_output_path(raw_output)
+    return _canonical_output_path()
+
+
 def _write_snapshot_text(output_path: Path, content: str) -> None:
     """Write generated snapshot content to the canonical tracked artifact."""
     output_path.write_text(  # NOSONAR - output_path is fixed by _canonical_output_path
