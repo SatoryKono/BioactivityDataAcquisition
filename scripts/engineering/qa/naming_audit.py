@@ -553,8 +553,7 @@ def format_report(results: dict[str, list[Violation]]) -> str:
     return "\n".join(lines)
 
 
-def main() -> int:
-    """Точка входа."""
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Naming Convention Audit Tool for BioETL"
     )
@@ -586,38 +585,51 @@ def main() -> int:
         default="configs",
         help="Configs path (default: configs)",
     )
+    return parser.parse_args()
 
-    args = parser.parse_args()
 
-    # Определяем базовые пути
+def _audit_paths(args: argparse.Namespace) -> tuple[Path, Path, Path]:
     base_dir = REPO_ROOT
-    src_path = base_dir / args.src
-    docs_path = base_dir / args.docs
-    configs_path = base_dir / args.configs
+    return base_dir / args.src, base_dir / args.docs, base_dir / args.configs
 
+
+def _load_validated_registry() -> NamingRegistry | None:
     try:
         registry = load_naming_registry()
     except (FileNotFoundError, OSError, ValueError, yaml.YAMLError) as exc:
         logger.error("Failed to load naming exception registry: %s", exc)
-        return 1
+        return None
 
     registry_errors = validate_naming_registry(registry)
     if registry_errors:
         for error in registry_errors:
             logger.error("Naming exception registry error: %s", error)
-        return 1
+        return None
 
-    # Запуск аудита
-    results = run_audit(src_path, docs_path, configs_path, registry)
-    report = format_report(results)
+    return registry
 
-    # Вывод или сохранение отчёта
-    if args.output:
-        output_path = Path(args.output)
+
+def _emit_report(report: str, output: str | None) -> None:
+    if output:
+        output_path = Path(output)
         output_path.write_text(report, encoding="utf-8")
         logger.info("Report saved to %s", output_path)
-    else:
-        logger.info("%s", report)
+        return
+    logger.info("%s", report)
+
+
+def main() -> int:
+    """Точка входа."""
+    args = parse_args()
+    src_path, docs_path, configs_path = _audit_paths(args)
+
+    registry = _load_validated_registry()
+    if registry is None:
+        return 1
+
+    results = run_audit(src_path, docs_path, configs_path, registry)
+    report = format_report(results)
+    _emit_report(report, args.output)
 
     # CI mode
     total_violations = sum(len(v) for v in results.values())

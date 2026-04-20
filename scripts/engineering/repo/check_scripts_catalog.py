@@ -55,6 +55,44 @@ def _parse_iso_date(raw: str) -> bool:
     return bool(re.match(r"^\d{4}-\d{2}-\d{2}$", raw))
 
 
+def _check_canonical_roots(
+    *,
+    root: Path,
+    canonical_roots: list[str],
+    violations: list[str],
+) -> None:
+    if not canonical_roots:
+        violations.append("catalog canonical_roots must be a non-empty list[str]")
+        return
+    for rel in canonical_roots:
+        path = root / rel
+        if not path.exists() or not path.is_dir():
+            violations.append(f"canonical root does not exist: {rel}")
+
+
+def _check_group_entry(
+    *,
+    root: Path,
+    group_name: object,
+    group_payload: object,
+    violations: list[str],
+) -> None:
+    if not isinstance(group_payload, dict):
+        violations.append(f"groups.{group_name} must be a mapping")
+        return
+
+    group_path = group_payload.get("path")
+    purpose = group_payload.get("purpose")
+    if not isinstance(group_path, str) or not group_path.strip():
+        violations.append(f"groups.{group_name}.path must be a non-empty string")
+        return
+    if not isinstance(purpose, str) or not purpose.strip():
+        violations.append(f"groups.{group_name}.purpose must be a non-empty string")
+    absolute = root / group_path
+    if not absolute.exists() or not absolute.is_dir():
+        violations.append(f"groups.{group_name}.path does not exist: {group_path}")
+
+
 def _check_catalog_structure(
     *,
     root: Path,
@@ -68,30 +106,22 @@ def _check_catalog_structure(
         return
 
     canonical_roots = _as_list_of_str(catalog.get("canonical_roots"))
-    if not canonical_roots:
-        violations.append("catalog canonical_roots must be a non-empty list[str]")
-    for rel in canonical_roots:
-        path = root / rel
-        if not path.exists() or not path.is_dir():
-            violations.append(f"canonical root does not exist: {rel}")
+    _check_canonical_roots(
+        root=root,
+        canonical_roots=canonical_roots,
+        violations=violations,
+    )
 
     groups = _as_dict(catalog.get("groups"))
     if not groups:
         violations.append("catalog groups must be a non-empty mapping")
     for group_name, group_payload in sorted(groups.items()):
-        if not isinstance(group_payload, dict):
-            violations.append(f"groups.{group_name} must be a mapping")
-            continue
-        group_path = group_payload.get("path")
-        purpose = group_payload.get("purpose")
-        if not isinstance(group_path, str) or not group_path.strip():
-            violations.append(f"groups.{group_name}.path must be a non-empty string")
-            continue
-        if not isinstance(purpose, str) or not purpose.strip():
-            violations.append(f"groups.{group_name}.purpose must be a non-empty string")
-        absolute = root / group_path
-        if not absolute.exists() or not absolute.is_dir():
-            violations.append(f"groups.{group_name}.path does not exist: {group_path}")
+        _check_group_entry(
+            root=root,
+            group_name=group_name,
+            group_payload=group_payload,
+            violations=violations,
+        )
 
 
 def _check_root_wrappers(

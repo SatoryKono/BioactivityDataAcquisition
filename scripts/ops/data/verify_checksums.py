@@ -552,6 +552,47 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _category_counts(manifest: ChecksumManifest) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for file_checksum in manifest.files.values():
+        counts[file_checksum.category] = counts.get(file_checksum.category, 0) + 1
+    return counts
+
+
+def _log_generated_manifest(manifest: ChecksumManifest, manifest_path: Path) -> None:
+    logger.info("")
+    logger.info("Manifest generated: %s", manifest_path)
+    logger.info("Files included: %d", len(manifest.files))
+    logger.info("")
+    logger.info("By category:")
+    for category, count in sorted(_category_counts(manifest).items()):
+        logger.info("  %s: %d", category, count)
+
+
+def _generate_manifest_flow(root: Path, manifest_path: Path) -> int:
+    logger.info("Generating checksum manifest...")
+    manifest = generate_manifest(root)
+    save_manifest(manifest, manifest_path)
+    _log_generated_manifest(manifest, manifest_path)
+    return 0
+
+
+def _load_manifest_or_error(manifest_path: Path) -> ChecksumManifest | None:
+    loaded_manifest = load_manifest(manifest_path)
+    if loaded_manifest is not None:
+        return loaded_manifest
+    logger.error("Manifest not found: %s", manifest_path)
+    logger.info("Run with --generate to create a new manifest.")
+    return None
+
+
+def _emit_verification_report(report: VerificationReport, *, as_json: bool) -> None:
+    if as_json:
+        log_report_json(report)
+        return
+    log_report_text(report)
+
+
 def main() -> int:
     """Entry point."""
     args = parse_args()
@@ -562,42 +603,14 @@ def main() -> int:
         return 2
 
     if args.generate:
-        # Generate new manifest
-        logger.info("Generating checksum manifest...")
-        manifest = generate_manifest(root)
+        return _generate_manifest_flow(root, args.manifest)
 
-        save_manifest(manifest, args.manifest)
-
-        logger.info("")
-        logger.info("Manifest generated: %s", args.manifest)
-        logger.info("Files included: %d", len(manifest.files))
-        logger.info("")
-
-        # Group by category
-        by_category: dict[str, int] = {}
-        for fc in manifest.files.values():
-            by_category[fc.category] = by_category.get(fc.category, 0) + 1
-
-        logger.info("By category:")
-        for category, count in sorted(by_category.items()):
-            logger.info("  %s: %d", category, count)
-
-        return 0
-
-    # Verify against manifest
-    loaded_manifest = load_manifest(args.manifest)
-
+    loaded_manifest = _load_manifest_or_error(args.manifest)
     if loaded_manifest is None:
-        logger.error("Manifest not found: %s", args.manifest)
-        logger.info("Run with --generate to create a new manifest.")
         return 2
 
     report = verify_checksums(root, loaded_manifest)
-
-    if args.json:
-        log_report_json(report)
-    else:
-        log_report_text(report)
+    _emit_verification_report(report, as_json=args.json)
 
     return 0 if report.passed else 1
 

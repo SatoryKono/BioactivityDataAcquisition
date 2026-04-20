@@ -591,36 +591,55 @@ def _pipeline_name(config: dict[str, Any], *, path: Path) -> str:
     return pipeline_name
 
 
-def _build_row(
-    path: Path,
+def _resolved_layer_locations(
     *,
-    config: dict[str, Any],
     binding: PipelineBinding,
     pyarrow_locations: dict[str, SymbolLocation],
     pandera_locations: dict[str, SymbolLocation],
     gold_locations: dict[str, SymbolLocation],
+) -> tuple[SymbolLocation, SymbolLocation, SymbolLocation]:
+    return (
+        _resolve_required_location(
+            locations=pyarrow_locations,
+            symbol=binding.silver_schema_symbol,
+            label="PyArrow schema",
+        ),
+        _resolve_required_location(
+            locations=pandera_locations,
+            symbol=binding.pandera_silver_symbol,
+            label="Pandera",
+        ),
+        _resolve_required_location(
+            locations=gold_locations,
+            symbol=binding.gold_schema_symbol,
+            label="Gold contract",
+        ),
+    )
+
+
+def _schema_refs(
+    *,
+    binding: PipelineBinding,
+    pyarrow_location: SymbolLocation,
+    pandera_location: SymbolLocation,
+    gold_location: SymbolLocation,
+) -> tuple[str, str, str]:
+    return (
+        f"{pyarrow_location.qualified_prefix}.{binding.silver_schema_symbol}",
+        f"{pandera_location.qualified_prefix}.{binding.pandera_silver_symbol}",
+        f"{gold_location.qualified_prefix}.{binding.gold_schema_symbol}",
+    )
+
+
+def _layer_schema_payloads(
+    *,
+    binding: PipelineBinding,
+    pyarrow_location: SymbolLocation,
+    pandera_location: SymbolLocation,
+    gold_location: SymbolLocation,
+    pandera_locations: dict[str, SymbolLocation],
     pyarrow_field_blocks: dict[str, list[dict[str, object]]],
-) -> dict[str, str]:
-    provider = str(config.get("provider", binding.provider))
-    entity = str(config.get("entity", binding.entity_type))
-    pipeline_name = _pipeline_name(config, path=path)
-
-    pyarrow_location = _resolve_required_location(
-        locations=pyarrow_locations,
-        symbol=binding.silver_schema_symbol,
-        label="PyArrow schema",
-    )
-    pandera_location = _resolve_required_location(
-        locations=pandera_locations,
-        symbol=binding.pandera_silver_symbol,
-        label="Pandera",
-    )
-    gold_location = _resolve_required_location(
-        locations=gold_locations,
-        symbol=binding.gold_schema_symbol,
-        label="Gold contract",
-    )
-
+) -> tuple[list[dict[str, object]], list[dict[str, object]], dict[str, object]]:
     pyarrow_fields = _extract_pyarrow_fields(
         pyarrow_location.path,
         binding.silver_schema_symbol,
@@ -635,10 +654,61 @@ def _build_row(
         gold_location.path,
         binding.gold_schema_symbol,
     )
+    return pyarrow_fields, pandera_fields, gold_json_contract
 
+
+def _config_schema_policy_payload(
+    config: dict[str, Any],
+) -> tuple[list[dict[str, object]], list[str], list[str], list[str], list[str]]:
     bronze_groups = _extract_column_groups(config)
     silver_include_groups, silver_exclude_fields = _schema_policy(config, "silver")
     gold_include_groups, gold_exclude_fields = _schema_policy(config, "gold")
+    return (
+        bronze_groups,
+        silver_include_groups,
+        silver_exclude_fields,
+        gold_include_groups,
+        gold_exclude_fields,
+    )
+
+
+def _build_row(
+    path: Path,
+    *,
+    config: dict[str, Any],
+    binding: PipelineBinding,
+    pyarrow_locations: dict[str, SymbolLocation],
+    pandera_locations: dict[str, SymbolLocation],
+    gold_locations: dict[str, SymbolLocation],
+    pyarrow_field_blocks: dict[str, list[dict[str, object]]],
+) -> dict[str, str]:
+    provider = str(config.get("provider", binding.provider))
+    entity = str(config.get("entity", binding.entity_type))
+    pipeline_name = _pipeline_name(config, path=path)
+
+    pyarrow_location, pandera_location, gold_location = _resolved_layer_locations(
+        binding=binding,
+        pyarrow_locations=pyarrow_locations,
+        pandera_locations=pandera_locations,
+        gold_locations=gold_locations,
+    )
+
+    pyarrow_fields, pandera_fields, gold_json_contract = _layer_schema_payloads(
+        binding=binding,
+        pyarrow_location=pyarrow_location,
+        pandera_location=pandera_location,
+        gold_location=gold_location,
+        pandera_locations=pandera_locations,
+        pyarrow_field_blocks=pyarrow_field_blocks,
+    )
+
+    (
+        bronze_groups,
+        silver_include_groups,
+        silver_exclude_fields,
+        gold_include_groups,
+        gold_exclude_fields,
+    ) = _config_schema_policy_payload(config)
 
     silver_pyarrow_columns = _column_names(pyarrow_fields)
     silver_pandera_columns = _column_names(pandera_fields)
@@ -646,13 +716,12 @@ def _build_row(
         cast("dict[str, object]", gold_json_contract["properties"]).keys()
     )
 
-    silver_pyarrow_ref = (
-        f"{pyarrow_location.qualified_prefix}.{binding.silver_schema_symbol}"
+    silver_pyarrow_ref, silver_pandera_ref, gold_contract_ref = _schema_refs(
+        binding=binding,
+        pyarrow_location=pyarrow_location,
+        pandera_location=pandera_location,
+        gold_location=gold_location,
     )
-    silver_pandera_ref = (
-        f"{pandera_location.qualified_prefix}.{binding.pandera_silver_symbol}"
-    )
-    gold_contract_ref = f"{gold_location.qualified_prefix}.{binding.gold_schema_symbol}"
 
     layer_flow = _build_layer_flow_summary(
         bronze_groups=bronze_groups,
@@ -690,6 +759,34 @@ def _build_row(
     }
 
 
+def _build_row_from_config_path(
+    path: Path,
+    *,
+    registry: dict[str, PipelineBinding],
+    pyarrow_locations: dict[str, SymbolLocation],
+    pandera_locations: dict[str, SymbolLocation],
+    gold_locations: dict[str, SymbolLocation],
+    pyarrow_field_blocks: dict[str, list[dict[str, object]]],
+) -> dict[str, str]:
+    config = _load_yaml(path)
+    pipeline_name = _pipeline_name(config, path=path)
+    binding = registry.get(pipeline_name)
+    if binding is None:
+        raise ValueError(
+            f"No pipeline registry entry found for {pipeline_name} "
+            f"({path.relative_to(PROJECT_ROOT).as_posix()})"
+        )
+    return _build_row(
+        path,
+        config=config,
+        binding=binding,
+        pyarrow_locations=pyarrow_locations,
+        pandera_locations=pandera_locations,
+        gold_locations=gold_locations,
+        pyarrow_field_blocks=pyarrow_field_blocks,
+    )
+
+
 def build_unified_schema_rows() -> list[dict[str, str]]:
     registry = _pipeline_registry()
     pyarrow_locations = _scan_pyarrow_schemas()
@@ -699,24 +796,16 @@ def build_unified_schema_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
 
     for path in _entity_config_paths():
-        config = _load_yaml(path)
-        pipeline_name = _pipeline_name(config, path=path)
-        binding = registry.get(pipeline_name)
-        if binding is None:
-            raise ValueError(
-                f"No pipeline registry entry found for {pipeline_name} "
-                f"({path.relative_to(PROJECT_ROOT).as_posix()})"
+        rows.append(
+            _build_row_from_config_path(
+                path,
+                registry=registry,
+                pyarrow_locations=pyarrow_locations,
+                pandera_locations=pandera_locations,
+                gold_locations=gold_locations,
+                pyarrow_field_blocks=pyarrow_field_blocks,
             )
-        row = _build_row(
-            path,
-            config=config,
-            binding=binding,
-            pyarrow_locations=pyarrow_locations,
-            pandera_locations=pandera_locations,
-            gold_locations=gold_locations,
-            pyarrow_field_blocks=pyarrow_field_blocks,
         )
-        rows.append(row)
 
     rows.sort(key=lambda row: (row["provider"], row["entity"], row["pipeline_name"]))
     return rows
