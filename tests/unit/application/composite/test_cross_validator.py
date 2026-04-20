@@ -13,12 +13,12 @@ import polars as pl
 import pytest
 
 from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
+from bioetl.domain.composite.config import CrossValidationConfig
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
     EnricherFieldPairing,
     FieldComparisonSpec,
 )
-from bioetl.domain.composite.config import CrossValidationConfig
 
 
 def _make_config(
@@ -73,7 +73,7 @@ class TestValidateDisabled:
         validator = EnrichmentCrossValidator(config, logger)
 
         df = pl.DataFrame({"a": [1, 2, 3]})
-        result_df, stats = validator.validate(
+        _, stats = validator.validate(
             df, ["crossref_publication"], "chembl_publication"
         )
 
@@ -139,7 +139,7 @@ class TestValidateExactComparison:
             }
         )
 
-        result_df, stats = validator.validate(
+        _, stats = validator.validate(
             df, ["crossref_publication"], "chembl_publication"
         )
 
