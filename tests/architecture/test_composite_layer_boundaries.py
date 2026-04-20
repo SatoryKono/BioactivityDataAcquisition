@@ -36,22 +36,33 @@ def _module_import_violations(package_path: Path, import_root: str) -> list[str]
     return violations
 
 
+def _type_checking_line_numbers(tree: ast.AST) -> set[int]:
+    return {
+        node.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.If)
+        and isinstance(node.test, ast.Name)
+        and node.test.id == "TYPE_CHECKING"
+    }
+
+
+def _runtime_import_from_nodes(tree: ast.AST) -> list[ast.ImportFrom]:
+    type_checking_lines = _type_checking_line_numbers(tree)
+    return [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.lineno not in type_checking_lines
+    ]
+
+
 def _module_level_checkpoint_imports(content: str) -> list[str]:
     tree = ast.parse(content)
-    checkpoint_imports: list[str] = []
-    in_type_checking = False
-
-    for node in ast.walk(tree):
-        if (
-            isinstance(node, ast.If)
-            and isinstance(node.test, ast.Name)
-            and node.test.id == "TYPE_CHECKING"
-        ):
-            in_type_checking = True
-        if isinstance(node, ast.ImportFrom) and not in_type_checking:
-            if node.module and "checkpoint" in node.module.lower():
-                checkpoint_imports.extend(alias.name for alias in node.names)
-    return checkpoint_imports
+    return [
+        alias.name
+        for node in _runtime_import_from_nodes(tree)
+        if node.module and "checkpoint" in node.module.lower()
+        for alias in node.names
+    ]
 
 
 def _checkpoint_module_content(src_dir: Path) -> str:
@@ -115,15 +126,14 @@ def _node_fsm_state_import_violations(
 def _fsm_state_import_violations(
     tree: ast.AST, *, allowed_modules: set[str]
 ) -> list[str]:
-    violations: list[str] = []
-    for node in ast.walk(tree):
-        violations.extend(
-            _node_fsm_state_import_violations(
-                node,
-                allowed_modules=allowed_modules,
-            )
+    return [
+        violation
+        for node in ast.walk(tree)
+        for violation in _node_fsm_state_import_violations(
+            node,
+            allowed_modules=allowed_modules,
         )
-    return violations
+    ]
 
 
 class TestDomainCompositeLayerBoundaries:

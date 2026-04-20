@@ -58,6 +58,44 @@ def _contains_forbidden_hypothesis_usage(content: str) -> bool:
     return "# hypothesis: boundary-exception" not in content
 
 
+def _required_provider_names(matrix: YamlMap, field: str) -> list[str]:
+    return [
+        provider
+        for provider, config in matrix["providers"].items()
+        if config.get(field) == "MUST"
+    ]
+
+
+def _must_unit_layers(matrix: YamlMap) -> list[str]:
+    return [
+        layer for layer, config in matrix["layers"].items() if config.get("unit") == "MUST"
+    ]
+
+
+def _provider_suite_index(provider_suites: Any) -> dict[str, set[str]]:
+    suite_index: dict[str, set[str]] = {}
+    for suite_name, suite_config in provider_suites.items():
+        for provider in suite_config.get("providers", {}):
+            suite_index.setdefault(provider, set()).add(suite_name)
+    return suite_index
+
+
+def _represented_golden_master_entities() -> dict[str, set[str]]:
+    from tests.architecture.test_config_golden_master import PIPELINES
+
+    represented: dict[str, set[str]] = {}
+    for provider, entity, config_path in _iter_entity_configs():
+        lines = config_path.read_text(encoding="utf-8").splitlines()
+        pipeline_name = next(
+            line.split(":", 1)[1].strip()
+            for line in lines
+            if "pipeline_name:" in line
+        )
+        if pipeline_name in PIPELINES:
+            represented.setdefault(provider, set()).add(entity)
+    return represented
+
+
 @pytest.mark.architecture
 class TestVCRCassetteCoverage:
     """Validate VCR cassettes exist for required providers."""
@@ -65,25 +103,23 @@ class TestVCRCassetteCoverage:
     def test_vcr_dir_exists_for_each_provider(self) -> None:
         matrix = _load_matrix()
         vcr_dir = TESTS_DIR / "fixtures" / "vcr"
-        for provider, config in matrix["providers"].items():
-            if config.get("vcr_cassettes") == "MUST":
-                provider_vcr = vcr_dir / provider
-                assert provider_vcr.is_dir(), (
-                    f"Missing VCR cassette directory for provider '{provider}': "
-                    f"{provider_vcr}"
-                )
+        for provider in _required_provider_names(matrix, "vcr_cassettes"):
+            provider_vcr = vcr_dir / provider
+            assert provider_vcr.is_dir(), (
+                f"Missing VCR cassette directory for provider '{provider}': "
+                f"{provider_vcr}"
+            )
 
     def test_vcr_cassettes_not_empty(self) -> None:
         matrix = _load_matrix()
         vcr_dir = TESTS_DIR / "fixtures" / "vcr"
-        for provider, config in matrix["providers"].items():
-            if config.get("vcr_cassettes") == "MUST":
-                provider_vcr = vcr_dir / provider
-                if provider_vcr.is_dir():
-                    cassettes = list(provider_vcr.glob("*.yaml"))
-                    assert len(cassettes) > 0, (
-                        f"Provider '{provider}' VCR directory exists but has no cassettes"
-                    )
+        for provider in _required_provider_names(matrix, "vcr_cassettes"):
+            provider_vcr = vcr_dir / provider
+            if provider_vcr.is_dir():
+                cassettes = list(provider_vcr.glob("*.yaml"))
+                assert len(cassettes) > 0, (
+                    f"Provider '{provider}' VCR directory exists but has no cassettes"
+                )
 
 
 @pytest.mark.architecture
@@ -117,18 +153,14 @@ class TestLayerTestCoverage:
     def test_unit_tests_exist_per_layer(self) -> None:
         """Each layer with unit: MUST should have unit tests."""
         matrix = _load_matrix()
-        for layer, config in matrix["layers"].items():
-            if config.get("unit") == "MUST":
-                layer_test_dir = TESTS_DIR / "unit" / layer
-                if not layer_test_dir.is_dir():
-                    # Try alternative naming
-                    layer_test_dir = TESTS_DIR / "unit" / layer
-                if layer_test_dir.is_dir():
-                    test_files = list(layer_test_dir.rglob("test_*.py"))
-                    assert len(test_files) > 0, (
-                        f"Layer '{layer}' requires unit tests but none found in "
-                        f"{layer_test_dir.relative_to(ROOT)}"
-                    )
+        for layer in _must_unit_layers(matrix):
+            layer_test_dir = TESTS_DIR / "unit" / layer
+            if layer_test_dir.is_dir():
+                test_files = list(layer_test_dir.rglob("test_*.py"))
+                assert len(test_files) > 0, (
+                    f"Layer '{layer}' requires unit tests but none found in "
+                    f"{layer_test_dir.relative_to(ROOT)}"
+                )
 
 
 @pytest.mark.architecture
@@ -168,16 +200,9 @@ class TestEntityOwnershipCoverage:
         matrix = _load_matrix()
         provider_suites = matrix.get("provider_regression_suites", {})
         contract_dir = TESTS_DIR / "contract"
+        suite_index = _provider_suite_index(provider_suites)
 
-        suite_index: dict[str, set[str]] = {}
-        for suite_name, suite_config in provider_suites.items():
-            for provider in suite_config.get("providers", {}):
-                suite_index.setdefault(provider, set()).add(suite_name)
-
-        for provider, config in matrix["providers"].items():
-            if config.get("contract_tests") != "MUST":
-                continue
-
+        for provider in _required_provider_names(matrix, "contract_tests"):
             contract_path = contract_dir / f"test_{provider}_contract.py"
             assert contract_path.exists() or provider in suite_index, (
                 f"provider '{provider}' requires contract coverage but has neither "
@@ -186,18 +211,7 @@ class TestEntityOwnershipCoverage:
 
     def test_golden_master_representative_set_matches_matrix_policy(self) -> None:
         matrix = _load_matrix()
-        from tests.architecture.test_config_golden_master import PIPELINES
-
-        represented: dict[str, set[str]] = {}
-        for provider, entity, config_path in _iter_entity_configs():
-            lines = config_path.read_text(encoding="utf-8").splitlines()
-            pipeline_name = next(
-                line.split(":", 1)[1].strip()
-                for line in lines
-                if "pipeline_name:" in line
-            )
-            if pipeline_name in PIPELINES:
-                represented.setdefault(provider, set()).add(entity)
+        represented = _represented_golden_master_entities()
 
         for provider, config in matrix["providers"].items():
             if provider == "chembl":

@@ -72,6 +72,14 @@ def _pattern_violations_for_file(
     return violations
 
 
+def _application_python_files(base: Path) -> list[Path]:
+    return [
+        py_file
+        for py_file in base.rglob("*.py")
+        if "composition" not in str(py_file)
+    ]
+
+
 class TestDIDiscipline:
     """Tests ensuring DI discipline in application layer."""
 
@@ -84,14 +92,7 @@ class TestDIDiscipline:
         base = _get_base_path(APPLICATION_DIR)
         if not base.exists():
             pytest.skip("Application layer not found")
-
-        files = []
-        for py_file in base.rglob("*.py"):
-            # Skip composition layer
-            if "composition" in str(py_file):
-                continue
-            files.append(py_file)
-        return files
+        return _application_python_files(base)
 
     def test_no_service_creation_in_application(
         self, application_python_files: list[Path]
@@ -107,19 +108,18 @@ class TestDIDiscipline:
 
         See CLAUDE.md §2.2 and §11 Anti-Patterns.
         """
-        violations = []
-
-        for py_file in application_python_files:
-            content = py_file.read_text(encoding="utf-8")
-            relative = py_file.relative_to(_get_base_path(APPLICATION_DIR))
-            relative_str = str(relative).replace("\\", "/")
-            violations.extend(
-                _pattern_violations_for_file(
-                    content=content,
-                    relative=relative,
-                    relative_str=relative_str,
-                )
+        base = _get_base_path(APPLICATION_DIR)
+        violations = [
+            violation
+            for py_file in application_python_files
+            for relative in [py_file.relative_to(base)]
+            for relative_str in [str(relative).replace("\\", "/")]
+            for violation in _pattern_violations_for_file(
+                content=py_file.read_text(encoding="utf-8"),
+                relative=relative,
+                relative_str=relative_str,
             )
+        ]
 
         assert not violations, (
             "DI discipline violations: Application layer must not create "
