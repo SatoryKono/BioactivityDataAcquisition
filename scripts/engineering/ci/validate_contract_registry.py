@@ -56,6 +56,75 @@ def _write_diagnostics(
     )
 
 
+def _missing_registry_issue(registry_path: Path) -> RegistryValidationIssue:
+    return RegistryValidationIssue(
+        message=f"Registry file not found: {registry_path}",
+        severity=RegistryValidationSeverity.BLOCKING,
+        contract_ref=None,
+        field="registry_path",
+    )
+
+
+def _print_validation_issues(
+    issues: list[RegistryValidationIssue],
+) -> None:
+    if not issues:
+        print("::notice::All registry entries are valid")
+        return
+
+    print(f"::warning::Found {len(issues)} validation issues")
+    blocking = [
+        issue
+        for issue in issues
+        if issue.severity == RegistryValidationSeverity.BLOCKING
+    ]
+    warnings = [
+        issue
+        for issue in issues
+        if issue.severity == RegistryValidationSeverity.WARNING
+    ]
+
+    if blocking:
+        print(f"::error::{len(blocking)} blocking issues found:")
+        for issue in blocking:
+            print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
+
+    if warnings:
+        print(f"::warning::{len(warnings)} non-blocking warnings:")
+        for issue in warnings:
+            print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
+
+
+def _finalize_validation(
+    *,
+    diagnostics_path: Path,
+    registry: ContractRegistry,
+    validation_issues: list[RegistryValidationIssue],
+    filesystem_issues: list[RegistryValidationIssue],
+) -> int:
+    has_blocking_validation_issues = any(
+        issue.severity == RegistryValidationSeverity.BLOCKING
+        for issue in validation_issues
+    )
+    has_errors = has_blocking_validation_issues or bool(filesystem_issues)
+
+    _write_diagnostics(
+        diagnostics_path,
+        valid=not has_errors,
+        validation_issues=validation_issues,
+        filesystem_issues=filesystem_issues,
+        entries_count=len(registry.entries),
+    )
+
+    if has_errors:
+        print("::error::Contract registry validation failed")
+        return 1
+
+    print("::notice::Contract registry validation passed")
+    print(f"registry_hash={registry.registry_hash}")
+    return 0
+
+
 def main() -> int:
     """Main validation entry point."""
     repo_root = Path(__file__).resolve().parents[3]
@@ -67,57 +136,21 @@ def main() -> int:
         _write_diagnostics(
             diagnostics_path,
             valid=False,
-            validation_issues=[
-                RegistryValidationIssue(
-                    message=f"Registry file not found: {registry_path}",
-                    severity=RegistryValidationSeverity.BLOCKING,
-                    contract_ref=None,
-                    field="registry_path",
-                )
-            ],
+            validation_issues=[_missing_registry_issue(registry_path)],
             filesystem_issues=[],
             entries_count=0,
         )
         return 1
 
     try:
-        # Load registry
         registry = ContractRegistry(registry_path)
         print(
             f"::notice::Loaded contract registry with {len(registry.entries)} entries"
         )
 
-        # Validate all entries
         validation_result = registry.validate_all()
+        _print_validation_issues(list(validation_result.issues))
 
-        if validation_result.valid:
-            print("::notice::All registry entries are valid")
-        else:
-            print(f"::warning::Found {len(validation_result.issues)} validation issues")
-
-            # Count by severity
-            blocking = [
-                issue
-                for issue in validation_result.issues
-                if issue.severity == RegistryValidationSeverity.BLOCKING
-            ]
-            warnings = [
-                issue
-                for issue in validation_result.issues
-                if issue.severity == RegistryValidationSeverity.WARNING
-            ]
-
-            if blocking:
-                print(f"::error::{len(blocking)} blocking issues found:")
-                for issue in blocking:
-                    print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
-
-            if warnings:
-                print(f"::warning::{len(warnings)} non-blocking warnings:")
-                for issue in warnings:
-                    print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
-
-        # Validate filesystem consistency
         fs_result = registry.validate_filesystem_consistency()
 
         if fs_result.valid:
@@ -127,29 +160,12 @@ def main() -> int:
             for issue in fs_result.issues:
                 print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
 
-        # Determine overall result
-        has_blocking_validation_issues = any(
-            issue.severity == RegistryValidationSeverity.BLOCKING
-            for issue in validation_result.issues
-        )
-        has_filesystem_issues = not fs_result.valid
-        has_errors = has_blocking_validation_issues or has_filesystem_issues
-
-        _write_diagnostics(
-            diagnostics_path,
-            valid=not has_errors,
+        return _finalize_validation(
+            diagnostics_path=diagnostics_path,
             validation_issues=list(validation_result.issues),
             filesystem_issues=list(fs_result.issues),
-            entries_count=len(registry.entries),
+            registry=registry,
         )
-
-        if has_errors:
-            print("::error::Contract registry validation failed")
-            return 1
-        else:
-            print("::notice::Contract registry validation passed")
-            print(f"registry_hash={registry.registry_hash}")
-            return 0
 
     except Exception as exc:  # pragma: no cover - defensive CI error path
         print(f"::error::Contract registry validation failed with exception: {exc!s}")
