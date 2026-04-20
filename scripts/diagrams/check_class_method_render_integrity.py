@@ -31,8 +31,8 @@ except ImportError:  # pragma: no cover - direct script execution
 SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 NS = {"svg": SVG_NS}
 
-CLASS_DECL_RE = re.compile(r"^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)\s*\{\s*$")
-METHOD_DECL_RE = re.compile(r"^\s*[+\-#~]\s*([A-Za-z_\\][A-Za-z0-9_\\]*)\s*\(")
+CLASS_DECL_RE = re.compile(r"^\s*class\s+([A-Za-z_]\w*)\s*\{\s*$")
+METHOD_DECL_RE = re.compile(r"^\s*[+\-#~]\s*([A-Za-z_\\][\\w]*)\s*\(")
 
 
 @dataclass
@@ -103,7 +103,7 @@ def _collect_split_method_issues(
         ]
         for left, right in itertools.pairwise(spans):
             # Broken split example: "start_execution_sp" + "an()"
-            if re.search(r"[A-Za-z0-9_]$", left) and re.match(r"^[A-Za-z0-9_]", right):
+            if re.search(r"\w$", left) and re.match(r"^\w", right):
                 split_issues.append((class_name, left, right))
     return split_issues
 
