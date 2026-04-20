@@ -52,91 +52,111 @@ def _path_exists(relative_path: str) -> bool:
     return (ROOT / relative_path).exists()
 
 
+def _append_governance_surface(
+    governance: dict[str, object],
+    bucket_name: str,
+    relative_path: str,
+) -> None:
+    bucket = governance.setdefault(bucket_name, [])
+    if not isinstance(bucket, list):
+        raise TypeError(
+            f"governance_and_runtime_surfaces.{bucket_name} must stay a list"
+        )
+    bucket.append(relative_path)
+
+
+def _classify_adapter_surface(
+    relative_path: str,
+    integration: dict[str, object],
+) -> bool:
+    if not relative_path.startswith("tests/integration/adapters/"):
+        return False
+    providers = _ensure_dict(integration, "adapter_provider_surfaces")
+    provider_key = "shared_http_behavior"
+    for candidate in (
+        "chembl",
+        "crossref",
+        "openalex",
+        "pubchem",
+        "pubmed",
+        "semanticscholar",
+        "uniprot",
+    ):
+        if candidate in relative_path:
+            provider_key = candidate
+            break
+    bucket = providers.setdefault(provider_key, [])
+    if not isinstance(bucket, list):
+        raise TypeError(f"adapter_provider_surfaces.{provider_key} must stay a list")
+    bucket.append(relative_path)
+    return True
+
+
+def _classify_integration_path_prefix(
+    relative_path: str,
+    integration: dict[str, object],
+) -> bool:
+    path_buckets = (
+        ("tests/integration/interfaces/", "interface_cli_surfaces"),
+        ("tests/integration/composite/", "composite_config_and_merge"),
+        ("tests/integration/validation/", "external_validation_surfaces"),
+        (
+            "tests/integration/chembl/",
+            "chembl_parameter_extraction_surfaces",
+        ),
+        (
+            "tests/integration/pipelines/",
+            "normalization_and_pipeline_support",
+        ),
+    )
+    for prefix, bucket_name in path_buckets:
+        if relative_path.startswith(prefix):
+            _ensure_list(integration, bucket_name).append(relative_path)
+            return True
+    if (
+        relative_path.startswith("tests/integration/config/")
+        or relative_path.startswith("tests/integration/infrastructure/")
+        or relative_path.startswith("tests/integration/ci/test_config_")
+    ):
+        _ensure_list(integration, "config_and_storage_surfaces").append(relative_path)
+        return True
+    return _classify_adapter_surface(relative_path, integration)
+
+
+def _classify_integration_governance_surface(
+    relative_path: str,
+    filename: str,
+    governance: dict[str, object],
+) -> bool:
+    if "grafana" in filename:
+        _append_governance_surface(governance, "grafana", relative_path)
+        return True
+    if "prometheus" in filename:
+        _append_governance_surface(governance, "prometheus", relative_path)
+        return True
+    if "dq_" in filename:
+        _append_governance_surface(governance, "data_quality", relative_path)
+        return True
+    if (
+        "runner_lifecycle" in filename
+        or "preflight_health_modes" in filename
+        or relative_path.startswith("tests/integration/ci/")
+    ):
+        _append_governance_surface(governance, "control_plane", relative_path)
+        return True
+    return False
+
+
 def _classify_integration(
     relative_path: str,
     integration: dict[str, object],
 ) -> None:
     normalized = relative_path.replace("\\", "/")
-    parts = Path(normalized).parts
     filename = Path(normalized).name
     governance = _ensure_dict(integration, "governance_and_runtime_surfaces")
-
-    if normalized.startswith("tests/integration/interfaces/"):
-        _ensure_list(integration, "interface_cli_surfaces").append(normalized)
+    if _classify_integration_path_prefix(normalized, integration):
         return
-    if normalized.startswith("tests/integration/composite/"):
-        _ensure_list(integration, "composite_config_and_merge").append(normalized)
-        return
-    if normalized.startswith("tests/integration/config/") or normalized.startswith(
-        "tests/integration/infrastructure/"
-    ) or normalized.startswith("tests/integration/ci/test_config_"):
-        _ensure_list(integration, "config_and_storage_surfaces").append(normalized)
-        return
-    if normalized.startswith("tests/integration/validation/"):
-        _ensure_list(integration, "external_validation_surfaces").append(normalized)
-        return
-    if normalized.startswith("tests/integration/chembl/"):
-        _ensure_list(integration, "chembl_parameter_extraction_surfaces").append(
-            normalized
-        )
-        return
-    if normalized.startswith("tests/integration/adapters/"):
-        providers = _ensure_dict(integration, "adapter_provider_surfaces")
-        provider_key = "shared_http_behavior"
-        for candidate in (
-            "chembl",
-            "crossref",
-            "openalex",
-            "pubchem",
-            "pubmed",
-            "semanticscholar",
-            "uniprot",
-        ):
-            if candidate in normalized:
-                provider_key = candidate
-                break
-        bucket = providers.setdefault(provider_key, [])
-        if not isinstance(bucket, list):
-            raise TypeError(f"adapter_provider_surfaces.{provider_key} must stay a list")
-        bucket.append(normalized)
-        return
-    if normalized.startswith("tests/integration/pipelines/"):
-        _ensure_list(integration, "normalization_and_pipeline_support").append(normalized)
-        return
-
-    if "grafana" in filename:
-        bucket = governance.setdefault("grafana", [])
-        if not isinstance(bucket, list):
-            raise TypeError("governance_and_runtime_surfaces.grafana must stay a list")
-        bucket.append(normalized)
-        return
-    if "prometheus" in filename:
-        bucket = governance.setdefault("prometheus", [])
-        if not isinstance(bucket, list):
-            raise TypeError(
-                "governance_and_runtime_surfaces.prometheus must stay a list"
-            )
-        bucket.append(normalized)
-        return
-    if "dq_" in filename:
-        bucket = governance.setdefault("data_quality", [])
-        if not isinstance(bucket, list):
-            raise TypeError(
-                "governance_and_runtime_surfaces.data_quality must stay a list"
-            )
-        bucket.append(normalized)
-        return
-    if (
-        "runner_lifecycle" in filename
-        or "preflight_health_modes" in filename
-        or normalized.startswith("tests/integration/ci/")
-    ):
-        bucket = governance.setdefault("control_plane", [])
-        if not isinstance(bucket, list):
-            raise TypeError(
-                "governance_and_runtime_surfaces.control_plane must stay a list"
-            )
-        bucket.append(normalized)
+    if _classify_integration_governance_surface(normalized, filename, governance):
         return
 
     _ensure_list(integration, "normalization_and_pipeline_support").append(normalized)
@@ -177,6 +197,106 @@ def _classify_e2e(relative_path: str, e2e: dict[str, object]) -> None:
     operational.append(normalized)
 
 
+def _clean_inventory_bucket_values(bucket_value: object) -> object:
+    if isinstance(bucket_value, list):
+        return _sorted_unique(value for value in bucket_value if _path_exists(value))
+    if isinstance(bucket_value, dict):
+        cleaned: dict[str, object] = {}
+        for key, value in bucket_value.items():
+            if isinstance(value, list):
+                cleaned[key] = _sorted_unique(item for item in value if _path_exists(item))
+            elif isinstance(value, str) and _path_exists(value):
+                cleaned[key] = value.replace("\\", "/")
+        return cleaned
+    return bucket_value
+
+
+def _clean_e2e_bucket_values(bucket_value: object) -> object:
+    if isinstance(bucket_value, list):
+        return _sorted_unique(value for value in bucket_value if _path_exists(value))
+    if isinstance(bucket_value, dict):
+        cleaned = {
+            key: value.replace("\\", "/")
+            for key, value in bucket_value.items()
+            if isinstance(value, str) and _path_exists(value)
+        }
+        return dict(sorted(cleaned.items()))
+    return bucket_value
+
+
+def _clean_tracked_inventory(
+    integration: dict[str, object],
+    e2e: dict[str, object],
+) -> None:
+    for bucket_name, bucket_value in integration.items():
+        integration[bucket_name] = _clean_inventory_bucket_values(bucket_value)
+    for bucket_name, bucket_value in e2e.items():
+        e2e[bucket_name] = _clean_e2e_bucket_values(bucket_value)
+
+
+def _repo_suite_paths(suite_name: str) -> list[str]:
+    return sorted(
+        str(path.relative_to(ROOT)).replace("\\", "/")
+        for path in (ROOT / "tests" / suite_name).rglob("test_*.py")
+    )
+
+
+def _tracked_inventory_paths(tracked: dict[str, object]) -> set[str]:
+    return {path.replace("\\", "/") for path in _iter_inventory_paths(tracked)}
+
+
+def _add_missing_inventory_paths(
+    repo_paths: Iterable[str],
+    tracked_paths: set[str],
+    classifier: callable,
+    bucket: dict[str, object],
+) -> None:
+    for relative_path in repo_paths:
+        if relative_path not in tracked_paths:
+            classifier(relative_path, bucket)
+
+
+def _sorted_bucket_values(bucket_value: object) -> object:
+    if isinstance(bucket_value, list):
+        return _sorted_unique(bucket_value)
+    if isinstance(bucket_value, dict):
+        cleaned: dict[str, object] = {}
+        for key, value in bucket_value.items():
+            if isinstance(value, list):
+                cleaned[key] = _sorted_unique(value)
+            elif isinstance(value, str):
+                cleaned[key] = value.replace("\\", "/")
+        return cleaned
+    return bucket_value
+
+
+def _sorted_e2e_bucket_values(bucket_value: object) -> object:
+    if isinstance(bucket_value, list):
+        return _sorted_unique(bucket_value)
+    if isinstance(bucket_value, dict):
+        return dict(
+            sorted(
+                (
+                    key,
+                    value.replace("\\", "/"),
+                )
+                for key, value in bucket_value.items()
+                if isinstance(value, str)
+            )
+        )
+    return bucket_value
+
+
+def _sort_tracked_inventory(
+    integration: dict[str, object],
+    e2e: dict[str, object],
+) -> None:
+    for bucket_name, bucket_value in integration.items():
+        integration[bucket_name] = _sorted_bucket_values(bucket_value)
+    for bucket_name, bucket_value in e2e.items():
+        e2e[bucket_name] = _sorted_e2e_bucket_values(bucket_value)
+
+
 def _sorted_inventory(policy: dict[str, object]) -> dict[str, object]:
     tracked = policy["tracked_suite_inventory"]
     if not isinstance(tracked, dict):
@@ -187,82 +307,21 @@ def _sorted_inventory(policy: dict[str, object]) -> dict[str, object]:
     if not isinstance(integration, dict) or not isinstance(e2e, dict):
         raise TypeError("tracked_suite_inventory sections must stay mappings")
 
-    # Drop stale paths while preserving the current bucket topology.
-    for bucket_name, bucket_value in integration.items():
-        if isinstance(bucket_value, list):
-            integration[bucket_name] = _sorted_unique(
-                value for value in bucket_value if _path_exists(value)
-            )
-        elif isinstance(bucket_value, dict):
-            cleaned: dict[str, object] = {}
-            for key, value in bucket_value.items():
-                if isinstance(value, list):
-                    cleaned[key] = _sorted_unique(
-                        item for item in value if _path_exists(item)
-                    )
-                elif isinstance(value, str) and _path_exists(value):
-                    cleaned[key] = value.replace("\\", "/")
-            integration[bucket_name] = cleaned
-
-    for bucket_name, bucket_value in e2e.items():
-        if isinstance(bucket_value, list):
-            e2e[bucket_name] = _sorted_unique(
-                value for value in bucket_value if _path_exists(value)
-            )
-        elif isinstance(bucket_value, dict):
-            cleaned = {
-                key: value.replace("\\", "/")
-                for key, value in bucket_value.items()
-                if isinstance(value, str) and _path_exists(value)
-            }
-            e2e[bucket_name] = dict(sorted(cleaned.items()))
-
-    tracked_paths = {
-        path.replace("\\", "/") for path in _iter_inventory_paths(tracked)
-    }
-    repo_integration_paths = sorted(
-        str(path.relative_to(ROOT)).replace("\\", "/")
-        for path in (ROOT / "tests" / "integration").rglob("test_*.py")
+    _clean_tracked_inventory(integration, e2e)
+    tracked_paths = _tracked_inventory_paths(tracked)
+    _add_missing_inventory_paths(
+        _repo_suite_paths("integration"),
+        tracked_paths,
+        _classify_integration,
+        integration,
     )
-    repo_e2e_paths = sorted(
-        str(path.relative_to(ROOT)).replace("\\", "/")
-        for path in (ROOT / "tests" / "e2e").rglob("test_*.py")
+    _add_missing_inventory_paths(
+        _repo_suite_paths("e2e"),
+        tracked_paths,
+        _classify_e2e,
+        e2e,
     )
-
-    for relative_path in repo_integration_paths:
-        if relative_path not in tracked_paths:
-            _classify_integration(relative_path, integration)
-
-    for relative_path in repo_e2e_paths:
-        if relative_path not in tracked_paths:
-            _classify_e2e(relative_path, e2e)
-
-    for bucket_name, bucket_value in integration.items():
-        if isinstance(bucket_value, list):
-            integration[bucket_name] = _sorted_unique(bucket_value)
-        elif isinstance(bucket_value, dict):
-            cleaned = {}
-            for key, value in bucket_value.items():
-                if isinstance(value, list):
-                    cleaned[key] = _sorted_unique(value)
-                elif isinstance(value, str):
-                    cleaned[key] = value.replace("\\", "/")
-            integration[bucket_name] = cleaned
-
-    for bucket_name, bucket_value in e2e.items():
-        if isinstance(bucket_value, list):
-            e2e[bucket_name] = _sorted_unique(bucket_value)
-        elif isinstance(bucket_value, dict):
-            e2e[bucket_name] = dict(
-                sorted(
-                    (
-                        key,
-                        value.replace("\\", "/"),
-                    )
-                    for key, value in bucket_value.items()
-                    if isinstance(value, str)
-                )
-            )
+    _sort_tracked_inventory(integration, e2e)
 
     return policy
 

@@ -31,68 +31,104 @@ class DQConsistencyValidator:
         self.issues = []
         self.warnings = []
 
+    def _load_config_data(self, config_path: Path) -> dict[str, Any] | None:
+        """Load YAML/JSON config data when the file type is supported."""
+        if config_path.suffix == ".yaml":
+            import yaml
+
+            with config_path.open("r", encoding="utf-8") as f:
+                config_data = yaml.safe_load(f)
+        elif config_path.suffix == ".json":
+            with config_path.open("r", encoding="utf-8") as f:
+                config_data = json.load(f)
+        else:
+            self.warnings.append(f"Skipping non-YAML/JSON config file: {config_path}")
+            return None
+
+        if isinstance(config_data, dict):
+            return config_data
+        return None
+
+    def _contract_field_presence(
+        self, config_data: dict[str, Any]
+    ) -> tuple[bool, bool, bool]:
+        """Return presence flags for contract metadata fields."""
+        return (
+            "contract_ref" in config_data,
+            "contract_version" in config_data,
+            "rule_bundle_version" in config_data,
+        )
+
+    def _validate_contract_field_group(
+        self,
+        config_path: Path,
+        *,
+        has_contract_ref: bool,
+        has_contract_version: bool,
+        has_rule_bundle: bool,
+    ) -> bool:
+        """Ensure partial contract references are not allowed."""
+        if not (has_contract_ref or has_contract_version or has_rule_bundle):
+            return True
+        if has_contract_ref and has_contract_version and has_rule_bundle:
+            return True
+        self.issues.append(
+            f"Incomplete contract reference in {config_path}:"
+            f" contract_ref={has_contract_ref}, "
+            f"contract_version={has_contract_version}, "
+            f"rule_bundle_version={has_rule_bundle}"
+        )
+        return False
+
+    def _validate_contract_ref(
+        self, config_path: Path, config_data: dict[str, Any]
+    ) -> bool:
+        """Validate the required contract_ref field."""
+        contract_ref = config_data["contract_ref"]
+        if isinstance(contract_ref, str) and contract_ref:
+            return True
+        self.issues.append(f"Invalid contract_ref in {config_path}: '{contract_ref}'")
+        return False
+
+    def _validate_contract_versions(
+        self, config_path: Path, config_data: dict[str, Any]
+    ) -> bool:
+        """Validate semantic versions for contract-related fields."""
+        for version_field in ("contract_version", "rule_bundle_version"):
+            version = config_data[version_field]
+            if isinstance(version, str) and self._is_valid_version(version):
+                continue
+            self.issues.append(
+                f"Invalid {version_field} in {config_path}: "
+                f"'{version}' (should be semantic version)"
+            )
+            return False
+        return True
+
     def validate_config_contract_references(self, config_path: Path) -> bool:
         """Validate that DQ configs have proper contract references."""
         try:
-            # Read the config file
-            if config_path.suffix == ".yaml":
-                import yaml
-
-                with config_path.open("r", encoding="utf-8") as f:
-                    config_data = yaml.safe_load(f)
-            elif config_path.suffix == ".json":
-                with config_path.open("r", encoding="utf-8") as f:
-                    config_data = json.load(f)
-            else:
-                self.warnings.append(
-                    f"Skipping non-YAML/JSON config file: {config_path}"
-                )
+            config_data = self._load_config_data(config_path)
+            if config_data is None:
                 return True
 
-            # Check if this looks like a DQ config
-            if not isinstance(config_data, dict):
+            (
+                has_contract_ref,
+                has_contract_version,
+                has_rule_bundle,
+            ) = self._contract_field_presence(config_data)
+            if not self._validate_contract_field_group(
+                config_path,
+                has_contract_ref=has_contract_ref,
+                has_contract_version=has_contract_version,
+                has_rule_bundle=has_rule_bundle,
+            ):
+                return False
+            if not (has_contract_ref and has_contract_version and has_rule_bundle):
                 return True
-
-            # Check for contract fields
-            has_contract_ref = "contract_ref" in config_data
-            has_contract_version = "contract_version" in config_data
-            has_rule_bundle = "rule_bundle_version" in config_data
-
-            # If it has any contract field, it should have all
-            if has_contract_ref or has_contract_version or has_rule_bundle:
-                if not (has_contract_ref and has_contract_version and has_rule_bundle):
-                    self.issues.append(
-                        f"Incomplete contract reference in {config_path}:"
-                        f" contract_ref={has_contract_ref}, "
-                        f"contract_version={has_contract_version}, "
-                        f"rule_bundle_version={has_rule_bundle}"
-                    )
-                    return False
-
-                # Validate contract ref format
-                if (
-                    not isinstance(config_data["contract_ref"], str)
-                    or not config_data["contract_ref"]
-                ):
-                    self.issues.append(
-                        f"Invalid contract_ref in {config_path}: "
-                        f"'{config_data['contract_ref']}'"
-                    )
-                    return False
-
-                # Validate version formats
-                for version_field in ["contract_version", "rule_bundle_version"]:
-                    version = config_data[version_field]
-                    if not isinstance(version, str) or not self._is_valid_version(
-                        version
-                    ):
-                        self.issues.append(
-                            f"Invalid {version_field} in {config_path}: "
-                            f"'{version}' (should be semantic version)"
-                        )
-                        return False
-
-            return True
+            if not self._validate_contract_ref(config_path, config_data):
+                return False
+            return self._validate_contract_versions(config_path, config_data)
 
         except Exception as e:
             self.issues.append(f"Error reading config {config_path}: {e}")
@@ -121,49 +157,18 @@ class DQConsistencyValidator:
         self, metadata: dict[str, Any], report_data: dict[str, Any] | None = None
     ) -> bool:
         """Validate consistency between metadata and DQ report."""
-        # Check if metadata has provenance
-        if (
-            "dq_rule_provenance" not in metadata
-            or metadata["dq_rule_provenance"] is None
-        ):
-            return True  # No provenance to validate
+        provenance_entries = metadata.get("dq_rule_provenance")
+        if provenance_entries is None:
+            return True
 
-        provenance_entries = metadata["dq_rule_provenance"]
         if not isinstance(provenance_entries, list) or not provenance_entries:
             self.issues.append("Invalid dq_rule_provenance: should be non-empty list")
             return False
 
-        # Validate each provenance entry
         for i, entry in enumerate(provenance_entries):
-            if not isinstance(entry, dict):
-                self.issues.append(f"Provenance entry {i} is not a dict: {type(entry)}")
-                continue
-
-            # Check required fields
-            required_fields = ["rule_id", "contract_version", "severity", "disposition"]
-            for field in required_fields:
-                if field not in entry:
-                    self.issues.append(
-                        f"Provenance entry {i} missing required field: {field}"
-                    )
-                    return False
-
-            # Validate disposition
-            if not isinstance(entry["disposition"], str):
-                self.issues.append(
-                    f"Provenance entry {i} has invalid disposition: {entry['disposition']}"
-                )
+            if not self._validate_provenance_entry(i, entry):
                 return False
 
-            try:
-                DQDisposition(entry["disposition"])  # Validate enum value
-            except ValueError:
-                self.issues.append(
-                    f"Provenance entry {i} has invalid disposition value: {entry['disposition']}"
-                )
-                return False
-
-        # If report data provided, check consistency
         if report_data and "rule_outcomes" in report_data:
             report_outcomes = report_data["rule_outcomes"]
             if len(provenance_entries) != len(report_outcomes):
@@ -172,6 +177,45 @@ class DQConsistencyValidator:
                     f"does not match report outcomes ({len(report_outcomes)})"
                 )
 
+        return True
+
+    def _validate_provenance_entry(self, index: int, entry: Any) -> bool:
+        """Validate one provenance entry payload."""
+        if not isinstance(entry, dict):
+            self.issues.append(f"Provenance entry {index} is not a dict: {type(entry)}")
+            return True
+        if not self._validate_provenance_required_fields(index, entry):
+            return False
+        return self._validate_provenance_disposition(index, entry["disposition"])
+
+    def _validate_provenance_required_fields(
+        self, index: int, entry: dict[str, Any]
+    ) -> bool:
+        """Ensure required provenance fields are present."""
+        required_fields = ("rule_id", "contract_version", "severity", "disposition")
+        for field in required_fields:
+            if field in entry:
+                continue
+            self.issues.append(
+                f"Provenance entry {index} missing required field: {field}"
+            )
+            return False
+        return True
+
+    def _validate_provenance_disposition(self, index: int, disposition: Any) -> bool:
+        """Validate disposition value and enum compatibility."""
+        if not isinstance(disposition, str):
+            self.issues.append(
+                f"Provenance entry {index} has invalid disposition: {disposition}"
+            )
+            return False
+        try:
+            DQDisposition(disposition)
+        except ValueError:
+            self.issues.append(
+                f"Provenance entry {index} has invalid disposition value: {disposition}"
+            )
+            return False
         return True
 
     def validate_policy_hash_stability(
@@ -246,7 +290,7 @@ class DQConsistencyValidator:
                     self.validate_config_contract_references(config_file)
 
         # Summary
-        print(f"\nDQ Consistency Check Summary:")
+        print("\nDQ Consistency Check Summary:")
         print(f"Issues found: {len(self.issues)}")
         print(f"Warnings found: {len(self.warnings)}")
 
