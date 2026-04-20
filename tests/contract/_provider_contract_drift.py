@@ -224,35 +224,47 @@ def _extract_actual_path_types(
     return actual_paths
 
 
+def _path_token(raw_part: str) -> tuple[str, str | None]:
+    match = _PATH_TOKEN_RE.fullmatch(raw_part)
+    if match is None:
+        raise ContractPathResolutionError(f"unsupported path token {raw_part!r}")
+    return match.groups()
+
+
+def _resolve_mapping_key(current: Any, key: str) -> Any:
+    if not isinstance(current, dict):
+        raise ContractPathResolutionError(
+            f"expected dict before key {key!r}, got {_infer_type_name(current)!r}"
+        )
+    if key not in current:
+        raise ContractPathResolutionError(f"missing key {key!r}")
+    return current[key]
+
+
+def _resolve_list_index(current: Any, raw_part: str, raw_index: str) -> Any:
+    if not isinstance(current, list):
+        raise ContractPathResolutionError(
+            f"expected list at {raw_part!r}, got {_infer_type_name(current)!r}"
+        )
+    index = int(raw_index)
+    if index >= len(current):
+        raise ContractPathResolutionError(
+            f"list at {raw_part!r} has length {len(current)}, missing index {index}"
+        )
+    return current[index]
+
+
 def _resolve_path(payload: Any, path: str) -> Any:
     current = payload
     for raw_part in path.split("."):
-        match = _PATH_TOKEN_RE.fullmatch(raw_part)
-        if match is None:
-            raise ContractPathResolutionError(f"unsupported path token {raw_part!r}")
-        key, raw_index = match.groups()
+        key, raw_index = _path_token(raw_part)
         if key:
-            if not isinstance(current, dict):
-                raise ContractPathResolutionError(
-                    f"expected dict before key {key!r}, got {_infer_type_name(current)!r}"
-                )
-            if key not in current:
-                raise ContractPathResolutionError(f"missing key {key!r}")
-            current = current[key]
+            current = _resolve_mapping_key(current, key)
         elif raw_index is None:
             raise ContractPathResolutionError(f"empty path token {raw_part!r}")
         if raw_index is None:
             continue
-        if not isinstance(current, list):
-            raise ContractPathResolutionError(
-                f"expected list at {raw_part!r}, got {_infer_type_name(current)!r}"
-            )
-        index = int(raw_index)
-        if index >= len(current):
-            raise ContractPathResolutionError(
-                f"list at {raw_part!r} has length {len(current)}, missing index {index}"
-            )
-        current = current[index]
+        current = _resolve_list_index(current, raw_part, raw_index)
     return current
 
 

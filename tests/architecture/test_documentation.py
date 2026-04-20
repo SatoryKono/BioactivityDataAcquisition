@@ -163,6 +163,20 @@ def _missing_adapter_class_docstrings(py_file: Path, *, src_dir: Path) -> list[s
     ]
 
 
+def _iter_adapter_python_files(adapters_dir: Path) -> list[Path]:
+    excluded_files = {
+        "__init__.py",
+        "base.py",
+        "types.py",
+        "exceptions.py",
+    }
+    return [
+        py_file
+        for py_file in adapters_dir.rglob("*.py")
+        if py_file.name not in excluded_files
+    ]
+
+
 class TestModuleDocstrings:
     """Tests ensuring modules have proper documentation."""
 
@@ -233,23 +247,11 @@ class TestClassDocstrings:
         """
         adapters_dir = src_dir / "bioetl" / "infrastructure" / "adapters"
         assert adapters_dir.exists(), "Infrastructure adapters not found"
-
-        # Excluded utility files
-        excluded_files = {
-            "__init__.py",
-            "base.py",
-            "types.py",
-            "exceptions.py",
-        }
-
-        missing_docstrings = []
-
-        for py_file in adapters_dir.rglob("*.py"):
-            if py_file.name in excluded_files:
-                continue
-            missing_docstrings.extend(
-                _missing_adapter_class_docstrings(py_file, src_dir=src_dir)
-            )
+        missing_docstrings = [
+            missing
+            for py_file in _iter_adapter_python_files(adapters_dir)
+            for missing in _missing_adapter_class_docstrings(py_file, src_dir=src_dir)
+        ]
 
         assert not missing_docstrings, (
             "Adapter classes must have docstrings.\n"

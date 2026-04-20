@@ -85,27 +85,49 @@ def _matches_prefix(module_name: str, prefix: str) -> bool:
     return module_name == prefix or module_name.startswith(f"{prefix}.")
 
 
+def _matched_disallowed_reason(module_name: str) -> str | None:
+    for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items():
+        if _matches_prefix(module_name, prefix):
+            return reason
+    return None
+
+
+def _import_violation(relative: Path, lineno: int, module_name: str) -> str:
+    reason = _matched_disallowed_reason(module_name)
+    if reason is None:
+        return ""
+    return f"{relative}:{lineno}: import {module_name} ({reason})"
+
+
+def _import_from_violation(relative: Path, lineno: int, module_name: str) -> str:
+    reason = _matched_disallowed_reason(module_name)
+    if reason is None:
+        return ""
+    return f"{relative}:{lineno}: from {module_name} import ... ({reason})"
+
+
 def _disallowed_import_violations_for_node(
     node: ast.AST,
     *,
     relative: Path,
 ) -> list[str]:
-    violations: list[str] = []
     if isinstance(node, ast.Import):
-        for alias in node.names:
-            for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items():
-                if _matches_prefix(alias.name, prefix):
-                    violations.append(
-                        f"{relative}:{node.lineno}: import {alias.name} ({reason})"
-                    )
+        return [
+            violation
+            for alias in node.names
+            if (violation := _import_violation(relative, node.lineno, alias.name))
+        ]
     if isinstance(node, ast.ImportFrom) and node.module is not None:
-        for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items():
-            if _matches_prefix(node.module, prefix):
-                violations.append(
-                    f"{relative}:{node.lineno}: from {node.module} import ..."
-                    f" ({reason})"
-                )
-    return violations
+        violation = _import_from_violation(relative, node.lineno, node.module)
+        return [violation] if violation else []
+    return []
+
+
+def _runtime_nodes(tree: ast.Module) -> list[ast.AST]:
+    parents = _build_parent_map(tree)
+    return [
+        node for node in ast.walk(tree) if not _is_inside_type_checking(node, parents)
+    ]
 
 
 def _iter_disallowed_imports(
@@ -116,10 +138,7 @@ def _iter_disallowed_imports(
     violations: list[str] = []
 
     for relative, tree in _iter_normalization_modules(source_ast_cache, src_dir):
-        parents = _build_parent_map(tree)
-        for node in ast.walk(tree):
-            if _is_inside_type_checking(node, parents):
-                continue
+        for node in _runtime_nodes(tree):
             violations.extend(
                 _disallowed_import_violations_for_node(
                     node,
@@ -138,14 +157,10 @@ def _iter_open_calls(
     violations: list[str] = []
 
     for relative, tree in _iter_normalization_modules(source_ast_cache, src_dir):
-        parents = _build_parent_map(tree)
-        for node in ast.walk(tree):
-            if _is_inside_type_checking(node, parents):
-                continue
-            if not isinstance(node, ast.Call):
-                continue
-            if isinstance(node.func, ast.Name) and node.func.id == "open":
-                violations.append(f"{relative}:{node.lineno}: open(...)")
+        for node in _runtime_nodes(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                if node.func.id == "open":
+                    violations.append(f"{relative}:{node.lineno}: open(...)")
 
     return violations
 
