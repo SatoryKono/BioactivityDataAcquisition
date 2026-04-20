@@ -126,4 +126,8 @@ def iter_rag_sources(root: Path) -> list[Path]:
 
 def iter_markdown_sources(root: Path) -> list[Path]:
     """Return only markdown RAG sources for backward-compatible callers."""
-    return [path for path in iter_rag_sources(root) if path.suffix.lower() in MARKDOWN_SUFFIXES]
+    return [
+        path
+        for path in iter_rag_sources(root)
+        if path.suffix.lower() in MARKDOWN_SUFFIXES
+    ]

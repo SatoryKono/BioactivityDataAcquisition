@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-20T18:53:33.516174+00:00",
+  "generated_at": "2026-04-20T19:17:23.261766+00:00",
   "summary": {
     "total_scripts": 426,
     "status_counts": {
@@ -16,7 +16,7 @@
       "docs": 131,
       "scripts": 277,
       "skills": 8,
-      "tests": 143
+      "tests": 144
     }
   },
   "scripts": [
@@ -9209,7 +9209,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/plans/project-memory-layer-implementation-plan-2026-04-20.md",
@@ -9246,6 +9246,12 @@
           "line": 24,
           "source_group": "scripts",
           "text": "- `query.py` is now a compatibility module alias to `memory.graph.query`."
+        },
+        {
+          "path": "tests/unit/memory/test_review_curated.py",
+          "line": 105,
+          "source_group": "tests",
+          "text": "\"source_refs\": [\"src/memory/query.py\", \"src/memory/README.md\"],"
         }
       ]
     },

@@ -90,7 +90,9 @@ def _score_timeline_event(
     query: str | None,
     profile: str,
 ) -> tuple[int, list[str]]:
-    normalized_profile = profile if profile in _TIMELINE_PROFILE_BONUS else DEFAULT_PROFILE
+    normalized_profile = (
+        profile if profile in _TIMELINE_PROFILE_BONUS else DEFAULT_PROFILE
+    )
     score = 0
     reasons: list[str] = []
 
@@ -118,10 +120,18 @@ def _score_timeline_event(
     if lowered_query:
         tokens = [token for token in lowered_query.split() if token]
         event_type = str(event.get("event_type") or "").lower()
-        source_refs = " ".join(str(item) for item in event.get("source_refs") or []).lower()
-        related_refs = " ".join(str(item) for item in event.get("related_refs") or []).lower()
-        graph_refs = " ".join(str(item) for item in event.get("graph_node_refs") or []).lower()
-        payload_text = json.dumps(event.get("payload") or {}, sort_keys=True, ensure_ascii=True).lower()
+        source_refs = " ".join(
+            str(item) for item in event.get("source_refs") or []
+        ).lower()
+        related_refs = " ".join(
+            str(item) for item in event.get("related_refs") or []
+        ).lower()
+        graph_refs = " ".join(
+            str(item) for item in event.get("graph_node_refs") or []
+        ).lower()
+        payload_text = json.dumps(
+            event.get("payload") or {}, sort_keys=True, ensure_ascii=True
+        ).lower()
 
         if lowered_query in event_type:
             score += 25
@@ -230,7 +240,9 @@ def query_all(
     lowered_query = query.lower()
     for view in ("sources", "owners", "zones", "placement"):
         payload = query_catalog(view)
-        haystack = json.dumps(payload["payload"], sort_keys=True, ensure_ascii=True).lower()
+        haystack = json.dumps(
+            payload["payload"], sort_keys=True, ensure_ascii=True
+        ).lower()
         if lowered_query in haystack:
             catalog_hits.append(payload)
 
@@ -251,7 +263,9 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Unified query facade for local memory-layer retrieval."
     )
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("--json", action="store_true", help="Emit machine-readable JSON output.")
+    common.add_argument(
+        "--json", action="store_true", help="Emit machine-readable JSON output."
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     catalog_parser = subparsers.add_parser(
@@ -259,7 +273,9 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Read a structured memory catalog view.",
         parents=[common],
     )
-    catalog_parser.add_argument("view", choices=("sources", "owners", "zones", "placement"))
+    catalog_parser.add_argument(
+        "view", choices=("sources", "owners", "zones", "placement")
+    )
 
     rag_parser = subparsers.add_parser(
         "rag",
@@ -273,7 +289,9 @@ def _build_parser() -> argparse.ArgumentParser:
     rag_parser.add_argument("--symbol-kind", type=str, default=None)
     rag_parser.add_argument("--chunks-path", type=Path, default=DEFAULT_RAG_CHUNKS)
     rag_parser.add_argument("--limit", type=int, default=20)
-    rag_parser.add_argument("--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE)
+    rag_parser.add_argument(
+        "--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE
+    )
 
     timeline_parser = subparsers.add_parser(
         "timeline",
@@ -283,7 +301,9 @@ def _build_parser() -> argparse.ArgumentParser:
     timeline_parser.add_argument("--query", type=str, default=None)
     timeline_parser.add_argument("--event-family", type=str, default=None)
     timeline_parser.add_argument("--event-type", type=str, default=None)
-    timeline_parser.add_argument("--events-dir", type=Path, default=DEFAULT_TIMELINE_DIR)
+    timeline_parser.add_argument(
+        "--events-dir", type=Path, default=DEFAULT_TIMELINE_DIR
+    )
     timeline_parser.add_argument("--limit", type=int, default=20)
     timeline_parser.add_argument(
         "--profile",
@@ -300,7 +320,9 @@ def _build_parser() -> argparse.ArgumentParser:
     all_parser.add_argument("--chunks-path", type=Path, default=DEFAULT_RAG_CHUNKS)
     all_parser.add_argument("--events-dir", type=Path, default=DEFAULT_TIMELINE_DIR)
     all_parser.add_argument("--limit", type=int, default=10)
-    all_parser.add_argument("--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE)
+    all_parser.add_argument(
+        "--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE
+    )
 
     graph_parser = subparsers.add_parser(
         "graph",
@@ -319,12 +341,19 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
     kind = payload.get("kind")
     if kind == "catalog":
         print(f"Catalog view: {payload['view']}")
-        print(json.dumps(payload["payload"], indent=2, sort_keys=True, ensure_ascii=True))
+        print(
+            json.dumps(payload["payload"], indent=2, sort_keys=True, ensure_ascii=True)
+        )
         return 0
     if kind in {"rag", "timeline"}:
         print(f"{kind} results: {payload['count']}")
         for item in payload["results"]:
-            title = item.get("title") or item.get("event_type") or item.get("source_path") or item.get("id")
+            title = (
+                item.get("title")
+                or item.get("event_type")
+                or item.get("source_path")
+                or item.get("id")
+            )
             print(f"- {title}")
         return 0
     if kind == "all":

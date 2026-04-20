@@ -850,11 +850,7 @@ def _run_artifacts_statement() -> str:
 
 
 def _runtime_state_statement(*, locks_only: bool = False) -> str:
-    filter_clause = (
-        "AND state.state_kind = 'lock_state' "
-        if locks_only
-        else ""
-    )
+    filter_clause = "AND state.state_kind = 'lock_state' " if locks_only else ""
     return (
         "MATCH (state:runtime_state_surface) "
         "WHERE ($name = 'all' OR state.name = $name OR state.state_kind = $name OR state.lock_key = $name OR state.manifest_id = $name) "
@@ -973,7 +969,9 @@ def _run_query(
         "target_label": profile_config["target_label"],
     }
     if profile_config["mode"] == "neighbors":
-        params["relation_types"] = list(profile_config.get("relation_types", DEFAULT_NEIGHBOR_RELATION_TYPES))
+        params["relation_types"] = list(
+            profile_config.get("relation_types", DEFAULT_NEIGHBOR_RELATION_TYPES)
+        )
     statement = _statement_for_profile_mode(str(profile_config["mode"]))
     return client.query(
         statement,
@@ -1049,7 +1047,9 @@ def _append_prefixed_row_values(
         lines.extend(_sorted_prefixed_values(row.get(field_name), prefix))
 
 
-def _format_neighbors_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_neighbors_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     seen: set[tuple[str, str, str, str]] = set()
     for row in rows:
@@ -1059,7 +1059,11 @@ def _format_neighbors_rows(title: str, name: str, rows: list[dict[str, JsonValue
         if not relation_type or not neighbor_name:
             continue
         neighbor_labels = row.get("neighbor_labels")
-        label_str = ",".join(str(label) for label in neighbor_labels) if isinstance(neighbor_labels, list) else ""
+        label_str = (
+            ",".join(str(label) for label in neighbor_labels)
+            if isinstance(neighbor_labels, list)
+            else ""
+        )
         key = (direction, relation_type, neighbor_name, label_str)
         if key in seen:
             continue
@@ -1129,7 +1133,9 @@ def _append_surface_lines(
         lines.extend(_format_surface_dict_list(row.get(field_name), prefix))
 
 
-def _format_docs_drift_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_docs_drift_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     seen: set[str] = set()
     for row in rows:
@@ -1151,7 +1157,9 @@ def _workflow_job_header(row: dict[str, JsonValue]) -> str | None:
     return f"- workflow={workflow_name} | job={job_name}"
 
 
-def _format_workflow_gates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_workflow_gates_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         header = _workflow_job_header(row)
@@ -1165,7 +1173,9 @@ def _format_workflow_gates_rows(title: str, name: str, rows: list[dict[str, Json
     return "\n".join(lines)
 
 
-def _format_workflow_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_workflow_artifacts_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         header = _workflow_job_header(row)
@@ -1200,7 +1210,9 @@ def _workflow_execution_suffix_parts(
         if isinstance(variant_axes, dict):
             return [
                 "axes="
-                + ",".join(f"{key}={variant_axes[key]!s}" for key in sorted(variant_axes))
+                + ",".join(
+                    f"{key}={variant_axes[key]!s}" for key in sorted(variant_axes)
+                )
             ]
         return []
     return [
@@ -1213,7 +1225,9 @@ def _workflow_execution_suffix_parts(
     ]
 
 
-def _format_workflow_execution_value(field_name: str, prefix: str, value: dict[str, JsonValue]) -> str | None:
+def _format_workflow_execution_value(
+    field_name: str, prefix: str, value: dict[str, JsonValue]
+) -> str | None:
     item_name = str(value.get("name") or "")
     if not item_name:
         return None
@@ -1258,14 +1272,18 @@ def _workflow_execution_lines(row: dict[str, JsonValue]) -> list[str]:
             rendered
             for value in values
             if isinstance(value, dict)
-            for rendered in [_format_workflow_execution_value(field_name, prefix, value)]
+            for rendered in [
+                _format_workflow_execution_value(field_name, prefix, value)
+            ]
             if rendered
         }
         rendered_lines.extend(sorted(normalized))
     return rendered_lines
 
 
-def _format_workflow_execution_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_workflow_execution_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         header = _workflow_execution_header(row)
@@ -1290,7 +1308,10 @@ def _label_suffix(labels: JsonValue) -> str:
 def _sorted_prefixed_values(values: JsonValue, prefix: str) -> list[str]:
     if not isinstance(values, list):
         return []
-    return [f"  {prefix}={value}" for value in sorted({str(item) for item in values if item})]
+    return [
+        f"  {prefix}={value}"
+        for value in sorted({str(item) for item in values if item})
+    ]
 
 
 def _storage_summary_line(row: dict[str, JsonValue], storage_name: str) -> str:
@@ -1326,25 +1347,33 @@ def _storage_producer_lines(producers: JsonValue) -> list[str]:
         producer_name = str(producer.get("name") or "")
         if not producer_name:
             continue
-        normalized.add(f"  producer={producer_name}{_label_suffix(producer.get('labels'))}")
+        normalized.add(
+            f"  producer={producer_name}{_label_suffix(producer.get('labels'))}"
+        )
     return sorted(normalized)
 
 
-def _format_storage_lineage_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_storage_lineage_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row, storage_name in _iter_named_rows(rows, "storage_name"):
         lines.append(_storage_summary_line(row, storage_name))
         _append_optional_prefixed_line(lines, _storage_detail_line(row))
         lines.extend(_storage_producer_lines(row.get("producers")))
         lines.extend(_sorted_prefixed_values(row.get("upstream_surfaces"), "upstream"))
-        lines.extend(_sorted_prefixed_values(row.get("downstream_surfaces"), "downstream"))
+        lines.extend(
+            _sorted_prefixed_values(row.get("downstream_surfaces"), "downstream")
+        )
         lines.extend(_sorted_prefixed_values(row.get("defining_configs"), "defined_by"))
     if len(lines) == 1:
         lines.append("- no storage lineage found")
     return "\n".join(lines)
 
 
-def _field_lineage_header(row: dict[str, JsonValue], storage_ref: str, field_name: str) -> str:
+def _field_lineage_header(
+    row: dict[str, JsonValue], storage_ref: str, field_name: str
+) -> str:
     return (
         f"- storage={storage_ref} | field={field_name} | group={row.get('field_group') or ''!s} "
         f"| drift={row.get('drift_classification') or ''!s} | required={row.get('required_in_quality')!s}"
@@ -1358,7 +1387,9 @@ def _validation_line(validation_types: JsonValue) -> str | None:
     return f"validations={normalized}" if normalized else None
 
 
-def _format_field_lineage_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_field_lineage_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         field_name = str(row.get("field_name") or "")
@@ -1366,7 +1397,9 @@ def _format_field_lineage_rows(title: str, name: str, rows: list[dict[str, JsonV
         if not field_name or not storage_ref:
             continue
         lines.append(_field_lineage_header(row, storage_ref, field_name))
-        _append_optional_prefixed_line(lines, _validation_line(row.get("validation_types")))
+        _append_optional_prefixed_line(
+            lines, _validation_line(row.get("validation_types"))
+        )
         _append_prefixed_row_values(
             lines,
             row,
@@ -1381,7 +1414,9 @@ def _format_field_lineage_rows(title: str, name: str, rows: list[dict[str, JsonV
     return "\n".join(lines)
 
 
-def _format_schema_drift_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_schema_drift_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         field_name = str(row.get("field_name") or "")
@@ -1424,7 +1459,9 @@ def _format_surface_dict_list(values: object, prefix: str) -> list[str]:
     return sorted(normalized)
 
 
-def _format_run_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_run_artifacts_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row, run_instance_name in _iter_named_rows(rows, "run_instance_name"):
         lines.append(
@@ -1437,7 +1474,9 @@ def _format_run_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonV
             _optional_row_part(row, "effective_config_artifact_id"),
             _optional_row_part(row, "lineage_fragment_id"),
         ]
-        _append_optional_prefixed_line(lines, " | ".join(part for part in detail_parts if part))
+        _append_optional_prefixed_line(
+            lines, " | ".join(part for part in detail_parts if part)
+        )
         _append_surface_lines(
             lines,
             row,
@@ -1452,7 +1491,9 @@ def _format_run_artifacts_rows(title: str, name: str, rows: list[dict[str, JsonV
     return "\n".join(lines)
 
 
-def _format_runtime_state_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_runtime_state_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row, state_name in _iter_named_rows(rows, "runtime_state_name"):
         lines.append(
@@ -1476,7 +1517,9 @@ def _format_runtime_state_rows(title: str, name: str, rows: list[dict[str, JsonV
     return "\n".join(lines)
 
 
-def _format_claim_trace_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_claim_trace_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row, claim_name in _iter_named_rows(rows, "claim_name"):
         lines.append(
@@ -1493,13 +1536,19 @@ def _format_claim_trace_rows(title: str, name: str, rows: list[dict[str, JsonVal
     return "\n".join(lines)
 
 
-def _format_cli_semantics_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_cli_semantics_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row, command_name in _iter_named_rows(rows, "command_name"):
-        lines.append(f"- command={command_name} | side_effect_class={row.get('side_effect_class') or ''!s}")
+        lines.append(
+            f"- command={command_name} | side_effect_class={row.get('side_effect_class') or ''!s}"
+        )
         lines.extend(_sorted_prefixed_values(row.get("options"), "option"))
         lines.extend(_sorted_prefixed_values(row.get("gates"), "gate"))
-        _append_surface_lines(lines, row, [("side_effect_targets", "side_effect_target")])
+        _append_surface_lines(
+            lines, row, [("side_effect_targets", "side_effect_target")]
+        )
     if len(lines) == 1:
         lines.append("- no CLI semantic coverage found")
     return "\n".join(lines)
@@ -1526,7 +1575,9 @@ def _test_coverage_lines(tests: JsonValue) -> list[str]:
     )
 
 
-def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_duplication_cluster_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     row = rows[0]
     family_name = str(row.get("family_name") or "")
     surface_kind = str(row.get("surface_kind") or "")
@@ -1542,13 +1593,17 @@ def _format_duplication_cluster_rows(title: str, name: str, rows: list[dict[str,
         f"| duplicates={duplicate_count} | promotion_score={promotion_score}"
     )
     if promotion_target:
-        lines.append(f"- promotion_target={promotion_target}{_label_suffix(target_labels)}")
+        lines.append(
+            f"- promotion_target={promotion_target}{_label_suffix(target_labels)}"
+        )
     lines.extend(_duplication_member_lines(members))
     lines.extend(_test_coverage_lines(tests))
     return "\n".join(lines)
 
 
-def _format_normalization_pipeline_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_normalization_pipeline_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     row = rows[0]
     lines = [f"{title}: `{name}`"]
     lines.append(
@@ -1582,7 +1637,9 @@ def _fallback_pipeline_line(row: dict[str, JsonValue], pipeline_name: str) -> st
     )
 
 
-def _format_fallback_pipelines_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_fallback_pipelines_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row, pipeline_name in _iter_named_rows(rows, "pipeline_name"):
         lines.append(_fallback_pipeline_line(row, pipeline_name))
@@ -1604,7 +1661,9 @@ def _promotion_candidate_line(row: dict[str, JsonValue], cluster_name: str) -> s
     )
 
 
-def _format_promotion_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_promotion_candidates_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     seen: set[str] = set()
     for row in rows:
@@ -1640,7 +1699,9 @@ def _anchor_count_parts(row: dict[str, JsonValue]) -> list[str]:
     ]
 
 
-def _target_row_line(row: dict[str, JsonValue], extra_parts: list[str], suffix: str = "") -> str:
+def _target_row_line(
+    row: dict[str, JsonValue], extra_parts: list[str], suffix: str = ""
+) -> str:
     return "- " + " | ".join([*_target_identity_parts(row), *extra_parts]) + suffix
 
 
@@ -1655,7 +1716,9 @@ def _blocker_detail_lines(blockers: JsonValue) -> list[str]:
         if not blocker_name:
             continue
         relation_name = str(blocker.get("relation") or "")
-        normalized.add(f"  blocker={blocker_name} | relation={relation_name}{_label_suffix(blocker.get('labels'))}")
+        normalized.add(
+            f"  blocker={blocker_name} | relation={relation_name}{_label_suffix(blocker.get('labels'))}"
+        )
     return sorted(normalized)
 
 
@@ -1689,7 +1752,9 @@ def _current_cycle_parts(row: dict[str, JsonValue]) -> list[str]:
     ]
 
 
-def _format_dead_code_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_dead_code_candidates_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         if not row.get("target_name"):
@@ -1715,7 +1780,9 @@ def _format_dead_code_candidates_rows(title: str, name: str, rows: list[dict[str
     return "\n".join(lines)
 
 
-def _format_current_cycle_code_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_current_cycle_code_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         _append_target_row_if_named(
@@ -1729,7 +1796,9 @@ def _format_current_cycle_code_rows(title: str, name: str, rows: list[dict[str, 
     return "\n".join(lines)
 
 
-def _format_overengineered_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_overengineered_candidates_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         if _append_target_row_if_named(
@@ -1772,7 +1841,9 @@ def _overengineered_marker_lines(row: dict[str, JsonValue]) -> tuple[str, str]:
     )
 
 
-def _format_removable_complexity_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_removable_complexity_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         marker_suffix = _marker_suffix(
@@ -1803,7 +1874,9 @@ def _simplification_blocker_detail_lines(row: dict[str, JsonValue]) -> list[str]
     ) + _blocker_detail_lines(row.get("blockers"))
 
 
-def _format_simplification_blockers_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
+def _format_simplification_blockers_rows(
+    title: str, name: str, rows: list[dict[str, JsonValue]]
+) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
         if _append_target_row_if_named(

@@ -48,7 +48,9 @@ def _template_note(memory_root: Path, template_rel_path: str):
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Create a memory note from a built-in template.")
+    parser = argparse.ArgumentParser(
+        description="Create a memory note from a built-in template."
+    )
     parser.add_argument("--kind", required=True, choices=sorted(NOTE_KINDS))
     parser.add_argument("--title", required=True)
     parser.add_argument("--task-id", help="Required for episodic notes.")

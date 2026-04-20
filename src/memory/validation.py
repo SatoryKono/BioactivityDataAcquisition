@@ -6,7 +6,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from memory.notes import extract_markdown_headings, normalize_text_key, parse_markdown_note
+from memory.notes import (
+    extract_markdown_headings,
+    normalize_text_key,
+    parse_markdown_note,
+)
 from memory.resources import (
     CATALOG_DIR,
     MEMORY_ROOT,
@@ -33,7 +37,9 @@ def _validate_exists(path: Path, issues: list[ValidationIssue]) -> None:
         issues.append(ValidationIssue(path=str(path), message="missing required file"))
 
 
-def _validate_schema_shape(path: Path, payload: Any, issues: list[ValidationIssue]) -> None:
+def _validate_schema_shape(
+    path: Path, payload: Any, issues: list[ValidationIssue]
+) -> None:
     if not isinstance(payload, dict):
         issues.append(
             ValidationIssue(path=str(path), message="schema root must be a JSON object")
@@ -42,7 +48,9 @@ def _validate_schema_shape(path: Path, payload: Any, issues: list[ValidationIssu
     for key in ("$schema", "title", "type"):
         if key not in payload:
             issues.append(
-                ValidationIssue(path=str(path), message=f"schema missing required key: {key}")
+                ValidationIssue(
+                    path=str(path), message=f"schema missing required key: {key}"
+                )
             )
 
 
@@ -81,7 +89,9 @@ def _validate_storage_policy(
     issues: list[ValidationIssue],
 ) -> None:
     valid_modes = storage_policy.get("storage_modes", [])
-    if not isinstance(valid_modes, list) or not all(isinstance(mode, str) for mode in valid_modes):
+    if not isinstance(valid_modes, list) or not all(
+        isinstance(mode, str) for mode in valid_modes
+    ):
         issues.append(
             ValidationIssue(
                 path="policy/storage.yaml",
@@ -243,9 +253,17 @@ def _schema_value_matches(expected_type: Any, value: Any) -> bool:
     for candidate in candidates:
         if candidate == "string" and isinstance(value, str):
             return True
-        if candidate == "integer" and isinstance(value, int) and not isinstance(value, bool):
+        if (
+            candidate == "integer"
+            and isinstance(value, int)
+            and not isinstance(value, bool)
+        ):
             return True
-        if candidate == "number" and isinstance(value, (int, float)) and not isinstance(value, bool):
+        if (
+            candidate == "number"
+            and isinstance(value, (int, float))
+            and not isinstance(value, bool)
+        ):
             return True
         if candidate == "boolean" and isinstance(value, bool):
             return True
@@ -276,7 +294,9 @@ def _promotion_placeholders(promotion_policy: dict[str, Any]) -> list[str]:
 
 def _contains_placeholder(text: str, promotion_policy: dict[str, Any]) -> bool:
     lowered = text.lower()
-    return any(marker in lowered for marker in _promotion_placeholders(promotion_policy))
+    return any(
+        marker in lowered for marker in _promotion_placeholders(promotion_policy)
+    )
 
 
 def _validate_note_placement(
@@ -319,7 +339,9 @@ def _validate_note_required_fields(
     for field_name in schema.get("required", []):
         if field_name not in metadata:
             issues.append(
-                ValidationIssue(path=str(path), message=f"note missing required field: {field_name}")
+                ValidationIssue(
+                    path=str(path), message=f"note missing required field: {field_name}"
+                )
             )
 
 
@@ -336,7 +358,9 @@ def _validate_note_field_types(
         if field_name not in metadata or not isinstance(field_schema, dict):
             continue
         expected_type = field_schema.get("type")
-        if expected_type is not None and not _schema_value_matches(expected_type, metadata[field_name]):
+        if expected_type is not None and not _schema_value_matches(
+            expected_type, metadata[field_name]
+        ):
             issues.append(
                 ValidationIssue(
                     path=str(path),
@@ -366,7 +390,9 @@ def _validate_note_governance(
     source_refs = metadata.get("source_refs")
     if not isinstance(source_refs, list) or not source_refs:
         issues.append(
-            ValidationIssue(path=str(path), message="note source_refs must be a non-empty list")
+            ValidationIssue(
+                path=str(path), message="note source_refs must be a non-empty list"
+            )
         )
 
     expected_confidence = _expected_confidence_id(confidence_policy, artifact_class)
@@ -383,10 +409,16 @@ def _validate_note_governance(
         )
 
     artifact_classes = retention_policy.get("artifact_classes", {})
-    policy_entry = artifact_classes.get(artifact_class) if isinstance(artifact_classes, dict) else None
+    policy_entry = (
+        artifact_classes.get(artifact_class)
+        if isinstance(artifact_classes, dict)
+        else None
+    )
     if artifact_class == "episodic_note":
         ttl_days = metadata.get("ttl_days")
-        if isinstance(policy_entry, dict) and isinstance(policy_entry.get("ttl_days"), int):
+        if isinstance(policy_entry, dict) and isinstance(
+            policy_entry.get("ttl_days"), int
+        ):
             policy_ttl = policy_entry["ttl_days"]
             if isinstance(ttl_days, int) and ttl_days > policy_ttl:
                 issues.append(
@@ -410,14 +442,16 @@ def _validate_note_governance(
                     path=str(path),
                     message=(
                         f"curated note kind must be {expected_kind_by_dir!r} "
-                    f"inside {parent_dir}/"
+                        f"inside {parent_dir}/"
                     ),
                 )
             )
         summary = metadata.get("summary")
         if not isinstance(summary, str) or not summary.strip():
             issues.append(
-                ValidationIssue(path=str(path), message="curated note summary must be non-empty")
+                ValidationIssue(
+                    path=str(path), message="curated note summary must be non-empty"
+                )
             )
         else:
             min_words = promotion_policy.get("global", {}).get("summary_min_words", 0)
@@ -430,11 +464,21 @@ def _validate_note_governance(
                 )
             if _contains_placeholder(summary, promotion_policy):
                 issues.append(
-                    ValidationIssue(path=str(path), message="curated note summary contains placeholder text")
+                    ValidationIssue(
+                        path=str(path),
+                        message="curated note summary contains placeholder text",
+                    )
                 )
-        if any(_contains_placeholder(str(ref), promotion_policy) for ref in source_refs if isinstance(ref, str)):
+        if any(
+            _contains_placeholder(str(ref), promotion_policy)
+            for ref in source_refs
+            if isinstance(ref, str)
+        ):
             issues.append(
-                ValidationIssue(path=str(path), message="curated note source_refs contain placeholder text")
+                ValidationIssue(
+                    path=str(path),
+                    message="curated note source_refs contain placeholder text",
+                )
             )
 
 
@@ -462,7 +506,9 @@ def _validate_curated_note_body(
             )
     if _contains_placeholder(body, promotion_policy):
         issues.append(
-            ValidationIssue(path=str(path), message="curated note body contains placeholder text")
+            ValidationIssue(
+                path=str(path), message="curated note body contains placeholder text"
+            )
         )
 
 
@@ -525,12 +571,16 @@ def _validate_note_files(
             note = parse_markdown_note(path)
         except Exception as exc:
             issues.append(
-                ValidationIssue(path=str(path), message=f"failed to parse markdown note: {exc}")
+                ValidationIssue(
+                    path=str(path), message=f"failed to parse markdown note: {exc}"
+                )
             )
             continue
 
         schema = schema_map[artifact_class]
-        _validate_note_placement(memory_root, path, artifact_class, placement_rules, issues)
+        _validate_note_placement(
+            memory_root, path, artifact_class, placement_rules, issues
+        )
         _validate_note_required_fields(path, note.metadata, schema, issues)
         _validate_note_field_types(path, note.metadata, schema, issues)
         _validate_note_governance(
@@ -576,7 +626,9 @@ def validate_memory_scaffold(root: Path | None = None) -> list[ValidationIssue]:
 
     for name, payload in {**policy_payloads, **catalog_payloads}.items():
         if not isinstance(payload, dict):
-            issues.append(ValidationIssue(path=name, message="YAML root must be a mapping"))
+            issues.append(
+                ValidationIssue(path=name, message="YAML root must be a mapping")
+            )
 
     for name, payload in schema_payloads.items():
         _validate_schema_shape(Path("schemas") / name, payload, issues)

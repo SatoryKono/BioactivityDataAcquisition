@@ -50,9 +50,19 @@ TASK_PROFILES: dict[str, dict[str, dict[str, int]]] = {
     },
     "audit": {
         "source_type": {"test": 35, "adr": 25, "config": 20, "doc": 15, "code": 10},
-        "domain": {"quality": 25, "architecture": 20, "configuration": 20, "runtime": 10},
+        "domain": {
+            "quality": 25,
+            "architecture": 20,
+            "configuration": 20,
+            "runtime": 10,
+        },
         "repo_zone": {"canonical_quality": 20, "canonical_architecture_docs": 15},
-        "symbol_kind": {"function": 10, "class": 10, "config_section": 12, "markdown_section": 8},
+        "symbol_kind": {
+            "function": 10,
+            "class": 10,
+            "config_section": 12,
+            "markdown_section": 8,
+        },
     },
 }
 
@@ -165,8 +175,12 @@ def score_chunk(
         title = str(chunk.get("title") or "").lower()
         source_path = str(chunk.get("source_path") or "").lower()
         content = str(chunk.get("content") or "").lower()
-        related_refs = " ".join(str(item) for item in chunk.get("related_refs") or []).lower()
-        graph_refs = " ".join(str(item) for item in chunk.get("graph_node_refs") or []).lower()
+        related_refs = " ".join(
+            str(item) for item in chunk.get("related_refs") or []
+        ).lower()
+        graph_refs = " ".join(
+            str(item) for item in chunk.get("graph_node_refs") or []
+        ).lower()
 
         if lowered_query in title:
             score += 30

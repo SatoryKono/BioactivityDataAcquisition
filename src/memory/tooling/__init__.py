@@ -8,6 +8,7 @@ __all__ = [
     "promote_note",
     "prune",
     "refresh_all",
+    "review_curated",
     "validate",
     "workflow",
 ]

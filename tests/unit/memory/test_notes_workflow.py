@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import memory.tooling.promote_note as promote_note_module
 from memory.notes import parse_markdown_note
 from memory.tooling.archive_note import archive_note
 from memory.tooling.create_note import create_note
@@ -67,7 +68,10 @@ def test_promote_note_moves_episodic_into_curated(tmp_path: Path) -> None:
     assert "## Observation" in note.body
 
 
-def test_promote_note_rejects_duplicate_curated_note_without_override(tmp_path: Path) -> None:
+def test_promote_note_rejects_duplicate_curated_note_without_override(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
     source = create_note(
         note_kind="episodic-summary",
         title="Duplicate me",
@@ -82,6 +86,11 @@ def test_promote_note_rejects_duplicate_curated_note_without_override(tmp_path: 
         task_id=None,
         source_refs=["src/memory/README.md"],
         output_path=existing,
+    )
+    monkeypatch.setattr(
+        promote_note_module,
+        "_existing_curated_notes",
+        lambda exclude=None: [existing],
     )
 
     try:
