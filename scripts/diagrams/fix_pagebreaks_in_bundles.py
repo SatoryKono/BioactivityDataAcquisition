@@ -32,34 +32,9 @@ def _safe_bundle_path(path: Path) -> Path:
     return resolved_path
 
 
-def _bundle_relative_path(path: Path) -> Path:
-    safe_path = _safe_bundle_path(path)
-    return safe_path.relative_to(DIAGRAM_ROOT.resolve())
-
-
-def _normalize_bundle_relative_path(path: Path) -> Path:
-    """Normalize and validate a DIAGRAM_ROOT-relative path."""
-    if path.is_absolute():
-        raise ValueError(f"expected bundle-relative path, got absolute path: {path}")
-
-    normalized_parts: list[str] = []
-    for part in path.parts:
-        if part in {"", "."}:
-            continue
-        if part == "..":
-            raise ValueError(f"refusing parent traversal path: {path}")
-        normalized_parts.append(part)
-
-    if not normalized_parts:
-        raise ValueError("refusing empty bundle-relative path")
-    return Path(*normalized_parts)
-
-
-def _write_bundle_text(relative_path: Path, content: str) -> None:
-    """Write bundle content via a DIAGRAM_ROOT-relative path."""
-    safe_relative_path = _normalize_bundle_relative_path(relative_path)
-    target_path = _safe_bundle_path(DIAGRAM_ROOT / safe_relative_path)
-    target_path.write_text(content, encoding="utf-8")
+def _write_bundle_text(path: Path, content: str) -> None:
+    """Write bundle content to a previously validated DIAGRAM_ROOT path."""
+    path.write_text(content, encoding="utf-8")
 
 
 def fix_bundle(md_path: Path) -> int:
@@ -132,7 +107,7 @@ def fix_bundle(md_path: Path) -> int:
 
     if changes > 0:
         result = "\n".join(out) + "\n"
-        _write_bundle_text(_bundle_relative_path(safe_path), result)
+        _write_bundle_text(safe_path, result)
         print(f"[OK] Fixed {changes} items in {safe_path.name}")
     else:
         print(f"[SKIP] No changes needed: {safe_path.name}")

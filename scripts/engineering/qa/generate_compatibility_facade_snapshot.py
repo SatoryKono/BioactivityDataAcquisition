@@ -77,10 +77,9 @@ def _resolve_canonical_output_path(raw_output: str | Path) -> Path:
     return canonical_output
 
 
-def _write_snapshot_text(path: Path, content: str) -> None:
+def _write_snapshot_text(content: str) -> None:
     """Write generated snapshot content to the canonical tracked artifact."""
-    safe_path = _resolve_canonical_output_path(path)
-    safe_path.write_text(content, encoding="utf-8")
+    _ensure_repo_path(DEFAULT_OUTPUT).write_text(content, encoding="utf-8")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -419,7 +418,7 @@ def main() -> int:
         return 0
     output_path.parent.mkdir(parents=True, exist_ok=True)
     rendered_with_frontmatter = f"{frontmatter}{rendered}" if frontmatter else rendered
-    _write_snapshot_text(output_path, rendered_with_frontmatter)
+    _write_snapshot_text(rendered_with_frontmatter)
     print(f"[updated] wrote {output_path.as_posix()}")
     if _validation_has_issues(
         unexpected=unexpected,

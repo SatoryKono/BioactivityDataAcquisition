@@ -318,12 +318,56 @@ def has_valid_suffix(class_name: str, allowed_no_suffix: frozenset[str]) -> bool
     return False
 
 
-def check_python_modules(base_path: Path) -> Iterator[Violation]:
-    """Проверяет naming conventions для Python-модулей."""
+def _iter_python_files(base_path: Path) -> Iterator[Path]:
     for py_file in base_path.rglob("*.py"):
         if "__pycache__" in str(py_file):
             continue
+        yield py_file
 
+
+def _class_naming_violation(py_file: Path, node: ast.ClassDef) -> Violation | None:
+    class_name = node.name
+
+    if class_name.startswith("_") and not class_name.startswith("__"):
+        return None
+
+    if is_pascal_case(class_name) or class_name.startswith("_"):
+        return None
+
+    return Violation(
+        category="class",
+        path=str(py_file),
+        line=node.lineno,
+        current_name=class_name,
+        issue=ViolationType.CAMELCASE,
+        recommendation=class_name[0].upper() + class_name[1:],
+    )
+
+
+def _doc_relative_parts(docs_path: Path, md_file: Path) -> tuple[Path | None, tuple[str, ...]]:
+    try:
+        rel = md_file.relative_to(docs_path)
+        return rel, rel.parts
+    except ValueError:
+        return None, ()
+
+
+def _is_excluded_doc_path(docs_path: Path, md_file: Path) -> bool:
+    rel, rel_parts = _doc_relative_parts(docs_path, md_file)
+    if rel_parts and rel_parts[0] in _DOC_EXCLUDED_DIRS:
+        return True
+    if rel is None:
+        return False
+    normalized_rel = str(rel).replace("\\", "/")
+    return any(
+        normalized_rel.startswith(_normalize_doc_excluded_subpath(subpath))
+        for subpath in _DOC_EXCLUDED_SUBPATHS
+    )
+
+
+def check_python_modules(base_path: Path) -> Iterator[Violation]:
+    """Проверяет naming conventions для Python-модулей."""
+    for py_file in _iter_python_files(base_path):
         filename = py_file.stem
         if filename.startswith("__"):  # __init__, __main__
             continue
@@ -353,10 +397,7 @@ def check_python_modules(base_path: Path) -> Iterator[Violation]:
 
 def check_classes(base_path: Path) -> Iterator[Violation]:
     """Проверяет naming conventions для классов."""
-    for py_file in base_path.rglob("*.py"):
-        if "__pycache__" in str(py_file):
-            continue
-
+    for py_file in _iter_python_files(base_path):
         try:
             with open(py_file, encoding="utf-8") as f:
                 tree = ast.parse(f.read(), filename=str(py_file))
@@ -364,23 +405,10 @@ def check_classes(base_path: Path) -> Iterator[Violation]:
             continue
 
         for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                class_name = node.name
-
-                # Проверка PascalCase (должна начинаться с заглавной, но не с _)
-                if class_name.startswith("_") and not class_name.startswith("__"):
-                    # Приватные классы типа _NoOpSpan допустимы
-                    continue
-
-                if not is_pascal_case(class_name) and not class_name.startswith("_"):
-                    yield Violation(
-                        category="class",
-                        path=str(py_file),
-                        line=node.lineno,
-                        current_name=class_name,
-                        issue=ViolationType.CAMELCASE,
-                        recommendation=class_name[0].upper() + class_name[1:],
-                    )
+            if not isinstance(node, ast.ClassDef):
+                continue
+            if violation := _class_naming_violation(py_file, node):
+                yield violation
 
 
 def check_documentation(
@@ -394,19 +422,7 @@ def check_documentation(
         if filename in documentation_exceptions:
             continue
 
-        # Пропуск исключённых директорий (архивы, планы, AI)
-        try:
-            rel = md_file.relative_to(docs_path)
-            rel_parts = rel.parts
-        except ValueError:
-            rel_parts = ()
-            rel = None
-        if rel_parts and rel_parts[0] in _DOC_EXCLUDED_DIRS:
-            continue
-        if rel is not None and any(
-            str(rel).replace("\\", "/").startswith(_normalize_doc_excluded_subpath(sp))
-            for sp in _DOC_EXCLUDED_SUBPATHS
-        ):
+        if _is_excluded_doc_path(docs_path, md_file):
             continue
 
         basename = md_file.stem
