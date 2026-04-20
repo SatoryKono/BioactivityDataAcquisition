@@ -530,21 +530,21 @@ class TestGodObjectDetection:
         Returns:
             Number of unique delegation patterns found.
         """
-        delegations: set[str] = set()
-
-        for node in ast.walk(class_node):
-            # Look for self._component.method() pattern
-            if isinstance(node, ast.Call):
-                if isinstance(node.func, ast.Attribute):
-                    # Check if it's self._component.method()
-                    value = node.func.value
-                    if isinstance(value, ast.Attribute):
-                        if (
-                            isinstance(value.value, ast.Name)
-                            and value.value.id == "self"
-                        ):
-                            if value.attr.startswith("_"):
-                                # Found delegation: self._component.method()
-                                delegations.add(f"{value.attr}.{node.func.attr}")
-
+        delegations = {
+            pattern
+            for node in ast.walk(class_node)
+            if (pattern := self._delegation_pattern(node)) is not None
+        }
         return len(delegations)
+
+    def _delegation_pattern(self, node: ast.AST) -> str | None:
+        if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+            return None
+        value = node.func.value
+        if not isinstance(value, ast.Attribute):
+            return None
+        if not isinstance(value.value, ast.Name) or value.value.id != "self":
+            return None
+        if not value.attr.startswith("_"):
+            return None
+        return f"{value.attr}.{node.func.attr}"

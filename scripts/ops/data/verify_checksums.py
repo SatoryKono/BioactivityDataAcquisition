@@ -429,6 +429,45 @@ def verify_checksums(
 # =============================================================================
 
 
+def _results_by_status(report: VerificationReport) -> dict[str, list[VerificationResult]]:
+    by_status: dict[str, list[VerificationResult]] = {}
+    for result in report.results:
+        by_status.setdefault(result.status, []).append(result)
+    return by_status
+
+
+def _log_missing_files(results: list[VerificationResult]) -> None:
+    logger.info("## MISSING FILES (%d)", len(results))
+    for result in results:
+        logger.info("  [!] %s", result.path)
+    logger.info("")
+
+
+def _log_modified_files(results: list[VerificationResult]) -> None:
+    logger.info("## MODIFIED FILES (%d)", len(results))
+    for result in results:
+        size_info = ""
+        if result.size_change:
+            size_info = f" ({result.size_change:+d} bytes)"
+        logger.info("  [M] %s%s", result.path, size_info)
+        logger.info(
+            "      Expected: %s...",
+            result.expected_hash[:16] if result.expected_hash else "N/A",
+        )
+        logger.info(
+            "      Actual:   %s...",
+            result.actual_hash[:16] if result.actual_hash else "N/A",
+        )
+    logger.info("")
+
+
+def _log_new_files(results: list[VerificationResult]) -> None:
+    logger.info("## NEW FILES (%d) - not in manifest", len(results))
+    for result in results:
+        logger.info("  [+] %s", result.path)
+    logger.info("")
+
+
 def log_report_text(report: VerificationReport) -> None:
     """Log text verification report."""
     logger.info("")
@@ -442,39 +481,16 @@ def log_report_text(report: VerificationReport) -> None:
         logger.info("Manifest date:    %s", report.manifest_date)
         logger.info("")
 
-    # Group by status
-    by_status: dict[str, list[VerificationResult]] = {}
-    for r in report.results:
-        by_status.setdefault(r.status, []).append(r)
+    by_status = _results_by_status(report)
 
-    # Show issues first
     if "missing" in by_status:
-        logger.info("## MISSING FILES (%d)", len(by_status["missing"]))
-        for r in by_status["missing"]:
-            logger.info("  [!] %s", r.path)
-        logger.info("")
+        _log_missing_files(by_status["missing"])
 
     if "modified" in by_status:
-        logger.info("## MODIFIED FILES (%d)", len(by_status["modified"]))
-        for r in by_status["modified"]:
-            size_info = ""
-            if r.size_change:
-                size_info = f" ({r.size_change:+d} bytes)"
-            logger.info("  [M] %s%s", r.path, size_info)
-            logger.info(
-                "      Expected: %s...",
-                r.expected_hash[:16] if r.expected_hash else "N/A",
-            )
-            logger.info(
-                "      Actual:   %s...", r.actual_hash[:16] if r.actual_hash else "N/A"
-            )
-        logger.info("")
+        _log_modified_files(by_status["modified"])
 
     if "new" in by_status:
-        logger.info("## NEW FILES (%d) - not in manifest", len(by_status["new"]))
-        for r in by_status["new"]:
-            logger.info("  [+] %s", r.path)
-        logger.info("")
+        _log_new_files(by_status["new"])
 
     # Summary
     logger.info("=" * 70)
