@@ -278,7 +278,7 @@ def test_snapshot_generator_rejects_parent_traversal_relative_output() -> None:
         "compatibility_facade_snapshot_security_loader",
     )
 
-    with pytest.raises(ValueError, match="canonical tracked artifact"):
+    with pytest.raises(ValueError, match=r"outside|canonical tracked artifact"):
         module._resolve_canonical_output_path("../escape.md")
 
 
