@@ -843,60 +843,137 @@ def _iter_call_keyword_violations(
     return violations
 
 
-_INTERNAL_CLI_MODULE_IMPORT_CASES = (
+def _assert_no_violations(violations: list[str], failure_message: str) -> None:
+    """Assert violation lists with one consistent failure rendering."""
+    assert not violations, failure_message + "\n" + "\n".join(violations)
+
+
+def _resolve_cache_fixture(
+    request: pytest.FixtureRequest,
+    cache_fixture_name: str,
+) -> dict[Path, ast.Module]:
+    """Resolve one AST cache fixture by name for parametrized seam checks."""
+    return request.getfixturevalue(cache_fixture_name)
+
+
+_MODULE_IMPORT_SCOPE_CASES = (
     pytest.param(
+        "src",
+        "source_ast_cache",
+        TRANSFORMER_DEPENDENCY_SHIM,
+        frozenset(),
+        "base_transformer dependency compatibility shim is still imported from src/:",
+        id="transformer-shim-src",
+    ),
+    pytest.param(
+        "tests",
+        "test_ast_cache",
+        TRANSFORMER_DEPENDENCY_SHIM,
+        frozenset(),
+        "base_transformer dependency compatibility shim must stay removed from tests:",
+        id="transformer-shim-tests",
+    ),
+    pytest.param(
+        "src",
+        "source_ast_cache",
+        CLI_REGISTRY_HELPER_MODULE,
+        ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES,
+        "CLI registry helper compatibility seam leaked beyond the known CLI src entrypoints:",
+        id="cli-registry-helper-src",
+    ),
+    pytest.param(
+        "src",
+        "source_ast_cache",
         RUN_COMMAND_INTERNAL_MODULE,
         ALLOWED_RUN_COMMAND_INTERNAL_SRC_FILES,
         "Internal run command module leaked into first-party src imports:",
         id="run",
     ),
     pytest.param(
+        "src",
+        "source_ast_cache",
         RUN_ALL_COMMAND_INTERNAL_MODULE,
         ALLOWED_RUN_ALL_COMMAND_INTERNAL_SRC_FILES,
         "Internal run-all command module leaked into first-party src imports:",
         id="run-all",
     ),
     pytest.param(
+        "src",
+        "source_ast_cache",
         RUN_COMPOSITE_COMMAND_INTERNAL_MODULE,
         ALLOWED_RUN_COMPOSITE_COMMAND_INTERNAL_SRC_FILES,
         "Internal run-composite command module leaked into first-party src imports:",
         id="run-composite",
     ),
     pytest.param(
+        "src",
+        "source_ast_cache",
         HEALTH_COMMAND_INTERNAL_MODULE,
         ALLOWED_HEALTH_COMMAND_INTERNAL_SRC_FILES,
         "Internal health command module leaked into first-party src imports:",
         id="health",
     ),
     pytest.param(
+        "src",
+        "source_ast_cache",
         QUARANTINE_COMMAND_INTERNAL_MODULE,
         ALLOWED_QUARANTINE_COMMAND_INTERNAL_SRC_FILES,
         "Internal quarantine command module leaked into first-party src imports:",
         id="quarantine",
     ),
     pytest.param(
+        "src",
+        "source_ast_cache",
         MAINTENANCE_COMMAND_INTERNAL_MODULE,
         ALLOWED_MAINTENANCE_COMMAND_INTERNAL_SRC_FILES,
         "Internal maintenance command module leaked into first-party src imports:",
         id="maintenance",
     ),
     pytest.param(
+        "src",
+        "source_ast_cache",
         ARCHIVE_COMMAND_INTERNAL_MODULE,
         ALLOWED_ARCHIVE_COMMAND_INTERNAL_SRC_FILES,
         "Internal archive command module leaked into first-party src imports:",
         id="archive",
     ),
     pytest.param(
+        "src",
+        "source_ast_cache",
         CLEANUP_COMMAND_INTERNAL_MODULE,
         ALLOWED_CLEANUP_COMMAND_INTERNAL_SRC_FILES,
         "Internal cleanup command module leaked into first-party src imports:",
         id="cleanup",
     ),
     pytest.param(
+        "src",
+        "source_ast_cache",
         VACUUM_COMMAND_INTERNAL_MODULE,
         ALLOWED_VACUUM_COMMAND_INTERNAL_SRC_FILES,
         "Internal vacuum command module leaked into first-party src imports:",
         id="vacuum",
+    ),
+    pytest.param(
+        "src",
+        "source_ast_cache",
+        "bioetl.composition.registry",
+        ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES,
+        (
+            "Direct src imports of bioetl.composition.registry leaked beyond the "
+            "canonical package-root and compatibility seams:"
+        ),
+        id="registry-module-src",
+    ),
+    pytest.param(
+        "tests",
+        "test_ast_cache",
+        "bioetl.composition.registry",
+        ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES,
+        (
+            "Direct test imports of bioetl.composition.registry leaked beyond "
+            "dedicated registry compatibility coverage:"
+        ),
+        id="registry-module-tests",
     ),
 )
 
@@ -990,22 +1067,7 @@ _TEST_FACING_HELPER_SEAM_CASES = (
     ),
 )
 
-_TRANSFORMER_DEPENDENCY_SHIM_ABSENCE_CASES = (
-    pytest.param(
-        "src",
-        "source_ast_cache",
-        "base_transformer dependency compatibility shim is still imported from src/:",
-        id="src",
-    ),
-    pytest.param(
-        "tests",
-        "test_ast_cache",
-        "base_transformer dependency compatibility shim must stay removed from tests:",
-        id="tests",
-    ),
-)
-
-_CLI_REGISTRY_HELPER_SYMBOL_ABSENCE_CASES = (
+_IMPORTED_SYMBOL_SCOPE_CASES = (
     pytest.param(
         "src",
         "source_ast_cache",
@@ -1024,13 +1086,9 @@ _CLI_REGISTRY_HELPER_SYMBOL_ABSENCE_CASES = (
         "Tests still import registry_helpers.get_default_registry directly:",
         id="cli-registry-helper-tests",
     ),
-)
-
-_COMPOSITION_REGISTRY_COMPATIBILITY_CASES = (
     pytest.param(
         "src",
         "source_ast_cache",
-        "imported_symbol",
         frozenset({"bioetl.composition.registry"}),
         "get_default_registry",
         ALLOWED_COMPOSITION_DEFAULT_REGISTRY_SRC_FILES,
@@ -1041,22 +1099,8 @@ _COMPOSITION_REGISTRY_COMPATIBILITY_CASES = (
         id="default-registry-src",
     ),
     pytest.param(
-        "src",
-        "source_ast_cache",
-        "module_import",
-        "bioetl.composition.registry",
-        None,
-        ALLOWED_COMPOSITION_REGISTRY_MODULE_SRC_FILES,
-        (
-            "Direct src imports of bioetl.composition.registry leaked beyond the "
-            "canonical package-root and compatibility seams:"
-        ),
-        id="registry-module-src",
-    ),
-    pytest.param(
         "tests",
         "test_ast_cache",
-        "imported_symbol",
         frozenset({"bioetl.composition.registry"}),
         "get_default_registry",
         ALLOWED_COMPOSITION_DEFAULT_REGISTRY_TEST_FILES,
@@ -1065,19 +1109,6 @@ _COMPOSITION_REGISTRY_COMPATIBILITY_CASES = (
             "sites:"
         ),
         id="default-registry-tests",
-    ),
-    pytest.param(
-        "tests",
-        "test_ast_cache",
-        "module_import",
-        "bioetl.composition.registry",
-        None,
-        ALLOWED_COMPOSITION_REGISTRY_MODULE_TEST_FILES,
-        (
-            "Direct test imports of bioetl.composition.registry leaked beyond "
-            "dedicated registry compatibility coverage:"
-        ),
-        id="registry-module-tests",
     ),
 )
 
@@ -1093,59 +1124,32 @@ def test_transformer_dependency_compat_shim_file_has_been_removed() -> None:
 
 @pytest.mark.architecture
 @pytest.mark.parametrize(
-    ("scope_label", "cache_fixture_name", "failure_message"),
-    _TRANSFORMER_DEPENDENCY_SHIM_ABSENCE_CASES,
+    (
+        "scope_label",
+        "cache_fixture_name",
+        "module_name",
+        "allowed_files",
+        "failure_message",
+    ),
+    _MODULE_IMPORT_SCOPE_CASES,
 )
-def test_transformer_dependency_compat_shim_is_not_used(
+def test_module_import_seams_are_confined(
     request: pytest.FixtureRequest,
     scope_label: str,
     cache_fixture_name: str,
-    failure_message: str,
-) -> None:
-    """Removed dependency shim must stay absent from src and tests."""
-    del scope_label
-    ast_cache = request.getfixturevalue(cache_fixture_name)
-    violations = _iter_module_import_violations(
-        ast_cache,
-        module_name=TRANSFORMER_DEPENDENCY_SHIM,
-        allowed_files=frozenset(),
-    )
-    assert not violations, failure_message + "\n" + "\n".join(violations)
-
-
-@pytest.mark.architecture
-def test_cli_registry_helper_module_is_confined_to_cli_src_entrypoints(
-    source_ast_cache: dict[Path, ast.Module],
-) -> None:
-    """Compatibility CLI registry helper must not leak outside the CLI perimeter."""
-    violations = _iter_module_import_violations(
-        source_ast_cache,
-        module_name=CLI_REGISTRY_HELPER_MODULE,
-        allowed_files=ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES,
-    )
-    assert not violations, (
-        "CLI registry helper compatibility seam leaked beyond the known CLI src "
-        "entrypoints:\n" + "\n".join(violations)
-    )
-
-
-@pytest.mark.parametrize(
-    ("module_name", "allowed_files", "failure_message"),
-    _INTERNAL_CLI_MODULE_IMPORT_CASES,
-)
-def test_internal_cli_command_modules_are_confined_to_known_src_seams(
-    source_ast_cache: dict[Path, ast.Module],
     module_name: str,
     allowed_files: frozenset[Path],
     failure_message: str,
 ) -> None:
-    """First-party src should only import retained internal CLI command seams."""
+    """Module import seams must stay frozen to the known src and test call sites."""
+    del scope_label
+    ast_cache = _resolve_cache_fixture(request, cache_fixture_name)
     violations = _iter_module_import_violations(
-        source_ast_cache,
+        ast_cache,
         module_name=module_name,
         allowed_files=allowed_files,
     )
-    assert not violations, failure_message + "\n" + "\n".join(violations)
+    _assert_no_violations(violations, failure_message)
 
 
 @pytest.mark.architecture
@@ -1197,9 +1201,9 @@ def test_test_facing_helper_seams_are_not_imported_in_first_party_src(
         "allowed_files",
         "failure_message",
     ),
-    _CLI_REGISTRY_HELPER_SYMBOL_ABSENCE_CASES,
+    _IMPORTED_SYMBOL_SCOPE_CASES,
 )
-def test_cli_registry_helper_get_default_registry_import_is_absent(
+def test_imported_symbol_seams_are_confined(
     request: pytest.FixtureRequest,
     scope_label: str,
     cache_fixture_name: str,
@@ -1208,58 +1212,13 @@ def test_cli_registry_helper_get_default_registry_import_is_absent(
     allowed_files: frozenset[Path],
     failure_message: str,
 ) -> None:
-    """Registry-helper default access must stay absent from src and tests."""
+    """Imported symbol seams must stay frozen to the known src and test sites."""
     del scope_label
-    ast_cache = request.getfixturevalue(cache_fixture_name)
+    ast_cache = _resolve_cache_fixture(request, cache_fixture_name)
     violations = _iter_imported_symbol_violations(
         ast_cache,
         module_names=module_names,
         symbol=symbol,
         allowed_files=allowed_files,
     )
-    assert not violations, failure_message + "\n" + "\n".join(violations)
-
-
-@pytest.mark.architecture
-@pytest.mark.parametrize(
-    (
-        "scope_label",
-        "cache_fixture_name",
-        "check_kind",
-        "target",
-        "symbol",
-        "allowed_files",
-        "failure_message",
-    ),
-    _COMPOSITION_REGISTRY_COMPATIBILITY_CASES,
-)
-def test_composition_registry_compatibility_seams_are_confined(
-    request: pytest.FixtureRequest,
-    scope_label: str,
-    cache_fixture_name: str,
-    check_kind: str,
-    target: str | frozenset[str],
-    symbol: str | None,
-    allowed_files: frozenset[Path],
-    failure_message: str,
-) -> None:
-    """Registry imports must stay frozen to the known src and test seams."""
-    del scope_label
-    ast_cache = request.getfixturevalue(cache_fixture_name)
-    if check_kind == "imported_symbol":
-        assert isinstance(target, frozenset)
-        assert symbol is not None
-        violations = _iter_imported_symbol_violations(
-            ast_cache,
-            module_names=target,
-            symbol=symbol,
-            allowed_files=allowed_files,
-        )
-    else:
-        assert isinstance(target, str)
-        violations = _iter_module_import_violations(
-            ast_cache,
-            module_name=target,
-            allowed_files=allowed_files,
-        )
-    assert not violations, failure_message + "\n" + "\n".join(violations)
+    _assert_no_violations(violations, failure_message)

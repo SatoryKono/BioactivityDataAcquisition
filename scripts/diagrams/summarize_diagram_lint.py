@@ -9,6 +9,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+NONE_MESSAGE = "  - none"
+
 
 def _out(message: str) -> None:
     sys.stdout.write(f"{message}\n")
@@ -16,9 +18,6 @@ def _out(message: str) -> None:
 
 def _err(message: str) -> None:
     sys.stderr.write(f"{message}\n")
-
-
-def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Summarize output produced by scripts/diagrams/lint_diagrams.py --json",
     )
@@ -72,21 +71,21 @@ def main() -> int:
     for sev in sorted(severity_counts):
         _out(f"  - {sev}: {severity_counts[sev]}")
     if not severity_counts:
-        _out("  - none")
+        _out(NONE_MESSAGE)
     _out("")
 
     _out(f"Top {args.top_rules} rules:")
     for rule, count in rule_counts.most_common(args.top_rules):
         _out(f"  - {rule}: {count}")
     if not rule_counts:
-        _out("  - none")
+        _out(NONE_MESSAGE)
     _out("")
 
     _out("Top files by issue count:")
     for file_name, count in file_counts.most_common(10):
         _out(f"  - {file_name}: {count}")
     if not file_counts:
-        _out("  - none")
+        _out(NONE_MESSAGE)
 
     return 0
 
