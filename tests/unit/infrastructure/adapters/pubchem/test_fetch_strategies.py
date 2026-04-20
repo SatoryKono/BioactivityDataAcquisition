@@ -96,6 +96,12 @@ async def collect_async_iterator(
     return result
 
 
+async def drain_async_iterator(async_iter: AsyncIterator[Any]) -> None:
+    """Consume an async iterator until completion."""
+    async for _ in async_iter:
+        continue
+
+
 @pytest.mark.unit
 class TestPubChemFetchStrategiesInit:
     """Tests for PubChemFetchStrategies initialization."""
@@ -181,8 +187,7 @@ class TestFetchByQuery:
         """Test that fetch_by_query acquires rate limit."""
         mock_circuit_breaker.call.return_value = []
 
-        async for _ in fetch_strategies.fetch_by_query("aspirin", limit=10):
-            pass
+        await drain_async_iterator(fetch_strategies.fetch_by_query("aspirin", limit=10))
 
         mock_rate_limiter.acquire.assert_called_once()
 
@@ -193,8 +198,7 @@ class TestFetchByQuery:
         """Test that fetch_by_query uses circuit breaker."""
         mock_circuit_breaker.call.return_value = []
 
-        async for _ in fetch_strategies.fetch_by_query("aspirin", limit=10):
-            pass
+        await drain_async_iterator(fetch_strategies.fetch_by_query("aspirin", limit=10))
 
         mock_circuit_breaker.call.assert_called_once()
 
@@ -425,8 +429,7 @@ class TestFetchSubstances:
     async def test_fetch_substances_raises_on_empty_query(self, fetch_strategies):
         """Test that fetch_substances raises ValueError for empty query."""
         with pytest.raises(ValueError, match="Query is required"):
-            async for _ in fetch_strategies.fetch_substances(None, limit=10):
-                pass
+            await drain_async_iterator(fetch_strategies.fetch_substances(None, limit=10))
 
     @pytest.mark.asyncio
     async def test_fetch_substances_yields_substances(
@@ -479,8 +482,7 @@ class TestFetchAssays:
     async def test_fetch_assays_raises_on_empty_query(self, fetch_strategies):
         """Test that fetch_assays raises ValueError for empty query."""
         with pytest.raises(ValueError, match="Query is required"):
-            async for _ in fetch_strategies.fetch_assays(None, limit=10):
-                pass
+            await drain_async_iterator(fetch_strategies.fetch_assays(None, limit=10))
 
     @pytest.mark.asyncio
     async def test_fetch_assays_yields_assays(

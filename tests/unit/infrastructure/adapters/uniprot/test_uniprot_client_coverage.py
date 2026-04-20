@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -12,6 +13,12 @@ from bioetl.infrastructure.adapters.common.deduplication import (
 )
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
+
+
+async def _drain_async_iter(async_iter: AsyncIterator[object]) -> None:
+    """Consume an async iterator until completion."""
+    async for _ in async_iter:
+        continue
 
 
 @pytest.fixture
@@ -128,8 +135,9 @@ async def test_fetch_routes_to_fetch_filtered_when_ids_passed(adapter):
 @pytest.mark.asyncio
 async def test_fetch_filtered_unsupported_entity_raises(adapter):
     with pytest.raises(ValueError, match="Unsupported entity type"):
-        async for _ in adapter.fetch_filtered("unknown", ["P1"], "accession"):
-            pass
+        await _drain_async_iter(
+            adapter.fetch_filtered("unknown", ["P1"], "accession")
+        )
 
 
 @pytest.mark.asyncio
@@ -199,8 +207,7 @@ async def test_fetch_multi_filtered_paths(adapter):
     assert empty == []
 
     with pytest.raises(ValueError, match="Unsupported entity type"):
-        async for _ in adapter.fetch_multi_filtered("unknown", {"x": ["1"]}):
-            pass
+        await _drain_async_iter(adapter.fetch_multi_filtered("unknown", {"x": ["1"]}))
 
     records = []
     async for record in adapter.fetch_multi_filtered(
@@ -435,12 +442,10 @@ async def test_features_and_sequences_error_paths(adapter, mock_http_client):
     assert await adapter._get_sequence_fasta("P1") is None
 
     with pytest.raises(ValueError, match="Query is required for feature search"):
-        async for _ in adapter._fetch_features(None, limit=None):
-            pass
+        await _drain_async_iter(adapter._fetch_features(None, limit=None))
 
     with pytest.raises(ValueError, match="Query is required for sequence fetch"):
-        async for _ in adapter._fetch_sequences(None, limit=None):
-            pass
+        await _drain_async_iter(adapter._fetch_sequences(None, limit=None))
 
 
 @pytest.mark.asyncio

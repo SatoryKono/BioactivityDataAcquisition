@@ -26,6 +26,12 @@ from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
 )
 
 
+async def _drain_async_iter(async_iter) -> None:
+    """Consume an async iterator until completion."""
+    async for _ in async_iter:
+        continue
+
+
 @pytest.fixture
 def mock_http_client():
     client = AsyncMock()
@@ -235,8 +241,7 @@ async def test_fetch_error(adapter, mock_http_client):
     mock_http_client.get.side_effect = RuntimeError("API Error")
 
     with pytest.raises(ExternalServiceError):
-        async for _ in adapter.fetch("activity"):
-            pass
+        await _drain_async_iter(adapter.fetch("activity"))
 
     # Error tracking is now handled by circuit breaker, no adapter state to check
 
@@ -313,7 +318,7 @@ async def test_health_check_status_endpoint_500_returns_degraded(
     """Treat ChEMBL status endpoint 5xx as DEGRADED to avoid hard preflight block."""
 
     class StatusProbeError(RuntimeError):
-        pass
+        """Synthetic status probe failure used by the test."""
 
     error = StatusProbeError("status endpoint failed")
     error.response = MagicMock(status_code=500)
@@ -330,7 +335,7 @@ async def test_check_health_status_endpoint_500_returns_degraded(
     """check_health() should return DEGRADED (not UNHEALTHY) on status endpoint 5xx."""
 
     class StatusProbeError(RuntimeError):
-        pass
+        """Synthetic status probe failure used by the test."""
 
     error = StatusProbeError("status endpoint failed")
     error.response = MagicMock(status_code=500)
@@ -417,8 +422,7 @@ class TestChemblAdapterErrorClassification:
         mock_http_client.get.side_effect = RateLimitError("chembl", 60.0)
 
         with pytest.raises(ExternalServiceError):
-            async for _ in adapter.fetch("activity"):
-                pass
+            await _drain_async_iter(adapter.fetch("activity"))
 
         # Verify error was logged with classification
         mock_logger.error.assert_called()
@@ -437,8 +441,7 @@ class TestChemblAdapterErrorClassification:
         mock_http_client.get.side_effect = RateLimitError("chembl", 60.0)
 
         with pytest.raises(ExternalServiceError):
-            async for _ in adapter.fetch("activity"):
-                pass
+            await _drain_async_iter(adapter.fetch("activity"))
 
         # Verify circuit breaker was consulted for health status
         mock_http_client.circuit_breaker.get_failure_count.assert_called()

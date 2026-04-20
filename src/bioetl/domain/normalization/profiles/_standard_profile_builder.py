@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field, fields
-from typing import cast
 
 from bioetl.domain.normalization.profiles._standard_profile_rule_components import (
     RuleComponent,

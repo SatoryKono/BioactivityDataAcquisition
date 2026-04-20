@@ -154,6 +154,7 @@ run_python() {
     else
         "$PYTHON_BIN" "$@"
     fi
+    return 0
 }
 
 pytest_only_stamp_file() {
@@ -299,6 +300,7 @@ for key in ("tests", "dev", "tracing"):
 for dep in deps:
     print(dep)
 PY
+    return 0
 }
 
 ensure_temp_pytest_runtime_venv() {
@@ -331,6 +333,7 @@ ensure_temp_pytest_runtime_venv() {
 
     PYTHON_BIN="$TEMP_PYTEST_VENV_DIR/bin/python"
     PYTHON_KIND="temp-posix-venv"
+    return 0
 }
 
 write_pytest_runtime_env_file() {
@@ -343,6 +346,7 @@ write_pytest_runtime_env_file() {
     {
         printf 'export BIOETL_PYTEST_RUNTIME_PYTHON=%q\n' "$PYTHON_BIN"
     } >"$PYTEST_RUNTIME_ENV_FILE"
+    return 0
 }
 
 if [[ -f "$PYTEST_RUNTIME_ENV_FILE" ]]; then
@@ -422,6 +426,7 @@ if missing:
 
 print("[setup-plugins][ok] pytest plugins are available")
 PY
+    return 0
 }
 
 install_precommit() {
@@ -538,6 +543,7 @@ Set-Location '$repo_root_win'
             log_warn "Not a git repository, skipping pre-commit install"
         fi
     fi
+    return 0
 }
 
 if pytest_only_stamp_is_fresh; then

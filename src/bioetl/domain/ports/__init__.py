@@ -244,8 +244,8 @@ __all__ = [
     "StorageMaintenancePort",
     "StoragePort",
     "TracingPort",
-    "coerce_silver_write_request",
     "coerce_silver_dq_analyze_request",
+    "coerce_silver_write_request",
     "resolve_metric_labels",
 ]
 

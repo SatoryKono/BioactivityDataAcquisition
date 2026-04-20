@@ -121,6 +121,12 @@ class MockFilterableDataSource:
 assert isinstance(MockFilterableDataSource(), FilterableDataSourcePort)
 
 
+async def _drain_async_iter(async_iter) -> None:
+    """Consume an async iterator until completion."""
+    async for _ in async_iter:
+        continue
+
+
 @pytest.fixture
 def mock_data_source():
     """Create a mock data source (does NOT implement FilterableDataSourcePort)."""
@@ -414,8 +420,7 @@ class TestFilteredDataSourceFetch:
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
-            async for _ in filtered.fetch("activity"):
-                pass
+            await _drain_async_iter(filtered.fetch("activity"))
 
 
 @pytest.mark.unit
@@ -729,8 +734,7 @@ class TestFilteredDataSourceMultiColumn:
         with pytest.raises(
             TypeError, match="does not implement FilterableDataSourcePort"
         ):
-            async for _ in filtered.fetch("activity"):
-                pass
+            await _drain_async_iter(filtered.fetch("activity"))
 
 
 @pytest.mark.unit
@@ -1123,5 +1127,4 @@ class TestFilteredDataSourceValidCombinations:
         object.__setattr__(filtered._filter_config, "filter_field", None)
 
         with pytest.raises(ValueError, match="filter_field must be specified"):
-            async for _ in filtered.fetch("activity"):
-                pass
+            await _drain_async_iter(filtered.fetch("activity"))

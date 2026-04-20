@@ -2,6 +2,7 @@ from __future__ import annotations
 
 "Tests for UniProt Adapter."
 
+from collections.abc import AsyncIterator
 from unittest.mock import MagicMock
 
 import pytest
@@ -14,6 +15,12 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucketRateLimiter
 from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 from tests.helpers.adapter_runtime import build_http_adapter_runtime_kwargs
+
+
+async def _drain_async_iter(async_iter: AsyncIterator[object]) -> None:
+    """Consume an async iterator until completion."""
+    async for _ in async_iter:
+        continue
 
 
 @pytest.fixture
@@ -169,24 +176,21 @@ async def test_fetch_unsupported_entity(uniprot_adapter):
     """Test fetching unsupported entity raises ValueError."""
     async with uniprot_adapter:
         with pytest.raises(ValueError, match="Unsupported entity type"):
-            async for _ in uniprot_adapter.fetch("invalid_entity"):
-                pass
+            await _drain_async_iter(uniprot_adapter.fetch("invalid_entity"))
 
 
 async def test_fetch_features_missing_query(uniprot_adapter):
     """Test fetching features without query raises ValueError."""
     async with uniprot_adapter:
         with pytest.raises(ValueError, match="Query is required"):
-            async for _ in uniprot_adapter.fetch("feature"):
-                pass
+            await _drain_async_iter(uniprot_adapter.fetch("feature"))
 
 
 async def test_fetch_sequences_missing_query(uniprot_adapter):
     """Test fetching sequences without query raises ValueError."""
     async with uniprot_adapter:
         with pytest.raises(ValueError, match="Query is required"):
-            async for _ in uniprot_adapter.fetch("sequence"):
-                pass
+            await _drain_async_iter(uniprot_adapter.fetch("sequence"))
 
 
 @respx.mock
