@@ -16,6 +16,7 @@ STABLE_DOI = "10.1038/s41586-020-2649-2"
 SEARCH_TITLE = "SARS-CoV-2"
 SEARCH_FIELDS = "paperId,title,externalIds,year"
 JSON_ACCEPT_HEADER = "application/json"
+JSON_CONTENT_TYPE_HEADER = JSON_ACCEPT_HEADER
 REQUEST_SPACING_SECONDS = 4.0
 RATE_LIMIT_RETRY_SECONDS = 4.0
 MAX_RATE_LIMIT_ATTEMPTS = 4
@@ -123,8 +124,8 @@ async def semanticscholar_batch_payload(
             params={"fields": SEARCH_FIELDS},
             json={"ids": [f"DOI:{STABLE_DOI}"]},
             headers={
-                "Accept": "application/json",
-                "Content-Type": "application/json",
+                "Accept": JSON_ACCEPT_HEADER,
+                "Content-Type": JSON_CONTENT_TYPE_HEADER,
             },
         )
         _BATCH_PAYLOAD_CACHE = response.json()

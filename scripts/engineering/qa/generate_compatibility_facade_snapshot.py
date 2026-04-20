@@ -148,7 +148,7 @@ def _render_import_violations(
 ) -> list[str]:
     """Render measured-only import violations as markdown bullets."""
     if not measured_only_import_violations:
-        return ["- None."]
+        return [_NONE_BULLET]
     return [
         f"- `{module}` imported by {', '.join(f'`{path}`' for path in importers)}"
         for module, importers in sorted(measured_only_import_violations.items())
