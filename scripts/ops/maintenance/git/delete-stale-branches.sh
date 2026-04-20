@@ -159,6 +159,7 @@ EOF
     printf "%b[FAIL]%b No GitHub token found in GH_TOKEN, GITHUB_TOKEN, or GITHUB_PERSONAL_ACCESS_TOKEN\n" "$RED" "$NC" >&2
     exit 1
   fi
+  return 0
 }
 
 validate_github_api_auth() {
@@ -357,6 +358,7 @@ current_branch() {
 branch_is_merged_remote() {
   local branch="$1"
   git branch -r --merged origin/main | sed 's#^[ *]*origin/##' | grep -Fx -- "$branch" >/dev/null 2>&1
+  return $?
 }
 
 branch_ahead_count() {
@@ -399,6 +401,7 @@ recommendation_for_branch() {
     fi
   fi
   printf "DELETE:candidate"
+  return 0
 }
 
 print_header() {

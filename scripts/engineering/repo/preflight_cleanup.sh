@@ -39,6 +39,7 @@ format_bytes() {
   else
     awk -v b="$bytes" 'BEGIN { printf "%.2f GiB", b/1024/1024/1024 }'
   fi
+  return 0
 }
 
 safe_dir_size_bytes() {
@@ -112,6 +113,7 @@ build_find_prune() {
   done
   expr+=( ')' -prune -o )
   printf '%s\n' "${expr[@]}"
+  return 0
 }
 
 mapfile -t PRUNE_EXPR < <(build_find_prune)

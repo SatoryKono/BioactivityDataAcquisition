@@ -308,7 +308,7 @@ class TestTransformStream:
                 saw_background_progress = True
             deadline = time.perf_counter() + 0.003
             while time.perf_counter() < deadline:
-                pass
+                continue
             return {"entity_id": record.get("id"), "value": record.get("value")}
 
         monkeypatch.setattr(

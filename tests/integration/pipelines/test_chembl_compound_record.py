@@ -139,8 +139,7 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
                 return await _raise_api_error()
 
         def mock_async_gen(*args, **kwargs):
-            if args or kwargs:
-                pass
+            del args, kwargs
             return _FailingAsyncIterator()
 
         # Patch the instance method on the adapter object

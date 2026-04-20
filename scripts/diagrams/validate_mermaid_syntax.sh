@@ -27,11 +27,13 @@ Options:
   --puppeteer FILE    Puppeteer config JSON path
   -h, --help          Show this help
 EOF
+  return 0
 }
 
 cleanup_temp_files() {
   [[ -n "$TEMP_PUPPETEER_CFG" ]] && rm -f "$TEMP_PUPPETEER_CFG" || true
   [[ -n "$TMP_DIR" ]] && rm -rf "$TMP_DIR" || true
+  return 0
 }
 trap cleanup_temp_files EXIT
 
@@ -115,6 +117,7 @@ Path(out_cfg).write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
 PY
   TEMP_PUPPETEER_CFG="$out_cfg"
   echo "$out_cfg"
+  return 0
 }
 
 while [[ $# -gt 0 ]]; do

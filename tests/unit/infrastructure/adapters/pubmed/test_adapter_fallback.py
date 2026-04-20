@@ -215,7 +215,7 @@ class TestFetchFilteredWithFallback:
                 filter_field="pmid",
                 fallback_mapping={},
             ):
-                pass
+                continue
 
     @pytest.mark.asyncio
     async def test_delegates_pubmed_request_to_fallback_service(

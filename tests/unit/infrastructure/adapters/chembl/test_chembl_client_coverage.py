@@ -68,7 +68,7 @@ async def test_fetch_as_models_invalid_type(adapter):
     """Test fetch_as_models with unsupported entity type."""
     with pytest.raises(ValueError):
         async for _ in adapter.fetch_as_models("unsupported_type"):
-            pass
+            continue
 
 
 @pytest.mark.asyncio
@@ -135,7 +135,7 @@ async def test_retry_with_split_batches(adapter, mock_http_client):
     )
 
     async for _ in gen:
-        pass
+        continue
 
     # Should call twice with split batches
     assert adapter._fetch_batch_with_reduction.call_count == 2

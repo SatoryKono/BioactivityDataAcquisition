@@ -159,6 +159,7 @@ run_python() {
 
 pytest_only_stamp_file() {
     printf '%s\n' "$REPO_ROOT/.pytest_cache/setup_plugins_pytest_only_${PYTHON_KIND}.stamp"
+    return 0
 }
 
 pytest_only_stamp_is_fresh() {
@@ -203,6 +204,7 @@ required = (
 
 raise SystemExit(0 if all(importlib.util.find_spec(module) is not None for module in required) else 1)
 PY
+    return 0
 }
 
 mark_pytest_only_stamp() {

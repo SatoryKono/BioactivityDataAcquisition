@@ -15,6 +15,7 @@ cleanup_tmp() {
   if [[ -d "$TMP_SITE_DIR" ]]; then
     rm -rf "$TMP_SITE_DIR"
   fi
+  return 0
 }
 
 trap cleanup_tmp EXIT

@@ -25,6 +25,7 @@ Examples:
   bash scripts/ops/maintenance/post_issue_2597_progress.sh
   GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/ops/maintenance/post_issue_2597_progress.sh --apply
 EOF
+  return 0
 }
 
 OWNER="$DEFAULT_OWNER"
