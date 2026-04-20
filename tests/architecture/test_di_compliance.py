@@ -150,6 +150,10 @@ def _httpx_import_violations(application_python_files: list[Path]) -> list[str]:
     return violations
 
 
+def _source_python_files(src: Path) -> list[Path]:
+    return [py_file for py_file in src.rglob("*.py") if "composition" not in str(py_file)]
+
+
 def _composition_module_imports(composition_path: Path) -> dict[str, set[str]]:
     module_imports: dict[str, set[str]] = {}
     for py_file in composition_path.rglob("*.py"):
@@ -235,14 +239,15 @@ def _domain_infrastructure_import_violations(src_dir: Path) -> list[str]:
     for py_file in domain_path.rglob("*.py"):
         lines = py_file.read_text(encoding="utf-8").splitlines()
         type_checking_lines = _type_checking_line_numbers(lines)
-        for i, line in enumerate(lines, 1):
-            if i in type_checking_lines:
-                continue
-            if (
+        violations.extend(
+            f"{py_file.relative_to(src_dir)}:{i}: {line.strip()}"
+            for i, line in enumerate(lines, 1)
+            if i not in type_checking_lines
+            and (
                 "from bioetl.infrastructure" in line
                 or "import bioetl.infrastructure" in line
-            ):
-                violations.append(f"{py_file.relative_to(src_dir)}:{i}: {line.strip()}")
+            )
+        )
     return violations
 
 
@@ -293,14 +298,7 @@ class TestDICompliance:
         src = _get_base_path(Path("src/bioetl"))
         if not src.exists():
             pytest.skip("Source directory not found")
-
-        files = []
-        for py_file in src.rglob("*.py"):
-            # Skip composition layer (allowed to instantiate)
-            if "composition" in str(py_file):
-                continue
-            files.append(py_file)
-        return files
+        return _source_python_files(src)
 
     def test_no_direct_instantiation_in_application(
         self, application_python_files: list[Path]
