@@ -31,6 +31,11 @@ from scripts.docs.generate_pipeline_normalization_field_matrix import (
     render_markdown,
     write_artifacts,
 )
+from tests.helpers import (
+    assert_check_artifacts_detects_drift,
+    assert_check_artifacts_passes_for_fresh_outputs,
+    assert_written_core_artifacts_are_deterministic,
+)
 
 
 def _row(
@@ -309,42 +314,41 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
 
 
 def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
-    first = tmp_path / "first"
-    second = tmp_path / "second"
+    def _assert_semantic_payload(first_payload: object, second_payload: object) -> None:
+        first_kpis = first_payload["semantic_kpis"]
+        second_kpis = second_payload["semantic_kpis"]
+        assert [kpi["name"] for kpi in first_kpis] == [
+            PROFILE_META_PASSTHROUGH_KPI,
+            PROFILE_SET_LIKE_JSON_STRING_KPI,
+            PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
+        ]
+        assert first_kpis == second_kpis
 
-    first_payload = write_artifacts(first)
-    second_payload = write_artifacts(second)
-
-    assert (first / CSV_NAME).read_text(encoding="utf-8") == (
-        second / CSV_NAME
-    ).read_text(encoding="utf-8")
-    assert (first / MD_NAME).read_text(encoding="utf-8") == (
-        second / MD_NAME
-    ).read_text(encoding="utf-8")
-    assert [kpi["name"] for kpi in first_payload["semantic_kpis"]] == [
-        PROFILE_META_PASSTHROUGH_KPI,
-        PROFILE_SET_LIKE_JSON_STRING_KPI,
-        PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
-    ]
-    assert first_payload["semantic_kpis"] == second_payload["semantic_kpis"]
+    assert_written_core_artifacts_are_deterministic(
+        tmp_path,
+        write_artifacts=write_artifacts,
+        csv_name=CSV_NAME,
+        md_name=MD_NAME,
+        payload_assertion=_assert_semantic_payload,
+    )
 
 
 def test_check_artifacts_detects_drift(tmp_path: Path) -> None:
-    out_dir = tmp_path / "matrix"
-    payloads = build_artifacts()
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / CSV_NAME).write_text(payloads[CSV_NAME], encoding="utf-8")
-    (out_dir / MD_NAME).write_text("drift", encoding="utf-8")
-
-    assert check_artifacts(out_dir) == 1
+    assert_check_artifacts_detects_drift(
+        tmp_path,
+        build_artifacts=build_artifacts,
+        check_artifacts=check_artifacts,
+        csv_name=CSV_NAME,
+        md_name=MD_NAME,
+    )
 
 
 def test_check_artifacts_returns_zero_for_fresh_outputs(tmp_path: Path) -> None:
-    out_dir = tmp_path / "matrix"
-
-    write_artifacts(out_dir)
-
-    assert check_artifacts(out_dir) == 0
+    assert_check_artifacts_passes_for_fresh_outputs(
+        tmp_path,
+        write_artifacts=write_artifacts,
+        check_artifacts=check_artifacts,
+    )
 
 
 def test_committed_artifacts_match_generator_output() -> None:
