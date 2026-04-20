@@ -76,9 +76,6 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     SilverWriterRuntimeServicesRequest,
     build_silver_writer_runtime_services,
 )
-from bioetl.infrastructure.storage.versioned_table_resolver import (
-    resolve_write_targets,
-)
 from bioetl.infrastructure.storage.writer_common import (
     get_write_targets,
     iterate_write_targets,

@@ -44,6 +44,7 @@ Examples:
     --title-file /tmp/title.txt \
     --body-file /tmp/body.md
 EOF
+  return 0
 }
 
 OWNER="$DEFAULT_OWNER"
@@ -238,10 +239,12 @@ api() {
     fi
     exit 1
   fi
+  return 0
 }
 
 json_from_stdin_as_comment() {
   python3 -c 'import json, sys; print(json.dumps({"body": sys.stdin.read()}, ensure_ascii=True))'
+  return 0
 }
 
 build_issue_patch() {
@@ -264,6 +267,7 @@ if state:
     payload["state"] = state
 print(json.dumps(payload, ensure_ascii=True))
 PY
+  return 0
 }
 
 if [[ -n "$COMMENT_TEXT" ]]; then

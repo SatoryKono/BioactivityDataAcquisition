@@ -20,6 +20,7 @@ Behavior:
   - closes issue #2595
   - references the completed repo-native spike memo
 EOF
+  return 0
 }
 
 DRY_RUN=0
@@ -64,10 +65,12 @@ api() {
       -H "X-GitHub-Api-Version: 2022-11-28" \
       "${API}${path}" >/dev/null
   fi
+  return 0
 }
 
 json_comment() {
   python3 -c 'import json, sys; print(json.dumps({"body": sys.stdin.read()}))'
+  return 0
 }
 
 json_state_patch() {
@@ -75,6 +78,7 @@ json_state_patch() {
 import json
 print(json.dumps({"state": "closed"}))
 PY
+  return 0
 }
 
 api POST "/issues/${ISSUE_NUMBER}/comments" "$(cat <<EOF | json_comment

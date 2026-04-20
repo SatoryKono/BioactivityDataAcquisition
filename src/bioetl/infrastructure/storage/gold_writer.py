@@ -66,9 +66,6 @@ from bioetl.infrastructure.storage.gold.runtime_helpers import (
 from bioetl.infrastructure.storage.gold.validation_mixin import (
     GoldWriterValidationMixin,
 )
-from bioetl.infrastructure.storage.versioned_table_resolver import (
-    resolve_write_targets,
-)
 from bioetl.infrastructure.storage.writer_common import (
     get_write_targets,
     iterate_write_targets,
