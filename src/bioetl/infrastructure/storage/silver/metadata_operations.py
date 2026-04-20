@@ -136,7 +136,7 @@ def _coerce_silver_metadata_write_request(
     for field_name, value in zip(
         _SILVER_METADATA_WRITE_POSITIONAL_FIELDS,
         legacy_values,
-        strict=True,
+        strict=False,
     ):
         if field_name in resolved_kwargs:
             raise TypeError(

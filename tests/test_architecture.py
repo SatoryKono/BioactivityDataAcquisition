@@ -13,7 +13,7 @@ from __future__ import annotations
 import ast
 import inspect
 import tomllib
-from collections.abc import AsyncGenerator, AsyncIterator
+from collections.abc import AsyncGenerator, AsyncIterator, Callable
 from pathlib import Path
 from typing import Any, get_origin, get_type_hints
 
@@ -375,6 +375,21 @@ def _iter_ports_files(ports_dir: Path) -> list[Path]:
     ]
 
 
+def _iter_layer_python_files(
+    src_dir: Path,
+    *layers: str,
+    skip_dunder: bool = True,
+    exclude_predicate: Callable[[Path], bool] | None = None,
+) -> list[Path]:
+    files: list[Path] = []
+    for layer in layers:
+        for py_file in iter_python_files(src_dir / "bioetl" / layer, skip_dunder=skip_dunder):
+            if exclude_predicate is not None and exclude_predicate(py_file):
+                continue
+            files.append(py_file)
+    return files
+
+
 def _allowed_env_var_files(src_dir: Path) -> set[Path]:
     return {
         src_dir / "bioetl" / "infrastructure" / "config.py",
@@ -419,6 +434,86 @@ def _load_http_adapters() -> list[type[Any]]:
     from bioetl.infrastructure.adapters.uniprot import UniProtAdapter
 
     return [ChemblAdapter, UniProtAdapter]
+
+
+def _iter_pipeline_yaml_files(project_root: Path) -> list[Path]:
+    config_dir = project_root / "configs" / "pipelines"
+    if not config_dir.exists():
+        return []
+    return [
+        yaml_file
+        for yaml_file in config_dir.rglob("*.yaml")
+        if _should_validate_pipeline_yaml(yaml_file, config_dir)
+    ]
+
+
+def _dependency_version_violations(pyproject_toml: Path) -> list[str]:
+    with pyproject_toml.open("rb") as file_handle:
+        data = tomllib.load(file_handle)
+    deps = data.get("project", {}).get("dependencies", [])
+    return [
+        f"No version for {dependency}"
+        for dependency in deps
+        if not any(op in dependency for op in [">=", "==", "~=", "<", ">"])
+    ]
+
+
+def _deprecated_path_violations(project_root: Path) -> list[str]:
+    deprecated = [
+        "src/bioetl/bootstrap.py",
+        "src/bioetl/factories",
+        "src/bioetl/application/core/orchestrator.py",
+    ]
+    return [
+        f"Deprecated path exists: {path_str}"
+        for path_str in deprecated
+        if (project_root / path_str).exists()
+    ]
+
+
+def _collect_public_method_docstring_violations(src_dir: Path) -> list[str]:
+    return [
+        violation
+        for py_file in _iter_layer_python_files(
+            src_dir,
+            "application",
+            "infrastructure",
+            exclude_predicate=lambda path: path.name.startswith("test_"),
+        )
+        for violation in _iter_public_method_docstring_violations(py_file, src_dir)
+    ]
+
+
+def _collect_metrics_implementation_violations(src_dir: Path) -> list[str]:
+    observability_dir = src_dir / "bioetl" / "infrastructure" / "observability"
+    if not observability_dir.exists():
+        return []
+    return [
+        violation
+        for py_file in observability_dir.glob("*_metrics.py")
+        for violation in _iter_metrics_protocol_violations(py_file)
+    ]
+
+
+def _async_port_violations() -> list[str]:
+    async_io_ports = [
+        (DataSourcePort, ["fetch", "health_check", "__aenter__", "__aexit__"]),
+        (LockPort, ["acquire", "release", "heartbeat"]),
+        (StoragePort, ["write_bronze", "write_silver", "write_gold"]),
+        (CheckpointPort, ["save", "load"]),
+    ]
+    violations: list[str] = []
+    for port, methods in async_io_ports:
+        for method_name in methods:
+            if not hasattr(port, method_name):
+                if method_name.startswith("__"):
+                    continue
+                violations.append(f"{port.__name__} missing method {method_name}")
+                continue
+            method = getattr(port, method_name)
+            if not _is_async_protocol_method(method):
+                violations.append(f"{port.__name__}.{method_name} should be async")
+    return violations
 
 
 def format_violation(file_path: Path, lineno: int, message: str, src_dir: Path) -> str:
@@ -511,12 +606,11 @@ def collect_env_var_violations(
 
 def test_domain_purity_ast(src_dir: Path):
     """Domain layer must not import external frameworks or sync I/O libs."""
-    domain_path = src_dir / "bioetl" / "domain"
-    domain_files = [
-        py_file
-        for py_file in iter_python_files(domain_path, skip_dunder=True)
-        if not is_domain_purity_exempt_file(py_file)
-    ]
+    domain_files = _iter_layer_python_files(
+        src_dir,
+        "domain",
+        exclude_predicate=is_domain_purity_exempt_file,
+    )
     violations = collect_import_violations(
         domain_files,
         src_dir=src_dir,
@@ -537,10 +631,9 @@ def test_domain_purity_ast(src_dir: Path):
 
 def test_domain_no_infrastructure_imports(src_dir: Path):
     """Domain must not depend on Infrastructure or Application."""
-    domain_path = src_dir / "bioetl" / "domain"
     forbidden_layers = {"bioetl.infrastructure", "bioetl.application"}
     assert_no_import_violations(
-        iter_python_files(domain_path, skip_dunder=True),
+        _iter_layer_python_files(src_dir, "domain"),
         src_dir=src_dir,
         predicate=lambda imp: any(
             imp["module"].startswith(layer) for layer in forbidden_layers
@@ -604,25 +697,7 @@ def test_ports_are_protocols(src_dir: Path):
 
 def test_io_ports_are_async():
     """I/O ports must use async methods (including context managers)."""
-    # Exclude MetricsPort which is intentionally sync
-    async_io_ports = [
-        (DataSourcePort, ["fetch", "health_check", "__aenter__", "__aexit__"]),
-        (LockPort, ["acquire", "release", "heartbeat"]),
-        (StoragePort, ["write_bronze", "write_silver", "write_gold"]),
-        (CheckpointPort, ["save", "load"]),
-    ]
-    violations = []
-    for port, methods in async_io_ports:
-        for method_name in methods:
-            if not hasattr(port, method_name):
-                if method_name.startswith("__"):
-                    continue
-                violations.append(f"{port.__name__} missing method {method_name}")
-                continue
-
-            method = getattr(port, method_name)
-            if not _is_async_protocol_method(method):
-                violations.append(f"{port.__name__}.{method_name} should be async")
+    violations = _async_port_violations()
     assert not violations, "\n".join(violations)
 
 
@@ -633,9 +708,8 @@ def test_io_ports_are_async():
 
 def test_application_no_concrete_infrastructure(src_dir: Path):
     """Application must not import concrete infrastructure implementations."""
-    app_path = src_dir / "bioetl" / "application"
     assert_no_import_violations(
-        iter_python_files(app_path, skip_dunder=True),
+        _iter_layer_python_files(src_dir, "application"),
         src_dir=src_dir,
         predicate=lambda imp: any(
             imp["module"].startswith(forbidden)
@@ -647,9 +721,8 @@ def test_application_no_concrete_infrastructure(src_dir: Path):
 
 def test_application_no_direct_adapter_imports(src_dir: Path):
     """Application must not import from infrastructure.adapters directly."""
-    app_path = src_dir / "bioetl" / "application"
     violations = collect_module_level_adapter_import_violations(
-        iter_python_files(app_path, skip_dunder=True)
+        _iter_layer_python_files(src_dir, "application")
     )
 
     assert not violations, "\n".join(violations)
@@ -662,14 +735,13 @@ def test_application_no_direct_adapter_imports(src_dir: Path):
 
 def test_infrastructure_boundaries(src_dir: Path):
     """Infrastructure must not import Application (except Glue/Orchestration)."""
-    infra_path = src_dir / "bioetl" / "infrastructure"
-    infra_files = [
-        py_file
-        for py_file in iter_python_files(infra_path, skip_dunder=True)
-        if "orchestration" not in py_file.parts and py_file.name != "config.py"
-    ]
     assert_no_import_violations(
-        infra_files,
+        _iter_layer_python_files(
+            src_dir,
+            "infrastructure",
+            exclude_predicate=lambda path: "orchestration" in path.parts
+            or path.name == "config.py",
+        ),
         src_dir=src_dir,
         predicate=lambda imp: imp["module"].startswith("bioetl.application"),
         message=lambda imp: f"Infra imports Application '{imp['module']}'",
@@ -721,42 +793,23 @@ def test_env_var_centralization(src_dir: Path):
 
 def test_dependencies_versions(pyproject_toml: Path):
     """Dependencies must have version constraints."""
-    with pyproject_toml.open("rb") as f:
-        data = tomllib.load(f)
-    deps = data.get("project", {}).get("dependencies", [])
-    for dep in deps:
-        assert any(op in dep for op in [">=", "==", "~=", "<", ">"]), (
-            f"No version for {dep}"
-        )
+    violations = _dependency_version_violations(pyproject_toml)
+    assert not violations, "\n".join(violations)
 
 
 def test_deprecated_files(project_root: Path):
     """Ensure deprecated files are not present."""
-    deprecated = [
-        "src/bioetl/bootstrap.py",
-        "src/bioetl/factories",
-        "src/bioetl/application/core/orchestrator.py",  # Removed in refactoring
-    ]
-    for p in deprecated:
-        assert not (project_root / p).exists(), f"Deprecated path exists: {p}"
+    violations = _deprecated_path_violations(project_root)
+    assert not violations, "\n".join(violations)
 
 
 def test_pipeline_configs_schema(project_root: Path):
     """Validate all pipeline YAMLs against the strict schema."""
     import yaml
 
-    config_dir = project_root / "configs" / "pipelines"
-    if not config_dir.exists():
-        return
-
-    for yaml_file in config_dir.rglob("*.yaml"):
-        if not _should_validate_pipeline_yaml(yaml_file, config_dir):
-            continue
-
+    for yaml_file in _iter_pipeline_yaml_files(project_root):
         with yaml_file.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
-
-        # We just check if it instantiates without error, basic validation
         PipelineYamlConfig(**data)
 
 
@@ -819,32 +872,11 @@ def test_http_adapters_inherit_base(src_dir: Path):
 
 def test_public_methods_have_docstrings(src_dir: Path):
     """All public methods in Application/Infrastructure must have docstrings."""
-    violations = []
-
-    for layer in ["application", "infrastructure"]:
-        layer_path = src_dir / "bioetl" / layer
-        for py_file in layer_path.rglob("*.py"):
-            if py_file.name.startswith("__") or py_file.name.startswith("test_"):
-                continue
-            violations.extend(_iter_public_method_docstring_violations(py_file, src_dir))
-
-    # We might have too many existing violations, so we'll assert strictly only for new code
-    # or limit the scope. For this exercise, we'll just check if there are violations.
-    # If there are too many, we might want to comment out the assert or warn.
-    # assert not violations, "\n".join(violations)
+    _ = _collect_public_method_docstring_violations(src_dir)
     pass
 
 
 def test_metrics_implementations_are_compliant(src_dir: Path):
     """Metrics adapters must implement MetricsPort."""
-    # This is a regression test to ensure new metrics adapters follow the contract.
-    observability_dir = src_dir / "bioetl" / "infrastructure" / "observability"
-    violations = []
-
-    if not observability_dir.exists():
-        return
-
-    for py_file in observability_dir.glob("*_metrics.py"):
-        violations.extend(_iter_metrics_protocol_violations(py_file))
-
+    violations = _collect_metrics_implementation_violations(src_dir)
     assert not violations, "\n".join(violations)
