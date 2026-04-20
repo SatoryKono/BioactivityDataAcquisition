@@ -1,33 +1,18 @@
 #!/usr/bin/env python3
-"""Group SonarQube issues by file and display functions needing simplification."""
+"""Compatibility shim for the historical ``scripts.ai.src.group_issues`` path."""
 
-import json
+from __future__ import annotations
+
 import sys
+from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-def main():
-    data = json.load(sys.stdin)
-    issues = [
-        issue for issue in data.get("issues", [])
-        if "Cognitive Complexity" in issue.get("message", "")
-    ]
+from scripts.ai.group_issues import *  # noqa: F403
+from scripts.ai.group_issues import main
 
-    files = {}
-    for issue in issues:
-        component = issue.get("component", "")
-        if ":" in component:
-            file = component.split(":")[1]
-        else:
-            file = component
-
-        if file not in files:
-            files[file] = []
-        files[file].append(issue.get("message", ""))
-
-    for file in list(files.keys())[:20]:
-        print(f"File: {file}")
-        for message in files[file]:
-            print(f"  - {message}")
 
 if __name__ == "__main__":
     main()

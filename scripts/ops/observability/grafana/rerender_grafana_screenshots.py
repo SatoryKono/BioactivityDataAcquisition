@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import json
 from pathlib import Path
+from typing import cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -39,7 +40,8 @@ def main() -> int:
     if not isinstance(dashboards, list):
         raise RuntimeError("Grafana search API returned unexpected payload")
 
-    for item in dashboards:
+    dashboard_items = cast(list[object], dashboards)
+    for item in dashboard_items:
         if not isinstance(item, dict):
             continue
         url = item.get("url")
