@@ -271,6 +271,18 @@ def test_measured_only_allowlist_matches_docstring_scan() -> None:
 
 
 @pytest.mark.architecture
+def test_snapshot_generator_rejects_parent_traversal_relative_output() -> None:
+    """Snapshot generator must reject parent traversal in relative output paths."""
+    module = _load_module(
+        SNAPSHOT_SCRIPT,
+        "compatibility_facade_snapshot_security_loader",
+    )
+
+    with pytest.raises(ValueError, match="parent traversal"):
+        module._write_repo_text(Path("../escape.md"), "content")
+
+
+@pytest.mark.architecture
 def test_first_party_src_does_not_import_measured_only_modules() -> None:
     """Measured-only compatibility modules must stay out of first-party src imports."""
     mod = _load_registry_module()
