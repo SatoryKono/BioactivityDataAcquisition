@@ -21,6 +21,13 @@ from scripts.docs.generate_chembl_activity_field_matrix import (
     render_csv,
     write_artifacts,
 )
+from tests.helpers import (
+    assert_build_artifacts_are_stable,
+    assert_check_artifacts_detects_drift,
+    assert_check_artifacts_passes_for_fresh_outputs,
+    assert_repeated_core_output_bytes_are_stable,
+    assert_written_core_artifacts_are_deterministic,
+)
 
 
 def test_build_field_matrix_rows_covers_schema_and_hash_policy() -> None:
@@ -67,44 +74,39 @@ def test_render_csv_uses_contract_column_order() -> None:
 
 
 def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
-    first = tmp_path / "first"
-    second = tmp_path / "second"
-
-    write_artifacts(first, with_docx=False, with_pdf=False)
-    write_artifacts(second, with_docx=False, with_pdf=False)
-
-    assert (first / CSV_NAME).read_text(encoding="utf-8") == (
-        second / CSV_NAME
-    ).read_text(encoding="utf-8")
-    assert (first / MD_NAME).read_text(encoding="utf-8") == (
-        second / MD_NAME
-    ).read_text(encoding="utf-8")
+    assert_written_core_artifacts_are_deterministic(
+        tmp_path,
+        write_artifacts=write_artifacts,
+        csv_name=CSV_NAME,
+        md_name=MD_NAME,
+        write_kwargs={"with_docx": False, "with_pdf": False},
+    )
 
 
 def test_build_artifacts_is_byte_for_byte_stable_across_repeated_calls() -> None:
-    first = build_artifacts()
-    second = build_artifacts()
-
-    assert first[CSV_NAME].encode("utf-8") == second[CSV_NAME].encode("utf-8")
-    assert first[MD_NAME].encode("utf-8") == second[MD_NAME].encode("utf-8")
+    assert_build_artifacts_are_stable(
+        build_artifacts=build_artifacts,
+        artifact_names=(CSV_NAME, MD_NAME),
+    )
 
 
 def test_check_artifacts_detects_drift(tmp_path: Path) -> None:
-    out_dir = tmp_path / "matrix"
-    payloads = build_artifacts()
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / CSV_NAME).write_text(payloads[CSV_NAME], encoding="utf-8")
-    (out_dir / MD_NAME).write_text("drift", encoding="utf-8")
-
-    assert check_artifacts(out_dir) == 1
+    assert_check_artifacts_detects_drift(
+        tmp_path,
+        build_artifacts=build_artifacts,
+        check_artifacts=check_artifacts,
+        csv_name=CSV_NAME,
+        md_name=MD_NAME,
+    )
 
 
 def test_check_artifacts_returns_zero_for_fresh_outputs(tmp_path: Path) -> None:
-    out_dir = tmp_path / "matrix"
-
-    write_artifacts(out_dir, with_docx=False, with_pdf=False)
-
-    assert check_artifacts(out_dir) == 0
+    assert_check_artifacts_passes_for_fresh_outputs(
+        tmp_path,
+        write_artifacts=write_artifacts,
+        check_artifacts=check_artifacts,
+        write_kwargs={"with_docx": False, "with_pdf": False},
+    )
 
 
 def test_write_artifacts_preserves_csv_and_md_when_optional_exports_requested(
@@ -122,12 +124,9 @@ def test_write_artifacts_preserves_csv_and_md_when_optional_exports_requested(
 def test_write_artifacts_produces_byte_identical_csv_on_repeated_generation(
     tmp_path: Path,
 ) -> None:
-    out_dir = tmp_path / "matrix"
-
-    write_artifacts(out_dir, with_docx=False, with_pdf=False)
-    first_csv = (out_dir / CSV_NAME).read_bytes()
-
-    write_artifacts(out_dir, with_docx=False, with_pdf=False)
-    second_csv = (out_dir / CSV_NAME).read_bytes()
-
-    assert first_csv == second_csv
+    assert_repeated_core_output_bytes_are_stable(
+        tmp_path,
+        write_artifacts=write_artifacts,
+        artifact_name=CSV_NAME,
+        write_kwargs={"with_docx": False, "with_pdf": False},
+    )
