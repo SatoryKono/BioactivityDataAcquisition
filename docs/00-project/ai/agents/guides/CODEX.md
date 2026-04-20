@@ -41,11 +41,15 @@
 1. просматривай контекст в порядке `catalog -> graph -> rag -> source`
 1. после завершения запускай `python -m memory.tooling.workflow post-task ...`
 1. промоутируй в curated memory только durable lessons/incidents/decisions
+1. на регулярной cadence и перед release/governance review запускай
+   `python -m memory.tooling.workflow review-curated`
+1. stale или superseded curated notes архивируй, а не оставляй silently active
 
 Подробности и операционные примеры:
 
 - `src/memory/DAILY_WORKFLOW.md`
 - `src/memory/README.md`
+- `src/memory/curated/REVIEW_LOOP.md`
 
 ### Evidence Anchors For Structural Claims
 

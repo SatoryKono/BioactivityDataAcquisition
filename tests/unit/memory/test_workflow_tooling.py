@@ -199,3 +199,36 @@ def test_post_task_workflow_writes_summary_and_promotes_note(
     note = parse_markdown_note(summary_note_path)
     assert note.metadata["task_id"] == "task-summary"
     assert note.metadata["confidence"] == "episodic"
+
+
+def test_review_curated_workflow_returns_ritual_summary(monkeypatch) -> None:
+    def _fake_review(root: Path | None = None) -> dict[str, object]:
+        return {
+            "ok": True,
+            "kind": "curated_review",
+            "summary": {
+                "note_count": 3,
+                "current_count": 1,
+                "due_count": 1,
+                "stale_count": 1,
+                "review_every_days": 30,
+                "review_candidates": 2,
+            },
+            "records": [
+                {
+                    "path": "src/memory/curated/lessons/example.md",
+                    "review_status": "due",
+                    "recommendation": "review",
+                }
+            ],
+        }
+
+    monkeypatch.setattr(workflow, "review_curated_notes", _fake_review)
+
+    payload = workflow.review_curated_workflow()
+
+    assert payload["kind"] == "review-curated"
+    assert payload["ok"] is True
+    assert payload["summary"]["review_candidates"] == 2
+    assert "regular engineering cadence" in payload["cadence"]
+    assert "archive" in payload["next_action"]

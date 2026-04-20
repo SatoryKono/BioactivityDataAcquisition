@@ -34,6 +34,9 @@ ______________________________________________________________________
 > `python -m memory.tooling.workflow post-task ...`
 > после задачи. Session/summary notes должны жить в `src/memory/episodic/`,
 > а durable lessons — промоутиться в `src/memory/curated/`.
+> На регулярной cadence и перед release/governance review запускай
+> `python -m memory.tooling.workflow review-curated`
+> и архивируй superseded curated notes вместо тихого накопления stale memory.
 
 ______________________________________________________________________
 
@@ -209,6 +212,8 @@ uv run python -m scripts.engineering.baselines dq-baseline --dry-run
 1. правка или аудит canonical source
 1. `python -m memory.tooling.workflow post-task ...`
 1. promotion только для durable knowledge
+1. по регулярной cadence и перед release/governance checkpoints:
+   `python -m memory.tooling.workflow review-curated`
 
 Минимальный пример:
 
