@@ -215,12 +215,14 @@ async def _write_dual_targets(
 
     active_result: SilverWriteResult | None = None
     write_versions = writer._contract_rollout_policy.write_versions
-    
+
     # Use common functions to reduce duplication
     validate_write_versions(write_versions)
     write_targets = get_write_targets(invocation.table_name, write_versions)
-    
-    for contract_version, physical_table in iterate_write_targets(write_versions, write_targets):
+
+    for contract_version, physical_table in iterate_write_targets(
+        write_versions, write_targets
+    ):
         try:
             result = await writer._write_single_target(
                 table_name=physical_table,

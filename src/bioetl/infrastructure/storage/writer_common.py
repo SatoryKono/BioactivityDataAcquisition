@@ -12,24 +12,26 @@ T = TypeVar("T")
 
 def validate_write_versions(write_versions: Sequence[str]) -> None:
     """Validate that write_versions is not empty to prevent zip() errors.
-    
+
     Args:
         write_versions: Sequence of contract versions for writing
-        
+
     Raises:
         ValueError: If write_versions is empty
     """
     if not write_versions:
-        raise ValueError("Contract rollout policy must specify at least one write version")
+        raise ValueError(
+            "Contract rollout policy must specify at least one write version"
+        )
 
 
 def get_write_targets(table_name: str, write_versions: Sequence[str]) -> list[str]:
     """Resolve physical write targets for versioned tables.
-    
+
     Args:
         table_name: Logical table name
         write_versions: Sequence of contract versions
-        
+
     Returns:
         List of physical table names for each version
     """
@@ -41,14 +43,14 @@ def iterate_write_targets(
     write_targets: Sequence[str],
 ) -> list[tuple[str, str]]:
     """Safely iterate over write versions and their corresponding targets.
-    
+
     Args:
         write_versions: Sequence of contract versions
         write_targets: Sequence of physical table names
-        
+
     Returns:
         List of (version, target) tuples
-        
+
     Raises:
         ValueError: If lengths don't match (shouldn't happen with proper usage)
     """

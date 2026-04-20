@@ -236,9 +236,7 @@ def _classify_required_sync_docs(
             missing_version.append(doc_path)
             continue
         if doc_version != rules_version:
-            mismatched.append(
-                f"{doc_path}: v{doc_version} (expected v{rules_version})"
-            )
+            mismatched.append(f"{doc_path}: v{doc_version} (expected v{rules_version})")
 
     return mismatched, missing_version, not_found
 
@@ -252,8 +250,7 @@ def _build_required_sync_doc_errors(
     errors: list[str] = []
     if not_found:
         errors.append(
-            "Required documents not found:\n"
-            + "\n".join(f"  - {f}" for f in not_found)
+            "Required documents not found:\n" + "\n".join(f"  - {f}" for f in not_found)
         )
     if missing_version:
         errors.append(
@@ -273,7 +270,9 @@ def _iter_canonical_docs(
     project_root: Path,
     docs_markdown_files: list[Path],
 ) -> list[Path]:
-    canonical_root_paths = tuple(project_root / root for root in CANONICAL_VERSION_ROOTS)
+    canonical_root_paths = tuple(
+        project_root / root for root in CANONICAL_VERSION_ROOTS
+    )
     return [
         md_file
         for md_file in docs_markdown_files

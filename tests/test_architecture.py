@@ -224,7 +224,9 @@ def _missing_protocol_members(adapter_cls: type[Any], protocol: type[Any]) -> li
     missing_fields = [
         field
         for field in proto_annotations
-        if not field.startswith("_") and field not in cls_dir and field not in cls_annotations
+        if not field.startswith("_")
+        and field not in cls_dir
+        and field not in cls_annotations
     ]
     return missing_members + missing_fields
 
@@ -265,7 +267,8 @@ def _iter_top_level_import_nodes(tree: ast.AST) -> list[ast.Import | ast.ImportF
     return [
         node
         for node in tree.body
-        if isinstance(node, (ast.Import, ast.ImportFrom)) and not _is_type_checking_guard(node)
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+        and not _is_type_checking_guard(node)
     ]
 
 
@@ -363,7 +366,9 @@ def _strict_domain_framework_violations(violations: list[str]) -> list[str]:
     return [
         violation
         for violation in violations
-        if any(f"'{framework}" in violation for framework in FORBIDDEN_DOMAIN_FRAMEWORKS)
+        if any(
+            f"'{framework}" in violation for framework in FORBIDDEN_DOMAIN_FRAMEWORKS
+        )
     ]
 
 
@@ -383,7 +388,9 @@ def _iter_layer_python_files(
 ) -> list[Path]:
     files: list[Path] = []
     for layer in layers:
-        for py_file in iter_python_files(src_dir / "bioetl" / layer, skip_dunder=skip_dunder):
+        for py_file in iter_python_files(
+            src_dir / "bioetl" / layer, skip_dunder=skip_dunder
+        ):
             if exclude_predicate is not None and exclude_predicate(py_file):
                 continue
             files.append(py_file)
@@ -739,8 +746,9 @@ def test_infrastructure_boundaries(src_dir: Path):
         _iter_layer_python_files(
             src_dir,
             "infrastructure",
-            exclude_predicate=lambda path: "orchestration" in path.parts
-            or path.name == "config.py",
+            exclude_predicate=lambda path: (
+                "orchestration" in path.parts or path.name == "config.py"
+            ),
         ),
         src_dir=src_dir,
         predicate=lambda imp: imp["module"].startswith("bioetl.application"),
@@ -828,7 +836,9 @@ def test_observability_library_isolation(src_dir: Path):
         ],
         src_dir=src_dir,
         predicate=lambda imp: imp["module"].startswith("prometheus_client"),
-        message=lambda _imp: "Forbidden import 'prometheus_client' outside observability",
+        message=lambda _imp: (
+            "Forbidden import 'prometheus_client' outside observability"
+        ),
     )
 
 

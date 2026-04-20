@@ -145,7 +145,9 @@ def _merge_silver_write_legacy_values(
         resolved_kwargs[field_name] = value
 
 
-def _raise_on_unexpected_silver_write_fields(resolved_kwargs: dict[str, object]) -> None:
+def _raise_on_unexpected_silver_write_fields(
+    resolved_kwargs: dict[str, object],
+) -> None:
     unexpected_fields = sorted(set(resolved_kwargs) - _SILVER_WRITE_ALLOWED_FIELDS)
     if unexpected_fields:
         unexpected = ", ".join(unexpected_fields)

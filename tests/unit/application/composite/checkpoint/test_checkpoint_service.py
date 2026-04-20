@@ -1179,9 +1179,7 @@ class TestDeleteOrphaned:
     @pytest.mark.asyncio
     async def test_deletes_other_run_checkpoints(self) -> None:
         """delete_orphaned() deletes checkpoints from other runs."""
-        svc, storage, _ = _make_service(
-            composite_name="my_composite", run_id="run-002"
-        )
+        svc, storage, _ = _make_service(composite_name="my_composite", run_id="run-002")
         storage.list_glob.return_value = [
             "composite_my_composite_run-001.json",
             "composite_my_composite_run-002.json",

@@ -32,12 +32,7 @@ _MappedExternalError = TypeVar(
     bound=ExternalServiceError,
 )
 InfrastructureSourceError = (
-    OSError
-    | RuntimeError
-    | ValueError
-    | LookupError
-    | AssertionError
-    | BioETLError
+    OSError | RuntimeError | ValueError | LookupError | AssertionError | BioETLError
 )
 
 

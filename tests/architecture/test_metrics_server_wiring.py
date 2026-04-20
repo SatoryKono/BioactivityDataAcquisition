@@ -95,8 +95,7 @@ def _iter_exported_names(node: ast.AST) -> set[str]:
     if not isinstance(node, ast.Assign):
         return set()
     if not any(
-        isinstance(target, ast.Name)
-        and target.id in {"__all__", "_PUBLIC_EXPORTS"}
+        isinstance(target, ast.Name) and target.id in {"__all__", "_PUBLIC_EXPORTS"}
         for target in node.targets
     ):
         return set()

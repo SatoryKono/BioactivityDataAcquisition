@@ -44,7 +44,9 @@ def _iter_node_shim_paths(node: ast.AST) -> list[str]:
     if isinstance(node, ast.ImportFrom) and node.module in ALLOWED_SHIM_MODULES:
         return [node.module]
     if isinstance(node, ast.Import):
-        return [alias.name for alias in node.names if alias.name in ALLOWED_SHIM_MODULES]
+        return [
+            alias.name for alias in node.names if alias.name in ALLOWED_SHIM_MODULES
+        ]
     return []
 
 

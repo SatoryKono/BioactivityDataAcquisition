@@ -242,8 +242,6 @@ def _is_forbidden_metrics_server_call_line(
     return not any(re.search(pattern, line) for pattern in allowed_patterns)
 
 
-
-
 class TestLocalOnlyPolicy:
     """Tests enforcing the Local-Only Architecture (ADR-010)."""
 

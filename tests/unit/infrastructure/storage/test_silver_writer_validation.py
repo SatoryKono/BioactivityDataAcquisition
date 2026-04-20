@@ -539,7 +539,9 @@ class TestSilverWriterPreparePayloadExecutor:
         # Normalize paths for comparison to handle different separators across platforms
         expected_path = str(Path(_silver_table_path("test.table")).resolve())
         actual_path = str(Path(payload.table_path).resolve())
-        assert expected_path == actual_path, f"Expected {expected_path}, got {actual_path}"
+        assert expected_path == actual_path, (
+            f"Expected {expected_path}, got {actual_path}"
+        )
         assert payload.arrow_data.equals(expected_table)
         mock_sync.assert_called_once()
         writer._check_schema_drift.assert_awaited_once_with(

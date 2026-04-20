@@ -133,7 +133,7 @@ async def test_postwrite_operations_preserve_service_specific_export_and_audit()
     # Use path normalization to handle different path separators across platforms
     maintenance.maybe_export_csv.assert_awaited_once()
     call_kwargs = maintenance.maybe_export_csv.call_args.kwargs
-    
+
     assert call_kwargs["table_name"] == "test.table"
     assert call_kwargs["arrow_data"] is payload.arrow_data
     assert call_kwargs["primary_keys"] == ["entity_id"]

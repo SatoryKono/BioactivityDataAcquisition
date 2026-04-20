@@ -310,9 +310,7 @@ class TestFetchFiltered:
     ) -> None:
         """Should raise ValueError for invalid entity type."""
         with pytest.raises(ValueError, match="supports 'work' or 'publication'"):
-            await anext(
-                adapter.fetch_filtered("invalid_type", ["10.1038/test"], "doi")
-            )
+            await anext(adapter.fetch_filtered("invalid_type", ["10.1038/test"], "doi"))
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_dois(
@@ -553,9 +551,7 @@ class TestFetchMultiFiltered:
     ) -> None:
         """Should raise NotImplementedError."""
         with pytest.raises(NotImplementedError):
-            await anext(
-                adapter.fetch_multi_filtered("publication", {"doi": ["test"]})
-            )
+            await anext(adapter.fetch_multi_filtered("publication", {"doi": ["test"]}))
 
 
 class TestFetch:

@@ -210,12 +210,14 @@ async def _write_dual_targets(
     assert writer._contract_rollout_policy is not None  # guarded by caller
 
     write_versions = writer._contract_rollout_policy.write_versions
-    
+
     # Use common functions to reduce duplication
     validate_write_versions(write_versions)
     write_targets = get_write_targets(request.table_name, write_versions)
-    
-    for contract_version, physical_table in iterate_write_targets(write_versions, write_targets):
+
+    for contract_version, physical_table in iterate_write_targets(
+        write_versions, write_targets
+    ):
         target_schema = schema_policy.for_version(contract_version)
         if target_schema is None:
             raise ValueError(
