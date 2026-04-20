@@ -19,6 +19,7 @@ Behavior:
   - adds explanatory comments to those issues
   - assumes follow-up issues #2593, #2594, #2595 already exist
 EOF
+  return 0
 }
 
 DRY_RUN=0
@@ -63,10 +64,12 @@ api() {
       -H "X-GitHub-Api-Version: 2022-11-28" \
       "${API}${path}" >/dev/null
   fi
+  return 0
 }
 
 json_comment() {
   python3 -c 'import json, sys; print(json.dumps({"body": sys.stdin.read()}))'
+  return 0
 }
 
 json_patch_from_files() {
@@ -88,6 +91,7 @@ if state:
 
 print(json.dumps(payload, ensure_ascii=False))
 PY
+  return 0
 }
 
 patch_state_only() {
@@ -100,6 +104,7 @@ print(json.dumps({"state": "${state}"}))
 PY
 )"
   api PATCH "/issues/${issue}" "$payload"
+  return 0
 }
 
 tmpdir="$(mktemp -d)"

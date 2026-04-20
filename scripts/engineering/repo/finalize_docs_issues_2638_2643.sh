@@ -139,6 +139,7 @@ EOF
 
 json_escape() {
   python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+  return 0
 }
 
 api_call() {
@@ -176,6 +177,7 @@ api_call() {
 
   echo "$status"
   cat "$body_file"
+  return 0
 }
 
 post_comment() {
@@ -190,6 +192,7 @@ post_comment() {
     echo "[WARN] failed to post comment to #$issue_number (HTTP ${response[0]})"
     printf '%s\n' "${response[@]:1}"
   fi
+  return 0
 }
 
 close_issue() {
@@ -201,6 +204,7 @@ close_issue() {
     echo "[WARN] failed to close #$issue_number (HTTP ${response[0]})"
     printf '%s\n' "${response[@]:1}"
   fi
+  return 0
 }
 
 update_tracker_body() {
@@ -213,6 +217,7 @@ update_tracker_body() {
     echo "[WARN] failed to update tracker body for #2643 (HTTP ${response[0]})"
     printf '%s\n' "${response[@]:1}"
   fi
+  return 0
 }
 
 echo "Applying docs issue sync for $OWNER/$REPO"
