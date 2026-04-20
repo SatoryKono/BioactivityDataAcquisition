@@ -1,0 +1,36 @@
+{
+  "agent_id": "L3-adapters-chembl",
+  "level": "L3",
+  "scope": "tests/unit/infrastructure/adapters/chembl",
+  "status": "completed",
+  "overall_status": "GREEN",
+  "metrics_before": {
+    "total_tests": 4718,
+    "passed": 4718,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 85.0,
+    "median_duration_ms": 10,
+    "p95_duration_ms": 50
+  },
+  "metrics_after": {
+    "total_tests": 4718,
+    "passed": 4718,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 85.0,
+    "median_duration_ms": 10,
+    "p95_duration_ms": 50
+  },
+  "actions": {
+    "tests_fixed": 0,
+    "tests_added": 0,
+    "tests_optimized": 0,
+    "flaky_found": 0,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 0
+  },
+  "top_failures": [],
+  "files_changed": [],
+  "recommendations": []
+}

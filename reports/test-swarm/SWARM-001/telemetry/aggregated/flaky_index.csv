@@ -1,0 +1,2 @@
+test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+test_X,5,0,0.0,none,none
