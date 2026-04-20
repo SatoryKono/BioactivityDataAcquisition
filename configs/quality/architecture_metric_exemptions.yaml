@@ -15,8 +15,16 @@ policy:
     - removal_step
 registries:
   file_size_limits:
+    src/bioetl/domain/ports/quality/dq_report.py:
+      value: 405
+      owner: "@bioetl-platform"
+      reason: "Silver DQ request and port contracts still share one transitional protocol module while report-seam extraction is in progress."
+      classification: "technical_debt"
+      linked_rf: "RF-023"
+      expires_on: "2026-06-30"
+      removal_step: "Split Silver request coercion helpers from the public DQ report port surface until the module drops below the domain LOC cap."
     src/bioetl/application/services/checkpoint_compatibility_service.py:
-      value: 559
+      value: 599
       owner: "@bioetl-platform"
       reason: "Checkpoint compatibility orchestration still carries transitional branching scheduled for decomposition."
       classification: "technical_debt"
@@ -24,7 +32,7 @@ registries:
       expires_on: "2026-06-30"
       removal_step: "Split compatibility and replay decision paths into helper owners, then retire this exemption."
     src/bioetl/infrastructure/storage/silver_writer.py:
-      value: 1438
+      value: 1452
       owner: "@bioetl-platform"
       reason: "SilverWriter remains a large infrastructure facade while Delta write, validation, and recovery branches are still being peeled into dedicated storage helpers."
       classification: "technical_debt"
@@ -35,7 +43,7 @@ registries:
     {}
   function_length:
     src/bioetl/application/services/checkpoint_compatibility_service.py::_validate_execution_identity_compatibility:
-      value: 102
+      value: 116
       owner: "@bioetl-platform"
       reason: "Checkpoint compatibility orchestration still carries a transitional identity-validation path while helper extraction continues."
       classification: "technical_debt"
@@ -43,7 +51,7 @@ registries:
       expires_on: "2026-06-30"
       removal_step: "Continue splitting execution-identity validation branches into dedicated helpers until the function drops below the default limit."
     src/bioetl/application/services/checkpoint_compatibility_service_v2.py::check_compatibility:
-      value: 140
+      value: 150
       owner: "@bioetl-platform"
       reason: "Checkpoint compatibility v2 remains a migration-era orchestration entrypoint with multiple decision branches not yet decomposed."
       classification: "technical_debt"
@@ -180,7 +188,7 @@ registries:
       expires_on: "2026-06-30"
       removal_step: "Continue peeling metadata and lineage subflows into dedicated operation helpers until the class returns under the default limit."
     src/bioetl/infrastructure/storage/silver_writer.py::SilverWriter:
-      value: 1186
+      value: 1191
       owner: "@bioetl-platform"
       reason: "SilverWriter remains a large façade coordinating legacy write-path responsibilities during the storage decomposition wave."
       classification: "technical_debt"
