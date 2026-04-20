@@ -62,7 +62,10 @@ def test_setup_plugins_prefers_local_venv_and_windows_git_fallback() -> None:
         encoding="utf-8"
     )
 
-    assert 'if [[ -x ".venv/Scripts/python.exe" ]]; then' in content
+    assert 'WINDOWS_LOCAL_VENV_PYTHON=".venv/Scripts/python.exe"' in content
+    assert 'WINDOWS_REPO_VENV_PYTHON=".venv-win/Scripts/python.exe"' in content
+    assert '[[ -x "$WINDOWS_LOCAL_VENV_PYTHON" ]]' in content
+    assert '[[ -x "$WINDOWS_REPO_VENV_PYTHON" ]]' in content
     assert "elif command -v uv >/dev/null 2>&1; then" in content
     assert "\\$env:Path='C:\\\\Program Files\\\\Git\\\\cmd;'+\\$env:Path" in content
     assert "\\$env:PRE_COMMIT_HOME=" in content
