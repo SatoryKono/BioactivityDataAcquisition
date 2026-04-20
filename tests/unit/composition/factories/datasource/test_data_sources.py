@@ -69,12 +69,16 @@ def test_create_uses_explicit_provider_registry(mock_http_client, mock_logger):
         logger: object | None = None
         provider_name: str = "isolated"
 
+        async def _close_async(self) -> None:
+            await asyncio.sleep(0)
+            return None
+
         async def __aenter__(self):
             return self
 
         async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-            await asyncio.sleep(0)
-            return None
+            del exc_type, exc_val, exc_tb
+            return await self._close_async()
 
         async def fetch(self, *args, **kwargs):
             yield {}
@@ -84,8 +88,7 @@ def test_create_uses_explicit_provider_registry(mock_http_client, mock_logger):
             return HealthStatus.HEALTHY
 
         async def aclose(self) -> None:
-            await asyncio.sleep(0)
-            return None
+            return await self._close_async()
 
     isolated.register(
         "isolated",

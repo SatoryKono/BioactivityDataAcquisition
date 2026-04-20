@@ -73,17 +73,19 @@ class _InlineInstantiationFinder(ast.NodeVisitor):
         self.generic_visit(node)
         self._current_class = prev
 
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+    def _visit_function_scope(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> None:
         prev = self._current_function
         self._current_function = node.name
         self.generic_visit(node)
         self._current_function = prev
 
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._visit_function_scope(node)
+
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        prev = self._current_function
-        self._current_function = node.name
-        self.generic_visit(node)
-        self._current_function = prev
+        self._visit_function_scope(node)
 
     def visit_Assign(self, node: ast.Assign) -> None:
         self._check_assignment(

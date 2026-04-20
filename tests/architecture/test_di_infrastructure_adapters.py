@@ -93,16 +93,17 @@ class _UnconditionalInstantiationFinder(ast.NodeVisitor):
 
     visit_AsyncFunctionDef = visit_FunctionDef  # type: ignore[assignment]
 
-    def visit_If(self, node: ast.If) -> None:
+    def _visit_guarded_branch(self, node: ast.AST) -> None:
         self._if_depth += 1
         self.generic_visit(node)
         self._if_depth -= 1
 
+    def visit_If(self, node: ast.If) -> None:
+        self._visit_guarded_branch(node)
+
     def visit_IfExp(self, node: ast.IfExp) -> None:
         # Inline ternary ``x if cond else Service(...)`` is guarded.
-        self._if_depth += 1
-        self.generic_visit(node)
-        self._if_depth -= 1
+        self._visit_guarded_branch(node)
 
     def visit_Assign(self, node: ast.Assign) -> None:
         self._check_assignment(node.value, node.lineno)
