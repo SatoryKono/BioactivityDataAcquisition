@@ -15,6 +15,9 @@ from bioetl.infrastructure.adapters.http.client_request_methods_mixin import (
     HTTPClientRequestMethodsMixin,
 )
 from bioetl.infrastructure.adapters.http.client_retry_mixin import HTTPClientRetryMixin
+from bioetl.infrastructure.observability.noop_resolution import (
+    resolve_optional_observability_ports,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -58,5 +61,7 @@ class UnifiedHTTPClient(
 
     def __post_init__(self) -> None:
         """Capture observability ports resolved by composition-owned wiring."""
-        self._tracer = self.tracer
-        self._metrics = self.metrics
+        self._tracer, self._metrics = resolve_optional_observability_ports(
+            tracer=self.tracer,
+            metrics=self.metrics,
+        )
