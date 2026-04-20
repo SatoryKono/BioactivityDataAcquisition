@@ -124,6 +124,29 @@ def build_check(
     )
 
 
+def _append_optional_check(
+    checks: list[BudgetCheck],
+    *,
+    enabled: bool,
+    metric: str,
+    value: int,
+    limit: int,
+    source: str,
+    message: str,
+) -> None:
+    if not enabled:
+        return
+    checks.append(
+        build_check(
+            metric=metric,
+            value=value,
+            limit=limit,
+            source=source,
+            message=message,
+        )
+    )
+
+
 def render_markdown(report: BudgetReport) -> str:
     lines: list[str] = []
     lines.append("# Diagram Quality Budget Report")
@@ -236,16 +259,15 @@ def _lint_checks(args: argparse.Namespace) -> list[BudgetCheck]:
             message="diagram lint errors exceed budget",
         )
     ]
-    if args.max_lint_warnings >= 0:
-        checks.append(
-            build_check(
-                metric="lint.warnings",
-                value=lint_warnings,
-                limit=args.max_lint_warnings,
-                source="lint_diagrams",
-                message="diagram lint warnings exceed budget",
-            )
-        )
+    _append_optional_check(
+        checks,
+        enabled=args.max_lint_warnings >= 0,
+        metric="lint.warnings",
+        value=lint_warnings,
+        limit=args.max_lint_warnings,
+        source="lint_diagrams",
+        message="diagram lint warnings exceed budget",
+    )
     return checks
 
 
@@ -264,16 +286,15 @@ def _nightly_checks(args: argparse.Namespace) -> list[BudgetCheck]:
             message="nightly suite errors exceed budget",
         )
     ]
-    if args.max_nightly_warnings >= 0:
-        checks.append(
-            build_check(
-                metric="nightly.warnings",
-                value=to_int(nightly_payload, "warnings", 0),
-                limit=args.max_nightly_warnings,
-                source="run_diagram_nightly_suite",
-                message="nightly suite warnings exceed budget",
-            )
-        )
+    _append_optional_check(
+        checks,
+        enabled=args.max_nightly_warnings >= 0,
+        metric="nightly.warnings",
+        value=to_int(nightly_payload, "warnings", 0),
+        limit=args.max_nightly_warnings,
+        source="run_diagram_nightly_suite",
+        message="nightly suite warnings exceed budget",
+    )
     return checks
 
 
@@ -298,6 +319,16 @@ def _write_optional_outputs(
         _write_output(args.markdown_out, render_markdown(report))
 
 
+def _budget_report(mode: str, checks: list[BudgetCheck]) -> BudgetReport:
+    failed_checks = sum(1 for check in checks if not check.passed)
+    return BudgetReport(
+        mode=mode,
+        checks=checks,
+        failed_checks=failed_checks,
+        passed=failed_checks == 0,
+    )
+
+
 def main() -> int:
     args = parse_args()
 
@@ -313,13 +344,7 @@ def main() -> int:
         _err("[ERROR] no budget checks configured; provide at least one report input")
         return 2
 
-    failed_checks = sum(1 for check in checks if not check.passed)
-    report = BudgetReport(
-        mode=args.mode,
-        checks=checks,
-        failed_checks=failed_checks,
-        passed=failed_checks == 0,
-    )
+    report = _budget_report(args.mode, checks)
 
     payload = _report_payload(report)
 

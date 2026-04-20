@@ -67,9 +67,19 @@ def _normalize_repo_relative_path(path: Path) -> Path:
 def _resolve_canonical_output_path(raw_output: str | Path) -> Path:
     """Allow writes only to the canonical tracked snapshot artifact."""
     candidate = Path(raw_output)
-    resolved_candidate = _ensure_repo_path(candidate if candidate.is_absolute() else ROOT / candidate)
     canonical_output = _ensure_repo_path(DEFAULT_OUTPUT)
-    if resolved_candidate != canonical_output:
+    canonical_relative = canonical_output.relative_to(ROOT.resolve())
+
+    if candidate.is_absolute():
+        if candidate.resolve() != canonical_output:
+            raise ValueError(
+                "compatibility facade snapshot may only write to the canonical tracked "
+                f"artifact: {canonical_output}"
+            )
+        return canonical_output
+
+    normalized_candidate = _normalize_repo_relative_path(candidate)
+    if normalized_candidate != canonical_relative:
         raise ValueError(
             "compatibility facade snapshot may only write to the canonical tracked "
             f"artifact: {canonical_output}"

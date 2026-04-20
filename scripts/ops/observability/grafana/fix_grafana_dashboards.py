@@ -57,57 +57,67 @@ RUN_ID_VAR = {
 }
 
 
+def _load_dashboard(path: Path) -> dict[str, object] | None:
+    try:
+        return json.loads(path.read_text(encoding="utf-8-sig"))
+    except Exception as exc:
+        print(f"Error reading {path}: {exc}")
+        return None
+
+
+def _dashboard_panels(data: dict[str, object]) -> list[dict[str, object]]:
+    panels = list(data.get("panels", []))
+    for row in data.get("rows", []):
+        if isinstance(row, dict):
+            panels.extend(row.get("panels", []))
+    return [panel for panel in panels if isinstance(panel, dict)]
+
+
+def _rewrite_promql_expr(expr: str) -> str:
+    if not expr or "bioetl_" not in expr or "$pipeline" in expr:
+        return expr
+
+    new_expr = expr
+    for metric in re.findall(r"bioetl_[a-z0-9_]+", expr):
+        if f"{metric}{{" in new_expr:
+            new_expr = new_expr.replace(
+                f"{metric}{{",
+                f'{metric}{{pipeline=~"$pipeline", run_id=~"$run_id", ',
+            )
+            continue
+        new_expr = new_expr.replace(
+            metric,
+            f'{metric}{{pipeline=~"$pipeline", run_id=~"$run_id"}}',
+        )
+    return new_expr.replace(", }", "}").replace(",,", ",")
+
+
+def _rewrite_panel_targets(panel: dict[str, object]) -> None:
+    targets = panel.get("targets", [])
+    if not isinstance(targets, list):
+        return
+    for target in targets:
+        if not isinstance(target, dict):
+            continue
+        expr = target.get("expr", "")
+        if isinstance(expr, str):
+            target["expr"] = _rewrite_promql_expr(expr)
+
+
+def _write_dashboard(path: Path, data: dict[str, object]) -> None:
+    path.write_text(json.dumps(data, indent=4), encoding="utf-8")
+
+
 def fix_dashboard(path):
     print(f"Processing {path}...")
-    try:
-        # Use utf-8-sig to handle possible BOM
-        with open(path, "r", encoding="utf-8-sig") as f:
-            data = json.load(f)
-    except Exception as e:
-        print(f"Error reading {path}: {e}")
+    data = _load_dashboard(path)
+    if data is None:
         return
 
-    # 1. Add variables
     data["templating"]["list"] = [PIPELINE_VAR, RUN_ID_VAR]
-
-    # 2. Update PromQL queries
-    panels = data.get("panels", [])
-    for row in data.get("rows", []):
-        panels.extend(row.get("panels", []))
-
-    for panel in panels:
-        targets = panel.get("targets", [])
-        if not targets:
-            continue
-
-        for target in targets:
-            expr = target.get("expr", "")
-            if not expr or ("bioetl_" not in expr):
-                continue
-
-            # Complex replacement:
-            metrics_found = re.findall(r"bioetl_[a-z0-9_]+", expr)
-            new_expr = expr
-
-            for m in metrics_found:
-                # If metric already has $pipeline filter, skip it
-                if "$pipeline" in new_expr:
-                    continue
-
-                if f"{m}{{" in new_expr:
-                    new_expr = new_expr.replace(
-                        f"{m}{{", f'{m}{{pipeline=~"$pipeline", run_id=~"$run_id", '
-                    )
-                else:
-                    new_expr = new_expr.replace(
-                        m, f'{m}{{pipeline=~"$pipeline", run_id=~"$run_id"}}'
-                    )
-
-            new_expr = new_expr.replace(", }", "}").replace(",,", ",")
-            target["expr"] = new_expr
-
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
+    for panel in _dashboard_panels(data):
+        _rewrite_panel_targets(panel)
+    _write_dashboard(path, data)
 
 
 if __name__ == "__main__":
