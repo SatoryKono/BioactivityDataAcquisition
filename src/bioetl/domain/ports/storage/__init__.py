@@ -28,6 +28,7 @@ from bioetl.domain.ports.storage.merged_port import MergedStoragePort
 from bioetl.domain.ports.storage.silver_port import (
     SilverStoragePort,
     SilverWriteRequest,
+    coerce_silver_write_request,
 )
 from bioetl.domain.ports.storage_maintenance import StorageMaintenancePort
 
@@ -40,4 +41,5 @@ __all__ = [
     "StorageLifecyclePort",
     "StorageMaintenancePort",
     "StoragePort",
+    "coerce_silver_write_request",
 ]

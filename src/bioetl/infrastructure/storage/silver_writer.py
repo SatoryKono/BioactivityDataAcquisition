@@ -24,11 +24,9 @@ from bioetl.domain.ports import (
     MetadataCoordinatorPort,
     MetadataWriterPort,
     MetricsPort,
+    SilverWriteRequest,
     SilverValidatorPort,
     TracingPort,
-)
-from bioetl.domain.ports.storage.silver_port import (
-    SilverWriteRequest,
     coerce_silver_write_request,
 )
 from bioetl.domain.services.dq_metrics_calculator import DQMetricsCalculator
