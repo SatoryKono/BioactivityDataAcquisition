@@ -129,12 +129,18 @@ async def test_postwrite_operations_preserve_service_specific_export_and_audit()
     )
 
     assert result == "finalized"
-    maintenance.maybe_export_csv.assert_awaited_once_with(
-        table_name="test.table",
-        arrow_data=payload.arrow_data,
-        export_path=SILVER_EXPORT_PATH,
-        primary_keys=["entity_id"],
-    )
+    # Check that maybe_export_csv was called with correct parameters
+    # Use path normalization to handle different path separators across platforms
+    maintenance.maybe_export_csv.assert_awaited_once()
+    call_kwargs = maintenance.maybe_export_csv.call_args.kwargs
+    
+    assert call_kwargs["table_name"] == "test.table"
+    assert call_kwargs["arrow_data"] is payload.arrow_data
+    assert call_kwargs["primary_keys"] == ["entity_id"]
+    # Normalize paths for comparison to handle different separators
+    expected_path = str(Path(SILVER_EXPORT_PATH).resolve())
+    actual_path = str(Path(call_kwargs["export_path"]).resolve())
+    assert expected_path == actual_path, f"Expected {expected_path}, got {actual_path}"
     host._maybe_export_csv.assert_not_awaited()
     metadata.log_silver_audit.assert_awaited_once_with(
         table_name="test.table",

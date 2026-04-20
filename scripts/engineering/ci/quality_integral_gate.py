@@ -985,26 +985,28 @@ def main() -> int:
     test_health_payload = _build_test_health_payload(test_health, test_health_taxonomy)
 
     output = _quality_gate_output(
-        quarter=quarter,
-        architecture_stats=architecture_stats,
-        max_total_exemptions=max_total_exemptions,
-        min_integral_score=min_integral_score,
-        ci_target=ci_target,
-        arch_failures=arch_failures,
-        total_exemptions=total_exemptions,
-        max_class_loc=max_class_loc,
-        domain_cc_exemptions=domain_cc_exemptions,
-        min_provider_vcr=min_provider_vcr,
-        provider_vcr_counts=provider_vcr_counts,
-        ruff_violations=ruff_violations,
-        coverage_percent=coverage_percent,
-        compatibility_surface=compatibility_surface,
-        test_health_payload=test_health_payload,
-        bonus=bonus,
-        summary=summary,
-        adjusted_integral_score=adjusted_integral_score,
-        gate_pass=gate_pass,
-        violations=violations,
+        QualityGateOutputContext(
+            quarter=quarter,
+            architecture_stats=architecture_stats,
+            max_total_exemptions=max_total_exemptions,
+            min_integral_score=min_integral_score,
+            ci_target=ci_target,
+            arch_failures=arch_failures,
+            total_exemptions=total_exemptions,
+            max_class_loc=max_class_loc,
+            domain_cc_exemptions=domain_cc_exemptions,
+            min_provider_vcr=min_provider_vcr,
+            provider_vcr_counts=provider_vcr_counts,
+            ruff_violations=ruff_violations,
+            coverage_percent=coverage_percent,
+            compatibility_surface=compatibility_surface,
+            test_health_payload=test_health_payload,
+            bonus=bonus,
+            summary=summary,
+            adjusted_integral_score=adjusted_integral_score,
+            gate_pass=gate_pass,
+            violations=violations,
+        )
     )
 
     output_path = Path(args.output)
