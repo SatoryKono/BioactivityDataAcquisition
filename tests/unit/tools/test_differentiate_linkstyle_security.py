@@ -24,23 +24,25 @@ def _load_module() -> ModuleType:
     return module
 
 
-def test_write_mermaid_text_rejects_parent_traversal(
+def test_write_validated_mermaid_text_rejects_parent_traversal(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module()
     monkeypatch.setattr(module, "MERMAID_DIR", tmp_path)
 
-    with pytest.raises(ValueError, match="parent traversal"):
-        module._write_mermaid_text(Path("../escape.mmd"), "content")
+    with pytest.raises(ValueError, match="outside"):
+        module._write_validated_mermaid_text(tmp_path.parent / "escape.mmd", "content")
 
 
-def test_write_mermaid_text_rejects_absolute_path(
+def test_write_validated_mermaid_text_accepts_mermaid_root_file(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     module = _load_module()
     monkeypatch.setattr(module, "MERMAID_DIR", tmp_path)
+    target = tmp_path / "ok.mmd"
 
-    with pytest.raises(ValueError, match="absolute path"):
-        module._write_mermaid_text(tmp_path / "escape.mmd", "content")
+    module._write_validated_mermaid_text(target, "content")
+
+    assert target.read_text(encoding="utf-8") == "content"
