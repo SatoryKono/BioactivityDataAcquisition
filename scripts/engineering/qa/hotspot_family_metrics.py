@@ -106,14 +106,21 @@ def count_files_ge_loc(*, files: list[Path], min_lines: int) -> int:
     )
 
 
+def _parse_python_ast(path: Path) -> ast.AST | None:
+    """Parse Python file into AST, returning None on syntax errors."""
+    try:
+        return ast.parse(path.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return None
+
+
 def helper_function_ratio(*, files: list[Path]) -> float:
     """Return the ratio of underscore-prefixed helper functions in the family."""
     total_functions = 0
     helper_functions = 0
     for path in files:
-        try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except SyntaxError:
+        tree = _parse_python_ast(path)
+        if tree is None:
             continue
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -188,9 +195,8 @@ def count_internal_fan_in(*, files: list[Path]) -> tuple[int, str | None]:
     fan_in_counter: Counter[str] = Counter()
 
     for source_module, path in module_map.items():
-        try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except SyntaxError:
+        tree = _parse_python_ast(path)
+        if tree is None:
             continue
 
         seen_targets: set[str] = set()
@@ -252,6 +258,74 @@ def _duplication_count_for_family(
     return None
 
 
+def _duplication_baseline_path(
+    *,
+    source: dict[str, object],
+    duplication_baseline_path: Path | None,
+) -> Path | None:
+    """Resolve duplication baseline path from explicit arg or scorecard policy."""
+    if duplication_baseline_path is not None:
+        return duplication_baseline_path
+    artifact_policy = source.get("report_only_hotspot_families", {})
+    if not isinstance(artifact_policy, dict):
+        return None
+    baseline_artifact = artifact_policy.get("artifact_policy", {})
+    if not isinstance(baseline_artifact, dict):
+        return None
+    baseline_path = baseline_artifact.get("baseline_artifact")
+    if isinstance(baseline_path, str):
+        return PROJECT_ROOT / baseline_path
+    return None
+
+
+def _bounded_growth_budgets(family: dict[str, object]) -> dict[str, int]:
+    """Return normalized bounded growth budgets mapping."""
+    bounded_growth_budgets = family.get("bounded_growth_budgets", {})
+    if not isinstance(bounded_growth_budgets, dict):
+        return {}
+    return {
+        str(key): int(value)
+        for key, value in bounded_growth_budgets.items()
+        if isinstance(key, str) and isinstance(value, int)
+    }
+
+
+def _path_prefixes(family: dict[str, object]) -> tuple[str, ...]:
+    """Return normalized hotspot family path prefixes."""
+    raw_prefixes = family.get("path_prefixes", [])
+    return tuple(prefix for prefix in raw_prefixes if isinstance(prefix, str))
+
+
+def _hotspot_family_metric(
+    *,
+    family: dict[str, object],
+    duplication_rows: dict[str, int],
+) -> HotspotFamilyMetrics:
+    """Build current metrics for one hotspot family row."""
+    path_prefixes = _path_prefixes(family)
+    files = iter_family_python_files(path_prefixes=list(path_prefixes))
+    max_fan_in, max_fan_in_module = count_internal_fan_in(files=files)
+    return HotspotFamilyMetrics(
+        name=str(family.get("name", "")),
+        owner=str(family.get("owner", "")),
+        linked_rf=str(family.get("linked_rf", "")),
+        ratchet_stage=str(family.get("ratchet_stage", "")),
+        ratchet_scope=str(family.get("ratchet_scope", "")),
+        path_prefixes=path_prefixes,
+        duplication_clusters=_duplication_count_for_family(
+            path_prefixes=path_prefixes,
+            duplication_rows=duplication_rows,
+        ),
+        files=len(files),
+        total_loc=count_total_loc(files=files),
+        files_ge_250_loc=count_files_ge_loc(files=files, min_lines=250),
+        helper_function_ratio=helper_function_ratio(files=files),
+        max_internal_fan_in=max_fan_in,
+        max_internal_fan_in_module=max_fan_in_module,
+        bounded_growth_budgets=_bounded_growth_budgets(family),
+    )
+
+
 def collect_hotspot_family_metrics(
     *,
     scorecard: dict[str, object] | None = None,
@@ -260,49 +334,15 @@ def collect_hotspot_family_metrics(
 ) -> list[HotspotFamilyMetrics]:
     """Collect current metrics for configured hotspot families."""
     source = scorecard if scorecard is not None else load_scorecard()
-    artifact_policy = source.get("report_only_hotspot_families", {})
-    if duplication_baseline_path is None and isinstance(artifact_policy, dict):
-        baseline_artifact = artifact_policy.get("artifact_policy", {})
-        if isinstance(baseline_artifact, dict):
-            baseline_path = baseline_artifact.get("baseline_artifact")
-            if isinstance(baseline_path, str):
-                duplication_baseline_path = PROJECT_ROOT / baseline_path
-
+    duplication_baseline_path = _duplication_baseline_path(
+        source=source,
+        duplication_baseline_path=duplication_baseline_path,
+    )
     duplication_rows = _load_duplication_baseline(duplication_baseline_path)
-    metrics: list[HotspotFamilyMetrics] = []
-    for family in iter_hotspot_families(scorecard=source, active_only=active_only):
-        raw_prefixes = family.get("path_prefixes", [])
-        path_prefixes = tuple(prefix for prefix in raw_prefixes if isinstance(prefix, str))
-        files = iter_family_python_files(path_prefixes=list(path_prefixes))
-        max_fan_in, max_fan_in_module = count_internal_fan_in(files=files)
-        bounded_growth_budgets = family.get("bounded_growth_budgets", {})
-        metrics.append(
-            HotspotFamilyMetrics(
-                name=str(family.get("name", "")),
-                owner=str(family.get("owner", "")),
-                linked_rf=str(family.get("linked_rf", "")),
-                ratchet_stage=str(family.get("ratchet_stage", "")),
-                ratchet_scope=str(family.get("ratchet_scope", "")),
-                path_prefixes=path_prefixes,
-                duplication_clusters=_duplication_count_for_family(
-                    path_prefixes=path_prefixes,
-                    duplication_rows=duplication_rows,
-                ),
-                files=len(files),
-                total_loc=count_total_loc(files=files),
-                files_ge_250_loc=count_files_ge_loc(files=files, min_lines=250),
-                helper_function_ratio=helper_function_ratio(files=files),
-                max_internal_fan_in=max_fan_in,
-                max_internal_fan_in_module=max_fan_in_module,
-                bounded_growth_budgets=(
-                    {
-                        str(key): int(value)
-                        for key, value in bounded_growth_budgets.items()
-                        if isinstance(key, str) and isinstance(value, int)
-                    }
-                    if isinstance(bounded_growth_budgets, dict)
-                    else {}
-                ),
-            )
+    return [
+        _hotspot_family_metric(
+            family=family,
+            duplication_rows=duplication_rows,
         )
-    return metrics
+        for family in iter_hotspot_families(scorecard=source, active_only=active_only)
+    ]

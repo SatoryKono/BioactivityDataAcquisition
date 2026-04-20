@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-19T16:25:16.053453+00:00",
+  "generated_at": "2026-04-19T17:56:58.686590+00:00",
   "summary": {
     "total_scripts": 416,
     "status_counts": {
@@ -3724,7 +3724,7 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_docs_agent.sh",
-          "line": 162,
+          "line": 165,
           "source_group": "scripts",
           "text": "DOCX_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/scripts/diagrams/generate_with_descriptions_docx.py\")"
         }
@@ -3775,7 +3775,7 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_docs_agent.sh",
-          "line": 171,
+          "line": 174,
           "source_group": "scripts",
           "text": "PDF_CMD=(\"$PYTHON_CMD\" \"$REPO_ROOT/scripts/diagrams/generate_with_descriptions_pdf.py\")"
         }
@@ -6092,13 +6092,13 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 376,
+          "line": 378,
           "source_group": "scripts",
           "text": "if should_run_preflight && [[ -f \"scripts/engineering/dev/pretest_guardrails.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 379,
+          "line": 381,
           "source_group": "scripts",
           "text": "preflight_cmd=(bash scripts/engineering/dev/pretest_guardrails.sh --mode \"$preflight_mode\" --scope \"$preflight_scope\")"
         }
@@ -9586,19 +9586,19 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 436,
+          "line": 438,
           "source_group": "scripts",
           "text": "if [[ -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 437,
+          "line": 439,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 441,
+          "line": 443,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
         },
