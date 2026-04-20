@@ -66,7 +66,7 @@ class TestStoragePortProtocol:
                 *args: object,
                 **kwargs: object,
             ) -> SilverWriteResult | None:
-                del coerce_silver_write_request(request, args=args, kwargs=kwargs)
+                _ = coerce_silver_write_request(request, args=args, kwargs=kwargs)
                 await _yield_once()
                 return None
 
