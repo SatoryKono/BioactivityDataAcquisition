@@ -65,14 +65,9 @@ def _missing_registry_issue(registry_path: Path) -> RegistryValidationIssue:
     )
 
 
-def _print_validation_issues(
+def _issues_by_severity(
     issues: list[RegistryValidationIssue],
-) -> None:
-    if not issues:
-        print("::notice::All registry entries are valid")
-        return
-
-    print(f"::warning::Found {len(issues)} validation issues")
+) -> tuple[list[RegistryValidationIssue], list[RegistryValidationIssue]]:
     blocking = [
         issue
         for issue in issues
@@ -83,16 +78,41 @@ def _print_validation_issues(
         for issue in issues
         if issue.severity == RegistryValidationSeverity.WARNING
     ]
+    return blocking, warnings
 
-    if blocking:
-        print(f"::error::{len(blocking)} blocking issues found:")
-        for issue in blocking:
-            print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
 
-    if warnings:
-        print(f"::warning::{len(warnings)} non-blocking warnings:")
-        for issue in warnings:
-            print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
+def _print_issue_group(
+    *,
+    issues: list[RegistryValidationIssue],
+    label: str,
+    annotation: str,
+) -> None:
+    if not issues:
+        return
+    print(f"{annotation}{len(issues)} {label}:")
+    for issue in issues:
+        print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
+
+
+def _print_validation_issues(
+    issues: list[RegistryValidationIssue],
+) -> None:
+    if not issues:
+        print("::notice::All registry entries are valid")
+        return
+
+    print(f"::warning::Found {len(issues)} validation issues")
+    blocking, warnings = _issues_by_severity(issues)
+    _print_issue_group(
+        issues=blocking,
+        label="blocking issues found",
+        annotation="::error::",
+    )
+    _print_issue_group(
+        issues=warnings,
+        label="non-blocking warnings",
+        annotation="::warning::",
+    )
 
 
 def _finalize_validation(

@@ -10,8 +10,11 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.ai.mcp.neo4j_memory_mcp_adapter import *  # noqa: F403
-from scripts.ai.mcp.neo4j_memory_mcp_adapter import main
+import scripts.ai.mcp.neo4j_memory_mcp_adapter as _impl
+
+main = _impl.main
+__all__ = getattr(_impl, "__all__", [name for name in vars(_impl) if not name.startswith("_")])
+globals().update({name: getattr(_impl, name) for name in __all__})
 
 
 if __name__ == "__main__":

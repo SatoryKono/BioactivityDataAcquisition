@@ -112,6 +112,87 @@ def _logical_type_from_dtype(dtype_name: str) -> str:
     return "unknown"
 
 
+def _apply_field_policy_sources(
+    config: dict[str, Any],
+    *,
+    explicit_expected: dict[str, tuple[OptionalitySource, ...]],
+) -> None:
+    field_policy = config.get("field_policy")
+    if not isinstance(field_policy, dict):
+        return
+    for field_name, policy in field_policy.items():
+        if (
+            not isinstance(field_name, str)
+            or is_framework_managed_field(field_name)
+            or not isinstance(policy, dict)
+        ):
+            continue
+        optional = policy.get("optional")
+        if optional is True:
+            explicit_expected[field_name] = ("field_policy_optional_true",)
+        elif optional is False:
+            explicit_expected[field_name] = ("field_policy_optional_false",)
+
+
+def _apply_required_filter_sources(
+    config: dict[str, Any],
+    *,
+    expected: dict[str, set[OptionalitySource]],
+) -> None:
+    filters = config.get("filters")
+    if not isinstance(filters, dict):
+        return
+    silver_filters = filters.get("silver_filters")
+    if not isinstance(silver_filters, dict):
+        return
+    for field in silver_filters.get("required_fields") or []:
+        if isinstance(field, str) and not is_framework_managed_field(field):
+            expected.setdefault(field, set()).add("silver_required_fields")
+
+
+def _apply_quality_validation_sources(
+    config: dict[str, Any],
+    *,
+    expected: dict[str, set[OptionalitySource]],
+) -> None:
+    quality = config.get("quality")
+    if not isinstance(quality, dict):
+        return
+    for item in quality.get("entity_field_validations") or []:
+        if not isinstance(item, dict):
+            continue
+        field = item.get("field")
+        if not isinstance(field, str) or is_framework_managed_field(field):
+            continue
+        validation_type = item.get("type")
+        if validation_type == "required":
+            expected.setdefault(field, set()).add("dq_required_validation")
+        elif validation_type == "not_null":
+            expected.setdefault(field, set()).add("dq_not_null_validation")
+
+    for item in quality.get("key_nullability") or []:
+        if not isinstance(item, dict):
+            continue
+        field = item.get("field")
+        if (
+            isinstance(field, str)
+            and not is_framework_managed_field(field)
+            and item.get("nullable") is False
+        ):
+            expected.setdefault(field, set()).add("dq_key_nullability")
+
+
+def _ordered_expected_sources(
+    expected: dict[str, set[OptionalitySource]],
+) -> dict[str, tuple[OptionalitySource, ...]]:
+    ordered_expected: dict[str, tuple[OptionalitySource, ...]] = {}
+    for field, sources in expected.items():
+        ordered_expected[field] = tuple(
+            source for source in _SOURCE_ORDER if source in sources
+        )
+    return ordered_expected
+
+
 def extract_expected_optionality_sources(
     config: dict[str, Any],
 ) -> dict[str, tuple[OptionalitySource, ...]]:
@@ -119,59 +200,11 @@ def extract_expected_optionality_sources(
     explicit_expected: dict[str, tuple[OptionalitySource, ...]] = {}
     expected: dict[str, set[OptionalitySource]] = {}
 
-    field_policy = config.get("field_policy")
-    if isinstance(field_policy, dict):
-        for field_name, policy in field_policy.items():
-            if (
-                not isinstance(field_name, str)
-                or is_framework_managed_field(field_name)
-                or not isinstance(policy, dict)
-            ):
-                continue
-            optional = policy.get("optional")
-            if optional is True:
-                explicit_expected[field_name] = ("field_policy_optional_true",)
-            elif optional is False:
-                explicit_expected[field_name] = ("field_policy_optional_false",)
+    _apply_field_policy_sources(config, explicit_expected=explicit_expected)
+    _apply_required_filter_sources(config, expected=expected)
+    _apply_quality_validation_sources(config, expected=expected)
 
-    filters = config.get("filters")
-    if isinstance(filters, dict):
-        silver_filters = filters.get("silver_filters")
-        if isinstance(silver_filters, dict):
-            for field in silver_filters.get("required_fields") or []:
-                if isinstance(field, str) and not is_framework_managed_field(field):
-                    expected.setdefault(field, set()).add("silver_required_fields")
-
-    quality = config.get("quality")
-    if isinstance(quality, dict):
-        for item in quality.get("entity_field_validations") or []:
-            if not isinstance(item, dict):
-                continue
-            field = item.get("field")
-            if not isinstance(field, str) or is_framework_managed_field(field):
-                continue
-            validation_type = item.get("type")
-            if validation_type == "required":
-                expected.setdefault(field, set()).add("dq_required_validation")
-            elif validation_type == "not_null":
-                expected.setdefault(field, set()).add("dq_not_null_validation")
-
-        for item in quality.get("key_nullability") or []:
-            if not isinstance(item, dict):
-                continue
-            field = item.get("field")
-            if (
-                isinstance(field, str)
-                and not is_framework_managed_field(field)
-                and item.get("nullable") is False
-            ):
-                expected.setdefault(field, set()).add("dq_key_nullability")
-
-    ordered_expected: dict[str, tuple[OptionalitySource, ...]] = {}
-    for field, sources in expected.items():
-        ordered_expected[field] = tuple(
-            source for source in _SOURCE_ORDER if source in sources
-        )
+    ordered_expected = _ordered_expected_sources(expected)
     ordered_expected.update(explicit_expected)
     return ordered_expected
 

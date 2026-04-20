@@ -170,6 +170,72 @@ def _collect_untracked_root_dirs(paths: list[str]) -> set[str]:
     return {path.split("/", maxsplit=1)[0] for path in paths if "/" in path}
 
 
+def _report_root_layout_violations(
+    *,
+    unexpected_root_files: list[str],
+    unexpected_root_dirs: list[str],
+) -> int:
+    if not unexpected_root_files and not unexpected_root_dirs:
+        return 0
+
+    sys.stderr.write("ERROR: root layout policy violation detected.\n")
+    if unexpected_root_files:
+        sys.stderr.write("Unexpected tracked root files:\n")
+        for entry in unexpected_root_files:
+            sys.stderr.write(f"  - {entry}\n")
+    if unexpected_root_dirs:
+        sys.stderr.write("Unexpected tracked root directories:\n")
+        for entry in unexpected_root_dirs:
+            sys.stderr.write(f"  - {entry}\n")
+    return 1
+
+
+def _report_missing_allowed_files(missing_allowed_files: list[str]) -> None:
+    if not missing_allowed_files:
+        return
+    sys.stdout.write(
+        "INFO: allowlisted root files currently absent (forward-compatible):\n"
+    )
+    for entry in missing_allowed_files:
+        sys.stdout.write(f"  - {entry}\n")
+
+
+def _unexpected_untracked_root_dirs(
+    untracked_paths: list[str], tracked_root_dirs: set[str]
+) -> list[str]:
+    return sorted(
+        root_dir
+        for root_dir in _collect_untracked_root_dirs(untracked_paths)
+        if root_dir not in tracked_root_dirs
+        and root_dir not in ALLOWED_ROOT_DIRECTORIES
+    )
+
+
+def _report_untracked_root_entries(
+    *,
+    unexpected_untracked_root_files: list[str],
+    unexpected_untracked_root_dirs: list[str],
+) -> bool:
+    has_violations = False
+    if unexpected_untracked_root_files:
+        has_violations = True
+        sys.stdout.write(
+            "WARNING: non-ignored untracked root files detected "
+            "(SHOULD be moved under tests/fixtures/reports or ignored):\n"
+        )
+        for entry in unexpected_untracked_root_files:
+            sys.stdout.write(f"  - {entry}\n")
+    if unexpected_untracked_root_dirs:
+        has_violations = True
+        sys.stdout.write(
+            "WARNING: non-ignored untracked root directories detected "
+            "(SHOULD be reviewed/moved/ignored):\n"
+        )
+        for entry in unexpected_untracked_root_dirs:
+            sys.stdout.write(f"  - {entry}\n")
+    return has_violations
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Validate root tracked layout and flag unexpected untracked root files.",
@@ -205,24 +271,14 @@ def main() -> int:
     unexpected_root_dirs = sorted(tracked_root_dirs - ALLOWED_ROOT_DIRECTORIES)
     missing_allowed_files = sorted(allowed_root_files - tracked_root_files)
 
-    if unexpected_root_files or unexpected_root_dirs:
-        sys.stderr.write("ERROR: root layout policy violation detected.\n")
-        if unexpected_root_files:
-            sys.stderr.write("Unexpected tracked root files:\n")
-            for entry in unexpected_root_files:
-                sys.stderr.write(f"  - {entry}\n")
-        if unexpected_root_dirs:
-            sys.stderr.write("Unexpected tracked root directories:\n")
-            for entry in unexpected_root_dirs:
-                sys.stderr.write(f"  - {entry}\n")
-        return 1
+    root_layout_exit = _report_root_layout_violations(
+        unexpected_root_files=unexpected_root_files,
+        unexpected_root_dirs=unexpected_root_dirs,
+    )
+    if root_layout_exit:
+        return root_layout_exit
 
-    if missing_allowed_files:
-        sys.stdout.write(
-            "INFO: allowlisted root files currently absent (forward-compatible):\n"
-        )
-        for entry in missing_allowed_files:
-            sys.stdout.write(f"  - {entry}\n")
+    _report_missing_allowed_files(missing_allowed_files)
 
     try:
         untracked_paths = _get_untracked_paths(repo_root)
@@ -233,29 +289,13 @@ def main() -> int:
     unexpected_untracked_root_files = sorted(
         _collect_untracked_root_files(untracked_paths)
     )
-    unexpected_untracked_root_dirs = sorted(
-        root_dir
-        for root_dir in _collect_untracked_root_dirs(untracked_paths)
-        if root_dir not in tracked_root_dirs
-        and root_dir not in ALLOWED_ROOT_DIRECTORIES
+    unexpected_untracked_root_dirs = _unexpected_untracked_root_dirs(
+        untracked_paths, tracked_root_dirs
     )
-    strict_untracked_violation = False
-    if unexpected_untracked_root_files:
-        strict_untracked_violation = True
-        sys.stdout.write(
-            "WARNING: non-ignored untracked root files detected "
-            "(SHOULD be moved under tests/fixtures/reports or ignored):\n"
-        )
-        for entry in unexpected_untracked_root_files:
-            sys.stdout.write(f"  - {entry}\n")
-    if unexpected_untracked_root_dirs:
-        strict_untracked_violation = True
-        sys.stdout.write(
-            "WARNING: non-ignored untracked root directories detected "
-            "(SHOULD be reviewed/moved/ignored):\n"
-        )
-        for entry in unexpected_untracked_root_dirs:
-            sys.stdout.write(f"  - {entry}\n")
+    strict_untracked_violation = _report_untracked_root_entries(
+        unexpected_untracked_root_files=unexpected_untracked_root_files,
+        unexpected_untracked_root_dirs=unexpected_untracked_root_dirs,
+    )
     if args.strict_untracked and strict_untracked_violation:
         return 1
 
