@@ -16,38 +16,3 @@ from scripts.ai.sonar_issue_processor import main
 
 if __name__ == "__main__":
     main()
-    if not SONARQUBE_TOKEN:
-        print("❌ SonarQube configuration missing. Please set SONARQUBE_TOKEN.")
-        return
-
-    if not GITHUB_TOKEN:
-        print("❌ GitHub token missing. Please set GITHUB_TOKEN.")
-        return
-
-    # Get project key (could be passed as argument or configured)
-    project_key = "bioactivitydataacquisition2"  # Adjust as needed
-
-    print(f"🔍 Fetching SonarQube issues for project: {project_key}")
-    issues = get_sonar_issues(project_key)
-
-    if not issues:
-        print("✅ No SonarQube issues found!")
-        return
-
-    print(f"📊 Found {len(issues)} issues. Grouping by layers...")
-    layered_issues = group_issues_by_layer(issues)
-
-    print("\n📝 Issue distribution by layer:")
-    for layer, layer_issues in layered_issues.items():
-        print(f"  - {layer}: {len(layer_issues)} issues")
-
-    print("\n🚀 Creating GitHub issues...")
-    for layer, layer_issues in layered_issues.items():
-        if layer_issues:  # Only create issues for layers with problems
-            create_github_issue(layer, layer_issues)
-
-    print("✅ Process completed!")
-
-
-if __name__ == "__main__":
-    main()
