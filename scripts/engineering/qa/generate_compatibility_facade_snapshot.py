@@ -65,7 +65,7 @@ def _normalize_repo_relative_path(path: Path) -> Path:
 
 
 def _resolve_canonical_output_path(raw_output: str | Path) -> Path:
-    """Allow writes only to the canonical tracked snapshot artifact."""
+    """Validate requested output and resolve it to the canonical tracked artifact."""
     candidate = Path(raw_output)
     canonical_output = _ensure_repo_path(DEFAULT_OUTPUT)
     canonical_relative = canonical_output.relative_to(ROOT.resolve())

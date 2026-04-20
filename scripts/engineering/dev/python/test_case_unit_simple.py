@@ -91,11 +91,11 @@ def test_normalization_rules():
     print("✓ Unit canonicalization tests passed!")
 
     print("\n=== Unit Mapping Info ===")
-    print(f"Total unit mappings: {len(UNIT_MAPPING)}")
+    print("Total unit mappings:", len(UNIT_MAPPING))
 
     # Show bioactivity-relevant units
     bioactivity_units = {k: v for k, v in UNIT_MAPPING.items() if v in ['nM', 'µM', 'mM', 'M', '%']}
-    print(f"Bioactivity units: {len(bioactivity_units)} mappings")
+    print("Bioactivity units:", len(bioactivity_units), "mappings")
     for k, v in list(bioactivity_units.items())[:10]:
         print(f"  {k} → {v}")
 

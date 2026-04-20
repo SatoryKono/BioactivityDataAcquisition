@@ -274,6 +274,22 @@ def _parse_pyarrow_field_call(field_call: ast.Call) -> dict[str, object] | None:
     return {"name": name, "type": dtype, "nullable": nullable}
 
 
+def _returned_pyarrow_fields(statement: ast.stmt) -> list[dict[str, object]]:
+    if not isinstance(statement, ast.Return):
+        return []
+    if not isinstance(statement.value, ast.List):
+        return []
+
+    fields: list[dict[str, object]] = []
+    for element in statement.value.elts:
+        if not isinstance(element, ast.Call):
+            continue
+        parsed = _parse_pyarrow_field_call(element)
+        if parsed is not None:
+            fields.append(parsed)
+    return fields
+
+
 def _scan_pyarrow_field_blocks(path: Path) -> dict[str, list[dict[str, object]]]:
     tree = _read_ast(path)
     blocks: dict[str, list[dict[str, object]]] = {}
@@ -281,20 +297,54 @@ def _scan_pyarrow_field_blocks(path: Path) -> dict[str, list[dict[str, object]]]
         if not isinstance(node, ast.FunctionDef):
             continue
         for statement in node.body:
-            if not isinstance(statement, ast.Return):
-                continue
-            if not isinstance(statement.value, ast.List):
-                continue
-            fields: list[dict[str, object]] = []
-            for element in statement.value.elts:
-                if not isinstance(element, ast.Call):
-                    continue
-                parsed = _parse_pyarrow_field_call(element)
-                if parsed is not None:
-                    fields.append(parsed)
+            fields = _returned_pyarrow_fields(statement)
             if fields:
                 blocks[node.name] = fields
     return blocks
+
+
+def _expand_pyarrow_list_element(
+    element: ast.AST,
+    *,
+    field_blocks: dict[str, list[dict[str, object]]],
+) -> list[dict[str, object]]:
+    if isinstance(element, ast.Call):
+        parsed = _parse_pyarrow_field_call(element)
+        if parsed is not None:
+            return [parsed]
+        if isinstance(element.func, ast.Name):
+            return field_blocks.get(element.func.id, [])
+        return []
+    if isinstance(element, ast.Starred) and isinstance(element.value, ast.Call):
+        if isinstance(element.value.func, ast.Name):
+            return field_blocks.get(element.value.func.id, [])
+    return []
+
+
+def _expand_pyarrow_call(
+    node: ast.Call,
+    *,
+    field_blocks: dict[str, list[dict[str, object]]],
+) -> list[dict[str, object]]:
+    func = node.func
+    if isinstance(func, ast.Attribute) and func.attr == "schema":
+        return _expand_pyarrow_fields(
+            node.args[0] if node.args else None,
+            field_blocks=field_blocks,
+        )
+    if isinstance(func, ast.Name) and func.id == "_build_publication_schema":
+        provider_fields = _expand_pyarrow_fields(
+            node.args[0] if node.args else None,
+            field_blocks=field_blocks,
+        )
+        return (
+            field_blocks.get("build_publication_system_prefix_fields", [])
+            + provider_fields
+            + field_blocks.get("build_publication_dq_suffix_fields", [])
+        )
+    if isinstance(func, ast.Name):
+        return field_blocks.get(func.id, [])
+    return []
 
 
 def _expand_pyarrow_fields(
@@ -305,38 +355,13 @@ def _expand_pyarrow_fields(
     if isinstance(node, ast.List):
         fields: list[dict[str, object]] = []
         for element in node.elts:
-            if isinstance(element, ast.Call):
-                parsed = _parse_pyarrow_field_call(element)
-                if parsed is not None:
-                    fields.append(parsed)
-                    continue
-                if isinstance(element.func, ast.Name):
-                    fields.extend(field_blocks.get(element.func.id, []))
-                    continue
-            if isinstance(element, ast.Starred) and isinstance(element.value, ast.Call):
-                if isinstance(element.value.func, ast.Name):
-                    fields.extend(field_blocks.get(element.value.func.id, []))
+            fields.extend(
+                _expand_pyarrow_list_element(element, field_blocks=field_blocks)
+            )
         return fields
 
     if isinstance(node, ast.Call):
-        func = node.func
-        if isinstance(func, ast.Attribute) and func.attr == "schema":
-            return _expand_pyarrow_fields(
-                node.args[0] if node.args else None,
-                field_blocks=field_blocks,
-            )
-        if isinstance(func, ast.Name) and func.id == "_build_publication_schema":
-            provider_fields = _expand_pyarrow_fields(
-                node.args[0] if node.args else None,
-                field_blocks=field_blocks,
-            )
-            return (
-                field_blocks.get("build_publication_system_prefix_fields", [])
-                + provider_fields
-                + field_blocks.get("build_publication_dq_suffix_fields", [])
-            )
-        if isinstance(func, ast.Name):
-            return field_blocks.get(func.id, [])
+        return _expand_pyarrow_call(node, field_blocks=field_blocks)
 
     return []
 
@@ -819,6 +844,13 @@ def write_csv(rows: list[dict[str, str]], output_path: Path) -> None:
         writer.writerows(rows)
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate a unified Bronze→Silver→Gold schema map as UTF-8 CSV."
@@ -840,9 +872,7 @@ def main() -> int:
 
     rows = build_unified_schema_rows()
     write_csv(rows, output_path)
-    print(
-        f"Generated {output_path.relative_to(PROJECT_ROOT)} with {len(rows)} entity mappings."
-    )
+    print(f"Generated {_display_path(output_path)} with {len(rows)} entity mappings.")
     return 0
 
 

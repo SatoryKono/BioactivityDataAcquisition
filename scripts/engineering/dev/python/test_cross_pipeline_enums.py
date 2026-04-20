@@ -99,7 +99,7 @@ def test_assay_profile_integration():
     for field in ["assay_type", "relationship_type", "assay_category",
                    "assay_test_type", "assay_group"]:
         rule = field_rules[field]
-        assert "enum" in rule.notes.lower(), f"{field} should have enum rule"
+        assert "enum" in rule.notes.lower(), field + " should have enum rule"
         # Enum rules handle case-insensitive matching internally
 
     print("✓ All enum fields properly configured with case-insensitive matching")

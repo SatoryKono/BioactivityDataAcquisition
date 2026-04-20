@@ -47,18 +47,22 @@ def _extract_docstrings(source: str) -> list[tuple[int, str]]:
     docstrings: list[tuple[int, str]] = []
 
     for node in ast.walk(tree):
-        # Module, class, and function docstrings
-        if isinstance(
+        if not isinstance(
             node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-        ) and (
-            node.body
-            and isinstance(node.body[0], ast.Expr)
-            and isinstance(node.body[0].value, ast.Constant)
-            and isinstance(node.body[0].value.value, str)
         ):
-            docstring = node.body[0].value.value
-            lineno = node.body[0].lineno
-            docstrings.append((lineno, docstring))
+            continue
+        if not node.body:
+            continue
+        first_stmt = node.body[0]
+        if not (
+            isinstance(first_stmt, ast.Expr)
+            and isinstance(first_stmt.value, ast.Constant)
+            and isinstance(first_stmt.value.value, str)
+        ):
+            continue
+        docstring = first_stmt.value.value
+        lineno = first_stmt.lineno
+        docstrings.append((lineno, docstring))
 
     return docstrings
 

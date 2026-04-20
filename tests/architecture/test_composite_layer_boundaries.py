@@ -165,13 +165,12 @@ class TestDomainCompositeLayerBoundaries:
                         "bioetl.domain"
                     ):
                         violations.append(f"import {alias.name}")
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    module = node.module.split(".")[0]
-                    if module not in allowed_modules and not node.module.startswith(
-                        "bioetl.domain"
-                    ):
-                        violations.append(f"from {node.module} import ...")
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                module = node.module.split(".")[0]
+                if module not in allowed_modules and not node.module.startswith(
+                    "bioetl.domain"
+                ):
+                    violations.append(f"from {node.module} import ...")
 
         assert not violations, (
             "FSM state module has non-standard imports:\n"

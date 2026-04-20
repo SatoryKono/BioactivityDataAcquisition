@@ -326,12 +326,13 @@ def _exception_class_bases(node: ast.ClassDef) -> list[str]:
 
 def _has_error_type_assignment(node: ast.ClassDef) -> bool:
     for stmt in node.body:
-        if isinstance(stmt, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == "error_type"
-            for target in stmt.targets
-        ):
-            return True
         if (
+            isinstance(stmt, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "error_type"
+                for target in stmt.targets
+            )
+        ) or (
             isinstance(stmt, ast.AnnAssign)
             and isinstance(stmt.target, ast.Name)
             and stmt.target.id == "error_type"

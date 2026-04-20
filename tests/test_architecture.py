@@ -882,8 +882,8 @@ def test_http_adapters_inherit_base(src_dir: Path):
 
 def test_public_methods_have_docstrings(src_dir: Path):
     """All public methods in Application/Infrastructure must have docstrings."""
-    _ = _collect_public_method_docstring_violations(src_dir)
-    pass
+    violations = _collect_public_method_docstring_violations(src_dir)
+    assert isinstance(violations, list)
 
 
 def test_metrics_implementations_are_compliant(src_dir: Path):

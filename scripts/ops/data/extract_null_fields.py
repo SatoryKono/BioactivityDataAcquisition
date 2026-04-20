@@ -70,7 +70,7 @@ NULL_FIELDS = {
 
 def extract_null_fields(csv_path, fields_to_extract, output_path):
     """Извлечь указанные поля из CSV и сохранить в новый файл"""
-    print(f"Processing {csv_path}...")
+    print("Processing", csv_path, "...")
 
     # Читаем только нужные колонки
     try:
@@ -82,8 +82,8 @@ def extract_null_fields(csv_path, fields_to_extract, output_path):
 
         # Сохраняем
         df.to_csv(output_path, index=False)
-        print(f"  ✓ Saved {len(df)} rows × {len(df.columns)} columns to {output_path}")
-        print(f"    Columns: {', '.join(df.columns.tolist())}")
+        print("  ✓ Saved", len(df), "rows ×", len(df.columns), "columns to", output_path)
+        print("    Columns:", ", ".join(df.columns.tolist()))
 
     except Exception as e:
         print(f"  ✗ Error: {e}")
