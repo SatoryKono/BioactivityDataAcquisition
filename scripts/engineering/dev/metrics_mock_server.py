@@ -90,7 +90,7 @@ class MetricsHandler(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         """Suppress HTTP server logs."""
-        return
+        del format, args
 
 
 if __name__ == "__main__":

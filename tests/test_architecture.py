@@ -682,7 +682,7 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
                 #     f"Field '{field}' (mapped to '{entity_field_name}') in "
                 #     f"{schema} not found in {entity_cls.__name__}"
                 # )
-                pass
+                continue
     assert not violations, "\n".join(violations)
 
 

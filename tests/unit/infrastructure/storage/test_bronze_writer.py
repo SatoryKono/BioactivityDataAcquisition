@@ -215,7 +215,7 @@ class TestBronzeWriterNameValidation:
         # Should not raise for valid iterators
         writer._validate_records_iterator(iter((b"test",)))
         writer._validate_records_iterator(iter(()))
-        writer._validate_records_iterator(x for x in (b"a", b"b"))
+        writer._validate_records_iterator(iter((b"a", b"b")))
 
 
 @pytest.mark.unit

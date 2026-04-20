@@ -159,9 +159,6 @@ class TestCompositeConfigColumnGroups:
         config_path = tmp_path / "broken.yaml"
         _write_yaml(config_path, {"composite": {"merge": {}}})
 
-        class _DummyValidationError(Exception):
-            pass
-
         def _raise_validation(_payload: dict[str, Any]) -> None:
             # Raise pydantic.ValidationError to match the expected exception type
             from pydantic import ValidationError

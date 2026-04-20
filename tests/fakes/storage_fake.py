@@ -82,7 +82,7 @@ class InMemoryStorage:
         )
         return Path(key)
 
-    async def write_silver(
+    async def write_silver(  # NOSONAR - test double mirrors StoragePort contract
         self,
         table_name: str,
         records: list[dict[str, Any]],

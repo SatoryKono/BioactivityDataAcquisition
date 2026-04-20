@@ -174,25 +174,18 @@ class TestChemblDateBuilding:
     These tests verify the expected behavior.
     """
 
+    @staticmethod
+    def _compute_publication_date(year: int | None) -> str | None:
+        return None if year is None else f"{year}-01-01"
+
     def test_chembl_year_to_publication_date(self) -> None:
         """ChEMBL should build publication_date from year only."""
-        # This is the expected logic:
-        year = 2024
-        expected = f"{year}-01-01"
-        assert expected == "2024-01-01"
-
-        year = 1999
-        expected = f"{year}-01-01"
-        assert expected == "1999-01-01"
+        assert self._compute_publication_date(2024) == "2024-01-01"
+        assert self._compute_publication_date(1999) == "1999-01-01"
 
     def test_chembl_none_year_gives_none_date(self) -> None:
         """ChEMBL with None year should give None publication_date."""
-        year = None
-        if year is None:
-            publication_date = None
-        else:
-            publication_date = f"{year}-01-01"
-        assert publication_date is None
+        assert self._compute_publication_date(None) is None
 
 
 @pytest.mark.unit

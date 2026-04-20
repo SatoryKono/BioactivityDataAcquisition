@@ -64,10 +64,15 @@ def _normalize_repo_relative_path(path: Path) -> Path:
     return Path(*normalized_parts)
 
 
-def _resolve_canonical_output_path(raw_output: str | Path) -> Path:
-    """Validate requested output and resolve it to the canonical tracked artifact."""
+def _canonical_output_path() -> Path:
+    """Return the one canonical snapshot path this generator may write."""
+    return _ensure_repo_path(DEFAULT_OUTPUT)
+
+
+def _validate_canonical_output_path(raw_output: str | Path) -> None:
+    """Validate that the requested output matches the canonical tracked artifact."""
     candidate = Path(raw_output)
-    canonical_output = _ensure_repo_path(DEFAULT_OUTPUT)
+    canonical_output = _canonical_output_path()
     canonical_relative = canonical_output.relative_to(ROOT.resolve())
 
     if candidate.is_absolute():
@@ -76,21 +81,26 @@ def _resolve_canonical_output_path(raw_output: str | Path) -> Path:
                 "compatibility facade snapshot may only write to the canonical tracked "
                 f"artifact: {canonical_output}"
             )
-        return canonical_output
+        return
 
-    normalized_candidate = _normalize_repo_relative_path(candidate)
+    try:
+        normalized_candidate = _normalize_repo_relative_path(candidate)
+    except ValueError as exc:
+        raise ValueError(
+            "compatibility facade snapshot may only write to the canonical tracked "
+            f"artifact: {canonical_output}"
+        ) from exc
     if normalized_candidate != canonical_relative:
         raise ValueError(
             "compatibility facade snapshot may only write to the canonical tracked "
             f"artifact: {canonical_output}"
         )
-    return canonical_output
-
-
-def _write_snapshot_text(content: str) -> None:
+def _write_snapshot_text(output_path: Path, content: str) -> None:
     """Write generated snapshot content to the canonical tracked artifact."""
-    safe_path = _ensure_repo_path(DEFAULT_OUTPUT)
-    safe_path.write_text(content, encoding="utf-8")
+    output_path.write_text(  # NOSONAR - output_path is fixed by _canonical_output_path
+        content,
+        encoding="utf-8",
+    )
 
 
 def _parse_args() -> argparse.Namespace:
@@ -401,7 +411,8 @@ def main() -> int:
         ratchet_violations=ratchet_violations,
         scoped_ratchet_counts=scoped_ratchet_counts,
     )
-    output_path = _resolve_canonical_output_path(args.output)
+    _validate_canonical_output_path(args.output)
+    output_path = _canonical_output_path()
     current = output_path.read_text(encoding="utf-8") if output_path.exists() else ""
     frontmatter, current_body = _split_frontmatter(current)
     if args.check:
@@ -429,7 +440,7 @@ def main() -> int:
         return 0
     output_path.parent.mkdir(parents=True, exist_ok=True)
     rendered_with_frontmatter = f"{frontmatter}{rendered}" if frontmatter else rendered
-    _write_snapshot_text(rendered_with_frontmatter)
+    _write_snapshot_text(output_path, rendered_with_frontmatter)
     print(f"[updated] wrote {output_path.as_posix()}")
     if _validation_has_issues(
         unexpected=unexpected,

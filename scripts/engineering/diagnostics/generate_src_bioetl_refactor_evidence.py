@@ -1058,7 +1058,6 @@ def _write_parent_pack(
     *,
     parent_root: Path,
     topic_id: str,
-    output_root: Path,
     date_str: str,
     file_facts: list[FileFact],
     object_facts: list[ObjectFact],
@@ -1351,7 +1350,6 @@ def generate(repo_root: Path, output_root: Path, topic_id: str) -> None:
     _write_parent_pack(
         parent_root=parent_root,
         topic_id=topic_id,
-        output_root=output_root,
         date_str=date_str,
         file_facts=file_facts,
         object_facts=object_facts,
