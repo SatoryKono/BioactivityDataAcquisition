@@ -137,6 +137,14 @@ def _append_file_if_new(path: Path, *, seen: set[Path], files: list[Path]) -> No
         files.append(path)
 
 
+def _discoverable_glob_candidates(resolved: Path, pattern: str) -> list[Path]:
+    return [
+        candidate
+        for candidate in resolved.rglob(pattern)
+        if _is_discoverable_file(candidate)
+    ]
+
+
 def _discoverable_candidates(resolved: Path) -> list[Path]:
     if resolved.is_file():
         return [resolved] if _is_discoverable_file(resolved) else []
@@ -145,11 +153,7 @@ def _discoverable_candidates(resolved: Path) -> list[Path]:
 
     candidates: list[Path] = []
     for pattern in ("*.mmd", "*.mermaid"):
-        candidates.extend(
-            candidate
-            for candidate in resolved.rglob(pattern)
-            if _is_discoverable_file(candidate)
-        )
+        candidates.extend(_discoverable_glob_candidates(resolved, pattern))
     return candidates
 
 

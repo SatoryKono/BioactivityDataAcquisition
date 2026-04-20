@@ -94,7 +94,13 @@ PROTOCOL_CLASSES = [
 def _dummy_value(name: str, annotation: Any) -> Any:
     """Provide generic arguments for protocol method invocation."""
     lower_name = name.lower()
+    by_name = _dummy_value_for_name(lower_name)
+    if by_name is not None:
+        return by_name
+    return _dummy_value_for_annotation(name, annotation)
 
+
+def _dummy_value_for_name(lower_name: str) -> Any | None:
     name_defaults: tuple[tuple[bool, Any], ...] = (
         ("path" in lower_name, Path(".")),
         (
@@ -122,15 +128,17 @@ def _dummy_value(name: str, annotation: Any) -> Any:
     for predicate, value in name_defaults:
         if predicate:
             return value
+    return None
 
+
+def _dummy_value_for_annotation(name: str, annotation: Any) -> Any:
     origin = get_origin(annotation)
     if origin in (list, tuple, set, frozenset):
         return []
     if origin is dict:
         return {}
     if origin is types.UnionType:
-        union_args = [arg for arg in get_args(annotation) if arg is not type(None)]
-        return _dummy_value(name, union_args[0]) if union_args else None
+        return _dummy_value_from_union(name, annotation)
     if origin is not None:
         if str(origin).endswith("Literal"):
             literal_args = get_args(annotation)
@@ -138,19 +146,23 @@ def _dummy_value(name: str, annotation: Any) -> Any:
         union_args = [arg for arg in get_args(annotation) if arg is not type(None)]
         if union_args:
             return _dummy_value(name, union_args[0])
+    return _dummy_scalar_value(annotation)
 
-    if annotation in (int,):
-        return 1
-    if annotation in (float,):
-        return 1.0
-    if annotation in (bool,):
-        return False
-    if annotation in (bytes,):
-        return b"x"
-    if annotation in (str,):
-        return "x"
 
-    return "x"
+def _dummy_value_from_union(name: str, annotation: Any) -> Any:
+    union_args = [arg for arg in get_args(annotation) if arg is not type(None)]
+    return _dummy_value(name, union_args[0]) if union_args else None
+
+
+def _dummy_scalar_value(annotation: Any) -> Any:
+    scalar_defaults = {
+        int: 1,
+        float: 1.0,
+        bool: False,
+        bytes: b"x",
+        str: "x",
+    }
+    return scalar_defaults.get(annotation, "x")
 
 
 def _build_required_arguments(method: Any) -> tuple[list[Any], dict[str, Any]]:

@@ -94,6 +94,40 @@ def _service_like_classes_in_file(py_file: Path) -> set[str]:
     return {node.name for node in ast.walk(tree) if _is_public_service_like_class(node)}
 
 
+def _init_instantiation_violations(
+    py_file: Path,
+    forbidden_classes: set[str],
+) -> list["Violation"]:
+    tree = _parse_python_tree(py_file)
+    if tree is None:
+        return []
+
+    finder = InitInstantiationFinder(forbidden_classes)
+    finder.visit(tree)
+    return [
+        Violation(
+            file_path=py_file,
+            line_number=lineno,
+            class_name=class_name,
+            containing_class=containing_class,
+            assignment_target=target,
+        )
+        for lineno, class_name, containing_class, target in finder.violations
+    ]
+
+
+def _format_violation_messages(violations: list["Violation"], base: Path) -> list[str]:
+    messages: list[str] = []
+    for violation in violations:
+        relative = violation.file_path.relative_to(base)
+        messages.append(
+            f"  - {relative}:{violation.line_number}: "
+            f"{violation.containing_class}.__init__: "
+            f"{violation.assignment_target} = {violation.class_name}()"
+        )
+    return messages
+
+
 class Violation(NamedTuple):
     """Represents a DI violation found in code."""
 
@@ -262,37 +296,16 @@ class TestDIConstructors:
         violations: list[Violation] = []
 
         for py_file in application_python_files:
-            content = py_file.read_text(encoding="utf-8")
-
-            try:
-                tree = ast.parse(content)
-            except SyntaxError:
-                continue
-
-            finder = InitInstantiationFinder(FORBIDDEN_SERVICE_INSTANTIATIONS)
-            finder.visit(tree)
-
-            for lineno, class_name, containing_class, target in finder.violations:
-                violations.append(
-                    Violation(
-                        file_path=py_file,
-                        line_number=lineno,
-                        class_name=class_name,
-                        containing_class=containing_class,
-                        assignment_target=target,
-                    )
+            violations.extend(
+                _init_instantiation_violations(
+                    py_file,
+                    FORBIDDEN_SERVICE_INSTANTIATIONS,
                 )
+            )
 
         if violations:
             base = _get_base_path(APPLICATION_DIR)
-            violation_messages = []
-            for v in violations:
-                relative = v.file_path.relative_to(base)
-                violation_messages.append(
-                    f"  - {relative}:{v.line_number}: "
-                    f"{v.containing_class}.__init__: "
-                    f"{v.assignment_target} = {v.class_name}()"
-                )
+            violation_messages = _format_violation_messages(violations, base)
 
             pytest.fail(
                 "DI violation: Service instantiation in __init__ methods.\n"

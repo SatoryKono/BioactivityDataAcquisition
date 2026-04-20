@@ -141,27 +141,38 @@ def _find_inline_construction_violations(
     return violations
 
 
+def _adapter_violations(
+    adapter_name: str,
+    relative_path: Path,
+) -> list[InlineConstructionViolation]:
+    source_file = Path(relative_path)
+    if not source_file.exists():
+        pytest.skip(f"Adapter source not found: {relative_path}")
+    return _find_inline_construction_violations(
+        source_file=source_file,
+        adapter_class_name=adapter_name,
+    )
+
+
+def _format_inline_construction_violations(
+    violations: list[InlineConstructionViolation],
+) -> str:
+    return "\n".join(
+        "  - "
+        f"{item.file_path}:{item.line_number} "
+        f"{item.class_name}.{item.function_name} -> {item.constructor_name}(...)"
+        for item in violations
+    )
+
+
 def test_no_inline_helper_construction_in_provider_adapters() -> None:
     """Adapters must receive helper services via DI, not construct concrete helpers."""
     violations: list[InlineConstructionViolation] = []
     for adapter_name, relative_path in TARGET_ADAPTERS.items():
-        source_file = Path(relative_path)
-        if not source_file.exists():
-            pytest.skip(f"Adapter source not found: {relative_path}")
-        violations.extend(
-            _find_inline_construction_violations(
-                source_file=source_file,
-                adapter_class_name=adapter_name,
-            )
-        )
+        violations.extend(_adapter_violations(adapter_name, relative_path))
 
     assert not violations, (
         "Inline helper construction detected in provider adapter constructors. "
         "Move helper creation to composition/factory and inject via constructor.\n"
-        + "\n".join(
-            "  - "
-            f"{item.file_path}:{item.line_number} "
-            f"{item.class_name}.{item.function_name} -> {item.constructor_name}(...)"
-            for item in violations
-        )
+        + _format_inline_construction_violations(violations)
     )
