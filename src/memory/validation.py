@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from memory.notes import parse_markdown_note
+from memory.notes import extract_markdown_headings, normalize_text_key, parse_markdown_note
 from memory.resources import (
     CATALOG_DIR,
     MEMORY_ROOT,
@@ -269,6 +269,16 @@ def _expected_confidence_id(
     return value if isinstance(value, str) else None
 
 
+def _promotion_placeholders(promotion_policy: dict[str, Any]) -> list[str]:
+    markers = promotion_policy.get("global", {}).get("placeholder_markers", [])
+    return [str(marker).lower() for marker in markers if isinstance(marker, str)]
+
+
+def _contains_placeholder(text: str, promotion_policy: dict[str, Any]) -> bool:
+    lowered = text.lower()
+    return any(marker in lowered for marker in _promotion_placeholders(promotion_policy))
+
+
 def _validate_note_placement(
     memory_root: Path,
     path: Path,
@@ -350,6 +360,7 @@ def _validate_note_governance(
     metadata: dict[str, Any],
     retention_policy: dict[str, Any],
     confidence_policy: dict[str, Any],
+    promotion_policy: dict[str, Any],
     issues: list[ValidationIssue],
 ) -> None:
     source_refs = metadata.get("source_refs")
@@ -399,10 +410,95 @@ def _validate_note_governance(
                     path=str(path),
                     message=(
                         f"curated note kind must be {expected_kind_by_dir!r} "
-                        f"inside {parent_dir}/"
+                    f"inside {parent_dir}/"
                     ),
                 )
             )
+        summary = metadata.get("summary")
+        if not isinstance(summary, str) or not summary.strip():
+            issues.append(
+                ValidationIssue(path=str(path), message="curated note summary must be non-empty")
+            )
+        else:
+            min_words = promotion_policy.get("global", {}).get("summary_min_words", 0)
+            if isinstance(min_words, int) and len(summary.split()) < min_words:
+                issues.append(
+                    ValidationIssue(
+                        path=str(path),
+                        message=f"curated note summary must contain at least {min_words} words",
+                    )
+                )
+            if _contains_placeholder(summary, promotion_policy):
+                issues.append(
+                    ValidationIssue(path=str(path), message="curated note summary contains placeholder text")
+                )
+        if any(_contains_placeholder(str(ref), promotion_policy) for ref in source_refs if isinstance(ref, str)):
+            issues.append(
+                ValidationIssue(path=str(path), message="curated note source_refs contain placeholder text")
+            )
+
+
+def _validate_curated_note_body(
+    path: Path,
+    metadata: dict[str, Any],
+    body: str,
+    promotion_policy: dict[str, Any],
+    issues: list[ValidationIssue],
+) -> None:
+    kind = metadata.get("kind")
+    if not isinstance(kind, str):
+        return
+    required_headings = (
+        promotion_policy.get("kinds", {}).get(kind, {}).get("required_headings", [])
+    )
+    headings = set(extract_markdown_headings(body))
+    for heading in required_headings:
+        if isinstance(heading, str) and heading not in headings:
+            issues.append(
+                ValidationIssue(
+                    path=str(path),
+                    message=f"curated note missing required heading: {heading}",
+                )
+            )
+    if _contains_placeholder(body, promotion_policy):
+        issues.append(
+            ValidationIssue(path=str(path), message="curated note body contains placeholder text")
+        )
+
+
+def _validate_curated_duplicates(
+    curated_notes: list[tuple[Path, dict[str, Any]]],
+    issues: list[ValidationIssue],
+) -> None:
+    by_id: dict[str, Path] = {}
+    by_title: dict[str, Path] = {}
+    for path, metadata in curated_notes:
+        note_id = metadata.get("id")
+        if isinstance(note_id, str):
+            if note_id in by_id:
+                issues.append(
+                    ValidationIssue(
+                        path=str(path),
+                        message=f"duplicate curated note id also used by {by_id[note_id].as_posix()}",
+                    )
+                )
+            else:
+                by_id[note_id] = path
+        title = metadata.get("title")
+        if isinstance(title, str):
+            normalized_title = normalize_text_key(title)
+            if normalized_title in by_title:
+                issues.append(
+                    ValidationIssue(
+                        path=str(path),
+                        message=(
+                            "duplicate curated note title also used by "
+                            f"{by_title[normalized_title].as_posix()}"
+                        ),
+                    )
+                )
+            else:
+                by_title[normalized_title] = path
 
 
 def _validate_note_files(
@@ -415,12 +511,14 @@ def _validate_note_files(
     placement_rules = catalog_payloads.get("placement_rules.yaml", {})
     retention_policy = policy_payloads.get("retention.yaml", {})
     confidence_policy = policy_payloads.get("confidence.yaml", {})
+    promotion_policy = policy_payloads.get("promotion.yaml", {})
     curated_schema = schema_payloads.get("curated_note.schema.json", {})
     episodic_schema = schema_payloads.get("episodic_note.schema.json", {})
     schema_map = {
         "curated_note": curated_schema if isinstance(curated_schema, dict) else {},
         "episodic_note": episodic_schema if isinstance(episodic_schema, dict) else {},
     }
+    curated_notes: list[tuple[Path, dict[str, Any]]] = []
 
     for artifact_class, path in _iter_note_paths(memory_root):
         try:
@@ -441,8 +539,20 @@ def _validate_note_files(
             note.metadata,
             retention_policy,
             confidence_policy,
+            promotion_policy if isinstance(promotion_policy, dict) else {},
             issues,
         )
+        if artifact_class == "curated_note":
+            curated_notes.append((path, note.metadata))
+            _validate_curated_note_body(
+                path,
+                note.metadata,
+                note.body,
+                promotion_policy if isinstance(promotion_policy, dict) else {},
+                issues,
+            )
+
+    _validate_curated_duplicates(curated_notes, issues)
 
 
 def validate_memory_scaffold(root: Path | None = None) -> list[ValidationIssue]:

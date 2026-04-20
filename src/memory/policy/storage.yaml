@@ -42,6 +42,7 @@ artifact_classes:
       - "src/memory/curated/incidents"
       - "src/memory/curated/lessons"
       - "src/memory/curated/domain_knowledge"
+      - "src/memory/curated/archive"
     notes: "Promoted durable memory should remain reviewable in git."
   episodic_note:
     storage_mode: ephemeral

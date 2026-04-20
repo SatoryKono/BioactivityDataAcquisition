@@ -183,8 +183,9 @@ python -m memory.tooling.create_note --kind curated-lesson --title "Durable less
 Promote an episodic note into curated memory:
 
 ```bash
-python -m memory.tooling.promote_note --source src/memory/episodic/summaries/example.md --target-kind lesson
-python -m memory.tooling.promote_note --source src/memory/episodic/summaries/example.md --target-kind lesson --move
+python -m memory.tooling.promote_note --source src/memory/episodic/summaries/example.md --target-kind lesson --summary "Durable lesson worth reusing."
+python -m memory.tooling.promote_note --source src/memory/episodic/summaries/example.md --target-kind lesson --summary "Durable lesson worth reusing." --move
+python -m memory.tooling.archive_note --source src/memory/curated/lessons/example.md --reason "Superseded by newer guidance."
 ```
 
 ## Daily Agent Workflow

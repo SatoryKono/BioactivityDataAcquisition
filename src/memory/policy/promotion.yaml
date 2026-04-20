@@ -1,0 +1,46 @@
+version: 1
+global:
+  min_source_refs: 1
+  summary_min_words: 4
+  placeholder_markers:
+    - "<add-source-ref>"
+    - "replace with"
+    - "todo"
+    - "tbd"
+  duplicate_detection:
+    compare_fields:
+      - id
+      - title
+    require_unique_ids: true
+    require_unique_normalized_titles: true
+promotion:
+  require_explicit_summary: true
+  require_non_placeholder_source_refs: true
+  require_duplicate_override: true
+  require_target_kind_match: true
+archive:
+  archive_dir: "src/memory/curated/archive"
+  require_reason: true
+kinds:
+  decision:
+    required_headings:
+      - "# Decision"
+      - "## Context"
+      - "## Durable guidance"
+      - "## Follow-up"
+  incident:
+    required_headings:
+      - "# Incident lesson"
+      - "## Trigger pattern"
+      - "## Response guidance"
+      - "## Durable lesson"
+  lesson:
+    required_headings:
+      - "# Lesson"
+      - "## Observation"
+      - "## Reuse guidance"
+  domain_knowledge:
+    required_headings:
+      - "# Domain knowledge"
+      - "## Concept"
+      - "## Practical implications"
