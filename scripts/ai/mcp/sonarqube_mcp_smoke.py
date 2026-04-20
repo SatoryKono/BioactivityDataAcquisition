@@ -487,6 +487,8 @@ def run_smoke_command(
     stderr_buffer = bytearray()
     responses: dict[int, dict[str, Any]] = {}
     chunks: queue.Queue[tuple[str, bytes | None]] = queue.Queue()
+    ready_seen = False
+    handshake_sent = False
 
     # Start I/O threads
     readers = _start_io_threads(process, chunks)
