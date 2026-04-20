@@ -147,12 +147,12 @@ def _extract_code_only(func_source: str) -> str:
 
 
 def _iter_async_function_defs(tree: ast.AST) -> list[ast.AsyncFunctionDef]:
-    return [
-        node for node in ast.walk(tree) if isinstance(node, ast.AsyncFunctionDef)
-    ]
+    return [node for node in ast.walk(tree) if isinstance(node, ast.AsyncFunctionDef)]
 
 
-def _async_function_uses_blocking_io(node: ast.AsyncFunctionDef, *, source: str) -> bool:
+def _async_function_uses_blocking_io(
+    node: ast.AsyncFunctionDef, *, source: str
+) -> bool:
     segment = ast.get_source_segment(source, node) or ""
     if "run_in_executor" in segment or "to_thread" in segment:
         return False

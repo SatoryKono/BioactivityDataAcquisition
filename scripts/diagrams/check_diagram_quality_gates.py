@@ -137,24 +137,30 @@ def _append_file_if_new(path: Path, *, seen: set[Path], files: list[Path]) -> No
         files.append(path)
 
 
+def _discoverable_candidates(resolved: Path) -> list[Path]:
+    if resolved.is_file():
+        return [resolved] if _is_discoverable_file(resolved) else []
+    if not resolved.exists():
+        return []
+
+    candidates: list[Path] = []
+    for pattern in ("*.mmd", "*.mermaid"):
+        candidates.extend(
+            candidate
+            for candidate in resolved.rglob(pattern)
+            if _is_discoverable_file(candidate)
+        )
+    return candidates
+
+
 def discover_files(targets: list[Path]) -> list[Path]:
     seen: set[Path] = set()
     files: list[Path] = []
 
     for target in targets:
         resolved = _ensure_repo_path(target)
-        if resolved.is_file():
-            if _is_discoverable_file(resolved):
-                _append_file_if_new(resolved, seen=seen, files=files)
-            continue
-
-        if not resolved.exists():
-            continue
-
-        for pattern in ("*.mmd", "*.mermaid"):
-            for candidate in resolved.rglob(pattern):
-                if _is_discoverable_file(candidate):
-                    _append_file_if_new(candidate, seen=seen, files=files)
+        for candidate in _discoverable_candidates(resolved):
+            _append_file_if_new(candidate, seen=seen, files=files)
 
     return sorted(files)
 

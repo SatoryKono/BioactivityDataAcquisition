@@ -85,7 +85,9 @@ def _target_adapter_class(
     return None
 
 
-def _lifecycle_methods(node: ast.ClassDef) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
+def _lifecycle_methods(
+    node: ast.ClassDef,
+) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
     return [
         class_member
         for class_member in node.body

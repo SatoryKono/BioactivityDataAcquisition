@@ -36,7 +36,9 @@ def _iter_pipeline_config_names(config_dir: Path) -> list[str]:
         for file in files:
             if not (file.endswith(".yaml") or file.endswith(".yml")):
                 continue
-            pipeline_name = _pipeline_config_name(Path(root) / file, config_dir=config_dir)
+            pipeline_name = _pipeline_config_name(
+                Path(root) / file, config_dir=config_dir
+            )
             if pipeline_name is not None:
                 found_configs.append(pipeline_name)
     return found_configs

@@ -44,7 +44,9 @@ def _get_base_path(relative_path: Path) -> Path:
     return Path(__file__).parent.parent.parent / relative_path
 
 
-def _line_pattern_violations(content: str, *, pattern: str, relative: Path) -> list[str]:
+def _line_pattern_violations(
+    content: str, *, pattern: str, relative: Path
+) -> list[str]:
     return [
         f"{relative}:{line_number}: {pattern}"
         for line_number, line in enumerate(content.splitlines(), 1)
