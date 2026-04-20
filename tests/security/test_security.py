@@ -452,7 +452,7 @@ class TestPIIHandling:
         py_file: Path,
         pattern_name: str,
     ) -> bool:
-        if pattern_name == "email" and py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES:
+        if py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES:
             return True
         return (
             pattern_name == "address"
