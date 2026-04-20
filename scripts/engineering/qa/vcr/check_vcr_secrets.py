@@ -38,14 +38,39 @@ def _scan_uri(path: Path, line_idx: int, uri_value: str) -> list[str]:
     findings: list[str] = []
     query_items = parse_qsl(urlparse(uri_value).query, keep_blank_values=True)
     for key, value in query_items:
-        if key.lower() not in QUERY_KEYS:
-            continue
-        if _looks_redacted(value):
-            continue
-        findings.append(
-            f"{path.relative_to(ROOT)}:{line_idx}: unredacted query credential '{key}'"
-        )
+        finding = _query_credential_finding(path, line_idx, key, value)
+        if finding is not None:
+            findings.append(finding)
     return findings
+
+
+def _query_credential_finding(
+    path: Path,
+    line_idx: int,
+    key: str,
+    value: str,
+) -> str | None:
+    """Return finding for one query credential when it looks unredacted."""
+    if key.lower() not in QUERY_KEYS or _looks_redacted(value):
+        return None
+    return f"{path.relative_to(ROOT)}:{line_idx}: unredacted query credential '{key}'"
+
+
+def _header_value_finding(
+    *,
+    path: Path,
+    idx: int,
+    header_name: str,
+    lines: list[str],
+) -> str | None:
+    """Return finding for a suspicious header value, if any."""
+    next_line = lines[idx].strip() if idx < len(lines) else ""
+    if not next_line.startswith("-"):
+        return f"{path.relative_to(ROOT)}:{idx}: header '{header_name}' without value"
+    header_value = next_line.lstrip("-").strip()
+    if _looks_redacted(header_value):
+        return None
+    return f"{path.relative_to(ROOT)}:{idx + 1}: unredacted header '{header_name}'"
 
 
 def _scan_file(path: Path) -> list[str]:
@@ -66,20 +91,14 @@ def _scan_file(path: Path) -> list[str]:
         header_name = line[:-1].strip().lower()
         if header_name not in HEADER_KEYS:
             continue
-
-        # VCR stores header values on the next list item line: "- value"
-        next_line = lines[idx].strip() if idx < len(lines) else ""
-        if not next_line.startswith("-"):
-            findings.append(
-                f"{path.relative_to(ROOT)}:{idx}: header '{header_name}' without value"
-            )
-            continue
-        header_value = next_line.lstrip("-").strip()
-        if _looks_redacted(header_value):
-            continue
-        findings.append(
-            f"{path.relative_to(ROOT)}:{idx + 1}: unredacted header '{header_name}'"
+        finding = _header_value_finding(
+            path=path,
+            idx=idx,
+            header_name=header_name,
+            lines=lines,
         )
+        if finding is not None:
+            findings.append(finding)
 
     return findings
 

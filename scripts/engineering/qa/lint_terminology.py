@@ -287,6 +287,11 @@ def _collect_docstring_line_numbers(content: str) -> set[int]:
     return docstring_lines
 
 
+def _allowed_context_file(filepath: Path, allowed_files: list[str]) -> bool:
+    """Return True when context-sensitive pattern is allowed in the file."""
+    return any(allowed in filepath.name for allowed in allowed_files)
+
+
 def _collect_context_sensitive_violations(
     *,
     filepath: Path,
@@ -296,7 +301,7 @@ def _collect_context_sensitive_violations(
     """Collect strict-mode violations with per-file allow-list handling."""
     violations: list[TermViolation] = []
     for pattern, (canonical, _desc, allowed_files) in CONTEXT_SENSITIVE_TERMS.items():
-        if any(allowed in filepath.name for allowed in allowed_files):
+        if _allowed_context_file(filepath, allowed_files):
             continue
 
         for match in re.finditer(pattern, line, re.IGNORECASE):
@@ -312,6 +317,51 @@ def _collect_context_sensitive_violations(
     return violations
 
 
+def _read_file_content(filepath: Path) -> str | None:
+    """Read file content while preserving stderr warning behavior."""
+    try:
+        return filepath.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        print(f"Warning: Could not read {filepath}: {exc}", file=sys.stderr)
+        return None
+
+
+def _line_should_be_checked(
+    *,
+    line_num: int,
+    line: str,
+    docstring_lines: set[int],
+) -> bool:
+    """Return True when terminology scan should inspect the line."""
+    return line_num not in docstring_lines and not _is_skippable_line(line)
+
+
+def _line_violations(
+    *,
+    filepath: Path,
+    line_num: int,
+    line: str,
+    strict: bool,
+) -> list[TermViolation]:
+    """Collect terminology violations for one normalized line."""
+    violations = _collect_deprecated_term_violations(
+        filepath=filepath,
+        line_num=line_num,
+        line=line,
+        strict=strict,
+    )
+    if not strict:
+        return violations
+    violations.extend(
+        _collect_context_sensitive_violations(
+            filepath=filepath,
+            line_num=line_num,
+            line=line,
+        )
+    )
+    return violations
+
+
 def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
     """Check a file for terminology violations.
 
@@ -324,38 +374,28 @@ def check_file(filepath: Path, strict: bool = False) -> list[TermViolation]:
     """
     violations: list[TermViolation] = []
 
-    try:
-        content = filepath.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError) as e:
-        print(f"Warning: Could not read {filepath}: {e}", file=sys.stderr)
+    content = _read_file_content(filepath)
+    if content is None:
         return []
 
     lines = _mask_non_code_segments(content)
     docstring_lines = _collect_docstring_line_numbers(content)
 
     for line_num, line in enumerate(lines, start=1):
-        if line_num in docstring_lines:
+        if not _line_should_be_checked(
+            line_num=line_num,
+            line=line,
+            docstring_lines=docstring_lines,
+        ):
             continue
-        if _is_skippable_line(line):
-            continue
-
         violations.extend(
-            _collect_deprecated_term_violations(
+            _line_violations(
                 filepath=filepath,
                 line_num=line_num,
                 line=line,
                 strict=strict,
             )
         )
-
-        if strict:
-            violations.extend(
-                _collect_context_sensitive_violations(
-                    filepath=filepath,
-                    line_num=line_num,
-                    line=line,
-                )
-            )
 
     return violations
 
@@ -373,13 +413,12 @@ def lint_directory(
     Returns:
         List of all violations found.
     """
-    all_violations = []
-
     if path.is_file():
         if path.suffix == ".py" and not should_skip_file(path):
             return check_file(path, strict)
         return []
 
+    all_violations = []
     for py_file in path.rglob("*.py"):
         if should_skip_file(py_file):
             continue
@@ -391,6 +430,20 @@ def lint_directory(
         all_violations.extend(violations)
 
     return all_violations
+
+
+def _json_payload(violations: list[TermViolation]) -> list[dict[str, object]]:
+    """Return JSON-serializable payload for terminology violations."""
+    return [
+        {
+            "file": str(v.file),
+            "line": v.line_num,
+            "deprecated": v.deprecated_term,
+            "canonical": v.canonical_term,
+            "context": v.context,
+        }
+        for v in violations
+    ]
 
 
 def resolve_default_paths() -> list[Path]:
@@ -478,17 +531,7 @@ def main() -> int:
     if args.json:
         import json
 
-        output = [
-            {
-                "file": str(v.file),
-                "line": v.line_num,
-                "deprecated": v.deprecated_term,
-                "canonical": v.canonical_term,
-                "context": v.context,
-            }
-            for v in all_violations
-        ]
-        print(json.dumps(output, indent=2))
+        print(json.dumps(_json_payload(all_violations), indent=2))
     else:
         print(format_violations(all_violations))
 

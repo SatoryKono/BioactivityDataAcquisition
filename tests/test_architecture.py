@@ -303,6 +303,62 @@ def _iter_metrics_protocol_violations(py_file: Path) -> list[str]:
     return violations
 
 
+def _unsafe_call_violation_message(call: dict[str, Any]) -> str | None:
+    name = call["name"]
+    if name in UNSAFE_BUILTINS and call.get("is_bare_call", True):
+        return f"Unsafe/Print function '{name}'"
+    if name in PRINT_FUNCTIONS:
+        return f"Unsafe/Print function '{name}'"
+    return None
+
+
+def _schema_entity_pairs():
+    from bioetl.domain.entities import Bioactivity, PubchemMolecule, UniprotTarget
+    from bioetl.infrastructure.schemas.silver import (
+        CHEMBL_ACTIVITY_SCHEMA,
+        PUBCHEM_COMPOUND_SCHEMA,
+        UNIPROT_PROTEIN_SCHEMA,
+    )
+
+    return [
+        (CHEMBL_ACTIVITY_SCHEMA, Bioactivity),
+        (PUBCHEM_COMPOUND_SCHEMA, PubchemMolecule),
+        (UNIPROT_PROTEIN_SCHEMA, UniprotTarget),
+    ]
+
+
+def _schema_field_aliases() -> dict[str, str]:
+    return {
+        "molecule_id": "molecule_id",
+        "parent_molecule_id": "parent_molecule_id",
+        "action_type": "action_type_action_type",
+        "journal": "journal",
+        "publication_id": "publication_id",
+        "publication_year": "publication_year",
+        "publication_pmc_id": "publication_pmc_id",
+        "taxonomy_id": "taxonomy_id",
+        "publication_doi": "publication_doi",
+        "assay_id": "assay_id",
+        "target_id": "target_id",
+        "publication_pmid": "publication_pmid",
+        "inchi_key": "inchi_key",
+        "aromatic_ring_count": "aromatic_ring_count",
+        "logp": "logp",
+        "logp_method": "logp_method",
+        "xlogp": "logp",
+        "tpsa": "tpsa",
+        "polar_surface_area": "tpsa",
+        "organism_id": "taxonomy_id",
+        "reactions": "catalytic_activity",
+        "reaction_ec_numbers": "protein_ec_numbers",
+        "isoform_count": "alternative_products",
+        "cross_reference_count": "go_terms",
+        "feature_count": "features_json",
+        "keyword_count": "keywords",
+        "publication_count": "similarity_comment",
+    }
+
+
 def format_violation(file_path: Path, lineno: int, message: str, src_dir: Path) -> str:
     relative_path = file_path.relative_to(src_dir)
     return f"{relative_path}:{lineno}: {message}"
@@ -346,23 +402,10 @@ def collect_unsafe_call_violations(files: list[Path], *, src_dir: Path) -> list[
     for py_file in files:
         _, calls = analyze_python_file(py_file)
         for call in calls:
-            if call["name"] in UNSAFE_BUILTINS and call.get("is_bare_call", True):
+            message = _unsafe_call_violation_message(call)
+            if message is not None:
                 violations.append(
-                    format_violation(
-                        py_file,
-                        call["lineno"],
-                        f"Unsafe/Print function '{call['name']}'",
-                        src_dir,
-                    )
-                )
-            elif call["name"] in PRINT_FUNCTIONS:
-                violations.append(
-                    format_violation(
-                        py_file,
-                        call["lineno"],
-                        f"Unsafe/Print function '{call['name']}'",
-                        src_dir,
-                    )
+                    format_violation(py_file, call["lineno"], message, src_dir)
                 )
     return violations
 
@@ -442,64 +485,13 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
     """Silver schemas (PyArrow) must match Domain Entities."""
     from dataclasses import fields
 
-    # Import schemas and entities
     try:
-        from bioetl.domain.entities import Bioactivity, PubchemMolecule, UniprotTarget
-        from bioetl.infrastructure.schemas.silver import (
-            CHEMBL_ACTIVITY_SCHEMA,
-            PUBCHEM_COMPOUND_SCHEMA,
-            UNIPROT_PROTEIN_SCHEMA,
-        )
+        pairs = _schema_entity_pairs()
     except ImportError as e:
         pytest.fail(f"Could not import schemas or entities: {e}")
 
-    # Map Schema -> Entity
-    pairs = [
-        (CHEMBL_ACTIVITY_SCHEMA, Bioactivity),
-        (PUBCHEM_COMPOUND_SCHEMA, PubchemMolecule),
-        (UNIPROT_PROTEIN_SCHEMA, UniprotTarget),
-    ]
-
-    # BaseEntity fields: entity_id, content_hash, run_id, run_type, source_batch_id, ingestion_ts
-    # Schema: _run_id, _run_type, _source_batch_id, _ingestion_ts
-
     system_fields_schema = {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
-
-    # Aliases: Schema Field -> Entity Field
-    # This documents where the Domain Language differs slightly from Persistence Schema
-    aliases = {
-        # Bioactivity aliases
-        "molecule_id": "molecule_id",
-        "parent_molecule_id": "parent_molecule_id",
-        "action_type": "action_type_action_type",
-        "journal": "journal",
-        "publication_id": "publication_id",
-        "publication_year": "publication_year",
-        "publication_pmc_id": "publication_pmc_id",  # Not in entity but in schema
-        "taxonomy_id": "taxonomy_id",
-        "publication_doi": "publication_doi",  # Not in entity but in schema
-        "assay_id": "assay_id",
-        "target_id": "target_id",
-        "publication_pmid": "publication_pmid",  # Not in entity but in schema
-        # Molecule aliases
-        "inchi_key": "inchi_key",
-        "aromatic_ring_count": "aromatic_ring_count",
-        "logp": "logp",
-        "logp_method": "logp_method",
-        # PubchemMolecule aliases
-        "xlogp": "logp",
-        "tpsa": "tpsa",
-        "polar_surface_area": "tpsa",
-        # UniprotTarget aliases
-        "organism_id": "taxonomy_id",
-        "reactions": "catalytic_activity",
-        "reaction_ec_numbers": "protein_ec_numbers",
-        "isoform_count": "alternative_products",
-        "cross_reference_count": "go_terms",
-        "feature_count": "features_json",
-        "keyword_count": "keywords",
-        "publication_count": "similarity_comment",
-    }
+    aliases = _schema_field_aliases()
 
     violations = []
 
@@ -727,24 +719,16 @@ def test_pipeline_configs_schema(project_root: Path):
 
 def test_observability_library_isolation(src_dir: Path):
     """Prometheus client must only be used in infrastructure.observability."""
-    # This ensures no other part of the system couples to Prometheus directly.
-    violations = []
-
-    for py_file in (src_dir / "bioetl").rglob("*.py"):
-        if _is_observability_prometheus_exempt(py_file):
-            continue
-
-        imports, _ = analyze_python_file(py_file)
-        for imp in imports:
-            if imp["module"].startswith("prometheus_client"):
-                violations.append(
-                    format_violation(
-                        py_file,
-                        imp["lineno"],
-                        "Forbidden import 'prometheus_client' outside observability",
-                        src_dir,
-                    )
-                )
+    violations = collect_import_violations(
+        [
+            py_file
+            for py_file in (src_dir / "bioetl").rglob("*.py")
+            if not _is_observability_prometheus_exempt(py_file)
+        ],
+        src_dir=src_dir,
+        predicate=lambda imp: imp["module"].startswith("prometheus_client"),
+        message=lambda _imp: "Forbidden import 'prometheus_client' outside observability",
+    )
 
     assert not violations, "\n".join(violations)
 

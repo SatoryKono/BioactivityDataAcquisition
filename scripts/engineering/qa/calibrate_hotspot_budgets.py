@@ -45,12 +45,37 @@ def _load_observations(path: Path) -> dict[str, dict[str, list[float]]]:
         line = line.strip()
         if not line:
             continue
-        rec = json.loads(line)
-        key = str(rec["benchmark_key"])
-        grouped.setdefault(key, {"latency_ms": [], "throughput_rps": []})
-        grouped[key]["latency_ms"].append(float(rec["latency_ms"]))
-        grouped[key]["throughput_rps"].append(float(rec["throughput_rps"]))
+        _append_observation(grouped, json.loads(line))
     return grouped
+
+
+def _append_observation(
+    grouped: dict[str, dict[str, list[float]]],
+    record: dict[str, Any],
+) -> None:
+    """Append one parsed observation record to the grouped series."""
+    key = str(record["benchmark_key"])
+    grouped.setdefault(key, {"latency_ms": [], "throughput_rps": []})
+    grouped[key]["latency_ms"].append(float(record["latency_ms"]))
+    grouped[key]["throughput_rps"].append(float(record["throughput_rps"]))
+
+
+def _recalibrated_benchmark(
+    cfg: dict[str, Any],
+    obs: dict[str, list[float]],
+    *,
+    latency_q: float,
+    throughput_q: float,
+) -> None:
+    """Apply recalibrated baseline values to one benchmark config."""
+    cfg["baseline_latency_ms"] = round(
+        _percentile(obs["latency_ms"], latency_q),
+        3,
+    )
+    cfg["baseline_throughput_rps"] = round(
+        _percentile(obs["throughput_rps"], throughput_q),
+        3,
+    )
 
 
 def recalibrate(
@@ -69,15 +94,23 @@ def recalibrate(
         obs = observations.get(key)
         if not obs:
             continue
-
-        latency = _percentile(obs["latency_ms"], latency_q)
-        throughput = _percentile(obs["throughput_rps"], throughput_q)
-
-        cfg["baseline_latency_ms"] = round(latency, 3)
-        cfg["baseline_throughput_rps"] = round(throughput, 3)
+        _recalibrated_benchmark(
+            cfg,
+            obs,
+            latency_q=latency_q,
+            throughput_q=throughput_q,
+        )
         changed.append(key)
 
     return budgets, changed
+
+
+def _write_updated_budgets(path: Path, payload: dict[str, Any]) -> None:
+    """Write recalibrated hotspot budgets back to disk."""
+    path.write_text(
+        json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def main() -> int:
@@ -121,10 +154,7 @@ def main() -> int:
         print("No matching observations found for configured benchmarks.")
         return 1
 
-    args.budgets.write_text(
-        json.dumps(updated, ensure_ascii=True, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    _write_updated_budgets(args.budgets, updated)
     print(f"Updated {len(changed)} benchmark baselines:")
     for key in changed:
         print(f"- {key}")
