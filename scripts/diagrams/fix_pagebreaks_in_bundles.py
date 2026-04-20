@@ -71,6 +71,43 @@ def _trim_trailing_pagebreak_context(lines: list[str]) -> None:
         lines.pop()
 
 
+def _should_drop_legacy_pagebreak(line: str) -> bool:
+    return "page-break-after" in line
+
+
+def _process_heading_line(
+    *,
+    line: str,
+    out: list[str],
+    first_diagram_heading_seen: bool,
+    is_toc_or_header: bool,
+) -> tuple[bool, int, bool, bool]:
+    heading_text = _heading_text(line)
+    if heading_text is None:
+        return False, 0, first_diagram_heading_seen, is_toc_or_header
+
+    normalized_subheading = _normalized_subheading(heading_text)
+    if normalized_subheading is not None:
+        out.append(normalized_subheading)
+        return True, 1, first_diagram_heading_seen, is_toc_or_header
+
+    if heading_text == "Table of Contents":
+        out.append(line)
+        return True, 0, first_diagram_heading_seen, is_toc_or_header
+
+    if not _is_diagram_heading(heading_text):
+        return False, 0, first_diagram_heading_seen, is_toc_or_header
+
+    if is_toc_or_header:
+        return False, 0, True, False
+
+    if first_diagram_heading_seen and _already_has_diagram_heading(out):
+        _trim_trailing_pagebreak_context(out)
+        out.append(PAGE_BREAK)
+        return False, 1, first_diagram_heading_seen, is_toc_or_header
+    return False, 0, first_diagram_heading_seen, is_toc_or_header
+
+
 def fix_bundle(md_path: Path) -> int:
     safe_path = _safe_bundle_path(md_path)
     text = safe_path.read_text(encoding="utf-8")
@@ -90,40 +127,27 @@ def fix_bundle(md_path: Path) -> int:
     while i < len(lines):
         line = lines[i]
 
-        # Remove old page-break-after divs
-        if "page-break-after" in line:
+        if _should_drop_legacy_pagebreak(line):
             i += 1
             changes += 1
             continue
 
-        # Detect diagram headings (## name, but not ## Table of Contents, ## Описание, ## Метаданные)
-        heading_text = _heading_text(line)
-        if heading_text is not None:
-            normalized_subheading = _normalized_subheading(heading_text)
-
-            # Normalise sub-headings to ###
-            if normalized_subheading is not None:
-                out.append(normalized_subheading)
-                i += 1
-                changes += 1
-                continue
-
-            if heading_text == "Table of Contents":
-                out.append(line)
-                i += 1
-                continue
-
-            # This is a diagram heading
-            if is_toc_or_header:
-                is_toc_or_header = False
-                first_diagram_heading_seen = True
-
-            if first_diagram_heading_seen and not is_toc_or_header:
-                # Insert page break before this heading (except very first)
-                if _already_has_diagram_heading(out):
-                    _trim_trailing_pagebreak_context(out)
-                    out.append(PAGE_BREAK)
-                    changes += 1
+        (
+            heading_handled,
+            heading_changes,
+            first_diagram_heading_seen,
+            is_toc_or_header,
+        ) = _process_heading_line(
+            line=line,
+            out=out,
+            first_diagram_heading_seen=first_diagram_heading_seen,
+            is_toc_or_header=is_toc_or_header,
+        )
+        if heading_handled:
+            i += 1
+            changes += heading_changes
+            continue
+        changes += heading_changes
 
         out.append(line)
         i += 1
