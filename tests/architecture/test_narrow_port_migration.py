@@ -61,26 +61,25 @@ def _uses_broad_storage_port_annotation(node: ast.AST) -> bool:
     )
 
 
+def _file_uses_broad_storage_port(py_file: Path) -> str | None:
+    source = _read_python_source(py_file)
+    if source is None or "StoragePort" not in source:
+        return None
+
+    tree = _parse_python_source(source)
+    if tree is None:
+        return None
+    if any(_uses_broad_storage_port_annotation(node) for node in ast.walk(tree)):
+        return _to_posix(py_file.relative_to(_APPLICATION_ROOT))
+    return None
+
+
 def _files_using_broad_storage_port() -> list[str]:
     """Return relative paths of .py files that import and annotate with StoragePort."""
     hits: list[str] = []
     for py_file in sorted(_APPLICATION_ROOT.rglob("*.py")):
-        source = _read_python_source(py_file)
-        if source is None:
-            continue
-
-        # Quick filter: must mention StoragePort at all
-        if "StoragePort" not in source:
-            continue
-
-        # Parse AST to find actual type annotation usage (not just comments/docstrings)
-        tree = _parse_python_source(source)
-        if tree is None:
-            continue
-
-        if any(_uses_broad_storage_port_annotation(node) for node in ast.walk(tree)):
-            hits.append(_to_posix(py_file.relative_to(_APPLICATION_ROOT)))
-
+        if hit := _file_uses_broad_storage_port(py_file):
+            hits.append(hit)
     return hits
 
 
