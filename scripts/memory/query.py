@@ -1709,31 +1709,44 @@ def _format_overengineered_candidates_rows(title: str, name: str, rows: list[dic
     for row in rows:
         if not row.get("target_name"):
             continue
-        blocked_suffix = f" | blocked_by={row.get('blocked_by_cycle') or ''!s}" if row.get("blocked_by_cycle") else ""
         lines.append(
             _target_row_line(
                 row,
-                [
-                    f"classification={row.get('classification') or ''!s}",
-                    f"complexity_score={row.get('complexity_score') or ''!s}",
-                    f"simplification_score={row.get('simplification_score') or ''!s}",
-                    f"removable_score={row.get('removable_score') or ''!s}",
-                    f"branches={row.get('branch_count') or ''!s}",
-                    f"nesting={row.get('nesting_depth') or ''!s}",
-                    f"helper_calls={row.get('helper_call_count') or ''!s}",
-                ],
-                blocked_suffix,
+                _overengineered_candidate_parts(row),
+                _blocked_by_cycle_suffix(row),
             )
         )
-        for marker_line in (
-            _optional_joined_list_part(row, "indirection_markers"),
-            _optional_joined_list_part(row, "stateful_markers"),
-        ):
+        for marker_line in _overengineered_marker_lines(row):
             if marker_line:
                 lines.append(f"  {marker_line}")
     if len(lines) == 1:
         lines.append("- no overengineered candidates found")
     return "\n".join(lines)
+
+
+def _overengineered_candidate_parts(row: dict[str, JsonValue]) -> list[str]:
+    return [
+        f"classification={row.get('classification') or ''!s}",
+        f"complexity_score={row.get('complexity_score') or ''!s}",
+        f"simplification_score={row.get('simplification_score') or ''!s}",
+        f"removable_score={row.get('removable_score') or ''!s}",
+        f"branches={row.get('branch_count') or ''!s}",
+        f"nesting={row.get('nesting_depth') or ''!s}",
+        f"helper_calls={row.get('helper_call_count') or ''!s}",
+    ]
+
+
+def _blocked_by_cycle_suffix(row: dict[str, JsonValue]) -> str:
+    if not row.get("blocked_by_cycle"):
+        return ""
+    return f" | blocked_by={row.get('blocked_by_cycle') or ''!s}"
+
+
+def _overengineered_marker_lines(row: dict[str, JsonValue]) -> tuple[str, str]:
+    return (
+        _optional_joined_list_part(row, "indirection_markers"),
+        _optional_joined_list_part(row, "stateful_markers"),
+    )
 
 
 def _format_removable_complexity_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
