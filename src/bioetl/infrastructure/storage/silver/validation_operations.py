@@ -20,7 +20,11 @@ from bioetl.domain.normalization import (
 )
 from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _collect_key_violations as _collect_key_violations,
+)
+from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _count_null_violations as _count_null_violations,
+)
+from bioetl.infrastructure.storage.silver.key_nullability_operations import (
     _validate_key_nullability_impl as _validate_key_nullability_impl,
 )
 from bioetl.infrastructure.storage.silver.schema_drift_operations import (
