@@ -32,13 +32,41 @@ def _to_posix(path: Path) -> str:
     return path.as_posix()
 
 
+def _read_python_source(py_file: Path) -> str | None:
+    try:
+        return py_file.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
+def _parse_python_source(source: str) -> ast.AST | None:
+    try:
+        return ast.parse(source)
+    except SyntaxError:
+        return None
+
+
+def _uses_broad_storage_port_annotation(node: ast.AST) -> bool:
+    if (
+        isinstance(node, ast.AnnAssign)
+        and isinstance(node.annotation, ast.Name)
+        and node.annotation.id == "StoragePort"
+    ):
+        return True
+    if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return False
+    return any(
+        isinstance(arg.annotation, ast.Name) and arg.annotation.id == "StoragePort"
+        for arg in node.args.args + node.args.kwonlyargs
+    )
+
+
 def _files_using_broad_storage_port() -> list[str]:
     """Return relative paths of .py files that import and annotate with StoragePort."""
     hits: list[str] = []
     for py_file in sorted(_APPLICATION_ROOT.rglob("*.py")):
-        try:
-            source = py_file.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError):
+        source = _read_python_source(py_file)
+        if source is None:
             continue
 
         # Quick filter: must mention StoragePort at all
@@ -46,31 +74,11 @@ def _files_using_broad_storage_port() -> list[str]:
             continue
 
         # Parse AST to find actual type annotation usage (not just comments/docstrings)
-        try:
-            tree = ast.parse(source)
-        except SyntaxError:
+        tree = _parse_python_source(source)
+        if tree is None:
             continue
 
-        has_annotation = False
-        for node in ast.walk(tree):
-            # Check field annotations: `storage: StoragePort`
-            if (
-                isinstance(node, ast.AnnAssign)
-                and isinstance(node.annotation, ast.Name)
-                and node.annotation.id == "StoragePort"
-            ):
-                has_annotation = True
-                break
-            # Check function parameter annotations
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and any(
-                isinstance(arg.annotation, ast.Name)
-                and arg.annotation.id == "StoragePort"
-                for arg in node.args.args + node.args.kwonlyargs
-            ):
-                has_annotation = True
-                break
-
-        if has_annotation:
+        if any(_uses_broad_storage_port_annotation(node) for node in ast.walk(tree)):
             hits.append(_to_posix(py_file.relative_to(_APPLICATION_ROOT)))
 
     return hits

@@ -74,6 +74,47 @@ def _extract_constructor_name(call_node: ast.Call) -> str | None:
     return None
 
 
+def _target_adapter_class(
+    tree: ast.AST,
+    *,
+    adapter_class_name: str,
+) -> ast.ClassDef | None:
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == adapter_class_name:
+            return node
+    return None
+
+
+def _lifecycle_methods(node: ast.ClassDef) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
+    return [
+        class_member
+        for class_member in node.body
+        if isinstance(class_member, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and class_member.name in {"__init__", "__post_init__"}
+    ]
+
+
+def _call_violation(
+    candidate: ast.AST,
+    *,
+    adapter_class_name: str,
+    source_file: Path,
+    function_name: str,
+) -> InlineConstructionViolation | None:
+    if not isinstance(candidate, ast.Call):
+        return None
+    constructor_name = _extract_constructor_name(candidate)
+    if constructor_name not in FORBIDDEN_HELPER_CONSTRUCTORS:
+        return None
+    return InlineConstructionViolation(
+        class_name=adapter_class_name,
+        file_path=source_file,
+        function_name=function_name,
+        line_number=candidate.lineno,
+        constructor_name=constructor_name,
+    )
+
+
 def _find_inline_construction_violations(
     source_file: Path,
     adapter_class_name: str,
@@ -81,30 +122,20 @@ def _find_inline_construction_violations(
     source_text = source_file.read_text(encoding="utf-8")
     tree = ast.parse(source_text)
     violations: list[InlineConstructionViolation] = []
+    adapter_class = _target_adapter_class(tree, adapter_class_name=adapter_class_name)
+    if adapter_class is None:
+        return violations
 
-    for node in tree.body:
-        if not isinstance(node, ast.ClassDef) or node.name != adapter_class_name:
-            continue
-        for class_member in node.body:
-            if not isinstance(class_member, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                continue
-            if class_member.name not in {"__init__", "__post_init__"}:
-                continue
-            for candidate in ast.walk(class_member):
-                if not isinstance(candidate, ast.Call):
-                    continue
-                constructor_name = _extract_constructor_name(candidate)
-                if constructor_name not in FORBIDDEN_HELPER_CONSTRUCTORS:
-                    continue
-                violations.append(
-                    InlineConstructionViolation(
-                        class_name=adapter_class_name,
-                        file_path=source_file,
-                        function_name=class_member.name,
-                        line_number=candidate.lineno,
-                        constructor_name=constructor_name,
-                    )
-                )
+    for class_member in _lifecycle_methods(adapter_class):
+        for candidate in ast.walk(class_member):
+            violation = _call_violation(
+                candidate,
+                adapter_class_name=adapter_class_name,
+                source_file=source_file,
+                function_name=class_member.name,
+            )
+            if violation is not None:
+                violations.append(violation)
     return violations
 
 
