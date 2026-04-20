@@ -11,11 +11,52 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _PreparedSilverMetadataWriteOperation,
     _SilverMergedMetadataWriteRequest,
     _SilverMetadataWriteRequest,
+    _coerce_silver_metadata_write_request,
     _execute_prepared_silver_metadata_write_operation,
 )
 
 TEST_ACTIVITY_TABLE_PATH = "test-output/silver/chembl/activity"
 TEST_COMPOSITE_TABLE_PATH = "test-output/silver/composite/publication"
+
+
+@pytest.mark.unit
+class TestCoerceSilverMetadataWriteRequest:
+    """Regression coverage for legacy Silver metadata argument coercion."""
+
+    def test_accepts_kwargs_only_calls(self) -> None:
+        request = _coerce_silver_metadata_write_request(
+            kwargs={
+                "table_path": TEST_ACTIVITY_TABLE_PATH,
+                "table_name": "chembl.activity",
+                "records": [{"entity_id": "1"}],
+                "primary_keys": ["entity_id"],
+                "mode": SilverWriteMode.MERGE,
+            }
+        )
+
+        assert request.table_path == TEST_ACTIVITY_TABLE_PATH
+        assert request.table_name == "chembl.activity"
+        assert request.primary_keys == ["entity_id"]
+        assert request.mode is SilverWriteMode.MERGE
+
+    def test_accepts_partial_legacy_positional_args(self) -> None:
+        request = _coerce_silver_metadata_write_request(
+            None,
+            args=(
+                TEST_ACTIVITY_TABLE_PATH,
+                "chembl.activity",
+                [{"entity_id": "1"}],
+                ["entity_id"],
+                SilverWriteMode.MERGE,
+            ),
+        )
+
+        assert request.table_path == TEST_ACTIVITY_TABLE_PATH
+        assert request.table_name == "chembl.activity"
+        assert request.records == [{"entity_id": "1"}]
+        assert request.primary_keys == ["entity_id"]
+        assert request.mode is SilverWriteMode.MERGE
+        assert request.bronze_refs is None
 
 
 @pytest.mark.unit
