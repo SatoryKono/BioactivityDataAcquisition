@@ -70,10 +70,7 @@ def _collect_style_text(root: ET.Element) -> str:
     return "\n".join(parts)
 
 
-def analyze_svg(path: Path) -> tuple[SvgMetrics, list[str]]:
-    tree = ET.parse(path)
-    root = tree.getroot()
-
+def _svg_structure(root: ET.Element) -> tuple[list[ET.Element], int, int]:
     edge_groups: list[ET.Element] = []
     fallback_text_nodes = 0
     foreign_objects = 0
@@ -91,42 +88,35 @@ def analyze_svg(path: Path) -> tuple[SvgMetrics, list[str]]:
         ):
             fallback_text_nodes += 1
 
-    edge_with_text = 0
-    for group in edge_groups:
-        has_text = False
-        for child in group.iter():
-            child_name = _local_name(child.tag)
-            if child_name == "foreignObject" and _has_nonempty_text(child):
-                has_text = True
-                break
-            if (
-                child_name == "text"
-                and "fo-fallback" in _class_tokens(child)
-                and _has_nonempty_text(child)
-            ):
-                has_text = True
-                break
-        if has_text:
-            edge_with_text += 1
+    return edge_groups, fallback_text_nodes, foreign_objects
 
-    style_text = _collect_style_text(root)
-    has_edge_label_color_css = (
-        ".edgeLabel span" in style_text and "#111827" in style_text
-    )
-    has_fallback_color_css = (
-        "text.fo-fallback" in style_text and "#111827" in style_text
-    )
 
-    metrics = SvgMetrics(
-        file=str(path),
-        edge_label_groups=len(edge_groups),
-        edge_label_groups_with_text=edge_with_text,
-        foreign_objects=foreign_objects,
-        fallback_text_nodes=fallback_text_nodes,
-        has_edge_label_color_css=has_edge_label_color_css,
-        has_fallback_color_css=has_fallback_color_css,
+def _group_has_readable_text(group: ET.Element) -> bool:
+    for child in group.iter():
+        child_name = _local_name(child.tag)
+        if child_name == "foreignObject" and _has_nonempty_text(child):
+            return True
+        if (
+            child_name == "text"
+            and "fo-fallback" in _class_tokens(child)
+            and _has_nonempty_text(child)
+        ):
+            return True
+    return False
+
+
+def _edge_groups_with_text(edge_groups: list[ET.Element]) -> int:
+    return sum(1 for group in edge_groups if _group_has_readable_text(group))
+
+
+def _has_required_label_color_css(style_text: str) -> tuple[bool, bool]:
+    return (
+        ".edgeLabel span" in style_text and "#111827" in style_text,
+        "text.fo-fallback" in style_text and "#111827" in style_text,
     )
 
+
+def _visibility_issues(metrics: SvgMetrics) -> list[str]:
     issues: list[str] = []
     if metrics.edge_label_groups > 0 and metrics.edge_label_groups_with_text == 0:
         issues.append("edgeLabel groups exist but no readable label text was found")
@@ -142,8 +132,29 @@ def analyze_svg(path: Path) -> tuple[SvgMetrics, list[str]]:
         issues.append(
             "fallback text nodes exist but text.fo-fallback CSS color rule is missing"
         )
+    return issues
 
-    return metrics, issues
+
+def analyze_svg(path: Path) -> tuple[SvgMetrics, list[str]]:
+    tree = ET.parse(path)
+    root = tree.getroot()
+
+    edge_groups, fallback_text_nodes, foreign_objects = _svg_structure(root)
+    style_text = _collect_style_text(root)
+    has_edge_label_color_css, has_fallback_color_css = _has_required_label_color_css(
+        style_text
+    )
+
+    metrics = SvgMetrics(
+        file=str(path),
+        edge_label_groups=len(edge_groups),
+        edge_label_groups_with_text=_edge_groups_with_text(edge_groups),
+        foreign_objects=foreign_objects,
+        fallback_text_nodes=fallback_text_nodes,
+        has_edge_label_color_css=has_edge_label_color_css,
+        has_fallback_color_css=has_fallback_color_css,
+    )
+    return metrics, _visibility_issues(metrics)
 
 
 def load_manifest(manifest_path: Path) -> list[str]:
@@ -276,19 +287,9 @@ def _print_text_report(targets: list[Path], metrics_out: list[SvgMetrics]) -> No
         )
 
 
-def main() -> int:
-    args = parse_args()
-    repo_root = Path.cwd()
-    try:
-        targets = _collect_targets(args, repo_root)
-    except (FileNotFoundError, ValueError) as exc:
-        _err(f"[ERROR] {exc}")
-        return 2
-
-    if not targets:
-        _err("[ERROR] No SVG files to check.")
-        return 2
-
+def _run_checks(
+    targets: list[Path], repo_root: Path
+) -> tuple[list[SvgMetrics], list[tuple[str, list[str]]]]:
     metrics_out: list[SvgMetrics] = []
     failures: list[tuple[str, list[str]]] = []
 
@@ -306,17 +307,39 @@ def main() -> int:
         if issues:
             failures.append((rel, issues))
 
+    return metrics_out, failures
+
+
+def _print_failures(failures: list[tuple[str, list[str]]]) -> None:
+    _err("[ERROR] SVG text visibility check failed:")
+    for file_path, issues in failures:
+        _err(f"  - {file_path}")
+        for issue in issues:
+            _err(f"      * {issue}")
+
+
+def main() -> int:
+    args = parse_args()
+    repo_root = Path.cwd()
+    try:
+        targets = _collect_targets(args, repo_root)
+    except (FileNotFoundError, ValueError) as exc:
+        _err(f"[ERROR] {exc}")
+        return 2
+
+    if not targets:
+        _err("[ERROR] No SVG files to check.")
+        return 2
+
+    metrics_out, failures = _run_checks(targets, repo_root)
+
     if args.json:
         _out(_json_payload(targets, metrics_out, failures))
     else:
         _print_text_report(targets, metrics_out)
 
     if failures:
-        _err("[ERROR] SVG text visibility check failed:")
-        for file_path, issues in failures:
-            _err(f"  - {file_path}")
-            for issue in issues:
-                _err(f"      * {issue}")
+        _print_failures(failures)
         return 1
 
     if not args.json:
