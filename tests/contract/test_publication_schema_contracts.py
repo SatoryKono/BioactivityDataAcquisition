@@ -18,6 +18,14 @@ from bioetl.domain.schemas.semanticscholar.publication import (
 
 pytestmark = [pytest.mark.contracts, pytest.mark.no_api]
 
+PUBLICATION_SCHEMA_CLASSES = (
+    ChemblPublicationSchema,
+    PubMedPublicationSchema,
+    PublicationEnrichedSchema,
+    OpenAlexPublicationSchema,
+    SemanticScholarPublicationSchema,
+)
+
 
 @pytest.mark.architecture
 class TestSchemaInheritance:
@@ -25,13 +33,7 @@ class TestSchemaInheritance:
 
     @pytest.mark.parametrize(
         "schema_class",
-        [
-            ChemblPublicationSchema,
-            PubMedPublicationSchema,
-            PublicationEnrichedSchema,
-            OpenAlexPublicationSchema,
-            SemanticScholarPublicationSchema,
-        ],
+        PUBLICATION_SCHEMA_CLASSES,
     )
     def test_schema_inherits_base(self, schema_class: type[pa.DataFrameModel]) -> None:
         """All schemas inherit PublicationBaseSchema."""
@@ -446,15 +448,11 @@ class TestBackwardCompatibility:
 
     def test_deprecated_fields_still_present(self) -> None:
         """Deprecated field aliases MUST remain for backward compatibility."""
-        # Example: if a field was renamed, old name should still work
-        # This is a placeholder - adjust based on actual deprecations
-        assert True  # No current deprecations
+        pytest.skip("No deprecated publication field aliases are tracked yet.")
 
     def test_new_fields_are_nullable(self) -> None:
         """New fields added to schemas MUST be nullable for compatibility."""
-        # When new fields are added, existing data won't have them
-        # So they must be nullable to not break existing pipelines
-        assert True  # This is a design rule reminder
+        pytest.skip("Nullable-field compatibility baseline is not defined yet.")
 
 
 @pytest.mark.architecture
@@ -542,14 +540,11 @@ class TestOutputFormatStability:
 
     def test_silver_output_is_delta(self) -> None:
         """Silver layer MUST use Delta Lake format."""
-        # This is enforced by ADR-006
-        # Placeholder test to document contract
-        assert True  # Verified by architecture tests
+        pytest.skip("Silver storage format is enforced by architecture tests.")
 
     def test_bronze_output_is_jsonl(self) -> None:
         """Bronze layer MUST use JSONL + zstd format."""
-        # This is enforced by ADR-014
-        assert True  # Verified by architecture tests
+        pytest.skip("Bronze storage format is enforced by architecture tests.")
 
 
 @pytest.mark.architecture
@@ -578,6 +573,8 @@ class TestFieldNamingConventions:
 
     def test_no_camel_case_in_field_names(self) -> None:
         """Field names MUST be snake_case, not camelCase."""
-        # This is a style guideline - all fields should be snake_case
-        # Example bad: "publicationYear", good: "publication_year"
-        assert True  # Verified by linting rules
+        for schema_class in PUBLICATION_SCHEMA_CLASSES:
+            for field_name in schema_class.__annotations__:
+                assert field_name == field_name.lower(), (
+                    f"{schema_class.__name__} field {field_name} must be lowercase"
+                )

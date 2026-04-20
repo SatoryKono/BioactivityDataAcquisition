@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.domain.ports.storage.silver_port import (
+from bioetl.domain.ports import (
     SilverWriteRequest,
     coerce_silver_write_request,
 )

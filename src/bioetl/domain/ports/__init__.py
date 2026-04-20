@@ -139,6 +139,7 @@ from bioetl.domain.ports.storage import (
     StorageLifecyclePort,
     StorageMaintenancePort,
     StoragePort,
+    coerce_silver_write_request,
 )
 
 __all__ = [
@@ -243,6 +244,7 @@ __all__ = [
     "StorageMaintenancePort",
     "StoragePort",
     "TracingPort",
+    "coerce_silver_write_request",
     "coerce_silver_dq_analyze_request",
     "resolve_metric_labels",
 ]
