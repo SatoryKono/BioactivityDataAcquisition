@@ -234,6 +234,62 @@ def resolve_sources(source_dir: Path, explicit_files: list[Path]) -> list[Path]:
     return sorted(source_dir.glob("*.mmd"))
 
 
+def _resolved_scan_dirs(source_dir: Path, svg_dir: Path | None) -> tuple[Path, Path]:
+    source_root = source_dir if source_dir.is_absolute() else Path.cwd() / source_dir
+    svg_dir_input = svg_dir if svg_dir is not None else source_root / "svg"
+    resolved_svg_dir = (
+        svg_dir_input if svg_dir_input.is_absolute() else Path.cwd() / svg_dir_input
+    )
+    return source_root, resolved_svg_dir
+
+
+def _collect_integrity_issues(sources: list[Path], svg_dir: Path) -> list[IntegrityIssue]:
+    all_issues: list[IntegrityIssue] = []
+    for mmd_path in sources:
+        if mmd_path.suffix != ".mmd":
+            continue
+        svg_path = svg_dir / f"{mmd_path.stem}.svg"
+        all_issues.extend(check_pair(mmd_path, svg_path))
+    return all_issues
+
+
+def _write_report(
+    *,
+    issues: list[IntegrityIssue],
+    sources: list[Path],
+    json_output: bool,
+) -> None:
+    if json_output:
+        payload = {
+            "files_checked": len(sources),
+            "issues": [
+                {
+                    "file": issue.file,
+                    "severity": issue.severity,
+                    "rule": issue.rule,
+                    "message": issue.message,
+                }
+                for issue in issues
+            ],
+        }
+        sys.stdout.write(json.dumps(payload, indent=2) + "\n")
+        return
+
+    if not issues:
+        sys.stdout.write(
+            f"class-method-render-integrity: OK ({len(sources)} files checked)\n"
+        )
+        return
+
+    for issue in issues:
+        sys.stdout.write(
+            f"[{issue.severity}] {issue.rule} {issue.file}: {issue.message}\n"
+        )
+    sys.stdout.write(
+        f"class-method-render-integrity: FAILED ({len(issues)} issues)\n"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Verify class-diagram method integrity between .mmd and rendered SVG files.",
@@ -264,57 +320,19 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    source_root = (
-        args.source_dir
-        if args.source_dir.is_absolute()
-        else Path.cwd() / args.source_dir
-    )
-    svg_dir_input = args.svg_dir if args.svg_dir is not None else source_root / "svg"
-    svg_dir = (
-        svg_dir_input if svg_dir_input.is_absolute() else Path.cwd() / svg_dir_input
-    )
-
+    source_root, svg_dir = _resolved_scan_dirs(args.source_dir, args.svg_dir)
     explicit_files = [Path(raw) for raw in args.file]
     sources = resolve_sources(source_root, explicit_files)
     if not sources:
         sys.stderr.write(f"No class-diagram sources found in {source_root}\n")
         return 2
 
-    all_issues: list[IntegrityIssue] = []
-    for mmd_path in sources:
-        if mmd_path.suffix != ".mmd":
-            continue
-        svg_path = svg_dir / f"{mmd_path.stem}.svg"
-        all_issues.extend(check_pair(mmd_path, svg_path))
-
-    if args.json_output:
-        payload = {
-            "files_checked": len(sources),
-            "issues": [
-                {
-                    "file": issue.file,
-                    "severity": issue.severity,
-                    "rule": issue.rule,
-                    "message": issue.message,
-                }
-                for issue in all_issues
-            ],
-        }
-        sys.stdout.write(json.dumps(payload, indent=2) + "\n")
-    else:
-        if not all_issues:
-            sys.stdout.write(
-                f"class-method-render-integrity: OK ({len(sources)} files checked)\n"
-            )
-        else:
-            for issue in all_issues:
-                sys.stdout.write(
-                    f"[{issue.severity}] {issue.rule} {issue.file}: {issue.message}\n"
-                )
-            sys.stdout.write(
-                f"class-method-render-integrity: FAILED ({len(all_issues)} issues)\n"
-            )
-
+    all_issues = _collect_integrity_issues(sources, svg_dir)
+    _write_report(
+        issues=all_issues,
+        sources=sources,
+        json_output=args.json_output,
+    )
     return 1 if all_issues else 0
 
 
