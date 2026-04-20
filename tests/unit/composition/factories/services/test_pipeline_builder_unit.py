@@ -366,7 +366,8 @@ class TestCreateRecordProcessorFromPipeline:
         )
 
         call_kwargs = create_fn.call_args.kwargs
-        assert call_kwargs["lock_validator"] is lock_validator
-        assert call_kwargs["tracer"] is tracer
-        assert call_kwargs["column_groups"] == tuple(pipeline.config.column_groups)
-        assert call_kwargs["scd_config"] == pipeline.config.scd_config
+        request = call_kwargs["request"]
+        assert request.lock_validator is lock_validator
+        assert request.tracer is tracer
+        assert request.column_groups == tuple(pipeline.config.column_groups)
+        assert request.scd_config == pipeline.config.scd_config

@@ -24,6 +24,8 @@ def _format_block(value: object) -> list[str]:
     if isinstance(value, list):
         if not value:
             return ["[]"]
+        if all(not isinstance(item, (dict, list)) for item in value):
+            return [_format_scalar(item) for item in value]
         return json.dumps(value, indent=2, sort_keys=True, default=str).splitlines()
     return [_format_scalar(value)]
 

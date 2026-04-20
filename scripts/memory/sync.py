@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
@@ -72,6 +73,7 @@ GATE_CONFIG_VALIDATION = "config validation"
 GATE_PRETEST_GUARDRAILS = "pretest guardrails"
 GATE_DIAGRAM_QUALITY = "diagram quality gates"
 GATE_NEO4J_ONTOLOGY_INVARIANTS = "deterministic neo4j memory ontology invariants"
+DEFAULT_LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
 YAML_FILE_GLOB = "*.yaml"
 MANIFEST_ID_TEMPLATE = "{manifest_id}"
 RUN_ID_TEMPLATE = "{run_id}"
@@ -846,7 +848,7 @@ CURATED_SCRIPT_CLUSTERS: tuple[dict[str, object], ...] = (
                 "summary": "Unified local entrypoint for project-memory helper commands.",
             },
             {
-                "name": "python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json",
+                "name": f"python -m scripts.memory sync --report {DEFAULT_LEGACY_REPORT_PATH}",
                 "platform": "cross_platform",
                 "summary": "Canonical audit/report path for the deterministic Neo4j repo graph.",
             },
@@ -4201,7 +4203,7 @@ def _link_execution_gate(snapshot: GraphSnapshot, execution: NodeKey, execution_
         snapshot.add_relation(execution, "EXECUTES_GATE", NodeKey("quality_gate", gate_name), provenance=provenance)
 
 
-def _add_curated_execution_paths(snapshot: GraphSnapshot, project: NodeKey, today: str, dev_readme: NodeKey) -> None:
+def _add_curated_execution_paths(snapshot: GraphSnapshot, today: str, dev_readme: NodeKey) -> None:
     for execution_payload in CURATED_EXECUTION_PATHS:
         execution = _add_execution_path_node(snapshot, today, execution_payload)
         _link_execution_gate(snapshot, execution, execution_payload, provenance="curated_execution")
@@ -4307,7 +4309,7 @@ def _add_curated_cluster_execution(
 def _add_quality_and_scripts(snapshot: GraphSnapshot, _root: Path, project: NodeKey, today: str) -> None:
     _add_curated_quality_gates(snapshot, project, today)
     dev_readme = _developer_workflow_readme(snapshot, project, today)
-    _add_curated_execution_paths(snapshot, project, today, dev_readme)
+    _add_curated_execution_paths(snapshot, today, dev_readme)
     _add_curated_script_clusters(snapshot, project, today)
 
 
@@ -6356,12 +6358,35 @@ def _add_composite_storage_data_surfaces(
             ),
         )
         _index_storage_layer_fields(schema_fields_by_storage, layer_nodes, field_nodes_by_layer)
-        if "silver" in layer_nodes and "gold" in layer_nodes:
-            snapshot.add_relation(layer_nodes["silver"], "PROMOTES_TO", layer_nodes["gold"], provenance="storage_surfaces")
-            for field_name, silver_field in field_nodes_by_layer.get("silver", {}).items():
-                gold_field = field_nodes_by_layer.get("gold", {}).get(field_name)
-                if gold_field is not None:
-                    snapshot.add_relation(silver_field, "PROMOTES_FIELD_TO", gold_field, provenance="schema_fields")
+        _link_composite_layer_promotions(snapshot, layer_nodes, field_nodes_by_layer)
+
+
+def _link_composite_layer_promotions(
+    snapshot: GraphSnapshot,
+    layer_nodes: dict[str, NodeKey],
+    field_nodes_by_layer: dict[str, dict[str, NodeKey]],
+) -> None:
+    silver_layer = layer_nodes.get("silver")
+    gold_layer = layer_nodes.get("gold")
+    if silver_layer is None or gold_layer is None:
+        return
+    snapshot.add_relation(
+        silver_layer,
+        "PROMOTES_TO",
+        gold_layer,
+        provenance="storage_surfaces",
+    )
+    gold_fields = field_nodes_by_layer.get("gold", {})
+    for field_name, silver_field in field_nodes_by_layer.get("silver", {}).items():
+        gold_field = gold_fields.get(field_name)
+        if gold_field is None:
+            continue
+        snapshot.add_relation(
+            silver_field,
+            "PROMOTES_FIELD_TO",
+            gold_field,
+            provenance="schema_fields",
+        )
 
 
 def _composite_storage_context(
@@ -6578,7 +6603,9 @@ def _add_runtime_evidence_storage_refs(
     storage_refs: object,
     today: str,
 ) -> None:
-    for storage_ref, suffix, key_template in storage_refs:
+    for storage_ref, suffix, key_template in _runtime_evidence_storage_refs(
+        storage_refs
+    ):
         _add_runtime_evidence_storage_artifact(
             snapshot,
             project,
@@ -6591,12 +6618,33 @@ def _add_runtime_evidence_storage_refs(
         )
 
 
+def _runtime_evidence_storage_refs(
+    storage_refs: object,
+) -> tuple[tuple[object, object, object], ...]:
+    if not isinstance(storage_refs, Iterable) or isinstance(
+        storage_refs, str | bytes | dict
+    ):
+        return ()
+    refs: list[tuple[object, object, object]] = []
+    for candidate in storage_refs:
+        if not isinstance(candidate, tuple | list) or len(candidate) != 3:
+            continue
+        refs.append((candidate[0], candidate[1], candidate[2]))
+    return tuple(refs)
+
+
+def _iter_object_values(values: object) -> tuple[object, ...]:
+    if not isinstance(values, Iterable) or isinstance(values, str | bytes | dict):
+        return ()
+    return tuple(values)
+
+
 def _link_runtime_evidence_docs(
     snapshot: GraphSnapshot,
     surface: NodeKey,
     doc_paths: object,
 ) -> None:
-    for doc_path in doc_paths:
+    for doc_path in _iter_object_values(doc_paths):
         doc_key = NodeKey("doc_artifact", str(doc_path))
         if doc_key in snapshot.nodes:
             snapshot.add_relation(surface, "DESCRIBED_IN", doc_key, provenance="runtime_evidence")
@@ -6607,7 +6655,7 @@ def _link_runtime_evidence_modules(
     surface: NodeKey,
     module_paths: object,
 ) -> None:
-    for module_path in module_paths:
+    for module_path in _iter_object_values(module_paths):
         module_key = NodeKey("module_surface", str(module_path))
         if module_key in snapshot.nodes:
             snapshot.add_relation(surface, "BACKED_BY", module_key, provenance="runtime_evidence")
@@ -9630,7 +9678,6 @@ def _register_duplication_method_surfaces(
         method_key = _add_duplication_callable_surface(
             context,
             relative_path=relative_path,
-            dotted_path=dotted_path,
             family=family,
             node=child,
             surface_label="method_surface",
@@ -9663,7 +9710,6 @@ def _register_duplication_function_surface(
     function_key = _add_duplication_callable_surface(
         context,
         relative_path=relative_path,
-        dotted_path=dotted_path,
         family=family,
         node=node,
         surface_label="function_surface",
@@ -9687,7 +9733,6 @@ def _add_duplication_callable_surface(
     context: DuplicationExtractionContext,
     *,
     relative_path: str,
-    dotted_path: str,
     family: DuplicateFamilyConfig,
     node: ast.FunctionDef | ast.AsyncFunctionDef,
     surface_label: str,
@@ -11430,7 +11475,6 @@ def _add_pipeline_normalization_evidence(
 ) -> None:
     evidence_by_pipeline = _build_normalization_pipeline_evidence()
     for pipeline_name, entity_key, update_payload in _iter_normalization_evidence_updates(
-        snapshot,
         pipeline_nodes,
         evidence_by_pipeline,
     ):
@@ -11446,7 +11490,6 @@ def _add_pipeline_normalization_evidence(
 
 
 def _iter_normalization_evidence_updates(
-    snapshot: GraphSnapshot,
     pipeline_nodes: dict[str, NodeKey],
     evidence_by_pipeline: dict[str, dict[str, JsonValue]],
 ) -> tuple[tuple[str, NodeKey, dict[str, JsonValue]], ...]:
@@ -15514,7 +15557,7 @@ def _snapshot_operation_count(args: argparse.Namespace) -> int:
     return 1 + int(args.export is not None) + int(args.apply) + int(args.report is not None)
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     _validate_cli_args(parser, args)
@@ -15525,7 +15568,7 @@ def main(argv: list[str] | None = None) -> None:
             batch_size=args.batch_size,
         )
         print(json.dumps(summary, indent=2))
-        return
+        return 0
     root = args.root.resolve()
     selection = _selection_from_args(args)
     snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
@@ -15539,7 +15582,8 @@ def main(argv: list[str] | None = None) -> None:
         args.report,
         args.report_fast,
     )
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
