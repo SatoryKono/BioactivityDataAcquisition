@@ -245,22 +245,31 @@ def find_diagram_files(base: Path) -> list[Path]:
     )
 
 
+def _missing_mmd_metadata_tags(lines: list[str]) -> list[str]:
+    required_tags = {"@version", "@date", "@type", "@level"}
+    found_tags: set[str] = set()
+    for line in lines:
+        stripped = line.strip()
+        for tag in required_tags:
+            if stripped.startswith(f"%% {tag}"):
+                found_tags.add(tag)
+    return sorted(required_tags - found_tags)
+
+
+def _has_mermaid_view_metadata(lines: list[str]) -> bool:
+    return any(
+        line.strip().startswith("%% View:") or line.strip().startswith("%% @view")
+        for line in lines
+    )
+
+
 def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
     """Check for structured metadata; format depends on file type/location."""
     issues: list[Issue] = []
     fname = str(path)
 
     if path.suffix == ".mmd":
-        required_tags = {"@version", "@date", "@type", "@level"}
-        found_tags: set[str] = set()
-        for line in lines:
-            stripped = line.strip()
-            for tag in required_tags:
-                if stripped.startswith(f"%% {tag}"):
-                    found_tags.add(tag)
-        missing = required_tags - found_tags
-
-        for tag in sorted(missing):
+        for tag in _missing_mmd_metadata_tags(lines):
             issues.append(
                 Issue(
                     file=fname,
@@ -270,11 +279,7 @@ def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
                 )
             )
     else:
-        has_view = any(
-            line.strip().startswith("%% View:") or line.strip().startswith("%% @view")
-            for line in lines
-        )
-        if not has_view:
+        if not _has_mermaid_view_metadata(lines):
             issues.append(
                 Issue(
                     file=fname,

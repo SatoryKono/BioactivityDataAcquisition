@@ -133,6 +133,50 @@ def _print_migration_summary(
         )
 
 
+def _maybe_sync_allowlist(
+    extensionless_files: list[Path],
+    *,
+    sync_allowlist: bool,
+    dry_run: bool,
+) -> None:
+    if not sync_allowlist:
+        return
+    _rewrite_allowlist(extensionless_files)
+    if dry_run:
+        sys.stdout.write("Allowlist synchronized (dry-run mode for file renames).\n")
+
+
+def _run_dry_mode(extensionless: list[Path], *, sync_allowlist: bool) -> None:
+    _maybe_sync_allowlist(extensionless, sync_allowlist=sync_allowlist, dry_run=True)
+
+
+def _run_apply_mode(
+    solo: list[tuple[Path, Path]],
+    pairs: list[tuple[Path, Path]],
+    *,
+    sync_allowlist: bool,
+    drop_paired: bool,
+) -> None:
+    migrated, dropped_paired = _apply_migration(
+        solo,
+        pairs,
+        drop_paired=drop_paired,
+    )
+    updated_extensionless = _collect_extensionless()
+    _maybe_sync_allowlist(
+        updated_extensionless,
+        sync_allowlist=sync_allowlist,
+        dry_run=False,
+    )
+    _print_migration_summary(
+        updated_extensionless=updated_extensionless,
+        migrated=migrated,
+        dropped_paired=dropped_paired,
+        had_pairs=bool(pairs),
+        drop_paired=drop_paired,
+    )
+
+
 def main() -> None:
     args = _parse_args()
     extensionless = _collect_extensionless()
@@ -140,24 +184,13 @@ def main() -> None:
     _print_inventory(extensionless, pairs, solo)
 
     if not args.apply:
-        if args.sync_allowlist:
-            _rewrite_allowlist(extensionless)
-            sys.stdout.write(
-                "Allowlist synchronized (dry-run mode for file renames).\n"
-            )
+        _run_dry_mode(extensionless, sync_allowlist=args.sync_allowlist)
         return
 
-    migrated, dropped_paired = _apply_migration(
-        solo, pairs, drop_paired=args.drop_paired
-    )
-    updated_extensionless = _collect_extensionless()
-    if args.sync_allowlist:
-        _rewrite_allowlist(updated_extensionless)
-    _print_migration_summary(
-        updated_extensionless=updated_extensionless,
-        migrated=migrated,
-        dropped_paired=dropped_paired,
-        had_pairs=bool(pairs),
+    _run_apply_mode(
+        solo,
+        pairs,
+        sync_allowlist=args.sync_allowlist,
         drop_paired=args.drop_paired,
     )
 
