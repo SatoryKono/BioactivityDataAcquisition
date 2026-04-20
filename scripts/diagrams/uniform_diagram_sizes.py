@@ -103,7 +103,8 @@ def _ensure_repo_path(path: Path) -> Path:
 
 def _write_repo_text(path: Path, content: str) -> None:
     """Write normalized diagram text to a previously validated repository path."""
-    _ensure_repo_path(path).write_text(content, encoding="utf-8")
+    safe_path = _ensure_repo_path(path)
+    safe_path.write_text(content, encoding="utf-8")
 
 
 # Flowchart node patterns:

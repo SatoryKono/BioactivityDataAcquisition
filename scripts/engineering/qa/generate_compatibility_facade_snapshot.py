@@ -89,7 +89,8 @@ def _resolve_canonical_output_path(raw_output: str | Path) -> Path:
 
 def _write_snapshot_text(content: str) -> None:
     """Write generated snapshot content to the canonical tracked artifact."""
-    _ensure_repo_path(DEFAULT_OUTPUT).write_text(content, encoding="utf-8")
+    safe_path = _ensure_repo_path(DEFAULT_OUTPUT)
+    safe_path.write_text(content, encoding="utf-8")
 
 
 def _parse_args() -> argparse.Namespace:
