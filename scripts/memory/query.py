@@ -1715,19 +1715,11 @@ def _format_dead_code_candidates_rows(title: str, name: str, rows: list[dict[str
 def _format_current_cycle_code_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        if not row.get("target_name"):
-            continue
-        lines.append(
-            _target_row_line(
-                row,
-                [
-                    f"cycle_status={row.get('cycle_status') or ''!s}",
-                    f"cycle_score={row.get('cycle_score') or ''!s}",
-                    f"recent_age_days={row.get('recent_age_days') or ''!s}",
-                    *_anchor_count_parts(row),
-                ],
-                _marker_suffix(row, "wip_markers", "wip_markers"),
-            )
+        _append_target_row_if_named(
+            lines,
+            row,
+            _current_cycle_parts(row),
+            _marker_suffix(row, "wip_markers", "wip_markers"),
         )
     if len(lines) == 1:
         lines.append("- no current-cycle code surfaces found")
@@ -1737,18 +1729,16 @@ def _format_current_cycle_code_rows(title: str, name: str, rows: list[dict[str, 
 def _format_overengineered_candidates_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        if not row.get("target_name"):
-            continue
-        lines.append(
-            _target_row_line(
-                row,
-                _overengineered_candidate_parts(row),
-                _blocked_by_cycle_suffix(row),
+        if _append_target_row_if_named(
+            lines,
+            row,
+            _overengineered_candidate_parts(row),
+            _blocked_by_cycle_suffix(row),
+        ):
+            _append_indented_nonempty_lines(
+                lines,
+                list(_overengineered_marker_lines(row)),
             )
-        )
-        for marker_line in _overengineered_marker_lines(row):
-            if marker_line:
-                lines.append(f"  {marker_line}")
     if len(lines) == 1:
         lines.append("- no overengineered candidates found")
     return "\n".join(lines)
@@ -1782,46 +1772,46 @@ def _overengineered_marker_lines(row: dict[str, JsonValue]) -> tuple[str, str]:
 def _format_removable_complexity_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        target_name = str(row.get("target_name") or "")
-        if not target_name:
-            continue
         marker_suffix = _marker_suffix(
             row,
             "deprecation_markers",
             "deprecation_markers",
         )
-        lines.append(
-            _target_row_line(
-                row,
-                [
-                    f"removable_score={row.get('removable_score') or ''!s}",
-                    f"removal_confidence={row.get('removal_confidence') or ''!s}",
-                    *_anchor_count_parts(row),
-                ],
-                marker_suffix,
-            )
+        _append_target_row_if_named(
+            lines,
+            row,
+            [
+                f"removable_score={row.get('removable_score') or ''!s}",
+                f"removal_confidence={row.get('removal_confidence') or ''!s}",
+                *_anchor_count_parts(row),
+            ],
+            marker_suffix,
         )
     if len(lines) == 1:
         lines.append("- no removable complexity candidates found")
     return "\n".join(lines)
 
 
+def _simplification_blocker_detail_lines(row: dict[str, JsonValue]) -> list[str]:
+    """Render cycle blocker and blocker detail lines for one row."""
+    return _sorted_prefixed_values(
+        row.get("cycle_blockers"),
+        "cycle_blocker",
+    ) + _blocker_detail_lines(row.get("blockers"))
+
+
 def _format_simplification_blockers_rows(title: str, name: str, rows: list[dict[str, JsonValue]]) -> str:
     lines = [f"{title}: `{name}`"]
     for row in rows:
-        if not row.get("target_name"):
-            continue
-        lines.append(
-            _target_row_line(
-                row,
-                [
-                    f"classification={row.get('classification') or ''!s}",
-                    *_anchor_count_parts(row),
-                ],
-            )
-        )
-        lines.extend(_sorted_prefixed_values(row.get("cycle_blockers"), "cycle_blocker"))
-        lines.extend(_blocker_detail_lines(row.get("blockers")))
+        if _append_target_row_if_named(
+            lines,
+            row,
+            [
+                f"classification={row.get('classification') or ''!s}",
+                *_anchor_count_parts(row),
+            ],
+        ):
+            lines.extend(_simplification_blocker_detail_lines(row))
     if len(lines) == 1:
         lines.append("- no simplification blockers found")
     return "\n".join(lines)

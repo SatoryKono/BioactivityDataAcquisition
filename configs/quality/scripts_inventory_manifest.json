@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-20T06:27:29.522422+00:00",
+  "generated_at": "2026-04-20T07:56:50.583556+00:00",
   "summary": {
-    "total_scripts": 416,
+    "total_scripts": 419,
     "status_counts": {
-      "active": 287,
+      "active": 302,
       "legacy": 15,
-      "orphan": 104,
+      "orphan": 92,
       "unknown": 10
     },
     "reference_group_coverage": {
@@ -16,7 +16,7 @@
       "docs": 119,
       "scripts": 275,
       "skills": 8,
-      "tests": 108
+      "tests": 137
     }
   },
   "scripts": [
@@ -925,13 +925,13 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 105,
+          "line": 95,
           "source_group": "tests",
           "text": "servers[\"github\"], \"powershell\", \"scripts/ai/mcp/github-mcp-wrapper.ps1\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 241,
+          "line": 231,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         }
@@ -964,13 +964,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 162,
+          "line": 152,
           "source_group": "tests",
           "text": "servers[\"github\"], \"bash\", \"scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 238,
+          "line": 228,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         }
@@ -985,7 +985,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 143,
+          "line": 133,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         }
@@ -1018,7 +1018,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 196,
+          "line": 186,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         }
@@ -1049,7 +1049,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 118,
+          "line": 108,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         }
@@ -1082,7 +1082,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 173,
+          "line": 163,
           "source_group": "tests",
           "text": "servers[\"context7\"], \"bash\", \"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         }
@@ -1097,7 +1097,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 113,
+          "line": 103,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.ps1\","
         }
@@ -1130,7 +1130,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 170,
+          "line": 160,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\","
         }
@@ -1145,7 +1145,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 108,
+          "line": 98,
           "source_group": "tests",
           "text": "servers[\"docker\"], \"powershell\", \"scripts/ai/mcp/mcp_docker_wrapper.ps1\""
         }
@@ -1178,7 +1178,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 165,
+          "line": 155,
           "source_group": "tests",
           "text": "servers[\"docker\"], \"bash\", \"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         }
@@ -1193,7 +1193,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 128,
+          "line": 118,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.ps1\","
         }
@@ -1226,7 +1226,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 183,
+          "line": 173,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\","
         }
@@ -1241,7 +1241,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 138,
+          "line": 128,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\","
         }
@@ -1274,7 +1274,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 191,
+          "line": 181,
           "source_group": "tests",
           "text": "servers[\"grafana\"], \"bash\", \"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         }
@@ -1305,7 +1305,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 153,
+          "line": 143,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         }
@@ -1338,7 +1338,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 206,
+          "line": 196,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         }
@@ -1353,7 +1353,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 158,
+          "line": 148,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         }
@@ -1425,7 +1425,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 123,
+          "line": 113,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.ps1\","
         }
@@ -1458,7 +1458,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 178,
+          "line": 168,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\","
         }
@@ -1473,7 +1473,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 133,
+          "line": 123,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\","
         }
@@ -1506,7 +1506,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 188,
+          "line": 178,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\","
         }
@@ -1553,7 +1553,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 148,
+          "line": 138,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.ps1\","
         }
@@ -1598,7 +1598,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 201,
+          "line": 191,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\","
         }
@@ -4203,7 +4203,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 38,
+          "line": 34,
           "source_group": "tests",
           "text": "svg2png_path = \"/\".join([\"scripts\", \"diagrams\", \"svg2png.mjs\"])"
         }
@@ -4383,6 +4383,14 @@
       ]
     },
     {
+      "path": "scripts/docs/_compat_shim.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/docs/build_docs_site.sh",
       "type": "sh",
       "status": "active",
@@ -4408,7 +4416,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/00-project/governance/01-documentation-governance-style-guide.md",
@@ -4465,7 +4473,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 28,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4522,7 +4530,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/docs/checks/check_docstrings.py",
@@ -4553,21 +4561,41 @@
           "line": 12,
           "source_group": "scripts",
           "text": "python scripts/check_docstring_coverage.py --fail-under 95  # Custom threshold (%)"
+        },
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "\"scripts/docs/check_docstring_coverage.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/docs/checks/_bootstrap.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/docs/checks/check_docstrings.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 49,
           "source_group": "scripts",
           "text": "| `check-docstrings`                    | `scripts/docs/checks/check_docstrings.py`                    | Check docstring coverage                                                              |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "\"scripts/docs/checks/check_docstrings.py\","
         }
       ]
     },
@@ -4576,13 +4604,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 48,
           "source_group": "scripts",
           "text": "| `check-drift`                         | `scripts/docs/checks/check_drift.py`                         | Check documentation drift (ports, classes, runtime mirrors, freshness)                |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "\"scripts/docs/checks/check_drift.py\","
         }
       ]
     },
@@ -4600,10 +4634,10 @@
           "text": "| `check-links`                         | `scripts/docs/checks/check_links.py`                         | Check documentation links, specs, configs, and mkdocs nav classification              |"
         },
         {
-          "path": "scripts/docs/check_doc_links.py",
-          "line": 14,
-          "source_group": "scripts",
-          "text": "_IMPL_FILE = Path(__file__).resolve().parent / \"checks\" / \"check_links.py\""
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "\"scripts/docs/checks/check_links.py\","
         }
       ]
     },
@@ -4612,13 +4646,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 50,
           "source_group": "scripts",
           "text": "| `check-kpi`                           | `scripts/docs/checks/report_docs_kpi.py`                     | Report documentation KPI metrics                                                      |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "\"scripts/docs/checks/report_docs_kpi.py\","
         }
       ]
     },
@@ -4640,10 +4680,17 @@
     {
       "path": "scripts/docs/chembl_matrix_structural_contract.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "\"scripts/docs/chembl_matrix_structural_contract.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/common/markdown.py",
@@ -4693,50 +4740,92 @@
     {
       "path": "scripts/docs/enrich_chembl_matrix_normalization_details.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "\"scripts/docs/enrich_chembl_matrix_normalization_details.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/export_chembl_matrix_structural_contract.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "\"scripts/docs/export_chembl_matrix_structural_contract.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/filter_chembl_matrix_rows.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "\"scripts/docs/filter_chembl_matrix_rows.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/fix_doc_links_auto.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "\"scripts/docs/fix_doc_links_auto.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/fix_doc_links_explicit.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "\"scripts/docs/fix_doc_links_explicit.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/fix_link_warnings.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 18,
+          "source_group": "tests",
+          "text": "\"scripts/docs/fix_link_warnings.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/fixers/fix_links_auto.py",
@@ -4816,25 +4905,39 @@
     {
       "path": "scripts/docs/generate_chembl_activity_field_matrix.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "\"scripts/docs/generate_chembl_activity_field_matrix.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/generate_chembl_matrix_dictionaries.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "\"scripts/docs/generate_chembl_matrix_dictionaries.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/generate_pipeline_normalization_field_matrix.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/05-engineering/normalization_plan_P0_P6.md",
@@ -4855,25 +4958,45 @@
           "text": "- [generate_pipeline_normalization_field_matrix.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministi"
         },
         {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\","
+        },
+        {
           "path": "tests/unit/scripts/test_generate_pipeline_normalization_field_matrix.py",
-          "line": 48,
+          "line": 53,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\""
         }
       ]
     },
     {
+      "path": "scripts/docs/matrix/_bootstrap.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/docs/matrix/build_matrix_dicts.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 54,
           "source_group": "scripts",
           "text": "| `build-matrix-dicts`                  | `scripts/docs/matrix/build_matrix_dicts.py`                  | Build inventory and dictionary artifacts for the canonical ChEMBL matrix workbook     |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/build_matrix_dicts.py\","
         }
       ]
     },
@@ -4882,13 +5005,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 55,
           "source_group": "scripts",
           "text": "| `enrich-matrix-normalization-details` | `scripts/docs/matrix/enrich_normalization_details.py`        | Populate exact per-row normalization details in the canonical ChEMBL matrix workbook  |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 14,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/enrich_normalization_details.py\","
         }
       ]
     },
@@ -4897,13 +5026,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 51,
           "source_group": "scripts",
           "text": "| `export-matrix-structural-contract`   | `scripts/docs/matrix/export_structural_contract.py`          | Export the canonical runtime structural contract for ChEMBL workbook sync             |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 15,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/export_structural_contract.py\","
         }
       ]
     },
@@ -4912,13 +5047,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 56,
           "source_group": "scripts",
           "text": "| `filter-matrix-rows`                  | `scripts/docs/matrix/filter_rows.py`                         | Remove rows from the canonical ChEMBL matrix workbook by column value                 |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/filter_rows.py\","
         }
       ]
     },
@@ -4927,13 +5068,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 52,
           "source_group": "scripts",
           "text": "| `generate-field-matrix`               | `scripts/docs/matrix/generate_field_matrix.py`               | Generate deterministic ChemBL Activity field-matrix artifacts directly from code      |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/generate_field_matrix.py\","
         }
       ]
     },
@@ -4942,13 +5089,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 53,
           "source_group": "scripts",
           "text": "| `generate-pipeline-normalization-matrix` | `scripts/docs/matrix/generate_pipeline_normalization_matrix.py` | Generate deterministic normalization field-matrix artifacts for all entity and composite "
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 18,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/generate_pipeline_normalization_matrix.py\","
         }
       ]
     },
@@ -4957,53 +5110,79 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 57,
           "source_group": "scripts",
           "text": "| `normalize-matrix-values`             | `scripts/docs/matrix/normalize_values.py`                    | Normalize controlled vocabulary values in the canonical ChEMBL matrix workbook        |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/normalize_values.py\","
         }
       ]
     },
     {
       "path": "scripts/docs/matrix/structural_contract.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 20,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/structural_contract.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/matrix/sync_structural_policy.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 58,
           "source_group": "scripts",
           "text": "| `sync-matrix-structural-policy`       | `scripts/docs/matrix/sync_structural_policy.py`              | Reconcile workbook policy columns with the current structural Silver policy semantics |"
+        },
+        {
+          "path": "tests/architecture/test_docs_internal_bootstrap_governance.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "\"scripts/docs/matrix/sync_structural_policy.py\","
         }
       ]
     },
     {
       "path": "scripts/docs/normalize_chembl_matrix_workbook.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 22,
+          "source_group": "tests",
+          "text": "\"scripts/docs/normalize_chembl_matrix_workbook.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/report_docs_kpi.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -5036,6 +5215,12 @@
           "text": "| `check-kpi`                           | `scripts/docs/checks/report_docs_kpi.py`                     | Report documentation KPI metrics                                                      |"
         },
         {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 23,
+          "source_group": "tests",
+          "text": "\"scripts/docs/report_docs_kpi.py\","
+        },
+        {
           "path": "tests/architecture/test_docs_kpi_workflow.py",
           "line": 21,
           "source_group": "tests",
@@ -5048,47 +5233,81 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 149,
           "source_group": "scripts",
           "text": "| `scripts/docs/run_mkdocs_build.py`| Python shim for the packaged MkDocs build entrypoint                                              |"
+        },
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 24,
+          "source_group": "tests",
+          "text": "\"scripts/docs/run_mkdocs_build.py\","
         }
       ]
     },
     {
       "path": "scripts/docs/sentence_doc_audit.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 25,
+          "source_group": "tests",
+          "text": "\"scripts/docs/sentence_doc_audit.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/sync_chembl_matrix_structural_policy.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 26,
+          "source_group": "tests",
+          "text": "\"scripts/docs/sync_chembl_matrix_structural_policy.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/sync_repo_identity.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 27,
+          "source_group": "tests",
+          "text": "\"scripts/docs/sync_repo_identity.py\","
+        }
+      ]
     },
     {
       "path": "scripts/docs/verify_docs.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "line": 28,
+          "source_group": "tests",
+          "text": "\"scripts/docs/verify_docs.py\","
+        }
+      ]
     },
     {
       "path": "scripts/engineering/baselines/__main__.py",
@@ -5922,37 +6141,37 @@
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 679,
+          "line": 678,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'"
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 693,
+          "line": 692,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'"
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 945,
+          "line": 944,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 954,
+          "line": 953,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 970,
+          "line": 969,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         },
         {
           "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 979,
+          "line": 978,
           "source_group": "scripts",
           "text": "- 'entrypoint.sh'\"\"\""
         }
@@ -6639,7 +6858,7 @@
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 40,
+          "line": 28,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/run_tests.ps1\").read_text("
         }
@@ -6723,7 +6942,7 @@
         },
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 31,
+          "line": 19,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/run_tests.sh\").read_text("
         }
@@ -6744,7 +6963,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 229,
+          "line": 219,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/setup_copilot_codex_mcp.ps1\").read_text("
         }
@@ -6822,7 +7041,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 220,
+          "line": 210,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/setup_copilot_codex_mcp.sh\").read_text("
         }
@@ -6951,7 +7170,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_run_tests_consolidation.py",
-          "line": 49,
+          "line": 37,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/test_changed.sh\").read_text("
         }
@@ -7446,7 +7665,7 @@
         },
         {
           "path": "tests/architecture/test_naming_package_consistency_gate.py",
-          "line": 51,
+          "line": 46,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py --check\" in workflow"
         }
@@ -8498,7 +8717,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_deprecation_backlog.py",
-          "line": 25,
+          "line": 18,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/check_scripts_inventory.py\","
         }
@@ -9559,9 +9778,9 @@
       "references": [
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 20,
+          "line": 15,
           "source_group": "tests",
-          "text": "[\"bash\", \"scripts/ops/launchers/codex/setup_agents.sh\", \"--dry-run\"],"
+          "text": "\"scripts/ops/launchers/codex/setup_agents.sh\","
         }
       ]
     },
@@ -9616,7 +9835,7 @@
         },
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 61,
+          "line": 51,
           "source_group": "tests",
           "text": "content = (root / \"scripts/ops/launchers/codex/setup_plugins.sh\").read_text("
         }
@@ -9631,9 +9850,9 @@
       "references": [
         {
           "path": "tests/architecture/test_ops_ai_setup_scripts.py",
-          "line": 43,
+          "line": 35,
           "source_group": "tests",
-          "text": "[\"bash\", \"scripts/ops/launchers/codex/setup_skills.sh\", \"--dry-run\"],"
+          "text": "\"scripts/ops/launchers/codex/setup_skills.sh\","
         }
       ]
     },
@@ -11000,13 +11219,13 @@
         },
         {
           "path": "tests/architecture/test_publication_type_codegen_contract.py",
-          "line": 21,
+          "line": 20,
           "source_group": "tests",
           "text": "/ \"generate_publication_type_classification_artifacts.py\""
         },
         {
           "path": "tests/architecture/test_publication_type_codegen_contract.py",
-          "line": 69,
+          "line": 61,
           "source_group": "tests",
           "text": "\"Run: python scripts/schema/generate_publication_type_classification_artifacts.py\""
         }
