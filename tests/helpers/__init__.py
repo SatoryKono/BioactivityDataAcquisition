@@ -7,7 +7,14 @@ from tests.helpers.artifact_generators import (
     assert_repeated_core_output_bytes_are_stable,
     assert_written_core_artifacts_are_deterministic,
 )
-from tests.helpers.cli_process import assert_cli_succeeded, run_python_cli
+from tests.helpers.cli_process import (
+    assert_cli_succeeded,
+    assert_process_succeeded,
+    repo_root,
+    run_python_cli,
+    run_repo_command,
+    run_repo_python,
+)
 from tests.helpers.clock import FixedClock, StepClock
 
 __all__ = [
@@ -19,5 +26,9 @@ __all__ = [
     "assert_repeated_core_output_bytes_are_stable",
     "assert_written_core_artifacts_are_deterministic",
     "assert_cli_succeeded",
+    "assert_process_succeeded",
+    "repo_root",
     "run_python_cli",
+    "run_repo_command",
+    "run_repo_python",
 ]

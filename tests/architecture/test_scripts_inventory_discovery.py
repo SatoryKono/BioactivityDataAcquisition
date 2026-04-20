@@ -4,18 +4,14 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import os
-import subprocess
 import sys
 from pathlib import Path
 
-
-def _project_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+from tests.helpers import repo_root, run_repo_python
 
 
 def _load_inventory_module():
-    root = _project_root()
+    root = repo_root()
     module_path = (
         root / "scripts" / "engineering" / "repo" / "check_scripts_inventory.py"
     )
@@ -33,7 +29,7 @@ def _load_inventory_module():
 def test_iter_scripts_includes_non_python_entrypoints_in_current_scope() -> None:
     """Inventory must cover non-Python utility entrypoints currently present in scope."""
     module = _load_inventory_module()
-    root = _project_root()
+    root = repo_root()
 
     svg2png_path = "/".join(["scripts", "diagrams", "svg2png.mjs"])
 
@@ -48,7 +44,7 @@ def test_iter_scripts_includes_non_python_entrypoints_in_current_scope() -> None
 def test_discover_refs_normalizes_windows_path_separators() -> None:
     """Windows-style script refs should resolve through path aliases."""
     module = _load_inventory_module()
-    root = _project_root()
+    root = repo_root()
     targets = [
         root / "scripts" / "ops" / "launchers" / "codex" / "codex-exec.bat",
         root / "scripts" / "ops" / "launchers" / "codex" / "codex.bat",
@@ -124,21 +120,12 @@ def test_agent_usage_includes_codex_agents_and_skills() -> None:
 
 def test_inventory_json_output_is_ascii_safe_for_windows_codepages() -> None:
     """--json should not fail when stdout encoding cannot represent Unicode text."""
-    root = _project_root()
-    env = dict(os.environ)
-    env["PYTHONIOENCODING"] = "cp1251"
-
-    result = subprocess.run(
-        [
-            sys.executable,
-            "scripts/engineering/repo/check_scripts_inventory.py",
-            "--json",
-        ],
+    root = repo_root()
+    result = run_repo_python(
+        "scripts/engineering/repo/check_scripts_inventory.py",
+        "--json",
         cwd=root,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
+        env={"PYTHONIOENCODING": "cp1251"},
     )
 
     assert result.returncode == 0, result.stderr or result.stdout

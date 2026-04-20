@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import hashlib
-import subprocess
-import sys
 from pathlib import Path
 
 import yaml
+from tests.helpers import run_repo_python
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CSV_PATH = PROJECT_ROOT / "configs" / "enums" / "publication_type_classification.csv"
@@ -53,14 +52,7 @@ def test_publication_type_codegen_manifest_hashes() -> None:
 
 def test_publication_type_codegen_is_deterministic() -> None:
     """`--check` mode must pass (no stale generated artifacts)."""
-
-    result = subprocess.run(
-        [sys.executable, str(GEN_SCRIPT), "--check"],
-        cwd=PROJECT_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    result = run_repo_python(str(GEN_SCRIPT), "--check", cwd=PROJECT_ROOT)
 
     assert result.returncode == 0, (
         "Publication type generated artifacts are stale.\n"

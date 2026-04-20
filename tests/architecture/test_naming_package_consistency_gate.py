@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
+
+from tests.helpers import run_repo_python
 
 
 def test_consistency_gate_script_runs_clean_in_check_mode() -> None:
@@ -21,12 +21,7 @@ def test_consistency_gate_script_runs_clean_in_check_mode() -> None:
         "scripts/engineering/qa/check_naming_package_consistency.py must exist"
     )
 
-    result = subprocess.run(
-        [sys.executable, str(script), "--check"],
-        capture_output=True,
-        text=True,
-        cwd=repo_root,
-    )
+    result = run_repo_python(str(script), "--check", cwd=repo_root)
     if result.returncode == 0:
         return
 
