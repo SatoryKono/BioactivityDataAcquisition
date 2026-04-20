@@ -230,35 +230,35 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if ! [[ "$SCALE" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+if ! [[ "$SCALE" =~ ^\d+([.]\d+)?$ ]]; then
   log_err "--scale must be a positive number (got: $SCALE)"
   exit 1
 fi
-if ! [[ "$LARGE_SCALE" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+if ! [[ "$LARGE_SCALE" =~ ^\d+([.]\d+)?$ ]]; then
   log_err "--large-scale must be a positive number (got: $LARGE_SCALE)"
   exit 1
 fi
-if ! [[ "$LARGE_THRESHOLD" =~ ^[0-9]+$ ]]; then
+if ! [[ "$LARGE_THRESHOLD" =~ ^\d+$ ]]; then
   log_err "--large-threshold must be a non-negative integer (got: $LARGE_THRESHOLD)"
   exit 1
 fi
-if ! [[ "$PNG_DPI" =~ ^[0-9]+$ ]]; then
+if ! [[ "$PNG_DPI" =~ ^\d+$ ]]; then
   log_err "--png-dpi must be a non-negative integer (got: $PNG_DPI)"
   exit 1
 fi
-if ! [[ "$LARGE_PNG_DPI" =~ ^[0-9]+$ ]]; then
+if ! [[ "$LARGE_PNG_DPI" =~ ^\d+$ ]]; then
   log_err "--large-png-dpi must be a non-negative integer (got: $LARGE_PNG_DPI)"
   exit 1
 fi
-if ! [[ "$WIDTH" =~ ^[0-9]+$ ]]; then
+if ! [[ "$WIDTH" =~ ^\d+$ ]]; then
   log_err "--width must be a non-negative integer (got: $WIDTH)"
   exit 1
 fi
-if ! [[ "$HEIGHT" =~ ^[0-9]+$ ]]; then
+if ! [[ "$HEIGHT" =~ ^\d+$ ]]; then
   log_err "--height must be a non-negative integer (got: $HEIGHT)"
   exit 1
 fi
-if ! [[ "$JOBS" =~ ^[0-9]+$ ]] || [[ "$JOBS" -lt 1 ]]; then
+if ! [[ "$JOBS" =~ ^\d+$ ]] || [[ "$JOBS" -lt 1 ]]; then
   log_err "--jobs must be an integer >= 1 (got: $JOBS)"
   exit 1
 fi

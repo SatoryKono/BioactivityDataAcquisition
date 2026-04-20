@@ -211,12 +211,18 @@ async def _write_dual_targets(
     assert writer._contract_rollout_policy is not None  # guarded by caller
 
     active_result: SilverWriteResult | None = None
+    write_versions = writer._contract_rollout_policy.write_versions
     write_targets = resolve_write_targets(
         invocation.table_name,
-        writer._contract_rollout_policy.write_versions,
+        write_versions,
     )
+    
+    # Guard against empty write_versions to avoid zip() ValueError
+    if not write_versions:
+        raise ValueError("Contract rollout policy must specify at least one write version")
+    
     for contract_version, physical_table in zip(
-        writer._contract_rollout_policy.write_versions,
+        write_versions,
         write_targets,
         strict=True,
     ):
