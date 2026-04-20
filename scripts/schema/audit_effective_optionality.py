@@ -150,6 +150,22 @@ def _apply_required_filter_sources(
             expected.setdefault(field, set()).add("silver_required_fields")
 
 
+def _quality_validation_source(item: dict[str, Any]) -> OptionalitySource | None:
+    validation_type = item.get("type")
+    if validation_type == "required":
+        return "dq_required_validation"
+    if validation_type == "not_null":
+        return "dq_not_null_validation"
+    return None
+
+
+def _optional_field_name(item: dict[str, Any]) -> str | None:
+    field = item.get("field")
+    if not isinstance(field, str) or is_framework_managed_field(field):
+        return None
+    return field
+
+
 def _apply_quality_validation_sources(
     config: dict[str, Any],
     *,
@@ -161,24 +177,18 @@ def _apply_quality_validation_sources(
     for item in quality.get("entity_field_validations") or []:
         if not isinstance(item, dict):
             continue
-        field = item.get("field")
-        if not isinstance(field, str) or is_framework_managed_field(field):
+        field = _optional_field_name(item)
+        if field is None:
             continue
-        validation_type = item.get("type")
-        if validation_type == "required":
-            expected.setdefault(field, set()).add("dq_required_validation")
-        elif validation_type == "not_null":
-            expected.setdefault(field, set()).add("dq_not_null_validation")
+        source = _quality_validation_source(item)
+        if source is not None:
+            expected.setdefault(field, set()).add(source)
 
     for item in quality.get("key_nullability") or []:
         if not isinstance(item, dict):
             continue
-        field = item.get("field")
-        if (
-            isinstance(field, str)
-            and not is_framework_managed_field(field)
-            and item.get("nullable") is False
-        ):
+        field = _optional_field_name(item)
+        if field is not None and item.get("nullable") is False:
             expected.setdefault(field, set()).add("dq_key_nullability")
 
 

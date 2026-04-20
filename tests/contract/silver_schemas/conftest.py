@@ -85,12 +85,75 @@ REPRESENTATIVE_SILVER_SCHEMAS = (
     "pubmed_publication",
     "uniprot_protein",
 )
+ALLOWED_ATTR_DIFFS = {
+    "_run_id": {"dtype"},
+    "_source_batch_id": {"dtype"},
+    "molecule_id": {"dtype"},
+    "publication_year": {"required"},
+}
+ALLOWED_CHECK_DIFFS = {"publication_year", "standard_relation", "usan_year"}
 
 
 @pytest.fixture
 def snapshots_dir() -> Path:
     """Get snapshots directory path."""
     return Path(__file__).parent / "snapshots"
+
+
+def _regex_value_for_check(check: Any) -> object | None:
+    for attr_name in ("regex_pattern", "pattern", "regex"):
+        if hasattr(check, attr_name):
+            return getattr(check, attr_name)
+
+    stats = getattr(check, "statistics", None)
+    if isinstance(stats, dict):
+        return stats.get("pattern") or stats.get("regex")
+    return None
+
+
+def _check_type_for_check(check: Any) -> str | None:
+    if not hasattr(check, "_check_fn"):
+        return None
+
+    check_fn_str = str(check._check_fn)
+    check_type_markers = (
+        ("ge", ("ge", "greater_than_or_equal")),
+        ("le", ("le", "less_than_or_equal")),
+        ("gt", ("gt",)),
+        ("lt", ("lt",)),
+        ("isin", ("isin",)),
+    )
+    for check_type, markers in check_type_markers:
+        if any(marker in check_fn_str for marker in markers):
+            return check_type
+    return None
+
+
+def _check_metadata(check: Any) -> dict[str, Any]:
+    check_meta = {"name": check.name or check.__class__.__name__}
+    regex_value = _regex_value_for_check(check)
+    if regex_value is not None:
+        check_meta["regex"] = str(regex_value)
+
+    check_type = _check_type_for_check(check)
+    if check_type is not None:
+        check_meta["type"] = check_type
+    return check_meta
+
+
+def _field_metadata(col_name: str, col_schema: Any) -> dict[str, Any]:
+    field_meta = {
+        "dtype": _normalize_dtype_name(col_name, str(col_schema.dtype)),
+        "nullable": col_schema.nullable,
+        "unique": col_schema.unique,
+        "coerce": col_schema.coerce,
+        "required": col_schema.required,
+        "description": col_schema.description or "",
+        "checks": [],
+    }
+    if col_schema.checks:
+        field_meta["checks"] = [_check_metadata(check) for check in col_schema.checks]
+    return field_meta
 
 
 def extract_field_metadata(schema_class: type[pa.DataFrameModel]) -> dict[str, Any]:
@@ -100,63 +163,11 @@ def extract_field_metadata(schema_class: type[pa.DataFrameModel]) -> dict[str, A
         Dict with field name as key, metadata dict as value.
         Metadata includes: dtype, nullable, checks (regex, range, enum).
     """
-    fields = {}
-
-    # Get schema columns
     schema_model = schema_class.to_schema()
-
-    for col_name, col_schema in schema_model.columns.items():
-        field_meta = {
-            "dtype": _normalize_dtype_name(col_name, str(col_schema.dtype)),
-            "nullable": col_schema.nullable,
-            "unique": col_schema.unique,
-            "coerce": col_schema.coerce,
-            "required": col_schema.required,
-            "description": col_schema.description or "",
-            "checks": [],
-        }
-
-        # Extract validation checks
-        if col_schema.checks:
-            for check in col_schema.checks:
-                check_meta = {
-                    "name": check.name or check.__class__.__name__,
-                }
-
-                # Extract check parameters
-                regex_value = None
-                if hasattr(check, "regex_pattern"):
-                    regex_value = check.regex_pattern
-                elif hasattr(check, "pattern"):
-                    regex_value = check.pattern
-                elif hasattr(check, "regex"):
-                    regex_value = check.regex
-                elif hasattr(check, "statistics"):
-                    stats = getattr(check, "statistics", None)
-                    if isinstance(stats, dict):
-                        regex_value = stats.get("pattern") or stats.get("regex")
-
-                if regex_value is not None:
-                    check_meta["regex"] = str(regex_value)
-                if hasattr(check, "_check_fn"):
-                    # Extract range checks (ge, le, gt, lt)
-                    check_fn_str = str(check._check_fn)
-                    if "ge" in check_fn_str or "greater_than_or_equal" in check_fn_str:
-                        check_meta["type"] = "ge"
-                    elif "le" in check_fn_str or "less_than_or_equal" in check_fn_str:
-                        check_meta["type"] = "le"
-                    elif "gt" in check_fn_str:
-                        check_meta["type"] = "gt"
-                    elif "lt" in check_fn_str:
-                        check_meta["type"] = "lt"
-                    elif "isin" in check_fn_str:
-                        check_meta["type"] = "isin"
-
-                field_meta["checks"].append(check_meta)
-
-        fields[col_name] = field_meta
-
-    return fields
+    return {
+        col_name: _field_metadata(col_name, col_schema)
+        for col_name, col_schema in schema_model.columns.items()
+    }
 
 
 def _normalize_dtype_name(field_name: str, dtype_name: str) -> str:
@@ -205,38 +216,28 @@ def load_snapshot(schema_name: str, snapshots_dir: Path) -> dict[str, Any] | Non
         return json.load(f)
 
 
-def assert_schema_matches_snapshot(
-    schema_name: str,
+def _update_or_create_snapshot(
     *,
+    schema_name: str,
+    current_metadata: dict[str, Any],
+    snapshot: dict[str, Any] | None,
     snapshots_dir: Path,
-    update_snapshots: bool = False,
-) -> None:
-    """Assert that current schema metadata matches the stored snapshot.
-
-    This helper centralizes schema drift diagnostics so the full suite and the
-    representative CI subset share exactly the same matching logic.
-    """
-    schema_class = SILVER_SCHEMAS[schema_name]
-
-    current_metadata = extract_field_metadata(schema_class)
-    snapshot = load_snapshot(schema_name, snapshots_dir)
-
+    update_snapshots: bool,
+) -> bool:
     if snapshot is None or update_snapshots:
         save_snapshot(schema_name, current_metadata, snapshots_dir)
         if snapshot is None:
             pytest.skip(f"Created initial snapshot for {schema_name}")
         pytest.skip(f"Updated snapshot for {schema_name} (UPDATE_SNAPSHOTS=1)")
+    return False
 
-    current_fields = set(current_metadata.keys())
-    snapshot_fields = set(snapshot.keys())
-    allowed_attr_diffs = {
-        "_run_id": {"dtype"},
-        "_source_batch_id": {"dtype"},
-        "molecule_id": {"dtype"},
-        "publication_year": {"required"},
-    }
-    allowed_check_diffs = {"publication_year", "standard_relation", "usan_year"}
 
+def _assert_matching_field_sets(
+    schema_name: str,
+    *,
+    current_fields: set[str],
+    snapshot_fields: set[str],
+) -> None:
     added_fields = current_fields - snapshot_fields
     if added_fields:
         pytest.fail(
@@ -252,37 +253,94 @@ def assert_schema_matches_snapshot(
             "Then run: UPDATE_SNAPSHOTS=1 pytest ..."
         )
 
+
+def _assert_field_attributes_match(
+    schema_name: str,
+    field_name: str,
+    *,
+    current_field: dict[str, Any],
+    snapshot_field: dict[str, Any],
+) -> None:
+    for attr in ["dtype", "nullable", "required"]:
+        if field_name in ALLOWED_ATTR_DIFFS and attr in ALLOWED_ATTR_DIFFS[field_name]:
+            continue
+        if current_field.get(attr) != snapshot_field.get(attr):
+            pytest.fail(
+                f"{schema_name}.{field_name}: {attr} changed\n"
+                f"  Expected: {snapshot_field.get(attr)}\n"
+                f"  Got:      {current_field.get(attr)}\n"
+                "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
+            )
+
+
+def _assert_field_checks_match(
+    schema_name: str,
+    field_name: str,
+    *,
+    current_field: dict[str, Any],
+    snapshot_field: dict[str, Any],
+) -> None:
+    if field_name in ALLOWED_CHECK_DIFFS:
+        return
+
+    current_checks = {c["name"] for c in current_field.get("checks", [])}
+    snapshot_checks = {c["name"] for c in snapshot_field.get("checks", [])}
+
+    added_checks = current_checks - snapshot_checks
+    removed_checks = snapshot_checks - current_checks
+    if added_checks or removed_checks:
+        pytest.fail(
+            f"{schema_name}.{field_name}: Validation checks changed\n"
+            f"  Added:   {sorted(added_checks) if added_checks else 'none'}\n"
+            f"  Removed: {sorted(removed_checks) if removed_checks else 'none'}\n"
+            "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
+        )
+
+
+def assert_schema_matches_snapshot(
+    schema_name: str,
+    *,
+    snapshots_dir: Path,
+    update_snapshots: bool = False,
+) -> None:
+    """Assert that current schema metadata matches the stored snapshot.
+
+    This helper centralizes schema drift diagnostics so the full suite and the
+    representative CI subset share exactly the same matching logic.
+    """
+    schema_class = SILVER_SCHEMAS[schema_name]
+
+    current_metadata = extract_field_metadata(schema_class)
+    snapshot = load_snapshot(schema_name, snapshots_dir)
+    _update_or_create_snapshot(
+        schema_name=schema_name,
+        current_metadata=current_metadata,
+        snapshot=snapshot,
+        snapshots_dir=snapshots_dir,
+        update_snapshots=update_snapshots,
+    )
+    assert snapshot is not None
+
+    current_fields = set(current_metadata.keys())
+    snapshot_fields = set(snapshot.keys())
+    _assert_matching_field_sets(
+        schema_name,
+        current_fields=current_fields,
+        snapshot_fields=snapshot_fields,
+    )
+
     for field_name in current_fields:
         current_field = current_metadata[field_name]
         snapshot_field = snapshot[field_name]
-
-        for attr in ["dtype", "nullable", "required"]:
-            if (
-                field_name in allowed_attr_diffs
-                and attr in allowed_attr_diffs[field_name]
-            ):
-                continue
-            if current_field.get(attr) != snapshot_field.get(attr):
-                pytest.fail(
-                    f"{schema_name}.{field_name}: {attr} changed\n"
-                    f"  Expected: {snapshot_field.get(attr)}\n"
-                    f"  Got:      {current_field.get(attr)}\n"
-                    "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
-                )
-
-        if field_name in allowed_check_diffs:
-            continue
-
-        current_checks = {c["name"] for c in current_field.get("checks", [])}
-        snapshot_checks = {c["name"] for c in snapshot_field.get("checks", [])}
-
-        added_checks = current_checks - snapshot_checks
-        removed_checks = snapshot_checks - current_checks
-
-        if added_checks or removed_checks:
-            pytest.fail(
-                f"{schema_name}.{field_name}: Validation checks changed\n"
-                f"  Added:   {sorted(added_checks) if added_checks else 'none'}\n"
-                f"  Removed: {sorted(removed_checks) if removed_checks else 'none'}\n"
-                "If intentional, run: UPDATE_SNAPSHOTS=1 pytest ..."
-            )
+        _assert_field_attributes_match(
+            schema_name,
+            field_name,
+            current_field=current_field,
+            snapshot_field=snapshot_field,
+        )
+        _assert_field_checks_match(
+            schema_name,
+            field_name,
+            current_field=current_field,
+            snapshot_field=snapshot_field,
+        )
