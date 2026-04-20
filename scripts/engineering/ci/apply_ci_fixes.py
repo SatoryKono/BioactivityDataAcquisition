@@ -1233,7 +1233,7 @@ def apply_hf_b(api: GitHubAPI) -> None:
     else:
         api.create_branch(branch, sha)
 
-    path = ".github/workflows/security.yml"
+    path = SECURITY_WORKFLOW_PATH
     read_branch = BASE_BRANCH if api.dry_run else branch
     content, file_sha = api.get_file(path, read_branch)
 
@@ -1599,7 +1599,7 @@ def apply_hf_pip_skip_editable(api: GitHubAPI) -> None:
     """HF-pip-skip-editable: add --skip-editable to pip-audit in security.yml."""
     print("=== HF-pip-skip-editable: Fix pip-audit — add --skip-editable ===")
     branch = BRANCHES["hf-pip-skip-editable"]
-    path = ".github/workflows/security.yml"
+    path = SECURITY_WORKFLOW_PATH
     read_branch = _prepare_fix_branch(api, branch)
     content, file_sha = api.get_file(path, read_branch)
 
@@ -1749,18 +1749,18 @@ def apply_hf_checkout_hygiene(api: GitHubAPI) -> None:
 
     for path in files_to_fix:
         content, file_sha = api.get_file(path, read_branch)
-        if "actions/checkout@v6" not in content:
+        if CHECKOUT_V6 not in content:
             print(f"  INFO: {path} does not contain checkout@v6 — skipping")
             continue
-        patched = content.replace("actions/checkout@v6", "actions/checkout@v4")
+        patched = content.replace(CHECKOUT_V6, CHECKOUT_V4)
         print(f"  Patching {path}: checkout@v6 → @v4")
         api.update_file(
             path=path,
             content=patched,
             sha=file_sha,
             message=(
-                f"fix(ci): replace actions/checkout@v6 with @v4 in {path.split('/')[-1]}\n\n"
-                "actions/checkout@v6 does not exist; @v4 is the current stable major.\n\n"
+                f"fix(ci): replace {CHECKOUT_V6} with {CHECKOUT_V4} in {path.split('/')[-1]}\n\n"
+                f"{CHECKOUT_V6} does not exist; {CHECKOUT_V4} is the current stable major.\n\n"
                 "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
             ),
             branch=branch,

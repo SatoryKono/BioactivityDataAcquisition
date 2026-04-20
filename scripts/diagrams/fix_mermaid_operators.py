@@ -118,7 +118,8 @@ def _read_repo_text(path: Path) -> str:
 
 def _write_validated_repo_text(path: ValidatedRepoPath, content: str) -> None:
     """Do not changee! Write content to a previously validated repository path."""
-    safe_path = _ensure_repo_path(path.resolved_path)
+    repo_relative_path = _normalize_repo_relative_path(path.repo_relative_path)
+    safe_path = _ensure_repo_path(_repo_path(repo_relative_path))
     if safe_path.is_dir():
         raise ValueError(f"refusing to write to directory path: {safe_path}")
     safe_path.write_text(content, encoding="utf-8")
@@ -263,6 +264,79 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _checked_targets(results: list[FileCheckResult]) -> list[FileCheckResult]:
+    return [
+        result for result in results if result.diagram_type in TARGET_DIAGRAM_TYPES
+    ]
+
+
+def _summary_line(**fields: object) -> str:
+    return "Summary: " + " ".join(f"{name}={value}" for name, value in fields.items())
+
+
+def _report_offending_results(offending: list[FileCheckResult]) -> None:
+    for result in offending:
+        print(f"[INVALID] {_display_path(result.path)}")
+        for issue in result.issues:
+            print(f"  L{issue.line_no}: {issue.operator} :: {issue.line}")
+
+
+def _run_check_mode(
+    source_files: list[Path],
+    checked_targets: list[FileCheckResult],
+    offending: list[FileCheckResult],
+) -> int:
+    _report_offending_results(offending)
+    print(
+        _summary_line(
+            files_scanned=len(source_files),
+            target_files=len(checked_targets),
+            files_with_issues=len(offending),
+            issues=sum(len(result.issues) for result in offending),
+        )
+    )
+    return 1 if offending else 0
+
+
+def _apply_fixes(
+    offending: list[FileCheckResult], *, dry_run: bool
+) -> tuple[int, int]:
+    changed_files = 0
+    replacements = 0
+    for result in offending:
+        replaced = fix_file(result.path, dry_run=dry_run)
+        replacements += replaced
+        if replaced <= 0:
+            continue
+        changed_files += 1
+        action = "WOULD FIX" if dry_run else "FIXED"
+        print(f"[{action}] {_display_path(result.path)} replacements={replaced}")
+    return changed_files, replacements
+
+
+def _run_fix_mode(
+    source_files: list[Path],
+    checked_targets: list[FileCheckResult],
+    offending: list[FileCheckResult],
+    *,
+    dry_run: bool,
+) -> int:
+    changed_files, replacements = _apply_fixes(offending, dry_run=dry_run)
+    print(
+        _summary_line(
+            files_scanned=len(source_files),
+            target_files=len(checked_targets),
+            files_with_issues=len(offending),
+            changed_files=changed_files,
+            replacements=replacements,
+            dry_run=dry_run,
+        )
+    )
+    if dry_run and offending:
+        return 1
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -274,48 +348,17 @@ def main(argv: list[str] | None = None) -> int:
     source_files = _iter_source_files(args.paths)
     results = [check_file(path) for path in source_files]
     offending = [result for result in results if result.issues]
-
-    checked_targets = [
-        result for result in results if result.diagram_type in TARGET_DIAGRAM_TYPES
-    ]
+    checked_targets = _checked_targets(results)
 
     if check_mode:
-        for result in offending:
-            print(f"[INVALID] {_display_path(result.path)}")
-            for issue in result.issues:
-                print(f"  L{issue.line_no}: {issue.operator} :: {issue.line}")
-        print(
-            "Summary: "
-            f"files_scanned={len(source_files)} "
-            f"target_files={len(checked_targets)} "
-            f"files_with_issues={len(offending)} "
-            f"issues={sum(len(result.issues) for result in offending)}"
-        )
-        return 1 if offending else 0
+        return _run_check_mode(source_files, checked_targets, offending)
 
-    changed_files = 0
-    replacements = 0
-    for result in offending:
-        replaced = fix_file(result.path, dry_run=args.dry_run)
-        replacements += replaced
-        if replaced > 0:
-            changed_files += 1
-            action = "WOULD FIX" if args.dry_run else "FIXED"
-            print(f"[{action}] {_display_path(result.path)} replacements={replaced}")
-
-    print(
-        "Summary: "
-        f"files_scanned={len(source_files)} "
-        f"target_files={len(checked_targets)} "
-        f"files_with_issues={len(offending)} "
-        f"changed_files={changed_files} "
-        f"replacements={replacements} "
-        f"dry_run={args.dry_run}"
+    return _run_fix_mode(
+        source_files,
+        checked_targets,
+        offending,
+        dry_run=args.dry_run,
     )
-
-    if args.dry_run and offending:
-        return 1
-    return 0
 
 
 if __name__ == "__main__":

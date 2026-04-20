@@ -12,9 +12,12 @@ from pathlib import Path
 from typing import Any
 
 if __package__ in {None, ""}:
-    repo_root = Path(__file__).resolve().parents[3]
-    sys.path.insert(0, str(repo_root))
-    sys.path.insert(0, str(repo_root / "src"))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _bootstrap import ensure_repo_imports
+else:
+    from scripts.docs.matrix._bootstrap import ensure_repo_imports
+
+ensure_repo_imports(include_src=True)
 
 from bioetl.domain.normalization.profiles import (
     CHEMBL_ACTIVITY_PROFILE,

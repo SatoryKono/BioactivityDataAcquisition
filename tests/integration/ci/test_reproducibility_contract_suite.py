@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -62,6 +62,17 @@ pytestmark = pytest.mark.integration
 
 _VALID_CONFIG_HASH = "a" * 64
 _PUBLISHED_SUPPORTED_FAMILIES = tuple(published_supported_reproducibility_families())
+
+
+@dataclass(frozen=True)
+class _ManifestIdentity:
+    pipeline_name: str = "chembl_activity"
+    provider: str = "chembl"
+    entity: str = "activity"
+    contract_ref: str = "chembl.activity"
+
+
+_DEFAULT_MANIFEST_IDENTITY = _ManifestIdentity()
 
 
 class _InMemoryRunManifestStore(RunManifestPort):
@@ -132,14 +143,13 @@ def _make_manifest(
     replay_of_manifest_id: str | None = None,
     required_persistence_profile: str = "degraded_observable",
     input_snapshots: tuple[RunInputSnapshotRef, ...] = (),
-    pipeline_name: str = "chembl_activity",
-    provider: str = "chembl",
-    entity: str = "activity",
-    contract_ref: str = "chembl.activity",
+    identity: _ManifestIdentity = _DEFAULT_MANIFEST_IDENTITY,
     exact_replay: bool = True,
     execution_context: str = "ordinary",
 ) -> RunManifest:
-    is_composite = execution_context == "composite" or provider == "composite"
+    is_composite = (
+        execution_context == "composite" or identity.provider == "composite"
+    )
     replay_capability = (
         ReplayCapability.REBUILD_ONLY
         if is_composite or not input_snapshots
@@ -152,9 +162,9 @@ def _make_manifest(
         created_at=datetime(2025, 1, 1, tzinfo=UTC),
         run_id=run_id,
         run_type=RunType.INCREMENTAL,
-        pipeline_name=pipeline_name,
-        provider=provider,
-        entity=entity,
+        pipeline_name=identity.pipeline_name,
+        provider=identity.provider,
+        entity=identity.entity,
         launch_context={
             "limit": 25,
             "exact_replay": exact_replay,
@@ -168,7 +178,10 @@ def _make_manifest(
             "execution_context": execution_context,
             "required_persistence_profile": required_persistence_profile,
         },
-        resolved_config={"provider": provider, "entity_type": entity},
+        resolved_config={
+            "provider": identity.provider,
+            "entity_type": identity.entity,
+        },
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
         replay_capability=replay_capability,
@@ -176,18 +189,18 @@ def _make_manifest(
             pipeline_version="1.0.0",
             git_commit="abc1234",
             config_hash=config_hash,
-            contract_ref=contract_ref,
+            contract_ref=identity.contract_ref,
             contract_version="1.0.0",
-            dq_policy_ref=f"{contract_ref}.dq",
+            dq_policy_ref=f"{identity.contract_ref}.dq",
             rule_bundle_version="dq-rules.v1",
             dq_contract_compatibility_hash="compat-hash-1",
             effective_config_artifact_id="eca-123",
         ),
         source_refs=(
             RunSourceRef(
-                provider=provider,
-                entity=entity,
-                pipeline_name=pipeline_name,
+                provider=identity.provider,
+                entity=identity.entity,
+                pipeline_name=identity.pipeline_name,
                 query="fixture://sample",
                 input_snapshots=input_snapshots,
             ),
@@ -619,10 +632,12 @@ def test_reproducibility_contract_forensic_grade_profile_is_attained(
                 captured_at=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             ),
         ),
-        pipeline_name=pipeline_name,
-        provider=provider,
-        entity=entity,
-        contract_ref=family,
+        identity=_ManifestIdentity(
+            pipeline_name=pipeline_name,
+            provider=provider,
+            entity=entity,
+            contract_ref=family,
+        ),
     )
     manifest_store.save(manifest)
     ledger_store.append(
@@ -737,11 +752,13 @@ def test_reproducibility_contract_composite_replay_ready_profile_is_fail_closed(
         execution_fingerprint="fp-composite-replay-ready",
         required_persistence_profile="replay_ready",
         input_snapshots=(),
+        identity=_ManifestIdentity(
+            pipeline_name="publications",
+            provider="composite",
+            entity="publications",
+            contract_ref="composite.publications",
+        ),
         exact_replay=False,
-        pipeline_name="publications",
-        provider="composite",
-        entity="publications",
-        contract_ref="composite.publications",
         execution_context="composite",
     )
     manifest_store.save(manifest)
@@ -790,10 +807,12 @@ def test_reproducibility_contract_forensic_grade_is_blocked_outside_supported_li
                 captured_at=datetime(2025, 1, 1, 0, 0, tzinfo=UTC),
             ),
         ),
-        pipeline_name="openalex_works",
-        provider="openalex",
-        entity="works",
-        contract_ref="openalex.works",
+        identity=_ManifestIdentity(
+            pipeline_name="openalex_works",
+            provider="openalex",
+            entity="works",
+            contract_ref="openalex.works",
+        ),
     )
     manifest_store.save(manifest)
     ledger_store.append(
@@ -876,10 +895,10 @@ def test_reproducibility_contract_silver_batch_dedup_is_order_insensitive() -> N
         {"id": "1", "value": "loser", "content_hash": "z-hash"},
     ]
     reverse = list(reversed(forward))
+    expected = [{"id": "1", "value": "winner", "content_hash": "a-hash"}]
 
-    assert _deduplicate_by_primary_keys_impl(forward, ["id"]) == [
-        {"id": "1", "value": "winner", "content_hash": "a-hash"}
-    ]
+    assert _deduplicate_by_primary_keys_impl(forward, ["id"]) == expected
+    assert _deduplicate_by_primary_keys_impl(reverse, ["id"]) == expected
 
 
 def test_reproducibility_contract_composite_rows_exclude_runtime_anchors() -> None:
