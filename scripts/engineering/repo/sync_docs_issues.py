@@ -149,6 +149,89 @@ def _resolve_retry_delay_seconds(
     return DEFAULT_RETRY_DELAY_SECONDS * attempt
 
 
+def _request_headers(token: str, payload: dict[str, object] | None) -> dict[str, str]:
+    """Build GitHub API headers for a request."""
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "User-Agent": "bioetl-docs-sync-issue-updater",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    if payload is not None:
+        headers["Content-Type"] = "application/json"
+    return headers
+
+
+def _request_body(payload: dict[str, object] | None) -> bytes | None:
+    """Encode a GitHub API payload when present."""
+    return None if payload is None else json.dumps(payload).encode("utf-8")
+
+
+def _decode_response_body(response: Any) -> Any:
+    """Decode JSON response bodies, returning None for empty payloads."""
+    charset = response.headers.get_content_charset("utf-8")
+    raw = response.read().decode(charset)
+    return json.loads(raw) if raw else None
+
+
+def _http_error_detail(exc: urllib.error.HTTPError) -> str:
+    """Extract a stable error detail string from an HTTPError."""
+    charset = exc.headers.get_content_charset("utf-8")
+    raw = exc.read().decode(charset)
+    try:
+        parsed = json.loads(raw)
+        return json.dumps(parsed, ensure_ascii=True)
+    except json.JSONDecodeError:
+        return raw
+
+
+def _retry_http_error(
+    *,
+    exc: urllib.error.HTTPError,
+    method: str,
+    url: str,
+    attempt: int,
+) -> bool:
+    """Handle retryable HTTP errors and return whether to continue looping."""
+    if exc.code not in RETRYABLE_HTTP_STATUS_CODES or attempt >= MAX_HTTP_RETRIES:
+        return False
+    delay = _resolve_retry_delay_seconds(
+        retry_after=exc.headers.get("Retry-After"),
+        attempt=attempt,
+    )
+    print(
+        f"[WARN] GitHub API {method} {url} returned {exc.code}; "
+        f"retrying in {delay:.1f}s (attempt {attempt}/{MAX_HTTP_RETRIES})",
+        file=sys.stderr,
+    )
+    time.sleep(delay)
+    return True
+
+
+def _retry_url_error(
+    *,
+    exc: urllib.error.URLError,
+    method: str,
+    url: str,
+    attempt: int,
+) -> bool:
+    """Handle retryable transport failures and return whether to continue."""
+    if attempt >= MAX_HTTP_RETRIES:
+        return False
+    delay = _resolve_retry_delay_seconds(
+        retry_after=None,
+        attempt=attempt,
+    )
+    print(
+        f"[WARN] GitHub API {method} {url} failed with network error "
+        f"{exc.reason!r}; retrying in {delay:.1f}s "
+        f"(attempt {attempt}/{MAX_HTTP_RETRIES})",
+        file=sys.stderr,
+    )
+    time.sleep(delay)
+    return True
+
+
 def _github_request(
     *,
     method: str,
@@ -156,21 +239,10 @@ def _github_request(
     token: str,
     payload: dict[str, object] | None = None,
 ) -> tuple[Any, dict[str, str]]:
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "Authorization": f"Bearer {token}",
-        "User-Agent": "bioetl-docs-sync-issue-updater",
-        "X-GitHub-Api-Version": "2022-11-28",
-    }
-    data = None
-    if payload is not None:
-        data = json.dumps(payload).encode("utf-8")
-        headers["Content-Type"] = "application/json"
-
     request = urllib.request.Request(
         url,
-        data=data,
-        headers=headers,
+        data=_request_body(payload),
+        headers=_request_headers(token, payload),
         method=method,
     )
     attempt = 0
@@ -178,47 +250,15 @@ def _github_request(
         attempt += 1
         try:
             with urllib.request.urlopen(request) as response:
-                charset = response.headers.get_content_charset("utf-8")
-                raw = response.read().decode(charset)
-                body = json.loads(raw) if raw else None
-                return body, dict(response.headers.items())
+                return _decode_response_body(response), dict(response.headers.items())
         except urllib.error.HTTPError as exc:
-            charset = exc.headers.get_content_charset("utf-8")
-            raw = exc.read().decode(charset)
-            detail = raw
-            try:
-                parsed = json.loads(raw)
-                detail = json.dumps(parsed, ensure_ascii=True)
-            except json.JSONDecodeError:
-                pass
-
-            if exc.code in RETRYABLE_HTTP_STATUS_CODES and attempt < MAX_HTTP_RETRIES:
-                delay = _resolve_retry_delay_seconds(
-                    retry_after=exc.headers.get("Retry-After"),
-                    attempt=attempt,
-                )
-                print(
-                    f"[WARN] GitHub API {method} {url} returned {exc.code}; "
-                    f"retrying in {delay:.1f}s (attempt {attempt}/{MAX_HTTP_RETRIES})",
-                    file=sys.stderr,
-                )
-                time.sleep(delay)
+            if _retry_http_error(exc=exc, method=method, url=url, attempt=attempt):
                 continue
-
-            raise RuntimeError(f"GitHub API {method} {url} failed: {detail}") from exc
+            raise RuntimeError(
+                f"GitHub API {method} {url} failed: {_http_error_detail(exc)}"
+            ) from exc
         except urllib.error.URLError as exc:
-            if attempt < MAX_HTTP_RETRIES:
-                delay = _resolve_retry_delay_seconds(
-                    retry_after=None,
-                    attempt=attempt,
-                )
-                print(
-                    f"[WARN] GitHub API {method} {url} failed with network error "
-                    f"{exc.reason!r}; retrying in {delay:.1f}s "
-                    f"(attempt {attempt}/{MAX_HTTP_RETRIES})",
-                    file=sys.stderr,
-                )
-                time.sleep(delay)
+            if _retry_url_error(exc=exc, method=method, url=url, attempt=attempt):
                 continue
             raise RuntimeError(
                 f"GitHub API {method} {url} failed with network error: {exc.reason!r}"
@@ -237,6 +277,23 @@ def _issue_comments_api_url(owner: str, repo: str, number: int) -> str:
     return f"{API_BASE}/repos/{owner}/{repo}/issues/{number}/comments"
 
 
+def _milestone_list_url(owner: str, repo: str, page: int) -> str:
+    """Build a paginated milestones API URL."""
+    query = urllib.parse.urlencode({"state": "all", "per_page": 100, "page": page})
+    return f"{_milestones_api_url(owner, repo)}?{query}"
+
+
+def _milestone_record(item: object, title: str) -> MilestoneRecord | None:
+    """Convert a milestone payload item to a MilestoneRecord when it matches."""
+    if not isinstance(item, dict) or item.get("title") != title:
+        return None
+    number = item.get("number")
+    html_url = item.get("html_url")
+    if isinstance(number, int) and isinstance(html_url, str):
+        return MilestoneRecord(number=number, title=title, url=html_url)
+    return None
+
+
 def _find_milestone(
     *,
     owner: str,
@@ -246,23 +303,17 @@ def _find_milestone(
 ) -> MilestoneRecord | None:
     page = 1
     while True:
-        query = urllib.parse.urlencode({"state": "all", "per_page": 100, "page": page})
         payload, _headers = _github_request(
             method="GET",
-            url=f"{_milestones_api_url(owner, repo)}?{query}",
+            url=_milestone_list_url(owner, repo, page),
             token=token,
         )
         if not isinstance(payload, list) or not payload:
             return None
         for item in payload:
-            if not isinstance(item, dict):
-                continue
-            if item.get("title") != title:
-                continue
-            number = item.get("number")
-            html_url = item.get("html_url")
-            if isinstance(number, int) and isinstance(html_url, str):
-                return MilestoneRecord(number=number, title=title, url=html_url)
+            record = _milestone_record(item, title)
+            if record is not None:
+                return record
         page += 1
 
 
