@@ -30,7 +30,7 @@ from bioetl.application.services.dq_report_service import (
     DQReportResult,
 )
 from tests.unit.application.core.postrun_test_support import (
-    build_test_postrun_service as _make_postrun_service,
+    build_test_postrun_service as build_test_postrun_service,
 )
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -178,7 +178,7 @@ class TestPostrunServiceDQReports:
         sample_dq_context: DQReportContext,
     ) -> None:
         """DQ reports should be generated when service is available."""
-        service = _make_postrun_service(
+        service = build_test_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
@@ -213,7 +213,7 @@ class TestPostrunServiceDQReports:
         mock_executor: MagicMock,
     ) -> None:
         """DQ reports should be skipped when no context provided."""
-        service = _make_postrun_service(
+        service = build_test_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
@@ -245,7 +245,7 @@ class TestPostrunServiceDQReports:
         sample_dq_context: DQReportContext,
     ) -> None:
         """DQ reports should be skipped when service not available."""
-        service = _make_postrun_service(
+        service = build_test_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
@@ -281,7 +281,7 @@ class TestPostrunServiceDQReports:
             side_effect=RuntimeError("Report generation failed")
         )
 
-        service = _make_postrun_service(
+        service = build_test_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,
@@ -323,7 +323,7 @@ class TestPostrunServiceDQReports:
         silver_config.enabled = True
         gold_config = None
 
-        service = _make_postrun_service(
+        service = build_test_postrun_service(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
             context=mock_context,

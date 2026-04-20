@@ -45,6 +45,7 @@ __all__ = [
     "MemoryMonitorPort",
     "MemoryStats",
     "MetricsExtractorPort",
+    "PipelineCreateWithServicesRequest",
     "PipelineDebugPort",
     "PipelineFactoryPort",
     "PipelineRegistryPort",
