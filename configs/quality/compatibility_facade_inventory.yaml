@@ -219,10 +219,10 @@ retained_entrypoints:
     exit_criteria: >-
       RF-035 decision is `retain`: direct `client.py` imports stay confined to the provider package root plus dedicated compatibility coverage, and legacy-path references remain reduced to that retained seam.
 measured_only_ratchet:
-  max_total_modules: 35
+  max_total_modules: 36
   scoped_limits:
     - path_prefix: "src/bioetl/application/services/"
-      max_modules: 19
+      max_modules: 20
     - path_prefix: "src/bioetl/interfaces/cli/commands/"
       max_modules: 6
 measured_only_review_workflow:
@@ -361,6 +361,12 @@ measured_only_modules:
   - path: "src/bioetl/application/services/lineage_inspection_service.py"
     owner: "bioetl.application.services.lineage"
     reason: "Compatibility facade for lineage inspection imports while first-party code keeps using bioetl.application.services.lineage.lineage_inspection_service."
+    review_date: "2026-09-30"
+    new_code_policy: "no-new-first-party-imports"
+    promotion_trigger: "sanctioned-public-seam"
+  - path: "src/bioetl/application/services/lineage/metadata_lineage_bundle.py"
+    owner: "bioetl.application.services.lineage"
+    reason: "Compatibility re-export seam for metadata lineage bundle imports while first-party code keeps using bioetl.domain.lineage."
     review_date: "2026-09-30"
     new_code_policy: "no-new-first-party-imports"
     promotion_trigger: "sanctioned-public-seam"

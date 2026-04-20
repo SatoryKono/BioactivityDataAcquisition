@@ -8,9 +8,9 @@
 - Curated inventory rows: `16`
 - Transition debt rows: `0`
 - Retained public entrypoints: `16`
-- Measured tracked modules: `51`
-- Measured-only modules outside curated inventory: `35`
-- Discovered docstring-tracked modules: `35`
+- Measured tracked modules: `52`
+- Measured-only modules outside curated inventory: `36`
+- Discovered docstring-tracked modules: `36`
 - Unexpected docstring-tracked modules: `0`
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
@@ -38,6 +38,7 @@
 - `src/bioetl/application/services/cli_run_orchestration_models.py`
 - `src/bioetl/application/services/cli_run_orchestration_service.py`
 - `src/bioetl/application/services/effective_config_service.py`
+- `src/bioetl/application/services/lineage/metadata_lineage_bundle.py`
 - `src/bioetl/application/services/lineage_inspection_service.py`
 - `src/bioetl/application/services/metadata_coordinator.py`
 - `src/bioetl/application/services/pipeline_run_context_service.py`
@@ -103,6 +104,7 @@
 - `src/bioetl/application/services/cli_run_orchestration_service.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for legacy CLI orchestration service imports while first-party code keeps using bioetl.application.services.execution.cli_run_orchestration_service.
 - `src/bioetl/application/services/effective_config_service.py` — owner: `bioetl.application.services.control_plane`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for effective-config service imports while first-party code keeps using bioetl.application.services.control_plane.effective_config_service.
 - `src/bioetl/application/services/lineage_inspection_service.py` — owner: `bioetl.application.services.lineage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for lineage inspection imports while first-party code keeps using bioetl.application.services.lineage.lineage_inspection_service.
+- `src/bioetl/application/services/lineage/metadata_lineage_bundle.py` — owner: `bioetl.application.services.lineage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility re-export seam for metadata lineage bundle imports while first-party code keeps using bioetl.domain.lineage.
 - `src/bioetl/application/services/metadata_coordinator.py` — owner: `bioetl.application.services.lineage`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for metadata coordinator imports while first-party code keeps using bioetl.application.services.lineage.metadata_coordinator.
 - `src/bioetl/application/services/pipeline_run_context_service.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for pipeline run-context imports while first-party code keeps using bioetl.application.services.execution.pipeline_run_context_service.
 - `src/bioetl/application/services/pipeline_run_execution_service.py` — owner: `bioetl.application.services.execution`, review: `2026-09-30`, policy: `no-new-first-party-imports`, promote on: `sanctioned-public-seam`, reason: Compatibility facade for pipeline execution service imports while first-party code keeps using bioetl.application.services.execution.pipeline_run_execution_service.
@@ -120,14 +122,14 @@
 
 ## Measured-Only Ratchet
 
-- Max measured-only modules: `35`
-- `src/bioetl/application/services/` <= `19` measured-only modules
+- Max measured-only modules: `36`
+- `src/bioetl/application/services/` <= `20` measured-only modules
 - `src/bioetl/interfaces/cli/commands/` <= `6` measured-only modules
 
 ### Live Ratchet Counts
 
-- Total measured-only modules: `35`
-- `src/bioetl/application/services/` currently has `19` modules
+- Total measured-only modules: `36`
+- `src/bioetl/application/services/` currently has `20` modules
 - `src/bioetl/interfaces/cli/commands/` currently has `6` modules
 
 ### Ratchet Violations
@@ -161,6 +163,7 @@
 - `src/bioetl/application/services/cli_run_orchestration_models.py`
 - `src/bioetl/application/services/cli_run_orchestration_service.py`
 - `src/bioetl/application/services/effective_config_service.py`
+- `src/bioetl/application/services/lineage/metadata_lineage_bundle.py`
 - `src/bioetl/application/services/lineage_inspection_service.py`
 - `src/bioetl/application/services/metadata_coordinator.py`
 - `src/bioetl/application/services/pipeline_run_context_service.py`

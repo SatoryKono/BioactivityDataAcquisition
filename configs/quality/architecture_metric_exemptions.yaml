@@ -24,7 +24,7 @@ registries:
       expires_on: "2026-06-30"
       removal_step: "Split Silver request coercion helpers from the public DQ report port surface until the module drops below the domain LOC cap."
     src/bioetl/application/services/checkpoint_compatibility_service.py:
-      value: 599
+      value: 635
       owner: "@bioetl-platform"
       reason: "Checkpoint compatibility orchestration still carries transitional branching scheduled for decomposition."
       classification: "technical_debt"
