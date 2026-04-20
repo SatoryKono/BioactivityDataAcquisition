@@ -90,6 +90,29 @@ def _extract_docstrings(source: str) -> list[tuple[int, str]]:
     ]
 
 
+def _read_python_source(py_file: Path) -> str | None:
+    try:
+        return py_file.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError):
+        return None
+
+
+def _file_docstring_print_violations(py_file: Path) -> list[str]:
+    source = _read_python_source(py_file)
+    if source is None:
+        return []
+    rel_path = py_file.relative_to(Path("src"))
+    return [
+        violation
+        for lineno, docstring in _extract_docstrings(source)
+        for violation in _docstring_print_violations(
+            rel_path=rel_path,
+            lineno=lineno,
+            docstring=docstring,
+        )
+    ]
+
+
 def _check_print_in_docstrings(directory: Path) -> list[str]:
     """Check for print() in docstring examples in a directory.
 
@@ -99,29 +122,14 @@ def _check_print_in_docstrings(directory: Path) -> list[str]:
     Returns:
         List of violation messages with file path and line number.
     """
-    violations: list[str] = []
-
     if not directory.exists():
-        return violations
+        return []
 
-    for py_file in directory.rglob("*.py"):
-        rel_path = py_file.relative_to(Path("src"))
-
-        try:
-            source = py_file.read_text(encoding="utf-8")
-        except (UnicodeDecodeError, OSError):
-            continue
-
-        for lineno, docstring in _extract_docstrings(source):
-            violations.extend(
-                _docstring_print_violations(
-                    rel_path=rel_path,
-                    lineno=lineno,
-                    docstring=docstring,
-                )
-            )
-
-    return violations
+    return [
+        violation
+        for py_file in directory.rglob("*.py")
+        for violation in _file_docstring_print_violations(py_file)
+    ]
 
 
 class TestNoPrintInDocstrings:

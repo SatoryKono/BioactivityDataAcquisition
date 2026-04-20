@@ -173,6 +173,15 @@ def _apply_quality_validation_sources(
     quality = config.get("quality")
     if not isinstance(quality, dict):
         return
+    _apply_entity_field_validation_sources(quality, expected=expected)
+    _apply_key_nullability_sources(quality, expected=expected)
+
+
+def _apply_entity_field_validation_sources(
+    quality: dict[str, Any],
+    *,
+    expected: dict[str, set[OptionalitySource]],
+) -> None:
     for item in quality.get("entity_field_validations") or []:
         if not isinstance(item, dict):
             continue
@@ -183,6 +192,12 @@ def _apply_quality_validation_sources(
         if source is not None:
             expected.setdefault(field, set()).add(source)
 
+
+def _apply_key_nullability_sources(
+    quality: dict[str, Any],
+    *,
+    expected: dict[str, set[OptionalitySource]],
+) -> None:
     for item in quality.get("key_nullability") or []:
         if not isinstance(item, dict):
             continue

@@ -60,6 +60,14 @@ ALLOWED_PATTERNS = [
     r'["\']password["\']\s*:\s*["\']["\']',  # Empty string
 ]
 
+PII_PATTERNS = [
+    (r"\bemail\b", "email"),
+    (r"\bphone\b", "phone"),
+    (r"\baddress\b", "address"),
+    (r"\bssn\b", "ssn"),
+    (r"\bsocial_security\b", "social_security"),
+]
+
 
 # ---------------------------------------------------------------------------
 # Session-scoped fixture: read all source .py files once per test session.
@@ -434,6 +442,42 @@ class TestPIIHandling:
         }
     )
 
+    def _scanned_layer_files(self) -> list[Path]:
+        infrastructure_files = list((SRC_DIR / "infrastructure").rglob("*.py"))
+        application_files = list((SRC_DIR / "application").rglob("*.py"))
+        return infrastructure_files + application_files
+
+    def _file_is_allowlisted_for_pattern(
+        self,
+        py_file: Path,
+        pattern_name: str,
+    ) -> bool:
+        if pattern_name == "email" and py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES:
+            return True
+        return (
+            pattern_name == "address"
+            and py_file.name in self.KNOWN_NON_PII_ADDRESS_FILES
+        )
+
+    def _file_mentions_hashing(self, content: str) -> bool:
+        return bool(re.search(r"sha256|hash|anonymize", content, re.IGNORECASE))
+
+    def _pii_violations_for_file(self, py_file: Path) -> list[str]:
+        content = py_file.read_text(encoding="utf-8")
+        violations: list[str] = []
+        for regex_pattern, pattern_name in PII_PATTERNS:
+            if not re.search(regex_pattern, content, re.IGNORECASE):
+                continue
+            if self._file_is_allowlisted_for_pattern(py_file, pattern_name):
+                continue
+            if self._file_mentions_hashing(content):
+                continue
+            rel_path = py_file.relative_to(PROJECT_ROOT)
+            violations.append(
+                f"{rel_path}: PII field '{pattern_name}' without hashing"
+            )
+        return violations
+
     def test_silver_layer_uses_hashing(self) -> None:
         """Verify Silver layer transformers use hashing for PII fields.
 
@@ -441,43 +485,11 @@ class TestPIIHandling:
         hashing/anonymization or be in the known allowlist.
         Violations indicate PII leakage risk (RULES.md S5.4).
         """
-        infrastructure_files = list((SRC_DIR / "infrastructure").rglob("*.py"))
-        application_files = list((SRC_DIR / "application").rglob("*.py"))
-
-        all_files = infrastructure_files + application_files
-
-        # PII patterns with more precise matching:
-        # - Use word boundaries to avoid false positives like issn -> ssn
-        # - email pattern excludes known technical API identifier files
-        pii_patterns = [
-            (r"\bemail\b", "email"),
-            (r"\bphone\b", "phone"),
-            (r"\baddress\b", "address"),
-            # Use word boundary to avoid matching 'issn' (International Standard Serial Number)
-            (r"\bssn\b", "ssn"),
-            (r"\bsocial_security\b", "social_security"),
+        files_with_pii = [
+            violation
+            for py_file in self._scanned_layer_files()
+            for violation in self._pii_violations_for_file(py_file)
         ]
-
-        files_with_pii = []
-        for py_file in all_files:
-            content = py_file.read_text(encoding="utf-8")
-            if py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES:
-                continue
-            for regex_pattern, pattern_name in pii_patterns:
-                if re.search(regex_pattern, content, re.IGNORECASE):
-                    # Skip known non-PII address files (email address text, network address)
-                    if (
-                        pattern_name == "address"
-                        and py_file.name in self.KNOWN_NON_PII_ADDRESS_FILES
-                    ):
-                        continue
-
-                    # Check if sha256 or hashing is mentioned in the file
-                    if not re.search(r"sha256|hash|anonymize", content, re.IGNORECASE):
-                        rel_path = py_file.relative_to(PROJECT_ROOT)
-                        files_with_pii.append(
-                            f"{rel_path}: PII field '{pattern_name}' without hashing"
-                        )
 
         assert not files_with_pii, (
             "PII fields found without hashing reference (RULES.md S5.4).\n"

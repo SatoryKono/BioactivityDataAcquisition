@@ -185,6 +185,33 @@ def _import_from_violation(
     return None
 
 
+def _node_edge_violations(
+    *,
+    node: ast.AST,
+    rel_path: Path,
+    importer_module: str,
+    forbidden_prefixes: tuple[str, ...],
+    sanctioned_exceptions: set[str],
+) -> list[str]:
+    if isinstance(node, ast.Import):
+        return _import_violations(
+            py_file=rel_path,
+            node=node,
+            forbidden_prefixes=forbidden_prefixes,
+            sanctioned_exceptions=sanctioned_exceptions,
+        )
+    if isinstance(node, ast.ImportFrom):
+        violation = _import_from_violation(
+            py_file=rel_path,
+            node=node,
+            importer_module=importer_module,
+            forbidden_prefixes=forbidden_prefixes,
+            sanctioned_exceptions=sanctioned_exceptions,
+        )
+        return [violation] if violation is not None else []
+    return []
+
+
 def _collect_edge_violations(
     *,
     src_dir: Path,
@@ -207,27 +234,15 @@ def _collect_edge_violations(
         for node in ast.walk(tree):
             if _is_inside_type_checking(node, parents):
                 continue
-
-            if isinstance(node, ast.Import):
-                violations.extend(
-                    _import_violations(
-                        py_file=rel_path,
-                        node=node,
-                        forbidden_prefixes=forbidden_prefixes,
-                        sanctioned_exceptions=sanctioned_exceptions,
-                    )
-                )
-
-            if isinstance(node, ast.ImportFrom):
-                violation = _import_from_violation(
-                    py_file=rel_path,
+            violations.extend(
+                _node_edge_violations(
                     node=node,
+                    rel_path=rel_path,
                     importer_module=importer_module,
                     forbidden_prefixes=forbidden_prefixes,
                     sanctioned_exceptions=sanctioned_exceptions,
                 )
-                if violation is not None:
-                    violations.append(violation)
+            )
 
     return violations
 

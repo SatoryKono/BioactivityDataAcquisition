@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
+from typing import Callable
 
 
 _NORMALIZATION_PACKAGE_PREFIX = "bioetl/domain/normalization/"
@@ -86,10 +87,14 @@ def _matches_prefix(module_name: str, prefix: str) -> bool:
 
 
 def _matched_disallowed_reason(module_name: str) -> str | None:
-    for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items():
-        if _matches_prefix(module_name, prefix):
-            return reason
-    return None
+    return next(
+        (
+            reason
+            for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items()
+            if _matches_prefix(module_name, prefix)
+        ),
+        None,
+    )
 
 
 def _import_violation(relative: Path, lineno: int, module_name: str) -> str:
@@ -130,23 +135,41 @@ def _runtime_nodes(tree: ast.Module) -> list[ast.AST]:
     ]
 
 
+def _runtime_module_violations(
+    source_ast_cache: dict[Path, ast.Module],
+    src_dir: Path,
+    collector: Callable[[ast.AST, Path], list[str]],
+) -> list[str]:
+    violations: list[str] = []
+    for relative, tree in _iter_normalization_modules(source_ast_cache, src_dir):
+        for node in _runtime_nodes(tree):
+            violations.extend(collector(node, relative))
+    return violations
+
+
 def _iter_disallowed_imports(
     source_ast_cache: dict[Path, ast.Module],
     src_dir: Path,
 ) -> list[str]:
     """Collect disallowed imports from normalization runtime modules."""
-    violations: list[str] = []
+    return _runtime_module_violations(
+        source_ast_cache,
+        src_dir,
+        lambda node, relative: _disallowed_import_violations_for_node(
+            node,
+            relative=relative,
+        ),
+    )
 
-    for relative, tree in _iter_normalization_modules(source_ast_cache, src_dir):
-        for node in _runtime_nodes(tree):
-            violations.extend(
-                _disallowed_import_violations_for_node(
-                    node,
-                    relative=relative,
-                )
-            )
 
-    return violations
+def _open_call_violations(node: ast.AST, relative: Path) -> list[str]:
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "open"
+    ):
+        return [f"{relative}:{node.lineno}: open(...)"]
+    return []
 
 
 def _iter_open_calls(
@@ -154,15 +177,11 @@ def _iter_open_calls(
     src_dir: Path,
 ) -> list[str]:
     """Collect direct `open(...)` calls from normalization runtime modules."""
-    violations: list[str] = []
-
-    for relative, tree in _iter_normalization_modules(source_ast_cache, src_dir):
-        for node in _runtime_nodes(tree):
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-                if node.func.id == "open":
-                    violations.append(f"{relative}:{node.lineno}: open(...)")
-
-    return violations
+    return _runtime_module_violations(
+        source_ast_cache,
+        src_dir,
+        _open_call_violations,
+    )
 
 
 def test_domain_normalization_modules_have_no_disallowed_runtime_imports(

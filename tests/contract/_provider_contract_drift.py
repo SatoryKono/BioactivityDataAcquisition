@@ -254,17 +254,21 @@ def _resolve_list_index(current: Any, raw_part: str, raw_index: str) -> Any:
     return current[index]
 
 
+def _resolve_path_token(current: Any, raw_part: str) -> Any:
+    key, raw_index = _path_token(raw_part)
+    if key:
+        current = _resolve_mapping_key(current, key)
+    elif raw_index is None:
+        raise ContractPathResolutionError(f"empty path token {raw_part!r}")
+    if raw_index is None:
+        return current
+    return _resolve_list_index(current, raw_part, raw_index)
+
+
 def _resolve_path(payload: Any, path: str) -> Any:
     current = payload
     for raw_part in path.split("."):
-        key, raw_index = _path_token(raw_part)
-        if key:
-            current = _resolve_mapping_key(current, key)
-        elif raw_index is None:
-            raise ContractPathResolutionError(f"empty path token {raw_part!r}")
-        if raw_index is None:
-            continue
-        current = _resolve_list_index(current, raw_part, raw_index)
+        current = _resolve_path_token(current, raw_part)
     return current
 
 
