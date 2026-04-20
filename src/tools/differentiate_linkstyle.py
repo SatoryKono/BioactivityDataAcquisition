@@ -79,9 +79,28 @@ def _mermaid_relative_path(path: Path) -> Path:
     return safe_path.relative_to(MERMAID_DIR.resolve())
 
 
+def _normalize_mermaid_relative_path(path: Path) -> Path:
+    """Normalize and validate a Mermaid-root-relative path."""
+    if path.is_absolute():
+        raise ValueError(f"expected Mermaid-relative path, got absolute path: {path}")
+
+    normalized_parts: list[str] = []
+    for part in path.parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            raise ValueError(f"refusing parent traversal path: {path}")
+        normalized_parts.append(part)
+
+    if not normalized_parts:
+        raise ValueError("refusing empty Mermaid-relative path")
+    return Path(*normalized_parts)
+
+
 def _write_mermaid_text(relative_path: Path, content: str) -> None:
     """Write Mermaid content via a MERMAID_DIR-relative path."""
-    target_path = MERMAID_DIR / relative_path
+    safe_relative_path = _normalize_mermaid_relative_path(relative_path)
+    target_path = _ensure_path_within_root(MERMAID_DIR / safe_relative_path, MERMAID_DIR)
     target_path.write_text(content, encoding="utf-8")
 
 
