@@ -1,121 +1,21 @@
 #!/usr/bin/env python3
-"""Bridge framed MCP stdio to the line-delimited stdio used by the upstream Neo4j memory server."""
+"""Compatibility shim for the historical ``scripts.ai.src.neo4j_memory_mcp_adapter`` path."""
 
 from __future__ import annotations
 
-import argparse
-import json
-import subprocess
 import sys
-import threading
-from collections.abc import Sequence
-from dataclasses import dataclass
-from queue import Queue
-from typing import Any, BinaryIO
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.ai.mcp.neo4j_memory_mcp_adapter import *  # noqa: F403
+from scripts.ai.mcp.neo4j_memory_mcp_adapter import main
 
 
-@dataclass(slots=True)
-class PumpError:
-    source: str
-    message: str
-
-
-def _read_exactly(stream: BinaryIO, size: int) -> bytes:
-    chunks: list[bytes] = []
-    remaining = size
-    while remaining > 0:
-        chunk = stream.read(remaining)
-        if not chunk:
-            raise EOFError("Unexpected EOF while reading framed MCP payload.")
-        chunks.append(chunk)
-        remaining -= len(chunk)
-    return b"".join(chunks)
-
-
-def _read_framed_message(stream: BinaryIO) -> dict[str, Any] | None:
-    headers: dict[str, str] = {}
-    saw_header = False
-    while True:
-        line = stream.readline()
-        if not line:
-            if saw_header:
-                raise EOFError("Unexpected EOF while reading framed MCP headers.")
-            return None
-        saw_header = True
-        if line == b"\r\n":
-            break
-        name, sep, value = line.decode("ascii").partition(":")
-        if not sep:
-            raise ValueError(f"Malformed framed MCP header line: {line!r}")
-        headers[name.strip().lower()] = value.strip()
-    content_length_raw = headers.get("content-length")
-    if content_length_raw is None:
-        raise ValueError("Framed MCP message missing Content-Length header.")
-    body = _read_exactly(stream, int(content_length_raw))
-    return json.loads(body.decode("utf-8"))
-
-
-def _write_framed_message(stream: BinaryIO, message: dict[str, Any]) -> None:
-    body = json.dumps(message, separators=(",", ":"), sort_keys=True).encode("utf-8")
-    stream.write(f"Content-Length: {len(body)}\r\n\r\n".encode("ascii"))
-    stream.write(body)
-    stream.flush()
-
-
-def _read_line_message(stream: BinaryIO) -> dict[str, Any] | None:
-    line = stream.readline()
-    if not line:
-        return None
-    return json.loads(line.decode("utf-8"))
-
-
-def _write_line_message(stream: BinaryIO, message: dict[str, Any]) -> None:
-    stream.write(json.dumps(message, separators=(",", ":"), sort_keys=True).encode("utf-8"))
-    stream.write(b"\n")
-    stream.flush()
-
-
-def _pump_framed_to_line(
-    *,
-    source: BinaryIO,
-    target: BinaryIO,
-    errors: Queue[PumpError],
-) -> None:
-    try:
-        while True:
-            message = _read_framed_message(source)
-            if message is None:
-                break
-            _write_line_message(target, message)
-    except (OSError, BrokenPipeError, ConnectionResetError, ValueError) as exc:  # pragma: no cover - exercised via subprocess tests
-        errors.put(PumpError("client->server", str(exc)))
-    except Exception as exc:  # pragma: no cover - exercised via subprocess tests
-        errors.put(PumpError("client->server", f"unexpected error: {exc}"))
-        raise
-    finally:
-        try:
-            target.close()
-        except BrokenPipeError:
-            pass
-
-
-def _pump_line_to_framed(
-    *,
-    source: BinaryIO,
-    target: BinaryIO,
-    errors: Queue[PumpError],
-) -> None:
-    try:
-        while True:
-            message = _read_line_message(source)
-            if message is None:
-                break
-            _write_framed_message(target, message)
-    except (OSError, BrokenPipeError, ConnectionResetError, ValueError) as exc:  # pragma: no cover - exercised via subprocess tests
-        errors.put(PumpError("server->client", str(exc)))
-    except Exception as exc:  # pragma: no cover - exercised via subprocess tests
-        errors.put(PumpError("server->client", f"unexpected error: {exc}"))
-        raise
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
 
 
 def _pump_stderr(source: BinaryIO, target: BinaryIO) -> None:

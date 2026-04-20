@@ -1,123 +1,21 @@
 #!/usr/bin/env python3
-"""Smoke-check the SonarQube MCP wrapper with readiness-aware stdio transport."""
+"""Compatibility shim for the historical ``scripts.ai.src.sonarqube_mcp_smoke`` path."""
 
 from __future__ import annotations
 
-import argparse
-import json
-import queue
-import subprocess
 import sys
-import threading
-import time
-from collections.abc import Sequence
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
-_INITIALIZE_REQUEST_ID = 1
-_TOOLS_LIST_REQUEST_ID = 2
-_READY_MARKER = "Status: Server ready"
-_STDIO_PROTOCOL_VERSION = "2024-11-05"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-
-@dataclass(frozen=True, slots=True)
-class SmokeResult:
-    ok: bool
-    summary: str
-    responses: tuple[dict[str, Any], ...] = ()
-    stderr: str = ""
-    returncode: int | None = None
-    ready_seen: bool = False
-    handshake_sent: bool = False
+from scripts.ai.mcp.sonarqube_mcp_smoke import *  # noqa: F403
+from scripts.ai.mcp.sonarqube_mcp_smoke import main
 
 
-def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[3]
-
-
-def _default_wrapper_command() -> list[str]:
-    return [str(_repo_root() / "scripts/ai/mcp/mcp_sonarqube_wrapper.sh")]
-
-
-def _build_handshake_lines() -> bytes:
-    initialize_request = {
-        "jsonrpc": "2.0",
-        "id": _INITIALIZE_REQUEST_ID,
-        "method": "initialize",
-        "params": {
-            "protocolVersion": _STDIO_PROTOCOL_VERSION,
-            "capabilities": {},
-            "clientInfo": {
-                "name": "bioetl-sonarqube-mcp-smoke",
-                "version": "1.0",
-            },
-        },
-    }
-    initialized_notification = {
-        "jsonrpc": "2.0",
-        "method": "notifications/initialized",
-        "params": {},
-    }
-    tools_list_request = {
-        "jsonrpc": "2.0",
-        "id": _TOOLS_LIST_REQUEST_ID,
-        "method": "tools/list",
-        "params": {},
-    }
-    return b"".join(
-        json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8") + b"\n"
-        for payload in (
-            initialize_request,
-            initialized_notification,
-            tools_list_request,
-        )
-    )
-
-
-def _drain_stdout_frames(
-    stdout_buffer: bytearray,
-    responses: dict[int, dict[str, Any]],
-) -> None:
-    while True:
-        data = bytes(stdout_buffer)
-        if not data:
-            return
-        if not data.startswith(b"Content-Length:"):
-            snippet = data[:120].decode("utf-8", errors="replace")
-            raise ValueError(f"Unexpected preamble on MCP stdout: {snippet!r}")
-        header_end = data.find(b"\r\n\r\n")
-        if header_end == -1:
-            return
-        content_length = _parse_content_length_header(data[:header_end])
-        body_start = header_end + 4
-        body_end = body_start + content_length
-        if len(data) < body_end:
-            return
-        _store_response_message(data[body_start:body_end], responses)
-        del stdout_buffer[:body_end]
-
-
-def _drain_stdout_lines(
-    stdout_buffer: bytearray,
-    responses: dict[int, dict[str, Any]],
-) -> None:
-    while True:
-        newline_index = stdout_buffer.find(b"\n")
-        if newline_index == -1:
-            return
-        raw_line = bytes(stdout_buffer[:newline_index]).rstrip(b"\r")
-        del stdout_buffer[: newline_index + 1]
-        if not raw_line:
-            continue
-        _store_response_message(raw_line, responses)
-
-
-def _drain_stdout_messages(
-    stdout_buffer: bytearray,
-    responses: dict[int, dict[str, Any]],
-) -> None:
-    data = bytes(stdout_buffer)
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
     if not data:
         return
     if data.startswith(b"Content-Length:"):
