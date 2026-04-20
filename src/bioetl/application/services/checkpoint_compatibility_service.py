@@ -557,7 +557,7 @@ class CheckpointCompatibilityService:
             checkpoint_metadata,
         )
         execution_identity_compatible, execution_identity_messages = (
-            _validate_lenient_execution_identity_compatibility(
+            _validate_execution_identity_compatibility(
                 current_metadata,
                 checkpoint_metadata,
             )
@@ -603,7 +603,7 @@ class CheckpointCompatibilityService:
             )
         )
         execution_identity_compatible, execution_identity_messages = (
-            _validate_execution_identity_compatibility(
+            _validate_lenient_execution_identity_compatibility(
                 current_metadata,
                 checkpoint_metadata,
             )
