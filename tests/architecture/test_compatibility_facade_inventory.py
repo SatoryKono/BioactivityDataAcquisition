@@ -278,8 +278,20 @@ def test_snapshot_generator_rejects_parent_traversal_relative_output() -> None:
         "compatibility_facade_snapshot_security_loader",
     )
 
-    with pytest.raises(ValueError, match="parent traversal"):
-        module._write_repo_text(Path("../escape.md"), "content")
+    with pytest.raises(ValueError, match="canonical tracked artifact"):
+        module._resolve_canonical_output_path("../escape.md")
+
+
+@pytest.mark.architecture
+def test_snapshot_generator_rejects_noncanonical_repo_output() -> None:
+    """Snapshot generator must not write to arbitrary repo-local markdown paths."""
+    module = _load_module(
+        SNAPSHOT_SCRIPT,
+        "compatibility_facade_snapshot_security_loader_noncanonical",
+    )
+
+    with pytest.raises(ValueError, match="canonical tracked artifact"):
+        module._resolve_canonical_output_path("docs/02-architecture/not-the-snapshot.md")
 
 
 @pytest.mark.architecture
