@@ -13055,40 +13055,18 @@ class Neo4jHttpClient:
         attempt_errors: list[str] = []
         for attempt in range(12):
             endpoint = self._endpoint
-            req = request.Request(self._endpoint, data=payload, headers=self._headers, method="POST")
             try:
-                with request.urlopen(req, timeout=60) as response:
-                    raw = response.read().decode("utf-8")
+                raw = self._execute_request(payload)
                 break
             except error.HTTPError as exc:  # pragma: no cover - live backend dependent
-                body_text = exc.read().decode("utf-8", errors="replace")
-                attempt_errors.append(
-                    self._format_transport_attempt(
-                        endpoint=endpoint,
-                        exc=exc,
-                        body_text=body_text,
-                    )
+                last_exc = self._handle_http_error(
+                    endpoint,
+                    exc,
+                    context=context,
+                    attempt=attempt,
+                    attempt_errors=attempt_errors,
                 )
-                if self._should_retry_http_error(exc):
-                    last_exc = RuntimeError(
-                        self._format_transport_error(
-                            exc,
-                            context=context,
-                            body_text=body_text,
-                            attempt_errors=attempt_errors,
-                        )
-                    )
-                    if self._switch_to_fallback_endpoint():
-                        continue
-                    if endpoint != self._primary_endpoint:
-                        raise last_exc from exc
-                    if self._is_last_attempt(attempt):
-                        raise last_exc from exc
-                    self._sleep_before_retry(attempt)
-                    continue
-                raise RuntimeError(
-                    self._format_query_error(exc, context=context, body_text=body_text)
-                ) from exc
+                continue
             except (
                 error.URLError,
                 TimeoutError,
@@ -13096,29 +13074,14 @@ class Neo4jHttpClient:
                 ConnectionAbortedError,
                 http.client.RemoteDisconnected,
             ) as exc:  # pragma: no cover - network errors vary per environment
-                last_exc = exc
-                attempt_errors.append(
-                    self._format_transport_attempt(endpoint=endpoint, exc=exc)
+                last_exc = self._handle_transport_error(
+                    endpoint,
+                    exc,
+                    context=context,
+                    attempt=attempt,
+                    attempt_errors=attempt_errors,
                 )
-                if self._switch_to_fallback_endpoint():
-                    continue
-                if endpoint != self._primary_endpoint:
-                    raise RuntimeError(
-                        self._format_transport_error(
-                            exc,
-                            context=context,
-                            attempt_errors=attempt_errors,
-                        )
-                    ) from exc
-                if self._is_last_attempt(attempt):
-                    raise RuntimeError(
-                        self._format_transport_error(
-                            exc,
-                            context=context,
-                            attempt_errors=attempt_errors,
-                        )
-                    ) from exc
-                self._sleep_before_retry(attempt)
+                continue
         else:  # pragma: no cover - loop always breaks or raises
             raise RuntimeError(
                 self._format_transport_error(
@@ -13133,6 +13096,82 @@ class Neo4jHttpClient:
             prefix = self._context_prefix(context)
             raise RuntimeError(f"{prefix}Neo4j query/runtime error: {errors}")
         return body
+
+    def _execute_request(self, payload: bytes) -> str:
+        req = request.Request(
+            self._endpoint,
+            data=payload,
+            headers=self._headers,
+            method="POST",
+        )
+        with request.urlopen(req, timeout=60) as response:
+            return response.read().decode("utf-8")
+
+    def _handle_http_error(
+        self,
+        endpoint: str,
+        exc: error.HTTPError,
+        *,
+        context: str | None,
+        attempt: int,
+        attempt_errors: list[str],
+    ) -> RuntimeError:
+        body_text = exc.read().decode("utf-8", errors="replace")
+        attempt_errors.append(
+            self._format_transport_attempt(
+                endpoint=endpoint,
+                exc=exc,
+                body_text=body_text,
+            )
+        )
+        if not self._should_retry_http_error(exc):
+            raise RuntimeError(
+                self._format_query_error(exc, context=context, body_text=body_text)
+            ) from exc
+        runtime_error = RuntimeError(
+            self._format_transport_error(
+                exc,
+                context=context,
+                body_text=body_text,
+                attempt_errors=attempt_errors,
+            )
+        )
+        return self._retry_or_raise(runtime_error, endpoint, exc, attempt)
+
+    def _handle_transport_error(
+        self,
+        endpoint: str,
+        exc: Exception,
+        *,
+        context: str | None,
+        attempt: int,
+        attempt_errors: list[str],
+    ) -> RuntimeError:
+        attempt_errors.append(
+            self._format_transport_attempt(endpoint=endpoint, exc=exc)
+        )
+        runtime_error = RuntimeError(
+            self._format_transport_error(
+                exc,
+                context=context,
+                attempt_errors=attempt_errors,
+            )
+        )
+        return self._retry_or_raise(runtime_error, endpoint, exc, attempt)
+
+    def _retry_or_raise(
+        self,
+        runtime_error: RuntimeError,
+        endpoint: str,
+        exc: Exception,
+        attempt: int,
+    ) -> RuntimeError:
+        if self._switch_to_fallback_endpoint():
+            return runtime_error
+        if endpoint != self._primary_endpoint or self._is_last_attempt(attempt):
+            raise runtime_error from exc
+        self._sleep_before_retry(attempt)
+        return runtime_error
 
     @staticmethod
     def _should_retry_http_error(exc: error.HTTPError) -> bool:

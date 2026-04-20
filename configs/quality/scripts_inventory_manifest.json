@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-20T05:53:05.173439+00:00",
+  "generated_at": "2026-04-20T06:27:29.522422+00:00",
   "summary": {
     "total_scripts": 416,
     "status_counts": {
@@ -11690,7 +11690,7 @@
         },
         {
           "path": "scripts/ops/maintenance/github/post_issue_rescope_comments.sh",
-          "line": 115,
+          "line": 116,
           "source_group": "scripts",
           "text": "- `src/tools/verify_schema_parity.py` уже сравнивает Silver ↔ Gold и использует baseline для известных расхождений"
         },
