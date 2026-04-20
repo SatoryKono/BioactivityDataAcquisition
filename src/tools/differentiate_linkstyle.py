@@ -74,6 +74,36 @@ def _ensure_path_within_root(path: Path, root: Path) -> Path:
     return resolved_path
 
 
+def _normalize_relative_mermaid_path(path: Path) -> Path:
+    """Normalize a Mermaid path and reject traversal or non-mermaid targets."""
+    if path.is_absolute():
+        raise ValueError(f"expected Mermaid path relative to {MERMAID_DIR}: {path}")
+
+    normalized_parts: list[str] = []
+    for part in path.parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            raise ValueError(f"refusing parent traversal path: {path}")
+        normalized_parts.append(part)
+
+    if not normalized_parts:
+        raise ValueError("refusing empty Mermaid path")
+
+    normalized = Path(*normalized_parts)
+    if normalized.suffix != ".mermaid":
+        raise ValueError(f"expected .mermaid file path, got: {normalized}")
+    return normalized
+
+
+def _resolve_mermaid_path(path: Path) -> Path:
+    """Resolve a Mermaid file path within the canonical Mermaid directory."""
+    candidate = (
+        path if path.is_absolute() else MERMAID_DIR / _normalize_relative_mermaid_path(path)
+    )
+    return _ensure_path_within_root(candidate, MERMAID_DIR)
+
+
 def _write_validated_mermaid_text(path: Path, content: str) -> None:
     """Write Mermaid content to a previously validated Mermaid file path."""
     path.write_text(content, encoding="utf-8")
@@ -248,7 +278,7 @@ def build_linkstyle_block(
 
 def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
     """Process one file. Returns (modified, reason)."""
-    safe_path = _ensure_path_within_root(fpath, MERMAID_DIR)
+    safe_path = _resolve_mermaid_path(fpath)
     content = safe_path.read_text(encoding="utf-8")
     lines = content.splitlines()
 
@@ -312,7 +342,7 @@ LEGEND_LINK_SECTION = """\
 
 
 def update_legend(fpath: Path, dry_run: bool = False) -> bool:
-    safe_path = _ensure_path_within_root(fpath, MERMAID_DIR)
+    safe_path = _resolve_mermaid_path(fpath)
     content = safe_path.read_text(encoding="utf-8")
     if "LinkTypes" in content:
         return False  # already updated

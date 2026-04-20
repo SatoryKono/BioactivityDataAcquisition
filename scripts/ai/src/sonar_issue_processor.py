@@ -10,8 +10,11 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.ai.sonar_issue_processor import *  # noqa: F403
-from scripts.ai.sonar_issue_processor import main
+import scripts.ai.sonar_issue_processor as _impl
+
+main = _impl.main
+__all__ = getattr(_impl, "__all__", [name for name in vars(_impl) if not name.startswith("_")])
+globals().update({name: getattr(_impl, name) for name in __all__})
 
 
 if __name__ == "__main__":
