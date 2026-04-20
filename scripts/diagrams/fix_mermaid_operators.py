@@ -22,9 +22,12 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+for bootstrap_path in (REPO_ROOT, SCRIPT_DIR):
+    bootstrap_path_str = str(bootstrap_path)
+    if bootstrap_path_str not in sys.path:
+        sys.path.insert(0, bootstrap_path_str)
 
 try:
     from .diagram_paths import DIAGRAM_ROOT
@@ -66,7 +69,7 @@ class ValidatedRepoPath:
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return REPO_ROOT
 
 
 def _ensure_repo_path(path: Path) -> Path:
