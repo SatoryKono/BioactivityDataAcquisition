@@ -204,19 +204,49 @@ def _port_import_violations(layer_path: Path, src_dir: Path) -> list[str]:
     for py_file in _python_files(layer_path):
         tree = _parse_file(py_file)
         relative_path = _relative(src_dir, py_file)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    if _is_forbidden_port_import_target(alias.name):
-                        violations.append(
-                            f"{relative_path}:{node.lineno} imports {alias.name}"
-                        )
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                if _is_forbidden_port_import_target(node.module):
-                    violations.append(
-                        f"{relative_path}:{node.lineno} imports from {node.module}"
-                    )
+        violations.extend(_port_import_violations_for_tree(relative_path, tree))
     return violations
+
+
+def _port_import_violations_for_tree(
+    relative_path: Path,
+    tree: ast.AST,
+) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        violations.extend(_port_import_violations_for_node(relative_path, node))
+    return violations
+
+
+def _port_import_violations_for_node(
+    relative_path: Path,
+    node: ast.AST,
+) -> list[str]:
+    if isinstance(node, ast.Import):
+        return _import_node_port_violations(relative_path, node)
+    if isinstance(node, ast.ImportFrom) and node.module:
+        return _import_from_port_violations(relative_path, node)
+    return []
+
+
+def _import_node_port_violations(
+    relative_path: Path,
+    node: ast.Import,
+) -> list[str]:
+    return [
+        f"{relative_path}:{node.lineno} imports {alias.name}"
+        for alias in node.names
+        if _is_forbidden_port_import_target(alias.name)
+    ]
+
+
+def _import_from_port_violations(
+    relative_path: Path,
+    node: ast.ImportFrom,
+) -> list[str]:
+    if not _is_forbidden_port_import_target(node.module or ""):
+        return []
+    return [f"{relative_path}:{node.lineno} imports from {node.module}"]
 
 
 def _iter_file_metrics_server_call_violations(
