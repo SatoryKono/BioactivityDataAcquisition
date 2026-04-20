@@ -82,6 +82,37 @@ def _write_raw_entry(
     zout.writestr(copy.copy(info), data)
 
 
+def _header_map(rows: list[ET.Element], shared_strings: list[str]) -> dict[int, str]:
+    return {
+        column_index(cell.attrib["r"]): cell_text(cell, shared_strings)
+        for cell in rows[0].findall("a:c", NS)
+    }
+
+
+def _row_map(
+    row: ET.Element,
+    shared_strings: list[str],
+    header_map: dict[int, str],
+) -> dict[str, str]:
+    return {
+        header_map[column_index(cell.attrib["r"])]: cell_text(cell, shared_strings)
+        for cell in row.findall("a:c", NS)
+        if column_index(cell.attrib["r"]) in header_map
+    }
+
+
+def _should_keep_row(
+    row: ET.Element,
+    shared_strings: list[str],
+    *,
+    header_map: dict[int, str],
+    columns: list[str],
+    filtered_value: str,
+) -> bool:
+    values = _row_map(row, shared_strings, header_map)
+    return not any(values.get(column) == filtered_value for column in columns)
+
+
 def _filter_kept_rows(
     rows: list[ET.Element],
     shared_strings: list[str],
@@ -89,22 +120,19 @@ def _filter_kept_rows(
     columns: list[str],
     filtered_value: str,
 ) -> tuple[list[ET.Element], int]:
-    header_map = {
-        column_index(cell.attrib["r"]): cell_text(cell, shared_strings)
-        for cell in rows[0].findall("a:c", NS)
-    }
+    header_map = _header_map(rows, shared_strings)
     max_col_index = max(header_map)
     kept_rows = [rows[0]]
 
     for row in rows[1:]:
-        row_map = {
-            header_map[column_index(cell.attrib["r"])]: cell_text(cell, shared_strings)
-            for cell in row.findall("a:c", NS)
-            if column_index(cell.attrib["r"]) in header_map
-        }
-        if any(row_map.get(column) == filtered_value for column in columns):
-            continue
-        kept_rows.append(row)
+        if _should_keep_row(
+            row,
+            shared_strings,
+            header_map=header_map,
+            columns=columns,
+            filtered_value=filtered_value,
+        ):
+            kept_rows.append(row)
 
     return kept_rows, max_col_index
 

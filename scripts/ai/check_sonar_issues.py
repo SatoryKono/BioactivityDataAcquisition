@@ -22,6 +22,13 @@ EXPECTED_ISSUE_ERRORS: Final[tuple[type[Exception], ...]] = (
     ValueError,
     IndexError,
 )
+ERROR_LABELS: Final[tuple[tuple[type[Exception], str], ...]] = (
+    (requests.exceptions.RequestException, "Network error"),
+    (json.JSONDecodeError, "JSON decode error"),
+    (KeyError, "Missing expected field"),
+    (ValueError, "Expected error"),
+    (IndexError, "Expected error"),
+)
 
 
 def _github_headers(token: str | None, *, include_accept: bool = True) -> dict[str, str]:
@@ -107,18 +114,10 @@ def _load_issue_details(
 
 
 def _report_issue_error(issue_number: int, exc: Exception) -> None:
-    if isinstance(exc, requests.exceptions.RequestException):
-        print(f"\n❌ Network error checking issue #{issue_number}: {exc}")
-        return
-    if isinstance(exc, json.JSONDecodeError):
-        print(f"\n❌ JSON decode error for issue #{issue_number}: {exc}")
-        return
-    if isinstance(exc, KeyError):
-        print(f"\n❌ Missing expected field in issue #{issue_number}: {exc}")
-        return
-    if isinstance(exc, (ValueError, IndexError)):
-        print(f"\n❌ Expected error checking issue #{issue_number}: {exc}")
-        return
+    for error_type, label in ERROR_LABELS:
+        if isinstance(exc, error_type):
+            print(f"\n❌ {label} checking issue #{issue_number}: {exc}")
+            return
     print(f"\n❌ Unexpected error checking issue #{issue_number}: {exc}")
 
 
@@ -126,31 +125,42 @@ def _is_expected_issue_error(exc: Exception) -> bool:
     return isinstance(exc, EXPECTED_ISSUE_ERRORS)
 
 
-def main() -> None:
-    github_token = os.getenv("GITHUB_TOKEN")
-    repo = os.getenv("GITHUB_REPO", DEFAULT_REPO)
-
+def _print_report_header() -> None:
     print("🔍 Analyzing Sonar Remediation Issues Relevance")
     print("=" * 60)
 
-    for issue_number in DEFAULT_ISSUES_TO_CHECK:
-        try:
-            issue, comments_count = _load_issue_details(repo, github_token, issue_number)
-            if issue is None:
-                print(f"\n❌ Issue #{issue_number}: Not found or inaccessible")
-                continue
-            _print_issue_summary(issue_number, issue, comments_count=comments_count)
-        except Exception as exc:
-            _report_issue_error(issue_number, exc)
-            if not _is_expected_issue_error(exc):
-                raise
 
+def _print_report_footer() -> None:
     print("\n" + "=" * 60)
     print("📊 SUMMARY ANALYSIS")
     print("=" * 60)
     print("These issues appear to be part of a structured Sonar remediation program.")
     print("The numbering suggests a wave-based approach to code quality improvement.")
     print("\nRecommendation: Check if these issues are still relevant given current Sonar status.")
+
+
+def _process_issue(repo: str, github_token: str | None, issue_number: int) -> None:
+    try:
+        issue, comments_count = _load_issue_details(repo, github_token, issue_number)
+        if issue is None:
+            print(f"\n❌ Issue #{issue_number}: Not found or inaccessible")
+            return
+        _print_issue_summary(issue_number, issue, comments_count=comments_count)
+    except Exception as exc:
+        _report_issue_error(issue_number, exc)
+        if not _is_expected_issue_error(exc):
+            raise
+
+
+def main() -> None:
+    github_token = os.getenv("GITHUB_TOKEN")
+    repo = os.getenv("GITHUB_REPO", DEFAULT_REPO)
+    _print_report_header()
+
+    for issue_number in DEFAULT_ISSUES_TO_CHECK:
+        _process_issue(repo, github_token, issue_number)
+
+    _print_report_footer()
 
 
 if __name__ == "__main__":

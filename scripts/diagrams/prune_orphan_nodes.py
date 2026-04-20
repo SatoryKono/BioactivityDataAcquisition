@@ -682,26 +682,31 @@ def _fixed_diagram_lines(
 # ── File discovery ────────────────────────────────────────────────────────────
 
 
+def _is_supported_input_file(path: Path) -> bool:
+    return path.suffix in SUPPORTED_SUFFIXES and not path.name.startswith("_")
+
+
+def _is_discoverable_diagram_file(path: Path) -> bool:
+    return _is_supported_input_file(path) and "svg" not in path.parts and "png" not in path.parts
+
+
+def _iter_discoverable_files(target: Path) -> list[Path]:
+    if target.is_file():
+        return [target] if _is_supported_input_file(target) else []
+    if not target.is_dir():
+        return []
+    return sorted(path for path in target.rglob("*") if _is_discoverable_diagram_file(path))
+
+
 def find_files(targets: list[Path]) -> list[Path]:
     result: list[Path] = []
     seen: set[Path] = set()
-    for t in targets:
-        if t.is_file():
-            if t.suffix in SUPPORTED_SUFFIXES and t not in seen:
-                seen.add(t)
-                result.append(t)
-        elif t.is_dir():
-            for p in sorted(t.rglob("*")):
-                if (
-                    p.suffix in SUPPORTED_SUFFIXES
-                    and not p.name.startswith("_")
-                    and p not in seen
-                    # Skip rendered output dirs
-                    and "svg" not in p.parts
-                    and "png" not in p.parts
-                ):
-                    seen.add(p)
-                    result.append(p)
+    for target in targets:
+        for path in _iter_discoverable_files(target):
+            if path in seen:
+                continue
+            seen.add(path)
+            result.append(path)
     return result
 
 
