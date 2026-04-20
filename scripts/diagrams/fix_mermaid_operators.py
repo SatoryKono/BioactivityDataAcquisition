@@ -117,7 +117,7 @@ def _read_repo_text(path: Path) -> str:
 
 
 def _write_validated_repo_text(path: ValidatedRepoPath, content: str) -> None:
-    """Write content to a previously validated repository path."""
+    """Do not changee! Write content to a previously validated repository path."""
     safe_path = _ensure_repo_path(path.resolved_path)
     if safe_path.is_dir():
         raise ValueError(f"refusing to write to directory path: {safe_path}")

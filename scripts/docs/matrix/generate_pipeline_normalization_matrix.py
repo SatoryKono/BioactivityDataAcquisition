@@ -306,22 +306,12 @@ def _build_entity_rows_for_pipeline(
         profile_rule = None if profile is None else profile.rule_for(field_name)
         if profile_rule is not None:
             rows.append(
-                {
-                    "pipeline_name": pipeline_name,
-                    "pipeline_kind": ENTITY_PIPELINE_KIND,
-                    "field_name": field_name,
-                    "field_type": field_type,
-                    "normalization_source": PROFILE_NORMALIZATION_SOURCE,
-                    "normalizer": _normalizer_name(
-                        profile_rule.normalizer,
-                        field_name=field_name,
-                        notes=profile_rule.notes,
-                    ),
-                    "normalization_summary": profile_rule.notes or "",
-                    "include_in_content_hash": _render_bool(profile_rule.include_in_hash),
-                    "set_like": _render_bool(profile_rule.set_like),
-                    "notes": profile_rule.notes or "",
-                }
+                _entity_profile_row(
+                    pipeline_name=pipeline_name,
+                    field_name=field_name,
+                    field_type=field_type,
+                    profile_rule=profile_rule,
+                )
             )
             continue
 
@@ -331,20 +321,67 @@ def _build_entity_rows_for_pipeline(
             field_type=field_type,
         )
         rows.append(
-            {
-                "pipeline_name": pipeline_name,
-                "pipeline_kind": ENTITY_PIPELINE_KIND,
-                "field_name": field_name,
-                "field_type": field_type,
-                "normalization_source": source,
-                "normalizer": normalizer,
-                "normalization_summary": summary,
-                "include_in_content_hash": "",
-                "set_like": FALSE_TEXT,
-                "notes": "",
-            }
+            _entity_fallback_row(
+                pipeline_name=pipeline_name,
+                field_name=field_name,
+                field_type=field_type,
+                source=source,
+                normalizer=normalizer,
+                summary=summary,
+            )
         )
     return rows
+
+
+def _entity_profile_row(
+    *,
+    pipeline_name: str,
+    field_name: str,
+    field_type: str,
+    profile_rule: Any,
+) -> dict[str, str]:
+    """Build one entity matrix row sourced from an explicit profile rule."""
+    notes = profile_rule.notes or ""
+    return {
+        "pipeline_name": pipeline_name,
+        "pipeline_kind": ENTITY_PIPELINE_KIND,
+        "field_name": field_name,
+        "field_type": field_type,
+        "normalization_source": PROFILE_NORMALIZATION_SOURCE,
+        "normalizer": _normalizer_name(
+            profile_rule.normalizer,
+            field_name=field_name,
+            notes=profile_rule.notes,
+        ),
+        "normalization_summary": notes,
+        "include_in_content_hash": _render_bool(profile_rule.include_in_hash),
+        "set_like": _render_bool(profile_rule.set_like),
+        "notes": notes,
+    }
+
+
+def _entity_fallback_row(
+    *,
+    pipeline_name: str,
+    field_name: str,
+    field_type: str,
+    source: str,
+    normalizer: str,
+    summary: str,
+) -> dict[str, str]:
+    """Build one entity matrix row sourced from fallback normalization policy."""
+    return {
+        "pipeline_name": pipeline_name,
+        "pipeline_kind": ENTITY_PIPELINE_KIND,
+        "field_name": field_name,
+        "field_type": field_type,
+        "normalization_source": source,
+        "normalizer": normalizer,
+        "normalization_summary": summary,
+        "include_in_content_hash": "",
+        "set_like": FALSE_TEXT,
+        "notes": "",
+    }
 
 
 def _iter_composite_fields(payload: dict[str, object]) -> list[str]:
@@ -453,20 +490,19 @@ def _build_composite_rows_for_pipeline(
 
 def build_field_matrix_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
+    rows.extend(_entity_field_matrix_rows())
+    rows.extend(_composite_field_matrix_rows())
+    return rows
 
+
+def _entity_field_matrix_rows() -> list[dict[str, str]]:
+    """Build matrix rows for all shipped entity pipelines."""
+    rows: list[dict[str, str]] = []
     for config_path in _entity_config_paths():
-        payload = _load_yaml(config_path)
-        pipeline = payload.get("pipeline")
-        if not isinstance(pipeline, dict):
+        pipeline_inputs = _entity_pipeline_inputs(config_path)
+        if pipeline_inputs is None:
             continue
-        pipeline_name = str(pipeline.get("pipeline_name", "")).strip()
-        if not pipeline_name:
-            continue
-        provider = str(payload.get("provider", "")).strip()
-        entity = str(payload.get("entity", "")).strip()
-        schema = ENTITY_SILVER_SCHEMA_REGISTRY.get(pipeline_name)
-        if schema is None:
-            raise ValueError(f"Missing Silver schema registry entry for {pipeline_name}")
+        pipeline_name, provider, entity, schema = pipeline_inputs
         rows.extend(
             _build_entity_rows_for_pipeline(
                 pipeline_name=pipeline_name,
@@ -475,23 +511,57 @@ def build_field_matrix_rows() -> list[dict[str, str]]:
                 schema=schema,
             )
         )
+    return rows
 
+
+def _entity_pipeline_inputs(
+    config_path: Path,
+) -> tuple[str, str, str, Any] | None:
+    """Resolve matrix inputs for one entity pipeline config."""
+    payload = _load_yaml(config_path)
+    pipeline = payload.get("pipeline")
+    if not isinstance(pipeline, dict):
+        return None
+    pipeline_name = str(pipeline.get("pipeline_name", "")).strip()
+    if not pipeline_name:
+        return None
+    schema = ENTITY_SILVER_SCHEMA_REGISTRY.get(pipeline_name)
+    if schema is None:
+        raise ValueError(f"Missing Silver schema registry entry for {pipeline_name}")
+    provider = str(payload.get("provider", "")).strip()
+    entity = str(payload.get("entity", "")).strip()
+    return pipeline_name, provider, entity, schema
+
+
+def _composite_field_matrix_rows() -> list[dict[str, str]]:
+    """Build matrix rows for all shipped composite pipelines."""
+    rows: list[dict[str, str]] = []
     for config_path in _composite_config_paths():
-        payload = _load_yaml(config_path)
-        composite = payload.get("composite")
-        if not isinstance(composite, dict):
+        composite_inputs = _composite_pipeline_inputs(config_path)
+        if composite_inputs is None:
             continue
-        pipeline_name = str(composite.get("name", "")).strip()
-        if not pipeline_name:
-            continue
+        pipeline_name, payload = composite_inputs
         rows.extend(
             _build_composite_rows_for_pipeline(
                 pipeline_name=pipeline_name,
                 payload=payload,
             )
         )
-
     return rows
+
+
+def _composite_pipeline_inputs(
+    config_path: Path,
+) -> tuple[str, dict[str, object]] | None:
+    """Resolve matrix inputs for one composite pipeline config."""
+    payload = _load_yaml(config_path)
+    composite = payload.get("composite")
+    if not isinstance(composite, dict):
+        return None
+    pipeline_name = str(composite.get("name", "")).strip()
+    if not pipeline_name:
+        return None
+    return pipeline_name, payload
 
 
 def build_entity_profile_coverage_kpi(
@@ -615,61 +685,103 @@ def _control_plane_surface_statuses() -> list[dict[str, object]]:
     )
 
     return [
-        {
-            "seam": "run_manifest_spec",
-            "covered": (
-                manifest_status["code_provenance"] == {"config_hash": "deadbeef"}
-                and manifest_status["planned_artifacts"][0]["layer"] == "bronze"
-                and manifest_status["source_refs"][0]["input_snapshots"][0]["snapshot_id"]
-                == "a"
-            ),
-        },
-        {
-            "seam": "run_ledger_payload",
-            "covered": (
-                ledger_status["run_id"] == "11111111-1111-1111-1111-111111111111"
-                and ledger_status["occurred_at"] == "2026-04-08T12:53:47Z"
-                and ledger_status["metrics_snapshot"] == {"records_a": 1, "records_b": 2}
-            ),
-        },
-        {
-            "seam": "execution_identity_payload",
-            "covered": (
-                execution_identity_status["contract_ref"] == "chembl.activity"
-                and execution_identity_status["contract_version"] == "2.0.0"
-                and execution_identity_status["exact_replay"] == "true"
-            ),
-        },
-        {
-            "seam": "runtime_anchor_payload",
-            "covered": (
-                runtime_anchor_status["effective_config_hash"]
-                == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                and runtime_anchor_status["contract_ref"] == "chembl.activity"
-                and runtime_anchor_status["contract_version"] == "2.0.0"
-            ),
-        },
-        {
-            "seam": "checkpoint_expected_context",
-            "covered": (
-                checkpoint_context.effective_config_hash
-                == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                and checkpoint_context.contract_ref == "chembl.activity"
-                and checkpoint_context.contract_version == "2.0.0"
-            ),
-        },
-        {
-            "seam": "checkpoint_anchor_merge",
-            "covered": (
-                merged_checkpoint.effective_config_hash
-                == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                and merged_checkpoint.contract_ref == "chembl.activity"
-                and merged_checkpoint.contract_version == "2.0.0"
-                and merged_checkpoint.manifest_id == "manifest-123"
-                and merged_checkpoint.composite_run_identity == "run-42"
-            ),
-        },
+        _control_plane_status(
+            "run_manifest_spec",
+            _manifest_status_covered(manifest_status),
+        ),
+        _control_plane_status(
+            "run_ledger_payload",
+            _ledger_status_covered(ledger_status),
+        ),
+        _control_plane_status(
+            "execution_identity_payload",
+            _execution_identity_status_covered(execution_identity_status),
+        ),
+        _control_plane_status(
+            "runtime_anchor_payload",
+            _runtime_anchor_status_covered(runtime_anchor_status),
+        ),
+        _control_plane_status(
+            "checkpoint_expected_context",
+            _checkpoint_context_covered(checkpoint_context),
+        ),
+        _control_plane_status(
+            "checkpoint_anchor_merge",
+            _checkpoint_anchor_merge_covered(merged_checkpoint),
+        ),
     ]
+
+
+def _control_plane_status(seam: str, covered: bool) -> dict[str, object]:
+    """Build one control-plane normalization seam status row."""
+    return {"seam": seam, "covered": covered}
+
+
+def _manifest_status_covered(manifest_status: dict[str, object]) -> bool:
+    """Return whether manifest normalization preserves canonical ordering/seams."""
+    planned_artifacts = manifest_status.get("planned_artifacts", [])
+    source_refs = manifest_status.get("source_refs", [])
+    if not isinstance(planned_artifacts, list) or not isinstance(source_refs, list):
+        return False
+    return (
+        manifest_status.get("code_provenance") == {"config_hash": "deadbeef"}
+        and bool(planned_artifacts)
+        and planned_artifacts[0].get("layer") == "bronze"
+        and bool(source_refs)
+        and source_refs[0].get("input_snapshots", [])[0].get("snapshot_id") == "a"
+    )
+
+
+def _ledger_status_covered(ledger_status: dict[str, object]) -> bool:
+    """Return whether ledger normalization preserves canonical ordering/format."""
+    return (
+        ledger_status.get("run_id") == "11111111-1111-1111-1111-111111111111"
+        and ledger_status.get("occurred_at") == "2026-04-08T12:53:47Z"
+        and ledger_status.get("metrics_snapshot") == {"records_a": 1, "records_b": 2}
+    )
+
+
+def _execution_identity_status_covered(
+    execution_identity_status: dict[str, object],
+) -> bool:
+    """Return whether execution identity normalization produces canonical values."""
+    return (
+        execution_identity_status.get("contract_ref") == "chembl.activity"
+        and execution_identity_status.get("contract_version") == "2.0.0"
+        and execution_identity_status.get("exact_replay") == "true"
+    )
+
+
+def _runtime_anchor_status_covered(runtime_anchor_status: dict[str, object]) -> bool:
+    """Return whether runtime anchor normalization produces canonical values."""
+    return (
+        runtime_anchor_status.get("effective_config_hash")
+        == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        and runtime_anchor_status.get("contract_ref") == "chembl.activity"
+        and runtime_anchor_status.get("contract_version") == "2.0.0"
+    )
+
+
+def _checkpoint_context_covered(checkpoint_context: object) -> bool:
+    """Return whether checkpoint context normalization preserves canonical anchors."""
+    return (
+        checkpoint_context.effective_config_hash
+        == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        and checkpoint_context.contract_ref == "chembl.activity"
+        and checkpoint_context.contract_version == "2.0.0"
+    )
+
+
+def _checkpoint_anchor_merge_covered(merged_checkpoint: object) -> bool:
+    """Return whether merged checkpoint anchors preserve canonical values."""
+    return (
+        merged_checkpoint.effective_config_hash
+        == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        and merged_checkpoint.contract_ref == "chembl.activity"
+        and merged_checkpoint.contract_version == "2.0.0"
+        and merged_checkpoint.manifest_id == "manifest-123"
+        and merged_checkpoint.composite_run_identity == "run-42"
+    )
 
 
 def build_control_plane_normalization_coverage_kpi() -> dict[str, object]:
@@ -811,7 +923,17 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
     headers = list(CSV_COLUMNS)
     surface_kpis = build_surface_coverage_kpis(rows)
     semantic_kpis = build_profile_semantic_invariants()
-    lines = [
+    lines = _markdown_intro_lines()
+    lines.extend(_surface_kpi_lines(surface_kpis))
+    lines.extend(_semantic_kpi_lines(semantic_kpis))
+    lines.extend(_markdown_table_lines(rows, headers))
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _markdown_intro_lines() -> list[str]:
+    """Render static markdown prelude for normalization matrix artifacts."""
+    return [
         "# Pipeline Normalization Field Matrix",
         "",
         "Generated from active pipeline configs, Silver schemas, and current normalization code paths.",
@@ -831,35 +953,58 @@ def render_markdown(rows: list[dict[str, str]]) -> str:
         ),
         "",
     ]
-    for kpi in surface_kpis:
-        lines.append(
+
+
+def _surface_kpi_lines(surface_kpis: list[dict[str, object]]) -> list[str]:
+    """Render surface coverage KPI bullet lines."""
+    return [
+        (
             f"- {kpi['surface']} / {kpi['name']}: `{kpi['value_pct']:.2f}%` "
             f"(`{kpi['numerator']}` / `{kpi['denominator']}`) {kpi['description']}"
         )
-    lines.extend(["", "## Semantic Invariant Summary", ""])
-    for kpi in semantic_kpis:
-        regressions = list(kpi.get("regressions", []))
-        regression_note = (
-            f" Regressions: {', '.join(regressions)}."
-            if regressions
-            else ""
-        )
-        lines.append(
-            f"- {kpi['surface']} / {kpi['name']}: `{kpi['value_pct']:.2f}%` "
-            f"(`{kpi['numerator']}` / `{kpi['denominator']}`) {kpi['description']}"
-            f"{regression_note}"
-        )
-    lines.extend(
-        [
-            "",
-            "| " + " | ".join(headers) + " |",
-            "| " + " | ".join("---" for _ in headers) + " |",
-        ]
+        for kpi in surface_kpis
+    ]
+
+
+def _semantic_kpi_lines(semantic_kpis: list[dict[str, object]]) -> list[str]:
+    """Render semantic invariant KPI bullet lines."""
+    lines = ["", "## Semantic Invariant Summary", ""]
+    lines.extend(_semantic_kpi_line(kpi) for kpi in semantic_kpis)
+    return lines
+
+
+def _semantic_kpi_line(kpi: dict[str, object]) -> str:
+    """Render one semantic invariant KPI line with optional regressions."""
+    regressions = list(kpi.get("regressions", []))
+    regression_note = (
+        f" Regressions: {', '.join(regressions)}."
+        if regressions
+        else ""
     )
-    for row in rows:
-        lines.append("| " + " | ".join(row[header] for header in headers) + " |")
-    lines.append("")
-    return "\n".join(lines)
+    return (
+        f"- {kpi['surface']} / {kpi['name']}: `{kpi['value_pct']:.2f}%` "
+        f"(`{kpi['numerator']}` / `{kpi['denominator']}`) {kpi['description']}"
+        f"{regression_note}"
+    )
+
+
+def _markdown_table_lines(
+    rows: list[dict[str, str]],
+    headers: list[str],
+) -> list[str]:
+    """Render markdown table header and all matrix rows."""
+    lines = [
+        "",
+        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join("---" for _ in headers) + " |",
+    ]
+    lines.extend(_markdown_table_row(row, headers) for row in rows)
+    return lines
+
+
+def _markdown_table_row(row: dict[str, str], headers: list[str]) -> str:
+    """Render one markdown table row."""
+    return "| " + " | ".join(row[header] for header in headers) + " |"
 
 
 def build_artifacts() -> dict[str, str]:
