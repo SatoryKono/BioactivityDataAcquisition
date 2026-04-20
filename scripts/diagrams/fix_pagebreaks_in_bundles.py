@@ -37,6 +37,40 @@ def _write_bundle_text(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def _heading_text(line: str) -> str | None:
+    match = re.match(r"^## (.+)$", line)
+    if match is None:
+        return None
+    return match.group(1).strip()
+
+
+def _normalized_subheading(heading_text: str) -> str | None:
+    if heading_text in ("Описание", "Метаданные"):
+        return f"### {heading_text}"
+    return None
+
+
+def _is_diagram_heading(heading_text: str) -> bool:
+    return heading_text not in {"Table of Contents", "Описание", "Метаданные"}
+
+
+def _already_has_diagram_heading(lines: list[str]) -> bool:
+    return any(
+        re.match(r"^## (?!Table of Contents)", existing_line)
+        for existing_line in lines
+        if existing_line.startswith("## ")
+    )
+
+
+def _trim_trailing_pagebreak_context(lines: list[str]) -> None:
+    while lines and lines[-1].strip() == "":
+        lines.pop()
+    while lines and lines[-1].strip() == "---":
+        lines.pop()
+    while lines and lines[-1].strip() == "":
+        lines.pop()
+
+
 def fix_bundle(md_path: Path) -> int:
     safe_path = _safe_bundle_path(md_path)
     text = safe_path.read_text(encoding="utf-8")
@@ -63,13 +97,13 @@ def fix_bundle(md_path: Path) -> int:
             continue
 
         # Detect diagram headings (## name, but not ## Table of Contents, ## Описание, ## Метаданные)
-        heading_match = re.match(r"^## (.+)$", line)
-        if heading_match:
-            heading_text = heading_match.group(1).strip()
+        heading_text = _heading_text(line)
+        if heading_text is not None:
+            normalized_subheading = _normalized_subheading(heading_text)
 
             # Normalise sub-headings to ###
-            if heading_text in ("Описание", "Метаданные"):
-                out.append(f"### {heading_text}")
+            if normalized_subheading is not None:
+                out.append(normalized_subheading)
                 i += 1
                 changes += 1
                 continue
@@ -86,19 +120,8 @@ def fix_bundle(md_path: Path) -> int:
 
             if first_diagram_heading_seen and not is_toc_or_header:
                 # Insert page break before this heading (except very first)
-                if any(
-                    re.match(r"^## (?!Table of Contents)", existing_line)
-                    for existing_line in out
-                    if existing_line.startswith("## ")
-                ):
-                    # Remove trailing blank lines before inserting page break
-                    while out and out[-1].strip() == "":
-                        out.pop()
-                    # Remove trailing --- separators
-                    while out and out[-1].strip() == "---":
-                        out.pop()
-                    while out and out[-1].strip() == "":
-                        out.pop()
+                if _already_has_diagram_heading(out):
+                    _trim_trailing_pagebreak_context(out)
                     out.append(PAGE_BREAK)
                     changes += 1
 

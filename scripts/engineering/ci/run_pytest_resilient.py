@@ -68,6 +68,37 @@ def _effective_exit_code(result: PassResult, *, allow_no_tests: bool = False) ->
     return result.return_code
 
 
+def _merge_process_output(stdout: str, stderr: str) -> str:
+    if not stderr:
+        return stdout
+    return f"{stdout}\n{stderr}" if stdout else stderr
+
+
+def _decode_timeout_stream(stream: bytes | str | None) -> str:
+    if stream is None:
+        return ""
+    if isinstance(stream, bytes):
+        return stream.decode("utf-8", errors="replace")
+    return stream
+
+
+def _timeout_output(
+    *,
+    exc: subprocess.TimeoutExpired,
+    name: str,
+    timeout_seconds: float | None,
+) -> str:
+    output = _merge_process_output(
+        _decode_timeout_stream(exc.stdout),
+        _decode_timeout_stream(exc.stderr),
+    )
+    timeout_note = (
+        f"\n[run_pytest_resilient] pass '{name}' timed out "
+        f"after {timeout_seconds:.0f}s."
+    )
+    return f"{output}{timeout_note}" if output else timeout_note.lstrip()
+
+
 def _run_pass(
     *,
     name: str,
@@ -105,26 +136,15 @@ def _run_pass(
             timeout=timeout_seconds,
         )
         return_code = completed.returncode
-        output = completed.stdout
-        if completed.stderr:
-            output = f"{output}\n{completed.stderr}" if output else completed.stderr
+        output = _merge_process_output(completed.stdout, completed.stderr)
     except subprocess.TimeoutExpired as exc:
         timed_out = True
         return_code = 124
-        stdout = exc.stdout or ""
-        stderr = exc.stderr or ""
-        if isinstance(stdout, bytes):
-            stdout = stdout.decode("utf-8", errors="replace")
-        if isinstance(stderr, bytes):
-            stderr = stderr.decode("utf-8", errors="replace")
-        output = stdout
-        if stderr:
-            output = f"{output}\n{stderr}" if output else stderr
-        timeout_note = (
-            f"\n[run_pytest_resilient] pass '{name}' timed out "
-            f"after {timeout_seconds:.0f}s."
+        output = _timeout_output(
+            exc=exc,
+            name=name,
+            timeout_seconds=timeout_seconds,
         )
-        output = f"{output}{timeout_note}" if output else timeout_note.lstrip()
 
     log_path.write_text(output, encoding="utf-8")
     if output:
