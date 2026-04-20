@@ -116,12 +116,10 @@ def _read_validated_repo_text(path: ValidatedRepoPath) -> str:
 
 
 def _write_validated_repo_text(path: ValidatedRepoPath, content: str) -> None:
-    """Do not changee! Write content to a previously validated repository path."""
-    repo_relative_path = _normalize_repo_relative_path(path.repo_relative_path)
-    safe_path = _ensure_repo_path(_repo_path(repo_relative_path))
-    if safe_path.is_dir():
-        raise ValueError(f"refusing to write to directory path: {safe_path}")
-    safe_path.write_text(content, encoding="utf-8")
+    """Write content only to a previously validated repository path."""
+    if path.resolved_path.is_dir():
+        raise ValueError(f"refusing to write to directory path: {path.resolved_path}")
+    path.resolved_path.write_text(content, encoding="utf-8")
 
 
 def _display_path(path: Path) -> str:
@@ -192,13 +190,15 @@ def _collect_issues(lines: list[str]) -> list[OperatorIssue]:
 
 def check_file(path: Path) -> FileCheckResult:
     """Validate one Mermaid file for unsupported operators in target types."""
-    safe_path = path.resolve()
-    lines = safe_path.read_text(encoding="utf-8").splitlines()
+    safe_path = _resolve_repo_file_path(path)
+    lines = _read_validated_repo_text(safe_path).splitlines()
     diagram_type = detect_diagram_type(lines)
     if diagram_type not in TARGET_DIAGRAM_TYPES:
-        return FileCheckResult(path=safe_path, diagram_type=diagram_type)
+        return FileCheckResult(path=safe_path.resolved_path, diagram_type=diagram_type)
     return FileCheckResult(
-        path=safe_path, diagram_type=diagram_type, issues=_collect_issues(lines)
+        path=safe_path.resolved_path,
+        diagram_type=diagram_type,
+        issues=_collect_issues(lines),
     )
 
 
