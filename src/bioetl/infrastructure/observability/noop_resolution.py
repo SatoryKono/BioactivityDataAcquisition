@@ -17,5 +17,7 @@ def resolve_optional_observability_ports(
 ) -> tuple[TracingPort, MetricsPort]:
     """Resolve optional observability ports to stable null-object implementations."""
     resolved_tracer = tracer if tracer is not None else NoOpTracing()
-    resolved_metrics = metrics if metrics is not None else NoOpMetrics(warn_on_use=False)
+    resolved_metrics = (
+        metrics if metrics is not None else NoOpMetrics(warn_on_use=False)
+    )
     return resolved_tracer, resolved_metrics

@@ -135,9 +135,7 @@ async def test_fetch_routes_to_fetch_filtered_when_ids_passed(adapter):
 @pytest.mark.asyncio
 async def test_fetch_filtered_unsupported_entity_raises(adapter):
     with pytest.raises(ValueError, match="Unsupported entity type"):
-        await _drain_async_iter(
-            adapter.fetch_filtered("unknown", ["P1"], "accession")
-        )
+        await _drain_async_iter(adapter.fetch_filtered("unknown", ["P1"], "accession"))
 
 
 @pytest.mark.asyncio

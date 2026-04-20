@@ -468,7 +468,9 @@ def _cached_adapter_instantiations(
     """Collect adapter instantiations from a prebuilt AST cache."""
     violations: list[str] = []
     for py_file, tree in source_ast_cache.items():
-        if py_file.name.startswith("__") or not _file_in_forbidden_layer(src_dir, py_file):
+        if py_file.name.startswith("__") or not _file_in_forbidden_layer(
+            src_dir, py_file
+        ):
             continue
         violations.extend(_adapter_instantiations_in_tree(src_dir, py_file, tree))
     return violations
