@@ -232,6 +232,12 @@ def _run_smoke_test_loop(
     closed_channels: set[str] = set()
     start = time.monotonic()
 
+    # Initialize result variables before try block to ensure they're available in except
+    result_ready_seen = False
+    result_handshake_sent = False
+    result_handshake_deadline = None
+    result_now = start
+    
     try:
         while True:
             now = time.monotonic()
@@ -275,7 +281,12 @@ def _run_smoke_test_loop(
                 handshake_timeout_seconds=handshake_timeout_seconds,
                 handshake_deadline=handshake_deadline,
             )
-        return ready_seen, handshake_sent, handshake_deadline, now
+            # Update result variables inside the loop
+            result_ready_seen = ready_seen
+            result_handshake_sent = handshake_sent
+            result_handshake_deadline = handshake_deadline
+            result_now = now
+        return result_ready_seen, result_handshake_sent, result_handshake_deadline, result_now
     except ValueError as exc:
         raise ValueError(f"sonarqube MCP smoke received invalid stdout transport output: {exc}") from exc
 
