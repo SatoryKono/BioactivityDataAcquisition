@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from enum import Enum
 
 from bioetl.application.services.checkpoint_compatibility_runtime import (
-    CheckpointExecutionIdentityFallbackInput,
-    ExecutionIdentityCompatibilityInput,
+    CheckpointExecutionIdentityFallbackContext,
+    ExecutionIdentityCompatibilityContext,
     IdentityDetailsRequest,
     build_identity_details,
     check_config_compatibility,
@@ -105,11 +105,11 @@ class CheckpointCompatibilityV2Service:
             checkpoint_hash=checkpoint_identity.effective_config_hash,
         )
         execution_identity_compatibility = check_execution_identity_compatibility(
-            current=ExecutionIdentityCompatibilityInput(
+            current=ExecutionIdentityCompatibilityContext(
                 composite_run_identity=current_identity.composite_run_identity,
                 execution_fingerprint=current_identity.execution_fingerprint,
                 manifest_id=current_identity.manifest_id,
-                fallback=CheckpointExecutionIdentityFallbackInput(
+                fallback=CheckpointExecutionIdentityFallbackContext(
                     pipeline_name=current_identity.pipeline_name,
                     run_type=current_identity.run_type,
                     pipeline_version=current_identity.pipeline_version,
@@ -128,11 +128,11 @@ class CheckpointCompatibilityV2Service:
                     ),
                 ),
             ),
-            checkpoint=ExecutionIdentityCompatibilityInput(
+            checkpoint=ExecutionIdentityCompatibilityContext(
                 composite_run_identity=checkpoint_identity.composite_run_identity,
                 execution_fingerprint=checkpoint_identity.execution_fingerprint,
                 manifest_id=checkpoint_identity.manifest_id,
-                fallback=CheckpointExecutionIdentityFallbackInput(
+                fallback=CheckpointExecutionIdentityFallbackContext(
                     pipeline_name=checkpoint_identity.pipeline_name,
                     run_type=checkpoint_identity.run_type,
                     pipeline_version=checkpoint_identity.pipeline_version,

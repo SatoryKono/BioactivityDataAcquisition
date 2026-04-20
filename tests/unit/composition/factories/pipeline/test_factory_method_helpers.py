@@ -206,24 +206,26 @@ class TestCreatePipelineInstanceWithServices:
         )
 
         assert result is expected_pipeline
-        mock_create_pipeline_with_services.assert_called_once_with(
-            pipeline_name="chembl_activity",
-            pipeline_class=pipeline_class,
-            provider="chembl",
-            create_data_source_fn=create_data_source_fn,
-            transformer_class=transformer_class,
-            pandera_silver_schema=factory_context.pandera_silver_schema,
-            run_id=request.run_id,
-            runtime=request.runtime,
-            settings=request.settings,
-            logger=request.logger,
-            config=request.config,
-            filter_config=request.filter_config,
-            tracer=request.tracer,
-            dq_monitor=request.dq_monitor,
-            metrics=request.metrics,
-            cached_bronze=request.cached_bronze,
-        )
+        # The function now passes parameters as structured objects
+        call_kwargs = mock_create_pipeline_with_services.call_args.kwargs
+        inputs = call_kwargs["inputs"]
+        
+        assert inputs.pipeline_name == "chembl_activity"
+        assert inputs.pipeline_class is pipeline_class
+        assert inputs.provider == "chembl"
+        assert inputs.create_data_source_fn is create_data_source_fn
+        assert inputs.transformer_class is transformer_class
+        assert inputs.pandera_silver_schema is factory_context.pandera_silver_schema
+        assert inputs.request.run_id == request.run_id
+        assert inputs.request.runtime is request.runtime
+        assert inputs.request.settings is request.settings
+        assert inputs.request.logger is request.logger
+        assert inputs.request.config is request.config
+        assert inputs.request.filter_config is request.filter_config
+        assert inputs.request.tracer is request.tracer
+        assert inputs.request.dq_monitor is request.dq_monitor
+        assert inputs.request.metrics is request.metrics
+        assert inputs.request.cached_bronze is request.cached_bronze
 
     @patch(
         "bioetl.composition.factories.pipeline.factory_method_helpers.create_pipeline_with_services"
@@ -255,11 +257,14 @@ class TestCreatePipelineInstanceWithServices:
             request=request,
         )
 
+        # The function now passes parameters as structured objects
         call_kwargs = mock_create_pipeline_with_services.call_args.kwargs
-        assert call_kwargs["manifest_id"] == "manifest-123"
-        assert call_kwargs["config_hash"] == "hash-123"
-        assert call_kwargs["dq_contract_compatibility_hash"] == "dq-hash-123"
-        assert call_kwargs["effective_config_artifact_id"] == "artifact-123"
+        inputs = call_kwargs["inputs"]
+        
+        assert inputs.request.manifest_id == "manifest-123"
+        assert inputs.request.config_hash == "hash-123"
+        assert inputs.request.dq_contract_compatibility_hash == "dq-hash-123"
+        assert inputs.request.effective_config_artifact_id == "artifact-123"
 
 
 @pytest.mark.unit

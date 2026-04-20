@@ -10,7 +10,7 @@ import polars as pl
 
 from bioetl.application.composite.join_planner_helpers import (
     EnricherJoinMetadataContext,
-    PrepareJoinFramesRequest,
+    PrepareJoinFramesContext,
     build_enricher_join_metadata,
     prepare_join_frames,
 )
@@ -83,7 +83,7 @@ def build_prepared_enricher_join_context(
         aggregator=aggregator,
     )
     prepared_merged_df, prepared_enricher_df = prepare_join_frames(
-        PrepareJoinFramesRequest(
+        PrepareJoinFramesContext(
             merged_df=merged_df,
             right_df=prepared_enricher_df,
             left_join_keys=metadata.join_keys_list,

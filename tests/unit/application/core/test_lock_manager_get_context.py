@@ -10,7 +10,7 @@ import pytest
 
 from bioetl.application.core.lifecycle.lock_manager import (
     LockCoordinator,
-    LockCoordinatorCreateRequest,
+    LockCoordinatorCreateContext,
 )
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
@@ -61,7 +61,7 @@ def _build_lock_manager(
     run_type: RunType,
 ) -> LockCoordinator:
     return LockCoordinator.create(
-        LockCoordinatorCreateRequest(
+        LockCoordinatorCreateContext(
             lock_port=mock_lock_port,
             run_id=run_id,
             provider="chembl",

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.lifecycle import LockCoordinator
 from bioetl.application.core.lifecycle.lock_manager import (
-    LockCoordinatorCreateRequest,
+    LockCoordinatorCreateContext,
 )
 from bioetl.application.core.preflight import (
     HealthAggregator,
@@ -68,7 +68,7 @@ def build_lock_manager(
     """Build the lock coordinator for one assembled runner."""
     pipeline = context.pipeline
     return LockCoordinator.create(
-        LockCoordinatorCreateRequest(
+        LockCoordinatorCreateContext(
             lock_port=pipeline.services.lock,
             run_id=pipeline.context.run_id,
             provider=pipeline.config.provider,

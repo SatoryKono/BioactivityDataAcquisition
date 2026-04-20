@@ -9,7 +9,7 @@ import polars as pl
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicatorService
 from bioetl.application.composite.join_planner_helpers import (
-    PrepareJoinFramesRequest,
+    PrepareJoinFramesContext,
     prepare_join_frames,
 )
 from bioetl.application.composite.protocols import JoinKeyResolverProtocol
@@ -81,7 +81,7 @@ def prepare_dependency_join_frames(
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Prepare left and right DataFrames for a dependency join."""
     return prepare_join_frames(
-        PrepareJoinFramesRequest(
+        PrepareJoinFramesContext(
             merged_df=merged_df,
             right_df=dep_df,
             left_join_keys=left_join_keys,

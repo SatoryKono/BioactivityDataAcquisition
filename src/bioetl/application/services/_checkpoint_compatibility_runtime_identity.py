@@ -29,7 +29,7 @@ _CANONICAL_ONLY_IDENTITY_FIELDS: Final[frozenset[str]] = frozenset(
 
 
 @dataclass(frozen=True, slots=True)
-class CheckpointExecutionIdentityFallbackInput:
+class CheckpointExecutionIdentityFallbackContext:
     """Canonical inputs for checkpoint execution-identity fallback comparison."""
 
     pipeline_name: str | None
@@ -45,19 +45,19 @@ class CheckpointExecutionIdentityFallbackInput:
 
 
 @dataclass(frozen=True, slots=True)
-class ExecutionIdentityCompatibilityInput:
+class ExecutionIdentityCompatibilityContext:
     """Canonical runtime/checkpoint identity input bundle."""
 
     composite_run_identity: str | None
     execution_fingerprint: str | None
     manifest_id: str | None
-    fallback: CheckpointExecutionIdentityFallbackInput
+    fallback: CheckpointExecutionIdentityFallbackContext
 
 
 def check_execution_identity_compatibility(
     *,
-    current: ExecutionIdentityCompatibilityInput,
-    checkpoint: ExecutionIdentityCompatibilityInput,
+    current: ExecutionIdentityCompatibilityContext,
+    checkpoint: ExecutionIdentityCompatibilityContext,
 ) -> JsonDict:
     """Check execution identity using canonical manifest and fallback anchors."""
     composite_identity_result = _check_composite_run_identity_compatibility(
@@ -200,7 +200,7 @@ def _build_checkpoint_execution_identity_payload(
 
 
 def _compute_checkpoint_execution_identity_fallback_fingerprint(
-    request: CheckpointExecutionIdentityFallbackInput,
+    request: CheckpointExecutionIdentityFallbackContext,
 ) -> str | None:
     """Build the canonical checkpoint execution-identity fallback fingerprint."""
     payload = _build_checkpoint_execution_identity_payload(
@@ -224,8 +224,8 @@ def _compute_checkpoint_execution_identity_fallback_fingerprint(
 
 def _check_checkpoint_execution_identity_fallback(
     *,
-    current: CheckpointExecutionIdentityFallbackInput,
-    checkpoint: CheckpointExecutionIdentityFallbackInput,
+    current: CheckpointExecutionIdentityFallbackContext,
+    checkpoint: CheckpointExecutionIdentityFallbackContext,
 ) -> JsonDict | None:
     """Compare canonical checkpoint execution-identity fallback fingerprints."""
     current_fingerprint = _compute_checkpoint_execution_identity_fallback_fingerprint(
@@ -271,8 +271,8 @@ def _compute_degraded_runtime_anchor_fingerprint(
 
 def _check_degraded_runtime_anchor_compatibility(
     *,
-    current: ExecutionIdentityCompatibilityInput,
-    checkpoint: ExecutionIdentityCompatibilityInput,
+    current: ExecutionIdentityCompatibilityContext,
+    checkpoint: ExecutionIdentityCompatibilityContext,
 ) -> JsonDict | None:
     """Compare degraded runtime-anchor fingerprints when both anchors exist."""
     current_fingerprint = _compute_degraded_runtime_anchor_fingerprint(

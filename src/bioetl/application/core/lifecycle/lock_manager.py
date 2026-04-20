@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
-class LockCoordinatorCreateRequest:
+class LockCoordinatorCreateContext:
     lock_port: LockPort
     run_id: RunID
     provider: str
@@ -117,7 +117,7 @@ class LockCoordinator:
     @classmethod
     def create(
         cls,
-        request: LockCoordinatorCreateRequest,
+        request: LockCoordinatorCreateContext,
     ) -> LockCoordinator:
         """Create a LockCoordinator instance.
 

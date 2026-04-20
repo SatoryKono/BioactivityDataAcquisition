@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
-class BasePublicationTransformerInit:
+class BasePublicationTransformerContext:
     """Typed constructor input for publication transformer wiring."""
 
     provider: str
@@ -72,12 +72,12 @@ class BasePublicationTransformerInit:
 
 
 def _coerce_publication_transformer_init(
-    init: BasePublicationTransformerInit | str | None,
+    init: BasePublicationTransformerContext | str | None,
     /,
     **kwargs: object,
-) -> BasePublicationTransformerInit:
+) -> BasePublicationTransformerContext:
     """Normalize compact and legacy constructor styles to one typed input."""
-    if isinstance(init, BasePublicationTransformerInit):
+    if isinstance(init, BasePublicationTransformerContext):
         if kwargs:
             unexpected = ", ".join(sorted(kwargs))
             raise TypeError(
@@ -90,7 +90,7 @@ def _coerce_publication_transformer_init(
     if not isinstance(provider, str) or not provider:
         raise TypeError(
             "BasePublicationTransformer requires a provider string or "
-            "BasePublicationTransformerInit."
+            "BasePublicationTransformerContext."
         )
 
     unexpected = sorted(
@@ -117,7 +117,7 @@ def _coerce_publication_transformer_init(
             f"{unexpected_args}"
         )
 
-    return BasePublicationTransformerInit(
+    return BasePublicationTransformerContext(
         provider=provider,
         entity_type=cast(str, kwargs.pop("entity_type", "publication")),
         silver_filters=cast(
@@ -271,7 +271,7 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
 
     def __init__(
         self,
-        init: BasePublicationTransformerInit | str | None = None,
+        init: BasePublicationTransformerContext | str | None = None,
         /,
         **kwargs: object,
     ) -> None:

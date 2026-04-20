@@ -117,7 +117,7 @@ class EnricherJoinMetadataContext:
 
 
 @dataclass(frozen=True, slots=True)
-class PrepareJoinFramesRequest:
+class PrepareJoinFramesContext:
     """Typed input bundle for qualified join-frame preparation."""
 
     merged_df: pl.DataFrame
@@ -201,7 +201,7 @@ def prepare_qualified_right_join_dataframe(
 
 
 def prepare_join_frames(
-    request: PrepareJoinFramesRequest,
+    request: PrepareJoinFramesContext,
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Prepare left and right DataFrames for a qualified join."""
     normalized_merged = request.join_key_resolver.normalize_join_key_columns(
