@@ -15,8 +15,9 @@ except ImportError:  # pragma: no cover - direct script execution
 
 
 DESCRIPTION_ROOT = DIAGRAM_ROOT / "descriptions"
-ROOT_INDEX_PATH = DESCRIPTION_ROOT / "INDEX.md"
-CLASS_INDEX_PATH = DESCRIPTION_ROOT / "class" / "INDEX.md"
+INDEX_FILENAME = "INDEX.md"
+ROOT_INDEX_PATH = DESCRIPTION_ROOT / INDEX_FILENAME
+CLASS_INDEX_PATH = DESCRIPTION_ROOT / "class" / INDEX_FILENAME
 TARGETS = ("root", "class")
 VIEW_SUFFIX_ORDER = ("-full", "-overview", "-dataflow", "-domain", "-infra")
 FAMILY_DIR_LABELS = {
@@ -49,7 +50,7 @@ def _generated_at() -> str:
 
 def collect_cards(family: str) -> list[Path]:
     family_dir = DESCRIPTION_ROOT / family
-    return sorted(path for path in family_dir.glob("*.md") if path.name != "INDEX.md")
+    return sorted(path for path in family_dir.glob("*.md") if path.name != INDEX_FILENAME)
 
 
 def _link_from(index_path: Path, target_path: Path) -> str:

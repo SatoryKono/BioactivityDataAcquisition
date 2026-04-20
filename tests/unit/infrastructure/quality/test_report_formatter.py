@@ -142,7 +142,7 @@ class TestCollectAllowances:
     def test_non_dict_allowances_skipped(self) -> None:
         """Non-dict allowances should be skipped."""
         windows = [{"allowances": "invalid"}]
-        total, by_registry, by_group = _collect_allowances(windows)
+        total, _by_registry, _by_group = _collect_allowances(windows)
         assert total == 0
 
     def test_non_int_values_skipped(self) -> None:

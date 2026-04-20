@@ -30,6 +30,7 @@ DEFAULT_OUTPUT = (
     ROOT / "docs" / "02-architecture" / "07-compatibility-facade-snapshot.md"
 )
 _FRONTMATTER_DELIMITER = "---"
+_NONE_BULLET = "- None."
 
 
 def _ensure_repo_path(path: Path) -> Path:
@@ -78,13 +79,13 @@ def _parse_args() -> argparse.Namespace:
 
 def _render_path_list(paths: list[str]) -> list[str]:
     if not paths:
-        return ["- None."]
+        return [_NONE_BULLET]
     return [f"- `{path}`" for path in paths]
 
 
 def _render_measured_only_modules(registry: CompatibilityRegistry) -> list[str]:
     if not registry.measured_only_modules:
-        return ["- None."]
+        return [_NONE_BULLET]
 
     lines: list[str] = []
     for row in registry.measured_only_modules:

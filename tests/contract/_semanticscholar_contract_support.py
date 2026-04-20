@@ -15,6 +15,7 @@ SEMANTICSCHOLAR_API_BASE = "https://api.semanticscholar.org/graph/v1"
 STABLE_DOI = "10.1038/s41586-020-2649-2"
 SEARCH_TITLE = "SARS-CoV-2"
 SEARCH_FIELDS = "paperId,title,externalIds,year"
+JSON_ACCEPT_HEADER = "application/json"
 REQUEST_SPACING_SECONDS = 4.0
 RATE_LIMIT_RETRY_SECONDS = 4.0
 MAX_RATE_LIMIT_ATTEMPTS = 4
@@ -102,7 +103,7 @@ async def semanticscholar_search_payload(
                 "offset": 0,
                 "fields": SEARCH_FIELDS,
             },
-            headers={"Accept": "application/json"},
+            headers={"Accept": JSON_ACCEPT_HEADER},
         )
         _SEARCH_PAYLOAD_CACHE = response.json()
     return _SEARCH_PAYLOAD_CACHE

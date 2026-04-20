@@ -184,7 +184,7 @@ class TestFindIdentifier:
         )
         aff_info = ET.fromstring(xml_str)
         extractor = AuthorExtractor()
-        ident, source = extractor._find_identifier(aff_info)
+        _ident, source = extractor._find_identifier(aff_info)
         assert source == "GRID"
 
     def test_fallback_to_first_available(self) -> None:

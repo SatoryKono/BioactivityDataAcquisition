@@ -119,7 +119,7 @@ class TestValidateRecord:
 
     def test_failed_validation_constraint_violation(self) -> None:
         """Test validation failure due to constraint violation."""
-        record: dict[str, Any] = {"id": "1", "name": "test", "value": -1}  # ge=0
+        record: dict[str, Any] = {"id": "1", "name": "test", "value": -1}
         result = validate_record(record, SampleModel)
 
         assert result.is_valid is False
