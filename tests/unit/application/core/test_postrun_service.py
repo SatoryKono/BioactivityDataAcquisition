@@ -16,7 +16,7 @@ from bioetl.application.core.postrun.service import (
     VacuumResult,
 )
 from tests.unit.application.core.postrun_test_support import (
-    build_test_postrun_service as build_test_postrun_service,
+    build_test_postrun_service as _make_postrun_service,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
@@ -167,7 +167,7 @@ def postrun_service(
     mock_metadata_writer,
 ):
     """Create a PostrunService instance."""
-    return build_test_postrun_service(
+    return _make_postrun_service(
         config=pipeline_config,
         runtime=runtime_config,
         context=mock_context,
@@ -199,7 +199,7 @@ class TestPostrunServiceInit:
         mock_metadata_writer,
     ):
         """Test postrun service initializes correctly."""
-        service = build_test_postrun_service(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime_config,
             context=mock_context,
@@ -381,7 +381,7 @@ class TestPostrunServiceVacuum:
             dry_run=False,
         )
 
-        service = build_test_postrun_service(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime,
             context=mock_context,
@@ -427,7 +427,7 @@ class TestPostrunServiceVacuum:
             dry_run=False,
         )
 
-        service = build_test_postrun_service(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime,
             context=mock_context,
@@ -526,7 +526,7 @@ class TestPostrunServiceMetadata:
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, skip_gold=True)
         mock_storage.get_table_path = MagicMock(return_value="test-output/test_gold")
 
-        service = build_test_postrun_service(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime,
             context=mock_context,
@@ -658,7 +658,7 @@ class TestPostrunServiceIntegrationWithDataQualityService:
             entity_type=pipeline_config.entity_type,
         )
 
-        service = build_test_postrun_service(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime_config,
             context=mock_context,
@@ -707,7 +707,7 @@ class TestPostrunServiceIntegrationWithDataQualityService:
             entity_type=pipeline_config.entity_type,
         )
 
-        service = build_test_postrun_service(
+        service = _make_postrun_service(
             config=pipeline_config,
             runtime=runtime_config,
             context=mock_context,
