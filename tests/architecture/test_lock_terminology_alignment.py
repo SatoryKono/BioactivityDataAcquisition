@@ -34,7 +34,7 @@ _LOCK_SURFACE_FILES = (
 )
 
 _FORBIDDEN_LOCK_DISTRIBUTED_PATTERN = re.compile(
-    r"distributed(?:\s|-){0,2}(?:lock|locking)|(?:lock|locking)(?:\s|-){0,2}distributed",
+    r"distributed(?:[\s-]){0,2}(?:lock|locking)|(?:lock|locking)(?:[\s-]){0,2}distributed",
     flags=re.IGNORECASE,
 )
 
