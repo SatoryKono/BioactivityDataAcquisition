@@ -575,6 +575,7 @@ class MockFilterableDataSource:
             yield doc
 
     async def fetch(self, entity_type: str, **kwargs):
+        del entity_type, kwargs
         async for doc in self._delegate_documents():
             yield doc
 
@@ -585,7 +586,8 @@ class MockFilterableDataSource:
         filter_field: str,
         limit: int | None = None,
     ):
-        async for doc in self._delegate_documents():
+        del filter_ids, filter_field, limit
+        async for doc in self.fetch(entity_type=entity_type):
             yield doc
 
     async def fetch_multi_filtered(
@@ -594,7 +596,8 @@ class MockFilterableDataSource:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ):
-        async for doc in self._delegate_documents():
+        del filters, limit
+        async for doc in self.fetch(entity_type=entity_type):
             yield doc
 
     async def fetch_filtered_with_fallback(
@@ -605,7 +608,8 @@ class MockFilterableDataSource:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ):
-        async for doc in self._delegate_documents():
+        del filter_ids, filter_field, fallback_mapping, limit
+        async for doc in self.fetch(entity_type=entity_type):
             yield doc
 
 

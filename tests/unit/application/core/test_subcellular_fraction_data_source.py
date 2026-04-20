@@ -64,6 +64,7 @@ class MockFilterableDataSource:
             yield assay
 
     async def fetch(self, entity_type: str, **kwargs):
+        del entity_type, kwargs
         async for assay in self._delegate_assays():
             yield assay
 
@@ -74,7 +75,8 @@ class MockFilterableDataSource:
         filter_field: str,
         limit: int | None = None,
     ):
-        async for assay in self._delegate_assays():
+        del filter_ids, filter_field, limit
+        async for assay in self.fetch(entity_type=entity_type):
             yield assay
 
     async def fetch_multi_filtered(
@@ -83,7 +85,8 @@ class MockFilterableDataSource:
         filters: dict[str, list[str]],
         limit: int | None = None,
     ):
-        async for assay in self._delegate_assays():
+        del filters, limit
+        async for assay in self.fetch(entity_type=entity_type):
             yield assay
 
     async def fetch_filtered_with_fallback(
@@ -94,7 +97,8 @@ class MockFilterableDataSource:
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ):
-        async for assay in self._delegate_assays():
+        del filter_ids, filter_field, fallback_mapping, limit
+        async for assay in self.fetch(entity_type=entity_type):
             yield assay
 
 

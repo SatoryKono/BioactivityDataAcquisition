@@ -70,6 +70,9 @@ class MockCircuitBreaker:
     """Mock circuit breaker for testing."""
 
     def __init__(self) -> None:
+        self._reset_state()
+
+    def _reset_state(self) -> None:
         self._state = CircuitBreakerState.CLOSED
         self._failure_count = 0
 
@@ -83,8 +86,7 @@ class MockCircuitBreaker:
         return await func(*args, **kwargs)
 
     def reset(self) -> None:
-        self._state = CircuitBreakerState.CLOSED
-        self._failure_count = 0
+        self._reset_state()
 
 
 @pytest.fixture
