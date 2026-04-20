@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
+import pytest
+
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
@@ -86,3 +88,10 @@ def test_classdef_coverage_warns_when_missing() -> None:
     issues = module.check_classdef_coverage(Path("docs/sample.mmd"), lines)
 
     assert any(issue.rule_id == "DIAG-T019" for issue in issues)
+
+
+def test_write_report_output_rejects_parent_traversal() -> None:
+    module = _load_module()
+
+    with pytest.raises(ValueError, match="outside"):
+        module._write_report_output(Path("../outside/report.json"), "{}\n")

@@ -39,6 +39,25 @@ def _err(message: str) -> None:
     sys.stderr.write(f"{message}\n")
 
 
+def _ensure_repo_path(path: Path) -> Path:
+    resolved_root = REPO_ROOT.resolve()
+    resolved_path = path.resolve()
+    if resolved_root != resolved_path and resolved_root not in resolved_path.parents:
+        raise ValueError(f"refusing to write path outside {resolved_root}: {resolved_path}")
+    return resolved_path
+
+
+def _resolve_output_path(path: Path) -> Path:
+    target = path if path.is_absolute() else REPO_ROOT / path
+    return _ensure_repo_path(target)
+
+
+def _write_output(path: Path, content: str) -> None:
+    safe_path = _resolve_output_path(path)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(content, encoding="utf-8")
+
+
 def load_json(path: Path) -> dict[str, Any]:
     resolved = path if path.is_absolute() else REPO_ROOT / path
     if not resolved.exists():
@@ -282,23 +301,18 @@ def main() -> int:
         "checks": [asdict(check) for check in report.checks],
     }
 
-    if args.json_out is not None:
-        out_path = (
-            args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
-        )
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(
-            json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8"
-        )
+    try:
+        if args.json_out is not None:
+            _write_output(
+                args.json_out,
+                json.dumps(payload, indent=2, ensure_ascii=True) + "\n",
+            )
 
-    if args.markdown_out is not None:
-        out_path = (
-            args.markdown_out
-            if args.markdown_out.is_absolute()
-            else REPO_ROOT / args.markdown_out
-        )
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(render_markdown(report), encoding="utf-8")
+        if args.markdown_out is not None:
+            _write_output(args.markdown_out, render_markdown(report))
+    except ValueError as exc:
+        _err(f"[ERROR] {exc}")
+        return 2
 
     if args.json:
         _out(json.dumps(payload, indent=2, ensure_ascii=True))

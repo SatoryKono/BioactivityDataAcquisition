@@ -73,7 +73,7 @@ class TestValidateDisabled:
         validator = EnrichmentCrossValidator(config, logger)
 
         df = pl.DataFrame({"a": [1, 2, 3]})
-        _, stats = validator.validate(
+        result_df, stats = validator.validate(
             df, ["crossref_publication"], "chembl_publication"
         )
 

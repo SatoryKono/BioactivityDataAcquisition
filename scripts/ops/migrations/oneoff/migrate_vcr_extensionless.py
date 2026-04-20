@@ -62,9 +62,9 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = _parse_args()
-    extensionless = _collect_extensionless()
+def _partition_extensionless(
+    extensionless: list[Path],
+) -> tuple[list[tuple[Path, Path]], list[tuple[Path, Path]]]:
     pairs: list[tuple[Path, Path]] = []
     solo: list[tuple[Path, Path]] = []
     for path in extensionless:
@@ -73,18 +73,71 @@ def main() -> None:
             pairs.append((path, yaml_path))
         else:
             solo.append((path, yaml_path))
+    return pairs, solo
 
+
+def _print_inventory(
+    extensionless: list[Path],
+    pairs: list[tuple[Path, Path]],
+    solo: list[tuple[Path, Path]],
+) -> None:
     sys.stdout.write(
         "VCR migration inventory: "
         f"extensionless={len(extensionless)} paired={len(pairs)} solo={len(solo)}\n"
     )
+    if not solo:
+        return
 
-    if solo:
-        sys.stdout.write("Solo files (can be migrated safely):\n")
-        for source, target in solo:
-            sys.stdout.write(
-                f"  - {source.relative_to(ROOT)} -> {target.relative_to(ROOT)}\n"
-            )
+    sys.stdout.write("Solo files (can be migrated safely):\n")
+    for source, target in solo:
+        sys.stdout.write(f"  - {source.relative_to(ROOT)} -> {target.relative_to(ROOT)}\n")
+
+
+def _apply_migration(
+    solo: list[tuple[Path, Path]],
+    pairs: list[tuple[Path, Path]],
+    *,
+    drop_paired: bool,
+) -> tuple[int, int]:
+    migrated = 0
+    dropped_paired = 0
+    for source, target in solo:
+        source.rename(target)
+        migrated += 1
+
+    if not drop_paired:
+        return migrated, dropped_paired
+
+    for source, _ in pairs:
+        source.unlink()
+        dropped_paired += 1
+    return migrated, dropped_paired
+
+
+def _print_migration_summary(
+    *,
+    updated_extensionless: list[Path],
+    migrated: int,
+    dropped_paired: int,
+    had_pairs: bool,
+    drop_paired: bool,
+) -> None:
+    sys.stdout.write(
+        "Migration complete: "
+        f"migrated={migrated}, dropped_paired={dropped_paired}, "
+        f"remaining_extensionless={len(updated_extensionless)}\n"
+    )
+    if had_pairs and not drop_paired:
+        sys.stdout.write(
+            "NOTE: paired files were preserved (manual review required before deletion).\n"
+        )
+
+
+def main() -> None:
+    args = _parse_args()
+    extensionless = _collect_extensionless()
+    pairs, solo = _partition_extensionless(extensionless)
+    _print_inventory(extensionless, pairs, solo)
 
     if not args.apply:
         if args.sync_allowlist:
@@ -94,29 +147,19 @@ def main() -> None:
             )
         return
 
-    migrated = 0
-    dropped_paired = 0
-    for source, target in solo:
-        source.rename(target)
-        migrated += 1
-    if args.drop_paired:
-        for source, _ in pairs:
-            source.unlink()
-            dropped_paired += 1
-
+    migrated, dropped_paired = _apply_migration(
+        solo, pairs, drop_paired=args.drop_paired
+    )
     updated_extensionless = _collect_extensionless()
     if args.sync_allowlist:
         _rewrite_allowlist(updated_extensionless)
-
-    sys.stdout.write(
-        "Migration complete: "
-        f"migrated={migrated}, dropped_paired={dropped_paired}, "
-        f"remaining_extensionless={len(updated_extensionless)}\n"
+    _print_migration_summary(
+        updated_extensionless=updated_extensionless,
+        migrated=migrated,
+        dropped_paired=dropped_paired,
+        had_pairs=bool(pairs),
+        drop_paired=args.drop_paired,
     )
-    if pairs and not args.drop_paired:
-        sys.stdout.write(
-            "NOTE: paired files were preserved (manual review required before deletion).\n"
-        )
 
 
 if __name__ == "__main__":

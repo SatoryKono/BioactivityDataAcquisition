@@ -15,6 +15,13 @@ load_dotenv()
 
 DEFAULT_REPO: Final[str] = "SatoryKono/BioactivityDataAcquisition"
 DEFAULT_ISSUES_TO_CHECK: Final[tuple[int, ...]] = (2988, 2987, 2986, 2985)
+EXPECTED_ISSUE_ERRORS: Final[tuple[type[Exception], ...]] = (
+    requests.exceptions.RequestException,
+    json.JSONDecodeError,
+    KeyError,
+    ValueError,
+    IndexError,
+)
 
 
 def _github_headers(token: str | None, *, include_accept: bool = True) -> dict[str, str]:
@@ -59,6 +66,66 @@ def _print_issue_summary(
     print(f'URL: {issue["html_url"]}')
 
 
+def _fetch_issue(
+    repo: str,
+    github_token: str | None,
+    issue_number: int,
+) -> requests.Response:
+    return requests.get(
+        f"https://api.github.com/repos/{repo}/issues/{issue_number}",
+        headers=_github_headers(github_token),
+        timeout=30,
+    )
+
+
+def _fetch_comments_count(
+    repo: str,
+    github_token: str | None,
+    issue_number: int,
+) -> int:
+    comments_response = requests.get(
+        f"https://api.github.com/repos/{repo}/issues/{issue_number}/comments",
+        headers=_github_headers(github_token, include_accept=False),
+        timeout=30,
+    )
+    if comments_response.status_code != 200:
+        return 0
+    return len(comments_response.json())
+
+
+def _load_issue_details(
+    repo: str,
+    github_token: str | None,
+    issue_number: int,
+) -> tuple[dict[str, object] | None, int]:
+    response = _fetch_issue(repo, github_token, issue_number)
+    if response.status_code != 200:
+        return None, 0
+    issue = response.json()
+    comments_count = _fetch_comments_count(repo, github_token, issue_number)
+    return issue, comments_count
+
+
+def _report_issue_error(issue_number: int, exc: Exception) -> None:
+    if isinstance(exc, requests.exceptions.RequestException):
+        print(f"\n❌ Network error checking issue #{issue_number}: {exc}")
+        return
+    if isinstance(exc, json.JSONDecodeError):
+        print(f"\n❌ JSON decode error for issue #{issue_number}: {exc}")
+        return
+    if isinstance(exc, KeyError):
+        print(f"\n❌ Missing expected field in issue #{issue_number}: {exc}")
+        return
+    if isinstance(exc, (ValueError, IndexError)):
+        print(f"\n❌ Expected error checking issue #{issue_number}: {exc}")
+        return
+    print(f"\n❌ Unexpected error checking issue #{issue_number}: {exc}")
+
+
+def _is_expected_issue_error(exc: Exception) -> bool:
+    return isinstance(exc, EXPECTED_ISSUE_ERRORS)
+
+
 def main() -> None:
     github_token = os.getenv("GITHUB_TOKEN")
     repo = os.getenv("GITHUB_REPO", DEFAULT_REPO)
@@ -68,39 +135,15 @@ def main() -> None:
 
     for issue_number in DEFAULT_ISSUES_TO_CHECK:
         try:
-            response = requests.get(
-                f"https://api.github.com/repos/{repo}/issues/{issue_number}",
-                headers=_github_headers(github_token),
-                timeout=30,
-            )
-
-            if response.status_code != 200:
+            issue, comments_count = _load_issue_details(repo, github_token, issue_number)
+            if issue is None:
                 print(f"\n❌ Issue #{issue_number}: Not found or inaccessible")
                 continue
-
-            issue = response.json()
-            comments_response = requests.get(
-                f"https://api.github.com/repos/{repo}/issues/{issue_number}/comments",
-                headers=_github_headers(github_token, include_accept=False),
-                timeout=30,
-            )
-            comments_count = (
-                len(comments_response.json()) if comments_response.status_code == 200 else 0
-            )
             _print_issue_summary(issue_number, issue, comments_count=comments_count)
-
-        except requests.exceptions.RequestException as exc:
-            print(f"\n❌ Network error checking issue #{issue_number}: {exc}")
-        except json.JSONDecodeError as exc:
-            print(f"\n❌ JSON decode error for issue #{issue_number}: {exc}")
-        except (KeyError, ValueError, IndexError) as exc:
-            if isinstance(exc, KeyError):
-                print(f"\n❌ Missing expected field in issue #{issue_number}: {exc}")
-            else:
-                print(f"\n❌ Expected error checking issue #{issue_number}: {exc}")
         except Exception as exc:
-            print(f"\n❌ Unexpected error checking issue #{issue_number}: {exc}")
-            raise
+            _report_issue_error(issue_number, exc)
+            if not _is_expected_issue_error(exc):
+                raise
 
     print("\n" + "=" * 60)
     print("📊 SUMMARY ANALYSIS")

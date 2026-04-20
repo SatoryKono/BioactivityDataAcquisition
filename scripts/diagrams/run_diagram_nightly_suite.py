@@ -51,6 +51,7 @@ TAG_RE = re.compile(r"<[^>]+>")
 EDGE_RE = re.compile(r"\s(?:-->|-.->|==>|---|--x|x--)\s")
 NODE_ID_RE = re.compile(r"\b([A-Za-z_]\w*)\b")
 SOURCE_FILE_MISSING = "source file missing"
+BARE_EXECUTABLE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 @dataclass(frozen=True)
@@ -131,6 +132,31 @@ def _parse_manifest_path_entry(line: str, allowed_suffixes: tuple[str, ...]) -> 
         allowed = ", ".join(allowed_suffixes)
         raise ValueError(f"Unsupported suffix in manifest ({allowed} expected): {line}")
     return path
+
+
+def _normalize_executable_argument(value: str) -> str:
+    candidate = value.strip()
+    if not candidate:
+        raise ValueError("Executable argument must not be empty")
+    if candidate.startswith("-"):
+        raise ValueError(f"Executable argument must not start with '-': {value}")
+    if any(char in candidate for char in ("\x00", "\r", "\n")):
+        raise ValueError("Executable argument must not contain control characters")
+    if "/" not in candidate and "\\" not in candidate:
+        if not BARE_EXECUTABLE_RE.fullmatch(candidate):
+            raise ValueError(f"Unsupported executable token: {value}")
+        return candidate
+
+    executable_path = Path(candidate)
+    if executable_path.is_absolute():
+        normalized = executable_path.resolve()
+    else:
+        if any(part == ".." for part in executable_path.parts):
+            raise ValueError(
+                f"Executable path must not escape the repository root: {value}"
+            )
+        normalized = (REPO_ROOT / executable_path).resolve()
+    return str(normalized)
 
 
 def load_manifest(manifest_path: Path, allowed_suffixes: tuple[str, ...]) -> list[Path]:
@@ -910,7 +936,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--skip-growth", action="store_true")
     parser.add_argument("--skip-theme", action="store_true")
     parser.add_argument("--json", action="store_true")
-    return parser.parse_args()
+    args = parser.parse_args()
+    args.mmdc_bin = _normalize_executable_argument(args.mmdc_bin)
+    return args
 
 
 def _resolve_repo_relative_cli_path(path: Path) -> Path:

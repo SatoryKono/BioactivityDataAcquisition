@@ -57,6 +57,34 @@ def _rel(path: Path) -> str:
     return str(path.relative_to(PROJECT_ROOT))
 
 
+def _included_field_name(field: object) -> str | None:
+    if not isinstance(field, str) or field in EXCLUDED_FIELDS:
+        return None
+    return field
+
+
+def _validation_requires_field(item: dict[str, Any]) -> bool:
+    return item.get("type") in {"required", "not_null"} or item.get("nullable") is False
+
+
+def _required_field_from_validation(item: object) -> str | None:
+    if not isinstance(item, dict):
+        return None
+    field = _included_field_name(item.get("field"))
+    if field is None or not _validation_requires_field(item):
+        return None
+    return field
+
+
+def _required_field_from_key_nullability(item: object) -> str | None:
+    if not isinstance(item, dict):
+        return None
+    field = _included_field_name(item.get("field"))
+    if field is None or item.get("nullable") is not False:
+        return None
+    return field
+
+
 def extract_expected_required_fields(config: dict[str, Any]) -> set[str]:
     """Collect explicit required fields already declared in the YAML config."""
     quality = config.get("quality")
@@ -66,26 +94,11 @@ def extract_expected_required_fields(config: dict[str, Any]) -> set[str]:
     expected: set[str] = set()
 
     for item in quality.get("entity_field_validations") or []:
-        if not isinstance(item, dict):
-            continue
-        field = item.get("field")
-        if not isinstance(field, str) or field in EXCLUDED_FIELDS:
-            continue
-        if (
-            item.get("type") in {"required", "not_null"}
-            or item.get("nullable") is False
-        ):
+        if field := _required_field_from_validation(item):
             expected.add(field)
 
     for item in quality.get("key_nullability") or []:
-        if not isinstance(item, dict):
-            continue
-        field = item.get("field")
-        if (
-            isinstance(field, str)
-            and field not in EXCLUDED_FIELDS
-            and item.get("nullable") is False
-        ):
+        if field := _required_field_from_key_nullability(item):
             expected.add(field)
 
     return expected

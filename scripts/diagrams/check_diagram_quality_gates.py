@@ -61,6 +61,17 @@ def _resolve_repo_relative_path(raw: Path | str) -> Path:
     return _ensure_repo_path(REPO_ROOT / candidate)
 
 
+def _resolve_output_path(path: Path) -> Path:
+    target = path if path.is_absolute() else REPO_ROOT / path
+    return _ensure_repo_path(target)
+
+
+def _write_report_output(path: Path, content: str) -> None:
+    safe_path = _resolve_output_path(path)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(content, encoding="utf-8")
+
+
 @dataclass(frozen=True)
 class Violation:
     file: str
@@ -573,37 +584,29 @@ def main() -> int:
         violations=violations,
     )
 
-    if args.json_out is not None:
-        out = (
-            args.json_out
-            if args.json_out.is_absolute()
-            else (REPO_ROOT / args.json_out)
-        )
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(
-            json.dumps(
-                {
-                    "checked_files": report.checked_files,
-                    "hard_failures": report.hard_failures,
-                    "warning_failures": report.warning_failures,
-                    "rules": [asdict(item) for item in report.rules],
-                    "violations": [asdict(item) for item in report.violations],
-                },
-                indent=2,
-                ensure_ascii=True,
+    try:
+        if args.json_out is not None:
+            _write_report_output(
+                args.json_out,
+                json.dumps(
+                    {
+                        "checked_files": report.checked_files,
+                        "hard_failures": report.hard_failures,
+                        "warning_failures": report.warning_failures,
+                        "rules": [asdict(item) for item in report.rules],
+                        "violations": [asdict(item) for item in report.violations],
+                    },
+                    indent=2,
+                    ensure_ascii=True,
+                )
+                + "\n",
             )
-            + "\n",
-            encoding="utf-8",
-        )
 
-    if args.markdown_out is not None:
-        out = (
-            args.markdown_out
-            if args.markdown_out.is_absolute()
-            else (REPO_ROOT / args.markdown_out)
-        )
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(render_markdown(report), encoding="utf-8")
+        if args.markdown_out is not None:
+            _write_report_output(args.markdown_out, render_markdown(report))
+    except ValueError as exc:
+        _err(f"[ERROR] {exc}")
+        return 2
 
     if args.json:
         _out(
