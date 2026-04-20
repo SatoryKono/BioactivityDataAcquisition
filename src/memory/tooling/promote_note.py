@@ -70,7 +70,9 @@ def _detect_duplicates(note_id: str, title: str) -> list[str]:
 
 
 def _build_curated_body(target_kind: str, source_path: Path, source_body: str) -> str:
-    quoted_source = "\n".join(f"> {line}" if line else ">" for line in source_body.strip().splitlines())
+    quoted_source = "\n".join(
+        f"> {line}" if line else ">" for line in source_body.strip().splitlines()
+    )
     if target_kind == "decision":
         return (
             "# Decision\n\n"
@@ -112,7 +114,9 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Promote an episodic note into curated long-term memory."
     )
-    parser.add_argument("--source", type=Path, required=True, help="Source episodic markdown note.")
+    parser.add_argument(
+        "--source", type=Path, required=True, help="Source episodic markdown note."
+    )
     parser.add_argument(
         "--target-kind",
         choices=sorted(_curated_targets()),
@@ -158,7 +162,9 @@ def promote_note(
     note_id = str(metadata.get("id") or source.stem)
     source_refs = metadata.get("source_refs") or []
     if not isinstance(source_refs, list) or not source_refs:
-        raise ValueError("source episodic note must contain non-empty source_refs before promotion")
+        raise ValueError(
+            "source episodic note must contain non-empty source_refs before promotion"
+        )
     if any(_contains_placeholder(str(ref)) for ref in source_refs):
         raise ValueError("source episodic note still contains placeholder source_refs")
     if _contains_placeholder(summary):

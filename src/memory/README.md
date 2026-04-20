@@ -131,6 +131,13 @@ Apply pruning:
 python -m memory.tooling.prune --apply
 ```
 
+Run a curated review loop report:
+
+```bash
+python -m memory.tooling.review_curated
+python -m memory.tooling.review_curated --json
+```
+
 Run the canonical daily agent/engineering workflow:
 
 ```bash
@@ -197,6 +204,7 @@ Canonical daily sequence for agents and engineers:
 3. update canonical source files
 4. run `python -m memory.tooling.workflow post-task ...`
 5. promote only durable lessons, incidents, decisions, or domain knowledge
+6. run `python -m memory.tooling.review_curated` on a regular cadence to review due/stale curated notes
 
 `pre-task` auto-refreshes rebuild-only RAG and timeline artifacts if manifests
 are missing, so the workflow remains usable even when `src/memory/` does not

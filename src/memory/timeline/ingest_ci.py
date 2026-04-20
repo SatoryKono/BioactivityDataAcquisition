@@ -14,7 +14,11 @@ from memory.graph.refs import (
     related_refs_for_workflow,
     related_refs_for_workflow_job,
 )
-from memory.timeline._common import DEFAULT_EVENTS_DIR, dedupe_preserve_order, write_jsonl
+from memory.timeline._common import (
+    DEFAULT_EVENTS_DIR,
+    dedupe_preserve_order,
+    write_jsonl,
+)
 
 DEFAULT_WORKFLOWS_DIR = Path(".github/workflows")
 
@@ -57,7 +61,9 @@ def build_ci_events(root: Path) -> list[dict[str, Any]]:
                     "severity": "info",
                     "occurred_at": None,
                     "source_refs": [rel],
-                    "graph_node_refs": graph_refs_for_workflow_job(rel, workflow_name, job_name),
+                    "graph_node_refs": graph_refs_for_workflow_job(
+                        rel, workflow_name, job_name
+                    ),
                     "related_refs": dedupe_preserve_order(
                         related_refs_for_workflow_job(rel, workflow_name, job_name)
                     ),
@@ -80,7 +86,9 @@ def write_ci_events(root: Path, output_path: Path | None = None) -> Path:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Project CI timeline events.")
-    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[3])
+    parser.add_argument(
+        "--root", type=Path, default=Path(__file__).resolve().parents[3]
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_EVENTS_DIR / "ci.jsonl")
     return parser
 

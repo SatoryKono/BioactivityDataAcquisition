@@ -7,7 +7,11 @@ from pathlib import Path
 
 from memory.graph.refs import graph_refs_for_source, related_refs_for_source
 from memory.rag.chunking import split_markdown_sections
-from memory.timeline._common import DEFAULT_EVENTS_DIR, dedupe_preserve_order, write_jsonl
+from memory.timeline._common import (
+    DEFAULT_EVENTS_DIR,
+    dedupe_preserve_order,
+    write_jsonl,
+)
 
 DEFAULT_RUNBOOKS_DIR = Path("docs/05-operations/runbooks")
 INCIDENT_KEYWORDS = ("incident", "failure")
@@ -36,7 +40,9 @@ def build_incident_events(root: Path) -> list[dict[str, object]]:
                 "occurred_at": None,
                 "source_refs": [rel],
                 "graph_node_refs": graph_refs_for_source(rel, "runbook"),
-                "related_refs": dedupe_preserve_order(related_refs_for_source(rel, "runbook")),
+                "related_refs": dedupe_preserve_order(
+                    related_refs_for_source(rel, "runbook")
+                ),
                 "confidence": "derived",
                 "payload": {
                     "title": title,
@@ -56,8 +62,12 @@ def write_incident_events(root: Path, output_path: Path | None = None) -> Path:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Project incident timeline events.")
-    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[3])
-    parser.add_argument("--output", type=Path, default=DEFAULT_EVENTS_DIR / "incidents.jsonl")
+    parser.add_argument(
+        "--root", type=Path, default=Path(__file__).resolve().parents[3]
+    )
+    parser.add_argument(
+        "--output", type=Path, default=DEFAULT_EVENTS_DIR / "incidents.jsonl"
+    )
     return parser
 
 

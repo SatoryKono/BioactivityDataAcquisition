@@ -16,6 +16,7 @@ Use the tooling helpers:
 python -m memory.tooling.create_note --kind curated-lesson --title "Example"
 python -m memory.tooling.promote_note --source src/memory/episodic/sessions/example.md --target-kind lesson --summary "Durable lesson worth reusing."
 python -m memory.tooling.archive_note --source src/memory/curated/lessons/example.md --reason "Superseded by newer guidance."
+python -m memory.tooling.review_curated
 ```
 
 Curated notes are expected to include:
@@ -34,3 +35,10 @@ Curated memory should grow slowly:
 - reject placeholder summaries and placeholder source refs
 - avoid duplicate ids and duplicate normalized titles
 - archive superseded notes instead of silently overwriting history
+
+Review loop:
+
+- run `python -m memory.tooling.review_curated` periodically
+- review `due` notes when `last_verified` exceeds policy cadence
+- treat `stale` notes as explicit review-or-archive candidates
+- archive notes that are superseded, too narrow, or no longer justify durable storage

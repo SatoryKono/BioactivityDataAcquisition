@@ -41,11 +41,11 @@ def test_memory_scaffold_validation_accepts_valid_note_files(tmp_path: Path) -> 
             "id": "valid-lesson",
             "title": "Valid lesson",
             "kind": "lesson",
-            "source_refs": ["src/memory/README.md"],
-            "confidence": "curated",
-            "last_verified": "2026-04-20T00:00:00Z",
-            "summary": "Durable lesson.",
-        },
+                "source_refs": ["src/memory/README.md"],
+                "confidence": "curated",
+                "last_verified": "2026-04-20T00:00:00Z",
+                "summary": "Durable lesson for repeated reuse.",
+            },
         body="# Lesson\n\n## Observation\n\n- Durable guidance\n\n## Reuse guidance\n\n- Apply again when the same conditions hold.\n",
     )
     write_markdown_note(

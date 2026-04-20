@@ -12,17 +12,29 @@ from memory.resources import discover_memory_root, load_yaml_resource
 def _archive_root() -> Path:
     memory_root = discover_memory_root()
     policy = load_yaml_resource(memory_root / "policy" / "promotion.yaml")
-    archive_dir = str(policy.get("archive", {}).get("archive_dir") or "src/memory/curated/archive")
+    archive_dir = str(
+        policy.get("archive", {}).get("archive_dir") or "src/memory/curated/archive"
+    )
     normalized = archive_dir.removeprefix("src/memory/")
     return memory_root / normalized
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Archive an active curated memory note.")
-    parser.add_argument("--source", type=Path, required=True, help="Curated note to archive.")
-    parser.add_argument("--reason", required=True, help="Short reason why the note is being archived.")
+    parser = argparse.ArgumentParser(
+        description="Archive an active curated memory note."
+    )
+    parser.add_argument(
+        "--source", type=Path, required=True, help="Curated note to archive."
+    )
+    parser.add_argument(
+        "--reason", required=True, help="Short reason why the note is being archived."
+    )
     parser.add_argument("--output", type=Path, help="Optional explicit archive path.")
-    parser.add_argument("--move", action="store_true", help="Delete the active source note after archiving.")
+    parser.add_argument(
+        "--move",
+        action="store_true",
+        help="Delete the active source note after archiving.",
+    )
     return parser
 
 

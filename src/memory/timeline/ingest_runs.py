@@ -6,7 +6,10 @@ import argparse
 from pathlib import Path
 from typing import Any
 
-from memory.graph.refs import graph_refs_for_runtime_event, related_refs_for_runtime_event
+from memory.graph.refs import (
+    graph_refs_for_runtime_event,
+    related_refs_for_runtime_event,
+)
 from memory.timeline._common import (
     DEFAULT_EVENTS_DIR,
     dedupe_preserve_order,
@@ -32,14 +35,20 @@ def _manifest_event(manifest_path: Path, payload: dict[str, Any]) -> dict[str, A
         "source_refs": [manifest_path.as_posix()],
         "graph_node_refs": graph_refs_for_runtime_event(
             "run_manifest",
-            pipeline_name=str(pipeline_name) if isinstance(pipeline_name, str) else None,
+            pipeline_name=str(pipeline_name)
+            if isinstance(pipeline_name, str)
+            else None,
         ),
         "related_refs": dedupe_preserve_order(
             related_refs_for_runtime_event(
                 "run_manifest",
-                manifest_id=str(payload["manifest_id"]) if payload.get("manifest_id") else None,
+                manifest_id=str(payload["manifest_id"])
+                if payload.get("manifest_id")
+                else None,
                 run_id=str(payload["run_id"]) if payload.get("run_id") else None,
-                pipeline_name=str(pipeline_name) if isinstance(pipeline_name, str) else None,
+                pipeline_name=str(pipeline_name)
+                if isinstance(pipeline_name, str)
+                else None,
                 provider=str(provider) if isinstance(provider, str) else None,
                 entity=str(entity) if isinstance(entity, str) else None,
             )
@@ -73,7 +82,9 @@ def build_run_events(root: Path) -> list[dict[str, Any]]:
             for entry in read_jsonl(ledger_path):
                 status = entry.get("status")
                 error_type = entry.get("error_type")
-                severity = "error" if error_type or status in {"failed", "error"} else "info"
+                severity = (
+                    "error" if error_type or status in {"failed", "error"} else "info"
+                )
                 related_refs = []
                 manifest_id = entry.get("manifest_id")
                 if manifest_id:
@@ -81,7 +92,9 @@ def build_run_events(root: Path) -> list[dict[str, Any]]:
                         related_refs_for_runtime_event(
                             "run_ledger",
                             manifest_id=str(manifest_id),
-                            run_id=str(entry["run_id"]) if entry.get("run_id") else None,
+                            run_id=str(entry["run_id"])
+                            if entry.get("run_id")
+                            else None,
                             pipeline_name=(
                                 str(entry["pipeline_name"])
                                 if isinstance(entry.get("pipeline_name"), str)
@@ -135,8 +148,12 @@ def write_run_events(root: Path, output_path: Path | None = None) -> Path:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Project run timeline events.")
-    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[3])
-    parser.add_argument("--output", type=Path, default=DEFAULT_EVENTS_DIR / "runs.jsonl")
+    parser.add_argument(
+        "--root", type=Path, default=Path(__file__).resolve().parents[3]
+    )
+    parser.add_argument(
+        "--output", type=Path, default=DEFAULT_EVENTS_DIR / "runs.jsonl"
+    )
     return parser
 
 

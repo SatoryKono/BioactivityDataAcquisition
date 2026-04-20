@@ -70,7 +70,10 @@ def _pipeline_like_name_from_path(source_path: str) -> str | None:
         return f"{provider}_{entity}"
     if source_path.startswith("configs/composites/") and stem != "__init__":
         return stem
-    if source_path.startswith("src/bioetl/application/pipelines/") and stem != "__init__":
+    if (
+        source_path.startswith("src/bioetl/application/pipelines/")
+        and stem != "__init__"
+    ):
         return stem
     if source_path.startswith("tests/") and stem.startswith("test_"):
         candidate = stem.removeprefix("test_")
@@ -83,7 +86,10 @@ def _provider_from_path(source_path: str) -> str | None:
     parts = path.parts
     if source_path.startswith("configs/entities/") and len(parts) >= 4:
         return parts[2]
-    if source_path.startswith("src/bioetl/infrastructure/adapters/") and len(parts) >= 5:
+    if (
+        source_path.startswith("src/bioetl/infrastructure/adapters/")
+        and len(parts) >= 5
+    ):
         return parts[4]
     pipeline_like = _pipeline_like_name_from_path(source_path)
     if pipeline_like is not None:
@@ -197,7 +203,9 @@ def graph_refs_for_source(
             if symbol_kind == "class":
                 refs.append(node_ref("class_surface", f"{dotted_path}.{symbol_name}"))
             elif symbol_kind in {"function", "async_function"}:
-                refs.append(node_ref("function_surface", f"{dotted_path}.{symbol_name}"))
+                refs.append(
+                    node_ref("function_surface", f"{dotted_path}.{symbol_name}")
+                )
     elif source_type == "test":
         refs.append(node_ref("test_artifact", source_path))
         suite_name = test_suite_name(source_path)
@@ -223,7 +231,9 @@ def graph_refs_for_workflow(source_path: str, workflow_name: str) -> list[str]:
     ]
 
 
-def graph_refs_for_workflow_job(source_path: str, workflow_name: str, job_id: str) -> list[str]:
+def graph_refs_for_workflow_job(
+    source_path: str, workflow_name: str, job_id: str
+) -> list[str]:
     """Derive deterministic refs for a workflow job definition."""
     refs = graph_refs_for_workflow(source_path, workflow_name)
     refs.append(node_ref("workflow_job_surface", f"{workflow_name}::{job_id}"))
@@ -238,7 +248,9 @@ def graph_refs_for_runtime_event(
     """Derive deterministic refs for run/control-plane timeline events."""
     refs = [node_ref("runtime_evidence_surface", evidence_name)]
     if evidence_name == "run_manifest":
-        refs.append(node_ref("control_plane_artifact_surface", RUN_MANIFEST_ARTIFACT_REF))
+        refs.append(
+            node_ref("control_plane_artifact_surface", RUN_MANIFEST_ARTIFACT_REF)
+        )
     elif evidence_name == "run_ledger":
         refs.append(node_ref("control_plane_artifact_surface", RUN_LEDGER_ARTIFACT_REF))
     if pipeline_name:

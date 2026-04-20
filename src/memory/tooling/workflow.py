@@ -27,7 +27,9 @@ def _default_note_path(task_id: str, *, kind: str) -> Path:
     raise ValueError(f"unsupported episodic note kind: {kind}")
 
 
-def _session_note_body(title: str, retrieval_query: str, retrieval_results: dict[str, Any]) -> str:
+def _session_note_body(
+    title: str, retrieval_query: str, retrieval_results: dict[str, Any]
+) -> str:
     rag_count = len(retrieval_results["results"]["rag"])
     timeline_count = len(retrieval_results["results"]["timeline"])
     catalog_count = len(retrieval_results["results"]["catalog"])
@@ -84,7 +86,11 @@ def pre_task_workflow(
     ):
         if output_root is None:
             output_root = Path(tempfile.mkdtemp(prefix="memory-pre-task-"))
-        repo_root = refresh_repo_root or discover_repo_root() or Path(__file__).resolve().parents[3]
+        repo_root = (
+            refresh_repo_root
+            or discover_repo_root()
+            or Path(__file__).resolve().parents[3]
+        )
         refresh_report = refresh_all(
             repo_root.resolve(),
             output_root.resolve(),
@@ -171,7 +177,8 @@ def post_task_workflow(
             "summary_note": str(summary_path),
             "ok": False,
             "validation_issues": [
-                {"path": issue.path, "message": issue.message} for issue in validation_issues
+                {"path": issue.path, "message": issue.message}
+                for issue in validation_issues
             ],
         }
 
@@ -180,7 +187,11 @@ def post_task_workflow(
     if run_refresh:
         if output_root is None:
             output_root = Path(tempfile.mkdtemp(prefix="memory-post-task-"))
-        repo_root = refresh_repo_root or discover_repo_root() or Path(__file__).resolve().parents[3]
+        repo_root = (
+            refresh_repo_root
+            or discover_repo_root()
+            or Path(__file__).resolve().parents[3]
+        )
         refresh_report = refresh_all(
             repo_root.resolve(),
             output_root.resolve(),
@@ -218,7 +229,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    pre_parser = subparsers.add_parser("pre-task", help="Run the standard pre-task retrieval flow.")
+    pre_parser = subparsers.add_parser(
+        "pre-task", help="Run the standard pre-task retrieval flow."
+    )
     pre_parser.add_argument("--task-id", required=True)
     pre_parser.add_argument("--title", required=True)
     pre_parser.add_argument("--query", default=None)
@@ -231,7 +244,9 @@ def _build_parser() -> argparse.ArgumentParser:
     pre_parser.add_argument("--skip-session-note", action="store_true")
     pre_parser.add_argument("--json", action="store_true")
 
-    post_parser = subparsers.add_parser("post-task", help="Run the standard post-task memory flow.")
+    post_parser = subparsers.add_parser(
+        "post-task", help="Run the standard post-task memory flow."
+    )
     post_parser.add_argument("--task-id", required=True)
     post_parser.add_argument("--title", required=True)
     post_parser.add_argument("--summary", required=True)

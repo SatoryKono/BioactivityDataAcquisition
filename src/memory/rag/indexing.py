@@ -32,7 +32,9 @@ def _load_owner_specs() -> list[tuple[str, tuple[str, ...]]]:
         paths = entry.get("paths", [])
         if not isinstance(owner, str):
             continue
-        normalized_paths = tuple(str(path).rstrip("/") for path in paths if isinstance(path, str))
+        normalized_paths = tuple(
+            str(path).rstrip("/") for path in paths if isinstance(path, str)
+        )
         specs.append((owner, normalized_paths))
     return specs
 
@@ -47,21 +49,31 @@ def _load_repo_zone_specs() -> list[tuple[str, tuple[str, ...]]]:
         paths = entry.get("paths", [])
         if not isinstance(zone_id, str):
             continue
-        normalized_paths = tuple(str(path).rstrip("/") for path in paths if isinstance(path, str))
+        normalized_paths = tuple(
+            str(path).rstrip("/") for path in paths if isinstance(path, str)
+        )
         specs.append((zone_id, normalized_paths))
     return specs
 
 
 def _lookup_owner(rel_path: str, owner_specs: list[tuple[str, tuple[str, ...]]]) -> str:
     for owner, prefixes in owner_specs:
-        if any(rel_path.startswith(f"{prefix}/") or rel_path == prefix for prefix in prefixes):
+        if any(
+            rel_path.startswith(f"{prefix}/") or rel_path == prefix
+            for prefix in prefixes
+        ):
             return owner
     return "BioETL Team"
 
 
-def _lookup_repo_zone(rel_path: str, zone_specs: list[tuple[str, tuple[str, ...]]]) -> str:
+def _lookup_repo_zone(
+    rel_path: str, zone_specs: list[tuple[str, tuple[str, ...]]]
+) -> str:
     for zone_id, prefixes in zone_specs:
-        if any(rel_path.startswith(f"{prefix}/") or rel_path == prefix for prefix in prefixes):
+        if any(
+            rel_path.startswith(f"{prefix}/") or rel_path == prefix
+            for prefix in prefixes
+        ):
             return zone_id
     return "unclassified"
 
@@ -104,7 +116,10 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
                     "repo_zone": repo_zone,
                     "title": section.title,
                     "heading_level": section.level,
-                    "symbol": section.title if section.symbol_kind not in {None, "markdown_section", "config_document"} else None,
+                    "symbol": section.title
+                    if section.symbol_kind
+                    not in {None, "markdown_section", "config_document"}
+                    else None,
                     "symbol_kind": section.symbol_kind,
                     "content": section.content,
                     "content_hash": content_hash(section.content),
@@ -112,13 +127,19 @@ def build_rag_manifests(root: Path) -> tuple[dict[str, Any], list[dict[str, Any]
                         rel_path_str,
                         source_type,
                         symbol_kind=section.symbol_kind,
-                        symbol_name=section.title if section.symbol_kind in {"class", "function", "async_function"} else None,
+                        symbol_name=section.title
+                        if section.symbol_kind
+                        in {"class", "function", "async_function"}
+                        else None,
                     ),
                     "related_refs": related_refs_for_source(
                         rel_path_str,
                         source_type,
                         symbol_kind=section.symbol_kind,
-                        symbol_name=section.title if section.symbol_kind in {"class", "function", "async_function"} else None,
+                        symbol_name=section.title
+                        if section.symbol_kind
+                        in {"class", "function", "async_function"}
+                        else None,
                     ),
                     "owner": owner,
                     "freshness_class": "warm",
@@ -140,7 +161,9 @@ def write_rag_manifests(root: Path, output_dir: Path) -> tuple[Path, Path]:
     catalog, chunks = build_rag_manifests(root)
     catalog_path = output_dir / "corpus_catalog.json"
     chunks_path = output_dir / "chunks.jsonl"
-    catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    catalog_path.write_text(
+        json.dumps(catalog, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     with chunks_path.open("w", encoding="utf-8") as handle:
         for chunk in chunks:
             handle.write(json.dumps(chunk, sort_keys=True, ensure_ascii=True))
@@ -175,7 +198,9 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    catalog_path, chunks_path = write_rag_manifests(args.root.resolve(), args.output_dir)
+    catalog_path, chunks_path = write_rag_manifests(
+        args.root.resolve(), args.output_dir
+    )
     if args.print_summary:
         catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
         print(
