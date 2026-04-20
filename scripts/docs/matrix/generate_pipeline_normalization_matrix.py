@@ -110,6 +110,17 @@ PROFILE_SEMANTICS_SURFACE = "profile_semantics"
 PROFILE_META_PASSTHROUGH_KPI = "shipped_profile_meta_passthrough_pct"
 PROFILE_SET_LIKE_JSON_STRING_KPI = "shipped_profile_set_like_json_string_pct"
 PROFILE_NON_META_PASSTHROUGH_FREE_KPI = "shipped_profile_non_meta_passthrough_free_pct"
+CANONICAL_EFFECTIVE_CONFIG_HASH_RAW = (
+    " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA "
+)
+CANONICAL_CONTRACT_REF_RAW = " ChemBL.Activity "
+CANONICAL_EFFECTIVE_CONFIG_HASH = (
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+)
+CANONICAL_CONTRACT_REF = "chembl.activity"
+CANONICAL_CONTRACT_VERSION = "2.0.0"
+CANONICAL_MANIFEST_ID = "manifest-123"
+CANONICAL_COMPOSITE_RUN_ID = "run-42"
 
 # Intentionally explicit governance seam:
 # the normalization matrix is config-discovered, but the Silver schema mapping
@@ -146,6 +157,21 @@ COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY: dict[str, str] = {
     "composite_publication": "unknown",
     "composite_target": "unknown",
 }
+
+
+class _ProfileSemanticStats:
+    """Mutable counters for shipped-profile semantic invariants."""
+
+    def __init__(self) -> None:
+        self.meta_total = 0
+        self.meta_ok = 0
+        self.set_like_total = 0
+        self.set_like_ok = 0
+        self.non_meta_total = 0
+        self.non_meta_ok = 0
+        self.meta_regressions: list[str] = []
+        self.set_like_regressions: list[str] = []
+        self.non_meta_passthrough_regressions: list[str] = []
 
 
 def _normalizer_name(
@@ -417,23 +443,31 @@ def _iter_composite_join_keys(payload: dict[str, object]) -> set[str]:
         return set()
 
     keys: set[str] = set()
-    dependencies = composite.get("dependencies")
-    if isinstance(dependencies, list):
-        for dependency in dependencies:
-            if not isinstance(dependency, dict):
-                continue
-            join_keys = dependency.get("join_keys")
-            if isinstance(join_keys, list):
-                keys.update(str(key) for key in join_keys if isinstance(key, str))
+    for entries in _composite_join_key_entry_lists(composite):
+        keys.update(_join_keys_from_entries(entries))
+    return keys
 
-    enrichers = composite.get("enrichers")
-    if isinstance(enrichers, list):
-        for enricher in enrichers:
-            if not isinstance(enricher, dict):
-                continue
-            join_keys = enricher.get("join_keys")
-            if isinstance(join_keys, list):
-                keys.update(str(key) for key in join_keys if isinstance(key, str))
+
+def _composite_join_key_entry_lists(composite: dict[str, object]) -> list[list[object]]:
+    """Return composite dependency/enricher entry lists that may declare join keys."""
+    entry_lists: list[list[object]] = []
+    for key in ("dependencies", "enrichers"):
+        value = composite.get(key)
+        if isinstance(value, list):
+            entry_lists.append(value)
+    return entry_lists
+
+
+def _join_keys_from_entries(entries: list[object]) -> set[str]:
+    """Extract declared join keys from composite dependency-like entries."""
+    keys: set[str] = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        join_keys = entry.get("join_keys")
+        if not isinstance(join_keys, list):
+            continue
+        keys.update(key for key in join_keys if isinstance(key, str))
     return keys
 
 
@@ -449,43 +483,59 @@ def _build_composite_rows_for_pipeline(
     join_keys = _iter_composite_join_keys(payload)
     rows: list[dict[str, str]] = []
     for field_name in _iter_composite_fields(payload):
-        policy = JOIN_KEY_NORMALIZATION_POLICIES.get(field_name)
-        if field_name in join_keys and policy is not None:
-            source = "composite_join_key_policy"
-            normalizer = "join_key_policy"
-            summary = _normalize_summary_from_policy(
-                key=field_name,
-                trim=policy.trim,
-                lowercase=policy.lowercase,
-            )
-            notes = "Applied only while resolving and comparing composite join keys."
-        else:
-            source = "upstream_inherited"
-            normalizer = NO_NORMALIZER
-            summary = (
+        rows.append(_composite_row(pipeline_name, field_name, join_keys))
+    return rows
+
+
+def _composite_row(
+    pipeline_name: str,
+    field_name: str,
+    join_keys: set[str],
+) -> dict[str, str]:
+    """Build one composite matrix row."""
+    source, normalizer, summary, notes = _composite_field_policy(field_name, join_keys)
+    return {
+        "pipeline_name": pipeline_name,
+        "pipeline_kind": COMPOSITE_PIPELINE_KIND,
+        "field_name": field_name,
+        "field_type": COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY.get(
+            pipeline_name, "unknown"
+        ),
+        "normalization_source": source,
+        "normalizer": normalizer,
+        "normalization_summary": summary,
+        "include_in_content_hash": "",
+        "set_like": FALSE_TEXT,
+        "notes": notes,
+    }
+
+
+def _composite_field_policy(
+    field_name: str,
+    join_keys: set[str],
+) -> tuple[str, str, str, str]:
+    """Resolve normalization semantics for one composite field."""
+    policy = JOIN_KEY_NORMALIZATION_POLICIES.get(field_name)
+    if field_name not in join_keys or policy is None:
+        return (
+            "upstream_inherited",
+            NO_NORMALIZER,
+            (
                 "No composite-specific field normalizer is defined; field is inherited "
                 "from already-normalized upstream records."
-            )
-            notes = (
-                "Composite normalization is key-oriented; non-key fields preserve upstream semantics."
-            )
-        rows.append(
-            {
-                "pipeline_name": pipeline_name,
-                "pipeline_kind": COMPOSITE_PIPELINE_KIND,
-                "field_name": field_name,
-                "field_type": COMPOSITE_GOLD_SCHEMA_TYPE_REGISTRY.get(
-                    pipeline_name, "unknown"
-                ),
-                "normalization_source": source,
-                "normalizer": normalizer,
-                "normalization_summary": summary,
-                "include_in_content_hash": "",
-                "set_like": FALSE_TEXT,
-                "notes": notes,
-            }
+            ),
+            "Composite normalization is key-oriented; non-key fields preserve upstream semantics.",
         )
-    return rows
+    return (
+        "composite_join_key_policy",
+        "join_key_policy",
+        _normalize_summary_from_policy(
+            key=field_name,
+            trim=policy.trim,
+            lowercase=policy.lowercase,
+        ),
+        "Applied only while resolving and comparing composite join keys.",
+    )
 
 
 def build_field_matrix_rows() -> list[dict[str, str]]:
@@ -651,9 +701,9 @@ def _control_plane_surface_statuses() -> list[dict[str, object]]:
         pipeline_name=" chembl_activity ",
         run_type=" INCREMENTAL ",
         pipeline_version=" 1.2.3 ",
-        effective_config_hash=" SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
+        effective_config_hash=CANONICAL_EFFECTIVE_CONFIG_HASH_RAW,
         dq_contract_compatibility_hash=" DEADBEEF ",
-        contract_ref=" ChemBL.Activity ",
+        contract_ref=CANONICAL_CONTRACT_REF_RAW,
         contract_version=" v2 ",
         effective_config_artifact_id=" artifact-42 ",
         exact_replay=True,
@@ -661,19 +711,19 @@ def _control_plane_surface_statuses() -> list[dict[str, object]]:
     )
     runtime_anchor_status = normalize_runtime_anchor_payload(
         {
-            "effective_config_hash": " SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
-            "contract_ref": " ChemBL.Activity ",
+            "effective_config_hash": CANONICAL_EFFECTIVE_CONFIG_HASH_RAW,
+            "contract_ref": CANONICAL_CONTRACT_REF_RAW,
             "contract_version": " v2 ",
-            "manifest_id": " manifest-123 ",
-            "composite_run_identity": " run-42 ",
+            "manifest_id": f" {CANONICAL_MANIFEST_ID} ",
+            "composite_run_identity": f" {CANONICAL_COMPOSITE_RUN_ID} ",
         }
     )
     checkpoint_context = create_expected_checkpoint_context(
-        effective_config_hash=" SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ",
-        contract_ref=" ChemBL.Activity ",
+        effective_config_hash=CANONICAL_EFFECTIVE_CONFIG_HASH_RAW,
+        contract_ref=CANONICAL_CONTRACT_REF_RAW,
         contract_version=" v2 ",
-        manifest_id=" manifest-123 ",
-        composite_run_identity=" run-42 ",
+        manifest_id=f" {CANONICAL_MANIFEST_ID} ",
+        composite_run_identity=f" {CANONICAL_COMPOSITE_RUN_ID} ",
     )
     merged_checkpoint = merge_expected_anchors(
         CompositeCheckpointState(
@@ -728,8 +778,25 @@ def _manifest_status_covered(manifest_status: dict[str, object]) -> bool:
         and bool(planned_artifacts)
         and planned_artifacts[0].get("layer") == "bronze"
         and bool(source_refs)
-        and source_refs[0].get("input_snapshots", [])[0].get("snapshot_id") == "a"
+        and _first_snapshot_id(source_refs) == "a"
     )
+
+
+def _first_snapshot_id(source_refs: list[object]) -> str | None:
+    """Return the first normalized snapshot id when present."""
+    if not source_refs:
+        return None
+    first_source = source_refs[0]
+    if not isinstance(first_source, dict):
+        return None
+    input_snapshots = first_source.get("input_snapshots")
+    if not isinstance(input_snapshots, list) or not input_snapshots:
+        return None
+    first_snapshot = input_snapshots[0]
+    if not isinstance(first_snapshot, dict):
+        return None
+    snapshot_id = first_snapshot.get("snapshot_id")
+    return snapshot_id if isinstance(snapshot_id, str) else None
 
 
 def _ledger_status_covered(ledger_status: dict[str, object]) -> bool:
@@ -746,8 +813,9 @@ def _execution_identity_status_covered(
 ) -> bool:
     """Return whether execution identity normalization produces canonical values."""
     return (
-        execution_identity_status.get("contract_ref") == "chembl.activity"
-        and execution_identity_status.get("contract_version") == "2.0.0"
+        execution_identity_status.get("contract_ref") == CANONICAL_CONTRACT_REF
+        and execution_identity_status.get("contract_version")
+        == CANONICAL_CONTRACT_VERSION
         and execution_identity_status.get("exact_replay") == "true"
     )
 
@@ -756,9 +824,10 @@ def _runtime_anchor_status_covered(runtime_anchor_status: dict[str, object]) -> 
     """Return whether runtime anchor normalization produces canonical values."""
     return (
         runtime_anchor_status.get("effective_config_hash")
-        == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        and runtime_anchor_status.get("contract_ref") == "chembl.activity"
-        and runtime_anchor_status.get("contract_version") == "2.0.0"
+        == CANONICAL_EFFECTIVE_CONFIG_HASH
+        and runtime_anchor_status.get("contract_ref") == CANONICAL_CONTRACT_REF
+        and runtime_anchor_status.get("contract_version")
+        == CANONICAL_CONTRACT_VERSION
     )
 
 
@@ -766,9 +835,9 @@ def _checkpoint_context_covered(checkpoint_context: object) -> bool:
     """Return whether checkpoint context normalization preserves canonical anchors."""
     return (
         checkpoint_context.effective_config_hash
-        == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        and checkpoint_context.contract_ref == "chembl.activity"
-        and checkpoint_context.contract_version == "2.0.0"
+        == CANONICAL_EFFECTIVE_CONFIG_HASH
+        and checkpoint_context.contract_ref == CANONICAL_CONTRACT_REF
+        and checkpoint_context.contract_version == CANONICAL_CONTRACT_VERSION
     )
 
 
@@ -776,11 +845,11 @@ def _checkpoint_anchor_merge_covered(merged_checkpoint: object) -> bool:
     """Return whether merged checkpoint anchors preserve canonical values."""
     return (
         merged_checkpoint.effective_config_hash
-        == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        and merged_checkpoint.contract_ref == "chembl.activity"
-        and merged_checkpoint.contract_version == "2.0.0"
-        and merged_checkpoint.manifest_id == "manifest-123"
-        and merged_checkpoint.composite_run_identity == "run-42"
+        == CANONICAL_EFFECTIVE_CONFIG_HASH
+        and merged_checkpoint.contract_ref == CANONICAL_CONTRACT_REF
+        and merged_checkpoint.contract_version == CANONICAL_CONTRACT_VERSION
+        and merged_checkpoint.manifest_id == CANONICAL_MANIFEST_ID
+        and merged_checkpoint.composite_run_identity == CANONICAL_COMPOSITE_RUN_ID
     )
 
 
@@ -835,76 +904,100 @@ def _build_profile_semantic_kpi(
 
 def build_profile_semantic_invariants() -> list[dict[str, object]]:
     """Return shipped-profile semantic invariants derived from active profile contracts."""
-    meta_total = 0
-    meta_ok = 0
-    set_like_total = 0
-    set_like_ok = 0
-    non_meta_total = 0
-    non_meta_ok = 0
-    meta_regressions: list[str] = []
-    set_like_regressions: list[str] = []
-    non_meta_passthrough_regressions: list[str] = []
-
+    stats = _ProfileSemanticStats()
     for (provider, entity), profile in sorted(NORMALIZATION_PROFILE_REGISTRY.items()):
         for field_name, rule in sorted(profile.field_rules.items()):
-            location = f"{provider}.{entity}.{field_name}"
-            if field_name in profile.meta_fields:
-                meta_total += 1
-                if (
-                    rule.normalizer is normalize_profile_passthrough
-                    and not rule.include_in_hash
-                ):
-                    meta_ok += 1
-                else:
-                    meta_regressions.append(
-                        f"{location} -> {getattr(rule.normalizer, '__name__', type(rule.normalizer).__name__)}"
-                    )
-                continue
-
-            non_meta_total += 1
-            if rule.normalizer is normalize_profile_passthrough:
-                non_meta_passthrough_regressions.append(location)
-            else:
-                non_meta_ok += 1
-
-            if rule.set_like:
-                set_like_total += 1
-                if rule.normalizer is normalize_profile_json_string:
-                    set_like_ok += 1
-                else:
-                    set_like_regressions.append(
-                        f"{location} -> {getattr(rule.normalizer, '__name__', type(rule.normalizer).__name__)}"
-                    )
+            _update_profile_semantic_stats(stats, provider, entity, profile, field_name, rule)
 
     return [
         _build_profile_semantic_kpi(
             name=PROFILE_META_PASSTHROUGH_KPI,
-            numerator=meta_ok,
-            denominator=meta_total,
+            numerator=stats.meta_ok,
+            denominator=stats.meta_total,
             description=(
                 "Shipped profile meta fields must use passthrough semantics and stay excluded from content_hash."
             ),
-            regressions=meta_regressions,
+            regressions=stats.meta_regressions,
         ),
         _build_profile_semantic_kpi(
             name=PROFILE_SET_LIKE_JSON_STRING_KPI,
-            numerator=set_like_ok,
-            denominator=set_like_total,
+            numerator=stats.set_like_ok,
+            denominator=stats.set_like_total,
             description=(
                 "Shipped profile set-like fields must canonicalize through the JSON-string normalizer family."
             ),
-            regressions=set_like_regressions,
+            regressions=stats.set_like_regressions,
         ),
         _build_profile_semantic_kpi(
             name=PROFILE_NON_META_PASSTHROUGH_FREE_KPI,
-            numerator=non_meta_ok,
-            denominator=non_meta_total,
+            numerator=stats.non_meta_ok,
+            denominator=stats.non_meta_total,
             description=(
                 "Non-meta shipped profile fields must not silently fall through the passthrough seam."
             ),
-            regressions=non_meta_passthrough_regressions,
+            regressions=stats.non_meta_passthrough_regressions,
         ),
     ]
+
+
+def _update_profile_semantic_stats(
+    stats: _ProfileSemanticStats,
+    provider: str,
+    entity: str,
+    profile: Any,
+    field_name: str,
+    rule: Any,
+) -> None:
+    """Update aggregate profile-semantic counters for one field rule."""
+    location = _profile_rule_location(provider, entity, field_name)
+    if field_name in profile.meta_fields:
+        _update_meta_profile_semantics(stats, location, rule)
+        return
+    _update_non_meta_profile_semantics(stats, location, rule)
+
+
+def _profile_rule_location(provider: str, entity: str, field_name: str) -> str:
+    """Render stable provider.entity.field location for invariant reporting."""
+    return f"{provider}.{entity}.{field_name}"
+
+
+def _normalizer_regression(location: str, rule: Any) -> str:
+    """Render one regression string with the effective normalizer name."""
+    normalizer_name = getattr(rule.normalizer, "__name__", type(rule.normalizer).__name__)
+    return f"{location} -> {normalizer_name}"
+
+
+def _update_meta_profile_semantics(
+    stats: _ProfileSemanticStats,
+    location: str,
+    rule: Any,
+) -> None:
+    """Update counters for shipped meta-field profile semantics."""
+    stats.meta_total += 1
+    if rule.normalizer is normalize_profile_passthrough and not rule.include_in_hash:
+        stats.meta_ok += 1
+        return
+    stats.meta_regressions.append(_normalizer_regression(location, rule))
+
+
+def _update_non_meta_profile_semantics(
+    stats: _ProfileSemanticStats,
+    location: str,
+    rule: Any,
+) -> None:
+    """Update counters for shipped non-meta profile semantics."""
+    stats.non_meta_total += 1
+    if rule.normalizer is normalize_profile_passthrough:
+        stats.non_meta_passthrough_regressions.append(location)
+    else:
+        stats.non_meta_ok += 1
+    if not rule.set_like:
+        return
+    stats.set_like_total += 1
+    if rule.normalizer is normalize_profile_json_string:
+        stats.set_like_ok += 1
+        return
+    stats.set_like_regressions.append(_normalizer_regression(location, rule))
 
 
 def render_csv(rows: list[dict[str, str]]) -> str:

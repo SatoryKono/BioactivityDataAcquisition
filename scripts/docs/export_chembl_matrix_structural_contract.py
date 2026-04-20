@@ -3,13 +3,16 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    import sys
+    from pathlib import Path
 
-from scripts.docs.matrix.export_structural_contract import main
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _compat_shim import load_main
+else:
+    from ._compat_shim import load_main
+
+main = load_main("scripts.docs.matrix.export_structural_contract")
 
 if __name__ == "__main__":
     raise SystemExit(main())

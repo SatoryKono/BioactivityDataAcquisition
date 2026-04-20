@@ -3,21 +3,16 @@
 
 from __future__ import annotations
 
-import sys
-from importlib import import_module
-from pathlib import Path
-
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    import sys
+    from pathlib import Path
 
-_IMPL = import_module("scripts.docs.matrix.build_matrix_dicts")
-globals().update(
-    {
-        name: value
-        for name, value in vars(_IMPL).items()
-        if name not in {"__name__", "__package__", "__loader__", "__spec__"}
-    }
-)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _compat_shim import load_public_api
+else:
+    from ._compat_shim import load_public_api
+
+_IMPL = load_public_api(globals(), "scripts.docs.matrix.build_matrix_dicts")
 
 
 if __name__ == "__main__":

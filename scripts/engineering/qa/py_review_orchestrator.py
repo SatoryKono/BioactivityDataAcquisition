@@ -34,6 +34,9 @@ SCORE_WEIGHTS = {
     "Configs": 0.05,
     "Documentation": 0.05,
 }
+DOMAIN_ROOT = "src/bioetl/domain"
+COMPOSITION_ROOT = "src/bioetl/composition"
+INTERFACES_ROOT = "src/bioetl/interfaces"
 IGNORED_REVIEW_DIRS = {
     ".venv",
     ".git",
@@ -140,16 +143,16 @@ STATIC_SUBSECTOR_DEFS: dict[str, list[dict[str, Any]]] = {
         {
             "id": "S4.1",
             "name": "Composition",
-            "paths": ["src/bioetl/composition"],
+            "paths": [COMPOSITION_ROOT],
         },
         {
             "id": "S4.2",
             "name": "Interfaces",
-            "paths": ["src/bioetl/interfaces"],
+            "paths": [INTERFACES_ROOT],
         },
     ],
     "S5": [
-        {"id": "S5.1", "name": "Cross Domain", "paths": ["src/bioetl/domain"]},
+        {"id": "S5.1", "name": "Cross Domain", "paths": [DOMAIN_ROOT]},
         {
             "id": "S5.2",
             "name": "Cross Application",
@@ -163,7 +166,7 @@ STATIC_SUBSECTOR_DEFS: dict[str, list[dict[str, Any]]] = {
         {
             "id": "S5.4",
             "name": "Cross Other",
-            "paths": ["src/bioetl/composition", "src/bioetl/interfaces"],
+            "paths": [COMPOSITION_ROOT, INTERFACES_ROOT],
         },
     ],
     "S6": [
@@ -426,7 +429,7 @@ class ReviewOrchestrator:
         self.reports_dir = reports_dir or self.repo_root / "reports" / "review"
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         self.sectors = [
-            {"id": "S1", "name": "Domain", "paths": ["src/bioetl/domain"]},
+            {"id": "S1", "name": "Domain", "paths": [DOMAIN_ROOT]},
             {"id": "S2", "name": "Application", "paths": ["src/bioetl/application"]},
             {
                 "id": "S3",
@@ -436,7 +439,7 @@ class ReviewOrchestrator:
             {
                 "id": "S4",
                 "name": "Composition + Interfaces",
-                "paths": ["src/bioetl/composition", "src/bioetl/interfaces"],
+                "paths": [COMPOSITION_ROOT, INTERFACES_ROOT],
             },
             {"id": "S6", "name": "Tests", "paths": ["tests"]},
             {"id": "S7", "name": "Configs", "paths": ["configs"]},

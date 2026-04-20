@@ -182,37 +182,22 @@ def _resolve_imported_string_bindings(
 ) -> dict[str, str]:
     cache: dict[Path, dict[str, str]] = {}
     bindings: dict[str, str] = {}
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.ImportFrom) or node.module is None:
+    for node in _import_from_nodes(tree):
+        module_bindings = _module_string_bindings(
+            node.module,
+            repo_root=repo_root,
+            cache=cache,
+        )
+        if module_bindings is None:
             continue
-        module_path = _module_path_from_import(node.module, repo_root)
-        if module_path is None:
-            continue
-        if module_path not in cache:
-            try:
-                cache[module_path] = _collect_module_string_bindings(module_path)
-            except UnicodeDecodeError:
-                cache[module_path] = {}
-        module_bindings = cache[module_path]
-        for alias in node.names:
-            if alias.name == "*":
-                continue
-            resolved = module_bindings.get(alias.name)
-            if resolved is not None:
-                bindings[alias.asname or alias.name] = resolved
+        _merge_imported_string_aliases(bindings, module_bindings, node.names)
     return bindings
 
 
 def _collect_class_attribute_bindings(tree: ast.AST) -> dict[str, str]:
     bindings: dict[str, str] = {}
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.ClassDef):
-            continue
-        for body_node in node.body:
-            for targets, value in _iter_string_assignments(body_node):
-                for target in targets:
-                    if isinstance(target, ast.Name):
-                        bindings[target.id] = value
+    for class_node in _class_nodes(tree):
+        bindings.update(_class_attribute_string_bindings(class_node))
     return bindings
 
 
@@ -289,33 +274,143 @@ def _scan_metric_names_in_tree(
     helper_metric_names: set[str] = set()
     alias_metric_names: set[str] = set()
 
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call):
+    for call_node in _call_nodes(tree):
+        direct_metric_name, helper_candidates = _metric_names_for_call(
+            call_node,
+            string_bindings=string_bindings,
+            attribute_bindings=attribute_bindings,
+        )
+        if direct_metric_name is not None:
+            direct_metric_names.add(direct_metric_name)
             continue
-        method_name = _call_method_name(node)
-        if method_name in _RUNTIME_METRIC_METHODS:
-            if not node.args:
-                continue
-            metric_name = _resolve_metric_name_expr(
-                node.args[0],
+        _partition_helper_metric_candidates(
+            helper_candidates,
+            helper_metric_names=helper_metric_names,
+            alias_metric_names=alias_metric_names,
+        )
+
+    return direct_metric_names, helper_metric_names, alias_metric_names
+
+
+def _import_from_nodes(tree: ast.AST) -> list[ast.ImportFrom]:
+    """Return import-from nodes with concrete module names."""
+    return [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    ]
+
+
+def _module_string_bindings(
+    module_name: str | None,
+    *,
+    repo_root: Path,
+    cache: dict[Path, dict[str, str]],
+) -> dict[str, str] | None:
+    """Load cached string bindings for one imported module."""
+    if module_name is None:
+        return None
+    module_path = _module_path_from_import(module_name, repo_root)
+    if module_path is None:
+        return None
+    if module_path not in cache:
+        try:
+            cache[module_path] = _collect_module_string_bindings(module_path)
+        except UnicodeDecodeError:
+            cache[module_path] = {}
+    return cache[module_path]
+
+
+def _merge_imported_string_aliases(
+    bindings: dict[str, str],
+    module_bindings: dict[str, str],
+    aliases: list[ast.alias],
+) -> None:
+    """Merge imported string constants into the local binding map."""
+    for alias in aliases:
+        if alias.name == "*":
+            continue
+        resolved = module_bindings.get(alias.name)
+        if resolved is not None:
+            bindings[alias.asname or alias.name] = resolved
+
+
+def _class_nodes(tree: ast.AST) -> list[ast.ClassDef]:
+    """Return all class definitions in the tree."""
+    return [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+
+
+def _class_attribute_string_bindings(class_node: ast.ClassDef) -> dict[str, str]:
+    """Collect string-valued class attribute bindings for one class."""
+    bindings: dict[str, str] = {}
+    for body_node in class_node.body:
+        for targets, value in _iter_string_assignments(body_node):
+            for target in targets:
+                if isinstance(target, ast.Name):
+                    bindings[target.id] = value
+    return bindings
+
+
+def _call_nodes(tree: ast.AST) -> list[ast.Call]:
+    """Return all call nodes from the AST."""
+    return [node for node in ast.walk(tree) if isinstance(node, ast.Call)]
+
+
+def _metric_names_for_call(
+    node: ast.Call,
+    *,
+    string_bindings: dict[str, str],
+    attribute_bindings: dict[str, str],
+) -> tuple[str | None, set[str]]:
+    """Return direct runtime metric name or helper candidates for one call."""
+    method_name = _call_method_name(node)
+    if method_name in _RUNTIME_METRIC_METHODS:
+        return (
+            _direct_metric_name(
+                node,
                 string_bindings=string_bindings,
                 attribute_bindings=attribute_bindings,
-            )
-            if metric_name is not None:
-                direct_metric_names.add(metric_name)
-            continue
-
-        for metric_name in _helper_metric_candidates(
+            ),
+            set(),
+        )
+    return (
+        None,
+        _helper_metric_candidates(
             node,
             string_bindings=string_bindings,
             attribute_bindings=attribute_bindings,
-        ):
-            if metric_name.startswith("bioetl_"):
-                helper_metric_names.add(metric_name)
-            else:
-                alias_metric_names.add(metric_name)
+        ),
+    )
 
-    return direct_metric_names, helper_metric_names, alias_metric_names
+
+def _direct_metric_name(
+    node: ast.Call,
+    *,
+    string_bindings: dict[str, str],
+    attribute_bindings: dict[str, str],
+) -> str | None:
+    """Resolve the direct runtime metric name from a runtime metrics call."""
+    if not node.args:
+        return None
+    return _resolve_metric_name_expr(
+        node.args[0],
+        string_bindings=string_bindings,
+        attribute_bindings=attribute_bindings,
+    )
+
+
+def _partition_helper_metric_candidates(
+    metric_names: set[str],
+    *,
+    helper_metric_names: set[str],
+    alias_metric_names: set[str],
+) -> None:
+    """Partition helper candidate names into canonical and alias buckets."""
+    for metric_name in metric_names:
+        if metric_name.startswith("bioetl_"):
+            helper_metric_names.add(metric_name)
+        else:
+            alias_metric_names.add(metric_name)
 
 
 def _record_runtime_mentions(

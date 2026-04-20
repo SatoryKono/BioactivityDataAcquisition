@@ -13136,7 +13136,8 @@ class Neo4jHttpClient:
                 attempt_errors=attempt_errors,
             )
         )
-        return self._retry_or_raise(runtime_error, endpoint, exc, attempt)
+        self._retry_or_raise(runtime_error, endpoint, exc, attempt)
+        return runtime_error
 
     def _handle_transport_error(
         self,
@@ -13157,7 +13158,8 @@ class Neo4jHttpClient:
                 attempt_errors=attempt_errors,
             )
         )
-        return self._retry_or_raise(runtime_error, endpoint, exc, attempt)
+        self._retry_or_raise(runtime_error, endpoint, exc, attempt)
+        return runtime_error
 
     def _retry_or_raise(
         self,
@@ -13165,13 +13167,13 @@ class Neo4jHttpClient:
         endpoint: str,
         exc: Exception,
         attempt: int,
-    ) -> RuntimeError:
+    ) -> None:
         if self._switch_to_fallback_endpoint():
-            return runtime_error
+            return
         if endpoint != self._primary_endpoint or self._is_last_attempt(attempt):
             raise runtime_error from exc
         self._sleep_before_retry(attempt)
-        return runtime_error
+        return
 
     @staticmethod
     def _should_retry_http_error(exc: error.HTTPError) -> bool:
@@ -15596,18 +15598,19 @@ def _snapshot_operation_count(args: argparse.Namespace) -> int:
     return 1 + int(args.export is not None) + int(args.apply) + int(args.report is not None)
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = _parser()
-    args = parser.parse_args(argv)
-    _validate_cli_args(parser, args)
-    if args.apply_normalization_evidence_only:
-        summary = apply_normalization_evidence_only(
-            args.root.resolve(),
-            args.http_uri,
-            batch_size=args.batch_size,
-        )
-        print(json.dumps(summary, indent=2))
-        return 0
+def _run_apply_normalization_evidence_only(args: argparse.Namespace) -> int:
+    """Execute normalization-evidence-only mode and return the CLI exit code."""
+    summary = apply_normalization_evidence_only(
+        args.root.resolve(),
+        args.http_uri,
+        batch_size=args.batch_size,
+    )
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
+def _run_snapshot_cli(args: argparse.Namespace) -> int:
+    """Execute the standard snapshot/sync CLI flow and return the exit code."""
     root = args.root.resolve()
     selection = _selection_from_args(args)
     snapshot = _filtered_snapshot(build_snapshot(root), selection=selection)
@@ -15622,6 +15625,15 @@ def main(argv: list[str] | None = None) -> int:
         args.report_fast,
     )
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = _parser()
+    args = parser.parse_args(argv)
+    _validate_cli_args(parser, args)
+    if args.apply_normalization_evidence_only:
+        return _run_apply_normalization_evidence_only(args)
+    return _run_snapshot_cli(args)
 
 
 if __name__ == "__main__":
