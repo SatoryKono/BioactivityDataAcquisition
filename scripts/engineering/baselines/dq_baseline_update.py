@@ -153,30 +153,44 @@ def _load_run_metrics(
     metrics = []
     cutoff = datetime.now() - window
 
-    # Look for metrics in audit directory
-    audit_dir = data_dir / "audit"
-    if audit_dir.exists():
-        pattern = f"{pipeline}/*.json" if pipeline else "*/*.json"
-        for audit_file in audit_dir.glob(pattern):
-            try:
-                run_metric = _parse_audit_file(audit_file, cutoff)
-                if run_metric:
-                    metrics.append(run_metric)
-            except Exception as e:
-                logger.debug("Failed to parse %s: %s", audit_file, e)
+    metrics.extend(
+        _load_metrics_from_glob(
+            base_dir=data_dir / "audit",
+            pattern=f"{pipeline}/*.json" if pipeline else "*/*.json",
+            cutoff=cutoff,
+            parser=_parse_audit_file,
+        )
+    )
+    metrics.extend(
+        _load_metrics_from_glob(
+            base_dir=data_dir / "metrics",
+            pattern=f"{pipeline}/runs/*.json" if pipeline else "*/runs/*.json",
+            cutoff=cutoff,
+            parser=_parse_metrics_file,
+        )
+    )
 
-    # Look for metrics in metrics directory
-    metrics_dir = data_dir / "metrics"
-    if metrics_dir.exists():
-        pattern = f"{pipeline}/runs/*.json" if pipeline else "*/runs/*.json"
-        for metrics_file in metrics_dir.glob(pattern):
-            try:
-                run_metric = _parse_metrics_file(metrics_file, cutoff)
-                if run_metric:
-                    metrics.append(run_metric)
-            except Exception as e:
-                logger.debug("Failed to parse %s: %s", metrics_file, e)
+    return metrics
 
+
+def _load_metrics_from_glob(
+    *,
+    base_dir: Path,
+    pattern: str,
+    cutoff: datetime,
+    parser: callable,
+) -> list[RunMetrics]:
+    metrics: list[RunMetrics] = []
+    if not base_dir.exists():
+        return metrics
+
+    for metrics_file in base_dir.glob(pattern):
+        try:
+            run_metric = parser(metrics_file, cutoff)
+            if run_metric:
+                metrics.append(run_metric)
+        except Exception as e:
+            logger.debug("Failed to parse %s: %s", metrics_file, e)
     return metrics
 
 
