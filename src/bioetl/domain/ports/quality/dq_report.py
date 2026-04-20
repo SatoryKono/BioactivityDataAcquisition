@@ -116,43 +116,17 @@ def coerce_silver_dq_analyze_request(
     kwargs: Mapping[str, object] | None = None,
 ) -> SilverDQAnalyzeRequest:
     """Normalize legacy or request-style Silver DQ analysis arguments."""
-    resolved_kwargs = dict(kwargs or {})
     if isinstance(request, SilverDQAnalyzeRequest):
-        if args or resolved_kwargs:
+        if args or kwargs:
             raise TypeError(
                 "SilverDQAnalyzeRequest cannot be combined with legacy args/kwargs"
             )
         return request
-
-    legacy_values: list[object] = list(args) if request is None else [request, *args]
-
-    if len(legacy_values) > len(_SILVER_DQ_ANALYZE_POSITIONAL_FIELDS):
-        raise TypeError("analyze() received too many positional arguments")
-
-    for field_name, value in zip(_SILVER_DQ_ANALYZE_POSITIONAL_FIELDS, legacy_values):
-        if field_name in resolved_kwargs:
-            raise TypeError(
-                f"analyze() got multiple values for argument '{field_name}'"
-            )
-        resolved_kwargs[field_name] = value
-
-    unexpected_fields = sorted(set(resolved_kwargs) - _SILVER_DQ_ANALYZE_ALLOWED_FIELDS)
-    if unexpected_fields:
-        unexpected = ", ".join(unexpected_fields)
-        raise TypeError(f"analyze() got unexpected keyword arguments: {unexpected}")
-
-    missing_fields = [
-        field_name
-        for field_name in _SILVER_DQ_ANALYZE_REQUIRED_FIELDS
-        if field_name not in resolved_kwargs
-    ]
-    if missing_fields:
-        missing = ", ".join(missing_fields)
-        raise TypeError(f"analyze() missing required arguments: {missing}")
-
-    for field_name, default in _SILVER_DQ_ANALYZE_DEFAULTS.items():
-        resolved_kwargs.setdefault(field_name, default)
-
+    resolved_kwargs = _resolve_silver_dq_analyze_kwargs(
+        request=request,
+        args=args,
+        kwargs=kwargs,
+    )
     return SilverDQAnalyzeRequest(
         data=resolved_kwargs["data"],  # type: ignore[arg-type]
         run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]
@@ -169,6 +143,55 @@ def coerce_silver_dq_analyze_request(
         previous_schema=resolved_kwargs["previous_schema"],  # type: ignore[arg-type]
         key_nullability_rules=resolved_kwargs["key_nullability_rules"],  # type: ignore[arg-type]
     )
+
+
+def _resolve_silver_dq_analyze_kwargs(
+    *,
+    request: SilverDQAnalyzeRequest | DataContainer | None,
+    args: tuple[object, ...],
+    kwargs: Mapping[str, object] | None,
+) -> dict[str, object]:
+    resolved_kwargs = dict(kwargs or {})
+    legacy_values = list(args) if request is None else [request, *args]
+    _merge_silver_dq_analyze_legacy_values(resolved_kwargs, legacy_values)
+    _raise_on_unexpected_silver_dq_fields(resolved_kwargs)
+    _raise_on_missing_silver_dq_fields(resolved_kwargs)
+    for field_name, default in _SILVER_DQ_ANALYZE_DEFAULTS.items():
+        resolved_kwargs.setdefault(field_name, default)
+    return resolved_kwargs
+
+
+def _merge_silver_dq_analyze_legacy_values(
+    resolved_kwargs: dict[str, object],
+    legacy_values: list[object],
+) -> None:
+    if len(legacy_values) > len(_SILVER_DQ_ANALYZE_POSITIONAL_FIELDS):
+        raise TypeError("analyze() received too many positional arguments")
+    positional_fields = _SILVER_DQ_ANALYZE_POSITIONAL_FIELDS[: len(legacy_values)]
+    for field_name, value in zip(positional_fields, legacy_values, strict=False):
+        if field_name in resolved_kwargs:
+            raise TypeError(
+                f"analyze() got multiple values for argument '{field_name}'"
+            )
+        resolved_kwargs[field_name] = value
+
+
+def _raise_on_unexpected_silver_dq_fields(resolved_kwargs: dict[str, object]) -> None:
+    unexpected_fields = sorted(set(resolved_kwargs) - _SILVER_DQ_ANALYZE_ALLOWED_FIELDS)
+    if unexpected_fields:
+        unexpected = ", ".join(unexpected_fields)
+        raise TypeError(f"analyze() got unexpected keyword arguments: {unexpected}")
+
+
+def _raise_on_missing_silver_dq_fields(resolved_kwargs: dict[str, object]) -> None:
+    missing_fields = [
+        field_name
+        for field_name in _SILVER_DQ_ANALYZE_REQUIRED_FIELDS
+        if field_name not in resolved_kwargs
+    ]
+    if missing_fields:
+        missing = ", ".join(missing_fields)
+        raise TypeError(f"analyze() missing required arguments: {missing}")
 
 
 @runtime_checkable

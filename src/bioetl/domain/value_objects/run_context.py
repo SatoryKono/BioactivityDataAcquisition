@@ -9,7 +9,7 @@ Implements RULES.md §1 - Domain Layer value objects (frozen dataclass).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from datetime import datetime
 from typing import cast
 
@@ -90,161 +90,47 @@ def _coerce_run_context_create_input(
     inputs: RunContextCreateInput | None,
     overrides: dict[str, object],
 ) -> RunContextCreateInput:
+    _ensure_required_create_input_fields(inputs, overrides)
+    return RunContextCreateInput(**_build_run_context_create_payload(inputs, overrides))
+
+
+def _ensure_required_create_input_fields(
+    inputs: RunContextCreateInput | None,
+    overrides: dict[str, object],
+) -> None:
     for field_name in _RUN_CONTEXT_REQUIRED_FIELDS:
         _resolve_create_input_value(
             field_name=field_name,
             inputs=inputs,
             overrides=overrides,
         )
-    return RunContextCreateInput(
-        run_id=cast(
-            RunID,
-            _resolve_create_input_value(
-                field_name="run_id",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        run_type=cast(
-            RunType,
-            _resolve_create_input_value(
-                field_name="run_type",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        started_at=cast(
-            datetime,
-            _resolve_create_input_value(
-                field_name="started_at",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        provider=cast(
-            str,
-            _resolve_create_input_value(
-                field_name="provider",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        entity=cast(
-            str,
-            _resolve_create_input_value(
-                field_name="entity",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        transform_version=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="transform_version",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        transform_steps=tuple(
-            cast(
-                tuple[str, ...] | None,
-                _resolve_create_input_value(
-                    field_name="transform_steps",
-                    inputs=inputs,
-                    overrides=overrides,
-                ),
-            )
-            or ()
-        ),
-        pipeline_version=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="pipeline_version",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        git_commit=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="git_commit",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        config_hash=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="config_hash",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        manifest_id=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="manifest_id",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        contract_ref=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="contract_ref",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        contract_version=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="contract_version",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        contract_schema_hash=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="contract_schema_hash",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        dq_policy_ref=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="dq_policy_ref",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        rule_bundle_version=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="rule_bundle_version",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        dq_contract_compatibility_hash=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="dq_contract_compatibility_hash",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-        effective_config_artifact_id=cast(
-            str | None,
-            _resolve_create_input_value(
-                field_name="effective_config_artifact_id",
-                inputs=inputs,
-                overrides=overrides,
-            ),
-        ),
-    )
+
+
+def _coerce_run_context_field_value(
+    field_name: str,
+    value: object,
+) -> object:
+    if field_name == "transform_steps":
+        return tuple(cast(tuple[str, ...] | None, value) or ())
+    return value
+
+
+def _build_run_context_create_payload(
+    inputs: RunContextCreateInput | None,
+    overrides: dict[str, object],
+) -> dict[str, object]:
+    payload: dict[str, object] = {}
+    for field_info in fields(RunContextCreateInput):
+        value = _resolve_create_input_value(
+            field_name=field_info.name,
+            inputs=inputs,
+            overrides=overrides,
+        )
+        payload[field_info.name] = _coerce_run_context_field_value(
+            field_info.name,
+            value,
+        )
+    return payload
 
 
 @dataclass(frozen=True, slots=True)

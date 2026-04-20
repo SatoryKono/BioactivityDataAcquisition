@@ -69,6 +69,11 @@ from bioetl.infrastructure.storage.gold.validation_mixin import (
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_write_targets,
 )
+from bioetl.infrastructure.storage.writer_common import (
+    get_write_targets,
+    iterate_write_targets,
+    validate_write_versions,
+)
 
 if TYPE_CHECKING:
     from pandera.polars import DataFrameSchema
@@ -205,20 +210,12 @@ async def _write_dual_targets(
     assert writer._contract_rollout_policy is not None  # guarded by caller
 
     write_versions = writer._contract_rollout_policy.write_versions
-    write_targets = resolve_write_targets(
-        request.table_name,
-        write_versions,
-    )
     
-    # Guard against empty write_versions to avoid zip() ValueError
-    if not write_versions:
-        raise ValueError("Contract rollout policy must specify at least one write version")
+    # Use common functions to reduce duplication
+    validate_write_versions(write_versions)
+    write_targets = get_write_targets(request.table_name, write_versions)
     
-    for contract_version, physical_table in zip(
-        write_versions,
-        write_targets,
-        strict=True,
-    ):
+    for contract_version, physical_table in iterate_write_targets(write_versions, write_targets):
         target_schema = schema_policy.for_version(contract_version)
         if target_schema is None:
             raise ValueError(

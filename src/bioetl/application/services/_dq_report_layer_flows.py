@@ -10,7 +10,7 @@ from bioetl.application.services.dq_report_models import (
     _DQ_REPORT_ERRORS,
     DQReportContext,
 )
-from bioetl.domain.ports.quality.dq_report import SilverDQAnalyzeRequest
+from bioetl.domain.ports import SilverDQAnalyzeRequest
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
