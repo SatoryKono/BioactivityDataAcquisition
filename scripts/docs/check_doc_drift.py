@@ -3,18 +3,16 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    import sys
+    from pathlib import Path
 
-from scripts.docs.checks.check_drift import (
-    DriftReport,
-    check_freshness,
-    check_runtime_mirrors,
-    main,
-)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _compat_shim import load_public_api
+else:
+    from ._compat_shim import load_public_api
+
+_IMPL = load_public_api(globals(), "scripts.docs.checks.check_drift")
 
 __all__ = [
     "DriftReport",
