@@ -479,29 +479,44 @@ def _yaml_dump(path: Path, payload: dict[str, object]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _yaml_dict_lines(key: str, value: dict[object, object], indent: int) -> list[str]:
+    prefix = " " * indent
+    lines = [f"{prefix}{key}:"]
+    for child_key, child_value in value.items():
+        lines.extend(_yaml_lines(str(child_key), child_value, indent + 2))
+    return lines
+
+
+def _yaml_nested_list_item_lines(item: object, indent: int) -> list[str]:
+    prefix = " " * indent
+    lines = [f"{prefix}  -"]
+    if isinstance(item, dict):
+        for child_key, child_value in item.items():
+            lines.extend(_yaml_lines(str(child_key), child_value, indent + 4))
+        return lines
+
+    for child in item:
+        lines.append(f"{prefix}    - {_yaml_scalar(child)}")
+    return lines
+
+
+def _yaml_list_lines(key: str, value: list[object], indent: int) -> list[str]:
+    prefix = " " * indent
+    lines = [f"{prefix}{key}:"]
+    for item in value:
+        if isinstance(item, (dict, list)):
+            lines.extend(_yaml_nested_list_item_lines(item, indent))
+        else:
+            lines.append(f"{prefix}  - {_yaml_scalar(item)}")
+    return lines
+
+
 def _yaml_lines(key: str, value: object, indent: int) -> list[str]:
     prefix = " " * indent
     if isinstance(value, dict):
-        lines = [f"{prefix}{key}:"]
-        for child_key, child_value in value.items():
-            lines.extend(_yaml_lines(str(child_key), child_value, indent + 2))
-        return lines
+        return _yaml_dict_lines(key, value, indent)
     if isinstance(value, list):
-        lines = [f"{prefix}{key}:"]
-        for item in value:
-            if isinstance(item, (dict, list)):
-                lines.append(f"{prefix}  -")
-                if isinstance(item, dict):
-                    for child_key, child_value in item.items():
-                        lines.extend(
-                            _yaml_lines(str(child_key), child_value, indent + 4)
-                        )
-                else:
-                    for child in item:
-                        lines.append(f"{prefix}    - {_yaml_scalar(child)}")
-            else:
-                lines.append(f"{prefix}  - {_yaml_scalar(item)}")
-        return lines
+        return _yaml_list_lines(key, value, indent)
     return [f"{prefix}{key}: {_yaml_scalar(value)}"]
 
 

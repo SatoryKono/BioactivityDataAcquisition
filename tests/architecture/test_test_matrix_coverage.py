@@ -45,6 +45,19 @@ def _ownership_paths(matrix: YamlMap, entity_key: str) -> list[Path]:
     return [ROOT / path for path in raw_paths]
 
 
+def _forbidden_test_dir(forbidden_path: str) -> Path:
+    parts = forbidden_path.split("/")
+    if len(parts) >= 2:
+        return TESTS_DIR / "unit" / parts[0] / parts[1]
+    return TESTS_DIR / "unit" / parts[0]
+
+
+def _contains_forbidden_hypothesis_usage(content: str) -> bool:
+    if "@given(" not in content and "from hypothesis" not in content:
+        return False
+    return "# hypothesis: boundary-exception" not in content
+
+
 @pytest.mark.architecture
 class TestVCRCassetteCoverage:
     """Validate VCR cassettes exist for required providers."""
@@ -83,22 +96,14 @@ class TestPropertyTestBoundaries:
         forbidden = matrix.get("property_test_boundaries", {}).get("forbidden", [])
 
         for forbidden_path in forbidden:
-            # Map source path to test path
-            parts = forbidden_path.split("/")
-            if len(parts) >= 2:
-                test_dir = TESTS_DIR / "unit" / parts[0] / parts[1]
-            else:
-                test_dir = TESTS_DIR / "unit" / parts[0]
+            test_dir = _forbidden_test_dir(forbidden_path)
 
             if not test_dir.is_dir():
                 continue
 
             for test_file in test_dir.rglob("test_*.py"):
                 content = test_file.read_text(encoding="utf-8")
-                if "@given(" in content or "from hypothesis" in content:
-                    # Allow if explicitly marked as exception
-                    if "# hypothesis: boundary-exception" in content:
-                        continue
+                if _contains_forbidden_hypothesis_usage(content):
                     pytest.fail(
                         f"Property-based test found in forbidden directory: "
                         f"{test_file.relative_to(ROOT)}"
