@@ -221,6 +221,10 @@ class TestProviderHealthMonitorHealthCheck:
 class TestProviderHealthMonitorMetrics:
     """Tests for metric emission."""
 
+    DEGRADED_METRIC = 1
+    HEALTHY_METRIC = 2
+    UNHEALTHY_METRIC = 0
+
     def test_emits_metric_on_error(
         self, monitor: ProviderHealthMonitor, mock_metrics: MagicMock
     ) -> None:
@@ -229,7 +233,7 @@ class TestProviderHealthMonitorMetrics:
 
         mock_metrics.set_gauge.assert_called_with(
             "bioetl_provider_health_status",
-            1,  # DEGRADED = 1
+            self.DEGRADED_METRIC,
             labels={"provider": "chembl"},
         )
 
@@ -241,7 +245,7 @@ class TestProviderHealthMonitorMetrics:
 
         mock_metrics.set_gauge.assert_called_with(
             "bioetl_provider_health_status",
-            2,  # HEALTHY = 2
+            self.HEALTHY_METRIC,
             labels={"provider": "chembl"},
         )
 
@@ -253,7 +257,7 @@ class TestProviderHealthMonitorMetrics:
 
         mock_metrics.set_gauge.assert_called_with(
             "bioetl_provider_health_status",
-            0,  # UNHEALTHY = 0
+            self.UNHEALTHY_METRIC,
             labels={"provider": "chembl"},
         )
 

@@ -881,7 +881,7 @@ class TestResumePartialEnrichment:
 
         seed_factory = FakePipelineRunnerFactory()
 
-        runner, components = create_test_runner(
+        runner, _ = create_test_runner(
             config=config,
             runtime=CompositeRuntimeConfig(resume=True),
             seed_factory=seed_factory,
@@ -964,7 +964,7 @@ class TestDryRunMode:
         """Dry run should skip merge operation."""
         merger = FakeMergeService()
 
-        runner, components = create_test_runner(
+        runner, _ = create_test_runner(
             runtime=CompositeRuntimeConfig(dry_run=True),
             merger=merger,
         )
@@ -1014,7 +1014,7 @@ class TestNoEnrichers:
         config = FakeCompositeConfig(enrichers=())
         coordinator = FakeEnrichmentCoordinator()
 
-        runner, components = create_test_runner(
+        runner, _ = create_test_runner(
             config=config,
             coordinator=coordinator,
         )
