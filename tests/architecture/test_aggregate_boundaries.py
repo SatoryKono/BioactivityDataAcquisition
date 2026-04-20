@@ -216,6 +216,44 @@ def _check_property_return_type(
         )
 
 
+def _other_aggregate_classes(
+    *,
+    aggregate_classes: dict[str, set[str]],
+    current_filename: str,
+) -> set[str]:
+    return {
+        class_name
+        for other_file, classes in aggregate_classes.items()
+        if other_file != current_filename
+        for class_name in classes
+    }
+
+
+def _cross_aggregate_import_patterns(py_file: Path, class_name: str) -> tuple[str, ...]:
+    return (
+        f"from bioetl.domain.aggregates.{py_file.stem} import {class_name}",
+        f"from bioetl.domain.aggregates import {class_name}",
+        f"aggregates.{class_name}",
+    )
+
+
+def _cross_aggregate_import_violations(
+    *,
+    py_file: Path,
+    content: str,
+    aggregate_classes: dict[str, set[str]],
+) -> list[str]:
+    violations: list[str] = []
+    for class_name in _other_aggregate_classes(
+        aggregate_classes=aggregate_classes,
+        current_filename=py_file.name,
+    ):
+        patterns = _cross_aggregate_import_patterns(py_file, class_name)
+        if any(pattern in content for pattern in patterns):
+            violations.append(f"{py_file.name} imports aggregate class {class_name}")
+    return violations
+
+
 class TestAggregateBoundaryIsolation:
     """Tests ensuring aggregates don't reference each other directly."""
 
@@ -258,26 +296,15 @@ class TestAggregateBoundaryIsolation:
             if py_file.name.startswith("_"):
                 continue
 
-            other_aggregates = set()
-            for other_file, classes in aggregate_classes.items():
-                if other_file != py_file.name:
-                    other_aggregates.update(classes)
-
             with py_file.open(encoding="utf-8") as f:
                 content = f.read()
-
-            for class_name in other_aggregates:
-                # Check for imports of other aggregate classes
-                patterns = [
-                    f"from bioetl.domain.aggregates.{py_file.stem} import {class_name}",
-                    f"from bioetl.domain.aggregates import {class_name}",
-                    f"aggregates.{class_name}",
-                ]
-                for pattern in patterns:
-                    if pattern in content:
-                        violations.append(
-                            f"{py_file.name} imports aggregate class {class_name}"
-                        )
+            violations.extend(
+                _cross_aggregate_import_violations(
+                    py_file=py_file,
+                    content=content,
+                    aggregate_classes=aggregate_classes,
+                )
+            )
 
         assert not violations, (
             "Aggregates should not import other aggregate classes. "
