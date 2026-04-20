@@ -69,6 +69,7 @@ PY
   else
     printf '%s=%s\n' "$key" "$value" >> "$file_path"
   fi
+  return 0
 }
 
 # Detect environment
@@ -82,6 +83,7 @@ detect_env() {
   else
     echo "unknown"
   fi
+  return 0
 }
 
 select_docker_bin() {
