@@ -11,9 +11,9 @@ def check_writable(dir_path):
         temp_file = path / ".health_check_probe"
         print(f"  Attempting touch: {temp_file}")
         temp_file.touch()
-        print(f"  Touch OK. Attempting unlink...")
+        print("  Touch OK. Attempting unlink...")
         temp_file.unlink()
-        print(f"  Unlink OK.")
+        print("  Unlink OK.")
         return True
     except Exception as e:
         print(f"  FAILED: {type(e).__name__}: {e}")

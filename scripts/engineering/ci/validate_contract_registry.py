@@ -176,7 +176,7 @@ def main() -> int:
         if fs_result.valid:
             print("::notice::Filesystem consistency validated")
         else:
-            print(f"::error::Filesystem consistency issues found:")
+            print("::error::Filesystem consistency issues found:")
             for issue in fs_result.issues:
                 print(f"  - {issue.contract_ref}: {issue.message} ({issue.field})")
 
