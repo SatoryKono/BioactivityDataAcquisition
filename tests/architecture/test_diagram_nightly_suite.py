@@ -109,6 +109,40 @@ def test_git_pathspec_rejects_option_like_repo_relative_paths() -> None:
         module._git_pathspec(Path("-unsafe.svg"))
 
 
+def test_normalize_executable_argument_keeps_bare_command_name() -> None:
+    module = _load_module()
+
+    normalized = module._normalize_executable_argument("mmdc")
+
+    assert normalized == "mmdc"
+
+
+def test_normalize_executable_argument_rejects_repo_escape() -> None:
+    module = _load_module()
+
+    with pytest.raises(ValueError, match="must not escape the repository root"):
+        module._normalize_executable_argument("../bin/mmdc")
+
+
+def test_parse_args_normalizes_relative_mmdc_bin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = _load_module()
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_diagram_nightly_suite.py",
+            "--mmdc-bin",
+            "tools/mmdc",
+        ],
+    )
+
+    args = module.parse_args()
+
+    assert args.mmdc_bin == str((module.REPO_ROOT / "tools/mmdc").resolve())
+
+
 def test_check_diag_t026_uses_repo_relative_git_pathspecs(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

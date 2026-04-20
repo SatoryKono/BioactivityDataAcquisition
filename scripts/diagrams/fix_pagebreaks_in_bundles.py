@@ -37,9 +37,28 @@ def _bundle_relative_path(path: Path) -> Path:
     return safe_path.relative_to(DIAGRAM_ROOT.resolve())
 
 
+def _normalize_bundle_relative_path(path: Path) -> Path:
+    """Normalize and validate a DIAGRAM_ROOT-relative path."""
+    if path.is_absolute():
+        raise ValueError(f"expected bundle-relative path, got absolute path: {path}")
+
+    normalized_parts: list[str] = []
+    for part in path.parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            raise ValueError(f"refusing parent traversal path: {path}")
+        normalized_parts.append(part)
+
+    if not normalized_parts:
+        raise ValueError("refusing empty bundle-relative path")
+    return Path(*normalized_parts)
+
+
 def _write_bundle_text(relative_path: Path, content: str) -> None:
     """Write bundle content via a DIAGRAM_ROOT-relative path."""
-    target_path = DIAGRAM_ROOT / relative_path
+    safe_relative_path = _normalize_bundle_relative_path(relative_path)
+    target_path = _safe_bundle_path(DIAGRAM_ROOT / safe_relative_path)
     target_path.write_text(content, encoding="utf-8")
 
 
@@ -93,9 +112,9 @@ def fix_bundle(md_path: Path) -> int:
             if first_diagram_heading_seen and not is_toc_or_header:
                 # Insert page break before this heading (except very first)
                 if any(
-                    re.match(r"^## (?!Table of Contents)", l)
-                    for l in out
-                    if l.startswith("## ")
+                    re.match(r"^## (?!Table of Contents)", existing_line)
+                    for existing_line in out
+                    if existing_line.startswith("## ")
                 ):
                     # Remove trailing blank lines before inserting page break
                     while out and out[-1].strip() == "":

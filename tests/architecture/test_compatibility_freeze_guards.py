@@ -524,15 +524,6 @@ ALLOWED_CLI_REGISTRY_HELPER_SRC_FILES = frozenset(
         / "domains"
         / "run_all"
         / "command.py",
-        ROOT
-        / "src"
-        / "bioetl"
-        / "interfaces"
-        / "cli"
-        / "commands"
-        / "domains"
-        / "run"
-        / "support.py",
     }
 )
 ALLOWED_CLI_GET_DEFAULT_REGISTRY_TEST_FILES: frozenset[Path] = frozenset()

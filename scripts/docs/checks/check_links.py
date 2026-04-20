@@ -976,6 +976,51 @@ def _print_path_message_violations(
     return len(violations)
 
 
+def _print_path_list_section(
+    title: str,
+    items: list[Path],
+) -> int:
+    if not items:
+        return 0
+    _print_section_header(f"{title} ({len(items)} found)")
+    for filepath in items:
+        rel = filepath.relative_to(PROJECT_ROOT)
+        print(f"  {rel}")
+    return len(items)
+
+
+def _report_path_list_check(
+    title: str,
+    items: list[Path],
+    *,
+    ok_message: str,
+) -> int:
+    if not items:
+        print(ok_message)
+        return 0
+    return _print_path_list_section(title, items)
+
+
+def _report_local_skill_nav_classification(
+    rel_paths: list[Path],
+) -> int:
+    if not rel_paths:
+        print(
+            "Local skill nav classification: OK "
+            "(all local skill pages are in nav or not_in_nav)"
+        )
+        return 0
+
+    _print_section_header(
+        "LOCAL SKILL NAV CLASSIFICATION VIOLATIONS "
+        f"({len(rel_paths)} found)"
+    )
+    for rel_path in rel_paths:
+        print(f"  docs/{rel_path}")
+    print("  Fix by adding the page to mkdocs nav or to mkdocs not_in_nav.")
+    return len(rel_paths)
+
+
 def _run_links_checks() -> int:
     violations = 0
 
@@ -990,40 +1035,23 @@ def _run_links_checks() -> int:
         print("Links: OK (no broken relative links found)")
 
     missing_nav_docs = check_missing_nav_docs()
-    if missing_nav_docs:
-        _print_section_header(f"MISSING NAV DOCS ({len(missing_nav_docs)} found)")
-        for filepath in missing_nav_docs:
-            rel = filepath.relative_to(PROJECT_ROOT)
-            print(f"  {rel}")
-        violations += len(missing_nav_docs)
-    else:
-        print("Nav docs: OK (all mkdocs nav files exist)")
+    violations += _report_path_list_check(
+        "MISSING NAV DOCS",
+        missing_nav_docs,
+        ok_message="Nav docs: OK (all mkdocs nav files exist)",
+    )
 
     nav_scope_gaps = check_nav_link_coverage(DOCS_DIR)
-    if nav_scope_gaps:
-        _print_section_header(f"NAV LINK SCOPE GAPS ({len(nav_scope_gaps)} found)")
-        for filepath in nav_scope_gaps:
-            rel = filepath.relative_to(PROJECT_ROOT)
-            print(f"  {rel}")
-        violations += len(nav_scope_gaps)
-    else:
-        print("Nav link scope: OK (all nav docs are included in link checks)")
+    violations += _report_path_list_check(
+        "NAV LINK SCOPE GAPS",
+        nav_scope_gaps,
+        ok_message="Nav link scope: OK (all nav docs are included in link checks)",
+    )
 
     unclassified_local_skill_docs = check_local_skill_nav_classification()
-    if unclassified_local_skill_docs:
-        _print_section_header(
-            "LOCAL SKILL NAV CLASSIFICATION VIOLATIONS "
-            f"({len(unclassified_local_skill_docs)} found)"
-        )
-        for rel_path in unclassified_local_skill_docs:
-            print(f"  docs/{rel_path}")
-        print("  Fix by adding the page to mkdocs nav or to mkdocs not_in_nav.")
-        violations += len(unclassified_local_skill_docs)
-    else:
-        print(
-            "Local skill nav classification: OK "
-            "(all local skill pages are in nav or not_in_nav)"
-        )
+    violations += _report_local_skill_nav_classification(
+        unclassified_local_skill_docs
+    )
 
     return violations
 

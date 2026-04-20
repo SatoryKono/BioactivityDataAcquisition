@@ -56,7 +56,7 @@ PLACEHOLDER_MARKERS = ["placeholder", "TODO", "FIXME", "stub"]
 _NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
 _GRAPH_LINE_RE = re.compile(r"^(graph|flowchart)\b", re.IGNORECASE)
 _EDGE_ROUTING_VALUE_RE = re.compile(
-    r"(?:['\"])?edgeRouting(?:['\"])?\s*:\s*['\"]([A-Za-z_]+)['\"]",
+    r"""(?:['"])?edgeRouting(?:['"])?\s*:\s*['"]([A-Z_]+)['"]""",
     re.IGNORECASE,
 )
 _NON_FLOW_RE = re.compile(

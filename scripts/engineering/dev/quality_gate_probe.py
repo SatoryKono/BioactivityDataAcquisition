@@ -103,6 +103,68 @@ def _stream_reader(
             close()
 
 
+def _terminate_probe_process(process: subprocess.Popen[str]) -> None:
+    process.terminate()
+    try:
+        process.wait(timeout=1.0)
+    except subprocess.TimeoutExpired:
+        process.kill()
+
+
+def _append_output_chunk(
+    *,
+    stream_name: str,
+    text: str,
+    seen_at: float,
+    start: float,
+    stdout_chunks: list[str],
+    stderr_chunks: list[str],
+    first_output_latency: float | None,
+) -> float | None:
+    if first_output_latency is None:
+        first_output_latency = seen_at - start
+
+    if stream_name == "stdout":
+        stdout_chunks.append(text)
+    else:
+        stderr_chunks.append(text)
+    return first_output_latency
+
+
+def _drain_output_queue(
+    output_queue: queue.Queue[tuple[str, str, float]],
+    *,
+    start: float,
+    stdout_chunks: list[str],
+    stderr_chunks: list[str],
+    first_output_latency: float | None,
+) -> float | None:
+    while not output_queue.empty():
+        stream_name, text, seen_at = output_queue.get_nowait()
+        first_output_latency = _append_output_chunk(
+            stream_name=stream_name,
+            text=text,
+            seen_at=seen_at,
+            start=start,
+            stdout_chunks=stdout_chunks,
+            stderr_chunks=stderr_chunks,
+            first_output_latency=first_output_latency,
+        )
+    return first_output_latency
+
+
+def _queue_item_or_none(
+    process: subprocess.Popen[str],
+    output_queue: queue.Queue[tuple[str, str, float]],
+) -> tuple[str, str, float] | None:
+    try:
+        return output_queue.get(timeout=0.1)
+    except queue.Empty:
+        if process.poll() is not None and output_queue.empty():
+            return None
+        return ("", "", -1.0)
+
+
 def _run_probe(
     probe: Probe,
     *,
@@ -145,39 +207,36 @@ def _run_probe(
     while True:
         if time.monotonic() - start > timeout_seconds:
             timed_out = True
-            process.terminate()
-            try:
-                process.wait(timeout=1.0)
-            except subprocess.TimeoutExpired:
-                process.kill()
+            _terminate_probe_process(process)
             break
 
-        try:
-            stream_name, text, seen_at = output_queue.get(timeout=0.1)
-        except queue.Empty:
-            if process.poll() is not None and output_queue.empty():
-                break
+        item = _queue_item_or_none(process, output_queue)
+        if item is None:
+            break
+        stream_name, text, seen_at = item
+        if seen_at < 0:
             continue
 
-        if first_output_latency is None:
-            first_output_latency = seen_at - start
-
-        if stream_name == "stdout":
-            stdout_chunks.append(text)
-        else:
-            stderr_chunks.append(text)
+        first_output_latency = _append_output_chunk(
+            stream_name=stream_name,
+            text=text,
+            seen_at=seen_at,
+            start=start,
+            stdout_chunks=stdout_chunks,
+            stderr_chunks=stderr_chunks,
+            first_output_latency=first_output_latency,
+        )
 
     for thread in threads:
         thread.join(timeout=0.2)
 
-    while not output_queue.empty():
-        stream_name, text, seen_at = output_queue.get_nowait()
-        if first_output_latency is None:
-            first_output_latency = seen_at - start
-        if stream_name == "stdout":
-            stdout_chunks.append(text)
-        else:
-            stderr_chunks.append(text)
+    first_output_latency = _drain_output_queue(
+        output_queue,
+        start=start,
+        stdout_chunks=stdout_chunks,
+        stderr_chunks=stderr_chunks,
+        first_output_latency=first_output_latency,
+    )
 
     return ProbeResult(
         name=probe.name,
