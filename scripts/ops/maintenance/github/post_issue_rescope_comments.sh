@@ -30,6 +30,7 @@ Examples:
   bash scripts/ops/maintenance/post_issue_rescope_comments.sh --issue 2600 --issue 2516
   GITHUB_PERSONAL_ACCESS_TOKEN=... bash scripts/ops/maintenance/post_issue_rescope_comments.sh --apply
 EOF
+  return 0
 }
 
 OWNER="$DEFAULT_OWNER"
@@ -195,14 +196,16 @@ This issue should remain open only as a coordination/meta artifact. Concrete imp
 EOF
 
 comment_file_for_issue() {
-  case "$1" in
+  local issue_number="$1"
+  case "$issue_number" in
     2600|2516|2515|2511)
-      printf '%s/%s.md\n' "$tmpdir" "$1"
+      printf '%s/%s.md\n' "$tmpdir" "$issue_number"
       ;;
     *)
       printf ''
       ;;
   esac
+  return 0
 }
 
 declare -a TARGET_ISSUES
