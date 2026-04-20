@@ -23,8 +23,11 @@ def _load_module() -> ModuleType:
     return module
 
 
-def test_check_file_flags_only_class_and_sequence_diagrams(tmp_path: Path) -> None:
+def test_check_file_flags_only_class_and_sequence_diagrams(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     module = _load_module()
+    monkeypatch.setattr(module, "_repo_root", lambda: tmp_path)
 
     class_diagram = tmp_path / "class-demo.mmd"
     class_diagram.write_text(
