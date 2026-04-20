@@ -11,8 +11,8 @@ from bioetl.application.services._checkpoint_compatibility_runtime_core import (
     generate_recovery_suggestions,
 )
 from bioetl.application.services._checkpoint_compatibility_runtime_identity import (
-    CheckpointExecutionIdentityFallbackInput,
-    ExecutionIdentityCompatibilityInput,
+    CheckpointExecutionIdentityFallbackContext,
+    ExecutionIdentityCompatibilityContext,
     check_execution_identity_compatibility,
 )
 from bioetl.application.services._checkpoint_compatibility_runtime_identity_details import (
@@ -22,8 +22,8 @@ from bioetl.application.services._checkpoint_compatibility_runtime_identity_deta
 )
 
 __all__ = [
-    "CheckpointExecutionIdentityFallbackInput",
-    "ExecutionIdentityCompatibilityInput",
+    "CheckpointExecutionIdentityFallbackContext",
+    "ExecutionIdentityCompatibilityContext",
     "IdentityDetailsRequest",
     "build_identity_details",
     "check_config_compatibility",

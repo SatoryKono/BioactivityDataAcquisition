@@ -88,6 +88,43 @@ class TestHealthClassification:
         }
 
 
+@dataclass(frozen=True)
+class ContractTestingContext:
+    """Normalized contract-testing policy inputs used for health classification."""
+
+    enforced_providers: list[str]
+    pilot_providers: list[str]
+    vcr_only_providers: list[str]
+    network_opt_in_required: bool
+    live_api_gate_mode: str
+
+
+@dataclass(frozen=True)
+class QualityGateOutputContext:
+    """Compact input bundle for quality gate JSON payload rendering."""
+
+    quarter: str
+    architecture_stats: ArchitectureTestStats
+    max_total_exemptions: int
+    min_integral_score: float
+    ci_target: dict[str, object]
+    arch_failures: int
+    total_exemptions: int
+    max_class_loc: int
+    domain_cc_exemptions: int
+    min_provider_vcr: int
+    provider_vcr_counts: dict[str, int]
+    ruff_violations: int
+    coverage_percent: float | None
+    compatibility_surface: object
+    test_health_payload: dict[str, object]
+    bonus: float
+    summary: object
+    adjusted_integral_score: float
+    gate_pass: bool
+    violations: list[str]
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -362,36 +399,17 @@ def _build_test_health_payload(
     taxonomy: dict[str, object],
 ) -> dict[str, object]:
     """Attach canonical taxonomy metadata to the computed classification."""
-    statuses = taxonomy.get("statuses", {})
-    status_entry: dict[str, object] = {}
-    if isinstance(statuses, dict):
-        raw_entry = statuses.get(classification.status, {})
-        if isinstance(raw_entry, dict):
-            status_entry = raw_entry
-
-    short_label = status_entry.get("short_label")
-    definition = status_entry.get("definition")
-    merge_semantics = status_entry.get("merge_semantics")
-    skip_classes_taxonomy = taxonomy.get("skip_classes", {})
-    skip_classes_detail: list[dict[str, object]] = []
-    if isinstance(skip_classes_taxonomy, dict):
-        for skip_class, count in classification.skip_classes:
-            raw_entry = skip_classes_taxonomy.get(skip_class, {})
-            entry = raw_entry if isinstance(raw_entry, dict) else {}
-            label = entry.get("short_label")
-            class_definition = entry.get("definition")
-            skip_classes_detail.append(
-                {
-                    "id": skip_class,
-                    "count": count,
-                    "short_label": label if isinstance(label, str) else skip_class,
-                    "definition": (
-                        class_definition
-                        if isinstance(class_definition, str)
-                        else skip_class
-                    ),
-                }
-            )
+    status_entry = _taxonomy_status_entry(taxonomy, classification.status)
+    short_label = _taxonomy_string(
+        status_entry.get("short_label"), classification.status
+    )
+    definition = _taxonomy_string(
+        status_entry.get("definition"), classification.summary
+    )
+    merge_semantics = _taxonomy_string(
+        status_entry.get("merge_semantics"), "informational"
+    )
+    skip_classes_detail = _skip_classes_detail(classification, taxonomy)
 
     return {
         **classification.as_dict(),
@@ -401,15 +419,9 @@ def _build_test_health_payload(
             "merge_blocking_source", "ci_pass_fail_and_quality_gate"
         ),
         "merge_blocking_note": taxonomy.get("merge_blocking_note", ""),
-        "short_label": short_label
-        if isinstance(short_label, str)
-        else classification.status,
-        "definition": definition
-        if isinstance(definition, str)
-        else classification.summary,
-        "merge_semantics": (
-            merge_semantics if isinstance(merge_semantics, str) else "informational"
-        ),
+        "short_label": short_label,
+        "definition": definition,
+        "merge_semantics": merge_semantics,
     }
 
 
@@ -419,31 +431,83 @@ def _string_list(value: object) -> list[str]:
     return [item for item in value if isinstance(item, str)]
 
 
-def _staged_rollout_flags(test_matrix: dict[str, object]) -> tuple[str, ...]:
-    flags: list[str] = []
+def _taxonomy_status_entry(
+    taxonomy: dict[str, object], status: str
+) -> dict[str, object]:
+    statuses = taxonomy.get("statuses", {})
+    if not isinstance(statuses, dict):
+        return {}
+    raw_entry = statuses.get(status, {})
+    return raw_entry if isinstance(raw_entry, dict) else {}
 
+
+def _taxonomy_string(value: object, fallback: str) -> str:
+    return value if isinstance(value, str) else fallback
+
+
+def _skip_classes_detail(
+    classification: TestHealthClassification,
+    taxonomy: dict[str, object],
+) -> list[dict[str, object]]:
+    skip_classes_taxonomy = taxonomy.get("skip_classes", {})
+    if not isinstance(skip_classes_taxonomy, dict):
+        return []
+    details: list[dict[str, object]] = []
+    for skip_class, count in classification.skip_classes:
+        raw_entry = skip_classes_taxonomy.get(skip_class, {})
+        entry = raw_entry if isinstance(raw_entry, dict) else {}
+        details.append(
+            {
+                "id": skip_class,
+                "count": count,
+                "short_label": _taxonomy_string(
+                    entry.get("short_label"), skip_class
+                ),
+                "definition": _taxonomy_string(
+                    entry.get("definition"), skip_class
+                ),
+            }
+        )
+    return details
+
+
+def _fixture_governance_rollout_flags(test_matrix: dict[str, object]) -> list[str]:
     fixture_governance = test_matrix.get("fixture_governance", {})
-    if isinstance(fixture_governance, dict):
-        rollout = fixture_governance.get("rollout", {})
-        if isinstance(rollout, dict):
-            for key, value in sorted(rollout.items()):
-                if isinstance(value, str) and value != "enforced":
-                    flags.append(f"fixture_governance.{key}={value}")
+    if not isinstance(fixture_governance, dict):
+        return []
+    rollout = fixture_governance.get("rollout", {})
+    if not isinstance(rollout, dict):
+        return []
+    flags: list[str] = []
+    for key, value in sorted(rollout.items()):
+        if isinstance(value, str) and value != "enforced":
+            flags.append(f"fixture_governance.{key}={value}")
+    return flags
 
+
+def _mutation_testing_rollout_flags(test_matrix: dict[str, object]) -> list[str]:
     mutation_testing = test_matrix.get("mutation_testing", {})
-    if isinstance(mutation_testing, dict):
-        ci_gate_mode = mutation_testing.get("ci_gate_mode")
-        if isinstance(ci_gate_mode, str) and ci_gate_mode != "full":
-            flags.append(f"mutation_testing.ci_gate_mode={ci_gate_mode}")
-        targets = mutation_testing.get("targets", {})
-        if isinstance(targets, dict):
-            for target_name, target_payload in sorted(targets.items()):
-                if not isinstance(target_payload, dict):
-                    continue
-                enforced = target_payload.get("enforced")
-                if enforced is False:
-                    flags.append(f"mutation_testing.targets.{target_name}=staged")
+    if not isinstance(mutation_testing, dict):
+        return []
+    flags: list[str] = []
+    ci_gate_mode = mutation_testing.get("ci_gate_mode")
+    if isinstance(ci_gate_mode, str) and ci_gate_mode != "full":
+        flags.append(f"mutation_testing.ci_gate_mode={ci_gate_mode}")
+    targets = mutation_testing.get("targets", {})
+    if not isinstance(targets, dict):
+        return flags
+    for target_name, target_payload in sorted(targets.items()):
+        if not isinstance(target_payload, dict):
+            continue
+        if target_payload.get("enforced") is False:
+            flags.append(f"mutation_testing.targets.{target_name}=staged")
+    return flags
 
+
+def _staged_rollout_flags(test_matrix: dict[str, object]) -> tuple[str, ...]:
+    flags = _fixture_governance_rollout_flags(
+        test_matrix
+    ) + _mutation_testing_rollout_flags(test_matrix)
     return tuple(flags)
 
 
@@ -480,75 +544,34 @@ def _classify_test_health(
     skip_ratio: float | None = None
     if total_executed > 0:
         skip_ratio = round(architecture_stats.skipped / total_executed, 4)
-
-    contract_testing = test_matrix.get("contract_testing", {})
-    enforced_providers: list[str] = []
-    pilot_providers: list[str] = []
-    vcr_only_providers: list[str] = []
-    network_opt_in_required = False
-    live_api_gate_mode = ""
-
-    if isinstance(contract_testing, dict):
-        network_opt_in_required = bool(
-            contract_testing.get("network_opt_in_required", False)
-        )
-        gate_mode = contract_testing.get("live_api_gate_mode")
-        if isinstance(gate_mode, str):
-            live_api_gate_mode = gate_mode
-
-        baseline = contract_testing.get("live_api_minimum_baseline", {})
-        if isinstance(baseline, dict):
-            enforced_providers = _string_list(baseline.get("enforced_providers"))
-            pilot_providers = _string_list(baseline.get("pilot_providers"))
-            vcr_only_providers = _string_list(baseline.get("vcr_only_providers"))
-
+    contract_context = _contract_testing_context(test_matrix)
     staged_flags = _staged_rollout_flags(test_matrix)
     skip_classes = _build_skip_classes(
         architecture_stats,
-        network_opt_in_required=network_opt_in_required,
-        live_api_gate_mode=live_api_gate_mode,
-        pilot_providers=pilot_providers,
-        vcr_only_providers=vcr_only_providers,
+        network_opt_in_required=contract_context.network_opt_in_required,
+        live_api_gate_mode=contract_context.live_api_gate_mode,
+        pilot_providers=contract_context.pilot_providers,
+        vcr_only_providers=contract_context.vcr_only_providers,
     )
-
-    reasons: list[str] = []
     if not suite_green:
-        reasons.append("merge-blocking failures remain present")
         return TestHealthClassification(
             status="non_green",
             summary=(
                 "Suite is not green, so descriptive confidence classes remain "
                 "secondary to active failures."
             ),
-            reasons=tuple(reasons),
+            reasons=("merge-blocking failures remain present",),
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
-            live_contract_enforced_provider_count=len(enforced_providers),
-            live_contract_pilot_provider_count=len(pilot_providers),
-            live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            live_contract_enforced_provider_count=len(contract_context.enforced_providers),
+            live_contract_pilot_provider_count=len(contract_context.pilot_providers),
+            live_contract_vcr_only_provider_count=len(contract_context.vcr_only_providers),
             skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
-
-    environment_reasons: list[str] = []
-    if architecture_stats.skipped > 0:
-        environment_reasons.append(
-            f"architecture suite still carries {architecture_stats.skipped} skips"
-        )
-    if network_opt_in_required:
-        environment_reasons.append("live contract execution is network opt-in gated")
-    if live_api_gate_mode and live_api_gate_mode != "always":
-        environment_reasons.append(f"live API gate mode is {live_api_gate_mode}")
-    if vcr_only_providers:
-        environment_reasons.append(
-            "live minimum baseline excludes "
-            f"{len(vcr_only_providers)} VCR-only provider(s)"
-        )
-    if pilot_providers:
-        environment_reasons.append(
-            f"live minimum baseline includes {len(pilot_providers)} pilot provider(s)"
-        )
-
+    environment_reasons = _environment_limited_reasons(
+        architecture_stats, contract_context
+    )
     if environment_reasons:
         return TestHealthClassification(
             status="environment_limited_green",
@@ -559,9 +582,9 @@ def _classify_test_health(
             reasons=tuple(environment_reasons),
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
-            live_contract_enforced_provider_count=len(enforced_providers),
-            live_contract_pilot_provider_count=len(pilot_providers),
-            live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            live_contract_enforced_provider_count=len(contract_context.enforced_providers),
+            live_contract_pilot_provider_count=len(contract_context.pilot_providers),
+            live_contract_vcr_only_provider_count=len(contract_context.vcr_only_providers),
             skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
@@ -576,9 +599,9 @@ def _classify_test_health(
             reasons=staged_flags,
             architecture_skip_count=architecture_stats.skipped,
             architecture_skip_ratio=skip_ratio,
-            live_contract_enforced_provider_count=len(enforced_providers),
-            live_contract_pilot_provider_count=len(pilot_providers),
-            live_contract_vcr_only_provider_count=len(vcr_only_providers),
+            live_contract_enforced_provider_count=len(contract_context.enforced_providers),
+            live_contract_pilot_provider_count=len(contract_context.pilot_providers),
+            live_contract_vcr_only_provider_count=len(contract_context.vcr_only_providers),
             skip_classes=skip_classes,
             staged_rollout_flags=staged_flags,
         )
@@ -592,12 +615,65 @@ def _classify_test_health(
         reasons=(),
         architecture_skip_count=architecture_stats.skipped,
         architecture_skip_ratio=skip_ratio,
-        live_contract_enforced_provider_count=len(enforced_providers),
-        live_contract_pilot_provider_count=len(pilot_providers),
-        live_contract_vcr_only_provider_count=len(vcr_only_providers),
+        live_contract_enforced_provider_count=len(contract_context.enforced_providers),
+        live_contract_pilot_provider_count=len(contract_context.pilot_providers),
+        live_contract_vcr_only_provider_count=len(contract_context.vcr_only_providers),
         skip_classes=skip_classes,
         staged_rollout_flags=staged_flags,
     )
+
+
+def _contract_testing_context(
+    test_matrix: dict[str, object],
+) -> ContractTestingContext:
+    contract_testing = test_matrix.get("contract_testing", {})
+    if not isinstance(contract_testing, dict):
+        return ContractTestingContext([], [], [], False, "")
+    live_api_gate_mode = contract_testing.get("live_api_gate_mode")
+    baseline = contract_testing.get("live_api_minimum_baseline", {})
+    baseline_mapping = baseline if isinstance(baseline, dict) else {}
+    return ContractTestingContext(
+        enforced_providers=_string_list(baseline_mapping.get("enforced_providers")),
+        pilot_providers=_string_list(baseline_mapping.get("pilot_providers")),
+        vcr_only_providers=_string_list(baseline_mapping.get("vcr_only_providers")),
+        network_opt_in_required=bool(
+            contract_testing.get("network_opt_in_required", False)
+        ),
+        live_api_gate_mode=(
+            live_api_gate_mode if isinstance(live_api_gate_mode, str) else ""
+        ),
+    )
+
+
+def _environment_limited_reasons(
+    architecture_stats: ArchitectureTestStats,
+    contract_context: ContractTestingContext,
+) -> list[str]:
+    reasons: list[str] = []
+    if architecture_stats.skipped > 0:
+        reasons.append(
+            f"architecture suite still carries {architecture_stats.skipped} skips"
+        )
+    if contract_context.network_opt_in_required:
+        reasons.append("live contract execution is network opt-in gated")
+    if (
+        contract_context.live_api_gate_mode
+        and contract_context.live_api_gate_mode != "always"
+    ):
+        reasons.append(
+            f"live API gate mode is {contract_context.live_api_gate_mode}"
+        )
+    if contract_context.vcr_only_providers:
+        reasons.append(
+            "live minimum baseline excludes "
+            f"{len(contract_context.vcr_only_providers)} VCR-only provider(s)"
+        )
+    if contract_context.pilot_providers:
+        reasons.append(
+            "live minimum baseline includes "
+            f"{len(contract_context.pilot_providers)} pilot provider(s)"
+        )
+    return reasons
 
 
 def _quarter_target(
@@ -720,72 +796,50 @@ def _metric_comparison(
     }
 
 
-def _quality_gate_output(
-    *,
-    quarter: str,
-    architecture_stats: ArchitectureTestStats,
-    max_total_exemptions: int,
-    min_integral_score: float,
-    ci_target: dict[str, object],
-    arch_failures: int,
-    total_exemptions: int,
-    max_class_loc: int,
-    domain_cc_exemptions: int,
-    min_provider_vcr: int,
-    provider_vcr_counts: dict[str, int],
-    ruff_violations: int,
-    coverage_percent: float | None,
-    compatibility_surface: object,
-    test_health_payload: dict[str, object],
-    bonus: float,
-    summary: object,
-    adjusted_integral_score: float,
-    gate_pass: bool,
-    violations: list[str],
-) -> dict[str, object]:
+def _quality_gate_output(payload: QualityGateOutputContext) -> dict[str, object]:
     """Build JSON payload emitted by the quality gate."""
     return {
         "generated_at_utc": datetime.now(UTC).isoformat(),
-        "quarter": quarter,
-        "architecture_tests": asdict(architecture_stats),
+        "quarter": payload.quarter,
+        "architecture_tests": asdict(payload.architecture_stats),
         "quarterly_target": {
-            "max_total_exemptions": max_total_exemptions,
-            "min_integral_score": min_integral_score,
+            "max_total_exemptions": payload.max_total_exemptions,
+            "min_integral_score": payload.min_integral_score,
         },
-        "ci_metric_targets": ci_target,
+        "ci_metric_targets": payload.ci_target,
         "metrics": {
-            "architecture_test_failures": arch_failures,
-            "total_exemptions": total_exemptions,
-            "max_class_loc": max_class_loc,
-            "domain_cc_gt5_exemptions": domain_cc_exemptions,
-            "vcr_cassettes_min_per_provider": min_provider_vcr,
-            "vcr_cassettes_by_provider": provider_vcr_counts,
-            "ruff_formatting_violations": ruff_violations,
-            "coverage_percent": coverage_percent,
-            "coverage_verified": coverage_percent is not None,
+            "architecture_test_failures": payload.arch_failures,
+            "total_exemptions": payload.total_exemptions,
+            "max_class_loc": payload.max_class_loc,
+            "domain_cc_gt5_exemptions": payload.domain_cc_exemptions,
+            "vcr_cassettes_min_per_provider": payload.min_provider_vcr,
+            "vcr_cassettes_by_provider": payload.provider_vcr_counts,
+            "ruff_formatting_violations": payload.ruff_violations,
+            "coverage_percent": payload.coverage_percent,
+            "coverage_verified": payload.coverage_percent is not None,
         },
-        "compatibility_surface": compatibility_surface.as_dict(),
-        "test_health": test_health_payload,
+        "compatibility_surface": payload.compatibility_surface.as_dict(),
+        "test_health": payload.test_health_payload,
         "integral_score": {
-            "base": summary.integral_score,
-            "bonus": bonus,
-            "adjusted": adjusted_integral_score,
-            "min_required": min_integral_score,
-            "pass": gate_pass,
+            "base": payload.summary.integral_score,
+            "bonus": payload.bonus,
+            "adjusted": payload.adjusted_integral_score,
+            "min_required": payload.min_integral_score,
+            "pass": payload.gate_pass,
         },
         "debt_scorecard": {
-            "violations_count": len(violations),
-            "violations": violations,
+            "violations_count": len(payload.violations),
+            "violations": payload.violations,
         },
         "metric_comparison": _metric_comparison(
-            ci_target=ci_target,
-            arch_failures=arch_failures,
-            total_exemptions=total_exemptions,
-            max_class_loc=max_class_loc,
-            domain_cc_exemptions=domain_cc_exemptions,
-            min_provider_vcr=min_provider_vcr,
-            ruff_violations=ruff_violations,
-            coverage_percent=coverage_percent,
+            ci_target=payload.ci_target,
+            arch_failures=payload.arch_failures,
+            total_exemptions=payload.total_exemptions,
+            max_class_loc=payload.max_class_loc,
+            domain_cc_exemptions=payload.domain_cc_exemptions,
+            min_provider_vcr=payload.min_provider_vcr,
+            ruff_violations=payload.ruff_violations,
+            coverage_percent=payload.coverage_percent,
         ),
     }
 

@@ -12,8 +12,8 @@ from bioetl.application.services._checkpoint_compatibility_message_helpers impor
     input_snapshot_mismatch_messages,
 )
 from bioetl.application.services.checkpoint_compatibility_runtime import (
-    CheckpointExecutionIdentityFallbackInput,
-    ExecutionIdentityCompatibilityInput,
+    CheckpointExecutionIdentityFallbackContext,
+    ExecutionIdentityCompatibilityContext,
     check_execution_identity_compatibility,
 )
 from bioetl.domain.types.checkpoint_metadata import (
@@ -130,11 +130,11 @@ def _validate_execution_identity_compatibility(
     messages: list[str] = []
     execution_identity_compatible = True
     execution_identity_result = check_execution_identity_compatibility(
-        current=ExecutionIdentityCompatibilityInput(
+        current=ExecutionIdentityCompatibilityContext(
             composite_run_identity=current_metadata.composite_run_identity,
             execution_fingerprint=current_metadata.execution_fingerprint,
             manifest_id=current_metadata.manifest_id,
-            fallback=CheckpointExecutionIdentityFallbackInput(
+            fallback=CheckpointExecutionIdentityFallbackContext(
                 pipeline_name=current_metadata.pipeline_name,
                 run_type=current_metadata.run_type,
                 pipeline_version=current_metadata.pipeline_version,
@@ -153,11 +153,11 @@ def _validate_execution_identity_compatibility(
                 ),
             ),
         ),
-        checkpoint=ExecutionIdentityCompatibilityInput(
+        checkpoint=ExecutionIdentityCompatibilityContext(
             composite_run_identity=checkpoint_metadata.composite_run_identity,
             execution_fingerprint=checkpoint_metadata.execution_fingerprint,
             manifest_id=checkpoint_metadata.manifest_id,
-            fallback=CheckpointExecutionIdentityFallbackInput(
+            fallback=CheckpointExecutionIdentityFallbackContext(
                 pipeline_name=checkpoint_metadata.pipeline_name,
                 run_type=checkpoint_metadata.run_type,
                 pipeline_version=checkpoint_metadata.pipeline_version,

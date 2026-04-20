@@ -8,7 +8,7 @@ import pytest
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.lifecycle.lock_manager import (
     LockCoordinator,
-    LockCoordinatorCreateRequest,
+    LockCoordinatorCreateContext,
 )
 from bioetl.application.core.lifecycle.shutdown import (
     PipelineShutdownError,
@@ -241,7 +241,7 @@ def test_lock_key_format_incremental(
     mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
 ) -> None:
     manager = LockCoordinator.create(
-        LockCoordinatorCreateRequest(
+        LockCoordinatorCreateContext(
             lock_port=mock_lock_port,
             run_id=TEST_RUN_ID,
             provider="chembl",
@@ -264,7 +264,7 @@ def test_lock_key_format_exclusive(
     mock_lock_port: AsyncMock, mock_shutdown_signal: Mock
 ) -> None:
     manager = LockCoordinator.create(
-        LockCoordinatorCreateRequest(
+        LockCoordinatorCreateContext(
             lock_port=mock_lock_port,
             run_id=TEST_RUN_ID,
             provider="chembl",

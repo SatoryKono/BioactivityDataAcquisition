@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
-class CompositeCheckpointServiceInit:
+class CompositeCheckpointServiceContext:
     """Typed input bundle for ``CompositeCheckpointService`` construction."""
 
     composite_name: str
@@ -72,7 +72,7 @@ _CHECKPOINT_INIT_OPTIONAL_DEFAULTS: dict[str, object] = {
 def _resolve_checkpoint_init_value(
     *,
     field_name: str,
-    init: CompositeCheckpointServiceInit | None,
+    init: CompositeCheckpointServiceContext | None,
     overrides: dict[str, object],
 ) -> object:
     if field_name in overrides:
@@ -86,17 +86,17 @@ def _resolve_checkpoint_init_value(
     return getattr(init, field_name)
 
 
-def _coerce_checkpoint_service_init(
-    init: CompositeCheckpointServiceInit | None,
+def _coerce_checkpoint_service_context(
+    init: CompositeCheckpointServiceContext | None,
     overrides: dict[str, object],
-) -> CompositeCheckpointServiceInit:
+) -> CompositeCheckpointServiceContext:
     for field_name in _CHECKPOINT_INIT_REQUIRED_FIELDS:
         _resolve_checkpoint_init_value(
             field_name=field_name,
             init=init,
             overrides=overrides,
         )
-    return CompositeCheckpointServiceInit(
+    return CompositeCheckpointServiceContext(
         composite_name=_resolve_checkpoint_init_value(
             field_name="composite_name",
             init=init,
@@ -178,10 +178,10 @@ class CompositeCheckpointService:
 
     def __init__(
         self,
-        init: CompositeCheckpointServiceInit | None = None,
+        init: CompositeCheckpointServiceContext | None = None,
         **overrides: object,
     ) -> None:
-        params = _coerce_checkpoint_service_init(init, overrides)
+        params = _coerce_checkpoint_service_context(init, overrides)
         self._composite_name = params.composite_name
         self._run_id = params.run_id
         self._storage = params.storage
