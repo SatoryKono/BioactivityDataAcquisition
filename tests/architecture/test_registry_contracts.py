@@ -421,9 +421,8 @@ class TestRegistryFactoryProtocol:
         )
         create_runner_annotations = PipelineFactoryPort.create_runner.__annotations__
 
-        assert create_with_services_annotations["settings"] == "SettingsPort"
-        assert create_with_services_annotations["config"] == (
-            "PipelineYamlConfigPort | None"
+        assert create_with_services_annotations["request"] == (
+            "PipelineCreateWithServicesRequest"
         )
         assert create_runner_annotations["settings"] == "SettingsPort"
         assert create_runner_annotations["observability"] == (

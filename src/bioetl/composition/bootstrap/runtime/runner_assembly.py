@@ -47,9 +47,22 @@ __all__ = [
 
 
 def create_composite_runner_service(
-    inputs: CompositeRunnerServiceInputs,
+    inputs: CompositeRunnerServiceInputs | None = None,
+    **kwargs: object,
 ) -> CompositePipelineRunner:
-    """Create a composite runner service from fully resolved dependencies."""
+    """Create a composite runner service from fully resolved dependencies.
+
+    Accept both the structured ``inputs`` object and keyword-expanded wiring so
+    bootstrap seams can stay assertion-friendly in tests.
+    """
+    if inputs is None:
+        inputs = CompositeRunnerServiceInputs(**kwargs)
+    elif kwargs:
+        unexpected = ", ".join(sorted(kwargs))
+        raise TypeError(
+            "create_composite_runner_service received both inputs and keyword "
+            f"arguments: {unexpected}"
+        )
     return _create_composite_runner_service_from_inputs_impl(inputs)
 
 
