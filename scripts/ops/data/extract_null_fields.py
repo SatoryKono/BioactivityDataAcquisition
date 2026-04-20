@@ -77,7 +77,7 @@ def extract_null_fields(csv_path, fields_to_extract, output_path):
         df = pd.read_csv(csv_path, usecols=lambda col: col in fields_to_extract)
 
         if df.empty or len(df.columns) == 0:
-            print(f"  ⚠ No matching columns found")
+            print("  ⚠ No matching columns found")
             return
 
         # Сохраняем

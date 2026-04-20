@@ -102,7 +102,7 @@ def test_assay_profile_integration():
         assert "enum" in rule.notes.lower(), f"{field} should have enum rule"
         # Enum rules handle case-insensitive matching internally
 
-    print(f"✓ All enum fields properly configured with case-insensitive matching")
+    print("✓ All enum fields properly configured with case-insensitive matching")
 
     print("✅ Assay profile integration tests passed!")
 

@@ -59,7 +59,7 @@ def test_normalization_rules():
 
     print("✓ Unit canonicalization tests passed!")
 
-    print(f"\n=== Unit Mapping Info ===")
+    print("\n=== Unit Mapping Info ===")
     print(f"Total unit mappings: {len(UNIT_MAPPING)}")
     print(f"Sample mappings: {list(UNIT_MAPPING.items())[:5]}")
 
