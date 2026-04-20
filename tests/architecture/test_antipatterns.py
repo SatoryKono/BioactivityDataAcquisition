@@ -13,6 +13,20 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC = REPO_ROOT / "src" / "bioetl"
 
 
+def _docstring_quote_prefix(stripped: str) -> str | None:
+    if stripped.startswith('"""') or stripped.startswith("'''"):
+        return stripped[:3]
+    return None
+
+
+def _docstring_closed_on_line(stripped: str, docstring_char: str) -> bool:
+    return stripped.endswith(docstring_char) or docstring_char in stripped[1:]
+
+
+def _strip_inline_comment(line: str, *, marker: str) -> str:
+    return line.split(marker)[0] if marker in line else line
+
+
 def _strip_docstrings_and_comments(text: str) -> dict[int, str]:
     """Return mapping of line_number -> code_only for non-docstring, non-comment lines."""
     result: dict[int, str] = {}
@@ -21,18 +35,19 @@ def _strip_docstrings_and_comments(text: str) -> dict[int, str]:
     for i, line in enumerate(text.splitlines(), 1):
         stripped = line.strip()
         if in_docstring:
-            if stripped.endswith(docstring_char) or docstring_char in stripped[1:]:
+            if _docstring_closed_on_line(stripped, docstring_char):
                 in_docstring = False
             continue
-        if stripped.startswith('"""') or stripped.startswith("'''"):
-            docstring_char = stripped[:3]
+        quote_prefix = _docstring_quote_prefix(stripped)
+        if quote_prefix is not None:
+            docstring_char = quote_prefix
             if stripped.count(docstring_char) == 1:
                 in_docstring = True
             continue
         if stripped.startswith("#"):
             continue
         # Remove inline comments
-        code_part = line.split("  #")[0] if "  #" in line else line
+        code_part = _strip_inline_comment(line, marker="  #")
         result[i] = code_part
     return result
 
@@ -119,8 +134,9 @@ def _extract_code_only(func_source: str) -> str:
             if ds_quote in stripped:
                 in_docstring = False
             continue
-        if stripped.startswith('"""') or stripped.startswith("'''"):
-            ds_quote = stripped[:3]
+        quote_prefix = _docstring_quote_prefix(stripped)
+        if quote_prefix is not None:
+            ds_quote = quote_prefix
             if stripped.count(ds_quote) < 2:
                 in_docstring = True
             continue
@@ -130,6 +146,20 @@ def _extract_code_only(func_source: str) -> str:
     return "\n".join(lines)
 
 
+def _iter_async_function_defs(tree: ast.AST) -> list[ast.AsyncFunctionDef]:
+    return [
+        node for node in ast.walk(tree) if isinstance(node, ast.AsyncFunctionDef)
+    ]
+
+
+def _async_function_uses_blocking_io(node: ast.AsyncFunctionDef, *, source: str) -> bool:
+    segment = ast.get_source_segment(source, node) or ""
+    if "run_in_executor" in segment or "to_thread" in segment:
+        return False
+    code_only = _extract_code_only(segment)
+    return any(x in code_only for x in ["open(", "requests.", "urllib"])
+
+
 def test_no_blocking_io_in_async(
     source_ast_cache: dict,
     source_content_cache: dict,
@@ -137,15 +167,9 @@ def test_no_blocking_io_in_async(
     violations: list[str] = []
     for path, tree in source_ast_cache.items():
         source = source_content_cache[path]
-        for node in ast.walk(tree):
-            if isinstance(node, ast.AsyncFunctionDef):
-                segment = ast.get_source_segment(source, node) or ""
-                # Allow functions that delegate blocking I/O via run_in_executor
-                if "run_in_executor" in segment or "to_thread" in segment:
-                    continue
-                code_only = _extract_code_only(segment)
-                if any(x in code_only for x in ["open(", "requests.", "urllib"]):
-                    violations.append(f"{path}:{node.lineno}: async def {node.name}")
+        for node in _iter_async_function_defs(tree):
+            if _async_function_uses_blocking_io(node, source=source):
+                violations.append(f"{path}:{node.lineno}: async def {node.name}")
     assert not violations, "Blocking I/O in async functions:\n" + "\n".join(
         violations[:50]
     )

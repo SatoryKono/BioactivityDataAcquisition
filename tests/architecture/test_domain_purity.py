@@ -115,6 +115,56 @@ def _complexity_violations_for_content(
     return violations
 
 
+def _iter_class_defs(tree: ast.AST) -> list[ast.ClassDef]:
+    return [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+
+
+def _iter_domain_class_defs(
+    source_ast_cache: dict,
+    *,
+    domain_path: Path,
+) -> list[tuple[Path, ast.ClassDef]]:
+    return [
+        (py_file, node)
+        for py_file, tree in source_ast_cache.items()
+        if domain_path in py_file.parents
+        for node in _iter_class_defs(tree)
+    ]
+
+
+def _non_frozen_dataclass_violation(
+    *,
+    py_file: Path,
+    node: ast.ClassDef,
+    mutable_service_exemptions: set[str],
+) -> str | None:
+    is_dataclass, is_frozen = _dataclass_flags(node)
+    if not is_dataclass or is_frozen:
+        return None
+    if node.name in mutable_service_exemptions:
+        return None
+    return f"{py_file.name}:{node.lineno} - {node.name} is not frozen"
+
+
+def _mutable_default_violations_for_class(
+    *,
+    py_file: Path,
+    node: ast.ClassDef,
+) -> list[str]:
+    violations: list[str] = []
+    is_dataclass, _is_frozen = _dataclass_flags(node)
+    if not is_dataclass:
+        return violations
+    for item in node.body:
+        if isinstance(item, ast.AnnAssign) and _has_mutable_default(item):
+            violations.append(
+                f"{py_file.name}:{item.lineno} - Field "
+                f"'{getattr(item.target, 'id', 'unknown')}' "
+                f"in class '{node.name}' has a mutable default value."
+            )
+    return violations
+
+
 class TestDomainImmutability:
     """Tests ensuring domain value objects are properly immutable."""
 
@@ -143,21 +193,16 @@ class TestDomainImmutability:
 
         violations = []
 
-        for py_file, tree in source_ast_cache.items():
-            if domain_path not in py_file.parents:
-                continue
-
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.ClassDef):
-                    continue
-                is_dataclass, is_frozen = _dataclass_flags(node)
-                if not is_dataclass or is_frozen:
-                    continue
-                if node.name in self.MUTABLE_SERVICE_EXEMPTIONS:
-                    continue
-                violations.append(
-                    f"{py_file.name}:{node.lineno} - {node.name} is not frozen"
-                )
+        for py_file, node in _iter_domain_class_defs(
+            source_ast_cache, domain_path=domain_path
+        ):
+            violation = _non_frozen_dataclass_violation(
+                py_file=py_file,
+                node=node,
+                mutable_service_exemptions=self.MUTABLE_SERVICE_EXEMPTIONS,
+            )
+            if violation is not None:
+                violations.append(violation)
 
         assert not violations, (
             "Found mutable domain dataclasses (must be frozen=True):\n"
@@ -177,19 +222,13 @@ class TestDomainImmutability:
         violations = []
 
         for py_file, tree in source_ast_cache.items():
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.ClassDef):
-                    continue
-                is_dataclass, _is_frozen = _dataclass_flags(node)
-                if not is_dataclass:
-                    continue
-                for item in node.body:
-                    if isinstance(item, ast.AnnAssign) and _has_mutable_default(item):
-                        violations.append(
-                            f"{py_file.name}:{item.lineno} - Field "
-                            f"'{getattr(item.target, 'id', 'unknown')}' "
-                            f"in class '{node.name}' has a mutable default value."
-                        )
+            for node in _iter_class_defs(tree):
+                violations.extend(
+                    _mutable_default_violations_for_class(
+                        py_file=py_file,
+                        node=node,
+                    )
+                )
 
         assert not violations, (
             "Found mutable defaults in dataclasses "
