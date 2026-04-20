@@ -85,6 +85,29 @@ def _matches_prefix(module_name: str, prefix: str) -> bool:
     return module_name == prefix or module_name.startswith(f"{prefix}.")
 
 
+def _disallowed_import_violations_for_node(
+    node: ast.AST,
+    *,
+    relative: Path,
+) -> list[str]:
+    violations: list[str] = []
+    if isinstance(node, ast.Import):
+        for alias in node.names:
+            for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items():
+                if _matches_prefix(alias.name, prefix):
+                    violations.append(
+                        f"{relative}:{node.lineno}: import {alias.name} ({reason})"
+                    )
+    if isinstance(node, ast.ImportFrom) and node.module is not None:
+        for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items():
+            if _matches_prefix(node.module, prefix):
+                violations.append(
+                    f"{relative}:{node.lineno}: from {node.module} import ..."
+                    f" ({reason})"
+                )
+    return violations
+
+
 def _iter_disallowed_imports(
     source_ast_cache: dict[Path, ast.Module],
     src_dir: Path,
@@ -97,22 +120,12 @@ def _iter_disallowed_imports(
         for node in ast.walk(tree):
             if _is_inside_type_checking(node, parents):
                 continue
-
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items():
-                        if _matches_prefix(alias.name, prefix):
-                            violations.append(
-                                f"{relative}:{node.lineno}: import {alias.name}"
-                                f" ({reason})"
-                            )
-            elif isinstance(node, ast.ImportFrom) and node.module is not None:
-                for prefix, reason in _DISALLOWED_IMPORT_PREFIXES.items():
-                    if _matches_prefix(node.module, prefix):
-                        violations.append(
-                            f"{relative}:{node.lineno}: from {node.module} import ..."
-                            f" ({reason})"
-                        )
+            violations.extend(
+                _disallowed_import_violations_for_node(
+                    node,
+                    relative=relative,
+                )
+            )
 
     return violations
 

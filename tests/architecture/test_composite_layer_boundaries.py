@@ -91,6 +91,27 @@ def _get_composite_runner_file(src_dir: Path) -> Path:
     return src_dir / "bioetl" / "application" / "composite" / "runner_pkg" / "runner.py"
 
 
+def _fsm_state_import_violations(
+    tree: ast.AST, *, allowed_modules: set[str]
+) -> list[str]:
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                module = alias.name.split(".")[0]
+                if module not in allowed_modules and not alias.name.startswith(
+                    "bioetl.domain"
+                ):
+                    violations.append(f"import {alias.name}")
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            module = node.module.split(".")[0]
+            if module not in allowed_modules and not node.module.startswith(
+                "bioetl.domain"
+            ):
+                violations.append(f"from {node.module} import ...")
+    return violations
+
+
 class TestDomainCompositeLayerBoundaries:
     """Tests for domain/composite layer isolation."""
 
@@ -155,23 +176,9 @@ class TestDomainCompositeLayerBoundaries:
             "bioetl.domain.exceptions",
         }
 
-        violations = []
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    module = alias.name.split(".")[0]
-                    if module not in allowed_modules and not alias.name.startswith(
-                        "bioetl.domain"
-                    ):
-                        violations.append(f"import {alias.name}")
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                module = node.module.split(".")[0]
-                if (
-                    module not in allowed_modules
-                    and not node.module.startswith("bioetl.domain")
-                ):
-                    violations.append(f"from {node.module} import ...")
+        violations = _fsm_state_import_violations(
+            tree, allowed_modules=allowed_modules
+        )
 
         assert not violations, (
             "FSM state module has non-standard imports:\n"
