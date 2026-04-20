@@ -23,6 +23,7 @@ from bioetl.domain.aggregates.batch import (
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 
+
 def _ts(offset_seconds: int = 0) -> datetime:
     """Return deterministic UTC timestamps for batch tests."""
     return datetime(2026, 1, 1, tzinfo=UTC) + timedelta(seconds=offset_seconds)
