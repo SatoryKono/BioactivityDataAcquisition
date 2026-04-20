@@ -54,12 +54,13 @@ def _files_using_broad_storage_port() -> list[str]:
         has_annotation = False
         for node in ast.walk(tree):
             # Check field annotations: `storage: StoragePort`
-            if isinstance(node, ast.AnnAssign) and isinstance(
-                node.annotation, ast.Name
+            if (
+                isinstance(node, ast.AnnAssign)
+                and isinstance(node.annotation, ast.Name)
+                and node.annotation.id == "StoragePort"
             ):
-                if node.annotation.id == "StoragePort":
-                    has_annotation = True
-                    break
+                has_annotation = True
+                break
             # Check function parameter annotations
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 for arg in node.args.args + node.args.kwonlyargs:

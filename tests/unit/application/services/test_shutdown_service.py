@@ -235,5 +235,4 @@ class TestShutdownServiceWithoutMetrics:
         service = ShutdownService(logger=logger, metrics=None)
         service.mark_completed()
 
-        # Should not raise
-        assert True
+        assert logger.warnings == []

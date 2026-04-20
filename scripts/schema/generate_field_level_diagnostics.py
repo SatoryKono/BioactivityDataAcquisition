@@ -140,6 +140,38 @@ def _parse_publication_aliases() -> dict[str, str]:
     return {}
 
 
+def _field_alias_payload(element: ast.AST) -> tuple[str, dict[str, str]] | None:
+    if not isinstance(element, ast.Call):
+        return None
+    if not isinstance(element.func, ast.Name) or element.func.id != "FieldAlias":
+        return None
+
+    canonical_name = ""
+    provider_aliases: dict[str, str] = {}
+    for kw in element.keywords:
+        if kw.arg == "canonical_name" and isinstance(kw.value, ast.Constant):
+            if isinstance(kw.value.value, str):
+                canonical_name = kw.value.value
+        elif kw.arg == "provider_aliases" and isinstance(kw.value, ast.Dict):
+            provider_aliases.update(_string_dict_literal(kw.value))
+
+    if not canonical_name:
+        return None
+    return canonical_name, provider_aliases
+
+
+def _record_provider_aliases(
+    provider_maps: dict[str, dict[str, str]],
+    *,
+    canonical_name: str,
+    provider_aliases: dict[str, str],
+) -> None:
+    for provider, provider_field in provider_aliases.items():
+        if provider_field == canonical_name:
+            continue
+        provider_maps.setdefault(provider, {})[provider_field] = canonical_name
+
+
 def _parse_molecule_aliases() -> dict[str, dict[str, str]]:
     tree = ast.parse(MOLECULE_ALIAS_FILE.read_text(encoding="utf-8"))
     provider_maps: dict[str, dict[str, str]] = {}
@@ -150,30 +182,15 @@ def _parse_molecule_aliases() -> dict[str, dict[str, str]]:
         if not isinstance(value, ast.Tuple):
             continue
         for element in value.elts:
-            if not isinstance(element, ast.Call):
+            payload = _field_alias_payload(element)
+            if payload is None:
                 continue
-            if (
-                not isinstance(element.func, ast.Name)
-                or element.func.id != "FieldAlias"
-            ):
-                continue
-
-            canonical_name = ""
-            provider_aliases: dict[str, str] = {}
-            for kw in element.keywords:
-                if kw.arg == "canonical_name" and isinstance(kw.value, ast.Constant):
-                    if isinstance(kw.value.value, str):
-                        canonical_name = kw.value.value
-                elif kw.arg == "provider_aliases" and isinstance(kw.value, ast.Dict):
-                    provider_aliases.update(_string_dict_literal(kw.value))
-
-            if not canonical_name:
-                continue
-
-            for provider, provider_field in provider_aliases.items():
-                if provider_field == canonical_name:
-                    continue
-                provider_maps.setdefault(provider, {})[provider_field] = canonical_name
+            canonical_name, provider_aliases = payload
+            _record_provider_aliases(
+                provider_maps,
+                canonical_name=canonical_name,
+                provider_aliases=provider_aliases,
+            )
         break
     return provider_maps
 
@@ -503,6 +520,13 @@ def write_csv(rows: list[dict[str, str]], output_path: Path) -> None:
         writer.writerows(rows)
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate field-level diagnostics for Bronze→Silver→Gold schema drift."
@@ -524,9 +548,7 @@ def main() -> int:
 
     rows = build_field_level_rows()
     write_csv(rows, output_path)
-    print(
-        f"Generated {output_path.relative_to(PROJECT_ROOT)} with {len(rows)} field diagnostics."
-    )
+    print(f"Generated {_display_path(output_path)} with {len(rows)} field diagnostics.")
     return 0
 
 
