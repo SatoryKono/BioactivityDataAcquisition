@@ -217,7 +217,7 @@ class TestCheckNullRates:
 
     def test_empty_dataframe(self, analyzer: SilverDQAnalyzer) -> None:
         df = pl.DataFrame({"a": pl.Series([], dtype=pl.Int64)})
-        results, overall = analyzer._statistics.check_null_rates(df)
+        _results, overall = analyzer._statistics.check_null_rates(df)
         assert overall == pytest.approx(0.0)
 
 

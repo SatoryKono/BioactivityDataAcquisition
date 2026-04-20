@@ -178,7 +178,6 @@ class TestRunResult:
 
     def test_success_rate(self, sample_result):
         """Test success_rate property."""
-        # (1000 - 50) / 1000 = 0.95
         assert sample_result.success_rate == pytest.approx(0.95)
 
     def test_success_rate_zero_fetched(self):

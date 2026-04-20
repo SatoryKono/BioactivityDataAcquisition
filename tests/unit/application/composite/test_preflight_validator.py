@@ -507,7 +507,7 @@ class TestValidateFieldPriority:
             },
         }
 
-        issues, resolved = validator._validate_field_priority(
+        issues, _resolved = validator._validate_field_priority(
             field_name="title",
             priorities=("chembl", "crossref", "pubmed"),
             valid_sources=valid_sources,

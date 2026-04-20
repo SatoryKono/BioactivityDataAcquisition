@@ -262,5 +262,4 @@ class TestPubChemContract:
                 params={"Threshold": 95},
             )
 
-        # Similarity search may take time
-        assert response.status_code in (200, 202)  # 202 = accepted, processing
+        assert response.status_code in (200, 202)

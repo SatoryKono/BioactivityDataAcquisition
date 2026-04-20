@@ -369,7 +369,7 @@ def _collect_architecture_skip_count() -> int:
         pytest.ExitCode.OK,
         pytest.ExitCode.NO_TESTS_COLLECTED,
     )
-    if exit_code not in accepted_exit_codes:
+    if int(exit_code) not in {int(code) for code in accepted_exit_codes}:
         pytest.fail(
             "Nested architecture collection failed while counting skip markers: "
             f"exit_code={exit_code}"

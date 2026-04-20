@@ -248,11 +248,12 @@ def detect_diagram_type(lines: list[str]) -> str:
 
 def parse_keep_orphans(lines: list[str]) -> set[str]:
     """Return set of node IDs explicitly exempted from orphan detection."""
+    split_pattern = r"[\s,]+"
     kept: set[str] = set()
     for ln in lines:
         m = _KEEP_ORPHAN_RE.search(ln)
         if m:
-            for nid in re.split(r"[\s,]+", m.group(1).strip()):
+            for nid in re.split(split_pattern, m.group(1).strip()):
                 if nid:
                     kept.add(nid)
     return kept

@@ -317,8 +317,10 @@ def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
     def _assert_semantic_payload(first_payload: object, second_payload: object) -> None:
         assert isinstance(first_payload, dict)
         assert isinstance(second_payload, dict)
-        first_kpis = first_payload["semantic_kpis"]
-        second_kpis = second_payload["semantic_kpis"]
+        first_payload_dict = cast(dict[str, object], first_payload)
+        second_payload_dict = cast(dict[str, object], second_payload)
+        first_kpis = first_payload_dict["semantic_kpis"]
+        second_kpis = second_payload_dict["semantic_kpis"]
         assert [kpi["name"] for kpi in first_kpis] == [
             PROFILE_META_PASSTHROUGH_KPI,
             PROFILE_SET_LIKE_JSON_STRING_KPI,

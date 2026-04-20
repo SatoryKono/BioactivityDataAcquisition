@@ -159,7 +159,6 @@ class TestUniProtIDMappingClient:
                     "from": "CHEMBL205",
                     "to": {"primaryAccession": "P00915", "uniProtkbId": "CAH1_HUMAN"},
                 },
-                # CHEMBL206 not in results = not found
             ]
         }
         results_response.headers = {}

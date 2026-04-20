@@ -616,7 +616,7 @@ class TestSeedFailure:
         coordinator = FakeEnrichmentCoordinator()
         merger = FakeMergeService()
 
-        runner, _ = create_test_runner(
+        runner, _components = create_test_runner(
             seed_factory=seed_factory,
             coordinator=coordinator,
             merger=merger,
@@ -808,7 +808,7 @@ class TestFullSuccessFlow:
             )
         )
 
-        runner, _ = create_test_runner(
+        runner, _components = create_test_runner(
             config=config,
             coordinator=coordinator,
             merger=merger,
@@ -881,7 +881,7 @@ class TestResumePartialEnrichment:
 
         seed_factory = FakePipelineRunnerFactory()
 
-        runner, _ = create_test_runner(
+        runner, _components = create_test_runner(
             config=config,
             runtime=CompositeRuntimeConfig(resume=True),
             seed_factory=seed_factory,
