@@ -16,5 +16,3 @@ from scripts.ai.code_quality_analysis import main
 
 if __name__ == "__main__":
     main()
-
-    print("\n✅ Analysis complete!")
