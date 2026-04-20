@@ -127,35 +127,47 @@ def _should_track_kpi_not_in_nav(rel_path: str) -> bool:
     return not rel_path.startswith(KPI_EXCLUDED_PREFIXES)
 
 
-def _collect_orphans(all_docs: list[Path], not_in_nav: set[str]) -> list[str]:
-    """Return docs outside nav that have no inbound relative links."""
-    tracked_not_in_nav = {
+def _tracked_not_in_nav_paths(not_in_nav: set[str]) -> set[str]:
+    return {
         rel_path
         for rel_path in not_in_nav
         if not rel_path.startswith(ORPHAN_EXCLUDED_PREFIXES)
     }
+
+
+def _resolved_docs_target(source: Path, raw_target: str, *, docs_root: Path) -> str | None:
+    resolved = (source.parent / raw_target).resolve()
+    try:
+        return resolved.relative_to(docs_root).as_posix()
+    except ValueError:
+        return None
+
+
+def _iter_inbound_targets(source: Path, *, docs_root: Path) -> list[str]:
+    targets: list[str] = []
+    lines = source.read_text(encoding="utf-8", errors="replace").splitlines()
+    for line in lines:
+        line_for_links = INLINE_CODE_RE.sub("", line)
+        for match in MD_LINK_RE.finditer(line_for_links):
+            raw_target = match.group(2).strip()
+            if not raw_target or raw_target.startswith(("*", "{")):
+                continue
+            rel_target = _resolved_docs_target(source, raw_target, docs_root=docs_root)
+            if rel_target is not None:
+                targets.append(rel_target)
+    return targets
+
+
+def _collect_orphans(all_docs: list[Path], not_in_nav: set[str]) -> list[str]:
+    """Return docs outside nav that have no inbound relative links."""
+    tracked_not_in_nav = _tracked_not_in_nav_paths(not_in_nav)
     inbound = dict.fromkeys(tracked_not_in_nav, 0)
     docs_root = DOCS_DIR.resolve()
 
     for source in all_docs:
-        lines = source.read_text(encoding="utf-8", errors="replace").splitlines()
-        for line in lines:
-            line_for_links = INLINE_CODE_RE.sub("", line)
-            for match in MD_LINK_RE.finditer(line_for_links):
-                raw_target = match.group(2).strip()
-                if (
-                    not raw_target
-                    or raw_target.startswith("*")
-                    or raw_target.startswith("{")
-                ):
-                    continue
-                resolved = (source.parent / raw_target).resolve()
-                try:
-                    rel = resolved.relative_to(docs_root).as_posix()
-                except ValueError:
-                    continue
-                if rel in inbound:
-                    inbound[rel] += 1
+        for rel_target in _iter_inbound_targets(source, docs_root=docs_root):
+            if rel_target in inbound:
+                inbound[rel_target] += 1
 
     return sorted(rel for rel, count in inbound.items() if count == 0)
 

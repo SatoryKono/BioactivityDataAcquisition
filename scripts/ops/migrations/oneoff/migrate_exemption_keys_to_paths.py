@@ -168,11 +168,42 @@ def _targets_for_registry_key(
         key,
         by_basename=by_basename,
     )
-    if targets or not keep_unmatched:
+    if targets:
         return targets, warnings
+    if keep_unmatched:
+        warnings.append(f"{key}: preserved unmatched legacy key (--keep-unmatched)")
+        return [key], warnings
+    return [], warnings
 
-    warnings.append(f"{key}: preserved unmatched legacy key (--keep-unmatched)")
-    return [key], warnings
+
+def _print_migration_summary(
+    *,
+    old_entries: dict[str, Any],
+    new_entries: dict[str, Any],
+    warnings: list[str],
+) -> None:
+    print(
+        "file_size_limits migration summary: "
+        f"{len(old_entries)} -> {len(new_entries)} entries"
+    )
+    for item in warnings:
+        print(f"[warn] {item}")
+
+
+def _write_or_report_dry_run(
+    *,
+    args: argparse.Namespace,
+    registry_path: Path,
+    migrated: dict[str, Any],
+) -> None:
+    if args.write:
+        registry_path.write_text(
+            yaml.safe_dump(migrated, sort_keys=False, allow_unicode=True),
+            encoding="utf-8",
+        )
+        print(f"[write] updated {registry_path}")
+        return
+    print("[dry-run] use --write to apply migration")
 
 
 def migrate_registry_keys(
@@ -222,21 +253,16 @@ def main() -> int:
 
     old_entries = raw["registries"]["file_size_limits"]
     new_entries = migrated["registries"]["file_size_limits"]
-    print(
-        "file_size_limits migration summary: "
-        f"{len(old_entries)} -> {len(new_entries)} entries"
+    _print_migration_summary(
+        old_entries=old_entries,
+        new_entries=new_entries,
+        warnings=warnings,
     )
-    for item in warnings:
-        print(f"[warn] {item}")
-
-    if args.write:
-        registry_path.write_text(
-            yaml.safe_dump(migrated, sort_keys=False, allow_unicode=True),
-            encoding="utf-8",
-        )
-        print(f"[write] updated {registry_path}")
-    else:
-        print("[dry-run] use --write to apply migration")
+    _write_or_report_dry_run(
+        args=args,
+        registry_path=registry_path,
+        migrated=migrated,
+    )
     return 0
 
 
