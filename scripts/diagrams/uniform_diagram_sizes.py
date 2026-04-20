@@ -298,54 +298,21 @@ def _parse_class_blocks(lines: list[str]) -> list[ClassBlock]:
         if m:
             name = m.group(1)
             start = i
-            # Detect indent from body lines
-            indent = "        "  # default 8 spaces
-            # Find closing brace
-            j = i + 1
-            body_lines: list[str] = []
-            while j < len(lines):
-                if _CLASS_BLOCK_END_RE.match(lines[j]):
-                    break
-                body_lines.append(lines[j])
-                j += 1
-            end = j
-
-            # Detect actual indent
-            for bl in body_lines:
-                if bl.strip():
-                    indent = bl[: len(bl) - len(bl.lstrip())]
-                    break
-
-            # Separate stereotype, content, and padding
-            stereotype_line: str | None = None
-            content_lines: list[str] = []
-            padding_count = 0
-
-            for bl in body_lines:
-                stripped = bl.strip()
-                if stereotype_line is None and stripped.startswith("<<"):
-                    stereotype_line = stripped
-                elif _is_nbsp_only(stripped):
-                    padding_count += 1
-                else:
-                    # If we had padding lines before content, they were
-                    # actually content separators — treat them as content
-                    if padding_count > 0 and content_lines:
-                        content_lines.extend([""] * padding_count)
-                        padding_count = 0
-                    if stripped:
-                        content_lines.append(stripped)
-
+            end, body_lines = _class_block_body(lines, start)
+            indent = _class_block_indent(body_lines)
+            stereotype_line, content_lines, padding_count = _class_block_parts(
+                body_lines
+            )
             blocks.append(
-                ClassBlock(
+                _build_class_block(
                     name=name,
-                    start_line=start,
-                    end_line=end,
+                    start=start,
+                    end=end,
+                    body_lines=body_lines,
+                    indent=indent,
                     stereotype_line=stereotype_line,
                     content_lines=content_lines,
-                    padding_lines=padding_count,
-                    raw_lines=body_lines,
-                    indent=indent,
+                    padding_count=padding_count,
                 )
             )
             i = end + 1
@@ -353,6 +320,95 @@ def _parse_class_blocks(lines: list[str]) -> list[ClassBlock]:
             i += 1
 
     return blocks
+
+
+def _class_block_body(lines: list[str], start: int) -> tuple[int, list[str]]:
+    """Return closing index and raw body lines for one class block."""
+    j = start + 1
+    body_lines: list[str] = []
+    while j < len(lines):
+        if _CLASS_BLOCK_END_RE.match(lines[j]):
+            break
+        body_lines.append(lines[j])
+        j += 1
+    return j, body_lines
+
+
+def _class_block_indent(body_lines: list[str]) -> str:
+    """Infer body indent from the first non-empty line."""
+    for body_line in body_lines:
+        if body_line.strip():
+            return body_line[: len(body_line) - len(body_line.lstrip())]
+    return "        "
+
+
+def _class_block_parts(
+    body_lines: list[str],
+) -> tuple[str | None, list[str], int]:
+    """Split raw body lines into stereotype, visible content, and padding."""
+    stereotype_line: str | None = None
+    content_lines: list[str] = []
+    padding_count = 0
+    for body_line in body_lines:
+        stripped = body_line.strip()
+        if _is_stereotype_candidate(stereotype_line, stripped):
+            stereotype_line = stripped
+            continue
+        if _is_nbsp_only(stripped):
+            padding_count += 1
+            continue
+        content_lines, padding_count = _append_visible_class_content(
+            content_lines,
+            padding_count,
+            stripped,
+        )
+    return stereotype_line, content_lines, padding_count
+
+
+def _is_stereotype_candidate(
+    stereotype_line: str | None,
+    stripped: str,
+) -> bool:
+    """Return whether the stripped line should be treated as a stereotype."""
+    return stereotype_line is None and stripped.startswith("<<")
+
+
+def _append_visible_class_content(
+    content_lines: list[str],
+    padding_count: int,
+    stripped: str,
+) -> tuple[list[str], int]:
+    """Append visible class content while preserving interior blank separators."""
+    if padding_count > 0 and content_lines:
+        content_lines.extend([""] * padding_count)
+        padding_count = 0
+    if stripped:
+        content_lines.append(stripped)
+    return content_lines, padding_count
+
+
+def _build_class_block(
+    *,
+    name: str,
+    start: int,
+    end: int,
+    body_lines: list[str],
+    indent: str,
+    stereotype_line: str | None,
+    content_lines: list[str],
+    padding_count: int,
+) -> ClassBlock:
+    """Build a parsed ClassBlock container."""
+    return ClassBlock(
+        name=name,
+        start_line=start,
+        end_line=end,
+        stereotype_line=stereotype_line,
+        content_lines=content_lines,
+        padding_lines=padding_count,
+        raw_lines=body_lines,
+        indent=indent,
+    )
 
 
 def _compute_class_uniform(blocks: list[ClassBlock]) -> UniformStats:
@@ -740,66 +796,104 @@ def _update_uniform_tag_grouped(
       %% @uniform-stats base    height=180 max_desc_lines=8  nodes=3
       %% @uniform-stats adapter height=126 max_desc_lines=5  nodes=7
     """
-    # Compute global width from all groups
-    global_width = 0
-    for gs in group_stats.values():
-        w, _ = _estimate_pixel_dims(gs)
-        global_width = max(global_width, w)
+    main_tag = _grouped_uniform_main_tag(
+        group_stats,
+        diagram_type,
+        width_strategy,
+    )
+    stats_lines = _grouped_uniform_stats_lines(group_stats, groups)
+    cleaned = _clean_uniform_metadata_lines(lines)
+    insert_at = _uniform_tag_insert_index(cleaned)
+    return _insert_uniform_metadata_lines(cleaned, insert_at, [main_tag, *stats_lines])
 
-    num_groups = len(group_stats)
+
+def _grouped_uniform_main_tag(
+    group_stats: dict[str, UniformStats],
+    diagram_type: str,
+    width_strategy: str,
+) -> str:
+    """Render the top-level grouped @uniform metadata line."""
+    global_width = max(_estimate_pixel_dims(stats)[0] for stats in group_stats.values())
     type_prefix = f"{diagram_type} " if diagram_type == "class" else ""
-    main_tag = (
+    return (
         f"%% @uniform {type_prefix}width={global_width} "
-        f"groups={num_groups} width_strategy={width_strategy}"
+        f"groups={len(group_stats)} width_strategy={width_strategy}"
     )
 
-    # Build stats lines in group definition order, then default last
+
+def _grouped_uniform_stats_lines(
+    group_stats: dict[str, UniformStats],
+    groups: list[UniformGroup],
+) -> list[str]:
+    """Render ordered @uniform-stats lines for grouped normalization."""
     stats_lines: list[str] = []
-    # Ordered group names: explicit groups first, then 'default' if present
-    ordered_names: list[str] = [g.name for g in groups]
+    for group_name in _ordered_group_names(group_stats, groups):
+        if group_name not in group_stats:
+            continue
+        stats_lines.append(
+            _grouped_uniform_stats_line(group_name, group_stats[group_name])
+        )
+    return stats_lines
+
+
+def _ordered_group_names(
+    group_stats: dict[str, UniformStats],
+    groups: list[UniformGroup],
+) -> list[str]:
+    """Return explicit group order with implicit default group last."""
+    ordered_names = [group.name for group in groups]
     if "default" in group_stats and "default" not in ordered_names:
         ordered_names.append("default")
+    return ordered_names
 
-    for gname in ordered_names:
-        if gname not in group_stats:
-            continue
-        gs = group_stats[gname]
-        est_w, est_h = _estimate_pixel_dims(gs)
-        stats_lines.append(
-            f"%% @uniform-stats {gname:<12s} "
-            f"width={est_w} "
-            f"height={est_h} "
-            f"max_desc_lines={gs.max_total_body}"
-        )
 
-    # Remove existing @uniform and @uniform-stats lines
+def _grouped_uniform_stats_line(group_name: str, stats: UniformStats) -> str:
+    """Render one grouped @uniform-stats metadata line."""
+    est_w, est_h = _estimate_pixel_dims(stats)
+    return (
+        f"%% @uniform-stats {group_name:<12s} "
+        f"width={est_w} "
+        f"height={est_h} "
+        f"max_desc_lines={stats.max_total_body}"
+    )
+
+
+def _clean_uniform_metadata_lines(lines: list[str]) -> list[str]:
+    """Remove existing uniform metadata lines before reinsertion."""
     cleaned: list[str] = []
     for line in lines:
         stripped = line.strip()
         if _UNIFORM_TAG_RE.match(stripped) or _UNIFORM_STATS_RE.match(stripped):
             continue
         cleaned.append(line)
+    return cleaned
 
-    # Find insertion point: before diagram declaration or %%{init
-    insert_at: int | None = None
-    for i, line in enumerate(cleaned):
+
+def _uniform_tag_insert_index(lines: list[str]) -> int | None:
+    """Find insertion point before init block or diagram declaration."""
+    for index, line in enumerate(lines):
         stripped = line.strip()
         if (
             _CLASS_DIAGRAM_RE.match(stripped)
             or _FLOWCHART_RE.match(stripped)
             or stripped.startswith("%%{init")
         ):
-            insert_at = i
-            break
+            return index
+    return None
 
-    if insert_at is not None:
-        for j, tag_line in enumerate([main_tag, *stats_lines]):
-            cleaned.insert(insert_at + j, tag_line)
-    else:
-        cleaned.append(main_tag)
-        cleaned.extend(stats_lines)
 
-    return cleaned
+def _insert_uniform_metadata_lines(
+    lines: list[str],
+    insert_at: int | None,
+    metadata_lines: list[str],
+) -> list[str]:
+    """Insert uniform metadata at the chosen position or append it."""
+    if insert_at is None:
+        return [*lines, *metadata_lines]
+    result = list(lines)
+    for offset, tag_line in enumerate(metadata_lines):
+        result.insert(insert_at + offset, tag_line)
+    return result
 
 
 def _update_uniform_tag(
@@ -880,18 +974,31 @@ def find_diagram_files(targets: list[Path]) -> list[Path]:
     for target in targets:
         target = _ensure_repo_path(target)
         if target.is_file():
-            if target.suffix in SUPPORTED_SUFFIXES and target not in seen:
-                seen.add(target)
-                files.append(target)
+            _append_diagram_file(target, files, seen)
             continue
 
-        for suffix in SUPPORTED_SUFFIXES:
-            for f in sorted(target.rglob(f"*{suffix}")):
-                if not f.name.startswith("_") and f not in seen:
-                    seen.add(f)
-                    files.append(f)
+        for diagram_file in _iter_supported_diagram_files(target):
+            _append_diagram_file(diagram_file, files, seen)
 
     return sorted(files)
+
+
+def _append_diagram_file(path: Path, files: list[Path], seen: set[Path]) -> None:
+    """Append a supported diagram file exactly once."""
+    if path.suffix not in SUPPORTED_SUFFIXES or path in seen:
+        return
+    if path.name.startswith("_"):
+        return
+    seen.add(path)
+    files.append(path)
+
+
+def _iter_supported_diagram_files(target: Path) -> list[Path]:
+    """Collect supported diagram files under one target directory."""
+    diagram_files: list[Path] = []
+    for suffix in SUPPORTED_SUFFIXES:
+        diagram_files.extend(sorted(target.rglob(f"*{suffix}")))
+    return diagram_files
 
 
 def show_diff(path: Path, original: str, normalized: str) -> None:
@@ -964,13 +1071,7 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    # Determine targets
-    if args.files:
-        targets = args.files
-    elif args.dirs:
-        targets = args.dirs
-    else:
-        targets = [d for d in DIAGRAM_DIRS if d.exists()]
+    targets = _cli_targets(args)
 
     files = find_diagram_files(targets)
     if not files:
@@ -986,32 +1087,13 @@ def main() -> int:
     error_count = 0
 
     for path in files:
-        try:
-            original, normalized, changed = normalize_file(path)
-        except Exception as e:
-            print(f"  {RED}ERROR{NC}  {path.name}: {e}")
-            error_count += 1
-            continue
-
-        checked_count += 1
-
-        if not changed:
-            if not args.check:
-                print(f"  {GREEN}OK{NC}     {path}")
-            continue
-
-        changed_count += 1
-
-        if args.check:
-            print(f"  {RED}DRIFT{NC}  {path}")
-        elif args.dry_run:
-            print(f"  {YELLOW}DIFF{NC}   {path}")
-            show_diff(path, original, normalized)
-            print()
-        else:
-            safe_path = _ensure_repo_path(path)
-            _write_repo_text(_repo_relative_path(safe_path), normalized)
-            print(f"  {GREEN}FIXED{NC}  {path}")
+        checked_count, changed_count, error_count = _process_diagram_file(
+            path=path,
+            args=args,
+            checked_count=checked_count,
+            changed_count=changed_count,
+            error_count=error_count,
+        )
 
     # Summary
     print()
@@ -1034,6 +1116,61 @@ def main() -> int:
         return 1
 
     return 1 if error_count > 0 else 0
+
+
+def _cli_targets(args: argparse.Namespace) -> list[Path]:
+    """Resolve CLI target paths from explicit files, dirs, or defaults."""
+    if args.files:
+        return args.files
+    if args.dirs:
+        return args.dirs
+    return [diagram_dir for diagram_dir in DIAGRAM_DIRS if diagram_dir.exists()]
+
+
+def _process_diagram_file(
+    *,
+    path: Path,
+    args: argparse.Namespace,
+    checked_count: int,
+    changed_count: int,
+    error_count: int,
+) -> tuple[int, int, int]:
+    """Process one diagram file and return updated counters."""
+    try:
+        original, normalized, changed = normalize_file(path)
+    except Exception as exc:
+        print(f"  {RED}ERROR{NC}  {path.name}: {exc}")
+        return checked_count, changed_count, error_count + 1
+
+    checked_count += 1
+    if not changed:
+        if not args.check:
+            print(f"  {GREEN}OK{NC}     {path}")
+        return checked_count, changed_count, error_count
+
+    changed_count += 1
+    _handle_changed_diagram(path, original, normalized, args)
+    return checked_count, changed_count, error_count
+
+
+def _handle_changed_diagram(
+    path: Path,
+    original: str,
+    normalized: str,
+    args: argparse.Namespace,
+) -> None:
+    """Handle one changed diagram according to active CLI mode."""
+    if args.check:
+        print(f"  {RED}DRIFT{NC}  {path}")
+        return
+    if args.dry_run:
+        print(f"  {YELLOW}DIFF{NC}   {path}")
+        show_diff(path, original, normalized)
+        print()
+        return
+    safe_path = _ensure_repo_path(path)
+    _write_repo_text(_repo_relative_path(safe_path), normalized)
+    print(f"  {GREEN}FIXED{NC}  {path}")
 
 
 if __name__ == "__main__":
