@@ -950,81 +950,113 @@ def _probe_backend_for_suite(
     )
 
 
-def main() -> int:
-    args = parse_args()
-    src_manifest = _resolve_repo_relative_cli_path(args.source_manifest)
-    rnd_manifest = _resolve_repo_relative_cli_path(args.render_manifest)
-    config = _resolve_repo_relative_cli_path(args.config)
-    css = _resolve_repo_relative_cli_path(args.css)
-    puppeteer = _resolve_optional_cli_path(args.puppeteer)
+def _resolve_suite_inputs(
+    args: argparse.Namespace,
+) -> tuple[Path, Path, Path, Path, Path | None]:
+    return (
+        _resolve_repo_relative_cli_path(args.source_manifest),
+        _resolve_repo_relative_cli_path(args.render_manifest),
+        _resolve_repo_relative_cli_path(args.config),
+        _resolve_repo_relative_cli_path(args.css),
+        _resolve_optional_cli_path(args.puppeteer),
+    )
 
+
+def _load_suite_inputs(
+    src_manifest: Path,
+    rnd_manifest: Path,
+) -> tuple[list[Path], list[Path]] | None:
     try:
-        source_paths, render_paths = _load_suite_manifests(src_manifest, rnd_manifest)
+        return _load_suite_manifests(src_manifest, rnd_manifest)
     except (FileNotFoundError, ValueError) as exc:
         _err(f"[ERROR] {exc}")
-        return 2
+        return None
 
+
+def _base_suite_issues(
+    args: argparse.Namespace,
+    source_paths: list[Path],
+    render_paths: list[Path],
+) -> list[Issue]:
     issues: list[Issue] = []
-
     issues.extend(
         check_diag_t024(source_paths, max_len=args.max_label_length, max_br=args.max_br)
     )
     issues.extend(check_diag_t025(render_paths))
     issues.extend(check_diag_t026(render_paths))
+    return issues
 
-    with tempfile.TemporaryDirectory(prefix="diagram-nightly-") as temp_dir:
-        tmpdir = Path(temp_dir)
-        backend_ok, backend_error = _probe_backend_for_suite(
-            args=args,
-            config=config,
-            css=css,
-            puppeteer=puppeteer,
-            tmpdir=tmpdir,
+
+def _backend_unavailable_issue(backend_error: str) -> Issue:
+    return Issue(
+        "DIAG-T027",
+        "WARNING",
+        "<render-backend>",
+        f"render backend unavailable, chaos/growth/theme checks skipped: {backend_error}",
+    )
+
+
+def _backend_suite_issues(
+    args: argparse.Namespace,
+    *,
+    source_paths: list[Path],
+    config: Path,
+    css: Path,
+    puppeteer: Path | None,
+    tmpdir: Path,
+) -> list[Issue]:
+    issues: list[Issue] = []
+    backend_ok, backend_error = _probe_backend_for_suite(
+        args=args,
+        config=config,
+        css=css,
+        puppeteer=puppeteer,
+        tmpdir=tmpdir,
+    )
+    if not backend_ok:
+        issues.append(_backend_unavailable_issue(backend_error))
+        return issues
+    if not args.skip_chaos:
+        issues.extend(
+            check_diag_t027(
+                source_paths,
+                mmdc_bin=args.mmdc_bin,
+                config=config,
+                css=css,
+                puppeteer=puppeteer,
+                tmpdir=tmpdir,
+            )
         )
-        if not backend_ok:
-            issues.append(
-                Issue(
-                    "DIAG-T027",
-                    "WARNING",
-                    "<render-backend>",
-                    f"render backend unavailable, chaos/growth/theme checks skipped: {backend_error}",
-                )
+    if not args.skip_growth:
+        issues.extend(
+            check_diag_t028(
+                source_paths,
+                mmdc_bin=args.mmdc_bin,
+                config=config,
+                css=css,
+                puppeteer=puppeteer,
+                tmpdir=tmpdir,
             )
+        )
+    if not args.skip_theme:
+        issues.extend(
+            check_diag_t029(
+                source_paths,
+                mmdc_bin=args.mmdc_bin,
+                config=config,
+                css=css,
+                puppeteer=puppeteer,
+                tmpdir=tmpdir,
+            )
+        )
+    return issues
 
-        if not args.skip_chaos and backend_ok:
-            issues.extend(
-                check_diag_t027(
-                    source_paths,
-                    mmdc_bin=args.mmdc_bin,
-                    config=config,
-                    css=css,
-                    puppeteer=puppeteer,
-                    tmpdir=tmpdir,
-                )
-            )
-        if not args.skip_growth and backend_ok:
-            issues.extend(
-                check_diag_t028(
-                    source_paths,
-                    mmdc_bin=args.mmdc_bin,
-                    config=config,
-                    css=css,
-                    puppeteer=puppeteer,
-                    tmpdir=tmpdir,
-                )
-            )
-        if not args.skip_theme and backend_ok:
-            issues.extend(
-                check_diag_t029(
-                    source_paths,
-                    mmdc_bin=args.mmdc_bin,
-                    config=config,
-                    css=css,
-                    puppeteer=puppeteer,
-                    tmpdir=tmpdir,
-                )
-            )
 
+def _build_report_payload(
+    source_paths: list[Path],
+    render_paths: list[Path],
+    issues: list[Issue],
+) -> tuple[Report, dict[str, object], int, int]:
     errors = sum(1 for issue in issues if issue.severity == "ERROR")
     warnings = sum(1 for issue in issues if issue.severity == "WARNING")
     report = Report(
@@ -1034,7 +1066,6 @@ def main() -> int:
         errors=errors,
         issues=issues,
     )
-
     payload = {
         "checked_sources": report.checked_sources,
         "checked_renders": report.checked_renders,
@@ -1042,40 +1073,83 @@ def main() -> int:
         "errors": report.errors,
         "issues": [asdict(issue) for issue in report.issues],
     }
+    return report, payload, errors, warnings
 
+
+def _write_suite_output(path: Path, content: str) -> None:
+    safe_path = _ensure_repo_path(path)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(content, encoding="utf-8")
+
+
+def _write_optional_outputs(
+    args: argparse.Namespace,
+    *,
+    payload: dict[str, object],
+    report: Report,
+) -> None:
     if args.json_out is not None:
         json_out = (
             args.json_out if args.json_out.is_absolute() else REPO_ROOT / args.json_out
         )
-        safe_json_out = _ensure_repo_path(json_out)
-        safe_json_out.parent.mkdir(parents=True, exist_ok=True)
-        safe_json_out.write_text(
-            json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
-            encoding="utf-8",
-        )
-
+        _write_suite_output(json_out, json.dumps(payload, ensure_ascii=True, indent=2) + "\n")
     if args.markdown_out is not None:
         md_out = (
             args.markdown_out
             if args.markdown_out.is_absolute()
             else REPO_ROOT / args.markdown_out
         )
-        safe_md_out = _ensure_repo_path(md_out)
-        safe_md_out.parent.mkdir(parents=True, exist_ok=True)
-        safe_md_out.write_text(render_markdown(report), encoding="utf-8")
+        _write_suite_output(md_out, render_markdown(report))
 
+
+def _emit_suite_report(
+    args: argparse.Namespace,
+    *,
+    payload: dict[str, object],
+    report: Report,
+) -> None:
     if args.json:
         _out(json.dumps(payload, ensure_ascii=True, indent=2))
-    else:
-        _out(
-            "[INFO] Nightly suite summary: "
-            f"sources={report.checked_sources}, renders={report.checked_renders}, "
-            f"warnings={report.warnings}, errors={report.errors}"
-        )
-        for issue in report.issues:
-            _out(
-                f"[INFO] {issue.rule_id} [{issue.severity}] {issue.file}: {issue.message}"
+        return
+    _out(
+        "[INFO] Nightly suite summary: "
+        f"sources={report.checked_sources}, renders={report.checked_renders}, "
+        f"warnings={report.warnings}, errors={report.errors}"
+    )
+    for issue in report.issues:
+        _out(f"[INFO] {issue.rule_id} [{issue.severity}] {issue.file}: {issue.message}")
+
+
+def main() -> int:
+    args = parse_args()
+    src_manifest, rnd_manifest, config, css, puppeteer = _resolve_suite_inputs(args)
+    suite_inputs = _load_suite_inputs(src_manifest, rnd_manifest)
+    if suite_inputs is None:
+        return 2
+    source_paths, render_paths = suite_inputs
+
+    issues = _base_suite_issues(args, source_paths, render_paths)
+
+    with tempfile.TemporaryDirectory(prefix="diagram-nightly-") as temp_dir:
+        tmpdir = Path(temp_dir)
+        issues.extend(
+            _backend_suite_issues(
+                args,
+                source_paths=source_paths,
+                config=config,
+                css=css,
+                puppeteer=puppeteer,
+                tmpdir=tmpdir,
             )
+        )
+
+    report, payload, errors, warnings = _build_report_payload(
+        source_paths,
+        render_paths,
+        issues,
+    )
+    _write_optional_outputs(args, payload=payload, report=report)
+    _emit_suite_report(args, payload=payload, report=report)
 
     if args.strict:
         return 1 if (errors > 0 or warnings > 0) else 0

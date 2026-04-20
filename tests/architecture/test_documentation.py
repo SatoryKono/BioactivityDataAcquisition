@@ -83,16 +83,33 @@ def _missing_protocol_method_docstrings(
     for py_file, tree in parsed_modules:
         relative_path = py_file.relative_to(src_dir)
         for node in ast.walk(tree):
-            if not isinstance(node, ast.ClassDef) or not _is_protocol_class(node):
+            if not _is_protocol_class_node(node):
                 continue
-            for item in node.body:
-                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    if item.name.startswith("_") or ast.get_docstring(item):
-                        continue
-                    missing.append(
-                        f"{relative_path}:{item.lineno} - {node.name}.{item.name}()"
-                    )
+            missing.extend(_missing_protocol_methods_for_class(relative_path, node))
     return missing
+
+
+def _is_protocol_class_node(node: ast.AST) -> bool:
+    return isinstance(node, ast.ClassDef) and _is_protocol_class(node)
+
+
+def _is_public_method_without_docstring(item: ast.stmt) -> bool:
+    if not isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return False
+    if item.name.startswith("_"):
+        return False
+    return not ast.get_docstring(item)
+
+
+def _missing_protocol_methods_for_class(
+    relative_path: Path,
+    node: ast.ClassDef,
+) -> list[str]:
+    return [
+        f"{relative_path}:{item.lineno} - {node.name}.{item.name}()"
+        for item in node.body
+        if _is_public_method_without_docstring(item)
+    ]
 
 
 def _missing_exception_docstrings(
