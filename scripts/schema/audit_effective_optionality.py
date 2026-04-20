@@ -152,11 +152,10 @@ def _apply_required_filter_sources(
 
 def _quality_validation_source(item: dict[str, Any]) -> OptionalitySource | None:
     validation_type = item.get("type")
-    if validation_type == "required":
-        return "dq_required_validation"
-    if validation_type == "not_null":
-        return "dq_not_null_validation"
-    return None
+    return {
+        "required": "dq_required_validation",
+        "not_null": "dq_not_null_validation",
+    }.get(validation_type)
 
 
 def _optional_field_name(item: dict[str, Any]) -> str | None:

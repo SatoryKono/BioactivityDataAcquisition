@@ -163,12 +163,14 @@ def _file_broad_exception_violations(
         if not isinstance(node, ast.Try):
             continue
         for index, handler in enumerate(node.handlers):
-            handler_violations, matched_reason_codes = _evaluate_broad_exception_handler(
-                rel_path=rel_path,
-                source=source,
-                node=node,
-                index=index,
-                handler=handler,
+            handler_violations, matched_reason_codes = (
+                _evaluate_broad_exception_handler(
+                    rel_path=rel_path,
+                    source=source,
+                    node=node,
+                    index=index,
+                    handler=handler,
+                )
             )
             violations.extend(handler_violations)
             if matched_reason_codes:
@@ -204,7 +206,9 @@ def test_broad_exception_handlers_are_limited_to_cli_entrypoints() -> None:
     }
 
     for file_path in Path("src/bioetl").rglob("*.py"):
-        violations.extend(_file_broad_exception_violations(file_path, seen_reason_codes))
+        violations.extend(
+            _file_broad_exception_violations(file_path, seen_reason_codes)
+        )
 
     violations.extend(_reason_code_coverage_violations(seen_reason_codes))
 

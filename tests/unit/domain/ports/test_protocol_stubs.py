@@ -95,22 +95,33 @@ def _dummy_value(name: str, annotation: Any) -> Any:
     """Provide generic arguments for protocol method invocation."""
     lower_name = name.lower()
 
-    if "path" in lower_name:
-        return Path(".")
-    if lower_name in {"records", "record", "primary_keys", "columns", "partition_cols"}:
-        return []
-    if lower_name in {"filters", "fallback_mapping", "labels", "scd_config"}:
-        return {}
-    if lower_name in {"date", "ingestion_ts", "timestamp", "start_time"}:
-        return datetime.now(UTC)
-    if lower_name in {"limit", "offset", "count", "rate", "capacity", "max_workers"}:
-        return 1
-    if (
-        "enabled" in lower_name
-        or lower_name.startswith("is_")
-        or "dry_run" in lower_name
-    ):
-        return False
+    name_defaults: tuple[tuple[bool, Any], ...] = (
+        ("path" in lower_name, Path(".")),
+        (
+            lower_name
+            in {"records", "record", "primary_keys", "columns", "partition_cols"},
+            [],
+        ),
+        (lower_name in {"filters", "fallback_mapping", "labels", "scd_config"}, {}),
+        (
+            lower_name in {"date", "ingestion_ts", "timestamp", "start_time"},
+            datetime.now(UTC),
+        ),
+        (
+            lower_name
+            in {"limit", "offset", "count", "rate", "capacity", "max_workers"},
+            1,
+        ),
+        (
+            "enabled" in lower_name
+            or lower_name.startswith("is_")
+            or "dry_run" in lower_name,
+            False,
+        ),
+    )
+    for predicate, value in name_defaults:
+        if predicate:
+            return value
 
     origin = get_origin(annotation)
     if origin in (list, tuple, set, frozenset):

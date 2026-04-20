@@ -60,14 +60,14 @@ def _get_base_path(relative_path: Path) -> Path:
 
 
 def _is_application_source_file(py_file: Path) -> bool:
-    return not (
-        py_file.name.startswith("__") or py_file.name.startswith("test_")
-    )
+    return not (py_file.name.startswith("__") or py_file.name.startswith("test_"))
 
 
 def _iter_application_source_files(app_path: Path) -> list[Path]:
     return [
-        py_file for py_file in app_path.rglob("*.py") if _is_application_source_file(py_file)
+        py_file
+        for py_file in app_path.rglob("*.py")
+        if _is_application_source_file(py_file)
     ]
 
 
@@ -91,9 +91,7 @@ def _service_like_classes_in_file(py_file: Path) -> set[str]:
     tree = _parse_python_tree(py_file)
     if tree is None:
         return set()
-    return {
-        node.name for node in ast.walk(tree) if _is_public_service_like_class(node)
-    }
+    return {node.name for node in ast.walk(tree) if _is_public_service_like_class(node)}
 
 
 class Violation(NamedTuple):

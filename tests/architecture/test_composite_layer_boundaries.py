@@ -176,9 +176,7 @@ class TestDomainCompositeLayerBoundaries:
             "bioetl.domain.exceptions",
         }
 
-        violations = _fsm_state_import_violations(
-            tree, allowed_modules=allowed_modules
-        )
+        violations = _fsm_state_import_violations(tree, allowed_modules=allowed_modules)
 
         assert not violations, (
             "FSM state module has non-standard imports:\n"
