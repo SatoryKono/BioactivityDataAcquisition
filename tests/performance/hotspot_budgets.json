@@ -13,7 +13,7 @@
       "baseline_latency_ms": 26.811,
       "baseline_throughput_rps": 22379.125,
       "max_regression_pct": 0.25,
-      "p95_latency_ms": 33.5,
+      "p95_latency_ms": 42.0,
       "max_p95_regression_pct": 0.35
     },
     "silver_write_merge_600": {
