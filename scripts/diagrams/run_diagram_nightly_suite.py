@@ -49,7 +49,7 @@ NS = {"svg": SVG_NS}
 QUOTED_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
 TAG_RE = re.compile(r"<[^>]+>")
 EDGE_RE = re.compile(r"\s(?:-->|-.->|==>|---|--x|x--)\s")
-NODE_ID_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\b")
+NODE_ID_RE = re.compile(r"\b([A-Za-z_]\w*)\b")
 SOURCE_FILE_MISSING = "source file missing"
 
 
