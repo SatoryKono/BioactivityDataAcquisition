@@ -113,9 +113,9 @@ class RuntimeMirrorRule:
     compare_version: bool = False
 
 
-RUNTIME_VERSION_PATTERN = re.compile(r"(?m)^\*Версия:\s*([0-9]+(?:\.[0-9]+)*)")
+RUNTIME_VERSION_PATTERN = re.compile(r"(?m)^\*Версия:\s*(\d+(?:\.\d+)*)")
 AGENT_MEMORY_SYNC_PATTERN = re.compile(
-    r"Синхронизировано с ORCHESTRATION\.md v([0-9]+(?:\.[0-9]+)*)"
+    r"Синхронизировано с ORCHESTRATION\.md v(\d+(?:\.\d+)*)"
 )
 LAST_UPDATED_PATTERN = re.compile(r"Последнее обновление:\s*(\d{4}-\d{2}-\d{2})")
 
