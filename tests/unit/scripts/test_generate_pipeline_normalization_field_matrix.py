@@ -315,6 +315,8 @@ def test_render_markdown_mentions_surface_scoped_coverage_kpis() -> None:
 
 def test_write_artifacts_is_deterministic(tmp_path: Path) -> None:
     def _assert_semantic_payload(first_payload: object, second_payload: object) -> None:
+        assert isinstance(first_payload, dict)
+        assert isinstance(second_payload, dict)
         first_kpis = first_payload["semantic_kpis"]
         second_kpis = second_payload["semantic_kpis"]
         assert [kpi["name"] for kpi in first_kpis] == [

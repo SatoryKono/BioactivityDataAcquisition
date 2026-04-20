@@ -15,18 +15,24 @@ def _format_scalar(value: object) -> str:
     return str(value)
 
 
+def _render_jsonish_block(value: object) -> list[str]:
+    """Render nested data compactly for text mode without JSON path escaping noise."""
+    rendered = json.dumps(value, indent=2, sort_keys=True, default=str)
+    return rendered.replace("\\\\", "\\").splitlines()
+
+
 def _format_block(value: object) -> list[str]:
     """Format nested values as one or more human-readable text lines."""
     if isinstance(value, dict):
         if not value:
             return ["{}"]
-        return json.dumps(value, indent=2, sort_keys=True, default=str).splitlines()
+        return _render_jsonish_block(value)
     if isinstance(value, list):
         if not value:
             return ["[]"]
         if all(not isinstance(item, (dict, list)) for item in value):
             return [_format_scalar(item) for item in value]
-        return json.dumps(value, indent=2, sort_keys=True, default=str).splitlines()
+        return _render_jsonish_block(value)
     return [_format_scalar(value)]
 
 
