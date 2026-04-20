@@ -8,7 +8,13 @@ from typing import Any
 
 import yaml
 
-from memory.timeline._common import DEFAULT_EVENTS_DIR, write_jsonl
+from memory.graph.refs import (
+    graph_refs_for_workflow,
+    graph_refs_for_workflow_job,
+    related_refs_for_workflow,
+    related_refs_for_workflow_job,
+)
+from memory.timeline._common import DEFAULT_EVENTS_DIR, dedupe_preserve_order, write_jsonl
 
 DEFAULT_WORKFLOWS_DIR = Path(".github/workflows")
 
@@ -28,8 +34,12 @@ def build_ci_events(root: Path) -> list[dict[str, Any]]:
             {
                 "id": f"ci-workflow::{workflow_path.stem}",
                 "event_type": "ci.workflow_defined",
+                "event_family": "ci",
+                "severity": "info",
                 "occurred_at": None,
                 "source_refs": [rel],
+                "graph_node_refs": graph_refs_for_workflow(rel, workflow_name),
+                "related_refs": related_refs_for_workflow(rel, workflow_name),
                 "confidence": "derived",
                 "payload": {
                     "workflow_name": workflow_name,
@@ -43,8 +53,14 @@ def build_ci_events(root: Path) -> list[dict[str, Any]]:
                 {
                     "id": f"ci-job::{workflow_path.stem}::{job_name}",
                     "event_type": "ci.job_defined",
+                    "event_family": "ci",
+                    "severity": "info",
                     "occurred_at": None,
                     "source_refs": [rel],
+                    "graph_node_refs": graph_refs_for_workflow_job(rel, workflow_name, job_name),
+                    "related_refs": dedupe_preserve_order(
+                        related_refs_for_workflow_job(rel, workflow_name, job_name)
+                    ),
                     "confidence": "derived",
                     "payload": {
                         "workflow_name": workflow_name,

@@ -6,7 +6,7 @@ If you have a machine with stable internet and want to avoid slow downloads on y
 
 ```bash
 # On source machine (with Ollama already running):
-cd script-mistrall/helper
+cd scripts/ai/mistrall/helper
 ./save-image.sh
 # Creates: ollama-image.tar.gz (~2GB compressed)
 ```
@@ -15,8 +15,8 @@ Transfer `ollama-image.tar.gz` to your target machine:
 
 ```bash
 # On target machine:
-cp /path/to/ollama-image.tar.gz script-mistrall/
-cd script-mistrall/helper
+cp /path/to/ollama-image.tar.gz scripts/ai/mistrall/
+cd scripts/ai/mistrall/helper
 ./load-image.sh
 ```
 

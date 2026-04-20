@@ -111,6 +111,19 @@ else
     ALL_CHECKS=false
 fi
 
+# 6. Create .env.gemini template if missing
+if [[ ! -f "${ENV_FILE}" ]]; then
+    log_warn "Creating .env.gemini template..."
+    cat > "${ENV_FILE}" <<EOF
+# Google Gemini Configuration
+# Get your API key from: https://aistudio.google.com/app/apikeys
+GEMINI_API_KEY=your-api-key-here
+# Optional model override
+# GEMINI_MODEL=gemini-2.5-flash
+EOF
+    log_warn ".env.gemini created - please edit and add your API key"
+fi
+
 echo ""
 
 # Return exit code
@@ -118,6 +131,6 @@ if [[ "${ALL_CHECKS}" == "true" ]]; then
     log_success "All checks passed"
     exit 0
 else
-    log_warn "Some checks failed - will attempt to fix"
+    log_warn "Some checks failed"
     exit 1
 fi

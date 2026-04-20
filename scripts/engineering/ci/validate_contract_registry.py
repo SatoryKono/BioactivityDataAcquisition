@@ -149,7 +149,7 @@ def main() -> int:
     """Main validation entry point."""
     repo_root = Path(__file__).resolve().parents[3]
     registry_path = repo_root / "configs/base/contract_registry.yaml"
-    diagnostics_path = repo_root / "contract-registry-diagnostics.json"
+    diagnostics_path = repo_root / "reports/quality/contract-registry-diagnostics.json"
 
     if not registry_path.exists():
         print("::error::Contract registry not found")

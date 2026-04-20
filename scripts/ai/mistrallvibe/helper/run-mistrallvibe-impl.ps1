@@ -41,7 +41,7 @@ function Start-Vibe {
     Write-Info "Starting Mistral Vibe Server..."
     
     if ([string]::IsNullOrEmpty($env:VIBE_API_KEY) -or $env:VIBE_API_KEY -eq "your-api-key-here") {
-        Write-Error "VIBE_API_KEY not configured in .env.mistrallvibe"
+        Write-Error "API key not configured in .env.mistrallvibe"
         Write-Info "Get your API key from: https://console.mistral.ai/api-keys/"
         return 1
     }
@@ -116,7 +116,7 @@ function Show-ApiKey {
         Write-Error "API key not configured"
         Write-Host ""
         Write-Info "1. Get key from: https://console.mistral.ai/api-keys/"
-        Write-Info "2. Edit .env.mistrallvibe and set VIBE_API_KEY"
+        Write-Info "2. Edit .env.mistrallvibe and set MISTRAL_API_KEY"
     } else {
         $keyLength = $env:VIBE_API_KEY.Length
         $prefix = $env:VIBE_API_KEY.Substring(0, [Math]::Min(10, $keyLength))
@@ -148,3 +148,6 @@ switch ($Command) {
 }
 
 exit $LASTEXITCODE
+if ([string]::IsNullOrEmpty($env:VIBE_API_KEY) -and -not [string]::IsNullOrEmpty($env:MISTRAL_API_KEY)) {
+    $env:VIBE_API_KEY = $env:MISTRAL_API_KEY
+}

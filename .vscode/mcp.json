@@ -127,18 +127,10 @@
       ]
     },
     "needle": {
-      "command": "npx",
+      "command": "bash",
       "args": [
-        "-y",
-        "mcp-remote",
-        "https://mcp.needle-ai.com/mcp",
-        "--header",
-        "Authorization:Bearer ${NEEDLE_API_KEY}"
-      ],
-      "env": {
-        "NEEDLE_API_KEY": "${env:NEEDLE_API_KEY}",
-        "NPM_CONFIG_CACHE": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/.cache/npm-cache"
-      }
+        "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh"
+      ]
     },
     "openaiDeveloperDocs": {
       "type": "http",

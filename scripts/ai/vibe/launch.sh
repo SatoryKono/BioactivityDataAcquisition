@@ -24,6 +24,7 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+COMPAT_ENV_FILE="${REPO_ROOT}/scripts/ai/mistrallvibe/.env.mistrallvibe"
 
 RED='\033[0;31m'
 BLUE='\033[0;34m'
@@ -48,6 +49,22 @@ if [[ -f "${HOME}/.local/bin/env" ]]; then
     source "${HOME}/.local/bin/env" 2>/dev/null || true
 fi
 
+if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
+    # shellcheck disable=SC1091
+    source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
+fi
+
+if [[ -f "${COMPAT_ENV_FILE}" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "${COMPAT_ENV_FILE}" 2>/dev/null || true
+    set +a
+fi
+
+if [[ -n "${VIBE_API_KEY:-}" && -z "${MISTRAL_API_KEY:-}" ]]; then
+    export MISTRAL_API_KEY="${VIBE_API_KEY}"
+fi
+
 if ! command -v vibe >/dev/null 2>&1; then
     log_error "Mistral Vibe CLI not found in PATH"
     echo "[mistral] Install with one of:"
@@ -60,6 +77,10 @@ fi
 VIBE_VERSION=$(vibe --version 2>/dev/null || echo "unknown")
 log_info "Using Vibe ${VIBE_VERSION}"
 log_info "Working directory: ${REPO_ROOT}"
+
+if [[ -n "${MISTRAL_API_KEY:-}" ]]; then
+    log_info "MISTRAL_API_KEY loaded for current session"
+fi
 
 if [[ $# -eq 0 ]]; then
     log_info "Starting interactive mode..."

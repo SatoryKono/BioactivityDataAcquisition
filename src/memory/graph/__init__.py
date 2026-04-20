@@ -2,4 +2,4 @@
 
 from __future__ import annotations
 
-__all__ = ["query", "sync"]
+__all__ = ["query", "refs", "sync"]

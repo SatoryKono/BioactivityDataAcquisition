@@ -55,15 +55,15 @@ Write-Info "Checking configuration..."
 $envFile = Join-Path $RootDir ".env.mistrallvibe"
 if (Test-Path $envFile) {
     $envContent = Get-Content $envFile -Raw
-    if ($envContent -match "VIBE_API_KEY=") {
+    if ($envContent -match "MISTRAL_API_KEY=" -or $envContent -match "VIBE_API_KEY=") {
         if ($envContent -match "your-api-key-here") {
-            Write-Warn ".env.mistrallvibe exists but VIBE_API_KEY not configured"
+            Write-Warn ".env.mistrallvibe exists but API key not configured"
             $allChecks = $false
         } else {
             Write-Success ".env.mistrallvibe configured with API key"
         }
     } else {
-        Write-Warn ".env.mistrallvibe missing VIBE_API_KEY"
+        Write-Warn ".env.mistrallvibe missing MISTRAL_API_KEY"
         $allChecks = $false
     }
 } else {

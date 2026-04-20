@@ -10,19 +10,20 @@ Act as L1 orchestrator by default.
 Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and produce final artifacts.
 
 ## Startup Sequence
-1. Read memory:
+1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the swarm task.
+2. Read memory:
 - `../../../docs/00-project/ai/memory/agent-memory.md`
 - `../../../docs/00-project/ai/memory/memory-py-test-bot.md`
 - `../../../.claude/agents/ORCHESTRATION.md` (sections 2-7)
-2. Read profile:
+3. Read profile:
 - `../../../.claude/agents/py-test-swarm.md`
-3. Confirm input contract:
+4. Confirm input contract:
 - `task_id` (required)
 - `mode` (required): `full_audit | fix_failures | coverage_boost | optimize | flakiness_scan`
 - `scope` (optional, default all tests)
 - `baseline_report` (optional)
 - `flakiness_runs` (optional, default `5`)
-4. Create artifact root: `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/` (LLM = caller).
+5. Create artifact root: `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/` (LLM = caller).
 
 ## Cross-Platform Runtime Note
 - CI or single-OS checkout: `uv run python -m ...`
@@ -117,6 +118,7 @@ Treat task as done only when:
 - L1 generated `FINAL-REPORT.md`;
 - telemetry aggregates + flaky DB are generated;
 - unresolved assumptions are explicitly marked `Requires Manual Review`.
+- after closeout, run `python -m memory.tooling.workflow post-task ...` and promote only durable testing lessons or incident knowledge.
 
 ## References
 - L1 runbook and command sequence: [l1-playbook.md](references/l1-playbook.md)

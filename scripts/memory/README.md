@@ -4,6 +4,10 @@
 the Neo4j project-memory tooling.
 
 The canonical graph implementation now lives under `src/memory/graph/`.
+Canonical graph-owned YAML surfaces now also live there:
+
+- `src/memory/graph/mappings.yaml`
+- `src/memory/graph/ontology.yaml`
 
 ## Stable entrypoints
 
@@ -16,8 +20,8 @@ The canonical graph implementation now lives under `src/memory/graph/`.
 
 ## Layout
 
-- `sync.py` remains the legacy sync surface used by existing scripts/tests.
-- `query.py` remains the legacy query surface used by existing scripts/tests.
+- `sync.py` is now a compatibility module alias to `memory.graph.sync`.
+- `query.py` is now a compatibility module alias to `memory.graph.query`.
 - `scripts/ai/mcp/neo4j_memory_mcp_smoke.py` validates framed stdio behavior for the `neo4j-memory` MCP server.
 - `scripts/ai/mcp/neo4j_memory_mcp_adapter.py` bridges Codex framed stdio to the upstream line-delimited server.
 - `scripts/ai/mcp/` contains the MCP wrappers and verification scripts.

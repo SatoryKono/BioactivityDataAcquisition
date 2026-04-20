@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2}"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
 
 # Load environment
 ENV_FILE="${ROOT_DIR}/.env.gemini"
@@ -47,7 +47,7 @@ fi
 # Verify google-generativeai package
 if ! "${PYTHON_BIN}" -c "import importlib.util, sys; sys.exit(0 if importlib.util.find_spec('google.genai') or importlib.util.find_spec('google.generativeai') else 1)" 2>/dev/null; then
     echo "[ERROR] Gemini Python SDK not installed" >&2
-    echo "[INFO] Run setup: run-gemini.ps1 setup" >&2
+    echo "[INFO] Run setup: scripts/ai/gemini/run-gemini.sh setup" >&2
     exit 1
 fi
 

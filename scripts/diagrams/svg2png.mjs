@@ -16,22 +16,29 @@ import {createRequire} from "node:module";
 import {promises as fs} from "node:fs";
 import path from "node:path";
 
-// Resolve puppeteer from mmdc's node_modules
+// Resolve puppeteer from explicit path, local install, or historical global mmdc path.
 const require = createRequire(import.meta.url);
 let puppeteer;
-const mmdc_puppeteer =
-  "C:/Users/Fedor/AppData/Roaming/npm/node_modules/@mermaid-js/mermaid-cli/node_modules/puppeteer";
-try {
-  puppeteer = require("puppeteer");
-} catch {
+const moduleCandidates = [
+  process.env.PUPPETEER_MODULE_PATH,
+  "puppeteer",
+  "C:/Users/Fedor/AppData/Roaming/npm/node_modules/@mermaid-js/mermaid-cli/node_modules/puppeteer",
+].filter(Boolean);
+
+for (const candidate of moduleCandidates) {
   try {
-    puppeteer = require(mmdc_puppeteer);
+    puppeteer = require(candidate);
+    break;
   } catch {
-    console.error(
-      "ERROR: puppeteer not found. Install via: npm install -g puppeteer"
-    );
-    process.exit(2);
+    // Try the next resolution candidate.
   }
+}
+
+if (!puppeteer) {
+  console.error(
+    "ERROR: puppeteer not found. Set PUPPETEER_MODULE_PATH or install puppeteer."
+  );
+  process.exit(2);
 }
 
 // ── CLI args ─────────────────────────────────────────────────
@@ -180,7 +187,9 @@ ${svgContent}
 
 // ── Parallel execution ───────────────────────────────────────
 async function main() {
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
   const browser = await puppeteer.launch({
+    executablePath,
     headless: "new",
     protocolTimeout: 120_000,
     args: [

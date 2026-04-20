@@ -68,6 +68,7 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [monitoring-observability-expansion-plan-2026-03-26.md](monitoring-observability-expansion-plan-2026-03-26.md)
 - [project-memory-layer-implementation-plan-2026-04-20.md](project-memory-layer-implementation-plan-2026-04-20.md)
 - [project-memory-layer-issue-pack-2026-04-20.md](project-memory-layer-issue-pack-2026-04-20.md)
+- [repository-file-structure-cleanup-plan-2026-04-20.md](repository-file-structure-cleanup-plan-2026-04-20.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -91,6 +92,11 @@ second active backlog or a normative knowledge-management policy.
 The project memory layer issue pack was added on `2026-04-20` as a staging
 surface for decomposing that rollout into bounded GitHub issues. It is retained
 as implementation support context, not as a second backlog.
+
+The repository file structure cleanup plan was added on `2026-04-20` as a
+bounded hygiene and governance-convergence roadmap for root placement policy,
+generated artifact cleanup, and report-surface normalization. It is retained as
+supporting implementation context, not as a second active backlog.
 
 If later waves close items named in that report, the report should keep its
 original date and gain a short freshness note instead of being silently treated

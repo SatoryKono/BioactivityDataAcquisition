@@ -6,8 +6,8 @@ import argparse
 from pathlib import Path
 
 from memory.notes import slugify, utc_now_iso, write_markdown_note
+from memory.resources import discover_memory_root
 
-MEMORY_ROOT = Path(__file__).resolve().parents[1]
 
 NOTE_KINDS: dict[str, dict[str, str]] = {
     "episodic-session": {
@@ -67,7 +67,8 @@ def create_note(
     """Create a markdown note in the canonical memory subtree."""
     config = NOTE_KINDS[note_kind]
     slug = slugify(title)
-    output = output_path or (MEMORY_ROOT / config["target_dir"] / f"{slug}.md")
+    memory_root = discover_memory_root()
+    output = output_path or (memory_root / config["target_dir"] / f"{slug}.md")
     timestamp = utc_now_iso()
 
     metadata = {
@@ -84,6 +85,7 @@ def create_note(
                 "task_id": task_id,
                 "created_at": timestamp,
                 "ttl_days": 14,
+                "confidence": "episodic",
                 "summary": "Short-lived working context.",
             }
         )

@@ -57,6 +57,19 @@ This document defines deterministic cleanup rules and automation for removing ca
 ### 1.5. IDE/OS
 
 - `.idea/workspace.xml`
+- `.idea/shelf/`
+- `.idea/dataSources*/`
+- `.idea/.ai/`
+- `.idea/AICommit.xml`
+- `.idea/claudeCodeTabState.xml`
+- `.idea/codex.xml`
+- `.idea/copilot.data.migration*.xml`
+- `.idea/csv-editor.xml`
+- `.idea/git_toolbox_prj.xml`
+- `.idea/junie.xml`
+- `.idea/sonarlint.xml`
+- `.idea/webResources.xml`
+- `.sonarlint/connectedMode.json`
 - `.DS_Store`
 - `Thumbs.db`
 - `.ipynb_checkpoints/`

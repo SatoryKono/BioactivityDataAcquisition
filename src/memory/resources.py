@@ -15,6 +15,8 @@ SCHEMA_DIR = MEMORY_ROOT / "schemas"
 
 REQUIRED_POLICY_FILES = (
     "source_priority.yaml",
+    "promotion.yaml",
+    "storage.yaml",
     "retention.yaml",
     "confidence.yaml",
     "freshness.yaml",
@@ -72,3 +74,20 @@ def load_yaml_resource(path: Path) -> Any:
 def load_json_resource(path: Path) -> Any:
     """Load a package JSON resource."""
     return _read_json(path)
+
+
+def discover_repo_root(start: Path | None = None) -> Path | None:
+    """Find the nearest repository root containing src/memory from the cwd upward."""
+    current = (start or Path.cwd()).absolute()
+    for candidate in (current, *current.parents):
+        if (candidate / "src" / "memory").exists():
+            return candidate
+    return None
+
+
+def discover_memory_root(start: Path | None = None) -> Path:
+    """Prefer the current workspace src/memory path when available."""
+    repo_root = discover_repo_root(start)
+    if repo_root is not None:
+        return repo_root / "src" / "memory"
+    return MEMORY_ROOT

@@ -1,1 +1,1 @@
-"""Project-memory tooling package."""
+"""Legacy compatibility package for canonical ``memory.*`` surfaces."""

@@ -17,6 +17,7 @@ EXPECTED_BRAVE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrappe
 EXPECTED_SONARQUBE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
 EXPECTED_NEO4J_CYPHER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
 EXPECTED_NEO4J_MEMORY_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+EXPECTED_NEEDLE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_needle_wrapper.sh"
 EXPECTED_FILESYSTEM_SCOPE="${REPO_ROOT}"
 # shellcheck source=./support/load_repo_env.sh
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
@@ -48,6 +49,7 @@ keys = [
     ("EXPECTED_SONARQUBE_WRAPPER_PATH", ("sonarqube", "args", 0)),
     ("EXPECTED_NEO4J_CYPHER_WRAPPER_PATH", ("neo4j-cypher", "args", 0)),
     ("EXPECTED_NEO4J_MEMORY_WRAPPER_PATH", ("neo4j-memory", "args", 0)),
+    ("EXPECTED_NEEDLE_WRAPPER_PATH", ("needle", "args", 0)),
     ("EXPECTED_FILESYSTEM_SCOPE", ("filesystem", "args", 2)),
 ]
 
@@ -166,8 +168,7 @@ require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search i
 require_wrapper_path "$sonarqube_out" "$EXPECTED_SONARQUBE_WRAPPER_PATH" "sonarqube is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
-require_contains "$needle_out" "url: https://mcp.needle-ai.com/mcp" "needle points to the official Needle MCP endpoint" || status=1
-require_contains "$needle_out" "bearer_token_env_var: NEEDLE_API_KEY" "needle uses NEEDLE_API_KEY bearer auth" || status=1
+require_wrapper_path "$needle_out" "$EXPECTED_NEEDLE_WRAPPER_PATH" "needle is routed through the project wrapper" || status=1
 require_contains "$openai_docs_out" "https://developers.openai.com/mcp" "openaiDeveloperDocs points to official OpenAI MCP endpoint" || status=1
 
 if grep -Fq -- "${EXPECTED_FILESYSTEM_SCOPE}" <<<"$filesystem_out"; then

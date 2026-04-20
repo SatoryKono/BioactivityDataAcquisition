@@ -13,6 +13,7 @@ SKIP_CLEANUP=0
 SKIP_REPO=0
 SKIP_DOCS=0
 SKIP_ARCHITECTURE=0
+SKIP_MEMORY=0
 DRY_RUN=0
 REPORT_JSON=""
 RUN_CLEANUP=1
@@ -20,11 +21,13 @@ RUN_AUTO_FIX=1
 RUN_REPO_CHECKS=1
 RUN_DOCS_IDENTITY_CHECKS=1
 RUN_DOCS_VERIFY=0
+RUN_MEMORY_CHECKS=1
 ARCHITECTURE_GROUP=""
 PYTHON_BIN=""
 STEP_LOG_FILE=""
 SESSION_STATUS="ok"
 PRETEST_START_TS=""
+MEMORY_TMP_OUTPUT=""
 
 usage() {
     cat <<'EOF'
@@ -48,6 +51,7 @@ Options:
   --skip-repo                   Skip inventory/catalog governance checks
   --skip-docs                   Skip docs identity + docs verification
   --skip-architecture           Skip targeted architecture fail-fast checks
+  --skip-memory                 Skip memory validation + refresh smoke checks
   --report-json PATH            Write machine-readable summary to PATH
   --dry-run                     Print commands without executing them
   -h, --help                    Show this help
@@ -226,6 +230,9 @@ PY
 }
 
 cleanup_temp() {
+    if [[ -n "$MEMORY_TMP_OUTPUT" && -d "$MEMORY_TMP_OUTPUT" ]]; then
+        rm -rf "$MEMORY_TMP_OUTPUT"
+    fi
     if [[ -n "$STEP_LOG_FILE" && -f "$STEP_LOG_FILE" ]]; then
         rm -f "$STEP_LOG_FILE"
     fi
@@ -282,6 +289,10 @@ parse_args() {
                 SKIP_ARCHITECTURE=1
                 shift
                 ;;
+            --skip-memory)
+                SKIP_MEMORY=1
+                shift
+                ;;
             --report-json)
                 [[ $# -ge 2 ]] || {
                     echo "[pretest-guardrails][error] --report-json requires a value" >&2
@@ -331,6 +342,7 @@ load_profile() {
     RUN_REPO_CHECKS="$(config_profile_value "$SCOPE" "run_repo_checks")"
     RUN_DOCS_IDENTITY_CHECKS="$(config_profile_value "$SCOPE" "run_docs_identity_checks")"
     RUN_DOCS_VERIFY="$(config_profile_value "$SCOPE" "run_docs_verify")"
+    RUN_MEMORY_CHECKS="$(config_profile_value "$SCOPE" "run_memory_checks")"
     ARCHITECTURE_GROUP="$(config_profile_value "$SCOPE" "architecture_group")"
     if [[ "$STRICT_DOCS" != "1" ]]; then
         STRICT_DOCS="$(config_profile_value "$SCOPE" "strict_docs")"
@@ -419,6 +431,28 @@ run_docs_verify() {
     run_step docs-verify "${cmd[@]}"
 }
 
+run_memory_checks() {
+    [[ "$SKIP_MEMORY" == "0" ]] || return 0
+    [[ "$RUN_MEMORY_CHECKS" == "1" ]] || return 0
+
+    run_step memory-validate \
+        "$PYTHON_BIN" -m memory.tooling.validate
+
+    if [[ "$DRY_RUN" == "1" ]]; then
+        MEMORY_TMP_OUTPUT="/tmp/bioetl-memory-refresh-dry-run"
+    else
+        MEMORY_TMP_OUTPUT="$(mktemp -d)"
+    fi
+
+    run_step memory-refresh-smoke \
+        "$PYTHON_BIN" -m memory.tooling.refresh_all \
+        --output-root "$MEMORY_TMP_OUTPUT" \
+        --json
+
+    run_step memory-prune-dry-run \
+        "$PYTHON_BIN" -m memory.tooling.prune --json
+}
+
 run_architecture_checks() {
     [[ "$SKIP_ARCHITECTURE" == "0" ]] || return 0
     [[ -n "$ARCHITECTURE_GROUP" ]] || return 0
@@ -458,6 +492,7 @@ main() {
     run_repo_checks
     run_docs_identity_checks
     run_docs_verify
+    run_memory_checks
     run_architecture_checks
 
     echo "[pretest-guardrails] OK"

@@ -11,10 +11,13 @@ Primary artifacts:
 - `corpus_catalog.json`
 - `chunks.jsonl`
 
-The current MVP indexes markdown sources from:
+The current MVP indexes deterministic sources from:
 
 - `docs/00-project/`
 - `docs/02-architecture/decisions/`
 - `docs/05-operations/runbooks/`
+- `src/bioetl/`
+- `tests/`
+- `configs/`
 
 Archive and generated-report surfaces are excluded by policy.

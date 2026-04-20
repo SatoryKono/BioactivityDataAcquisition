@@ -48,7 +48,11 @@ fi
 
 VIBE_PORT="${VIBE_PORT:-5173}"
 VIBE_HOST="${VIBE_HOST:-localhost}"
-VIBE_API_KEY="${VIBE_API_KEY:-}"
+if [[ -n "${MISTRAL_API_KEY:-}" && -z "${VIBE_API_KEY:-}" ]]; then
+    VIBE_API_KEY="${MISTRAL_API_KEY}"
+else
+    VIBE_API_KEY="${VIBE_API_KEY:-}"
+fi
 SERVER_SCRIPT="${ROOT_DIR}/vibe-server.js"
 SERVER_PROCESS_PATTERN="vibe-server.js"
 
@@ -57,7 +61,7 @@ start_vibe() {
     log_info "Starting Mistral Vibe Server..."
     
     if [[ -z "${VIBE_API_KEY}" ]] || [[ "${VIBE_API_KEY}" == "your-api-key-here" ]]; then
-        log_error "VIBE_API_KEY not configured in .env.mistrallvibe"
+        log_error "API key not configured in .env.mistrallvibe"
         log_info "Get your API key from: https://console.mistral.ai/api-keys/"
         return 1
     fi
@@ -130,7 +134,7 @@ show_api_key() {
     if [[ -z "${VIBE_API_KEY}" ]] || [[ "${VIBE_API_KEY}" == "your-api-key-here" ]]; then
         log_error "API key not configured"
         log_info "1. Get key from: https://console.mistral.ai/api-keys/"
-        log_info "2. Edit .env.mistrallvibe and set VIBE_API_KEY"
+        log_info "2. Edit .env.mistrallvibe and set MISTRAL_API_KEY"
     else
         echo "  ${VIBE_API_KEY:0:10}...${VIBE_API_KEY: -10}"
         log_info "Full key shown in .env.mistrallvibe"

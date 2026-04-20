@@ -29,17 +29,33 @@ Last verified: '2026-03-29'
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
-- Root-level tracked директории MUST ограничиваться approved runtime/tooling and project surfaces: `.ai`, `.aiassistant`, `.claude`, `.codex`, `.codex_tmp`, `.gemini`, `.github`, `.jules`, `.junie`, `.python-user`, `.vibe`, `assets`, `configs`, `data`, `docs`, `grafana`, `reports`, `scripts`, `src`, `tests`.
+- Root-level tracked директории MUST ограничиваться approved runtime/tooling and project surfaces: `.ai`, `.aiassistant`, `.claude`, `.codex`, `.codex_tmp`, `.gemini`, `.github`, `.jules`, `.junie`, `.vibe`, `assets`, `configs`, `data`, `docs`, `grafana`, `reports`, `scripts`, `src`, `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
-- Локальные tooling-каталоги (например, `.idea/`, `.vscode/`, `.cursor/`, `.trae/`, `.windsurf/`) MAY существовать в рабочем дереве, но MUST оставаться untracked и игнорироваться `.gitignore`.
+- Shared repo tooling surfaces such as `.claude/`, `.codex/`, `.gemini/`,
+  `.vibe/`, `.vscode/`, and `.cursor/` MAY оставаться tracked только если они
+  поддерживаются как проектные runtime/editor integrations.
+- `.idea/` MAY содержать curated shared project metadata (например,
+  run configurations, scopes, inspections, словарь), но local/plugin state
+  files such as `workspace.xml`, `shelf/`, `dataSources*/`, `.ai/`,
+  `AICommit.xml`, `claudeCodeTabState.xml`, `codex.xml`,
+  `copilot.data.migration*.xml`, `csv-editor.xml`, `git_toolbox_prj.xml`,
+  `junie.xml`, `sonarlint.xml`, and `webResources.xml` MUST оставаться
+  untracked.
+- Локальные tooling-каталоги без статуса shared repo surface (например,
+  `.sonarlint/`, `.trae/`, `.windsurf/`) MAY существовать в рабочем дереве,
+  но MUST оставаться untracked и игнорироваться `.gitignore`.
+- Generated/runtime root trees such as `node_modules/`, `output/`, `test-output/`,
+  `logs/`, `MagicMock/`, and local package trees like `.python-user/` MUST NOT
+  попадать в git-index.
 
 Root allowlist интерпретируется как policy surface, а не как временный склад.
 Если новый root-level файл существует только для инцидента, ручной проверки или
 финального статуса волны, он не должен закрепляться в корне.
 
-`.codex_tmp`, `.python-user`, и `.vibe` currently remain as tracked transitional
-tooling surfaces. They are allowed explicitly so root-hygiene stays truthful,
-not because they are preferred long-term root placements.
+`.codex_tmp` и `.vibe` may remain transitional tooling surfaces only while they
+are intentionally maintained as shared repo tooling. They are not preferred
+long-term root placements, and local package/runtime output trees are excluded
+from this exception.
 
 Проверка:
 
@@ -53,6 +69,8 @@ python3 scripts/engineering/diagnostics/audit_structure.py --path .
 - active deployment / verification / runbook docs → `docs/05-operations/`
 - repo-only evidence and historical status artifacts → `docs/99-archive/`
 - generated working outputs → `reports/`
+- generated helper exports and merged snapshots MUST NOT live under `src/`;
+  they belong in `reports/` or another non-source artifact surface
 
 ----------------------------------------------------------------------
 

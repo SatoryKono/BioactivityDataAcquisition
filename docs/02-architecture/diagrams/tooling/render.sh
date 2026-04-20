@@ -43,6 +43,7 @@ JOBS=4           # parallel jobs
 FIT=1            # adaptive sizing by default
 TEXT_LAYER="fallback-only"   # dual | fo-only | fallback-only
 EXCLUDE_PATHS=("docs/99-archive")
+MMDC_BIN="${MMDC_BIN:-$REPO_ROOT/scripts/diagrams/mmdc_wrapper.sh}"
 
 # ── Diagram source directories ──────────────────────────────
 DEFAULT_DIRS=(
@@ -230,35 +231,35 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if ! [[ "$SCALE" =~ ^\d+([.]\d+)?$ ]]; then
+if ! [[ "$SCALE" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
   log_err "--scale must be a positive number (got: $SCALE)"
   exit 1
 fi
-if ! [[ "$LARGE_SCALE" =~ ^\d+([.]\d+)?$ ]]; then
+if ! [[ "$LARGE_SCALE" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
   log_err "--large-scale must be a positive number (got: $LARGE_SCALE)"
   exit 1
 fi
-if ! [[ "$LARGE_THRESHOLD" =~ ^\d+$ ]]; then
+if ! [[ "$LARGE_THRESHOLD" =~ ^[0-9]+$ ]]; then
   log_err "--large-threshold must be a non-negative integer (got: $LARGE_THRESHOLD)"
   exit 1
 fi
-if ! [[ "$PNG_DPI" =~ ^\d+$ ]]; then
+if ! [[ "$PNG_DPI" =~ ^[0-9]+$ ]]; then
   log_err "--png-dpi must be a non-negative integer (got: $PNG_DPI)"
   exit 1
 fi
-if ! [[ "$LARGE_PNG_DPI" =~ ^\d+$ ]]; then
+if ! [[ "$LARGE_PNG_DPI" =~ ^[0-9]+$ ]]; then
   log_err "--large-png-dpi must be a non-negative integer (got: $LARGE_PNG_DPI)"
   exit 1
 fi
-if ! [[ "$WIDTH" =~ ^\d+$ ]]; then
+if ! [[ "$WIDTH" =~ ^[0-9]+$ ]]; then
   log_err "--width must be a non-negative integer (got: $WIDTH)"
   exit 1
 fi
-if ! [[ "$HEIGHT" =~ ^\d+$ ]]; then
+if ! [[ "$HEIGHT" =~ ^[0-9]+$ ]]; then
   log_err "--height must be a non-negative integer (got: $HEIGHT)"
   exit 1
 fi
-if ! [[ "$JOBS" =~ ^\d+$ ]] || [[ "$JOBS" -lt 1 ]]; then
+if ! [[ "$JOBS" =~ ^[0-9]+$ ]] || [[ "$JOBS" -lt 1 ]]; then
   log_err "--jobs must be an integer >= 1 (got: $JOBS)"
   exit 1
 fi
@@ -287,21 +288,25 @@ echo -e "${BOLD}  BioETL Diagram Renderer${NC}"
 echo -e "${BOLD}════════════════════════════════════════════${NC}"
 echo ""
 
-if ! command -v mmdc &>/dev/null; then
-  log_err "mermaid-cli (mmdc) not installed"
+if [[ ! -x "$MMDC_BIN" ]]; then
+  log_err "mmdc wrapper is not executable: $MMDC_BIN"
   echo ""
-  echo "  Install:  npm install -g @mermaid-js/mermaid-cli"
-  echo "  Or:       npx @mermaid-js/mermaid-cli --help"
+  echo "  Provide MMDC_BIN=/path/to/mmdc or restore scripts/diagrams/mmdc_wrapper.sh"
   echo ""
   exit 1
 fi
-log_info "mmdc $(mmdc --version 2>/dev/null || echo '(version unknown)') found"
+log_info "mmdc $("$MMDC_BIN" --version 2>/dev/null || echo '(version unknown)') found via $MMDC_BIN"
 
 PYTHON_BIN=""
 if command -v python3 &>/dev/null; then
   PYTHON_BIN="python3"
 elif command -v python &>/dev/null; then
   PYTHON_BIN="python"
+fi
+
+NODE_BIN=""
+if command -v node &>/dev/null; then
+  NODE_BIN="node"
 fi
 
 HAS_RSVG=0
@@ -312,7 +317,7 @@ elif command -v inkscape &>/dev/null; then
   HAS_RSVG=2
   log_info "inkscape found (will use for PNG conversion)"
 else
-  log_warn "Neither rsvg-convert nor inkscape found; mmdc will render PNG directly"
+  log_warn "Neither rsvg-convert nor inkscape found; PNG will be rendered from SVG via scripts/diagrams/svg2png.mjs"
 fi
 
 if [[ ! -f "$CONFIG" ]]; then
@@ -466,7 +471,7 @@ render_one() {
   if [[ $FORMAT_SVG -eq 1 ]]; then
     mkdir -p "$svg_dir"
     local svg_out="$svg_dir/${base}.svg"
-    if mmdc -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
+    if "$MMDC_BIN" -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
       # Manage text rendering layers to avoid duplicate labels in viewers
       # that support both foreignObject and fallback text.
       case "$TEXT_LAYER" in
@@ -520,11 +525,11 @@ render_one() {
     local png_svg_source="$svg_dir/${base}.svg"
     local temp_png_svg=""
 
-    # In --png-only mode with SVG converters available, render a temporary SVG first
-    # and run the same text post-processing pipeline to preserve readable labels.
-    if [[ $FORMAT_SVG -eq 0 && ( $HAS_RSVG -eq 1 || $HAS_RSVG -eq 2 ) ]]; then
+    # PNG should always be produced from a post-processed SVG so text fallback
+    # and foreignObject stripping are preserved in raster output as well.
+    if [[ $FORMAT_SVG -eq 0 ]]; then
       temp_png_svg="$(mktemp "${TMPDIR:-/tmp}/bioetl-render-${base}-XXXXXX.svg")"
-      if ! mmdc -i "$src" -o "$temp_png_svg" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
+      if ! "$MMDC_BIN" -i "$src" -o "$temp_png_svg" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
         echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
         rm -f "$temp_png_svg"
         return 1
@@ -568,14 +573,14 @@ render_one() {
       png_svg_source="$temp_png_svg"
     fi
 
-    if [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 1 ]]; then
+    if [[ $HAS_RSVG -eq 1 ]]; then
       # SVG → PNG via rsvg-convert (adaptive: use SVG intrinsic size)
       if [[ $FIT -eq 0 ]]; then
         rsvg-convert -b "$BG" -w "$WIDTH" -h "$HEIGHT" "$png_svg_source" -o "$png_out" 2>/dev/null
       else
         rsvg-convert -b "$BG" -d "$dpi_for_file" -p "$dpi_for_file" "$png_svg_source" -o "$png_out" 2>/dev/null
       fi
-    elif [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 2 ]]; then
+    elif [[ $HAS_RSVG -eq 2 ]]; then
       # SVG → PNG via inkscape
       if [[ $FIT -eq 0 ]]; then
         inkscape "$png_svg_source" --export-type=png --export-width="$WIDTH" \
@@ -585,25 +590,19 @@ render_one() {
         inkscape "$png_svg_source" --export-type=png --export-dpi="$dpi_for_file" \
           --export-background="$BG" --export-background-opacity=1 --export-filename="$png_out" 2>/dev/null
       fi
-    elif [[ $FORMAT_SVG -eq 0 && $HAS_RSVG -eq 1 ]]; then
-      if [[ $FIT -eq 0 ]]; then
-        rsvg-convert -b "$BG" -w "$WIDTH" -h "$HEIGHT" "$png_svg_source" -o "$png_out" 2>/dev/null
-      else
-        rsvg-convert -b "$BG" -d "$dpi_for_file" -p "$dpi_for_file" "$png_svg_source" -o "$png_out" 2>/dev/null
-      fi
-    elif [[ $FORMAT_SVG -eq 0 && $HAS_RSVG -eq 2 ]]; then
-      if [[ $FIT -eq 0 ]]; then
-        inkscape "$png_svg_source" --export-type=png --export-width="$WIDTH" \
-          --export-height="$HEIGHT" --export-background="$BG" --export-background-opacity=1 \
-          --export-filename="$png_out" 2>/dev/null
-      else
-        inkscape "$png_svg_source" --export-type=png --export-dpi="$dpi_for_file" \
-          --export-background="$BG" --export-background-opacity=1 --export-filename="$png_out" 2>/dev/null
-      fi
     else
-      # Direct mmdc → PNG (adaptive: use -s scale only)
-      mmdc -i "$src" -o "$png_out" "${MMDC_ARGS[@]}" \
-        "${size_args[@]}" -s "$scale_for_file" -b "$BG" 2>/dev/null
+      if [[ -z "$NODE_BIN" ]]; then
+        echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+        echo "Node.js is required for SVG -> PNG fallback via scripts/diagrams/svg2png.mjs" >&2
+        [[ -n "$temp_png_svg" ]] && rm -f "$temp_png_svg"
+        return 1
+      fi
+      if ! PUPPETEER_MODULE_PATH="${PUPPETEER_MODULE_PATH:-/tmp/mermaid-cli-lite/node_modules/puppeteer}" \
+        "$NODE_BIN" "$REPO_ROOT/scripts/diagrams/svg2png.mjs" --scale "$scale_for_file" "$png_svg_source" >/dev/null 2>&1; then
+        echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+        [[ -n "$temp_png_svg" ]] && rm -f "$temp_png_svg"
+        return 1
+      fi
     fi
 
     if [[ -n "$temp_png_svg" ]]; then

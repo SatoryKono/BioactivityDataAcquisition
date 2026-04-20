@@ -2,4 +2,4 @@
 
 from __future__ import annotations
 
-__all__ = ["resources", "validation"]
+__all__ = ["query", "resources", "validation"]

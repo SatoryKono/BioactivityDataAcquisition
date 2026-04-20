@@ -352,8 +352,7 @@ What this script does:
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
 - Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, `brave-search`, `sonarqube`, `neo4j-cypher`, `neo4j-memory`, `needle`, and `openaiDeveloperDocs` in Codex CLI.
 - Uses Docker-backed wrappers for `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, and `brave-search`.
-- Uses native streamable HTTP MCP for `needle` in Codex CLI with bearer auth from `NEEDLE_API_KEY`.
-- Uses `mcp-remote` bridge for `needle` in VS Code workspace config to keep Copilot-compatible auth handling.
+- Uses a repo-local `mcp-remote` wrapper for `needle`, loading bearer auth from `NEEDLE_API_KEY`.
 - Uses local defaults when not overridden:
   - `PROMETHEUS_URL=http://host.docker.internal:9090`
   - `GRAFANA_URL=http://host.docker.internal:3000`

@@ -61,7 +61,9 @@ if (Test-Path $envFile) {
 } else {
     $envContent = @"
 # Mistral Vibe Configuration
-VIBE_API_KEY=your-api-key-here
+MISTRAL_API_KEY=your-api-key-here
+# Legacy compatibility alias:
+# VIBE_API_KEY=your-api-key-here
 VIBE_PORT=5173
 VIBE_HOST=localhost
 "@
@@ -102,7 +104,7 @@ Write-Host "================================================" -ForegroundColor C
 Write-Host ""
 Write-Info "Next steps:"
 Write-Host "  1. Get your API key: https://console.mistral.ai/api-keys/"
-Write-Host "  2. Edit .env.mistrallvibe and add VIBE_API_KEY"
+Write-Host "  2. Edit .env.mistrallvibe and add MISTRAL_API_KEY"
 Write-Host "  3. Start Vibe: .\run-vibe.ps1"
 Write-Host ""
 

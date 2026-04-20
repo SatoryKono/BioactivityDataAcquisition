@@ -148,6 +148,11 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
             "powershell",
             "scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1",
         )
+        _assert_shell_wrapper(
+            servers["needle"],
+            "powershell",
+            "scripts/ai/mcp/mcp_needle_wrapper.ps1",
+        )
     else:
         _assert_shell_wrapper(
             servers["github"], "bash", "scripts/ai/mcp/github-mcp-wrapper.sh"
@@ -201,17 +206,13 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
             "bash",
             "scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh",
         )
+        _assert_shell_wrapper(
+            servers["needle"],
+            "bash",
+            "scripts/ai/mcp/mcp_needle_wrapper.sh",
+        )
     assert servers["openaiDeveloperDocs"]["type"] == "http"
     assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
-    assert servers["needle"]["command"] == "npx"
-    assert servers["needle"]["args"] == [
-        "-y",
-        "mcp-remote",
-        "https://mcp.needle-ai.com/mcp",
-        "--header",
-        "Authorization:Bearer ${NEEDLE_API_KEY}",
-    ]
-    assert servers["needle"]["env"]["NEEDLE_API_KEY"] == "${env:NEEDLE_API_KEY}"
 
 
 def test_setup_sh_wrapper_delegates_to_backend() -> None:

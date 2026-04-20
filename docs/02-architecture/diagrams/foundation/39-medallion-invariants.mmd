@@ -11,7 +11,7 @@
 %%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=272 height=112 max_title_len=27 max_desc_lines=4
 flowchart TB
-%% keep-orphan: E3, E4
+%% keep-orphan: E3, E4, E5
     subgraph RunTypes["RunType Enum (domain/types.py)"]
         INC["RunType.INCREMENTAL<br/>'Fetch new data since last run'"]
         BF["RunType.BACKFILL<br/>'Re-fetch a date range'"]

@@ -6,8 +6,12 @@
   "properties": {
     "id": {"type": "string"},
     "event_type": {"type": "string"},
-    "occurred_at": {"type": "string"},
+    "event_family": {"type": ["string", "null"]},
+    "severity": {"type": ["string", "null"]},
+    "occurred_at": {"type": ["string", "null"]},
     "source_refs": {"type": "array", "items": {"type": "string"}},
+    "graph_node_refs": {"type": "array", "items": {"type": "string"}},
+    "related_refs": {"type": "array", "items": {"type": "string"}},
     "payload": {"type": "object"},
     "confidence": {"type": ["string", "null"]}
   },

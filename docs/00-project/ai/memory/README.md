@@ -211,6 +211,34 @@ The memory **implementation subsystem** is being formalized under
   `scripts.memory.*` remains a compatibility surface during migration.
 - Canonical project truth remains outside both surfaces in runtime code,
   configs, accepted ADRs, and active docs.
+- Canonical daily workflow for agents and engineers now lives in
+  `src/memory/DAILY_WORKFLOW.md` and is executed through
+  `python -m memory.tooling.workflow pre-task ...` and
+  `python -m memory.tooling.workflow post-task ...`.
+
+## Daily Workflow Entry Point
+
+For daily AI-assisted engineering and audit work, use the canonical workflow in
+`src/memory/` instead of inventing task-local memory conventions:
+
+```bash
+python -m memory.tooling.workflow pre-task \
+  --task-id task-123 \
+  --title "Investigate chembl memory"
+
+python -m memory.tooling.workflow post-task \
+  --task-id task-123 \
+  --title "Investigate chembl memory" \
+  --summary "Verified the relevant source surfaces and refreshed memory."
+```
+
+This workflow standardizes:
+
+- pre-task retrieval
+- session-note creation
+- post-task summary creation
+- rebuild-only artifact refresh
+- optional promotion into curated memory
 
 Если возникает конфликт между memory notes и runtime source, приоритет у
 runtime source и canonical governance docs:

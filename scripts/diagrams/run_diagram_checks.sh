@@ -234,8 +234,9 @@ run_syntax_check() {
     return 0
   fi
 
-  if ! command -v mmdc >/dev/null 2>&1; then
-    echo "Error: mmdc not found. Install with: npm install -g @mermaid-js/mermaid-cli" >&2
+  local mmdc_bin="${MMDC_BIN:-$REPO_ROOT/scripts/diagrams/mmdc_wrapper.sh}"
+  if [[ ! -x "$mmdc_bin" ]]; then
+    echo "Error: mmdc wrapper is not executable: $mmdc_bin" >&2
     exit 2
   fi
 
@@ -248,7 +249,7 @@ run_syntax_check() {
   [[ -f "$THEME_CONFIG" ]] && mmdc_args+=(-c "$THEME_CONFIG")
   [[ -n "$PUPPETEER_CFG" ]] && mmdc_args+=(-p "$PUPPETEER_CFG")
 
-  if ! mmdc -i "$source_abs" -o "$tmp_svg" "${mmdc_args[@]}" >/dev/null 2>"$tmp_err"; then
+  if ! "$mmdc_bin" -i "$source_abs" -o "$tmp_svg" "${mmdc_args[@]}" >/dev/null 2>"$tmp_err"; then
     echo "ERROR: Mermaid validation failed for $DIAGRAM_PATH" >&2
     if grep -q "Could not find Chrome" "$tmp_err"; then
       echo "HINT: mmdc could not find Chrome/Chromium for Puppeteer." >&2

@@ -13,8 +13,16 @@ They also support the staged internal layout migration:
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 
-from scripts.common.repo_paths import REPO_ROOT, resolve_repo_root
+try:
+    from scripts.common.repo_paths import REPO_ROOT, resolve_repo_root
+except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
+    SCRIPT_DIR = Path(__file__).resolve().parent
+    REPO_CANDIDATE = SCRIPT_DIR.parents[1]
+    if str(REPO_CANDIDATE) not in sys.path:
+        sys.path.insert(0, str(REPO_CANDIDATE))
+    from scripts.common.repo_paths import REPO_ROOT, resolve_repo_root
 
 ARCHITECTURE_DOCS_ROOT = REPO_ROOT / "docs" / "02-architecture"
 

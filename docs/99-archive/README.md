@@ -28,6 +28,9 @@ current documentation.
   provide useful historical context.
 - [Reports Index](../reports/index.md) — curated repo-only evidence and bounded
   internal reports.
+- [Root Status Artifacts](root-status-artifacts/README.md) — historical root
+  completion notes, sync summaries, and one-off setup/recovery artifacts moved
+  out of the repository root.
 
 ## Usage Rules
 

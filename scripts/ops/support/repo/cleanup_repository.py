@@ -80,6 +80,7 @@ class RepositoryCleaner:
         cache_patterns = [
             ".python-user",
             ".codex_tmp",
+            "MagicMock",
             "__pycache__",
             ".pytest_cache",
             ".mypy_cache",

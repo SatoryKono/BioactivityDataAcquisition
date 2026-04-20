@@ -70,15 +70,15 @@ fi
 log_info "Checking configuration..."
 ENV_FILE="${ROOT_DIR}/.env.mistrallvibe"
 if [[ -f "${ENV_FILE}" ]]; then
-    if grep -q "VIBE_API_KEY=" "${ENV_FILE}"; then
+    if grep -qE "^(MISTRAL_API_KEY|VIBE_API_KEY)=" "${ENV_FILE}"; then
         if grep -q "your-api-key-here" "${ENV_FILE}"; then
-            log_warn ".env.mistrallvibe exists but VIBE_API_KEY not configured"
+            log_warn ".env.mistrallvibe exists but API key not configured"
             ALL_CHECKS=false
         else
             log_success ".env.mistrallvibe configured with API key"
         fi
     else
-        log_warn ".env.mistrallvibe exists but missing VIBE_API_KEY"
+        log_warn ".env.mistrallvibe exists but missing MISTRAL_API_KEY"
         ALL_CHECKS=false
     fi
 else
