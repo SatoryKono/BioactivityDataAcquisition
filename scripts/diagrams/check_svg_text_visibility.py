@@ -287,6 +287,20 @@ def _print_text_report(targets: list[Path], metrics_out: list[SvgMetrics]) -> No
         )
 
 
+def _check_svg_target(
+    path: Path,
+    repo_root: Path,
+) -> tuple[SvgMetrics | None, tuple[str, list[str]] | None]:
+    rel = _relative_path(path, repo_root)
+    if not path.exists():
+        return None, (rel, ["file not found"])
+    try:
+        metrics, issues = analyze_svg(path)
+    except ET.ParseError as exc:
+        return None, (rel, [f"xml parse error: {exc}"])
+    return metrics, (rel, issues) if issues else None
+
+
 def _run_checks(
     targets: list[Path], repo_root: Path
 ) -> tuple[list[SvgMetrics], list[tuple[str, list[str]]]]:
@@ -294,18 +308,11 @@ def _run_checks(
     failures: list[tuple[str, list[str]]] = []
 
     for path in targets:
-        rel = _relative_path(path, repo_root)
-        if not path.exists():
-            failures.append((rel, ["file not found"]))
-            continue
-        try:
-            metrics, issues = analyze_svg(path)
-        except ET.ParseError as exc:
-            failures.append((rel, [f"xml parse error: {exc}"]))
-            continue
-        metrics_out.append(metrics)
-        if issues:
-            failures.append((rel, issues))
+        metrics, failure = _check_svg_target(path, repo_root)
+        if metrics is not None:
+            metrics_out.append(metrics)
+        if failure is not None:
+            failures.append(failure)
 
     return metrics_out, failures
 

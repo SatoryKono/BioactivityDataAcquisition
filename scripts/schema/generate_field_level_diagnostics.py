@@ -272,52 +272,61 @@ def _unified_row_payload(
     )
 
 
-def _collect_layer_items(
+def _ensure_diagnostic_record(
+    diagnostics: dict[str, dict[str, Any]], canonical: str
+) -> dict[str, Any]:
+    if canonical not in diagnostics:
+        diagnostics[canonical] = {
+            "bronze_groups": set(),
+            "bronze_field_names": set(),
+            "silver_pyarrow_field_names": set(),
+            "silver_pandera_field_names": set(),
+            "gold_field_names": set(),
+            "silver_pyarrow_types": set(),
+            "silver_pandera_types": set(),
+            "gold_types": set(),
+            "silver_pyarrow_nullable": set(),
+            "silver_pandera_nullable": set(),
+            "gold_nullable": set(),
+            "descriptions": [],
+            "actual_names": set(),
+        }
+    return diagnostics[canonical]
+
+
+def _add_bronze_fields(
+    *,
     provider: str,
     entity: str,
     bronze_groups: list[dict[str, Any]],
-    silver_pyarrow_fields: list[dict[str, Any]],
-    silver_pandera_fields: list[dict[str, Any]],
-    gold_properties: dict[str, dict[str, Any]],
-) -> dict[str, dict[str, Any]]:
-    diagnostics: dict[str, dict[str, Any]] = {}
-
-    def ensure(canonical: str) -> dict[str, Any]:
-        if canonical not in diagnostics:
-            diagnostics[canonical] = {
-                "bronze_groups": set(),
-                "bronze_field_names": set(),
-                "silver_pyarrow_field_names": set(),
-                "silver_pandera_field_names": set(),
-                "gold_field_names": set(),
-                "silver_pyarrow_types": set(),
-                "silver_pandera_types": set(),
-                "gold_types": set(),
-                "silver_pyarrow_nullable": set(),
-                "silver_pandera_nullable": set(),
-                "gold_nullable": set(),
-                "descriptions": [],
-                "actual_names": set(),
-            }
-        return diagnostics[canonical]
-
+    diagnostics: dict[str, dict[str, Any]],
+) -> None:
     for group in bronze_groups:
         for field_name in group.get("fields", []):
             if not isinstance(field_name, str):
                 continue
             canonical = _canonical_field(provider, entity, field_name)
-            record = ensure(canonical)
+            record = _ensure_diagnostic_record(diagnostics, canonical)
             record["bronze_field_names"].add(field_name)
             record["actual_names"].add(field_name)
             for group_name in _field_groups_for_name(bronze_groups, field_name):
                 record["bronze_groups"].add(group_name)
 
+
+def _add_pyarrow_fields(
+    *,
+    provider: str,
+    entity: str,
+    bronze_groups: list[dict[str, Any]],
+    silver_pyarrow_fields: list[dict[str, Any]],
+    diagnostics: dict[str, dict[str, Any]],
+) -> None:
     for field in silver_pyarrow_fields:
         field_name = str(field.get("name", ""))
         if not field_name:
             continue
         canonical = _canonical_field(provider, entity, field_name)
-        record = ensure(canonical)
+        record = _ensure_diagnostic_record(diagnostics, canonical)
         record["silver_pyarrow_field_names"].add(field_name)
         record["actual_names"].add(field_name)
         record["silver_pyarrow_types"].add(
@@ -327,12 +336,21 @@ def _collect_layer_items(
         for group_name in _field_groups_for_name(bronze_groups, field_name):
             record["bronze_groups"].add(group_name)
 
+
+def _add_pandera_fields(
+    *,
+    provider: str,
+    entity: str,
+    bronze_groups: list[dict[str, Any]],
+    silver_pandera_fields: list[dict[str, Any]],
+    diagnostics: dict[str, dict[str, Any]],
+) -> None:
     for field in silver_pandera_fields:
         field_name = str(field.get("name", ""))
         if not field_name:
             continue
         canonical = _canonical_field(provider, entity, field_name)
-        record = ensure(canonical)
+        record = _ensure_diagnostic_record(diagnostics, canonical)
         record["silver_pandera_field_names"].add(field_name)
         record["actual_names"].add(field_name)
         record["silver_pandera_types"].add(
@@ -345,9 +363,18 @@ def _collect_layer_items(
         for group_name in _field_groups_for_name(bronze_groups, field_name):
             record["bronze_groups"].add(group_name)
 
+
+def _add_gold_fields(
+    *,
+    provider: str,
+    entity: str,
+    bronze_groups: list[dict[str, Any]],
+    gold_properties: dict[str, dict[str, Any]],
+    diagnostics: dict[str, dict[str, Any]],
+) -> None:
     for field_name, prop in gold_properties.items():
         canonical = _canonical_field(provider, entity, field_name)
-        record = ensure(canonical)
+        record = _ensure_diagnostic_record(diagnostics, canonical)
         record["gold_field_names"].add(field_name)
         record["actual_names"].add(field_name)
         record["gold_types"].add(_normalize_gold_type(prop.get("type")))
@@ -360,6 +387,43 @@ def _collect_layer_items(
         for group_name in _field_groups_for_name(bronze_groups, field_name):
             record["bronze_groups"].add(group_name)
 
+
+def _collect_layer_items(
+    provider: str,
+    entity: str,
+    bronze_groups: list[dict[str, Any]],
+    silver_pyarrow_fields: list[dict[str, Any]],
+    silver_pandera_fields: list[dict[str, Any]],
+    gold_properties: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    diagnostics: dict[str, dict[str, Any]] = {}
+    _add_bronze_fields(
+        provider=provider,
+        entity=entity,
+        bronze_groups=bronze_groups,
+        diagnostics=diagnostics,
+    )
+    _add_pyarrow_fields(
+        provider=provider,
+        entity=entity,
+        bronze_groups=bronze_groups,
+        silver_pyarrow_fields=silver_pyarrow_fields,
+        diagnostics=diagnostics,
+    )
+    _add_pandera_fields(
+        provider=provider,
+        entity=entity,
+        bronze_groups=bronze_groups,
+        silver_pandera_fields=silver_pandera_fields,
+        diagnostics=diagnostics,
+    )
+    _add_gold_fields(
+        provider=provider,
+        entity=entity,
+        bronze_groups=bronze_groups,
+        gold_properties=gold_properties,
+        diagnostics=diagnostics,
+    )
     return diagnostics
 
 

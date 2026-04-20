@@ -208,6 +208,23 @@ def _evaluate_status(
     return "monitoring", breaches
 
 
+def _current_docs_state() -> tuple[list[str], list[str], set[str], list[str]]:
+    all_docs = _collect_all_docs()
+    nav_docs = _load_nav_docs()
+    all_rel_paths = [path.relative_to(DOCS_DIR).as_posix() for path in all_docs]
+    not_in_nav = sorted(
+        path
+        for path in all_rel_paths
+        if path not in nav_docs and _should_track_kpi_not_in_nav(path)
+    )
+    return all_rel_paths, nav_docs, set(not_in_nav), _collect_orphans(all_docs, set(not_in_nav))
+
+
+def _deadline_days_remaining(target_deadline: date) -> int:
+    today_utc = datetime.now(UTC).date()
+    return (target_deadline - today_utc).days
+
+
 def compute_metrics(
     baseline_file: Path,
     target_not_in_nav: int,
@@ -216,22 +233,10 @@ def compute_metrics(
     target_deadline: date,
 ) -> DocsKpiMetrics:
     """Compute docs KPI metrics for current repository state."""
-    all_docs = _collect_all_docs()
-    nav_docs = _load_nav_docs()
-
-    all_rel_paths = [path.relative_to(DOCS_DIR).as_posix() for path in all_docs]
-    not_in_nav = sorted(
-        path
-        for path in all_rel_paths
-        if path not in nav_docs and _should_track_kpi_not_in_nav(path)
-    )
-    not_in_nav_set = set(not_in_nav)
-
-    orphans = _collect_orphans(all_docs, not_in_nav_set)
+    all_rel_paths, nav_docs, not_in_nav_set, orphans = _current_docs_state()
+    not_in_nav = sorted(not_in_nav_set)
     baseline_count, baseline_exists = _load_baseline_count(baseline_file)
-
-    today_utc = datetime.now(UTC).date()
-    days_remaining = (target_deadline - today_utc).days
+    days_remaining = _deadline_days_remaining(target_deadline)
 
     status, breaches = _evaluate_status(
         not_in_nav_count=len(not_in_nav),
