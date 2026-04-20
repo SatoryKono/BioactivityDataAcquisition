@@ -181,103 +181,130 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _quality_checks(args: argparse.Namespace) -> list[BudgetCheck]:
+    if args.quality_report is None:
+        return []
+    quality_payload = load_json(args.quality_report)
+    checks = [
+        build_check(
+            metric="quality.hard_failures",
+            value=to_int(quality_payload, "hard_failures", 0),
+            limit=args.max_hard_failures,
+            source="check_diagram_quality_gates",
+            message="hard quality-gate failures exceed budget",
+        ),
+        build_check(
+            metric="quality.DIAG-T022",
+            value=rule_violations(quality_payload, "DIAG-T022"),
+            limit=args.max_diag_t022,
+            source="check_diagram_quality_gates",
+            message="label-length warnings (DIAG-T022) exceed budget",
+        ),
+        build_check(
+            metric="quality.DIAG-T023",
+            value=rule_violations(quality_payload, "DIAG-T023"),
+            limit=args.max_diag_t023,
+            source="check_diagram_quality_gates",
+            message="multi-line label warnings (DIAG-T023) exceed budget",
+        ),
+    ]
+    if args.max_warning_failures >= 0:
+        checks.insert(
+            1,
+            build_check(
+                metric="quality.warning_failures",
+                value=to_int(quality_payload, "warning_failures", 0),
+                limit=args.max_warning_failures,
+                source="check_diagram_quality_gates",
+                message="warning quality-gate failures exceed budget",
+            ),
+        )
+    return checks
+
+
+def _lint_checks(args: argparse.Namespace) -> list[BudgetCheck]:
+    if args.lint_report is None:
+        return []
+    lint_payload = load_json(args.lint_report)
+    lint_errors, lint_warnings = lint_counts(lint_payload)
+    checks = [
+        build_check(
+            metric="lint.errors",
+            value=lint_errors,
+            limit=args.max_lint_errors,
+            source="lint_diagrams",
+            message="diagram lint errors exceed budget",
+        )
+    ]
+    if args.max_lint_warnings >= 0:
+        checks.append(
+            build_check(
+                metric="lint.warnings",
+                value=lint_warnings,
+                limit=args.max_lint_warnings,
+                source="lint_diagrams",
+                message="diagram lint warnings exceed budget",
+            )
+        )
+    return checks
+
+
+def _nightly_checks(args: argparse.Namespace) -> list[BudgetCheck]:
+    if args.mode != "nightly":
+        return []
+    if args.nightly_report is None:
+        raise ValueError("--nightly-report is required in nightly mode")
+    nightly_payload = load_json(args.nightly_report)
+    checks = [
+        build_check(
+            metric="nightly.errors",
+            value=to_int(nightly_payload, "errors", 0),
+            limit=args.max_nightly_errors,
+            source="run_diagram_nightly_suite",
+            message="nightly suite errors exceed budget",
+        )
+    ]
+    if args.max_nightly_warnings >= 0:
+        checks.append(
+            build_check(
+                metric="nightly.warnings",
+                value=to_int(nightly_payload, "warnings", 0),
+                limit=args.max_nightly_warnings,
+                source="run_diagram_nightly_suite",
+                message="nightly suite warnings exceed budget",
+            )
+        )
+    return checks
+
+
+def _report_payload(report: BudgetReport) -> dict[str, object]:
+    return {
+        "mode": report.mode,
+        "failed_checks": report.failed_checks,
+        "passed": report.passed,
+        "checks": [asdict(check) for check in report.checks],
+    }
+
+
+def _write_optional_outputs(
+    args: argparse.Namespace, report: BudgetReport, payload: dict[str, object]
+) -> None:
+    if args.json_out is not None:
+        _write_output(
+            args.json_out,
+            json.dumps(payload, indent=2, ensure_ascii=True) + "\n",
+        )
+    if args.markdown_out is not None:
+        _write_output(args.markdown_out, render_markdown(report))
+
+
 def main() -> int:
     args = parse_args()
-    checks: list[BudgetCheck] = []
 
     try:
-        if args.quality_report is not None:
-            quality_payload = load_json(args.quality_report)
-            hard_failures = to_int(quality_payload, "hard_failures", 0)
-            warning_failures = to_int(quality_payload, "warning_failures", 0)
-            t022 = rule_violations(quality_payload, "DIAG-T022")
-            t023 = rule_violations(quality_payload, "DIAG-T023")
-
-            checks.append(
-                build_check(
-                    metric="quality.hard_failures",
-                    value=hard_failures,
-                    limit=args.max_hard_failures,
-                    source="check_diagram_quality_gates",
-                    message="hard quality-gate failures exceed budget",
-                )
-            )
-            if args.max_warning_failures >= 0:
-                checks.append(
-                    build_check(
-                        metric="quality.warning_failures",
-                        value=warning_failures,
-                        limit=args.max_warning_failures,
-                        source="check_diagram_quality_gates",
-                        message="warning quality-gate failures exceed budget",
-                    )
-                )
-            checks.append(
-                build_check(
-                    metric="quality.DIAG-T022",
-                    value=t022,
-                    limit=args.max_diag_t022,
-                    source="check_diagram_quality_gates",
-                    message="label-length warnings (DIAG-T022) exceed budget",
-                )
-            )
-            checks.append(
-                build_check(
-                    metric="quality.DIAG-T023",
-                    value=t023,
-                    limit=args.max_diag_t023,
-                    source="check_diagram_quality_gates",
-                    message="multi-line label warnings (DIAG-T023) exceed budget",
-                )
-            )
-        if args.lint_report is not None:
-            lint_payload = load_json(args.lint_report)
-            lint_errors, lint_warnings = lint_counts(lint_payload)
-            checks.append(
-                build_check(
-                    metric="lint.errors",
-                    value=lint_errors,
-                    limit=args.max_lint_errors,
-                    source="lint_diagrams",
-                    message="diagram lint errors exceed budget",
-                )
-            )
-            if args.max_lint_warnings >= 0:
-                checks.append(
-                    build_check(
-                        metric="lint.warnings",
-                        value=lint_warnings,
-                        limit=args.max_lint_warnings,
-                        source="lint_diagrams",
-                        message="diagram lint warnings exceed budget",
-                    )
-                )
-        if args.mode == "nightly":
-            if args.nightly_report is None:
-                _err("[ERROR] --nightly-report is required in nightly mode")
-                return 2
-            nightly_payload = load_json(args.nightly_report)
-            nightly_errors = to_int(nightly_payload, "errors", 0)
-            nightly_warnings = to_int(nightly_payload, "warnings", 0)
-            checks.append(
-                build_check(
-                    metric="nightly.errors",
-                    value=nightly_errors,
-                    limit=args.max_nightly_errors,
-                    source="run_diagram_nightly_suite",
-                    message="nightly suite errors exceed budget",
-                )
-            )
-            if args.max_nightly_warnings >= 0:
-                checks.append(
-                    build_check(
-                        metric="nightly.warnings",
-                        value=nightly_warnings,
-                        limit=args.max_nightly_warnings,
-                        source="run_diagram_nightly_suite",
-                        message="nightly suite warnings exceed budget",
-                    )
-                )
+        checks = (
+            _quality_checks(args) + _lint_checks(args) + _nightly_checks(args)
+        )
     except (FileNotFoundError, ValueError) as exc:
         _err(f"[ERROR] {exc}")
         return 2
@@ -294,22 +321,10 @@ def main() -> int:
         passed=failed_checks == 0,
     )
 
-    payload = {
-        "mode": report.mode,
-        "failed_checks": report.failed_checks,
-        "passed": report.passed,
-        "checks": [asdict(check) for check in report.checks],
-    }
+    payload = _report_payload(report)
 
     try:
-        if args.json_out is not None:
-            _write_output(
-                args.json_out,
-                json.dumps(payload, indent=2, ensure_ascii=True) + "\n",
-            )
-
-        if args.markdown_out is not None:
-            _write_output(args.markdown_out, render_markdown(report))
+        _write_optional_outputs(args, report, payload)
     except ValueError as exc:
         _err(f"[ERROR] {exc}")
         return 2
