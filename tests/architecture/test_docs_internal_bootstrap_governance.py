@@ -28,4 +28,3 @@ def test_internal_docs_modules_use_local_bootstrap_helpers() -> None:
         assert "_bootstrap import" in source, relative_path
         assert "Path(__file__).resolve().parents[3]" not in source, relative_path
         assert "repo_root = Path(__file__).resolve()" not in source, relative_path
-

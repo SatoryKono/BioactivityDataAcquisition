@@ -429,7 +429,9 @@ class TestFetchSubstances:
     async def test_fetch_substances_raises_on_empty_query(self, fetch_strategies):
         """Test that fetch_substances raises ValueError for empty query."""
         with pytest.raises(ValueError, match="Query is required"):
-            await drain_async_iterator(fetch_strategies.fetch_substances(None, limit=10))
+            await drain_async_iterator(
+                fetch_strategies.fetch_substances(None, limit=10)
+            )
 
     @pytest.mark.asyncio
     async def test_fetch_substances_yields_substances(
