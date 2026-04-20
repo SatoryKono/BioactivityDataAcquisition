@@ -111,9 +111,8 @@ def _resolve_repo_file_path(path: Path) -> ValidatedRepoPath:
     return ValidatedRepoPath(_ensure_repo_path(_repo_path(path)))
 
 
-def _read_repo_text(path: Path) -> str:
-    safe_path = _resolve_repo_file_path(path)
-    return safe_path.resolved_path.read_text(encoding="utf-8")
+def _read_validated_repo_text(path: ValidatedRepoPath) -> str:
+    return path.resolved_path.read_text(encoding="utf-8")
 
 
 def _write_validated_repo_text(path: ValidatedRepoPath, content: str) -> None:
@@ -123,11 +122,6 @@ def _write_validated_repo_text(path: ValidatedRepoPath, content: str) -> None:
     if safe_path.is_dir():
         raise ValueError(f"refusing to write to directory path: {safe_path}")
     safe_path.write_text(content, encoding="utf-8")
-
-
-def _write_repo_text(relative_path: Path, content: str) -> None:
-    safe_path = _resolve_repo_file_path(relative_path)
-    _write_validated_repo_text(safe_path, content)
 
 
 def _display_path(path: Path) -> str:
@@ -210,7 +204,8 @@ def check_file(path: Path) -> FileCheckResult:
 
 def fix_file(path: Path, *, dry_run: bool) -> int:
     """Rewrite a Mermaid file in-place and return replacement count."""
-    lines = _read_repo_text(path).splitlines()
+    safe_path = _resolve_repo_file_path(path)
+    lines = _read_validated_repo_text(safe_path).splitlines()
     if detect_diagram_type(lines) not in TARGET_DIAGRAM_TYPES:
         return 0
 
@@ -226,7 +221,7 @@ def fix_file(path: Path, *, dry_run: bool) -> int:
         fixed_lines.append(line.replace("==>>", "-->>").replace("==>", "-->"))
 
     if replaced > 0 and not dry_run:
-        _write_repo_text(path, "\n".join(fixed_lines) + "\n")
+        _write_validated_repo_text(safe_path, "\n".join(fixed_lines) + "\n")
 
     return replaced
 

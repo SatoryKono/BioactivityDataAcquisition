@@ -2,46 +2,34 @@
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
-
-
-def _run_command(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, *args],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+from tests.helpers import assert_cli_succeeded, run_python_cli
 
 
 def test_docs_cli_generate_pipeline_normalization_matrix_help_smoke() -> None:
-    result = _run_command(
+    result = run_python_cli(
         "-m",
         "scripts.docs",
         "generate-pipeline-normalization-matrix",
         "--help",
     )
 
-    assert result.returncode == 0, result.stderr
+    assert_cli_succeeded(result)
     assert (
         "Generate deterministic normalization field-matrix artifacts" in result.stdout
     )
 
 
 def test_qa_cli_report_normalization_fallback_inventory_help_smoke() -> None:
-    result = _run_command(
+    result = run_python_cli(
         "-m",
         "scripts.engineering.qa",
         "report-normalization-fallback-inventory",
         "--help",
     )
 
-    assert result.returncode == 0, result.stderr
+    assert_cli_succeeded(result)
     assert (
         "Generate a report-only inventory of fields still using fallback normalization."
         in result.stdout
@@ -53,7 +41,7 @@ def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
 ) -> None:
     out_dir = tmp_path / "matrix"
 
-    generate = _run_command(
+    generate = run_python_cli(
         "-m",
         "scripts.docs",
         "generate-pipeline-normalization-matrix",
@@ -61,11 +49,11 @@ def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
         str(out_dir),
     )
 
-    assert generate.returncode == 0, generate.stderr
+    assert_cli_succeeded(generate)
     assert (out_dir / "pipeline_normalization_field_matrix.csv").exists()
     assert (out_dir / "pipeline_normalization_field_matrix.md").exists()
 
-    check = _run_command(
+    check = run_python_cli(
         "-m",
         "scripts.docs",
         "generate-pipeline-normalization-matrix",
@@ -74,7 +62,7 @@ def test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke(
         "--check",
     )
 
-    assert check.returncode == 0, check.stderr
+    assert_cli_succeeded(check)
 
 
 def test_qa_cli_report_normalization_fallback_inventory_execution_smoke(
@@ -83,7 +71,7 @@ def test_qa_cli_report_normalization_fallback_inventory_execution_smoke(
     json_out = tmp_path / "fallback.json"
     markdown_out = tmp_path / "fallback.md"
 
-    result = _run_command(
+    result = run_python_cli(
         "-m",
         "scripts.engineering.qa",
         "report-normalization-fallback-inventory",
@@ -95,6 +83,6 @@ def test_qa_cli_report_normalization_fallback_inventory_execution_smoke(
         str(markdown_out),
     )
 
-    assert result.returncode == 0, result.stderr
+    assert_cli_succeeded(result)
     assert json_out.exists()
     assert markdown_out.exists()

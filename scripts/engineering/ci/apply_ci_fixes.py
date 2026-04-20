@@ -610,7 +610,6 @@ def apply_ci02(api: GitHubAPI) -> None:
     content, file_sha = api.get_file(path, read_branch)
 
     old_matrix = 'python-version: [ "3.11", "3.12" ]'
-    new_matrix = 'python-version: [ "3.11", "3.12", "3.13" ]'
 
     if old_matrix not in content:
         print(f"  WARNING: expected pattern not found in {path}. Already updated?")
