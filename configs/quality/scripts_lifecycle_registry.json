@@ -128,6 +128,72 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical manual triage helper for clustered pytest failure analysis; prefer canonical QA reporting and targeted test diagnostics instead of extending this orphan script."
     },
+    "scripts/ai/src/__main__.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a compatibility module router for the historical scripts.ai.src package surface while callers finish converging on the canonical scripts.ai entrypoints; remove it once no orphan references remain."
+    },
+    "scripts/ai/src/analyze_test_failures.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical scripts.ai.src copy of manual pytest-failure triage helpers; prefer canonical QA reporting flows and remove this orphan mirror once no references remain."
+    },
+    "scripts/ai/src/bioetl/composition/factories/pipeline/_factory_method_types.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a compatibility-era mirror under scripts.ai.src for historical import stability; remove it once all legacy references have converged on the canonical src/bioetl package path."
+    },
+    "scripts/ai/src/check_sonar_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical scripts.ai.src copy of Sonar issue review helpers; prefer the canonical repo-governance tooling and remove this orphan mirror once unreferenced."
+    },
+    "scripts/ai/src/code_quality_analysis.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical scripts.ai.src exploratory quality-analysis helper; prefer canonical architecture and lint/report tooling instead of extending this orphan mirror."
+    },
+    "scripts/ai/src/group_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical scripts.ai.src copy of Sonar issue grouping helpers; remove it once all remaining manual triage flows use the canonical scripts.ai path or are retired."
+    },
+    "scripts/ai/src/neo4j_memory_mcp_adapter.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for the Neo4j memory MCP adapter while legacy import paths remain; remove it once callers converge on the canonical scripts/ai/mcp implementation."
+    },
+    "scripts/ai/src/neo4j_memory_mcp_smoke.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for Neo4j memory MCP smoke checks while legacy import paths remain; remove it once callers converge on the canonical scripts/ai/mcp implementation."
+    },
+    "scripts/ai/src/setup_mcp.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for MCP setup automation while historical module paths remain; remove it once all callers use the canonical scripts.ai.codex.setup_mcp entrypoint."
+    },
+    "scripts/ai/src/sonar_issue_processor_demo.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical demo helper under scripts.ai.src for Sonar issue processing experiments; remove it once the exploratory workflow is fully retired."
+    },
+    "scripts/ai/src/sonarqube_mcp_smoke.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a compatibility-era scripts.ai.src mirror for SonarQube MCP smoke checks while historical module paths remain; remove it once callers converge on the canonical scripts/ai/mcp implementation."
+    },
     "scripts/ai/mcp/mcp_chembl_wrapper.sh": {
       "owner": "@bioetl-platform",
       "decision": "internal_compatibility_launcher",
@@ -175,6 +241,78 @@
       "decision": "internal_compatibility_launcher",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a thin PowerShell launcher for the Docker MCP gateway mermaid server while Windows-side MCP configs still expect repo-local wrapper paths; do not expand it into a broader orchestration surface."
+    },
+    "scripts/ai/scripts/ai/mcp/github-mcp-wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the GitHub MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to scripts/ai/mcp/github-mcp-wrapper.sh."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_brave_search_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Brave Search MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_context7_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Context7 MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_docker_docs_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Docker Docs MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_docker_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Docker MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_dockerhub_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Docker Hub MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_grafana_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Grafana MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Neo4j Cypher MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Neo4j Memory MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_paper_search_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Paper Search MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_prometheus_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the Prometheus MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
+    },
+    "scripts/ai/scripts/ai/mcp/mcp_sonarqube_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "internal_compatibility_launcher",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as an orphan compatibility copy of the SonarQube MCP shell wrapper while historical mirrored paths remain; remove it once all references resolve to the canonical scripts/ai/mcp path."
     },
     "scripts/engineering/dev/run_project_python.py": {
       "owner": "@bioetl-platform",
