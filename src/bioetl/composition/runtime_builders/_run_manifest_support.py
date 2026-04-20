@@ -1,3 +1,5 @@
+"""Support helpers for constructing run manifest payloads."""
+
 from __future__ import annotations
 
 from pathlib import Path

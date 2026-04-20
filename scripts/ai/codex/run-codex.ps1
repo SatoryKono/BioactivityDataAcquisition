@@ -9,8 +9,23 @@ param(
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $HelperDir = Join-Path $ScriptDir "helper"
-$RepoWSL = "/mnt/e/g-drive/05_ai/github/BioactivityDataAcquisition2"
+$RepoWin = (Resolve-Path (Join-Path $ScriptDir "..\..\..")).Path
+$RepoWSL = $null
+
+try {
+    $RepoWSL = (wsl -d Ubuntu -- wslpath -a "$RepoWin" 2>$null | Select-Object -First 1).Trim()
+} catch {
+    $RepoWSL = $null
+}
+
+if (-not $RepoWSL) {
+    $drive = $RepoWin.Substring(0, 1).ToLowerInvariant()
+    $pathPart = $RepoWin.Substring(2).Replace('\', '/')
+    $RepoWSL = "/mnt/$drive$pathPart"
+}
+
 $HelperWSL = "$RepoWSL/scripts/ai/codex/helper"
+$RepoWSLQuoted = $RepoWSL.Replace("'", "'\"'\"'")
 
 # Colors
 $Colors = @{ Success = "Green"; Warning = "Yellow"; Error = "Red"; Info = "Cyan" }
@@ -64,7 +79,7 @@ try {
 # Quick Codex check
 $codexExists = $false
 try {
-    $codexCheck = wsl -d Ubuntu -- bash -c "command -v codex >/dev/null 2>&1 && echo OK" 2>$null
+    $codexCheck = wsl -d Ubuntu -- bash -lc "test -x '$RepoWSLQuoted/.cache/tools/codex-cli/npm-global/bin/codex' && echo OK" 2>$null
     $codexExists = $codexCheck -eq "OK"
 } catch {
     $codexExists = $false

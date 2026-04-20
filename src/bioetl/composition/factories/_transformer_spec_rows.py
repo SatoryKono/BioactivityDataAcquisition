@@ -1,3 +1,5 @@
+"""Built-in transformer specification rows for factory registration."""
+
 from __future__ import annotations
 
 from typing import Final

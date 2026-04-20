@@ -66,6 +66,8 @@ This is now the only active execution/backlog document in `docs/plans/`.
 
 - [architecture-review-and-refactor-plan-2026-03-21.md](architecture-review-and-refactor-plan-2026-03-21.md)
 - [monitoring-observability-expansion-plan-2026-03-26.md](monitoring-observability-expansion-plan-2026-03-26.md)
+- [project-memory-layer-implementation-plan-2026-04-20.md](project-memory-layer-implementation-plan-2026-04-20.md)
+- [project-memory-layer-issue-pack-2026-04-20.md](project-memory-layer-issue-pack-2026-04-20.md)
 
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
@@ -80,6 +82,15 @@ The monitoring observability expansion plan was added on `2026-03-26` as a
 bounded rollout plan for extending the existing Prometheus/Grafana stack around
 control-plane and lineage signals. It is retained as supporting operational
 context, not as a second active backlog.
+
+The project memory layer implementation plan was added on `2026-04-20` as a
+bounded rollout plan for introducing a hybrid project-memory subsystem rooted
+in `src/memory/`. It is retained as supporting implementation context, not as a
+second active backlog or a normative knowledge-management policy.
+
+The project memory layer issue pack was added on `2026-04-20` as a staging
+surface for decomposing that rollout into bounded GitHub issues. It is retained
+as implementation support context, not as a second backlog.
 
 If later waves close items named in that report, the report should keep its
 original date and gain a short freshness note instead of being silently treated

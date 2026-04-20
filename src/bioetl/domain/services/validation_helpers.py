@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Validation helpers module for common validation operations."""
+
+from __future__ import annotations
 
 
 def validate_data(data: object) -> None:

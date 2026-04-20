@@ -120,7 +120,7 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem sequential-thinking fetch pdf github docker docker-docs context7 paper-search dockerhub prometheus grafana brave-search neo4j-cypher neo4j-memory openaiDeveloperDocs; do
+for server in memory filesystem sequential-thinking fetch pdf github docker docker-docs context7 paper-search dockerhub prometheus grafana brave-search sonarqube neo4j-cypher neo4j-memory needle openaiDeveloperDocs; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
@@ -128,13 +128,6 @@ for server in memory filesystem sequential-thinking fetch pdf github docker dock
     status=1
   fi
 done
-
-if grep -Eq "^sonarqube[[:space:]]" <<<"$list_out"; then
-  ok "Server 'sonarqube' is registered"
-else
-  fail "Server 'sonarqube' is missing"
-  status=1
-fi
 
 memory_out="$(codex mcp get memory 2>&1 || true)"
 filesystem_out="$(codex mcp get filesystem 2>&1 || true)"
@@ -153,6 +146,7 @@ brave_out="$(codex mcp get brave-search 2>&1 || true)"
 sonarqube_out="$(codex mcp get sonarqube 2>&1 || true)"
 neo4j_cypher_out="$(codex mcp get neo4j-cypher 2>&1 || true)"
 neo4j_memory_out="$(codex mcp get neo4j-memory 2>&1 || true)"
+needle_out="$(codex mcp get needle 2>&1 || true)"
 openai_docs_out="$(codex mcp get openaiDeveloperDocs 2>&1 || true)"
 
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
@@ -172,6 +166,8 @@ require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search i
 require_wrapper_path "$sonarqube_out" "$EXPECTED_SONARQUBE_WRAPPER_PATH" "sonarqube is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
+require_contains "$needle_out" "url: https://mcp.needle-ai.com/mcp" "needle points to the official Needle MCP endpoint" || status=1
+require_contains "$needle_out" "bearer_token_env_var: NEEDLE_API_KEY" "needle uses NEEDLE_API_KEY bearer auth" || status=1
 require_contains "$openai_docs_out" "https://developers.openai.com/mcp" "openaiDeveloperDocs points to official OpenAI MCP endpoint" || status=1
 
 if grep -Fq -- "${EXPECTED_FILESYSTEM_SCOPE}" <<<"$filesystem_out"; then
@@ -194,6 +190,12 @@ elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
   ok "GITHUB_TOKEN is set and will be mapped for GitHub MCP auth"
 else
   warn "Neither GITHUB_PERSONAL_ACCESS_TOKEN nor GITHUB_TOKEN is set (GitHub MCP auth may fail)"
+fi
+
+if [[ -n "${NEEDLE_API_KEY:-}" ]]; then
+  ok "NEEDLE_API_KEY is set (shell or .env)"
+else
+  warn "NEEDLE_API_KEY is not set (Needle MCP auth will fail)"
 fi
 
 exit "$status"

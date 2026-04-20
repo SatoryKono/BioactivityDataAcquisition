@@ -41,10 +41,27 @@ def build_test_postrun_service(
     logger: LoggerPort,
     metrics: object | None = None,
     tracer: object | None = None,
+    metadata_coordinator: object | None = None,
+    metadata_writer: object | None = None,
+    dq_report_service: object | None = None,
+    bronze_dq_config: object | None = None,
+    silver_dq_config: object | None = None,
+    gold_dq_config: object | None = None,
     overrides: PostrunDependencyOverrides | None = None,
 ) -> PostrunService:
-    """Build PostrunService with explicit injected collaborators for tests."""
-    dependency_overrides = overrides or PostrunDependencyOverrides()
+    """Build PostrunService with explicit injected collaborators for tests.
+
+    The helper accepts either a pre-built ``overrides`` bundle or direct keyword
+    overrides for older tests that injected collaborators individually.
+    """
+    dependency_overrides = overrides or PostrunDependencyOverrides(
+        metadata_coordinator=metadata_coordinator,
+        metadata_writer=metadata_writer,
+        dq_report_service=dq_report_service,
+        bronze_dq_config=bronze_dq_config,
+        silver_dq_config=silver_dq_config,
+        gold_dq_config=gold_dq_config,
+    )
     return PostrunService(
         config=config,
         runtime=runtime,

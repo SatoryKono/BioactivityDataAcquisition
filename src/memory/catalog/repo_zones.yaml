@@ -1,0 +1,17 @@
+version: 1
+zones:
+  - id: canonical_runtime
+    classification: canonical
+    paths: ["src/bioetl"]
+  - id: canonical_project_docs
+    classification: canonical
+    paths: ["docs/00-project", "docs/01-requirements", "docs/02-architecture", "docs/03-guides", "docs/04-reference", "docs/05-operations"]
+  - id: memory_implementation
+    classification: derived
+    paths: ["src/memory"]
+  - id: legacy_memory_tooling
+    classification: indexable
+    paths: ["scripts/memory", "docs/00-project/ai/memory"]
+  - id: generated_context
+    classification: derived
+    paths: ["docs/reports", "reports", "site"]

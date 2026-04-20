@@ -103,7 +103,7 @@ Write-Host ""
 Write-Info "Next steps:"
 Write-Host "  1. Get your API key: https://console.mistral.ai/api-keys/"
 Write-Host "  2. Edit .env.mistrallvibe and add VIBE_API_KEY"
-Write-Host "  3. Start Vibe: .\run-mistrallvibe.ps1 start"
+Write-Host "  3. Start Vibe: .\run-vibe.ps1"
 Write-Host ""
 
 exit 0

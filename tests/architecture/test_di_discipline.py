@@ -74,9 +74,7 @@ def _pattern_violations_for_file(
 
 def _application_python_files(base: Path) -> list[Path]:
     return [
-        py_file
-        for py_file in base.rglob("*.py")
-        if "composition" not in str(py_file)
+        py_file for py_file in base.rglob("*.py") if "composition" not in str(py_file)
     ]
 
 

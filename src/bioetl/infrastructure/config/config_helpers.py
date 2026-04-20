@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Config helpers module for common configuration operations."""
+
+from __future__ import annotations
 
 
 def load_config(_config_path: str) -> dict[str, object]:

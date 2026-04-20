@@ -4,7 +4,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
 
 CODEX_TOOL_HOME_DEFAULT="${REPO_ROOT}/.cache/tools/codex-cli"
 CODEX_NPM_PREFIX="${CODEX_NPM_PREFIX:-${CODEX_TOOL_HOME_DEFAULT}/npm-global}"

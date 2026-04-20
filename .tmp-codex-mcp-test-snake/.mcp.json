@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "needle": {
+      "type": "http",
+      "url": "https://mcp.needle-ai.com/mcp",
+      "bearer_token_env_var": "NEEDLE_API_KEY"
+    }
+  }
+}

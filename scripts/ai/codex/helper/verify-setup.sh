@@ -63,7 +63,7 @@ if [[ -n "${CODEX_BIN}" && -x "${CODEX_BIN}" ]]; then
     echo "  → Prefix: ${CODEX_PREFIX}"
 else
     echo "✗ Codex CLI not found"
-    echo "  → Run: bash ./script-codex/helper/setup-wsl.sh"
+    echo "  → Run: bash ./scripts/ai/codex/helper/setup-wsl.sh"
     ERRORS=$((ERRORS + 1))
 fi
 echo ""
@@ -92,15 +92,15 @@ if [[ $ERRORS -eq 0 ]]; then
     echo ""
     echo "You can now use Codex:"
     echo ""
-    echo "  Interactive:  ./scripts/ops/codex.sh"
-    echo "  With prompt:  ./scripts/ops/codex.sh \"analyze the pipeline\""
-    echo "  Auto-exec:    ./scripts/ops/codex-exec.sh \"fix all TODOs\""
+    echo "  Interactive:  ./scripts/ops/launchers/codex/codex.sh"
+    echo "  With prompt:  ./scripts/ops/launchers/codex/codex.sh \"analyze the pipeline\""
+    echo "  Auto-exec:    ./scripts/ops/launchers/codex/codex-exec.sh \"fix all TODOs\""
     echo ""
 else
     echo "  ✗ Setup verification found $ERRORS issue(s)"
     echo "$SEPARATOR"
     echo ""
     echo "Please fix the issues above, then run:"
-    echo "  bash ./script-codex/helper/setup-wsl.sh"
+    echo "  bash ./scripts/ai/codex/helper/setup-wsl.sh"
     echo ""
 fi

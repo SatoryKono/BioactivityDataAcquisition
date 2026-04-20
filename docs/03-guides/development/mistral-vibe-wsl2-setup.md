@@ -14,16 +14,19 @@ ______________________________________________________________________
 # Mistral Vibe: Setup and Usage via WSL2
 
 Guide for running Mistral Vibe in this repository from WSL2 or from
-Windows through the canonical wrappers in `script-mistrallvibe/`.
+Windows through the canonical launchers in `scripts/ai/vibe/` or the
+compatibility wrappers in `scripts/ai/mistrallvibe/`.
 
 ______________________________________________________________________
 
 ## What Is Configured
 
 - Project-local Vibe config: `.vibe/config.toml`
-- Canonical WSL launcher: `script-mistrallvibe/run-vibe.sh`
-- Canonical Windows PowerShell launcher: `script-mistrallvibe/run-vibe.ps1`
-- Canonical setup helper: `script-mistrallvibe/helper/setup-env.sh`
+- Canonical WSL launcher: `scripts/ai/vibe/launch.sh`
+- Canonical Windows PowerShell launcher: `scripts/ai/vibe/launch.ps1`
+- Compatibility WSL launcher: `scripts/ai/mistrallvibe/run-vibe.sh`
+- Compatibility Windows PowerShell launcher: `scripts/ai/mistrallvibe/run-vibe.ps1`
+- Compatibility setup helper: `scripts/ai/mistrallvibe/helper/setup-env.sh`
 
 The project-local config is discovered automatically by Vibe before
 `~/.vibe/config.toml`, which keeps repository-specific defaults local to
@@ -46,10 +49,10 @@ Alternative:
 python3 -m pip install --user mistral-vibe
 ```
 
-Repository helper:
+Repository compatibility helper:
 
 ```bash
-bash script-mistrallvibe/helper/setup-env.sh
+bash scripts/ai/mistrallvibe/helper/setup-env.sh
 ```
 
 Official references:
@@ -78,23 +81,38 @@ ______________________________________________________________________
 From WSL/Linux:
 
 ```bash
-bash script-mistrallvibe/run-vibe.sh
-bash script-mistrallvibe/run-vibe.sh "inspect the failing architecture tests"
-bash script-mistrallvibe/run-vibe.sh --prompt "fix the failing architecture test" --max-turns 5
+bash scripts/ai/vibe/launch.sh
+bash scripts/ai/vibe/launch.sh "inspect the failing architecture tests"
+bash scripts/ai/vibe/launch.sh --prompt "fix the failing architecture test" --max-turns 5
+```
+
+Compatibility wrapper:
+
+```bash
+bash scripts/ai/mistrallvibe/run-vibe.sh
+bash scripts/ai/mistrallvibe/run-vibe.sh "inspect the failing architecture tests"
+bash scripts/ai/mistrallvibe/run-vibe.sh --prompt "fix the failing architecture test" --max-turns 5
 ```
 
 From Windows PowerShell:
 
 ```powershell
-.\script-mistrallvibe\run-vibe.ps1
-.\script-mistrallvibe\run-vibe.ps1 "inspect the failing architecture tests"
+pwsh -File .\scripts\ai\vibe\launch.ps1
+pwsh -File .\scripts\ai\vibe\launch.ps1 "inspect the failing architecture tests"
+```
+
+Compatibility wrapper:
+
+```powershell
+.\scripts\ai\mistrallvibe\run-vibe.ps1
+.\scripts\ai\mistrallvibe\run-vibe.ps1 "inspect the failing architecture tests"
 ```
 
 From Windows CMD:
 
 ```cmd
-powershell -NoProfile -ExecutionPolicy Bypass -File .\script-mistrallvibe\run-vibe.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\script-mistrallvibe\run-vibe.ps1 "inspect the failing architecture tests"
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai\vibe\launch.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\ai\vibe\launch.ps1 "inspect the failing architecture tests"
 ```
 
 The wrappers pass `--workdir` with the repository root so Vibe starts in

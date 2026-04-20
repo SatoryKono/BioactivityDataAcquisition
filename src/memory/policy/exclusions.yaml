@@ -1,0 +1,20 @@
+version: 1
+default_exclusions:
+  - pattern: "docs/99-archive/**"
+    reason: "Archived docs are not default retrieval sources."
+  - pattern: "site/**"
+    reason: "Rendered site output is generated and duplicates docs/."
+  - pattern: "node_modules/**"
+    reason: "Third-party vendored content is outside project memory scope."
+  - pattern: ".pytest_cache/**"
+    reason: "Transient test cache is not durable project memory."
+rag_exclusions:
+  - pattern: "docs/reports/generated/**"
+    reason: "Generated reports are low-priority derived context."
+  - pattern: "data/**"
+    reason: "Runtime data artifacts are not indexed as default RAG context."
+graph_exclusions:
+  - pattern: "site/**"
+    reason: "Static site output duplicates published docs."
+  - pattern: "output/**"
+    reason: "Ad hoc generated output is not modeled by default."

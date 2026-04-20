@@ -1,3 +1,5 @@
+"""CrossRef datasource input validation helpers."""
+
 from __future__ import annotations
 
 from bioetl.domain.ports import LoggerPort

@@ -6,6 +6,7 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 
 # Colors
 GREEN='\033[0;32m'
@@ -79,76 +80,21 @@ echo ""
 
 # STEP 3: Install Codex
 log_info "STEP 3: Installing Codex CLI..."
-
-# Check if already installed globally
-if command -v codex >/dev/null 2>&1; then
-    log_success "Codex already installed: $(codex --version)"
-    exit 0
+if [[ ! -x "${ENSURE_SCRIPT}" ]]; then
+    log_error "Bootstrap helper not found: ${ENSURE_SCRIPT}"
+    exit 1
 fi
 
-log_info "Running npm install -g @openai/codex (3 attempts, timeout 180s each)..."
-
-SUCCESS=0
-for attempt in 1 2 3; do
-    log_info "  Attempt $attempt/3..."
-    
-    # Try with sudo first if needed, then fallback to --save-prefix if permission denied
-    if timeout 180 npm install -g @openai/codex@latest 2>&1 | tail -5; then
-        # Verify installation
-        if command -v codex >/dev/null 2>&1; then
-            log_success "Codex installed: $(codex --version)"
-            SUCCESS=1
-            break
-        else
-            log_warn "  npm succeeded but codex not in PATH yet"
-        fi
-    else
-        EXIT_CODE=$?
-        if [[ $EXIT_CODE -eq 124 ]]; then
-            log_warn "  Attempt $attempt timed out (124)"
-        elif [[ $EXIT_CODE -eq 243 ]]; then
-            log_warn "  Attempt $attempt failed with permission error (243) - trying with sudo"
-            if sudo timeout 180 npm install -g @openai/codex@latest 2>&1 | tail -5 \
-                && command -v codex >/dev/null 2>&1; then
-                log_success "Codex installed via sudo: $(codex --version)"
-                SUCCESS=1
-                break
-            fi
-        else
-            log_warn "  Attempt $attempt failed (code: $EXIT_CODE)"
-        fi
+if CODEX_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null)" && [[ -x "${CODEX_BIN}" ]]; then
+    log_success "Codex already installed: $("${CODEX_BIN}" --version)"
+else
+    log_info "Installing managed Codex CLI into repo-local prefix..."
+    if ! "${ENSURE_SCRIPT}" --ensure >/dev/null; then
+        log_error "Codex installation failed"
+        exit 1
     fi
-    
-    if [[ $attempt -lt 3 ]]; then
-        log_info "  Waiting 3 seconds before retry..."
-        sleep 3
-    fi
-done
-
-if [[ $SUCCESS -eq 0 ]]; then
-    # Last resort - check if it's somewhere in npm
-    CODEX_BIN=$(npm list -g @openai/codex 2>/dev/null | grep "@openai/codex" | head -1)
-    if [[ -n "$CODEX_BIN" ]]; then
-        log_warn "Codex was installed but not in PATH"
-        log_info "Location: $CODEX_BIN"
-        log_info "Try running: hash -r && codex"
-        exit 0
-    fi
-    
-    log_error "Codex installation failed after 3 attempts"
-    log_info "Trying manual installation..."
-    
-    # Last attempt with sudo
-    if sudo npm install -g @openai/codex@latest 2>&1 | tail -20 \
-        && command -v codex >/dev/null 2>&1; then
-        log_success "Codex installed via sudo"
-        exit 0
-    fi
-    
-    log_error "Permission issue detected. You may need to:"
-    echo "  1. Fix npm permissions: npm config set prefix ~/.npm-global"
-    echo "  2. Or use: sudo npm install -g @openai/codex@latest"
-    exit 1
+    CODEX_BIN="$("${ENSURE_SCRIPT}" --print-bin)"
+    log_success "Codex installed: $("${CODEX_BIN}" --version)"
 fi
 
 echo ""

@@ -6,7 +6,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2}"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
+ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -80,7 +81,7 @@ fi
 log_info "Checking API key..."
 ENV_FILE="${ROOT_DIR}/.env.codex"
 if [[ -f "${ENV_FILE}" ]]; then
-    if grep -q "OPENAI_API_KEY=sk-" "${ENV_FILE}"; then
+    if grep -Eq 'OPENAI_API_KEY="?sk-' "${ENV_FILE}"; then
         log_success "API key found in .env.codex"
     else
         log_warn ".env.codex exists but API key missing or invalid"
@@ -93,7 +94,10 @@ fi
 
 # 5. Check Codex binary
 log_info "Checking Codex CLI..."
-CODEX_BIN="${HOME}/.cache/tools/codex-cli/npm-global/bin/codex"
+CODEX_BIN=""
+if [[ -x "${ENSURE_SCRIPT}" ]]; then
+    CODEX_BIN="$("${ENSURE_SCRIPT}" --no-install --print-bin 2>/dev/null || true)"
+fi
 if [[ -x "${CODEX_BIN}" ]]; then
     CODEX_VER=$("${CODEX_BIN}" --version 2>/dev/null || echo "unknown")
     log_success "Codex CLI is installed: $CODEX_VER"

@@ -72,8 +72,7 @@ def _non_cli_source_items(source_content_cache: dict) -> list[tuple[Path, str]]:
         (path, text)
         for path, text in source_content_cache.items()
         if not (
-            path.match("src/bioetl/interfaces/cli/*")
-            or "interfaces/cli" in str(path)
+            path.match("src/bioetl/interfaces/cli/*") or "interfaces/cli" in str(path)
         )
     ]
 

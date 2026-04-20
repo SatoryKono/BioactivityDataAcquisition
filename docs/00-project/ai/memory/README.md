@@ -198,6 +198,20 @@ profiles в BioETL.
 - Prompts живут в `docs/00-project/ai/prompts/`.
 - Skills и reference mirrors живут в `docs/00-project/ai/skills/`.
 
+## Implementation Rollout Note
+
+The memory **implementation subsystem** is being formalized under
+`src/memory/`.
+
+- `docs/00-project/ai/memory/` remains a repo-facing AI entrypoint and
+  reference surface.
+- `src/memory/` is the canonical home for memory policy, catalog data,
+  schemas, and future retrieval/graph/timeline implementation.
+- transitional graph facades now exist under `memory.graph`, while
+  `scripts.memory.*` remains a compatibility surface during migration.
+- Canonical project truth remains outside both surfaces in runtime code,
+  configs, accepted ADRs, and active docs.
+
 Если возникает конфликт между memory notes и runtime source, приоритет у
 runtime source и canonical governance docs:
 

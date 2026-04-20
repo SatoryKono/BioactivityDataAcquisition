@@ -1,11 +1,5 @@
 #!/usr/bin/env pwsh
-# Launch Mistral Vibe from Windows (via WSL) in the current repository.
-# Usage: .\run-vibe.ps1 [args...]
-#
-# Examples:
-#   .\run-vibe.ps1                      # Start interactive mode
-#   .\run-vibe.ps1 "explain this code"  # Send prompt
-#   .\run-vibe.ps1 --help               # Show vibe help
+# Compatibility launcher for the canonical Vibe surface.
 
 param(
     [Parameter(ValueFromRemainingArguments=$true)]
@@ -13,68 +7,46 @@ param(
 )
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RepoRoot = Split-Path -Parent $ScriptDir  # Go up from script-mistrallvibe to root
-
-# Convert Windows path to WSL path
-$WSLRepoRoot = $RepoRoot -replace '\\', '/' -replace '^([A-Z]):', '/mnt/$1' -replace '/mnt/([a-z])', '/mnt/${1}'
-$WSLRepoRoot = $WSLRepoRoot.ToLower()
+$HelperDir = Join-Path $ScriptDir "helper"
+$CanonicalLauncher = (Join-Path $ScriptDir "..\vibe\launch.ps1")
 
 # Colors
 $Colors = @{ Error = "Red"; Warning = "Yellow"; Info = "Cyan" }
 
 function Write-MistralError { Write-Host "[vibe]" -ForegroundColor $Colors.Error -NoNewline; Write-Host " ERROR: $args" }
 function Write-MistralWarn { Write-Host "[vibe]" -ForegroundColor $Colors.Warning -NoNewline; Write-Host " $args" }
-function Write-MistralInfo { Write-Host "[vibe]" -ForegroundColor $Colors.Info -NoNewline; Write-Host " $args" }
 
-# Check if WSL is available
-$WSLExists = $false
-try {
-    $WSLCheck = wsl -e bash -c "echo ok" 2>$null
-    $WSLExists = $LASTEXITCODE -eq 0
-} catch {
-    $WSLExists = $false
+if ($Args.Count -gt 0) {
+    switch ($Args[0]) {
+        "check" {
+            & (Join-Path $HelperDir "check-env.ps1")
+            exit $LASTEXITCODE
+        }
+        "setup" {
+            & (Join-Path $HelperDir "setup-env.ps1")
+            exit $LASTEXITCODE
+        }
+        "--help" {
+            Write-Host "Mistral Vibe Compatibility Launcher"
+            Write-Host ""
+            Write-Host "Usage: .\run-vibe.ps1 [check|setup|args...]"
+            Write-Host "All other arguments are forwarded to scripts/ai/vibe/launch.ps1."
+            exit 0
+        }
+        "-h" {
+            Write-Host "Mistral Vibe Compatibility Launcher"
+            Write-Host ""
+            Write-Host "Usage: .\run-vibe.ps1 [check|setup|args...]"
+            Write-Host "All other arguments are forwarded to scripts/ai/vibe/launch.ps1."
+            exit 0
+        }
+    }
 }
 
-if (-not $WSLExists) {
-    Write-MistralError "WSL (Windows Subsystem for Linux) not found"
-    Write-Host "[vibe] Install WSL2 or use bash wrapper on Linux/macOS"
+if (-not (Test-Path $CanonicalLauncher)) {
+    Write-MistralError "Canonical Vibe launcher not found: $CanonicalLauncher"
     exit 1
 }
 
-# Check if vibe is installed in WSL
-$vibeExists = $false
-try {
-    $vibeVersion = wsl -e bash -c 'export PATH="$HOME/.local/bin:$PATH" && vibe --version' 2>$null
-    $vibeExists = $LASTEXITCODE -eq 0
-} catch {
-    $vibeExists = $false
-}
-
-if (-not $vibeExists) {
-    Write-MistralError "Mistral Vibe CLI not found in WSL"
-    Write-Host "[vibe] Install with one of:"
-    Write-Host "[vibe]   wsl -e bash -c 'curl -LsSf https://mistral.ai/vibe/install.sh | bash'"
-    Write-Host "[vibe]   wsl -e bash -c 'python3 -m pip install --user mistral-vibe'"
-    Write-Host "[vibe]   wsl -e bash -c 'pipx install mistral-vibe'"
-    Write-Host "[vibe]"
-    Write-Host "[vibe] Or run setup: .\run-vibe.ps1 setup"
-    exit 1
-}
-
-# Get version
-$vibeVersion = wsl -e bash -c 'export PATH="$HOME/.local/bin:$PATH" && vibe --version 2>/dev/null || echo "unknown"' 2>$null
-
-Write-MistralInfo "Using Vibe $vibeVersion (via WSL)"
-Write-MistralInfo "Working directory: $RepoRoot"
-
-# Launch vibe via WSL
-if ($Args.Count -eq 0) {
-    Write-MistralInfo "Starting interactive mode..."
-    wsl -e bash -c "export PATH=`$HOME/.local/bin:`$PATH && source `$HOME/.local/bin/env 2>/dev/null || true && vibe --workdir '$WSLRepoRoot'"
-} else {
-    $PromptText = $Args -join ' '
-    Write-MistralInfo "Prompt: $PromptText"
-    wsl -e bash -c "export PATH=`$HOME/.local/bin:`$PATH && source `$HOME/.local/bin/env 2>/dev/null || true && vibe --workdir '$WSLRepoRoot' '$PromptText'"
-}
-
+& $CanonicalLauncher @Args
 exit $LASTEXITCODE

@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 # WSL Codex setup — install dependencies and configure environment
-# Run from WSL: bash ./script-codex/helper/setup-wsl.sh
+# Run from WSL: bash ./scripts/ai/codex/helper/setup-wsl.sh
 
 set -euo pipefail
 SEPARATOR_LINE="=========================================="
-echo SEPARATOR_LINE
+echo "${SEPARATOR_LINE}"
 echo "  WSL Codex Setup"
-echo SEPARATOR_LINE
+echo "${SEPARATOR_LINE}"
 echo ""
 
 # Check if running in WSL
 if ! grep -qi microsoft /proc/version 2>/dev/null; then
     echo "[WARNING] Not running in WSL. This script is designed for WSL2."
-    echo "[INFO] Run from WSL Ubuntu distro: wsl -- bash ./script-codex/helper/setup-wsl.sh"
+    echo "[INFO] Run from WSL Ubuntu distro: wsl -- bash ./scripts/ai/codex/helper/setup-wsl.sh"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 
 # Step 1: Update package manager (with retry logic)
@@ -92,14 +92,14 @@ if ! grep -q "wsl_proxy_env.sh" "$BASHRC" 2>/dev/null; then
 fi
 
 echo ""
-echo SEPARATOR_LINE
+echo "${SEPARATOR_LINE}"
 echo "  Setup Complete!"
-echo SEPARATOR_LINE
+echo "${SEPARATOR_LINE}"
 echo ""
 echo "Quick start:"
-echo "  • Interactive:  $REPO_ROOT/scripts/ops/codex.sh"
-echo "  • With prompt:  $REPO_ROOT/scripts/ops/codex.sh \"analyze the pipeline\""
-echo "  • Auto-exec:    $REPO_ROOT/scripts/ops/codex-exec.sh \"refactor ChemBL parser\""
+echo "  • Interactive:  $REPO_ROOT/scripts/ops/launchers/codex/codex.sh"
+echo "  • With prompt:  $REPO_ROOT/scripts/ops/launchers/codex/codex.sh \"analyze the pipeline\""
+echo "  • Auto-exec:    $REPO_ROOT/scripts/ops/launchers/codex/codex-exec.sh \"refactor ChemBL parser\""
 echo ""
-echo "For more info, see: $REPO_ROOT/docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md"
+echo "For more info, see: $REPO_ROOT/scripts/ai/codex/README.md"
 echo ""

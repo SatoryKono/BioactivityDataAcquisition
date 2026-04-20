@@ -1,19 +1,19 @@
-# Mistral Vibe - CLI Wrapper
+# Mistral Vibe - Compatibility Wrapper
 
-Direct Mistral Vibe access with repository context.
+Compatibility surface for the canonical `scripts/ai/vibe` launcher.
 
 ## ⚡ Quick Start
 
 ### Windows (PowerShell)
 ```powershell
-cd script-mistrallvibe
+cd scripts/ai/mistrallvibe
 notepad .env.mistrallvibe    # Add VIBE_API_KEY
 .\run-vibe.ps1
 ```
 
 ### Linux/WSL (Bash)
 ```bash
-cd script-mistrallvibe
+cd scripts/ai/mistrallvibe
 nano .env.mistrallvibe       # Add VIBE_API_KEY
 ./run-vibe.sh
 ```
@@ -21,9 +21,11 @@ nano .env.mistrallvibe       # Add VIBE_API_KEY
 ## 📋 Commands
 
 ```bash
+./run-vibe.sh check                # Verify setup
+./run-vibe.sh setup                # Install/configure Vibe
 ./run-vibe.sh                      # Interactive mode
 ./run-vibe.sh "explain this code"  # Send prompt
-./run-vibe.sh --help              # Help
+./run-vibe.sh --help               # Help
 ```
 
 ## 🔐 Configuration
@@ -37,25 +39,15 @@ Get API key from: https://console.mistral.ai/api-keys/
 
 ## 📚 Documentation
 
-See `archive/` for additional resources:
-- `QUICK_START.md` - Full walkthrough
-- `ARCHITECTURE.md` - Design overview
-- `SETUP.md` - Setup guide
+See the canonical Vibe surface for current behavior and launch options:
+- `scripts/ai/vibe/README.md` - primary launcher documentation
+- `scripts/ai/vibe/launch.sh` - canonical WSL/Linux entrypoint
+- `scripts/ai/vibe/launch.ps1` - canonical Windows PowerShell entrypoint
 
 ## 🏗️ Structure
 
-```
-script-mistrallvibe/
-├── run-vibe.ps1          ⭐ Launcher (Windows)
-├── run-vibe.sh           ⭐ Launcher (Linux)
-├── README.md             # This file
-├── .env.mistrallvibe     # Configuration
-├── helper/               # Support scripts
-└── archive/              # Additional tools
-    ├── run-mistrallvibe.* # Full manager (server, chat, web UI)
-    ├── vibe-*.* # Web server, CLI, UI files
-    └── *.md # Documentation
-```
+`scripts/ai/mistrallvibe/` keeps historical entrypoints, but the actual launch
+path is delegated to `scripts/ai/vibe/launch.sh` and `scripts/ai/vibe/launch.ps1`.
 
 ## 🚀 Features
 
@@ -65,14 +57,11 @@ script-mistrallvibe/
 ✅ Fast startup
 ✅ No dependencies beyond Mistral Vibe itself
 
-## 📖 Full Features
+## 📖 Notes
 
-For web server, chat mode, and more, see `archive/run-mistrallvibe.*`:
-```powershell
-.\archive\run-mistrallvibe.ps1 start    # Web server
-.\archive\run-mistrallvibe.ps1 chat     # Chat mode
-.\archive\run-mistrallvibe.ps1 help     # All commands
-```
+This directory is a compatibility wrapper. Advanced and future launcher behavior
+should be added to `scripts/ai/vibe`, not to a separate `mistrallvibe`
+execution path.
 
 ## ✨ Ready!
 

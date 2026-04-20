@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
-# Launch Mistral Vibe in the current repository.
-# Usage: ./run-vibe.sh [args...]
-#
-# Examples:
-#   ./run-vibe.sh                          # Interactive mode
-#   ./run-vibe.sh "explain this code"      # Send prompt
-#   ./run-vibe.sh --help                   # Show vibe help
+# Compatibility launcher for the canonical Vibe surface.
+# Usage: ./run-vibe.sh [check|setup|args...]
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
+HELPER_DIR="${SCRIPT_DIR}/helper"
+CANONICAL_LAUNCHER="${REPO_ROOT}/scripts/ai/vibe/launch.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -25,49 +22,37 @@ log_error() {
     return 0
 }
 
-log_warn() {
-    local message="${1:-}"
-    echo -e "${YELLOW}[vibe]${NC} ${message}"
-    return 0
+print_help() {
+    cat <<'EOF'
+Mistral Vibe Compatibility Launcher
+
+Usage: run-vibe.sh [command|args...]
+
+Commands:
+  check    Verify local setup
+  setup    Install/configure Vibe
+  --help   Show this help
+
+All other arguments are forwarded to scripts/ai/vibe/launch.sh.
+EOF
 }
 
-log_info() {
-    local message="${1:-}"
-    echo -e "${BLUE}[vibe]${NC} ${message}"
-    return 0
-}
+case "${1:-}" in
+    --help|-h)
+        print_help
+        exit 0
+        ;;
+    check)
+        exec bash "${HELPER_DIR}/check-env.sh"
+        ;;
+    setup)
+        exec bash "${HELPER_DIR}/setup-env.sh"
+        ;;
+esac
 
-# Ensure user tools are in PATH
-export PATH="${HOME}/.local/bin:${PATH}"
-
-# Source uv environment if available
-if [[ -f "${HOME}/.local/bin/env" ]]; then
-    # shellcheck disable=SC1091
-    source "${HOME}/.local/bin/env" 2>/dev/null || true
-fi
-
-# Check if vibe is installed
-if ! command -v vibe >/dev/null 2>&1; then
-    log_error "Mistral Vibe CLI not found in PATH"
-    echo "[vibe] Install with one of:"
-    echo "[vibe]   curl -LsSf https://mistral.ai/vibe/install.sh | bash"
-    echo "[vibe]   python3 -m pip install --user mistral-vibe"
-    echo "[vibe]   pipx install mistral-vibe"
-    echo "[vibe]"
-    echo "[vibe] Or run setup: bash run-mistrallvibe.sh setup"
+if [[ ! -x "${CANONICAL_LAUNCHER}" ]]; then
+    log_error "Canonical Vibe launcher not found: ${CANONICAL_LAUNCHER}"
     exit 1
 fi
 
-# Show version
-VIBE_VERSION=$(vibe --version 2>/dev/null || echo "unknown")
-log_info "Using Vibe ${VIBE_VERSION}"
-log_info "Working directory: ${REPO_ROOT}"
-
-# Launch vibe
-if [[ $# -eq 0 ]]; then
-    log_info "Starting interactive mode..."
-    exec vibe --workdir "${REPO_ROOT}"
-else
-    log_info "Prompt: $*"
-    exec vibe --workdir "${REPO_ROOT}" "$@"
-fi
+exec bash "${CANONICAL_LAUNCHER}" "$@"

@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 # Helper: Run Mistral Vibe operations on Windows
-# Called by: run-mistrallvibe.ps1
+# Historical manager helper retained for compatibility only.
 
 param(
     [string]$Command = "start",
@@ -98,7 +98,7 @@ function Status-Vibe {
         Write-Info "Web UI: http://$env:VIBE_HOST`:$env:VIBE_PORT"
     } else {
         Write-Warn "Vibe is NOT running"
-        Write-Info "Start with: .\run-mistrallvibe.ps1 start"
+        Write-Info "Start with: .\run-vibe.ps1"
     }
 }
 

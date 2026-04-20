@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 # Helper: Check Mistral Vibe environment on Windows
-# Called by: run-mistrallvibe.ps1
+# Called by: run-vibe.ps1
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent $ScriptDir

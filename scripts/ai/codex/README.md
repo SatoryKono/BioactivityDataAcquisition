@@ -5,7 +5,7 @@
 ## 📁 Структура
 
 ```
-script-codex/
+scripts/ai/codex/
 ├── run-codex.ps1              ⭐ Main entry point (PowerShell) - Non-blocking!
 ├── run-codex.sh               ⭐ Main entry point (WSL/Bash)
 ├── .env.codex                 # API key configuration
@@ -26,7 +26,7 @@ script-codex/
 ### From PowerShell (Windows) - NON-BLOCKING
 
 ```powershell
-cd script-codex
+cd scripts/ai/codex
 
 # Just run - setup happens in background if needed!
 .\run-codex.ps1
@@ -42,7 +42,7 @@ cd script-codex
 ### From WSL (Ubuntu)
 
 ```bash
-cd script-codex
+cd scripts/ai/codex
 
 bash run-codex.sh check
 bash run-codex.sh setup

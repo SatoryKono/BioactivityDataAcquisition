@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Comprehensive WSL Codex Setup
-# Run from WSL: bash ./script-codex/helper/setup-wsl-complete.sh
+# Run from WSL: bash ./scripts/ai/codex/helper/setup-wsl-complete.sh
 
 set -euo pipefail
 
@@ -43,7 +43,7 @@ check_wsl() {
         return 0
     else
         log_error "Not running in WSL. This script requires WSL2."
-        log_error "Run from WSL: wsl -- bash ./script-codex/helper/setup-wsl-complete.sh"
+        log_error "Run from WSL: wsl -- bash ./scripts/ai/codex/helper/setup-wsl-complete.sh"
         exit 1
     fi
     return 0
@@ -51,7 +51,7 @@ check_wsl() {
 
 # Setup directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../.." && pwd))}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-codex-cli.sh"
 CACHE_DIR="${REPO_ROOT}/.cache/tools"
 SEPARATOR="==========================================="
@@ -226,13 +226,13 @@ echo ""
 echo "Next steps:"
 echo ""
 echo "1. Test interactive Codex:"
-echo "   ${REPO_ROOT}/scripts/ops/codex.sh"
+echo "   ${REPO_ROOT}/scripts/ops/launchers/codex/codex.sh"
 echo ""
 echo "2. Run Codex with a prompt:"
-echo "   ${REPO_ROOT}/scripts/ops/codex.sh \"analyze the pipeline\""
+echo "   ${REPO_ROOT}/scripts/ops/launchers/codex/codex.sh \"analyze the pipeline\""
 echo ""
 echo "3. Run Codex in auto-exec mode:"
-echo "   ${REPO_ROOT}/scripts/ops/codex-exec.sh \"refactor ChemBL parser\""
+echo "   ${REPO_ROOT}/scripts/ops/launchers/codex/codex-exec.sh \"refactor ChemBL parser\""
 echo ""
 echo "4. From Windows (PowerShell), use the batch wrappers:"
 echo "   .\scripts\ops\codex.bat"

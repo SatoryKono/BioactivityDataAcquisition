@@ -350,8 +350,10 @@ Windows PowerShell:
 What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
-- Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, `brave-search`, `neo4j-cypher`, `neo4j-memory`, and `openaiDeveloperDocs` in Codex CLI.
+- Registers `memory`, `filesystem`, `sequential-thinking`, `fetch`, `pdf`, `github`, `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, `brave-search`, `sonarqube`, `neo4j-cypher`, `neo4j-memory`, `needle`, and `openaiDeveloperDocs` in Codex CLI.
 - Uses Docker-backed wrappers for `docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `prometheus`, `grafana`, and `brave-search`.
+- Uses native streamable HTTP MCP for `needle` in Codex CLI with bearer auth from `NEEDLE_API_KEY`.
+- Uses `mcp-remote` bridge for `needle` in VS Code workspace config to keep Copilot-compatible auth handling.
 - Uses local defaults when not overridden:
   - `PROMETHEUS_URL=http://host.docker.internal:9090`
   - `GRAFANA_URL=http://host.docker.internal:3000`
@@ -369,6 +371,7 @@ GRAFANA_SERVICE_ACCOUNT_TOKEN=
 BRAVE_API_KEY=
 DOCKERHUB_USERNAME=
 HUB_PAT_TOKEN=
+NEEDLE_API_KEY=
 NEO4J_URI=bolt://localhost:7687
 NEO4J_USERNAME=
 NEO4J_PASSWORD=

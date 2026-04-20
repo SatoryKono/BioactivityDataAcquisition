@@ -1,0 +1,43 @@
+version: 1
+classifications:
+  - canonical
+  - indexable
+  - derived
+  - ephemeral
+sources:
+  - id: runtime_code
+    classification: canonical
+    paths: ["src/bioetl"]
+    description: "Primary implementation code."
+  - id: project_configs
+    classification: canonical
+    paths: ["configs"]
+    description: "Behavioral and operational configuration."
+  - id: accepted_adrs
+    classification: canonical
+    paths: ["docs/02-architecture/decisions"]
+    description: "Accepted architecture decisions."
+  - id: active_docs
+    classification: canonical
+    paths: ["docs/00-project", "docs/03-guides", "docs/04-reference", "docs/05-operations"]
+    description: "Published active project and operational documentation."
+  - id: tests
+    classification: indexable
+    paths: ["tests"]
+    description: "Behavioral evidence and regression coverage."
+  - id: operational_assets
+    classification: indexable
+    paths: [".github", "grafana"]
+    description: "Workflows, dashboards, alerts, and observability assets."
+  - id: generated_reports
+    classification: derived
+    paths: ["docs/reports", "reports"]
+    description: "Generated evidence and analysis outputs."
+  - id: curated_memory
+    classification: derived
+    paths: ["src/memory/curated"]
+    description: "Promoted durable memory records."
+  - id: episodic_memory
+    classification: ephemeral
+    paths: ["src/memory/episodic"]
+    description: "Short-lived task and session notes."

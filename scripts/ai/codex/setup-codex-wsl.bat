@@ -11,7 +11,7 @@ set "SCRIPT_DIR=%~dp0"
 echo [codex-setup] Starting WSL Codex setup...
 echo.
 
-pushd "%SCRIPT_DIR%..\..\" >nul || (
+pushd "%SCRIPT_DIR%..\..\..\" >nul || (
     echo [ERROR] Unable to resolve repository root
     exit /b 1
 )
@@ -45,7 +45,7 @@ echo [codex-setup] WSL path: %REPO_WSL%
 echo.
 
 REM Run the complete setup script in WSL
-wsl -d %WSL_DISTRO% -- bash "%REPO_WSL%/script-codex/helper/setup-wsl-complete.sh"
+wsl -d %WSL_DISTRO% -- bash "%REPO_WSL%/scripts/ai/codex/helper/setup-wsl-complete.sh"
 
 if errorlevel 1 (
     echo.
@@ -61,7 +61,7 @@ echo   - From WSL: ./scripts/ops/launchers/codex/codex-exec.sh "prompt"
 echo   - From Windows: .\scripts\ops\codex.bat
 echo   - From Windows: .\scripts\ops\codex-exec.bat "prompt"
 echo.
-echo For more info: notepad .\script-codex\md\POWERSHELL_QUICK_START.md
+echo For more info: notepad .\scripts\ai\codex\md\POWERSHELL_QUICK_START.md
 echo.
 
 pause

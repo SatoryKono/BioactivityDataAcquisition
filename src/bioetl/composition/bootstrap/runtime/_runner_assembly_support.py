@@ -1,3 +1,5 @@
+"""Composite runner assembly helpers for runtime bootstrap."""
+
 from __future__ import annotations
 
 from collections.abc import Callable

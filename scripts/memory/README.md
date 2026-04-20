@@ -1,6 +1,9 @@
 # scripts/memory
 
-`scripts/memory/` contains the canonical Neo4j project-memory tooling for BioETL.
+`scripts/memory/` contains compatibility entrypoints and operator helpers for
+the Neo4j project-memory tooling.
+
+The canonical graph implementation now lives under `src/memory/graph/`.
 
 ## Stable entrypoints
 
@@ -13,8 +16,8 @@
 
 ## Layout
 
-- `sync.py` builds and optionally applies the deterministic repo graph.
-- `query.py` exposes operator-facing query shortcuts.
+- `sync.py` remains the legacy sync surface used by existing scripts/tests.
+- `query.py` remains the legacy query surface used by existing scripts/tests.
 - `scripts/ai/mcp/neo4j_memory_mcp_smoke.py` validates framed stdio behavior for the `neo4j-memory` MCP server.
 - `scripts/ai/mcp/neo4j_memory_mcp_adapter.py` bridges Codex framed stdio to the upstream line-delimited server.
 - `scripts/ai/mcp/` contains the MCP wrappers and verification scripts.

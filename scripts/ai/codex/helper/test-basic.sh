@@ -4,9 +4,9 @@
 
 set -euo pipefail
 SEPARATOR_LINE="=========================================="
-echo SEPARATOR_LINE
+echo "${SEPARATOR_LINE}"
 echo "  Codex WSL Quick Test"
-echo SEPARATOR_LINE
+echo "${SEPARATOR_LINE}"
 echo ""
 
 # Test 1: Node.js available
@@ -50,7 +50,7 @@ echo ""
 
 # Test 5: Check project path
 echo "[5] Testing project path..."
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || (cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd))"
 if [[ -d "$REPO_ROOT" ]]; then
     echo "✓ Project path accessible: $REPO_ROOT"
 else
@@ -59,12 +59,12 @@ else
 fi
 echo ""
 
-echo SEPARATOR_LINE
+echo "${SEPARATOR_LINE}"
 echo "  ✓ All basic tests passed!"
-echo SEPARATOR_LINE
+echo "${SEPARATOR_LINE}"
 echo ""
 echo "You can now run:"
-echo "  ./scripts/ops/codex.sh \"analyze this code\""
+echo "  ./scripts/ops/launchers/codex/codex.sh \"analyze this code\""
 echo ""
 echo "Note: First API call may take 20-30 seconds while"
 echo "Codex connects to OpenAI's servers."

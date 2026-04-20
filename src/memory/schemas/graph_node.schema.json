@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GraphNode",
+  "type": "object",
+  "required": ["id", "label", "properties"],
+  "properties": {
+    "id": {"type": "string"},
+    "label": {"type": "string"},
+    "properties": {"type": "object"}
+  },
+  "additionalProperties": false
+}
