@@ -141,6 +141,40 @@ def _merge_entries(
     return merged
 
 
+def _validated_file_size_entry(
+    key: object,
+    entry: object,
+) -> tuple[str | None, dict[str, Any] | None, list[str]]:
+    warnings: list[str] = []
+    if not isinstance(key, str):
+        warnings.append(f"{key!r}: non-string key skipped")
+        return None, None, warnings
+    if not isinstance(entry, dict):
+        warnings.append(f"{key}: non-mapping entry skipped")
+        return key, None, warnings
+    return key, entry, warnings
+
+
+def _targets_for_registry_key(
+    key: str,
+    *,
+    by_basename: dict[str, list[ModuleInfo]],
+    keep_unmatched: bool,
+) -> tuple[list[str], list[str]]:
+    if _is_canonical_file_key(key):
+        return [key.replace("\\", "/")], []
+
+    targets, warnings = _resolve_targets_for_legacy_key(
+        key,
+        by_basename=by_basename,
+    )
+    if targets or not keep_unmatched:
+        return targets, warnings
+
+    warnings.append(f"{key}: preserved unmatched legacy key (--keep-unmatched)")
+    return [key], warnings
+
+
 def migrate_registry_keys(
     raw: dict[str, Any],  # Any: registry payload is heterogeneous
 ) -> tuple[dict[str, Any], list[str]]:  # Any: registry payload is heterogeneous
@@ -156,29 +190,20 @@ def migrate_registry_keys(
 
     migrated: dict[str, Any] = {}
     for key, entry in file_size.items():
-        if not isinstance(key, str):
-            warnings.append(f"{key!r}: non-string key skipped")
-            continue
-        if not isinstance(entry, dict):
-            warnings.append(f"{key}: non-mapping entry skipped")
+        valid_key, valid_entry, entry_warnings = _validated_file_size_entry(key, entry)
+        warnings.extend(entry_warnings)
+        if valid_key is None or valid_entry is None:
             continue
 
-        if _is_canonical_file_key(key):
-            targets = [key.replace("\\", "/")]
-        else:
-            targets, key_warnings = _resolve_targets_for_legacy_key(
-                key,
-                by_basename=by_basename,
-            )
-            warnings.extend(key_warnings)
-            if not targets and key in file_size and _MIGRATION_KEEP_UNMATCHED:
-                warnings.append(
-                    f"{key}: preserved unmatched legacy key (--keep-unmatched)"
-                )
-                targets = [key]
+        targets, key_warnings = _targets_for_registry_key(
+            valid_key,
+            by_basename=by_basename,
+            keep_unmatched=_MIGRATION_KEEP_UNMATCHED,
+        )
+        warnings.extend(key_warnings)
 
         for target in targets:
-            migrated[target] = _merge_entries(migrated.get(target, {}), entry)
+            migrated[target] = _merge_entries(migrated.get(target, {}), valid_entry)
 
     new_raw = dict(raw)
     new_registries = dict(registries)

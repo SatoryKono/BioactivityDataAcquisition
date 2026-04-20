@@ -111,6 +111,75 @@ def _enricher_runner_factory(name: str, df: pl.DataFrame) -> AsyncMock:
     return AsyncMock()
 
 
+def _create_runner(
+    *,
+    config: MagicMock,
+    logger: MagicMock,
+    lock: AsyncMock,
+    merger: AsyncMock,
+    coordinator: AsyncMock,
+    key_extractor: AsyncMock,
+    seed_runner: AsyncMock,
+    run_id: str,
+    dry_run: bool = False,
+    resume: bool = False,
+    checkpoint_manager: InMemoryCheckpointManager | None = None,
+) -> tuple[CompositePipelineRunner, InMemoryCheckpointManager]:
+    """Create a runner with the standard FSM test dependency scaffold."""
+    manager = checkpoint_manager or create_checkpoint_manager(
+        composite_name="test_composite",
+        run_id=run_id,
+        logger=logger,
+        resume=resume,
+    )
+    deps = CompositeRunnerDependencies(
+        seed_runner_factory=_seed_runner_factory(seed_runner),
+        enricher_runner_factory=_enricher_runner_factory,
+        key_extractor=key_extractor,
+        coordinator=coordinator,
+        merger=merger,
+        checkpoint_manager=manager,
+        logger=logger,
+        lock=lock,
+        fsm_state_helper=FSMStateHelperService(
+            config=config,
+            logger=logger,
+            run_id=run_id,
+        ),
+    )
+    runner = CompositePipelineRunner(
+        config=config,
+        runtime=CompositeRuntimeConfig(dry_run=dry_run, resume=resume),
+        deps=deps,
+        run_id=run_id,
+    )
+    return runner, manager
+
+
+def _track_saved_states(
+    checkpoint_manager: InMemoryCheckpointManager,
+) -> list[CompositePipelineState]:
+    """Record checkpoint states persisted by the in-memory checkpoint manager."""
+    saved_states: list[CompositePipelineState] = []
+    original_save = checkpoint_manager.save
+
+    async def tracking_save(state: CompositeCheckpointState) -> None:
+        saved_states.append(state.state)
+        await original_save(state)
+
+    checkpoint_manager.save = tracking_save  # type: ignore[method-assign]
+    return saved_states
+
+
+def _fsm_transition_calls(logger: MagicMock) -> list[object]:
+    """Return FSM transition log calls emitted through the mock logger."""
+    return [
+        call
+        for call in logger.info.call_args_list
+        if call.args and "FSM state transition" in str(call.args[0])
+    ]
+
+
 @pytest.fixture
 def mock_config() -> MagicMock:
     """Create a mock composite config."""
