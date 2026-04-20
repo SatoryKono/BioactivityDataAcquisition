@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-20T08:36:06.784597+00:00",
+  "generated_at": "2026-04-20T10:50:49.712301+00:00",
   "summary": {
-    "total_scripts": 419,
+    "total_scripts": 421,
     "status_counts": {
-      "active": 302,
+      "active": 301,
       "legacy": 15,
-      "orphan": 92,
+      "orphan": 95,
       "unknown": 10
     },
     "reference_group_coverage": {
@@ -14,9 +14,9 @@
       "build": 1,
       "ci": 49,
       "docs": 119,
-      "scripts": 275,
+      "scripts": 274,
       "skills": 8,
-      "tests": 137
+      "tests": 140
     }
   },
   "scripts": [
@@ -58,6 +58,22 @@
           "text": "python -m scripts.ai vibe --help"
         }
       ]
+    },
+    {
+      "path": "scripts/ai/check_sonar_issues.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/ai/code_quality_analysis.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/codex/helper/check-env.ps1",
@@ -1364,7 +1380,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -1564,7 +1580,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
@@ -1586,12 +1602,6 @@
         },
         {
           "path": "scripts/ai/mcp/sonarqube_mcp_smoke.py",
-          "line": 40,
-          "source_group": "scripts",
-          "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
-        },
-        {
-          "path": "scripts/ai/src/sonarqube_mcp_smoke.py",
           "line": 40,
           "source_group": "scripts",
           "text": "return [str(_repo_root() / \"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\")]"
@@ -2677,17 +2687,10 @@
     {
       "path": "scripts/ai/src/sonar_issue_processor.py",
       "type": "py",
-      "status": "active",
+      "status": "orphan",
       "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ai/src/sonar_issue_processor_demo.py",
-          "line": 174,
-          "source_group": "scripts",
-          "text": "print(\"   2. Run: python3 sonar_issue_processor.py\")"
-        }
-      ]
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/ai/src/sonar_issue_processor_demo.py",
@@ -3378,7 +3381,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -3409,6 +3412,12 @@
           "line": 377,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/enforce_diagram_quality_budget.py\""
+        },
+        {
+          "path": "tests/architecture/test_diagram_quality_budget_security.py",
+          "line": 16,
+          "source_group": "tests",
+          "text": "repo_root / \"scripts\" / \"diagrams\" / \"enforce_diagram_quality_budget.py\""
         }
       ]
     },
@@ -3462,7 +3471,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/diagrams/README.md",
@@ -3475,6 +3484,18 @@
           "line": 71,
           "source_group": "scripts",
           "text": "\"fix-pagebreaks\": \"fix_pagebreaks_in_bundles.py\","
+        },
+        {
+          "path": "tests/unit/scripts/diagrams/test_write_path_security.py",
+          "line": 34,
+          "source_group": "tests",
+          "text": "_repo_root() / \"scripts\" / \"diagrams\" / \"fix_pagebreaks_in_bundles.py\","
+        },
+        {
+          "path": "tests/unit/scripts/diagrams/test_write_path_security.py",
+          "line": 49,
+          "source_group": "tests",
+          "text": "_repo_root() / \"scripts\" / \"diagrams\" / \"fix_pagebreaks_in_bundles.py\","
         }
       ]
     },
@@ -4058,7 +4079,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -4214,7 +4235,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -5582,13 +5603,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 578,
+          "line": 596,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 602,
+          "line": 620,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -5621,13 +5642,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 579,
+          "line": 597,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 603,
+          "line": 621,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -11542,7 +11563,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",

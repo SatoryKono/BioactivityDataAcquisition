@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `1646`
-- Internal import edges (raw): `6300`
+- Scanned modules: `1647`
+- Internal import edges (raw): `6303`
 - Aggregated layer edges: `14`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `287`
@@ -28,8 +28,8 @@ flowchart LR
     composition -->|343 OK| domain
     composition -->|283 OK| infrastructure
     domain -->|989 OK| domain
-    infrastructure -->|689 OK| domain
-    infrastructure -->|889 OK| infrastructure
+    infrastructure -->|691 OK| domain
+    infrastructure -->|890 OK| infrastructure
     interfaces -->|64 OK| application
     interfaces -->|60 OK| composition
     interfaces -->|40 OK| domain
@@ -48,8 +48,8 @@ flowchart LR
 | `composition`    | `domain`         |     343 | allowed |
 | `composition`    | `infrastructure` |     283 | allowed |
 | `domain`         | `domain`         |     989 | allowed |
-| `infrastructure` | `domain`         |     689 | allowed |
-| `infrastructure` | `infrastructure` |     889 | allowed |
+| `infrastructure` | `domain`         |     691 | allowed |
+| `infrastructure` | `infrastructure` |     890 | allowed |
 | `interfaces`     | `application`    |      64 | allowed |
 | `interfaces`     | `composition`    |      60 | allowed |
 | `interfaces`     | `domain`         |      40 | allowed |
@@ -113,13 +113,13 @@ flowchart LR
 | `composition.factories`        | `domain.services`               |      12 |
 | `composition.runtime_builders` | `domain.context`                |      12 |
 | `infrastructure.adapters`      | `domain.models`                 |      12 |
+| `infrastructure.observability` | `domain.ports`                  |      12 |
 | `application.pipelines`        | `domain.services`               |      11 |
 | `application.services`         | `domain.lineage`                |      11 |
 | `application.services`         | `domain.services`               |      11 |
 | `interfaces.cli`               | `composition.registry_api`      |      11 |
 | `application.core`             | `domain.exceptions`             |      10 |
 | `application.core`             | `domain.normalization`          |      10 |
-| `application.pipelines`        | `domain.filtering`              |      10 |
 
 ## Policy Violations
 

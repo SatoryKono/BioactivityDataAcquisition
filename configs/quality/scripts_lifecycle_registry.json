@@ -110,6 +110,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a narrow stdin-driven Sonar issue grouping helper for historical remediation triage; remove it once issue-wave analysis is fully folded into the canonical quality tooling."
     },
+    "scripts/ai/check_sonar_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical GitHub/Sonar reconciliation helper for manual issue review; do not expand it into a supported automation surface without fresh call-site evidence."
+    },
+    "scripts/ai/code_quality_analysis.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical exploratory code-quality probe; prefer canonical architecture and lint/report tooling instead of extending this orphan analysis script."
+    },
     "scripts/ai/scripts/ai/check_sonar_issues.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -187,6 +199,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical demo helper under scripts.ai.src for Sonar issue processing experiments; remove it once the exploratory workflow is fully retired."
+    },
+    "scripts/ai/src/sonar_issue_processor.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a historical scripts.ai.src copy of the Sonar issue processor; prefer the canonical scripts/ai/sonar_issue_processor.py workflow and remove this orphan mirror once no legacy references remain."
     },
     "scripts/ai/src/sonarqube_mcp_smoke.py": {
       "owner": "@bioetl-platform",

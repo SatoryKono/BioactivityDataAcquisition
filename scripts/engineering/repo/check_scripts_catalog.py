@@ -288,6 +288,44 @@ def _check_registry_entry_coverage(
     return manifest_paths
 
 
+def _lifecycle_policy_values(
+    lifecycle: dict[str, object],
+) -> tuple[set[str], list[str], set[str], list[str]]:
+    non_active_statuses = set(
+        _as_list_of_str(lifecycle.get("non_active_statuses"))
+        or ["unknown", "orphan", "legacy"]
+    )
+    required_registry_fields = _as_list_of_str(
+        lifecycle.get("required_registry_fields")
+    ) or ["owner", "decision", "next_step", "review_by"]
+    deprecated_decisions = set(
+        _as_list_of_str(lifecycle.get("deprecated_decisions")) or ["deprecate"]
+    )
+    deprecated_required_fields = _as_list_of_str(
+        lifecycle.get("deprecated_required_fields")
+    ) or ["replacement", "sunset_date"]
+    return (
+        non_active_statuses,
+        required_registry_fields,
+        deprecated_decisions,
+        deprecated_required_fields,
+    )
+
+
+def _check_stale_registry_entries(
+    *,
+    lifecycle: dict[str, object],
+    entries: dict[str, object],
+    manifest_paths: set[str],
+    violations: list[str],
+) -> None:
+    if not bool(lifecycle.get("enforce_known_registry_paths", True)):
+        return
+    for path in sorted(entries):
+        if path not in manifest_paths:
+            violations.append(f"stale lifecycle entry not found in manifest: {path}")
+
+
 def _check_lifecycle_coverage(
     *,
     root: Path,
@@ -325,19 +363,12 @@ def _check_lifecycle_coverage(
         violations.append(f"registry entries payload malformed: {registry_rel}")
         return
 
-    non_active_statuses = set(
-        _as_list_of_str(lifecycle.get("non_active_statuses"))
-        or ["unknown", "orphan", "legacy"]
-    )
-    required_registry_fields = _as_list_of_str(
-        lifecycle.get("required_registry_fields")
-    ) or ["owner", "decision", "next_step", "review_by"]
-    deprecated_decisions = set(
-        _as_list_of_str(lifecycle.get("deprecated_decisions")) or ["deprecate"]
-    )
-    deprecated_required_fields = _as_list_of_str(
-        lifecycle.get("deprecated_required_fields")
-    ) or ["replacement", "sunset_date"]
+    (
+        non_active_statuses,
+        required_registry_fields,
+        deprecated_decisions,
+        deprecated_required_fields,
+    ) = _lifecycle_policy_values(lifecycle)
 
     manifest_paths = _check_registry_entry_coverage(
         scripts=scripts,
@@ -348,16 +379,12 @@ def _check_lifecycle_coverage(
         deprecated_required_fields=deprecated_required_fields,
         violations=violations,
     )
-
-    enforce_known_registry_paths = bool(
-        lifecycle.get("enforce_known_registry_paths", True)
+    _check_stale_registry_entries(
+        lifecycle=lifecycle,
+        entries=entries,
+        manifest_paths=manifest_paths,
+        violations=violations,
     )
-    if enforce_known_registry_paths:
-        for path in sorted(entries):
-            if path not in manifest_paths:
-                violations.append(
-                    f"stale lifecycle entry not found in manifest: {path}"
-                )
 
 
 def _load_json_object_with_retry(
