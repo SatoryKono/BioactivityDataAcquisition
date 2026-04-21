@@ -5,7 +5,6 @@ Records deterministic health-probe cassettes to increase provider baseline.
 
 from __future__ import annotations
 
-import asyncio
 import os
 import time
 from collections.abc import AsyncIterator
@@ -47,14 +46,6 @@ def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     return f"rf013_openalex_health_{case_id}"
 
 
-@pytest.fixture(scope="module")
-def event_loop() -> AsyncIterator[asyncio.AbstractEventLoop]:
-    """Provide a module-scoped event loop for module-scoped async fixtures."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
 def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
     """Reset mutable HTTP client state between parameterized rebalance cases."""
     client.circuit_breaker.reset()
@@ -64,7 +55,7 @@ def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
         rate_limiter._last_refill = time.monotonic()
 
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Create and manage OpenAlex HTTP client lifecycle for integration tests."""
     client = UnifiedHTTPClient(

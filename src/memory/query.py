@@ -10,6 +10,24 @@ from pathlib import Path
 from typing import Any
 
 from memory.graph import query as graph_query
+from memory.graph.importers.expanded_json import (
+    default_expanded_graph_path,
+    load_file_relation_index,
+    load_module_relation_index,
+    write_expanded_graph_relation_artifacts,
+)
+from memory.graph.importers.expanded_json import (
+    query_file_neighborhood as _query_file_neighborhood,
+)
+from memory.graph.importers.expanded_json import (
+    query_file_relations as _query_file_relations,
+)
+from memory.graph.importers.expanded_json import (
+    query_module_neighborhood as _query_module_neighborhood,
+)
+from memory.graph.importers.expanded_json import (
+    query_module_relations as _query_module_relations,
+)
 from memory.rag.retrieval import TASK_PROFILES, load_chunk_manifest, rank_chunks
 from memory.resources import CATALOG_DIR, MEMORY_ROOT, POLICY_DIR, load_yaml_resource
 from memory.timeline._common import read_jsonl
@@ -17,6 +35,10 @@ from memory.tooling.refresh_all import refresh_all
 
 DEFAULT_RAG_CHUNKS = MEMORY_ROOT / "rag" / "manifests" / "chunks.jsonl"
 DEFAULT_TIMELINE_DIR = MEMORY_ROOT / "timeline" / "events"
+DEFAULT_FILE_RELATION_INDEX = MEMORY_ROOT / "graph" / "indexes" / "file_relations.json"
+DEFAULT_MODULE_RELATION_INDEX = (
+    MEMORY_ROOT / "graph" / "indexes" / "module_relations.json"
+)
 DEFAULT_PROFILE = "general"
 MISSING_MANIFEST_HINT = (
     "Run `python -m memory.tooling.refresh_all` first or pass `--auto-refresh` "
@@ -60,6 +82,13 @@ def _missing_manifest_error(path: Path, artifact: str) -> FileNotFoundError:
     )
 
 
+def _missing_graph_snapshot_error(path: Path) -> FileNotFoundError:
+    return FileNotFoundError(
+        f"Missing expanded graph snapshot at {path}. Pass `--expanded-graph-path` "
+        "or provide a generated file relation index."
+    )
+
+
 def _resolve_refresh_output_root(output_root: Path | None) -> Path:
     return output_root or Path(tempfile.mkdtemp(prefix="memory-query-"))
 
@@ -79,6 +108,80 @@ def _refresh_query_artifacts(
         include_graph_export=False,
     )
     return output_root, report
+
+
+def _refresh_file_relation_index(
+    *,
+    refresh_output_root: Path | None,
+    expanded_graph_path: Path | None,
+    refresh_repo_root: Path | None,
+) -> tuple[Path, Path, dict[str, Any]]:
+    output_root = _resolve_refresh_output_root(refresh_output_root)
+    repo_root = refresh_repo_root or Path(__file__).resolve().parents[2]
+    snapshot_path = expanded_graph_path or default_expanded_graph_path(repo_root)
+    if not snapshot_path.exists():
+        raise _missing_graph_snapshot_error(snapshot_path)
+    _, index_path, report = write_expanded_graph_relation_artifacts(
+        snapshot_path.resolve(),
+        output_root.resolve(),
+    )
+    return index_path, output_root, report
+
+
+def _refresh_module_relation_index(
+    *,
+    refresh_output_root: Path | None,
+    expanded_graph_path: Path | None,
+    refresh_repo_root: Path | None,
+) -> tuple[Path, Path, dict[str, Any]]:
+    output_root = _resolve_refresh_output_root(refresh_output_root)
+    repo_root = refresh_repo_root or Path(__file__).resolve().parents[2]
+    snapshot_path = expanded_graph_path or default_expanded_graph_path(repo_root)
+    if not snapshot_path.exists():
+        raise _missing_graph_snapshot_error(snapshot_path)
+    _, _, report = write_expanded_graph_relation_artifacts(
+        snapshot_path.resolve(),
+        output_root.resolve(),
+    )
+    return output_root / "graph" / "indexes" / "module_relations.json", output_root, report
+
+
+def _resolve_file_relation_index(
+    *,
+    index_path: Path,
+    auto_refresh: bool,
+    refresh_output_root: Path | None,
+    expanded_graph_path: Path | None,
+    refresh_repo_root: Path | None,
+) -> tuple[Path, Path | None, dict[str, Any] | None]:
+    if index_path.exists():
+        return index_path, None, None
+    if not auto_refresh:
+        raise _missing_manifest_error(index_path, "file relation index")
+    return _refresh_file_relation_index(
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+
+
+def _resolve_module_relation_index(
+    *,
+    index_path: Path,
+    auto_refresh: bool,
+    refresh_output_root: Path | None,
+    expanded_graph_path: Path | None,
+    refresh_repo_root: Path | None,
+) -> tuple[Path, Path | None, dict[str, Any] | None]:
+    if index_path.exists():
+        return index_path, None, None
+    if not auto_refresh:
+        raise _missing_manifest_error(index_path, "module relation index")
+    return _refresh_module_relation_index(
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
 
 
 def _resolve_query_paths(
@@ -112,6 +215,239 @@ def _resolve_query_paths(
     )
 
 
+def query_file_refs(
+    *,
+    source_path: str,
+    direction: str = "both",
+    index_path: Path = DEFAULT_FILE_RELATION_INDEX,
+    limit: int = 20,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return direct file-reference relations for one source path."""
+    resolved_index_path, output_root, refresh_report = _resolve_file_relation_index(
+        index_path=index_path,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload = _query_file_relations(
+        load_file_relation_index(resolved_index_path),
+        source_path,
+        direction=direction,
+        limit=limit,
+    )
+    payload["index_path"] = str(resolved_index_path)
+    payload["refresh_output_root"] = str(output_root) if output_root else None
+    payload["refresh_report"] = refresh_report
+    return payload
+
+
+def query_file_impact(
+    *,
+    source_path: str,
+    index_path: Path = DEFAULT_FILE_RELATION_INDEX,
+    limit: int = 50,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return inbound and outbound impact candidates for one file."""
+    payload = query_file_refs(
+        source_path=source_path,
+        direction="both",
+        index_path=index_path,
+        limit=limit,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload["kind"] = "file_impact"
+    payload["impact_candidates"] = {
+        "files_that_reference_query": [
+            item["source_path"] for item in payload["inbound"]
+        ],
+        "files_referenced_by_query": [
+            item["target_path"] for item in payload["outbound"]
+        ],
+    }
+    return payload
+
+
+def query_file_neighborhood(
+    *,
+    source_path: str,
+    depth: int = 1,
+    index_path: Path = DEFAULT_FILE_RELATION_INDEX,
+    limit: int = 50,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return a bounded graph neighborhood over file-reference relations."""
+    resolved_index_path, output_root, refresh_report = _resolve_file_relation_index(
+        index_path=index_path,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload = _query_file_neighborhood(
+        load_file_relation_index(resolved_index_path),
+        source_path,
+        depth=depth,
+        limit=limit,
+    )
+    payload["index_path"] = str(resolved_index_path)
+    payload["refresh_output_root"] = str(output_root) if output_root else None
+    payload["refresh_report"] = refresh_report
+    return payload
+
+
+def query_module_refs(
+    *,
+    module_name: str,
+    direction: str = "both",
+    index_path: Path = DEFAULT_MODULE_RELATION_INDEX,
+    limit: int = 20,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return direct module-reference relations for one module."""
+    resolved_index_path, output_root, refresh_report = _resolve_module_relation_index(
+        index_path=index_path,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload = _query_module_relations(
+        load_module_relation_index(resolved_index_path),
+        module_name,
+        direction=direction,
+        limit=limit,
+    )
+    payload["index_path"] = str(resolved_index_path)
+    payload["refresh_output_root"] = str(output_root) if output_root else None
+    payload["refresh_report"] = refresh_report
+    return payload
+
+
+def query_module_impact(
+    *,
+    module_name: str,
+    index_path: Path = DEFAULT_MODULE_RELATION_INDEX,
+    limit: int = 50,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return inbound and outbound impact candidates for one module."""
+    payload = query_module_refs(
+        module_name=module_name,
+        direction="both",
+        index_path=index_path,
+        limit=limit,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload["kind"] = "module_impact"
+    payload["impact_candidates"] = {
+        "modules_that_reference_query": [
+            item["source_name"] for item in payload["inbound"]
+        ],
+        "modules_referenced_by_query": [
+            item["target_name"] for item in payload["outbound"]
+        ],
+    }
+    return payload
+
+
+def query_module_neighborhood(
+    *,
+    module_name: str,
+    depth: int = 1,
+    index_path: Path = DEFAULT_MODULE_RELATION_INDEX,
+    limit: int = 50,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return a bounded graph neighborhood over module-reference relations."""
+    resolved_index_path, output_root, refresh_report = _resolve_module_relation_index(
+        index_path=index_path,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload = _query_module_neighborhood(
+        load_module_relation_index(resolved_index_path),
+        module_name,
+        depth=depth,
+        limit=limit,
+    )
+    payload["index_path"] = str(resolved_index_path)
+    payload["refresh_output_root"] = str(output_root) if output_root else None
+    payload["refresh_report"] = refresh_report
+    return payload
+
+
+def _rag_file_relation_context(
+    *,
+    file_context: str | None,
+    index_path: Path,
+    auto_refresh: bool,
+    refresh_output_root: Path | None,
+    expanded_graph_path: Path | None,
+    refresh_repo_root: Path | None,
+    depth: int,
+) -> tuple[str | None, set[str], dict[str, Any] | None]:
+    if file_context is None:
+        return None, set(), None
+    resolved_index_path, output_root, refresh_report = _resolve_file_relation_index(
+        index_path=index_path,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    neighborhood = _query_file_neighborhood(
+        load_file_relation_index(resolved_index_path),
+        file_context,
+        depth=depth,
+        limit=500,
+    )
+    resolved_path = neighborhood.get("resolved_path")
+    nodes = {
+        str(path)
+        for path in neighborhood.get("nodes") or []
+        if isinstance(path, str) and path != resolved_path
+    }
+    context = {
+        "file_context": file_context,
+        "resolved_path": resolved_path,
+        "index_path": str(resolved_index_path),
+        "depth": depth,
+        "related_file_count": len(nodes),
+        "refresh_output_root": str(output_root) if output_root else None,
+        "refresh_report": refresh_report,
+    }
+    return str(resolved_path) if resolved_path else None, nodes, context
+
+
 def query_rag(
     *,
     query: str | None,
@@ -125,6 +461,10 @@ def query_rag(
     auto_refresh: bool = False,
     refresh_output_root: Path | None = None,
     refresh_repo_root: Path | None = None,
+    file_context: str | None = None,
+    file_relation_index_path: Path = DEFAULT_FILE_RELATION_INDEX,
+    expanded_graph_path: Path | None = None,
+    file_context_depth: int = 1,
 ) -> dict[str, Any]:
     """Return filtered deterministic RAG chunks."""
     resolved_chunks_path, _, output_root, refresh_report = _resolve_query_paths(
@@ -136,6 +476,17 @@ def query_rag(
         require_events=False,
     )
     chunks = load_chunk_manifest(resolved_chunks_path)
+    resolved_file_context, related_file_paths, file_relation_context = (
+        _rag_file_relation_context(
+            file_context=file_context,
+            index_path=file_relation_index_path,
+            auto_refresh=auto_refresh,
+            refresh_output_root=output_root or refresh_output_root,
+            expanded_graph_path=expanded_graph_path,
+            refresh_repo_root=refresh_repo_root,
+            depth=file_context_depth,
+        )
+    )
     matches = rank_chunks(
         chunks,
         source_type=source_type,
@@ -144,6 +495,8 @@ def query_rag(
         symbol_kind=symbol_kind,
         query=query,
         profile=profile,
+        file_context_path=resolved_file_context,
+        related_file_paths=related_file_paths,
     )[:limit]
     return {
         "kind": "rag",
@@ -151,6 +504,7 @@ def query_rag(
         "profile": profile,
         "count": len(matches),
         "chunks_path": str(resolved_chunks_path),
+        "file_relation_context": file_relation_context,
         "refresh_output_root": str(output_root) if output_root else None,
         "refresh_report": refresh_report,
         "results": matches,
@@ -362,6 +716,10 @@ def query_all(
     auto_refresh: bool = False,
     refresh_output_root: Path | None = None,
     refresh_repo_root: Path | None = None,
+    file_context: str | None = None,
+    file_relation_index_path: Path = DEFAULT_FILE_RELATION_INDEX,
+    expanded_graph_path: Path | None = None,
+    file_context_depth: int = 1,
 ) -> dict[str, Any]:
     """Run a lightweight local search across catalog, RAG, and timeline."""
     resolved_chunks_path, resolved_events_dir, output_root, refresh_report = (
@@ -382,6 +740,13 @@ def query_all(
         chunks_path=resolved_chunks_path,
         limit=limit,
         profile=profile,
+        file_context=file_context,
+        file_relation_index_path=file_relation_index_path,
+        expanded_graph_path=expanded_graph_path,
+        file_context_depth=file_context_depth,
+        auto_refresh=auto_refresh,
+        refresh_output_root=output_root or refresh_output_root,
+        refresh_repo_root=refresh_repo_root,
     )
     timeline_payload = query_timeline(
         query=query,
@@ -415,6 +780,7 @@ def query_all(
             "rag": rag_payload["results"],
             "timeline": timeline_payload["results"],
         },
+        "file_relation_context": rag_payload.get("file_relation_context"),
     }
 
 
@@ -455,6 +821,20 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Build temporary RAG/timeline artifacts first when manifests are missing.",
     )
     rag_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    rag_parser.add_argument(
+        "--file-context",
+        type=str,
+        default=None,
+        help="Boost RAG chunks from this file and its references_file neighborhood.",
+    )
+    rag_parser.add_argument(
+        "--file-relation-index",
+        type=Path,
+        default=DEFAULT_FILE_RELATION_INDEX,
+        help="Generated file relation index used by --file-context.",
+    )
+    rag_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+    rag_parser.add_argument("--file-context-depth", type=int, default=1)
     rag_parser.add_argument(
         "--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE
     )
@@ -499,7 +879,139 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     all_parser.add_argument("--refresh-output-root", type=Path, default=None)
     all_parser.add_argument(
+        "--file-context",
+        type=str,
+        default=None,
+        help="Boost RAG chunks from this file and its references_file neighborhood.",
+    )
+    all_parser.add_argument(
+        "--file-relation-index",
+        type=Path,
+        default=DEFAULT_FILE_RELATION_INDEX,
+        help="Generated file relation index used by --file-context.",
+    )
+    all_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+    all_parser.add_argument("--file-context-depth", type=int, default=1)
+    all_parser.add_argument(
         "--profile", choices=tuple(TASK_PROFILES.keys()), default=DEFAULT_PROFILE
+    )
+
+    refs_parser = subparsers.add_parser(
+        "refs",
+        help="Query direct file -> references_file -> file relations.",
+        parents=[common],
+    )
+    refs_parser.add_argument("source_path", type=str)
+    refs_parser.add_argument(
+        "--direction",
+        choices=("both", "outbound", "inbound"),
+        default="both",
+    )
+    refs_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_FILE_RELATION_INDEX,
+        help="Generated file relation index path.",
+    )
+    refs_parser.add_argument("--limit", type=int, default=20)
+    refs_parser.add_argument("--auto-refresh", action="store_true")
+    refs_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    refs_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+
+    impact_parser = subparsers.add_parser(
+        "impact",
+        help="Query inbound/outbound file impact candidates.",
+        parents=[common],
+    )
+    impact_parser.add_argument("source_path", type=str)
+    impact_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_FILE_RELATION_INDEX,
+        help="Generated file relation index path.",
+    )
+    impact_parser.add_argument("--limit", type=int, default=50)
+    impact_parser.add_argument("--auto-refresh", action="store_true")
+    impact_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    impact_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+
+    neighborhood_parser = subparsers.add_parser(
+        "neighborhood",
+        help="Query a bounded file-reference graph neighborhood.",
+        parents=[common],
+    )
+    neighborhood_parser.add_argument("source_path", type=str)
+    neighborhood_parser.add_argument("--depth", type=int, default=1)
+    neighborhood_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_FILE_RELATION_INDEX,
+        help="Generated file relation index path.",
+    )
+    neighborhood_parser.add_argument("--limit", type=int, default=50)
+    neighborhood_parser.add_argument("--auto-refresh", action="store_true")
+    neighborhood_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    neighborhood_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+
+    module_refs_parser = subparsers.add_parser(
+        "module-refs",
+        help="Query direct module -> references -> module relations.",
+        parents=[common],
+    )
+    module_refs_parser.add_argument("module_name", type=str)
+    module_refs_parser.add_argument(
+        "--direction",
+        choices=("both", "outbound", "inbound"),
+        default="both",
+    )
+    module_refs_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_MODULE_RELATION_INDEX,
+        help="Generated module relation index path.",
+    )
+    module_refs_parser.add_argument("--limit", type=int, default=20)
+    module_refs_parser.add_argument("--auto-refresh", action="store_true")
+    module_refs_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    module_refs_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+
+    module_impact_parser = subparsers.add_parser(
+        "module-impact",
+        help="Query inbound/outbound module impact candidates.",
+        parents=[common],
+    )
+    module_impact_parser.add_argument("module_name", type=str)
+    module_impact_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_MODULE_RELATION_INDEX,
+        help="Generated module relation index path.",
+    )
+    module_impact_parser.add_argument("--limit", type=int, default=50)
+    module_impact_parser.add_argument("--auto-refresh", action="store_true")
+    module_impact_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    module_impact_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+
+    module_neighborhood_parser = subparsers.add_parser(
+        "module-neighborhood",
+        help="Query a bounded module-reference graph neighborhood.",
+        parents=[common],
+    )
+    module_neighborhood_parser.add_argument("module_name", type=str)
+    module_neighborhood_parser.add_argument("--depth", type=int, default=1)
+    module_neighborhood_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_MODULE_RELATION_INDEX,
+        help="Generated module relation index path.",
+    )
+    module_neighborhood_parser.add_argument("--limit", type=int, default=50)
+    module_neighborhood_parser.add_argument("--auto-refresh", action="store_true")
+    module_neighborhood_parser.add_argument(
+        "--refresh-output-root", type=Path, default=None
+    )
+    module_neighborhood_parser.add_argument(
+        "--expanded-graph-path", type=Path, default=None
     )
 
     graph_parser = subparsers.add_parser(
@@ -540,6 +1052,26 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
         print(f"- catalog matches: {len(results['catalog'])}")
         print(f"- rag matches: {len(results['rag'])}")
         print(f"- timeline matches: {len(results['timeline'])}")
+    elif payload.get("kind") in {"file_refs", "file_impact"}:
+        print(f"{payload['kind']}: {payload['query']}")
+        print(f"- resolved path: {payload.get('resolved_path')}")
+        print(f"- inbound: {len(payload.get('inbound') or [])}")
+        print(f"- outbound: {len(payload.get('outbound') or [])}")
+    elif payload.get("kind") == "file_neighborhood":
+        print(f"file_neighborhood: {payload['query']}")
+        print(f"- resolved path: {payload.get('resolved_path')}")
+        print(f"- nodes: {len(payload.get('nodes') or [])}")
+        print(f"- edges: {len(payload.get('edges') or [])}")
+    elif payload.get("kind") in {"module_refs", "module_impact"}:
+        print(f"{payload['kind']}: {payload['query']}")
+        print(f"- resolved module: {payload.get('resolved_module')}")
+        print(f"- inbound: {len(payload.get('inbound') or [])}")
+        print(f"- outbound: {len(payload.get('outbound') or [])}")
+    elif payload.get("kind") == "module_neighborhood":
+        print(f"module_neighborhood: {payload['query']}")
+        print(f"- resolved module: {payload.get('resolved_module')}")
+        print(f"- nodes: {len(payload.get('nodes') or [])}")
+        print(f"- edges: {len(payload.get('edges') or [])}")
     else:
         print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
     return _payload_exit_code(payload)
@@ -565,6 +1097,10 @@ def main(argv: list[str] | None = None) -> int:
                     profile=args.profile,
                     auto_refresh=args.auto_refresh,
                     refresh_output_root=args.refresh_output_root,
+                    file_context=args.file_context,
+                    file_relation_index_path=args.file_relation_index,
+                    expanded_graph_path=args.expanded_graph_path,
+                    file_context_depth=args.file_context_depth,
                 ),
                 as_json=args.json,
             )
@@ -592,6 +1128,86 @@ def main(argv: list[str] | None = None) -> int:
                     profile=args.profile,
                     auto_refresh=args.auto_refresh,
                     refresh_output_root=args.refresh_output_root,
+                    file_context=args.file_context,
+                    file_relation_index_path=args.file_relation_index,
+                    expanded_graph_path=args.expanded_graph_path,
+                    file_context_depth=args.file_context_depth,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "refs":
+            return _emit(
+                query_file_refs(
+                    source_path=args.source_path,
+                    direction=args.direction,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "impact":
+            return _emit(
+                query_file_impact(
+                    source_path=args.source_path,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "neighborhood":
+            return _emit(
+                query_file_neighborhood(
+                    source_path=args.source_path,
+                    depth=args.depth,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "module-refs":
+            return _emit(
+                query_module_refs(
+                    module_name=args.module_name,
+                    direction=args.direction,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "module-impact":
+            return _emit(
+                query_module_impact(
+                    module_name=args.module_name,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "module-neighborhood":
+            return _emit(
+                query_module_neighborhood(
+                    module_name=args.module_name,
+                    depth=args.depth,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
                 ),
                 as_json=args.json,
             )

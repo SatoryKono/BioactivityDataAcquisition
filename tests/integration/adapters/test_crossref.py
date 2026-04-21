@@ -6,7 +6,6 @@ See RULES.md §4.2 for VCR requirements.
 
 from __future__ import annotations
 
-import asyncio
 import time
 from collections.abc import AsyncIterator
 from unittest.mock import MagicMock
@@ -33,14 +32,6 @@ def mock_logger() -> MagicMock:
     return MagicMock()
 
 
-@pytest.fixture(scope="module")
-def event_loop() -> AsyncIterator[asyncio.AbstractEventLoop]:
-    """Provide a module-scoped event loop for module-scoped async fixtures."""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
-
-
 def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
     """Reset mutable HTTP client state between tests sharing one client."""
     client.circuit_breaker.reset()
@@ -50,7 +41,7 @@ def _reset_http_client_state(client: UnifiedHTTPClient) -> None:
         rate_limiter._last_refill = time.monotonic()
 
 
-@pytest_asyncio.fixture(scope="module")
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
 async def http_client() -> AsyncIterator[UnifiedHTTPClient]:
     """Provide a shared started HTTP client for CrossRef integration tests."""
     client = UnifiedHTTPClient(

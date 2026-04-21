@@ -34,6 +34,8 @@ CURATED_KIND_BY_DIR = {
 REBUILD_ONLY_DIRS = (
     "src/memory/rag/manifests",
     "src/memory/graph/exports",
+    "src/memory/graph/projections",
+    "src/memory/graph/indexes",
     "src/memory/timeline/events",
 )
 

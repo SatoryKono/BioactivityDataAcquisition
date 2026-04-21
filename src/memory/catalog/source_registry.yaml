@@ -41,6 +41,10 @@ sources:
     classification: derived
     paths: ["docs/reports", "reports"]
     description: "Generated evidence and analysis outputs."
+  - id: expanded_knowledge_graph_snapshot
+    classification: derived
+    paths: ["src/bioetl_knowledge_graph_expanded.json"]
+    description: "Optional expanded graph snapshot used as an import source for file-level relation projections."
   - id: curated_memory
     classification: derived
     paths: ["src/memory/curated"]

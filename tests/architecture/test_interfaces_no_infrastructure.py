@@ -264,15 +264,15 @@ class TestEntrypointsLegacyServiceCompatibility:
         """Test that entrypoints exports getter functions for services."""
         from bioetl.composition import entrypoints
 
-        # Check that getter functions exist
-        assert hasattr(entrypoints, "get_checkpoint_service"), (
-            "entrypoints should export get_checkpoint_service"
+        entrypoint_names = set(dir(entrypoints))
+        assert "get_checkpoint_service" in entrypoint_names, (
+            "entrypoints should expose get_checkpoint_service for legacy discovery"
         )
-        assert hasattr(entrypoints, "get_quarantine_service"), (
-            "entrypoints should export get_quarantine_service"
+        assert "get_quarantine_service" in entrypoint_names, (
+            "entrypoints should expose get_quarantine_service for legacy discovery"
         )
-        assert hasattr(entrypoints, "get_bronze_cleanup_service"), (
-            "entrypoints should export get_bronze_cleanup_service"
+        assert "get_bronze_cleanup_service" in entrypoint_names, (
+            "entrypoints should expose get_bronze_cleanup_service for legacy discovery"
         )
 
     def test_entrypoints_all_excludes_legacy_service_getters(self):

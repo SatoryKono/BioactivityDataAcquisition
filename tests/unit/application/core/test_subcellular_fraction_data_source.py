@@ -54,18 +54,10 @@ class MockFilterableDataSource:
         self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
         self.aclose = AsyncMock()
 
-    async def _yield_assays(self):
-        await asyncio.sleep(0)
-        for assay in self._assays:
-            yield assay
-
-    async def _delegate_assays(self):
-        async for assay in self._yield_assays():
-            yield assay
-
     async def _passthrough_fetch(self, *args: object, **kwargs: object):
         del args, kwargs
-        async for assay in self._delegate_assays():
+        await asyncio.sleep(0)
+        for assay in self._assays:
             yield assay
 
     fetch = _passthrough_fetch
@@ -666,7 +658,7 @@ class TestSubcellularFractionFilterable:
                         "limit": limit,
                     }
                 )
-                async for assay in self._yield_assays():
+                for assay in self._assays:
                     yield assay
 
         source = _RecordingFilterableDataSource(

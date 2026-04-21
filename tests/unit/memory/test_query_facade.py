@@ -10,6 +10,8 @@ from memory.query import (
     main,
     query_all,
     query_catalog,
+    query_file_impact,
+    query_file_refs,
     query_rag,
     query_timeline,
 )
@@ -125,6 +127,110 @@ def test_query_rag_profile_prefers_runtime_code_for_implementation_tasks(
     )
     assert payload["results"][0]["id"] == "code-1"
     assert payload["results"][0]["score"] >= payload["results"][1]["score"]
+
+
+def test_query_rag_boosts_file_relation_context(tmp_path: Path) -> None:
+    chunks_path = tmp_path / "chunks.jsonl"
+    rows = [
+        {
+            "id": "unrelated",
+            "title": "unrelated",
+            "content": "shared implementation context",
+            "source_path": "src/unrelated.py",
+            "source_type": "code",
+            "domain": "runtime",
+            "repo_zone": "canonical_runtime",
+            "symbol_kind": "function",
+        },
+        {
+            "id": "related",
+            "title": "related",
+            "content": "shared implementation context",
+            "source_path": "src/related.py",
+            "source_type": "code",
+            "domain": "runtime",
+            "repo_zone": "canonical_runtime",
+            "symbol_kind": "function",
+        },
+        {
+            "id": "focus",
+            "title": "focus",
+            "content": "shared implementation context",
+            "source_path": "src/focus.py",
+            "source_type": "code",
+            "domain": "runtime",
+            "repo_zone": "canonical_runtime",
+            "symbol_kind": "function",
+        },
+    ]
+    chunks_path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n",
+        encoding="utf-8",
+    )
+    index_path = tmp_path / "file_relations.json"
+    index_path.write_text(
+        json.dumps(
+            {
+                "kind": "file_relation_index",
+                "relation": "references_file",
+                "source_snapshot": "snapshot.json",
+                "by_file": {
+                    "src/focus.py": {
+                        "outbound": [
+                            {
+                                "id": "src/focus.py|references_file|src/related.py",
+                                "direction": "outbound",
+                                "relation": "references_file",
+                                "source_path": "src/focus.py",
+                                "target_path": "src/related.py",
+                                "confidence": "derived",
+                                "provenance": "test",
+                                "source_generated_at": "2026-04-17",
+                                "evidence": {},
+                            }
+                        ],
+                        "inbound": [],
+                    },
+                    "src/related.py": {
+                        "outbound": [],
+                        "inbound": [
+                            {
+                                "id": "src/focus.py|references_file|src/related.py",
+                                "direction": "inbound",
+                                "relation": "references_file",
+                                "source_path": "src/focus.py",
+                                "target_path": "src/related.py",
+                                "confidence": "derived",
+                                "provenance": "test",
+                                "source_generated_at": "2026-04-17",
+                                "evidence": {},
+                            }
+                        ],
+                    },
+                },
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = query_rag(
+        query="shared",
+        source_type=None,
+        domain=None,
+        repo_zone=None,
+        symbol_kind=None,
+        chunks_path=chunks_path,
+        limit=5,
+        file_context="focus.py",
+        file_relation_index_path=index_path,
+    )
+
+    assert [item["id"] for item in payload["results"][:2]] == ["focus", "related"]
+    assert "file_context:focus" in payload["results"][0]["ranking_reasons"]
+    assert "file_relation:references_file" in payload["results"][1][
+        "ranking_reasons"
+    ]
 
 
 def test_query_timeline_filters_local_events(tmp_path: Path) -> None:
@@ -321,3 +427,63 @@ def test_query_all_auto_refreshes_missing_rebuild_only_artifacts(
     assert payload["refresh_report"]["ok"] is True
     assert len(payload["results"]["rag"]) >= 1
     assert any(item["source_type"] == "workflow" for item in payload["results"]["rag"])
+
+
+def test_query_file_refs_reads_generated_relation_index(tmp_path: Path) -> None:
+    index_path = tmp_path / "file_relations.json"
+    index_path.write_text(
+        json.dumps(
+            {
+                "kind": "file_relation_index",
+                "relation": "references_file",
+                "source_snapshot": "snapshot.json",
+                "by_file": {
+                    "src/a.py": {
+                        "outbound": [
+                            {
+                                "id": "src/a.py|references_file|src/b.py",
+                                "direction": "outbound",
+                                "relation": "references_file",
+                                "source_path": "src/a.py",
+                                "target_path": "src/b.py",
+                                "confidence": "derived",
+                                "provenance": "test",
+                                "source_generated_at": "2026-04-17",
+                                "evidence": {},
+                            }
+                        ],
+                        "inbound": [],
+                    },
+                    "src/b.py": {
+                        "outbound": [],
+                        "inbound": [
+                            {
+                                "id": "src/a.py|references_file|src/b.py",
+                                "direction": "inbound",
+                                "relation": "references_file",
+                                "source_path": "src/a.py",
+                                "target_path": "src/b.py",
+                                "confidence": "derived",
+                                "provenance": "test",
+                                "source_generated_at": "2026-04-17",
+                                "evidence": {},
+                            }
+                        ],
+                    },
+                },
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    refs = query_file_refs(
+        source_path="a.py",
+        direction="outbound",
+        index_path=index_path,
+    )
+    impact = query_file_impact(source_path="src/b.py", index_path=index_path)
+
+    assert refs["resolved_path"] == "src/a.py"
+    assert refs["outbound"][0]["target_path"] == "src/b.py"
+    assert impact["impact_candidates"]["files_that_reference_query"] == ["src/a.py"]

@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import Any
 
 from memory.graph import sync as graph_sync
+from memory.graph.importers.expanded_json import (
+    default_expanded_graph_path,
+    write_expanded_graph_relation_artifacts,
+)
 from memory.rag.indexing import write_rag_manifests
 from memory.resources import MEMORY_ROOT
 from memory.timeline.ingest_ci import write_ci_events
@@ -47,6 +51,17 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Also export a deterministic graph snapshot under graph/exports/.",
     )
     parser.add_argument(
+        "--include-graph-relations",
+        action="store_true",
+        help="Also import file-level relation projections from expanded graph JSON.",
+    )
+    parser.add_argument(
+        "--expanded-graph-path",
+        type=Path,
+        default=None,
+        help="Path to bioetl_knowledge_graph_expanded.json for relation imports.",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="Emit the refresh summary as JSON.",
@@ -61,6 +76,8 @@ def refresh_all(
     include_rag: bool = True,
     include_timeline: bool = True,
     include_graph_export: bool = False,
+    include_graph_relations: bool = False,
+    expanded_graph_path: Path | None = None,
 ) -> dict[str, Any]:
     """Refresh supported memory artifacts and return a summary."""
     summary: dict[str, Any] = {"ok": True, "artifacts": []}
@@ -102,6 +119,35 @@ def refresh_all(
         if exit_code != 0:
             summary["ok"] = False
 
+    if include_graph_relations:
+        snapshot_path = expanded_graph_path or default_expanded_graph_path(root)
+        if not snapshot_path.exists():
+            summary["ok"] = False
+            summary["artifacts"].append(
+                {
+                    "kind": "graph_relations",
+                    "paths": [],
+                    "error": f"missing expanded graph snapshot: {snapshot_path}",
+                }
+            )
+        else:
+            _, _, relation_summary = (
+                write_expanded_graph_relation_artifacts(snapshot_path, output_root)
+            )
+            summary["artifacts"].append(
+                {
+                    "kind": "graph_relations",
+                    "paths": relation_summary["paths"],
+                    "relation_count": relation_summary["relation_count"],
+                    "file_count": relation_summary["file_count"],
+                    "module_relation_count": relation_summary[
+                        "module_relation_count"
+                    ],
+                    "module_count": relation_summary["module_count"],
+                    "source_snapshot": relation_summary["source_snapshot"],
+                }
+            )
+
     return summary
 
 
@@ -114,6 +160,8 @@ def main(argv: list[str] | None = None) -> int:
         include_rag=not args.skip_rag,
         include_timeline=not args.skip_timeline,
         include_graph_export=args.include_graph_export,
+        include_graph_relations=args.include_graph_relations,
+        expanded_graph_path=args.expanded_graph_path,
     )
 
     if args.json:
