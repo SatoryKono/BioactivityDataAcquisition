@@ -7,6 +7,7 @@ import json
 import re
 import sys
 from collections import Counter, defaultdict, deque
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -103,44 +104,58 @@ def iter_module_reference_records(
     records: list[dict[str, Any]] = []
 
     for edge_id, edge in edges.items():
-        if edge.get("edge_type") != "references":
-            continue
-        source_id = str(edge.get("source") or "")
-        target_id = str(edge.get("target") or "")
-        source_node = nodes.get(source_id) or {}
-        target_node = nodes.get(target_id) or {}
-        if (
-            source_node.get("node_type") != "Module"
-            or target_node.get("node_type") != "Module"
-        ):
-            continue
-        source_name = _node_module_name(source_node, source_id)
-        target_name = _node_module_name(target_node, target_id)
-        if not source_name or not target_name:
-            continue
-        records.append(
-            {
-                "id": f"{source_name}|references|{target_name}",
-                "source_id": source_id,
-                "source_name": source_name,
-                "source_path": _node_source_path(source_node),
-                "target_id": target_id,
-                "target_name": target_name,
-                "target_path": _node_source_path(target_node),
-                "relation": "references",
-                "confidence": "derived",
-                "provenance": "bioetl_knowledge_graph_expanded.references",
-                "source_snapshot": source_snapshot,
-                "source_generated_at": snapshot_generated_at,
-                "edge_id": str(edge_id),
-                "description": str(edge.get("description") or ""),
-                "evidence": edge.get("meta")
-                if isinstance(edge.get("meta"), dict)
-                else {},
-            }
+        record = _module_reference_record(
+            edge_id=edge_id,
+            edge=edge,
+            nodes=nodes,
+            source_snapshot=source_snapshot,
+            snapshot_generated_at=snapshot_generated_at,
         )
+        if record is not None:
+            records.append(record)
     records.sort(key=lambda item: (item["source_name"], item["target_name"]))
     return records
+
+
+def _module_reference_record(
+    *,
+    edge_id: str,
+    edge: dict[str, Any],
+    nodes: dict[str, dict[str, Any]],
+    source_snapshot: str,
+    snapshot_generated_at: str,
+) -> dict[str, Any] | None:
+    if edge.get("edge_type") != "references":
+        return None
+    source_id = str(edge.get("source") or "")
+    target_id = str(edge.get("target") or "")
+    source_node = nodes.get(source_id) or {}
+    target_node = nodes.get(target_id) or {}
+    if source_node.get("node_type") != "Module":
+        return None
+    if target_node.get("node_type") != "Module":
+        return None
+    source_name = _node_module_name(source_node, source_id)
+    target_name = _node_module_name(target_node, target_id)
+    if not source_name or not target_name:
+        return None
+    return {
+        "id": f"{source_name}|references|{target_name}",
+        "source_id": source_id,
+        "source_name": source_name,
+        "source_path": _node_source_path(source_node),
+        "target_id": target_id,
+        "target_name": target_name,
+        "target_path": _node_source_path(target_node),
+        "relation": "references",
+        "confidence": "derived",
+        "provenance": "bioetl_knowledge_graph_expanded.references",
+        "source_snapshot": source_snapshot,
+        "source_generated_at": snapshot_generated_at,
+        "edge_id": str(edge_id),
+        "description": str(edge.get("description") or ""),
+        "evidence": edge.get("meta") if isinstance(edge.get("meta"), dict) else {},
+    }
 
 
 def iter_entity_relation_records(
@@ -956,6 +971,59 @@ def _empty_entity_relation_payload(
     }
 
 
+def _empty_neighborhood_payload(
+    *,
+    kind: str,
+    query: str,
+    resolved_key: str,
+    depth: int,
+) -> dict[str, Any]:
+    return {
+        "kind": kind,
+        "query": query,
+        resolved_key: None,
+        "depth": depth,
+        "nodes": [],
+        "edges": [],
+        "count": 0,
+        "ok": True,
+    }
+
+
+def _bounded_relation_neighborhood(
+    *,
+    entries: dict[str, dict[str, Any]],
+    start: str,
+    depth: int,
+    limit: int,
+    relations_for_entry: Callable[[dict[str, Any]], list[dict[str, Any]]],
+    neighbor_for_relation: Callable[[dict[str, Any], str], str],
+) -> tuple[list[str], list[dict[str, Any]]]:
+    visited = {start}
+    seen_edge_ids: set[str] = set()
+    queue: deque[tuple[str, int]] = deque([(start, 0)])
+    edges: list[dict[str, Any]] = []
+
+    while queue and len(edges) < limit:
+        current, current_depth = queue.popleft()
+        if current_depth >= depth:
+            continue
+        for relation in relations_for_entry(entries.get(current, {})):
+            relation_id = str(relation.get("id") or "")
+            if relation_id in seen_edge_ids:
+                continue
+            seen_edge_ids.add(relation_id)
+            edges.append(relation)
+            neighbor = neighbor_for_relation(relation, current)
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append((neighbor, current_depth + 1))
+            if len(edges) >= limit:
+                break
+
+    return sorted(visited), edges
+
+
 def query_file_neighborhood(
     index: dict[str, Any],
     source_path: str,
@@ -966,42 +1034,20 @@ def query_file_neighborhood(
     """Return a bounded BFS neighborhood over file-reference relations."""
     resolved_path = resolve_index_file_path(index, source_path)
     if resolved_path is None:
-        return {
-            "kind": "file_neighborhood",
-            "query": source_path,
-            "resolved_path": None,
-            "depth": depth,
-            "nodes": [],
-            "edges": [],
-            "count": 0,
-            "ok": True,
-        }
-    by_file = index["by_file"]
-    visited = {resolved_path}
-    seen_edge_ids: set[str] = set()
-    queue: deque[tuple[str, int]] = deque([(resolved_path, 0)])
-    edges: list[dict[str, Any]] = []
-
-    while queue and len(edges) < limit:
-        current, current_depth = queue.popleft()
-        if current_depth >= depth:
-            continue
-        for relation in _relations_for_entry(by_file.get(current, {})):
-            relation_id = str(relation.get("id") or "")
-            if relation_id in seen_edge_ids:
-                continue
-            seen_edge_ids.add(relation_id)
-            edges.append(relation)
-            neighbor = (
-                relation["target_path"]
-                if relation["source_path"] == current
-                else relation["source_path"]
-            )
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append((neighbor, current_depth + 1))
-            if len(edges) >= limit:
-                break
+        return _empty_neighborhood_payload(
+            kind="file_neighborhood",
+            query=source_path,
+            resolved_key="resolved_path",
+            depth=depth,
+        )
+    nodes, edges = _bounded_relation_neighborhood(
+        entries=index["by_file"],
+        start=resolved_path,
+        depth=depth,
+        limit=limit,
+        relations_for_entry=_relations_for_entry,
+        neighbor_for_relation=_file_relation_neighbor,
+    )
 
     return {
         "kind": "file_neighborhood",
@@ -1009,7 +1055,7 @@ def query_file_neighborhood(
         "resolved_path": resolved_path,
         "depth": depth,
         "source_snapshot": index.get("source_snapshot"),
-        "nodes": sorted(visited),
+        "nodes": nodes,
         "edges": edges,
         "count": len(edges),
         "ok": True,
@@ -1026,42 +1072,20 @@ def query_module_neighborhood(
     """Return a bounded BFS neighborhood over module-reference relations."""
     resolved_name = resolve_index_module_name(index, module_name)
     if resolved_name is None:
-        return {
-            "kind": "module_neighborhood",
-            "query": module_name,
-            "resolved_module": None,
-            "depth": depth,
-            "nodes": [],
-            "edges": [],
-            "count": 0,
-            "ok": True,
-        }
-    by_module = index["by_module"]
-    visited = {resolved_name}
-    seen_edge_ids: set[str] = set()
-    queue: deque[tuple[str, int]] = deque([(resolved_name, 0)])
-    edges: list[dict[str, Any]] = []
-
-    while queue and len(edges) < limit:
-        current, current_depth = queue.popleft()
-        if current_depth >= depth:
-            continue
-        for relation in _module_relations_for_entry(by_module.get(current, {})):
-            relation_id = str(relation.get("id") or "")
-            if relation_id in seen_edge_ids:
-                continue
-            seen_edge_ids.add(relation_id)
-            edges.append(relation)
-            neighbor = (
-                relation["target_name"]
-                if relation["source_name"] == current
-                else relation["source_name"]
-            )
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append((neighbor, current_depth + 1))
-            if len(edges) >= limit:
-                break
+        return _empty_neighborhood_payload(
+            kind="module_neighborhood",
+            query=module_name,
+            resolved_key="resolved_module",
+            depth=depth,
+        )
+    nodes, edges = _bounded_relation_neighborhood(
+        entries=index["by_module"],
+        start=resolved_name,
+        depth=depth,
+        limit=limit,
+        relations_for_entry=_module_relations_for_entry,
+        neighbor_for_relation=_module_relation_neighbor,
+    )
 
     return {
         "kind": "module_neighborhood",
@@ -1069,7 +1093,7 @@ def query_module_neighborhood(
         "resolved_module": resolved_name,
         "depth": depth,
         "source_snapshot": index.get("source_snapshot"),
-        "nodes": sorted(visited),
+        "nodes": nodes,
         "edges": edges,
         "count": len(edges),
         "ok": True,
@@ -1086,42 +1110,20 @@ def query_entity_neighborhood(
     """Return a bounded BFS neighborhood over generic entity relations."""
     resolved_entity = resolve_index_entity(index, entity)
     if resolved_entity is None:
-        return {
-            "kind": "entity_neighborhood",
-            "query": entity,
-            "resolved_entity": None,
-            "depth": depth,
-            "nodes": [],
-            "edges": [],
-            "count": 0,
-            "ok": True,
-        }
-    by_entity = index["by_entity"]
-    visited = {resolved_entity}
-    seen_edge_ids: set[str] = set()
-    queue: deque[tuple[str, int]] = deque([(resolved_entity, 0)])
-    edges: list[dict[str, Any]] = []
-
-    while queue and len(edges) < limit:
-        current, current_depth = queue.popleft()
-        if current_depth >= depth:
-            continue
-        for relation in _entity_relations_for_entry(by_entity.get(current, {})):
-            relation_id = str(relation.get("id") or "")
-            if relation_id in seen_edge_ids:
-                continue
-            seen_edge_ids.add(relation_id)
-            edges.append(relation)
-            neighbor = (
-                relation["target_id"]
-                if relation["source_id"] == current
-                else relation["source_id"]
-            )
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append((neighbor, current_depth + 1))
-            if len(edges) >= limit:
-                break
+        return _empty_neighborhood_payload(
+            kind="entity_neighborhood",
+            query=entity,
+            resolved_key="resolved_entity",
+            depth=depth,
+        )
+    nodes, edges = _bounded_relation_neighborhood(
+        entries=index["by_entity"],
+        start=resolved_entity,
+        depth=depth,
+        limit=limit,
+        relations_for_entry=_entity_relations_for_entry,
+        neighbor_for_relation=_entity_relation_neighbor,
+    )
 
     return {
         "kind": "entity_neighborhood",
@@ -1129,11 +1131,35 @@ def query_entity_neighborhood(
         "resolved_entity": resolved_entity,
         "depth": depth,
         "source_snapshot": index.get("source_snapshot"),
-        "nodes": sorted(visited),
+        "nodes": nodes,
         "edges": edges,
         "count": len(edges),
         "ok": True,
     }
+
+
+def _file_relation_neighbor(relation: dict[str, Any], current: str) -> str:
+    return (
+        relation["target_path"]
+        if relation["source_path"] == current
+        else relation["source_path"]
+    )
+
+
+def _module_relation_neighbor(relation: dict[str, Any], current: str) -> str:
+    return (
+        relation["target_name"]
+        if relation["source_name"] == current
+        else relation["source_name"]
+    )
+
+
+def _entity_relation_neighbor(relation: dict[str, Any], current: str) -> str:
+    return (
+        relation["target_id"]
+        if relation["source_id"] == current
+        else relation["source_id"]
+    )
 
 
 def _relations_for_entry(entry: dict[str, Any]) -> list[dict[str, Any]]:

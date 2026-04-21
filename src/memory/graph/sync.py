@@ -20,7 +20,7 @@ import tempfile
 import time
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from datetime import UTC, date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import TypeAlias, TypeVar, cast
 from urllib import error, parse, request
@@ -201,6 +201,7 @@ DEFAULT_FILE_STRUCTURE_EXCLUDED_PREFIXES: tuple[str, ...] = (
     "scripts/archive",
 )
 DEFAULT_FILE_STRUCTURE_EXCLUDED_DIR_NAMES: tuple[str, ...] = ("__pycache__",)
+ADR_DECISIONS_DIR = "docs/02-architecture/decisions"
 OPS_SCRIPT_HUB_PREFIXES: tuple[str, ...] = (
     "scripts/diagrams/",
     "scripts/docs/",
@@ -543,6 +544,11 @@ DOCS_DRIFT_FILTER: ShardFilterSpec = (
             "ASSERTS",
             frozenset({"doc_source_surface", "doc_artifact", "policy_surface"}),
             frozenset({"doc_claim_surface"}),
+        ),
+        (
+            "DESCRIBED_IN",
+            frozenset({"module_surface"}),
+            frozenset({"doc_artifact"}),
         ),
         (
             "ASSERTS_ABOUT",
@@ -3878,6 +3884,9 @@ def build_snapshot(root: Path, verified_at: str | None = None) -> GraphSnapshot:
     _add_ci_workflow_graph(snapshot, root, project, today)
     _add_cli_command_graph(snapshot, root, project, today)
     _add_docs_to_code_drift_edges(snapshot, root)
+    _add_pipeline_doc_edges(snapshot)
+    _add_reverse_module_doc_edges(snapshot)
+    _add_adr_constraint_edges(snapshot, root, project, today)
     _add_retirement_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     _add_complexity_analysis_surfaces(snapshot, root, project, today, memory_mapping)
     return snapshot
@@ -9510,6 +9519,161 @@ def _add_docs_to_code_drift_edges(snapshot: GraphSnapshot, root: Path) -> None:
         _add_doc_claim_edges(snapshot, source_node, source_path, text, path_pattern)
 
 
+def _add_reverse_module_doc_edges(snapshot: GraphSnapshot) -> None:
+    for relation in tuple(snapshot.relations.values()):
+        if relation.relation_type != "DESCRIBES":
+            continue
+        if relation.source.label != "doc_artifact":
+            continue
+        if relation.target.label != "module_surface":
+            continue
+        snapshot.add_relation(
+            relation.target,
+            "DESCRIBED_IN",
+            relation.source,
+            provenance="docs_code_drift_reverse",
+            confidence=relation.properties.get("confidence"),
+        )
+
+
+def _add_pipeline_doc_edges(snapshot: GraphSnapshot) -> None:
+    for node in tuple(snapshot.nodes.values()):
+        if node.key.label != "pipeline_surface":
+            continue
+        pipeline_kind = node.properties.get("pipeline_kind")
+        if pipeline_kind == "entity":
+            provider_name = str(node.properties.get("provider") or "")
+            entity_name = str(node.properties.get("entity") or "")
+        elif pipeline_kind == "composite":
+            provider_name = "composite"
+            entity_name = node.key.name.removeprefix("composite_")
+        else:
+            continue
+        if not provider_name or not entity_name:
+            continue
+        _link_pipeline_doc_artifacts(
+            snapshot,
+            node.key,
+            _pipeline_doc_artifact_targets(
+                snapshot,
+                provider_name=provider_name,
+                entity_name=entity_name,
+            ),
+            provenance="impact_pipeline_docs",
+        )
+
+
+def _add_adr_constraint_edges(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+) -> None:
+    decisions_dir = root / ADR_DECISIONS_DIR
+    if not decisions_dir.is_dir():
+        return
+    path_pattern = _docs_path_pattern()
+    for adr_path in sorted(decisions_dir.glob("ADR-*.md")):
+        _add_single_adr_constraint_edges(
+            snapshot,
+            root,
+            project,
+            today,
+            adr_path,
+            path_pattern,
+        )
+
+
+def _add_single_adr_constraint_edges(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    adr_path: Path,
+    path_pattern: re.Pattern[str],
+) -> None:
+    relative_adr_path = _rel_path(root, adr_path)
+    adr_node = _add_adr_decision_node(snapshot, root, project, today, adr_path)
+    adr_doc = NodeKey("doc_artifact", relative_adr_path)
+    if adr_doc in snapshot.nodes:
+        snapshot.add_relation(
+            adr_node, "DESCRIBED_IN", adr_doc, provenance="adr_constraints"
+        )
+    text = _read_text(adr_path)
+    seen_targets: set[NodeKey] = set()
+    for path_match in path_pattern.finditer(text):
+        normalized = _normalize_docs_repo_reference(path_match.group(1))
+        if normalized is None or normalized == relative_adr_path:
+            continue
+        target = _resolve_adr_constraint_target(snapshot, normalized)
+        if target is None or target in seen_targets:
+            continue
+        seen_targets.add(target)
+        section_title, section_anchor, line_number = _doc_reference_context(
+            text, path_match.start()
+        )
+        snapshot.add_relation(
+            adr_node,
+            "CONSTRAINS",
+            target,
+            provenance="adr_path_reference",
+            doc_reference=normalized,
+            section_title=section_title,
+            section_anchor=section_anchor,
+            line_number=line_number,
+            confidence="medium",
+        )
+
+
+def _add_adr_decision_node(
+    snapshot: GraphSnapshot,
+    root: Path,
+    project: NodeKey,
+    today: str,
+    adr_path: Path,
+) -> NodeKey:
+    relative_adr_path = _rel_path(root, adr_path)
+    title = _adr_title(adr_path)
+    adr_node = snapshot.add_node(
+        "decision",
+        adr_path.stem,
+        summary=title,
+        source_path=relative_adr_path,
+        source_kind="adr",
+        last_verified=today,
+        ingest_wave="repo_sync_v1",
+        confidence="high",
+    )
+    snapshot.add_relation(project, "HAS_DECISION", adr_node, provenance="adr")
+    return adr_node
+
+
+def _adr_title(adr_path: Path) -> str:
+    text = _read_text(adr_path)
+    for _offset, title in _markdown_headings(text):
+        return title
+    return adr_path.stem
+
+
+def _resolve_adr_constraint_target(
+    snapshot: GraphSnapshot, normalized_ref: str
+) -> NodeKey | None:
+    for candidate in _adr_constraint_candidates(normalized_ref):
+        if candidate in snapshot.nodes:
+            return candidate
+    return None
+
+
+def _adr_constraint_candidates(normalized_ref: str) -> tuple[NodeKey, ...]:
+    return (
+        NodeKey("module_surface", normalized_ref),
+        NodeKey("config_artifact", normalized_ref),
+        NodeKey("test_artifact", normalized_ref),
+        NodeKey("file_surface", normalized_ref),
+        NodeKey("directory_surface", normalized_ref),
+    )
+
+
 def _docs_path_pattern() -> re.Pattern[str]:
     return re.compile(
         r"(?<![\w./-])("
@@ -12489,6 +12653,21 @@ def _link_entity_pipeline_dependencies(
         snapshot.add_relation(
             pipeline, "DEPENDS_ON", contract_key, provenance="impact_pipelines"
         )
+    config_artifact = _pipeline_source_config_artifact(snapshot, pipeline)
+    if config_artifact in snapshot.nodes:
+        snapshot.add_relation(
+            pipeline, "DEFINED_BY", config_artifact, provenance="impact_pipelines"
+        )
+    _link_pipeline_doc_artifacts(
+        snapshot,
+        pipeline,
+        _pipeline_doc_artifact_targets(
+            snapshot,
+            provider_name=provider_name,
+            entity_name=entity_name,
+        ),
+        provenance="impact_pipeline_docs",
+    )
 
 
 def _add_entity_pipeline_surface(
@@ -12535,6 +12714,54 @@ def _add_entity_pipeline_surface(
         contract_nodes=contract_nodes,
         adapter_nodes=adapter_nodes,
     )
+
+
+def _pipeline_source_config_artifact(
+    snapshot: GraphSnapshot, pipeline: NodeKey
+) -> NodeKey:
+    source_path = snapshot.nodes[pipeline].properties.get("source_path", "")
+    return NodeKey("config_artifact", str(source_path))
+
+
+def _pipeline_doc_artifact_targets(
+    snapshot: GraphSnapshot,
+    *,
+    provider_name: str,
+    entity_name: str,
+) -> tuple[NodeKey, ...]:
+    entity_dash = entity_name.replace("_", "-")
+    candidates = (
+        f"docs/04-reference/providers/{provider_name}/{entity_dash}.md",
+        f"docs/04-reference/pipelines/{provider_name}-{entity_dash}.md",
+    )
+    glob_prefix = f"docs/04-reference/pipelines/{provider_name}/"
+    glob_suffix = f"-{entity_dash}-spec.md"
+    doc_keys = [
+        NodeKey("doc_artifact", path)
+        for path in candidates
+        if NodeKey("doc_artifact", path) in snapshot.nodes
+    ]
+    doc_keys.extend(
+        node.key
+        for node in snapshot.nodes.values()
+        if node.key.label == "doc_artifact"
+        and node.key.name.startswith(glob_prefix)
+        and node.key.name.endswith(glob_suffix)
+    )
+    return tuple(sorted(set(doc_keys), key=lambda key: key.name))
+
+
+def _link_pipeline_doc_artifacts(
+    snapshot: GraphSnapshot,
+    pipeline: NodeKey,
+    doc_artifacts: tuple[NodeKey, ...],
+    *,
+    provenance: str,
+) -> None:
+    for doc_artifact in doc_artifacts:
+        snapshot.add_relation(
+            pipeline, "DESCRIBED_IN", doc_artifact, provenance=provenance
+        )
 
 
 def _add_composite_pipeline_surfaces(
@@ -12598,6 +12825,21 @@ def _add_composite_pipeline_surface(
         snapshot.add_relation(
             pipeline, "BACKED_BY", composite_key, provenance="impact_pipelines"
         )
+    config_artifact = NodeKey("config_artifact", _rel_path(root, composite_path))
+    if config_artifact in snapshot.nodes:
+        snapshot.add_relation(
+            pipeline, "DEFINED_BY", config_artifact, provenance="impact_pipelines"
+        )
+    _link_pipeline_doc_artifacts(
+        snapshot,
+        pipeline,
+        _pipeline_doc_artifact_targets(
+            snapshot,
+            provider_name="composite",
+            entity_name=composite_name.removeprefix("composite_"),
+        ),
+        provenance="impact_pipeline_docs",
+    )
     _link_composite_pipeline_dependencies(
         snapshot, pipeline, composite_payload, pipeline_nodes
     )
@@ -16179,6 +16421,7 @@ SNAPSHOT_REQUIRED_RELATION_TYPES = (
     "USES_ACTION",
     "PUBLISHES_ARTIFACT",
     "REQUIRES_SECRET",
+    "CONSTRAINS",
 )
 SNAPSHOT_RELATION_REQUIREMENTS = (
     (
@@ -16296,10 +16539,28 @@ SNAPSHOT_RELATION_REQUIREMENTS = (
         {"test_artifact"},
     ),
     (
+        "missing pipeline_surface -> DEFINED_BY -> config_artifact links",
+        {"pipeline_surface"},
+        "DEFINED_BY",
+        {"config_artifact"},
+    ),
+    (
+        "missing pipeline_surface -> DESCRIBED_IN -> doc_artifact links",
+        {"pipeline_surface"},
+        "DESCRIBED_IN",
+        {"doc_artifact"},
+    ),
+    (
         "missing pipeline_surface -> DEPENDS_ON -> module_surface links",
         {"pipeline_surface"},
         "DEPENDS_ON",
         {"module_surface"},
+    ),
+    (
+        "missing module_surface -> DESCRIBED_IN -> doc_artifact links",
+        {"module_surface"},
+        "DESCRIBED_IN",
+        {"doc_artifact"},
     ),
     (
         "missing entity_config -> DEPENDS_ON -> module_surface links",
@@ -16524,6 +16785,18 @@ SNAPSHOT_RELATION_REQUIREMENTS = (
             "file_surface",
             "directory_surface",
             "execution_path",
+        },
+    ),
+    (
+        "missing ADR constraint edges",
+        {"decision"},
+        "CONSTRAINS",
+        {
+            "module_surface",
+            "file_surface",
+            "config_artifact",
+            "test_artifact",
+            "directory_surface",
         },
     ),
     (

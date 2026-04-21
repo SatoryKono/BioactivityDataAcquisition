@@ -6,27 +6,23 @@ import argparse
 import json
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from memory.graph import query as graph_query
 from memory.graph.importers.expanded_json import (
     default_expanded_graph_path,
+    load_entity_relation_index,
     load_file_relation_index,
     load_module_relation_index,
-    write_expanded_graph_relation_artifacts,
-)
-from memory.graph.importers.expanded_json import (
+    query_entity_neighborhood as _query_entity_neighborhood,
+    query_entity_relations as _query_entity_relations,
     query_file_neighborhood as _query_file_neighborhood,
-)
-from memory.graph.importers.expanded_json import (
     query_file_relations as _query_file_relations,
-)
-from memory.graph.importers.expanded_json import (
     query_module_neighborhood as _query_module_neighborhood,
-)
-from memory.graph.importers.expanded_json import (
     query_module_relations as _query_module_relations,
+    write_expanded_graph_relation_artifacts,
 )
 from memory.rag.retrieval import TASK_PROFILES, load_chunk_manifest, rank_chunks
 from memory.resources import CATALOG_DIR, MEMORY_ROOT, POLICY_DIR, load_yaml_resource
@@ -39,7 +35,13 @@ DEFAULT_FILE_RELATION_INDEX = MEMORY_ROOT / "graph" / "indexes" / "file_relation
 DEFAULT_MODULE_RELATION_INDEX = (
     MEMORY_ROOT / "graph" / "indexes" / "module_relations.json"
 )
+DEFAULT_ENTITY_RELATION_INDEX = (
+    MEMORY_ROOT / "graph" / "indexes" / "entity_relations.json"
+)
 DEFAULT_PROFILE = "general"
+FILE_RELATION_INDEX_HELP = "Generated file relation index path."
+MODULE_RELATION_INDEX_HELP = "Generated module relation index path."
+ENTITY_RELATION_INDEX_HELP = "Generated entity relation index path."
 MISSING_MANIFEST_HINT = (
     "Run `python -m memory.tooling.refresh_all` first or pass `--auto-refresh` "
     "to build temporary rebuild-only manifests for this query."
@@ -57,6 +59,27 @@ _TIMELINE_PROFILE_BONUS: dict[str, dict[str, int]] = {
     "operations": {"incident": 40, "run": 30, "ci": 15},
     "audit": {"incident": 25, "run": 25, "ci": 25},
 }
+
+
+@dataclass(frozen=True)
+class RagQueryOptions:
+    """Inputs for deterministic local RAG chunk retrieval."""
+
+    query: str | None
+    source_type: str | None = None
+    domain: str | None = None
+    repo_zone: str | None = None
+    symbol_kind: str | None = None
+    chunks_path: Path = DEFAULT_RAG_CHUNKS
+    limit: int = 20
+    profile: str = DEFAULT_PROFILE
+    auto_refresh: bool = False
+    refresh_output_root: Path | None = None
+    refresh_repo_root: Path | None = None
+    file_context: str | None = None
+    file_relation_index_path: Path = DEFAULT_FILE_RELATION_INDEX
+    expanded_graph_path: Path | None = None
+    file_context_depth: int = 1
 
 
 def _load_catalog_view(view: str) -> Any:
@@ -150,6 +173,29 @@ def _refresh_module_relation_index(
     )
 
 
+def _refresh_entity_relation_index(
+    *,
+    refresh_output_root: Path | None,
+    expanded_graph_path: Path | None,
+    refresh_repo_root: Path | None,
+) -> tuple[Path, Path, dict[str, Any]]:
+    output_root = _resolve_refresh_output_root(refresh_output_root)
+    repo_root = refresh_repo_root or Path(__file__).resolve().parents[2]
+    snapshot_path = expanded_graph_path or default_expanded_graph_path(repo_root)
+    if not snapshot_path.exists():
+        raise _missing_graph_snapshot_error(snapshot_path)
+    _, _, report = write_expanded_graph_relation_artifacts(
+        snapshot_path.resolve(),
+        output_root.resolve(),
+        repo_root=repo_root.resolve(),
+    )
+    return (
+        output_root / "graph" / "indexes" / "entity_relations.json",
+        output_root,
+        report,
+    )
+
+
 def _resolve_file_relation_index(
     *,
     index_path: Path,
@@ -182,6 +228,25 @@ def _resolve_module_relation_index(
     if not auto_refresh:
         raise _missing_manifest_error(index_path, "module relation index")
     return _refresh_module_relation_index(
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+
+
+def _resolve_entity_relation_index(
+    *,
+    index_path: Path,
+    auto_refresh: bool,
+    refresh_output_root: Path | None,
+    expanded_graph_path: Path | None,
+    refresh_repo_root: Path | None,
+) -> tuple[Path, Path | None, dict[str, Any] | None]:
+    if index_path.exists():
+        return index_path, None, None
+    if not auto_refresh:
+        raise _missing_manifest_error(index_path, "entity relation index")
+    return _refresh_entity_relation_index(
         refresh_output_root=refresh_output_root,
         expanded_graph_path=expanded_graph_path,
         refresh_repo_root=refresh_repo_root,
@@ -409,6 +474,103 @@ def query_module_neighborhood(
     return payload
 
 
+def query_entity_refs(
+    *,
+    entity: str,
+    direction: str = "both",
+    relation: str | None = None,
+    index_path: Path = DEFAULT_ENTITY_RELATION_INDEX,
+    limit: int = 20,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return direct generic entity relation records for one graph entity."""
+    resolved_index_path, output_root, refresh_report = _resolve_entity_relation_index(
+        index_path=index_path,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload = _query_entity_relations(
+        load_entity_relation_index(resolved_index_path),
+        entity,
+        direction=direction,
+        relation=relation,
+        limit=limit,
+    )
+    payload["index_path"] = str(resolved_index_path)
+    payload["refresh_output_root"] = str(output_root) if output_root else None
+    payload["refresh_report"] = refresh_report
+    return payload
+
+
+def query_entity_impact(
+    *,
+    entity: str,
+    index_path: Path = DEFAULT_ENTITY_RELATION_INDEX,
+    limit: int = 50,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return inbound and outbound impact candidates for one graph entity."""
+    payload = query_entity_refs(
+        entity=entity,
+        direction="both",
+        index_path=index_path,
+        limit=limit,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload["kind"] = "entity_impact"
+    payload["impact_candidates"] = {
+        "entities_that_reference_query": [
+            item["source_id"] for item in payload["inbound"]
+        ],
+        "entities_referenced_by_query": [
+            item["target_id"] for item in payload["outbound"]
+        ],
+    }
+    return payload
+
+
+def query_entity_neighborhood(
+    *,
+    entity: str,
+    depth: int = 1,
+    index_path: Path = DEFAULT_ENTITY_RELATION_INDEX,
+    limit: int = 50,
+    auto_refresh: bool = False,
+    refresh_output_root: Path | None = None,
+    expanded_graph_path: Path | None = None,
+    refresh_repo_root: Path | None = None,
+) -> dict[str, Any]:
+    """Return a bounded graph neighborhood over generic entity relations."""
+    resolved_index_path, output_root, refresh_report = _resolve_entity_relation_index(
+        index_path=index_path,
+        auto_refresh=auto_refresh,
+        refresh_output_root=refresh_output_root,
+        expanded_graph_path=expanded_graph_path,
+        refresh_repo_root=refresh_repo_root,
+    )
+    payload = _query_entity_neighborhood(
+        load_entity_relation_index(resolved_index_path),
+        entity,
+        depth=depth,
+        limit=limit,
+    )
+    payload["index_path"] = str(resolved_index_path)
+    payload["refresh_output_root"] = str(output_root) if output_root else None
+    payload["refresh_report"] = refresh_report
+    return payload
+
+
 def _rag_file_relation_context(
     *,
     file_context: str | None,
@@ -452,60 +614,43 @@ def _rag_file_relation_context(
     return str(resolved_path) if resolved_path else None, nodes, context
 
 
-def query_rag(
-    *,
-    query: str | None,
-    source_type: str | None,
-    domain: str | None,
-    repo_zone: str | None,
-    symbol_kind: str | None,
-    chunks_path: Path = DEFAULT_RAG_CHUNKS,
-    limit: int = 20,
-    profile: str = DEFAULT_PROFILE,
-    auto_refresh: bool = False,
-    refresh_output_root: Path | None = None,
-    refresh_repo_root: Path | None = None,
-    file_context: str | None = None,
-    file_relation_index_path: Path = DEFAULT_FILE_RELATION_INDEX,
-    expanded_graph_path: Path | None = None,
-    file_context_depth: int = 1,
-) -> dict[str, Any]:
+def query_rag(options: RagQueryOptions) -> dict[str, Any]:
     """Return filtered deterministic RAG chunks."""
     resolved_chunks_path, _, output_root, refresh_report = _resolve_query_paths(
-        chunks_path=chunks_path,
+        chunks_path=options.chunks_path,
         events_dir=DEFAULT_TIMELINE_DIR,
-        auto_refresh=auto_refresh,
-        refresh_output_root=refresh_output_root,
-        refresh_repo_root=refresh_repo_root,
+        auto_refresh=options.auto_refresh,
+        refresh_output_root=options.refresh_output_root,
+        refresh_repo_root=options.refresh_repo_root,
         require_events=False,
     )
     chunks = load_chunk_manifest(resolved_chunks_path)
     resolved_file_context, related_file_paths, file_relation_context = (
         _rag_file_relation_context(
-            file_context=file_context,
-            index_path=file_relation_index_path,
-            auto_refresh=auto_refresh,
-            refresh_output_root=output_root or refresh_output_root,
-            expanded_graph_path=expanded_graph_path,
-            refresh_repo_root=refresh_repo_root,
-            depth=file_context_depth,
+            file_context=options.file_context,
+            index_path=options.file_relation_index_path,
+            auto_refresh=options.auto_refresh,
+            refresh_output_root=output_root or options.refresh_output_root,
+            expanded_graph_path=options.expanded_graph_path,
+            refresh_repo_root=options.refresh_repo_root,
+            depth=options.file_context_depth,
         )
     )
     matches = rank_chunks(
         chunks,
-        source_type=source_type,
-        domain=domain,
-        repo_zone=repo_zone,
-        symbol_kind=symbol_kind,
-        query=query,
-        profile=profile,
+        source_type=options.source_type,
+        domain=options.domain,
+        repo_zone=options.repo_zone,
+        symbol_kind=options.symbol_kind,
+        query=options.query,
+        profile=options.profile,
         file_context_path=resolved_file_context,
         related_file_paths=related_file_paths,
-    )[:limit]
+    )[: options.limit]
     return {
         "kind": "rag",
-        "query": query,
-        "profile": profile,
+        "query": options.query,
+        "profile": options.profile,
         "count": len(matches),
         "chunks_path": str(resolved_chunks_path),
         "file_relation_context": file_relation_context,
@@ -736,21 +881,19 @@ def query_all(
         )
     )
     rag_payload = query_rag(
-        query=query,
-        source_type=None,
-        domain=None,
-        repo_zone=None,
-        symbol_kind=None,
-        chunks_path=resolved_chunks_path,
-        limit=limit,
-        profile=profile,
-        file_context=file_context,
-        file_relation_index_path=file_relation_index_path,
-        expanded_graph_path=expanded_graph_path,
-        file_context_depth=file_context_depth,
-        auto_refresh=auto_refresh,
-        refresh_output_root=output_root or refresh_output_root,
-        refresh_repo_root=refresh_repo_root,
+        RagQueryOptions(
+            query=query,
+            chunks_path=resolved_chunks_path,
+            limit=limit,
+            profile=profile,
+            file_context=file_context,
+            file_relation_index_path=file_relation_index_path,
+            expanded_graph_path=expanded_graph_path,
+            file_context_depth=file_context_depth,
+            auto_refresh=auto_refresh,
+            refresh_output_root=output_root or refresh_output_root,
+            refresh_repo_root=refresh_repo_root,
+        )
     )
     timeline_payload = query_timeline(
         query=query,
@@ -915,7 +1058,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--index-path",
         type=Path,
         default=DEFAULT_FILE_RELATION_INDEX,
-        help="Generated file relation index path.",
+        help=FILE_RELATION_INDEX_HELP,
     )
     refs_parser.add_argument("--limit", type=int, default=20)
     refs_parser.add_argument("--auto-refresh", action="store_true")
@@ -932,7 +1075,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--index-path",
         type=Path,
         default=DEFAULT_FILE_RELATION_INDEX,
-        help="Generated file relation index path.",
+        help=FILE_RELATION_INDEX_HELP,
     )
     impact_parser.add_argument("--limit", type=int, default=50)
     impact_parser.add_argument("--auto-refresh", action="store_true")
@@ -950,7 +1093,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--index-path",
         type=Path,
         default=DEFAULT_FILE_RELATION_INDEX,
-        help="Generated file relation index path.",
+        help=FILE_RELATION_INDEX_HELP,
     )
     neighborhood_parser.add_argument("--limit", type=int, default=50)
     neighborhood_parser.add_argument("--auto-refresh", action="store_true")
@@ -972,7 +1115,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--index-path",
         type=Path,
         default=DEFAULT_MODULE_RELATION_INDEX,
-        help="Generated module relation index path.",
+        help=MODULE_RELATION_INDEX_HELP,
     )
     module_refs_parser.add_argument("--limit", type=int, default=20)
     module_refs_parser.add_argument("--auto-refresh", action="store_true")
@@ -989,7 +1132,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--index-path",
         type=Path,
         default=DEFAULT_MODULE_RELATION_INDEX,
-        help="Generated module relation index path.",
+        help=MODULE_RELATION_INDEX_HELP,
     )
     module_impact_parser.add_argument("--limit", type=int, default=50)
     module_impact_parser.add_argument("--auto-refresh", action="store_true")
@@ -1007,7 +1150,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--index-path",
         type=Path,
         default=DEFAULT_MODULE_RELATION_INDEX,
-        help="Generated module relation index path.",
+        help=MODULE_RELATION_INDEX_HELP,
     )
     module_neighborhood_parser.add_argument("--limit", type=int, default=50)
     module_neighborhood_parser.add_argument("--auto-refresh", action="store_true")
@@ -1015,6 +1158,68 @@ def _build_parser() -> argparse.ArgumentParser:
         "--refresh-output-root", type=Path, default=None
     )
     module_neighborhood_parser.add_argument(
+        "--expanded-graph-path", type=Path, default=None
+    )
+
+    entity_refs_parser = subparsers.add_parser(
+        "entity-refs",
+        help="Query direct generic entity relations.",
+        parents=[common],
+    )
+    entity_refs_parser.add_argument("entity", type=str)
+    entity_refs_parser.add_argument(
+        "--direction",
+        choices=("both", "outbound", "inbound"),
+        default="both",
+    )
+    entity_refs_parser.add_argument("--relation", type=str, default=None)
+    entity_refs_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_ENTITY_RELATION_INDEX,
+        help=ENTITY_RELATION_INDEX_HELP,
+    )
+    entity_refs_parser.add_argument("--limit", type=int, default=20)
+    entity_refs_parser.add_argument("--auto-refresh", action="store_true")
+    entity_refs_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    entity_refs_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+
+    entity_impact_parser = subparsers.add_parser(
+        "entity-impact",
+        help="Query inbound/outbound generic entity impact candidates.",
+        parents=[common],
+    )
+    entity_impact_parser.add_argument("entity", type=str)
+    entity_impact_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_ENTITY_RELATION_INDEX,
+        help=ENTITY_RELATION_INDEX_HELP,
+    )
+    entity_impact_parser.add_argument("--limit", type=int, default=50)
+    entity_impact_parser.add_argument("--auto-refresh", action="store_true")
+    entity_impact_parser.add_argument("--refresh-output-root", type=Path, default=None)
+    entity_impact_parser.add_argument("--expanded-graph-path", type=Path, default=None)
+
+    entity_neighborhood_parser = subparsers.add_parser(
+        "entity-neighborhood",
+        help="Query a bounded generic entity-relation graph neighborhood.",
+        parents=[common],
+    )
+    entity_neighborhood_parser.add_argument("entity", type=str)
+    entity_neighborhood_parser.add_argument("--depth", type=int, default=1)
+    entity_neighborhood_parser.add_argument(
+        "--index-path",
+        type=Path,
+        default=DEFAULT_ENTITY_RELATION_INDEX,
+        help=ENTITY_RELATION_INDEX_HELP,
+    )
+    entity_neighborhood_parser.add_argument("--limit", type=int, default=50)
+    entity_neighborhood_parser.add_argument("--auto-refresh", action="store_true")
+    entity_neighborhood_parser.add_argument(
+        "--refresh-output-root", type=Path, default=None
+    )
+    entity_neighborhood_parser.add_argument(
         "--expanded-graph-path", type=Path, default=None
     )
 
@@ -1031,53 +1236,101 @@ def _payload_exit_code(payload: dict[str, Any]) -> int:
     return 0 if payload.get("ok", True) else 1
 
 
+def _emit_json_payload(payload: dict[str, Any]) -> None:
+    print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
+
+
+def _emit_catalog(payload: dict[str, Any]) -> None:
+    print(f"Catalog view: {payload['view']}")
+    print(json.dumps(payload["payload"], indent=2, sort_keys=True, ensure_ascii=True))
+
+
+def _emit_ranked_results(payload: dict[str, Any]) -> None:
+    kind = payload["kind"]
+    print(f"{kind} results: {payload['count']}")
+    for item in payload["results"]:
+        title = (
+            item.get("title")
+            or item.get("event_type")
+            or item.get("source_path")
+            or item.get("id")
+        )
+        print(f"- {title}")
+
+
+def _emit_all(payload: dict[str, Any]) -> None:
+    results = payload["results"]
+    print(f"All-surface query: {payload['query']}")
+    print(f"- catalog matches: {len(results['catalog'])}")
+    print(f"- rag matches: {len(results['rag'])}")
+    print(f"- timeline matches: {len(results['timeline'])}")
+
+
+def _emit_file_relation_summary(payload: dict[str, Any]) -> None:
+    print(f"{payload['kind']}: {payload['query']}")
+    print(f"- resolved path: {payload.get('resolved_path')}")
+    print(f"- inbound: {len(payload.get('inbound') or [])}")
+    print(f"- outbound: {len(payload.get('outbound') or [])}")
+
+
+def _emit_file_neighborhood_summary(payload: dict[str, Any]) -> None:
+    print(f"file_neighborhood: {payload['query']}")
+    print(f"- resolved path: {payload.get('resolved_path')}")
+    print(f"- nodes: {len(payload.get('nodes') or [])}")
+    print(f"- edges: {len(payload.get('edges') or [])}")
+
+
+def _emit_module_relation_summary(payload: dict[str, Any]) -> None:
+    print(f"{payload['kind']}: {payload['query']}")
+    print(f"- resolved module: {payload.get('resolved_module')}")
+    print(f"- inbound: {len(payload.get('inbound') or [])}")
+    print(f"- outbound: {len(payload.get('outbound') or [])}")
+
+
+def _emit_module_neighborhood_summary(payload: dict[str, Any]) -> None:
+    print(f"module_neighborhood: {payload['query']}")
+    print(f"- resolved module: {payload.get('resolved_module')}")
+    print(f"- nodes: {len(payload.get('nodes') or [])}")
+    print(f"- edges: {len(payload.get('edges') or [])}")
+
+
+def _emit_entity_relation_summary(payload: dict[str, Any]) -> None:
+    print(f"{payload['kind']}: {payload['query']}")
+    print(f"- resolved entity: {payload.get('resolved_entity')}")
+    print(f"- relation filter: {payload.get('relation')}")
+    print(f"- inbound: {len(payload.get('inbound') or [])}")
+    print(f"- outbound: {len(payload.get('outbound') or [])}")
+
+
+def _emit_entity_neighborhood_summary(payload: dict[str, Any]) -> None:
+    print(f"entity_neighborhood: {payload['query']}")
+    print(f"- resolved entity: {payload.get('resolved_entity')}")
+    print(f"- nodes: {len(payload.get('nodes') or [])}")
+    print(f"- edges: {len(payload.get('edges') or [])}")
+
+
+_TEXT_EMITTERS = {
+    "catalog": _emit_catalog,
+    "rag": _emit_ranked_results,
+    "timeline": _emit_ranked_results,
+    "all": _emit_all,
+    "file_refs": _emit_file_relation_summary,
+    "file_impact": _emit_file_relation_summary,
+    "file_neighborhood": _emit_file_neighborhood_summary,
+    "module_refs": _emit_module_relation_summary,
+    "module_impact": _emit_module_relation_summary,
+    "module_neighborhood": _emit_module_neighborhood_summary,
+    "entity_refs": _emit_entity_relation_summary,
+    "entity_impact": _emit_entity_relation_summary,
+    "entity_neighborhood": _emit_entity_neighborhood_summary,
+}
+
+
 def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
     if as_json:
-        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
-    elif payload.get("kind") == "catalog":
-        print(f"Catalog view: {payload['view']}")
-        print(
-            json.dumps(payload["payload"], indent=2, sort_keys=True, ensure_ascii=True)
-        )
-    elif payload.get("kind") in {"rag", "timeline"}:
-        kind = payload["kind"]
-        print(f"{kind} results: {payload['count']}")
-        for item in payload["results"]:
-            title = (
-                item.get("title")
-                or item.get("event_type")
-                or item.get("source_path")
-                or item.get("id")
-            )
-            print(f"- {title}")
-    elif payload.get("kind") == "all":
-        results = payload["results"]
-        print(f"All-surface query: {payload['query']}")
-        print(f"- catalog matches: {len(results['catalog'])}")
-        print(f"- rag matches: {len(results['rag'])}")
-        print(f"- timeline matches: {len(results['timeline'])}")
-    elif payload.get("kind") in {"file_refs", "file_impact"}:
-        print(f"{payload['kind']}: {payload['query']}")
-        print(f"- resolved path: {payload.get('resolved_path')}")
-        print(f"- inbound: {len(payload.get('inbound') or [])}")
-        print(f"- outbound: {len(payload.get('outbound') or [])}")
-    elif payload.get("kind") == "file_neighborhood":
-        print(f"file_neighborhood: {payload['query']}")
-        print(f"- resolved path: {payload.get('resolved_path')}")
-        print(f"- nodes: {len(payload.get('nodes') or [])}")
-        print(f"- edges: {len(payload.get('edges') or [])}")
-    elif payload.get("kind") in {"module_refs", "module_impact"}:
-        print(f"{payload['kind']}: {payload['query']}")
-        print(f"- resolved module: {payload.get('resolved_module')}")
-        print(f"- inbound: {len(payload.get('inbound') or [])}")
-        print(f"- outbound: {len(payload.get('outbound') or [])}")
-    elif payload.get("kind") == "module_neighborhood":
-        print(f"module_neighborhood: {payload['query']}")
-        print(f"- resolved module: {payload.get('resolved_module')}")
-        print(f"- nodes: {len(payload.get('nodes') or [])}")
-        print(f"- edges: {len(payload.get('edges') or [])}")
+        _emit_json_payload(payload)
     else:
-        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=True))
+        _TEXT_EMITTERS.get(str(payload.get("kind")), _emit_json_payload)(payload)
     return _payload_exit_code(payload)
 
 
@@ -1091,20 +1344,22 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "rag":
             return _emit(
                 query_rag(
-                    query=args.query,
-                    source_type=args.source_type,
-                    domain=args.domain,
-                    repo_zone=args.repo_zone,
-                    symbol_kind=args.symbol_kind,
-                    chunks_path=args.chunks_path,
-                    limit=args.limit,
-                    profile=args.profile,
-                    auto_refresh=args.auto_refresh,
-                    refresh_output_root=args.refresh_output_root,
-                    file_context=args.file_context,
-                    file_relation_index_path=args.file_relation_index,
-                    expanded_graph_path=args.expanded_graph_path,
-                    file_context_depth=args.file_context_depth,
+                    RagQueryOptions(
+                        query=args.query,
+                        source_type=args.source_type,
+                        domain=args.domain,
+                        repo_zone=args.repo_zone,
+                        symbol_kind=args.symbol_kind,
+                        chunks_path=args.chunks_path,
+                        limit=args.limit,
+                        profile=args.profile,
+                        auto_refresh=args.auto_refresh,
+                        refresh_output_root=args.refresh_output_root,
+                        file_context=args.file_context,
+                        file_relation_index_path=args.file_relation_index,
+                        expanded_graph_path=args.expanded_graph_path,
+                        file_context_depth=args.file_context_depth,
+                    )
                 ),
                 as_json=args.json,
             )
@@ -1206,6 +1461,45 @@ def main(argv: list[str] | None = None) -> int:
             return _emit(
                 query_module_neighborhood(
                     module_name=args.module_name,
+                    depth=args.depth,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "entity-refs":
+            return _emit(
+                query_entity_refs(
+                    entity=args.entity,
+                    direction=args.direction,
+                    relation=args.relation,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "entity-impact":
+            return _emit(
+                query_entity_impact(
+                    entity=args.entity,
+                    index_path=args.index_path,
+                    limit=args.limit,
+                    auto_refresh=args.auto_refresh,
+                    refresh_output_root=args.refresh_output_root,
+                    expanded_graph_path=args.expanded_graph_path,
+                ),
+                as_json=args.json,
+            )
+        if args.command == "entity-neighborhood":
+            return _emit(
+                query_entity_neighborhood(
+                    entity=args.entity,
                     depth=args.depth,
                     index_path=args.index_path,
                     limit=args.limit,

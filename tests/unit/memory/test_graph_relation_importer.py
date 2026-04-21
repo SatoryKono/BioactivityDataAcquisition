@@ -6,8 +6,10 @@ import json
 from pathlib import Path
 
 from memory.graph.importers.expanded_json import (
+    load_entity_relation_index,
     load_file_relation_index,
     load_module_relation_index,
+    query_entity_relations,
     query_file_neighborhood,
     query_file_relations,
     query_module_neighborhood,
@@ -56,6 +58,19 @@ def _write_expanded_graph(path: Path) -> None:
                 "source_path": "src/c.py",
                 "label": "pkg.c",
             },
+            "pipeline:chembl_activity": {
+                "id": "pipeline:chembl_activity",
+                "node_type": "Pipeline",
+                "source_path": "configs/entities/chembl/activity.yaml",
+                "label": "chembl_activity",
+                "meta": {"provider": "chembl", "entity": "activity"},
+            },
+            "config:configs/entities/chembl/activity.yaml": {
+                "id": "config:configs/entities/chembl/activity.yaml",
+                "node_type": "Config",
+                "source_path": "configs/entities/chembl/activity.yaml",
+                "label": "activity.yaml",
+            },
         },
         "edges": {
             "src/a.py|references_file|src/b.py": {
@@ -81,6 +96,12 @@ def _write_expanded_graph(path: Path) -> None:
                 "target": "mod:pkg.c",
                 "edge_type": "references",
                 "meta": {"statement_count": 1},
+            },
+            "chembl_activity|configured_by|activity": {
+                "source": "pipeline:chembl_activity",
+                "target": "config:configs/entities/chembl/activity.yaml",
+                "edge_type": "configured_by",
+                "meta": {"source": "pipeline_config"},
             },
         },
     }
@@ -145,3 +166,45 @@ def test_module_relation_index_queries_direct_refs_and_neighborhood(
     assert refs["outbound"][0]["target_name"] == "pkg.b"
     assert neighborhood["nodes"] == ["pkg.a", "pkg.b", "pkg.c"]
     assert len(neighborhood["edges"]) == 2
+
+
+def test_entity_relation_index_includes_pipeline_docs_tests_configs_and_adr_refs(
+    tmp_path: Path,
+) -> None:
+    snapshot_path = tmp_path / "bioetl_knowledge_graph_expanded.json"
+    _write_expanded_graph(snapshot_path)
+    repo_root = tmp_path / "repo"
+    (repo_root / "configs/quality").mkdir(parents=True)
+    (repo_root / "configs/quality/test_matrix.yaml").write_text(
+        "entity_test_ownership:\n"
+        "  chembl.activity:\n"
+        "    - tests/integration/pipelines/test_chembl_activity.py\n",
+        encoding="utf-8",
+    )
+    (repo_root / "docs/04-reference/pipelines/chembl").mkdir(parents=True)
+    (repo_root / "docs/04-reference/providers/chembl").mkdir(parents=True)
+    (repo_root / "docs/04-reference/pipelines/chembl/05-activity-spec.md").write_text(
+        "# Activity spec\n",
+        encoding="utf-8",
+    )
+    (repo_root / "docs/04-reference/providers/chembl/activity.md").write_text(
+        "# Activity provider\n",
+        encoding="utf-8",
+    )
+    (repo_root / "docs/02-architecture/decisions").mkdir(parents=True)
+    (repo_root / "docs/02-architecture/decisions/ADR-999-test.md").write_text(
+        "# ADR test\n\nConstrains configs/entities/chembl/activity.yaml.\n",
+        encoding="utf-8",
+    )
+
+    _, _, summary = write_expanded_graph_relation_artifacts(
+        snapshot_path,
+        tmp_path / "memory",
+        repo_root=repo_root,
+    )
+    index = load_entity_relation_index(Path(summary["entity_index_path"]))
+    refs = query_entity_relations(index, "chembl_activity", direction="outbound")
+
+    relations = {item["relation"] for item in refs["outbound"]}
+    assert {"defined_by", "described_by", "tested_by"} <= relations
+    assert index["relation_counts"]["constrains"] == 1

@@ -197,4 +197,5 @@ normalize_repo_env_aliases() {
   if [[ -z "${GRAFANA_PASSWORD:-}" && -n "${GF_SECURITY_ADMIN_PASSWORD:-}" ]]; then
     export GRAFANA_PASSWORD="${GF_SECURITY_ADMIN_PASSWORD}"
   fi
+  return 0
 }

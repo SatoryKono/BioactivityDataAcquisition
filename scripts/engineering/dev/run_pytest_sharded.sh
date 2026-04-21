@@ -349,10 +349,12 @@ raise SystemExit(
     else 1
 )
 PY
+    return $?
 }
 
 windows_venv_supports_pytest_cov() {
     python_has_modules ".venv-win/Scripts/python.exe" pytest pytest_cov coverage
+    return $?
 }
 
 selected_python() {
