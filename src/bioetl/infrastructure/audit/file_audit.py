@@ -20,7 +20,7 @@ __all__ = ["FileAuditAdapter"]
 
 import asyncio
 import time
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -227,7 +227,7 @@ class FileAuditAdapter:
         self,
         event_name: str,
         event_data: JsonDict | None = None,
-        timestamp: datetime,
+        timestamp: datetime | None = None,
     ) -> None:
         """Log a non-write lifecycle event to the audit trail."""
         if self._closed:
