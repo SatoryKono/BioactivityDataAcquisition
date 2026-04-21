@@ -58,7 +58,7 @@ jobs:
       - name: Generate provider drift artifact
         run: |
           uv run python -m scripts.engineering.qa report-provider-contract-drift \
-            --output provider-contract-drift-report.json \
+            --output reports/quality/provider-contract-drift-report.json \
             --fail-on breaking
 
       - name: Upload provider drift artifact
@@ -66,5 +66,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: provider-contract-drift-report
-          path: provider-contract-drift-report.json
+          path: reports/quality/provider-contract-drift-report.json
           retention-days: 30

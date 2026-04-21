@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 BASE_URL = "http://localhost:3000"
 SEARCH_URL = f"{BASE_URL}/api/search?type=dash-db"
-OUTPUT_DIR = Path("output/playwright")
+OUTPUT_DIR = Path("reports/observability/grafana/screenshots")
 WIDTH = 1600
 HEIGHT = 2200
 

@@ -48,7 +48,7 @@ COMMANDS: dict[str, CommandSpec] = {
             "-m",
             "not memory",
             "--cov=src/bioetl",
-            "--cov-report=html",
+            "--cov-report=html:reports/coverage/htmlcov",
             "--cov-report=term-missing",
             "--cov-fail-under=85",
             "-q",
@@ -131,7 +131,7 @@ def _run_pytest(
     if completed.returncode == 0:
         _print_ok(f"{label} passed")
         if label == "Tests + Coverage":
-            _print_ok("HTML report: htmlcov/index.html")
+            _print_ok("HTML report: reports/coverage/htmlcov/index.html")
         return 0
 
     _print_fail(f"{label} failed")

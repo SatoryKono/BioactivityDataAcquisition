@@ -32,6 +32,7 @@ def _write_diagnostics(
     entries_count: int,
 ) -> None:
     """Persist identity diagnostics for CI artifact upload."""
+    diagnostics_path.parent.mkdir(parents=True, exist_ok=True)
     blocking_count = sum(
         1 for issue in issues if issue.severity == RegistryValidationSeverity.BLOCKING
     )
@@ -197,7 +198,7 @@ def main() -> int:
     """Validate contract identity and write CI diagnostics."""
     repo_root = Path(__file__).resolve().parents[3]
     registry_path = repo_root / "configs" / "base" / "contract_registry.yaml"
-    diagnostics_path = repo_root / "contract-identity-diagnostics.json"
+    diagnostics_path = repo_root / "reports/quality/contract-identity-diagnostics.json"
 
     if not registry_path.exists():
         print("::error::Contract registry not found")

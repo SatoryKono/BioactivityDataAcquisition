@@ -14,7 +14,7 @@
 ## Назначение
 
 автоматическое устранение architecture debt
-на основе задач из `tasks_architecture_metric_exemptions_*.json`.
+на основе задач из `reports/quality/tasks_architecture_metric_exemptions_*.json`.
 
 ______________________________________________________________________
 
@@ -22,7 +22,7 @@ ______________________________________________________________________
 
 ### 1.1 Загрузка задач
 
-1. Найди все файлы `tasks_architecture_metric_exemptions_*.json` в корне проекта.
+1. Найди все файлы `reports/quality/tasks_architecture_metric_exemptions_*.json`.
 1. При наличии нескольких файлов — используй файл с **наиболее поздней датой** в имени.
 1. Прочитай JSON и извлеки массив `tasks[]`.
 

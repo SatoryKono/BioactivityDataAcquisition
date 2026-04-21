@@ -54,6 +54,15 @@ def test_tests_workflow_runs_ci_quality_integral_gate() -> None:
     assert 'QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"' in workflow
 
 
+def test_tests_workflow_routes_coverage_xml_under_reports() -> None:
+    """Coverage XML must be generated and uploaded from reports/coverage."""
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    assert "coverage xml -o reports/coverage/coverage.xml" in workflow
+    assert "path: reports/coverage/coverage.xml" in workflow
+    assert "coverage xml -o coverage.xml" not in workflow
+    assert "path: coverage.xml" not in workflow
+
+
 def test_tests_workflow_enforces_scripts_lifecycle_governance() -> None:
     """Merge pipeline must validate scripts inventory drift + lifecycle policy."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
@@ -68,3 +77,11 @@ def test_tests_workflow_enforces_scripts_catalog_governance() -> None:
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "scripts/engineering/repo/check_scripts_catalog.py" in workflow
     assert "scripts/catalog.yaml" in workflow
+
+
+def test_pretest_guardrails_enforce_generated_artifact_routing() -> None:
+    """Pretest governance profile must block unsafe generated artifact routes."""
+    guardrails = Path("configs/quality/pretest_guardrails.yaml").read_text(
+        encoding="utf-8"
+    )
+    assert "tests/architecture/test_generated_artifact_routing.py" in guardrails

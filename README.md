@@ -243,7 +243,7 @@ uv sync --extra dev --extra tracing
    | **Observability**                          |                                                             |                   |
    | `BIOETL_LOG_LEVEL`                         | Logging level (`DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`) | `INFO`            |
    | `BIOETL_LOG_FORMAT`                        | Log format (`json` / `text`)                                | `json`            |
-   | `BIOETL_LOG_FILE`                          | Log file path                                               | `logs/bioetl.log` |
+   | `BIOETL_LOG_FILE`                          | Log file path                                               | `reports/logs/bioetl.log` |
    | `BIOETL_METRICS_ENABLED`                   | Enable Prometheus metrics                                   | `true`            |
    | `BIOETL_METRICS_PORT`                      | Prometheus HTTP server port                                 | `8000`            |
    | `BIOETL_OBSERVABILITY__TRACING_ENABLED`    | Enable OpenTelemetry tracing                                | `false`           |
@@ -330,8 +330,8 @@ If you do not want to activate the environment, call the interpreter directly:
 Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
 
 - Временные диагностические дампы сохраняйте в `tmp/`.
-- Логи локальных запусков сохраняйте в `logs/`.
-- Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
+- Логи локальных запусков сохраняйте в `reports/logs/`.
+- Для ad-hoc команд используйте явное перенаправление (`> reports/logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
 
 ### MCP Setup (GitHub Copilot + Codex)
 
@@ -623,13 +623,17 @@ Only approved top-level entries are allowed.
 - Documentation and references: `docs/`, `README.md`, `CHANGELOG.md`
 - Build/configuration: `pyproject.toml`, `uv.lock`, `Makefile`, `.pre-commit-config.yaml`, `.github/`
 - Operational/project assets: `configs/`, `scripts/`, `assets/`, `data/`, `reports/`, `grafana/`
+- Shared AI/editor tooling surfaces approved by policy:
+  `.ai/`, `.aiassistant/`, `.claude/`, `.codex/`, `.codex_tmp/`,
+  `.cursor/`, `.gemini/`, `.idea/`, `.jules/`, `.junie/`, `.sonarlint/`,
+  `.vibe/`, `.vscode/`
 - Explicit exceptions listed in `.github/root-allowlist.txt`
 
 **Where to place artifacts**:
 
 - Test artifacts and run reports → `reports/`
 - Logs and diagnostic dumps → `reports/` (or nested folder by run date/provider)
-- Coverage artifacts (`coverage.xml`, `htmlcov/`, `.coverage*`) → keep out of git, generate locally/CI only
+- Coverage artifacts (`reports/coverage/coverage.xml`, `reports/coverage/htmlcov/`, `.coverage*`) → keep out of git, generate locally/CI only
 - Reference datasets and static lookup files → `docs/` (documentation reference) or `data/` (runtime/local data)
 
 ## Local-Only Deployment

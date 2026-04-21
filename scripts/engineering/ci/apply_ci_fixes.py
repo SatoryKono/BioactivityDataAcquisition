@@ -776,19 +776,22 @@ jobs:
             echo "image-ref=bioetl:${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Prepare security reports directory
+        run: mkdir -p reports/security
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: ${{ steps.set-ref.outputs.image-ref }}
           format: 'sarif'
-          output: 'trivy-results.sarif'
+          output: 'reports/security/trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: 'reports/security/trivy-results.sarif'
 
       - name: Run Trivy on debian:bookworm-slim base image
         uses: aquasecurity/trivy-action@0.30.0

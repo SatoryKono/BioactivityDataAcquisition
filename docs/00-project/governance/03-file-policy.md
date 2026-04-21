@@ -29,7 +29,11 @@ Last verified: '2026-03-29'
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
-- Root-level tracked директории MUST ограничиваться approved runtime/tooling and project surfaces: `.ai`, `.aiassistant`, `.claude`, `.codex`, `.codex_tmp`, `.gemini`, `.github`, `.jules`, `.junie`, `.vibe`, `assets`, `configs`, `data`, `docs`, `grafana`, `reports`, `scripts`, `src`, `tests`.
+- Root-level tracked директории MUST ограничиваться approved runtime/tooling and
+  project surfaces: `.ai`, `.aiassistant`, `.claude`, `.codex`, `.codex_tmp`,
+  `.cursor`, `.gemini`, `.github`, `.idea`, `.jules`, `.junie`, `.sonarlint`,
+  `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
+  `reports`, `scripts`, `src`, `tests`.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Shared repo tooling surfaces such as `.claude/`, `.codex/`, `.gemini/`,
   `.vibe/`, `.vscode/`, and `.cursor/` MAY оставаться tracked только если они

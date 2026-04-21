@@ -36,8 +36,9 @@ This document defines deterministic cleanup rules and automation for removing ca
 ### 1.2. Coverage
 
 - `.coverage*`
-- `coverage.xml`
-- `htmlcov/`
+- `reports/coverage/coverage.xml`
+- `reports/coverage/htmlcov/`
+- legacy root outputs: `coverage.xml`, `htmlcov/`
 
 ### 1.3. Build/Dist
 
@@ -265,7 +266,11 @@ Root-level audit artifacts **MUST NOT** be committed.
 Enforcement:
 
 - `.gitignore` **MUST** include `/coverage.json` and `/all_fixtures.txt`.
-- CI **MUST** run a root-level allowlist check from `.github/root-allowlist.txt`.
+- CI **MUST** run `scripts/engineering/repo/audit_root_cleanliness.py`; this
+  validates `.github/root-allowlist.txt` and blocks tracked root/generated
+  artifact regressions such as root coverage files, root Python helpers,
+  non-canonical root text files, `src/tools/reports/`, and local runtime
+  output trees.
 - Any intentional new root-level tracked file **MUST** be added to `.github/root-allowlist.txt` in the same PR with justification.
 
 ### 7.4. Scheduled Jobs (SHOULD)

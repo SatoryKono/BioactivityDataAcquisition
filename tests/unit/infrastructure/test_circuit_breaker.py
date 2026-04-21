@@ -11,6 +11,7 @@ from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import CircuitBreakerState
 from bioetl.infrastructure.adapters.http.circuit_breaker import (
+    METRIC_CIRCUIT_BREAKER_OPEN_TOTAL,
     METRIC_CIRCUIT_BREAKER_STATE,
     METRIC_CIRCUIT_BREAKER_TRIPS,
     CircuitBreakerGuard,
@@ -299,6 +300,40 @@ class TestCircuitBreakerMetrics:
         assert calls[1][0] == (
             METRIC_CIRCUIT_BREAKER_STATE,
             0.0,
+            {"adapter": "test"},
+        )
+
+    @pytest.mark.unit
+    async def test_open_circuit_rejected_call_emits_open_metric(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """Rejected calls while OPEN should emit an open-circuit counter."""
+        cb = CircuitBreakerGuard(
+            provider="test",
+            failure_threshold=1,
+            recovery_timeout=300,
+            metrics=mock_metrics,
+        )
+
+        async def fail() -> None:
+            await asyncio.sleep(0)
+            raise RuntimeError("error")
+
+        with pytest.raises(RuntimeError):
+            await cb.call(fail)
+        assert cb.get_state() == CircuitBreakerState.OPEN
+        mock_metrics.reset_mock()
+
+        async def would_succeed() -> str:
+            await asyncio.sleep(0)
+            return "ok"
+
+        with pytest.raises(CircuitBreakerOpenError):
+            await cb.call(would_succeed)
+
+        mock_metrics.increment_counter.assert_called_once_with(
+            METRIC_CIRCUIT_BREAKER_OPEN_TOTAL,
+            1,
             {"adapter": "test"},
         )
 

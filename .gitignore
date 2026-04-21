@@ -165,6 +165,14 @@ coverage-*.xml
 coverage_output.txt
 coverage_summary.txt
 htmlcov/
+reports/coverage/
+reports/pytest/
+reports/junit/
+reports/logs/
+reports/observability/grafana/screenshots/
+reports/quality/architecture_debt_execution_plan_*.json
+reports/quality/tasks_architecture_metric_exemptions_*.json
+reports/security/
 
 # Other generated artifacts
 .vercel/

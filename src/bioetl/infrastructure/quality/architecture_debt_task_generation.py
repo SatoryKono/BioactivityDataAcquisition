@@ -67,7 +67,7 @@ def _default_output_path(
         "tasks_architecture_metric_exemptions_"
         f"{generated_at.strftime('%Y-%m-%d-%H-%M')}.json"
     )
-    return project_root / file_name
+    return project_root / "reports" / "quality" / file_name
 
 
 def _build_checks(registry_name: str) -> list[str]:

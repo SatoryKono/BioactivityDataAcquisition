@@ -22,6 +22,7 @@ from bioetl.composition.factories.pipeline.runner import (
     create_metrics_extractor,
     create_runner_factory,
 )
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics
 from bioetl.infrastructure.time import SystemClock
 
 __all__ = ["bootstrap_pipeline_runner_service"]
@@ -62,6 +63,8 @@ def bootstrap_pipeline_runner_service(
         runner_factory=runner_factory,
         metrics_extractor=metrics_extractor,
         logger=logger,
+        metrics=NoOpMetrics(warn_on_use=False),
+        audit=NoOpAudit(),
         clock=SystemClock(),
         _context_service=PipelineRunContextService(),
         _execution_service=PipelineRunExecutionService(),

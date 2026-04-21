@@ -77,19 +77,22 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Prepare security reports directory
+        run: mkdir -p reports/security
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
         with:
           image-ref: "bioetl:${{ github.sha }}"
           format: 'sarif'
-          output: 'trivy-results.sarif'
+          output: 'reports/security/trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6 # v2
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: 'reports/security/trivy-results.sarif'
 
       - name: Run Trivy on debian:bookworm-slim base image
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0

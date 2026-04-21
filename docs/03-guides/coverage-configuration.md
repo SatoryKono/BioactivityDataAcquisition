@@ -108,14 +108,14 @@ make test
 make test-cov-fast-stable
 
 # Generate HTML report after a coverage-producing run
-uv run coverage html -d htmlcov
+uv run coverage html -d reports/coverage/htmlcov
 ```
 
 Notes:
 
 - `make test` is the stable serial default and enforces `--cov-fail-under=85`;
 - `make test-cov-fast-stable` is the local optimization path and defaults to `LOCAL_COV_FAIL_UNDER=80`;
-- `htmlcov/` is not produced automatically by `make test`.
+- `reports/coverage/htmlcov/` is not produced automatically by `make test`.
 
 ### CI Validation
 
@@ -294,7 +294,7 @@ coverage-verify:
         --skip-serial-pass
     - run: uv run python -m coverage combine --keep reports/coverage
     - run: uv run python -m coverage report --show-missing --fail-under=85
-    - run: uv run python -m coverage xml -o coverage.xml
+    - run: uv run python -m coverage xml -o reports/coverage/coverage.xml
 ```
 
 **Status Check**: Required for PR merge. If coverage drops below 85%, merge is blocked.

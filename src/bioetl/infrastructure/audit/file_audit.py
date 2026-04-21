@@ -20,12 +20,13 @@ __all__ = ["FileAuditAdapter"]
 
 import asyncio
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import AuditEntry, AuditLayer
 from bioetl.domain.serialization import serialize_to_json
+from bioetl.domain.types import JsonDict
 
 from ._file_audit_readers import process_audit_file
 
@@ -130,6 +131,11 @@ class FileAuditAdapter:
         date_str = date.strftime("%Y-%m-%d")
         return self.base_path / f"audit_{date_str}.jsonl"
 
+    def _get_event_file_path(self, date: datetime) -> Path:
+        """Get the audit event file path for a specific date."""
+        date_str = date.strftime("%Y-%m-%d")
+        return self.base_path / f"events_{date_str}.jsonl"
+
     def _ensure_directory(self) -> None:
         """Ensure the audit directory exists."""
         self.base_path.mkdir(parents=True, exist_ok=True)
@@ -147,6 +153,25 @@ class FileAuditAdapter:
         json_line = serialize_to_json(entry.to_dict(), sort_keys=True) + "\n"
 
         # Append atomically using exclusive create + append mode
+        with open(file_path, "a", encoding="utf-8") as f:
+            f.write(json_line)
+            f.flush()
+
+    def _write_event_sync(
+        self,
+        event_name: str,
+        event_data: JsonDict | None,
+    ) -> None:
+        """Synchronously write a generic audit event to the event file."""
+        self._ensure_directory()
+        timestamp = datetime.now(UTC)
+        file_path = self._get_event_file_path(timestamp)
+        payload = {
+            "event_name": event_name,
+            "event_data": event_data or {},
+            "timestamp": timestamp.isoformat(),
+        }
+        json_line = serialize_to_json(payload, sort_keys=True) + "\n"
         with open(file_path, "a", encoding="utf-8") as f:
             f.write(json_line)
             f.flush()
@@ -198,6 +223,30 @@ class FileAuditAdapter:
             table=entry.table_name,
             operation=entry.operation.value,
             records_count=entry.records_count,
+        )
+
+    def log_event(
+        self,
+        event_name: str,
+        event_data: JsonDict | None = None,
+    ) -> None:
+        """Log a non-write lifecycle event to the audit trail."""
+        if self._closed:
+            raise RuntimeError("FileAuditAdapter has been closed")
+        with self._tracer.start_as_current_span("audit.log_event") as span:
+            span.set_attribute("bioetl.audit.event_name", event_name)
+            try:
+                self._write_event_sync(event_name, event_data)
+            except OSError as exc:
+                span.set_attribute(_AUDIT_STATUS_ATTRIBUTE, "error")
+                span.record_exception(exc)
+                raise
+            span.set_attribute(_AUDIT_STATUS_ATTRIBUTE, "success")
+
+        self.logger.debug(
+            "audit_event_logged",
+            event_name=event_name,
+            event_data=event_data or {},
         )
 
     def _read_entries_sync(

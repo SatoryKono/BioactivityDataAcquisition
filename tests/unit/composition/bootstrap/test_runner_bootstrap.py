@@ -16,15 +16,16 @@ from bioetl.application.services.pipeline_run_context_service import (
 from bioetl.application.services.pipeline_run_execution_service import (
     PipelineRunExecutionService,
 )
+from bioetl.composition import PipelineRegistry
 from bioetl.composition.bootstrap.runtime.runner import (
     bootstrap_pipeline_runner_service,
 )
-from bioetl.domain.ports import ClockPort
 from bioetl.composition.factories.pipeline.runner import (
     MetricsExtractor,
     RunnerFactory,
 )
-from bioetl.composition import PipelineRegistry
+from bioetl.domain.ports import ClockPort
+from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics
 from bioetl.infrastructure.time import SystemClock
 
 
@@ -83,6 +84,8 @@ class TestBootstrapPipelineRunnerService:
         assert isinstance(result._execution_service, PipelineRunExecutionService)
         assert isinstance(result.clock, ClockPort)
         assert isinstance(result.clock, SystemClock)
+        assert isinstance(result.metrics, NoOpMetrics)
+        assert isinstance(result.audit, NoOpAudit)
 
     def test_bootstrap_logger_has_correct_pipeline_name(self):
         """Test that the logger is configured with correct pipeline name."""

@@ -171,6 +171,7 @@ class TestRequiredMetricsSmoke:
             "bioetl_circuit_breaker_trips_total",
             "bioetl_circuit_breaker_success_total",
             "bioetl_circuit_breaker_failure_total",
+            "bioetl_circuit_breaker_open_total",
         ]
         cb_gauges = [
             "bioetl_circuit_breaker_state",
@@ -297,6 +298,29 @@ class TestPrometheusCounterLabelNormalization:
             )
             COUNTERS[
                 "bioetl_dq_validation_failures_total"
+            ].labels().inc.assert_called_once_with(1)
+
+    def test_dq_check_failures_total_normalizes_labels(self, prometheus_metrics):
+        with patch.dict(COUNTERS, {"bioetl_dq_check_failures_total": MagicMock()}):
+            prometheus_metrics.increment_counter(
+                "bioetl_dq_check_failures_total",
+                1,
+                {
+                    "pipeline": "chembl_activity",
+                    "stage": "Bronze",
+                    "check_type": "Encoding Validation",
+                    "severity": "HARD-FAIL",
+                },
+            )
+
+            COUNTERS["bioetl_dq_check_failures_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                stage="bronze",
+                check_type="encoding_validation",
+                severity="hard_fail",
+            )
+            COUNTERS[
+                "bioetl_dq_check_failures_total"
             ].labels().inc.assert_called_once_with(1)
 
     def test_silver_filter_rejections_total_normalizes_labels(self, prometheus_metrics):

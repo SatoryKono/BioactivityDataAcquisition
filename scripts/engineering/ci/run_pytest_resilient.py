@@ -294,7 +294,8 @@ def _create_parser() -> argparse.ArgumentParser:
             "-q --tb=short "
             "--ignore=tests/e2e --ignore=tests/contract "
             "-n auto --dist loadscope --max-worker-restart=0 "
-            "--cov=src/bioetl --cov-report=term-missing --cov-report=xml:coverage.xml "
+            "--cov=src/bioetl --cov-report=term-missing "
+            "--cov-report=xml:reports/coverage/coverage.xml "
             "--cov-fail-under=85"
         ),
         help="Extra options for parallel pass.",
@@ -305,7 +306,8 @@ def _create_parser() -> argparse.ArgumentParser:
             "-q --tb=short "
             "--ignore=tests/e2e --ignore=tests/contract "
             "-p no:xdist "
-            "--cov=src/bioetl --cov-report=term-missing --cov-report=xml:coverage.xml "
+            "--cov=src/bioetl --cov-report=term-missing "
+            "--cov-report=xml:reports/coverage/coverage.xml "
             "--cov-fail-under=85"
         ),
         help="Extra options for serial fallback pass.",

@@ -99,7 +99,7 @@ curl http://localhost:8000/metrics | grep bioetl_
   to the active run.
 
 ```bash
-cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
+cat reports/logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_name)'
 ```
 
 ### 3. Dashboard / Alert Surface

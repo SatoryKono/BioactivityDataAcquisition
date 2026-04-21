@@ -81,6 +81,28 @@ class DQReportGenerationMixin:
             },
         )
 
+    def _emit_dq_check_failure_metric(
+        self,
+        *,
+        pipeline: str,
+        stage: str,
+        check_type: str,
+        severity: str,
+    ) -> None:
+        """Emit per-check DQ failure counters when metrics are available."""
+        if self._metrics is None:
+            return
+        self._metrics.increment_counter(
+            "bioetl_dq_check_failures_total",
+            1,
+            {
+                "pipeline": pipeline,
+                "stage": stage,
+                "check_type": check_type,
+                "severity": severity,
+            },
+        )
+
     async def _try_generate_bronze(
         self,
         context: DQReportContext,
@@ -139,6 +161,14 @@ class DQReportGenerationMixin:
                     stage=stage,
                 )
             ),
+            emit_check_failure_metric=lambda pipeline, stage, check_type, severity: (
+                self._emit_dq_check_failure_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                    check_type=check_type,
+                    severity=severity,
+                )
+            ),
         )
 
     async def _generate_silver_report(
@@ -166,6 +196,14 @@ class DQReportGenerationMixin:
                     stage=stage,
                 )
             ),
+            emit_check_failure_metric=lambda pipeline, stage, check_type, severity: (
+                self._emit_dq_check_failure_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                    check_type=check_type,
+                    severity=severity,
+                )
+            ),
         )
 
     async def _generate_gold_report(
@@ -191,6 +229,14 @@ class DQReportGenerationMixin:
                 self._emit_dq_report_generated_metric(
                     pipeline=pipeline,
                     stage=stage,
+                )
+            ),
+            emit_check_failure_metric=lambda pipeline, stage, check_type, severity: (
+                self._emit_dq_check_failure_metric(
+                    pipeline=pipeline,
+                    stage=stage,
+                    check_type=check_type,
+                    severity=severity,
                 )
             ),
         )

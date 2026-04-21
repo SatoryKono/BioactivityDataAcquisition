@@ -159,7 +159,7 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--coverage-xml",
-        default="coverage.xml",
+        default="reports/coverage/coverage.xml",
         help="Coverage XML file path (optional).",
     )
     parser.add_argument(

@@ -13,7 +13,7 @@ Validates naming conventions according to RULES.md v5.24 §2:
 Usage:
     python src/tools/naming_audit.py                  # Full audit
     python src/tools/naming_audit.py --check          # CI mode (exit 1 on violations)
-    python src/tools/naming_audit.py --output report.md  # Save report to file
+    python src/tools/naming_audit.py --output reports/quality/naming-audit.md  # Save report to file
 """
 
 from __future__ import annotations

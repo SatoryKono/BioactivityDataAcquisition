@@ -45,10 +45,12 @@ from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
+        AuditPort,
         ClockPort,
         ExecutionMetricsRunnerPort,
         LoggerPort,
         MetricsExtractorPort,
+        MetricsPort,
         RunnerFactoryPort,
     )
 
@@ -70,6 +72,8 @@ class PipelineRunnerService:
         runner_factory: Factory for creating pipeline runners (injected).
         metrics_extractor: Extractor for runner execution metrics (injected).
         logger: Structured logger for observability (injected).
+        metrics: Metrics sink for pipeline-run counters (injected).
+        audit: Audit sink for pipeline lifecycle events (injected).
         _context_service: Helper service for building effective options and run context.
         _execution_service: Helper service for executing the prepared runner.
 
@@ -83,6 +87,8 @@ class PipelineRunnerService:
     runner_factory: RunnerFactoryPort
     metrics_extractor: MetricsExtractorPort
     logger: LoggerPort
+    metrics: MetricsPort
+    audit: AuditPort
     clock: ClockPort
     _context_service: PipelineRunContextService
     _execution_service: PipelineRunExecutionService
@@ -134,6 +140,13 @@ class PipelineRunnerService:
             context=context,
             options=effective_options,
         )
+        self._record_pipeline_audit_event(
+            event_name="PipelineRunStarted",
+            pipeline_name=pipeline_name,
+            run_id=effective_run_id,
+            run_type=effective_options.run_type,
+            status="started",
+        )
         dry_run_result = self._maybe_dry_run_result(
             pipeline_name=pipeline_name,
             run_id=effective_run_id,
@@ -142,6 +155,13 @@ class PipelineRunnerService:
             run_logger=run_logger,
         )
         if dry_run_result is not None:
+            self._record_pipeline_audit_event(
+                event_name="PipelineRunCompleted",
+                pipeline_name=pipeline_name,
+                run_id=effective_run_id,
+                run_type=effective_options.run_type,
+                status=dry_run_result.status.value,
+            )
             return dry_run_result
 
         runner = self._require_execution_runner(self.runner_factory.create(context))
@@ -258,7 +278,7 @@ class PipelineRunnerService:
             started_at=started_at,
             started_monotonic=started_monotonic,
         )
-        return self._build_run_result(
+        result = self._build_run_result(
             outcome=outcome,
             runner=runner,
             pipeline_name=pipeline_name,
@@ -266,6 +286,63 @@ class PipelineRunnerService:
             run_type=run_type,
             started_at=started_at,
         )
+        self._record_pipeline_run_metric(
+            pipeline_name=pipeline_name,
+            run_type=run_type,
+            status=result.status.value,
+        )
+        self._record_pipeline_audit_event(
+            event_name="PipelineRunCompleted",
+            pipeline_name=pipeline_name,
+            run_id=run_id,
+            run_type=run_type,
+            status=result.status.value,
+            manifest_id=result.manifest_id,
+            error_type=result.error_type,
+        )
+        return result
+
+    def _record_pipeline_run_metric(
+        self,
+        *,
+        pipeline_name: str,
+        run_type: str,
+        status: str,
+    ) -> None:
+        """Record pipeline run outcome via the metrics port abstraction."""
+        self.metrics.increment_counter(
+            "bioetl_pipeline_runs_total",
+            1,
+            {
+                "pipeline": pipeline_name,
+                "run_type": run_type,
+                "status": status,
+            },
+        )
+
+    def _record_pipeline_audit_event(
+        self,
+        *,
+        event_name: str,
+        pipeline_name: str,
+        run_id: RunID,
+        run_type: str,
+        status: str,
+        manifest_id: str | None = None,
+        error_type: str | None = None,
+    ) -> None:
+        """Record pipeline lifecycle outcome via the audit port abstraction."""
+        event_data = {
+            "pipeline": pipeline_name,
+            "run_id": str(run_id),
+            "run_type": run_type,
+            "status": status,
+        }
+        if manifest_id is not None:
+            event_data["manifest_id"] = manifest_id
+        if error_type is not None:
+            event_data["error_type"] = error_type
+        self.audit.log_event(event_name, event_data)
 
     def _build_run_result(
         self,

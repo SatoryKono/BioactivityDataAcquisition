@@ -37,7 +37,7 @@ _config_lock = threading.Lock()
 _configured = False
 # Logging output mode: True for JSON, False for console rendering.
 _current_format: bool | None = None
-_DEFAULT_LOG_FILE = Path("logs") / "bioetl.log"
+_DEFAULT_LOG_FILE = Path("reports") / "logs" / "bioetl.log"
 
 # Patterns for secret detection in log values
 _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
@@ -190,7 +190,7 @@ def _resolve_log_file_path() -> Path | None:
     Resolution order:
     1. ``BIOETL_LOG_FILE`` explicit override
     2. no default file sink during pytest runs
-    3. repository-local ``logs/bioetl.log`` for normal runtime usage
+    3. repository-local ``reports/logs/bioetl.log`` for normal runtime usage
     """
     configured_path = os.getenv("BIOETL_LOG_FILE")
     if configured_path is not None:

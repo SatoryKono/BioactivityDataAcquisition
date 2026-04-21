@@ -71,6 +71,12 @@ def _write_expanded_graph(path: Path) -> None:
                 "source_path": "configs/entities/chembl/activity.yaml",
                 "label": "activity.yaml",
             },
+            "artifact:silver/chembl/activity": {
+                "id": "artifact:silver/chembl/activity",
+                "node_type": "Silver table",
+                "source_path": "data/output/silver/chembl/activity",
+                "label": "silver/chembl/activity",
+            },
         },
         "edges": {
             "src/a.py|references_file|src/b.py": {
@@ -102,6 +108,12 @@ def _write_expanded_graph(path: Path) -> None:
                 "target": "config:configs/entities/chembl/activity.yaml",
                 "edge_type": "configured_by",
                 "meta": {"source": "pipeline_config"},
+            },
+            "chembl_activity|writes_to|silver_activity": {
+                "source": "pipeline:chembl_activity",
+                "target": "artifact:silver/chembl/activity",
+                "edge_type": "writes_to",
+                "meta": {"layer": "silver"},
             },
         },
     }
@@ -191,9 +203,30 @@ def test_entity_relation_index_includes_pipeline_docs_tests_configs_and_adr_refs
         "# Activity provider\n",
         encoding="utf-8",
     )
+    (repo_root / "docs/03-guides").mkdir(parents=True)
+    (repo_root / "docs/03-guides/config-policy.md").write_text(
+        "# Config policy\n\nConstrains configs/entities/chembl/activity.yaml.\n",
+        encoding="utf-8",
+    )
     (repo_root / "docs/02-architecture/decisions").mkdir(parents=True)
     (repo_root / "docs/02-architecture/decisions/ADR-999-test.md").write_text(
-        "# ADR test\n\nConstrains configs/entities/chembl/activity.yaml.\n",
+        "# ADR test\n\n"
+        "**Supersedes:** [ADR-998](ADR-998-old.md)\n"
+        "**Amends:** [ADR-997](ADR-997-amended.md)\n\n"
+        "Constrains configs/entities/chembl/activity.yaml.\n",
+        encoding="utf-8",
+    )
+    (repo_root / "docs/02-architecture/decisions/ADR-998-old.md").write_text(
+        "# ADR old\n",
+        encoding="utf-8",
+    )
+    (repo_root / "docs/02-architecture/decisions/ADR-997-amended.md").write_text(
+        "# ADR amended\n",
+        encoding="utf-8",
+    )
+    (repo_root / "docs/05-operations/runbooks").mkdir(parents=True)
+    (repo_root / "docs/05-operations/runbooks/pipeline-failure-dq.md").write_text(
+        "# Pipeline Failure: High DQ Rate (P1)\n",
         encoding="utf-8",
     )
 
@@ -206,5 +239,52 @@ def test_entity_relation_index_includes_pipeline_docs_tests_configs_and_adr_refs
     refs = query_entity_relations(index, "chembl_activity", direction="outbound")
 
     relations = {item["relation"] for item in refs["outbound"]}
-    assert {"defined_by", "described_by", "tested_by"} <= relations
-    assert index["relation_counts"]["constrains"] == 1
+    assert {"defined_by", "described_by", "emits_artifact", "tested_by"} <= relations
+    assert refs["outbound"][0]["source_kind"] == "Pipeline"
+    artifact_refs = [
+        item for item in refs["outbound"] if item["relation"] == "emits_artifact"
+    ]
+    assert artifact_refs[0]["target_id"] == "artifact:silver/chembl/activity"
+    assert index["relation_counts"]["amends"] == 1
+    assert index["relation_counts"]["constrains"] == 2
+    assert index["relation_counts"]["emits_artifact"] == 1
+    assert index["relation_counts"]["mitigates"] == 1
+    assert index["relation_counts"]["supersedes"] == 1
+    assert index["relation_counts"]["tested_by"] == 2
+
+    config_refs = query_entity_relations(
+        index,
+        "config:configs/entities/chembl/activity.yaml",
+        direction="outbound",
+        relation="tested_by",
+    )
+    assert config_refs["outbound"][0]["target_kind"] == "Test"
+
+    doc_refs = query_entity_relations(
+        index,
+        "docs/03-guides/config-policy.md",
+        direction="outbound",
+        relation="constrains",
+    )
+    assert doc_refs["outbound"][0]["target_id"] == (
+        "config:configs/entities/chembl/activity.yaml"
+    )
+
+    adr_refs = query_entity_relations(
+        index,
+        "ADR-999-test.md",
+        direction="outbound",
+    )
+    assert {"amends", "constrains", "supersedes"} <= {
+        item["relation"] for item in adr_refs["outbound"]
+    }
+
+    runbook_refs = query_entity_relations(
+        index,
+        "pipeline-failure-dq.md",
+        direction="outbound",
+        relation="mitigates",
+    )
+    assert runbook_refs["outbound"][0]["target_id"] == (
+        "failure_mode:pipeline-failure-high-dq-rate"
+    )

@@ -72,14 +72,15 @@ jobs:
           fi
 
           # Run tests and capture exit code
-          uv run pytest $PYTEST_ARGS --junit-xml=contract-results.xml || echo "TESTS_FAILED=true" >> $GITHUB_OUTPUT
+          mkdir -p reports/junit
+          uv run pytest $PYTEST_ARGS --junit-xml=reports/junit/contract-results.xml || echo "TESTS_FAILED=true" >> $GITHUB_OUTPUT
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: contract-test-results
-          path: contract-results.xml
+          path: reports/junit/contract-results.xml
           retention-days: 30
 
       - name: Create Issue on Failure

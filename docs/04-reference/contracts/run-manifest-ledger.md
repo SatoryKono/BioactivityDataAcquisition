@@ -58,12 +58,15 @@ and provenance artifact at the same time.
 
 File-backed control-plane persistence uses the following canonical paths:
 
-| Artifact              | Path                                                       |
-| --------------------- | ---------------------------------------------------------- |
-| Manifest payload      | `data/output/control/run_manifest/{manifest_id}.json`      |
-| Manifest run-id index | `data/output/control/run_manifest/_by_run_id/{run_id}.txt` |
-| Ledger payload        | `data/output/control/run_ledger/{manifest_id}.jsonl`       |
-| Ledger run-id index   | `data/output/control/run_ledger/_by_run_id/{run_id}.txt`   |
+| Artifact                             | Path                                                              |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| Manifest payload                     | `data/output/control/run_manifest/{manifest_id}.json`             |
+| Manifest run-id index                | `data/output/control/run_manifest/_by_run_id/{run_id}.txt`        |
+| Ledger payload                       | `data/output/control/run_ledger/{manifest_id}.jsonl`              |
+| Ledger run-id index                  | `data/output/control/run_ledger/_by_run_id/{run_id}.txt`          |
+| Effective config semantic artifact   | `data/output/control/effective_config/{artifact_id}.json`         |
+| Effective config occurrence envelope | `data/output/control/effective_config/_occurrences/{run_id}.json` |
+| Effective config run-id index        | `data/output/control/effective_config/_by_run_id/{run_id}.txt`    |
 
 `run_manifest` and `run_ledger` stores are bootstrapped from
 `Path(settings.data_dir) / "output" / "control" / <leaf>` and are therefore
@@ -288,12 +291,21 @@ published effective-config baseline is:
 
 - canonical YAML-backed `source_refs` persist stable `source_hash` values when
   the referenced config files exist;
-- occurrence-only timestamps inside the effective-config artifact are
-  UTC-normalized before persistence and are not part of the semantic
-  effective-config identity;
-- file-backed effective-config persistence is crash-safe at the payload/index
-  pair boundary: runtime must not leave a committed artifact payload behind when
-  the corresponding `run_id -> artifact_id` index write fails in-process.
+- the semantic effective-config artifact lives at
+  `effective_config/{artifact_id}.json` and contains the stable
+  `semantic_artifact` payload only;
+- occurrence-only fields such as `created_at`, resolved-config timestamp, and
+  effective-execution timestamp live in
+  `effective_config/_occurrences/{run_id}.json` and are not part of the
+  semantic effective-config identity;
+- file-backed effective-config persistence is fail-closed for semantic
+  rewrites: identical semantic payloads are idempotent and leave the existing
+  artifact bytes untouched, while conflicting payloads for the same
+  `artifact_id` are rejected;
+- file-backed effective-config persistence is crash-safe across semantic
+  artifact, occurrence envelope, and `run_id -> artifact_id` index writes:
+  runtime must not leave a newly committed semantic artifact or occurrence
+  envelope behind when a later consistency step fails in-process.
 
 ### `RunCodeProvenance` field set
 

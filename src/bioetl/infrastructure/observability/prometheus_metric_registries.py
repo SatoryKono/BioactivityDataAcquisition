@@ -140,6 +140,7 @@ DQ_VALIDATION_REGISTRY = MetricRegistryFamily(
         "bioetl_dq_report_skipped_total": _metrics.DQ_REPORT_SKIPPED_TOTAL,
         "bioetl_dq_soft_threshold_exceeded": _metrics.DQ_SOFT_THRESHOLD_EXCEEDED,
         "bioetl_dq_validation_failures_total": _metrics.DQ_VALIDATION_FAILURES_TOTAL,
+        "bioetl_dq_check_failures_total": _metrics.DQ_CHECK_FAILURES_TOTAL,
         "bioetl_observability_events_total": _metrics.OBSERVABILITY_EVENTS_TOTAL,
     },
     gauges={
@@ -158,6 +159,7 @@ SYSTEM_PROCESS_REGISTRY = MetricRegistryFamily(
     family="system_process",
     counters={
         "bioetl_circuit_breaker_trips_total": _metrics.CIRCUIT_BREAKER_TRIPS_TOTAL,
+        "bioetl_circuit_breaker_open_total": _metrics.CIRCUIT_BREAKER_OPEN_TOTAL,
         "bioetl_circuit_breaker_success_total": _metrics.CIRCUIT_BREAKER_SUCCESS_TOTAL,
         "bioetl_circuit_breaker_failure_total": _metrics.CIRCUIT_BREAKER_FAILURE_TOTAL,
         "bioetl_health_check_degraded_total": _metrics.HEALTH_CHECK_DEGRADED_TOTAL,
