@@ -29,9 +29,17 @@ FORBIDDEN_TRACKED_PATH_PREFIXES: tuple[str, ...] = (
 )
 FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
     {
+        "contract-identity-diagnostics.json",
         "contract-registry-diagnostics.json",
+        "contract-registry-dq-diagnostics.json",
+        "contract-schema-classifier-diagnostics.json",
         "coverage.json",
         "coverage.xml",
+        "contract-results.xml",
+        "hypothesis-contracts-results.xml",
+        "port-contracts-results.xml",
+        "provider-contract-drift-report.json",
+        "trivy-results.sarif",
     }
 )
 
@@ -221,6 +229,10 @@ def _is_forbidden_tracked_artifact(path: str) -> bool:
     if path.startswith(".coverage"):
         return True
     if path.startswith("coverage-") and path.endswith(".xml"):
+        return True
+    if path.startswith("tasks_architecture_metric_exemptions_") and path.endswith(
+        ".json"
+    ):
         return True
     return "sonar-scanner" in path and path.endswith(".zip")
 

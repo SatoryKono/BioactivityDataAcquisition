@@ -358,6 +358,63 @@ class TestDQReportService:
         mock_report_writer.write_bronze_report.assert_called_once()
 
     @pytest.mark.asyncio
+    async def test_generate_reports_emits_dq_check_failure_metrics(
+        self,
+        mock_logger: MagicMock,
+        mock_bronze_analyzer: MagicMock,
+        mock_report_writer: AsyncMock,
+        dq_context: DQReportContext,
+        bronze_dq_config: MagicMock,
+    ) -> None:
+        """generate_reports should emit per-check DQ failure metrics."""
+        mock_bronze_analyzer.analyze.return_value.checks = {
+            "record_count": {"status": "warn"},
+            "encoding_validation": {"status": "fail"},
+            "schema_snapshot": {"status": "pass"},
+            "raw_field_presence": {},
+        }
+        mock_metrics = MagicMock()
+        service = DQReportService(
+            logger=mock_logger,
+            bronze_analyzer=mock_bronze_analyzer,
+            report_writer=mock_report_writer,
+            metrics=mock_metrics,
+        )
+
+        await service.generate_reports(
+            context=dq_context,
+            bronze_config=bronze_dq_config,
+        )
+
+        failure_calls = [
+            call.args
+            for call in mock_metrics.increment_counter.call_args_list
+            if call.args[0] == "bioetl_dq_check_failures_total"
+        ]
+        assert failure_calls == [
+            (
+                "bioetl_dq_check_failures_total",
+                1,
+                {
+                    "pipeline": "test_pipeline",
+                    "stage": "bronze",
+                    "check_type": "record_count",
+                    "severity": "warning",
+                },
+            ),
+            (
+                "bioetl_dq_check_failures_total",
+                1,
+                {
+                    "pipeline": "test_pipeline",
+                    "stage": "bronze",
+                    "check_type": "encoding_validation",
+                    "severity": "hard_fail",
+                },
+            ),
+        ]
+
+    @pytest.mark.asyncio
     async def test_generate_reports_silver_when_enabled(
         self,
         mock_logger: MagicMock,

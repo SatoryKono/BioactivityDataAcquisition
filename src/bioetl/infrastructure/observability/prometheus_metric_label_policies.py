@@ -119,6 +119,7 @@ _ALLOWED_STAGE_LABELS = frozenset(
         "validation",
         "threshold",
         "transform",
+        "bronze",
         "silver",
         "gold",
         "postrun",
@@ -127,6 +128,31 @@ _ALLOWED_STAGE_LABELS = frozenset(
 )
 _ALLOWED_SEVERITY_LABELS = frozenset(
     {"soft_fail", "hard_fail", "warning", "error", "other"}
+)
+_ALLOWED_DQ_CHECK_TYPE_LABELS = frozenset(
+    {
+        "anomaly_detection",
+        "business_rules",
+        "completeness",
+        "content_hash_integrity",
+        "data_freshness",
+        "deduplication_stats",
+        "encoding_validation",
+        "file_integrity",
+        "key_nullability",
+        "null_rate",
+        "raw_field_presence",
+        "record_count",
+        "referential_integrity",
+        "schema_drift",
+        "schema_snapshot",
+        "scd_integrity",
+        "statistical_profile",
+        "type_conformance",
+        "uniqueness",
+        "value_distribution",
+        "other",
+    }
 )
 _ALLOWED_STRUCTURAL_ACTION_LABELS = frozenset(
     {
@@ -178,6 +204,15 @@ def normalize_metric_dispatch_labels(
         return {
             **labels,
             "stage": normalize_dq_stage(str(labels.get("stage", "other"))),
+            "severity": normalize_dq_severity(str(labels.get("severity", "other"))),
+        }
+    if name == "bioetl_dq_check_failures_total":
+        return {
+            **labels,
+            "stage": normalize_dq_stage(str(labels.get("stage", "other"))),
+            "check_type": normalize_dq_check_type(
+                str(labels.get("check_type", "other"))
+            ),
             "severity": normalize_dq_severity(str(labels.get("severity", "other"))),
         }
     if name == "bioetl_silver_filter_rejections_total":
@@ -262,6 +297,11 @@ def normalize_dq_stage(stage: str) -> str:
 def normalize_dq_severity(severity: str) -> str:
     """Normalize DQ severity label to a bounded label set."""
     return _normalize_bounded_label(severity, _ALLOWED_SEVERITY_LABELS)
+
+
+def normalize_dq_check_type(check_type: str) -> str:
+    """Normalize DQ check type label to the configured bounded set."""
+    return _normalize_bounded_label(check_type, _ALLOWED_DQ_CHECK_TYPE_LABELS)
 
 
 def normalize_structural_action(action: str) -> str:

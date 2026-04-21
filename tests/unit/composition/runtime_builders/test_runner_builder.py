@@ -488,7 +488,7 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     assert effective_payload["semantic_artifact"]["artifact_id"] == (
         effective_config_artifact_id
     )
-    assert "occurrence_envelope" in effective_payload
+    assert "occurrence_envelope" not in effective_payload
 
     effective_index_path = (
         tmp_path
@@ -502,6 +502,19 @@ def test_build_pipeline_runner_persists_manifest_before_factory_create(
     assert effective_index_path.read_text(encoding="utf-8").strip() == (
         effective_config_artifact_id
     )
+    occurrence_path = (
+        tmp_path
+        / "output"
+        / "control"
+        / "effective_config"
+        / "_occurrences"
+        / f"{context.run_id}.json"
+    )
+    assert occurrence_path.exists()
+    occurrence_payload = json.loads(occurrence_path.read_text(encoding="utf-8"))
+    assert occurrence_payload["artifact_id"] == effective_config_artifact_id
+    assert occurrence_payload["run_id"] == str(context.run_id)
+    assert "occurrence_envelope" in occurrence_payload
     assert fake_factory.runner.attached_run_ledger_service is not None
 
     ledger_path = (

@@ -97,7 +97,7 @@ All structured logs include `run-id`:
 ```
 
 This enables:
-- Log aggregation: `grep run-id=<uuid> logs/*.jsonl`
+- Log aggregation: `grep run-id=<uuid> reports/logs/*.jsonl`
 - Metrics correlation: labels include `run-id` where appropriate
 - Batch tracing: `run-id` + `batch-id` for granular tracking
 

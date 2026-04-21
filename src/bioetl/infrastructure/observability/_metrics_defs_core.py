@@ -11,6 +11,7 @@ from bioetl.infrastructure.observability.circuit_breaker_mapping import (
 __all__ = [
     "BATCH_SIZE_RECORDS",
     "CIRCUIT_BREAKER_FAILURE_TOTAL",
+    "CIRCUIT_BREAKER_OPEN_TOTAL",
     "CIRCUIT_BREAKER_STATE",
     "CIRCUIT_BREAKER_SUCCESS_TOTAL",
     "CIRCUIT_BREAKER_TRIPS_TOTAL",
@@ -19,6 +20,7 @@ __all__ = [
     "DQ_BASELINE_SAMPLES",
     "DQ_BASELINE_UPDATED",
     "DQ_CHECK_DURATION_MS",
+    "DQ_CHECK_FAILURES_TOTAL",
     "DQ_MONITOR_ENABLED",
     "DQ_RECORDS_QUARANTINED_TOTAL",
     "DQ_VALIDATION_FAILURES_TOTAL",
@@ -109,9 +111,21 @@ DQ_VALIDATION_FAILURES_TOTAL = Counter(
     ["pipeline", "stage", "severity"],
 )
 
+DQ_CHECK_FAILURES_TOTAL = Counter(
+    "bioetl_dq_check_failures_total",
+    "Total failed or warning DQ checks by check type",
+    ["pipeline", "stage", "check_type", "severity"],
+)
+
 CIRCUIT_BREAKER_STATE = Gauge(
     "bioetl_circuit_breaker_state",
     CIRCUIT_BREAKER_STATE_DESCRIPTION,
+    ["adapter"],
+)
+
+CIRCUIT_BREAKER_OPEN_TOTAL = Counter(
+    "bioetl_circuit_breaker_open_total",
+    "Total calls rejected while the circuit breaker is open",
     ["adapter"],
 )
 

@@ -42,10 +42,14 @@ ALLOWED_ROOT_DIRS: set[str] = {
     ".aiassistant",
     ".claude",
     ".codex",
+    ".codex_tmp",
+    ".cursor",
     ".gemini",
     ".github",
+    ".idea",
     ".jules",
     ".junie",
+    ".sonarlint",
     "assets",
     "configs",
     "data",
@@ -55,15 +59,14 @@ ALLOWED_ROOT_DIRS: set[str] = {
     "scripts",
     "src",
     "tests",
+    ".vibe",
+    ".vscode",
 }
 
 # Local untracked directories tolerated by structural audit.
 LOCAL_TOLERATED_ROOT_DIRS: set[str] = {
-    ".cursor",
-    ".idea",
     ".import_linter_cache",
     ".trae",
-    ".vscode",
     ".windsurf",
 }
 
@@ -73,7 +76,12 @@ GENERATED_DIRS: set[str] = {
     "build",
     "dist",
     "htmlcov",
+    "logs",
     "node_modules",
+    "output",
+    "test-output",
+    "MagicMock",
+    ".python-user",
 }
 
 # Technical directories (auto-generated, always excluded)

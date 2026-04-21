@@ -11,6 +11,7 @@ State machine:
 from __future__ import annotations
 
 __all__ = [
+    "METRIC_CIRCUIT_BREAKER_OPEN_TOTAL",
     "METRIC_CIRCUIT_BREAKER_STATE",
     "METRIC_CIRCUIT_BREAKER_TRIPS",
     "CircuitBreakerGuard",
@@ -46,6 +47,7 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 METRIC_CIRCUIT_BREAKER_STATE = "bioetl_circuit_breaker_state"
+METRIC_CIRCUIT_BREAKER_OPEN_TOTAL = "bioetl_circuit_breaker_open_total"
 METRIC_CIRCUIT_BREAKER_TRIPS = "bioetl_circuit_breaker_trips_total"
 
 
@@ -144,6 +146,11 @@ class CircuitBreakerGuard:
                 state_metric_name=METRIC_CIRCUIT_BREAKER_STATE,
             )
             if not should_attempt:
+                emit_counter_metric(
+                    self.metrics,
+                    provider=self.provider,
+                    metric_name=METRIC_CIRCUIT_BREAKER_OPEN_TOTAL,
+                )
                 raise CircuitBreakerOpenError(
                     self.provider,
                     time_until_retry(

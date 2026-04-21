@@ -175,6 +175,27 @@ class TestFileAuditAdapter:
         assert data["layer"] == "bronze"
         assert data["records_count"] == 100
 
+    def test_log_event_creates_event_file(
+        self, tmp_path: Path, noop_logger: NoOpLogger
+    ) -> None:
+        """Test log_event creates a generic audit event file."""
+        adapter = FileAuditAdapter(tmp_path / "audit", noop_logger)
+
+        adapter.log_event(
+            "PipelineRunCompleted",
+            {"pipeline": "test_pipeline", "status": "success"},
+        )
+
+        event_files = list((tmp_path / "audit").glob("events_*.jsonl"))
+        assert len(event_files) == 1
+        data = json.loads(event_files[0].read_text().strip())
+        assert data["event_name"] == "PipelineRunCompleted"
+        assert data["event_data"] == {
+            "pipeline": "test_pipeline",
+            "status": "success",
+        }
+        assert "timestamp" in data
+
     @pytest.mark.asyncio
     async def test_log_write_appends_entries(
         self, tmp_path: Path, noop_logger: NoOpLogger, run_id: RunID

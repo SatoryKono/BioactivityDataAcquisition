@@ -36,15 +36,38 @@ Current baseline:
 - No tracked paths were found for the previously risky generated families:
   `src/tools/reports/`, `output/`, `test-output/`, `MagicMock/`,
   `.python-user/`, `node_modules/`, `logs/`, root coverage artifacts, or
-  `contract-registry-diagnostics.json`.
+  root contract-governance diagnostics.
 
-Remaining work is governance work:
+Remaining work is governance work. The first implementation pass on
+2026-04-21 tightened `audit_root_cleanliness.py`, pruned
+`.github/root-allowlist.txt` to current tracked root files, synchronized the
+file-policy/root-cleanup documentation, and added unit coverage for root
+markdown, root Python, and generated-artifact guardrails. It also introduced
+`configs/quality/generated_artifact_routing.yaml` with an architecture guard for
+reviewed generated-artifact destinations, and wired that guard into the pretest
+governance/full profiles. A follow-up pass moved contract-governance diagnostic
+defaults from repository root into `reports/quality/` and expanded the routing
+registry across the main quality-report generators. Coverage XML generation was
+also routed from root `coverage.xml` to `reports/coverage/coverage.xml`, and
+Grafana render screenshots moved from root `output/playwright` to
+`reports/observability/grafana/screenshots`. The default local runtime log file
+also moved from root `logs/bioetl.log` to `reports/logs/bioetl.log`, and HTML
+coverage guidance now routes local reports from root `htmlcov/` to
+`reports/coverage/htmlcov/`. Provider contract drift CI now uploads its JSON
+artifact from `reports/quality/provider-contract-drift-report.json` instead of
+the repository root. Docker security scanning now writes Trivy SARIF under
+`reports/security/trivy-results.sarif` before upload. Contract JUnit XML
+artifacts now route to `reports/junit/`, and architecture-debt task backlogs
+now default to `reports/quality/tasks_architecture_metric_exemptions_*.json`
+instead of the repository root.
 
-1. align root allowlist, README policy, cleanup docs, and audits;
-1. decide which AI/editor config directories are intentional shared repo
-   surfaces;
-1. make generated artifact placement rules explicit for all generators;
-1. add regression checks for the cleanup state already achieved.
+Open follow-up work:
+
+1. expand the generated-artifact routing registry to any remaining maintained
+   writer not yet inventoried;
+1. keep `.gitignore`, `.dockerignore`, root audit, and routing registry changes
+   synchronized as new output families are added;
+1. run broader CI shards after the unrelated working-tree changes stabilize.
 
 ## Evidence snapshot
 
@@ -53,7 +76,7 @@ Commands used for the 2026-04-21 refresh:
 ```bash
 python3 scripts/engineering/repo/audit_root_cleanliness.py
 git ls-files | rg '^[^/]+\.md$|^[^/]+\.py$'
-git ls-files | rg '^(src/tools/reports/|output/|test-output/|MagicMock/|\.python-user/|node_modules/|logs/|.*sonar-scanner.*zip$|contract-registry-diagnostics\.json$|.*\.coverage|htmlcov/|coverage\.xml$)'
+git ls-files | rg '^(src/tools/reports/|output/|test-output/|MagicMock/|\.python-user/|node_modules/|logs/|.*sonar-scanner.*zip$|contract-(identity|registry|registry-dq|schema-classifier)-diagnostics\.json$|.*\.coverage|htmlcov/|coverage\.xml$)'
 ```
 
 Observed results:
@@ -174,16 +197,21 @@ Forbidden:
 
 Goal: make every policy surface say the same thing.
 
+Status: partially implemented on 2026-04-21.
+
 Actions:
 
-- Reconcile `README.md` root layout policy with
+- Completed: reconcile `README.md` root layout policy with
   `scripts/engineering/repo/audit_root_cleanliness.py`.
-- Review `.github/root-allowlist.txt` and remove forward-compatible allowances
-  that are no longer intended root files.
-- Add a short note to `docs/plans/README.md` that this plan was refreshed on
-  2026-04-21 and now tracks prevention work.
-- Cross-check cleanup docs under `docs/03-guides/` for stale references to
-  removed root status files or removed generated trees.
+- Completed: review `.github/root-allowlist.txt` and remove
+  forward-compatible allowances that are no longer intended root files.
+- Completed: add a short note to `docs/plans/README.md` that this plan was
+  refreshed on 2026-04-21 and now tracks prevention work.
+- Completed: synchronize `docs/00-project/governance/03-file-policy.md` with
+  currently approved root tooling/editor directory surfaces.
+- Completed: cross-check cleanup docs under `docs/03-guides/` for stale
+  placement guidance and update `cleanup-policy.md` to describe the expanded
+  root audit checks.
 
 Acceptance:
 
@@ -195,15 +223,37 @@ Acceptance:
 
 Goal: ensure every generator writes to a known, policy-compliant destination.
 
+Status: partially implemented on 2026-04-21.
+
 Actions:
 
-- Inventory scripts that write files under `reports/`, `docs/reports/`,
-  `docs/reports/generated/`, `src/**/generated/`, or repository root.
+- Started: inventory scripts that write files under `reports/`,
+  `docs/reports/`, `docs/reports/generated/`, `src/**/generated/`, or
+  repository root in `configs/quality/generated_artifact_routing.yaml`;
+  current coverage includes docs export/merge generators, schema generators,
+  architecture dependency maps, contract-governance diagnostics, quality debt
+  reports, VCR/provider drift reports, duplication/hotspot reports, and
+  resilient pytest telemetry.
 - Classify each output as source artifact, generated source, working report,
   curated evidence, or local-only diagnostic.
-- For each generated writer, document the intended output directory and whether
-  the output is tracked, ignored, or CI-only.
-- Add or update tests for generators that previously wrote to risky locations.
+- Started: for each inventoried generated writer, document the intended output
+  directory and whether the output is tracked, ignored, or CI-only.
+- Completed: add an architecture test that rejects unsafe generated-artifact
+  output routes such as repository root, `src/tools/reports/`, coverage trees,
+  logs, and local runtime output trees.
+- Completed: document the routing registry in `configs/README.md`.
+- Completed: move `validate_contract_identity.py`,
+  `validate_schema_classifier_gate.py`, and `validate_registry_dq_refs.py`
+  diagnostics from repository root into `reports/quality/`, including the
+  contract-governance workflow upload paths.
+- Completed: move CI/resilient coverage XML defaults from root `coverage.xml`
+  to `reports/coverage/coverage.xml`, with architecture tests guarding the
+  workflow and script defaults.
+- Completed: move Grafana dashboard screenshot rerenders from root `output/`
+  to `reports/observability/grafana/screenshots`, with routing-registry
+  coverage.
+- Completed: move the default local runtime log file from root `logs/` to
+  `reports/logs/bioetl.log`, and update active operator docs/runbooks.
 
 Acceptance:
 
@@ -236,11 +286,16 @@ Acceptance:
 
 Goal: keep the cleaned structure from regressing.
 
+Status: partially implemented on 2026-04-21.
+
 Actions:
 
-- Extend root hygiene checks to flag tracked generated artifact families.
-- Add architecture tests for root markdown and root Python policy.
-- Add a guard for generated report placement under `src/`.
+- Completed: extend root hygiene checks to flag tracked generated artifact
+  families.
+- Completed: add tests for root markdown and root Python policy.
+- Completed: add a guard for generated report placement under `src/`.
+- Completed: include the generated-artifact routing guard in the pretest
+  governance and full architecture profiles.
 - Keep `.gitignore`, `.dockerignore`, and root audit rules in sync for
   coverage, logs, temporary outputs, and generated reports.
 
@@ -260,8 +315,6 @@ Acceptance:
 - Should `docs/reports/generated/` remain a tracked generated-docs surface, or
   should it be split into tracked curated generated outputs and ignored local
   generated outputs?
-- Should `.github/root-allowlist.txt` keep absent forward-compatible entries,
-  or should it only list files that are expected in the current tree?
 
 ## Definition of done
 

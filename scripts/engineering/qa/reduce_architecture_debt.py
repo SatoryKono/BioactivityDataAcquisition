@@ -29,7 +29,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help=(
             "Path to tasks_architecture_metric_exemptions_*.json. Defaults to "
-            "the latest file in project root."
+            "the latest file in reports/quality, with legacy root fallback."
         ),
     )
     parser.add_argument(
@@ -66,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
     if tasks_path is None:
         parser.error(
             "No tasks_architecture_metric_exemptions_*.json files found in "
-            "project root. Run `python -m scripts.engineering.qa generate-debt-tasks` first."
+            "reports/quality. Run `python -m scripts.engineering.qa generate-debt-tasks` first."
         )
 
     payload = load_architecture_debt_tasks(tasks_path)

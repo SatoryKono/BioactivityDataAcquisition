@@ -36,8 +36,8 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help=(
             "Explicit output path. Defaults to "
-            "tasks_architecture_metric_exemptions_YYYY-MM-DD-HH-MM.json "
-            "in project root."
+            "reports/quality/tasks_architecture_metric_exemptions_"
+            "YYYY-MM-DD-HH-MM.json."
         ),
     )
     parser.add_argument(

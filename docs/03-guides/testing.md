@@ -367,7 +367,7 @@ make test-architecture
 uv run python -m pytest tests/integration/adapters/test_pubmed.py --vcr-record=new_episodes -v
 
 # Генерация HTML coverage report после coverage-run
-uv run coverage html -d htmlcov
+uv run coverage html -d reports/coverage/htmlcov
 ```
 
 ### 4.2. Integration / E2E execution matrix
@@ -413,14 +413,14 @@ uv run coverage html -d htmlcov
 | 3 | `make test-fast` | Получить быстрый feedback для unit + architecture |
 | 4 | `make test` | Выполнить стабильный локальный прогон с coverage gate 85% |
 | 5 | `make test-cov-fast-stable` | Выполнить ускоренный split-run для локального coverage анализа |
-| 6 | `uv run coverage html -d htmlcov` | Сгенерировать HTML coverage report при необходимости |
+| 6 | `uv run coverage html -d reports/coverage/htmlcov` | Сгенерировать HTML coverage report при необходимости |
 | 7 | `uv run python -m pytest tests/e2e/ -m e2e -v` | Отдельно запустить E2E в Local-Only режиме |
 
 **Примечания:**
 
 - Если нужен быстрый coverage-run без полного serial suite, используйте `make test-cov-fast-stable`.
 - Для корректного прохождения трассировки и мониторинга установите опциональные зависимости (`psutil`, `opentelemetry-*`).
-- `make test` не генерирует `htmlcov/` автоматически; HTML-отчёт создаётся отдельной командой `uv run coverage html -d htmlcov`.
+- `make test` не генерирует `reports/coverage/htmlcov/` автоматически; HTML-отчёт создаётся отдельной командой `uv run coverage html -d reports/coverage/htmlcov`.
 - В CI используется `.github/workflows/tests.yml`, а локальный `make test-ci` служит способом воспроизвести resilient flow вручную.
 - В mixed Windows + WSL checkout `.venv` не должен быть общим между PowerShell и WSL: используйте `.venv-win` и внешний WSL venv через `setup_env_windows.ps1` / `setup_env_wsl.sh`.
 
@@ -560,7 +560,7 @@ provider-contract-drift.yml
   как default PR/CI baseline;
 - live contract workflow guarded to repository `SatoryKono/BioactivityDataAcquisition`; в нём `tests/contract/` запускаются только при `BIOETL_LIVE_API_TESTS=true`, `BIOETL_NETWORK_TESTS=true` и флаге `--network`;
 - `provider-contract-drift.yml` генерирует machine-readable artifact
-  `provider-contract-drift-report.json` и hard-fail'ит только на `breaking`
+  `reports/quality/provider-contract-drift-report.json` и hard-fail'ит только на `breaking`
   drift; `warning` остаётся видимым в artifact для PR review;
 - `duration-telemetry` собирает JUnit telemetry и публикует slow-test artifact.
 

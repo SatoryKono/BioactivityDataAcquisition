@@ -37,8 +37,8 @@
 - Для валидации можешь ориентироваться на тесты в `tests/architecture/test_code_metrics.py` и `tests/architecture/test_quality_burndown_priorities.py`
 
 ФОРМАТ ВЫХОДНОГО JSON
-Сохрани файл с именем:
-`tasks_architecture_metric_exemptions_YYYY-MM-DD-HH-MM.json`
+Сохрани файл в `reports/quality/` с именем:
+`reports/quality/tasks_architecture_metric_exemptions_YYYY-MM-DD-HH-MM.json`
 (используй `HH-MM`, не `HH:MM`)
 
 Структура:

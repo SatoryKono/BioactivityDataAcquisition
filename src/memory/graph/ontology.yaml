@@ -58,6 +58,8 @@ relation_families:
     - DEFINED_BY
     - GOVERNS
     - CONSTRAINS
+    - SUPERSEDES
+    - AMENDS
   engineering_links:
     - DEPENDS_ON
     - TESTED_BY
@@ -66,6 +68,7 @@ relation_families:
     - RUNS_VIA
   runtime_and_lineage:
     - EMITS
+    - EMITS_ARTIFACT
     - MATERIALIZES
     - SUPPORTS
   analysis_and_debt:
@@ -74,6 +77,7 @@ relation_families:
     - CANDIDATE_FOR_SIMPLIFICATION
     - JUSTIFIED_BY_RUNTIME
     - BLOCKED_BY_VARIANCE
+    - MITIGATES
 invariants:
   - docs_drift_edges_present
   - workflow_job_parent_links_present

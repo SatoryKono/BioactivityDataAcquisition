@@ -175,7 +175,13 @@ graph_entity_relations:
     pipeline_defined_by_config: "defined_by"
     pipeline_described_by_doc: "described_by"
     pipeline_tested_by_test: "tested_by"
+    config_tested_by_test: "tested_by"
     adr_constrains_target: "constrains"
+    doc_constrains_config: "constrains"
+    adr_supersedes_adr: "supersedes"
+    adr_amends_adr: "amends"
+    pipeline_emits_artifact: "emits_artifact"
+    runbook_mitigates_failure_mode: "mitigates"
 
 normalization:
   relation_type: "DEPENDS_ON"

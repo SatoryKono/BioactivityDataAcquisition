@@ -175,10 +175,10 @@ jobs:
         with:
           name: contract-governance-diagnostics
           path: |
-            contract-identity-diagnostics.json
+            reports/quality/contract-identity-diagnostics.json
             reports/quality/contract-registry-diagnostics.json
-            contract-schema-classifier-diagnostics.json
-            contract-registry-dq-diagnostics.json
+            reports/quality/contract-schema-classifier-diagnostics.json
+            reports/quality/contract-registry-dq-diagnostics.json
           retention-days: 30
 
       - name: Add to CI summary

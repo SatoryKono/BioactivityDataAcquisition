@@ -174,10 +174,10 @@ pytest tests/contract/ --cov=src/bioetl --cov-report=html
 open docs/05-operations/runbooks/publication-validation-runbook.md
 
 # Проверить последние ошибки валидации
-tail -200 logs/bioetl.log | jq 'select(.event == "validation-failed")'
+tail -200 reports/logs/bioetl.log | jq 'select(.event == "validation-failed")'
 
 # Топ провайдеров по fail rate
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq -r 'select(.event == "validation-failed") | "\(.provider) \(.validation-level)"' | \
   sort | uniq -c | sort -rn | head -10
 ```

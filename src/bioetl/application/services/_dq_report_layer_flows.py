@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -36,6 +36,7 @@ async def generate_bronze_report(
     logger: LoggerPort,
     emit_skipped_metric: Callable[[str, str, str], None],
     emit_generated_metric: Callable[[str, str], None],
+    emit_check_failure_metric: Callable[[str, str, str, str], None],
 ) -> Path | None:
     """Generate Bronze DQ report when analyzer and data are available."""
     if analyzer is None or report_writer is None:
@@ -83,6 +84,12 @@ async def generate_bronze_report(
             path=str(path),
             status=report.summary.overall_status.value,
         )
+        _emit_check_failure_metrics(
+            checks=getattr(report, "checks", None),
+            pipeline=context.pipeline_name,
+            stage="bronze",
+            emit_check_failure_metric=emit_check_failure_metric,
+        )
         emit_generated_metric(context.pipeline_name, "bronze")
         return path
     except _DQ_REPORT_ERRORS as exc:
@@ -103,6 +110,7 @@ async def generate_silver_report(
     logger: LoggerPort,
     emit_skipped_metric: Callable[[str, str, str], None],
     emit_generated_metric: Callable[[str, str], None],
+    emit_check_failure_metric: Callable[[str, str, str, str], None],
 ) -> Path | None:
     """Generate Silver DQ report when analyzer and data are available."""
     if analyzer is None or report_writer is None:
@@ -158,6 +166,12 @@ async def generate_silver_report(
             path=str(path),
             status=report.summary.overall_status.value,
         )
+        _emit_check_failure_metrics(
+            checks=getattr(report, "checks", None),
+            pipeline=context.pipeline_name,
+            stage="silver",
+            emit_check_failure_metric=emit_check_failure_metric,
+        )
         emit_generated_metric(context.pipeline_name, "silver")
         return path
     except _DQ_REPORT_ERRORS as exc:
@@ -178,6 +192,7 @@ async def generate_gold_report(
     logger: LoggerPort,
     emit_skipped_metric: Callable[[str, str, str], None],
     emit_generated_metric: Callable[[str, str], None],
+    emit_check_failure_metric: Callable[[str, str, str, str], None],
 ) -> Path | None:
     """Generate Gold DQ report when analyzer and data are available."""
     if analyzer is None or report_writer is None:
@@ -228,6 +243,12 @@ async def generate_gold_report(
             path=str(path),
             status=report.summary.overall_status.value,
         )
+        _emit_check_failure_metrics(
+            checks=getattr(report, "checks", None),
+            pipeline=context.pipeline_name,
+            stage="gold",
+            emit_check_failure_metric=emit_check_failure_metric,
+        )
         emit_generated_metric(context.pipeline_name, "gold")
         return path
     except _DQ_REPORT_ERRORS as exc:
@@ -248,4 +269,38 @@ def _resolve_output_path(
         return Path(context_output_path)
     if config_output_path:
         return Path(config_output_path)
+    return None
+
+
+def _emit_check_failure_metrics(
+    *,
+    checks: object,
+    pipeline: str,
+    stage: str,
+    emit_check_failure_metric: Callable[[str, str, str, str], None],
+) -> None:
+    """Emit one bounded metric for each failed or warning DQ check."""
+    if not isinstance(checks, Mapping):
+        return
+    for check_type, payload in checks.items():
+        severity = _metric_severity_for_check_payload(payload)
+        if severity is None:
+            continue
+        emit_check_failure_metric(pipeline, stage, str(check_type), severity)
+
+
+def _metric_severity_for_check_payload(payload: object) -> str | None:
+    """Map serialized DQ check payload status to a metric severity label."""
+    if not isinstance(payload, Mapping):
+        return None
+    raw_status = payload.get("status")
+    if raw_status is None:
+        return None
+    status = str(raw_status).strip().lower()
+    if status == "fail":
+        return "hard_fail"
+    if status == "warn":
+        return "warning"
+    if status == "error":
+        return "error"
     return None

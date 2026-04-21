@@ -85,10 +85,10 @@ sum by (pipeline, stage) (
 
    ```bash
    # Посмотреть ошибки за последний час
-   tail -200 logs/bioetl.log | jq 'select(.event == "validation-failed")'
+   tail -200 reports/logs/bioetl.log | jq 'select(.event == "validation-failed")'
 
    # Фильтр по окну времени (UTC timestamps внутри JSON)
-   cat logs/bioetl.log | \
+   cat reports/logs/bioetl.log | \
      jq 'select(.event == "validation-failed") | select(.timestamp > now - 3600)'
    ```
 
@@ -96,7 +96,7 @@ sum by (pipeline, stage) (
 
    ```bash
    # Топ pipeline/stage по validation-failed
-   cat logs/bioetl.log | \
+   cat reports/logs/bioetl.log | \
      jq -r 'select(.event == "validation-failed") | "\(.pipeline) \(.stage // .validation-level // "unknown")"' | \
      sort | uniq -c | sort -rn | head -10
    ```
@@ -128,7 +128,7 @@ histogram_quantile(
 
    ```bash
    # Latency по уровням
-   cat logs/bioetl.log | \
+   cat reports/logs/bioetl.log | \
      jq 'select(.event == "validation-step-complete") |
          {level: .validator, duration: .duration-seconds}' | \
      jq -s 'group-by(.level) |
@@ -140,7 +140,7 @@ histogram_quantile(
    - Проверить rate limiting:
      ```bash
      # Количество 429 ответов от API
-     grep "rate-limit-exceeded" logs/bioetl.log | wc -l
+     grep "rate-limit-exceeded" reports/logs/bioetl.log | wc -l
      ```
    - Снизить `batch-size` или увеличить `retry-delay`
 
@@ -182,7 +182,7 @@ ______________________________________________________________________
 1. Проверить топ правил, вызывающих WARN:
 
    ```bash
-   cat logs/bioetl.log | \
+   cat reports/logs/bioetl.log | \
      jq -r 'select(.event == "validation-warning") | .rule' | \
      sort | uniq -c | sort -rn | head -10
    ```
@@ -214,17 +214,17 @@ ______________________________________________________________________
 
 ```bash
 # 1. Посмотреть последние SchemaError
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq 'select(.event == "base-validation-failed") | .error' | tail -20
 
 # 2. Проверить, какие колонки fail чаще всего
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq -r 'select(.event == "base-validation-failed") |
          .error | match("Column \'([^\']+)\'") | .captures[0].string' | \
   sort | uniq -c | sort -rn
 
 # 3. Посмотреть примеры некорректных значений
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq 'select(.event == "base-validation-failed") |
       {column: .column, value: .invalid-value, record-id: .record-id}' | \
   head -10
@@ -358,7 +358,7 @@ ______________________________________________________________________
 
 ```bash
 # 1. Топ структурных правил с WARN
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq -r 'select(.event == "structural-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
@@ -433,13 +433,13 @@ curl -I -w "\n%{http-code}\n" https://api.openalex.org/works/W2124179640
 curl -I -w "\n%{http-code}\n" https://api.semanticscholar.org/graph/v1/paper/649def34f8be52c8b66281af98ae884c09aef38b
 
 # 2. Проверить rate limiting
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq 'select(.event == "external-api-rate-limited") |
       {provider: .provider, timestamp: .timestamp}' | \
   tail -20
 
 # 3. Количество 404 по провайдерам
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq -r 'select(.event == "external-id-not-found") | .provider' | \
   sort | uniq -c
 ```
@@ -555,7 +555,7 @@ ______________________________________________________________________
 
 ```bash
 # 1. Топ логических правил с WARN
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq -r 'select(.event == "logical-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
@@ -643,7 +643,7 @@ ______________________________________________________________________
 
 ```bash
 # 1. Топ semantic правил с WARN
-cat logs/bioetl.log | \
+cat reports/logs/bioetl.log | \
   jq -r 'select(.event == "semantic-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
@@ -734,7 +734,7 @@ ______________________________________________________________________
 ps aux | grep bioetl
 
 # Проверить последний лог-event
-tail -1 logs/bioetl.log | jq
+tail -1 reports/logs/bioetl.log | jq
 
 # Если застряло на External Verification — проверить active HTTP connections
 lsof -i -P -n | grep bioetl

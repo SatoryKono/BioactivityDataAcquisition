@@ -146,6 +146,19 @@ class AuditPort(Protocol):
         """
         ...
 
+    def log_event(
+        self,
+        event_name: str,
+        event_data: JsonDict | None = None,
+    ) -> None:
+        """Log a non-write audit event to the audit trail.
+
+        Args:
+            event_name: Stable event name for the audited lifecycle event.
+            event_data: Optional structured event context.
+        """
+        ...
+
     async def aclose(self) -> None:
         """Gracefully close the audit log and release resources.
 

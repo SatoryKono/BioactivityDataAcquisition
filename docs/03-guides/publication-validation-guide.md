@@ -567,7 +567,7 @@ bioetl run --pipeline pubmed_publication \
 
 - Активны все уровни, соответствующие конфигу pipeline
 - `-dq-warn=True` → запись попадает в карантин (поведение задаётся конфигом)
-- Используется стандартный логгер CLI (`logs/bioetl.log`)
+- Используется стандартный логгер CLI (`reports/logs/bioetl.log`)
 - В CLI нет отдельного `--run-type validation`; validation depth задаётся schema/pipeline config
 
 ______________________________________________________________________

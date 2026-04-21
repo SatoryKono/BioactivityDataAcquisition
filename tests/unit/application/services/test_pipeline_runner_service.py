@@ -5,6 +5,7 @@ Tests the universal pipeline runner service.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
@@ -20,10 +21,10 @@ from bioetl.application.services.pipeline_run_execution_service import (
 )
 from bioetl.application.services.pipeline_runner_service import (
     PipelineNotFoundError,
+    PipelineRunResult,
     PipelineRunnerService,
     RunOptions,
     RunResult,
-    PipelineRunResult,
 )
 
 
@@ -86,7 +87,29 @@ def mock_metrics_extractor():
 
 
 @pytest.fixture
-def service(mock_runner_factory, mock_metrics_extractor, mock_logger):
+def mock_metrics_port():
+    """Create a mock metrics port."""
+    metrics = MagicMock()
+    metrics.increment_counter = MagicMock()
+    return metrics
+
+
+@pytest.fixture
+def mock_audit_port():
+    """Create a mock audit port."""
+    audit = MagicMock()
+    audit.log_event = MagicMock()
+    return audit
+
+
+@pytest.fixture
+def service(
+    mock_runner_factory,
+    mock_metrics_extractor,
+    mock_metrics_port,
+    mock_audit_port,
+    mock_logger,
+):
     """Create a PipelineRunnerService instance."""
     clock = MagicMock()
     clock.now.return_value = datetime(2026, 3, 31, 9, 0, tzinfo=UTC)
@@ -94,6 +117,8 @@ def service(mock_runner_factory, mock_metrics_extractor, mock_logger):
         runner_factory=mock_runner_factory,
         metrics_extractor=mock_metrics_extractor,
         logger=mock_logger,
+        metrics=mock_metrics_port,
+        audit=mock_audit_port,
         clock=clock,
         _context_service=PipelineRunContextService(),
         _execution_service=PipelineRunExecutionService(),
@@ -323,7 +348,13 @@ class TestPipelineRunnerServiceRun:
 
     @pytest.mark.asyncio
     async def test_successful_run(
-        self, service, mock_runner_factory, mock_runner, mock_metrics_extractor
+        self,
+        service,
+        mock_runner_factory,
+        mock_runner,
+        mock_metrics_extractor,
+        mock_metrics_port,
+        mock_audit_port,
     ):
         """Test successful pipeline execution."""
         result = await service.run("test_pipeline")
@@ -338,6 +369,35 @@ class TestPipelineRunnerServiceRun:
         mock_runner_factory.create.assert_called_once()
         mock_runner.run.assert_called_once()
         mock_metrics_extractor.extract_metrics.assert_called_once_with(mock_runner)
+        mock_metrics_port.increment_counter.assert_called_once_with(
+            "bioetl_pipeline_runs_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "status": "success",
+            },
+        )
+        assert mock_audit_port.log_event.call_count == 2
+        mock_audit_port.log_event.assert_any_call(
+            "PipelineRunStarted",
+            {
+                "pipeline": "test_pipeline",
+                "run_id": result.run_id,
+                "run_type": "incremental",
+                "status": "started",
+            },
+        )
+        mock_audit_port.log_event.assert_any_call(
+            "PipelineRunCompleted",
+            {
+                "pipeline": "test_pipeline",
+                "run_id": result.run_id,
+                "run_type": "incremental",
+                "status": "success",
+                "manifest_id": "manifest-123",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_run_with_options(self, service, mock_runner_factory):
@@ -373,7 +433,14 @@ class TestPipelineRunnerServiceRun:
         assert context.run_id == run_id
 
     @pytest.mark.asyncio
-    async def test_dry_run(self, service, mock_runner_factory, mock_runner):
+    async def test_dry_run(
+        self,
+        service,
+        mock_runner_factory,
+        mock_runner,
+        mock_metrics_port,
+        mock_audit_port,
+    ):
         """Test dry-run mode."""
         options = RunOptions(dry_run=True)
 
@@ -384,6 +451,17 @@ class TestPipelineRunnerServiceRun:
         # Runner should not be created in dry-run mode
         mock_runner_factory.create.assert_not_called()
         mock_runner.run.assert_not_called()
+        mock_metrics_port.increment_counter.assert_not_called()
+        assert mock_audit_port.log_event.call_count == 2
+        mock_audit_port.log_event.assert_any_call(
+            "PipelineRunCompleted",
+            {
+                "pipeline": "test_pipeline",
+                "run_id": result.run_id,
+                "run_type": "incremental",
+                "status": "dry_run",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_pipeline_not_found(self, service, mock_runner_factory):
@@ -399,7 +477,7 @@ class TestPipelineRunnerServiceRun:
 
     @pytest.mark.asyncio
     async def test_pipeline_shutdown(
-        self, service, mock_runner, mock_metrics_extractor
+        self, service, mock_runner, mock_metrics_extractor, mock_metrics_port
     ):
         """Test graceful shutdown handling."""
         mock_runner.run.side_effect = PipelineShutdownError("Signal received")
@@ -410,9 +488,25 @@ class TestPipelineRunnerServiceRun:
         assert result.is_success is False
         # Metrics should still be extracted
         mock_metrics_extractor.extract_metrics.assert_called_once()
+        mock_metrics_port.increment_counter.assert_called_once_with(
+            "bioetl_pipeline_runs_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "status": "shutdown",
+            },
+        )
 
     @pytest.mark.asyncio
-    async def test_pipeline_failure(self, service, mock_runner, mock_metrics_extractor):
+    async def test_pipeline_failure(
+        self,
+        service,
+        mock_runner,
+        mock_metrics_extractor,
+        mock_metrics_port,
+        mock_audit_port,
+    ):
         """Test exception handling."""
         mock_runner.run.side_effect = ValueError("Invalid configuration")
 
@@ -422,6 +516,26 @@ class TestPipelineRunnerServiceRun:
         assert result.error_message == "Invalid configuration"
         assert result.error_type == "ValueError"
         mock_metrics_extractor.extract_metrics.assert_called_once()
+        mock_metrics_port.increment_counter.assert_called_once_with(
+            "bioetl_pipeline_runs_total",
+            1,
+            {
+                "pipeline": "test_pipeline",
+                "run_type": "incremental",
+                "status": "failed",
+            },
+        )
+        mock_audit_port.log_event.assert_any_call(
+            "PipelineRunCompleted",
+            {
+                "pipeline": "test_pipeline",
+                "run_id": result.run_id,
+                "run_type": "incremental",
+                "status": "failed",
+                "manifest_id": "manifest-123",
+                "error_type": "ValueError",
+            },
+        )
 
     @pytest.mark.asyncio
     async def test_run_fails_before_execution_for_runner_without_metrics(

@@ -30,7 +30,8 @@ Active configuration docs must stay aligned with the JSON schemas under
 - `configs/_schema/`: canonical JSON schemas for pipeline, source, composite, and
   related config contracts
 - `configs/providers/`: provider YAML definitions
-- `configs/quality/`: architecture, compatibility, and debt registries
+- `configs/quality/`: architecture, compatibility, generated-artifact routing,
+  and debt registries
 
 For deeper usage guidance, see the active docs in
 `docs/03-guides/pipeline-configuration.md` and the individual schema files.

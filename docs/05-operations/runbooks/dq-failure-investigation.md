@@ -67,7 +67,7 @@ quality:
 - Check logs for DQ summary:
 
 ```bash
-grep "dq-check\|dq-threshold" logs/bioetl.log | tail -20
+grep "dq-check\|dq-threshold" reports/logs/bioetl.log | tail -20
 ```
 
 - Key log fields:

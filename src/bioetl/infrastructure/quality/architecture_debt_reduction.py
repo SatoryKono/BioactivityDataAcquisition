@@ -51,12 +51,22 @@ def find_latest_architecture_debt_tasks_file(
     *,
     project_root: Path | str | None = None,
 ) -> Path | None:
-    """Return the latest generated architecture debt task file from repo root."""
+    """Return the latest generated architecture debt task file."""
     root = Path(project_root) if project_root is not None else _project_root()
-    candidates = sorted(root.glob("tasks_architecture_metric_exemptions_*.json"))
-    if not candidates:
-        return None
-    return candidates[-1]
+    reports_candidates = sorted(
+        (root / "reports" / "quality").glob(
+            "tasks_architecture_metric_exemptions_*.json"
+        )
+    )
+    if reports_candidates:
+        return reports_candidates[-1]
+
+    legacy_root_candidates = sorted(
+        root.glob("tasks_architecture_metric_exemptions_*.json")
+    )
+    if legacy_root_candidates:
+        return legacy_root_candidates[-1]
+    return None
 
 
 def load_architecture_debt_tasks(path: Path | str) -> dict[str, object]:

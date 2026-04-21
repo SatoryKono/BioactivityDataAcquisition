@@ -339,6 +339,7 @@ def _write_diagnostics(
     issues: list[GateIssue],
 ) -> None:
     """Write classifier gate diagnostics artifact."""
+    path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "valid": len(issues) == 0,
         "base_ref": base_ref,
@@ -515,7 +516,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--head-sha", default="HEAD")
     parser.add_argument(
         "--diagnostics-path",
-        default="contract-schema-classifier-diagnostics.json",
+        default="reports/quality/contract-schema-classifier-diagnostics.json",
     )
     return parser.parse_args()
 

@@ -711,7 +711,7 @@ ______________________________________________________________________
 1. Проверить логи на ошибки:
 
    ```bash
-   grep -i error logs/bioetl.log
+   grep -i error reports/logs/bioetl.log
    ```
 
 ### Tracing не работает

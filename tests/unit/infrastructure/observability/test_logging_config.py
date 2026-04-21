@@ -112,7 +112,7 @@ class TestConfigureLogging:
         monkeypatch: pytest.MonkeyPatch,
         tmp_path: Path,
     ) -> None:
-        """Test that normal runtime defaults to logs/bioetl.log."""
+        """Test that normal runtime defaults to reports/logs/bioetl.log."""
         from bioetl.infrastructure.observability.logging_config import configure_logging
 
         monkeypatch.delenv("BIOETL_LOG_FILE", raising=False)
@@ -124,7 +124,7 @@ class TestConfigureLogging:
         assert result is True
         logging.getLogger("bioetl.test").info("default file sink smoke")
 
-        log_path = tmp_path / "logs" / "bioetl.log"
+        log_path = tmp_path / "reports" / "logs" / "bioetl.log"
         assert log_path.exists()
         assert "default file sink smoke" in log_path.read_text(encoding="utf-8")
 

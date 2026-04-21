@@ -42,6 +42,7 @@ architecture_groups:
     - tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_testing_guide_matches_current_fixture_governance_and_live_contract_policy
     - tests/architecture/test_documentation_sync.py::test_no_legacy_repo_slug_in_active_docs_and_workflows
     - tests/architecture/test_documentation_sync.py::test_no_legacy_contract_path_in_active_docs
+    - tests/architecture/test_generated_artifact_routing.py
     - tests/architecture/test_scripts_catalog_governance.py::test_scripts_catalog_governance_check_passes
     - tests/architecture/test_scripts_inventory_manifest.py::test_scripts_inventory_manifest_drift_check_passes
   full:
@@ -49,6 +50,7 @@ architecture_groups:
     - tests/architecture/test_integration_vcr_policy.py::TestIntegrationVcrPolicy::test_testing_guide_matches_current_fixture_governance_and_live_contract_policy
     - tests/architecture/test_documentation_sync.py::test_no_legacy_repo_slug_in_active_docs_and_workflows
     - tests/architecture/test_documentation_sync.py::test_no_legacy_contract_path_in_active_docs
+    - tests/architecture/test_generated_artifact_routing.py
     - tests/architecture/test_scripts_catalog_governance.py::test_scripts_catalog_governance_check_passes
     - tests/architecture/test_scripts_inventory_manifest.py::test_scripts_inventory_manifest_drift_check_passes
     - tests/architecture/test_any_budget.py::test_any_budget_threshold

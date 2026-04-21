@@ -28,6 +28,12 @@ SEMANTIC_GRAPH_EDGE_RELATIONS = {
 PATH_REF_PATTERN = re.compile(
     r"\b(?:src|configs|tests|docs)/(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+"
 )
+ADR_REF_PATTERN = re.compile(r"\bADR-(\d{3})\b", re.IGNORECASE)
+ADR_LIFECYCLE_FIELD_PATTERN = re.compile(
+    r"^\s*(?:[*_`#>\-\s]*)(supersedes|superseded by|amends|amended by)\s*:",
+    re.IGNORECASE,
+)
+RUNBOOK_EXCLUDED_STEMS = frozenset({"index"})
 
 
 def default_expanded_graph_path(root: Path) -> Path:
@@ -173,7 +179,20 @@ def iter_entity_relation_records(
     ]
     if repo_root is not None:
         records.extend(
+            iter_pipeline_artifact_relation_records(
+                payload,
+                source_snapshot=source_snapshot,
+            )
+        )
+        records.extend(
             iter_pipeline_test_relation_records(
+                payload,
+                repo_root=repo_root,
+                source_snapshot=source_snapshot,
+            )
+        )
+        records.extend(
+            iter_config_test_relation_records(
                 payload,
                 repo_root=repo_root,
                 source_snapshot=source_snapshot,
@@ -188,6 +207,24 @@ def iter_entity_relation_records(
         )
         records.extend(
             iter_adr_constraint_relation_records(
+                repo_root=repo_root,
+                source_snapshot=source_snapshot,
+            )
+        )
+        records.extend(
+            iter_doc_config_constraint_relation_records(
+                repo_root=repo_root,
+                source_snapshot=source_snapshot,
+            )
+        )
+        records.extend(
+            iter_adr_lifecycle_relation_records(
+                repo_root=repo_root,
+                source_snapshot=source_snapshot,
+            )
+        )
+        records.extend(
+            iter_runbook_failure_mode_relation_records(
                 repo_root=repo_root,
                 source_snapshot=source_snapshot,
             )
@@ -299,6 +336,59 @@ def iter_pipeline_test_relation_records(
     return records
 
 
+def iter_config_test_relation_records(
+    payload: dict[str, Any],
+    *,
+    repo_root: Path,
+    source_snapshot: str,
+) -> list[dict[str, Any]]:
+    """Derive ``config -> tested_by -> test`` from entity test ownership."""
+    test_matrix_path = repo_root / "configs" / "quality" / "test_matrix.yaml"
+    if not test_matrix_path.is_file():
+        return []
+    matrix = yaml.safe_load(test_matrix_path.read_text(encoding="utf-8")) or {}
+    ownership = matrix.get("entity_test_ownership")
+    if not isinstance(ownership, dict):
+        return []
+    pipeline_nodes = _pipeline_nodes_by_name(payload)
+    records: list[dict[str, Any]] = []
+    for entity_ref, test_paths in sorted(ownership.items()):
+        if not isinstance(entity_ref, str) or not isinstance(test_paths, list):
+            continue
+        pipeline_name = entity_ref.replace(".", "_")
+        source_node = pipeline_nodes.get(pipeline_name)
+        if source_node is None:
+            continue
+        config_path = _node_source_path(source_node)
+        if not config_path.startswith("configs/"):
+            continue
+        for test_path in sorted(
+            str(path) for path in test_paths if isinstance(path, str)
+        ):
+            records.append(
+                _path_relation_record(
+                    source_path=config_path,
+                    source_kind="Config",
+                    source_id=_path_entity_id(config_path),
+                    source_name=config_path,
+                    target_path=test_path,
+                    target_kind="Test",
+                    target_id=f"test:{test_path}",
+                    target_name=test_path,
+                    relation="tested_by",
+                    confidence="derived",
+                    provenance="configs/quality/test_matrix.entity_test_ownership",
+                    source_snapshot=source_snapshot,
+                    evidence={
+                        "test_matrix_path": "configs/quality/test_matrix.yaml",
+                        "entity_ref": entity_ref,
+                        "pipeline_name": pipeline_name,
+                    },
+                )
+            )
+    return records
+
+
 def iter_pipeline_doc_relation_records(
     payload: dict[str, Any],
     *,
@@ -324,6 +414,59 @@ def iter_pipeline_doc_relation_records(
                     evidence={"matching_strategy": "provider_entity_doc_path"},
                 )
             )
+    return records
+
+
+def iter_pipeline_artifact_relation_records(
+    payload: dict[str, Any],
+    *,
+    source_snapshot: str,
+) -> list[dict[str, Any]]:
+    """Derive ``pipeline -> emits_artifact -> artifact`` from write edges."""
+    nodes: dict[str, dict[str, Any]] = payload["nodes"]
+    edges: dict[str, dict[str, Any]] = payload["edges"]
+    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+    snapshot_generated_at = str(meta.get("generated_at") or "unknown")
+    records: list[dict[str, Any]] = []
+    for edge_id, edge in edges.items():
+        if edge.get("edge_type") != "writes_to":
+            continue
+        source_id = str(edge.get("source") or "")
+        target_id = str(edge.get("target") or "")
+        source_node = nodes.get(source_id) or {}
+        target_node = nodes.get(target_id) or {}
+        if str(source_node.get("node_type") or "") not in PIPELINE_NODE_TYPES:
+            continue
+        source_ref = _entity_ref(source_node, source_id)
+        target_ref = _entity_ref(target_node, target_id)
+        target_entity_id = (
+            target_ref
+            if target_ref.startswith("artifact:")
+            else f"artifact:{target_ref}"
+        )
+        records.append(
+            {
+                "id": f"{source_ref}|emits_artifact|{target_entity_id}",
+                "source_id": source_ref,
+                "source_name": _node_display_name(source_node, source_id),
+                "source_kind": str(source_node.get("node_type") or "Unknown"),
+                "source_path": _node_source_path(source_node),
+                "target_id": target_entity_id,
+                "target_name": _node_display_name(target_node, target_id),
+                "target_kind": "Artifact",
+                "target_path": _node_source_path(target_node),
+                "relation": "emits_artifact",
+                "confidence": "derived",
+                "provenance": "bioetl_knowledge_graph_expanded.writes_to",
+                "source_snapshot": source_snapshot,
+                "source_generated_at": snapshot_generated_at,
+                "edge_id": str(edge_id),
+                "description": str(edge.get("description") or ""),
+                "evidence": edge.get("meta")
+                if isinstance(edge.get("meta"), dict)
+                else {},
+            }
+        )
     return records
 
 
@@ -364,6 +507,138 @@ def iter_adr_constraint_relation_records(
                     "evidence": {"adr_path": relative_adr_path},
                 }
             )
+    return records
+
+
+def iter_doc_config_constraint_relation_records(
+    *,
+    repo_root: Path,
+    source_snapshot: str,
+) -> list[dict[str, Any]]:
+    """Derive ``doc -> constrains -> config`` from explicit config refs."""
+    docs_root = repo_root / "docs"
+    if not docs_root.is_dir():
+        return []
+    records: list[dict[str, Any]] = []
+    for doc_path in sorted(docs_root.rglob("*.md")):
+        if _is_adr_path(doc_path, repo_root):
+            continue
+        relative_doc_path = doc_path.relative_to(repo_root).as_posix()
+        text = doc_path.read_text(encoding="utf-8")
+        for target_path in sorted(_explicit_config_path_refs(text)):
+            if target_path == relative_doc_path:
+                continue
+            records.append(
+                _path_relation_record(
+                    source_path=relative_doc_path,
+                    source_kind="Doc",
+                    source_id=f"doc:{relative_doc_path}",
+                    source_name=_markdown_title(text) or relative_doc_path,
+                    target_path=target_path,
+                    target_kind="Config",
+                    target_id=_path_entity_id(target_path),
+                    target_name=target_path,
+                    relation="constrains",
+                    confidence="inferred",
+                    provenance="docs.config_path_refs",
+                    source_snapshot=source_snapshot,
+                    evidence={"doc_path": relative_doc_path},
+                )
+            )
+    return records
+
+
+def iter_adr_lifecycle_relation_records(
+    *,
+    repo_root: Path,
+    source_snapshot: str,
+) -> list[dict[str, Any]]:
+    """Derive ``ADR -> supersedes/amends -> ADR`` lifecycle relations."""
+    decisions_dir = repo_root / "docs" / "02-architecture" / "decisions"
+    if not decisions_dir.is_dir():
+        return []
+    adr_paths = {
+        _adr_number(path): path
+        for path in sorted(decisions_dir.glob("ADR-*.md"))
+        if _adr_number(path) is not None
+    }
+    records: list[dict[str, Any]] = []
+    for adr_path in sorted(decisions_dir.glob("ADR-*.md")):
+        source_number = _adr_number(adr_path)
+        if source_number is None:
+            continue
+        source_relative_path = adr_path.relative_to(repo_root).as_posix()
+        text = adr_path.read_text(encoding="utf-8")
+        for field, target_number in _iter_adr_lifecycle_refs(text):
+            target_path = adr_paths.get(target_number)
+            if target_path is None:
+                continue
+            relation = "amends" if "amend" in field else "supersedes"
+            if field in {"superseded by", "amended by"}:
+                source_path = target_path
+                target_relative_path = source_relative_path
+            else:
+                source_path = adr_path
+                target_relative_path = target_path.relative_to(repo_root).as_posix()
+            source_relative = source_path.relative_to(repo_root).as_posix()
+            records.append(
+                _path_relation_record(
+                    source_path=source_relative,
+                    source_kind="ADR",
+                    source_id=f"adr:{source_relative}",
+                    source_name=source_path.stem,
+                    target_path=target_relative_path,
+                    target_kind="ADR",
+                    target_id=f"adr:{target_relative_path}",
+                    target_name=Path(target_relative_path).stem,
+                    relation=relation,
+                    confidence="derived",
+                    provenance="docs/02-architecture/decisions.lifecycle_metadata",
+                    source_snapshot=source_snapshot,
+                    evidence={
+                        "declaring_adr_path": source_relative_path,
+                        "field": field,
+                    },
+                )
+            )
+    return records
+
+
+def iter_runbook_failure_mode_relation_records(
+    *,
+    repo_root: Path,
+    source_snapshot: str,
+) -> list[dict[str, Any]]:
+    """Derive ``runbook -> mitigates -> failure_mode`` relations."""
+    runbook_dir = repo_root / "docs" / "05-operations" / "runbooks"
+    if not runbook_dir.is_dir():
+        return []
+    records: list[dict[str, Any]] = []
+    for runbook_path in sorted(runbook_dir.glob("*.md")):
+        if runbook_path.stem in RUNBOOK_EXCLUDED_STEMS:
+            continue
+        relative_runbook_path = runbook_path.relative_to(repo_root).as_posix()
+        text = runbook_path.read_text(encoding="utf-8")
+        title = _markdown_title(text) or runbook_path.stem.replace("-", " ")
+        failure_mode = _failure_mode_name(title, runbook_path.stem)
+        failure_slug = _slugify(failure_mode)
+        records.append(
+            _path_relation_record(
+                source_path=relative_runbook_path,
+                source_kind="Runbook",
+                source_id=f"runbook:{relative_runbook_path}",
+                source_name=title,
+                target_path="",
+                target_kind="FailureMode",
+                target_id=f"failure_mode:{failure_slug}",
+                target_name=failure_mode,
+                relation="mitigates",
+                confidence="inferred",
+                provenance="docs/05-operations/runbooks.filename_and_title",
+                source_snapshot=source_snapshot,
+                evidence={"runbook_path": relative_runbook_path},
+            )
+        )
     return records
 
 
@@ -468,6 +743,45 @@ def _path_target_relation_record(
     }
 
 
+def _path_relation_record(
+    *,
+    source_path: str,
+    source_kind: str,
+    source_id: str,
+    source_name: str,
+    target_path: str,
+    target_kind: str,
+    target_id: str,
+    target_name: str,
+    relation: str,
+    confidence: str,
+    provenance: str,
+    source_snapshot: str,
+    evidence: dict[str, Any],
+) -> dict[str, Any]:
+    normalized_source_path = source_path.replace("\\", "/")
+    normalized_target_path = target_path.replace("\\", "/")
+    return {
+        "id": f"{source_id}|{relation}|{target_id}",
+        "source_id": source_id,
+        "source_name": source_name,
+        "source_kind": source_kind,
+        "source_path": normalized_source_path,
+        "target_id": target_id,
+        "target_name": target_name,
+        "target_kind": target_kind,
+        "target_path": normalized_target_path,
+        "relation": relation,
+        "confidence": confidence,
+        "provenance": provenance,
+        "source_snapshot": source_snapshot,
+        "source_generated_at": "unknown",
+        "edge_id": "",
+        "description": "",
+        "evidence": evidence,
+    }
+
+
 def _pipeline_nodes_by_name(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
     nodes: dict[str, dict[str, Any]] = payload["nodes"]
     pipeline_nodes: dict[str, dict[str, Any]] = {}
@@ -513,6 +827,15 @@ def _explicit_path_refs(text: str) -> set[str]:
     return {match.group(0).rstrip(".,);]") for match in PATH_REF_PATTERN.finditer(text)}
 
 
+def _explicit_config_path_refs(text: str) -> set[str]:
+    return {
+        path
+        for path in _explicit_path_refs(text)
+        if path.startswith("configs/")
+        and Path(path).suffix in {".yaml", ".yml", ".json"}
+    }
+
+
 def _path_entity_id(path: str) -> str:
     return f"{_path_entity_kind(path).lower()}:{path}"
 
@@ -527,6 +850,50 @@ def _path_entity_kind(path: str) -> str:
     if path.startswith("docs/"):
         return "Doc"
     return "Path"
+
+
+def _is_adr_path(path: Path, repo_root: Path) -> bool:
+    try:
+        relative = path.relative_to(repo_root).as_posix()
+    except ValueError:
+        return False
+    return relative.startswith("docs/02-architecture/decisions/ADR-")
+
+
+def _adr_number(path: Path) -> str | None:
+    match = ADR_REF_PATTERN.search(path.name)
+    return match.group(1) if match else None
+
+
+def _iter_adr_lifecycle_refs(text: str) -> list[tuple[str, str]]:
+    refs: list[tuple[str, str]] = []
+    for line in text.splitlines():
+        field_match = ADR_LIFECYCLE_FIELD_PATTERN.search(line)
+        if field_match is None:
+            continue
+        field = field_match.group(1).lower()
+        for target_match in ADR_REF_PATTERN.finditer(line):
+            refs.append((field, target_match.group(1)))
+    return refs
+
+
+def _markdown_title(text: str) -> str:
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("# "):
+            return stripped.removeprefix("# ").strip()
+    return ""
+
+
+def _failure_mode_name(title: str, fallback_stem: str) -> str:
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", title).strip()
+    cleaned = re.sub(r"\s+runbook\s*$", "", cleaned, flags=re.IGNORECASE).strip()
+    return cleaned or fallback_stem.replace("-", " ")
+
+
+def _slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return slug or "unknown"
 
 
 def _dedupe_entity_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:

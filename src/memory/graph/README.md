@@ -16,8 +16,10 @@ Current state:
   `module_references.jsonl`, `module_relations.json`,
   `entity_relations.jsonl`, and `entity_relations.json`
 - entity relation projections include pipeline-to-config `defined_by`,
-  pipeline-to-doc `described_by`, pipeline-to-test `tested_by`, and
-  ADR-to-target `constrains` links
+  pipeline-to-doc `described_by`, pipeline/config-to-test `tested_by`,
+  doc/ADR-to-config/path `constrains`, ADR-to-ADR `supersedes`/`amends`,
+  pipeline-to-artifact `emits_artifact`, and runbook-to-failure-mode
+  `mitigates` links
 - `scripts/memory/` still exists as a compatibility surface for legacy callers
 
 Primary entrypoints:

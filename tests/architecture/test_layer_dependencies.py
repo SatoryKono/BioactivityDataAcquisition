@@ -33,6 +33,7 @@ INFRASTRUCTURE_IMPORTS = {
     "polars",
     "asyncpg",
     "motor",
+    "prometheus_client",
     "pymongo",
 }
 
