@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-gemini-cli.sh"
+ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
 if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
     source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
@@ -99,6 +100,24 @@ EOF
     log_warn ".env.gemini created - please edit and add your API key"
 else
     log_success ".env.gemini exists"
+fi
+
+echo ""
+
+log_info "STEP 5: Configuring MCP for Gemini..."
+if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
+    log_error "MCP helper not found: ${ENSURE_MCP_SCRIPT}"
+    exit 1
+fi
+
+if GEMINI_BIN="${GEMINI_BIN}" GEMINI_PREFIX="${GEMINI_PREFIX}" "${ENSURE_MCP_SCRIPT}" \
+    --ensure \
+    --gemini-bin "${GEMINI_BIN}" \
+    --gemini-prefix "${GEMINI_PREFIX}" >/dev/null; then
+    log_success "MCP configuration synchronized"
+else
+    log_error "MCP configuration failed"
+    exit 1
 fi
 
 echo ""

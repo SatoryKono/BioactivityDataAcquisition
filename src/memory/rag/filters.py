@@ -9,23 +9,34 @@ from memory.resources import CATALOG_DIR, POLICY_DIR, load_yaml_resource
 
 DEFAULT_SOURCE_PATHS = (
     Path("docs/00-project"),
+    Path("docs/01-requirements"),
     Path("docs/02-architecture/decisions"),
+    Path("docs/plans"),
     Path("docs/05-operations/runbooks"),
     Path("src/bioetl"),
     Path("tests"),
     Path("configs"),
+    Path(".github/workflows"),
+    Path("grafana"),
+    Path("scripts/engineering"),
 )
 
 MARKDOWN_SUFFIXES = {".md"}
 PYTHON_SUFFIXES = {".py"}
 CONFIG_SUFFIXES = {".yaml", ".yml", ".json", ".toml"}
+SCRIPT_SUFFIXES = {".py", ".sh", ".ps1"}
+OPERATIONAL_SUFFIXES = MARKDOWN_SUFFIXES | CONFIG_SUFFIXES | SCRIPT_SUFFIXES
+MEMORY_SUFFIXES = MARKDOWN_SUFFIXES | PYTHON_SUFFIXES | CONFIG_SUFFIXES
 
 SOURCE_SUFFIXES = {
     "active_docs": MARKDOWN_SUFFIXES,
+    "planning_docs": MARKDOWN_SUFFIXES,
     "accepted_adrs": MARKDOWN_SUFFIXES,
     "runtime_code": PYTHON_SUFFIXES,
+    "memory_implementation": MEMORY_SUFFIXES,
     "tests": PYTHON_SUFFIXES,
     "project_configs": CONFIG_SUFFIXES,
+    "operational_assets": OPERATIONAL_SUFFIXES,
 }
 
 
@@ -43,10 +54,13 @@ def _load_source_paths() -> tuple[Path, ...]:
     registry = load_yaml_resource(CATALOG_DIR / "source_registry.yaml")
     selected_ids = {
         "active_docs",
+        "planning_docs",
         "accepted_adrs",
         "runtime_code",
+        "memory_implementation",
         "tests",
         "project_configs",
+        "operational_assets",
     }
     paths: list[Path] = []
     for item in registry.get("sources", []):
@@ -62,10 +76,13 @@ def _load_source_specs() -> list[tuple[str, Path]]:
     registry = load_yaml_resource(CATALOG_DIR / "source_registry.yaml")
     selected_ids = {
         "active_docs",
+        "planning_docs",
         "accepted_adrs",
         "runtime_code",
+        "memory_implementation",
         "tests",
         "project_configs",
+        "operational_assets",
     }
     specs: list[tuple[str, Path]] = []
     for item in registry.get("sources", []):
@@ -81,11 +98,17 @@ def _load_source_specs() -> list[tuple[str, Path]]:
         return specs
     return [
         ("active_docs", Path("docs/00-project")),
+        ("active_docs", Path("docs/01-requirements")),
         ("accepted_adrs", Path("docs/02-architecture/decisions")),
+        ("active_docs", Path("docs/plans")),
         ("active_docs", Path("docs/05-operations/runbooks")),
         ("runtime_code", Path("src/bioetl")),
+        ("memory_implementation", Path("src/memory")),
         ("tests", Path("tests")),
         ("project_configs", Path("configs")),
+        ("operational_assets", Path(".github/workflows")),
+        ("operational_assets", Path("grafana")),
+        ("operational_assets", Path("scripts/engineering")),
     ]
 
 

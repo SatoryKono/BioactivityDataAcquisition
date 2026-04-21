@@ -5,7 +5,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from memory.query import _emit, query_all, query_catalog, query_rag, query_timeline
+from memory.query import (
+    _emit,
+    main,
+    query_all,
+    query_catalog,
+    query_rag,
+    query_timeline,
+)
 
 
 def test_query_catalog_returns_sources_view() -> None:
@@ -264,3 +271,55 @@ def test_query_all_aggregates_local_surfaces(tmp_path: Path) -> None:
     assert payload["kind"] == "all"
     assert len(payload["results"]["rag"]) == 1
     assert len(payload["results"]["timeline"]) == 1
+
+
+def test_query_cli_reports_missing_manifest_without_traceback(
+    tmp_path: Path, capsys
+) -> None:
+    exit_code = main(
+        [
+            "rag",
+            "--query",
+            "memory",
+            "--chunks-path",
+            str(tmp_path / "missing.jsonl"),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "Missing RAG chunk manifest" in captured.err
+    assert "--auto-refresh" in captured.err
+    assert "Traceback" not in captured.err
+
+
+def test_query_all_auto_refreshes_missing_rebuild_only_artifacts(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "docs/00-project").mkdir(parents=True)
+    (tmp_path / "docs/00-project/overview.md").write_text(
+        "# Memory Overview\nMemory retrieval context.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / ".github/workflows").mkdir(parents=True)
+    (tmp_path / ".github/workflows/tests.yml").write_text(
+        "name: Tests\njobs:\n  memory-tests:\n    runs-on: ubuntu-latest\n",
+        encoding="utf-8",
+    )
+
+    payload = query_all(
+        query="memory",
+        chunks_path=tmp_path / "missing" / "chunks.jsonl",
+        events_dir=tmp_path / "missing" / "events",
+        limit=5,
+        auto_refresh=True,
+        refresh_output_root=tmp_path / "memory-refresh",
+        refresh_repo_root=tmp_path,
+    )
+
+    assert payload["refresh_output_root"] == str(tmp_path / "memory-refresh")
+    assert payload["refresh_report"]["ok"] is True
+    assert len(payload["results"]["rag"]) >= 1
+    assert any(
+        item["source_type"] == "workflow" for item in payload["results"]["rag"]
+    )

@@ -15,6 +15,7 @@ scripts/ai/gemini/
 │   ├── check-env.ps1              # PowerShell compatibility check wrapper
 │   ├── check-env.sh               # Environment check
 │   ├── ensure-gemini-cli.sh       # Managed Gemini CLI bootstrap
+│   ├── ensure-mcp.sh              # Sync .gemini/settings.json MCP config
 │   ├── setup-env.sh               # Setup managed CLI and env template
 │   └── run-gemini-impl.sh         # Runtime launcher implementation
 └── README.md
@@ -49,6 +50,8 @@ bash scripts/ai/gemini/run-gemini.sh prompt "..."  # Explicit headless prompt
 bash scripts/ai/gemini/run-gemini.sh exec "..."    # Headless YOLO approvals
 bash scripts/ai/gemini/run-gemini.sh check         # Check setup
 bash scripts/ai/gemini/run-gemini.sh setup         # Install managed CLI
+bash scripts/ai/gemini/run-gemini.sh mcp-check     # Check MCP configuration
+bash scripts/ai/gemini/run-gemini.sh mcp-setup     # Sync MCP configuration
 bash scripts/ai/gemini/run-gemini.sh update        # Reinstall/update CLI
 ```
 
@@ -77,6 +80,22 @@ GEMINI_API_KEY=your-api-key-here
 ```
 
 Get an API key from https://aistudio.google.com/app/apikeys.
+
+## MCP Configuration
+
+Gemini CLI reads MCP servers from Gemini settings, not from the repository `.mcp.json` file directly. The launcher synchronizes the workspace-level `.gemini/settings.json` before startup so the CLI sees the repository MCP servers after `cd "${REPO_ROOT}"`.
+
+`run-gemini.sh` writes only the workspace settings file and does not mutate the managed user home at `.cache/tools/gemini-cli/home/.gemini/settings.json`, because that file can contain OAuth state and user UI preferences.
+
+Environment switches:
+
+- `GEMINI_SKIP_MCP_SETUP=1` launches without synchronizing MCP.
+- `GEMINI_RESPECT_MCP_DISABLES=1` keeps existing Gemini `/mcp disable` choices; by default, core servers such as `filesystem` are re-enabled for coding-agent use.
+- `GEMINI_VALIDATE_MCP_LIST=1` additionally runs `gemini mcp list`.
+- `GEMINI_REQUIRE_MCP_LIST=1` makes that runtime validation fatal.
+- `GEMINI_MCP_CHECK_TIMEOUT=15` controls the validation timeout in seconds.
+
+Docker-backed MCP servers require Docker Desktop or a working Docker CLI. If Docker is not running, those servers will show as disconnected until Docker is started.
 
 ## Notes
 

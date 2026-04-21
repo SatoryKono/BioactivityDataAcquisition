@@ -41,16 +41,23 @@ def test_infer_source_metadata_from_repo_paths() -> None:
     assert (
         infer_source_type(Path("docs/05-operations/runbooks/example.md")) == "runbook"
     )
+    assert infer_source_type(Path("docs/plans/example.md")) == "plan"
     assert infer_source_type(Path("docs/00-project/overview.md")) == "doc"
+    assert infer_source_type(Path("src/memory/query.py")) == "memory"
     assert infer_source_type(Path("src/bioetl/application/service.py")) == "code"
     assert infer_source_type(Path("tests/unit/test_service.py")) == "test"
     assert infer_source_type(Path("configs/app.yaml")) == "config"
+    assert infer_source_type(Path(".github/workflows/tests.yml")) == "workflow"
+    assert infer_source_type(Path("grafana/dashboards/main.json")) == "dashboard"
+    assert infer_source_type(Path("scripts/engineering/dev/run.sh")) == "script"
     assert (
         infer_domain(Path("docs/02-architecture/decisions/ADR-043-example.md"))
         == "architecture"
     )
     assert infer_domain(Path("docs/05-operations/runbooks/example.md")) == "operations"
+    assert infer_domain(Path(".github/workflows/tests.yml")) == "operations"
     assert infer_domain(Path("docs/00-project/overview.md")) == "project"
+    assert infer_domain(Path("src/memory/query.py")) == "memory_subsystem"
     assert infer_domain(Path("src/bioetl/application/service.py")) == "runtime"
     assert infer_domain(Path("tests/unit/test_service.py")) == "quality"
     assert infer_domain(Path("configs/app.yaml")) == "configuration"
@@ -96,17 +103,25 @@ def test_build_rag_manifests_indexes_docs_code_tests_and_configs(
 ) -> None:
     (tmp_path / "docs/00-project").mkdir(parents=True)
     (tmp_path / "docs/02-architecture/decisions").mkdir(parents=True)
+    (tmp_path / "docs/plans").mkdir(parents=True)
     (tmp_path / "docs/05-operations/runbooks").mkdir(parents=True)
     (tmp_path / "docs/99-archive").mkdir(parents=True)
     (tmp_path / "src/bioetl/application").mkdir(parents=True)
     (tmp_path / "tests/unit").mkdir(parents=True)
     (tmp_path / "configs").mkdir(parents=True)
+    (tmp_path / ".github/workflows").mkdir(parents=True)
+    (tmp_path / "grafana/dashboards").mkdir(parents=True)
+    (tmp_path / "scripts/engineering/dev").mkdir(parents=True)
 
     (tmp_path / "docs/00-project/overview.md").write_text(
         "# Overview\nAlpha\n", encoding="utf-8"
     )
     (tmp_path / "docs/02-architecture/decisions/ADR-999-test.md").write_text(
         "# ADR Test\nDecision body.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "docs/plans/memory-plan.md").write_text(
+        "# Memory Plan\nImplementation steps.\n",
         encoding="utf-8",
     )
     (tmp_path / "docs/05-operations/runbooks/sample.md").write_text(
@@ -125,18 +140,34 @@ def test_build_rag_manifests_indexes_docs_code_tests_and_configs(
         "version: 1\nfeature_flags:\n  enabled: true\n",
         encoding="utf-8",
     )
+    (tmp_path / ".github/workflows/tests.yml").write_text(
+        "name: Tests\njobs:\n  unit:\n    runs-on: ubuntu-latest\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "grafana/dashboards/main.json").write_text(
+        '{"title": "Main", "panels": []}\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "scripts/engineering/dev/run.sh").write_text(
+        "#!/usr/bin/env bash\nset -euo pipefail\n",
+        encoding="utf-8",
+    )
     (tmp_path / "docs/99-archive/ignored.md").write_text("# Ignore\n", encoding="utf-8")
 
     catalog, chunks = build_rag_manifests(tmp_path)
 
-    assert catalog["source_count"] == 6
+    assert catalog["source_count"] == 10
     assert {item["source_type"] for item in catalog["sources"]} == {
         "doc",
         "adr",
+        "plan",
         "runbook",
         "code",
         "test",
         "config",
+        "workflow",
+        "dashboard",
+        "script",
     }
     assert all("99-archive" not in chunk["source_path"] for chunk in chunks)
     assert {
@@ -165,6 +196,13 @@ def test_build_rag_manifests_indexes_docs_code_tests_and_configs(
     assert "test-suite::unit tests" in test_chunk["related_refs"]
     config_chunk = next(chunk for chunk in chunks if chunk["source_type"] == "config")
     assert "config::configs/app.yaml" in config_chunk["related_refs"]
+    workflow_chunk = next(
+        chunk for chunk in chunks if chunk["source_type"] == "workflow"
+    )
+    assert "workflow::.github/workflows/tests.yml" in workflow_chunk["related_refs"]
+    assert "operational_artifact:.github/workflows/tests.yml" in workflow_chunk[
+        "graph_node_refs"
+    ]
 
 
 def test_write_and_reload_rag_manifests(tmp_path: Path) -> None:

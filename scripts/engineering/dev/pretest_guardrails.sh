@@ -64,6 +64,21 @@ require_python() {
         printf '%s\n' "$PYTHON_BIN"
         return 0
     fi
+    if [[ -n "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" && -x "${BIOETL_PYTEST_RUNTIME_PYTHON:-}" ]]; then
+        PYTHON_BIN="$BIOETL_PYTEST_RUNTIME_PYTHON"
+        printf '%s\n' "$PYTHON_BIN"
+        return 0
+    fi
+    if [[ -x "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" ]]; then
+        PYTHON_BIN="${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
+        printf '%s\n' "$PYTHON_BIN"
+        return 0
+    fi
+    if [[ -x ".venv/bin/python" ]]; then
+        PYTHON_BIN=".venv/bin/python"
+        printf '%s\n' "$PYTHON_BIN"
+        return 0
+    fi
     if command -v python3 >/dev/null 2>&1; then
         PYTHON_BIN="python3"
         printf '%s\n' "$PYTHON_BIN"

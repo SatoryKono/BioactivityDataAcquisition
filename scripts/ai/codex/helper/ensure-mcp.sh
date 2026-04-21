@@ -83,7 +83,8 @@ case "${MODE}" in
         python3 "${SETUP_MCP}" \
             --root "${REPO_ROOT}" \
             --workspace-root "${REPO_ROOT}" \
-            --skip-codex >/dev/null
+            --skip-codex \
+            --skip-gemini-settings >/dev/null
         ;;
     check)
         ;;

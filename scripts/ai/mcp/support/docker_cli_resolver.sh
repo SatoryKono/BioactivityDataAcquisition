@@ -10,17 +10,19 @@ resolve_docker_bin() {
     docker_linux="$(command -v docker)"
   fi
 
-  # Prefer the Linux docker binary when running inside WSL/Unix so we hit the Unix socket
-  if [[ -n "${docker_linux}" ]]; then
-    candidates+=("${docker_linux}")
-  fi
-
+  # Docker MCP Toolkit is owned by Docker Desktop. In WSL, the Linux Docker CLI
+  # can talk to the engine while `docker mcp gateway` still fails with
+  # "Docker Desktop is not running", so prefer Docker Desktop's docker.exe.
   if [[ -x "${docker_desktop_default}" ]]; then
     candidates+=("${docker_desktop_default}")
   fi
 
   if command -v docker.exe >/dev/null 2>&1; then
     candidates+=("$(command -v docker.exe)")
+  fi
+
+  if [[ -n "${docker_linux}" ]]; then
+    candidates+=("${docker_linux}")
   fi
   if command -v docker >/dev/null 2>&1; then
     candidates+=("$(command -v docker)")

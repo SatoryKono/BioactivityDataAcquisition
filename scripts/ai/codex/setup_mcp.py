@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Canonical entrypoint for Codex/Copilot MCP workspace setup."""
+"""Canonical entrypoint for AI assistant MCP workspace setup."""
 
 from __future__ import annotations
 
@@ -40,6 +40,8 @@ def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
 def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
     memory_file_path = workspace_root / "docs/00-project/ai/memory/mcp-memory.json"
     npm_cache_dir = str((workspace_root / ".cache" / "npm-cache").resolve())
+    uv_cache_dir = str((workspace_root / ".cache" / "uv-cache").resolve())
+    uv_tool_dir = str((workspace_root / ".cache" / "uv-tools").resolve())
     servers: dict[str, dict[str, Any]] = {
         "memory": {
             "command": "npx",
@@ -66,7 +68,11 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
             ],
             "env": {"NPM_CONFIG_CACHE": npm_cache_dir},
         },
-        "fetch": {"command": "uvx", "args": FETCH_SPEC},
+        "fetch": {
+            "command": "uvx",
+            "args": FETCH_SPEC,
+            "env": {"UV_CACHE_DIR": uv_cache_dir, "UV_TOOL_DIR": uv_tool_dir},
+        },
         "pdf": {
             "command": "npx",
             "args": ["-y", "@modelcontextprotocol/server-pdf@1.3.1", "--stdio"],
@@ -116,6 +122,38 @@ def _write_configs(output_root: Path, workspace_root: Path) -> tuple[Path, Path]
     _write_json(mcp_path, codex_payload)
     _write_json(vscode_path, vscode_payload)
     return mcp_path, vscode_path
+
+
+def _gemini_server_config(server: dict[str, Any]) -> dict[str, Any]:
+    rendered = deepcopy(server)
+    if rendered.get("type") == "http" and "url" in rendered:
+        rendered["httpUrl"] = rendered.pop("url")
+        rendered.pop("type", None)
+    return rendered
+
+
+def _write_gemini_settings(output_root: Path, workspace_root: Path) -> Path:
+    settings_path = output_root / ".gemini" / "settings.json"
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if settings_path.exists():
+        existing = json.loads(settings_path.read_text(encoding="utf-8"))
+        if not isinstance(existing, dict):
+            raise ValueError(f"Gemini settings must be a JSON object: {settings_path}")
+    else:
+        existing = {}
+
+    existing_servers = existing.get("mcpServers", {})
+    if existing_servers and not isinstance(existing_servers, dict):
+        raise ValueError(f"Gemini mcpServers must be a JSON object: {settings_path}")
+
+    merged_servers = dict(existing_servers)
+    for name, server in _canonical_servers(workspace_root).items():
+        merged_servers[name] = _gemini_server_config(server)
+
+    existing["mcpServers"] = merged_servers
+    _write_json(settings_path, existing)
+    return settings_path
 
 
 def _toml_string(value: str) -> str:
@@ -261,6 +299,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="Do not update ~/.codex/config.toml with the generated MCP servers.",
     )
+    parser.add_argument(
+        "--skip-gemini-settings",
+        action="store_true",
+        help="Do not update .gemini/settings.json with the generated MCP servers.",
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     output_root = args.root.resolve()
@@ -271,6 +314,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not args.skip_codex_config:
         codex_config_path = _write_codex_config(workspace_root)
         print(f"Wrote {codex_config_path}")
+    if not args.skip_gemini_settings:
+        gemini_settings_path = _write_gemini_settings(output_root, workspace_root)
+        print(f"Wrote {gemini_settings_path}")
 
     if not args.skip_codex:
         _run_codex_validation(workspace_root)

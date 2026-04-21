@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-gemini-cli.sh"
+ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
 ENV_FILE="${ROOT_DIR}/.env.gemini"
 if [[ -f "${ENV_FILE}" ]]; then
@@ -50,5 +51,18 @@ export npm_config_prefix="${GEMINI_PREFIX}"
 export PATH="${GEMINI_PREFIX}/bin:/usr/local/bin:${PATH}"
 
 mkdir -p "${GEMINI_CLI_HOME}"
+
+if [[ "${GEMINI_SKIP_MCP_SETUP:-0}" != "1" ]]; then
+    if [[ ! -x "${ENSURE_MCP_SCRIPT}" ]]; then
+        echo "[ERROR] Gemini MCP setup helper not found: ${ENSURE_MCP_SCRIPT}" >&2
+        exit 1
+    fi
+    "${ENSURE_MCP_SCRIPT}" \
+        --ensure \
+        --gemini-bin "${GEMINI_BIN}" \
+        --gemini-prefix "${GEMINI_PREFIX}" >/dev/null
+    echo "[INFO] MCP configuration synchronized"
+fi
+
 cd "${REPO_ROOT}"
 exec "${GEMINI_BIN}" "$@"

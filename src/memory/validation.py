@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -30,6 +31,11 @@ CURATED_KIND_BY_DIR = {
     "lessons": "lesson",
     "domain_knowledge": "domain_knowledge",
 }
+REBUILD_ONLY_DIRS = (
+    "src/memory/rag/manifests",
+    "src/memory/graph/exports",
+    "src/memory/timeline/events",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,6 +112,49 @@ def _validate_storage_policy(
     _validate_storage_class_coverage(storage_classes, retention_classes, issues)
     for artifact_class, entry in storage_classes.items():
         _validate_storage_class_entry(artifact_class, entry, valid_modes, issues)
+
+
+def _is_tracked_generated_memory_artifact(relative_path: str) -> bool:
+    path = Path(relative_path)
+    if "__pycache__" in path.parts or path.suffix == ".pyc":
+        return True
+    if path.name == "README.md":
+        return False
+    return any(relative_path.startswith(f"{prefix}/") for prefix in REBUILD_ONLY_DIRS)
+
+
+def _tracked_memory_files(memory_root: Path) -> list[str]:
+    repo_root = memory_root.parent.parent
+    if not (repo_root / ".git").exists():
+        return []
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "--", "src/memory"],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def _validate_tracked_generated_artifacts(
+    memory_root: Path,
+    issues: list[ValidationIssue],
+) -> None:
+    for relative_path in _tracked_memory_files(memory_root):
+        if _is_tracked_generated_memory_artifact(relative_path):
+            issues.append(
+                ValidationIssue(
+                    path=relative_path,
+                    message=(
+                        "generated or rebuild-only memory artifact must not be "
+                        "tracked in git"
+                    ),
+                )
+            )
 
 
 def _validate_storage_modes(
@@ -813,6 +862,7 @@ def validate_memory_scaffold(root: Path | None = None) -> list[ValidationIssue]:
         _validate_source_priority(source_priority, source_registry, issues)
     if isinstance(storage_policy, dict) and isinstance(retention_policy, dict):
         _validate_storage_policy(storage_policy, retention_policy, issues)
+    _validate_tracked_generated_artifacts(memory_root, issues)
 
     if not issues:
         _validate_note_files(

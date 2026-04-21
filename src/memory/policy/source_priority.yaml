@@ -2,8 +2,10 @@ version: 1
 ordered_sources:
   - runtime_code
   - project_configs
+  - memory_implementation
   - accepted_adrs
   - active_docs
+  - planning_docs
   - tests
   - operational_assets
   - generated_reports
@@ -12,8 +14,10 @@ ordered_sources:
 notes:
   runtime_code: "Primary implementation truth under src/bioetl/."
   project_configs: "Operational and behavioral truth in configs/."
+  memory_implementation: "Memory subsystem implementation and governance surfaces under src/memory/."
   accepted_adrs: "Accepted architecture decisions that constrain implementation."
   active_docs: "Published active docs and runbooks."
+  planning_docs: "Working plans and issue packs; useful context, but not normative truth."
   tests: "Behavioral evidence and regression safety net."
   operational_assets: "Dashboards, alert rules, workflows, and deployment assets."
   generated_reports: "Derived evidence and generated analysis artifacts."
