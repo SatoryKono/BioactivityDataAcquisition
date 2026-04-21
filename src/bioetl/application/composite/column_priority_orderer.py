@@ -41,8 +41,10 @@ def resolve_by_column_scan(
     columns_set: set[str],
 ) -> str | None:
     """Find a provider-prefixed column by scanning available columns."""
+    prefix = f"{provider}."
+    suffix = f".{field}"
     for column in columns_set:
-        if column.startswith(f"{provider}.") and column.endswith(f".{field}"):
+        if column.startswith(prefix) and column.endswith(suffix):
             return column
     return None
 
@@ -85,6 +87,7 @@ def collect_priority_field_columns(
 ) -> tuple[list[str], bool]:
     """Collect candidate field columns and indicate whether parsing fallback was used."""
     columns: list[str] = []
+    columns_set: set[str] = set()
     used_parse_fallback = False
     if seed_pipeline:
         try:
@@ -92,6 +95,7 @@ def collect_priority_field_columns(
             seed_qualified = f"{seed_provider}.{seed_entity}.{field}"
             if seed_qualified in available_columns:
                 columns.append(seed_qualified)
+                columns_set.add(seed_qualified)
         except ValueError:
             used_parse_fallback = True
     for enricher in enrichers:
@@ -100,13 +104,15 @@ def collect_priority_field_columns(
             enricher_qualified = f"{provider}.{entity}.{field}"
             if (
                 enricher_qualified in available_columns
-                and enricher_qualified not in columns
+                and enricher_qualified not in columns_set
             ):
                 columns.append(enricher_qualified)
+                columns_set.add(enricher_qualified)
         except ValueError:
             legacy_col = f"{get_enricher_prefix(enricher.pipeline)}{field}".rstrip(".")
-            if legacy_col in available_columns and legacy_col not in columns:
+            if legacy_col in available_columns and legacy_col not in columns_set:
                 columns.append(legacy_col)
+                columns_set.add(legacy_col)
     return columns, used_parse_fallback
 
 
@@ -119,6 +125,7 @@ def order_priority_columns(
 ) -> tuple[list[str], bool]:
     """Order columns by source priority and indicate seed-pipeline parse fallback."""
     ordered_cols: list[str] = []
+    ordered_cols_set: set[str] = set()
     columns_set = set(columns)
     seed_provider: str | None = None
     seed_entity: str | None = None
@@ -136,10 +143,11 @@ def order_priority_columns(
             seed_provider=seed_provider,
             seed_entity=seed_entity,
         )
-        if qualified and qualified in columns_set and qualified not in ordered_cols:
+        if qualified and qualified in columns_set and qualified not in ordered_cols_set:
             ordered_cols.append(qualified)
+            ordered_cols_set.add(qualified)
     for column in columns:
-        if column not in ordered_cols:
+        if column not in ordered_cols_set:
             ordered_cols.append(column)
     return ordered_cols, used_parse_fallback
 
