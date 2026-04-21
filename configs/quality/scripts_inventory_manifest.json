@@ -1,12 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-21T05:32:35.298810+00:00",
+  "generated_at": "2026-04-21T05:41:45.926102+00:00",
   "summary": {
     "total_scripts": 428,
     "status_counts": {
-      "active": 308,
+      "active": 316,
       "legacy": 15,
-      "orphan": 93,
+      "orphan": 85,
       "unknown": 12
     },
     "reference_group_coverage": {
@@ -16,7 +16,7 @@
       "docs": 131,
       "scripts": 280,
       "skills": 8,
-      "tests": 144
+      "tests": 152
     }
   },
   "scripts": [
@@ -1056,13 +1056,13 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 96,
+          "line": 100,
           "source_group": "tests",
           "text": "servers[\"github\"], \"powershell\", \"scripts/ai/mcp/github-mcp-wrapper.ps1\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 242,
+          "line": 286,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         }
@@ -1095,13 +1095,13 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 158,
+          "line": 182,
           "source_group": "tests",
           "text": "servers[\"github\"], \"bash\", \"scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 239,
+          "line": 283,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -1122,7 +1122,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 134,
+          "line": 138,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\","
         }
@@ -1155,7 +1155,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 192,
+          "line": 216,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\","
         }
@@ -1164,18 +1164,32 @@
     {
       "path": "scripts/ai/mcp/mcp_chembl_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 163,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_chembl_wrapper.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_chembl_wrapper.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 241,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_chembl_wrapper.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_context7_wrapper.ps1",
@@ -1186,7 +1200,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 109,
+          "line": 113,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\","
         }
@@ -1219,7 +1233,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 169,
+          "line": 193,
           "source_group": "tests",
           "text": "servers[\"context7\"], \"bash\", \"scripts/ai/mcp/mcp_context7_wrapper.sh\""
         }
@@ -1234,7 +1248,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 104,
+          "line": 108,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.ps1\","
         }
@@ -1267,7 +1281,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 166,
+          "line": 190,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\","
         }
@@ -1282,7 +1296,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 99,
+          "line": 103,
           "source_group": "tests",
           "text": "servers[\"docker\"], \"powershell\", \"scripts/ai/mcp/mcp_docker_wrapper.ps1\""
         }
@@ -1315,7 +1329,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 161,
+          "line": 185,
           "source_group": "tests",
           "text": "servers[\"docker\"], \"bash\", \"scripts/ai/mcp/mcp_docker_wrapper.sh\""
         }
@@ -1330,7 +1344,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 119,
+          "line": 123,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.ps1\","
         }
@@ -1363,7 +1377,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 179,
+          "line": 203,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\","
         }
@@ -1378,7 +1392,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 129,
+          "line": 133,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\","
         }
@@ -1411,7 +1425,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 187,
+          "line": 211,
           "source_group": "tests",
           "text": "servers[\"grafana\"], \"bash\", \"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         }
@@ -1420,18 +1434,32 @@
     {
       "path": "scripts/ai/mcp/mcp_mermaid_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 178,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 256,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_needle_wrapper.ps1",
@@ -1442,7 +1470,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 154,
+          "line": 158,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_needle_wrapper.ps1\","
         }
@@ -1463,7 +1491,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 212,
+          "line": 236,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_needle_wrapper.sh\","
         },
@@ -1484,7 +1512,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 144,
+          "line": 148,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\","
         }
@@ -1517,7 +1545,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 202,
+          "line": 226,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\","
         }
@@ -1532,7 +1560,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 149,
+          "line": 153,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\","
         }
@@ -1604,7 +1632,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 114,
+          "line": 118,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.ps1\","
         }
@@ -1637,7 +1665,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 174,
+          "line": 198,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\","
         }
@@ -1652,7 +1680,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 124,
+          "line": 128,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\","
         }
@@ -1685,7 +1713,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 184,
+          "line": 208,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\","
         }
@@ -1694,34 +1722,62 @@
     {
       "path": "scripts/ai/mcp/mcp_pubchem_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 168,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_pubchem_wrapper.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_pubchem_wrapper.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 246,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_pubchem_wrapper.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_pubmed_wrapper.ps1",
       "type": "ps1",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 173,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_pubmed_wrapper.ps1\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_pubmed_wrapper.sh",
       "type": "sh",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
+          "line": 251,
+          "source_group": "tests",
+          "text": "\"scripts/ai/mcp/mcp_pubmed_wrapper.sh\","
+        }
+      ]
     },
     {
       "path": "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1",
@@ -1732,7 +1788,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 139,
+          "line": 143,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.ps1\","
         }
@@ -1771,7 +1827,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 197,
+          "line": 221,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_sonarqube_wrapper.sh\","
         }
@@ -7288,7 +7344,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 230,
+          "line": 274,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/setup_copilot_codex_mcp.ps1\").read_text("
         }
@@ -7366,7 +7422,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 221,
+          "line": 265,
           "source_group": "tests",
           "text": "content = (root / \"scripts/engineering/dev/setup_copilot_codex_mcp.sh\").read_text("
         }
