@@ -101,12 +101,12 @@ as implementation support context, not as a second backlog.
 
 The repository file structure cleanup plan was added on `2026-04-20` as a
 bounded hygiene and governance-convergence roadmap for root placement policy,
-generated artifact cleanup, and report-surface normalization. It is retained as
-supporting implementation context, not as a second active backlog.
-
-If later waves close items named in that report, the report should keep its
-original date and gain a short freshness note instead of being silently treated
-as the live queue.
+generated artifact cleanup, and report-surface normalization. It was refreshed
+on `2026-04-21` after the root artifact cleanup wave: the current plan now
+tracks policy convergence, generated-artifact routing, AI/editor surface
+decisions, and enforcement hardening rather than repeating closed root cleanup
+items. It is retained as supporting implementation context, not as a second
+active backlog.
 
 ### Retained Historical Context With Live Evidence References
 

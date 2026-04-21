@@ -9,6 +9,31 @@ import sys
 from pathlib import Path
 
 ALLOWLIST_FILE = Path(".github/root-allowlist.txt")
+CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
+    {
+        "CHANGELOG.md",
+        "GEMINI.md",
+        "README.md",
+    }
+)
+FORBIDDEN_TRACKED_PATH_PREFIXES: tuple[str, ...] = (
+    ".coverage-sharded/",
+    ".python-user/",
+    "MagicMock/",
+    "htmlcov/",
+    "logs/",
+    "node_modules/",
+    "output/",
+    "src/tools/reports/",
+    "test-output/",
+)
+FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
+    {
+        "contract-registry-diagnostics.json",
+        "coverage.json",
+        "coverage.xml",
+    }
+)
 
 ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
     {
@@ -185,6 +210,50 @@ def _report_root_layout_violations(
     return 1
 
 
+def _is_forbidden_tracked_artifact(path: str) -> bool:
+    """Return True when a tracked path belongs to a generated/local artifact family."""
+    if path.startswith(FORBIDDEN_TRACKED_PATH_PREFIXES):
+        return True
+    if "/" in path:
+        return False
+    if path in FORBIDDEN_TRACKED_ROOT_FILES:
+        return True
+    if path.startswith(".coverage"):
+        return True
+    if path.startswith("coverage-") and path.endswith(".xml"):
+        return True
+    return "sonar-scanner" in path and path.endswith(".zip")
+
+
+def _collect_tracked_policy_violations(paths: list[str]) -> list[str]:
+    """Return tracked paths that violate root and generated-artifact policy."""
+    violations: list[str] = []
+    for path in paths:
+        if _is_forbidden_tracked_artifact(path):
+            violations.append(f"{path}: generated/runtime artifact must not be tracked")
+            continue
+        if "/" in path:
+            continue
+        if path.endswith(".py"):
+            violations.append(f"{path}: root-level Python files are not allowed")
+            continue
+        if path.endswith((".md", ".txt")) and path not in CANONICAL_ROOT_TEXT_FILES:
+            violations.append(
+                f"{path}: root text files must be canonical entrypoints only"
+            )
+    return sorted(violations)
+
+
+def _report_tracked_policy_violations(violations: list[str]) -> int:
+    if not violations:
+        return 0
+
+    sys.stderr.write("ERROR: tracked repository placement policy violation detected.\n")
+    for violation in violations:
+        sys.stderr.write(f"  - {violation}\n")
+    return 1
+
+
 def _report_missing_allowed_files(missing_allowed_files: list[str]) -> None:
     if not missing_allowed_files:
         return
@@ -272,6 +341,12 @@ def main() -> int:
     )
     if root_layout_exit:
         return root_layout_exit
+
+    tracked_policy_exit = _report_tracked_policy_violations(
+        _collect_tracked_policy_violations(tracked_paths)
+    )
+    if tracked_policy_exit:
+        return tracked_policy_exit
 
     _report_missing_allowed_files(missing_allowed_files)
 
